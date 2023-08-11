@@ -4,8 +4,9 @@ import { actionConfig } from '../../../page-block/const/action-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 
 export const ActionItems = (pageElement: PageBlockComponent) =>
-  actionConfig.map(
-    ({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
+  actionConfig
+    .filter(({ showWhen }) => showWhen(pageElement))
+    .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
       const enabled = enabledWhen(pageElement);
       const toolTip = enabled
         ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
@@ -21,5 +22,4 @@ export const ActionItems = (pageElement: PageBlockComponent) =>
       >
         ${icon}${toolTip}
       </icon-button>`;
-    }
-  );
+    });

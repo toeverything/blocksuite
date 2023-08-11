@@ -749,16 +749,16 @@ test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: 50, y: 90 },
-    { x: 400, y: 400 },
+    { x: 800, y: 800 },
     { steps: 10 }
   );
-  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 428.5]);
+  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 461.5]);
 
   await copyByKeyboard(page);
-  await page.mouse.move(400, 400);
+  await page.mouse.move(800, 400);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [0, 185.75, EDITOR_WIDTH, 428.5]);
+  await assertEdgelessSelectedRect(page, [400, 169.25, EDITOR_WIDTH, 461.5]);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {

@@ -5,7 +5,6 @@ import {
   getBookmarkInitialProps,
   getEdgelessPage,
   getServiceOrRegister,
-  tryUpdateNoteSize,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
@@ -134,7 +133,6 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         if (focusId) {
           asyncFocusRichText(page, focusId);
-          tryUpdateNoteSize(page, 1);
         }
         return;
       }

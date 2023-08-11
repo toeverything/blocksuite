@@ -291,7 +291,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},${EDITOR_WIDTH},480]`;
+    const xywh = `[0,${count * 60},${EDITOR_WIDTH},91]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);

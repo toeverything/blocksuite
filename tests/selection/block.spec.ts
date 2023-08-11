@@ -1270,7 +1270,10 @@ test('click bottom of page and if the last is embed block, editor should insert 
 
   const pageRect = await page.evaluate(() => {
     const pageBlock = document.querySelector('.affine-doc-viewport');
-    return pageBlock?.getBoundingClientRect() || null;
+    if (!pageBlock) {
+      throw new Error("Can't find doc viewport");
+    }
+    return pageBlock.getBoundingClientRect();
   });
 
   await page
