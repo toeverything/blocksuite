@@ -20,7 +20,7 @@
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "yjs": "^13",
-    "@toeverything/theme": "^0.7.9"
+    "@toeverything/theme": "^0.7.12"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
@@ -81,6 +81,6 @@
     "@types/sortablejs": "^1.15.1",
     "@types/turndown": "^5.0.1",
     "yjs": "^13.6.7",
-    "@toeverything/theme": "^0.7.9"
+    "@toeverything/theme": "^0.7.12"
   }
 }

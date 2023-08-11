@@ -25,6 +25,7 @@ import {
   registerService,
 } from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -443,6 +444,50 @@ export class DocPageBlockComponent
         }
         return;
       },
+    });
+
+    this.handleEvent('click', ctx => {
+      const state = ctx.get('pointerState');
+      if (
+        state.raw.target !== this &&
+        state.raw.target !== this.viewportElement &&
+        state.raw.target !== this.pageBlockContainer
+      ) {
+        return;
+      }
+      let noteId: string;
+      let paragraphId: string;
+      const lastNote = this.model.children
+        .reverse()
+        .find(
+          child =>
+            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
+        );
+      if (!lastNote) {
+        noteId = this.page.addBlock('affine:note', {}, this.model.id);
+        paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+      } else {
+        noteId = lastNote.id;
+        const last = lastNote.children.at(-1);
+        if (!last || !last.text) {
+          paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+        } else {
+          paragraphId = last.id;
+        }
+      }
+
+      requestAnimationFrame(() => {
+        this.root.selectionManager.set([
+          this.root.selectionManager.getInstance('text', {
+            from: {
+              path: [this.model.id, noteId, paragraphId],
+              index: 0,
+              length: 0,
+            },
+            to: null,
+          }),
+        ]);
+      });
     });
   }
 
