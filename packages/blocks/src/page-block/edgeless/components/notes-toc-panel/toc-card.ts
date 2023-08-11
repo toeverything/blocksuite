@@ -398,7 +398,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
               }deg)`,
               width: width ? `${width}px` : undefined,
             })
-          : undefined}
+          : nothing}
       >
         <div class="drag-area">
           <div class="action">
