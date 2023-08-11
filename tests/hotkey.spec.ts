@@ -673,7 +673,7 @@ test('should multiple line format hotkey work', async ({ page }) => {
   );
 });
 
-test.fixme('should hotkey work in paragraph', async ({ page }) => {
+test('should hotkey work in paragraph', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
 
@@ -805,7 +805,7 @@ test('format list to h1', async ({ page }) => {
   await assertTypeFormat(page, 'h1');
 });
 
-test.fixme('should cut work single line', async ({ page }) => {
+test('should cut work single line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -977,22 +977,6 @@ test('should bracket complete with backtick works', async ({ page }) => {
     paragraphId
   );
 });
-
-test.fixme(
-  'pressing enter when selecting multiple blocks should create new block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await dragBetweenIndices(page, [0, 1], [2, 1]);
-    await waitNextFrame(page);
-    await pressEnter(page);
-    await assertRichTexts(page, ['1', '89']);
-    await assertSelection(page, 1, 0, 0);
-    await undoByKeyboard(page);
-    await assertRichTexts(page, ['123', '456', '789']);
-  }
-);
 
 // FIXME: getCurrentBlockRange need to handle comment node
 test.skip('should left/right key navigator works', async ({ page }) => {
