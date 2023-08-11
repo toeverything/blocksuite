@@ -14,11 +14,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockHost,
-  EditingState,
-  SelectionPosition,
-} from '../../__internal__/index.js';
+import type { BlockHost, EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import {
   getService,
@@ -131,8 +127,6 @@ export class DocPageBlockComponent
   clipboard = new PageClipboard(this);
 
   getService = getService;
-
-  lastSelectionPosition: SelectionPosition = 'start';
 
   @state()
   private _isComposing = false;
@@ -457,6 +451,7 @@ export class DocPageBlockComponent
       }
       let noteId: string;
       let paragraphId: string;
+      let index = 0;
       const lastNote = this.model.children
         .reverse()
         .find(
@@ -473,6 +468,7 @@ export class DocPageBlockComponent
           paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
         } else {
           paragraphId = last.id;
+          index = last.text.length ?? 0;
         }
       }
 
@@ -481,7 +477,7 @@ export class DocPageBlockComponent
           this.root.selectionManager.getInstance('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
-              index: 0,
+              index,
               length: 0,
             },
             to: null,
