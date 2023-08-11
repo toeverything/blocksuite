@@ -67,7 +67,8 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
     }
   }
 
-  private _clickMoreAction = () => {
+  private _clickMoreAction = (e: MouseEvent) => {
+    e.stopPropagation();
     this.showToolBar(true);
     popMenu(this._moreActionContainer, {
       options: {
@@ -78,35 +79,17 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
           },
         },
         items: [
-          // {
-          //   type: 'sub-menu',
-          //   name: 'Layout',
-          //   icon: viewOpIcons.groupBy,
-          //   hide: () => !(this.view instanceof DataViewKanbanManager),
-          //   options: {
-          //     input: {
-          //       search: true,
-          //       placeholder: 'Search',
-          //     },
-          //     items: this.view.columnsWithoutFilter.map(id => {
-          //       const column = this.view.columnGet(id);
-          //       return {
-          //         type: 'action',
-          //         name: column.name,
-          //         select: () => {
-          //           this.view.changeGroup(id);
-          //         },
-          //       };
-          //     }),
-          //   },
-          // },
           {
             type: 'action',
             name: 'Properties',
             icon: viewOpIcons.properties,
             select: () => {
-              popPropertiesSetting(this._moreActionContainer, {
-                view: this.view,
+              requestAnimationFrame(() => {
+                this.showToolBar(true);
+                popPropertiesSetting(this._moreActionContainer, {
+                  view: this.view,
+                  onClose: () => this.showToolBar(false),
+                });
               });
             },
           },

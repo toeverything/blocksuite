@@ -75,9 +75,6 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           icon: html`<uni-lit
             .uni=${viewRendererManager.getView(v.type).icon}
           ></uni-lit>`,
-          hide: () =>
-            v.type === 'kanban' &&
-            !this.model.page.awarenessStore.getFlag('enable_database_filter'),
           select: () => {
             const view = this.model.addView(v.type);
             this.setViewId(view.id);

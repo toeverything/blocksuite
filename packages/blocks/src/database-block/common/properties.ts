@@ -1,7 +1,8 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, svg } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import Sortable from 'sortablejs';
 
 import { createPopup } from '../../components/menu/index.js';
 import type {
@@ -136,6 +137,35 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     );
   }
 
+  @query('.properties-group')
+  groupContainer!: HTMLElement;
+
+  override firstUpdated() {
+    const sortable = new Sortable(this.groupContainer, {
+      animation: 150,
+      group: `properties-sort-${this.view.id}`,
+      onEnd: evt => {
+        const properties = [...this.view.columnsWithoutFilter];
+        const index = evt.oldIndex ?? -1;
+        const from = properties[index];
+        properties.splice(index, 1);
+        const to = properties[evt.newIndex ?? -1];
+        this.view.columnMove(
+          from,
+          to
+            ? {
+                before: true,
+                id: to,
+              }
+            : 'end'
+        );
+      },
+    });
+    this._disposables.add({
+      dispose: () => sortable.destroy(),
+    });
+  }
+
   private itemsGroup() {
     return this.view.columnsWithoutFilter.map(id => this.view.columnGet(id));
   }
@@ -152,13 +182,22 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       <div class="property-item-op-icon" @click="${changeVisible}">${icon}</div>
     </div>`;
   };
+  clickChangeAll = (allShow: boolean) => {
+    this.view.columnsWithoutFilter.forEach(id => {
+      this.view.columnUpdateHide(id, allShow);
+    });
+  };
 
   override render() {
     const items = this.itemsGroup();
+    const isAllShowed = items.every(v => !v.hide);
+    const clickChangeAll = () => this.clickChangeAll(isAllShowed);
     return html`
       <div class="properties-group-header">
-        <div class="properties-group-title">Shown in Database</div>
-        <div class="properties-group-op">Hide All</div>
+        <div class="properties-group-title">Properties</div>
+        <div class="properties-group-op" @click="${clickChangeAll}">
+          ${isAllShowed ? 'Hide All' : 'Show All'}
+        </div>
       </div>
       <div class="properties-group">
         ${repeat(items, v => v.id, this.renderColumn)}
@@ -177,9 +216,10 @@ export const popPropertiesSetting = (
   target: HTMLElement,
   props: {
     view: DataViewManager;
+    onClose?: () => void;
   }
 ) => {
   const view = new DataViewPropertiesSettingView();
   view.view = props.view;
-  createPopup(target, view);
+  createPopup(target, view, { onClose: props.onClose });
 };
