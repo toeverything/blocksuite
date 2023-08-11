@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { BrushSize } from '../../../../__internal__/utils/types.js';
@@ -114,6 +114,9 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   selectedSize: BrushSize = BrushSize.LINE_WIDTH_TWO;
+
+  @property({ attribute: false })
+  hasTooltip = true;
 
   @query('.line-width-panel.has-tool-tip')
   private _lineWidthPanel!: HTMLElement;
@@ -342,9 +345,11 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       <div class="drag-handle"></div>
       <div class="bottom-line"></div>
       <div class="line-width-overlay"></div>
-      <tool-tip inert role="tooltip" tip-position="top" arrow>
-        Thickness
-      </tool-tip>
+      ${this.hasTooltip
+        ? html`<tool-tip inert role="tooltip" tip-position="top" arrow>
+            Thickness
+          </tool-tip>`
+        : nothing}
     </div>`;
   }
 }

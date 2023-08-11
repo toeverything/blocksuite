@@ -14,7 +14,6 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       overflow-x: hidden;
       position: relative;
     }
-
     .next-slide-button,
     .previous-slide-button {
       align-items: center;
@@ -29,31 +28,26 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       transition: transform 0.2s ease-in-out;
       z-index: 12;
     }
-
     .next-slide-button {
       display: flex;
       top: 50%;
       right: 0;
       transform: translate(50%, -50%) scale(0.75);
     }
-
     .next-slide-button:hover {
       cursor: pointer;
       transform: translate(50%, -50%) scale(1);
     }
-
     .previous-slide-button {
       display: none;
       top: 50%;
       left: 0;
       transform: translate(-50%, -50%) scale(0.75);
     }
-
     .previous-slide-button:hover {
       cursor: pointer;
       transform: translate(-50%, -50%) scale(1);
     }
-
     .previous-slide-button svg {
       transform: rotate(180deg);
     }

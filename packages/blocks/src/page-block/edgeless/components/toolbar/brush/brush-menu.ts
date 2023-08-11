@@ -11,7 +11,6 @@ import {
   type EdgelessTool,
 } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
-import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
@@ -43,8 +42,6 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
     menu-divider {
       height: 24px;
     }
-
-    ${tooltipStyle}
   `;
 
   @property({ attribute: false })
@@ -89,6 +86,7 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
           <div class="menu-content">
             <edgeless-line-width-panel
               .selectedSize=${this.selectedSize}
+              .hasTooltip=${false}
               @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
             >
             </edgeless-line-width-panel>
