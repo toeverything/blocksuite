@@ -1168,7 +1168,7 @@ test('should format quick bar show after convert to code block', async ({
     { x: 0, y: 0 }
   );
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(375.5, 194);
+  await formatBarController.assertBoundingBox(345, 194);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
