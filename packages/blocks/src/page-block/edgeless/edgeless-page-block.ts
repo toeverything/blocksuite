@@ -341,34 +341,37 @@ export class EdgelessPageBlockComponent
 
   private _noteResizeObserver = new NoteResizeObserver();
 
+  computeValue(value: string) {
+    const { parentElement } = this;
+    assertExists(parentElement);
+    if (isCssVariable(value)) {
+      const cssValue = getThemePropertyValue(
+        parentElement,
+        value as CssVariableName
+      );
+      if (cssValue === undefined) {
+        console.error(
+          new Error(
+            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
+          )
+        );
+      }
+      return cssValue ?? value;
+    }
+    return value;
+  }
+
   // just init surface, attach to dom later
   private _initSurface() {
-    const { page, parentElement } = this;
+    const { page } = this;
     const surfaceBlock = this.model.children.find(
       child => child.flavour === 'affine:surface'
     ) as SurfaceBlockModel | undefined;
-    assertExists(parentElement);
     assertExists(surfaceBlock);
     const yContainer = surfaceBlock.originProp('elements') as InstanceType<
       typeof page.YMap
     >;
-    this.surface = new SurfaceManager(yContainer, value => {
-      if (isCssVariable(value)) {
-        const cssValue = getThemePropertyValue(
-          parentElement,
-          value as CssVariableName
-        );
-        if (cssValue === undefined) {
-          console.error(
-            new Error(
-              `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
-            )
-          );
-        }
-        return cssValue ?? value;
-      }
-      return value;
-    });
+    this.surface = new SurfaceManager(yContainer, this.computeValue.bind(this));
     const { surface } = this;
     this._disposables.add(
       surface.slots.elementAdded.on(id => {

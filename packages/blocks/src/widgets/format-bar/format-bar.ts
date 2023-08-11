@@ -20,9 +20,10 @@ import {
   getSelectedContentBlockElements,
   getTextSelection,
 } from '../../page-block/utils/selection.js';
-import { ActionItems } from './component.ts/action-items.js';
-import { InlineItems } from './component.ts/inline-items.js';
-import { ParagraphButton } from './component.ts/paragraph-button.js';
+import { ActionItems } from './components/action-items.js';
+import { BackgroundHighlightButton } from './components/bg-highlight-button.js';
+import { InlineItems } from './components/inline-items.js';
+import { ParagraphButton } from './components/paragraph-button.js';
 import { formatBarStyle } from './styles.js';
 
 type CustomElementCreator = (
@@ -312,6 +313,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     });
     const actionItems = ActionItems(pageElement);
     const inlineItems = InlineItems({ pageElement, formatBar: this });
+    const backgroundHighlightButton = BackgroundHighlightButton({
+      formatBar: this,
+    });
 
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET_TAG}
@@ -325,6 +329,8 @@ export class AffineFormatBarWidget extends WidgetElement {
       <div class="divider"></div>
       ${inlineItems}
       ${inlineItems.length ? html`<div class="divider"></div>` : nothing}
+      ${backgroundHighlightButton}
+      <div class="divider"></div>
       ${actionItems}
     </div>`;
   }
