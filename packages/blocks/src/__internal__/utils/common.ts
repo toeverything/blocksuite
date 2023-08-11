@@ -394,3 +394,85 @@ export function pickValues<T, K extends Partial<keyof T>>(
     return pre;
   }, [] as Array<T[K]>);
 }
+
+export function pickArray<T>(target: Array<T>, keys: number[]): Array<T> {
+  return keys.reduce((pre, key) => {
+    pre.push(target[key]);
+    return pre;
+  }, [] as T[]);
+}
+
+export function lastN<T>(target: Array<T>, n: number) {
+  return target.slice(target.length - n, target.length);
+}
+
+export function on<T extends Document, K extends keyof M, M = DocumentEventMap>(
+  element: T,
+  event: K,
+  handler: (ev: M[K]) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
+export function on<T extends HTMLElement, K extends keyof HTMLElementEventMap>(
+  element: T,
+  event: K,
+  handler: (ev: HTMLElementEventMap[K]) => void,
+  options?: boolean | AddEventListenerOptions
+) {
+  const dispose = () => {
+    element.removeEventListener(
+      event as string,
+      handler as unknown as EventListenerObject,
+      options
+    );
+  };
+
+  element.addEventListener(
+    event as string,
+    handler as unknown as EventListenerObject,
+    options
+  );
+
+  return dispose;
+}
+
+export function once<
+  T extends HTMLElement,
+  K extends keyof M,
+  M = HTMLElementEventMap
+>(
+  element: T,
+  event: K,
+  handler: (ev: M[K]) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
+export function once<
+  T extends Document,
+  K extends keyof M,
+  M = DocumentEventMap
+>(
+  element: T,
+  event: K,
+  handler: (ev: M[K]) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
+export function once<
+  T extends HTMLElement,
+  K extends keyof HTMLElementEventMap
+>(
+  element: T,
+  event: K,
+  handler: (ev: HTMLElementEventMap[K]) => void,
+  options?: boolean | AddEventListenerOptions
+) {
+  const onceHandler = (e: HTMLElementEventMap[K]) => {
+    dispose();
+    handler(e);
+  };
+  const dispose = () => {
+    element.removeEventListener(event, onceHandler, options);
+  };
+
+  element.addEventListener(event, onceHandler, options);
+
+  return dispose;
+}

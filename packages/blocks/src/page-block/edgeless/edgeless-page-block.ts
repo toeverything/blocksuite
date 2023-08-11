@@ -1297,7 +1297,7 @@ export class EdgelessPageBlockComponent
           .edgeless=${this}
         ></edgeless-dragging-area-rect>
         <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
-        ${EdgelessNotesStatus(this, this.sortedNotes)} ${widgets}
+        ${EdgelessNotesStatus(this, this.notes)} ${widgets}
       </div>
     `;
   }
