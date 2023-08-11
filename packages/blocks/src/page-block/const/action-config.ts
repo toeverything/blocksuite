@@ -1,9 +1,6 @@
 import { BlockSelection } from '@blocksuite/block-std';
-import {
-  CopyIcon,
-  DatabaseTableViewIcon20,
-  SHORT_KEY,
-} from '@blocksuite/global/config';
+import { CopyIcon, DatabaseTableViewIcon20 } from '@blocksuite/global/config';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists, matchFlavours } from '@blocksuite/store';
 import { type TemplateResult } from 'lit';
 
@@ -47,7 +44,7 @@ export const actionConfig: ActionConfig[] = [
     disabledToolTip:
       'Contains Block types that cannot be converted to Database',
     icon: DatabaseTableViewIcon20,
-    hotkey: `${SHORT_KEY}+g`,
+    hotkey: `Mod-g`,
     showWhen: (pageElement: PageBlockComponent) => {
       const selectedModels = getSelectedContentModels(pageElement);
 
@@ -71,10 +68,9 @@ export const actionConfig: ActionConfig[] = [
         .filter(selection => selection instanceof BlockSelection)
         .map(selection => {
           const page = pageElement.page;
-          const block = page.getBlockById(selection.blockId);
-          assertExists(block);
-          return block;
-        });
+          return page.getBlockById(selection.blockId);
+        })
+        .filter((model): model is BaseBlockModel => !!model);
 
       if (selectedBlocks.length === 0) {
         return false;

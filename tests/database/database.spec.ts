@@ -16,6 +16,7 @@ import {
   pressEnter,
   pressEscape,
   pressShiftEnter,
+  redoByClick,
   redoByKeyboard,
   selectAllByKeyboard,
   type,
@@ -247,17 +248,15 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseColumn(page);
   await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-  await undoByKeyboard(page);
-  await pressEnter(page);
+  await undoByClick(page);
   await assertDatabaseCellRichTexts(page, { text: '' });
-  await redoByKeyboard(page);
+  await redoByClick(page);
   await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await focusDatabaseTitle(page);
-  await pressArrowRight(page, 10);
   await type(page, 'abc');
   await assertDatabaseTitleText(page, 'Database 1abc');
-  await undoByKeyboard(page);
+  await undoByClick(page);
   await assertDatabaseTitleText(page, 'Database 1');
   await redoByKeyboard(page);
   await assertDatabaseTitleText(page, 'Database 1abc');

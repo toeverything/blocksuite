@@ -11,7 +11,6 @@ import { test } from '../utils/playwright.js';
 import {
   assertRowsSelection,
   getDatabaseBodyCell,
-  getFirstColumnCell,
   initDatabaseColumn,
   switchColumnType,
 } from './actions.js';
@@ -47,7 +46,6 @@ test.describe('focus', () => {
 
     const endBox = await getBoundingBox(selectColumn);
     const endX = endBox.x + endBox.width / 2;
-    const endY = endBox.y + endBox.height / 2;
 
     await dragBetweenCoords(
       page,
