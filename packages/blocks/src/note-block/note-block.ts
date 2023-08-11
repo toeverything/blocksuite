@@ -7,6 +7,7 @@ import { registerService } from '../__internal__/service/index.js';
 import { bindHotKey } from './keymap.js';
 import type { NoteBlockModel } from './note-model.js';
 import { NoteBlockService } from './note-service.js';
+import { tryUpdateNoteSize } from './utils.js';
 
 @customElement('affine-note')
 export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
@@ -26,8 +27,13 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
+    tryUpdateNoteSize(this);
   }
 
   override render() {

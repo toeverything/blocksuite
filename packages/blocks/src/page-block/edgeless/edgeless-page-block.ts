@@ -77,11 +77,10 @@ import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { tryUpdateNoteSize } from '../utils/operations/model.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
-import { readImageSize } from './components/utils.js';
+import { readImageSize, updateNotesPosition } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
 import {
   EdgelessZoomToolbar,
@@ -539,6 +538,8 @@ export class EdgelessPageBlockComponent
         if (this.selection.selectedBlocks.length) {
           this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
+
+        updateNotesPosition(this, this.notes);
       })
     );
     _disposables.add(
@@ -1120,7 +1121,6 @@ export class EdgelessPageBlockComponent
     this._initResizeEffect();
     this._initNoteHeightUpdate();
     this.clipboard.init(this.page);
-    tryUpdateNoteSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
