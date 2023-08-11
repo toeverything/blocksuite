@@ -138,7 +138,8 @@ export function getCurrentCombinedFormat(
 function formatTextSelection(
   pageElement: PageBlockComponent,
   textSelection: TextSelection,
-  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
+  value: boolean | string = true
 ) {
   const selectedModels = getSelectedContentModels(pageElement);
 
@@ -164,7 +165,7 @@ function formatTextSelection(
         (vEditor.marks && vEditor.marks[key]) ||
         (delta.attributes && delta.attributes[key])
           ? null
-          : true,
+          : value,
     });
     clearMarksOnDiscontinuousInput(vEditor);
 
@@ -180,7 +181,7 @@ function formatTextSelection(
       rangeManager.syncTextSelectionToRange(textSelection);
     });
     startModel.text?.format(from.index, from.length, {
-      [key]: format[key] ? null : true,
+      [key]: format[key] ? null : value,
     });
     return;
   }
@@ -188,13 +189,13 @@ function formatTextSelection(
   // format start model
   if (!matchFlavours(startModel, ['affine:code'])) {
     startModel.text?.format(from.index, from.length, {
-      [key]: format[key] ? null : true,
+      [key]: format[key] ? null : value,
     });
   }
   // format end model
   if (!matchFlavours(endModel, ['affine:code'])) {
     endModel.text?.format(to?.index ?? 0, to?.length ?? 0, {
-      [key]: format[key] ? null : true,
+      [key]: format[key] ? null : value,
     });
   }
   // format between models
@@ -203,7 +204,7 @@ function formatTextSelection(
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
       model.text?.format(0, model.text.length, {
-        [key]: format[key] ? null : true,
+        [key]: format[key] ? null : value,
       });
     });
 
@@ -231,10 +232,11 @@ function formatTextSelection(
 export function handleFormat(
   pageElement: PageBlockComponent,
   textSelection: TextSelection,
-  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
+  value: boolean | string = true
 ) {
   pageElement.page.captureSync();
-  formatTextSelection(pageElement, textSelection, key);
+  formatTextSelection(pageElement, textSelection, key, value);
 }
 
 export function toggleLink(

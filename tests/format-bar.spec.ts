@@ -130,7 +130,7 @@ test('should format quick bar show when click drag handler', async ({
   if (!box) {
     throw new Error("formatBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 375.5, 5);
+  assertAlmostEqual(box.x, 345, 5);
   assertAlmostEqual(box.y - dragHandleRect.y, -55.5, 5);
 });
 
@@ -156,7 +156,7 @@ test('should format quick bar show when select text by keyboard', async ({
     throw new Error("formatBar doesn't exist");
   }
   let rect = await getSelectionRect(page);
-  assertAlmostEqual(leftBox.x - rect.x, -77, 10);
+  assertAlmostEqual(leftBox.x - rect.x, -85, 10);
   assertAlmostEqual(leftBox.y + leftBox.height - rect.top, -5, 10);
 
   await page.keyboard.press('ArrowLeft');
@@ -178,7 +178,7 @@ test('should format quick bar show when select text by keyboard', async ({
   // The x position of the format quick bar depends on the font size
   // so there are slight differences in different environments
   rect = await getSelectionRect(page);
-  assertAlmostEqual(leftBox.x - rect.x, -77, 10);
+  assertAlmostEqual(leftBox.x - rect.x, -85, 10);
   assertAlmostEqual(leftBox.y + leftBox.height - rect.top, -5, 10);
 });
 
