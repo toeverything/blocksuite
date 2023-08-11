@@ -367,8 +367,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
       ses:
-        specifier: ^0.18.5
-        version: 0.18.5
+        specifier: ^0.18.7
+        version: 0.18.7
       tweakpane:
         specifier: ^3.1.10
         version: 3.1.10
@@ -1098,8 +1098,8 @@ packages:
       - search-insights
     dev: true
 
-  /@endo/env-options@0.1.1:
-    resolution: {integrity: sha512-QlY6Z2r/izom+wZI0vQtU6yQf5V/EGRMwcqacmZv6j3e9bcYGZbG0ikoa8E155XETKr551BALlJhculBvlBLpg==}
+  /@endo/env-options@0.1.3:
+    resolution: {integrity: sha512-ljs5E0+Fhe5IQsciCn6jL5bsi1PYysPm4NhrPmNByw136AcjUbfZhOBmOzeXwOhxaL93cI/jTStNdWEA80Q+nQ==}
     dev: false
 
   /@esbuild/android-arm64@0.18.17:
@@ -6721,10 +6721,10 @@ packages:
       lru-cache: 6.0.0
     dev: true
 
-  /ses@0.18.5:
-    resolution: {integrity: sha512-paLV2JHUqGGpbLn+V4LM9g20WVzAn9jLU22Bx5/18fo6h6nF8SwhC+3cAMYxzmHmkAzplY5lkg1ms3xSkmSzdw==}
+  /ses@0.18.7:
+    resolution: {integrity: sha512-bcQ3CY8jh+UnumfdDZCPDgRA9hWk6acpL1d7ecQLMOdMkqKkP0yv2b6Sd9AVxuxbu4cXMt158epbpwkV/5sIfw==}
     dependencies:
-      '@endo/env-options': 0.1.1
+      '@endo/env-options': 0.1.3
     dev: false
 
   /set-blocking@2.0.0:
