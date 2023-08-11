@@ -51,13 +51,13 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     .navigation-panel-container {
       background-color: var(--affine-background-overlay-panel-color);
-      padding: 17.5px 18.5px;
+      padding: 17.5px 16px;
       box-sizing: border-box;
 
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 12px;
+      gap: 8px;
 
       height: 100%;
     }
@@ -111,9 +111,14 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     }
 
     .panel-list {
-      flex-grow: 1;
-      overflow: scroll;
       position: relative;
+      left: -8px;
+
+      flex-grow: 1;
+      width: calc(100% + 4px);
+      padding-left: 8px;
+
+      overflow-y: scroll;
     }
 
     .panel-list .title {

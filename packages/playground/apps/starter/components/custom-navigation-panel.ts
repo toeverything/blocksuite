@@ -17,7 +17,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color, #e3e2e4);
       background: var(--affine-background-overlay-panel-color);
       height: 100vh;
-      width: 300px;
+      width: 289px;
       box-sizing: border-box;
       overflow-y: scroll;
       overflow-x: visible;
