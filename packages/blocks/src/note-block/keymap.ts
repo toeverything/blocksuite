@@ -1,11 +1,21 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import { TextSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
+import { getBlockElementByModel } from '../__internal__/utils/query.js';
+import { paragraphConfig } from '../page-block/const/paragraph-config.js';
+import type { PageBlockComponent } from '../page-block/types.js';
+import {
+  onModelElementUpdated,
+  updateBlockElementType,
+} from '../page-block/utils/index.js';
 import {
   ensureBlockInContainer,
   getBlockSelectionBySide,
   getNextBlock,
   getPrevBlock,
+  getSelectedBlockElements,
   getTextSelection,
   moveCursorToNextBlockElement,
   moveCursorToPrevBlockElement,
@@ -228,5 +238,55 @@ export const bindHotKey = (blockElement: BlockElement) => {
         return selList.filter(sel => !sel.is('block')).concat(blocks);
       });
     },
+  });
+
+  paragraphConfig.forEach(config => {
+    if (!config.hotkey) {
+      return;
+    }
+
+    config.hotkey.forEach(key => {
+      blockElement.bindHotKey({
+        [key]: ctx => {
+          const selectionManager = blockElement.root.selectionManager;
+
+          const pageElement = blockElement.closest<PageBlockComponent>(
+            'affine-doc-page,affine-edgeless-page'
+          );
+          if (!pageElement) return;
+
+          ctx.get('defaultState').event.preventDefault();
+
+          const selected = getSelectedBlockElements(pageElement);
+
+          const newModels = updateBlockElementType(
+            pageElement,
+            selected,
+            config.flavour,
+            config.type
+          );
+
+          if (config.flavour !== 'affine:code') {
+            return;
+          }
+
+          const [codeModel] = newModels;
+          onModelElementUpdated(codeModel, () => {
+            const codeElement = getBlockElementByModel(codeModel);
+            assertExists(codeElement);
+            selectionManager.set([
+              new TextSelection({
+                from: {
+                  path: codeElement.path,
+                  index: 0,
+                  length: codeModel.text?.length ?? 0,
+                },
+                to: null,
+              }),
+            ]);
+          });
+        },
+      });
+    });
   });
 };
