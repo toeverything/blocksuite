@@ -41,8 +41,8 @@ const paragraphButtonStyle = css`
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     position: absolute;
-    min-width: 173px;
-    padding: 8px 4px;
+    min-width: 178px;
+    padding: 8px 8px;
     overflow-y: auto;
 
     background: var(--affine-background-overlay-panel-color);

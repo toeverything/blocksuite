@@ -23,7 +23,7 @@ export const backgroundHighlightConfig: BackgroundHighlightConfig[] = [
   },
   ...colors.map(color => ({
     name: `${color[0].toUpperCase()}${color.slice(1)} Background`,
-    color: `var(--affine-texthighlight-${color})`,
+    color: `var(--affine-text-highlight-${color})`,
     hotkey: null,
   })),
 ];

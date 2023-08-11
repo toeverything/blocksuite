@@ -44,12 +44,16 @@ const BackgroundHighlightPanel = ({
       ({ name, color }) => html`<icon-button
         width="100%"
         height="32px"
-        style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
+        style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
         text="${name}"
         data-testid="${color}"
         @click="${() => updateBackgroundHighlight(pageElement, color)}"
       >
-        <span style="color: ${color}; display: flex; align-items: center;">
+        <span
+          style="color: ${color === 'unset'
+            ? 'rgba(0,0,0,0)'
+            : color}; display: flex; align-items: center;"
+        >
           ${TextBackgroundDuotoneIcon}
         </span>
       </icon-button>`
@@ -107,7 +111,9 @@ export const BackgroundHighlightButton = ({
   >
     <icon-button
       class="background-highlight-icon"
-      style="color: ${lastUsedColor}"
+      style="color: ${lastUsedColor === 'unset'
+        ? 'rgba(0,0,0,0)'
+        : lastUsedColor}"
       width="52px"
       height="32px"
       @click="${() => updateBackgroundHighlight(pageElement)}"
