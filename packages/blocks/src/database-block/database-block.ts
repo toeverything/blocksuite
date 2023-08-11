@@ -36,7 +36,7 @@ import type { BlockOperation } from './types.js';
 type ViewData = {
   view: DataViewManager;
   selectionUpdated: Slot<DataViewSelectionState>;
-  setSelection: (selection: DataViewSelectionState) => void;
+  setSelection: (selection?: DataViewSelectionState) => void;
   bindHotkey: BaseDataView['bindHotkey'];
   handleEvent: BaseDataView['handleEvent'];
 };
@@ -148,6 +148,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         view: view,
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
+          if (!selection) {
+            this.root.selectionManager.set([]);
+            return;
+          }
           const data = this.root.selectionManager.getInstance('database', {
             path: this.path,
             viewSelection: selection as never,
@@ -269,7 +273,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           </div>
         </div>
         <uni-lit
-          .ref=${this._view}
+          .ref="${this._view}"
           .uni="${viewRendererManager.getView(current.mode).view}"
           .props="${props}"
           class="affine-block-element"
