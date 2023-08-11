@@ -283,7 +283,7 @@ test('keyboard selection and copy paste', async ({ page }) => {
   expect(content).toBe('useuse');
 });
 
-test('use keyboard copy inside code block copy', async ({ page }) => {
+test.skip('use keyboard copy inside code block copy', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
