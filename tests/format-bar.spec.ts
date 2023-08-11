@@ -353,7 +353,7 @@ test('should format quick bar be able to change background color', async ({
     prop:text={
       <>
         <text
-          bghighlight="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-pink)"
           insert="456"
         />
       </>
@@ -384,7 +384,7 @@ test('should format quick bar be able to change background color', async ({
     prop:text={
       <>
         <text
-          bghighlight="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-pink)"
           insert="123"
         />
       </>
@@ -395,7 +395,7 @@ test('should format quick bar be able to change background color', async ({
     prop:text={
       <>
         <text
-          bghighlight="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-pink)"
           insert="456"
         />
       </>
@@ -434,7 +434,7 @@ test('should format quick bar be able to change background color', async ({
     prop:text={
       <>
         <text
-          bghighlight="var(--affine-text-highlight-pink)"
+          background="var(--affine-text-highlight-pink)"
           insert="456"
         />
       </>

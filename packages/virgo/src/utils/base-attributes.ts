@@ -7,7 +7,6 @@ export const baseTextAttributes = z.object({
   strike: z.literal(true).optional().catch(undefined),
   code: z.literal(true).optional().catch(undefined),
   link: z.string().optional().catch(undefined),
-  bghighlight: z.string().optional().catch(undefined),
 });
 // .partial();
 

@@ -139,7 +139,7 @@ function getDefaultFormatForKey(
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
   value: boolean | string = true
 ) {
-  if (key === 'bghighlight') {
+  if (key === 'background') {
     if (value === 'unset') {
       return null;
     }

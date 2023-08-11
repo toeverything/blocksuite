@@ -33,7 +33,7 @@ const updateBackgroundHighlight = (
   if (color) {
     lastUsedColor = color;
   }
-  handleFormat(pageElement, textSelection, 'bghighlight', lastUsedColor);
+  handleFormat(pageElement, textSelection, 'background', lastUsedColor);
 };
 
 const BackgroundHighlightPanel = ({
