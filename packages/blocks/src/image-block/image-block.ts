@@ -125,48 +125,12 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
     );
 
+    this._bindKeymap();
+    this._handleSelection();
+
     this._observeDrag();
     // Wait for DOM to be ready
     setTimeout(() => this._observePosition());
-
-    const selection = this.root.selectionManager;
-    this._disposables.add(
-      selection.slots.changed.on(selList => {
-        const curr = selList.find(
-          sel => PathFinder.equals(sel.path, this.path) && sel.is('image')
-        );
-
-        this._focused = !!curr;
-      })
-    );
-
-    this.handleEvent('click', () => {
-      selection.update(selList => {
-        return selList
-          .filter(sel => {
-            return !['text', 'block', 'image'].includes(sel.type);
-          })
-          .concat(selection.getInstance('image', { path: this.path }));
-      });
-      return true;
-    });
-    this.handleEvent(
-      'click',
-      () => {
-        if (!this._focused) return;
-
-        selection.update(selList => {
-          return selList.filter(sel => {
-            const current =
-              sel.is('image') && PathFinder.equals(sel.path, this.path);
-            return !current;
-          });
-        });
-      },
-      {
-        global: true,
-      }
-    );
   }
 
   override disconnectedCallback() {
@@ -393,6 +357,111 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         updateOptionsPosition()
       );
     }
+  }
+
+  private _handleSelection() {
+    const selection = this.root.selectionManager;
+    this._disposables.add(
+      selection.slots.changed.on(selList => {
+        const curr = selList.find(
+          sel => PathFinder.equals(sel.path, this.path) && sel.is('image')
+        );
+
+        this._focused = !!curr;
+      })
+    );
+
+    this.handleEvent('click', () => {
+      selection.update(selList => {
+        return selList
+          .filter(sel => {
+            return !['text', 'block', 'image'].includes(sel.type);
+          })
+          .concat(selection.getInstance('image', { path: this.path }));
+      });
+      return true;
+    });
+    this.handleEvent(
+      'click',
+      () => {
+        if (!this._focused) return;
+
+        selection.update(selList => {
+          return selList.filter(sel => {
+            const current =
+              sel.is('image') && PathFinder.equals(sel.path, this.path);
+            return !current;
+          });
+        });
+      },
+      {
+        global: true,
+      }
+    );
+  }
+
+  private _bindKeymap() {
+    const selection = this.root.selectionManager;
+    const addParagraph = () => {
+      const parent = this.page.getParent(this.model);
+      if (!parent) return;
+      const index = parent.children.indexOf(this.model);
+      const blockId = this.page.addBlock(
+        'affine:paragraph',
+        {},
+        parent,
+        index + 1
+      );
+      requestAnimationFrame(() => {
+        selection.update(selList => {
+          return selList
+            .filter(sel => !sel.is('image'))
+            .concat(
+              selection.getInstance('text', {
+                from: {
+                  path: this.parentPath.concat(blockId),
+                  index: 0,
+                  length: 0,
+                },
+                to: null,
+              })
+            );
+        });
+      });
+    };
+
+    this.bindHotKey({
+      Escape: () => {
+        selection.update(selList => {
+          return selList.map(sel => {
+            const current =
+              sel.is('image') && PathFinder.equals(sel.path, this.path);
+            if (current) {
+              return selection.getInstance('block', { path: this.path });
+            }
+            return sel;
+          });
+        });
+        return true;
+      },
+      Delete: () => {
+        if (!this._focused) return;
+        addParagraph();
+        this.page.deleteBlock(this.model);
+        return true;
+      },
+      Backspace: () => {
+        if (!this._focused) return;
+        addParagraph();
+        this.page.deleteBlock(this.model);
+        return true;
+      },
+      Enter: () => {
+        if (!this._focused) return;
+        addParagraph();
+        return true;
+      },
+    });
   }
 
   private _imageOptionsTemplate() {

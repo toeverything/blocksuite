@@ -5,7 +5,14 @@ import type { VirgoRootElement } from '@blocksuite/virgo';
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import { getCurrentCombinedFormat } from '../../../page-block/utils/operations/inline.js';
-import { getTextSelection } from '../../../page-block/utils/selection.js';
+import {
+  getSelectedContentModels,
+  getTextSelection,
+} from '../../../page-block/utils/selection.js';
+import {
+  handleMultiBlockIndent,
+  handleMultiBlockUnindent,
+} from '../rich-text-operations.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selectionManager;
@@ -66,13 +73,53 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return;
     },
+    'Mod-a': () => {
+      if (blockElement.selected?.is('text')) {
+        return _selectBlock();
+      }
+      return;
+    },
+    Tab: () => {
+      if (
+        blockElement.selected?.is('block') ||
+        blockElement.selected?.is('text')
+      ) {
+        const page = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!page) {
+          return;
+        }
+        const models = getSelectedContentModels(page);
+        handleMultiBlockIndent(blockElement.page, models);
+        return true;
+      }
+      return;
+    },
+    'Shift-Tab': () => {
+      if (
+        blockElement.selected?.is('block') ||
+        blockElement.selected?.is('text')
+      ) {
+        const page = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!page) {
+          return;
+        }
+        const models = getSelectedContentModels(page);
+        handleMultiBlockUnindent(blockElement.page, models);
+        return true;
+      }
+      return;
+    },
   });
 
   inlineFormatConfig.forEach(config => {
     if (!config.hotkey) return;
 
     blockElement.bindHotKey({
-      [config.hotkey]: () => {
+      [config.hotkey]: ctx => {
         if (blockElement.page.readonly) return;
 
         const pageElement = blockElement.closest<PageBlockComponent>(
@@ -82,8 +129,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const textSelection = getTextSelection(pageElement);
         if (!textSelection) return;
 
+        ctx.get('defaultState').event.preventDefault();
+
         const format = getCurrentCombinedFormat(pageElement, textSelection);
         config.action({ pageElement, format });
+        return true;
       },
     });
   });

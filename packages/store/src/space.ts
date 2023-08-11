@@ -91,7 +91,14 @@ export class Space<
 
     let subDoc = this.doc.spaces.get(prefixedId);
     if (!subDoc) {
-      subDoc = new Y.Doc({ guid: prefixedId });
+      const rootDocId = this.doc.guid;
+      subDoc = new Y.Doc({
+        // this is
+        // to make sure that the guid is unique
+        // when we create the demo workspace in AFFiNE
+        // and import the same page doc multiple times
+        guid: `${rootDocId}:${prefixedId}`,
+      });
       this.doc.spaces.set(prefixedId, subDoc);
       this._loaded = true;
       this._onLoadSlot.emit();

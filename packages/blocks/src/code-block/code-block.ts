@@ -278,6 +278,20 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     this._observePosition();
     bindContainerHotkey(this);
+
+    const selection = this.root.selectionManager;
+    this.bindHotKey({
+      Backspace: () => {
+        if (!selection.find('text')) return;
+
+        selection.update(selList => {
+          return selList
+            .filter(sel => !sel.is('text'))
+            .concat(selection.getInstance('block', { path: this.path }));
+        });
+        return true;
+      },
+    });
   }
 
   override disconnectedCallback() {

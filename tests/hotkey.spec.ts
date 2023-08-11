@@ -20,7 +20,6 @@ import {
   redoByClick,
   redoByKeyboard,
   resetHistory,
-  selectAllByKeyboard,
   setVirgoSelection,
   SHORT_KEY,
   strikethrough,
@@ -54,7 +53,7 @@ test('rich-text hotkey scope on single press', async ({ page }) => {
   await assertRichTexts(page, ['']);
 });
 
-test.fixme('single line rich-text inline code hotkey', async ({ page }) => {
+test('single line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -76,12 +75,12 @@ test.fixme('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test.fixme('type character jump out code node', async ({ page }) => {
+test('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'Hello');
-  await selectAllByKeyboard(page);
+  await setVirgoSelection(page, 0, 5);
   await inlineCode(page);
   await assertStoreMatchJSX(
     page,
@@ -123,7 +122,7 @@ test.fixme('type character jump out code node', async ({ page }) => {
   );
 });
 
-test.fixme('multi line rich-text inline code hotkey', async ({ page }) => {
+test('multi line rich-text inline code hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -265,7 +264,7 @@ test.fixme('multi line rich-text inline code hotkey', async ({ page }) => {
   );
 });
 
-test.fixme('single line rich-text strikethrough hotkey', async ({ page }) => {
+test('single line rich-text strikethrough hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -286,7 +285,7 @@ test.fixme('single line rich-text strikethrough hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test.fixme('use formatted cursor with hotkey', async ({ page }) => {
+test('use formatted cursor with hotkey', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -481,7 +480,7 @@ test.fixme('use formatted cursor with hotkey', async ({ page }) => {
   );
 });
 
-test.fixme('should single line format hotkey work', async ({ page }) => {
+test('should single line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -559,7 +558,7 @@ test.fixme('should single line format hotkey work', async ({ page }) => {
   );
 });
 
-test.fixme('should multiple line format hotkey work', async ({ page }) => {
+test('should multiple line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -574,7 +573,7 @@ test.fixme('should multiple line format hotkey work', async ({ page }) => {
   // underline
   await page.keyboard.press(`${SHORT_KEY}+u`);
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+S`);
 
   await waitNextFrame(page);
 
@@ -674,7 +673,7 @@ test.fixme('should multiple line format hotkey work', async ({ page }) => {
   );
 });
 
-test.fixme('should hotkey work in paragraph', async ({ page }) => {
+test('should hotkey work in paragraph', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
 
@@ -806,7 +805,7 @@ test('format list to h1', async ({ page }) => {
   await assertTypeFormat(page, 'h1');
 });
 
-test.fixme('should cut work single line', async ({ page }) => {
+test('should cut work single line', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await focusRichText(page);
@@ -979,22 +978,6 @@ test('should bracket complete with backtick works', async ({ page }) => {
   );
 });
 
-test.fixme(
-  'pressing enter when selecting multiple blocks should create new block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await dragBetweenIndices(page, [0, 1], [2, 1]);
-    await waitNextFrame(page);
-    await pressEnter(page);
-    await assertRichTexts(page, ['1', '89']);
-    await assertSelection(page, 1, 0, 0);
-    await undoByKeyboard(page);
-    await assertRichTexts(page, ['123', '456', '789']);
-  }
-);
-
 // FIXME: getCurrentBlockRange need to handle comment node
 test.skip('should left/right key navigator works', async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -1020,7 +1003,7 @@ test.skip('should left/right key navigator works', async ({ page }) => {
   await assertSelection(page, 1, 3);
 });
 
-test.fixme('should up/down key navigator works', async ({ page }) => {
+test('should up/down key navigator works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -1058,30 +1041,28 @@ test.fixme('should cut in title works', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 });
 
-test.fixme(
-  'should support ctrl/cmd+g convert to database',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
+test('should support ctrl/cmd+g convert to database', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
 
-    await dragBetweenIndices(
-      page,
-      [2, 3],
-      [0, 0],
-      { x: 20, y: 20 },
-      { x: 0, y: 0 }
-    );
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
 
-    await page.keyboard.press(`${SHORT_KEY}+g`);
-    const tableView = page.locator('.modal-view-item.table');
-    await tableView.click();
-    const database = page.locator('affine-database');
-    await expect(database).toBeVisible();
-    const rows = page.locator('.affine-database-block-row');
-    expect(await rows.count()).toBe(3);
-  }
-);
+  await waitNextFrame(page);
+  await page.keyboard.press(`${SHORT_KEY}+g`);
+  const tableView = page.locator('.modal-view-item.table');
+  await tableView.click();
+  const database = page.locator('affine-database');
+  await expect(database).toBeVisible();
+  const rows = page.locator('.affine-database-block-row');
+  expect(await rows.count()).toBe(3);
+});
 
 test('should forwardDelete works when delete single character', async ({
   page,
@@ -1112,20 +1093,17 @@ test('should forwardDelete works when delete multi characters', async ({
   await assertRichTexts(page, ['ho']);
 });
 
-test.fixme(
-  'should drag multiple block and input text works',
-  async ({ page }) => {
-    test.info().annotations.push({
-      type: 'issue',
-      description: 'https://github.com/toeverything/blocksuite/issues/2982',
-    });
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await dragBetweenIndices(page, [0, 1], [2, 1]);
-    await type(page, 'ab');
-    await assertRichTexts(page, ['1ab89']);
-    await undoByKeyboard(page);
-    await assertRichTexts(page, ['123', '456', '789']);
-  }
-);
+test('should drag multiple block and input text works', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2982',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [0, 1], [2, 1]);
+  await type(page, 'ab');
+  await assertRichTexts(page, ['1ab89']);
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+});

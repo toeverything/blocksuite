@@ -120,7 +120,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['//']);
   });
 
-  test.fixme('pressing esc should close the slash menu', async () => {
+  test('pressing esc should close the slash menu', async () => {
     // You may need to press Esc twice in a real browser
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
@@ -128,7 +128,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test.fixme('should position slash menu correctly', async () => {
+  test('should position slash menu correctly', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
       throw new Error("slashMenu doesn't exist");
@@ -139,7 +139,7 @@ test.describe('slash menu should show and hide correctly', () => {
     assertAlmostEqual(y - rect.bottom, 5, 10);
   });
 
-  test.fixme('should move up down with arrow key', async () => {
+  test('should move up down with arrow key', async () => {
     await page.keyboard.press('ArrowDown');
     await expect(slashMenu).toBeVisible();
 
@@ -160,7 +160,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test.fixme('should move up down with ctrl/cmd+N and ctrl/cmd+N', async () => {
+  test('should move up down with ctrl/cmd+N and ctrl/cmd+N', async () => {
     page.keyboard.press(`${SHORT_KEY}+N`);
     await expect(slashMenu).toBeVisible();
 
@@ -179,7 +179,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test.fixme('should allow only pressing modifier key', async () => {
+  test('should allow only pressing modifier key', async () => {
     page.keyboard.press(SHORT_KEY);
     await expect(slashMenu).toBeVisible();
 
@@ -187,7 +187,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).toBeVisible();
   });
 
-  test.fixme('should allow other hotkey to passthrough', async () => {
+  test('should allow other hotkey to passthrough', async () => {
     page.keyboard.press(`${SHORT_KEY}+A`);
     await expect(slashMenu).not.toBeVisible();
     await assertRichTexts(page, ['/']);
@@ -196,7 +196,7 @@ test.describe('slash menu should show and hide correctly', () => {
     expect(selected).toBe('/');
   });
 
-  test.fixme('left arrow should active left panel', async () => {
+  test('left arrow should active left panel', async () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('ArrowRight');
@@ -209,7 +209,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await assertRichTexts(page, ['/']);
   });
 
-  test.fixme('press tab should move up and down', async () => {
+  test('press tab should move up and down', async () => {
     await page.keyboard.press('Tab');
     await expect(slashMenu).toBeVisible();
 
@@ -226,7 +226,7 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashItem1).not.toHaveAttribute('hover', '');
   });
 
-  test.fixme('can input search input after click menu', async () => {
+  test('can input search input after click menu', async () => {
     const box = await slashMenu.boundingBox();
     if (!box) {
       throw new Error("slashMenu doesn't exist");
@@ -504,7 +504,7 @@ test.describe('slash menu with style', () => {
     );
   });
 
-  test.fixme('should style empty line works', async ({ page }) => {
+  test('should style empty line works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { paragraphId } = await initEmptyParagraphState(page);
     await focusRichText(page);

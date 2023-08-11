@@ -14,7 +14,6 @@ import {
   asyncSetVRange,
 } from '../utils/common-operations.js';
 import {
-  getDocPage,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
@@ -379,15 +378,6 @@ export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
       handleUnindent(page, model);
     }
   }
-}
-
-// When deleting at line start of a code block,
-// select the code block itself
-function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:code'])) return false;
-
-  focusBlockByModel(model);
-  return true;
 }
 
 // When deleting at line end of a code block,
@@ -773,7 +763,6 @@ function handleUnknownBlockForwardDelete(model: ExtendedModel) {
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   if (
-    handleCodeBlockBackspace(page, model) ||
     handleListBlockBackspace(page, model) ||
     handleParagraphBlockBackspace(page, model)
   ) {
@@ -794,33 +783,6 @@ export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
     return;
   }
   handleUnknownBlockForwardDelete(model);
-}
-
-export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:paragraph'])) return;
-  const pageElement = getDocPage(page);
-  if (!pageElement) {
-    // Maybe in edgeless mode
-    return;
-  }
-  const titleVEditor = pageElement.titleVEditor;
-  const parent = page.getParent(model);
-  if (parent && matchFlavours(parent, ['affine:note'])) {
-    const paragraphIndex = parent.children.indexOf(model);
-    if (paragraphIndex === 0) {
-      const noteParent = page.getParent(parent);
-      if (noteParent && matchFlavours(noteParent, ['affine:page'])) {
-        const noteIndex = noteParent.children
-          // page block may contain other blocks like surface
-          .filter(block => matchFlavours(block, ['affine:note']))
-          .indexOf(parent);
-        if (noteIndex === 0) {
-          titleVEditor.focusEnd();
-          return;
-        }
-      }
-    }
-  }
 }
 
 export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {

@@ -113,22 +113,15 @@ export function updateBlockElementType(
     });
     return newModels;
   } else if (blockSelections.length !== 0) {
-    if (blockSelections[0].blockId !== firstNewModel.id) {
-      blockSelections[0] = selectionManager.getInstance('block', {
-        path: blockSelections[0].path.slice(0, -1).concat(firstNewModel.id),
-      });
-    }
-    if (
-      blockSelections[blockSelections.length - 1].blockId !== lastNewModel.id
-    ) {
-      blockSelections[blockSelections.length - 1] =
-        selectionManager.getInstance('block', {
-          path: blockSelections[blockSelections.length - 1].path
-            .slice(0, -1)
-            .concat(lastNewModel.id),
-        });
-    }
-    selectionManager.set(blockSelections);
+    requestAnimationFrame(() => {
+      selectionManager.set(
+        newModels.map(model => {
+          return selectionManager.getInstance('block', {
+            path: blockSelections[0].path.slice(0, -1).concat(model.id),
+          });
+        })
+      );
+    });
     return newModels;
   }
 

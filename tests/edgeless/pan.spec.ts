@@ -7,10 +7,12 @@ import {
 } from '../utils/actions/edgeless.js';
 import {
   addBasicRectShapeElement,
+  defaultTool,
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
   locatorPanButton,
+  pressSpace,
   type,
   waitForVirgoStateUpdated,
 } from '../utils/actions/index.js';
@@ -44,7 +46,7 @@ test('pan tool basic', async ({ page }) => {
   await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
 });
 
-test.fixme('pan tool shortcut', async ({ page }) => {
+test('pan tool shortcut', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
@@ -56,7 +58,7 @@ test.fixme('pan tool shortcut', async ({ page }) => {
   await page.mouse.move(start.x + 5, start.y + 5);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 
-  await page.keyboard.down('Space');
+  await pressSpace(page);
   const panButton = locatorPanButton(page);
   expect(await panButton.getAttribute('active')).toEqual('');
 
@@ -72,7 +74,7 @@ test.fixme('pan tool shortcut', async ({ page }) => {
     }
   );
 
-  await page.keyboard.up('Space');
+  await defaultTool(page);
 
   expect(await panButton.getAttribute('active')).toBeNull();
 

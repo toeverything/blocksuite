@@ -1,11 +1,22 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import { TextSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
+import { getBlockElementByModel } from '../__internal__/utils/query.js';
+import { actionConfig } from '../page-block/const/action-config.js';
+import { paragraphConfig } from '../page-block/const/paragraph-config.js';
+import type { PageBlockComponent } from '../page-block/types.js';
+import {
+  onModelElementUpdated,
+  updateBlockElementType,
+} from '../page-block/utils/index.js';
 import {
   ensureBlockInContainer,
   getBlockSelectionBySide,
   getNextBlock,
   getPrevBlock,
+  getSelectedBlockElements,
   getTextSelection,
   moveCursorToNextBlockElement,
   moveCursorToPrevBlockElement,
@@ -160,5 +171,142 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
       return true;
     },
+    Escape: () => {
+      const blockSelection = getBlockSelectionBySide(blockElement, true);
+      if (!blockSelection) {
+        return;
+      }
+      const selection = blockElement.root.selectionManager;
+      selection.update(selList => {
+        return selList.filter(sel => !sel.is('block'));
+      });
+      return true;
+    },
+    Enter: () => {
+      const blockSelection = getBlockSelectionBySide(blockElement, true);
+      if (!blockSelection) {
+        return;
+      }
+      const element = blockElement.root.viewStore.viewFromPath(
+        'block',
+        blockSelection.path
+      );
+      if (!element) {
+        return;
+      }
+
+      const page = blockElement.page;
+      const { model } = element;
+      const parent = page.getParent(model);
+      if (!parent) {
+        return;
+      }
+
+      const index = parent.children.indexOf(model) ?? undefined;
+
+      const blockId = page.addBlock('affine:paragraph', {}, parent, index + 1);
+
+      const selection = element.root.selectionManager;
+      const sel = selection.getInstance('text', {
+        from: {
+          path: element.parentPath.concat(blockId),
+          index: 0,
+          length: 0,
+        },
+        to: null,
+      });
+      selection.update(selList => {
+        return selList.filter(sel => !sel.is('block')).concat(sel);
+      });
+
+      return true;
+    },
+    'Mod-a': () => {
+      const view = blockElement.root.viewStore;
+      const selection = blockElement.root.selectionManager;
+      const blocks: BlockSelection[] = [];
+      view.walkThrough(nodeView => {
+        if (nodeView.type === 'block') {
+          blocks.push(
+            selection.getInstance('block', {
+              path: nodeView.path,
+            })
+          );
+        }
+        return null;
+      }, blockElement.path);
+      selection.update(selList => {
+        return selList.filter(sel => !sel.is('block')).concat(blocks);
+      });
+    },
+  });
+
+  actionConfig.forEach(config => {
+    if (!config.hotkey) return;
+    blockElement.bindHotKey({
+      [config.hotkey]: ctx => {
+        const pageElement = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!pageElement) return;
+
+        if (!config.showWhen(pageElement)) return;
+
+        ctx.get('defaultState').event.preventDefault();
+        config.action(pageElement);
+      },
+    });
+  });
+
+  paragraphConfig.forEach(config => {
+    if (!config.hotkey) {
+      return;
+    }
+
+    config.hotkey.forEach(key => {
+      blockElement.bindHotKey({
+        [key]: ctx => {
+          const selectionManager = blockElement.root.selectionManager;
+
+          const pageElement = blockElement.closest<PageBlockComponent>(
+            'affine-doc-page,affine-edgeless-page'
+          );
+          if (!pageElement) return;
+
+          ctx.get('defaultState').event.preventDefault();
+
+          const selected = getSelectedBlockElements(pageElement);
+
+          const newModels = updateBlockElementType(
+            pageElement,
+            selected,
+            config.flavour,
+            config.type
+          );
+
+          if (config.flavour !== 'affine:code') {
+            return;
+          }
+
+          const [codeModel] = newModels;
+          onModelElementUpdated(codeModel, () => {
+            const codeElement = getBlockElementByModel(codeModel);
+            assertExists(codeElement);
+            selectionManager.set([
+              new TextSelection({
+                from: {
+                  path: codeElement.path,
+                  index: 0,
+                  length: codeModel.text?.length ?? 0,
+                },
+                to: null,
+              }),
+            ]);
+          });
+
+          return true;
+        },
+      });
+    });
   });
 };

@@ -71,7 +71,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   @query('.database-title')
   private _titleContainer!: HTMLDivElement;
 
-  private _titleVInput: VirgoInput | null = null;
+  titleVInput: VirgoInput | null = null;
 
   override firstUpdated() {
     this._initTitleVEditor();
@@ -87,12 +87,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   }
 
   private _initTitleVEditor() {
-    this._titleVInput = new VirgoInput({
+    this.titleVInput = new VirgoInput({
       yText: this.titleText.yText,
       rootElement: this._titleContainer,
       maxLength: DATABASE_TITLE_LENGTH,
     });
-    this._titleVInput.vEditor.setReadonly(this.readonly);
+    this.titleVInput.vEditor.setReadonly(this.readonly);
     this._titleContainer.addEventListener('keydown', this._handleKeyDown);
 
     // for title placeholder
@@ -112,11 +112,11 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   private _onTitleFocus = () => {
-    this._titleVInput?.setActive(true);
+    this.titleVInput?.setActive(true);
   };
 
   private _onTitleBlur = () => {
-    this._titleVInput?.setActive(false);
+    this.titleVInput?.setActive(false);
   };
 
   override render() {
