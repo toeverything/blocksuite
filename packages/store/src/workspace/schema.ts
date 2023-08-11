@@ -107,6 +107,7 @@ export class Schema {
   }
 
   upgradeWorkspace = (rootData: Y.Doc) => {
+    this._upgradeBlockVersions(rootData);
     workspaceMigrations.forEach(migration => {
       try {
         if (migration.condition(rootData)) {
@@ -147,6 +148,18 @@ export class Schema {
     const data = toBlockMigrationData(blockData, this.proxy);
 
     return onUpgrade(data, oldVersion, version);
+  };
+
+  private _upgradeBlockVersions = (rootData: Y.Doc) => {
+    const meta = rootData.getMap('meta');
+    const blockVersions = meta.get('blockVersions') as Y.Map<number>;
+    if (!blockVersions) {
+      return;
+    }
+    blockVersions.forEach((origin, flavour) => {
+      const currentSchema = this.flavourSchemaMap.get(flavour);
+      blockVersions.set(flavour, currentSchema?.version ?? origin);
+    });
   };
 
   private _validateRole(child: BlockSchemaType, parent: BlockSchemaType) {

@@ -947,8 +947,9 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async waitForLoaded() {
+  override async waitForLoaded(onLoaded?: () => void) {
     await super.waitForLoaded();
+    onLoaded?.();
     if (!this._synced) {
       this.trySyncFromExistingDoc();
     }
