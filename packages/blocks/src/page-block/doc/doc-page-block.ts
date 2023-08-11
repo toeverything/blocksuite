@@ -449,7 +449,8 @@ export class DocPageBlockComponent
       const state = ctx.get('pointerState');
       if (
         state.raw.target !== this &&
-        state.raw.target !== this.viewportElement
+        state.raw.target !== this.viewportElement &&
+        state.raw.target !== this.pageBlockContainer
       ) {
         return;
       }

@@ -1262,31 +1262,24 @@ test('should be cleared when dragging block card from BlockHub', async ({
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(0);
 });
 
-test.fixme(
-  'click bottom of page and if the last is embed block, editor should insert a new editable block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initImageState(page);
+test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
 
-    await page.evaluate(async () => {
-      const viewport = document.querySelector('.affine-doc-viewport');
-      if (!viewport) {
-        throw new Error();
-      }
-      viewport.scrollTo(0, 1000);
-    });
+  const pageRect = await page.evaluate(() => {
+    const pageBlock = document.querySelector('.affine-doc-viewport');
+    return pageBlock?.getBoundingClientRect() || null;
+  });
 
-    const pageRect = await page.evaluate(() => {
-      const pageBlock = document.querySelector('affine-doc-page');
-      return pageBlock?.getBoundingClientRect() || null;
-    });
+  await page
+    .locator('.affine-doc-viewport')
+    .click({ position: { x: pageRect.width / 2, y: pageRect.bottom - 10 } });
 
-    expect(pageRect).not.toBeNull();
-    await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
-
-    await assertStoreMatchJSX(
-      page,
-      `<affine:page>
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:hidden={false}
@@ -1303,9 +1296,8 @@ test.fixme(
     />
   </affine:note>
 </affine:page>`
-    );
-  }
-);
+  );
+});
 
 test('should select blocks when pressing escape', async ({ page }) => {
   await enterPlaygroundRoom(page);
