@@ -119,8 +119,9 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   }
 
   override render() {
+    const value = `${this.value ?? ''}`;
     return html`<input
-      .value="${this.value ?? ''}"
+      .value="${value}"
       @keydown="${this._keydown}"
       @blur="${this._blur}"
       @focus="${this._focus}"
