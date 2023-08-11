@@ -128,8 +128,7 @@ test('select all and delete by forwardDelete', async ({ page }) => {
 });
 
 async function clickListIcon(page: Page, i = 0) {
-  await page.mouse.click(0, 0);
-  const locator = page.locator('.affine-list-block__prefix ').nth(i);
+  const locator = page.locator('.affine-list-block__prefix').nth(i);
   await locator.click({ force: true });
 }
 
@@ -162,11 +161,13 @@ test('click the list icon can select and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await clickListIcon(page, 0);
-  await pressBackspace(page, 2);
-  await assertRichTexts(page, ['456', '789']);
-  await clickListIcon(page, 0);
+  await waitNextFrame(page);
   await pressBackspace(page);
-  await assertRichTexts(page, ['']);
+  await assertRichTexts(page, ['', '456', '789']);
+  await clickListIcon(page, 0);
+  await waitNextFrame(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['', '']);
 });
 
 test('click the list icon can select and delete by forwardDelete', async ({
@@ -178,10 +179,11 @@ test('click the list icon can select and delete by forwardDelete', async ({
   await assertRichTexts(page, ['123', '456', '789']);
 
   await clickListIcon(page, 0);
-  await pressForwardDelete(page);
+  await waitNextFrame(page);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['', '456', '789']);
   await clickListIcon(page, 0);
+  await waitNextFrame(page);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['', '']);
 });
