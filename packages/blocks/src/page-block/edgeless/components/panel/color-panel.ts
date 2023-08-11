@@ -155,6 +155,30 @@ export function ColorUnit(
   </div>`;
 }
 
+export const colorContainerStyles = css`
+  .color-container {
+    display: flex;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .color-container[active] {
+    border: 1px solid var(--affine-primary-color);
+  }
+
+  .color-unit::before {
+    content: attr(data-letter);
+    display: block;
+    font-size: 12px;
+  }
+`;
+
 @customElement('edgeless-color-panel')
 export class EdgelessColorPanel extends LitElement {
   static override styles = css`
@@ -169,27 +193,7 @@ export class EdgelessColorPanel extends LitElement {
       background: var(--affine-popover-background);
     }
 
-    .color-container {
-      display: flex;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      box-sizing: border-box;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      cursor: pointer;
-    }
-
-    .color-container[active] {
-      border: 1px solid var(--affine-primary-color);
-    }
-
-    .color-unit::before {
-      content: attr(data-letter);
-      display: block;
-      font-size: 12px;
-    }
+    ${colorContainerStyles}
   `;
 
   @property({ attribute: false })
@@ -204,7 +208,7 @@ export class EdgelessColorPanel extends LitElement {
   @property({ attribute: false })
   hollowCircle = false;
 
-  private _onSelect(value: CssVariableName) {
+  onSelect(value: CssVariableName) {
     this.dispatchEvent(
       new ColorEvent('select', {
         detail: value,
@@ -229,7 +233,7 @@ export class EdgelessColorPanel extends LitElement {
           <div
             class="color-container"
             ?active=${color === this.value}
-            @click=${() => this._onSelect(color)}
+            @click=${() => this.onSelect(color)}
           >
             ${unit}
           </div>

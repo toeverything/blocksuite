@@ -1875,3 +1875,13 @@ export const ScribbledShapeStyleIcon = html`<svg
     />
   </g>
 </svg>`;
+
+export const ArrowRightSmallIcon = svg`<svg 
+  xmlns="http://www.w3.org/2000/svg" 
+  width="16" 
+  height="16" 
+  viewBox="0 0 16 16" 
+  fill="none"
+>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M5.64612 4.31344C5.45086 4.5087 5.45086 4.82528 5.64612 5.02055L8.6259 8.00033L5.64612 10.9801C5.45086 11.1754 5.45086 11.492 5.64612 11.6872C5.84138 11.8825 6.15797 11.8825 6.35323 11.6872L9.68656 8.35388C9.88182 8.15862 9.88182 7.84203 9.68656 7.64677L6.35323 4.31344C6.15797 4.11818 5.84138 4.11818 5.64612 4.31344Z" fill="#77757D"/>
+</svg>`;

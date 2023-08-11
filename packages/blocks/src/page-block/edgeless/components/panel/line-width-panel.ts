@@ -45,6 +45,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       position: relative;
       width: 100px;
       margin: 4px;
+      cursor: default;
     }
 
     .line-width-button {
@@ -81,7 +82,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       border-radius: 50%;
       background-color: var(--affine-icon-color);
       z-index: 3;
-      cursor: ew-resize;
     }
 
     .bottom-line,
@@ -255,7 +255,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this.selectedSize = lineWidth;
   }
 
-  private _onPoinetrDown = (e: PointerEvent) => {
+  private _onPointerDown = (e: PointerEvent) => {
     e.preventDefault();
     const { left, width } = this._lineWidthPanel.getBoundingClientRect();
     const bottomLineWidth = this._bottomLine.getBoundingClientRect().width;
@@ -306,7 +306,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   override firstUpdated(): void {
     this._updateLineWidthPanel(this.selectedSize);
-    this._disposables.addFromEvent(this, 'pointerdown', this._onPoinetrDown);
+    this._disposables.addFromEvent(this, 'pointerdown', this._onPointerDown);
     this._disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
     this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
     this._disposables.addFromEvent(this, 'pointerout', this._onPointerOut);

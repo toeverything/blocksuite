@@ -121,7 +121,7 @@ test('add brush element with different size', async ({ page }) => {
   await switchEditorMode(page);
 
   await setEdgelessTool(page, 'brush');
-  await selectBrushSize(page, 10);
+  await selectBrushSize(page, 'ten');
   const color = '--affine-palette-line-blue';
   await selectBrushColor(page, color);
 

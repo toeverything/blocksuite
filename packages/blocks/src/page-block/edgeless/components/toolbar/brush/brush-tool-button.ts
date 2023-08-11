@@ -25,10 +25,11 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   reference.shadowRoot.appendChild(brushMenu);
 
   computePosition(reference, brushMenu, {
-    placement: 'top',
+    placement: 'top-start',
     middleware: [
       offset({
-        mainAxis: 10,
+        mainAxis: 42,
+        crossAxis: -120,
       }),
     ],
   }).then(({ x, y }) => {
