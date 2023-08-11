@@ -266,7 +266,7 @@ export function getGridBound(ele: Selectable) {
   return isTopLevelBlock(ele) ? Bound.deserialize(ele.xywh) : ele.gridBound;
 }
 
-export function updateNotesPoision(
+export function updateNotesPosition(
   edgeless: EdgelessPageBlockComponent,
   notes: NoteBlockModel[]
 ) {

@@ -6,7 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { isTopLevelBlock } from '../utils/query.js';
-import { updateNotesPoision } from './utils.js';
+import { updateNotesPosition } from './utils.js';
 
 export function EdgelessNotesStatus(
   edgeless: EdgelessPageBlockComponent,
@@ -34,7 +34,7 @@ export function EdgelessNotesStatus(
   const visibleNotes = notes.filter(note => !note.hidden);
 
   requestAnimationFrame(() => {
-    updateNotesPoision(edgeless, notesWithoutSelected);
+    updateNotesPosition(edgeless, notesWithoutSelected);
   });
 
   return html`<div class="affine-edgeless-notes-status">

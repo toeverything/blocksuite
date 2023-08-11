@@ -80,7 +80,7 @@ import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
-import { readImageSize, updateNotesPoision } from './components/utils.js';
+import { readImageSize, updateNotesPosition } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
 import {
   EdgelessZoomToolbar,
@@ -539,7 +539,7 @@ export class EdgelessPageBlockComponent
           this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
 
-        updateNotesPoision(this, this.notes);
+        updateNotesPosition(this, this.notes);
       })
     );
     _disposables.add(
