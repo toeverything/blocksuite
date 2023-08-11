@@ -217,7 +217,7 @@ export class ContentParser {
           layer.style.setProperty('transform', 'none');
         }
 
-        const boxShadowEles = document.querySelectorAll(
+        const boxShadowEles = documentClone.querySelectorAll(
           "[style*='box-shadow']"
         );
         boxShadowEles.forEach(function (element) {
