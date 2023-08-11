@@ -3,14 +3,17 @@ import type { BlockModels } from '@blocksuite/global/types';
 import {
   assertExists,
   type BaseBlockModel,
+  nanoid,
   type Page,
 } from '@blocksuite/store';
 
 import { getService } from '../__internal__/service/index.js';
 import { BaseService } from '../__internal__/service/service.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
-import { columnManager } from './common/columns/manager.js';
-import { multiSelectColumnTypeName } from './common/columns/multi-select/define.js';
+import { getTagColor } from '../components/tags/colors.js';
+import { selectPureColumnConfig } from './common/columns/select/define.js';
+import { titlePureColumnConfig } from './common/columns/title/define.js';
+import type { DataViewTypes } from './common/data-view.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Column } from './table/types.js';
@@ -21,17 +24,53 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
     page: Page,
     model: BaseBlockModel,
     databaseId: string,
+    viewType: DataViewTypes,
     isAppendNewRow = true
   ) {
+    const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
+    assertExists(blockModel);
+    // default column
+    const ids = [nanoid(), nanoid(), nanoid()];
+    const statusId = blockModel.addColumn(
+      'end',
+      selectPureColumnConfig.create('Status', {
+        options: [
+          {
+            id: ids[0],
+            color: getTagColor(),
+            value: 'TODO',
+          },
+          {
+            id: ids[1],
+            color: getTagColor(),
+            value: 'In Progress',
+          },
+          {
+            id: ids[2],
+            color: getTagColor(),
+            value: 'Done',
+          },
+        ],
+      })
+    );
+    blockModel.addColumn(
+      'start',
+      titlePureColumnConfig.create(titlePureColumnConfig.name)
+    );
+    blockModel.addView(viewType);
     // By default, database has 3 empty rows
-    for (let i = 0; i < 3; i++) {
-      page.addBlock(
+    for (let i = 0; i < 4; i++) {
+      const rowId = page.addBlock(
         'affine:paragraph',
         {
-          text: new page.Text(''),
+          text: new page.Text(`Task ${i + 1}`),
         },
         databaseId
       );
+      blockModel.updateCell(rowId, {
+        columnId: statusId,
+        value: ids[i],
+      });
     }
     if (isAppendNewRow) {
       // Add a paragraph after database
@@ -39,16 +78,6 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
       assertExists(parent);
       page.addBlock('affine:paragraph', {}, parent.id);
     }
-
-    const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
-    assertExists(blockModel);
-    // default column
-    blockModel.addColumn(
-      'end',
-      columnManager.getColumn(multiSelectColumnTypeName).create('Tag', {
-        options: [],
-      })
-    );
     blockModel.applyColumnUpdate();
   }
 

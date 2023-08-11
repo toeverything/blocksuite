@@ -23,31 +23,6 @@ type SerializedCells = {
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
-  override onCreated() {
-    super.onCreated();
-
-    this.page.slots.onYEvent.on(({ event }) => {
-      if (
-        event.path.includes(this.id) &&
-        (event.path.includes('prop:columns') ||
-          event.path.includes('prop:cells'))
-      ) {
-        this.propsUpdated.emit();
-      }
-    });
-    if (!this.columns.find(v => v.id === this.id)) {
-      this.columns.unshift({
-        type: 'title',
-        id: this.id,
-        name: 'Title',
-        data: {},
-      });
-    }
-    if (!this.views.length) {
-      this.addView('table');
-    }
-  }
-
   getViewList() {
     return this.views;
   }

@@ -305,7 +305,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   public override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
-      return 432;
+      return 260;
     }
     return super.propertyGetDefaultWidth(propertyId);
   }
