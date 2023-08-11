@@ -178,14 +178,19 @@ export async function assertDatabaseCellRichTexts(
     text: string;
   }
 ) {
-  const actualTexts = await page
-    .locator(
-      `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
-    )
-    .locator('affine-database-rich-text-cell')
-    .evaluate(ele => {
-      return (ele as RichText).vEditor?.yText.toString();
-    });
+  const cellContainer = await page.locator(
+    `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
+  );
+
+  const cellEditing = cellContainer.locator(
+    'affine-database-rich-text-cell-editing'
+  );
+  const cell = cellContainer.locator('affine-database-rich-text-cell');
+
+  const richText = (await cellEditing.count()) === 0 ? cell : cellEditing;
+  const actualTexts = await richText.evaluate(ele => {
+    return (ele as RichText).vEditor?.yText.toString();
+  });
   expect(actualTexts).toEqual(text);
 }
 

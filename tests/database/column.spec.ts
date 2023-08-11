@@ -4,7 +4,6 @@ import {
   assertDatabaseColumnOrder,
   dragBetweenCoords,
   enterPlaygroundRoom,
-  focusDatabaseTitle,
   getBoundingBox,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseState,
@@ -18,13 +17,11 @@ import {
 } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
 import {
-  assertDatabaseCellLink,
   assertDatabaseCellNumber,
   assertDatabaseCellRichTexts,
   assertSelectedStyle,
   clickDatabaseOutside,
   clickSelectOption,
-  focusDatabaseHeader,
   getDatabaseHeaderColumn,
   getFirstColumnCell,
   initDatabaseColumn,

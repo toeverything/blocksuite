@@ -34,10 +34,11 @@ enum Direction {
 class AutoCompleteOverlay extends Overlay {
   linePoints: IVec[] = [];
   shapePoints: IVec[] = [];
+  stroke = '';
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     if (this.linePoints.length && this.shapePoints.length) {
       ctx.setLineDash([2, 2]);
-
+      ctx.strokeStyle = this.stroke;
       ctx.beginPath();
       this.linePoints.forEach((p, index) => {
         if (index === 0) ctx.moveTo(p[0], p[1]);
@@ -204,18 +205,15 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       if (Vec.dist(start, point) > 8 && !this._isMoving) {
         this._isMoving = true;
         const { startPosition } = getPosition(type);
-        const id = surface.addElement('connector', {
-          mode: ConnectorMode.Orthogonal,
-          source: {
+        connector = this._addConnector(
+          {
             id: this._current.id,
             position: startPosition,
           },
-          target: {
+          {
             position: point,
-          },
-          strokeWidth: 2,
-        });
-        connector = surface.pickById(id) as ConnectorElement;
+          }
+        );
       }
       if (this._isMoving) {
         assertExists(connector);
@@ -236,6 +234,18 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     });
   };
 
+  private _addConnector(source: Connection, target: Connection) {
+    const { surface } = this.edgeless;
+    const id = surface.addElement('connector', {
+      mode: ConnectorMode.Orthogonal,
+      strokeWidth: 2,
+      stroke: this._current.strokeColor,
+      source,
+      target,
+    });
+    return surface.pickById(id) as ConnectorElement;
+  }
+
   private _generateShapeOnClick(type: Direction) {
     const { surface } = this.edgeless;
     const bound = this._computeNextShape(type);
@@ -246,20 +256,17 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     surface.updateElement(id, { xywh: bound.serialize() });
 
     const { startPosition, endPosition } = getPosition(type);
-    surface.addElement('connector', {
-      mode: ConnectorMode.Orthogonal,
-      source: {
+    this._addConnector(
+      {
         id: this._current.id,
         position: startPosition,
       },
-      target: {
+      {
         id,
         position: endPosition,
-      },
-      strokeWidth: 2,
-      // stroke: color,
-      //   strokeStyle: StrokeStyle.Solid,
-    });
+      }
+    );
+
     this.edgeless.selection.setSelection({
       elements: [id],
       editing: false,
@@ -313,6 +320,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     surface.viewport.addOverlay(this._overlay);
     const bound = this._computeNextShape(type);
     const path = this._computeLine(type, this._current, bound);
+
+    this._overlay.stroke = this.edgeless.computeValue(
+      this._current.strokeColor
+    );
     this._overlay.linePoints = path;
     this._overlay.shapePoints = rotatePoints(
       ShapeMethodsMap[this._current.shapeType].points(bound),

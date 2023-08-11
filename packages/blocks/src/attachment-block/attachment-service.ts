@@ -11,13 +11,13 @@ export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
     block: AttachmentBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
-    return `<p>Attachment-${block.name}</a></p>`;
+    return `<p>Attachment-${block.name}</p>`;
   }
   override block2Text(
     block: AttachmentBlockModel,
     { childText = '', begin = 0, end }: BlockTransformContext = {}
   ): string {
-    return block.name;
+    return `Attachment-${block.name}`;
   }
 
   override block2Json(

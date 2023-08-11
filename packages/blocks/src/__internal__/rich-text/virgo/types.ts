@@ -14,6 +14,7 @@ export const affineTextAttributes = baseTextAttributes.extend({
       pageId: z.string(),
     })
     .optional(),
+  background: z.string().optional().catch(undefined),
 });
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;
