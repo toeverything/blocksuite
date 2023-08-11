@@ -445,7 +445,14 @@ export class DocPageBlockComponent
       },
     });
 
-    this.handleEvent('click', () => {
+    this.handleEvent('click', ctx => {
+      const state = ctx.get('pointerState');
+      if (
+        state.raw.target !== this &&
+        state.raw.target !== this.viewportElement
+      ) {
+        return;
+      }
       let noteId: string;
       let paragraphId: string;
       const lastNote = this.model.children
