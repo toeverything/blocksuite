@@ -1,6 +1,6 @@
 import { ArrowIcon, HiddenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store/index.js';
+import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

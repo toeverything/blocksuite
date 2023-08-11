@@ -1,4 +1,4 @@
-import type { Page } from '@blocksuite/store/index.js';
+import type { Page } from '@blocksuite/store';
 
 import { lastN, on, once } from '../../../../../__internal__/utils/index.js';
 import type { NoteBlockModel } from '../../../../../models.js';

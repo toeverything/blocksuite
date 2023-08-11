@@ -11,9 +11,9 @@ import {
   QuoteIcon,
   TodoIcon,
 } from '@blocksuite/global/config';
-import type { BlockModels } from '@blocksuite/global/types.js';
+import type { BlockModels } from '@blocksuite/global/types';
 import { WithDisposable } from '@blocksuite/lit';
-import { matchFlavours } from '@blocksuite/store/index.js';
+import { matchFlavours } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

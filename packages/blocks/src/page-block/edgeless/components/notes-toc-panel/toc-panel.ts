@@ -4,7 +4,7 @@ import {
   HiddenCardIcon,
 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound } from '@blocksuite/phasor/index.js';
+import { Bound } from '@blocksuite/phasor';
 import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
