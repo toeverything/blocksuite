@@ -30,7 +30,7 @@ async function createTestPage(pageId = 'page0', workspace?: Workspace) {
   return page;
 }
 
-describe.only('workspace.search works', () => {
+describe('workspace.search works', () => {
   it('workspace search matching', async () => {
     const page = await createTestPage();
     const workspace = page.workspace;
