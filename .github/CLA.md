@@ -89,3 +89,4 @@ Example:
 - wangheyang @wangheyang 2023/08/09
 - Garfield Lee, @Garfield550, 2023/08/09
 - wiirhan @wiirhan 2023/08/10
+- Tomoyuki Yamada @tomoyukiy 2023/08/11
