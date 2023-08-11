@@ -1,8 +1,9 @@
 import { BlockSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
+import { assertExists, DisposableGroup } from '@blocksuite/store';
 import {
+  autoUpdate,
   computePosition,
   inline,
   offset,
@@ -196,8 +197,11 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
   }
 
+  private _floatDisposables: DisposableGroup | null = null;
   override updated() {
     if (this._shouldDisplay()) {
+      this._floatDisposables = new DisposableGroup();
+
       const formatQuickBarElement = this._formatBarElement;
       assertExists(formatQuickBarElement, 'format quick bar should exist');
       if (this._displayType === 'text') {
@@ -207,19 +211,24 @@ export class AffineFormatBarWidget extends WidgetElement {
           getBoundingClientRect: () => range.getBoundingClientRect(),
           getClientRects: () => range.getClientRects(),
         };
-        computePosition(visualElement, formatQuickBarElement, {
-          placement: this._placement,
-          middleware: [
-            offset(10),
-            inline(),
-            shift({
-              padding: 6,
-            }),
-          ],
-        }).then(({ x, y }) => {
-          formatQuickBarElement.style.top = `${y}px`;
-          formatQuickBarElement.style.left = `${x}px`;
-        });
+
+        this._floatDisposables.add(
+          autoUpdate(visualElement, formatQuickBarElement, () => {
+            computePosition(visualElement, formatQuickBarElement, {
+              placement: this._placement,
+              middleware: [
+                offset(10),
+                inline(),
+                shift({
+                  padding: 6,
+                }),
+              ],
+            }).then(({ x, y }) => {
+              formatQuickBarElement.style.top = `${y}px`;
+              formatQuickBarElement.style.left = `${x}px`;
+            });
+          })
+        );
       } else if (this._displayType === 'block') {
         const firstBlockElement = this._selectedBlockElements[0];
         let rect = firstBlockElement.getBoundingClientRect();
@@ -243,19 +252,28 @@ export class AffineFormatBarWidget extends WidgetElement {
           getClientRects: () =>
             this._selectedBlockElements.map(el => el.getBoundingClientRect()),
         };
-        computePosition(visualElement, formatQuickBarElement, {
-          placement: this._placement,
-          middleware: [
-            offset(10),
-            inline(),
-            shift({
-              padding: 6,
-            }),
-          ],
-        }).then(({ x, y }) => {
-          formatQuickBarElement.style.top = `${y}px`;
-          formatQuickBarElement.style.left = `${x}px`;
-        });
+
+        this._floatDisposables.add(
+          autoUpdate(visualElement, formatQuickBarElement, () => {
+            computePosition(visualElement, formatQuickBarElement, {
+              placement: this._placement,
+              middleware: [
+                offset(10),
+                inline(),
+                shift({
+                  padding: 6,
+                }),
+              ],
+            }).then(({ x, y }) => {
+              formatQuickBarElement.style.top = `${y}px`;
+              formatQuickBarElement.style.left = `${x}px`;
+            });
+          })
+        );
+      }
+    } else {
+      if (this._floatDisposables) {
+        this._floatDisposables.dispose();
       }
     }
   }
