@@ -1,4 +1,4 @@
-import type { Y } from '@blocksuite/store';
+import type { DeltaOperation, Y } from '@blocksuite/store';
 import { assertExists, Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
@@ -115,7 +115,12 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   private _initYText = (text?: string) => {
     const yText = new YText(text);
+    this.onChange(yText);
+    return yText;
+  };
 
+  private _initYTextFromDelta = (delta: DeltaOperation[]) => {
+    const yText = Text.fromDelta(delta).yText;
     this.onChange(yText);
     return yText;
   };
@@ -128,6 +133,10 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       // When copying the database, the type of the value is `string`.
       if (typeof this.value === 'string') {
         value = this._initYText(this.value);
+      } else if (Array.isArray(this.value)) {
+        // When `Import Snapshot`, the type of the value is `Array`.
+        // See https://github.com/toeverything/AFFiNE/blob/master/packages/templates/v1/okr-template.json#L135-L139
+        value = this._initYTextFromDelta(this.value);
       } else {
         value = this.value;
       }
