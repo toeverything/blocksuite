@@ -184,11 +184,33 @@ export class NotionHtmlParser extends BaseParser {
       const bookmarkUrlElement = element.querySelector('.bookmark.source');
       if (bookmarkUrlElement) {
         const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
+        const bookmarkTitle =
+          bookmarkUrlElement?.querySelector('.bookmark-title')?.textContent ??
+          'Bookmark';
+        const bookmarDescription =
+          bookmarkUrlElement?.querySelector('.bookmark-description')
+            ?.textContent ?? bookmarkUrl;
+        const bookmarIcon =
+          bookmarkUrlElement
+            ?.querySelector('.bookmark-icon')
+            ?.getAttribute('src') ?? '';
+        const bookmarImage =
+          bookmarkUrlElement
+            ?.querySelector('.bookmark-image')
+            ?.getAttribute('src') ?? '';
+        const bookmarCaption =
+          bookmarkUrlElement?.querySelector('figcaption')?.textContent ?? '';
+
         return [
           {
             flavour: 'affine:bookmark',
             children: [],
             url: bookmarkUrl,
+            bookmarkTitle: bookmarkTitle,
+            description: bookmarDescription,
+            icon: bookmarIcon,
+            image: bookmarImage,
+            caption: bookmarCaption,
           },
         ];
       }

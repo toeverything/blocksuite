@@ -12,26 +12,26 @@ import type { PageBlockComponent } from '../types.js';
  */
 export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
-  private get _selection() {
-    return this.host.root.selectionManager;
+  private get _selectionManager() {
+    return this.pageElement.root.selectionManager;
   }
 
   private get _isNativeSelection() {
-    return Boolean(this.host.gesture?.isNativeSelection);
+    return Boolean(this.pageElement.gesture?.isNativeSelection);
   }
 
   private get _currentSelection() {
-    return this._selection.value;
+    return this._selectionManager.value;
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
+    assertExists(this.pageElement.rangeManager);
+    return this.pageElement.rangeManager;
   }
 
-  constructor(public host: PageBlockComponent) {
-    this.host.disposables.add(
-      this._selection.slots.changed.on(selections => {
+  constructor(public pageElement: PageBlockComponent) {
+    this.pageElement.disposables.add(
+      this._selectionManager.slots.changed.on(selections => {
         if (this._isNativeSelection) {
           return;
         }
@@ -52,25 +52,37 @@ export class RangeSynchronizer {
           this._prevSelection = text;
           this._rangeManager.syncTextSelectionToRange(text);
         });
-        this.host.disposables.add(() => {
+        this.pageElement.disposables.add(() => {
           cancelAnimationFrame(rafId);
         });
       })
     );
 
-    this.host.handleEvent('selectionChange', () => {
-      const selection = window.getSelection();
-      if (!selection) {
-        return;
+    this.pageElement.handleEvent(
+      'selectionChange',
+      () => {
+        const selection = window.getSelection();
+        if (!selection) {
+          this._selectionManager.clear();
+          return;
+        }
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        if (range && range.intersectsNode(this.pageElement)) {
+          this._prevSelection =
+            this._rangeManager.syncRangeToTextSelection(range);
+        } else {
+          this._prevSelection = null;
+          this._selectionManager.clear(['text']);
+        }
+      },
+      {
+        global: true,
       }
-      const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-      this._prevSelection =
-        this._rangeManager.writeRangeByTextSelection(range) ?? null;
-    });
+    );
 
-    this.host.handleEvent('beforeInput', ctx => {
+    this.pageElement.handleEvent('beforeInput', ctx => {
       const event = ctx.get('defaultState').event as InputEvent;
-      if (this.host.page.readonly) return;
+      if (this.pageElement.page.readonly) return;
 
       const current = this._currentSelection.at(0);
       if (!current) return;
@@ -99,7 +111,7 @@ export class RangeSynchronizer {
 
     const endIsSelectedAll = to.length === endText.length;
 
-    this.host.page.transact(() => {
+    this.pageElement.page.transact(() => {
       if (endIsSelectedAll && composing) {
         this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
@@ -108,7 +120,7 @@ export class RangeSynchronizer {
         startText.join(endText);
       }
       blocks.slice(1).forEach(block => {
-        this.host.page.deleteBlock(block.model);
+        this.pageElement.page.deleteBlock(block.model);
       });
     });
 

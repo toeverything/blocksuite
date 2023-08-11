@@ -144,18 +144,6 @@ export class EditorContainer
         this.requestUpdate('page');
       })
     );
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(async ({ type, id }) => {
-        const block = this.page.getBlockById(id);
-
-        if (!block) return;
-
-        if (type === 'update') {
-          const service = await getServiceOrRegister(block.flavour);
-          service.updateEffect(block);
-        }
-      })
-    );
 
     this._disposables.addFromEvent(
       this,
@@ -222,6 +210,7 @@ export class EditorContainer
           flavour: 'affine:attachment',
           name: file.name,
           size: file.size,
+          type: file.type,
           sourceId,
         };
       },
@@ -284,10 +273,6 @@ export class EditorContainer
       ></block-suite-root>`
     );
 
-    const remoteSelectionContainer = html`
-      <remote-selection .page=${this.page}></remote-selection>
-    `;
-
     return html`
       <style>
         editor-container * {
@@ -309,7 +294,7 @@ export class EditorContainer
           }
         }
       </style>
-      ${rootContainer} ${remoteSelectionContainer}
+      ${rootContainer}
     `;
   }
 }

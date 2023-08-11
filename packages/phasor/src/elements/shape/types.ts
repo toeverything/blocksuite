@@ -1,6 +1,6 @@
 import type * as Y from 'yjs';
 
-import type { ShapeStyle, StrokeStyle } from '../../consts.js';
+import type { IBound, ShapeStyle, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import type { PointLocation } from '../../utils/point-location.js';
@@ -69,4 +69,5 @@ export interface ShapeMethods {
     point: IVec,
     element: ShapeElement
   ) => PointLocation;
+  points: (bound: IBound) => IVec[];
 }

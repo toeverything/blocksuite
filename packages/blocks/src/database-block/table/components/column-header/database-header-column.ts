@@ -19,7 +19,6 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -30,12 +29,12 @@ import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import { getTableContainer } from '../../table-view.js';
 import type {
   DataViewTableColumnManager,
   DataViewTableManager,
 } from '../../table-view-manager.js';
 import type { ColumnTypeIcon } from '../../types.js';
+import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
 @customElement('affine-database-header-column')
@@ -412,10 +411,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             class="affine-database-column-type-icon"
             @click="${this._clickTypeIcon}"
           >
-            ${keyed(
-              column.type,
-              html`<uni-lit .uni="${column.icon}"></uni-lit>`
-            )}
+            <uni-lit .uni="${column.icon}"></uni-lit>
           </div>
           <div class="affine-database-column-text-content">
             <div class="affine-database-column-text-input">${column.name}</div>

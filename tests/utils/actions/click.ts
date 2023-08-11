@@ -102,23 +102,6 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
   await menuItem.waitFor({ state: 'hidden' }); // wait for animation ended
 }
 
-export async function clickBlockTypeMenuItem(page: Page, name: string) {
-  const menuButton = getDebugMenu(page).blockTypeButton;
-  await menuButton.click();
-
-  const menuItem = page.getByRole('menuitem', { name });
-  await menuItem.click();
-  await menuItem.waitFor({ state: 'hidden' });
-}
-
-export async function addCodeBlock(page: Page) {
-  await clickBlockTypeMenuItem(page, 'Code');
-  await page.waitForFunction(() => {
-    const loader = document.querySelector('affine-code loader-element');
-    return !loader;
-  });
-}
-
 export async function switchReadonly(page: Page) {
   page.evaluate(() => {
     const defaultPage = document.querySelector(

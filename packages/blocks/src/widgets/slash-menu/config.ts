@@ -10,7 +10,6 @@ import {
   ImageIcon20,
   NewPageIcon,
   NowIcon,
-  paragraphConfig,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
@@ -18,34 +17,29 @@ import {
 import { assertExists, Text } from '@blocksuite/store';
 
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
-import { getServiceOrRegister } from '../../__internal__/service.js';
+import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,
   getPageBlock,
   getVirgoByModel,
+  openFileOrFiles,
   resetNativeSelection,
-  uploadFileFromLocal,
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
-import { humanFileSize } from '../../__internal__/utils/math.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import type {
-  AttachmentBlockModel,
-  AttachmentProps,
-} from '../../attachment-block/attachment-model.js';
-import {
-  MAX_ATTACHMENT_SIZE,
-  setAttachmentLoading,
-} from '../../attachment-block/utils.js';
+import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
+import type { ImageProps } from '../../image-block/image-model.js';
+import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
+import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
-import { formatConfig } from '../../page-block/utils/format-config.js';
 import {
+  getSelectedContentBlockElements,
   onModelTextUpdated,
-  updateBlockType,
 } from '../../page-block/utils/index.js';
+import { updateBlockElementType } from '../../page-block/utils/operations/block-element.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -74,8 +68,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
             return true;
           },
-          action: ({ model }) => {
-            const newModels = updateBlockType([model], flavour, type);
+          action: ({ pageElement }) => {
+            const selectedBlockElements =
+              getSelectedContentBlockElements(pageElement);
+            const newModels = updateBlockElementType(
+              pageElement,
+              selectedBlockElements,
+              flavour,
+              type
+            );
             // Reset selection if the target is code block
             if (flavour === 'affine:code') {
               if (newModels.length !== 1) {
@@ -96,7 +97,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
   },
   {
     name: 'Style',
-    items: formatConfig
+    items: inlineFormatConfig
       .filter(i => !['Link', 'Code'].includes(i.name))
       .map(({ name, icon, id }) => ({
         name,
@@ -134,7 +135,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: ({ model }) => updateBlockType([model], flavour, type),
+        action: ({ pageElement }) => {
+          const selectedBlockElements =
+            getSelectedContentBlockElements(pageElement);
+          updateBlockElementType(
+            pageElement,
+            selectedBlockElements,
+            flavour,
+            type
+          );
+        },
       })),
   },
 
@@ -146,8 +156,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: NewPageIcon,
         showWhen: model =>
           !!model.page.awarenessStore.getFlag('enable_linked_page'),
-        action: async ({ page, model }) => {
-          const newPage = await createPage(page.workspace);
+        action: async ({ pageElement, model }) => {
+          const newPage = await createPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
             reference: { type: 'LinkedPage', pageId: newPage.id },
           });
@@ -174,7 +184,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           return true;
         },
         action: ({ model }) => {
-          insertContent(model, '@');
+          const triggerKey = '@';
+          insertContent(model, triggerKey);
           const pageBlock = getPageBlock(model);
           const widgetEle = pageBlock?.widgetElements.linkedPage;
           assertExists(widgetEle);
@@ -182,7 +193,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const linkedPageWidget = widgetEle as LinkedPageWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedPageWidget.showLinkedPage(model);
+            linkedPageWidget.showLinkedPage(model, triggerKey);
           });
         },
       },
@@ -203,16 +214,18 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        async action({ page, model }) {
-          const parent = page.getParent(model);
+        async action({ pageElement, model }) {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
-          parent.children.indexOf(model);
-          const props = (await uploadImageFromLocal(page.blobs)).map(
-            ({ sourceId }) => ({ flavour: 'affine:image', sourceId })
-          );
-          page.addSiblingBlocks(model, props);
+          const props = (
+            await uploadImageFromLocal(pageElement.page.blobs)
+          ).map(({ sourceId }): ImageProps & { flavour: 'affine:image' } => ({
+            flavour: 'affine:image',
+            sourceId,
+          }));
+          pageElement.page.addSiblingBlocks(model, props);
         },
       },
       {
@@ -224,8 +237,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return !insideDatabase(model);
         },
-        async action({ page, model }) {
-          const parent = page.getParent(model);
+        async action({ pageElement, model }) {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
@@ -235,7 +248,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             flavour: 'affine:bookmark',
             url,
           } as const;
-          page.addSiblingBlocks(model, [props]);
+          pageElement.page.addSiblingBlocks(model, [props]);
         },
       },
       {
@@ -249,50 +262,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return false;
           return !insideDatabase(model);
         },
-        action: async ({ page, model }) => {
+        action: async ({ pageElement, model }) => {
+          const page = pageElement.page;
           const parent = page.getParent(model);
-          if (!parent) {
-            return;
-          }
-          let attachmentModel: AttachmentBlockModel | null = null;
-          const fileInfo = await uploadFileFromLocal(page.blobs, file => {
-            if (file.size > MAX_ATTACHMENT_SIZE) {
-              toast(
-                `You can only upload files less than ${humanFileSize(
-                  MAX_ATTACHMENT_SIZE,
-                  true,
-                  0
-                )}`
-              );
-              return false;
-            }
-
-            const loadingKey = page.generateId();
-            setAttachmentLoading(loadingKey, true);
-            const props: AttachmentProps & { flavour: 'affine:attachment' } = {
-              flavour: 'affine:attachment',
-              name: file.name,
-              size: file.size,
-              loadingKey,
-            };
-            const [newBlockId] = page.addSiblingBlocks(model, [props]);
-            assertExists(newBlockId);
-            attachmentModel = page.getBlockById(
-              newBlockId
-            ) as AttachmentBlockModel;
-
-            return true;
-          });
-          if (!fileInfo || !attachmentModel) return;
-          const { sourceId } = fileInfo;
-          // FIXME: I think it is a bug of TypeScript
-          const realAttachmentModel: AttachmentBlockModel = attachmentModel;
-          // await new Promise(resolve => setTimeout(resolve, 1000));
-          setAttachmentLoading(realAttachmentModel.loadingKey ?? '', false);
-          page.updateBlock(realAttachmentModel, {
-            sourceId,
-            loadingKey: null,
-          });
+          if (!parent) return;
+          const file = await openFileOrFiles();
+          if (!file) return;
+          appendAttachmentBlock(file, model);
         },
       },
     ],
@@ -365,19 +341,19 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = page.addBlock(
+          const id = pageElement.page.addBlock(
             'affine:database',
             {},
-            page.getParent(model),
+            pageElement.page.getParent(model),
             index + 1
           );
           const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(page, model, id, false);
+          service.initDatabaseBlock(pageElement.page, model, id, false);
         },
       },
       {
@@ -422,15 +398,15 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          page.addBlock(
+          pageElement.page.addBlock(
             'affine:data-view',
             {},
-            page.getParent(model),
+            pageElement.page.getParent(model),
             index + 1
           );
         },
@@ -462,26 +438,26 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Duplicate',
         icon: DuplicateIcon,
-        action: ({ page, model }) => {
+        action: ({ pageElement, model }) => {
           if (!model.text || !(model.text instanceof Text)) {
             throw new Error("Can't duplicate a block without text");
           }
-          const parent = page.getParent(model);
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             throw new Error('Failed to duplicate block! Parent not found');
           }
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          page.addBlock(
+          pageElement.page.addBlock(
             model.flavour,
             {
               type: model.type,
-              text: page.Text.fromDelta(model.text.toDelta()),
+              text: pageElement.page.Text.fromDelta(model.text.toDelta()),
               // @ts-expect-error
               checked: model.checked,
             },
-            page.getParent(model),
+            pageElement.page.getParent(model),
             index
           );
         },
@@ -489,8 +465,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Delete',
         icon: DeleteIcon,
-        action: ({ page, model }) => {
-          page.deleteBlock(model);
+        action: ({ pageElement, model }) => {
+          pageElement.page.deleteBlock(model);
         },
       },
     ],

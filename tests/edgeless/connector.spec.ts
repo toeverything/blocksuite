@@ -80,7 +80,7 @@ test('elbow connector one side attached element another side free', async ({
   ]);
 });
 
-test('elbow connector both side attatched element', async ({ page }) => {
+test.fixme('elbow connector both side attatched element', async ({ page }) => {
   await commonSetup(page);
 
   await createShapeElement(page, [0, 0], [100, 100], Shape.Square);

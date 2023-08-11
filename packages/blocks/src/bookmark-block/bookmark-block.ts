@@ -2,14 +2,13 @@ import './components/bookmark-toolbar.js';
 import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
 import './components/loader.js';
-import '../components/portal.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
@@ -256,6 +255,14 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onCardClick() {
+    const selectionManager = this.root.selectionManager;
+    const blockSelection = selectionManager.getInstance('block', {
+      path: this.path,
+    });
+    selectionManager.set([blockSelection]);
+  }
+
+  private _onCardDbClick() {
     let link = this.model.url;
 
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
@@ -338,6 +345,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     const linkCard = html`<div
       class="affine-bookmark-link"
       @click=${this._onCardClick}
+      @dblclick=${this._onCardDbClick}
     >
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">
@@ -368,7 +376,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         @mouseover="${this._onHover}"
         @mouseout="${this._onHoverOut}"
       >
-        <affine-portal .template=${toolbar}></affine-portal>
+        <blocksuite-portal .template=${toolbar}></blocksuite-portal>
         ${this._isLoading ? loading : linkCard}
         <input
           .disabled=${this.model.page.readonly}
@@ -377,7 +385,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           value=${this._caption}
           @input=${this._onInputChange}
           @blur=${this._onInputBlur}
-          @click=${stopPropagation}
+          @pointerdown=${stopPropagation}
         />
         ${this.selected?.is('block')
           ? html`<affine-block-selection></affine-block-selection>`

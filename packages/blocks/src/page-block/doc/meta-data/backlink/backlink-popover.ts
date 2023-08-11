@@ -76,7 +76,7 @@ const styles = css`
     gap: 8px;
   }
 
-  ${scrollbarStyle}
+  ${scrollbarStyle('.backlink-popover .group')}
 `;
 
 @customElement('backlink-button')

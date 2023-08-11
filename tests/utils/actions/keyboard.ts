@@ -37,8 +37,10 @@ export async function withPressKey(
   await page.keyboard.up(key);
 }
 
-export async function pressBackspace(page: Page) {
-  await page.keyboard.press('Backspace', { delay: 50 });
+export async function pressBackspace(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('Backspace', { delay: 50 });
+  }
 }
 
 export async function pressSpace(page: Page) {
@@ -78,19 +80,23 @@ export async function pressEscape(page: Page) {
 }
 
 export async function undoByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+z`);
+  await page.keyboard.press(`${SHORT_KEY}+z`, { delay: 20 });
 }
 
 export async function formatType(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`, {
+    delay: 50,
+  });
 }
 
 export async function redoByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+Shift+z`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+Z`, { delay: 20 });
 }
 
 export async function selectAllByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await page.keyboard.press(`${SHORT_KEY}+a`, {
+    delay: 50,
+  });
 }
 
 export async function pressTab(page: Page) {

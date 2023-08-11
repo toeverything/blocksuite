@@ -13,7 +13,6 @@ import { ParagraphBlockSchema } from '../../../../../blocks/src/paragraph-block/
 import { SurfaceBlockSchema } from '../../../../../blocks/src/surface-block/surface-model.js';
 // normal import
 import { Schema } from '../../schema.js';
-import { migrateWorkspace } from '../migrate-workspace.js';
 
 async function loadBinary(name: string) {
   const url = new URL(`./ydocs/${name}.ydoc`, import.meta.url);
@@ -43,7 +42,7 @@ describe('workspace migration', () => {
     assert.equal(before['workspaceVersion'], 1);
     assert.isUndefined(before['pageVersion']);
 
-    migrateWorkspace(doc);
+    schema.upgradeWorkspace(doc);
 
     const after = meta.toJSON();
     assert.equal(after['workspaceVersion'], 2);

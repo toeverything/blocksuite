@@ -4,15 +4,13 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  hotkeys-js@3.11.2:
-    hash: 3mgwcccs6bhgogrpuyqhyqyhea
-    path: patches/hotkeys-js@3.11.2.patch
-
 importers:
 
   .:
     devDependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:packages/block-std
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:packages/blocks
@@ -170,9 +168,6 @@ importers:
       file-type:
         specifier: ^16.5.4
         version: 16.5.4
-      hotkeys-js:
-        specifier: ^3.11.2
-        version: 3.11.2(patch_hash=3mgwcccs6bhgogrpuyqhyqyhea)
       html2canvas:
         specifier: ^1.4.1
         version: 1.4.1
@@ -207,6 +202,9 @@ importers:
       '@blocksuite/store':
         specifier: workspace:*
         version: link:../store
+      '@toeverything/theme':
+        specifier: ^0.7.9
+        version: 0.7.9
       '@types/autosize':
         specifier: ^4.0.1
         version: 4.0.1
@@ -247,12 +245,6 @@ importers:
       lit:
         specifier: ^2.7.6
         version: 2.7.6
-      marked:
-        specifier: ^4.3.0
-        version: 4.3.0
-      turndown:
-        specifier: ^7.1.2
-        version: 7.1.2
     devDependencies:
       '@blocksuite/blocks':
         specifier: workspace:*
@@ -266,12 +258,6 @@ importers:
       '@toeverything/theme':
         specifier: ^0.7.9
         version: 0.7.9
-      '@types/marked':
-        specifier: ^4.3.1
-        version: 4.3.1
-      '@types/turndown':
-        specifier: ^5.0.1
-        version: 5.0.1
 
   packages/global:
     dependencies:
@@ -4428,11 +4414,6 @@ packages:
     dependencies:
       lru-cache: 6.0.0
     dev: true
-
-  /hotkeys-js@3.11.2(patch_hash=3mgwcccs6bhgogrpuyqhyqyhea):
-    resolution: {integrity: sha512-hLuR+wtvrVrVFHku5cud44cPXQf5ke+96TonRaGzlNSt22rh2LH65avLYFNsc+QpzMuOEQG/IxJT5mEop99rvg==}
-    dev: false
-    patched: true
 
   /html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}

@@ -14,6 +14,7 @@ import {
   initEmptyDatabaseState,
   initEmptyDatabaseWithParagraphState,
   pasteByKeyboard,
+  pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
   pressBackspace,
@@ -60,6 +61,7 @@ test('edit database block title and create new rows', async ({ page }) => {
     title: dbTitle,
   });
   await focusDatabaseTitle(page);
+  await pressArrowDown(page);
   for (let i = 0; i < dbTitle.length; i++) {
     await pressBackspace(page);
   }
@@ -113,7 +115,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   expect(text?.trim()).toBe('1');
 });
 
-test.fixme('should rich-text column support soft enter', async ({ page }) => {
+test('should rich-text column support soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -162,7 +164,7 @@ test('should hide placeholder of paragraph in database', async ({ page }) => {
   expect(await tipsPlaceholder.count()).toEqual(0);
 });
 
-test.fixme('should show or hide database toolbar', async ({ page }) => {
+test('should show or hide database toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -256,29 +258,30 @@ test('should database search input displayed correctly', async ({ page }) => {
   await assertDatabaseSearching(page, false);
 });
 
-test.fixme(
-  'should database title and rich-text support undo/redo',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyDatabaseState(page);
+test('should database title and rich-text support undo/redo', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
 
-    await initDatabaseColumn(page);
-    await switchColumnType(page, 'Text');
-    await initDatabaseDynamicRowWithData(page, '123', true);
-    await undoByKeyboard(page);
-    await assertDatabaseCellRichTexts(page, { text: '' });
-    await redoByKeyboard(page);
-    await assertDatabaseCellRichTexts(page, { text: '123' });
+  await initDatabaseColumn(page);
+  await switchColumnType(page, 'Text');
+  await initDatabaseDynamicRowWithData(page, '123', true);
+  await undoByKeyboard(page);
+  await pressEnter(page);
+  await assertDatabaseCellRichTexts(page, { text: '' });
+  await redoByKeyboard(page);
+  await assertDatabaseCellRichTexts(page, { text: '123' });
 
-    await focusDatabaseTitle(page);
-    await type(page, 'abc');
-    await assertDatabaseTitleText(page, 'Database 1abc');
-    await undoByKeyboard(page);
-    await assertDatabaseTitleText(page, 'Database 1');
-    await redoByKeyboard(page);
-    await assertDatabaseTitleText(page, 'Database 1abc');
-  }
-);
+  await focusDatabaseTitle(page);
+  await pressArrowRight(page, 10);
+  await type(page, 'abc');
+  await assertDatabaseTitleText(page, 'Database 1abc');
+  await undoByKeyboard(page);
+  await assertDatabaseTitleText(page, 'Database 1');
+  await redoByKeyboard(page);
+  await assertDatabaseTitleText(page, 'Database 1abc');
+});
 
 test('should support delete database through action menu', async ({ page }) => {
   await enterPlaygroundRoom(page);

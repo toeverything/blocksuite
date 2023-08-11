@@ -8,12 +8,13 @@ import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { getPageBlock } from '../__internal__/index.js';
+import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListBlockService } from './list-service.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -32,12 +33,13 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     .affine-list-block-container .affine-list-block-container {
       margin-top: 0;
     }
-    .affine-list-block-container.selected {
-      background-color: var(--affine-hover-color);
-    }
     .affine-list-rich-text-wrapper {
       display: flex;
       align-items: center;
+      border-radius: 5px;
+    }
+    .affine-list-rich-text-wrapper.selected {
+      background-color: var(--affine-hover-color);
     }
     .affine-list-rich-text-wrapper rich-text {
       flex: 1;
@@ -122,9 +124,12 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   private _select() {
     const pageBlock = getPageBlock(this.model);
     assertExists(pageBlock);
-    // if (pageBlock instanceof DefaultPageBlockComponent) {
-    //   pageBlock.selection?.selectOneBlock(this);
-    // }
+    const selection = this.root.selectionManager;
+    selection.update(selList => {
+      return selList
+        .filter(sel => !sel.is('text') && !sel.is('block'))
+        .concat(selection.getInstance('block', { path: this.path }));
+    });
   }
 
   private _onClickIcon = (e: MouseEvent) => {
@@ -150,6 +155,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:list', ListBlockService);
+    bindContainerHotkey(this);
   }
 
   override render() {
@@ -161,6 +167,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
     const top = shouldAddMarginTop ? 'affine-list-block-container--first' : '';
+    const checked = this.model.checked ? 'affine-list--checked' : '';
 
     const children = html`<div
       class="affine-block-children-container"
@@ -170,12 +177,8 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     </div>`;
 
     return html`
-      <div class=${`affine-list-block-container ${top} ${selected}`}>
-        <div
-          class=${`affine-list-rich-text-wrapper ${
-            this.model.checked ? 'affine-list--checked' : ''
-          }`}
-        >
+      <div class=${`affine-list-block-container ${top}`}>
+        <div class=${`affine-list-rich-text-wrapper ${checked} ${selected}`}>
           ${listIcon}
           <rich-text
             .model=${this.model}

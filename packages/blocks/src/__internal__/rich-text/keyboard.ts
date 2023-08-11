@@ -3,9 +3,9 @@ import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
-import { getService } from '../service.js';
 import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
+import { createRichTextKeymap } from './keymap/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 
 // Type definitions is ported from quill
@@ -56,8 +56,7 @@ export function createKeyboardBindings(
   model: BaseBlockModel,
   vEditor: AffineVEditor
 ): KeyboardBindings {
-  const service = getService(model.flavour);
-  const blockKeyBinding = service.defineKeymap(model, vEditor);
+  const blockKeyBinding = createRichTextKeymap(model, vEditor);
 
   const keyboardBindings: KeyboardBindings = {
     ...blockKeyBinding,

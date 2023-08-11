@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import { UIEventState, UIEventStateContext } from '../base.js';
@@ -114,8 +113,9 @@ export class RangeControl {
     const getBlockView = this._dispatcher.blockStore.viewStore.getNodeView;
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const view = getBlockView(ancestor)?.view;
-      assertExists(view);
-      return [view];
+      if (view) {
+        return [view];
+      }
     }
     const nodes = new Set<Node>();
 

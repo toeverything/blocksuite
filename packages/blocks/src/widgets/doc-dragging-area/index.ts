@@ -1,3 +1,4 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -5,8 +6,8 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isBlankArea } from '../../__internal__/index.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
+import { autoScroll } from '../../page-block/text-selection/utils.js';
 
 type Rect = {
   left: number;
@@ -31,6 +32,11 @@ function rectIncludes(a: Rect, b: Rect) {
     a.top <= b.top &&
     a.top + a.height >= b.top + b.height
   );
+}
+
+function isBlankArea(e: PointerEventState) {
+  const { cursor } = window.getComputedStyle(e.raw.target as Element);
+  return cursor !== 'text';
 }
 
 @customElement('affine-doc-dragging-area-widget')
@@ -75,14 +81,15 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
     const elements = getAllNodeFromTree();
 
+    const rootRect = this.root.getBoundingClientRect();
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
         id: element.model.id,
         path: element.path,
         rect: {
-          left: bounding.left + viewportElement.scrollLeft,
-          top: bounding.top + viewportElement.scrollTop,
+          left: bounding.left + viewportElement.scrollLeft - rootRect.left,
+          top: bounding.top + viewportElement.scrollTop - rootRect.top,
           width: bounding.width,
           height: bounding.height,
         },
@@ -91,7 +98,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
   }
 
   private get _viewportElement() {
-    const pageBlock = this.hostElement as DocPageBlockComponent;
+    const pageBlock = this.pageElement as DocPageBlockComponent;
 
     assertExists(pageBlock);
 
@@ -120,34 +127,6 @@ export class DocDraggingAreaWidget extends WidgetElement {
     }
   }
 
-  private _autoScroll = (y: number): boolean => {
-    const { scrollHeight, clientHeight, scrollTop } = this._viewportElement;
-    let _scrollTop = scrollTop;
-    const threshold = 50;
-    const max = scrollHeight - clientHeight;
-
-    let d = 0;
-    let flag = false;
-
-    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
-      // ↓
-      d = threshold - (clientHeight - y);
-      flag = Math.ceil(_scrollTop) < max;
-    } else if (scrollTop > 0 && y < threshold) {
-      // ↑
-      d = y - threshold;
-      flag = _scrollTop > 0;
-    }
-
-    _scrollTop += d * 0.25;
-
-    if (this._viewportElement && flag && scrollTop !== _scrollTop) {
-      this._viewportElement.scrollTop = _scrollTop;
-      return true;
-    }
-    return false;
-  };
-
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent(
@@ -175,6 +154,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
         if (!this._dragging) {
           return;
         }
+        ctx.get('defaultState').event.preventDefault();
 
         const runner = () => {
           const state = ctx.get('pointerState');
@@ -195,7 +175,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
           this.rect = userRect;
           this._selectBlocksByRect(userRect);
 
-          const result = this._autoScroll(y);
+          const result = autoScroll(this._viewportElement, y);
           if (!result) {
             this._clearRaf();
             return;

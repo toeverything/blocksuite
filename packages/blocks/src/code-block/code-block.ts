@@ -1,5 +1,4 @@
 import '../__internal__/rich-text/rich-text.js';
-import '../components/portal.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
@@ -23,8 +22,9 @@ import {
   getViewportElement,
   queryCurrentMode,
 } from '../__internal__/index.js';
+import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { getService, registerService } from '../__internal__/service.js';
+import { getService, registerService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -186,6 +186,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @state()
   private _wrap = false;
 
+  private _langListSlots = {
+    selectedLanguageChanged: new Slot<{ language: string | null }>(),
+    dispose: new Slot(),
+  };
+
   readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
     textRenderer: () =>
@@ -235,6 +240,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:code', CodeBlockService);
+    // set highlight options getter used by "exportToHtml"
+    getService('affine:code').setHighlightOptionsGetter(() => {
+      return {
+        lang: this._curLanguage.id as Lang,
+        highlighter: this._highlighter,
+      };
+    });
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
@@ -256,7 +268,16 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
+    this._langListSlots.selectedLanguageChanged.on(({ language }) => {
+      getService('affine:code').setLang(this.model, language);
+      this._showLangList = false;
+    });
+    this._langListSlots.dispose.on(() => {
+      this._showLangList = false;
+    });
+
     this._observePosition();
+    bindContainerHotkey(this);
   }
 
   override disconnectedCallback() {
@@ -386,13 +407,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       ${this._showLangList
         ? html`<lang-list
             .currentLanguageId=${this._curLanguage.id as Lang}
-            @selected-language-changed=${(e: CustomEvent) => {
-              getService('affine:code').setLang(this.model, e.detail.language);
-              this._showLangList = false;
-            }}
-            @dispose=${() => {
-              this._showLangList = false;
-            }}
+            .slots=${this._langListSlots}
           ></lang-list>`
         : nothing}
     </div>`;
@@ -400,7 +415,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   private _codeOptionTemplate() {
     if (!this._optionPosition) return '';
-    return html`<affine-portal
+    return html`<blocksuite-portal
       .template=${CodeOptionTemplate({
         model: this.model,
         position: this._optionPosition,
@@ -408,7 +423,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         wrap: this._wrap,
         onClickWrap: () => this._onClickWrapBtn(),
       })}
-    ></affine-portal>`;
+    ></blocksuite-portal>`;
   }
 
   private _updateLineNumbers() {

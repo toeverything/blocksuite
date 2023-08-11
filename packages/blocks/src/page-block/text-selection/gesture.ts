@@ -6,7 +6,7 @@ import type {
 import { assertExists } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { DocPageBlockComponent } from '../doc/doc-page-block.js';
+import type { DocPageBlockComponent } from '../doc/doc-page-block.js';
 import type { PageBlockComponent } from '../types.js';
 import {
   autoScroll,
@@ -25,29 +25,29 @@ export class Gesture {
   private _rafID = 0;
 
   private get _selectionManager() {
-    return this.host.root.selectionManager;
+    return this.pageElement.root.selectionManager;
   }
 
   private get _viewportElement() {
-    if (this.host instanceof DocPageBlockComponent) {
-      return this.host.viewportElement;
+    if (this.pageElement.tagName === 'AFFINE-DOC-PAGE') {
+      return (this.pageElement as DocPageBlockComponent).viewportElement;
     }
     return null;
   }
 
   private get _rangeManager() {
-    assertExists(this.host.rangeManager);
-    return this.host.rangeManager;
+    assertExists(this.pageElement.rangeManager);
+    return this.pageElement.rangeManager;
   }
 
-  constructor(public host: PageBlockComponent) {
-    this.host.handleEvent('dragStart', this._dragStartHandler);
-    this.host.handleEvent('dragMove', this._dragMoveHandler);
-    this.host.handleEvent('dragEnd', this._dragEndHandler);
-    this.host.handleEvent('pointerMove', this._pointerMoveHandler);
-    this.host.handleEvent('click', this._clickHandler);
-    this.host.handleEvent('doubleClick', this._doubleClickHandler);
-    this.host.handleEvent('tripleClick', this._tripleClickHandler);
+  constructor(public pageElement: PageBlockComponent) {
+    this.pageElement.handleEvent('dragStart', this._dragStartHandler);
+    this.pageElement.handleEvent('dragMove', this._dragMoveHandler);
+    this.pageElement.handleEvent('dragEnd', this._dragEndHandler);
+    this.pageElement.handleEvent('pointerMove', this._pointerMoveHandler);
+    this.pageElement.handleEvent('click', this._clickHandler);
+    this.pageElement.handleEvent('doubleClick', this._doubleClickHandler);
+    this.pageElement.handleEvent('tripleClick', this._tripleClickHandler);
   }
 
   private _dragStartHandler: UIEventHandler = ctx => {
@@ -56,12 +56,15 @@ export class Gesture {
       this.isNativeSelection = false;
       return;
     }
-    this._nativeDragStartHandler(ctx);
+
+    this.isNativeSelection = true;
+    this._selectByCaret(ctx);
+    state.raw.preventDefault();
   };
 
   private _selectByCaret: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const caret = caretFromPoint(state.raw.clientX, state.raw.clientY);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }
@@ -79,28 +82,21 @@ export class Gesture {
     this._rangeManager.renderRange(range);
   };
 
-  private _nativeDragStartHandler: UIEventHandler = ctx => {
-    this.isNativeSelection = true;
-    this._selectByCaret(ctx);
-  };
-
   private _dragMoveHandler: UIEventHandler = ctx => {
     this._clearRaf();
     if (!this.isNativeSelection) {
       return;
     }
-    this._nativeDragMoveHandler(ctx);
-  };
 
-  private _nativeDragMoveHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
+    state.raw.preventDefault();
     const runner = () => {
       if (!this._rafID) return;
 
       this._updateRange(state);
 
       const result = this._viewportElement
-        ? autoScroll(this._viewportElement, state.y)
+        ? autoScroll(this._viewportElement, state.raw.y)
         : false;
       if (result) {
         this._rafID = requestAnimationFrame(runner);
@@ -114,12 +110,13 @@ export class Gesture {
     return;
   };
 
-  private _dragEndHandler: UIEventHandler = ctx => {
+  private _dragEndHandler: UIEventHandler = () => {
     this._clearRaf();
     if (!this.isNativeSelection) {
       return;
     }
-    this._nativeDragEndHandler(ctx);
+    this._startRange = null;
+    this.isNativeSelection = false;
   };
 
   private _pointerMoveHandler: UIEventHandler = ctx => {
@@ -128,11 +125,6 @@ export class Gesture {
     }
     const state = ctx.get('defaultState');
     state.event.preventDefault();
-  };
-
-  private _nativeDragEndHandler: UIEventHandler = ctx => {
-    this._startRange = null;
-    this.isNativeSelection = false;
   };
 
   private _tripleClickHandler: UIEventHandler = ctx => {
@@ -235,12 +227,16 @@ export class Gesture {
   private _updateRange = (state: PointerEventState) => {
     if (!this._startRange) return;
 
-    const caret = caretFromPoint(state.x, state.y);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }
 
     if (caret.node.nodeType !== Node.TEXT_NODE) {
+      return;
+    }
+
+    if (!caret.node.parentElement?.closest('[data-virgo-root="true"]')) {
       return;
     }
 

@@ -1,3 +1,4 @@
+import type { TextSelection } from '@blocksuite/block-std';
 import {
   assertExists,
   type BaseBlockModel,
@@ -5,10 +6,14 @@ import {
 } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
-import { ContentParser } from '../../content-parser/index.js';
-import { getService } from '../../service.js';
+import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
-  type BlockRange,
+  getSelectedContentModels,
+  getTextSelection,
+} from '../../../page-block/utils/selection.js';
+import { ContentParser } from '../../content-parser/index.js';
+import { getServiceOrRegister } from '../../service/index.js';
+import {
   getCurrentNativeRange,
   getEdgelessCanvasTextEditor,
   hasNativeSelection,
@@ -31,7 +36,7 @@ export async function getBlockClipboardInfo(
   begin?: number,
   end?: number
 ) {
-  const service = getService(model.flavour);
+  const service = await getServiceOrRegister(model.flavour);
   const html = await service.block2html(model, { begin, end });
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
@@ -46,20 +51,23 @@ export async function getBlockClipboardInfo(
   };
 }
 
-async function createPageClipboardItems(range: BlockRange) {
+async function createPageClipboardItems(
+  selectedModels: BaseBlockModel[],
+  textSelection?: TextSelection
+): Promise<ClipboardItem[]> {
   const uniqueModelsFilter = new Map();
   const addToFilter = (model: BaseBlockModel, index: number) => {
     uniqueModelsFilter.set(model.id, index);
     model.children?.forEach(child => addToFilter(child, index));
   };
 
-  const selectedModels = new Map();
+  const selectedModelsMap = new Map();
 
-  range.models.forEach((model, index) => {
-    selectedModels.set(model.id, index);
+  selectedModels.forEach((model, index) => {
+    selectedModelsMap.set(model.id, index);
   });
 
-  const clipModels = range.models.filter((model, index) => {
+  const clipModels = selectedModels.filter((model, index) => {
     if (uniqueModelsFilter.has(model.id)) {
       uniqueModelsFilter.set(model.id, index);
       return false;
@@ -73,20 +81,26 @@ async function createPageClipboardItems(range: BlockRange) {
       if (index === 0) {
         return await getBlockClipboardInfo(
           model,
-          selectedModels,
-          range.startOffset,
-          index === array.length - 1 ? range.endOffset : undefined
+          selectedModelsMap,
+          textSelection ? textSelection.from.index : undefined,
+          index === array.length - 1
+            ? textSelection
+              ? textSelection.from.index + textSelection.from.length
+              : undefined
+            : undefined
         );
       }
       if (index === array.length - 1) {
         return await getBlockClipboardInfo(
           model,
-          selectedModels,
+          selectedModelsMap,
           undefined,
-          range.endOffset
+          textSelection && textSelection.to
+            ? textSelection.to.index + textSelection.to.length
+            : undefined
         );
       }
-      return await getBlockClipboardInfo(model, selectedModels);
+      return await getBlockClipboardInfo(model, selectedModelsMap);
     })
   );
 
@@ -121,11 +135,26 @@ async function createPageClipboardItems(range: BlockRange) {
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
 }
 
-export async function copyBlocks(range: BlockRange) {
-  const clipboardItems = await createPageClipboardItems(range);
+export async function copyBlocksInPage(pageElement: PageBlockComponent) {
+  const selectedModels = getSelectedContentModels(pageElement);
+  const textSelection = getTextSelection(pageElement) ?? undefined;
+  const clipboardItems = await createPageClipboardItems(
+    selectedModels,
+    textSelection
+  );
 
   const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
 
+  performNativeCopy(clipboardItems);
+
+  if (savedRange) {
+    resetNativeSelection(savedRange);
+  }
+}
+
+export async function copyBlocks(models: BaseBlockModel[]) {
+  const clipboardItems = await createPageClipboardItems(models);
+  const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
   performNativeCopy(clipboardItems);
 
   if (savedRange) {

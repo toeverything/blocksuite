@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import { PathFinder } from '../utils/index.js';
 import type { BlockStore } from './block-store.js';
-import { PathFinder } from './path-finder.js';
 
 export type NodeView<T = unknown> = {
   id: string;
@@ -40,6 +40,14 @@ export class ViewStore<NodeViewType = unknown> {
       this._cachedTree = null;
     });
   }
+
+  getChildren = (path: string[]): NodeViewTree<NodeViewType>[] => {
+    const node = this.fromPath(path);
+    if (!node) {
+      return [];
+    }
+    return node.children;
+  };
 
   register<T extends BlockSuiteViewType>(type: T, spec: BlockSuiteView[T]) {
     this.viewSpec.set(type, spec);
@@ -163,15 +171,17 @@ export class ViewStore<NodeViewType = unknown> {
     const tree = this.fromPath(path);
     assertExists(tree, `Invalid path to get node in view: ${path}`);
 
-    const iterate = (node: NodeViewTree<NodeViewType>, index: number) => {
-      const result = fn(node, index, tree);
-      if (result === true) {
-        return;
-      }
-      node.children.forEach(iterate);
-    };
+    const iterate =
+      (parent: NodeViewTree<NodeViewType>) =>
+      (node: NodeViewTree<NodeViewType>, index: number) => {
+        const result = fn(node, index, parent);
+        if (result === true) {
+          return;
+        }
+        node.children.forEach(iterate(node));
+      };
 
-    tree.children.forEach(iterate);
+    tree.children.forEach(iterate(tree));
   };
 
   getParent = (path: string[]) => {
@@ -188,7 +198,7 @@ export class ViewStore<NodeViewType = unknown> {
       index: number,
       parent: NodeViewTree<NodeViewType>
     ) => undefined | null | true
-  ) => {
+  ): NodeViewTree<NodeViewType> | null => {
     const getPrev = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {
@@ -243,7 +253,7 @@ export class ViewStore<NodeViewType = unknown> {
       index: number,
       parent: NodeViewTree<NodeViewType>
     ) => undefined | null | true
-  ) => {
+  ): NodeViewTree<NodeViewType> | null => {
     const getNext = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {

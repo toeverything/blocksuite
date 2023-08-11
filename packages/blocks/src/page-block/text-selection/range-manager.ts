@@ -39,8 +39,11 @@ export class RangeManager {
       ranges.push(end);
     }
 
-    this._mergeRanges(ranges);
-    this._renderRange();
+    const range = this._mergeRanges(ranges);
+    if (range) {
+      this._reusedRange = range;
+      this._renderRange();
+    }
   }
 
   syncTextSelectionToRange(selection: TextSelection | null) {
@@ -56,8 +59,8 @@ export class RangeManager {
       return;
     }
 
-    const startRange = this._pointToRange(from);
-    const endRange = to ? this._pointToRange(to) : null;
+    const startRange = this.pointToRange(from);
+    const endRange = to ? this.pointToRange(to) : null;
 
     if (!startRange) {
       return;
@@ -65,7 +68,7 @@ export class RangeManager {
     this.renderRange(startRange, endRange);
   }
 
-  writeRangeByTextSelection(range: Range | null) {
+  syncRangeToTextSelection(range: Range) {
     const selectionManager = this.root.selectionManager;
     let hasTextSelection = false;
     const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
@@ -76,7 +79,7 @@ export class RangeManager {
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
-    const to = range?.collapsed ? null : this._nodeToPoint(endContainer);
+    const to = range.collapsed ? null : this._nodeToPoint(endContainer);
     if (!from) {
       if (hasTextSelection) {
         selectionManager.clear(['text']);
@@ -151,20 +154,42 @@ export class RangeManager {
   };
 
   getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
-    const blocksId = Array.from(
-      range.cloneContents().querySelectorAll<BlockElement>(`[${BLOCK_ID_ATTR}]`)
-    ).map(block => {
-      const id = block.getAttribute(BLOCK_ID_ATTR);
-      assertExists(id, 'Cannot find block id');
-      return id;
-    });
-
-    return blocksId;
+    return this.getSelectedBlockElementsByRange(range).map(el => el.model.id);
   }
 
-  private _pointToRange(point: TextRangePoint): Range | null {
+  getSelectedBlockElementsByRange(range: Range): BlockElement[] {
+    return Array.from<BlockElement>(
+      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+    ).filter(el => range.intersectsNode(el));
+  }
+
+  textSelectionToRange(selection: TextSelection): Range | null {
+    const { from, to } = selection;
+    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    if (!fromBlock) {
+      return null;
+    }
+
+    const startRange = this.pointToRange(from);
+    const endRange = to ? this.pointToRange(to) : null;
+
+    if (!startRange) {
+      return null;
+    }
+
+    const ranges = [startRange];
+    if (endRange) {
+      ranges.push(endRange);
+    }
+
+    return this._mergeRanges(ranges);
+  }
+
+  pointToRange(point: TextRangePoint): Range | null {
     const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
-    assertExists(fromBlock, `Cannot find block ${point.path.join(' > ')}`);
+    if (!fromBlock) {
+      return null;
+    }
     const startVirgoElement =
       fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
     assertExists(
@@ -222,13 +247,14 @@ export class RangeManager {
 
   private _mergeRanges(ranges: RangeSnapshot[]) {
     if (ranges.length === 0) {
-      return;
+      return null;
     }
     if (ranges.length === 1) {
       const [current] = ranges;
-      this._range.setStart(current.startContainer, current.startOffset);
-      this._range.setEnd(current.endContainer, current.endOffset);
-      return;
+      const range = document.createRange();
+      range.setStart(current.startContainer, current.startOffset);
+      range.setEnd(current.endContainer, current.endOffset);
+      return range;
     }
 
     const [leftRangeSnapshot, rightRangeSnapshot] = ranges;
@@ -260,11 +286,14 @@ export class RangeManager {
       }
     }
 
-    this._range.setStart(leftRange.startContainer, leftRange.startOffset);
-    this._range.setEnd(rightRange.endContainer, rightRange.endOffset);
+    const range = document.createRange();
+    range.setStart(leftRange.startContainer, leftRange.startOffset);
+    range.setEnd(rightRange.endContainer, rightRange.endOffset);
 
     leftRange.detach();
     rightRange.detach();
+
+    return range;
   }
 
   private _renderRange() {

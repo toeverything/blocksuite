@@ -3,10 +3,12 @@
   "version": "0.7.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
+    "packages/block-std",
     "packages/blocks",
     "packages/docs",
     "packages/editor",
     "packages/global",
+    "packages/lit",
     "packages/phasor",
     "packages/playground",
     "packages/store",
@@ -50,6 +52,7 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
+    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
@@ -92,9 +95,6 @@
     "vitest": "^0.28.5"
   },
   "pnpm": {
-    "patchedDependencies": {
-      "hotkeys-js@3.11.2": "patches/hotkeys-js@3.11.2.patch"
-    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "@algolia/client-search"

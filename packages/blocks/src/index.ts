@@ -16,18 +16,16 @@ import './surface-block/index.js';
 import './database-block/index.js';
 
 export * from './__internal__/rich-text/rich-text-operations.js';
-export { getServiceOrRegister } from './__internal__/service.js';
-export type { BaseService } from './__internal__/service/index.js';
+export { getServiceOrRegister } from './__internal__/service/index.js';
+export type { BaseService } from './__internal__/service/service.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/theme-observer.js';
 export * from './__internal__/utils/active-editor-manager.js';
-export * from './__internal__/utils/block-range.js';
 export * from './__internal__/utils/common.js';
 export * from './__internal__/utils/common-operations.js';
 export * from './__internal__/utils/filesys.js';
 export * from './__internal__/utils/query.js';
-export * as SelectionUtils from './__internal__/utils/selection.js';
 export * from './__internal__/utils/types.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
@@ -39,11 +37,13 @@ export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './image-block/index.js';
 export * from './list-block/index.js';
+export * from './models.js';
 export * from './note-block/index.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export * from './preset/index.js';
 export * from './surface-block/index.js';
+export * from './test-utils/test-utils.js';
 export * from './widgets/index.js';
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'

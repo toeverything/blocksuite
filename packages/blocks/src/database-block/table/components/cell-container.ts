@@ -1,9 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { PropertyValues } from 'lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -54,10 +52,14 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
+
+  private get selectionView() {
+    return this.closest('affine-database-table')?.selection;
+  }
+
   private _selectCurrentCell = (editing: boolean) => {
-    const selection = this.closest('affine-database-table')?.selection;
-    if (selection) {
-      selection.selection = {
+    if (this.selectionView) {
+      this.selectionView.selection = {
         focus: {
           rowIndex: this.rowIndex,
           columnIndex: this.columnIndex,
@@ -65,6 +67,10 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
         isEditing: editing,
       };
     }
+  };
+
+  private _rectChanged = () => {
+    this.selectionView?.updateSelection();
   };
 
   private get readonly() {
@@ -83,10 +89,12 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this._cell.value?.expose;
   }
 
-  protected override firstUpdated(_changedProperties: PropertyValues) {
-    super.firstUpdated(_changedProperties);
+  override connectedCallback() {
+    super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
-      this._selectCurrentCell(true);
+      if (!this.isEditing) {
+        this._selectCurrentCell(true);
+      }
     });
   }
 
@@ -103,18 +111,14 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       rowId: this.rowId,
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
+      rectChanged: this._rectChanged,
     };
-    const isEditView = view === uni;
-
-    return html`${keyed(
-      `${isEditView} ${this.column.type}`,
-      html`<uni-lit
-        ${ref(this._cell)}
-        style=${style}
-        .uni="${uni}"
-        .props="${props}"
-      ></uni-lit>`
-    )}`;
+    return html`<uni-lit
+      ${ref(this._cell)}
+      style=${style}
+      .uni="${uni}"
+      .props="${props}"
+    ></uni-lit>`;
   }
 }
 

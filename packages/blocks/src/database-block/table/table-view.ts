@@ -2,8 +2,6 @@
 import './components/column-header/column-header.js';
 import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
-import './components/toolbar/toolbar.js';
-import './components/database-title.js';
 import './components/selection.js';
 
 import { PlusIcon } from '@blocksuite/global/config';
@@ -26,7 +24,6 @@ import type { DataViewTableManager } from './table-view-manager.js';
 const styles = css`
   affine-database-table {
     position: relative;
-    margin-top: 32px;
   }
 
   affine-database-table * {
@@ -190,6 +187,10 @@ export class DatabaseTable extends BaseDataView<
     this._columnHeaderComponent.showAddColumnButton();
   };
 
+  public override addRow(position: InsertPosition) {
+    this._addRow(this.view, position);
+  }
+
   private _addRow = (
     tableViewManager: DataViewTableManager,
     position: InsertPosition
@@ -233,20 +234,6 @@ export class DatabaseTable extends BaseDataView<
     };
     return html`
       <div class="affine-database-table">
-        <div class="affine-database-block-title-container">
-          <affine-database-title
-            .titleText="${this.titleText}"
-            .addRow="${() => addRow('start')}"
-            .readonly="${this.readonly}"
-          ></affine-database-title>
-          <affine-database-toolbar
-            .tableView="${this}"
-            .copyBlock="${this.blockOperation.copy}"
-            .deleteSelf="${this.blockOperation.delete}"
-            .view="${this.view}"
-            .addRow="${addRow}"
-          ></affine-database-toolbar>
-        </div>
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
@@ -280,11 +267,3 @@ declare global {
     'affine-database-table': DatabaseTable;
   }
 }
-
-export const getTableContainer = (ele: HTMLElement) => {
-  const element = ele.closest(
-    '.affine-database-table-container'
-  ) as HTMLElement;
-  assertExists(element);
-  return element;
-};

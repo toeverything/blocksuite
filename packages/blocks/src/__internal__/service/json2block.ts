@@ -1,3 +1,4 @@
+import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
@@ -5,25 +6,24 @@ import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
-import { getServiceOrRegister } from '../service.js';
 import {
   asyncGetVirgoByModel,
-  type BlockRange,
   focusBlockByModel,
   type SerializedBlock,
 } from '../utils/index.js';
+import { getServiceOrRegister } from './index.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
   pastedBlocks: SerializedBlock[],
   options?: {
     convertToPastedIfEmpty?: boolean;
-    range?: BlockRange;
+    textRangePoint?: TextRangePoint;
   }
 ) {
-  const { convertToPastedIfEmpty = false, range } = options ?? {};
+  const { convertToPastedIfEmpty = false, textRangePoint } = options ?? {};
 
-  assertExists(range);
+  assertExists(textRangePoint);
 
   const { page } = focusedBlockModel;
   // After deleteModelsByRange, selected block is must only, and selection is must caret
@@ -44,15 +44,22 @@ export async function json2block(
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
 
-    const shouldSplitBlock = focusedBlockModel.text?.length !== range.endOffset;
+    const shouldSplitBlock =
+      focusedBlockModel.text?.length !==
+      textRangePoint.index + textRangePoint.length;
 
     shouldSplitBlock &&
-      (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
+      (await handleBlockSplit(
+        page,
+        focusedBlockModel,
+        textRangePoint.index,
+        0
+      ));
 
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
         firstBlock.text || [],
-        range?.startOffset || 0
+        textRangePoint.index || 0
       );
 
       await addSerializedBlocks(
@@ -63,7 +70,7 @@ export async function json2block(
       );
 
       await setRange(focusedBlockModel, {
-        index: (range?.startOffset ?? 0) + textLength,
+        index: (textRangePoint.index ?? 0) + textLength,
         length: 0,
       });
     } else {
@@ -89,12 +96,12 @@ export async function json2block(
     return;
   }
 
-  await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0);
+  await handleBlockSplit(page, focusedBlockModel, textRangePoint.index, 0);
 
   if (shouldMergeFirstBlock) {
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
-      range?.startOffset || 0
+      textRangePoint.index || 0
     );
     await addSerializedBlocks(
       page,
@@ -185,6 +192,7 @@ export async function addSerializedBlocks(
       icon: json.icon,
       image: json.image,
       crawled: json.crawled,
+      bookmarkTitle: json.bookmarkTitle,
     };
 
     let id: string;

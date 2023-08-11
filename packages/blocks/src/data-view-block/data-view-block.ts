@@ -1,6 +1,5 @@
 // related component
 import '../database-block/table/table-view.js';
-import '../database-block/common/database-view-header.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
@@ -16,7 +15,7 @@ import {
   createDatasource,
   getDatasourceTitle,
 } from '../__internal__/datasource/datasource-manager.js';
-import { registerService } from '../__internal__/service.js';
+import { registerService } from '../__internal__/service/index.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
 import type { ViewSource } from '../database-block/common/view-source.js';
 import type { BlockOperation } from '../database-block/index.js';
@@ -122,12 +121,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       : '';
     const blockOperation: BlockOperation = {
       copy: () => {
-        copyBlocks({
-          type: 'Block',
-          models: [this.model],
-          startOffset: 0,
-          endOffset: 0,
-        });
+        copyBlocks([this.model]);
       },
       delete: () => {
         const models = [this.model, ...this.model.children];

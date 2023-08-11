@@ -71,21 +71,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           return;
         }
 
+        this.updateSelection(tableSelection);
+
         const old = this._databaseSelection;
-
-        this.updateSelectionStyle(
-          tableSelection?.rowsSelection,
-          tableSelection?.columnsSelection
-        );
-
-        const isRowSelection =
-          tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
-        this.updateFocusSelectionStyle(
-          tableSelection?.focus,
-          isRowSelection,
-          tableSelection?.isEditing
-        );
-
         if (old) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
@@ -122,8 +110,11 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   private handleDragEvent() {
+    let isDragging = false;
     this._disposables.add(
       this.tableView.handleEvent('dragStart', context => {
+        isDragging = true;
+
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
@@ -143,6 +134,23 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           event.preventDefault();
           return true;
         }
+        return false;
+      })
+    );
+
+    this._disposables.add(
+      this.tableView.handleEvent('dragMove', context => {
+        if (isDragging) {
+          const event = context.get('pointerState').raw;
+          event.preventDefault();
+        }
+        return false;
+      })
+    );
+
+    this._disposables.add(
+      this.tableView.handleEvent('dragEnd', context => {
+        isDragging = false;
         return false;
       })
     );
@@ -469,12 +477,27 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return this.tableContainer.querySelectorAll('.affine-database-block-row');
   }
 
+  updateSelection(tableSelection = this.selection) {
+    this.updateSelectionStyle(
+      tableSelection?.rowsSelection,
+      tableSelection?.columnsSelection
+    );
+
+    const isRowSelection =
+      tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
+    this.updateFocusSelectionStyle(
+      tableSelection?.focus,
+      isRowSelection,
+      tableSelection?.isEditing
+    );
+  }
+
   updateSelectionStyle(
     rowSelection?: MultiSelection,
     columnSelection?: MultiSelection
   ) {
     const div = this.selectionRef.value;
-    assertExists(div);
+    if (!div) return;
     if (!rowSelection && !columnSelection) {
       div.style.display = 'none';
       return;
@@ -502,28 +525,35 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     isRowSelection?: boolean,
     isEditing = false
   ) {
-    const div = this.focusRef.value;
-    assertExists(div);
-    if (focus && !isRowSelection) {
-      const { left, top, width, height, scale } = this.getRect(
-        focus.rowIndex,
-        focus.rowIndex,
-        focus.columnIndex,
-        focus.columnIndex
-      );
-      const tableRect = this.tableContainer.getBoundingClientRect();
-      div.style.left = `${left - tableRect.left / scale}px`;
-      div.style.top = `${top - tableRect.top / scale}px`;
-      div.style.width = `${width}px`;
-      div.style.height = `${height}px`;
-      div.style.borderColor = 'var(--affine-primary-color)';
-      div.style.boxShadow = isEditing
-        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
-        : 'unset';
-      div.style.display = 'block';
-    } else {
-      div.style.display = 'none';
-    }
+    // Calculate styles after dom update.
+    requestAnimationFrame(() => {
+      const div = this.focusRef.value;
+      if (!div) return;
+      if (focus && !isRowSelection) {
+        // Check if row is removed.
+        const rows = this.rows();
+        if (rows.length <= focus.rowIndex) return;
+
+        const { left, top, width, height, scale } = this.getRect(
+          focus.rowIndex,
+          focus.rowIndex,
+          focus.columnIndex,
+          focus.columnIndex
+        );
+        const tableRect = this.tableContainer.getBoundingClientRect();
+        div.style.left = `${left - tableRect.left / scale}px`;
+        div.style.top = `${top - tableRect.top / scale}px`;
+        div.style.width = `${width}px`;
+        div.style.height = `${height}px`;
+        div.style.borderColor = 'var(--affine-primary-color)';
+        div.style.boxShadow = isEditing
+          ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
+          : 'unset';
+        div.style.display = 'block';
+      } else {
+        div.style.display = 'none';
+      }
+    });
   }
 
   getRect(top: number, bottom: number, left: number, right: number) {

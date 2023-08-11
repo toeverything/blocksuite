@@ -2,14 +2,15 @@ import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BlockSuiteViewSpec } from '@blocksuite/block-std';
 import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
+// import { ShadowlessElement } from './shadowless-element.js';
+import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { WithDisposable } from '../with-disposable.js';
 import type { BlockElement } from './block-element.js';
 import type { BlockSuiteRoot } from './lit-root.js';
-import { ShadowlessElement } from './shadowless-element.js';
 
-export class WidgetElement extends WithDisposable(ShadowlessElement) {
+export class WidgetElement extends WithDisposable(LitElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
 
@@ -26,7 +27,7 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
     return this.path.slice(0, -1);
   }
 
-  get hostElement() {
+  get pageElement() {
     const parentElement = this.parentElement;
     assertExists(parentElement);
     const nodeView = this.root.viewStore.getNodeView(parentElement);
@@ -35,8 +36,8 @@ export class WidgetElement extends WithDisposable(ShadowlessElement) {
   }
 
   get flavour(): string {
-    assertExists(this.hostElement);
-    return this.hostElement.model.flavour;
+    assertExists(this.pageElement);
+    return this.pageElement.model.flavour;
   }
 
   handleEvent = (
