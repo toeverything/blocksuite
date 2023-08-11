@@ -4,6 +4,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import { getBlockElementByModel } from '../__internal__/utils/query.js';
+import { actionConfig } from '../page-block/const/action-config.js';
 import { paragraphConfig } from '../page-block/const/paragraph-config.js';
 import type { PageBlockComponent } from '../page-block/types.js';
 import {
@@ -238,6 +239,23 @@ export const bindHotKey = (blockElement: BlockElement) => {
         return selList.filter(sel => !sel.is('block')).concat(blocks);
       });
     },
+  });
+
+  actionConfig.forEach(config => {
+    if (!config.hotkey) return;
+    blockElement.bindHotKey({
+      [config.hotkey]: ctx => {
+        const pageElement = blockElement.closest<PageBlockComponent>(
+          'affine-doc-page,affine-edgeless-page'
+        );
+        if (!pageElement) return;
+
+        if (!config.showWhen(pageElement)) return;
+
+        ctx.get('defaultState').event.preventDefault();
+        config.action(pageElement);
+      },
+    });
   });
 
   paragraphConfig.forEach(config => {

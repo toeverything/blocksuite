@@ -129,7 +129,9 @@ export class AffineFormatBarWidget extends WidgetElement {
         } else if (this._displayType === 'block') {
           const e = ctx.get('pointerState');
           const blockElement = this._selectedBlockElements[0];
-          assertExists(blockElement);
+          if (!blockElement) {
+            return;
+          }
           const blockRect = blockElement.getBoundingClientRect();
           if (e.y < blockRect.bottom) {
             this._placement = 'top';
@@ -141,7 +143,8 @@ export class AffineFormatBarWidget extends WidgetElement {
     );
 
     this._disposables.add(
-      this._selectionManager.slots.changed.on(selections => {
+      this._selectionManager.slots.changed.on(async selections => {
+        await this.updateComplete;
         const textSelection = getTextSelection(pageElement);
         const blockSelections = selections.filter(
           selection => selection instanceof BlockSelection
@@ -159,15 +162,15 @@ export class AffineFormatBarWidget extends WidgetElement {
           }
         } else if (blockSelections.length > 0) {
           this._displayType = 'block';
-          this._selectedBlockElements = blockSelections.map(selection => {
-            const path = selection.path;
-            const blockElement = this.pageElement.root.viewStore.viewFromPath(
-              'block',
-              path
-            );
-            assertExists(blockElement);
-            return blockElement;
-          });
+          this._selectedBlockElements = blockSelections
+            .map(selection => {
+              const path = selection.path;
+              return this.pageElement.root.viewStore.viewFromPath(
+                'block',
+                path
+              );
+            })
+            .filter((el): el is BlockElement => !!el);
         } else {
           this._reset();
         }
