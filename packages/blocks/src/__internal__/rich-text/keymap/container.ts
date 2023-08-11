@@ -119,7 +119,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     if (!config.hotkey) return;
 
     blockElement.bindHotKey({
-      [config.hotkey]: () => {
+      [config.hotkey]: ctx => {
         if (blockElement.page.readonly) return;
 
         const pageElement = blockElement.closest<PageBlockComponent>(
@@ -129,8 +129,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const textSelection = getTextSelection(pageElement);
         if (!textSelection) return;
 
+        ctx.get('defaultState').event.preventDefault();
+
         const format = getCurrentCombinedFormat(pageElement, textSelection);
         config.action({ pageElement, format });
+        return true;
       },
     });
   });

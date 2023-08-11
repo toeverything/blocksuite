@@ -128,13 +128,8 @@ test('select all and delete by forwardDelete', async ({ page }) => {
 });
 
 async function clickListIcon(page: Page, i = 0) {
-  await page.mouse.click(0, 0);
-  const locator = page
-    .locator('.affine-list-rich-text-wrapper')
-    .nth(i)
-    .locator('div')
-    .first();
-  await locator.click();
+  const locator = page.locator('.affine-list-block__prefix').nth(i);
+  await locator.click({ force: true });
 }
 
 test('click the list icon can select and copy', async ({ page }) => {
@@ -166,12 +161,11 @@ test('click the list icon can select and delete', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 
   await clickListIcon(page, 0);
-  await pressBackspace(page);
-  await shamefullyBlurActiveElement(page);
+  await waitNextFrame(page);
   await pressBackspace(page);
   await assertRichTexts(page, ['', '456', '789']);
   await clickListIcon(page, 0);
-  await shamefullyBlurActiveElement(page);
+  await waitNextFrame(page);
   await pressBackspace(page);
   await assertRichTexts(page, ['', '']);
 });
@@ -185,12 +179,11 @@ test('click the list icon can select and delete by forwardDelete', async ({
   await assertRichTexts(page, ['123', '456', '789']);
 
   await clickListIcon(page, 0);
-  await pressForwardDelete(page);
-  await shamefullyBlurActiveElement(page);
+  await waitNextFrame(page);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['', '456', '789']);
   await clickListIcon(page, 0);
-  await shamefullyBlurActiveElement(page);
+  await waitNextFrame(page);
   await pressForwardDelete(page);
   await assertRichTexts(page, ['', '']);
 });
@@ -1269,31 +1262,24 @@ test('should be cleared when dragging block card from BlockHub', async ({
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(0);
 });
 
-test.fixme(
-  'click bottom of page and if the last is embed block, editor should insert a new editable block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initImageState(page);
+test('click bottom of page and if the last is embed block, editor should insert a new editable block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
 
-    await page.evaluate(async () => {
-      const viewport = document.querySelector('.affine-doc-viewport');
-      if (!viewport) {
-        throw new Error();
-      }
-      viewport.scrollTo(0, 1000);
-    });
+  const pageRect = await page.evaluate(() => {
+    const pageBlock = document.querySelector('.affine-doc-viewport');
+    return pageBlock?.getBoundingClientRect() || null;
+  });
 
-    const pageRect = await page.evaluate(() => {
-      const pageBlock = document.querySelector('affine-doc-page');
-      return pageBlock?.getBoundingClientRect() || null;
-    });
+  await page
+    .locator('.affine-doc-viewport')
+    .click({ position: { x: pageRect.width / 2, y: pageRect.bottom - 10 } });
 
-    expect(pageRect).not.toBeNull();
-    await page.mouse.click(pageRect!.width / 2, pageRect!.bottom - 20);
-
-    await assertStoreMatchJSX(
-      page,
-      `<affine:page>
+  await assertStoreMatchJSX(
+    page,
+    `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:hidden={false}
@@ -1310,9 +1296,8 @@ test.fixme(
     />
   </affine:note>
 </affine:page>`
-    );
-  }
-);
+  );
+});
 
 test('should select blocks when pressing escape', async ({ page }) => {
   await enterPlaygroundRoom(page);

@@ -150,7 +150,7 @@ test('use more than three backticks can not create code block', async ({
   expect(await inlineCodelocator.count()).toEqual(1);
 });
 
-test.fixme('use shortcut can create code block', async ({ page }) => {
+test('use shortcut can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
