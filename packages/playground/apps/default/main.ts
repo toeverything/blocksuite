@@ -95,9 +95,14 @@ const syncProviders = async (
     }
   }
 
+  const oldVersions = { ...workspace.meta.blockVersions };
+
+  workspace.schema.upgradeWorkspace(workspace.doc);
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded();
+    await page.waitForLoaded(() => {
+      workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+    });
   });
 };
 
