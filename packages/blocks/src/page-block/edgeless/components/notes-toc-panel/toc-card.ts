@@ -451,16 +451,16 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
           <div class="card-content">
             ${
               first
-                ? html`<blocksuite-toc-block-preview
+                ? html`<edgeless-toc-block-preview
                     .block=${first}
-                  ></blocksuite-toc-block-preview>`
+                  ></edgeless-toc-block-preview>`
                 : nothing
             }
             ${
               second
-                ? html`<blocksuite-toc-block-preview
+                ? html`<edgeless-toc-block-preview
                     .block=${second}
-                  ></blocksuite-toc-block-preview>`
+                  ></edgeless-toc-block-preview>`
                 : nothing
             }
             ${
@@ -478,16 +478,16 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
             }
             ${
               secondToLast
-                ? html`<blocksuite-toc-block-preview
+                ? html`<edgeless-toc-block-preview
                     .block=${secondToLast}
-                  ></blocksuite-toc-block-preview>`
+                  ></edgeless-toc-block-preview>`
                 : nothing
             }
             ${
               last
-                ? html`<blocksuite-toc-block-preview
+                ? html`<edgeless-toc-block-preview
                     .block=${last}
-                  ></blocksuite-toc-block-preview>`
+                  ></edgeless-toc-block-preview>`
                 : nothing
             }
             </div>
