@@ -20,7 +20,6 @@ import {
   redoByClick,
   redoByKeyboard,
   resetHistory,
-  selectAllByKeyboard,
   setVirgoSelection,
   SHORT_KEY,
   strikethrough,
@@ -76,12 +75,12 @@ test('single line rich-text inline code hotkey', async ({ page }) => {
   await assertTextFormat(page, 0, 0, {});
 });
 
-test.fixme('type character jump out code node', async ({ page }) => {
+test('type character jump out code node', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, 'Hello');
-  await selectAllByKeyboard(page);
+  await setVirgoSelection(page, 0, 5);
   await inlineCode(page);
   await assertStoreMatchJSX(
     page,
@@ -559,7 +558,7 @@ test('should single line format hotkey work', async ({ page }) => {
   );
 });
 
-test.fixme('should multiple line format hotkey work', async ({ page }) => {
+test('should multiple line format hotkey work', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
@@ -574,7 +573,7 @@ test.fixme('should multiple line format hotkey work', async ({ page }) => {
   // underline
   await page.keyboard.press(`${SHORT_KEY}+u`);
   // strikethrough
-  await page.keyboard.press(`${SHORT_KEY}+Shift+s`);
+  await page.keyboard.press(`${SHORT_KEY}+Shift+S`);
 
   await waitNextFrame(page);
 

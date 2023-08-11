@@ -285,6 +285,8 @@ export const bindHotKey = (blockElement: BlockElement) => {
               }),
             ]);
           });
+
+          return true;
         },
       });
     });
