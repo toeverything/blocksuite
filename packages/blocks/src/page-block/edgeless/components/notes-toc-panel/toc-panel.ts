@@ -128,7 +128,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       color: var(--affine-text-secondary-color);
       font-family: var(--affine-font-sans-family);
       padding-left: 16px;
-      margin: 34px 0 24px 0;
+      margin: 21px 0 9px 0;
     }
 
     .insert-indicator {
