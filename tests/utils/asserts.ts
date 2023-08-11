@@ -232,6 +232,10 @@ export async function assertBlockCount(
   const actual = await page.locator(`affine-${flavour}`).count();
   expect(actual).toBe(count);
 }
+export async function assertRowCount(page: Page, count: number) {
+  const actual = await page.locator('.affine-database-block-row').count();
+  expect(actual).toBe(count);
+}
 
 export async function assertSelection(
   page: Page,

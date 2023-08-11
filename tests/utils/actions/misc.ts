@@ -416,10 +416,6 @@ export async function initDatabaseRow(page: Page) {
 
 export async function initDatabaseRowWithData(page: Page, data: string) {
   await initDatabaseRow(page);
-
-  const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-paragraph');
-  await cell.click({ force: true });
   await type(page, data);
 }
 

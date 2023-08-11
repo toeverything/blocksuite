@@ -15,7 +15,7 @@ import { viewRendererManager } from '../../data-view.js';
 
 const styles = css`
   .affine-database-toolbar {
-    display: flex;
+    display: none;
     align-items: center;
     gap: 6px;
   }

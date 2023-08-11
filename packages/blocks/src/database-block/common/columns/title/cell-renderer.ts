@@ -126,6 +126,9 @@ export class TitleCellEditing extends BaseCellRenderer<string> {
   }
 
   private _setValue = (str: string = this._inputEle.value) => {
+    if (str == this.value) {
+      return;
+    }
     if (!str) {
       this.onChange(undefined);
       return;
