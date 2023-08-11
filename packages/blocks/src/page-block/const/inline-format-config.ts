@@ -23,15 +23,6 @@ import {
   getTextSelection,
 } from '../utils/selection.js';
 
-const UNSUPPORTED_MODELS: Flavour[] = ['affine:code', 'affine:attachment'];
-
-function noneUnsupportedBlockSelected(pageElement: PageBlockComponent) {
-  const selectedModels = getSelectedContentModels(pageElement);
-  return !selectedModels.every(model =>
-    UNSUPPORTED_MODELS.includes(model.flavour as Flavour)
-  );
-}
-
 function handleCommonStyle({
   pageElement,
   type,
@@ -77,6 +68,20 @@ export interface InlineFormatConfig {
   action: (props: InlineFormatConfigAction) => void;
 }
 
+const INLINE_UNSUPPORTED_MODELS: Flavour[] = [
+  'affine:code',
+  'affine:attachment',
+];
+
+export function noneInlineUnsupportedBlockSelected(
+  pageElement: PageBlockComponent
+) {
+  const selectedModels = getSelectedContentModels(pageElement);
+  return !selectedModels.every(model =>
+    INLINE_UNSUPPORTED_MODELS.includes(model.flavour as Flavour)
+  );
+}
+
 export const inlineFormatConfig: InlineFormatConfig[] = [
   {
     id: 'bold',
@@ -85,7 +90,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-b',
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneUnsupportedBlockSelected(pageElement),
+      noneInlineUnsupportedBlockSelected(pageElement),
     action: ({ pageElement, type, format }) => {
       handleCommonStyle({
         pageElement,
@@ -102,7 +107,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-i',
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneUnsupportedBlockSelected(pageElement),
+      noneInlineUnsupportedBlockSelected(pageElement),
     action: ({ pageElement, type, format }) => {
       handleCommonStyle({
         pageElement,
@@ -119,7 +124,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-u',
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneUnsupportedBlockSelected(pageElement),
+      noneInlineUnsupportedBlockSelected(pageElement),
     action: ({ pageElement, type, format }) => {
       handleCommonStyle({
         pageElement,
@@ -136,7 +141,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-shift-s',
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneUnsupportedBlockSelected(pageElement),
+      noneInlineUnsupportedBlockSelected(pageElement),
     action: ({ pageElement, type, format }) => {
       handleCommonStyle({
         pageElement,
@@ -153,7 +158,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-e',
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneUnsupportedBlockSelected(pageElement),
+      noneInlineUnsupportedBlockSelected(pageElement),
     action: ({ pageElement, type, format }) => {
       handleCommonStyle({
         pageElement,
@@ -176,7 +181,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
       return (
         !!textSelection &&
         selectedModels.length === 1 &&
-        noneUnsupportedBlockSelected(pageElement) &&
+        noneInlineUnsupportedBlockSelected(pageElement) &&
         // can't create link when selection includes reference node
         // XXX get loose format at here is not a good practice
         !getCombinedFormatInTextSelection(pageElement, textSelection, true)

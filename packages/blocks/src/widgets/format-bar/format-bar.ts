@@ -14,6 +14,7 @@ import { html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
+import { noneInlineUnsupportedBlockSelected } from '../../page-block/const/inline-format-config.js';
 import type { RangeManager } from '../../page-block/text-selection/range-manager.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import {
@@ -329,8 +330,10 @@ export class AffineFormatBarWidget extends WidgetElement {
       <div class="divider"></div>
       ${inlineItems}
       ${inlineItems.length ? html`<div class="divider"></div>` : nothing}
-      ${backgroundHighlightButton}
-      <div class="divider"></div>
+      ${noneInlineUnsupportedBlockSelected(pageElement)
+        ? html`${backgroundHighlightButton}
+            <div class="divider"></div>`
+        : nothing}
       ${actionItems}
     </div>`;
   }
