@@ -46,7 +46,7 @@ function handleCommonStyle({
   if (type === 'text') {
     const textSelection = getTextSelection(pageElement);
     assertExists(textSelection);
-    formatByTextSelection(pageElement, textSelection, style);
+    formatByTextSelection(pageElement, textSelection, style, value);
   } else {
     const blockSelections = getBlockSelections(pageElement);
     const viewStore = pageElement.root.viewStore;

@@ -130,7 +130,7 @@ test('should format quick bar show when click drag handler', async ({
   if (!box) {
     throw new Error("formatBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 345, 5);
+  assertAlmostEqual(box.x, 252.5, 5);
   assertAlmostEqual(box.y - dragHandleRect.y, -55.5, 5);
 });
 
@@ -735,6 +735,7 @@ test('should format quick bar be able to copy', async ({ page }) => {
 
   await pressArrowRight(page, 1);
   await pasteByKeyboard(page);
+  await waitNextFrame(page);
 
   await assertRichTexts(page, ['123', '456456', '789']);
 });
@@ -924,7 +925,7 @@ test('should format quick bar work in single block selection', async ({
   const selectionRect = await blockSelections.boundingBox();
   assertExists(formatRect);
   assertExists(selectionRect);
-  assertAlmostEqual(formatRect.x - selectionRect.x, 209, 10);
+  assertAlmostEqual(formatRect.x - selectionRect.x, 178.5, 10);
   assertAlmostEqual(formatRect.y - selectionRect.y, -50, 10);
 
   const boldBtn = formatBar.getByTestId('bold');
@@ -1000,7 +1001,7 @@ test('should format quick bar work in multiple block selection', async ({
   }
   const rect = await blockSelections.first().boundingBox();
   assertExists(rect);
-  assertAlmostEqual(box.x - rect.x, 209, 10);
+  assertAlmostEqual(box.x - rect.x, 178.5, 10);
   assertAlmostEqual(box.y - rect.y, -45, 10);
 
   await formatBarController.boldBtn.click();
@@ -1160,12 +1161,12 @@ test('should format quick bar show after convert to code block', async ({
     { x: 0, y: 0 }
   );
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(345, 194);
+  await formatBarController.assertBoundingBox(252.5, 194);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(6, 244);
+  await formatBarController.assertBoundingBox(42.6, 244);
   await assertStoreMatchJSX(
     page,
     `

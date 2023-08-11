@@ -11,15 +11,13 @@ import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.
 import { clearMarksOnDiscontinuousInput } from '../../../../__internal__/utils/virgo.js';
 import { showLinkPopover } from '../../../../components/link-popover/index.js';
 import type { PageBlockComponent } from '../../../types.js';
-import {
-  getCombinedFormatInTextSelection,
-  getSelectedContentModels,
-} from '../../selection.js';
+import { getSelectedContentModels } from '../../selection.js';
 
 export function formatByTextSelection(
   pageElement: PageBlockComponent,
   textSelection: TextSelection,
-  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>
+  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
+  value: string | true | null
 ) {
   const selectedModels = getSelectedContentModels(pageElement);
 
@@ -45,13 +43,12 @@ export function formatByTextSelection(
         (vEditor.marks && vEditor.marks[key]) ||
         (delta.attributes && delta.attributes[key])
           ? null
-          : true,
+          : value,
     });
     clearMarksOnDiscontinuousInput(vEditor);
 
     return;
   }
-  const format = getCombinedFormatInTextSelection(pageElement, textSelection);
 
   // edge case 2: same model
   if (textSelection.isInSameBlock()) {
@@ -61,7 +58,7 @@ export function formatByTextSelection(
       rangeManager.syncTextSelectionToRange(textSelection);
     });
     startModel.text?.format(from.index, from.length, {
-      [key]: format[key] ? null : true,
+      [key]: value,
     });
     return;
   }
@@ -69,13 +66,13 @@ export function formatByTextSelection(
   // format start model
   if (!matchFlavours(startModel, ['affine:code'])) {
     startModel.text?.format(from.index, from.length, {
-      [key]: format[key] ? null : true,
+      [key]: value,
     });
   }
   // format end model
   if (!matchFlavours(endModel, ['affine:code'])) {
     endModel.text?.format(to?.index ?? 0, to?.length ?? 0, {
-      [key]: format[key] ? null : true,
+      [key]: value,
     });
   }
   // format between models
@@ -84,7 +81,7 @@ export function formatByTextSelection(
     .filter(model => !matchFlavours(model, ['affine:code']))
     .forEach(model => {
       model.text?.format(0, model.text.length, {
-        [key]: format[key] ? null : true,
+        [key]: value,
       });
     });
 
