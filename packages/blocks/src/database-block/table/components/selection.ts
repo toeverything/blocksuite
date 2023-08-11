@@ -220,8 +220,14 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return (x1: number, x2: number, y1: number, y2: number) => {
       const [startX, endX] = x1 < x2 ? [x1, x2] : [x2, x1];
       const [startY, endY] = y1 < y2 ? [y1, y2] : [y2, y1];
-      const row: MultiSelection = { start: 0, end: 0 };
-      const column: MultiSelection = { start: 0, end: 0 };
+      const row: MultiSelection = {
+        start: 0,
+        end: 0,
+      };
+      const column: MultiSelection = {
+        start: 0,
+        end: 0,
+      };
       for (let i = 0; i < rowOffsets.length; i++) {
         const offset = rowOffsets[i];
         if (offset < startY) {
@@ -278,7 +284,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         y: number;
       }
     >(evt, {
-      transform: evt => ({ x: evt.x, y: evt.y }),
+      transform: evt => ({
+        x: evt.x,
+        y: evt.y,
+      }),
       onDrag: () => undefined,
       onMove: ({ x, y }) => {
         const currentOffsetX = x - tableRect.left;
@@ -297,6 +306,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           return;
         }
         select(selection);
+      },
+      onClear: () => {
+        //
       },
     });
   }
@@ -576,8 +588,14 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   public selectRow(index: number) {
     this.selection = {
-      rowsSelection: { start: index, end: index },
-      focus: { rowIndex: index, columnIndex: 0 },
+      rowsSelection: {
+        start: index,
+        end: index,
+      },
+      focus: {
+        rowIndex: index,
+        columnIndex: 0,
+      },
       isEditing: false,
     };
   }
@@ -600,8 +618,14 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       }
     }
     this.selection = {
-      rowsSelection: { start: index, end: index },
-      focus: { rowIndex: index, columnIndex: 0 },
+      rowsSelection: {
+        start: index,
+        end: index,
+      },
+      focus: {
+        rowIndex: index,
+        columnIndex: 0,
+      },
       isEditing: false,
     };
   }
@@ -611,6 +635,16 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       <div ${ref(this.selectionRef)} class="database-selection"></div>
       <div tabindex="0" ${ref(this.focusRef)} class="database-focus"></div>
     `;
+  }
+
+  focusFirstCell() {
+    this.selection = {
+      focus: {
+        rowIndex: 0,
+        columnIndex: 0,
+      },
+      isEditing: true,
+    };
   }
 }
 

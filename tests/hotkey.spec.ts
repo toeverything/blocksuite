@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  cutByKeyboard,
   dragBetweenIndices,
   dragOverTitle,
   enterPlaygroundRoom,
@@ -10,6 +11,7 @@ import {
   initThreeParagraphs,
   inlineCode,
   MODIFIER_KEY,
+  pasteByKeyboard,
   pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
@@ -1024,7 +1026,7 @@ test('should up/down key navigator works', async ({ page }) => {
   await assertSelection(page, 1, 1);
 });
 
-test.fixme('should cut in title works', async ({ page }) => {
+test('should cut in title works', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -1033,11 +1035,11 @@ test.fixme('should cut in title works', async ({ page }) => {
   await assertTitle(page, 'hello');
 
   await dragOverTitle(page);
-  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await cutByKeyboard(page);
   await assertTitle(page, '');
 
   await focusRichText(page);
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pasteByKeyboard(page);
   await assertRichTexts(page, ['hello']);
 });
 

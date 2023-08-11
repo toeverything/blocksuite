@@ -1,6 +1,6 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { Page, Text } from '@blocksuite/store';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
@@ -31,6 +31,7 @@ export interface DataViewProps<
 
 export interface DataViewExpose {
   addRow?(position: InsertPosition): void;
+  focusFirstCell(): void;
 }
 
 declare global {
@@ -65,12 +66,16 @@ export interface DataViewConfig<
 
   init(model: DatabaseBlockModel, id: string, name: string): Data;
 }
+
 export interface DataViewRendererConfig<
   Data extends DataViewDataType = DataViewDataType
 > {
   type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;
+  tools?: UniComponent<{
+    view: DataViewManager;
+  }>[];
 }
 
 export class ViewManager {

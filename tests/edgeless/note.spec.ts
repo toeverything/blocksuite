@@ -647,32 +647,31 @@ test('manage note index and hidden status', async ({ page }) => {
   expect(await page.locator('.note-status').innerText()).toBe('3');
 });
 
-test.fixme(
-  'when no visible note block, clicking in page mode will auto add a new note block',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
-    await switchEditorMode(page);
+test('when no visible note block, clicking in page mode will auto add a new note block', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
 
-    assertBlockCount(page, 'note', 1);
+  assertBlockCount(page, 'note', 1);
 
-    // select note
-    await selectNoteInEdgeless(page, '2');
-    expect(await page.locator('.note-status').innerText()).toBe('1');
-    expect(await page.locator('affine-note').count()).toBe(1);
-    // hide note
-    await page.locator('.note-status-button').click();
+  // select note
+  await selectNoteInEdgeless(page, '2');
+  expect(await page.locator('.note-status').innerText()).toBe('1');
+  expect(await page.locator('affine-note').count()).toBe(1);
+  // hide note
+  await page.locator('.note-status-button').click();
 
-    await switchEditorMode(page);
-    let note = await page.evaluate(() => {
-      return document.querySelector('affine-note');
-    });
-    expect(note).toBeNull();
-    await click(page, { x: 100, y: 280 });
+  await switchEditorMode(page);
+  let note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
+  });
+  expect(note).toBeNull();
+  await click(page, { x: 100, y: 280 });
 
-    note = await page.evaluate(() => {
-      return document.querySelector('affine-note');
-    });
-    expect(note).not.toBeNull();
-  }
-);
+  note = await page.evaluate(() => {
+    return document.querySelector('affine-note');
+  });
+  expect(note).not.toBeNull();
+});

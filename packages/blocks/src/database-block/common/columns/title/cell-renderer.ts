@@ -1,64 +1,195 @@
-import type { TemplateResult } from 'lit';
-import { css } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-import { classMap } from 'lit/directives/class-map.js';
+import { EditIcon } from '@blocksuite/global/config';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { css, type TemplateResult } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { popSideDetail } from '../../detail/layout.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { titleColumnTypeName, titlePureColumnConfig } from './define.js';
 
-@customElement('affine-database-title-cell')
-export class TitleCell extends BaseCellRenderer<TemplateResult> {
+@customElement('data-view-title-cell')
+export class TitleCell extends BaseCellRenderer<string> {
   static override styles = css`
-    affine-database-title-cell {
+    data-view-title-cell {
+      width: 100%;
+      height: max-content;
+      display: flex;
+      align-items: center;
       position: relative;
     }
 
-    affine-database-title-cell .mask {
-      position: absolute;
+    .data-view-title {
+      position: relative;
       width: 100%;
-      height: 100%;
+      word-break: break-all;
+    }
+
+    .data-view-title,
+    .data-view-title textarea {
+      font-family: var(--affine-font-family);
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--affine-text-primary-color);
+      font-weight: 400;
+    }
+
+    data-view-title-cell:hover .open-detail {
+      visibility: visible;
+    }
+
+    .open-detail {
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      padding: 2px 6px;
+      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
+      gap: 4px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 20px;
+      cursor: pointer;
+      background-color: var(--affine-background-primary-color);
+    }
+
+    .open-detail:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    .edit-detail-icon {
+      display: flex;
+      align-items: center;
+    }
+
+    .edit-detail-icon svg {
+      fill: var(--affine-icon-color);
+      width: 16px;
+      height: 16px;
+    }
+  `;
+  _clickOpenDetail = (e: MouseEvent) => {
+    e.stopPropagation();
+    popSideDetail({
+      view: this.column.dataViewManager,
+      rowId: this.rowId,
+    });
+  };
+
+  override render() {
+    return html`<span class="data-view-title" style="white-space: pre-wrap"
+        >${this.value ?? ''}</span
+      >
+      <div class="open-detail" @click="${this._clickOpenDetail}">
+        <div class="edit-detail-icon">${EditIcon}</div>
+        Edit
+      </div> `;
+  }
+}
+
+@customElement('data-view-title-cell-editing')
+export class TitleCellEditing extends BaseCellRenderer<string> {
+  static override styles = css`
+    data-view-title-cell-editing {
+      width: 100%;
+      height: max-content;
+      cursor: text;
+      display: flex;
+      align-items: center;
+    }
+
+    .data-view-title textarea {
+      resize: none;
+      border: none;
+      outline: none;
+      position: absolute;
       left: 0;
       top: 0;
-    }
-
-    .affine-database-block-row-cell-content {
-      display: flex;
-      align-items: center;
       height: 100%;
-      min-height: 44px;
-      transform: translateX(0);
-    }
-
-    .affine-database-block-row-cell-content > [data-block-id] {
       width: 100%;
-    }
-
-    .affine-database-block-row-cell-content > affine-paragraph {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-    }
-
-    .affine-database-block-row-cell-content > affine-paragraph > .text {
-      width: 100%;
-      margin-top: unset;
-    }
-
-    .mock-focus {
-      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-      border: 2px solid var(--affine-primary-color) !important;
-      pointer-events: none;
-      box-sizing: border-box;
+      padding: 0;
+      background-color: transparent;
     }
   `;
 
-  @state()
-  realEditing = false;
+  @query('textarea')
+  private _inputEle!: HTMLTextAreaElement;
 
-  protected override firstUpdated() {
+  focusEnd = () => {
+    const end = this._inputEle.value.length;
+    this._inputEle.focus();
+    this._inputEle.setSelectionRange(end, end);
+  };
+
+  override onExitEditMode() {
+    this._setValue();
+  }
+
+  private _setValue = (str: string = this._inputEle.value) => {
+    if (str == this.value) {
+      return;
+    }
+    if (!str) {
+      this.onChange(undefined);
+      return;
+    }
+    this.onChange(str);
+  };
+
+  private _keydown = (e: KeyboardEvent) => {
+    this.rectChanged?.();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      requestAnimationFrame(() => {
+        this.selectCurrentCell(false);
+      });
+    }
+  };
+
+  override firstUpdated() {
+    requestAnimationFrame(() => {
+      this.focusEnd();
+    });
+  }
+
+  _blur() {
+    this.selectCurrentCell(false);
+  }
+
+  _focus() {
+    if (!this.isEditing) {
+      this.selectCurrentCell(true);
+    }
+  }
+
+  @state()
+  text?: string;
+
+  _input() {
+    this.text = this._inputEle.value;
+  }
+
+  override render() {
+    return html` <div class="data-view-title">
+      <span style="opacity: 0;white-space: pre-wrap"
+        >${this.text ?? this.value}<span> </span></span
+      ><textarea
+        @keydown="${this._keydown}"
+        @blur="${this._blur}"
+        @focus="${this._focus}"
+        @input="${this._input}"
+        .value=${this.value ?? ''}
+      ></textarea>
+    </div>`;
+  }
+}
+
+@customElement('data-view-title-detail-cell')
+export class TitleDetailCell extends BaseCellRenderer<string> {
+  static override styles = css``;
+
+  override connectedCallback() {
+    super.connectedCallback();
     this._disposables.addFromEvent(
       this,
       'keydown',
@@ -66,74 +197,22 @@ export class TitleCell extends BaseCellRenderer<TemplateResult> {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.stopPropagation();
           e.preventDefault();
+          return;
         }
       },
       true
     );
-    this._disposables.addFromEvent(
-      this,
-      'click',
-      e => {
-        if (this.realEditing) {
-          e.stopPropagation();
-        }
-      },
-      true
-    );
-    this._disposables.addFromEvent(
-      this,
-      'pointerdown',
-      e => {
-        if (this.realEditing) {
-          e.stopPropagation();
-        }
-      },
-      true
-    );
-    requestAnimationFrame(() => {
-      const editor = this.querySelector('rich-text')?.vEditor;
-      if (editor) {
-        this._disposables.add(
-          editor.slots.vRangeUpdated.on(([range]) => {
-            this.realEditing = !!range;
-          })
-        );
-      }
-    });
   }
 
-  override focusCell() {
-    const block = this.querySelector('affine-paragraph');
-    const selectionManager = block?.root.selectionManager;
-    if (selectionManager) {
-      const length =
-        block?.querySelector('rich-text')?.vEditor?.yText.length ?? 0;
-      const selection = selectionManager.getInstance('text', {
-        from: {
-          path: block.path,
-          index: length,
-          length: 0,
-        },
-        to: null,
-      });
-      selectionManager.set([selection]);
-    }
-    return false;
-  }
-
-  override blurCell() {
-    return false;
+  extra(): {
+    model: BaseBlockModel;
+    result: TemplateResult;
+  } {
+    return this.column.getExtra(this.rowId) as never;
   }
 
   override render() {
-    const className = classMap({
-      'mock-focus': this.realEditing,
-      mask: true,
-    });
-    return html`
-      <div class="affine-database-block-row-cell-content">${this.value}</div>
-      <div class="${className}"></div>
-    `;
+    return this.extra().result;
   }
 }
 
@@ -141,6 +220,10 @@ columnRenderer.register({
   type: titleColumnTypeName,
   cellRenderer: {
     view: createFromBaseCellRenderer(TitleCell),
+    edit: createFromBaseCellRenderer(TitleCellEditing),
+  },
+  detailCellRenderer: {
+    view: createFromBaseCellRenderer(TitleDetailCell),
   },
 });
 

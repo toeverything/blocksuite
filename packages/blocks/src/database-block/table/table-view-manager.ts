@@ -11,6 +11,7 @@ import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 
 type TableViewData = RealDataViewDataTypeMap['table'];
+
 export class DataViewTableManager extends BaseDataViewManager {
   public override get type(): string {
     return this.view.mode;
@@ -70,11 +71,14 @@ export class DataViewTableManager extends BaseDataViewManager {
     }
     this.viewSource.updateView(view => {
       return {
-        columns: this.columnManagerList.map((column, i) => ({
-          id: column.id,
-          width: column.width,
-          hide: column.hide,
-        })),
+        columns: this.columnsWithoutFilter.map((id, i) => {
+          const column = this.columnGet(id);
+          return {
+            id: column.id,
+            hide: column.hide,
+            width: column.width,
+          };
+        }),
       };
     });
   }
@@ -110,13 +114,22 @@ export class DataViewTableManager extends BaseDataViewManager {
     this.updateView(view => {
       return {
         columns: view.columns.map(v =>
-          v.id === columnId ? { ...v, width: width } : v
+          v.id === columnId
+            ? {
+                ...v,
+                width: width,
+              }
+            : v
         ),
       };
     });
   }
 
   public get columns(): string[] {
+    return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
+  }
+
+  public get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.view.columns.forEach(v => {
@@ -141,18 +154,39 @@ export class DataViewTableManager extends BaseDataViewManager {
     }
     return true;
   }
+
+  columnUpdateHide(columnId: string, hide: boolean): void {
+    this.updateView(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                hide,
+              }
+            : v
+        ),
+      };
+    });
+  }
+  columnGetHide(columnId: string): boolean {
+    return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
+  }
 }
 
 export class DataViewTableColumnManager extends BaseDataViewColumnManager {
-  constructor(propertyId: string, override viewManager: DataViewTableManager) {
-    super(propertyId, viewManager);
+  constructor(
+    propertyId: string,
+    override dataViewManager: DataViewTableManager
+  ) {
+    super(propertyId, dataViewManager);
   }
 
   get width(): number {
-    return this.viewManager.columnGetWidth(this.id);
+    return this.dataViewManager.columnGetWidth(this.id);
   }
 
   updateWidth(width: number): void {
-    this.viewManager.columnUpdateWidth(this.id, width);
+    this.dataViewManager.columnUpdateWidth(this.id, width);
   }
 }
