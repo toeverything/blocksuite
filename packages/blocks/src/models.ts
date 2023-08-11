@@ -33,9 +33,11 @@ import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
 
 export type {
+  AttachmentBlockModel,
   BookmarkBlockModel,
   CodeBlockModel,
   DatabaseBlockModel,
+  DataViewBlockModel,
   DividerBlockModel,
   ImageBlockModel,
   ListBlockModel,

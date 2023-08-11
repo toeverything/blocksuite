@@ -36,6 +36,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
 import { registerFormatBarCustomElement } from './custom-format-bar';
+import type { CustomNavigationPanel } from './custom-navigation-panel';
 import { createViewer } from './doc-inspector';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
@@ -142,6 +143,9 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   contentParser!: ContentParser;
+
+  @property({ attribute: false })
+  navigationPanel!: CustomNavigationPanel;
 
   @state()
   private _connected = true;
@@ -251,6 +255,10 @@ export class DebugMenu extends ShadowlessElement {
       const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
       this.mode = mode;
     }
+  }
+
+  private _toggleNavigationPanel() {
+    this.navigationPanel.toggleDisplay();
   }
 
   private _switchOffsetMode() {
@@ -684,6 +692,20 @@ export class DebugMenu extends ShadowlessElement {
               @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip
+            content="Toggle navigation panel"
+            placement="bottom"
+            hoist
+          >
+            <sl-button
+              size="small"
+              content=""
+              @click=${this._toggleNavigationPanel}
+            >
+              <sl-icon name="list"></sl-icon>
             </sl-button>
           </sl-tooltip>
 

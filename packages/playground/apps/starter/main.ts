@@ -13,6 +13,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
+import { CustomNavigationPanel } from './components/custom-navigation-panel';
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';
 import {
@@ -46,11 +47,16 @@ function subscribePage(workspace: Workspace) {
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
+    const navigationPanel = new CustomNavigationPanel();
+
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
+    debugMenu.navigationPanel = navigationPanel;
+    navigationPanel.editor = editor;
     document.body.appendChild(debugMenu);
+    document.body.appendChild(navigationPanel);
 
     window.editor = editor;
     window.page = page;
