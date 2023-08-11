@@ -17,13 +17,13 @@ export class EdgelessShapeMenu extends LitElement {
     .shape-menu-container {
       display: flex;
       align-items: center;
-      width: 240px;
       height: 48px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       fill: none;
       stroke: currentColor;
+      padding: 0 8px;
     }
   `;
 
