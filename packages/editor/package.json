@@ -16,7 +16,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.9"
+    "@toeverything/theme": "^0.7.12"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
@@ -26,7 +26,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.9"
+    "@toeverything/theme": "^0.7.12"
   },
   "exports": {
     ".": "./src/index.ts",
