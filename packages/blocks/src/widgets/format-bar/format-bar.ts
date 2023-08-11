@@ -10,7 +10,7 @@ import {
   type Placement,
   shift,
 } from '@floating-ui/dom';
-import { html, nothing, type PropertyValues } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
@@ -72,7 +72,10 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   private _shouldDisplay() {
+    const readonly = this.page.awarenessStore.isReadonly(this.page);
+
     return (
+      !readonly &&
       this._displayType !== 'none' &&
       this._selectedBlockElements.length > 0 &&
       !this._dragging
@@ -180,29 +183,26 @@ export class AffineFormatBarWidget extends WidgetElement {
     );
   }
 
-  override update(changedProperties: PropertyValues) {
-    super.update(changedProperties);
-    if (
-      this._customElements.length === 0 &&
-      AffineFormatBarWidget.customElements.size !== 0
-    ) {
-      this._customElements = [...AffineFormatBarWidget.customElements].map(
-        element => element(this)
-      );
-      this.customItemsContainer.append(...this._customElements);
-      this._disposables.add(() => {
-        this._customElements.forEach(element => {
-          element.remove();
-        });
-        this._customElements = [];
-        this.customItemsContainer.replaceChildren();
-      });
-    }
-  }
-
   private _floatDisposables: DisposableGroup | null = null;
   override updated() {
     if (this._shouldDisplay()) {
+      if (
+        this._customElements.length === 0 &&
+        AffineFormatBarWidget.customElements.size !== 0
+      ) {
+        this._customElements = [...AffineFormatBarWidget.customElements].map(
+          element => element(this)
+        );
+        this.customItemsContainer.append(...this._customElements);
+        this._disposables.add(() => {
+          this._customElements.forEach(element => {
+            element.remove();
+          });
+          this._customElements = [];
+          this.customItemsContainer.replaceChildren();
+        });
+      }
+
       this._floatDisposables = new DisposableGroup();
 
       const formatQuickBarElement = this._formatBarElement;
@@ -311,7 +311,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       page,
     });
     const actionItems = ActionItems(pageElement);
-    const inlineItems = InlineItems({ pageElement });
+    const inlineItems = InlineItems({ pageElement, formatBar: this });
 
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET_TAG}
