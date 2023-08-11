@@ -42,7 +42,7 @@ export class KanbanSelection {
       viewId: this.viewEle.view.id,
       type: 'kanban',
     };
-    if (selection.focus) {
+    if (selection.focus && selection.focus.isEditing) {
       const focus = selection.focus;
       const container = this.getFocusCellContainer(selection);
       const cell = container?.cell;
@@ -238,5 +238,30 @@ export class KanbanSelection {
 
   public focusRight() {
     //
+  }
+
+  public deleteCard() {
+    const selection = this.selection;
+    if (!selection || !!selection.focus) {
+      return;
+    }
+    this.viewEle.view.rowDelete([selection.cardId]);
+    this.selection = undefined;
+  }
+
+  focusFirstCell() {
+    const group = this.viewEle.groupHelper?.groups[0];
+    const card = group?.rows[0];
+    const columnId = card && this.viewEle.view.getHeaderTitle(card)?.id;
+    if (group && card && columnId) {
+      this.selection = {
+        groupKey: group.key,
+        cardId: card,
+        focus: {
+          columnId,
+          isEditing: true,
+        },
+      };
+    }
   }
 }

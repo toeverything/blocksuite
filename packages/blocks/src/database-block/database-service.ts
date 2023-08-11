@@ -8,7 +8,6 @@ import {
 
 import { getService } from '../__internal__/service/index.js';
 import { BaseService } from '../__internal__/service/service.js';
-import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
 import { columnManager } from './common/columns/manager.js';
 import { multiSelectColumnTypeName } from './common/columns/multi-select/define.js';
@@ -26,14 +25,13 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
   ) {
     // By default, database has 3 empty rows
     for (let i = 0; i < 3; i++) {
-      const id = page.addBlock(
+      page.addBlock(
         'affine:paragraph',
         {
           text: new page.Text(''),
         },
         databaseId
       );
-      if (i === 0) asyncFocusRichText(page, id);
     }
     if (isAppendNewRow) {
       // Add a paragraph after database

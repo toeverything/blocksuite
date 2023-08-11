@@ -90,10 +90,11 @@ export async function assertDatabaseTitleColumnText(
       `.database-row:nth-child(${index + 1})`
     );
     const titleColumnCell = row?.querySelector('.database-cell:nth-child(1)');
-    const richText = titleColumnCell?.querySelector('rich-text');
-    const editor = richText?.vEditor;
-    if (!editor) throw new Error('Cannot find database title column editor');
-    return editor.yText.toString();
+    const titleSpan = titleColumnCell?.querySelector(
+      '.data-view-title'
+    ) as HTMLElement;
+    if (!titleSpan) throw new Error('Cannot find database title column editor');
+    return titleSpan.innerText;
   }, index);
 
   expect(text).toBe(title);

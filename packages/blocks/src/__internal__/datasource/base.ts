@@ -1,4 +1,4 @@
-import type { Slot } from '@blocksuite/global/utils';
+import type { Disposable, Slot } from '@blocksuite/global/utils';
 
 import type {
   ColumnConfig,
@@ -14,6 +14,7 @@ export interface DataSource {
   rows: string[];
   cellGetValue: (rowId: string, propertyId: string) => unknown;
   cellGetRenderValue: (rowId: string, propertyId: string) => unknown;
+  cellGetExtra: (rowId: string, columnId: string) => unknown;
   cellChangeRenderValue: (
     rowId: string,
     propertyId: string,
@@ -26,13 +27,14 @@ export interface DataSource {
   propertyGetDefaultWidth: (propertyId: string) => number;
   propertyGetType: (propertyId: string) => string;
   propertyGetData: (propertyId: string) => Record<string, unknown>;
+  propertyGetReadonly: (columnId: string) => boolean;
   propertyChangeName: (propertyId: string, name: string) => void;
   propertyChangeType: (propertyId: string, type: string) => void;
   propertyChangeData: (
     propertyId: string,
     data: Record<string, unknown>
   ) => void;
-  propertyAdd: (insertPosition: InsertPosition) => string;
+  propertyAdd: (insertPosition: InsertPosition, type?: string) => string;
   propertyDelete: (id: string) => void;
   propertyDuplicate: (columnId: string) => string;
 
@@ -46,6 +48,12 @@ export interface DataSource {
   slots: {
     update: Slot;
   };
+
+  onCellUpdate: (
+    rowId: string,
+    propertyId: string,
+    callback: () => void
+  ) => Disposable;
 }
 
 export abstract class BaseDataSource implements DataSource {
@@ -65,6 +73,10 @@ export abstract class BaseDataSource implements DataSource {
 
   public cellGetRenderValue(rowId: string, propertyId: string): unknown {
     return this.cellGetValue(rowId, propertyId);
+  }
+
+  public cellGetExtra(rowId: string, propertyId: string): unknown {
+    return undefined;
   }
 
   public abstract cellGetValue(rowId: string, propertyId: string): unknown;
@@ -88,8 +100,24 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetData(propertyId: string): Record<string, unknown>;
 
+  public propertyGetReadonly(propertyId: string): boolean {
+    return false;
+  }
+
   public propertyGetDefaultWidth(propertyId: string): number {
     return DEFAULT_COLUMN_WIDTH;
+  }
+
+  onCellUpdate(
+    rowId: string,
+    propertyId: string,
+    callback: () => void
+  ): Disposable {
+    return {
+      dispose: () => {
+        //
+      },
+    };
   }
 
   public abstract propertyGetName(propertyId: string): string;
@@ -101,6 +129,7 @@ export abstract class BaseDataSource implements DataSource {
   public abstract rowDelete(ids: string[]): void;
 
   public abstract rows: string[];
+
   public abstract slots: {
     update: Slot;
   };

@@ -15,7 +15,6 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       align-items: center;
       width: 100%;
       height: 100%;
-      padding: 2px 0;
     }
 
     .affine-select-cell-container * {
@@ -32,8 +31,10 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-select-cell-container .select-selected {
-      height: 28px;
-      padding: 2px 10px;
+      height: 20px;
+      font-size: 12px;
+      line-height: 20px;
+      padding: 0 8px;
       border-radius: 4px;
       white-space: nowrap;
       background: var(--affine-tag-white);

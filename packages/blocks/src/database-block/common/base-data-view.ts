@@ -1,7 +1,7 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
+import type { Page, Text } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
@@ -9,7 +9,7 @@ import type { InsertPosition } from '../types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
 
-export class BaseDataView<
+export abstract class BaseDataView<
     T extends DataViewManager = DataViewManager,
     Selection extends DataViewSelection = DataViewSelection
   >
@@ -41,4 +41,6 @@ export class BaseDataView<
   getFlag!: Page['awarenessStore']['getFlag'];
 
   addRow?(position: InsertPosition): void;
+
+  abstract focusFirstCell(): void;
 }

@@ -23,8 +23,8 @@ export class NumberCell extends BaseCellRenderer<number> {
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
+      font-size: 12px;
+      line-height: 20px;
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
@@ -56,8 +56,8 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
+      font-size: 12px;
+      line-height: 20px;
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;

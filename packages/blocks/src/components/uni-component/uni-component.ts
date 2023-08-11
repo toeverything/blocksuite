@@ -1,5 +1,5 @@
 import { ShadowlessElement } from '@blocksuite/lit';
-import type { PropertyValues } from 'lit';
+import type { LitElement, PropertyValues } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
@@ -76,7 +76,7 @@ export const createUniComponentFromWebComponent = <
   T,
   Expose extends NonNullable<unknown> = NonNullable<unknown>
 >(
-  component: typeof HTMLElement
+  component: typeof LitElement
 ): UniComponent<T, Expose> => {
   return (ele, props) => {
     const ins = new component();
