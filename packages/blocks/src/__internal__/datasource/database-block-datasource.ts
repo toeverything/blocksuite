@@ -206,6 +206,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   public propertyChangeName(propertyId: string, name: string): void {
     this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({ name }));
+    this._model.applyColumnUpdate();
   }
 
   public propertyChangeType(propertyId: string, toType: string): void {
@@ -233,6 +234,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       }
     });
     this._model.updateCells(propertyId, cells);
+    this._model.applyColumnUpdate();
   }
 
   public propertyDelete(id: string): void {
@@ -243,6 +245,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     this.page.transact(() => {
       this._model.columns.splice(index, 1);
     });
+    this._model.applyColumnUpdate();
   }
 
   public propertyGetData(propertyId: string): Record<string, unknown> {
@@ -281,8 +284,8 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       },
       schema
     );
-    this._model.applyColumnUpdate();
     this._model.copyCellsByColumn(copyId, id);
+    this._model.applyColumnUpdate();
     return id;
   }
 

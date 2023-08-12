@@ -31,11 +31,11 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   initEmpty(viewType: DataViewTypes) {
-    this.addView(viewType);
     this.addColumn(
       'start',
       titlePureColumnConfig.create(titlePureColumnConfig.name)
     );
+    this.addView(viewType);
   }
 
   init(viewType: DataViewTypes) {

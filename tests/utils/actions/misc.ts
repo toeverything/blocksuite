@@ -369,6 +369,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     );
     const model = page.getBlockById(databaseId) as DatabaseBlockModel;
     model.initEmpty('table');
+    model.applyColumnUpdate();
     page.captureSync();
     return { pageId, noteId, databaseId };
   }, pageId);

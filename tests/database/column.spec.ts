@@ -333,7 +333,7 @@ test.describe('switch column type', () => {
 
     const progress = getFirstColumnCell(page, 'progress');
     expect(await progress.textContent()).toBe('0');
-
+    await waitNextFrame(page, 500);
     const progressBg = page.locator('.affine-database-progress-bg');
     const {
       x: progressBgX,
@@ -453,6 +453,7 @@ test.describe('select column tag action', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
     await performSelectColumnTagAction(page, 'Red');
+    await pressEscape(page);
     await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
   });
 });

@@ -138,7 +138,7 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   await initDatabaseDynamicRowWithData(page, '1', true);
   await pressEscape(page);
   await initDatabaseDynamicRowWithData(page, '2');
-
+  await pressEscape(page);
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(2);
   expect(await cell.nth(0).innerText()).toBe('1');
@@ -272,8 +272,8 @@ test('should support drag to change column width', async ({ page }) => {
   const normalColumn = headerColumns.nth(1);
 
   const dragDistance = 100;
-  const titleColumnWidth = 432;
-  const normalColumnWidth = 200;
+  const titleColumnWidth = 260;
+  const normalColumnWidth = 180;
 
   await assertColumnWidth(titleColumn, titleColumnWidth);
   const box = await assertColumnWidth(normalColumn, normalColumnWidth);
@@ -314,7 +314,7 @@ test('should display the add column button on the right side of database correct
   await dragBetweenCoords(
     page,
     { x: box.x, y: box.y },
-    { x: box.x + 120, y: box.y },
+    { x: box.x + 400, y: box.y },
     {
       steps: 50,
       beforeMouseUp: async () => {
