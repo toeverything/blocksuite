@@ -256,6 +256,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   override connectedCallback() {
     super.connectedCallback();
     document.body.addEventListener('keydown', this._keydown);
+    this._restoreMode();
   }
 
   override disconnectedCallback() {
@@ -292,7 +293,15 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+    localStorage.setItem('playground:editorMode', mode);
     this.mode = mode;
+  }
+
+  private _restoreMode() {
+    const mode = localStorage.getItem('playground:editorMode');
+    if (mode && (mode === 'edgeless' || mode === 'page')) {
+      this.mode = mode;
+    }
   }
 
   private _addNote() {
