@@ -39,7 +39,7 @@ import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
 } from '../../page-block/utils/index.js';
-import { updateBlockElementType } from '../../page-block/utils/operations/block-element.js';
+import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,

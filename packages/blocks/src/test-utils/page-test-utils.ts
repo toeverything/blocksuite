@@ -1,7 +1,7 @@
-import { updateBlockElementType } from '../page-block/utils/operations/block-element.js';
+import { updateBlockElementType } from '../page-block/utils/operations/element/block-level.js';
 import {
-  mergeToCodeBlocks,
-  transformBlock,
+  mergeToCodeModel,
+  transformModel,
 } from '../page-block/utils/operations/model.js';
 import {
   getSelectedContentBlockElements,
@@ -13,8 +13,8 @@ export class PageTestUtils {
   updateBlockElementType = updateBlockElementType;
 
   // block model operations (data layer)
-  mergeToCodeBlocks = mergeToCodeBlocks;
-  transformBlock = transformBlock;
+  mergeToCodeModel = mergeToCodeModel;
+  transformModel = transformModel;
 
   // selection
   getSelectedContentModels = getSelectedContentModels;
