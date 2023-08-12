@@ -20,7 +20,7 @@
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "yjs": "^13",
-    "@toeverything/theme": "^0.7.9"
+    "@toeverything/theme": "^0.7.12"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
@@ -36,6 +36,7 @@
     "marked": "^4.3.0",
     "pdf-lib": "^1.17.1",
     "shiki": "^0.14.3",
+    "sortablejs": "^1.15.0",
     "turndown": "^7.1.2",
     "zod": "^3.21.4"
   },
@@ -77,8 +78,9 @@
     "@blocksuite/store": "workspace:*",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.3.1",
+    "@types/sortablejs": "^1.15.1",
     "@types/turndown": "^5.0.1",
     "yjs": "^13.6.7",
-    "@toeverything/theme": "^0.7.9"
+    "@toeverything/theme": "^0.7.12"
   }
 }

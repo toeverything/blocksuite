@@ -14,17 +14,14 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
-import type {
-  BlockHost,
-  EditingState,
-  SelectionPosition,
-} from '../../__internal__/index.js';
+import type { BlockHost, EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import {
   getService,
   registerService,
 } from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -32,7 +29,6 @@ import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { UtilManager } from '../utils/util-manager.js';
 
 export interface PageViewport {
   left: number;
@@ -128,17 +124,9 @@ export class DocPageBlockComponent
 
   gesture: Gesture | null = null;
 
-  /**
-   * @internal
-   * just used for test
-   */
-  utilManager = new UtilManager(this);
-
   clipboard = new PageClipboard(this);
 
   getService = getService;
-
-  lastSelectionPosition: SelectionPosition = 'start';
 
   @state()
   private _isComposing = false;
@@ -341,6 +329,25 @@ export class DocPageBlockComponent
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);
+    // filter cut event in page title
+    this.handleEvent('cut', ctx => {
+      const { event } = ctx.get('defaultState');
+      const element =
+        event.target instanceof HTMLElement
+          ? event.target
+          : event.target instanceof Node
+          ? event.target.parentElement
+          : null;
+      if (!element) {
+        return;
+      }
+
+      if (element.closest('[data-block-is-title]')) {
+        return true;
+      }
+
+      return;
+    });
 
     this.bindHotKey({
       ArrowUp: () => {
@@ -450,6 +457,52 @@ export class DocPageBlockComponent
         }
         return;
       },
+    });
+
+    this.handleEvent('click', ctx => {
+      const state = ctx.get('pointerState');
+      if (
+        state.raw.target !== this &&
+        state.raw.target !== this.viewportElement &&
+        state.raw.target !== this.pageBlockContainer
+      ) {
+        return;
+      }
+      let noteId: string;
+      let paragraphId: string;
+      let index = 0;
+      const lastNote = this.model.children
+        .reverse()
+        .find(
+          child =>
+            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
+        );
+      if (!lastNote) {
+        noteId = this.page.addBlock('affine:note', {}, this.model.id);
+        paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+      } else {
+        noteId = lastNote.id;
+        const last = lastNote.children.at(-1);
+        if (!last || !last.text) {
+          paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
+        } else {
+          paragraphId = last.id;
+          index = last.text.length ?? 0;
+        }
+      }
+
+      requestAnimationFrame(() => {
+        this.root.selectionManager.set([
+          this.root.selectionManager.getInstance('text', {
+            from: {
+              path: [this.model.id, noteId, paragraphId],
+              index,
+              length: 0,
+            },
+            to: null,
+          }),
+        ]);
+      });
     });
   }
 

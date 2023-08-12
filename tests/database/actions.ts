@@ -90,16 +90,32 @@ export async function assertDatabaseTitleColumnText(
       `.database-row:nth-child(${index + 1})`
     );
     const titleColumnCell = row?.querySelector('.database-cell:nth-child(1)');
-    const richText = titleColumnCell?.querySelector('rich-text');
-    const editor = richText?.vEditor;
-    if (!editor) throw new Error('Cannot find database title column editor');
-    return editor.yText.toString();
+    const titleSpan = titleColumnCell?.querySelector(
+      '.data-view-title'
+    ) as HTMLElement;
+    if (!titleSpan) throw new Error('Cannot find database title column editor');
+    return titleSpan.innerText;
   }, index);
 
   expect(text).toBe(title);
 }
 
 export function getDatabaseBodyCell(
+  page: Page,
+  {
+    rowIndex,
+    columnIndex,
+  }: {
+    rowIndex: number;
+    columnIndex: number;
+  }
+) {
+  const row = getDatabaseBodyRow(page, rowIndex);
+  const cell = row.locator('.database-cell').nth(columnIndex);
+  return cell;
+}
+
+export function getDatabaseBodyCellContent(
   page: Page,
   {
     rowIndex,
@@ -111,14 +127,13 @@ export function getDatabaseBodyCell(
     cellClass: string;
   }
 ) {
-  const row = getDatabaseBodyRow(page, rowIndex);
-  const cell = row.locator('.database-cell').nth(columnIndex);
+  const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
   const cellContent = cell.locator(`.${cellClass}`);
   return cellContent;
 }
 
 export function getFirstColumnCell(page: Page, cellClass: string) {
-  const cellContent = getDatabaseBodyCell(page, {
+  const cellContent = getDatabaseBodyCellContent(page, {
     rowIndex: 0,
     columnIndex: 1,
     cellClass,
@@ -178,14 +193,19 @@ export async function assertDatabaseCellRichTexts(
     text: string;
   }
 ) {
-  const actualTexts = await page
-    .locator(
-      `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
-    )
-    .locator('affine-database-rich-text-cell')
-    .evaluate(ele => {
-      return (ele as RichText).vEditor?.yText.toString();
-    });
+  const cellContainer = await page.locator(
+    `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
+  );
+
+  const cellEditing = cellContainer.locator(
+    'affine-database-rich-text-cell-editing'
+  );
+  const cell = cellContainer.locator('affine-database-rich-text-cell');
+
+  const richText = (await cellEditing.count()) === 0 ? cell : cellEditing;
+  const actualTexts = await richText.evaluate(ele => {
+    return (ele as RichText).vEditor?.yText.toString();
+  });
   expect(actualTexts).toEqual(text);
 }
 
@@ -363,6 +383,79 @@ export async function assertRowsSelection(
       y: startRowBox.y,
       width: lastCell.x + lastCell.width - startRowBox.x,
       height: startRowBox.height + endRowBox.height,
+    });
+  }
+}
+
+export async function assertCellsSelection(
+  page: Page,
+  cellIndexes: {
+    start: [rowIndex: number, columnIndex: number];
+    end?: [rowIndex: number, columnIndex: number];
+  }
+) {
+  const { start, end } = cellIndexes;
+
+  if (!end) {
+    // single cell
+    const focus = page.locator('.database-focus');
+    const focusBox = await getBoundingBox(focus);
+
+    const [rowIndex, columnIndex] = start;
+    const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
+    const cellBox = await getBoundingBox(cell);
+    expect(focusBox).toEqual({
+      x: cellBox.x,
+      y: cellBox.y,
+      height: cellBox.height + 1,
+      width: cellBox.width,
+    });
+  } else {
+    // multi cells
+    const selection = page.locator('.database-selection');
+    const selectionBox = await getBoundingBox(selection);
+
+    const [startRowIndex, startColumnIndex] = start;
+    const [endRowIndex, endColumnIndex] = end;
+
+    const rowIndexStart = Math.min(startRowIndex, endRowIndex);
+    const rowIndexEnd = Math.max(startRowIndex, endRowIndex);
+    const columnIndexStart = Math.min(startColumnIndex, endColumnIndex);
+    const columnIndexEnd = Math.max(startColumnIndex, endColumnIndex);
+
+    let height = 0;
+    let width = 0;
+    let x = 0;
+    let y = 0;
+    for (let i = rowIndexStart; i <= rowIndexEnd; i++) {
+      const cell = getDatabaseBodyCell(page, {
+        rowIndex: i,
+        columnIndex: columnIndexStart,
+      });
+      const box = await getBoundingBox(cell);
+      height += box.height + 1;
+      if (i === rowIndexStart) {
+        y = box.y;
+      }
+    }
+
+    for (let j = columnIndexStart; j <= columnIndexEnd; j++) {
+      const cell = getDatabaseBodyCell(page, {
+        rowIndex: rowIndexStart,
+        columnIndex: j,
+      });
+      const box = await getBoundingBox(cell);
+      width += box.width;
+      if (j === columnIndexStart) {
+        x = box.x;
+      }
+    }
+
+    expect(selectionBox).toEqual({
+      x,
+      y,
+      height,
+      width,
     });
   }
 }

@@ -1,20 +1,24 @@
 import { AttachmentIcon16 } from '@blocksuite/global/config';
 import { BlockElement, createLitPortal } from '@blocksuite/lit';
-import { html } from 'lit';
+import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
-import { queryCurrentMode } from '../__internal__/utils/query.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
 } from './attachment-model.js';
 import { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
-import { AttachmentBanner, LoadingIcon, styles } from './styles.js';
-import { downloadAttachment, isAttachmentLoading } from './utils.js';
+import {
+  AttachmentBanner,
+  ErrorBanner,
+  LoadingIcon,
+  styles,
+} from './styles.js';
+import { downloadAttachment, hasBlob, isAttachmentLoading } from './utils.js';
 
 @customElement('affine-attachment')
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
@@ -24,13 +28,36 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   private _showCaption = false;
 
   @query('input.affine-attachment-caption')
-  _captionInput!: HTMLInputElement;
+  private _captionInput!: HTMLInputElement;
+
+  // Sometimes the attachment is unavailable
+  // e.g. paste a attachment block from another workspace
+  @state()
+  private _error = false;
 
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:attachment', AttachmentBlockService);
     if (this.model.caption) {
       this._showCaption = true;
+    }
+    this._checkAttachment();
+  }
+
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('sourceId')) {
+      this._checkAttachment();
+    }
+    super.willUpdate(changedProperties);
+  }
+
+  // Check if the attachment is available
+  private async _checkAttachment() {
+    const storage = this.page.blobs;
+    const sourceId = this.model.sourceId;
+    if (!sourceId) return;
+    if (!(await hasBlob(storage, sourceId))) {
+      this._error = true;
     }
   }
 
@@ -80,22 +107,46 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     } satisfies Partial<AttachmentProps>);
   }
 
+  private _attachmentTail(isError: boolean) {
+    return html`
+      <div class="affine-attachment-banner">
+        ${isError ? ErrorBanner() : AttachmentBanner()}
+      </div>
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection
+            .borderRadius=${12}
+            .borderWidth=${3}
+          ></affine-block-selection>`
+        : null}
+    `;
+  }
+
   override render() {
-    const mode = queryCurrentMode();
-    if (this.model.loadingKey && isAttachmentLoading(this.model.loadingKey)) {
-      return html`<div class="affine-attachment-container">
+    const isLoading =
+      this.model.loadingKey && isAttachmentLoading(this.model.loadingKey);
+    const isError = !isLoading && (this._error || !this.model.sourceId);
+    if (isLoading) {
+      return html`<div
+        class="affine-attachment-container"
+        @click=${this._focusAttachment}
+      >
         <div class="affine-attachment-loading">${LoadingIcon}Loading...</div>
         <div class="affine-attachment-desc">
           ${humanFileSize(this.model.size)}
         </div>
+        ${this._attachmentTail(isError)}
       </div>`;
     }
-    if (!this.model.sourceId) {
-      return html`<div class="affine-attachment-container">
+    if (isError) {
+      return html`<div
+        class="affine-attachment-container"
+        @click=${this._focusAttachment}
+      >
         <div class="affine-attachment-name">
           ${AttachmentIcon16}${this.model.name}
         </div>
         <div class="affine-attachment-desc">Unable to upload</div>
+        ${this._attachmentTail(isError)}
       </div>`;
     }
 
@@ -111,19 +162,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         <div class="affine-attachment-desc">
           ${humanFileSize(this.model.size)}
         </div>
-
-        <div class="affine-attachment-banner">
-          ${mode === 'light'
-            ? AttachmentBanner
-            : // TODO dark mode
-              AttachmentBanner}
-        </div>
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection
-              .borderRadius=${12}
-              .borderWidth=${3}
-            ></affine-block-selection>`
-          : null}
+        ${this._attachmentTail(isError)}
       </div>
       <input
         ?hidden=${!this._showCaption}

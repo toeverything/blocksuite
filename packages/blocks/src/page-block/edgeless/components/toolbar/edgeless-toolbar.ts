@@ -39,7 +39,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
       transform: translateX(-50%);
       user-select: none;
-      font-family: var(--sl-font-sans);
+      font-family: var(--affine-font-family);
     }
     .edgeless-toolbar-container {
       display: flex;
@@ -50,6 +50,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       box-shadow: var(--affine-shadow-2);
       border-radius: 40px;
       fill: currentcolor;
+      min-height: 52px;
     }
     .edgeless-toolbar-container[level='second'] {
       position: absolute;
@@ -120,7 +121,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      margin-right: 4px;
+      margin-right: 8px;
     }
 
     .edgeless-frame-navigator-count {

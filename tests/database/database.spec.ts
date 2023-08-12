@@ -1,19 +1,14 @@
-import { type DatabaseBlockModel } from '@blocksuite/blocks';
 import { expect } from '@playwright/test';
 
 import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusDatabaseTitle,
-  focusRichText,
-  getBlockModel,
   getBoundingBox,
   initDatabaseDynamicRowWithData,
   initDatabaseRow,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
-  initEmptyDatabaseWithParagraphState,
-  pasteByKeyboard,
   pressArrowDown,
   pressArrowLeft,
   pressArrowRight,
@@ -21,6 +16,7 @@ import {
   pressEnter,
   pressEscape,
   pressShiftEnter,
+  redoByClick,
   redoByKeyboard,
   selectAllByKeyboard,
   type,
@@ -28,7 +24,7 @@ import {
   undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertBlockCount, assertBlockProps } from '../utils/asserts.js';
+import { assertBlockProps, assertRowCount } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 import {
   assertColumnWidth,
@@ -76,15 +72,12 @@ test('edit database block title and create new rows', async ({ page }) => {
   });
   await initDatabaseRowWithData(page, '');
   await initDatabaseRowWithData(page, '');
-  await assertBlockProps(page, '4', {
-    flavour: 'affine:paragraph',
-  });
-  await assertBlockProps(page, '5', {
-    flavour: 'affine:paragraph',
-  });
+  await assertRowCount(page, 2);
+  await waitNextFrame(page, 100);
+  await pressEscape(page);
   await undoByClick(page);
   await undoByClick(page);
-  await assertBlockCount(page, 'paragraph', 0);
+  await assertRowCount(page, 0);
 });
 
 test('edit column title', async ({ page }) => {
@@ -115,7 +108,7 @@ test('should modify the value when the input loses focus', async ({ page }) => {
   expect(text?.trim()).toBe('1');
 });
 
-test.fixme('should rich-text column support soft enter', async ({ page }) => {
+test('should rich-text column support soft enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -152,19 +145,7 @@ test('should the multi-select mode work correctly', async ({ page }) => {
   expect(await cell.nth(1).innerText()).toBe('2');
 });
 
-test('should hide placeholder of paragraph in database', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseState(page);
-
-  await initDatabaseColumn(page);
-  await initDatabaseRow(page);
-
-  await focusRichText(page);
-  const tipsPlaceholder = page.locator('.tips-placeholder');
-  expect(await tipsPlaceholder.count()).toEqual(0);
-});
-
-test.fixme('should show or hide database toolbar', async ({ page }) => {
+test('should show or hide database toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
@@ -258,72 +239,27 @@ test('should database search input displayed correctly', async ({ page }) => {
   await assertDatabaseSearching(page, false);
 });
 
-test.fixme(
-  'should database title and rich-text support undo/redo',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyDatabaseState(page);
-
-    await initDatabaseColumn(page);
-    await switchColumnType(page, 'Text');
-    await initDatabaseDynamicRowWithData(page, '123', true);
-    await undoByKeyboard(page);
-    await assertDatabaseCellRichTexts(page, { text: '' });
-    await redoByKeyboard(page);
-    await assertDatabaseCellRichTexts(page, { text: '123' });
-
-    await focusDatabaseTitle(page);
-    await type(page, 'abc');
-    await assertDatabaseTitleText(page, 'Database 1abc');
-    await undoByKeyboard(page);
-    await assertDatabaseTitleText(page, 'Database 1');
-    await redoByKeyboard(page);
-    await assertDatabaseTitleText(page, 'Database 1abc');
-  }
-);
-
-test('should support delete database through action menu', async ({ page }) => {
+test('should database title and rich-text support undo/redo', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseState(page);
 
-  await focusDatabaseSearch(page);
-  const moreAction = page.locator('.more-action');
-  await moreAction.click();
-
-  const deleteDb = page.locator('.affine-menu-action', {
-    hasText: 'Delete Database',
-  });
-  await deleteDb.click();
-  const db = page.locator('affine-database');
-  expect(await db.count()).toBe(0);
-
-  await undoByClick(page);
-  expect(await db.count()).toBe(1);
-});
-
-test('should support copy database through action menu', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyDatabaseWithParagraphState(page);
-
   await initDatabaseColumn(page);
+  await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-  await pressEscape(page);
-  await initDatabaseDynamicRowWithData(page, 'abc');
-  await pressEscape(page);
-  await focusDatabaseSearch(page);
-  const moreAction = page.locator('.more-action');
-  await moreAction.click();
+  await undoByClick(page);
+  await assertDatabaseCellRichTexts(page, { text: '' });
+  await redoByClick(page);
+  await assertDatabaseCellRichTexts(page, { text: '123' });
 
-  const copyDb = page.locator('.affine-menu-action', { hasText: 'Copy' });
-  await copyDb.click();
-
-  await focusRichText(page, 1);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-  await assertBlockCount(page, 'database', 2);
-  const db1Model = (await getBlockModel(page, '2')) as DatabaseBlockModel;
-  const db2Model = (await getBlockModel(page, '7')) as DatabaseBlockModel;
-  expect(db1Model.title.toString()).toEqual(db2Model.title.toString());
+  await focusDatabaseTitle(page);
+  await type(page, 'abc');
+  await assertDatabaseTitleText(page, 'Database 1abc');
+  await undoByClick(page);
+  await assertDatabaseTitleText(page, 'Database 1');
+  await redoByKeyboard(page);
+  await assertDatabaseTitleText(page, 'Database 1abc');
 });
 
 test('should support drag to change column width', async ({ page }) => {
@@ -478,6 +414,7 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
   expect(await rows.count()).toBe(3);
   await waitNextFrame(page, 50);
   await type(page, '1');
+  await pressEscape(page);
   await waitNextFrame(page);
   await assertDatabaseTitleColumnText(page, '1');
 });

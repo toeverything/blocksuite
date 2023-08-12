@@ -478,6 +478,10 @@ export function toRadian(angle: number) {
   return (angle * Math.PI) / 180;
 }
 
+export function toDegree(radian: number) {
+  return (radian * 180) / Math.PI;
+}
+
 // 0 means x axis, 1 means y axis
 export function isOverlap(
   line1: IVec[],

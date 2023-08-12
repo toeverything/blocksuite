@@ -24,9 +24,9 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
   const noteId = page.addBlock('affine:note', {}, pageBlockId);
 
   const selection: SelectTag[] = [
-    { id: nanoid(), value: 'Done', color: 'var(--affine-tag-white)' },
     { id: nanoid(), value: 'TODO', color: 'var(--affine-tag-pink)' },
     { id: nanoid(), value: 'WIP', color: 'var(--affine-tag-blue)' },
+    { id: nanoid(), value: 'Done', color: 'var(--affine-tag-white)' },
   ];
   // Add database block inside note block
   const databaseId = page.addBlock(

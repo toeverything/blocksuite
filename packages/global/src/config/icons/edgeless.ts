@@ -93,6 +93,22 @@ export const FrameOrderAdjustmentIcon = html`
   </svg>
 `;
 
+// auto-complete
+export const AutoCompleteArrowIcon = html`
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M11.875 8C11.875 8.09946 11.8355 8.19484 11.7652 8.26517L9.76516 10.2652C9.61872 10.4116 9.38128 10.4116 9.23483 10.2652C9.08839 10.1187 9.08839 9.88128 9.23483 9.73484L10.5947 8.375L4.5 8.375C4.29289 8.375 4.125 8.20711 4.125 8C4.125 7.79289 4.29289 7.625 4.5 7.625L10.5947 7.625L9.23484 6.26516C9.08839 6.11872 9.08839 5.88128 9.23484 5.73483C9.38128 5.58839 9.61872 5.58839 9.76517 5.73483L11.7652 7.73484C11.8355 7.80516 11.875 7.90054 11.875 8Z"
+    />
+  </svg>
+`;
+
 export const ShapeIcon = html`<svg
   width="24"
   height="24"
@@ -638,6 +654,57 @@ export const HiddenIcon = html`<svg
     stroke-linejoin="round"
   />
 </svg>`;
+
+export const CardIcon = html`<svg
+  width="17"
+  height="16"
+  viewBox="0 0 17 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M2 4.66683C2 3.65431 2.82081 2.8335 3.83333 2.8335H13.1667C14.1792 2.8335 15 3.65431 15 4.66683V11.3335C15 12.346 14.1792 13.1668 13.1667 13.1668H3.83333C2.82081 13.1668 2 12.346 2 11.3335V4.66683ZM3.83333 3.8335C3.3731 3.8335 3 4.20659 3 4.66683V11.3335C3 11.7937 3.3731 12.1668 3.83333 12.1668H13.1667C13.6269 12.1668 14 11.7937 14 11.3335V4.66683C14 4.20659 13.6269 3.8335 13.1667 3.8335H3.83333Z"
+    fill="currentColor"
+  />
+</svg> `;
+
+export const HiddenCardIcon = html`<svg
+  width="17"
+  height="16"
+  viewBox="0 0 17 16"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M8.5 2.5C5.46243 2.5 3 4.96243 3 8C3 11.0376 5.46243 13.5 8.5 13.5C11.5376 13.5 14 11.0376 14 8C14 4.96243 11.5376 2.5 8.5 2.5ZM2 8C2 4.41015 4.91015 1.5 8.5 1.5C12.0899 1.5 15 4.41015 15 8C15 11.5899 12.0899 14.5 8.5 14.5C4.91015 14.5 2 11.5899 2 8Z"
+    fill="currentColor"
+  />
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5 8C5 7.72386 5.22386 7.5 5.5 7.5H11.5C11.7761 7.5 12 7.72386 12 8C12 8.27614 11.7761 8.5 11.5 8.5H5.5C5.22386 8.5 5 8.27614 5 8Z"
+    fill="currentColor"
+  />
+</svg> `;
+
+export const ArrowIcon = html`
+  <svg
+    width="17"
+    height="16"
+    viewBox="0 0 17 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M12.3702 9.68705C12.175 9.88231 11.8584 9.88231 11.6631 9.68705L8.91906 6.94297C8.78889 6.8128 8.57783 6.8128 8.44766 6.94297L5.70358 9.68705C5.50832 9.88231 5.19173 9.88231 4.99647 9.68705C4.80121 9.49179 4.80121 9.1752 4.99647 8.97994L7.74055 6.23586C8.26125 5.71517 9.10547 5.71516 9.62617 6.23586L12.3702 8.97994C12.5655 9.1752 12.5655 9.49179 12.3702 9.68705Z"
+      fill="currentColor"
+    />
+  </svg>
+`;
 
 export const CutIcon = html`<svg
   width="8"

@@ -416,10 +416,6 @@ export async function initDatabaseRow(page: Page) {
 
 export async function initDatabaseRowWithData(page: Page, data: string) {
   await initDatabaseRow(page);
-
-  const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-paragraph');
-  await cell.click({ force: true });
   await type(page, data);
 }
 
@@ -445,6 +441,16 @@ export async function initDatabaseDynamicRowWithData(
 export async function focusDatabaseTitle(page: Page) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   await dbTitle.click();
+
+  await page.evaluate(() => {
+    const dbTitle = document.querySelector('affine-database-title');
+    if (!dbTitle) {
+      throw new Error('Cannot find database title');
+    }
+
+    dbTitle.titleVInput?.vEditor.focusEnd();
+  });
+  await waitNextFrame(page);
 }
 
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
@@ -920,7 +926,7 @@ export async function initImageState(page: Page) {
     Object.entries(clipData).forEach(([key, value]) => {
       e.clipboardData?.setData(key, value);
     });
-    document.body.dispatchEvent(e);
+    document.dispatchEvent(e);
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.

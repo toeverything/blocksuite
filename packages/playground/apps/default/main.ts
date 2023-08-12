@@ -95,9 +95,22 @@ const syncProviders = async (
     }
   }
 
+  const oldVersions = { ...workspace.meta.blockVersions };
+
+  let run = true;
+  const runWorkspaceMigration = () => {
+    if (run) {
+      workspace.schema.upgradeWorkspace(workspace.doc);
+      run = false;
+    }
+  };
+
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded();
+    await page.waitForLoaded(() => {
+      runWorkspaceMigration();
+      workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+    });
   });
 };
 

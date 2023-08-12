@@ -4,11 +4,13 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { nanoid, Slot } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import { getTagColor } from '../../components/tags/colors.js';
+import { toast } from '../../components/toast.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
-import { getFileFromClipboard } from '../clipboard/utils/pure.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -17,6 +19,7 @@ import {
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../utils/index.js';
+import { humanFileSize } from '../utils/math.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
@@ -215,12 +218,12 @@ export class ContentParser {
           layer.style.setProperty('transform', 'none');
         }
 
-        const childNodes = documentClone.querySelectorAll(
-          '.affine-edgeless-child-note'
+        const boxShadowEles = documentClone.querySelectorAll(
+          "[style*='box-shadow']"
         );
-        childNodes.forEach(childNode => {
-          if (childNode instanceof HTMLElement) {
-            childNode.style.setProperty('box-shadow', 'none');
+        boxShadowEles.forEach(function (element) {
+          if (element instanceof HTMLElement) {
+            element.style.setProperty('box-shadow', 'none');
           }
         });
       },
@@ -401,24 +404,58 @@ export class ContentParser {
   }
 
   async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
-    const file = getFileFromClipboard(clipboardData);
-    if (file) {
-      if (file.type.includes('image')) {
-        // TODO: upload file to file server
-        // XXX: should use blob storage here?
-        const storage = this._page.blobs;
-        assertExists(storage);
-        // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
-        const id = await storage.set(
-          new File([file], file.name, { type: file.type })
+    const files = clipboardData.files;
+    if (!files) return [];
+    const file = files[0];
+    if (!file) return [];
+
+    const storage = this._page.blobs;
+    if (file.type.includes('image')) {
+      // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
+      const id = await storage.set(
+        new File([file], file.name, { type: file.type })
+      );
+      return [
+        {
+          flavour: 'affine:image',
+          sourceId: id,
+          children: [],
+        },
+      ];
+    }
+
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      toast(
+        `You can only upload files less than ${humanFileSize(
+          MAX_ATTACHMENT_SIZE,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
+    try {
+      const sourceId = await storage.set(
+        new File([file], file.name, { type: file.type })
+      );
+      const attachmentProps: AttachmentProps & {
+        flavour: 'affine:attachment';
+        children: [];
+      } = {
+        flavour: 'affine:attachment',
+        name: file.name,
+        sourceId,
+        size: file.size,
+        type: file.type,
+        children: [],
+      };
+      return [attachmentProps];
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
+        toast(
+          `Failed to upload attachment! ${error.message || error.toString()}`
         );
-        return [
-          {
-            flavour: 'affine:image',
-            sourceId: id,
-            children: [],
-          },
-        ];
       }
     }
     return [];

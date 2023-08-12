@@ -186,6 +186,9 @@ importers:
       shiki:
         specifier: ^0.14.3
         version: 0.14.3
+      sortablejs:
+        specifier: ^1.15.0
+        version: 1.15.0
       turndown:
         specifier: ^7.1.2
         version: 7.1.2
@@ -203,14 +206,17 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.9
-        version: 0.7.9
+        specifier: ^0.7.12
+        version: 0.7.12
       '@types/autosize':
         specifier: ^4.0.1
         version: 4.0.1
       '@types/marked':
         specifier: ^4.3.1
         version: 4.3.1
+      '@types/sortablejs':
+        specifier: ^1.15.1
+        version: 1.15.1
       '@types/turndown':
         specifier: ^5.0.1
         version: 5.0.1
@@ -256,8 +262,8 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.9
-        version: 0.7.9
+        specifier: ^0.7.12
+        version: 0.7.12
 
   packages/global:
     dependencies:
@@ -367,8 +373,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
       ses:
-        specifier: ^0.18.5
-        version: 0.18.5
+        specifier: ^0.18.7
+        version: 0.18.7
       tweakpane:
         specifier: ^3.1.10
         version: 3.1.10
@@ -1098,8 +1104,8 @@ packages:
       - search-insights
     dev: true
 
-  /@endo/env-options@0.1.1:
-    resolution: {integrity: sha512-QlY6Z2r/izom+wZI0vQtU6yQf5V/EGRMwcqacmZv6j3e9bcYGZbG0ikoa8E155XETKr551BALlJhculBvlBLpg==}
+  /@endo/env-options@0.1.3:
+    resolution: {integrity: sha512-ljs5E0+Fhe5IQsciCn6jL5bsi1PYysPm4NhrPmNByw136AcjUbfZhOBmOzeXwOhxaL93cI/jTStNdWEA80Q+nQ==}
     dev: false
 
   /@esbuild/android-arm64@0.18.17:
@@ -1597,8 +1603,8 @@ packages:
     resolution: {integrity: sha512-tvtmkI4ALjKThVVORh++sB9JnkFY7eGInKxNy+Df7WVQiF7T85tlvGADzlgX4Ic+CK5MIUzZ0jhOlQ/RRlgXpg==}
     dev: false
 
-  /@toeverything/theme@0.7.9:
-    resolution: {integrity: sha512-CrgP/c2OrVIAWrAaASChUy8YBcr/u6fOt07sZUL72MsLGQ9IbfistfBZtcvPA2HyXUhAkktgM28WOx7Ga7ZHWA==}
+  /@toeverything/theme@0.7.12:
+    resolution: {integrity: sha512-PJeFrNrYSYiVYbdq7ACEia3RVmOBDdqJ8zBM074HT/mhV9vNsO18TNuXyCxCGjkMJ1M7IGwbg2daiivyFyJ2iw==}
     dev: true
 
   /@toeverything/y-indexeddb@0.8.0-canary.4(yjs@13.6.7):
@@ -1826,6 +1832,10 @@ packages:
       '@types/http-errors': 2.0.1
       '@types/mime': 3.0.1
       '@types/node': 18.17.1
+    dev: true
+
+  /@types/sortablejs@1.15.1:
+    resolution: {integrity: sha512-g/JwBNToh6oCTAwNS8UGVmjO7NLDKsejVhvE4x1eWiPTC3uCuNsa/TD4ssvX3du+MLiM+SHPNDuijp8y76JzLQ==}
     dev: true
 
   /@types/trusted-types@2.0.3:
@@ -6721,10 +6731,10 @@ packages:
       lru-cache: 6.0.0
     dev: true
 
-  /ses@0.18.5:
-    resolution: {integrity: sha512-paLV2JHUqGGpbLn+V4LM9g20WVzAn9jLU22Bx5/18fo6h6nF8SwhC+3cAMYxzmHmkAzplY5lkg1ms3xSkmSzdw==}
+  /ses@0.18.7:
+    resolution: {integrity: sha512-bcQ3CY8jh+UnumfdDZCPDgRA9hWk6acpL1d7ecQLMOdMkqKkP0yv2b6Sd9AVxuxbu4cXMt158epbpwkV/5sIfw==}
     dependencies:
-      '@endo/env-options': 0.1.1
+      '@endo/env-options': 0.1.3
     dev: false
 
   /set-blocking@2.0.0:
@@ -6860,6 +6870,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /sortablejs@1.15.0:
+    resolution: {integrity: sha512-bv9qgVMjUMf89wAvM6AxVvS/4MX3sPeN0+agqShejLU5z5GX4C75ow1O2e5k4L6XItUyAK3gH6AxSbXrOM5e8w==}
+    dev: false
 
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}

@@ -77,12 +77,10 @@ import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { RangeManager } from '../text-selection/range-manager.js';
 import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
-import { tryUpdateNoteSize } from '../utils/operations/model.js';
-import { UtilManager } from '../utils/util-manager.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
-import { readImageSize } from './components/utils.js';
+import { readImageSize, updateNotesPosition } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
 import {
   EdgelessZoomToolbar,
@@ -252,12 +250,6 @@ export class EdgelessPageBlockComponent
 
   gesture: Gesture | null = null;
 
-  /**
-   * @internal
-   * just used for test
-   */
-  utilManager = new UtilManager(this);
-
   mouseRoot!: HTMLElement;
 
   showGrid = true;
@@ -349,34 +341,37 @@ export class EdgelessPageBlockComponent
 
   private _noteResizeObserver = new NoteResizeObserver();
 
+  computeValue(value: string) {
+    const { parentElement } = this;
+    assertExists(parentElement);
+    if (isCssVariable(value)) {
+      const cssValue = getThemePropertyValue(
+        parentElement,
+        value as CssVariableName
+      );
+      if (cssValue === undefined) {
+        console.error(
+          new Error(
+            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
+          )
+        );
+      }
+      return cssValue ?? value;
+    }
+    return value;
+  }
+
   // just init surface, attach to dom later
   private _initSurface() {
-    const { page, parentElement } = this;
+    const { page } = this;
     const surfaceBlock = this.model.children.find(
       child => child.flavour === 'affine:surface'
     ) as SurfaceBlockModel | undefined;
-    assertExists(parentElement);
     assertExists(surfaceBlock);
     const yContainer = surfaceBlock.originProp('elements') as InstanceType<
       typeof page.YMap
     >;
-    this.surface = new SurfaceManager(yContainer, value => {
-      if (isCssVariable(value)) {
-        const cssValue = getThemePropertyValue(
-          parentElement,
-          value as CssVariableName
-        );
-        if (cssValue === undefined) {
-          console.error(
-            new Error(
-              `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
-            )
-          );
-        }
-        return cssValue ?? value;
-      }
-      return value;
-    });
+    this.surface = new SurfaceManager(yContainer, this.computeValue.bind(this));
     const { surface } = this;
     this._disposables.add(
       surface.slots.elementAdded.on(id => {
@@ -543,6 +538,8 @@ export class EdgelessPageBlockComponent
         if (this.selection.selectedBlocks.length) {
           this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
         }
+
+        updateNotesPosition(this, this.notes);
       })
     );
     _disposables.add(
@@ -1124,7 +1121,6 @@ export class EdgelessPageBlockComponent
     this._initResizeEffect();
     this._initNoteHeightUpdate();
     this.clipboard.init(this.page);
-    tryUpdateNoteSize(this.page, this.surface.viewport.zoom);
 
     requestAnimationFrame(() => {
       // Should be called in requestAnimationFrame,
@@ -1301,7 +1297,7 @@ export class EdgelessPageBlockComponent
           .edgeless=${this}
         ></edgeless-dragging-area-rect>
         <edgeless-selected-rect .edgeless=${this}></edgeless-selected-rect>
-        ${EdgelessNotesStatus(this, this.sortedNotes)} ${widgets}
+        ${EdgelessNotesStatus(this, this.notes)} ${widgets}
       </div>
     `;
   }

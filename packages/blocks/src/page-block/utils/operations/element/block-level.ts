@@ -1,18 +1,12 @@
 import type { BlockElement } from '@blocksuite/lit';
 import { assertFlavours, type BaseBlockModel } from '@blocksuite/store';
 
-import { asyncFocusRichText } from '../../../__internal__/utils/common-operations.js';
-import type { Flavour } from '../../../models.js';
-import type { PageBlockComponent } from '../../types.js';
-import { onModelTextUpdated } from '../callback.js';
-import { getBlockSelections, getTextSelection } from '../selection.js';
-import { mergeToCodeBlocks, transformBlock } from './model.js';
-
-/**
- * This file should only contain functions that are used to
- * operate on block elements, which means that this operations
- * will be involved in something about ui like selection reset.
- */
+import { asyncFocusRichText } from '../../../../__internal__/utils/common-operations.js';
+import type { Flavour } from '../../../../models.js';
+import type { PageBlockComponent } from '../../../types.js';
+import { onModelTextUpdated } from '../../callback.js';
+import { getBlockSelections, getTextSelection } from '../../selection.js';
+import { mergeToCodeModel, transformModel } from '../model.js';
 
 export function updateBlockElementType(
   pageElement: PageBlockComponent,
@@ -38,7 +32,7 @@ export function updateBlockElementType(
   const blockModels = blockElements.map(ele => ele.model);
 
   if (flavour === 'affine:code') {
-    const id = mergeToCodeBlocks(page, blockModels);
+    const id = mergeToCodeModel(blockModels);
     const model = page.getBlockById(id);
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
@@ -77,7 +71,7 @@ export function updateBlockElementType(
       newModels.push(model);
       return;
     }
-    const newId = transformBlock(model, flavour, type);
+    const newId = transformModel(model, flavour, type);
     const newModel = page.getBlockById(newId);
     if (!newModel) {
       throw new Error('Failed to get new model after transform block!');
@@ -113,22 +107,15 @@ export function updateBlockElementType(
     });
     return newModels;
   } else if (blockSelections.length !== 0) {
-    if (blockSelections[0].blockId !== firstNewModel.id) {
-      blockSelections[0] = selectionManager.getInstance('block', {
-        path: blockSelections[0].path.slice(0, -1).concat(firstNewModel.id),
-      });
-    }
-    if (
-      blockSelections[blockSelections.length - 1].blockId !== lastNewModel.id
-    ) {
-      blockSelections[blockSelections.length - 1] =
-        selectionManager.getInstance('block', {
-          path: blockSelections[blockSelections.length - 1].path
-            .slice(0, -1)
-            .concat(lastNewModel.id),
-        });
-    }
-    selectionManager.set(blockSelections);
+    requestAnimationFrame(() => {
+      selectionManager.set(
+        newModels.map(model => {
+          return selectionManager.getInstance('block', {
+            path: blockSelections[0].path.slice(0, -1).concat(model.id),
+          });
+        })
+      );
+    });
     return newModels;
   }
 

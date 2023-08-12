@@ -180,11 +180,15 @@ export function onBackspace(
   e: KeyboardEvent,
   vEditor: AffineVEditor
 ) {
-  e.stopPropagation();
   if (isCollapsedAtBlockStart(vEditor)) {
+    if (model.flavour === 'affine:code') {
+      return ALLOW_DEFAULT;
+    }
+    e.stopPropagation();
     handleLineStartBackspace(model.page, model);
     return PREVENT_DEFAULT;
   }
+  e.stopPropagation();
   return ALLOW_DEFAULT;
 }
 

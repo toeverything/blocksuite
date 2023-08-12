@@ -260,6 +260,10 @@ export class DatabaseTable extends BaseDataView<
       </div>
     `;
   }
+
+  focusFirstCell(): void {
+    this.selection.focusFirstCell();
+  }
 }
 
 declare global {
