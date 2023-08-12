@@ -59,7 +59,7 @@ export const styles = css`
     width: 190px;
     height: 40px;
     box-shadow: var(--affine-shadow-1);
-    border-radius:10px;
+    border-radius: 10px;
   }
 
   .footer {
