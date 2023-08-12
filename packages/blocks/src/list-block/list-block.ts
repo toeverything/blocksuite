@@ -93,19 +93,24 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
 
     const toggleChildren = () => (this.showChildren = !this.showChildren);
-    const toggleIcon =
-      this.model.children.length > 0
-        ? this.showChildren
-          ? html`<div class="toggle-icon" @click=${toggleChildren}>
-              ${toggleDown()}
-            </div>`
-          : html`<div
-              class="toggle-icon toggle-icon__collapsed"
-              @click=${toggleChildren}
-            >
-              ${toggleRight()}
-            </div>`
-        : nothing;
+    const noChildren = this.model.children.length === 0;
+    const toggleDownTemplate = html`<div
+      class="toggle-icon"
+      @click=${toggleChildren}
+    >
+      ${toggleDown()}
+    </div>`;
+    const toggleRightTemplate = html`<div
+      class="toggle-icon toggle-icon__collapsed"
+      @click=${toggleChildren}
+    >
+      ${toggleRight()}
+    </div>`;
+    const toggleIcon = noChildren
+      ? nothing
+      : this.showChildren
+      ? toggleDownTemplate
+      : toggleRightTemplate;
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
