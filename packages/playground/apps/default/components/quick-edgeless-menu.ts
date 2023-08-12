@@ -253,12 +253,24 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     return this;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    document.body.addEventListener('keydown', this._keydown);
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     matchMedia.removeEventListener('change', this._darkModeChange);
+    document.body.removeEventListener('keydown', this._keydown);
   }
+
+  private _keydown = (e: KeyboardEvent) => {
+    if (e.key === 'F1') {
+      this._switchEditorMode();
+    }
+  };
 
   private _toggleConnection() {
     if (this._connected) {
@@ -493,6 +505,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           width: 100%;
           min-width: 390px;
           align-items: center;
+          justify-content: space-between;
         }
 
         .default-toolbar sl-button.dots-menu::part(base) {
@@ -521,142 +534,177 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <sl-dropdown placement="bottom" hoist>
-            <sl-button
-              class="dots-menu"
-              variant="text"
-              size="small"
-              slot="trigger"
-            >
-              <sl-icon
-                style="font-size: 14px"
-                name="three-dots-vertical"
-                label="Menu"
-              ></sl-icon>
-            </sl-button>
-            <sl-menu>
-              <sl-menu-item
-                @mouseenter=${() => this.testOperationsDropdown.show()}
-                @mouseleave=${() => this.testOperationsDropdown.hide()}
+          <div>
+            <sl-dropdown placement="bottom" hoist>
+              <sl-button
+                class="dots-menu"
+                variant="text"
+                size="small"
+                slot="trigger"
               >
                 <sl-icon
-                  slot="prefix"
-                  name="terminal"
-                  label="Test operations"
+                  style="font-size: 14px"
+                  name="three-dots-vertical"
+                  label="Menu"
                 ></sl-icon>
-                <sl-dropdown
-                  id="test-operations-dropdown"
-                  placement="right-start"
-                  .distance=${54}
-                  hoist
+              </sl-button>
+              <sl-menu>
+                <sl-menu-item
+                  @mouseenter=${() => this.testOperationsDropdown.show()}
+                  @mouseleave=${() => this.testOperationsDropdown.hide()}
                 >
-                  <span slot="trigger">Test operations</span>
-                  <sl-menu>
-                    <sl-menu-item @click=${this._toggleConnection}>
-                      ${this._connected ? 'Disconnect' : 'Connect'}
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._addNote}>
-                      Add Note</sl-menu-item
-                    >
-                    <sl-menu-item @click=${this._exportMarkDown}>
-                      Export Markdown
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportHtml}>
-                      Export HTML
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportPdf}>
-                      Export PDF
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportPng}>
-                      Export PNG
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportSnapshot}>
-                      Export Snapshot
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._importSnapshot}>
-                      Import Snapshot
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._shareUrl}>
-                      Share URL</sl-menu-item
-                    >
-                    <sl-menu-item @click=${this._toggleStyleDebugMenu}>
-                      Toggle CSS Debug Menu
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._inspect}>
-                      Inspect Doc</sl-menu-item
-                    >
-                  </sl-menu>
-                </sl-dropdown>
-              </sl-menu-item>
-              <sl-menu-item @click=${this._switchEditorMode}>
-                Switch to ${this.mode === 'page' ? 'Edgeless' : 'Page'} Mode
-                <sl-icon
-                  slot="prefix"
-                  name=${this.mode === 'page'
-                    ? 'bounding-box-circles'
-                    : 'filetype-doc'}
-                ></sl-icon>
-              </sl-menu-item>
-              <sl-menu-item @click=${this._toggleDarkMode}>
-                Toggle Dark Mode
-                <sl-icon
-                  slot="prefix"
-                  name=${this._dark ? 'moon' : 'brightness-high'}
-                ></sl-icon>
-              </sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item @click=${this._startCollaboration}>
-                Start Collaboration
-                <sl-icon slot="prefix" name="people"></sl-icon>
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
+                  <sl-icon
+                    slot="prefix"
+                    name="terminal"
+                    label="Test operations"
+                  ></sl-icon>
+                  <sl-dropdown
+                    id="test-operations-dropdown"
+                    placement="right-start"
+                    .distance=${42}
+                    hoist
+                  >
+                    <span slot="trigger">Test operations</span>
+                    <sl-menu>
+                      <sl-menu-item @click=${this._toggleConnection}>
+                        ${this._connected ? 'Disconnect' : 'Connect'}
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._addNote}>
+                        Add Note</sl-menu-item
+                      >
+                      <sl-menu-item @click=${this._exportMarkDown}>
+                        Export Markdown
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportHtml}>
+                        Export HTML
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportPdf}>
+                        Export PDF
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportPng}>
+                        Export PNG
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportSnapshot}>
+                        Export Snapshot
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._importSnapshot}>
+                        Import Snapshot
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._shareUrl}>
+                        Share URL</sl-menu-item
+                      >
+                      <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+                        Toggle CSS Debug Menu
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._inspect}>
+                        Inspect Doc</sl-menu-item
+                      >
+                    </sl-menu>
+                  </sl-dropdown>
+                </sl-menu-item>
+                <sl-menu-item @click=${this._toggleDarkMode}>
+                  Toggle Dark Mode
+                  <sl-icon
+                    slot="prefix"
+                    name=${this._dark ? 'moon' : 'brightness-high'}
+                  ></sl-icon>
+                </sl-menu-item>
+                <sl-divider></sl-divider>
+                <sl-menu-item @click=${this._startCollaboration}>
+                  Start Collaboration
+                  <sl-icon slot="prefix" name="people"></sl-icon>
+                </sl-menu-item>
+                <sl-divider></sl-divider>
+                <a
+                  target="_blank"
+                  href="https://github.com/toeverything/blocksuite"
+                >
+                  <sl-menu-item>
+                    <sl-icon slot="prefix" name="github"></sl-icon>
+                    Github
+                  </sl-menu-item>
+                </a>
+              </sl-menu>
+            </sl-dropdown>
 
-          <!-- undo/redo group -->
-          <sl-button-group label="History" style="margin-right: 12px">
-            <!-- undo -->
-            <sl-tooltip content="Undo" placement="bottom" hoist>
-              <sl-button
-                pill
-                size="small"
-                content="Undo"
-                .disabled=${!this._canUndo}
-                @click=${() => {
-                  this.page.undo();
-                }}
-              >
-                <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
-              </sl-button>
-            </sl-tooltip>
-            <!-- redo -->
-            <sl-tooltip content="Redo" placement="bottom" hoist>
-              <sl-button
-                pill
-                size="small"
-                content="Redo"
-                .disabled=${!this._canRedo}
-                @click=${() => {
-                  this.page.redo();
-                }}
-              >
-                <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
-              </sl-button>
-            </sl-tooltip>
-          </sl-button-group>
+            <!-- undo/redo group -->
+            <sl-button-group label="History" style="margin-right: 12px">
+              <!-- undo -->
+              <sl-tooltip content="Undo" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Undo"
+                  .disabled=${!this._canUndo}
+                  @click=${() => {
+                    this.page.undo();
+                  }}
+                >
+                  <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+              <!-- redo -->
+              <sl-tooltip content="Redo" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Redo"
+                  .disabled=${!this._canRedo}
+                  @click=${() => {
+                    this.page.redo();
+                  }}
+                >
+                  <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+            </sl-button-group>
+          </div>
 
-          ${this._initws
-            ? html`<div class="ws-indicator">
-                <sl-icon name="people" label="Collaboration"></sl-icon>
-                <sl-spinner></sl-spinner>
-              </div>`
-            : nothing}
-          ${this._showTabMenu
-            ? getTabGroupTemplate({
-                workspace: this.workspace,
-                editor: this.editor,
-                requestUpdate: () => this.requestUpdate(),
-              })
-            : null}
+          <div>
+            <sl-button-group label="Mode" style="margin-right: 12px">
+              <!-- switch to edgeless -->
+              <sl-tooltip content="Edgeless" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Edgeless"
+                  .disabled=${this.mode !== 'page'}
+                  @click=${this._switchEditorMode}
+                >
+                  <sl-icon
+                    name="bounding-box-circles"
+                    label="Edgeless"
+                  ></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+              <!-- switch to page -->
+              <sl-tooltip content="Page" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Page"
+                  .disabled=${this.mode !== 'edgeless'}
+                  @click=${this._switchEditorMode}
+                >
+                  <sl-icon name="filetype-doc" label="Page"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+            </sl-button-group>
+
+            ${this._initws
+              ? html`<div class="ws-indicator">
+                  <sl-icon name="people" label="Collaboration"></sl-icon>
+                  <sl-spinner></sl-spinner>
+                </div>`
+              : nothing}
+            ${this._showTabMenu
+              ? getTabGroupTemplate({
+                  workspace: this.workspace,
+                  editor: this.editor,
+                  requestUpdate: () => this.requestUpdate(),
+                })
+              : null}
+          </div>
         </div>
       </div>
     `;
