@@ -11,7 +11,7 @@ import {
 import { scrollbarStyle } from '../../components/utils.js';
 import {
   getLanguagePriority,
-  type selectedLanguageChangedSlot,
+  type selectedLanguageChangedSlots,
 } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
@@ -114,7 +114,7 @@ export class LangList extends ShadowlessElement {
   delay = 150;
 
   @property({ attribute: false })
-  slots!: selectedLanguageChangedSlot;
+  slots!: selectedLanguageChangedSlots;
 
   override async connectedCallback() {
     super.connectedCallback();

@@ -4,7 +4,7 @@ import { BUNDLED_LANGUAGES } from 'shiki';
 
 import { PLAIN_TEXT_REGISTRATION } from './consts.js';
 
-export interface selectedLanguageChangedSlot {
+export interface selectedLanguageChangedSlots {
   selectedLanguageChanged: Slot<{ language: string | null }>;
   dispose: Slot;
 }
