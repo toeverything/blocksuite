@@ -1,8 +1,13 @@
+import type { Slot } from '@blocksuite/store';
 import type { ILanguageRegistration, Lang } from 'shiki';
 import { BUNDLED_LANGUAGES } from 'shiki';
 
 import { PLAIN_TEXT_REGISTRATION } from './consts.js';
 
+export interface selectedLanguageChangedSlot {
+  selectedLanguageChanged: Slot<{ language: string | null }>;
+  dispose: Slot;
+}
 // TIOBE Index for May 2023
 // ref https://www.tiobe.com/tiobe-index/
 const PopularLanguages: Lang[] = [
