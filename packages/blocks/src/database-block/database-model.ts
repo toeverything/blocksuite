@@ -1,6 +1,9 @@
 import type { MigrationRunner, Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
+import { getTagColor } from '../components/tags/colors.js';
+import { selectPureColumnConfig } from './common/columns/select/define.js';
+import { titlePureColumnConfig } from './common/columns/title/define.js';
 import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
 import { viewManager } from './common/data-view.js';
 import type { Column } from './table/types.js';
@@ -25,6 +28,59 @@ type SerializedCells = {
 export class DatabaseBlockModel extends BaseBlockModel<Props> {
   getViewList() {
     return this.views;
+  }
+
+  initEmpty(viewType: DataViewTypes) {
+    this.addView(viewType);
+    this.addColumn(
+      'start',
+      titlePureColumnConfig.create(titlePureColumnConfig.name)
+    );
+  }
+
+  init(viewType: DataViewTypes) {
+    const ids = [nanoid(), nanoid(), nanoid()];
+    const statusId = this.addColumn(
+      'end',
+      selectPureColumnConfig.create('Status', {
+        options: [
+          {
+            id: ids[0],
+            color: getTagColor(),
+            value: 'TODO',
+          },
+          {
+            id: ids[1],
+            color: getTagColor(),
+            value: 'In Progress',
+          },
+          {
+            id: ids[2],
+            color: getTagColor(),
+            value: 'Done',
+          },
+        ],
+      })
+    );
+    this.addColumn(
+      'start',
+      titlePureColumnConfig.create(titlePureColumnConfig.name)
+    );
+    this.addView(viewType);
+    // By default, database has 3 empty rows
+    for (let i = 0; i < 4; i++) {
+      const rowId = this.page.addBlock(
+        'affine:paragraph',
+        {
+          text: new this.page.Text(`Task ${i + 1}`),
+        },
+        this.id
+      );
+      this.updateCell(rowId, {
+        columnId: statusId,
+        value: ids[i],
+      });
+    }
   }
 
   addView(type: DataViewTypes) {

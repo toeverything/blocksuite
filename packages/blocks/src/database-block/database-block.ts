@@ -46,7 +46,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:database', LegacyDatabaseBlockService);
-    this.currentView = this.model.getViewList()[0].id;
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
         const databaseSelection = selections.find(
@@ -245,6 +244,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   };
 
   override render() {
+    if (!this.currentView) {
+      this.currentView = this.model.views[0]?.id;
+    }
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
     const viewData = this.getView(current.id);
