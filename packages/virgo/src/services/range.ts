@@ -119,6 +119,12 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyVRange = (vRange: VRange): void => {
+    if (!this._editor.rootElement.isConnected) {
+      console.error(
+        'Failed to setVRange! rootElement is not mounted.',
+        this._editor
+      );
+    }
     if (!this._editor.isActive()) {
       return;
     }
