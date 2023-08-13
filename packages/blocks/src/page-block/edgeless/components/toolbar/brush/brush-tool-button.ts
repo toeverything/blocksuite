@@ -4,7 +4,6 @@ import './brush-menu.js';
 import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
