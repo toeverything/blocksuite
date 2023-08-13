@@ -36,14 +36,15 @@ const updateParagraphType = (
   if (selectedBlockElements.length === 0) {
     throw new Error('No models to update!');
   }
-
   const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
   const targetFlavour = selectedBlockElements.every(
-    el => el.flavour === flavour
+    el => el.flavour === flavour && el.model.type === type
   )
     ? defaultFlavour
     : flavour;
-  const targetType = selectedBlockElements.every(el => el.model.type === type)
+  const targetType = selectedBlockElements.every(
+    el => el.flavour === flavour && el.model.type === type
+  )
     ? defaultType
     : type;
   const newModels = updateBlockElementType(
