@@ -12,7 +12,7 @@ import {
   copyBlocksInPage,
   textedClipboardData2Blocks,
 } from './utils/commons.js';
-import { deleteModelsByRange } from './utils/operation.js';
+import { deleteModelsByTextSelection } from './utils/operation.js';
 
 export class PageClipboard implements Clipboard {
   _page!: Page;
@@ -60,7 +60,10 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
 
     let blocks = [];
-    const focusedBlockModel = deleteModelsByRange(this._ele, textSelection);
+    const focusedBlockModel = deleteModelsByTextSelection(
+      this._ele,
+      textSelection
+    );
     // This assert is unreliable
     // but it's reasonable to paste nothing when focus block is not found
     assertExists(focusedBlockModel);
@@ -112,6 +115,6 @@ export class PageClipboard implements Clipboard {
     }
     e.preventDefault();
     await this._onCopy(ctx);
-    deleteModelsByRange(this._ele, textSelection);
+    deleteModelsByTextSelection(this._ele, textSelection);
   };
 }

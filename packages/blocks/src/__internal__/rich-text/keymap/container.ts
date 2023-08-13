@@ -90,7 +90,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!page) {
           return;
         }
-        const models = getSelectedContentModels(page);
+        const models = getSelectedContentModels(page, ['text', 'block']);
         handleMultiBlockIndent(blockElement.page, models);
         return true;
       }
@@ -107,7 +107,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!page) {
           return;
         }
-        const models = getSelectedContentModels(page);
+        const models = getSelectedContentModels(page, ['text', 'block']);
         handleMultiBlockUnindent(blockElement.page, models);
         return true;
       }

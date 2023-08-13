@@ -71,8 +71,10 @@ export const menuGroups: {
             return true;
           },
           action: ({ pageElement }) => {
-            const selectedBlockElements =
-              getSelectedContentBlockElements(pageElement);
+            const selectedBlockElements = getSelectedContentBlockElements(
+              pageElement,
+              ['text', 'block']
+            );
             const newModels = updateBlockElementType(
               pageElement,
               selectedBlockElements,
@@ -138,8 +140,10 @@ export const menuGroups: {
           return true;
         },
         action: ({ pageElement }) => {
-          const selectedBlockElements =
-            getSelectedContentBlockElements(pageElement);
+          const selectedBlockElements = getSelectedContentBlockElements(
+            pageElement,
+            ['text', 'block']
+          );
           updateBlockElementType(
             pageElement,
             selectedBlockElements,
