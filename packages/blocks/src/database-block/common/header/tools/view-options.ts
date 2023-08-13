@@ -5,6 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
 import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
+import { groupByMatcher } from '../../group-by/matcher.js';
 import { popPropertiesSetting } from '../../properties.js';
 
 export const viewOpIcons = {
@@ -115,16 +116,23 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
                 search: true,
                 placeholder: 'Search',
               },
-              items: this.view.columnsWithoutFilter.map(id => {
-                const column = this.view.columnGet(id);
-                return {
-                  type: 'action',
-                  name: column.name,
-                  select: () => {
-                    this.view.changeGroup(id);
-                  },
-                };
-              }),
+              items: this.view.columnsWithoutFilter
+                .filter(id => {
+                  return !!groupByMatcher.match(
+                    this.view.columnGet(id).dataType
+                  );
+                })
+                .map(id => {
+                  const column = this.view.columnGet(id);
+                  return {
+                    type: 'action',
+                    name: column.name,
+                    icon: html`<uni-lit .uni="${column.icon}"></uni-lit>`,
+                    select: () => {
+                      this.view.changeGroup(id);
+                    },
+                  };
+                }),
             },
           },
           {

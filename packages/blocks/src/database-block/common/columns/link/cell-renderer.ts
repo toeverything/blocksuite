@@ -38,6 +38,8 @@ export class LinkCell extends BaseCellRenderer<string> {
       height: 100%;
       outline: none;
       overflow: hidden;
+      font-size: 12px;
+      line-height: 20px;
     }
 
     affine-database-link-node {
@@ -51,7 +53,11 @@ export class LinkCell extends BaseCellRenderer<string> {
       align-items: center;
       visibility: hidden;
       cursor: pointer;
-      background: var(--affine-white);
+      background: var(--affine-background-primary-color);
+      border-radius: 4px;
+    }
+    .affine-database-link-icon:hover {
+      background: var(--affine-hover-color);
     }
 
     .affine-database-link-icon svg {
@@ -120,11 +126,11 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
+      font-size: 12px;
+      line-height: 20px;
     }
 
     .affine-database-link-editing:focus {
