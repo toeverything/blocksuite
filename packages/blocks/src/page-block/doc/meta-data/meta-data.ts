@@ -133,7 +133,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--affine-icon-color);
+      fill: var(--affine-icon-color);
     }
 
     .meta-data-expanded-column-item .backlinks {

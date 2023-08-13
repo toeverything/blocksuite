@@ -22,7 +22,6 @@ import {
   enterPlaygroundRoom,
   getEditorLocator,
   initEmptyEdgelessState,
-  waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
 

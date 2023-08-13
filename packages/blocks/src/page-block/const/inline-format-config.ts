@@ -10,27 +10,53 @@ import { assertExists } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import type { Flavour } from '../../models.js';
 import type { PageBlockComponent } from '../types.js';
 import {
-  getCurrentCombinedFormat,
-  handleFormat,
+  formatByTextSelection,
   toggleLink,
-} from '../utils/operations/inline.js';
+} from '../utils/operations/element/inline-level.js';
 import {
+  getBlockSelections,
+  getCombinedFormatInTextSelection,
   getSelectedContentModels,
   getTextSelection,
 } from '../utils/selection.js';
 
-function noneCodeBlockSelected(pageElement: PageBlockComponent) {
-  const selectedModels = getSelectedContentModels(pageElement);
-  return !selectedModels.every(model => model.flavour === 'affine:code');
+function handleCommonStyle({
+  pageElement,
+  type,
+  style,
+  value,
+}: {
+  pageElement: PageBlockComponent;
+  type: 'text' | 'block';
+  style: keyof Omit<AffineTextAttributes, 'link' | 'reference'>;
+  value: true | null;
+}) {
+  if (type === 'text') {
+    const textSelection = getTextSelection(pageElement);
+    assertExists(textSelection);
+    formatByTextSelection(pageElement, textSelection, style, value);
+  } else {
+    const blockSelections = getBlockSelections(pageElement);
+    const viewStore = pageElement.root.viewStore;
+    for (const blockSelection of blockSelections) {
+      const blockElement = viewStore.viewFromPath('block', blockSelection.path);
+      if (blockElement && blockElement.model.text) {
+        blockElement.model.text.format(0, blockElement.model.text.length, {
+          [style]: value,
+        });
+      }
+    }
+  }
 }
 
 interface InlineFormatConfigAction {
   pageElement: PageBlockComponent;
+  type: 'text' | 'block';
   format: AffineTextAttributes;
 }
-
 export interface InlineFormatConfig {
   id: string;
   name: string;
@@ -42,6 +68,23 @@ export interface InlineFormatConfig {
   action: (props: InlineFormatConfigAction) => void;
 }
 
+const INLINE_UNSUPPORTED_MODELS: Flavour[] = [
+  'affine:code',
+  'affine:attachment',
+];
+
+export function noneInlineUnsupportedBlockSelected(
+  pageElement: PageBlockComponent
+) {
+  const selectedModels = getSelectedContentModels(pageElement, [
+    'text',
+    'block',
+  ]);
+  return !selectedModels.every(model =>
+    INLINE_UNSUPPORTED_MODELS.includes(model.flavour as Flavour)
+  );
+}
+
 export const inlineFormatConfig: InlineFormatConfig[] = [
   {
     id: 'bold',
@@ -50,11 +93,14 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-b',
     activeWhen: (format: AffineTextAttributes) => 'bold' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneCodeBlockSelected(pageElement),
-    action: ({ pageElement }) => {
-      const textSelection = getTextSelection(pageElement);
-      assertExists(textSelection);
-      handleFormat(pageElement, textSelection, 'bold');
+      noneInlineUnsupportedBlockSelected(pageElement),
+    action: ({ pageElement, type, format }) => {
+      handleCommonStyle({
+        pageElement,
+        type,
+        style: 'bold',
+        value: format.bold ? null : true,
+      });
     },
   },
   {
@@ -64,11 +110,14 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-i',
     activeWhen: (format: AffineTextAttributes) => 'italic' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneCodeBlockSelected(pageElement),
-    action: ({ pageElement }) => {
-      const textSelection = getTextSelection(pageElement);
-      assertExists(textSelection);
-      handleFormat(pageElement, textSelection, 'italic');
+      noneInlineUnsupportedBlockSelected(pageElement),
+    action: ({ pageElement, type, format }) => {
+      handleCommonStyle({
+        pageElement,
+        type,
+        style: 'italic',
+        value: format.italic ? null : true,
+      });
     },
   },
   {
@@ -78,11 +127,14 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-u',
     activeWhen: (format: AffineTextAttributes) => 'underline' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneCodeBlockSelected(pageElement),
-    action: ({ pageElement }) => {
-      const textSelection = getTextSelection(pageElement);
-      assertExists(textSelection);
-      handleFormat(pageElement, textSelection, 'underline');
+      noneInlineUnsupportedBlockSelected(pageElement),
+    action: ({ pageElement, type, format }) => {
+      handleCommonStyle({
+        pageElement,
+        type,
+        style: 'underline',
+        value: format.underline ? null : true,
+      });
     },
   },
   {
@@ -92,11 +144,14 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-shift-s',
     activeWhen: (format: AffineTextAttributes) => 'strike' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneCodeBlockSelected(pageElement),
-    action: ({ pageElement }) => {
-      const textSelection = getTextSelection(pageElement);
-      assertExists(textSelection);
-      handleFormat(pageElement, textSelection, 'strike');
+      noneInlineUnsupportedBlockSelected(pageElement),
+    action: ({ pageElement, type, format }) => {
+      handleCommonStyle({
+        pageElement,
+        type,
+        style: 'strike',
+        value: format.strike ? null : true,
+      });
     },
   },
   {
@@ -106,11 +161,14 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     hotkey: 'Mod-e',
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (pageElement: PageBlockComponent) =>
-      noneCodeBlockSelected(pageElement),
-    action: ({ pageElement }) => {
-      const textSelection = getTextSelection(pageElement);
-      assertExists(textSelection);
-      handleFormat(pageElement, textSelection, 'code');
+      noneInlineUnsupportedBlockSelected(pageElement),
+    action: ({ pageElement, type, format }) => {
+      handleCommonStyle({
+        pageElement,
+        type,
+        style: 'code',
+        value: format.code ? null : true,
+      });
     },
   },
   {
@@ -122,14 +180,18 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     // Only can show link button when selection is in one line paragraph
     showWhen: (pageElement: PageBlockComponent) => {
       const textSelection = getTextSelection(pageElement);
-      assertExists(textSelection);
-      const selectedModels = getSelectedContentModels(pageElement);
+      const selectedModels = getSelectedContentModels(pageElement, [
+        'text',
+        'block',
+      ]);
       return (
+        !!textSelection &&
         selectedModels.length === 1 &&
-        noneCodeBlockSelected(pageElement) &&
+        noneInlineUnsupportedBlockSelected(pageElement) &&
         // can't create link when selection includes reference node
         // XXX get loose format at here is not a good practice
-        !getCurrentCombinedFormat(pageElement, textSelection, true).reference
+        !getCombinedFormatInTextSelection(pageElement, textSelection, true)
+          .reference
       );
     },
     action: ({ pageElement }) => {

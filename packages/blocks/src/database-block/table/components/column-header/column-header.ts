@@ -115,7 +115,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _onAddColumn = () => {
     if (this.readonly) return;
     this.tableViewManager.columnAdd('end');
-    Promise.resolve().then(() => {
+    requestAnimationFrame(() => {
       this.editLastColumnTitle();
     });
   };

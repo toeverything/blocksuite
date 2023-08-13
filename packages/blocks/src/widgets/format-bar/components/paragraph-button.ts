@@ -11,7 +11,7 @@ import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import { onModelElementUpdated } from '../../../page-block/utils/callback.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
-import { updateBlockElementType } from '../../../page-block/utils/operations/block-element.js';
+import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
@@ -36,14 +36,15 @@ const updateParagraphType = (
   if (selectedBlockElements.length === 0) {
     throw new Error('No models to update!');
   }
-
   const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
   const targetFlavour = selectedBlockElements.every(
-    el => el.flavour === flavour
+    el => el.flavour === flavour && el.model.type === type
   )
     ? defaultFlavour
     : flavour;
-  const targetType = selectedBlockElements.every(el => el.model.type === type)
+  const targetType = selectedBlockElements.every(
+    el => el.flavour === flavour && el.model.type === type
+  )
     ? defaultType
     : type;
   const newModels = updateBlockElementType(

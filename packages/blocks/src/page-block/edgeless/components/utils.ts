@@ -3,6 +3,9 @@ import { assertExists, type Disposable } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 
+import { getBlockElementById } from '../../../__internal__/utils/query.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { isTopLevelBlock } from '../utils/query.js';
 
@@ -261,4 +264,33 @@ export function getResizeLabel(target: HTMLElement) {
 
 export function getGridBound(ele: Selectable) {
   return isTopLevelBlock(ele) ? Bound.deserialize(ele.xywh) : ele.gridBound;
+}
+
+export function updateNotesPosition(
+  edgeless: EdgelessPageBlockComponent,
+  notes: NoteBlockModel[]
+) {
+  for (const note of notes) {
+    const noteStatusElement = edgeless.querySelector(
+      `[data-note-id="${note.id}"]`
+    );
+    if (noteStatusElement instanceof HTMLElement) {
+      const noteElement = getBlockElementById(note.id);
+      assertExists(noteElement);
+      computePosition(noteElement, noteStatusElement, {
+        placement: 'top-start',
+        middleware: [
+          flip(),
+          offset({
+            // 24 is `EDGELESS_BLOCK_CHILD_PADDING`
+            mainAxis: (8 + 24) * edgeless.surface.viewport.zoom,
+            crossAxis: (4 - 24) * edgeless.surface.viewport.zoom,
+          }),
+        ],
+      }).then(({ x, y }) => {
+        noteStatusElement.style.top = y + 'px';
+        noteStatusElement.style.left = x + 'px';
+      });
+    }
+  }
 }

@@ -329,6 +329,25 @@ export class DocPageBlockComponent
     this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);
+    // filter cut event in page title
+    this.handleEvent('cut', ctx => {
+      const { event } = ctx.get('defaultState');
+      const element =
+        event.target instanceof HTMLElement
+          ? event.target
+          : event.target instanceof Node
+          ? event.target.parentElement
+          : null;
+      if (!element) {
+        return;
+      }
+
+      if (element.closest('[data-block-is-title]')) {
+        return true;
+      }
+
+      return;
+    });
 
     this.bindHotKey({
       ArrowUp: () => {

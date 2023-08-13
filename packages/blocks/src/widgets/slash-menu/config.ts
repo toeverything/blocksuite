@@ -39,17 +39,19 @@ import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
 } from '../../page-block/utils/index.js';
-import { updateBlockElementType } from '../../page-block/utils/operations/block-element.js';
+import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
   insertContent,
   insideDatabase,
-  insideDataView,
   type SlashItem,
 } from './utils.js';
 
-export const menuGroups: { name: string; items: SlashItem[] }[] = [
+export const menuGroups: {
+  name: string;
+  items: SlashItem[];
+}[] = [
   {
     name: 'Text',
     items: [
@@ -69,8 +71,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return true;
           },
           action: ({ pageElement }) => {
-            const selectedBlockElements =
-              getSelectedContentBlockElements(pageElement);
+            const selectedBlockElements = getSelectedContentBlockElements(
+              pageElement,
+              ['text', 'block']
+            );
             const newModels = updateBlockElementType(
               pageElement,
               selectedBlockElements,
@@ -136,8 +140,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           return true;
         },
         action: ({ pageElement }) => {
-          const selectedBlockElements =
-            getSelectedContentBlockElements(pageElement);
+          const selectedBlockElements = getSelectedContentBlockElements(
+            pageElement,
+            ['text', 'block']
+          );
           updateBlockElementType(
             pageElement,
             selectedBlockElements,
@@ -159,7 +165,10 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         action: async ({ pageElement, model }) => {
           const newPage = await createPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
-            reference: { type: 'LinkedPage', pageId: newPage.id },
+            reference: {
+              type: 'LinkedPage',
+              pageId: newPage.id,
+            },
           });
         },
       },
@@ -221,10 +230,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           const props = (
             await uploadImageFromLocal(pageElement.page.blobs)
-          ).map(({ sourceId }): ImageProps & { flavour: 'affine:image' } => ({
-            flavour: 'affine:image',
-            sourceId,
-          }));
+          ).map(
+            ({
+              sourceId,
+            }): ImageProps & {
+              flavour: 'affine:image';
+            } => ({
+              flavour: 'affine:image',
+              sourceId,
+            })
+          );
           pageElement.page.addSiblingBlocks(model, props);
         },
       },
@@ -353,13 +368,19 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             index + 1
           );
           const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(pageElement.page, model, id, false);
+          service.initDatabaseBlock(
+            pageElement.page,
+            model,
+            id,
+            'table',
+            false
+          );
         },
       },
       {
         name: 'Kanban View',
         alias: ['database'],
-        disabled: true,
+        disabled: false,
         icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
           if (!model.page.awarenessStore.getFlag('enable_database')) {
@@ -374,40 +395,24 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        action: ({ model }) => {},
-      },
-    ],
-  },
-  {
-    name: 'Data View',
-    items: [
-      {
-        name: 'Data View Table',
-        alias: ['table'],
-        icon: DatabaseKanbanViewIcon20,
-        showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_data_view')) {
-            return false;
-          }
-          if (!model.page.schema.flavourSchemaMap.has('affine:data-view')) {
-            return false;
-          }
-          if (insideDataView(model)) {
-            return false;
-          }
-          return true;
-        },
-        action: async ({ pageElement, model }) => {
+        action: async ({ model, pageElement }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          pageElement.page.addBlock(
-            'affine:data-view',
+          const id = pageElement.page.addBlock(
+            'affine:database',
             {},
             pageElement.page.getParent(model),
             index + 1
+          );
+          const service = await getServiceOrRegister('affine:database');
+          service.initDatabaseBlock(
+            pageElement.page,
+            model,
+            id,
+            'kanban',
+            false
           );
         },
       },
@@ -471,4 +476,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       },
     ],
   },
-] satisfies { name: string; items: SlashItem[] }[];
+] satisfies {
+  name: string;
+  items: SlashItem[];
+}[];

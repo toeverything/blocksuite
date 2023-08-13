@@ -1,4 +1,4 @@
-interface BackgroundHighlightConfig {
+interface BackgroundConfig {
   name: string;
   color: string;
   hotkey: string | null;
@@ -15,7 +15,7 @@ const colors = [
   'grey',
 ];
 
-export const backgroundHighlightConfig: BackgroundHighlightConfig[] = [
+export const backgroundConfig: BackgroundConfig[] = [
   {
     name: 'Default Background',
     color: 'unset',

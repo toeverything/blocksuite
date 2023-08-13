@@ -4,8 +4,8 @@ import type { VirgoRootElement } from '@blocksuite/virgo';
 
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import { getCurrentCombinedFormat } from '../../../page-block/utils/operations/inline.js';
 import {
+  getCombinedFormatInTextSelection,
   getSelectedContentModels,
   getTextSelection,
 } from '../../../page-block/utils/selection.js';
@@ -90,7 +90,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!page) {
           return;
         }
-        const models = getSelectedContentModels(page);
+        const models = getSelectedContentModels(page, ['text', 'block']);
         handleMultiBlockIndent(blockElement.page, models);
         return true;
       }
@@ -107,7 +107,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!page) {
           return;
         }
-        const models = getSelectedContentModels(page);
+        const models = getSelectedContentModels(page, ['text', 'block']);
         handleMultiBlockUnindent(blockElement.page, models);
         return true;
       }
@@ -131,8 +131,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         ctx.get('defaultState').event.preventDefault();
 
-        const format = getCurrentCombinedFormat(pageElement, textSelection);
-        config.action({ pageElement, format });
+        const format = getCombinedFormatInTextSelection(
+          pageElement,
+          textSelection
+        );
+        config.action({ pageElement, type: 'text', format });
         return true;
       },
     });

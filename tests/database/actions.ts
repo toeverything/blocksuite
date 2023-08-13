@@ -17,7 +17,6 @@ import {
 } from '../utils/actions/misc.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
-  await focusDatabaseHeader(page);
   const editor = getEditorLocator(page);
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
@@ -90,10 +89,11 @@ export async function assertDatabaseTitleColumnText(
       `.database-row:nth-child(${index + 1})`
     );
     const titleColumnCell = row?.querySelector('.database-cell:nth-child(1)');
-    const richText = titleColumnCell?.querySelector('rich-text');
-    const editor = richText?.vEditor;
-    if (!editor) throw new Error('Cannot find database title column editor');
-    return editor.yText.toString();
+    const titleSpan = titleColumnCell?.querySelector(
+      '.data-view-title'
+    ) as HTMLElement;
+    if (!titleSpan) throw new Error('Cannot find database title column editor');
+    return titleSpan.innerText;
   }, index);
 
   expect(text).toBe(title);
@@ -393,15 +393,13 @@ export async function assertCellsSelection(
     end?: [rowIndex: number, columnIndex: number];
   }
 ) {
-  const focus = page.locator('.database-focus');
-  const focusBox = await getBoundingBox(focus);
-  // const selection = page.locator('.database-selection');
-  // const selectionBox = await getBoundingBox(selection);
-
   const { start, end } = cellIndexes;
 
   if (!end) {
     // single cell
+    const focus = page.locator('.database-focus');
+    const focusBox = await getBoundingBox(focus);
+
     const [rowIndex, columnIndex] = start;
     const cell = getDatabaseBodyCell(page, { rowIndex, columnIndex });
     const cellBox = await getBoundingBox(cell);
@@ -413,43 +411,50 @@ export async function assertCellsSelection(
     });
   } else {
     // multi cells
+    const selection = page.locator('.database-selection');
+    const selectionBox = await getBoundingBox(selection);
+
+    const [startRowIndex, startColumnIndex] = start;
+    const [endRowIndex, endColumnIndex] = end;
+
+    const rowIndexStart = Math.min(startRowIndex, endRowIndex);
+    const rowIndexEnd = Math.max(startRowIndex, endRowIndex);
+    const columnIndexStart = Math.min(startColumnIndex, endColumnIndex);
+    const columnIndexEnd = Math.max(startColumnIndex, endColumnIndex);
+
+    let height = 0;
+    let width = 0;
+    let x = 0;
+    let y = 0;
+    for (let i = rowIndexStart; i <= rowIndexEnd; i++) {
+      const cell = getDatabaseBodyCell(page, {
+        rowIndex: i,
+        columnIndex: columnIndexStart,
+      });
+      const box = await getBoundingBox(cell);
+      height += box.height + 1;
+      if (i === rowIndexStart) {
+        y = box.y;
+      }
+    }
+
+    for (let j = columnIndexStart; j <= columnIndexEnd; j++) {
+      const cell = getDatabaseBodyCell(page, {
+        rowIndex: rowIndexStart,
+        columnIndex: j,
+      });
+      const box = await getBoundingBox(cell);
+      width += box.width;
+      if (j === columnIndexStart) {
+        x = box.x;
+      }
+    }
+
+    expect(selectionBox).toEqual({
+      x,
+      y,
+      height,
+      width,
+    });
   }
-
-  // const startIndex = cellIndexes[0];
-  // const endIndex = cellIndexes[1];
-
-  // if (startIndex === endIndex) {
-  //   // single row
-  //   const row = getDatabaseBodyRow(page, startIndex);
-  //   const rowBox = await getBoundingBox(row);
-  //   const lastCell = await row
-  //     .locator('affine-database-cell-container')
-  //     .last()
-  //     .boundingBox();
-  //   assertExists(lastCell);
-  //   expect(selectionBox).toEqual({
-  //     x: rowBox.x,
-  //     y: rowBox.y,
-  //     height: rowBox.height,
-  //     width: lastCell.x + lastCell.width - rowBox.x,
-  //   });
-  // } else {
-  //   // multiple rows
-  //   // Only test at most two lines when testing.
-  //   const startRow = getDatabaseBodyRow(page, startIndex);
-  //   const endRow = getDatabaseBodyRow(page, endIndex);
-  //   const startRowBox = await getBoundingBox(startRow);
-  //   const endRowBox = await getBoundingBox(endRow);
-  //   const lastCell = await startRow
-  //     .locator('affine-database-cell-container')
-  //     .last()
-  //     .boundingBox();
-  //   assertExists(lastCell);
-  //   expect(selectionBox).toEqual({
-  //     x: startRowBox.x,
-  //     y: startRowBox.y,
-  //     width: lastCell.x + lastCell.width - startRowBox.x,
-  //     height: startRowBox.height + endRowBox.height,
-  //   });
-  // }
 }

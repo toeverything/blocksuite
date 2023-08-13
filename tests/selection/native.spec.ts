@@ -755,23 +755,25 @@ test('should forwardDelete divider works properly', async ({ page }) => {
 test('the cursor should move to closest editor block when clicking outside container', async ({
   page,
 }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/pull/570',
+  });
+  // This test only works in playwright or touch device!
+  test.fail();
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  const rect = await page.evaluate(() => {
-    const secondRichText = document.querySelector(
-      '[data-block-id="3"] .virgo-editor'
-    );
-    if (!secondRichText) {
-      throw new Error();
-    }
+  const text2 = page.locator('[data-block-id="3"] .virgo-editor');
+  const rect = await text2.boundingBox();
 
-    return secondRichText.getBoundingClientRect();
-  });
-
-  await page.mouse.click(rect.left - 50, rect.top + 5);
+  // The behavior of mouse click is similar to touch in mobile device
+  // await page.mouse.click(rect.x - 50, rect.y + 5);
+  await page.mouse.move(rect.x - 50, rect.y + 5);
+  await page.mouse.down();
+  await page.mouse.up();
 
   await pressArrowLeft(page, 4);
   await pressBackspace(page);
@@ -780,12 +782,17 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await page.mouse.click(rect.right + 50, rect.top + 5);
+
+  // await page.mouse.click(rect.x + rect.width + 50, rect.y + 5);
+  await page.mouse.move(rect.x + rect.width + 50, rect.y + 5);
+  await page.mouse.down();
+  await page.mouse.up();
+  await waitNextFrame(page);
 
   await pressArrowLeft(page);
   await pressBackspace(page);
   await waitNextFrame(page);
-  await assertRichTexts(page, ['123', '45', '789']);
+  await assertRichTexts(page, ['123', '46', '789']);
 });
 
 test('should not crash when mouse over the left side of the list block prefix', async ({

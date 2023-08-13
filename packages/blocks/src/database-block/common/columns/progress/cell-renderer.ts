@@ -37,7 +37,7 @@ const styles = css`
   .affine-database-progress-bg {
     overflow: hidden;
     width: 100%;
-    height: 13px;
+    height: 10px;
     border-radius: 22px;
   }
 
@@ -51,7 +51,7 @@ const styles = css`
     left: 0;
     transform: translate(0px, -1px);
     width: 6px;
-    height: 15px;
+    height: 12px;
     border-radius: 2px;
     opacity: 1;
     cursor: ew-resize;

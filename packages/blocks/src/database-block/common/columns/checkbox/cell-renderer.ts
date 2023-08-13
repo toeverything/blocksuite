@@ -31,6 +31,10 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
       width: 100%;
       position: relative;
     }
+    .affine-database-checkbox svg {
+      width: 16px;
+      height: 16px;
+    }
 
     .affine-database-checkbox-animation {
       width: 20px;
@@ -85,14 +89,12 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     if (checked) {
       this._animation.classList.add('animation');
     }
-
     this.onChange(checked);
     return false;
   }
 
   override render() {
     const checked = this.value ?? false;
-
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html` <div class="affine-database-checkbox-container">
       <div class="affine-database-checkbox checkbox ${checked && 'checked'}">

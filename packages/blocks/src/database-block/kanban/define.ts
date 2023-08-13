@@ -1,7 +1,7 @@
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager } from '../common/columns/manager.js';
 import { viewManager } from '../common/data-view.js';
-import { defaultGroupBy } from '../common/groupBy/util.js';
+import { defaultGroupBy } from '../common/group-by/util.js';
 import type { GroupBy } from '../common/types.js';
 import { tTag } from '../logical/data-type.js';
 import { isTArray } from '../logical/typesystem.js';
@@ -16,10 +16,22 @@ export type KanbanViewColumn = {
   hide?: boolean;
 };
 
+export type KanbanGroupProperty = {
+  key: string;
+  hide?: boolean;
+  manuallyCardSort: string[];
+};
+
 export type KanbanViewData = {
   columns: KanbanViewColumn[];
   filter: FilterGroup;
   groupBy?: GroupBy;
+  header: {
+    titleColumn?: string;
+    iconColumn?: string;
+    coverColumn?: string;
+  };
+  groupProperties: KanbanGroupProperty[];
 };
 
 viewManager.register('kanban', {
@@ -46,6 +58,11 @@ viewManager.register('kanban', {
         conditions: [],
       },
       groupBy: defaultGroupBy(column.id, column.type, column.data),
+      header: {
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+        iconColumn: 'type',
+      },
+      groupProperties: [],
     };
   },
 });

@@ -1,5 +1,5 @@
 // related component
-import './common/groupBy/define.js';
+import './common/group-by/define.js';
 import './common/header/views.js';
 import './common/header/title.js';
 import './common/header/tools/tools.js';
@@ -36,7 +36,7 @@ import type { BlockOperation } from './types.js';
 type ViewData = {
   view: DataViewManager;
   selectionUpdated: Slot<DataViewSelectionState>;
-  setSelection: (selection: DataViewSelectionState) => void;
+  setSelection: (selection?: DataViewSelectionState) => void;
   bindHotkey: BaseDataView['bindHotkey'];
   handleEvent: BaseDataView['handleEvent'];
 };
@@ -46,7 +46,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:database', LegacyDatabaseBlockService);
-    this.currentView = this.model.getViewList()[0].id;
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
         const databaseSelection = selections.find(
@@ -85,16 +84,14 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   private _view = createRef<BaseDataView>();
 
-  get viewEle() {
-    return this._view.value;
-  }
-
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
       this.service?.selectionManager.set([]);
-      this.currentView = viewId;
       requestAnimationFrame(() => {
-        this.requestUpdate();
+        this.currentView = viewId;
+        requestAnimationFrame(() => {
+          this.requestUpdate();
+        });
       });
     }
   };
@@ -114,6 +111,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private viewMap: Record<string, ViewData> = {};
   private getViewDataById = (id: string) => {
     return this.model.views.find(v => v.id === id);
+  };
+
+  public focusFirstCell = () => {
+    this._view.value?.focusFirstCell();
   };
 
   private viewSource(id: string): ViewSource {
@@ -146,6 +147,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         view: view,
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
+          if (!selection) {
+            this.root.selectionManager.set([]);
+            return;
+          }
           const data = this.root.selectionManager.getInstance('database', {
             path: this.path,
             viewSelection: selection as never,
@@ -201,6 +206,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   private renderViews = () => {
     return html` <data-view-header-views
+      style="flex:1"
       .currentView="${this.currentView}"
       .setViewId="${this._setViewId}"
       .model="${this.model}"
@@ -238,8 +244,14 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   };
 
   override render() {
+    if (!this.currentView) {
+      this.currentView = this.model.views[0]?.id;
+    }
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
+    if (!current) {
+      return;
+    }
     const viewData = this.getView(current.id);
     const props = {
       titleText: this.model.title,
@@ -260,13 +272,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             ${this.renderTitle()} ${this.renderReference()}
           </div>
           <div
-            style="display:flex;align-items:center;justify-content: space-between"
+            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
           >
             ${this.renderViews()} ${this.renderTools(viewData.view)}
           </div>
         </div>
         <uni-lit
-          .ref=${this._view}
+          .ref="${this._view}"
           .uni="${viewRendererManager.getView(current.mode).view}"
           .props="${props}"
           class="affine-block-element"

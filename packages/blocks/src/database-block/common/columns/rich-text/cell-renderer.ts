@@ -87,6 +87,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       width: 100%;
       height: 100%;
       outline: none;
+      font-size: 12px;
+      line-height: 20px;
     }
 
     .affine-database-rich-text v-line {
@@ -113,7 +115,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   private _initYText = (text?: string) => {
     const yText = new YText(text);
-
     this.onChange(yText);
     return yText;
   };
@@ -220,7 +221,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.rectChanged();
+          this.rectChanged?.();
         } else {
           this.selectCurrentCell(false);
         }

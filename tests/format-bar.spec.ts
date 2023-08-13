@@ -130,7 +130,7 @@ test('should format quick bar show when click drag handler', async ({
   if (!box) {
     throw new Error("formatBar doesn't exist");
   }
-  assertAlmostEqual(box.x, 345, 5);
+  assertAlmostEqual(box.x, 252.5, 5);
   assertAlmostEqual(box.y - dragHandleRect.y, -55.5, 5);
 });
 
@@ -329,7 +329,7 @@ test('should format quick bar be able to change background color', async ({
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const paragraphBtn = page.locator(`.background-highlight-button`);
+  const paragraphBtn = page.locator('.background-button');
   await paragraphBtn.hover();
   const PinkBtn = page
     .locator(`.affine-format-bar-widget`)
@@ -735,6 +735,7 @@ test('should format quick bar be able to copy', async ({ page }) => {
 
   await pressArrowRight(page, 1);
   await pasteByKeyboard(page);
+  await waitNextFrame(page);
 
   await assertRichTexts(page, ['123', '456456', '789']);
 });
@@ -752,22 +753,19 @@ test('should format quick bar show when double click text', async ({
   await expect(formatBar).toBeVisible();
 });
 
-test.fixme(
-  'should format quick bar not show at readonly mode',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await switchReadonly(page);
+test('should format quick bar not show at readonly mode', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await switchReadonly(page);
 
-    await dragBetweenIndices(page, [0, 0], [2, 3]);
-    const formatBar = page.locator(`.affine-format-bar-widget`);
-    await expect(formatBar).not.toBeVisible();
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  const formatBar = page.locator(`.affine-format-bar-widget`);
+  await expect(formatBar).not.toBeVisible();
 
-    await page.dblclick('.affine-rich-text', { position: { x: 10, y: 10 } });
-    await expect(formatBar).not.toBeVisible();
-  }
-);
+  await page.dblclick('.affine-rich-text', { position: { x: 10, y: 10 } });
+  await expect(formatBar).not.toBeVisible();
+});
 
 async function scrollToTop(page: Page) {
   await page.mouse.wheel(0, -1000);
@@ -903,50 +901,47 @@ test('should format quick bar action status updated while undo', async ({
   await expect(boldBtn).not.toHaveAttribute('active', '');
 });
 
-test.fixme(
-  'should format quick bar work in single block selection',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { noteId } = await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
+test('should format quick bar work in single block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
 
-    await dragBetweenIndices(
-      page,
-      [1, 0],
-      [1, 3],
-      { x: -26 - 24, y: -10 },
-      { x: 0, y: 0 }
-    );
-    const blockSelections = page.locator('.selected');
-    await expect(blockSelections).toHaveCount(1);
+  await dragBetweenIndices(
+    page,
+    [1, 0],
+    [1, 3],
+    { x: -26 - 24, y: -10 },
+    { x: 0, y: 0 }
+  );
+  const blockSelections = page.locator('.selected,affine-block-selection');
+  await expect(blockSelections).toHaveCount(1);
 
-    const formatBar = page.locator(`.affine-format-bar-widget`);
-    await expect(formatBar).toBeVisible();
+  const { formatBar } = getFormatBar(page);
+  await expect(formatBar).toBeVisible();
 
-    const box = await formatBar.boundingBox();
-    if (!box) {
-      throw new Error("formatBar doesn't exist");
-    }
-    const rect = await blockSelections.boundingBox();
-    assertExists(rect);
-    // const rect = await getSelectionRect(page);
-    assertAlmostEqual(box.x - rect.x, 301.5, 10);
-    assertAlmostEqual(box.y - rect.y, -50, 10);
+  const formatRect = await formatBar.boundingBox();
+  const selectionRect = await blockSelections.boundingBox();
+  assertExists(formatRect);
+  assertExists(selectionRect);
+  assertAlmostEqual(formatRect.x - selectionRect.x, 178.5, 10);
+  assertAlmostEqual(formatRect.y - selectionRect.y, -50, 10);
 
-    const boldBtn = formatBar.getByTestId('bold');
-    await boldBtn.click();
-    const italicBtn = formatBar.getByTestId('italic');
-    await italicBtn.click();
-    const underlineBtn = formatBar.getByTestId('underline');
-    await underlineBtn.click();
-    // Cancel italic
-    await italicBtn.click();
+  const boldBtn = formatBar.getByTestId('bold');
+  await boldBtn.click();
+  const italicBtn = formatBar.getByTestId('italic');
+  await italicBtn.click();
+  const underlineBtn = formatBar.getByTestId('underline');
+  await underlineBtn.click();
+  // Cancel italic
+  await italicBtn.click();
 
-    await expect(blockSelections).toHaveCount(1);
+  await expect(blockSelections).toHaveCount(1);
 
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:hidden={false}
@@ -973,54 +968,53 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
+    noteId
+  );
 
-    await page.mouse.click(0, 0);
-    await expect(formatBar).not.toBeVisible();
+  await page.mouse.click(0, 0);
+  await expect(formatBar).not.toBeVisible();
+});
+
+test('should format quick bar work in multiple block selection', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+
+  await dragBetweenIndices(
+    page,
+    [2, 3],
+    [0, 0],
+    { x: 20, y: 20 },
+    { x: 0, y: 0 }
+  );
+  const blockSelections = page.locator('.selected,affine-block-selection');
+  await expect(blockSelections).toHaveCount(3);
+
+  const formatBarController = getFormatBar(page);
+  await expect(formatBarController.formatBar).toBeVisible();
+
+  const box = await formatBarController.formatBar.boundingBox();
+  if (!box) {
+    throw new Error("formatBar doesn't exist");
   }
-);
+  const rect = await blockSelections.first().boundingBox();
+  assertExists(rect);
+  assertAlmostEqual(box.x - rect.x, 178.5, 10);
+  assertAlmostEqual(box.y - rect.y, -45, 10);
 
-test.fixme(
-  'should format quick bar work in multiple block selection',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    const { noteId } = await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
+  await formatBarController.boldBtn.click();
+  await formatBarController.italicBtn.click();
+  await formatBarController.underlineBtn.click();
+  // Cancel italic
+  await formatBarController.italicBtn.click();
 
-    await dragBetweenIndices(
-      page,
-      [2, 3],
-      [0, 0],
-      { x: 20, y: 20 },
-      { x: 0, y: 0 }
-    );
-    const blockSelections = page.locator('affine-selected-blocks > *');
-    await expect(blockSelections).toHaveCount(3);
+  await expect(blockSelections).toHaveCount(3);
 
-    const formatBarController = getFormatBar(page);
-    await expect(formatBarController.formatBar).toBeVisible();
-
-    const box = await formatBarController.formatBar.boundingBox();
-    if (!box) {
-      throw new Error("formatBar doesn't exist");
-    }
-    const rect = await blockSelections.first().boundingBox();
-    assertExists(rect);
-    assertAlmostEqual(box.x - rect.x, 301.5, 10);
-    assertAlmostEqual(box.y - rect.y, -45, 10);
-
-    await formatBarController.boldBtn.click();
-    await formatBarController.italicBtn.click();
-    await formatBarController.underlineBtn.click();
-    // Cancel italic
-    await formatBarController.italicBtn.click();
-
-    await expect(blockSelections).toHaveCount(3);
-
-    await assertStoreMatchJSX(
-      page,
-      `
+  await assertStoreMatchJSX(
+    page,
+    `
 <affine:note
   prop:background="--affine-background-secondary-color"
   prop:hidden={false}
@@ -1063,13 +1057,12 @@ test.fixme(
     prop:type="text"
   />
 </affine:note>`,
-      noteId
-    );
+    noteId
+  );
 
-    await page.mouse.click(0, 0);
-    await expect(formatBarController.formatBar).not.toBeVisible();
-  }
-);
+  await page.mouse.click(0, 0);
+  await expect(formatBarController.formatBar).not.toBeVisible();
+});
 
 test('should format quick bar with block selection works when update block type', async ({
   page,
@@ -1168,12 +1161,12 @@ test('should format quick bar show after convert to code block', async ({
     { x: 0, y: 0 }
   );
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(345, 194);
+  await formatBarController.assertBoundingBox(252.5, 194);
 
   await formatBarController.openParagraphMenu();
   await formatBarController.codeBlockBtn.click();
   await expect(formatBarController.formatBar).toBeVisible();
-  await formatBarController.assertBoundingBox(6, 244);
+  await formatBarController.assertBoundingBox(73.1, 244);
   await assertStoreMatchJSX(
     page,
     `
@@ -1388,17 +1381,16 @@ test('should update the format quick bar state when there is a change in keyboar
   });
 });
 
-test.fixme(
-  'should register custom elements in format quick bar',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await registerFormatBarCustomElements(page);
-    await dragBetweenIndices(page, [0, 0], [2, 3]);
-    await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
-  }
-);
+test('should register custom elements in format quick bar', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await registerFormatBarCustomElements(page);
+  await dragBetweenIndices(page, [0, 0], [2, 3]);
+  await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
+});
 
 test('format quick bar should not break cursor jumping', async ({ page }) => {
   await enterPlaygroundRoom(page);

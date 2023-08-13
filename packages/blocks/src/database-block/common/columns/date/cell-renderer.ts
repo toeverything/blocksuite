@@ -19,16 +19,16 @@ export class DateCell extends BaseCellRenderer<number> {
     .affine-database-date {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
+      font-size: 12px;
+      line-height: 20px;
+      height: 20px;
     }
   `;
 
@@ -46,21 +46,6 @@ export class DateCellEditing extends BaseCellRenderer<number> {
       width: 100%;
       height: 100%;
       cursor: text;
-    }
-
-    .affine-database-date {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      width: 100%;
-      padding: 0;
-      border: none;
-      font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
-      color: var(--affine-text-primary-color);
-      font-weight: 400;
-      background-color: transparent;
     }
 
     .affine-database-date:focus {

@@ -97,7 +97,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},91]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
@@ -230,6 +230,10 @@ export async function assertBlockCount(
   count: number
 ) {
   const actual = await page.locator(`affine-${flavour}`).count();
+  expect(actual).toBe(count);
+}
+export async function assertRowCount(page: Page, count: number) {
+  const actual = await page.locator('.affine-database-block-row').count();
   expect(actual).toBe(count);
 }
 

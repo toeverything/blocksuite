@@ -20,7 +20,7 @@ export abstract class BaseCellRenderer<
   @property({ attribute: false })
   selectCurrentCell!: (editing: boolean) => void;
   @property({ attribute: false })
-  rectChanged!: () => void;
+  rectChanged?: () => void;
 
   get readonly(): boolean {
     return this.column.readonly;
@@ -68,5 +68,17 @@ export abstract class BaseCellRenderer<
         e.stopPropagation();
       }
     });
+    const type = this.column.type;
+    this._disposables.add(
+      this.column.onCellUpdate(this.rowId, () => {
+        if (this.column.type === type) {
+          this.requestUpdate();
+        }
+      })
+    );
+  }
+
+  forceUpdate(): void {
+    this.requestUpdate();
   }
 }

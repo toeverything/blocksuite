@@ -16,7 +16,10 @@ export async function updateBlockType(
       ) as PageBlockComponent;
       const selectedBlockElements =
         //@ts-ignore
-        window.testUtils.pageBlock.getSelectedContentBlockElements(pageElement);
+        window.testUtils.pageBlock.getSelectedContentBlockElements(
+          pageElement,
+          ['text', 'block']
+        );
       //@ts-ignore
       window.testUtils.pageBlock.updateBlockElementType(
         pageElement,

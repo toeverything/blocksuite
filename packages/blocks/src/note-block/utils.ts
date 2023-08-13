@@ -1,14 +1,18 @@
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockElement } from '@blocksuite/lit';
+import { deserializeXYWH } from '@blocksuite/phasor';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
+import { almostEqual } from '../__internal__/utils/common.js';
+import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import {
   autoScroll,
   caretFromPoint,
 } from '../page-block/text-selection/utils.js';
-import type { PageBlockComponent } from '../page-block/types.js';
-import { getSelectedContentBlockElements } from '../page-block/utils/index.js';
+import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
+import type { NoteBlockComponent } from './note-block.js';
 
 const getSelection = (blockComponent: BlockElement) =>
   blockComponent.root.selectionManager;
@@ -349,23 +353,25 @@ export function moveCursorToPrevBlockElement(prevBlock: BlockElement) {
   }
 }
 
-export function getSelectedBlockElements(
-  pageElement: PageBlockComponent
-): BlockElement[] {
-  const selectionManager = pageElement.root.selectionManager;
+export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
+  requestAnimationFrame(() => {
+    const page = noteElement.page;
+    if (!page.root) return;
 
-  if (selectionManager.find('text')) {
-    return getSelectedContentBlockElements(pageElement);
-  }
+    let zoom = 1;
+    const pageElement = getClosestPageBlockComponent(noteElement);
+    if (pageElement instanceof EdgelessPageBlockComponent) {
+      zoom = pageElement.surface.viewport.zoom;
+    }
 
-  const blockSelections = selectionManager.filter('block');
-  if (blockSelections.length === 0) {
-    return [];
-  }
-
-  return blockSelections
-    .map(selection => {
-      return pageElement.root.viewStore.viewFromPath('block', selection.path);
-    })
-    .filter((block): block is BlockElement => block?.model.role === 'content');
+    const bound = noteElement.getBoundingClientRect();
+    const [x, y, w, h] = deserializeXYWH(noteElement.model.xywh);
+    const newModelHeight =
+      bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
+    if (!almostEqual(newModelHeight, h)) {
+      page.updateBlock(noteElement.model, {
+        xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+      });
+    }
+  });
 }

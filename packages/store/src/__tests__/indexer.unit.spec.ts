@@ -30,7 +30,7 @@ async function createTestPage(pageId = 'page0', workspace?: Workspace) {
   return page;
 }
 
-describe.skip('workspace.search works', () => {
+describe('workspace.search works', () => {
   it('workspace search matching', async () => {
     const page = await createTestPage();
     const workspace = page.workspace;
@@ -60,11 +60,15 @@ describe.skip('workspace.search works', () => {
       noteId
     );
 
-    const id = page.id.replace('space:', '');
+    const id = page.id;
 
     queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(new Map([['2', id]]));
-      expect(workspace.search('索尼')).toStrictEqual(new Map([['3', id]]));
+      expect(workspace.search('处理器')).toStrictEqual(
+        new Map([['2', `space:${id}`]])
+      );
+      expect(workspace.search('索尼')).toStrictEqual(
+        new Map([['3', `space:${id}`]])
+      );
     });
   });
 });
