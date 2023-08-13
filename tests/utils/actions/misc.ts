@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
+import type { DatabaseBlockModel } from '@blocksuite/blocks';
 import {
   type CssVariableName,
   type ListType,
@@ -359,16 +360,18 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       });
     }
     const noteId = page.addBlock('affine:note', {}, pageId);
-    const paragraphId = page.addBlock(
+    const databaseId = page.addBlock(
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumnName: 'Title',
       },
       noteId
     );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
     page.captureSync();
-    return { pageId, noteId, paragraphId };
+    return { pageId, noteId, databaseId };
   }, pageId);
   return ids;
 }

@@ -1,10 +1,13 @@
-import type { SelectTag } from '@blocksuite/blocks/components/tags/multi-tag-select';
-import { columnManager } from '@blocksuite/blocks/database-block/common/columns/manager';
-import { numberColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/number/define';
-import { richTextColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/rich-text/define';
-import { selectColumnTypeName } from '@blocksuite/blocks/database-block/common/columns/select/define';
+import { getServiceOrRegister } from '@blocksuite/blocks';
+import { checkboxPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/checkbox/define';
+import { datePureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/date/define';
+import { linkPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/link/define';
+import { multiSelectColumnConfig } from '@blocksuite/blocks/database-block/common/columns/multi-select/cell-renderer';
+import { numberPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/number/define';
+import { progressPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/progress/define';
+import { richTextPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/rich-text/define';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
-import { nanoid, Text, type Workspace } from '@blocksuite/store';
+import { assertExists, Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
@@ -22,75 +25,55 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
 
   // Add note block inside page block
   const noteId = page.addBlock('affine:note', {}, pageBlockId);
-
-  const selection: SelectTag[] = [
-    { id: nanoid(), value: 'TODO', color: 'var(--affine-tag-pink)' },
-    { id: nanoid(), value: 'WIP', color: 'var(--affine-tag-blue)' },
-    { id: nanoid(), value: 'Done', color: 'var(--affine-tag-white)' },
-  ];
+  const pId = page.addBlock('affine:paragraph', {}, noteId);
+  const model = page.getBlockById(pId);
+  assertExists(model);
   // Add database block inside note block
   const databaseId = page.addBlock(
     'affine:database',
     {
       columns: [],
       cells: {},
-      titleColumnName: 'Title',
-      titleColumnWidth: 200,
     },
     noteId
   );
+  const service = await getServiceOrRegister('affine:database');
+  service.initDatabaseBlock(page, model, databaseId, 'table', true);
   const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-  const col1 = database.addColumn(
+  database.addColumn(
     'end',
-    columnManager.getColumn(numberColumnTypeName).create('Number')
+    numberPureColumnConfig.create(numberPureColumnConfig.name)
   );
-  const col2 = database.addColumn(
+  database.addColumn(
     'end',
-    columnManager
-      .getColumn(selectColumnTypeName)
-      .create('Single Select', { options: selection })
+    richTextPureColumnConfig.create(richTextPureColumnConfig.name)
   );
-  const col3 = database.addColumn(
+  database.addColumn(
     'end',
-    columnManager.getColumn(richTextColumnTypeName).create('Rich Text')
+    datePureColumnConfig.create(datePureColumnConfig.name)
   );
-
-  database.applyColumnUpdate();
-
-  const p1 = page.addBlock(
-    'affine:paragraph',
-    {
-      text: new page.Text('text1'),
-    },
-    databaseId
+  database.addColumn(
+    'end',
+    linkPureColumnConfig.create(linkPureColumnConfig.name)
   );
-  const p2 = page.addBlock(
-    'affine:paragraph',
-    {
-      text: new page.Text('text2'),
-    },
-    databaseId
+  database.addColumn(
+    'end',
+    progressPureColumnConfig.create(progressPureColumnConfig.name)
   );
-
-  database.updateCell(p1, {
-    columnId: col1,
-    value: 0.1,
-  });
-
-  database.updateCell(p2, {
-    columnId: col2,
-    value: selection[1].id,
-  });
-
-  const text = new page.YText();
-  text.insert(0, '123');
-  text.insert(0, 'code');
-  database.updateCell(p2, {
-    columnId: col3,
-    value: text,
-  });
-
+  database.addColumn(
+    'end',
+    checkboxPureColumnConfig.create(checkboxPureColumnConfig.name)
+  );
+  database.addColumn(
+    'end',
+    multiSelectColumnConfig.create(multiSelectColumnConfig.name)
+  );
   // Add a paragraph after database
+  page.addBlock('affine:paragraph', {}, noteId);
+  page.addBlock('affine:paragraph', {}, noteId);
+  page.addBlock('affine:paragraph', {}, noteId);
+  page.addBlock('affine:paragraph', {}, noteId);
+  page.addBlock('affine:paragraph', {}, noteId);
   page.addBlock('affine:paragraph', {}, noteId);
   database.addView('kanban');
   page.resetHistory();

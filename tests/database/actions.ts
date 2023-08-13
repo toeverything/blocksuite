@@ -17,7 +17,6 @@ import {
 } from '../utils/actions/misc.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
-  await focusDatabaseHeader(page);
   const editor = getEditorLocator(page);
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();

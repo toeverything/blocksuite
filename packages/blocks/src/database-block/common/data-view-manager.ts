@@ -54,7 +54,7 @@ export interface DataViewManager {
 
   rowAdd(insertPosition: InsertPosition): string;
 
-  columnAdd(toAfterOfColumn: InsertPosition, type?: string): void;
+  columnAdd(toAfterOfColumn: InsertPosition, type?: string): string;
 
   columnDelete(columnId: string): void;
 
@@ -291,8 +291,10 @@ export abstract class BaseDataViewManager implements DataViewManager {
     this.dataSource.cellChangeValue(rowId, columnId, value);
   }
 
-  public columnAdd(toAfterOfColumn: InsertPosition, type?: string): void {
-    this.dataSource.propertyAdd(toAfterOfColumn, type);
+  public columnAdd(position: InsertPosition, type?: string): string {
+    const id = this.dataSource.propertyAdd(position, type);
+    this.columnMove(id, position);
+    return id;
   }
 
   public columnDelete(columnId: string): void {

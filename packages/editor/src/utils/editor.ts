@@ -51,7 +51,11 @@ export const createBlockHub: (
         );
       } else if (data.flavour === 'affine:bookmark') {
         const url = await getBookmarkInitialProps();
-        url && models.push({ flavour: 'affine:bookmark', url });
+        url &&
+          models.push({
+            flavour: 'affine:bookmark',
+            url,
+          });
       } else {
         models.push(data);
       }
@@ -94,7 +98,11 @@ export const createBlockHub: (
         );
       } else if (props.flavour === 'affine:bookmark') {
         const url = await getBookmarkInitialProps();
-        url && models.push({ flavour: 'affine:bookmark', url });
+        url &&
+          models.push({
+            flavour: 'affine:bookmark',
+            url,
+          });
       } else {
         models.push(props);
       }
@@ -126,7 +134,7 @@ export const createBlockHub: (
           const service = await getServiceOrRegister<'affine:database'>(
             props.flavour
           );
-          service.initDatabaseBlock(page, model, focusId);
+          service.initDatabaseBlock(page, model, focusId, 'table');
         }
       }
 
@@ -164,7 +172,7 @@ export const createBlockHub: (
           const service = await getServiceOrRegister<'affine:database'>(
             props.flavour
           );
-          service.initDatabaseBlock(page, model, model.id);
+          service.initDatabaseBlock(page, model, model.id, 'table');
         }
       }
       pageBlock.setSelection(noteId, true, focusId, point);
@@ -191,7 +199,11 @@ export const createBlockHub: (
     getHoveringNoteState: (point: Point) => {
       const state = {
         scale: 1,
-      } as { container?: Element; rect?: Rect; scale: number };
+      } as {
+        container?: Element;
+        rect?: Rect;
+        scale: number;
+      };
 
       if (editor.mode === 'page') {
         const docPageBlock = editor.querySelector('affine-doc-page');
