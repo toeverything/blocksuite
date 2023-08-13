@@ -249,6 +249,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     }
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
+    if (!current) {
+      return;
+    }
     const viewData = this.getView(current.id);
     const props = {
       titleText: this.model.title,

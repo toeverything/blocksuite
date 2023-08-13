@@ -8,17 +8,14 @@ import { assertExists } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { columnManager } from '../../database-block/common/columns/manager.js';
-import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
+import type { DataViewTypes } from '../../database-block/common/data-view.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { styles } from './styles.js';
 
-type DatabaseViewName = 'table' | 'kanban';
-
 interface DatabaseView {
-  type: DatabaseViewName;
+  type: DataViewTypes;
   text: string;
   icon: TemplateResult;
   description?: string;
@@ -35,8 +32,6 @@ const databaseViews: DatabaseView[] = [
     type: 'kanban',
     text: 'Kanban view',
     icon: DatabaseKanbanViewIcon,
-    description: 'Coming soon',
-    isComingSoon: true,
   },
 ];
 
@@ -53,7 +48,7 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
     this.style.display = 'none';
   }
 
-  private _convertToDatabase(viewType: DatabaseViewName) {
+  private _convertToDatabase(viewType: DataViewTypes) {
     const pageElement = this.pageElement;
     if (!isPageComponent(pageElement)) {
       throw new Error(
@@ -61,8 +56,12 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
       );
     }
     const selectedModels = getSelectedContentModels(pageElement);
-    //TODO: kanban view
-    if (viewType !== 'table' || selectedModels.length === 0) return;
+
+    if (
+      selectedModels.length === 0 ||
+      new Set(selectedModels.map(v => v.flavour)).size !== 1
+    )
+      return;
 
     this.page.captureSync();
 
@@ -71,37 +70,25 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
 
     const id = this.page.addBlock(
       'affine:database',
-      {
-        columns: [],
-        titleColumnName: 'Title',
-      },
+      {},
       parentModel,
       parentModel.children.indexOf(selectedModels[0])
     );
-
     const databaseModel = this.page.getBlockById(id) as DatabaseBlockModel;
     assertExists(databaseModel);
-
-    // default column
-    databaseModel.addColumn(
-      'end',
-      columnManager
-        .getColumn(multiSelectPureColumnConfig.type)
-        .create('Tag', { options: [] })
-    );
+    databaseModel.initConvert(viewType);
     databaseModel.applyColumnUpdate();
-
     this.page.moveBlocks(selectedModels, databaseModel);
 
     this.style.display = 'none';
   }
 
   override render() {
-    return html`<div class=${AFFINE_DATABASE_CONVERT_WIDGET_TAG}>
+    return html` <div class="${AFFINE_DATABASE_CONVERT_WIDGET_TAG}">
       <div
-        @click=${() => {
+        @click="${() => {
           this.style.display = 'none';
-        }}
+        }}"
         class="overlay-mask"
       ></div>
       <div class="modal-container">
@@ -118,10 +105,8 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
             ${databaseViews.map(view => {
               return html`
                 <div
-                  class="modal-view-item ${view.type} ${view.isComingSoon
-                    ? 'coming-soon'
-                    : ''}"
-                  @click=${() => this._convertToDatabase(view.type)}
+                  class="modal-view-item ${view.type}"
+                  @click="${() => this._convertToDatabase(view.type)}"
                 >
                   <div class="modal-view-item-content">
                     <div class="modal-view-item-icon">${view.icon}</div>

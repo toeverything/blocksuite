@@ -547,7 +547,7 @@ test('should insert database', async ({ page }) => {
   const database = page.locator('affine-database');
   expect(database).toBeVisible();
   const tagColumn = page.locator('.affine-database-column').nth(1);
-  expect(await tagColumn.innerText()).toBe('Tag');
+  expect(await tagColumn.innerText()).toBe('Status');
   const defaultRows = page.locator('.affine-database-block-row');
   expect(await defaultRows.count()).toBe(3);
 });

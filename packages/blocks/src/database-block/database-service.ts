@@ -25,7 +25,7 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
   ) {
     const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
     assertExists(blockModel);
-    blockModel.init(viewType);
+    blockModel.initTemplate(viewType);
     if (isAppendNewRow) {
       // Add a paragraph after database
       const parent = page.getParent(model);
