@@ -8,6 +8,7 @@ import {
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
@@ -38,6 +39,7 @@ const styles = css`
     border-radius: 4px;
     cursor: pointer;
   }
+
   .field-left:hover {
     background-color: var(--affine-hover-color);
   }
@@ -66,10 +68,19 @@ const styles = css`
     border-radius: 4px;
     flex: 1;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
   }
 
   .field-content:hover {
     background-color: var(--affine-hover-color);
+  }
+  .field-content.is-editing {
+    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+  }
+  .field-content.is-focus {
+    border: 1px solid var(--affine-primary-color);
   }
 `;
 
@@ -83,7 +94,8 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   column!: DataViewColumnManager;
   @property({ attribute: false })
   rowId!: string;
-
+  @state()
+  isFocus = false;
   @state()
   editing = false;
   private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
@@ -93,10 +105,17 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   }
 
   public changeEditing = (editing: boolean) => {
-    this.editing = editing;
+    const selection = this.closest('affine-data-view-record-detail')?.selection;
+    if (selection) {
+      selection.selection = {
+        propertyId: this.column.id,
+        isEditing: editing,
+      };
+    }
   };
 
-  public _click = () => {
+  public _click = (e: MouseEvent) => {
+    e.stopPropagation();
     this.changeEditing(true);
   };
   public _clickLeft = (e: MouseEvent) => {
@@ -147,7 +166,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Move up',
-            icon: html`<div
+            icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${DatabaseMoveLeft}
@@ -167,7 +186,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Move down',
-            icon: html`<div
+            icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
               ${DatabaseMoveRight}
@@ -215,6 +234,11 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       selectCurrentCell: this.changeEditing,
     };
     const { view, edit } = this.column.detailRenderer;
+    const contentClass = classMap({
+      'field-content': true,
+      'is-editing': this.editing,
+      'is-focus': this.isFocus,
+    });
     return html`
       <div class="field-left" @click="${this._clickLeft}">
         <div class="icon">
@@ -222,7 +246,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
         </div>
         <div class="filed-name">${column.name}</div>
       </div>
-      <div @click="${this._click}" class="field-content">
+      <div @click="${this._click}" class="${contentClass}">
         <uni-lit
           ${ref(this._cell)}
           class="kanban-cell"
