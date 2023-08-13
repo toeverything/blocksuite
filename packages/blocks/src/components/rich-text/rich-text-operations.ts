@@ -331,7 +331,6 @@ export function handleOutdent(
     }
   }
 
-  assertExists(model);
   asyncSetVRange(model, { index: offset, length: 0 });
 }
 

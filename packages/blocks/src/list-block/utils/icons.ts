@@ -1,4 +1,4 @@
-import { html } from 'lit';
+import { html, svg } from 'lit';
 
 export const point1 = () => {
   return html`
@@ -69,39 +69,33 @@ export const point4 = () => {
   `;
 };
 
-export const toggleRight = (enabled = true) => {
-  return html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      data-is-toggle-icon="true"
-      width="1em"
-      height="1em"
-      viewBox="0 0 20 20"
-    >
-      <path
-        fill="currentColor"
-        opacity="${enabled ? '1' : '0.6'}"
-        d="m15.795 11.272l-8 5A1.5 1.5 0 0 1 5.5 15V5a1.5 1.5 0 0 1 2.295-1.272l8 5a1.5 1.5 0 0 1 0 2.544Z"
-      />
-    </svg>
-  `;
-};
-export const toggleDown = () => {
-  return html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      data-is-toggle-icon="true"
-      width="1em"
-      height="1em"
-      viewBox="0 0 20 20"
-    >
-      <path
-        fill="currentColor"
-        d="m8.728 15.795l-5-8A1.5 1.5 0 0 1 5 5.5h10a1.5 1.5 0 0 1 1.272 2.295l-5 8a1.5 1.5 0 0 1-2.544 0Z"
-      />
-    </svg>
-  `;
-};
+const toggleSVG = svg`<path
+d="M16.5 11.134C17.1667 11.5189 17.1667 12.4811 16.5 12.866L9 17.1962C8.33333 17.5811 7.5 17.0999 7.5 16.3301L7.5 7.66989C7.5 6.90009 8.33333 6.41896 9 6.80386L16.5 11.134Z"
+fill="#77757D"
+/>`;
+
+export const toggleRight = html`
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    ${toggleSVG}
+  </svg>
+`;
+
+export const toggleDown = html`
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    style="transform: rotate(90deg)"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    ${toggleSVG}
+  </svg>
+`;
 
 export const checkboxChecked = () => {
   return html`
