@@ -27,6 +27,7 @@ import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 import {
+  DRAG_HANDLE_GRABBER_BORDER_RADIUS,
   DRAG_HANDLE_GRABBER_HEIGHT,
   DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
@@ -134,6 +135,9 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
     this._dragHandleGrabber.style.width = `${
       DRAG_HANDLE_GRABBER_WIDTH * this._scale
+    }px`;
+    this._dragHandleGrabber.style.borderRadius = `${
+      DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
     }px`;
   }
 
