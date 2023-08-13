@@ -527,7 +527,11 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             @input=${this._onInputChange}
             @blur=${this._onInputBlur}
             @click=${stopPropagation}
+            @keydown=${stopPropagation}
             @keyup=${stopPropagation}
+            @pointerdown=${stopPropagation}
+            @pointerup=${stopPropagation}
+            @pointermove=${stopPropagation}
             @paste=${stopPropagation}
             @cut=${stopPropagation}
             @copy=${stopPropagation}

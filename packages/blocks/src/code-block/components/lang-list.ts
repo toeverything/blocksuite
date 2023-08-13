@@ -1,6 +1,5 @@
 import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { Slot } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
@@ -10,7 +9,10 @@ import {
 } from 'shiki';
 
 import { scrollbarStyle } from '../../components/utils.js';
-import { getLanguagePriority } from '../utils/code-languages.js';
+import {
+  getLanguagePriority,
+  type selectedLanguageChangedSlots,
+} from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
@@ -111,10 +113,9 @@ export class LangList extends ShadowlessElement {
   @property({ attribute: false })
   delay = 150;
 
-  slots = {
-    selectedLanguageChanged: new Slot<{ language: string | null }>(),
-    dispose: new Slot(),
-  };
+  @property({ attribute: false })
+  slots!: selectedLanguageChangedSlots;
+
   override async connectedCallback() {
     super.connectedCallback();
     // Avoid triggering click away listener on initial render
