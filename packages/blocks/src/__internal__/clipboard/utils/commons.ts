@@ -136,7 +136,7 @@ async function createPageClipboardItems(
 }
 
 export async function copyBlocksInPage(pageElement: PageBlockComponent) {
-  const selectedModels = getSelectedContentModels(pageElement);
+  const selectedModels = getSelectedContentModels(pageElement, ['text']);
   const textSelection = getTextSelection(pageElement) ?? undefined;
   const clipboardItems = await createPageClipboardItems(
     selectedModels,

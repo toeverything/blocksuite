@@ -8,6 +8,7 @@ import { actionConfig } from '../page-block/const/action-config.js';
 import { paragraphConfig } from '../page-block/const/paragraph-config.js';
 import type { PageBlockComponent } from '../page-block/types.js';
 import {
+  getSelectedContentBlockElements,
   onModelElementUpdated,
   updateBlockElementType,
 } from '../page-block/utils/index.js';
@@ -16,7 +17,6 @@ import {
   getBlockSelectionBySide,
   getNextBlock,
   getPrevBlock,
-  getSelectedBlockElements,
   getTextSelection,
   moveCursorToNextBlockElement,
   moveCursorToPrevBlockElement,
@@ -275,7 +275,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
           ctx.get('defaultState').event.preventDefault();
 
-          const selected = getSelectedBlockElements(pageElement);
+          const selected = getSelectedContentBlockElements(pageElement, [
+            'text',
+            'block',
+          ]);
 
           const newModels = updateBlockElementType(
             pageElement,

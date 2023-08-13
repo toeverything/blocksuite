@@ -50,7 +50,7 @@ import {
   isPureFileInClipboard,
   performNativeCopy,
 } from './utils/index.js';
-import { deleteModelsByRange } from './utils/operation.js';
+import { deleteModelsByTextSelection } from './utils/operation.js';
 
 function prepareConnnectorClipboardData(
   connector: ConnectorElement,
@@ -140,7 +140,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const { state } = this.selection;
     if (state.editing) {
-      deleteModelsByRange(this._edgeless);
+      deleteModelsByTextSelection(this._edgeless);
       return;
     }
 
@@ -240,11 +240,11 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByRange(this._edgeless);
+    deleteModelsByTextSelection(this._edgeless);
 
     const textSelection = getTextSelection(this._edgeless);
     assertExists(textSelection);
-    const selectedModels = getSelectedContentModels(this._edgeless);
+    const selectedModels = getSelectedContentModels(this._edgeless, ['text']);
 
     const focusedBlockModel = selectedModels[0];
     assertExists(focusedBlockModel);

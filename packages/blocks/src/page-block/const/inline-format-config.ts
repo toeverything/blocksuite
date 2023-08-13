@@ -76,7 +76,10 @@ const INLINE_UNSUPPORTED_MODELS: Flavour[] = [
 export function noneInlineUnsupportedBlockSelected(
   pageElement: PageBlockComponent
 ) {
-  const selectedModels = getSelectedContentModels(pageElement);
+  const selectedModels = getSelectedContentModels(pageElement, [
+    'text',
+    'block',
+  ]);
   return !selectedModels.every(model =>
     INLINE_UNSUPPORTED_MODELS.includes(model.flavour as Flavour)
   );
@@ -177,7 +180,10 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     // Only can show link button when selection is in one line paragraph
     showWhen: (pageElement: PageBlockComponent) => {
       const textSelection = getTextSelection(pageElement);
-      const selectedModels = getSelectedContentModels(pageElement);
+      const selectedModels = getSelectedContentModels(pageElement, [
+        'text',
+        'block',
+      ]);
       return (
         !!textSelection &&
         selectedModels.length === 1 &&

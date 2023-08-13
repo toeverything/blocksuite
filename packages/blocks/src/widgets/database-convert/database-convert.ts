@@ -55,7 +55,10 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
         'database convert widget must be hosted in page component'
       );
     }
-    const selectedModels = getSelectedContentModels(pageElement);
+    const selectedModels = getSelectedContentModels(pageElement, [
+      'text',
+      'block',
+    ]);
 
     if (
       selectedModels.length === 0 ||

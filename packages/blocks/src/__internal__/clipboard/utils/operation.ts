@@ -8,7 +8,7 @@ import {
 } from '../../../page-block/utils/selection.js';
 import { getVirgoByModel } from '../../utils/query.js';
 
-export function deleteModelsByRange(
+export function deleteModelsByTextSelection(
   pageElement: PageBlockComponent,
   textSelection?: TextSelection
 ) {
@@ -18,7 +18,7 @@ export function deleteModelsByRange(
   assertExists(textSelection);
 
   const page = pageElement.page;
-  const selectedModels = getSelectedContentModels(pageElement);
+  const selectedModels = getSelectedContentModels(pageElement, ['text']);
 
   if (selectedModels.length === 0) {
     return null;

@@ -14,7 +14,6 @@ import { html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
-import { noneInlineUnsupportedBlockSelected } from '../../page-block/const/inline-format-config.js';
 import type { RangeManager } from '../../page-block/text-selection/range-manager.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import {
@@ -22,7 +21,6 @@ import {
   getTextSelection,
 } from '../../page-block/utils/selection.js';
 import { ActionItems } from './components/action-items.js';
-import { BackgroundHighlightButton } from './components/bg-highlight-button.js';
 import { InlineItems } from './components/inline-items.js';
 import { ParagraphButton } from './components/paragraph-button.js';
 import { formatBarStyle } from './styles.js';
@@ -160,8 +158,10 @@ export class AffineFormatBarWidget extends WidgetElement {
             this._displayType = 'text';
             assertExists(pageElement.rangeManager);
             this._rangeManager = pageElement.rangeManager;
-            this._selectedBlockElements =
-              getSelectedContentBlockElements(pageElement);
+            this._selectedBlockElements = getSelectedContentBlockElements(
+              pageElement,
+              ['text']
+            );
           } else {
             this._reset();
           }
@@ -313,10 +313,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       page,
     });
     const actionItems = ActionItems(pageElement);
-    const inlineItems = InlineItems({ pageElement, formatBar: this });
-    const backgroundHighlightButton = BackgroundHighlightButton({
-      formatBar: this,
-    });
+    const inlineItems = InlineItems(this);
 
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET_TAG}
@@ -328,13 +325,7 @@ export class AffineFormatBarWidget extends WidgetElement {
         : nothing}
       ${paragraphButton}
       <div class="divider"></div>
-      ${inlineItems}
-      ${inlineItems.length ? html`<div class="divider"></div>` : nothing}
-      ${noneInlineUnsupportedBlockSelected(pageElement)
-        ? html`${backgroundHighlightButton}
-            <div class="divider"></div>`
-        : nothing}
-      ${actionItems}
+      ${inlineItems} ${actionItems}
     </div>`;
   }
 }

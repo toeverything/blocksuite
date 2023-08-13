@@ -12,7 +12,8 @@ import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import type { PageBlockComponent } from '../types.js';
 
 export function getSelectedContentModels(
-  pageElement: PageBlockComponent
+  pageElement: PageBlockComponent,
+  types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
 ): BaseBlockModel[] {
   const { rangeManager } = pageElement;
   const selectionManager = pageElement.root.selectionManager;
@@ -22,8 +23,10 @@ export function getSelectedContentModels(
     return [];
   }
 
+  const dirtyResult: BaseBlockModel[] = [];
+
   const textSelection = selectionManager.find('text');
-  if (textSelection) {
+  if (textSelection && types.includes('text')) {
     assertExists(rangeManager);
     const range = rangeManager.value;
     const selectedBlocks = rangeManager
@@ -34,32 +37,73 @@ export function getSelectedContentModels(
         return model ?? [];
       });
 
-    return selectedBlocks.filter(model => model.role === 'content');
+    dirtyResult.push(
+      ...selectedBlocks.filter(model => model.role === 'content')
+    );
   }
 
   const blockSelections = selectionManager.filter('block');
-  if (blockSelections.length > 0) {
-    return blockSelections
-      .map(selection => {
-        const model = pageElement.page.getBlockById(selection.blockId);
-        assertExists(model);
-        return model;
-      })
-      .filter(model => model.role === 'content');
+  if (blockSelections.length > 0 && types.includes('block')) {
+    dirtyResult.push(
+      ...blockSelections
+        .map(selection => {
+          const model = pageElement.page.getBlockById(selection.blockId);
+          assertExists(model);
+          return model;
+        })
+        .filter(model => model.role === 'content')
+    );
   }
 
-  return [];
+  // remove duplicate models
+  const result: BaseBlockModel[] = dirtyResult.filter(
+    (model, index) => dirtyResult.indexOf(model) === index
+  );
+
+  return result;
 }
 
 export function getSelectedContentBlockElements(
-  pageElement: PageBlockComponent
+  pageElement: PageBlockComponent,
+  types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
 ): BlockElement[] {
   const { rangeManager } = pageElement;
-  assertExists(rangeManager);
-  const range = rangeManager.value;
-  const selectedBlockElements =
-    rangeManager.getSelectedBlockElementsByRange(range);
-  return selectedBlockElements.filter(el => el.model.role === 'content');
+  const selectionManager = pageElement.root.selectionManager;
+  const selections = selectionManager.value;
+
+  if (selections.length === 0) {
+    return [];
+  }
+
+  const dirtyResult: BlockElement[] = [];
+
+  if (types.includes('text')) {
+    assertExists(rangeManager);
+    const range = rangeManager.value;
+    const selectedBlockElements =
+      rangeManager.getSelectedBlockElementsByRange(range);
+    dirtyResult.push(
+      ...selectedBlockElements.filter(el => el.model.role === 'content')
+    );
+  }
+
+  if (types.includes('block')) {
+    const viewStore = pageElement.root.viewStore;
+    const blockSelections = selectionManager.filter('block');
+    dirtyResult.push(
+      ...blockSelections.flatMap(selection => {
+        const el = viewStore.viewFromPath('block', selection.path);
+        return el ?? [];
+      })
+    );
+  }
+
+  // remove duplicate elements
+  const result: BlockElement[] = dirtyResult.filter(
+    (el, index) => dirtyResult.indexOf(el) === index
+  );
+
+  return result;
 }
 
 export function getTextSelection(
@@ -115,7 +159,10 @@ export function getCombinedFormatInTextSelection(
   textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  const selectedModel = getSelectedContentModels(pageElement);
+  const selectedModel = getSelectedContentModels(pageElement, [
+    'text',
+    'block',
+  ]);
   if (selectedModel.length === 0) {
     return {};
   }

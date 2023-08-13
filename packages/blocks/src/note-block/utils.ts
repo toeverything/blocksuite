@@ -11,8 +11,6 @@ import {
   autoScroll,
   caretFromPoint,
 } from '../page-block/text-selection/utils.js';
-import type { PageBlockComponent } from '../page-block/types.js';
-import { getSelectedContentBlockElements } from '../page-block/utils/index.js';
 import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
 import type { NoteBlockComponent } from './note-block.js';
 
@@ -353,27 +351,6 @@ export function moveCursorToPrevBlockElement(prevBlock: BlockElement) {
       autoScroll(viewport, nextRect.range.getBoundingClientRect().top);
     }
   }
-}
-
-export function getSelectedBlockElements(
-  pageElement: PageBlockComponent
-): BlockElement[] {
-  const selectionManager = pageElement.root.selectionManager;
-
-  if (selectionManager.find('text')) {
-    return getSelectedContentBlockElements(pageElement);
-  }
-
-  const blockSelections = selectionManager.filter('block');
-  if (blockSelections.length === 0) {
-    return [];
-  }
-
-  return blockSelections
-    .map(selection => {
-      return pageElement.root.viewStore.viewFromPath('block', selection.path);
-    })
-    .filter((block): block is BlockElement => block?.model.role === 'content');
 }
 
 export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {

@@ -329,7 +329,7 @@ test('should format quick bar be able to change background color', async ({
   // drag only the `456` paragraph
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const paragraphBtn = page.locator(`.background-highlight-button`);
+  const paragraphBtn = page.locator('.background-button');
   await paragraphBtn.hover();
   const PinkBtn = page
     .locator(`.affine-format-bar-widget`)

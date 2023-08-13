@@ -46,7 +46,10 @@ export const actionConfig: ActionConfig[] = [
     icon: DatabaseTableViewIcon20,
     hotkey: `Mod-g`,
     showWhen: (pageElement: PageBlockComponent) => {
-      const selectedModels = getSelectedContentModels(pageElement);
+      const selectedModels = getSelectedContentModels(pageElement, [
+        'text',
+        'block',
+      ]);
 
       if (selectedModels.length === 0) {
         return false;
