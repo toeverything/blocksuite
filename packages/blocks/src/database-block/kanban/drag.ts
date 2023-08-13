@@ -121,18 +121,15 @@ const createDragPreview = (card: KanbanCard, x: number, y: number) => {
   kanbanCard.view = card.view;
   kanbanCard.isFocus = true;
   kanbanCard.style.backgroundColor = 'var(--affine-background-primary-color)';
-  const parent = card.offsetParent;
-  assertExists(parent);
-  const parentRect = parent.getBoundingClientRect();
   div.append(kanbanCard);
   div.style.width = `${card.getBoundingClientRect().width}px`;
-  div.style.position = 'absolute';
+  div.style.position = 'fixed';
   // div.style.pointerEvents = 'none';
   div.style.transform = 'rotate(-3deg)';
-  div.style.left = `${x - parentRect.left}px`;
-  div.style.top = `${y - parentRect.top}px`;
+  div.style.left = `${x}px`;
+  div.style.top = `${y}px`;
   div.style.zIndex = '999';
-  card.closest('affine-data-view-kanban')?.append(div);
+  document.body.append(div);
   return {
     display(x: number, y: number) {
       div.style.left = `${Math.round(x)}px`;
