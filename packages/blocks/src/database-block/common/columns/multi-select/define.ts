@@ -23,6 +23,14 @@ export const multiSelectPureColumnConfig = columnManager.register<
   defaultData: () => ({
     options: [],
   }),
+  addGroup: (text, oldData) => {
+    return {
+      options: [
+        ...oldData.options,
+        { id: nanoid(), value: text, color: getTagColor() },
+      ],
+    };
+  },
   formatValue: v => {
     if (Array.isArray(v)) {
       return v.filter(v => v != null);

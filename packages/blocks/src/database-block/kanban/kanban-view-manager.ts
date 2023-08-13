@@ -344,6 +344,10 @@ export class GroupHelper {
     return this.viewManager.columnGetDataType(this.groupBy.columnId);
   }
 
+  get column() {
+    return this.viewManager.columnGet(this.groupBy.columnId);
+  }
+
   get columnId() {
     return this.groupBy.columnId;
   }
@@ -369,7 +373,7 @@ export class GroupHelper {
   public readonly groups: KanbanGroupData[];
   public readonly groupMap: Record<string, KanbanGroupData>;
 
-  groupData() {
+  groupConfig() {
     return groupByMatcher.findData(v => v.name === this.groupBy.name);
   }
 
@@ -383,7 +387,7 @@ export class GroupHelper {
 
   addToGroup(rowId: string, key: string) {
     const columnId = this.columnId;
-    const addTo = this.groupData()?.addToGroup ?? (value => value);
+    const addTo = this.groupConfig()?.addToGroup ?? (value => value);
     const newValue = addTo(
       this.groupMap[key].value,
       this.viewManager.cellGetJsonValue(rowId, columnId)
@@ -393,7 +397,7 @@ export class GroupHelper {
 
   removeFromGroup(rowId: string, key: string) {
     const columnId = this.columnId;
-    const remove = this.groupData()?.removeFromGroup ?? (() => undefined);
+    const remove = this.groupConfig()?.removeFromGroup ?? (() => undefined);
     const newValue = remove(
       this.groupMap[key].value,
       this.viewManager.cellGetJsonValue(rowId, columnId)
@@ -454,12 +458,12 @@ export class GroupHelper {
   ) {
     if (fromGroupKey !== toGroupKey) {
       const columnId = this.columnId;
-      const remove = this.groupData()?.removeFromGroup ?? (() => undefined);
+      const remove = this.groupConfig()?.removeFromGroup ?? (() => undefined);
       let newValue = remove(
         this.groupMap[fromGroupKey].value,
         this.viewManager.cellGetJsonValue(rowId, columnId)
       );
-      const addTo = this.groupData()?.addToGroup ?? (value => value);
+      const addTo = this.groupConfig()?.addToGroup ?? (value => value);
       newValue = addTo(this.groupMap[toGroupKey].value, newValue);
       this.viewManager.cellUpdateValue(rowId, columnId, newValue);
     }
@@ -467,5 +471,9 @@ export class GroupHelper {
     const index = insertPositionToIndex(position, rows, id => id);
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
+  }
+  get addGroup() {
+    return this.viewManager.columnConfigManager.getColumn(this.column.type).ops
+      .addGroup;
   }
 }
