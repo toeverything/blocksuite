@@ -2,6 +2,7 @@ import { TagsIcon } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
+import { DEFAULT_PAGE_NAME } from '../__internal__/rich-text/reference-node.js';
 import { getService } from '../__internal__/service/index.js';
 import { BaseService } from '../__internal__/service/service.js';
 import type {
@@ -46,7 +47,9 @@ export class PageBlockService extends BaseService<PageBlockModel> {
         </div>
       `;
     }
-    return `<header><h1 class="page-title">${block.title.toString()}</h1>${pageMetaHtml}</header><div>${childText}</div>`;
+    return `<header><h1 class="page-title">${
+      block.title.toString() ?? DEFAULT_PAGE_NAME
+    }</h1>${pageMetaHtml}</header><div>${childText}</div>`;
   }
 
   override block2Text(

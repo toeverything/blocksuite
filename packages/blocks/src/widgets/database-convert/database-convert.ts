@@ -80,6 +80,9 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
     databaseModel.applyColumnUpdate();
     this.page.moveBlocks(selectedModels, databaseModel);
 
+    const selectionManager = this.pageElement.root.selectionManager;
+    selectionManager.clear();
+
     this.style.display = 'none';
   }
 

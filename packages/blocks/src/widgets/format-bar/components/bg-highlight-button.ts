@@ -10,7 +10,7 @@ import { html } from 'lit';
 import { backgroundHighlightConfig } from '../../../page-block/const/bg-highlight-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
-import { handleFormat } from '../../../page-block/utils/operations/inline.js';
+import { formatByTextSelection } from '../../../page-block/utils/operations/element/inline-level.js';
 import { getTextSelection } from '../../../page-block/utils/selection.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
@@ -33,7 +33,12 @@ const updateBackgroundHighlight = (
   if (color) {
     lastUsedColor = color;
   }
-  handleFormat(pageElement, textSelection, 'background', lastUsedColor);
+  formatByTextSelection(
+    pageElement,
+    textSelection,
+    'background',
+    !lastUsedColor || lastUsedColor === 'unset' ? null : lastUsedColor
+  );
 };
 
 const BackgroundHighlightPanel = ({

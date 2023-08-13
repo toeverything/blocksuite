@@ -115,7 +115,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   private _initYText = (text?: string) => {
     const yText = new YText(text);
-
     this.onChange(yText);
     return yText;
   };

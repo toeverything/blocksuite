@@ -17,7 +17,7 @@ export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: () => ({
-    xywh: `[0,0,${EDITOR_WIDTH},480]`,
+    xywh: `[0,0,${EDITOR_WIDTH},91]`,
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
