@@ -1,5 +1,5 @@
 import type { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { assertExists, type BaseBlockModel } from '@blocksuite/store';
 
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
@@ -12,7 +12,11 @@ export async function onModelTextUpdated(
   callback?: (text: RichText) => void
 ) {
   const richText = await asyncGetRichTextByModel(model);
-  richText?.vEditor?.slots.updated.once(() => {
+  assertExists(richText, 'RichText is not ready yet.');
+  await richText.updateComplete;
+  const vEditor = richText.vEditor;
+  assertExists(vEditor, 'VEditor is not ready yet.');
+  vEditor.slots.updated.once(() => {
     if (callback) {
       callback(richText);
     }
