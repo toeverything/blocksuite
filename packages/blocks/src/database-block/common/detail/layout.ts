@@ -94,10 +94,12 @@ class SideLayoutModal extends ShadowlessElement {
 export const popSideDetail = (ops: {
   view: DataViewManager;
   rowId: string;
+  onClose?: () => void;
 }) => {
   const modal = createModal();
   const close = () => {
     modal.remove();
+    ops.onClose?.();
   };
   const detail = new RecordDetail();
   detail.view = ops.view;

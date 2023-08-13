@@ -9,6 +9,7 @@ import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import type { DataViewManager } from '../data-view-manager.js';
+import { DetailSelection } from './selection.js';
 
 const styles = css`
   affine-data-view-record-detail {
@@ -16,6 +17,7 @@ const styles = css`
     flex-direction: column;
     padding: 0 36px;
     gap: 12px;
+    height: 100%;
   }
 
   .add-property {
@@ -56,7 +58,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   view!: DataViewManager;
   @property({ attribute: false })
   rowId!: string;
-
+  selection = new DetailSelection(this);
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -64,6 +66,10 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
+    this._disposables.addFromEvent(this, 'click', e => {
+      e.stopPropagation();
+      this.selection.selection = undefined;
+    });
   }
 
   @query('.add-property')
@@ -99,6 +105,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
             .view="${this.view}"
             .column="${column}"
             .rowId="${this.rowId}"
+            data-column-id="${column.id}"
           ></affine-data-view-record-field>`;
         }
       )}

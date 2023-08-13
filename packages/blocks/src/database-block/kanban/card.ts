@@ -76,9 +76,19 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
+      const selection = this.closest('affine-data-view-kanban')?.selection;
+      const preSelection = selection?.selection;
+      if (selection) {
+        selection.selection = undefined;
+      }
       popSideDetail({
         view: this.view,
         rowId: this.cardId,
+        onClose: () => {
+          if (selection) {
+            selection.selection = preSelection;
+          }
+        },
       });
     });
     this._disposables.add(
@@ -104,13 +114,14 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       ></affine-data-view-kanban-cell>
     </div>`;
   }
+
   private renderIcon() {
     const icon = this.view.getHeaderIcon(this.cardId);
     if (!icon) {
       return;
     }
     return html` <div class="card-header-icon">
-      <img src=${icon.getValue(this.cardId) as string} />
+      <img src="${icon.getValue(this.cardId) as string}" />
     </div>`;
   }
 
