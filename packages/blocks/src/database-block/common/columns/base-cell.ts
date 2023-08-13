@@ -68,9 +68,12 @@ export abstract class BaseCellRenderer<
         e.stopPropagation();
       }
     });
+    const type = this.column.type;
     this._disposables.add(
       this.column.onCellUpdate(this.rowId, () => {
-        this.requestUpdate();
+        if (this.column.type === type) {
+          this.requestUpdate();
+        }
       })
     );
   }
