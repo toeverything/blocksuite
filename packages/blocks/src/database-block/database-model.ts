@@ -48,7 +48,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   initTemplate(viewType: DataViewTypes) {
-    this.initEmpty(viewType);
     const ids = [nanoid(), nanoid(), nanoid()];
     const statusId = this.addColumn(
       'end',
@@ -85,6 +84,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         value: ids[i],
       });
     }
+    this.initEmpty(viewType);
   }
 
   addView(type: DataViewTypes) {
