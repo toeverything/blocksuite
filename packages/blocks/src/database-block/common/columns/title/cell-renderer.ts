@@ -4,6 +4,7 @@ import { css, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { popSideDetail } from '../../detail/layout.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -218,6 +219,7 @@ export class TitleDetailCell extends BaseCellRenderer<string> {
 
 columnRenderer.register({
   type: titleColumnTypeName,
+  icon: createIcon('TextIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(TitleCell),
     edit: createFromBaseCellRenderer(TitleCellEditing),

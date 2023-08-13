@@ -126,6 +126,8 @@ export interface DataViewColumnManager<
 
   get type(): string;
 
+  get dataType(): TType;
+
   get name(): string;
 
   get hide(): boolean;
@@ -460,6 +462,10 @@ export abstract class BaseDataViewColumnManager
 
   get type(): string {
     return this.dataViewManager.columnGetType(this.id);
+  }
+
+  get dataType(): TType {
+    return columnManager.getColumn(this.type).dataType(this.data);
   }
 
   getValue(rowId: string): unknown | undefined {

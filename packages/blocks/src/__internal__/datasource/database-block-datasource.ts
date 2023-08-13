@@ -131,6 +131,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
         columnId: propertyId,
         value,
       });
+      this._model.applyColumnUpdate();
     }
   }
 
@@ -318,7 +319,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     propertyId: string,
     callback: () => void
   ): Disposable {
-    if (this.propertyGetType(propertyId)) {
+    if (this.propertyGetType(propertyId) === 'title') {
       this.getModelById(rowId)?.text?.yText.observe(callback);
       return {
         dispose: () => {
@@ -326,7 +327,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
         },
       };
     }
-    return super.onCellUpdate(rowId, propertyId, callback);
+    return this._model.propsUpdated.on(callback);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

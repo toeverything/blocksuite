@@ -40,6 +40,7 @@ const styles = css`
     width: 16px;
     height: 16px;
     fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
   }
 
   .kanban-cell {
