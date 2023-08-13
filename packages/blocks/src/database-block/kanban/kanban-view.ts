@@ -3,6 +3,7 @@ import './header.js';
 import './drag.js';
 import '../common/group-by/define.js';
 
+import { AddCursorIcon } from '@blocksuite/global/config';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -10,6 +11,7 @@ import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
 import type { KanbanViewSelection } from '../../__internal__/index.js';
+import { popMenu } from '../../components/menu/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import { KanbanGroup } from './group.js';
 import { KanbanHotkeys } from './hotkeys.js';
@@ -28,6 +30,25 @@ const styles = css`
     display: flex;
     gap: 20px;
     overflow-x: auto;
+  }
+
+  .add-group-icon {
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .add-group-icon:hover {
+    background-color: var(--affine-hover-color);
+  }
+
+  .add-group-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
   }
 `;
 
@@ -94,12 +115,42 @@ export class DataViewKanban extends BaseDataView<
     });
   }
 
+  renderAddGroup = () => {
+    const addGroup = this.groupHelper?.addGroup;
+    if (!addGroup) {
+      return;
+    }
+    const add = (e: MouseEvent) => {
+      const ele = e.currentTarget as HTMLElement;
+      popMenu(ele, {
+        options: {
+          input: {
+            onComplete: text => {
+              const column = this.groupHelper?.column;
+              if (column) {
+                column.updateData(() => addGroup(text, column.data) as never);
+              }
+            },
+          },
+          items: [],
+        },
+      });
+    };
+    return html` <div
+      style="height: 32px;width: 100px;flex-shrink:0;display:flex;align-items:center;"
+      @click="${add}"
+    >
+      <div class="add-group-icon">${AddCursorIcon}</div>
+    </div>`;
+  };
+
   override render() {
     this.groupHelper = this.view.groupHelper;
     const groups = this.groupHelper?.groups;
     if (!groups) {
       return html``;
     }
+
     return html`
       <div class="affine-data-view-kanban-groups">
         ${repeat(
@@ -113,6 +164,7 @@ export class DataViewKanban extends BaseDataView<
             ></affine-data-view-kanban-group>`;
           }
         )}
+        ${this.renderAddGroup()}
       </div>
       <affine-data-view-kanban-drag
         .kanbanView="${this}"

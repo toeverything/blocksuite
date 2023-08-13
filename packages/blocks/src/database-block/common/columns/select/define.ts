@@ -22,6 +22,14 @@ export const selectPureColumnConfig = columnManager.register<
   defaultData: () => ({
     options: [],
   }),
+  addGroup: (text, oldData) => {
+    return {
+      options: [
+        ...oldData.options,
+        { id: nanoid(), value: text, color: getTagColor() },
+      ],
+    };
+  },
   cellToString: (data, colData) =>
     colData.options.find(v => v.id === data)?.value ?? '',
   cellFromString: (data, colData) => {

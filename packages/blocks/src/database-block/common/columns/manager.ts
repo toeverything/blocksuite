@@ -62,6 +62,7 @@ type ColumnOps<
     colData: Data
   ) => { value: unknown; data?: Record<string, unknown> };
   cellToJson: (data: Value, colData: Data) => JSON;
+  addGroup?: (text: string, oldData: Data) => Data;
 };
 
 type ConvertFunction<From extends ColumnConfig, To extends ColumnConfig> = (

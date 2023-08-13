@@ -202,6 +202,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   ): void {
     this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({ data }));
+    this._model.applyColumnUpdate();
   }
 
   public propertyChangeName(propertyId: string, name: string): void {
