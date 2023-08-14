@@ -36,10 +36,15 @@ const styles = css`
   }
 
   .group-header-title {
+    overflow: hidden;
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 12px;
+  }
+  .group-header-name {
+    flex: 1;
+    overflow: hidden;
   }
 
   .group-header-icon {
@@ -56,6 +61,7 @@ const styles = css`
   }
 
   .group-header-count {
+    flex-shrink: 0;
     width: 20px;
     height: 20px;
     border-radius: 4px;
