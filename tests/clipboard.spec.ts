@@ -410,8 +410,7 @@ test(scoped`copy & paste outside editor`, async ({ page }) => {
   await assertRichTexts(page, ['123']);
 });
 
-// FIXME: this test case can pass in local but not online
-test.skip('should keep first line format when pasted into a new line', async ({
+test('should keep first line format when pasted into a new line', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -560,7 +559,7 @@ test(
   }
 );
 
-test.skip('cut will delete all content, and copy will reappear content', async ({
+test('cut will delete all content, and copy will reappear content', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
