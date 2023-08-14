@@ -1,4 +1,5 @@
 import { css } from 'lit';
+
 export const styles = css`
   affine-multi-tag-select {
     position: absolute;
@@ -52,6 +53,8 @@ export const styles = css`
     padding: 8px;
     color: var(--affine-black-90);
     fill: var(--affine-black-90);
+    max-height: 400px;
+    overflow-y: auto;
   }
 
   .select-option-container-header {

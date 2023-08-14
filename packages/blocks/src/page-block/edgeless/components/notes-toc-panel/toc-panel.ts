@@ -7,7 +7,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
 import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
@@ -22,6 +22,7 @@ import {
   type SelectEvent,
   TOCNoteCard,
 } from './toc-card.js';
+import { TOCBlockPreview } from './toc-preview.js';
 import { startDragging } from './utils/drag.js';
 
 type TOCNoteItem = {
@@ -40,7 +41,6 @@ type TOCNoteItem = {
 
 noop(TOCNoteCard);
 
-@customElement('edgeless-toc-notes-panel')
 export class TOCNotesPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
@@ -51,13 +51,13 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     .navigation-panel-container {
       background-color: var(--affine-background-overlay-panel-color);
-      padding: 17.5px 18.5px;
+      padding: 17.5px 16px;
       box-sizing: border-box;
 
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 12px;
+      gap: 8px;
 
       height: 100%;
     }
@@ -111,9 +111,14 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     }
 
     .panel-list {
-      flex-grow: 1;
-      overflow: scroll;
       position: relative;
+      left: -8px;
+
+      flex-grow: 1;
+      width: calc(100% + 4px);
+      padding-left: 8px;
+
+      overflow-y: scroll;
     }
 
     .panel-list .title {
@@ -123,7 +128,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       color: var(--affine-text-secondary-color);
       font-family: var(--affine-font-sans-family);
       padding-left: 16px;
-      margin: 34px 0 24px 0;
+      margin: 21px 0 9px 0;
     }
 
     .insert-indicator {
@@ -160,6 +165,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   @query('.panel-list')
   panelListElement!: HTMLElement;
+
+  @property({ attribute: false })
+  host!: Document | HTMLElement;
 
   private _noteElementHeight = 0;
 
@@ -320,7 +328,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     startDragging(draggedNotesInfo, {
       width,
+      container: this,
       doc: this.ownerDocument,
+      host: this.host ?? this.ownerDocument,
       page: this.page,
       start: {
         x: e.detail.clientX,
@@ -466,4 +476,16 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-toc-notes-panel': TOCNotesPanel;
   }
+}
+
+const componentsMap = {
+  'edgeless-note-toc-card': TOCNoteCard,
+  'edgeless-toc-block-preview': TOCBlockPreview,
+  'edgeless-toc-notes-panel': TOCNotesPanel,
+};
+
+export function registerTOCComponents(
+  callback: (components: typeof componentsMap) => void
+) {
+  callback(componentsMap);
 }

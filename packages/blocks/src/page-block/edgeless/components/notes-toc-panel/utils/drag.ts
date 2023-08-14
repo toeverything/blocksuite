@@ -2,7 +2,8 @@ import type { Page } from '@blocksuite/store';
 
 import { lastN, on, once } from '../../../../../__internal__/utils/index.js';
 import type { NoteBlockModel } from '../../../../../models.js';
-import type { TOCNoteCard } from '../toc-card.js';
+import { TOCNoteCard } from '../toc-card.js';
+import type { TOCNotesPanel } from '../toc-panel.js';
 
 /**
  * start drag notes
@@ -21,6 +22,8 @@ export function startDragging(
     onDragMove?: (insertIdx?: number) => void;
     tocListContainer: HTMLElement;
     doc: Document;
+    host: Document | HTMLElement;
+    container: TOCNotesPanel;
     page: Page;
     start: {
       x: number;
@@ -28,9 +31,18 @@ export function startDragging(
     };
   }
 ) {
-  const { doc, page, onDragMove, onDragEnd, tocListContainer, start } = options;
+  const {
+    doc,
+    host,
+    container,
+    page,
+    onDragMove,
+    onDragEnd,
+    tocListContainer,
+    start,
+  } = options;
   const cardElements = lastN(notes, 2).map((note, idx, arr) => {
-    const el = doc.createElement('edgeless-note-toc-card');
+    const el = new TOCNoteCard();
 
     el.page = page;
     el.note = note.note;
@@ -48,8 +60,8 @@ export function startDragging(
   const children = Array.from(tocListContainer.children) as TOCNoteCard[];
   let idx: undefined | number;
 
-  doc.body.appendChild(maskElement);
-  doc.body.append(...cardElements);
+  container.renderRoot.appendChild(maskElement);
+  container.renderRoot.append(...cardElements);
 
   const insideListContainer = (e: MouseEvent) => {
     return (
@@ -60,7 +72,7 @@ export function startDragging(
     );
   };
 
-  const disposeMove = on(doc, 'mousemove', e => {
+  const disposeMove = on(container, 'mousemove', e => {
     cardElements.forEach(el => {
       el.pos = {
         x: e.clientX,
@@ -95,13 +107,19 @@ export function startDragging(
     onDragMove?.(idx);
   });
 
-  once(doc, 'mouseup', () => {
-    cardElements.forEach(child => doc.body.removeChild(child));
-    doc.body.removeChild(maskElement);
+  let ended = false;
+  const dragEnd = () => {
+    if (ended) return;
+
+    ended = true;
+    cardElements.forEach(child => container.renderRoot.removeChild(child));
+    container.renderRoot.removeChild(maskElement);
 
     disposeMove();
     onDragEnd?.(idx);
-  });
+  };
+
+  once(host as Document, 'mouseup', dragEnd);
 }
 
 function createMaskElement(doc: Document) {
