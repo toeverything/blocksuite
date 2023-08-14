@@ -31,7 +31,7 @@ export class IconButton extends LitElement {
       border: none;
       width: var(--button-width);
       height: var(--button-height);
-      border-radius: 5px;
+      border-radius: 4px;
       background: transparent;
       cursor: pointer;
       user-select: none;
