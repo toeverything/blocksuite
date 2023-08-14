@@ -7,10 +7,11 @@ import {
   CrossIcon,
   DatabaseTableViewIcon,
   EmbedIcon,
+  IS_FIREFOX,
   NumberedListIconLarge,
   TextIconLarge,
 } from '@blocksuite/global/config';
-import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -580,7 +581,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         this._inEdgelessMode = mode === 'edgeless';
       })
     );
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       disposables.addFromEvent(
         this._mouseRoot,
         'dragover',
@@ -741,7 +742,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   };
 
   private _onMouseDown = (e: MouseEvent) => {
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
     }
@@ -751,7 +752,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._hideCardList();
     let x = e.clientX;
     let y = e.clientY;
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
       x = this._currentClientX;
@@ -820,7 +821,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
-    if (!isFirefox) {
+    if (!IS_FIREFOX) {
       throw new Error('FireFox only');
     }
     this._currentClientX = e.clientX;

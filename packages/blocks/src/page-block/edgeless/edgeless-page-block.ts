@@ -38,6 +38,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
 import {
   almostEqual,
   asyncFocusRichText,
@@ -65,9 +66,7 @@ import {
 } from '../../__internal__/theme/utils.js';
 import { toast } from '../../components/toast.js';
 import type {
-  BlockHost,
   EdgelessPageBlockWidgetName,
-  EdgelessTool,
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
