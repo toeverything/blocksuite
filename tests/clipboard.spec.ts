@@ -1010,7 +1010,7 @@ test(scoped`auto identify url`, async ({ page }) => {
   );
 });
 
-test.fixme(scoped`paste parent block`, async ({ page }) => {
+test(scoped`paste parent block`, async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/3153',

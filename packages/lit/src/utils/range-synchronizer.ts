@@ -94,7 +94,10 @@ export class RangeSynchronizer {
     const range = this._rangeManager.value;
     if (!range) return;
 
-    const blocks = this._rangeManager.findBlockElementsByRange(range);
+    const blocks = this._rangeManager.getSelectedBlockElementsByRange(range, {
+      match: element => element.role === 'content',
+      mode: 'flat',
+    });
     const start = blocks.at(0);
     const end = blocks.at(-1);
     if (!start || !end) return;
