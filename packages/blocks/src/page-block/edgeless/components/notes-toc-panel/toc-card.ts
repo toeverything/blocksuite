@@ -2,7 +2,7 @@ import { ArrowIcon, HiddenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -12,7 +12,7 @@ import {
   queryCurrentMode,
 } from '../../../../__internal__/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import { TOCBlockPreview } from './block-preview.js';
+import { TOCBlockPreview } from './toc-preview.js';
 
 noop(TOCBlockPreview);
 
@@ -40,34 +40,45 @@ export type FitViewEvent = CustomEvent<{
   block: NoteBlockModel;
 }>;
 
-@customElement('edgeless-note-toc-card')
 export class TOCNoteCard extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: block;
+      position: relative;
     }
 
-    .navigation-card-container {
+    .card-container {
+      position: relative;
+
       height: 136px;
+      padding: 9px 11px 7px;
+      box-sizing: border-box;
     }
 
-    .drag-area {
-      border-radius: 8px;
+    .card-wrapper {
+      position: absolute;
+      top: 0px;
+      left: -8px;
+
       display: flex;
-      flex-direction: row;
       align-items: center;
-      gap: 0;
-      padding: 9px 7px 7px 1px;
+
+      box-sizing: border-box;
+      width: calc(100% + 4px);
+      height: 100%;
+
+      border-radius: 8px;
       background-color: rgba(0, 0, 0, 0);
       transition: background-color 0.2s ease-out;
       user-select: none;
     }
 
     .action {
+      flex-grow: 1;
       opacity: 0;
       position: relative;
       height: 100px;
-      width: 17px;
+      width: 16px;
       transition: opacity 0.2s ease-out;
     }
 
@@ -113,17 +124,21 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     }
 
     .card-preview {
-      cursor: default;
-      user-select: none;
-      flex: 1;
       overflow: hidden;
+      position: relative;
+
       box-sizing: border-box;
       height: 120px;
-      border-radius: 8px;
       padding: 7px 12px;
+
+      border-radius: 8px;
       outline: 2px solid var(--affine-background-primary-color);
       background-color: var(--affine-background-primary-color);
       box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.18);
+
+      cursor: default;
+      user-select: none;
+
       transition: border-color 0.2s ease-out;
     }
 
@@ -195,7 +210,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       background-color: var(--affine-icon-secondary);
     }
 
-    .navigation-card-container.dragging {
+    .card-container.dragging {
       pointer-events: none;
       transform-origin: 16px 9px;
       position: fixed;
@@ -205,22 +220,22 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       z-index: calc(var(--affine-z-index-popover, 0) + 3);
     }
 
-    .navigation-card-container:hover .drag-area {
+    .card-container:hover .card-wrapper {
       background-color: var(--affine-hover-color, rgba(0, 0, 0, 0.04));
     }
 
-    .navigation-card-container.placeholder {
+    .card-container.placeholder {
       pointer-events: none;
       opacity: 0.5;
     }
 
-    .navigation-card-container[data-invisible='true'] .action {
+    .card-container[data-invisible='true'] .action {
       visibility: hidden;
     }
 
-    .navigation-card-container.dragging .card-preview,
-    .navigation-card-container.placeholder .card-preview,
-    .navigation-card-container.selected .card-preview {
+    .card-container.dragging .card-preview,
+    .card-container.placeholder .card-preview,
+    .card-container.selected .card-preview {
       outline: 2px solid var(--affine-blue-500);
       background: linear-gradient(
           180deg,
@@ -230,10 +245,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         #fff;
     }
 
-    .dark.navigation-card-container.dragging .card-preview,
-    .dark.navigation-card-container.placeholder .card-preview,
-    .dark.navigation-card-container.selected .card-preview,
-    .dark.navigation-card-container .card-preview:hover {
+    .dark.card-container.dragging .card-preview,
+    .dark.card-container.placeholder .card-preview,
+    .dark.card-container.selected .card-preview,
+    .dark.card-container .card-preview:hover {
       background: linear-gradient(
           180deg,
           rgba(147, 146, 139, 0.2) 0%,
@@ -242,14 +257,14 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         #000;
     }
 
-    .navigation-card-container[data-invisible='true'] .card-preview:hover,
-    .navigation-card-container[data-invisible='true'] .card-preview {
+    .card-container[data-invisible='true'] .card-preview:hover,
+    .card-container[data-invisible='true'] .card-preview {
       background: none;
       outline: none;
       box-shadow: none;
       border: 1px dashed var(--affine-border-color);
     }
-    .navigation-card-container[data-invisible='true'] .drag-area {
+    .card-container[data-invisible='true'] .card-wrapper {
       background: none;
     }
   `;
@@ -390,17 +405,19 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     return html`
       <div
         data-invisible="${this.invisible ? 'true' : 'false'}"
-        class="navigation-card-container ${this.status ?? ''} ${mode}"
-        style=${this.status === 'dragging'
-          ? styleMap({
-              transform: `translate(${pos.x - 16}px, ${pos.y - 9}px) rotate(${
-                stackOrder === 0 ? 3 : 1
-              }deg)`,
-              width: width ? `${width}px` : undefined,
-            })
-          : nothing}
+        class="card-container ${this.status ?? ''} ${mode}"
+        style=${
+          this.status === 'dragging'
+            ? styleMap({
+                transform: `translate(${pos.x - 16}px, ${pos.y - 9}px) rotate(${
+                  stackOrder === 0 ? 3 : 1
+                }deg)`,
+                width: width ? `${width}px` : undefined,
+              })
+            : nothing
+        }
       >
-        <div class="drag-area">
+        <div class="card-wrapper">
           <div class="action">
             <div class="handle" @mousedown=${this._dispatchDragEvent}></div>
             <span
@@ -408,38 +425,45 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
               role="button"
               style="top: 0; left:0;"
               @click=${this._moveForward}
-              >${ArrowIcon}</span
-            >
+            >${ArrowIcon}</span>
             <span
               class="switch"
               role="button"
               style="transform:rotate(0.5turn); bottom: 0; left: 0;"
               @click=${this._moveBackward}
-              >${ArrowIcon}</span
+            >${ArrowIcon}</span
             >
           </div>
-          <div
-            class="card-preview"
-            @click=${this._dispatchSelectEvent}
-            @dblclick=${this._dispatchFitViewEvent}
-          >
-            <div class="card-number">
-              ${this.invisible
+        </div>
+        <div
+          class="card-preview"
+          @click=${this._dispatchSelectEvent}
+          @dblclick=${this._dispatchFitViewEvent}
+        >
+          <div class="card-number">
+            ${
+              this.invisible
                 ? HiddenIcon
-                : html`<span class="number">${this.number}</span>`}
-            </div>
-            <div class="card-content">
-              ${first
-                ? html`<blocksuite-toc-block-preview
+                : html`<span class="number">${this.number}</span>`
+            }
+          </div>
+          <div class="card-content">
+            ${
+              first
+                ? html`<edgeless-toc-block-preview
                     .block=${first}
-                  ></blocksuite-toc-block-preview>`
-                : nothing}
-              ${second
-                ? html`<blocksuite-toc-block-preview
+                  ></edgeless-toc-block-preview>`
+                : nothing
+            }
+            ${
+              second
+                ? html`<edgeless-toc-block-preview
                     .block=${second}
-                  ></blocksuite-toc-block-preview>`
-                : nothing}
-              ${showEllipsis
+                  ></edgeless-toc-block-preview>`
+                : nothing
+            }
+            ${
+              showEllipsis
                 ? html`<div class="card-ellipsis">
                     <div class="dash"></div>
                     <div class="dots">
@@ -449,17 +473,22 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
                     </div>
                     <div class="dash"></div>
                   </div>`
-                : null}
-              ${secondToLast
-                ? html`<blocksuite-toc-block-preview
+                : null
+            }
+            ${
+              secondToLast
+                ? html`<edgeless-toc-block-preview
                     .block=${secondToLast}
-                  ></blocksuite-toc-block-preview>`
-                : nothing}
-              ${last
-                ? html`<blocksuite-toc-block-preview
+                  ></edgeless-toc-block-preview>`
+                : nothing
+            }
+            ${
+              last
+                ? html`<edgeless-toc-block-preview
                     .block=${last}
-                  ></blocksuite-toc-block-preview>`
-                : nothing}
+                  ></edgeless-toc-block-preview>`
+                : nothing
+            }
             </div>
           </div>
         </div>
