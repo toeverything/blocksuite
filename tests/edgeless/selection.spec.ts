@@ -155,7 +155,7 @@ test('when the selection is always a note, it should remain in an active state',
   await assertSelectionInNote(page, ids.noteId);
 });
 
-test.only('copy to clipboard as PNG', async ({ page, context }) => {
+test('copy to clipboard as PNG', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 
   await edgelessCommonSetup(page);
