@@ -12,6 +12,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
@@ -35,6 +36,7 @@ import type { BlockOperation } from './types.js';
 
 type ViewData = {
   view: DataViewManager;
+  viewUpdated: Slot;
   selectionUpdated: Slot<DataViewSelectionState>;
   setSelection: (selection?: DataViewSelectionState) => void;
   bindHotkey: BaseDataView['bindHotkey'];
@@ -62,6 +64,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             return;
           }
           v.selectionUpdated.emit(databaseSelection?.viewSelection);
+        });
+      })
+    );
+    this._disposables.add(
+      this.model.propsUpdated.on(() => {
+        this.model.views.forEach(v => {
+          this.viewMap[v.id]?.viewUpdated.emit();
         });
       })
     );
@@ -117,7 +126,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     this._view.value?.focusFirstCell();
   };
 
-  private viewSource(id: string): ViewSource {
+  private viewSource(id: string, viewUpdated: Slot): ViewSource {
     const getViewDataById = this.getViewDataById;
     return {
       get view() {
@@ -130,21 +139,23 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       updateView: updater => {
         this.model.updateView(id, updater as never);
       },
-      updateSlot: this.model.propsUpdated,
+      updateSlot: viewUpdated,
     };
   }
 
   private getView(id: string): ViewData {
     if (!this.viewMap[id]) {
+      const viewUpdated = new Slot();
       const view = new {
         table: DataViewTableManager,
         kanban: DataViewKanbanManager,
       }[this.getViewDataById(id)?.mode ?? 'table'](
-        this.viewSource(id) as never,
+        this.viewSource(id, viewUpdated) as never,
         this.dataSource
       );
       this.viewMap[id] = {
         view: view,
+        viewUpdated,
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
           if (!selection) {
@@ -224,7 +235,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return html` <div></div>`;
   };
 
-  private renderTools = (view: DataViewManager) => {
+  private renderTools = (view?: DataViewManager) => {
+    if (!view) {
+      return;
+    }
     const blockOperation: BlockOperation = {
       copy: () => {
         copyBlocks([this.model]);
@@ -243,16 +257,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     ></data-view-header-tools>`;
   };
 
-  override render() {
-    if (!this.currentView) {
-      this.currentView = this.model.views[0]?.id;
-    }
-    const views = this.model.views;
-    const current = views.find(v => v.id === this.currentView) ?? views[0];
-    if (!current) {
+  private renderView(viewData?: ViewData) {
+    if (!viewData) {
       return;
     }
-    const viewData = this.getView(current.id);
     const props = {
       titleText: this.model.title,
       selectionUpdated: viewData.selectionUpdated,
@@ -263,6 +271,25 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       modalMode: this.modalMode,
       getFlag: this.page.awarenessStore.getFlag.bind(this.page.awarenessStore),
     };
+    return keyed(
+      viewData.view.id,
+      html` <uni-lit
+        .ref="${this._view}"
+        .uni="${viewRendererManager.getView(viewData.view.type).view}"
+        .props="${props}"
+        class="affine-block-element"
+      ></uni-lit>`
+    );
+  }
+
+  override render() {
+    const viewData = this.model.views
+      .map(view => this.getView(view.id))
+      .find(v => v.view.id === this.currentView);
+    if (!viewData && this.model.views.length !== 0) {
+      this.currentView = this.model.views[0].id;
+      return;
+    }
     return html`
       <div class="toolbar-hover-container data-view-root">
         <div
@@ -274,15 +301,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
           >
-            ${this.renderViews()} ${this.renderTools(viewData.view)}
+            ${this.renderViews()} ${this.renderTools(viewData?.view)}
           </div>
         </div>
-        <uni-lit
-          .ref="${this._view}"
-          .uni="${viewRendererManager.getView(current.mode).view}"
-          .props="${props}"
-          class="affine-block-element"
-        ></uni-lit>
+        ${this.renderView(viewData)}
       </div>
     `;
   }

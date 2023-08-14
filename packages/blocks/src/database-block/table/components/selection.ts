@@ -70,7 +70,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           this.selection = undefined;
           return;
         }
-
         this.updateSelection(tableSelection);
 
         const old = this._databaseSelection;

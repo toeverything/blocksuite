@@ -70,10 +70,6 @@ export class DataViewKanban extends BaseDataView<
     this._disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.querySelectorAll('affine-data-view-kanban-cell').forEach(v => {
-          v.cell?.forceUpdate();
-          v.requestUpdate();
-        });
       })
     );
     this._disposables.add(this.selection.run());
