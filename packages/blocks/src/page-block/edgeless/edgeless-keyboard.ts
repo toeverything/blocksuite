@@ -1,9 +1,9 @@
 import { ConnectorMode } from '@blocksuite/phasor';
 
 import {
-  BrushSize,
   type Connectable,
   type EdgelessTool,
+  LineWidth,
 } from '../../__internal__/utils/types.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import {
@@ -40,6 +40,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'connector',
             mode: ConnectorMode.Straight,
             color: GET_DEFAULT_LINE_COLOR(),
+            strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
         },
         x: () => {
@@ -47,6 +48,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
             color: GET_DEFAULT_LINE_COLOR(),
+            strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
         },
         h: () => {
@@ -68,7 +70,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(pageElement, {
             type: 'brush',
             color: GET_DEFAULT_LINE_COLOR(),
-            lineWidth: BrushSize.Thin,
+            lineWidth: LineWidth.Thin,
           });
         },
         e: () => {

@@ -4,11 +4,13 @@ import './connector-menu.js';
 import { EdgelessConnectorIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
+import {
+  type EdgelessTool,
+  LineWidth,
+} from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
@@ -24,18 +26,15 @@ function createConnectorMenuPopper(
   const menu = document.createElement('edgeless-connector-menu');
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(menu);
-  computePosition(reference, menu, {
-    placement: 'top',
-    middleware: [
-      offset({
-        mainAxis: 10,
-      }),
-    ],
-  }).then(({ x, y }) => {
-    Object.assign(menu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
+
+  // The connector menu should be positioned at the top of the connector button.
+  // And it should be positioned at the top center of the toolbar all the time.
+  const x = 92;
+  const y = -44;
+
+  Object.assign(menu.style, {
+    left: `${x}px`,
+    top: `${y}px`,
   });
 
   return {
@@ -51,6 +50,10 @@ export class EdgelessConnectorToolButton extends LitElement {
   static override styles = css`
     :host {
       display: flex;
+    }
+    .edgeless-connector-button {
+      display: flex;
+      position: relative;
     }
     edgeless-toolbar-button svg {
       transition: 0.3s ease-in-out;
@@ -109,11 +112,13 @@ export class EdgelessConnectorToolButton extends LitElement {
         .tooltip=${'Connector'}
         .active=${type === 'connector'}
         .activeMode=${'background'}
+        class="edgeless-connector-button"
         @click=${() => {
           this.setEdgelessTool({
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
             color: GET_DEFAULT_LINE_COLOR(),
+            strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
           this._toggleMenu();
         }}

@@ -156,7 +156,7 @@ export type ShapeTool = {
   strokeColor: CssVariableName;
 };
 
-export enum BrushSize {
+export enum LineWidth {
   LINE_WIDTH_TWO = 2,
   LINE_WIDTH_FOUR = 4,
   LINE_WIDTH_SIX = 6,
@@ -174,7 +174,7 @@ export type TextTool = {
 export type BrushTool = {
   type: 'brush';
   color: CssVariableName;
-  lineWidth: BrushSize;
+  lineWidth: LineWidth;
 };
 
 export type EraserTool = {
@@ -204,6 +204,7 @@ export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;
   color: CssVariableName;
+  strokeWidth: LineWidth;
 };
 
 export type EdgelessTool =
