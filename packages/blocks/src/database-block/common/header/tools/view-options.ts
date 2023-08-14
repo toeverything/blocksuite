@@ -144,7 +144,7 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
                 name: 'Delete View',
                 icon: DeleteIcon,
                 select: () => {
-                  //
+                  this.view.deleteView();
                 },
                 class: 'delete-item',
               },

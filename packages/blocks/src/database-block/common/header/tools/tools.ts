@@ -55,6 +55,9 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
   public showToolBar = false;
 
   override render() {
+    if (this.view.isDeleted) {
+      return;
+    }
     const classList = classMap({
       'show-toolbar': this.showToolBar,
       'affine-database-toolbar': true,
