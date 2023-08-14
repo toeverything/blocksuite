@@ -16,10 +16,12 @@ export const lineStyleButtonStyles = [
       width: 16px;
       height: 16px;
       color: var(--affine-icon-color);
+      gap: 8px;
     }
 
     .line-style-button {
       margin: 0 4px;
+      padding: 6px 8px;
     }
   `,
 ];
