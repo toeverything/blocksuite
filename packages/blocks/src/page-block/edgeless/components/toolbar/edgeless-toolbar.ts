@@ -277,7 +277,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           >${frame?.title ?? 'no frame'}</span
         >
         <span class="edgeless-frame-navigator-count"
-          >${current + 1}/${frames.length}</span
+          >${frames.length === 0 ? 0 : current + 1}/${frames.length}</span
         >
       </div>
       <edgeless-tool-icon-button
