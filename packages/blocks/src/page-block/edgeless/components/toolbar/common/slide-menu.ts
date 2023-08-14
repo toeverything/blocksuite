@@ -13,7 +13,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       padding: 4px;
       align-items: center;
       width: var(--menu-width);
-      overflow-x: hidden;
+      overflow: hidden;
       position: relative;
     }
     .next-slide-button,
@@ -27,11 +27,12 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      transition: transform 0.2s ease-in-out;
+      transition: transform 0.3s ease-in-out, opacity 0.5s ease-in-out;
       z-index: 12;
     }
     .next-slide-button {
       display: flex;
+      opacity: 1;
       top: 50%;
       right: 0;
       transform: translate(50%, -50%) scale(0.75);
@@ -41,7 +42,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       transform: translate(50%, -50%) scale(1);
     }
     .previous-slide-button {
-      display: none;
+      opacity: 0;
       top: 50%;
       left: 0;
       transform: translate(-50%, -50%) scale(0.75);
@@ -97,13 +98,13 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       const { scrollLeft, scrollWidth, clientWidth } = this._menuContainer;
       if (scrollLeft === 0) {
         // if the scroll is at the beginning, hide the previous button
-        this._previousSlideButton.style.display = 'none';
+        this._previousSlideButton.style.opacity = '0';
       } else if (scrollLeft === scrollWidth - clientWidth) {
         // if the scroll is at the right end, hide the next button
-        this._nextSlideButton.style.display = 'none';
+        this._nextSlideButton.style.opacity = '0';
       } else {
-        this._previousSlideButton.style.display = 'flex';
-        this._nextSlideButton.style.display = 'flex';
+        this._previousSlideButton.style.opacity = '1';
+        this._nextSlideButton.style.opacity = '1';
       }
     });
   }

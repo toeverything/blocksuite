@@ -78,7 +78,6 @@ export class EdgelessConnectorMenu extends LitElement {
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px 8px 0 0;
-      position: relative;
       cursor: default;
     }
 
@@ -173,7 +172,7 @@ export class EdgelessConnectorMenu extends LitElement {
     if (this.edgelessTool.type !== 'connector') return nothing;
 
     const { color, strokeWidth } = this.edgelessTool;
-    const LineWidthButtonGroup = ConnectorModeButtonGroup(
+    const connectorModeButtonGroup = ConnectorModeButtonGroup(
       this.edgelessTool,
       this._setConnectorMode
     );
@@ -181,7 +180,7 @@ export class EdgelessConnectorMenu extends LitElement {
     return html`
       <div class="container">
         <edgeless-slide-menu>
-          ${LineWidthButtonGroup}
+          ${connectorModeButtonGroup}
           <menu-divider .vertical=${true}></menu-divider>
           <edgeless-line-width-panel
             .selectedSize=${strokeWidth}
