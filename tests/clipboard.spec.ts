@@ -178,10 +178,7 @@ test(
     await pressArrowUp(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 2);
-    await assertText(
-      page,
-      'Lorem Ipsum placeholder text.Lorem Ipsum placeholder text.'
-    );
+    await assertText(page, 'Lorem Ipsum placeholder text.');
     await pressArrowDown(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 3);
