@@ -14,7 +14,6 @@ import { html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
-import type { RangeManager } from '../../page-block/text-selection/range-manager.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import {
   getSelectedContentBlockElements,
@@ -61,14 +60,15 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   private _abortController = new AbortController();
 
-  private _rangeManager: RangeManager | null = null;
-
   private _placement: Placement = 'top';
+
+  private get _rangeManager() {
+    return this.root.rangeManager;
+  }
 
   private _reset() {
     this._displayType = 'none';
     this._selectedBlockElements = [];
-    this._rangeManager = null;
   }
 
   private _shouldDisplay() {
@@ -156,8 +156,7 @@ export class AffineFormatBarWidget extends WidgetElement {
         if (textSelection) {
           if (!textSelection.isCollapsed()) {
             this._displayType = 'text';
-            assertExists(pageElement.rangeManager);
-            this._rangeManager = pageElement.rangeManager;
+            assertExists(pageElement.root.rangeManager);
             this._selectedBlockElements = getSelectedContentBlockElements(
               pageElement,
               ['text']

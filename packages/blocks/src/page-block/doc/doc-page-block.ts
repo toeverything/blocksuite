@@ -27,8 +27,6 @@ import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
-import { RangeManager } from '../text-selection/range-manager.js';
-import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 
 export interface PageViewport {
   left: number;
@@ -117,9 +115,6 @@ export class DocPageBlockComponent
     }
   `;
 
-  rangeManager: RangeManager | null = null;
-  rangeSynchronizer: RangeSynchronizer | null = null;
-
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
@@ -154,10 +149,6 @@ export class DocPageBlockComponent
   @query('.affine-doc-page-block-title')
   private _titleContainer!: HTMLElement;
   private _titleVEditor: VEditor | null = null;
-
-  get disposables() {
-    return this._disposables;
-  }
 
   get titleVEditor() {
     assertExists(this._titleVEditor);
@@ -324,9 +315,7 @@ export class DocPageBlockComponent
     super.connectedCallback();
 
     registerService('affine:page', PageBlockService);
-    this.rangeManager = new RangeManager(this.root);
     this.gesture = new Gesture(this);
-    this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);
     // filter cut event in page title
@@ -510,9 +499,7 @@ export class DocPageBlockComponent
     super.disconnectedCallback();
     this.clipboard.dispose();
     this._disposables.dispose();
-    this.rangeManager = null;
     this.gesture = null;
-    this.rangeSynchronizer = null;
     this.keyboardManager = null;
   }
 

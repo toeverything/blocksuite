@@ -127,7 +127,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     const container = this._container;
     const containerRect = this._containerRect;
     if (textSelection) {
-      const rangeManager = this.pageElement.rangeManager;
+      const rangeManager = this.root.rangeManager;
       assertExists(rangeManager);
       const range = rangeManager.textSelectionToRange(textSelection);
 
@@ -186,7 +186,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
       throw new Error('remote selection widget must be used in page component');
     }
 
-    const rangeManager = this.pageElement.rangeManager;
+    const rangeManager = this.root.rangeManager;
     assertExists(rangeManager);
     const range = rangeManager.pointToRange({
       path: textSelection.to ? textSelection.to.path : textSelection.from.path,

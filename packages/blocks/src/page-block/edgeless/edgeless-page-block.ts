@@ -75,8 +75,6 @@ import type {
 } from '../../index.js';
 import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
-import { RangeManager } from '../text-selection/range-manager.js';
-import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
@@ -243,9 +241,6 @@ export class EdgelessPageBlockComponent
     zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
-  rangeManager: RangeManager | null = null;
-  rangeSynchronizer: RangeSynchronizer | null = null;
-
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
@@ -331,10 +326,6 @@ export class EdgelessPageBlockComponent
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
-  }
-
-  get disposables() {
-    return this._disposables;
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -1198,9 +1189,7 @@ export class EdgelessPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
 
-    this.rangeManager = new RangeManager(this.root);
     this.gesture = new Gesture(this);
-    this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
@@ -1232,9 +1221,7 @@ export class EdgelessPageBlockComponent
       this._resizeObserver = null;
     }
 
-    this.rangeManager = null;
     this.gesture = null;
-    this.rangeSynchronizer = null;
     this.keyboardManager = null;
 
     this.tools.clear();

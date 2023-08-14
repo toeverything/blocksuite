@@ -36,8 +36,8 @@ export class Gesture {
   }
 
   private get _rangeManager() {
-    assertExists(this.pageElement.rangeManager);
-    return this.pageElement.rangeManager;
+    assertExists(this.pageElement.root.rangeManager);
+    return this.pageElement.root.rangeManager;
   }
 
   constructor(public pageElement: PageBlockComponent) {

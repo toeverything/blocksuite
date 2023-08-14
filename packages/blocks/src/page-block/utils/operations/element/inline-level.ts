@@ -1,4 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, matchFlavours } from '@blocksuite/store';
 
 import { LinkMockSelection } from '../../../../__internal__/rich-text/link-node/mock-selection.js';
@@ -14,18 +15,18 @@ import type { PageBlockComponent } from '../../../types.js';
 import { getSelectedContentModels } from '../../selection.js';
 
 export function formatByTextSelection(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
   value: string | true | null
 ) {
-  const selectedModels = getSelectedContentModels(pageElement, ['text']);
+  const selectedModels = getSelectedContentModels(blockElement, ['text']);
 
   if (selectedModels.length === 0) {
     throw new Error('No selected models');
   }
 
-  const rangeManager = pageElement.rangeManager;
+  const rangeManager = blockElement.root.rangeManager;
   assertExists(rangeManager);
   const { from, to } = textSelection;
   const startModel = selectedModels[0];
