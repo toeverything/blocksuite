@@ -1,9 +1,5 @@
 type DisposeCallback = () => void;
 
-interface AllDocumentEventMap extends DocumentEventMap {
-  'virgo-vrange-updated': CustomEvent;
-}
-
 export interface Disposable {
   dispose: DisposeCallback;
 }
@@ -36,10 +32,10 @@ export class DisposableGroup implements Disposable {
     handler: (e: WindowEventMap[N]) => void,
     options?: boolean | AddEventListenerOptions
   ): void;
-  addFromEvent<N extends keyof AllDocumentEventMap>(
+  addFromEvent<N extends keyof DocumentEventMap>(
     element: Document,
     eventName: N,
-    handler: (e: AllDocumentEventMap[N]) => void,
+    handler: (e: DocumentEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
   ): void;
   addFromEvent<N extends keyof HTMLElementEventMap>(
