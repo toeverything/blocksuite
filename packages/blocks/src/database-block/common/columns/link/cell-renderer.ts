@@ -1,6 +1,5 @@
 import './components/link-node.js';
 
-import { PenIcon } from '@blocksuite/global/config';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -10,6 +9,7 @@ import {
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { PenIcon } from '../../../../icons/index.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { linkPureColumnConfig } from './define.js';

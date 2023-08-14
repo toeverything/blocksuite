@@ -1,10 +1,9 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-
-import type { PageBlockComponent } from '../types.js';
+import type { BlockElement } from '@blocksuite/lit';
 
 export class PageKeyboardManager {
-  constructor(public pageElement: PageBlockComponent) {
+  constructor(public pageElement: BlockElement) {
     this.pageElement.bindHotKey(
       {
         'Mod-z': ctx => {

@@ -1,16 +1,5 @@
-import {
-  BLOCKHUB_FILE_ITEMS,
-  BLOCKHUB_LIST_ITEMS,
-  BLOCKHUB_TEXT_ITEMS,
-  BlockHubIcon,
-  BlockHubRoundedRectangleIcon,
-  CrossIcon,
-  DatabaseTableViewIcon,
-  EmbedIcon,
-  NumberedListIconLarge,
-  TextIconLarge,
-} from '@blocksuite/global/config';
-import { assertExists, isFirefox } from '@blocksuite/global/utils';
+import { IS_FIREFOX } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -36,8 +25,161 @@ import {
   getModelByBlockElement,
   Point,
 } from '../__internal__/index.js';
+import {
+  BlockHubIcon,
+  BlockHubRoundedRectangleIcon,
+  BookmarkIcon,
+  BulletedListIcon,
+  CodeBlockIcon,
+  CrossIcon,
+  DatabaseTableViewIcon,
+  DividerIcon,
+  EmbedIcon,
+  H1Icon,
+  H2Icon,
+  H3Icon,
+  H4Icon,
+  H5Icon,
+  H6Icon,
+  ImageIcon,
+  NumberedListIcon,
+  NumberedListIconLarge,
+  QuoteIcon,
+  TextIcon,
+  TextIconLarge,
+  TodoIcon,
+} from '../icons/index.js';
 import { type DragIndicator } from './drag-indicator.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
+
+export const BLOCKHUB_TEXT_ITEMS = [
+  {
+    flavour: 'affine:paragraph',
+    type: 'text',
+    name: 'Text',
+    description: 'Start typing with plain text.',
+    icon: TextIcon,
+    tooltip: 'Drag/Click to insert Text block',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'h1',
+    name: 'Heading 1',
+    description: 'Headings in the largest font.',
+    icon: H1Icon,
+    tooltip: 'Drag/Click to insert Heading 1',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'h2',
+    name: 'Heading 2',
+    description: 'Headings in the 2nd font size.',
+    icon: H2Icon,
+    tooltip: 'Drag/Click to insert Heading 2',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'h3',
+    name: 'Heading 3',
+    description: 'Headings in the 3rd font size.',
+    icon: H3Icon,
+    tooltip: 'Drag/Click to insert Heading 3',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'h4',
+    name: 'Heading 4',
+    description: 'Heading in the 4th font size.',
+    icon: H4Icon,
+    tooltip: 'Drag/Click to insert Heading 4',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'h5',
+    name: 'Heading 5',
+    description: 'Heading in the 5th font size.',
+    icon: H5Icon,
+    tooltip: 'Drag/Click to insert Heading 5',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'h6',
+    name: 'Heading 6',
+    description: 'Heading in the 6th font size.',
+    icon: H6Icon,
+    tooltip: 'Drag/Click to insert Heading 6',
+  },
+  {
+    flavour: 'affine:code',
+    type: null,
+    name: 'Code Block',
+    description: 'Capture a code snippet.',
+    icon: CodeBlockIcon,
+    tooltip: 'Drag/Click to insert Code Block',
+  },
+  {
+    flavour: 'affine:paragraph',
+    type: 'quote',
+    name: 'Quote',
+    description: 'Capture a quote.',
+    icon: QuoteIcon,
+    tooltip: 'Drag/Click to insert Quote',
+  },
+  {
+    flavour: 'affine:divider',
+    type: null,
+    name: 'Divider',
+    description: 'A visual divider.',
+    icon: DividerIcon,
+    tooltip: 'A visual divider',
+  },
+];
+
+export const BLOCKHUB_LIST_ITEMS = [
+  {
+    flavour: 'affine:list',
+    type: 'bulleted',
+    name: 'Bulleted List',
+    description: 'A simple bulleted list.',
+    icon: BulletedListIcon,
+    tooltip: 'Drag/Click to insert Bulleted List',
+  },
+  {
+    flavour: 'affine:list',
+    type: 'numbered',
+    name: 'Numbered List',
+    description: 'A list with numbering.',
+    icon: NumberedListIcon,
+    tooltip: 'Drag/Click to insert Numbered List',
+  },
+  {
+    flavour: 'affine:list',
+    type: 'todo',
+    name: 'To-do List',
+    description: 'Track tasks with a to-do list.',
+    icon: TodoIcon,
+    tooltip: 'Drag/Click to insert To-do List',
+  },
+];
+
+export const BLOCKHUB_FILE_ITEMS = [
+  {
+    flavour: 'affine:image',
+    type: 'image',
+    name: 'Image',
+    description: 'Upload images.',
+    icon: ImageIcon,
+    tooltip: 'Drag/Click to insert Image',
+  },
+  {
+    flavour: 'affine:bookmark',
+    type: 'bookmark',
+    name: 'Bookmark',
+    description: 'Insert a link in card view.',
+    icon: BookmarkIcon,
+    tooltip: 'Drag/Click to insert Bookmark',
+  },
+];
 
 const styles = css`
   affine-block-hub {
@@ -580,7 +722,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
         this._inEdgelessMode = mode === 'edgeless';
       })
     );
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       disposables.addFromEvent(
         this._mouseRoot,
         'dragover',
@@ -741,7 +883,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   };
 
   private _onMouseDown = (e: MouseEvent) => {
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       this._currentClientX = e.clientX;
       this._currentClientY = e.clientY;
     }
@@ -751,7 +893,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     this._hideCardList();
     let x = e.clientX;
     let y = e.clientY;
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       // In Firefox, `pageX` and `pageY` are always set to 0.
       // Refs: https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event.
       x = this._currentClientX;
@@ -820,7 +962,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   };
 
   private _onDragOverDocument = (e: DragEvent) => {
-    if (!isFirefox) {
+    if (!IS_FIREFOX) {
       throw new Error('FireFox only');
     }
     this._currentClientX = e.clientX;

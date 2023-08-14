@@ -481,7 +481,7 @@ export class DocPageBlockComponent
       }
 
       requestAnimationFrame(() => {
-        this.root.selectionManager.set([
+        this.root.selectionManager.setGroup('note', [
           this.root.selectionManager.getInstance('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],

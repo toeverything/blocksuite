@@ -1,8 +1,8 @@
-import { HiddenIcon } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { HiddenIcon } from '../../../icons/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { isTopLevelBlock } from '../utils/query.js';
@@ -15,7 +15,7 @@ export function EdgelessNotesStatus(
   if (!edgeless.page.awarenessStore.getFlag('enable_note_index'))
     return nothing;
 
-  const state = edgeless.selection.state;
+  const state = edgeless.selectionManager.state;
   const isSelectOne = state.elements.length === 1;
   const singleSelected = edgeless.getElementModel(state.elements[0]);
 

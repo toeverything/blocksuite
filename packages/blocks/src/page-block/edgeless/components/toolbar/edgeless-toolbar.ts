@@ -6,6 +6,14 @@ import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 
+import { WithDisposable } from '@blocksuite/lit';
+import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
+import { css, html, LitElement, type PropertyValues } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+
+import { stopPropagation } from '../../../../__internal__/utils/event.js';
+import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
+import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
 import {
   EdgelessEraserIcon,
   EdgelessImageIcon,
@@ -15,15 +23,7 @@ import {
   FrameNavigatorPrevIcon,
   HandIcon,
   SelectIcon,
-} from '@blocksuite/global/config';
-import { WithDisposable } from '@blocksuite/lit';
-import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
-import { css, html, LitElement, type PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
-import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
+} from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../utils.js';
 

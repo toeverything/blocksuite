@@ -29,10 +29,6 @@ export function DataBaseRowContainer(view: DataViewTableManager) {
         background: transparent;
       }
 
-      .affine-database-block-row > .database-cell {
-        background: var(--affine-white);
-      }
-
       .database-cell {
         min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
       }

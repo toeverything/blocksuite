@@ -1,4 +1,3 @@
-import { AutoCompleteArrowIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
@@ -20,6 +19,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { getGridBound } from '../utils.js';
@@ -185,7 +185,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
   private get _selected() {
-    return this.edgeless.selection.elements;
+    return this.edgeless.selectionManager.elements;
   }
 
   private get _current() {
@@ -267,7 +267,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
     );
 
-    this.edgeless.selection.setSelection({
+    this.edgeless.selectionManager.setSelection({
       elements: [id],
       editing: false,
     });
@@ -308,7 +308,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     surface.updateElement<'connector'>(connector.id, {
       target: { id, position },
     });
-    this.edgeless.selection.setSelection({
+    this.edgeless.selectionManager.setSelection({
       elements: [id],
       editing: false,
     });

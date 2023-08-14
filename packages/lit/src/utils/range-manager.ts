@@ -73,18 +73,13 @@ export class RangeManager {
 
   syncRangeToTextSelection(range: Range) {
     const selectionManager = this.root.selectionManager;
-    let hasTextSelection = false;
-    const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
-      if (sel.is('text')) hasTextSelection = true;
-      return !sel.is('text') && !sel.is('block');
-    });
     this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
     const to = range.collapsed ? null : this._nodeToPoint(endContainer);
     if (!from) {
-      if (hasTextSelection) {
+      if (selectionManager.find('text')) {
         selectionManager.clear(['text']);
       }
       return null;
@@ -95,7 +90,7 @@ export class RangeManager {
       to,
     });
 
-    selectionManager.set([...noneTextAndBlockSelection, selection]);
+    selectionManager.setGroup('note', [selection]);
     return selection;
   }
 

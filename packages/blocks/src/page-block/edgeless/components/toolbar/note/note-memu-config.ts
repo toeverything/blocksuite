@@ -1,9 +1,8 @@
+import type { NoteChildrenFlavour } from '../../../../../__internal__/index.js';
 import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
-} from '@blocksuite/global/config';
-
-import type { NoteChildrenFlavour } from '../../../../../__internal__/index.js';
+} from '../../../../../components/block-hub.js';
 
 export const BUTTON_GROUP_LENGTH = 10;
 

@@ -87,7 +87,7 @@ export class NoteCut extends WithDisposable(LitElement) {
   }
 
   private get selection() {
-    return this.edgelessPage.selection;
+    return this.edgelessPage.selectionManager;
   }
 
   private get _notHovering() {

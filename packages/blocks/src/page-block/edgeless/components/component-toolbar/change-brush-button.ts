@@ -11,7 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
-import { BrushSize } from '../../../../__internal__/utils/types.js';
+import { LineWidth } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   type ColorEvent,
@@ -27,10 +27,10 @@ function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonSize(elements: BrushElement[]): BrushSize {
+function getMostCommonSize(elements: BrushElement[]): LineWidth {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
   const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
 @customElement('edgeless-change-brush-button')
@@ -106,7 +106,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _selectedColor: string | null = null;
 
   @state()
-  private _selectedSize: BrushSize | null = BrushSize.LINE_WIDTH_FOUR;
+  private _selectedSize: LineWidth | null = LineWidth.LINE_WIDTH_FOUR;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
@@ -114,7 +114,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _setBrushSize(size: BrushSize) {
+  private _setLineWidth(size: LineWidth) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
@@ -160,7 +160,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-line-width-panel
         .selectedSize=${this._selectedSize}
-        @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
+        @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
       >
       </edgeless-line-width-panel>
       <menu-divider .vertical=${true}></menu-divider>

@@ -1,12 +1,6 @@
 import '../../../components/tags/multi-tag-select.js';
 import '../../../components/tags/multi-tag-view.js';
 
-import {
-  ArrowDownSmallIcon,
-  DualLinkIcon16,
-  PlusIcon,
-  TagsIcon,
-} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
@@ -16,6 +10,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
 import { popTagSelect } from '../../../components/tags/multi-tag-select.js';
+import {
+  ArrowDownSmallIcon,
+  DualLinkIcon16,
+  PlusIcon,
+  TagsIcon,
+} from '../../../icons/index.js';
 import type { PageBlockComponent } from '../../types.js';
 import type { BacklinkData } from './backlink/backlink.js';
 import { DEFAULT_PAGE_NAME, listenBacklinkList } from './backlink/backlink.js';

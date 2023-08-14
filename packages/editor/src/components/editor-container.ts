@@ -15,12 +15,13 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
+import { IS_FIREFOX } from '@blocksuite/global/config';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { isFirefox, type Page, Slot } from '@blocksuite/store';
+import { type Page, Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -117,7 +118,7 @@ export class EditorContainer
     };
 
     // Question: Why do we prevent this?
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       this._disposables.addFromEvent(document.body, 'keydown', keydown);
     } else {
       this._disposables.addFromEvent(window, 'keydown', keydown);

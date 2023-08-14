@@ -1,11 +1,12 @@
 import './tool-icon-button.js';
 
+import { css, html } from 'lit';
+
 import {
   BanIcon,
-  ConnectorLIcon,
   DashLineIcon,
-} from '@blocksuite/global/config';
-import { css, html } from 'lit';
+  StraightLineIcon,
+} from '../../../../icons/index.js';
 
 export const lineStyleButtonStyles = [
   css`
@@ -16,6 +17,10 @@ export const lineStyleButtonStyles = [
       width: 16px;
       height: 16px;
       color: var(--affine-icon-color);
+    }
+
+    .line-style-button {
+      margin: 0 4px;
     }
   `,
 ];
@@ -31,7 +36,7 @@ export interface LineStyleButtonProps {
 function getModeIcon(mode: LineStyleButtonProps['mode']) {
   switch (mode) {
     case 'solid': {
-      return ConnectorLIcon;
+      return StraightLineIcon;
     }
     case 'dash': {
       return DashLineIcon;

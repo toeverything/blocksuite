@@ -3,11 +3,10 @@ import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
+import { when } from 'lit/directives/when.js';
 
-import { getPageBlock } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
@@ -36,10 +35,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     .affine-list-rich-text-wrapper {
       display: flex;
       align-items: center;
-      border-radius: 4px;
-    }
-    .affine-list-rich-text-wrapper.selected {
-      background-color: var(--affine-hover-color);
+      position: relative;
     }
     .affine-list-rich-text-wrapper rich-text {
       flex: 1;
@@ -122,8 +118,6 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   private _select() {
-    const pageBlock = getPageBlock(this.model);
-    assertExists(pageBlock);
     const selection = this.root.selectionManager;
     selection.update(selList => {
       return selList
@@ -162,7 +156,6 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
-    const selected = this.selected?.is('block') ? 'selected' : '';
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
@@ -178,12 +171,16 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
     return html`
       <div class=${`affine-list-block-container ${top}`}>
-        <div class=${`affine-list-rich-text-wrapper ${checked} ${selected}`}>
+        <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${listIcon}
           <rich-text
             .model=${this.model}
             .textSchema=${this.textSchema}
           ></rich-text>
+          ${when(
+            this.selected?.is('block'),
+            () => html`<affine-block-selection></affine-block-selection>`
+          )}
         </div>
         ${this.showChildren ? children : nothing}
       </div>

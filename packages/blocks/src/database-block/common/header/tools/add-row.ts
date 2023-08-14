@@ -1,9 +1,9 @@
-import { PlusIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { PlusIcon } from '../../../../icons/index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { InsertPosition } from '../../../types.js';
 import type { DataViewExpose } from '../../data-view.js';

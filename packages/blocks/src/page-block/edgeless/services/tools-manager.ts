@@ -95,7 +95,7 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
   private _shiftKey = false;
 
   get selection() {
-    return this.container.selection;
+    return this.container.selectionManager;
   }
 
   get surface() {

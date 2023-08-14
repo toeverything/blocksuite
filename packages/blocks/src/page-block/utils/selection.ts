@@ -88,18 +88,6 @@ export function getSelectedContentBlockElements(
   return result;
 }
 
-export function getTextSelection(
-  blockElement: BlockElement
-): TextSelection | null {
-  return blockElement.root.selectionManager.find('text') ?? null;
-}
-
-export function getBlockSelections(
-  blockElement: BlockElement
-): BlockSelection[] {
-  return blockElement.root.selectionManager.filter('block');
-}
-
 /**
  * Merge format of multiple blocks. Format will be active only when all blocks have the same format.
  *

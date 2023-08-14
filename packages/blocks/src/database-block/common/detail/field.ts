@@ -1,10 +1,3 @@
-import {
-  DatabaseDuplicate,
-  DatabaseMoveLeft,
-  DatabaseMoveRight,
-  DeleteIcon,
-  TextIcon,
-} from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -14,6 +7,13 @@ import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../components/menu/index.js';
 import type { UniLit } from '../../../components/uni-component/uni-component.js';
+import {
+  DatabaseDuplicate,
+  DatabaseMoveLeft,
+  DatabaseMoveRight,
+  DeleteIcon,
+  TextIcon,
+} from '../../../icons/index.js';
 import type { DataViewCellLifeCycle } from '../columns/manager.js';
 import type {
   DataViewColumnManager,

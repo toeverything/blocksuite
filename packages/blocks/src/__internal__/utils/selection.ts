@@ -1,9 +1,5 @@
-import { SCROLL_THRESHOLD } from '@blocksuite/global/config';
-import {
-  assertExists,
-  caretRangeFromPoint,
-  matchFlavours,
-} from '@blocksuite/global/utils';
+import { IS_FIREFOX, SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { type VirgoLine } from '@blocksuite/virgo';
 
@@ -16,6 +12,55 @@ import {
 } from './query.js';
 import { Rect } from './rect.js';
 import type { SelectionPosition } from './types.js';
+
+declare global {
+  interface Document {
+    // firefox API
+    caretPositionFromPoint(
+      x: number,
+      y: number
+    ): {
+      offsetNode: Node;
+      offset: number;
+    };
+  }
+}
+
+export function caretRangeFromPoint(
+  clientX: number,
+  clientY: number
+): Range | null {
+  if (IS_FIREFOX) {
+    const caret = document.caretPositionFromPoint(clientX, clientY);
+    // TODO handle caret is covered by popup
+    const range = document.createRange();
+    range.setStart(caret.offsetNode, caret.offset);
+    return range;
+  }
+
+  const range = document.caretRangeFromPoint(clientX, clientY);
+
+  if (!range) {
+    return null;
+  }
+
+  // See https://github.com/toeverything/blocksuite/issues/1382
+  const rangeRects = range?.getClientRects();
+  if (
+    rangeRects &&
+    rangeRects.length === 2 &&
+    range.startOffset === range.endOffset &&
+    clientY < rangeRects[0].y + rangeRects[0].height
+  ) {
+    const deltaX = (rangeRects[0].x | 0) - (rangeRects[1].x | 0);
+
+    if (deltaX > 0) {
+      range.setStart(range.startContainer, range.startOffset - 1);
+      range.setEnd(range.endContainer, range.endOffset - 1);
+    }
+  }
+  return range;
+}
 
 function setStartRange(editableContainer: Element) {
   const newRange = document.createRange();

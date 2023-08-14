@@ -1200,7 +1200,7 @@ test('should clear native selection before block selection', async ({
 
   expect(text0).toBe('456');
   expect(textCount).toBe(0);
-  const rects = page.locator('.affine-paragraph-block-container.selected');
+  const rects = page.locator('affine-block-selection');
   await expect(rects).toHaveCount(1);
 });
 

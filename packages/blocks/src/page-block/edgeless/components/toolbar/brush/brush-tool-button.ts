@@ -1,16 +1,16 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import {
-  BrushSize,
   type EdgelessTool,
+  LineWidth,
 } from '../../../../../__internal__/index.js';
+import { ArrowUpIcon, EdgelessPenIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -183,7 +183,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
         @click=${() => {
           this.setEdgelessTool({
             type: 'brush',
-            lineWidth: BrushSize.LINE_WIDTH_FOUR,
+            lineWidth: LineWidth.LINE_WIDTH_FOUR,
             color: DEFAULT_BRUSH_COLOR,
           });
           this._toggleBrushMenu();

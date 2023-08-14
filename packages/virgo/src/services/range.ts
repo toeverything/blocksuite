@@ -23,7 +23,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
-    document.dispatchEvent(new CustomEvent('virgo-vrange-updated'));
 
     if (
       this._editor.mounted &&

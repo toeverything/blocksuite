@@ -3,13 +3,10 @@ import { assertFlavours, type BaseBlockModel } from '@blocksuite/store';
 
 import { asyncFocusRichText } from '../../../../__internal__/utils/common-operations.js';
 import type { Flavour } from '../../../../models.js';
-import type { PageBlockComponent } from '../../../types.js';
 import { onModelTextUpdated } from '../../callback.js';
-import { getBlockSelections, getTextSelection } from '../../selection.js';
 import { mergeToCodeModel, transformModel } from '../model.js';
 
 export function updateBlockElementType(
-  pageElement: PageBlockComponent,
   blockElements: BlockElement[],
   flavour: Flavour,
   type?: string
@@ -17,7 +14,8 @@ export function updateBlockElementType(
   if (blockElements.length === 0) {
     return [];
   }
-  const page = pageElement.page;
+  const root = blockElements[0].root;
+  const page = blockElements[0].page;
   const hasSamePage = blockElements.every(block => block.page === page);
   if (!hasSamePage) {
     // page check
@@ -83,9 +81,10 @@ export function updateBlockElementType(
   const lastNewModel = newModels[newModels.length - 1];
 
   const allTextUpdated = newModels.map(model => onModelTextUpdated(model));
-  const selectionManager = pageElement.root.selectionManager;
-  const textSelection = getTextSelection(pageElement);
-  const blockSelections = getBlockSelections(pageElement);
+  const selectionManager = root.selectionManager;
+  const textSelection = selectionManager.find('text');
+  const blockSelections = selectionManager.filter('block');
+
   if (textSelection) {
     const newTextSelection = selectionManager.getInstance('text', {
       from: {
@@ -103,18 +102,20 @@ export function updateBlockElementType(
     });
 
     Promise.all(allTextUpdated).then(() => {
-      selectionManager.set([newTextSelection]);
+      selectionManager.setGroup('note', [newTextSelection]);
     });
     return newModels;
-  } else if (blockSelections.length !== 0) {
+  }
+
+  if (blockSelections.length !== 0) {
     requestAnimationFrame(() => {
-      selectionManager.set(
-        newModels.map(model => {
-          return selectionManager.getInstance('block', {
-            path: blockSelections[0].path.slice(0, -1).concat(model.id),
-          });
-        })
-      );
+      const selections = newModels.map(model => {
+        return selectionManager.getInstance('block', {
+          path: blockSelections[0].path.slice(0, -1).concat(model.id),
+        });
+      });
+
+      selectionManager.setGroup('note', selections);
     });
     return newModels;
   }

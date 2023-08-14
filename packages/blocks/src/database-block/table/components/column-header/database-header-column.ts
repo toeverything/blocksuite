@@ -1,3 +1,11 @@
+import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { html } from 'lit/static-html.js';
+
+import { popMenu } from '../../../../components/menu/menu.js';
 import {
   DatabaseDragIcon,
   DatabaseDuplicate,
@@ -14,15 +22,7 @@ import {
   LinkIcon,
   TextIcon,
   TodoIcon,
-} from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { html } from 'lit/static-html.js';
-
-import { popMenu } from '../../../../components/menu/menu.js';
+} from '../../../../icons/index.js';
 import type { InsertPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';

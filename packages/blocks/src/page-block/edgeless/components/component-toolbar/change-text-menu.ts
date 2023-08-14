@@ -1,15 +1,6 @@
 import '../panel/font-family-panel.js';
 import '../panel/font-size-panel.js';
 
-import {
-  AlignCenterIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-  BoldIcon,
-  FontFamilyIcon,
-  ItalicIcon,
-  SmallArrowDownIcon,
-} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
@@ -22,6 +13,15 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
+import {
+  AlignCenterIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
+  BoldIcon,
+  FontFamilyIcon,
+  ItalicIcon,
+  SmallArrowDownIcon,
+} from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';

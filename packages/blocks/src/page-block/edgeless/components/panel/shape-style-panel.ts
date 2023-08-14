@@ -1,10 +1,11 @@
-import {
-  GeneralShapeStyleIcon,
-  ScribbledShapeStyleIcon,
-} from '@blocksuite/global/config';
 import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import {
+  GeneralShapeStyleIcon,
+  ScribbledShapeStyleIcon,
+} from '../../../../icons/index.js';
 
 @customElement('edgeless-shape-style-panel')
 export class EdgelessShapeStylePanel extends LitElement {

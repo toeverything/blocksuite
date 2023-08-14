@@ -11,7 +11,6 @@ import {
 import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.js';
 import { clearMarksOnDiscontinuousInput } from '../../../../__internal__/utils/virgo.js';
 import { showLinkPopover } from '../../../../components/link-popover/index.js';
-import type { PageBlockComponent } from '../../../types.js';
 import { getSelectedContentModels } from '../../selection.js';
 
 export function formatByTextSelection(
@@ -106,7 +105,7 @@ export function formatByTextSelection(
 }
 
 export function toggleLink(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   textSelection: TextSelection
 ) {
   if (textSelection.isCollapsed()) {
@@ -117,13 +116,13 @@ export function toggleLink(
     return;
   }
 
-  const selectedModel = getSelectedContentModels(pageElement, ['text']);
+  const selectedModel = getSelectedContentModels(blockElement, ['text']);
   if (selectedModel.length === 0) {
     return;
   }
 
   const [model] = selectedModel;
-  const page = pageElement.page;
+  const page = blockElement.page;
   const vEditor = getVirgoByModel(model);
   assertExists(vEditor);
 

@@ -1,10 +1,3 @@
-import {
-  CaptionIcon,
-  CopyIcon,
-  DeleteIcon,
-  DownloadIcon,
-  LinkToCardIcon,
-} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -13,6 +6,13 @@ import { stopPropagation } from '../../__internal__/utils/event.js';
 import type { IPoint } from '../../__internal__/utils/types.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import {
+  CaptionIcon,
+  CopyIcon,
+  DeleteIcon,
+  DownloadIcon,
+  LinkToCardIcon,
+} from '../../icons/index.js';
 import type { ImageBlockModel } from '../image-model.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 

@@ -61,6 +61,29 @@ export class BlockElement<
     return this.model.flavour;
   }
 
+  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
+    return Object.keys(this.widgets).reduce((mapping, key) => {
+      return {
+        ...mapping,
+        [key]: this.root.viewStore.viewFromPath('widget', [...this.path, key]),
+      };
+    }, {});
+  }
+
+  get service(): Service | undefined {
+    return this.root.blockStore.specStore.getService(this.model.flavour) as
+      | Service
+      | undefined;
+  }
+
+  get selection() {
+    return this.root.selectionManager;
+  }
+
+  get viewStore() {
+    return this.root.viewStore;
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
@@ -96,24 +119,9 @@ export class BlockElement<
     );
   }
 
-  get widgetElements(): Partial<Record<WidgetName, WidgetElement>> {
-    return Object.keys(this.widgets).reduce((mapping, key) => {
-      return {
-        ...mapping,
-        [key]: this.root.viewStore.viewFromPath('widget', [...this.path, key]),
-      };
-    }, {});
-  }
-
   renderModel = (model: BaseBlockModel): TemplateResult => {
     return this.root.renderModel(model);
   };
-
-  get service(): Service | undefined {
-    return this.root.blockStore.specStore.getService(this.model.flavour) as
-      | Service
-      | undefined;
-  }
 
   override connectedCallback() {
     super.connectedCallback();

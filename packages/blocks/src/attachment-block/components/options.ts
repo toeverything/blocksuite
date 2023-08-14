@@ -1,3 +1,9 @@
+import { createLitPortal } from '@blocksuite/lit';
+import { html } from 'lit';
+import { createRef, ref } from 'lit/directives/ref.js';
+
+import { stopPropagation } from '../../__internal__/utils/event.js';
+import { getViewportElement } from '../../__internal__/utils/query.js';
 import {
   CaptionIcon,
   EditIcon,
@@ -5,13 +11,7 @@ import {
   LinkIcon,
   MoreIcon,
   ViewIcon,
-} from '@blocksuite/global/config';
-import { createLitPortal } from '@blocksuite/lit';
-import { html } from 'lit';
-import { createRef, ref } from 'lit/directives/ref.js';
-
-import { stopPropagation } from '../../__internal__/utils/event.js';
-import { getViewportElement } from '../../__internal__/utils/query.js';
+} from '../../icons/index.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { turnIntoEmbedView } from '../utils.js';
 import { MoreMenu } from './more-menu.js';
