@@ -1,7 +1,6 @@
 import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
-import { EdgelessConnectorIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
@@ -11,6 +10,7 @@ import {
   type EdgelessTool,
   LineWidth,
 } from '../../../../../__internal__/index.js';
+import { EdgelessConnectorIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';

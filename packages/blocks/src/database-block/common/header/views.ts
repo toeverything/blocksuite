@@ -1,4 +1,3 @@
-import { AddCursorIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -9,6 +8,7 @@ import {
   popFilterableSimpleMenu,
   popMenu,
 } from '../../../components/menu/index.js';
+import { AddCursorIcon } from '../../../icons/index.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { viewManager, viewRendererManager } from '../data-view.js';
 

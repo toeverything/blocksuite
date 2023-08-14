@@ -1,8 +1,8 @@
-import { HiddenIcon } from '@blocksuite/global/config';
 import { matchFlavours } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { HiddenIcon } from '../../../icons/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { isTopLevelBlock } from '../utils/query.js';

@@ -1,13 +1,13 @@
+import type { TemplateResult } from 'lit';
+
+import type { ShapeTool } from '../../../../../__internal__/index.js';
 import {
   DiamondIcon,
   EllipseIcon,
   RoundedRectangleIcon,
   SquareIcon,
   TriangleIcon,
-} from '@blocksuite/global/config';
-import type { TemplateResult } from 'lit';
-
-import type { ShapeTool } from '../../../../../__internal__/index.js';
+} from '../../../../../icons/index.js';
 
 type Config = {
   name: ShapeTool['shape'];

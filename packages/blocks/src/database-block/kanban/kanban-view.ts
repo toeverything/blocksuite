@@ -3,7 +3,6 @@ import './header.js';
 import './drag.js';
 import '../common/group-by/define.js';
 
-import { AddCursorIcon } from '@blocksuite/global/config';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -12,6 +11,7 @@ import Sortable from 'sortablejs';
 
 import type { KanbanViewSelection } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
+import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import { KanbanGroup } from './group.js';
 import { KanbanHotkeys } from './hotkeys.js';

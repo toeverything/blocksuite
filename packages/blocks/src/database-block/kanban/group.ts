@@ -1,10 +1,5 @@
 import './card.js';
 
-import {
-  AddCursorIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -12,6 +7,11 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../components/menu/index.js';
+import {
+  AddCursorIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '../../icons/index.js';
 import type { GroupRenderProps } from '../common/group-by/matcher.js';
 import type {
   DataViewKanbanManager,

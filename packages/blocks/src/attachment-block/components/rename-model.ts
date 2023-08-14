@@ -1,8 +1,8 @@
-import { ConfirmIcon } from '@blocksuite/global/config';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import { toast } from '../../components/toast.js';
+import { ConfirmIcon } from '../../icons/index.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { renameStyles } from './styles.js';
 

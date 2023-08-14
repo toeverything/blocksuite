@@ -2,7 +2,6 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
-import { ArrowDownIcon } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, nothing, render } from 'lit';
@@ -27,6 +26,7 @@ import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js'
 import { getService, registerService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
+import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';

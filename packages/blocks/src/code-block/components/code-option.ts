@@ -1,15 +1,15 @@
-import {
-  CancelWrapIcon,
-  CopyIcon,
-  DeleteIcon,
-  WrapIcon,
-} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import {
+  CancelWrapIcon,
+  CopyIcon,
+  DeleteIcon,
+  WrapIcon,
+} from '../../icons/index.js';
 import { copyCode } from '../../page-block/doc/utils.js';
 import type { CodeBlockModel } from '../code-model.js';
 

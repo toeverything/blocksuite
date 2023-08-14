@@ -1,4 +1,3 @@
-import { TransparentIcon } from '@blocksuite/global/config';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -6,6 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { queryCurrentMode } from '../../../../__internal__/utils/query.js';
+import { TransparentIcon } from '../../../../icons/index.js';
 
 export class ColorEvent extends Event {
   detail: CssVariableName;
