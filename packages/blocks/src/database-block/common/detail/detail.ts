@@ -1,6 +1,5 @@
 import './field.js';
 
-import { PlusIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -8,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
+import { PlusIcon } from '../../../icons/index.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { DetailSelection } from './selection.js';
 

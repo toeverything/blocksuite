@@ -1,4 +1,3 @@
-import { AutoCompleteArrowIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
@@ -20,6 +19,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { getGridBound } from '../utils.js';

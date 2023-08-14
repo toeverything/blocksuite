@@ -1,3 +1,5 @@
+import type { TemplateResult } from 'lit';
+
 import {
   BulletedListIcon,
   CodeBlockIcon,
@@ -12,9 +14,7 @@ import {
   QuoteIcon,
   TextIcon,
   TodoIcon,
-} from '@blocksuite/global/config';
-import type { TemplateResult } from 'lit';
-
+} from '../../icons/index.js';
 import type { BlockSchemas } from '../../models.js';
 
 interface BlockConfig {

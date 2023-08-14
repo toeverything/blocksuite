@@ -1,10 +1,10 @@
-import { EditIcon } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { EditIcon } from '../../../../icons/index.js';
 import { popSideDetail } from '../../detail/layout.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';

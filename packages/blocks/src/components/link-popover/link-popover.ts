@@ -1,14 +1,14 @@
-import {
-  ConfirmIcon,
-  EditIcon,
-  LinkToCardIcon,
-  UnlinkIcon,
-} from '@blocksuite/global/config';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { createEvent } from '../../__internal__/utils/index.js';
 import { isValidUrl, normalizeUrl } from '../../__internal__/utils/url.js';
+import {
+  ConfirmIcon,
+  EditIcon,
+  LinkToCardIcon,
+  UnlinkIcon,
+} from '../../icons/index.js';
 import { toast } from '../toast.js';
 import { linkPopoverStyle } from './styles.js';
 

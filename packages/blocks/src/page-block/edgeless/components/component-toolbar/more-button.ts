@@ -1,7 +1,6 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 
-import { MoreHorizontalIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -13,6 +12,7 @@ import {
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
+import { MoreHorizontalIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';

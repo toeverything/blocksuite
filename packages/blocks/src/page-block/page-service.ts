@@ -1,4 +1,3 @@
-import { TagsIcon } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
@@ -9,6 +8,7 @@ import type {
   BlockTransformContext,
   SerializedBlock,
 } from '../__internal__/utils/index.js';
+import { TagsIcon } from '../icons/index.js';
 import type { PageBlockModel } from './page-model.js';
 
 export class PageBlockService extends BaseService<PageBlockModel> {

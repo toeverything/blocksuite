@@ -1,7 +1,6 @@
 import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
-import { ArrowUpIcon, NoteIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
@@ -9,6 +8,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
+import { ArrowUpIcon, NoteIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { EdgelessNoteMenu } from './note-menu.js';

@@ -1,4 +1,3 @@
-import { AttachmentIcon16 } from '@blocksuite/global/config';
 import { BlockElement, createLitPortal } from '@blocksuite/lit';
 import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -6,6 +5,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
+import { AttachmentIcon16 } from '../icons/index.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,

@@ -1,4 +1,3 @@
-import { ImportIcon, NewPageIcon, PageIcon } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
 import {
   assertExists,
@@ -12,6 +11,7 @@ import { isFuzzyMatch } from '../../__internal__/utils/common.js';
 import { createPage } from '../../__internal__/utils/common-operations.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import { showImportModal } from '../../components/import-page/index.js';
+import { ImportIcon, NewPageIcon, PageIcon } from '../../icons/index.js';
 
 export type LinkedPageOptions = {
   triggerKeys: string[];

@@ -1,11 +1,6 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 
-import {
-  ConnectorLIcon,
-  ConnectorXIcon,
-  LineStyleIcon,
-} from '@blocksuite/global/config';
 import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
 import { StrokeStyle } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
@@ -17,6 +12,11 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
+import {
+  ConnectorLIcon,
+  ConnectorXIcon,
+  LineStyleIcon,
+} from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';

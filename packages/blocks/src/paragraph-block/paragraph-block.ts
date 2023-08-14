@@ -1,9 +1,6 @@
 import '../__internal__/rich-text/rich-text.js';
 
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BlockHubIcon20,
-} from '@blocksuite/global/config';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -21,6 +18,7 @@ import {
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service/index.js';
+import { BlockHubIcon20 } from '../icons/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 import paragraphService from './paragraph-service.js';
 
