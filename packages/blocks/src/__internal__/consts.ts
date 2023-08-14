@@ -5,7 +5,7 @@ export const SCROLL_THRESHOLD = 100;
 export const EDITOR_WIDTH = 800;
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
 export const PAGE_BLOCK_CHILD_PADDING = 24;
-export const EDGELESS_BLOCK_CHILD_PADDING = 24;
+export const EDGELESS_BLOCK_CHILD_PADDING = 36;
 export const EDGELESS_BLOCK_CHILD_BORDER_WIDTH = 2;
 
 // The height of the header, which is used to calculate the scroll offset
