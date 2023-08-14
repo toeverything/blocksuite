@@ -406,13 +406,26 @@ export function lastN<T>(target: Array<T>, n: number) {
   return target.slice(target.length - n, target.length);
 }
 
+export function on<
+  T extends HTMLElement,
+  K extends keyof M,
+  M = HTMLElementEventMap
+>(
+  element: T,
+  event: K,
+  handler: (ev: M[K]) => void,
+  options?: boolean | AddEventListenerOptions
+): () => void;
 export function on<T extends Document, K extends keyof M, M = DocumentEventMap>(
   element: T,
   event: K,
   handler: (ev: M[K]) => void,
   options?: boolean | AddEventListenerOptions
 ): () => void;
-export function on<T extends HTMLElement, K extends keyof HTMLElementEventMap>(
+export function on<
+  T extends HTMLElement | Document,
+  K extends keyof HTMLElementEventMap
+>(
   element: T,
   event: K,
   handler: (ev: HTMLElementEventMap[K]) => void,

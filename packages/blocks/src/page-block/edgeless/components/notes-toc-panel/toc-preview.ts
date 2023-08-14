@@ -13,11 +13,11 @@ import {
 } from '@blocksuite/global/config';
 import type { BlockModels } from '@blocksuite/global/types';
 import { WithDisposable } from '@blocksuite/lit';
-import { matchFlavours } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
+import * as Y from 'yjs';
 
-import { getVirgoByModel, noop } from '../../../../__internal__/index.js';
+import { noop } from '../../../../__internal__/index.js';
 import type { DividerBlockModel } from '../../../../models.js';
 import {
   type AttachmentBlockModel,
@@ -45,7 +45,6 @@ const listIconMap: {
   toggle: BulletedListIcon,
 };
 
-@customElement('blocksuite-toc-block-preview')
 export class TOCBlockPreview extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
@@ -53,7 +52,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
       width: 156%;
     }
 
-    .blocksuite-toc-block-preview {
+    .edgeless-toc-block-preview {
       white-space: nowrap;
       line-height: 15px;
       display: flex;
@@ -95,18 +94,17 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   @property({ attribute: false })
   block!: ValuesOf<BlockModels>;
 
-  override connectedCallback() {
+  override connectedCallback(): void {
     super.connectedCallback();
 
-    if (matchFlavours(this.block, ['affine:paragraph'])) {
-      const virgoEditor = getVirgoByModel(this.block);
+    this._disposables.add(
+      this.block.page.slots.onYEvent.on(({ event }) => {
+        if (event instanceof Y.YTextEvent && event.path[0] === this.block.id) {
+          this.requestUpdate();
+        }
+      })
+    );
 
-      if (virgoEditor) {
-        this._disposables.add(
-          virgoEditor.slots.updated.on(() => this.requestUpdate())
-        );
-      }
-    }
     this._disposables.add(
       this.block.propsUpdated.on(() => this.requestUpdate())
     );
@@ -182,7 +180,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="blocksuite-toc-block-preview">
+    return html`<div class="edgeless-toc-block-preview">
       ${this.renderBlockByFlavour()}
     </div>`;
   }
@@ -190,6 +188,6 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'blocksuite-toc-block-preview': TOCBlockPreview;
+    'edgeless-toc-block-preview': TOCBlockPreview;
   }
 }
