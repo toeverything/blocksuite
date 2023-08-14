@@ -67,6 +67,11 @@ export class DataViewKanban extends BaseDataView<
 
   override connectedCallback() {
     super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
     this._disposables.add(this.selection.run());
     this._disposables.add(this.hotkeys.run());
   }

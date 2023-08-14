@@ -168,7 +168,11 @@ export class DatabaseTable extends BaseDataView<
 
   override connectedCallback() {
     super.connectedCallback();
-
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
     if (this.readonly) return;
     requestAnimationFrame(() => {
       const tableContent = this._tableContainer.parentElement;

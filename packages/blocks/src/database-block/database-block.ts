@@ -288,6 +288,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       .find(v => v.view.id === this.currentView);
     if (!viewData && this.model.views.length !== 0) {
       this.currentView = this.model.views[0].id;
+      return;
     }
     return html`
       <div class="toolbar-hover-container data-view-root">
