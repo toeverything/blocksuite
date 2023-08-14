@@ -86,7 +86,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
-      border-radius: 5px;
+      border-radius: 4px;
     }
     .affine-paragraph-block-container.selected {
       background-color: var(--affine-hover-color);

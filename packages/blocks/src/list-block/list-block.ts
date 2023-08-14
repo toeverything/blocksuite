@@ -25,7 +25,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   static override styles = css`
     .affine-list-block-container {
       box-sizing: border-box;
-      border-radius: 5px;
+      border-radius: 4px;
     }
     .affine-list-block-container--first {
       margin-top: 14px;
@@ -36,7 +36,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     .affine-list-rich-text-wrapper {
       display: flex;
       align-items: center;
-      border-radius: 5px;
+      border-radius: 4px;
     }
     .affine-list-rich-text-wrapper.selected {
       background-color: var(--affine-hover-color);
