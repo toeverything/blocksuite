@@ -24,7 +24,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
 
     .edgeless-frame-order-title {
       color: #8e8d91;
-      border-bottom: 1px solid #8e8d91;
+      border-bottom: 1px solid var(--affine-divider-color);
       font-size: 12px;
       padding-bottom: 6px;
       margin-bottom: 10px;

@@ -143,7 +143,7 @@ export class SurfaceManager {
         this._elements.delete(id);
         this.deleteElementLocalRecord(id);
         this._removeFromBatch(element);
-        this.slots.elementRemoved.emit(id);
+        this.slots.elementRemoved.emit({ id, element });
       }
     });
   };
