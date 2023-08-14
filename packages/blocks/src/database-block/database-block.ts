@@ -50,7 +50,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   static override styles = css`
     .database-block-selected {
       background-color: var(--affine-hover-color);
-      border-radius: 5px;
+      border-radius: 4px;
     }
   `;
   override connectedCallback() {
