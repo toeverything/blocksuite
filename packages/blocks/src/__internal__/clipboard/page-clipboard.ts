@@ -3,8 +3,10 @@ import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/index.js';
-import { getBlockSelections } from '../../page-block/index.js';
-import { getTextSelection } from '../../page-block/utils/selection.js';
+import {
+  getBlockSelections,
+  getTextSelection,
+} from '../../page-block/utils/selection.js';
 import { getService } from '../service/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import type { Clipboard } from './type.js';
