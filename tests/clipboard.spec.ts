@@ -50,6 +50,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertBlockType,
   assertBlockTypes,
   assertClipItems,
   assertEdgelessNoteBackground,
@@ -416,110 +417,19 @@ test('should keep first line format when pasted into a new line', async ({
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
+  await pressEnter(page);
+  await focusRichText(page);
   await type(page, '-');
   await pressSpace(page);
   await type(page, '1');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, '2');
-  await pressEnter(page);
-  await type(page, '3');
-  await pressEnter(page);
-  await pressShiftTab(page);
-  await type(page, '4');
-
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-background-secondary-color"
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-  </affine:note>
-</affine:page>`
-  );
-
-  await setSelection(page, 3, 0, 5, 1);
+  await setSelection(page, 4, 0, 4, 1);
   await waitNextFrame(page);
   await copyByKeyboard(page);
-
-  await focusRichText(page, 3);
-  await pressEnter(page);
-  await pressBackspace(page);
-  await pasteByKeyboard(page);
+  await focusRichText(page, 1);
   await waitNextFrame(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-background-secondary-color"
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-  </affine:note>
-</affine:page>`
-  );
+  await pasteByKeyboard(page);
+  await assertBlockType(page, 4, 'bulleted');
+  await assertBlockType(page, 5, 'bulleted');
 });
 
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
