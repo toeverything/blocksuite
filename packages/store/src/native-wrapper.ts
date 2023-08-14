@@ -5,6 +5,7 @@ export class NativeWrapper<T = unknown> extends Y.Map<T> {
     const entry: [string, T] = ['value', value];
     super([entry]);
   }
+
   setValue(value: T) {
     return super.set('value', value);
   }
