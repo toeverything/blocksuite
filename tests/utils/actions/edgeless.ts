@@ -386,10 +386,17 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
   await colorButton.click();
 }
 
-export async function selectBrushSize(page: Page, size: 4 | 10) {
-  const sizeMap = { 4: 'thin', 10: 'thick' };
+export async function selectBrushSize(page: Page, size: string) {
+  const sizeIndexMap: { [key: string]: number } = {
+    two: 6,
+    four: 5,
+    six: 4,
+    eight: 3,
+    ten: 2,
+    twelve: 1,
+  };
   const sizeButton = page.locator(
-    `edgeless-brush-menu .brush-size-button .${sizeMap[size]}`
+    `edgeless-brush-menu .line-width-panel .line-width-button:nth-child(${sizeIndexMap[size]})`
   );
   await sizeButton.click();
 }

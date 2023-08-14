@@ -4,11 +4,13 @@ import './brush-menu.js';
 import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
+import {
+  BrushSize,
+  type EdgelessTool,
+} from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -24,18 +26,14 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(brushMenu);
 
-  computePosition(reference, brushMenu, {
-    placement: 'top',
-    middleware: [
-      offset({
-        mainAxis: 10,
-      }),
-    ],
-  }).then(({ x, y }) => {
-    Object.assign(brushMenu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
+  // The brush menu should be positioned at the top of the brush button.
+  // And it should be positioned at the top center of the toolbar all the time.
+  const x = 90;
+  const y = -44;
+
+  Object.assign(brushMenu.style, {
+    left: `${x}px`,
+    top: `${y}px`,
   });
 
   return {
@@ -185,7 +183,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
         @click=${() => {
           this.setEdgelessTool({
             type: 'brush',
-            lineWidth: 4,
+            lineWidth: BrushSize.LINE_WIDTH_FOUR,
             color: DEFAULT_BRUSH_COLOR,
           });
           this._toggleBrushMenu();

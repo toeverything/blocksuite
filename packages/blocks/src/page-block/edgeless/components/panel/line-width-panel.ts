@@ -1,5 +1,5 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { BrushSize } from '../../../../__internal__/utils/types.js';
@@ -45,6 +45,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       position: relative;
       width: 100px;
       margin: 4px;
+      cursor: default;
     }
 
     .line-width-button {
@@ -81,7 +82,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       border-radius: 50%;
       background-color: var(--affine-icon-color);
       z-index: 3;
-      cursor: ew-resize;
     }
 
     .bottom-line,
@@ -114,6 +114,9 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   selectedSize: BrushSize = BrushSize.LINE_WIDTH_TWO;
+
+  @property({ attribute: false })
+  hasTooltip = true;
 
   @query('.line-width-panel.has-tool-tip')
   private _lineWidthPanel!: HTMLElement;
@@ -255,7 +258,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     this.selectedSize = lineWidth;
   }
 
-  private _onPoinetrDown = (e: PointerEvent) => {
+  private _onPointerDown = (e: PointerEvent) => {
     e.preventDefault();
     const { left, width } = this._lineWidthPanel.getBoundingClientRect();
     const bottomLineWidth = this._bottomLine.getBoundingClientRect().width;
@@ -306,7 +309,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   override firstUpdated(): void {
     this._updateLineWidthPanel(this.selectedSize);
-    this._disposables.addFromEvent(this, 'pointerdown', this._onPoinetrDown);
+    this._disposables.addFromEvent(this, 'pointerdown', this._onPointerDown);
     this._disposables.addFromEvent(this, 'pointermove', this._onPointerMove);
     this._disposables.addFromEvent(this, 'pointerup', this._onPointerUp);
     this._disposables.addFromEvent(this, 'pointerout', this._onPointerOut);
@@ -342,9 +345,11 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       <div class="drag-handle"></div>
       <div class="bottom-line"></div>
       <div class="line-width-overlay"></div>
-      <tool-tip inert role="tooltip" tip-position="top" arrow>
-        Thickness
-      </tool-tip>
+      ${this.hasTooltip
+        ? html`<tool-tip inert role="tooltip" tip-position="top" arrow>
+            Thickness
+          </tool-tip>`
+        : nothing}
     </div>`;
   }
 }
