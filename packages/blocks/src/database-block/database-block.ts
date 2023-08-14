@@ -11,7 +11,9 @@ import './kanban/renderer.js';
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
@@ -45,6 +47,12 @@ type ViewData = {
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
+  static override styles = css`
+    .database-block-selected {
+      background-color: var(--affine-hover-color);
+      border-radius: 5px;
+    }
+  `;
   override connectedCallback() {
     super.connectedCallback();
     registerService('affine:database', LegacyDatabaseBlockService);
@@ -290,8 +298,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.currentView = this.model.views[0].id;
       return;
     }
+    const containerClass = classMap({
+      'toolbar-hover-container': true,
+      'data-view-root': true,
+      'database-block-selected': !!this.selected,
+    });
     return html`
-      <div class="toolbar-hover-container data-view-root">
+      <div class="${containerClass}">
         <div
           style="margin-bottom: 16px;display:flex;flex-direction: column;gap: 8px"
         >
