@@ -1,10 +1,11 @@
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+
 import {
   AlignCenterIcon,
   AlignLeftIcon,
   AlignRightIcon,
-} from '@blocksuite/global/config';
-import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+} from '../../../../icons/index.js';
 
 @customElement('edgeless-align-panel')
 export class EdgelessAlignPanel extends LitElement {

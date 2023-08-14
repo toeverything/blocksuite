@@ -1,13 +1,13 @@
-import {
-  ArrowDownIcon,
-  HighLightDuotoneIcon,
-  TextBackgroundDuotoneIcon,
-} from '@blocksuite/global/config';
 import type { BlockElement } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 
+import {
+  ArrowDownIcon,
+  HighLightDuotoneIcon,
+  TextBackgroundDuotoneIcon,
+} from '../../../../icons/index.js';
 import { noneInlineUnsupportedBlockSelected } from '../../../../page-block/const/inline-format-config.js';
 import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { formatByTextSelection } from '../../../../page-block/utils/operations/element/inline-level.js';

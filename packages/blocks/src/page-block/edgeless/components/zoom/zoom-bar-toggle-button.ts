@@ -1,10 +1,10 @@
-import { MoreIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/store';
 import { computePosition } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/index.js';
+import { MoreIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { EdgelessZoomToolbar } from './zoom-tool-bar.js';
 

@@ -1,13 +1,5 @@
 import '../loader.js';
 
-import {
-  CloseIcon,
-  ExportToHTMLIcon,
-  ExportToMarkdownIcon,
-  HelpIcon,
-  NewIcon,
-  NotionIcon,
-} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists, type Page, type Workspace } from '@blocksuite/store';
 import JSZip from 'jszip';
@@ -19,6 +11,14 @@ import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
+import {
+  CloseIcon,
+  ExportToHTMLIcon,
+  ExportToMarkdownIcon,
+  HelpIcon,
+  NewIcon,
+  NotionIcon,
+} from '../../icons/index.js';
 import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';

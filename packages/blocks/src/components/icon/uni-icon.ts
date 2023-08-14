@@ -1,5 +1,4 @@
-import type { icons } from '@blocksuite/global/config';
-
+import type * as icons from '../../icons/index.js';
 import { map } from '../uni-component/operation.js';
 import { createUniComponentFromWebComponent } from '../uni-component/uni-component.js';
 import { AffineLitIcon } from './icon.js';

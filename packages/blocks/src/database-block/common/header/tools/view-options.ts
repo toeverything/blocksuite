@@ -1,9 +1,9 @@
-import { DeleteIcon, MoreHorizontalIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, svg } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
+import { DeleteIcon, MoreHorizontalIcon } from '../../../../icons/index.js';
 import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import { groupByMatcher } from '../../group-by/matcher.js';
 import { popPropertiesSetting } from '../../properties.js';

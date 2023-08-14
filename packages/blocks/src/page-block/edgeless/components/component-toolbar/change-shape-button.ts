@@ -4,11 +4,6 @@ import '../panel/shape-style-panel.js';
 import '../panel/shape-panel.js';
 import './change-text-menu.js';
 
-import {
-  GeneralShapeStyleIcon,
-  LineStyleIcon,
-  ScribbledShapeStyleIcon,
-} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type ShapeElement,
@@ -26,6 +21,11 @@ import {
   LineWidth,
   type ShapeTool,
 } from '../../../../__internal__/utils/types.js';
+import {
+  GeneralShapeStyleIcon,
+  LineStyleIcon,
+  ScribbledShapeStyleIcon,
+} from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';

@@ -1,8 +1,3 @@
-import {
-  DatabaseKanbanViewIcon,
-  DatabaseSearchClose,
-  DatabaseTableViewIcon,
-} from '@blocksuite/global/config';
 import { WidgetElement } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
@@ -10,6 +5,11 @@ import { customElement } from 'lit/decorators.js';
 
 import type { DataViewTypes } from '../../database-block/common/data-view.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
+import {
+  DatabaseKanbanViewIcon,
+  DatabaseSearchClose,
+  DatabaseTableViewIcon,
+} from '../../icons/index.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { styles } from './styles.js';

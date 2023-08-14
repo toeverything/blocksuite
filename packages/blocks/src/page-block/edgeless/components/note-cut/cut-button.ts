@@ -1,7 +1,8 @@
-import { CutIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+
+import { CutIcon } from '../../../../icons/index.js';
 
 const buttonStyle = css`
   .scissors-button {
