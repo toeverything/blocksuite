@@ -18,7 +18,7 @@ export const lineStyleButtonStyles = [
       color: var(--affine-icon-color);
     }
 
-    edgeless-tool-icon-button {
+    .line-style-button {
       margin: 0 4px;
     }
   `,

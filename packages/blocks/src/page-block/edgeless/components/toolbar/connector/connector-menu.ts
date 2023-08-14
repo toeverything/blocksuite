@@ -12,7 +12,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import {
   type EdgelessTool,
-  LineWidth,
+  type LineWidth,
 } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
@@ -38,9 +38,6 @@ function ConnectorModeButtonGroup(
   return html`
     <div class="connector-mode-button-group has-tool-tip">
       <!-- This tooltip is for the last button(Thick) -->
-      <tool-tip inert role="tooltip" tip-position="top" arrow>
-        ${orthogonalTooltip}
-      </tool-tip>
 
       <div
         class="connector-mode-button has-tool-tip"
@@ -54,11 +51,14 @@ function ConnectorModeButtonGroup(
       </div>
 
       <div
-        class="connector-mode-button"
+        class="connector-mode-button has-tool-tip"
         ?active=${mode === ConnectorMode.Orthogonal}
         @click=${() => setConnectorMode(ConnectorMode.Orthogonal)}
       >
         ${ConnectorXWithArrowIcon}
+        <tool-tip inert role="tooltip" tip-position="top" arrow>
+          ${orthogonalTooltip}
+        </tool-tip>
       </div>
     </div>
   `;
@@ -131,9 +131,6 @@ export class EdgelessConnectorMenu extends LitElement {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  selectedSize: LineWidth = LineWidth.LINE_WIDTH_FOUR;
-
   private _setConnectorColor = (color: CssVariableName) => {
     if (this.edgelessTool.type !== 'connector') return;
 
@@ -175,7 +172,7 @@ export class EdgelessConnectorMenu extends LitElement {
   override render() {
     if (this.edgelessTool.type !== 'connector') return nothing;
 
-    const { color } = this.edgelessTool;
+    const { color, strokeWidth } = this.edgelessTool;
     const LineWidthButtonGroup = ConnectorModeButtonGroup(
       this.edgelessTool,
       this._setConnectorMode
@@ -187,7 +184,7 @@ export class EdgelessConnectorMenu extends LitElement {
           ${LineWidthButtonGroup}
           <menu-divider .vertical=${true}></menu-divider>
           <edgeless-line-width-panel
-            .selectedSize=${this.selectedSize}
+            .selectedSize=${strokeWidth}
             .hasTooltip=${false}
             @select=${(e: LineWidthEvent) =>
               this._setConnectorStrokeWidth(e.detail)}

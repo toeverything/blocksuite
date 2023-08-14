@@ -52,6 +52,7 @@ export function LineStylesPanel({
     mode => mode,
     mode => {
       return LineStyleButton({
+        className: 'line-style-button',
         mode,
         active: mode === selectedLineStyle,
         onClick: () => {
