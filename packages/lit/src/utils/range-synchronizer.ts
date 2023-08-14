@@ -1,6 +1,7 @@
 import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
+import { debounce } from '@blocksuite/blocks';
 import { assertExists, type Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
@@ -64,7 +65,7 @@ export class RangeSynchronizer {
     );
   }
 
-  private _onSelectionModelChanged = (selections: BaseSelection[]) => {
+  private _onSelectionModelChanged = debounce((selections: BaseSelection[]) => {
     // wait for lit updated
     const rafId = requestAnimationFrame(() => {
       const text =
@@ -85,7 +86,7 @@ export class RangeSynchronizer {
     this.root.disposables.add(() => {
       cancelAnimationFrame(rafId);
     });
-  };
+  }, 50);
 
   private _beforeTextInput(selection: TextSelection, composing: boolean) {
     const { from, to } = selection;
