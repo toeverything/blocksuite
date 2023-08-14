@@ -48,6 +48,13 @@ type ViewData = {
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   static override styles = css`
+    affine-database {
+      display: block;
+      border-radius: 8px;
+      background-color: var(--affine-background-primary-color);
+      padding: 8px;
+      margin: -8px;
+    }
     .database-block-selected {
       background-color: var(--affine-hover-color);
       border-radius: 4px;
@@ -298,7 +305,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.currentView = this.model.views[0].id;
       return;
     }
-    console.log(this.selected);
     const containerClass = classMap({
       'toolbar-hover-container': true,
       'data-view-root': true,

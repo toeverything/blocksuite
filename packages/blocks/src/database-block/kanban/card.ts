@@ -17,6 +17,7 @@ const styles = css`
     box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     transition: background-color 100ms ease-in-out;
+    background-color: var(--affine-background-secondary-color);
   }
 
   affine-data-view-kanban-card:hover {

@@ -46,6 +46,7 @@ const styles = css`
   .kanban-cell {
     flex: 1;
     display: block;
+    overflow: hidden;
   }
 `;
 

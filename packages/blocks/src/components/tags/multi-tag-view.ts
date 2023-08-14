@@ -38,6 +38,8 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       border-radius: 4px;
       white-space: nowrap;
       background: var(--affine-tag-white);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   `;
 

@@ -15,7 +15,7 @@ export class SelectGroupView extends BaseGroup<
 > {
   static override styles = css`
     .data-view-group-title-select-view {
-      width: max-content;
+      width: 100%;
       cursor: pointer;
     }
 
@@ -25,6 +25,9 @@ export class SelectGroupView extends BaseGroup<
       font-size: 12px;
       line-height: 20px;
       height: 20px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   `;
 
