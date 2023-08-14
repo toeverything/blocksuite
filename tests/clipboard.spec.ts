@@ -523,27 +523,26 @@ test.skip('should keep first line format when pasted into a new line', async ({
   );
 });
 
-test.fixme(
-  scoped`cut should work for multi-block selection`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
+test(scoped`cut should work for multi-block selection`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
 
-    await type(page, 'a');
-    await pressEnter(page);
-    await type(page, 'b');
-    await pressEnter(page);
-    await type(page, 'c');
-    await selectAllByKeyboard(page);
-    await selectAllByKeyboard(page);
-    await page.keyboard.press(`${SHORT_KEY}+x`);
-    await assertText(page, '');
-    await page.keyboard.press(`${SHORT_KEY}+v`);
-    await waitNextFrame(page);
-    await assertRichTexts(page, ['a', 'b', 'c']);
-  }
-);
+  await type(page, 'a');
+  await pressEnter(page);
+  await type(page, 'b');
+  await pressEnter(page);
+  await type(page, 'c');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+x`);
+  await page.locator('.affine-doc-viewport').click();
+  await waitNextFrame(page);
+  await assertText(page, '');
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['a', 'b', 'c']);
+});
 
 test(
   scoped`pasting into empty list should not convert the list into paragraph`,

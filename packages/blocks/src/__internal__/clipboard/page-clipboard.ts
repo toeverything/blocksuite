@@ -3,6 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/index.js';
+import { getBlockSelections } from '../../page-block/index.js';
 import { getTextSelection } from '../../page-block/utils/selection.js';
 import { getService } from '../service/index.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
@@ -110,11 +111,21 @@ export class PageClipboard implements Clipboard {
       return;
     }
     const textSelection = getTextSelection(this._ele);
-    if (!textSelection) {
+    if (textSelection) {
+      e.preventDefault();
+      await this._onCopy(ctx);
+      deleteModelsByTextSelection(this._ele, textSelection);
       return;
     }
+    const blockSelections = getBlockSelections(this._ele);
     e.preventDefault();
     await this._onCopy(ctx);
-    deleteModelsByTextSelection(this._ele, textSelection);
+    blockSelections.forEach(block => {
+      const model = this._page.getBlockById(block.blockId);
+      if (!model) {
+        return;
+      }
+      this._page.deleteBlock(model);
+    });
   };
 }
