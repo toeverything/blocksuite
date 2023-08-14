@@ -1,11 +1,12 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VirgoRootElement } from '@blocksuite/virgo';
+
+import type { BlockElement } from '../element/block-element.js';
+import type { BlockSuiteRoot } from '../element/lit-root.js';
+import { RangeSynchronizer } from './range-synchronizer.js';
 
 type RangeSnapshot = {
   startContainer: Node;
@@ -20,7 +21,9 @@ type RangeSnapshot = {
 export class RangeManager {
   private _reusedRange: Range | null = null;
 
-  constructor(public root: BlockSuiteRoot) {}
+  constructor(public root: BlockSuiteRoot) {
+    new RangeSynchronizer(root);
+  }
 
   get value() {
     return this._range;
@@ -70,18 +73,13 @@ export class RangeManager {
 
   syncRangeToTextSelection(range: Range) {
     const selectionManager = this.root.selectionManager;
-    let hasTextSelection = false;
-    const noneTextAndBlockSelection = selectionManager.value.filter(sel => {
-      if (sel.is('text')) hasTextSelection = true;
-      return !sel.is('text') && !sel.is('block');
-    });
     this._reusedRange = range;
 
     const { startContainer, endContainer } = this._range;
     const from = this._nodeToPoint(startContainer);
     const to = range.collapsed ? null : this._nodeToPoint(endContainer);
     if (!from) {
-      if (hasTextSelection) {
+      if (selectionManager.find('text')) {
         selectionManager.clear(['text']);
       }
       return null;
@@ -92,7 +90,7 @@ export class RangeManager {
       to,
     });
 
-    selectionManager.set([...noneTextAndBlockSelection, selection]);
+    selectionManager.setGroup('note', [selection]);
     return selection;
   }
 
@@ -159,7 +157,7 @@ export class RangeManager {
 
   getSelectedBlockElementsByRange(range: Range): BlockElement[] {
     return Array.from<BlockElement>(
-      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+      this.root.querySelectorAll(`[${this.root.blockIdAttr}]`)
     ).filter(el => range.intersectsNode(el));
   }
 
@@ -321,6 +319,6 @@ export class RangeManager {
   }
 
   private _getBlock(element: HTMLElement) {
-    return element.closest(`[${BLOCK_ID_ATTR}]`) as BlockElement;
+    return element.closest(`[${this.root.blockIdAttr}]`) as BlockElement;
   }
 }

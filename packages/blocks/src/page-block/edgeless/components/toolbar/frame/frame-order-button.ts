@@ -55,7 +55,6 @@ export class EdgelessFrameOrderButton extends WithDisposable(LitElement) {
   protected override render() {
     return html`
       <edgeless-tool-icon-button
-        .active=${this._menuShow}
         @click=${() => {
           this._toggleMenu();
         }}

@@ -117,7 +117,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     .affine-code-block-container .rich-text-container {
       position: relative;
-      border-radius: 5px;
+      border-radius: 4px;
       padding: 4px 12px 4px 60px;
     }
 

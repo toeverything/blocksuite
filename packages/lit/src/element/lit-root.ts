@@ -16,6 +16,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
 import { html, unsafeStatic } from 'lit/static-html.js';
 
+import { RangeManager } from '../utils/range-manager.js';
 import { WithDisposable } from '../with-disposable.js';
 import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
@@ -43,6 +44,8 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   modelSubscribed = new Set<string>();
 
   blockStore!: BlockStore<StaticValue, BlockElement | WidgetElement>;
+
+  rangeManager: RangeManager | null = null;
 
   get uiEventDispatcher(): UIEventDispatcher {
     return this.blockStore.uiEventDispatcher;
@@ -80,6 +83,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
     this.blockStore.mount();
     this.blockStore.specStore.applySpecs(this.blocks);
+    this.rangeManager = new RangeManager(this);
   }
 
   override disconnectedCallback() {
@@ -87,6 +91,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
     this.blockStore.unmount();
     this.modelSubscribed.clear();
+    this.rangeManager = null;
   }
 
   override render() {

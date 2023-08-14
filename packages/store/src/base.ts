@@ -2,6 +2,7 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+import { NativeWrapper } from './native-wrapper.js';
 import { Text } from './text-adapter.js';
 import type { Page } from './workspace/index.js';
 import type { YBlock } from './workspace/page.js';
@@ -16,10 +17,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
+  Native: <T>(input?: T) => NativeWrapper<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
+  Native: <T>(input: T = {} as T) => new NativeWrapper(input),
 });
 
 export const BlockSchema = z.object({

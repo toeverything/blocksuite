@@ -3,6 +3,7 @@ import { PathFinder } from '../utils/index.js';
 type SelectionConstructor<T = unknown> = {
   new (...args: unknown[]): T;
   type: string;
+  group: string;
 };
 
 export type BaseSelectionOptions = {
@@ -11,6 +12,7 @@ export type BaseSelectionOptions = {
 
 export abstract class BaseSelection {
   static readonly type: string;
+  static readonly group: string;
   readonly path: string[];
 
   constructor({ path }: BaseSelectionOptions) {
@@ -30,6 +32,10 @@ export abstract class BaseSelection {
   get type(): BlockSuiteSelectionType {
     return (this.constructor as SelectionConstructor)
       .type as BlockSuiteSelectionType;
+  }
+
+  get group(): string {
+    return (this.constructor as SelectionConstructor).group;
   }
 
   abstract equals(other: BaseSelection): boolean;

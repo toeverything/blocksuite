@@ -268,20 +268,14 @@ export const bindHotKey = (blockElement: BlockElement) => {
         [key]: ctx => {
           const selectionManager = blockElement.root.selectionManager;
 
-          const pageElement = blockElement.closest<PageBlockComponent>(
-            'affine-doc-page,affine-edgeless-page'
-          );
-          if (!pageElement) return;
-
           ctx.get('defaultState').event.preventDefault();
 
-          const selected = getSelectedContentBlockElements(pageElement, [
+          const selected = getSelectedContentBlockElements(blockElement, [
             'text',
             'block',
           ]);
 
           const newModels = updateBlockElementType(
-            pageElement,
             selected,
             config.flavour,
             config.type
@@ -295,7 +289,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
           onModelElementUpdated(codeModel, () => {
             const codeElement = getBlockElementByModel(codeModel);
             assertExists(codeElement);
-            selectionManager.set([
+            selectionManager.setGroup('note', [
               new TextSelection({
                 from: {
                   path: codeElement.path,

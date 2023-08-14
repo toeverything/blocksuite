@@ -38,6 +38,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
 import {
   almostEqual,
   asyncFocusRichText,
@@ -65,9 +66,7 @@ import {
 } from '../../__internal__/theme/utils.js';
 import { toast } from '../../components/toast.js';
 import type {
-  BlockHost,
   EdgelessPageBlockWidgetName,
-  EdgelessTool,
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
@@ -75,8 +74,6 @@ import type {
 } from '../../index.js';
 import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
-import { RangeManager } from '../text-selection/range-manager.js';
-import { RangeSynchronizer } from '../text-selection/range-synchronizer.js';
 import { NoteCut } from './components/note-cut/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
@@ -243,9 +240,6 @@ export class EdgelessPageBlockComponent
     zoomBarToggleButton: <ZoomBarToggleButton | null>null,
   };
 
-  rangeManager: RangeManager | null = null;
-  rangeSynchronizer: RangeSynchronizer | null = null;
-
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
@@ -306,7 +300,7 @@ export class EdgelessPageBlockComponent
 
   getService = getService;
 
-  selection!: EdgelessSelectionManager;
+  selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
 
   snap!: EdgelessSnapManager;
@@ -331,10 +325,6 @@ export class EdgelessPageBlockComponent
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
-  }
-
-  get disposables() {
-    return this._disposables;
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -459,9 +449,15 @@ export class EdgelessPageBlockComponent
   private _initSlotEffects() {
     // TODO: listen to new children
     // this.model.children.forEach(note => {
-    //   note.propsUpdated.on(() => this.selection.syncDraggingArea());
+    //   note.propsUpdated.on(() => this.selectionManager.syncDraggingArea());
     // });
-    const { _disposables, slots, selection, page, surface } = this;
+    const {
+      _disposables,
+      slots,
+      selectionManager: selection,
+      page,
+      surface,
+    } = this;
     _disposables.add(
       page.slots.yBlockUpdated.on(({ id, props }) => {
         const block = page.getBlockById(id);
@@ -535,8 +531,10 @@ export class EdgelessPageBlockComponent
           `${translateY}px`
         );
 
-        if (this.selection.selectedBlocks.length) {
-          this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
+        if (this.selectionManager.selectedBlocks.length) {
+          this.selectionManager.setSelectedBlocks([
+            ...this.selectionManager.selectedBlocks,
+          ]);
         }
 
         updateNotesPosition(this, this.notes);
@@ -544,7 +542,7 @@ export class EdgelessPageBlockComponent
     );
     _disposables.add(
       selection.slots.blocksUpdated.on(selectedBlocks => {
-        this.selection.selectedBlocks = selectedBlocks;
+        this.selectionManager.selectedBlocks = selectedBlocks;
         // TODO: remove `requestAnimationFrame`
         requestAnimationFrame(() => {
           this._rectsOfSelectedBlocks = selectedBlocks.map(
@@ -568,7 +566,7 @@ export class EdgelessPageBlockComponent
       })
     );
     _disposables.add(this.tools);
-    _disposables.add(this.selection);
+    _disposables.add(this.selectionManager);
     _disposables.add(this.surface);
 
     _disposables.add(this._noteResizeObserver);
@@ -1037,8 +1035,8 @@ export class EdgelessPageBlockComponent
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.selection.setSelectedBlocks([]);
-      this.selection.setSelection({
+      this.selectionManager.setSelectedBlocks([]);
+      this.selectionManager.setSelection({
         elements: [noteBlock.id],
         editing: false,
       });
@@ -1087,8 +1085,10 @@ export class EdgelessPageBlockComponent
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.selection.setSelectedBlocks([...this.selection.selectedBlocks]);
-      this.selection.setSelection(this.selection.state);
+      this.selectionManager.setSelectedBlocks([
+        ...this.selectionManager.selectedBlocks,
+      ]);
+      this.selectionManager.setSelection(this.selectionManager.state);
     });
     resizeObserver.observe(this.pageBlockContainer);
     this._resizeObserver = resizeObserver;
@@ -1198,9 +1198,7 @@ export class EdgelessPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
 
-    this.rangeManager = new RangeManager(this.root);
     this.gesture = new Gesture(this);
-    this.rangeSynchronizer = new RangeSynchronizer(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
@@ -1220,7 +1218,7 @@ export class EdgelessPageBlockComponent
     registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
-    this.selection = new EdgelessSelectionManager(this);
+    this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.root.uiEventDispatcher);
   }
 
@@ -1232,15 +1230,13 @@ export class EdgelessPageBlockComponent
       this._resizeObserver = null;
     }
 
-    this.rangeManager = null;
     this.gesture = null;
-    this.rangeSynchronizer = null;
     this.keyboardManager = null;
 
     this.tools.clear();
     this.tools.dispose();
 
-    this.selection.dispose();
+    this.selectionManager.dispose();
   }
 
   override render() {

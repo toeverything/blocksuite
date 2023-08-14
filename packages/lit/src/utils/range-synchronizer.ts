@@ -1,11 +1,11 @@
 import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, type Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import type { PageBlockComponent } from '../types.js';
+import type { BlockElement } from '../element/block-element.js';
+import type { BlockSuiteRoot } from '../element/lit-root.js';
 
 /**
  * Two-way binding between native range and text selection
@@ -13,11 +13,7 @@ import type { PageBlockComponent } from '../types.js';
 export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
   private get _selectionManager() {
-    return this.pageElement.root.selectionManager;
-  }
-
-  private get _isNativeSelection() {
-    return Boolean(this.pageElement.gesture?.isNativeSelection);
+    return this.root.selectionManager;
   }
 
   private get _currentSelection() {
@@ -25,74 +21,71 @@ export class RangeSynchronizer {
   }
 
   private get _rangeManager() {
-    assertExists(this.pageElement.rangeManager);
-    return this.pageElement.rangeManager;
+    assertExists(this.root.rangeManager);
+    return this.root.rangeManager;
   }
 
-  constructor(public pageElement: PageBlockComponent) {
-    this.pageElement.disposables.add(
-      this._selectionManager.slots.changed.on(selections => {
-        if (this._isNativeSelection) {
-          return;
-        }
-        // wait for lit updated
-        const rafId = requestAnimationFrame(() => {
-          const text =
-            selections.find((selection): selection is TextSelection =>
-              selection.is('text')
-            ) ?? null;
-          const eq =
-            text && this._prevSelection
-              ? text.equals(this._prevSelection)
-              : text === this._prevSelection;
-          if (eq) {
-            return;
-          }
-
-          this._prevSelection = text;
-          this._rangeManager.syncTextSelectionToRange(text);
-        });
-        this.pageElement.disposables.add(() => {
-          cancelAnimationFrame(rafId);
-        });
-      })
+  constructor(public root: BlockSuiteRoot) {
+    this.root.disposables.add(
+      this._selectionManager.slots.changed.on(this._onSelectionModelChanged)
     );
 
-    this.pageElement.handleEvent(
-      'selectionChange',
-      () => {
+    this.root.disposables.add(
+      this.root.uiEventDispatcher.add('selectionChange', () => {
         const selection = window.getSelection();
         if (!selection) {
           this._selectionManager.clear();
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        if (range && range.intersectsNode(this.pageElement)) {
+        if (range && range.intersectsNode(this.root)) {
           this._prevSelection =
             this._rangeManager.syncRangeToTextSelection(range);
         } else {
           this._prevSelection = null;
           this._selectionManager.clear(['text']);
         }
-      },
-      {
-        global: true,
-      }
+      })
     );
 
-    this.pageElement.handleEvent('beforeInput', ctx => {
-      const event = ctx.get('defaultState').event as InputEvent;
-      if (this.pageElement.page.readonly) return;
+    this.root.disposables.add(
+      this.root.uiEventDispatcher.add('beforeInput', ctx => {
+        const event = ctx.get('defaultState').event as InputEvent;
+        if (this.root.page.readonly) return;
 
-      const current = this._currentSelection.at(0);
-      if (!current) return;
+        const current = this._currentSelection.at(0);
+        if (!current) return;
 
-      if (current.is('text')) {
-        this._beforeTextInput(current, event.isComposing);
+        if (current.is('text')) {
+          this._beforeTextInput(current, event.isComposing);
+          return;
+        }
+      })
+    );
+  }
+
+  private _onSelectionModelChanged = (selections: BaseSelection[]) => {
+    // wait for lit updated
+    const rafId = requestAnimationFrame(() => {
+      const text =
+        selections.find((selection): selection is TextSelection =>
+          selection.is('text')
+        ) ?? null;
+      const eq =
+        text && this._prevSelection
+          ? text.equals(this._prevSelection)
+          : text === this._prevSelection;
+      if (eq) {
         return;
       }
+
+      this._prevSelection = text;
+      this._rangeManager.syncTextSelectionToRange(text);
     });
-  }
+    this.root.disposables.add(() => {
+      cancelAnimationFrame(rafId);
+    });
+  };
 
   private _beforeTextInput(selection: TextSelection, composing: boolean) {
     const { from, to } = selection;
@@ -111,7 +104,7 @@ export class RangeSynchronizer {
 
     const endIsSelectedAll = to.length === endText.length;
 
-    this.pageElement.page.transact(() => {
+    this.root.page.transact(() => {
       if (endIsSelectedAll && composing) {
         this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
@@ -120,7 +113,7 @@ export class RangeSynchronizer {
         startText.join(endText);
       }
       blocks.slice(1).forEach(block => {
-        this.pageElement.page.deleteBlock(block.model);
+        this.root.page.deleteBlock(block.model);
       });
     });
 

@@ -87,12 +87,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         'Mod-a': ctx => {
-          if (this.pageElement.selection.editing) {
+          if (this.pageElement.selectionManager.editing) {
             return;
           }
 
           ctx.get('defaultState').event.preventDefault();
-          this.pageElement.selection.setSelection({
+          this.pageElement.selectionManager.setSelection({
             elements: [
               ...this.pageElement.notes.map(note => note.id),
               ...this.pageElement.surface.getElements().map(el => el.id),
@@ -152,7 +152,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
     const { edgelessTool: edgelessTool } = edgeless.tools;
-    const { state } = edgeless.selection;
+    const { state } = edgeless.selectionManager;
     if (event.type === 'keydown') {
       if (edgelessTool.type === 'pan') {
         return;
@@ -192,11 +192,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _delete() {
     const edgeless = this.pageElement;
 
-    if (edgeless.selection.editing) {
+    if (edgeless.selectionManager.editing) {
       return;
     }
 
-    const { elements } = edgeless.selection;
+    const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
       if (isTopLevelBlock(element)) {
         const children = edgeless.page.root?.children ?? [];
@@ -210,8 +210,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       }
     });
 
-    edgeless.selection.clear();
-    edgeless.selection.setSelection(edgeless.selection.state);
+    edgeless.selectionManager.clear();
+    edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
   }
 
   private _setEdgelessTool(
@@ -220,7 +220,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     ignoreActiveState = false
   ) {
     // when editing, should not update mouse mode by shortcut
-    if (!ignoreActiveState && edgeless.selection.editing) {
+    if (!ignoreActiveState && edgeless.selectionManager.editing) {
       return;
     }
     edgeless.tools.setEdgelessTool(edgelessTool);

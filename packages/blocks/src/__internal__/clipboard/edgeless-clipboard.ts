@@ -1,4 +1,4 @@
-import type { IBound, SurfaceManager } from '@blocksuite/phasor';
+import type { IBound } from '@blocksuite/phasor';
 import {
   Bound,
   compare,
@@ -22,10 +22,7 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import {
-  getSelectedContentModels,
-  getTextSelection,
-} from '../../page-block/utils/selection.js';
+import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
   type Connectable,
@@ -52,10 +49,9 @@ import {
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
-function prepareConnnectorClipboardData(
+function prepareConnectorClipboardData(
   connector: ConnectorElement,
-  selected: Selectable[],
-  surface: SurfaceManager
+  selected: Selectable[]
 ) {
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
@@ -71,16 +67,13 @@ function prepareConnnectorClipboardData(
   return serialized;
 }
 
-async function prepareClipboardData(
-  selectedAll: Selectable[],
-  surface: SurfaceManager
-) {
+async function prepareClipboardData(selectedAll: Selectable[]) {
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       if (isTopLevelBlock(selected)) {
         return (await getBlockClipboardInfo(selected)).json;
       } else if (selected instanceof ConnectorElement) {
-        return prepareConnnectorClipboardData(selected, selectedAll, surface);
+        return prepareConnectorClipboardData(selected, selectedAll);
       } else {
         return selected.serialize();
       }
@@ -110,11 +103,11 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   get selection() {
-    return this._edgeless.selection;
+    return this._edgeless.selectionManager;
   }
 
   get textSelection() {
-    return getTextSelection(this._edgeless);
+    return this._edgeless.selection.find('text');
   }
 
   get slots() {
@@ -181,7 +174,7 @@ export class EdgelessClipboard implements Clipboard {
       }
       return;
     }
-    const data = await prepareClipboardData(elements, this.surface);
+    const data = await prepareClipboardData(elements);
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
@@ -242,7 +235,7 @@ export class EdgelessClipboard implements Clipboard {
 
     deleteModelsByTextSelection(this._edgeless);
 
-    const textSelection = getTextSelection(this._edgeless);
+    const textSelection = this.textSelection;
     assertExists(textSelection);
     const selectedModels = getSelectedContentModels(this._edgeless, ['text']);
 

@@ -7,10 +7,7 @@ import {
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import {
-  getSelectedContentModels,
-  getTextSelection,
-} from '../../../page-block/utils/selection.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
 import { getServiceOrRegister } from '../../service/index.js';
 import {
@@ -140,7 +137,7 @@ export async function copyBlocksInPage(pageElement: PageBlockComponent) {
     'text',
     'block',
   ]);
-  const textSelection = getTextSelection(pageElement) ?? undefined;
+  const textSelection = pageElement.selection.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,
     textSelection

@@ -1,4 +1,5 @@
 import type { TextSelection } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, matchFlavours } from '@blocksuite/store';
 
 import { LinkMockSelection } from '../../../../__internal__/rich-text/link-node/mock-selection.js';
@@ -10,22 +11,21 @@ import {
 import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.js';
 import { clearMarksOnDiscontinuousInput } from '../../../../__internal__/utils/virgo.js';
 import { showLinkPopover } from '../../../../components/link-popover/index.js';
-import type { PageBlockComponent } from '../../../types.js';
 import { getSelectedContentModels } from '../../selection.js';
 
 export function formatByTextSelection(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
   value: string | true | null
 ) {
-  const selectedModels = getSelectedContentModels(pageElement, ['text']);
+  const selectedModels = getSelectedContentModels(blockElement, ['text']);
 
   if (selectedModels.length === 0) {
     throw new Error('No selected models');
   }
 
-  const rangeManager = pageElement.rangeManager;
+  const rangeManager = blockElement.root.rangeManager;
   assertExists(rangeManager);
   const { from, to } = textSelection;
   const startModel = selectedModels[0];
@@ -105,7 +105,7 @@ export function formatByTextSelection(
 }
 
 export function toggleLink(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   textSelection: TextSelection
 ) {
   if (textSelection.isCollapsed()) {
@@ -116,13 +116,13 @@ export function toggleLink(
     return;
   }
 
-  const selectedModel = getSelectedContentModels(pageElement, ['text']);
+  const selectedModel = getSelectedContentModels(blockElement, ['text']);
   if (selectedModel.length === 0) {
     return;
   }
 
   const [model] = selectedModel;
-  const page = pageElement.page;
+  const page = blockElement.page;
   const vEditor = getVirgoByModel(model);
   assertExists(vEditor);
 

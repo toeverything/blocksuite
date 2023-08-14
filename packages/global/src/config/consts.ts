@@ -1,5 +1,3 @@
-import { SHORT_KEY } from './consts/platform.js';
-
 export * from './consts/block-hub.js';
 export * from './consts/event.js';
 export * from './consts/platform.js';
@@ -11,28 +9,6 @@ export type PREVENT_DEFAULT = typeof PREVENT_DEFAULT;
 export const ALLOW_DEFAULT = true;
 export type ALLOW_DEFAULT = typeof ALLOW_DEFAULT;
 
-export const HOTKEYS = {
-  ANY_KEY: '*',
-  UNDO: `${SHORT_KEY}+z`,
-  REDO: `${SHORT_KEY}+shift+z,ctrl+y`,
-  BACKSPACE: 'backspace',
-  DELETE: 'delete',
-  SELECT_ALL: `${SHORT_KEY}+a`,
-  SHIFT_UP: 'shift+up',
-  SHIFT_DOWN: 'shift+down',
-  SHIFT_TAB: 'shift+tab',
-
-  UP: 'up',
-  DOWN: 'down',
-  LEFT: 'left',
-  RIGHT: 'right',
-  ENTER: 'enter',
-  TAB: 'tab',
-  SPACE: 'space',
-  ESC: 'esc',
-};
-
-export const MOVE_DETECT_THRESHOLD = 2;
 export const SCROLL_THRESHOLD = 100;
 
 export const EDITOR_WIDTH = 800;

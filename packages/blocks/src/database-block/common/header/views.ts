@@ -18,7 +18,6 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     data-view-header-views {
       display: flex;
       user-select: none;
-      overflow-x: scroll;
     }
     data-view-header-views::-webkit-scrollbar-thumb {
       width: 1px;
@@ -32,14 +31,14 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       color: var(--affine-text-secondary-color);
+      white-space: nowrap;
     }
 
     .database-view-button .name {
       height: 22px;
-      max-width: 120px;
+      max-width: 100px;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
     }
 
     .database-view-button .icon {
@@ -85,6 +84,40 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     );
   }
 
+  _showMore(event: MouseEvent) {
+    popFilterableSimpleMenu(event.target as HTMLElement, [
+      ...this.model.views.map(v => ({
+        type: 'action' as const,
+        icon: html`<uni-lit
+          .uni=${viewRendererManager.getView(v.mode).icon}
+        ></uni-lit>`,
+        name: v.name,
+        select: () => {
+          this.setViewId(v.id);
+        },
+      })),
+      {
+        type: 'group',
+        name: '',
+        children: () =>
+          viewManager.all.map(v => {
+            return {
+              type: 'action',
+              name: `Create ${v.defaultName}`,
+              icon: html`<uni-lit
+                .uni=${viewRendererManager.getView(v.type).icon}
+              ></uni-lit>`,
+              select: () => {
+                const view = this.model.addView(v.type);
+                this.setViewId(view.id);
+                this.model.applyViewsUpdate();
+              },
+            };
+          }),
+      },
+    ]);
+  }
+
   _clickView(event: MouseEvent, id: string) {
     if (this.currentView !== id) {
       this.setViewId(id);
@@ -126,11 +159,30 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     });
   }
 
+  renderMore() {
+    if (this.model.views.length <= 3) {
+      return html`<div
+        class="database-view-button"
+        @click="${this._addViewMenu}"
+      >
+        ${AddCursorIcon}
+      </div>`;
+    }
+    return html`
+      <div class="database-view-button" @click="${this._showMore}">
+        ${this.model.views.length - 3} More
+      </div>
+    `;
+  }
+
   override render() {
     const views = this.model.views;
+    const i = views.findIndex(v => v.id === this.currentView);
+    const needShow =
+      i > 2 ? [...views.slice(0, 2), views[i]] : views.slice(0, 3);
     return html`
       ${repeat(
-        views,
+        needShow,
         v => v.id,
         view => {
           const classList = classMap({
@@ -149,9 +201,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           </div>`;
         }
       )}
-      <div class="database-view-button" @click="${this._addViewMenu}">
-        ${AddCursorIcon}
-      </div>
+      ${this.renderMore()}
     `;
   }
 }

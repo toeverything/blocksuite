@@ -75,6 +75,15 @@ export class SelectionManager {
     this.slots.changed.emit(selections);
   }
 
+  setGroup(group: string, selections: BaseSelection[]) {
+    const current = this.value.filter(s => s.group !== group);
+    this.set([...current, ...selections]);
+  }
+
+  getGroup(group: string) {
+    return this.value.filter(s => s.group === group);
+  }
+
   update(fn: (currentSelections: BaseSelection[]) => BaseSelection[]) {
     const selections = fn(this.value);
     this.set(selections);

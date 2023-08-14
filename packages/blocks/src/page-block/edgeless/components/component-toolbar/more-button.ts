@@ -83,7 +83,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       height: 32px;
       box-sizing: border-box;
       padding: 5px 12px;
-      border-radius: 5px;
+      border-radius: 4px;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
@@ -122,7 +122,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selection;
+    return this.edgeless.selectionManager;
   }
 
   get slots() {

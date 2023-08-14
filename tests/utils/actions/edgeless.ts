@@ -974,7 +974,7 @@ export async function getSelectedBound(page: Page, index = 0) {
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
-      const selected = container.selection.elements[index];
+      const selected = container.selectionManager.elements[index];
       return JSON.parse(selected.xywh);
     },
     [index]

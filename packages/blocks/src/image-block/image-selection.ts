@@ -2,6 +2,7 @@ import { BaseSelection, PathFinder } from '@blocksuite/block-std';
 
 export class ImageSelection extends BaseSelection {
   static override type = 'image';
+  static override group = 'note';
 
   override equals(other: BaseSelection): boolean {
     if (other instanceof ImageSelection) {

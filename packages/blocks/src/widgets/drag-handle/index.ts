@@ -176,8 +176,8 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private get _rangeManager() {
-    assertExists(this._pageBlockElement.rangeManager);
-    return this._pageBlockElement.rangeManager;
+    assertExists(this.root.rangeManager);
+    return this.root.rangeManager;
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
@@ -274,8 +274,8 @@ export class DragHandleWidget extends WidgetElement {
     const edgelessPage = this._pageBlockElement as EdgelessPageBlockComponent;
     const noteBlockId = noteBlock.path[noteBlock.path.length - 1];
     return (
-      edgelessPage.selection.editing &&
-      edgelessPage.selection.state.elements[0] === noteBlockId
+      edgelessPage.selectionManager.editing &&
+      edgelessPage.selectionManager.state.elements[0] === noteBlockId
     );
   };
 

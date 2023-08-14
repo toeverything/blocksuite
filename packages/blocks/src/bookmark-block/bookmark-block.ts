@@ -259,7 +259,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });
-    selectionManager.set([blockSelection]);
+    selectionManager.setGroup('note', [blockSelection]);
   }
 
   private _onCardDbClick() {

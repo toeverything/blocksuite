@@ -13,7 +13,7 @@ export class EdgelessToolIconButton extends LitElement {
       align-items: center;
       padding: 6px;
       color: var(--affine-icon-color);
-      border-radius: 5px;
+      border-radius: 4px;
       cursor: pointer;
     }
 
