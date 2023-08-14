@@ -1,67 +1,119 @@
 import '../../buttons/tool-icon-button.js';
+import '../../panel/one-row-color-panel.js';
 
-import { Slot } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { WithDisposable } from '@blocksuite/lit';
+import type { ShapeType } from '@blocksuite/phasor';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ShapeTool } from '../../../../../__internal__/index.js';
+import type {
+  EdgelessTool,
+  ShapeTool,
+} from '../../../../../__internal__/index.js';
+import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
+import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import type { ColorEvent } from '../../panel/color-panel.js';
 import { ShapeComponentConfig } from './shape-menu-config.js';
 
 @customElement('edgeless-shape-menu')
-export class EdgelessShapeMenu extends LitElement {
+export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
-      display: block;
-      z-index: 2;
+      display: flex;
+      position: absolute;
+      z-index: -1;
     }
     .shape-menu-container {
       display: flex;
       align-items: center;
-      height: 48px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      border-radius: 8px 8px 0 0;
+      position: relative;
+      cursor: default;
+    }
+    .menu-content {
+      display: flex;
+      align-items: center;
+    }
+    .shape-type-container {
+      display: flex;
+      align-items: center;
       fill: none;
       stroke: currentColor;
-      padding: 0 8px;
+    }
+    menu-divider {
+      height: 24px;
     }
   `;
+  @property({ attribute: false })
+  edgelessTool!: EdgelessTool;
+
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
   selectedShape?: ShapeTool['shape'] | null;
 
-  slots = {
-    select: new Slot<ShapeTool['shape']>(),
+  private _setShapeType = (shape: ShapeType | 'roundedRect') => {
+    if (this.edgelessTool.type !== 'shape') return;
+
+    const { fillColor, strokeColor } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
+      type: 'shape',
+      shape,
+      fillColor,
+      strokeColor,
+    });
   };
 
-  private _onSelect(value: ShapeTool['shape']) {
-    this.selectedShape = value;
-    this.slots.select.emit(value);
-  }
+  private _setStrokeColor = (strokeColor: CssVariableName) => {
+    if (this.edgelessTool.type !== 'shape') return;
 
-  override disconnectedCallback(): void {
-    this.slots.select.dispose();
-    super.disconnectedCallback();
-  }
+    const { shape, fillColor } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
+      type: 'shape',
+      shape,
+      fillColor,
+      strokeColor,
+    });
+  };
 
   override render() {
+    if (this.edgelessTool.type !== 'shape') return nothing;
+
+    const { shape, strokeColor } = this.edgelessTool;
+
     return html`
       <div class="shape-menu-container">
-        ${ShapeComponentConfig.map(({ name, icon, tooltip, disabled }) => {
-          return html`
-            <edgeless-tool-icon-button
-              .disabled=${disabled}
-              .tooltip=${tooltip}
-              .active=${this.selectedShape === name}
-              @click=${() => {
-                if (disabled) return;
-                this._onSelect(name);
-              }}
-            >
-              ${icon}
-            </edgeless-tool-icon-button>
-          `;
-        })}
+        <edgeless-slide-menu>
+          <div class="menu-content">
+            <div class="shape-type-container">
+              ${ShapeComponentConfig.map(
+                ({ name, icon, tooltip, disabled }) => {
+                  return html`
+                    <edgeless-tool-icon-button
+                      .disabled=${disabled}
+                      .tooltip=${tooltip}
+                      .active=${shape === name}
+                      @click=${() => {
+                        if (disabled) return;
+                        this._setShapeType(name);
+                      }}
+                    >
+                      ${icon}
+                    </edgeless-tool-icon-button>
+                  `;
+                }
+              )}
+            </div>
+            <menu-divider .vertical=${true}></menu-divider>
+            <edgeless-one-row-color-panel
+              .value=${strokeColor}
+              @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
+            ></edgeless-one-row-color-panel>
+          </div>
+        </edgeless-slide-menu>
       </div>
     `;
   }

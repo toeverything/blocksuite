@@ -3,8 +3,9 @@ import './shape-menu.js';
 
 import { EdgelessShapeIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -12,9 +13,36 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../../component-toolbar/change-shape-button.js';
-import { createButtonPopper } from '../../utils.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
+
+interface ShapeMenuPopper {
+  element: EdgelessShapeMenu;
+  dispose: () => void;
+}
+
+function createShapeMenuPopper(reference: HTMLElement): ShapeMenuPopper {
+  const shapeMenu = document.createElement('edgeless-shape-menu');
+  assertExists(reference.shadowRoot);
+  reference.shadowRoot.appendChild(shapeMenu);
+
+  // The brush menu should be positioned at the top of the brush button.
+  // And it should be positioned at the top center of the toolbar all the time.
+  const x = 90;
+  const y = -44;
+
+  Object.assign(shapeMenu.style, {
+    left: `${x}px`,
+    top: `${y}px`,
+  });
+
+  return {
+    element: shapeMenu,
+    dispose: () => {
+      shapeMenu.remove();
+    },
+  };
+}
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
@@ -28,12 +56,6 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     edgeless-toolbar-button:hover svg {
       scale: 1.15;
     }
-    edgeless-shape-menu {
-      display: none;
-    }
-    edgeless-shape-menu[data-show] {
-      display: block;
-    }
   `;
 
   @property({ attribute: false })
@@ -45,55 +67,38 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  @state()
-  private _popperShow = false;
-
-  @query('edgeless-shape-menu')
-  private _shapeMenu!: EdgelessShapeMenu;
-
-  private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
+  private _shapeMenu: ShapeMenuPopper | null = null;
 
   private _toggleShapeMenu() {
-    this._shapeMenuPopper?.toggle();
+    if (this._shapeMenu) {
+      this._shapeMenu.dispose();
+      this._shapeMenu = null;
+    } else {
+      this._shapeMenu = createShapeMenuPopper(this);
+      this._shapeMenu.element.edgelessTool = this.edgelessTool;
+      this._shapeMenu.element.edgeless = this.edgeless;
+    }
   }
 
-  override firstUpdated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
-
-    this._shapeMenuPopper = createButtonPopper(
-      this,
-      this._shapeMenu,
-      ({ display }) => {
-        this._popperShow = display === 'show';
+  override updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('edgelessTool')) {
+      if (this.edgelessTool.type !== 'shape') {
+        this._shapeMenu?.dispose();
+        this._shapeMenu = null;
       }
-    );
-    _disposables.add(this._shapeMenuPopper);
-    _disposables.add(
-      this._shapeMenu.slots.select.on(shape => {
-        this.setEdgelessTool({
-          type: 'shape',
-          shape,
-          fillColor: DEFAULT_SHAPE_FILL_COLOR,
-          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-        });
-      })
-    );
-    super.firstUpdated(changedProperties);
-  }
-
-  override disconnectedCallback() {
-    this._disposables?.dispose();
-    super.disconnectedCallback();
+      if (this._shapeMenu) {
+        this._shapeMenu.element.edgelessTool = this.edgelessTool;
+        this._shapeMenu.element.edgeless = this.edgeless;
+      }
+    }
   }
 
   override render() {
     const type = this.edgelessTool?.type;
-    const selectedShape =
-      type === 'shape' ? this.edgelessTool.shape : undefined;
 
     return html`
       <edgeless-toolbar-button
-        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Shape', 'S')}
+        .tooltip=${getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         .activeMode=${'background'}
         @click=${() => {
@@ -108,8 +113,6 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
       >
         ${EdgelessShapeIcon}
       </edgeless-toolbar-button>
-      <edgeless-shape-menu .selectedShape=${selectedShape}>
-      </edgeless-shape-menu>
     `;
   }
 }
