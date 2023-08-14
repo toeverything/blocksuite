@@ -1,4 +1,4 @@
-import type { IBound, SurfaceManager } from '@blocksuite/phasor';
+import type { IBound } from '@blocksuite/phasor';
 import {
   Bound,
   compare,
@@ -52,10 +52,9 @@ import {
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
-function prepareConnnectorClipboardData(
+function prepareConnectorClipboardData(
   connector: ConnectorElement,
-  selected: Selectable[],
-  surface: SurfaceManager
+  selected: Selectable[]
 ) {
   const sourceId = connector.source?.id;
   const targetId = connector.target?.id;
@@ -71,16 +70,13 @@ function prepareConnnectorClipboardData(
   return serialized;
 }
 
-async function prepareClipboardData(
-  selectedAll: Selectable[],
-  surface: SurfaceManager
-) {
+async function prepareClipboardData(selectedAll: Selectable[]) {
   const selected = await Promise.all(
     selectedAll.map(async selected => {
       if (isTopLevelBlock(selected)) {
         return (await getBlockClipboardInfo(selected)).json;
       } else if (selected instanceof ConnectorElement) {
-        return prepareConnnectorClipboardData(selected, selectedAll, surface);
+        return prepareConnectorClipboardData(selected, selectedAll);
       } else {
         return selected.serialize();
       }
@@ -181,7 +177,7 @@ export class EdgelessClipboard implements Clipboard {
       }
       return;
     }
-    const data = await prepareClipboardData(elements, this.surface);
+    const data = await prepareClipboardData(elements);
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
