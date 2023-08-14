@@ -20,7 +20,6 @@ export const lineStyleButtonStyles = [
     }
 
     .line-style-button {
-      margin: 0 4px;
       padding: 6px 8px;
     }
   `,
