@@ -298,10 +298,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.currentView = this.model.views[0].id;
       return;
     }
+    console.log(this.selected);
     const containerClass = classMap({
       'toolbar-hover-container': true,
       'data-view-root': true,
-      'database-block-selected': !!this.selected,
+      'database-block-selected': this.selected?.type === 'block',
     });
     return html`
       <div class="${containerClass}">
