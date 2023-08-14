@@ -76,7 +76,6 @@ export const menuGroups: {
               ['text', 'block']
             );
             const newModels = updateBlockElementType(
-              pageElement,
               selectedBlockElements,
               flavour,
               type
@@ -144,12 +143,7 @@ export const menuGroups: {
             pageElement,
             ['text', 'block']
           );
-          updateBlockElementType(
-            pageElement,
-            selectedBlockElements,
-            flavour,
-            type
-          );
+          updateBlockElementType(selectedBlockElements, flavour, type);
         },
       })),
   },

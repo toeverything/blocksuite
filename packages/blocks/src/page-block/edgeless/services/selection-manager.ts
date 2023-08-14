@@ -101,11 +101,9 @@ export class EdgelessSelectionManager {
           const selections = states[id];
 
           selections.forEach(selection => {
-            if (selection.type === 'surface') {
-              result[id] = selection as SurfaceSelection;
-              (selection as SurfaceSelection).elements.forEach(id =>
-                remoteSelectedElements.add(id)
-              );
+            if (selection.is('surface')) {
+              result[id] = selection;
+              selection.elements.forEach(id => remoteSelectedElements.add(id));
             }
           });
         });
@@ -137,11 +135,7 @@ export class EdgelessSelectionManager {
       selection.editing
     );
 
-    const values = this._selection.value.filter(
-      selection => selection.type !== 'surface'
-    );
-
-    this._selection.set([...values, instance]);
+    this._selection.setGroup('edgeless', [instance]);
   }
 
   setSelectedBlocks(blocks: BlockComponentElement[]) {

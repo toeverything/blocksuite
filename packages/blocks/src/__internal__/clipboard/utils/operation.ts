@@ -1,24 +1,21 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/lit';
 
-import type { PageBlockComponent } from '../../../page-block/index.js';
-import {
-  getSelectedContentModels,
-  getTextSelection,
-} from '../../../page-block/utils/selection.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { getVirgoByModel } from '../../utils/query.js';
 
 export function deleteModelsByTextSelection(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   textSelection?: TextSelection
 ) {
   if (!textSelection) {
-    textSelection = getTextSelection(pageElement) ?? undefined;
+    textSelection = blockElement.selection.find('text');
   }
   assertExists(textSelection);
 
-  const page = pageElement.page;
-  const selectedModels = getSelectedContentModels(pageElement, ['text']);
+  const page = blockElement.page;
+  const selectedModels = getSelectedContentModels(blockElement, ['text']);
 
   if (selectedModels.length === 0) {
     return null;
