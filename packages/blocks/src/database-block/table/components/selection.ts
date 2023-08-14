@@ -379,15 +379,46 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           if (!selection || selection.isEditing) {
             return false;
           }
-          const length = this.tableView.view.columnManagerList.length;
-          const column = selection.focus.columnIndex + 1;
-          this.focusTo(
-            selection.focus.rowIndex + (column >= length ? 1 : 0),
-            column % length
-          );
 
-          const event = ctx.get('keyboardState').event;
+          const event = ctx.get('keyboardState').raw;
           event.preventDefault();
+          const focuedColumnIndex = selection.focus.columnIndex;
+          const focuedRowIndex = selection.focus.rowIndex;
+          const columnLength = this.tableView.view.columnManagerList.length;
+          const rowLength = this.tableView.view.rows.length;
+          if (
+            focuedColumnIndex === columnLength - 1 &&
+            focuedRowIndex === rowLength - 1
+          )
+            return true;
+
+          const isBoundary = focuedColumnIndex === columnLength - 1;
+          const columnIndex = isBoundary ? 0 : focuedColumnIndex + 1;
+          const rowIndex = isBoundary ? focuedRowIndex + 1 : focuedRowIndex;
+
+          this.focusTo(rowIndex, columnIndex);
+          return true;
+        },
+        'Shift-Tab': ctx => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+
+          const event = ctx.get('keyboardState').raw;
+          event.preventDefault();
+          const columnLength = this.tableView.view.columnManagerList.length;
+          const focuedColumnIndex = selection.focus.columnIndex;
+          const focuedRowIndex = selection.focus.rowIndex;
+          if (focuedColumnIndex === 0 && focuedRowIndex === 0) return true;
+
+          const isBoundary = focuedColumnIndex === 0;
+          const columnIndex = isBoundary
+            ? columnLength - 1
+            : focuedColumnIndex - 1;
+          const rowIndex = isBoundary ? focuedRowIndex - 1 : focuedRowIndex;
+
+          this.focusTo(rowIndex, columnIndex);
           return true;
         },
         ArrowLeft: () => {
