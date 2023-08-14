@@ -254,14 +254,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }, 100);
   }
 
-  // private _onCardClick() {
-  //   const selectionManager = this.root.selectionManager;
-  //   const blockSelection = selectionManager.getInstance('block', {
-  //     path: this.path,
-  //   });
-  //   selectionManager.setGroup('note', [blockSelection]);
-  // }
-
   private _onCardDbClick() {
     let link = this.model.url;
 
