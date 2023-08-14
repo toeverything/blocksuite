@@ -24,7 +24,7 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     return html`<edgeless-tool-icon-button
       @click=${() => {
-        let bound = getSelectedBound(this.edgeless.selection.elements);
+        let bound = getSelectedBound(this.edgeless.selectionManager.elements);
         bound = bound.expand(FRAME_PADDING);
         if (bound.w < MIN_FRAME_WIDTH) {
           const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
@@ -42,7 +42,7 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
         this.edgeless.page.captureSync();
         const frame = surface.pickById(id);
         assertExists(frame);
-        this.edgeless.selection.setSelection({
+        this.edgeless.selectionManager.setSelection({
           elements: [frame.id],
           editing: false,
         });

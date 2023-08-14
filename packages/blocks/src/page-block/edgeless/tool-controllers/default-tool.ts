@@ -83,7 +83,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   get selection() {
-    return this._edgeless.selection;
+    return this._edgeless.selectionManager;
   }
 
   get selectedBlocks() {

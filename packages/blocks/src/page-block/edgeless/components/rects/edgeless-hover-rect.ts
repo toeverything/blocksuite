@@ -36,14 +36,16 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
       this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
     );
     this._disposables.add(
-      this.edgeless.selection.slots.updated.on(() => this.requestUpdate())
+      this.edgeless.selectionManager.slots.updated.on(() =>
+        this.requestUpdate()
+      )
     );
   }
 
   protected override render() {
     const { edgeless } = this;
     const hoverState = edgeless.tools.getHoverState();
-    if (!hoverState || edgeless.selection.state.editing) return nothing;
+    if (!hoverState || edgeless.selectionManager.state.editing) return nothing;
     const rect = hoverState.rect;
     const isNote =
       isTopLevelBlock(hoverState.content) &&

@@ -72,7 +72,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selection;
+    return this.edgeless.selectionManager;
   }
 
   get slots() {
@@ -166,7 +166,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     this._disposables.add(
-      this.edgeless.selection.slots.updated.on(() => {
+      this.selection.slots.updated.on(() => {
         this.requestUpdate();
       })
     );

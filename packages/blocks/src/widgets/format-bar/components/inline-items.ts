@@ -7,10 +7,8 @@ import {
 } from '../../../page-block/const/inline-format-config.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import {
-  getBlockSelections,
   getCombinedFormatInBlockSelections,
   getCombinedFormatInTextSelection,
-  getTextSelection,
 } from '../../../page-block/utils/selection.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 import { BackgroundButton } from './background/background-button.js';
@@ -27,8 +25,8 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
 
   let type: 'text' | 'block' = 'text';
   let format: AffineTextAttributes = {};
-  const textSelection = getTextSelection(pageElement);
-  const blockSelections = getBlockSelections(pageElement);
+  const textSelection = pageElement.selection.find('text');
+  const blockSelections = pageElement.selection.filter('block');
 
   if (
     !(
@@ -59,7 +57,7 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
           ?active=${activeWhen(format)}
           @click=${() => {
             action({
-              pageElement,
+              blockElement: pageElement,
               type,
               format,
             });

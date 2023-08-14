@@ -122,7 +122,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   get selection() {
-    return this.edgeless.selection;
+    return this.edgeless.selectionManager;
   }
 
   get slots() {

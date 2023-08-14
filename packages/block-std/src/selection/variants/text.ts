@@ -14,6 +14,7 @@ export type TextSelectionProps = {
 
 export class TextSelection extends BaseSelection {
   static override type = 'text';
+  static override group = 'note';
 
   from: TextRangePoint;
 

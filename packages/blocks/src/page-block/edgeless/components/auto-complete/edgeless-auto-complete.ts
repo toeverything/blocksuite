@@ -185,7 +185,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
   private get _selected() {
-    return this.edgeless.selection.elements;
+    return this.edgeless.selectionManager.elements;
   }
 
   private get _current() {
@@ -267,7 +267,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
     );
 
-    this.edgeless.selection.setSelection({
+    this.edgeless.selectionManager.setSelection({
       elements: [id],
       editing: false,
     });
@@ -308,7 +308,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     surface.updateElement<'connector'>(connector.id, {
       target: { id, position },
     });
-    this.edgeless.selection.setSelection({
+    this.edgeless.selectionManager.setSelection({
       elements: [id],
       editing: false,
     });

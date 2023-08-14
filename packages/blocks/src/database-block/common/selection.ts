@@ -7,6 +7,7 @@ import type {
 
 export class DatabaseSelection extends BaseSelection {
   static override type = 'database';
+  static override group = 'note';
 
   readonly viewSelection: DataViewSelection;
 

@@ -3,35 +3,34 @@ import {
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
 } from '@blocksuite/global/config';
+import type { BlockElement } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 
 import { noneInlineUnsupportedBlockSelected } from '../../../../page-block/const/inline-format-config.js';
-import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { formatByTextSelection } from '../../../../page-block/utils/operations/element/inline-level.js';
-import { getTextSelection } from '../../../../page-block/utils/selection.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig } from './const.js';
 
 let lastUsedColor: string | undefined;
 
-const updateBackground = (pageElement: PageBlockComponent, color?: string) => {
-  const textSelection = getTextSelection(pageElement);
+const updateBackground = (blockElement: BlockElement, color?: string) => {
+  const textSelection = blockElement.selection.find('text');
   assertExists(textSelection);
   if (color) {
     lastUsedColor = color;
   }
   formatByTextSelection(
-    pageElement,
+    blockElement,
     textSelection,
     'background',
     !lastUsedColor || lastUsedColor === 'unset' ? null : lastUsedColor
   );
 };
 
-const BackgroundPanel = (pageElement: PageBlockComponent) => {
+const BackgroundPanel = (blockElement: BlockElement) => {
   return html`<div class="background-highlight-panel">
     ${backgroundConfig.map(
       ({ name, color }) => html`<icon-button
@@ -40,7 +39,7 @@ const BackgroundPanel = (pageElement: PageBlockComponent) => {
         style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
         text="${name}"
         data-testid="${color}"
-        @click="${() => updateBackground(pageElement, color)}"
+        @click="${() => updateBackground(blockElement, color)}"
       >
         <span
           style="color: ${color === 'unset'
