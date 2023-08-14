@@ -16,7 +16,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
-import { BrushSize } from '../../../../__internal__/utils/types.js';
+import { LineWidth } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
@@ -46,12 +46,12 @@ function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
   return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
-function getMostCommonLineWidth(elements: ConnectorElement[]): BrushSize {
+function getMostCommonLineWidth(elements: ConnectorElement[]): LineWidth {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
 function getMostCommonLineStyle(
@@ -185,7 +185,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     if (shouldUpdate) this.requestUpdate();
   }
 
-  private _setShapeStrokeWidth(strokeWidth: number) {
+  private _setConnectorStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'connector'>(ele.id, {
         strokeWidth,
@@ -193,7 +193,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     });
   }
 
-  private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
+  private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'connector'>(ele.id, {
         strokeStyle,
@@ -201,22 +201,22 @@ export class EdgelessChangeConnectorButton extends LitElement {
     });
   }
 
-  private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
+  private _setConnectorStyles({ type, value }: LineStylesPanelClickedButton) {
     if (type === 'size') {
       const strokeWidth = value;
-      this._setShapeStrokeWidth(strokeWidth);
+      this._setConnectorStrokeWidth(strokeWidth);
     } else if (type === 'lineStyle') {
       switch (value) {
         case 'solid': {
-          this._setShapeStrokeStyle(StrokeStyle.Solid);
+          this._setConnectorStrokeStyle(StrokeStyle.Solid);
           break;
         }
         case 'dash': {
-          this._setShapeStrokeStyle(StrokeStyle.Dashed);
+          this._setConnectorStrokeStyle(StrokeStyle.Dashed);
           break;
         }
         case 'none': {
-          this._setShapeStrokeStyle(StrokeStyle.None);
+          this._setConnectorStrokeStyle(StrokeStyle.None);
           break;
         }
       }
@@ -248,7 +248,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
     const selectedColor = getMostCommonColor(this.elements);
     const selectedMode = getMostCommonMode(this.elements);
     const selectedLineSize =
-      getMostCommonLineWidth(this.elements) ?? BrushSize.LINE_WIDTH_FOUR;
+      getMostCommonLineWidth(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
 
     return html`
@@ -308,7 +308,7 @@ export class EdgelessChangeConnectorButton extends LitElement {
         selectedLineStyle,
         lineStyle: ['solid', 'dash'],
         onClick: event => {
-          this._setShapeStyles(event);
+          this._setConnectorStyles(event);
         },
       })}
     `;

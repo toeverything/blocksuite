@@ -7,8 +7,8 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  BrushSize,
   type EdgelessTool,
+  LineWidth,
 } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -51,7 +51,7 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  selectedSize: BrushSize = BrushSize.LINE_WIDTH_FOUR;
+  selectedSize: LineWidth = LineWidth.LINE_WIDTH_FOUR;
 
   private _setBrushColor = (color: CssVariableName) => {
     if (this.edgelessTool.type !== 'brush') return;
@@ -64,7 +64,7 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
     });
   };
 
-  private _setBrushSize = (lineWidth: BrushSize) => {
+  private _setLineWidth = (lineWidth: LineWidth) => {
     if (this.edgelessTool.type !== 'brush') return;
 
     const { color } = this.edgelessTool;
@@ -87,7 +87,7 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
             <edgeless-line-width-panel
               .selectedSize=${this.selectedSize}
               .hasTooltip=${false}
-              @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
+              @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
             >
             </edgeless-line-width-panel>
             <menu-divider .vertical=${true}></menu-divider>
