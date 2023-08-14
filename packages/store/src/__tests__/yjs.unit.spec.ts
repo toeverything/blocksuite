@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
+import { NativeWrapper } from '../native-wrapper';
 import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
 
 const proxyManager = new ProxyManager();
@@ -117,6 +118,28 @@ describe('blocksuite yjs', () => {
       proxy.inner = { ...proxy.inner };
       expect(proxy.inner.text).toBeInstanceOf(Y.Text);
       expect(proxy.inner.text.toJSON()).toBe('hello');
+    });
+
+    test('with native wrapper', () => {
+      const ydoc = new Y.Doc();
+      const map = ydoc.getMap('map');
+      const inner = new Y.Map();
+      map.set('inner', inner);
+      const native = new NativeWrapper(['hello', 'world']);
+      inner.set('native', native);
+
+      const proxy = proxyManager.createYProxy<{
+        inner: { native: NativeWrapper };
+      }>(map, {
+        deep: true,
+      });
+
+      expect(proxy.inner.native).toEqual({
+        value: ['hello', 'world'],
+      });
+
+      proxy.inner.native.value = ['hello', 'world', 'foo'];
+      expect(native.getValue()).toEqual(['hello', 'world', 'foo']);
     });
   });
 });
