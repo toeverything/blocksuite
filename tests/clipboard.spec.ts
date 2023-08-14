@@ -777,7 +777,7 @@ test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await pressArrowRight(page);
   await type(page, '555');
   await pasteByKeyboard(page, false);
-  await assertText(page, '1234555');
+  await assertText(page, '12345551234');
 });
 
 test(scoped`paste note block with background`, async ({ page }) => {
