@@ -504,7 +504,7 @@ export class DragHandleWidget extends WidgetElement {
         const range = nativeSelection.getRangeAt(0);
         const blockElements =
           this._rangeManager.getSelectedBlockElementsByRange(range, {
-            match: el => el.role === 'content',
+            match: el => el.model.role === 'content',
             mode: 'highest',
           });
         this._setSelectedBlocks(blockElements);
