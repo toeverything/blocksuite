@@ -25,14 +25,14 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
 
   protected override firstUpdated() {
     this._disposables.add(
-      this.edgeless.selection.slots.updated.on(() => {
+      this.edgeless.selectionManager.slots.updated.on(() => {
         this.requestUpdate();
       })
     );
   }
 
   override render() {
-    if (this.edgeless.selection.state.editing) return nothing;
+    if (this.edgeless.selectionManager.state.editing) return nothing;
     const style = {
       position: 'absolute',
       top: '0',

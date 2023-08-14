@@ -103,7 +103,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
-      this.service?.selectionManager.set([]);
+      this.service?.selectionManager.setGroup('note', []);
       requestAnimationFrame(() => {
         this.currentView = viewId;
         requestAnimationFrame(() => {
@@ -167,14 +167,14 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
           if (!selection) {
-            this.root.selectionManager.set([]);
+            this.root.selectionManager.setGroup('note', []);
             return;
           }
           const data = this.root.selectionManager.getInstance('database', {
             path: this.path,
             viewSelection: selection as never,
           });
-          this.root.selectionManager.set([data]);
+          this.root.selectionManager.setGroup('note', [data]);
         },
         handleEvent: (name, handler) => {
           return {

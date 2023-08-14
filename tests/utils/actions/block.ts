@@ -22,7 +22,6 @@ export async function updateBlockType(
         );
       //@ts-ignore
       window.testUtils.pageBlock.updateBlockElementType(
-        pageElement,
         selectedBlockElements,
         flavour,
         type

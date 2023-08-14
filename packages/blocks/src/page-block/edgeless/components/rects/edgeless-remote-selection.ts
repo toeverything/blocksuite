@@ -52,7 +52,7 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
   > = {};
 
   get selection() {
-    return this.edgeless.selection;
+    return this.edgeless.selectionManager;
   }
 
   get surface() {

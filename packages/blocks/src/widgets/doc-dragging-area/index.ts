@@ -117,7 +117,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
         });
       });
 
-    this.root.selectionManager.set(selections);
+    this.root.selectionManager.setGroup('note', selections);
   }
 
   private _clearRaf() {

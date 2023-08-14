@@ -109,7 +109,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.remove();
     assertExists(this._edgeless);
-    this._edgeless.selection.setSelection({
+    this._edgeless.selectionManager.setSelection({
       elements: [],
       editing: false,
     });

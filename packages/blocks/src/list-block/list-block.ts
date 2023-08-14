@@ -3,11 +3,9 @@ import '../__internal__/rich-text/rich-text.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { getPageBlock } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
@@ -122,8 +120,6 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   private _select() {
-    const pageBlock = getPageBlock(this.model);
-    assertExists(pageBlock);
     const selection = this.root.selectionManager;
     selection.update(selList => {
       return selList

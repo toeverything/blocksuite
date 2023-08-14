@@ -66,7 +66,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });
-    selectionManager.set([blockSelection]);
+    selectionManager.setGroup('note', [blockSelection]);
   }
 
   private _optionsPortal: HTMLDivElement | null = null;
