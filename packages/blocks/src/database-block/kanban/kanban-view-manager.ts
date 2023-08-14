@@ -265,6 +265,12 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   columnGetHide(columnId: string): boolean {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
+  public deleteView(): void {
+    this.viewSource.delete();
+  }
+  public get isDeleted(): boolean {
+    return this.viewSource.isDeleted();
+  }
 }
 
 export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {

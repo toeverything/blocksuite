@@ -154,6 +154,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       updateView: updater => {
         this.model.updateView(id, updater as never);
       },
+      delete: () => {
+        this.model.deleteView(id);
+        this.model.applyColumnUpdate();
+      },
+      isDeleted: () => {
+        return !getViewDataById(id);
+      },
       updateSlot: viewUpdated,
     };
   }
@@ -263,7 +270,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         models.forEach(model => this.page.deleteBlock(model));
       },
     };
-
     return html` <data-view-header-tools
       .viewEle="${this._view.value}"
       .copyBlock="${blockOperation.copy}"

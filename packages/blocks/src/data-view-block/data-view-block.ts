@@ -63,6 +63,12 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       updateView: updater => {
         this.model.updateView(id, updater as never);
       },
+      delete: () => {
+        this.model.deleteView(id);
+      },
+      isDeleted: () => {
+        return !getViewDataById(id);
+      },
       updateSlot: this.model.propsUpdated,
     };
   }
