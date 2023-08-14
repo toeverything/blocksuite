@@ -374,7 +374,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           };
           return true;
         },
-        Tab: () => {
+        Tab: ctx => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
             return false;
@@ -385,6 +385,9 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             selection.focus.rowIndex + (column >= length ? 1 : 0),
             column % length
           );
+
+          const event = ctx.get('keyboardState').event;
+          event.preventDefault();
           return true;
         },
         ArrowLeft: () => {
