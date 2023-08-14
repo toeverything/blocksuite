@@ -1,11 +1,9 @@
-import { TOCNotesPanel } from '@blocksuite/blocks';
+import { registerTOCComponents } from '@blocksuite/blocks';
 import type { EditorContainer } from '@blocksuite/editor';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-
-TOCNotesPanel;
 
 @customElement('custom-navigation-panel')
 export class CustomNavigationPanel extends WithDisposable(LitElement) {
@@ -58,6 +56,12 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
       this.editor.slots.pageLinkClicked.on(this._switchPage)
     );
     this.page = this.editor.page;
+
+    registerTOCComponents(components => {
+      Object.entries(components).forEach(([name, component]) => {
+        customElements.define(name, component);
+      });
+    });
   }
 
   override render() {

@@ -7,7 +7,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
 import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
@@ -22,6 +22,7 @@ import {
   type SelectEvent,
   TOCNoteCard,
 } from './toc-card.js';
+import { TOCBlockPreview } from './toc-preview.js';
 import { startDragging } from './utils/drag.js';
 
 type TOCNoteItem = {
@@ -40,7 +41,6 @@ type TOCNoteItem = {
 
 noop(TOCNoteCard);
 
-@customElement('edgeless-toc-notes-panel')
 export class TOCNotesPanel extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
@@ -165,6 +165,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   @query('.panel-list')
   panelListElement!: HTMLElement;
+
+  @property({ attribute: false })
+  host!: Document | HTMLElement;
 
   private _noteElementHeight = 0;
 
@@ -325,7 +328,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     startDragging(draggedNotesInfo, {
       width,
+      container: this,
       doc: this.ownerDocument,
+      host: this.host ?? this.ownerDocument,
       page: this.page,
       start: {
         x: e.detail.clientX,
@@ -471,4 +476,16 @@ declare global {
   interface HTMLElementTagNameMap {
     'edgeless-toc-notes-panel': TOCNotesPanel;
   }
+}
+
+const componentsMap = {
+  'edgeless-note-toc-card': TOCNoteCard,
+  'edgeless-toc-block-preview': TOCBlockPreview,
+  'edgeless-toc-notes-panel': TOCNotesPanel,
+};
+
+export function registerTOCComponents(
+  callback: (components: typeof componentsMap) => void
+) {
+  callback(componentsMap);
 }

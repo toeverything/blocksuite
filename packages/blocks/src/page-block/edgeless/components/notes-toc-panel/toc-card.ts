@@ -2,7 +2,7 @@ import { ArrowIcon, HiddenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -12,7 +12,7 @@ import {
   queryCurrentMode,
 } from '../../../../__internal__/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
-import { TOCBlockPreview } from './block-preview.js';
+import { TOCBlockPreview } from './toc-preview.js';
 
 noop(TOCBlockPreview);
 
@@ -40,7 +40,6 @@ export type FitViewEvent = CustomEvent<{
   block: NoteBlockModel;
 }>;
 
-@customElement('edgeless-note-toc-card')
 export class TOCNoteCard extends WithDisposable(LitElement) {
   static override styles = css`
     :host {

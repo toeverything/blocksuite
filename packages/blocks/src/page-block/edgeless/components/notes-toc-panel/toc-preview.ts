@@ -14,7 +14,7 @@ import {
 import type { BlockModels } from '@blocksuite/global/types';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { property } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
 import { noop } from '../../../../__internal__/index.js';
@@ -45,7 +45,6 @@ const listIconMap: {
   toggle: BulletedListIcon,
 };
 
-@customElement('edgeless-toc-block-preview')
 export class TOCBlockPreview extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
