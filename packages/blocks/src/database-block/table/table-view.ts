@@ -166,21 +166,19 @@ export class DatabaseTable extends BaseDataView<
     return this.view.readonly;
   }
 
-  override firstUpdated() {
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
+  override connectedCallback() {
+    super.connectedCallback();
 
     if (this.readonly) return;
-    const tableContent = this._tableContainer.parentElement;
-    assertExists(tableContent);
-    this._disposables.addFromEvent(
-      tableContent,
-      'scroll',
-      this._onDatabaseScroll
-    );
+    requestAnimationFrame(() => {
+      const tableContent = this._tableContainer.parentElement;
+      assertExists(tableContent);
+      this._disposables.addFromEvent(
+        tableContent,
+        'scroll',
+        this._onDatabaseScroll
+      );
+    });
   }
 
   private _onDatabaseScroll = (event: Event) => {

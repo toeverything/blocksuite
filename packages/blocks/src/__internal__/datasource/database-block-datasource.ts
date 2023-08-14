@@ -76,7 +76,6 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       .getPage(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
-    this._model.propsUpdated.pipe(this.slots.update);
   }
 
   public get rows(): string[] {
