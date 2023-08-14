@@ -9,14 +9,13 @@ import {
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
-import type { PageBlockComponent } from '../types.js';
 
 export function getSelectedContentModels(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
 ): BaseBlockModel[] {
-  const { rangeManager } = pageElement;
-  const selectionManager = pageElement.root.selectionManager;
+  const { rangeManager } = blockElement.root;
+  const selectionManager = blockElement.root.selectionManager;
   const selections = selectionManager.value;
 
   if (selections.length === 0) {
@@ -32,7 +31,7 @@ export function getSelectedContentModels(
     const selectedBlocks = rangeManager
       .getSelectedBlocksIdByRange(range)
       .flatMap(id => {
-        const model = pageElement.page.getBlockById(id);
+        const model = blockElement.page.getBlockById(id);
         // model can be null if the block is deleted
         return model ?? [];
       });
@@ -47,7 +46,7 @@ export function getSelectedContentModels(
     dirtyResult.push(
       ...blockSelections
         .map(selection => {
-          const model = pageElement.page.getBlockById(selection.blockId);
+          const model = blockElement.page.getBlockById(selection.blockId);
           assertExists(model);
           return model;
         })
@@ -64,11 +63,11 @@ export function getSelectedContentModels(
 }
 
 export function getSelectedContentBlockElements(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
 ): BlockElement[] {
-  const { rangeManager } = pageElement;
-  const selectionManager = pageElement.root.selectionManager;
+  const { rangeManager } = blockElement.root;
+  const selectionManager = blockElement.root.selectionManager;
   const selections = selectionManager.value;
 
   if (selections.length === 0) {
@@ -88,7 +87,7 @@ export function getSelectedContentBlockElements(
   }
 
   if (types.includes('block')) {
-    const viewStore = pageElement.root.viewStore;
+    const viewStore = blockElement.root.viewStore;
     const blockSelections = selectionManager.filter('block');
     dirtyResult.push(
       ...blockSelections.flatMap(selection => {
@@ -155,11 +154,11 @@ function mergeFormat(
  * formats with different values will only return the last one.
  */
 export function getCombinedFormatInTextSelection(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  const selectedModel = getSelectedContentModels(pageElement, [
+  const selectedModel = getSelectedContentModels(blockElement, [
     'text',
     'block',
   ]);
@@ -236,12 +235,12 @@ export function getCombinedFormatInTextSelection(
 }
 
 export function getCombinedFormatInBlockSelections(
-  pageElement: PageBlockComponent,
+  blockElement: BlockElement,
   blockSelections: BlockSelection[],
   loose = false
 ): AffineTextAttributes {
-  const viewStore = pageElement.root.viewStore;
-  const selectionManager = pageElement.root.selectionManager;
+  const viewStore = blockElement.root.viewStore;
+  const selectionManager = blockElement.root.selectionManager;
 
   const formats = blockSelections.flatMap(blockSelection => {
     const blockElement = viewStore.viewFromPath('block', blockSelection.path);
@@ -258,7 +257,7 @@ export function getCombinedFormatInBlockSelections(
       to: null,
     });
     const format = getCombinedFormatInTextSelection(
-      pageElement,
+      blockElement,
       textSelection,
       loose
     );

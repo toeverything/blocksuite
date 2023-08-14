@@ -1,11 +1,12 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VirgoRootElement } from '@blocksuite/virgo';
+
+import type { BlockElement } from '../element/block-element.js';
+import type { BlockSuiteRoot } from '../element/lit-root.js';
+import { RangeSynchronizer } from './range-synchronizer.js';
 
 type RangeSnapshot = {
   startContainer: Node;
@@ -20,7 +21,9 @@ type RangeSnapshot = {
 export class RangeManager {
   private _reusedRange: Range | null = null;
 
-  constructor(public root: BlockSuiteRoot) {}
+  constructor(public root: BlockSuiteRoot) {
+    new RangeSynchronizer(root);
+  }
 
   get value() {
     return this._range;
@@ -159,7 +162,7 @@ export class RangeManager {
 
   getSelectedBlockElementsByRange(range: Range): BlockElement[] {
     return Array.from<BlockElement>(
-      this.root.querySelectorAll(`[${BLOCK_ID_ATTR}]`)
+      this.root.querySelectorAll(`[${this.root.blockIdAttr}]`)
     ).filter(el => range.intersectsNode(el));
   }
 
@@ -321,6 +324,6 @@ export class RangeManager {
   }
 
   private _getBlock(element: HTMLElement) {
-    return element.closest(`[${BLOCK_ID_ATTR}]`) as BlockElement;
+    return element.closest(`[${this.root.blockIdAttr}]`) as BlockElement;
   }
 }

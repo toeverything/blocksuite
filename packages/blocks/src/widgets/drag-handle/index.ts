@@ -176,8 +176,8 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private get _rangeManager() {
-    assertExists(this._pageBlockElement.rangeManager);
-    return this._pageBlockElement.rangeManager;
+    assertExists(this.root.rangeManager);
+    return this.root.rangeManager;
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
