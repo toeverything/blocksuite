@@ -66,6 +66,7 @@ export const styles = css`
     margin-top: 0;
   }
   .affine-list-rich-text-wrapper {
+    position: relative;
     display: flex;
     position: relative;
   }
