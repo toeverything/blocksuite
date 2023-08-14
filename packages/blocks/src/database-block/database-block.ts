@@ -298,7 +298,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.currentView = this.model.views[0].id;
       return;
     }
-    console.log(this.selected);
     const containerClass = classMap({
       'toolbar-hover-container': true,
       'data-view-root': true,
