@@ -1,8 +1,10 @@
 import { ArrowRightSmallIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
+const DEFAULT_MENU_WIDTH = 455;
 @customElement('edgeless-slide-menu')
 export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   static override styles = css`
@@ -10,7 +12,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       display: flex;
       padding: 4px;
       align-items: center;
-      width: 455px;
+      width: var(--menu-width);
       overflow-x: hidden;
       position: relative;
     }
@@ -52,6 +54,8 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       transform: rotate(180deg);
     }
   `;
+  @property({ attribute: false })
+  menuWidth = DEFAULT_MENU_WIDTH;
 
   @query('.menu-container')
   private _menuContainer!: HTMLDivElement;
@@ -110,6 +114,10 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   }
 
   override render() {
+    const menuContainerStyles = styleMap({
+      '--menu-width': `${this.menuWidth}px`,
+    });
+
     return html`
       <div>
         <div
@@ -118,7 +126,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
         >
           ${ArrowRightSmallIcon}
         </div>
-        <div class="menu-container">
+        <div class="menu-container" style=${menuContainerStyles}>
           <slot></slot>
         </div>
         <div class="next-slide-button" @click=${this._onNextSlideButtonClick}>

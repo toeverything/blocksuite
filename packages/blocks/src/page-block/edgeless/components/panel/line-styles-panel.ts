@@ -1,7 +1,7 @@
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { BrushSize } from '../../../../__internal__/utils/types.js';
+import type { LineWidth } from '../../../../__internal__/utils/types.js';
 import {
   LineStyleButton,
   type LineStyleButtonProps,
@@ -15,7 +15,7 @@ export const lineStylesPanelStyles = [panelWrapperStyle, lineStyleButtonStyles];
 export type LineStylesPanelClickedButton =
   | {
       type: 'size';
-      value: BrushSize;
+      value: LineWidth;
     }
   | {
       type: 'lineStyle';
@@ -24,7 +24,7 @@ export type LineStylesPanelClickedButton =
 
 interface LineStylesPanelProps {
   onClick?: (clickedButton: LineStylesPanelClickedButton) => void;
-  selectedLineSize?: BrushSize;
+  selectedLineSize?: LineWidth;
   selectedLineStyle?: LineStyleButtonProps['mode'];
   lineStyle?: LineStyleButtonProps['mode'][];
 }
@@ -37,7 +37,7 @@ export function LineStylesPanel({
 }: LineStylesPanelProps = {}) {
   const lineSizePanel = html`
     <edgeless-line-width-panel
-      .selectedSize=${selectedLineSize}
+      .selectedSize=${selectedLineSize as LineWidth}
       @select=${(e: LineWidthEvent) => {
         onClick?.({
           type: 'size',

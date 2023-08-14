@@ -42,13 +42,13 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     assertExists(this._source);
     assertExists(this._startPoint);
     this._page.captureSync();
-    const { mode, color } = this.tool;
+    const { mode, color, strokeWidth } = this.tool;
     const { _surface } = this;
     const id = _surface.addElement('connector', {
       stroke: color,
       mode,
       controllers: [],
-      strokeWidth: 2,
+      strokeWidth,
       strokeStyle: StrokeStyle.Solid,
       source: this._source,
       target: { position: this._startPoint },
