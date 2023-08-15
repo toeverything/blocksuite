@@ -1,7 +1,7 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
+import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -94,71 +94,65 @@ export class RangeManager {
     return selection;
   }
 
-  findBlockElementsByRange = (range: Range): BlockElement[] => {
-    const start = range.startContainer;
-    const end = range.endContainer;
-    const ancestor = range.commonAncestorContainer;
-    const getBlockView = (node: Node) =>
-      this.root.viewStore.getNodeView(node)?.view as BlockElement;
+  /**
+   * @example
+   * aaa
+   *   b[bb
+   *     ccc
+   * ddd
+   *   ee]e
+   *
+   * all mode: [aaa, bbb, ccc, ddd, eee]
+   * flat mode: [bbb, ccc, ddd, eee]
+   * highest mode: [bbb, ddd]
+   *
+   * match function will be evaluated before filtering using mode
+   */
+  getSelectedBlockElementsByRange(
+    range: Range,
+    options: {
+      match?: (el: BlockElement) => boolean;
+      mode?: 'all' | 'flat' | 'highest';
+    } = {}
+  ): BlockElement[] {
+    const { mode = 'all', match = () => true } = options;
 
-    if (ancestor.nodeType === Node.TEXT_NODE) {
-      const block = getBlockView(ancestor);
-      if (!block) return [];
-      return [block];
-    }
-    const nodes = new Set<Node>();
-
-    let startRecorded = false;
-    const dfsDOMSearch = (current: Node | null, ancestor: Node) => {
-      if (!current) {
-        return;
-      }
-      if (current === ancestor) {
-        return;
-      }
-      if (current === end) {
-        nodes.add(current);
-        startRecorded = false;
-        return;
-      }
-      if (current === start) {
-        startRecorded = true;
-      }
-      if (startRecorded) {
-        if (
-          current.nodeType === Node.TEXT_NODE ||
-          current.nodeType === Node.ELEMENT_NODE
-        ) {
-          nodes.add(current);
-        }
-      }
-      dfsDOMSearch(current.firstChild, ancestor);
-      dfsDOMSearch(current.nextSibling, ancestor);
-    };
-    dfsDOMSearch(ancestor.firstChild, ancestor);
-
-    const blocks = new Set<BlockElement>();
-    nodes.forEach(node => {
-      const blockView = getBlockView(node);
-      if (!blockView) {
-        return;
-      }
-      if (blocks.has(blockView)) {
-        return;
-      }
-      blocks.add(blockView);
-    });
-    return Array.from(blocks);
-  };
-
-  getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
-    return this.getSelectedBlockElementsByRange(range).map(el => el.model.id);
-  }
-
-  getSelectedBlockElementsByRange(range: Range): BlockElement[] {
-    return Array.from<BlockElement>(
+    let result = Array.from<BlockElement>(
       this.root.querySelectorAll(`[${this.root.blockIdAttr}]`)
-    ).filter(el => range.intersectsNode(el));
+    ).filter(el => range.intersectsNode(el) && match(el));
+
+    if (result.length === 0) {
+      return [];
+    }
+
+    const firstElement = range.startContainer.parentElement?.closest(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(firstElement);
+
+    if (mode === 'flat') {
+      result = result.filter(
+        el =>
+          firstElement.compareDocumentPosition(el) &
+            Node.DOCUMENT_POSITION_FOLLOWING || el === firstElement
+      );
+    } else if (mode === 'highest') {
+      let parent = result[0];
+      result = result.filter((node, index) => {
+        if (index === 0) return true;
+        if (
+          parent.compareDocumentPosition(node) &
+          Node.DOCUMENT_POSITION_CONTAINED_BY
+        ) {
+          return false;
+        } else {
+          parent = node;
+          return true;
+        }
+      });
+    }
+
+    return result;
   }
 
   textSelectionToRange(selection: TextSelection): Range | null {
