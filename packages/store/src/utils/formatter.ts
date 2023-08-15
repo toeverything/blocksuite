@@ -1,4 +1,4 @@
-import { BaseBlockModel } from '../base.js';
+import { BaseBlockModel } from '../schema/base.js';
 
 function isBaseBlockModel(a: unknown): a is BaseBlockModel {
   return a instanceof BaseBlockModel;
@@ -37,7 +37,7 @@ function initCustomFormatter() {
         return [
           'div',
           {},
-          ['span', bannerStyle, 'BaseBlockModel'],
+          ['span', bannerStyle, obj.constructor.name],
           ['span', typeStyle, obj.flavour],
           obj.text.toString(),
         ];
@@ -46,7 +46,7 @@ function initCustomFormatter() {
       return [
         'div',
         {},
-        ['span', bannerStyle, 'BaseBlockModel'],
+        ['span', bannerStyle, obj.constructor.name],
         ['span', typeStyle, obj.flavour],
       ];
     },
