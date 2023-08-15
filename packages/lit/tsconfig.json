@@ -6,5 +6,15 @@
     "noEmit": false
   },
   "include": ["./src"],
-  "references": []
+  "references": [
+    {
+      "path": "../global"
+    },
+    {
+      "path": "../store"
+    },
+    {
+      "path": "../block-std"
+    }
+  ]
 }
