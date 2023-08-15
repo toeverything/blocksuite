@@ -46,10 +46,6 @@ export function createEvent<
   return new CustomEvent<Detail<T>>(type, { detail });
 }
 
-export function noop(_?: unknown) {
-  return;
-}
-
 export function isControlledKeyboardEvent(e: KeyboardEvent) {
   return e.ctrlKey || e.metaKey || e.altKey;
 }

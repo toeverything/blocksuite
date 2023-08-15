@@ -8,7 +8,6 @@ import {
   FileDropManager,
   getServiceOrRegister,
   type ImageProps,
-  noop,
   type PageBlockModel,
   pagePreset,
   readImageSize,
@@ -16,7 +15,7 @@ import {
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
-import { Slot } from '@blocksuite/global/utils';
+import { noop, Slot } from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
