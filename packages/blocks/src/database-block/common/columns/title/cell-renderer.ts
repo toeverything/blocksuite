@@ -4,7 +4,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../components/icon/uni-icon.js';
-import { EditIcon } from '../../../../icons/index.js';
 import { popSideDetail } from '../../detail/layout.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -30,43 +29,14 @@ export class TitleCell extends BaseCellRenderer<string> {
     .data-view-title,
     .data-view-title textarea {
       font-family: var(--affine-font-family);
-      font-size: 12px;
-      line-height: 20px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
     }
 
     data-view-title-cell:hover .open-detail {
       visibility: visible;
-    }
-
-    .open-detail {
-      visibility: hidden;
-      display: flex;
-      align-items: center;
-      padding: 2px 6px;
-      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
-      gap: 4px;
-      border-radius: 4px;
-      font-size: 12px;
-      line-height: 20px;
-      cursor: pointer;
-      background-color: var(--affine-background-primary-color);
-    }
-
-    .open-detail:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    .edit-detail-icon {
-      display: flex;
-      align-items: center;
-    }
-
-    .edit-detail-icon svg {
-      fill: var(--affine-icon-color);
-      width: 16px;
-      height: 16px;
     }
   `;
   _clickOpenDetail = (e: MouseEvent) => {
@@ -79,12 +49,8 @@ export class TitleCell extends BaseCellRenderer<string> {
 
   override render() {
     return html`<span class="data-view-title" style="white-space: pre-wrap"
-        >${this.value ?? ''}</span
-      >
-      <div class="open-detail" @click="${this._clickOpenDetail}">
-        <div class="edit-detail-icon">${EditIcon}</div>
-        Edit
-      </div> `;
+      >${this.value ?? ''}</span
+    >`;
   }
 }
 

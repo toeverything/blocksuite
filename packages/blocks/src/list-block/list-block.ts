@@ -2,7 +2,7 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { BlockElement } from '@blocksuite/lit';
-import { css, html, nothing } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
@@ -16,98 +16,13 @@ import {
 import { registerService } from '../__internal__/service/index.js';
 import type { ListBlockModel } from './list-model.js';
 import { ListBlockService } from './list-service.js';
+import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
-  static override styles = css`
-    .affine-list-block-container {
-      box-sizing: border-box;
-      border-radius: 4px;
-    }
-    .affine-list-block-container--first {
-      margin-top: 14px;
-    }
-    .affine-list-block-container .affine-list-block-container {
-      margin-top: 0;
-    }
-    .affine-list-rich-text-wrapper {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-    .affine-list-rich-text-wrapper rich-text {
-      flex: 1;
-    }
-
-    .affine-list-block__prefix {
-      flex-shrink: 0;
-      min-width: 26px;
-      height: 26px;
-      margin-right: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      align-self: flex-start;
-      color: var(--affine-blue-700);
-      font-size: 14px;
-      line-height: var(--affine-line-height);
-      user-select: none;
-      position: relative;
-    }
-    .affine-list-block__todo-prefix {
-      cursor: pointer;
-      margin-right: 0px;
-    }
-    .affine-list-block__todo {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      border: 1px solid var(--affine-icon-color);
-    }
-    .affine-list-block__todo.affine-list-block__todo--active {
-      background: var(--affine-icon-color);
-    }
-
-    .affine-list--checked {
-      color: var(--affine-icon-color);
-    }
-    .affine-list-block__todo-checked-prefix {
-      width: 20px;
-      height: 20px;
-      position: absolute;
-      left: 0px;
-      border-radius: 50%;
-    }
-    .affine-list--checked .affine-list-block__todo-checked-prefix {
-      animation: sparking 0.6s ease forwards;
-    }
-    @keyframes sparking {
-      0% {
-        width: 14px;
-        height: 14px;
-        left: 3px;
-      }
-      40% {
-        width: 20px;
-        height: 20px;
-        left: 0px;
-        box-shadow: 0 -18px 0 -8px #1e96eb, 16px -8px 0 -8px #1e96eb,
-          16px 8px 0 -8px #1e96eb, 0 18px 0 -8px #1e96eb,
-          -16px 8px 0 -8px #1e96eb, -16px -8px 0 -8px #1e96eb;
-      }
-
-      100% {
-        width: 20px;
-        height: 20px;
-        left: 0px;
-        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent,
-          32px 16px 0 -10px transparent, 0 36px 0 -10px transparent,
-          -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
-      }
-    }
-  `;
+  static override styles = styles;
 
   @state()
   showChildren = true;
@@ -160,7 +75,6 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
     const top = shouldAddMarginTop ? 'affine-list-block-container--first' : '';
-    const checked = this.model.checked ? 'affine-list--checked' : '';
 
     const children = html`<div
       class="affine-block-children-container"
@@ -171,7 +85,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
     return html`
       <div class=${`affine-list-block-container ${top}`}>
-        <div class=${`affine-list-rich-text-wrapper ${checked}`}>
+        <div class="affine-list-rich-text-wrapper">
           ${listIcon}
           <rich-text
             .model=${this.model}

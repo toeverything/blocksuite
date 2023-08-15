@@ -66,7 +66,6 @@ export function ImageOptionsTemplate({
       <div style=${styleMap(style)} class="embed-editing-state">
         <icon-button
           class="has-tool-tip"
-          data-testid="unlink"
           @click=${() => turnImageIntoCardView(model, blob)}
         >
           ${LinkToCardIcon}

@@ -2,6 +2,7 @@ import type { TemplateResult } from 'lit';
 
 import {
   BulletedListIcon,
+  CheckBoxIcon,
   CodeBlockIcon,
   DividerIcon,
   H1Icon,
@@ -13,7 +14,6 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
-  TodoIcon,
 } from '../../icons/index.js';
 import type { BlockSchemas } from '../../models.js';
 
@@ -94,7 +94,7 @@ export const paragraphConfig: BlockConfig[] = [
     type: 'todo',
     name: 'To-do List',
     hotkey: null,
-    icon: TodoIcon,
+    icon: CheckBoxIcon,
   },
   {
     flavour: 'affine:code',

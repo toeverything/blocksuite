@@ -1,8 +1,10 @@
 /// <reference types="@blocksuite/global" />
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../shim.d.ts" />
-export * from './awareness.js';
-export * from './base.js';
+
+export type { Y };
+
+export * from './migration/index.js';
 export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
 export { createMemoryStorage } from './persistence/blob/memory-storage.js';
 export { createSimpleServerStorage } from './persistence/blob/mock-server-storage.js';
@@ -12,19 +14,17 @@ export type {
   BlobStorageCRUD,
 } from './persistence/blob/types.js';
 export * from './providers/type.js';
-export * from './space.js';
-export * from './store.js';
-export * from './text-adapter.js';
-export type { IdGenerator } from './utils/id-generator.js';
-export type { Y };
+export * from './schema/index.js';
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
+  type IdGenerator,
   nanoid,
   uuidv4,
 } from './utils/id-generator.js';
 export * as Utils from './utils/utils.js';
 export * from './workspace/index.js';
+export * from './yjs/index.js';
 
 import './utils/formatter.js';
 

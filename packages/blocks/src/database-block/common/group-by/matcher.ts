@@ -14,6 +14,7 @@ export interface GroupRenderProps<
 
 export type GroupByConfig = {
   name: string;
+  groupName: (type: TType, value: unknown) => string;
   defaultKeys: (type: TType) => {
     key: string;
     value: unknown;

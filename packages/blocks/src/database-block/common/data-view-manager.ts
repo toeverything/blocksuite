@@ -116,6 +116,8 @@ export interface DataViewManager {
   deleteView(): void;
 
   get isDeleted(): boolean;
+
+  isMainColumn(id: string): boolean;
 }
 
 export interface DataViewColumnManager<
@@ -135,6 +137,8 @@ export interface DataViewColumnManager<
   get name(): string;
 
   get hide(): boolean;
+
+  get isMain(): boolean;
 
   get data(): Data;
 
@@ -417,7 +421,12 @@ export abstract class BaseDataViewManager implements DataViewManager {
   abstract columnMove(columnId: string, position: InsertPosition): void;
 
   public abstract deleteView(): void;
+
   public abstract get isDeleted(): boolean;
+
+  public isMainColumn(id: string): boolean {
+    return this.dataSource.propertyGetMain() === id;
+  }
 }
 
 export abstract class BaseDataViewColumnManager
@@ -438,6 +447,10 @@ export abstract class BaseDataViewColumnManager
 
   get hide(): boolean {
     return this.dataViewManager.columnGetHide(this.id);
+  }
+
+  get isMain(): boolean {
+    return this.dataViewManager.isMainColumn(this.id);
   }
 
   get id(): string {
