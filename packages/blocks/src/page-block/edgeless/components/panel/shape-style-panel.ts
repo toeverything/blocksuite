@@ -18,8 +18,8 @@ export class EdgelessShapeStylePanel extends LitElement {
       align-items: center;
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
-      gap: 12px;
-      padding: 8px 8px;
+      gap: 10px;
+      padding: 6px 8px;
     }
 
     edgeless-tool-icon-button svg {
