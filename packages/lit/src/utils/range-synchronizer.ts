@@ -39,7 +39,7 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        if (range && range.intersectsNode(this.root)) {
+        if (range === null || range.intersectsNode(this.root)) {
           this._prevSelection =
             this._rangeManager.syncRangeToTextSelection(range);
         } else {

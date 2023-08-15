@@ -19,7 +19,7 @@ import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  type: 'delete' | 'copy-as-png' | ReorderingType;
+  type: 'delete' | 'copy-as-png' | 'create-frame' | ReorderingType;
   disabled?: boolean;
 };
 
@@ -33,6 +33,7 @@ const ACTIONS: Action[] = [
   { name: 'Send backward', type: 'backward' },
   { name: 'Send to back', type: 'back' },
   { name: 'Copy as PNG', type: 'copy-as-png' },
+  { name: 'Create Frame', type: 'create-frame' },
   { name: 'Delete', type: 'delete' },
 ];
 
@@ -175,6 +176,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           notes,
           shapes,
         });
+        break;
+      }
+      case 'create-frame': {
+        this.edgeless.frame.createFrameOnSelected();
         break;
       }
       case 'front':

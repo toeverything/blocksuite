@@ -70,6 +70,7 @@ export interface InlineFormatConfig {
 const INLINE_UNSUPPORTED_MODELS: Flavour[] = [
   'affine:code',
   'affine:attachment',
+  'affine:bookmark',
 ];
 
 export function noneInlineUnsupportedBlockSelected(
