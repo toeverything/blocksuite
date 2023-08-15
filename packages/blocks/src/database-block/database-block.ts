@@ -48,6 +48,13 @@ type ViewData = {
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   static override styles = css`
+    affine-database {
+      display: block;
+      border-radius: 8px;
+      background-color: var(--affine-background-primary-color);
+      padding: 8px;
+      margin: -8px;
+    }
     .database-block-selected {
       background-color: var(--affine-hover-color);
       border-radius: 4px;
@@ -103,7 +110,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
-      this.service?.selectionManager.set([]);
+      this.service?.selectionManager.setGroup('note', []);
       requestAnimationFrame(() => {
         this.currentView = viewId;
         requestAnimationFrame(() => {
@@ -147,6 +154,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       updateView: updater => {
         this.model.updateView(id, updater as never);
       },
+      delete: () => {
+        this.model.deleteView(id);
+        this.model.applyColumnUpdate();
+      },
+      isDeleted: () => {
+        return !getViewDataById(id);
+      },
       updateSlot: viewUpdated,
     };
   }
@@ -167,14 +181,14 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
           if (!selection) {
-            this.root.selectionManager.set([]);
+            this.root.selectionManager.setGroup('note', []);
             return;
           }
           const data = this.root.selectionManager.getInstance('database', {
             path: this.path,
             viewSelection: selection as never,
           });
-          this.root.selectionManager.set([data]);
+          this.root.selectionManager.setGroup('note', [data]);
         },
         handleEvent: (name, handler) => {
           return {
@@ -256,7 +270,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         models.forEach(model => this.page.deleteBlock(model));
       },
     };
-
     return html` <data-view-header-tools
       .viewEle="${this._view.value}"
       .copyBlock="${blockOperation.copy}"
@@ -301,7 +314,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     const containerClass = classMap({
       'toolbar-hover-container': true,
       'data-view-root': true,
-      'database-block-selected': !!this.selected,
+      'database-block-selected': this.selected?.type === 'block',
     });
     return html`
       <div class="${containerClass}">

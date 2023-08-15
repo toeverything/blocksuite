@@ -22,10 +22,7 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
-import {
-  getSelectedContentModels,
-  getTextSelection,
-} from '../../page-block/utils/selection.js';
+import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
   type Connectable,
@@ -106,11 +103,11 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   get selection() {
-    return this._edgeless.selection;
+    return this._edgeless.selectionManager;
   }
 
   get textSelection() {
-    return getTextSelection(this._edgeless);
+    return this._edgeless.selection.find('text');
   }
 
   get slots() {
@@ -238,7 +235,7 @@ export class EdgelessClipboard implements Clipboard {
 
     deleteModelsByTextSelection(this._edgeless);
 
-    const textSelection = getTextSelection(this._edgeless);
+    const textSelection = this.textSelection;
     assertExists(textSelection);
     const selectedModels = getSelectedContentModels(this._edgeless, ['text']);
 

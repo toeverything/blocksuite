@@ -1,4 +1,3 @@
-import { nextItemIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -8,6 +7,7 @@ import {
   type NoteChildrenFlavour,
   throttle,
 } from '../../../../../__internal__/index.js';
+import { nextItemIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
   BUTTON_GROUP_LENGTH,

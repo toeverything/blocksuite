@@ -17,7 +17,6 @@ export const styles = css`
 
   .affine-database-column {
     cursor: pointer;
-    background: var(--affine-white);
     transform: translateX(0);
   }
   .database-cell {

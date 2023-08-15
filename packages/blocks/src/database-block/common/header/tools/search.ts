@@ -1,15 +1,15 @@
 import '../../../common/filter/filter-group.js';
 
-import {
-  DatabaseSearchClose,
-  DatabaseSearchIcon,
-} from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
+import {
+  DatabaseSearchClose,
+  DatabaseSearchIcon,
+} from '../../../../icons/index.js';
 import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 

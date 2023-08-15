@@ -1,4 +1,3 @@
-import { BlockSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import { assertExists, DisposableGroup } from '@blocksuite/store';
@@ -15,10 +14,7 @@ import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
-import {
-  getSelectedContentBlockElements,
-  getTextSelection,
-} from '../../page-block/utils/selection.js';
+import { getSelectedContentBlockElements } from '../../page-block/utils/selection.js';
 import { ActionItems } from './components/action-items.js';
 import { InlineItems } from './components/inline-items.js';
 import { ParagraphButton } from './components/paragraph-button.js';
@@ -146,12 +142,10 @@ export class AffineFormatBarWidget extends WidgetElement {
     );
 
     this._disposables.add(
-      this._selectionManager.slots.changed.on(async selections => {
+      this._selectionManager.slots.changed.on(async () => {
         await this.updateComplete;
-        const textSelection = getTextSelection(pageElement);
-        const blockSelections = selections.filter(
-          selection => selection instanceof BlockSelection
-        ) as BlockSelection[];
+        const textSelection = pageElement.selection.find('text');
+        const blockSelections = pageElement.selection.filter('block');
 
         if (textSelection) {
           if (!textSelection.isCollapsed()) {
@@ -306,7 +300,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     //TODO: format bar in database
 
     const paragraphButton = ParagraphButton({
-      pageElement,
       formatBar: this,
       selectedBlockElements,
       page,

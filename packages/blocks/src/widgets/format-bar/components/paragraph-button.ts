@@ -1,34 +1,30 @@
 import { TextSelection } from '@blocksuite/block-std';
-import { ArrowDownIcon } from '@blocksuite/global/config';
 import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, type Page } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
+import { ArrowDownIcon } from '../../../icons/index.js';
 import type { Flavour } from '../../../models.js';
 import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
-import type { PageBlockComponent } from '../../../page-block/types.js';
 import { onModelElementUpdated } from '../../../page-block/utils/callback.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
-  pageElement: PageBlockComponent;
   page: Page;
   selectedBlockElements: BlockElement[];
 }
 
 interface ParagraphButtonProps {
-  pageElement: PageBlockComponent;
   formatBar: AffineFormatBarWidget;
   page: Page;
   selectedBlockElements: BlockElement[];
 }
 
 const updateParagraphType = (
-  pageElement: PageBlockComponent,
   selectedBlockElements: BlockElement[],
   flavour: Flavour,
   type?: string
@@ -48,7 +44,6 @@ const updateParagraphType = (
     ? defaultType
     : type;
   const newModels = updateBlockElementType(
-    pageElement,
     selectedBlockElements,
     targetFlavour,
     targetType
@@ -83,7 +78,6 @@ const updateParagraphType = (
 const ParagraphPanel = ({
   page,
   selectedBlockElements,
-  pageElement,
 }: ParagraphPanelProps) => {
   return html`<div class="paragraph-panel">
     ${paragraphConfig
@@ -97,12 +91,7 @@ const ParagraphPanel = ({
           text="${name}"
           data-testid="${flavour}/${type}"
           @click="${() =>
-            updateParagraphType(
-              pageElement,
-              selectedBlockElements,
-              flavour,
-              type
-            )}"
+            updateParagraphType(selectedBlockElements, flavour, type)}"
         >
           ${icon}
         </icon-button>`
@@ -130,7 +119,6 @@ export const ParagraphButton = ({
   }
 
   const paragraphPanel = ParagraphPanel({
-    pageElement,
     selectedBlockElements,
     page,
   });

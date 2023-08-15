@@ -7,7 +7,6 @@ import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   getCombinedFormatInTextSelection,
   getSelectedContentModels,
-  getTextSelection,
 } from '../../../page-block/utils/selection.js';
 import {
   handleMultiBlockIndent,
@@ -122,20 +121,16 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       [config.hotkey]: ctx => {
         if (blockElement.page.readonly) return;
 
-        const pageElement = blockElement.closest<PageBlockComponent>(
-          'affine-doc-page,affine-edgeless-page'
-        );
-        if (!pageElement) return;
-        const textSelection = getTextSelection(pageElement);
+        const textSelection = blockElement.selection.find('text');
         if (!textSelection) return;
 
         ctx.get('defaultState').event.preventDefault();
 
         const format = getCombinedFormatInTextSelection(
-          pageElement,
+          blockElement,
           textSelection
         );
-        config.action({ pageElement, type: 'text', format });
+        config.action({ blockElement, type: 'text', format });
         return true;
       },
     });

@@ -5,7 +5,6 @@ import type { BlockModels } from './types.js';
 export type { Disposable } from './utils/disposable.js';
 export { DisposableGroup } from './utils/disposable.js';
 export { Slot } from './utils/slot.js';
-export { caretRangeFromPoint, isFirefox, isWeb } from './utils/web.js';
 
 export const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -62,12 +61,6 @@ export const nonTextBlock: (keyof BlockModels)[] = [
   'affine:code',
   'affine:bookmark',
 ];
-
-export const isNonTextBlock = <
-  Key extends keyof BlockModels & string = keyof BlockModels & string
->(
-  model: BaseBlockModel
-) => matchFlavours(model, nonTextBlock);
 
 type Allowed =
   | unknown

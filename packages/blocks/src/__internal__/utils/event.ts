@@ -1,4 +1,4 @@
-import { IS_IOS, IS_MAC, MOUSE_BUTTONS } from '@blocksuite/global/config';
+import { IS_IOS, IS_MAC } from '@blocksuite/global/config';
 
 export function isPinchEvent(e: WheelEvent) {
   // two finger pinches on touch pad, ctrlKey is always true.
@@ -26,6 +26,16 @@ export function createDragEvent(type: string, event?: MouseEvent) {
     });
   }
   return new DragEvent(type, options);
+}
+
+// See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
+export enum MOUSE_BUTTONS {
+  NO_BUTTON = 0,
+  PRIMARY = 1,
+  SECONDARY = 2,
+  AUXILIARY = 4,
+  FORTH = 8,
+  FIFTH = 16,
 }
 
 export function isMiddleButtonPressed(e: MouseEvent) {

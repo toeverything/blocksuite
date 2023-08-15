@@ -1,19 +1,3 @@
-import {
-  AttachmentIcon,
-  BookmarkIcon,
-  CopyIcon,
-  DatabaseKanbanViewIcon20,
-  DatabaseTableViewIcon20,
-  DeleteIcon,
-  DualLinkIcon,
-  DuplicateIcon,
-  ImageIcon20,
-  NewPageIcon,
-  NowIcon,
-  TodayIcon,
-  TomorrowIcon,
-  YesterdayIcon,
-} from '@blocksuite/global/config';
 import { assertExists, Text } from '@blocksuite/store';
 
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
@@ -31,6 +15,22 @@ import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.j
 import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
 import { toast } from '../../components/toast.js';
+import {
+  AttachmentIcon,
+  BookmarkIcon,
+  CopyIcon,
+  DatabaseKanbanViewIcon20,
+  DatabaseTableViewIcon20,
+  DeleteIcon,
+  DualLinkIcon,
+  DuplicateIcon,
+  ImageIcon20,
+  NewPageIcon,
+  NowIcon,
+  TodayIcon,
+  TomorrowIcon,
+  YesterdayIcon,
+} from '../../icons/index.js';
 import type { ImageProps } from '../../image-block/image-model.js';
 import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
 import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
@@ -76,7 +76,6 @@ export const menuGroups: {
               ['text', 'block']
             );
             const newModels = updateBlockElementType(
-              pageElement,
               selectedBlockElements,
               flavour,
               type
@@ -144,12 +143,7 @@ export const menuGroups: {
             pageElement,
             ['text', 'block']
           );
-          updateBlockElementType(
-            pageElement,
-            selectedBlockElements,
-            flavour,
-            type
-          );
+          updateBlockElementType(selectedBlockElements, flavour, type);
         },
       })),
   },

@@ -1,3 +1,10 @@
+import type { BlockModels } from '@blocksuite/global/types';
+import { WithDisposable } from '@blocksuite/lit';
+import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { property } from 'lit/decorators.js';
+import * as Y from 'yjs';
+
+import { noop } from '../../../../__internal__/index.js';
 import {
   AttachmentIcon,
   BookmarkIcon,
@@ -10,14 +17,7 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TodoIcon,
-} from '@blocksuite/global/config';
-import type { BlockModels } from '@blocksuite/global/types';
-import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { property } from 'lit/decorators.js';
-import * as Y from 'yjs';
-
-import { noop } from '../../../../__internal__/index.js';
+} from '../../../../icons/index.js';
 import type { DividerBlockModel } from '../../../../models.js';
 import {
   type AttachmentBlockModel,

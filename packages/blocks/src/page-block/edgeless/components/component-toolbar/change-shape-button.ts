@@ -4,11 +4,6 @@ import '../panel/shape-style-panel.js';
 import '../toolbar/shape/shape-menu.js';
 import './change-text-menu.js';
 
-import {
-  GeneralShapeStyleIcon,
-  LineStyleIcon,
-  ScribbledShapeStyleIcon,
-} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type ShapeElement,
@@ -23,9 +18,14 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import {
-  BrushSize,
+  LineWidth,
   type ShapeTool,
 } from '../../../../__internal__/utils/types.js';
+import {
+  GeneralShapeStyleIcon,
+  LineStyleIcon,
+  ScribbledShapeStyleIcon,
+} from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
@@ -75,12 +75,12 @@ function getMostCommonStrokeColor(
   return max ? (max[0] as ShapeTool['fillColor']) : null;
 }
 
-function getMostCommonLineSize(elements: ShapeElement[]): BrushSize {
+function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
   const sizes = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeWidth;
   });
   const max = maxBy(Object.entries(sizes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
 function getMostCommonLineStyle(
@@ -414,7 +414,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const selectedStrokeColor =
       getMostCommonStrokeColor(this.elements) ?? STROKE_COLORS[0];
     const selectedLineSize =
-      getMostCommonLineSize(this.elements) ?? BrushSize.LINE_WIDTH_FOUR;
+      getMostCommonLineSize(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
     const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
     const selectedShapeStyle =
       getMostCommonShapeStyle(this.elements) ?? ShapeStyle.Scribbled;

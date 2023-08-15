@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
-import { BrushSize } from '../../../../__internal__/utils/types.js';
+import { LineWidth } from '../../../../__internal__/utils/types.js';
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 
 type DragConfig = {
@@ -13,7 +13,7 @@ type DragConfig = {
 };
 
 export class LineWidthEvent extends Event {
-  detail: BrushSize;
+  detail: LineWidth;
 
   constructor(
     type: string,
@@ -21,7 +21,7 @@ export class LineWidthEvent extends Event {
       detail,
       composed,
       bubbles,
-    }: { detail: BrushSize; composed: boolean; bubbles: boolean }
+    }: { detail: LineWidth; composed: boolean; bubbles: boolean }
   ) {
     super(type, { bubbles, composed });
     this.detail = detail;
@@ -113,7 +113,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  selectedSize: BrushSize = BrushSize.LINE_WIDTH_TWO;
+  selectedSize: LineWidth = LineWidth.LINE_WIDTH_TWO;
 
   @property({ attribute: false })
   hasTooltip = true;
@@ -135,27 +135,27 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   private _dragConfig: DragConfig | null = null;
 
-  private _updateLineWidthPanel(selectedSize: BrushSize) {
+  private _updateLineWidthPanel(selectedSize: LineWidth) {
     if (!this._lineWidthOverlay) return;
     let width = 0;
     let dragHandleOffsetX = 0;
     switch (selectedSize) {
-      case BrushSize.LINE_WIDTH_TWO:
+      case LineWidth.LINE_WIDTH_TWO:
         width = 0;
         break;
-      case BrushSize.LINE_WIDTH_FOUR:
+      case LineWidth.LINE_WIDTH_FOUR:
         width = 16;
         dragHandleOffsetX = 1;
         break;
-      case BrushSize.LINE_WIDTH_SIX:
+      case LineWidth.LINE_WIDTH_SIX:
         width = 32;
         dragHandleOffsetX = 2;
         break;
-      case BrushSize.LINE_WIDTH_EIGHT:
+      case LineWidth.LINE_WIDTH_EIGHT:
         width = 48;
         dragHandleOffsetX = 3;
         break;
-      case BrushSize.LINE_WIDTH_TEN:
+      case LineWidth.LINE_WIDTH_TEN:
         width = 64;
         dragHandleOffsetX = 4;
         break;
@@ -229,23 +229,23 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
     // Need to select the nearest size.
     let selectedSize = this.selectedSize;
     if (dragHandlerPosition <= 12) {
-      selectedSize = BrushSize.LINE_WIDTH_TWO;
+      selectedSize = LineWidth.LINE_WIDTH_TWO;
     } else if (dragHandlerPosition > 12 && dragHandlerPosition <= 26) {
-      selectedSize = BrushSize.LINE_WIDTH_FOUR;
+      selectedSize = LineWidth.LINE_WIDTH_FOUR;
     } else if (dragHandlerPosition > 26 && dragHandlerPosition <= 40) {
-      selectedSize = BrushSize.LINE_WIDTH_SIX;
+      selectedSize = LineWidth.LINE_WIDTH_SIX;
     } else if (dragHandlerPosition > 40 && dragHandlerPosition <= 54) {
-      selectedSize = BrushSize.LINE_WIDTH_EIGHT;
+      selectedSize = LineWidth.LINE_WIDTH_EIGHT;
     } else if (dragHandlerPosition > 54 && dragHandlerPosition <= 68) {
-      selectedSize = BrushSize.LINE_WIDTH_TEN;
+      selectedSize = LineWidth.LINE_WIDTH_TEN;
     } else {
-      selectedSize = BrushSize.LINE_WIDTH_TWELVE;
+      selectedSize = LineWidth.LINE_WIDTH_TWELVE;
     }
     this._updateLineWidthPanel(selectedSize);
     this._onSelect(selectedSize);
   }
 
-  private _onSelect(lineWidth: BrushSize) {
+  private _onSelect(lineWidth: LineWidth) {
     // If the selected size is the same as the previous one, do nothing.
     if (lineWidth === this.selectedSize) return;
     this.dispatchEvent(

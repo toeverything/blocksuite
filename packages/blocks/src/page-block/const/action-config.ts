@@ -1,11 +1,11 @@
 import { BlockSelection } from '@blocksuite/block-std';
-import { CopyIcon, DatabaseTableViewIcon20 } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists, matchFlavours } from '@blocksuite/store';
 import { type TemplateResult } from 'lit';
 
 import { copyBlocksInPage } from '../../__internal__/clipboard/utils/commons.js';
 import { toast } from '../../components/toast.js';
+import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';
 import {
   AFFINE_DATABASE_CONVERT_WIDGET_TAG,
   DATABASE_CONVERT_WHITE_LIST,

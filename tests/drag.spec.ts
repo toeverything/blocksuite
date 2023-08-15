@@ -393,7 +393,7 @@ test('should be able to drag & drop multiple blocks', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '2', '4', true);
@@ -491,7 +491,7 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
     }
   );
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(page, '3', '8');
@@ -606,7 +606,7 @@ test('should create preview when dragging', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
   await dragHandleFromBlockToBlockBottomById(
@@ -641,7 +641,7 @@ test('should drag and drop blocks under block-level selection', async ({
     }
   );
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
   const editors = page.locator('rich-text');
@@ -689,7 +689,7 @@ test('should trigger click event on editor container when clicking on blocks und
     }
   );
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
   await expect(page.locator('*:focus')).toHaveCount(0);
 
@@ -732,7 +732,7 @@ test('should get to selected block when dragging unselected block', async ({
   await page.mouse.down();
   await page.mouse.up();
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(1);
 
   await page.mouse.move(editorRect1.x - 5, editorRect0.y);
@@ -782,7 +782,7 @@ test('should clear the currently selected block when clicked again', async ({
   await page.mouse.down();
   await page.mouse.up();
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(1);
 
   let selectedBlockRect = await blockSelections.nth(0).boundingBox();
@@ -846,7 +846,7 @@ test('should support moving blocks from multiple notes', async ({ page }) => {
     }
   );
 
-  const blockSelections = page.locator('.selected');
+  const blockSelections = page.locator('affine-block-selection');
   await expect(blockSelections).toHaveCount(2);
 
   const editors = page.locator('rich-text');

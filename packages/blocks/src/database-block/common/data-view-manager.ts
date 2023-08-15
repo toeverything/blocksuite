@@ -112,6 +112,10 @@ export interface DataViewManager {
   ): Disposable;
 
   columnMove(columnId: string, position: InsertPosition): void;
+
+  deleteView(): void;
+
+  get isDeleted(): boolean;
 }
 
 export interface DataViewColumnManager<
@@ -411,6 +415,9 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   abstract columnMove(columnId: string, position: InsertPosition): void;
+
+  public abstract deleteView(): void;
+  public abstract get isDeleted(): boolean;
 }
 
 export abstract class BaseDataViewColumnManager

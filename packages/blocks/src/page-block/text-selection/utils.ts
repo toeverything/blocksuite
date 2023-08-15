@@ -37,41 +37,6 @@ export function rangeFromCaret(caret: { node: Node; offset: number }): Range {
   return range;
 }
 
-export function getNearestText(
-  anchor: Node,
-  node: Element,
-  point: { x: number; y: number }
-) {
-  const block = node.querySelector('[data-virgo-root]');
-  const anchorBlock = anchor.parentElement?.closest('[data-virgo-root]');
-  const rect = block?.getBoundingClientRect();
-
-  if (
-    block &&
-    rect &&
-    anchorBlock &&
-    block !== anchorBlock &&
-    Math.abs(anchorBlock.getBoundingClientRect().top - rect.top) >
-      rect.height * 1.5
-  ) {
-    const range = document.createRange();
-    range.selectNodeContents(block);
-    let result = rect;
-    Array.from(range.getClientRects()).reduce((d, rect) => {
-      const y = Math.abs(rect.top - point.y);
-      const x = Math.abs(rect.left - point.x);
-      const distance = y ** 2 + x ** 2;
-      if (distance < d) {
-        result = rect;
-        return distance;
-      }
-      return d;
-    }, Infinity);
-    return caretFromPoint(result.left, result.top);
-  }
-  return undefined;
-}
-
 export function autoScroll(
   viewportElement: HTMLElement,
   y: number,

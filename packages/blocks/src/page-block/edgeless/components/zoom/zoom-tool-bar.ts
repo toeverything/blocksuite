@@ -1,4 +1,3 @@
-import { MinusIcon, PlusIcon, ViewBarIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -9,6 +8,7 @@ import {
   type EdgelessTool,
   stopPropagation,
 } from '../../../../__internal__/index.js';
+import { MinusIcon, PlusIcon, ViewBarIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';

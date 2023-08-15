@@ -5,6 +5,7 @@ import {
   type Page,
 } from '@blocksuite/store';
 
+import type { AbstractEditor } from '../__internal__/index.js';
 import {
   asyncFocusRichText,
   calcDropTarget,
@@ -15,7 +16,6 @@ import {
   Point,
 } from '../__internal__/index.js';
 import type {
-  AbstractEditor,
   DocPageBlockComponent,
   EdgelessPageBlockComponent,
   ImageBlockModel,

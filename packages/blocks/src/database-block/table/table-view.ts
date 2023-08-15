@@ -4,7 +4,6 @@ import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/selection.js';
 
-import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -13,6 +12,7 @@ import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import { PlusIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
