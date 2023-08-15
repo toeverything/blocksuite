@@ -1,5 +1,4 @@
 import '../../panel/one-row-color-panel.js';
-import '../../buttons/tool-icon-button.js';
 import '../common/slide-menu.js';
 
 import { ConnectorMode } from '@blocksuite/phasor';
@@ -20,6 +19,8 @@ import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+
+const CONNECTOR_SUBMENU_WIDTH = 474;
 
 function ConnectorModeButtonGroup(
   edgelessTool: EdgelessTool,
@@ -45,7 +46,7 @@ function ConnectorModeButtonGroup(
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
         ${ConnectorLWithArrowIcon}
-        <tool-tip inert role="tooltip" tip-position="top" arrow>
+        <tool-tip inert role="tooltip" tip-position="top-end" arrow>
           ${straightLineTooltip}
         </tool-tip>
       </div>
@@ -72,34 +73,40 @@ export class EdgelessConnectorMenu extends LitElement {
       display: flex;
       z-index: -1;
     }
-    .container {
+
+    .connector-submenu-container {
       display: flex;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
+      border: 1px solid var(--affine-border-color);
       border-radius: 8px 8px 0 0;
       cursor: default;
     }
 
+    .connector-submenu-content {
+      display: flex;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+    }
+
     .connector-mode-button-group {
       display: flex;
-      padding: 0 4px;
-      gap: 8px;
+      gap: 14px;
     }
 
     .connector-mode-button {
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 32px;
-      height: 32px;
       box-sizing: border-box;
-      border-radius: 4px;
       color: var(--affine-icon-color);
+      padding: 2px;
+      border-radius: 4px;
       cursor: pointer;
     }
 
-    .connector-mode-button[active],
     .connector-mode-button:hover {
       background-color: var(--affine-hover-color);
     }
@@ -113,8 +120,16 @@ export class EdgelessConnectorMenu extends LitElement {
       fill: var(--affine-icon-color);
     }
 
-    menu-divider {
+    .connector-mode-button[active] svg {
+      fill: var(--affine-primary-color);
+    }
+
+    .submenu-divider {
+      width: 1px;
       height: 24px;
+      margin: 0 16px;
+      background-color: var(--affine-border-color);
+      display: inline-block;
     }
 
     ${tooltipStyle}
@@ -178,22 +193,23 @@ export class EdgelessConnectorMenu extends LitElement {
     );
 
     return html`
-      <div class="container">
-        <edgeless-slide-menu>
-          ${connectorModeButtonGroup}
-          <menu-divider .vertical=${true}></menu-divider>
-          <edgeless-line-width-panel
-            .selectedSize=${strokeWidth}
-            .hasTooltip=${false}
-            @select=${(e: LineWidthEvent) =>
-              this._setConnectorStrokeWidth(e.detail)}
-          >
-          </edgeless-line-width-panel>
-          <menu-divider .vertical=${true}></menu-divider>
-          <edgeless-one-row-color-panel
-            .value=${color}
-            @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
-          ></edgeless-one-row-color-panel>
+      <div class="connector-submenu-container">
+        <edgeless-slide-menu .menuWidth=${CONNECTOR_SUBMENU_WIDTH}>
+          <div class="connector-submenu-content">
+            ${connectorModeButtonGroup}
+            <div class="submenu-divider"></div>
+            <edgeless-line-width-panel
+              .selectedSize=${strokeWidth}
+              @select=${(e: LineWidthEvent) =>
+                this._setConnectorStrokeWidth(e.detail)}
+            >
+            </edgeless-line-width-panel>
+            <div class="submenu-divider"></div>
+            <edgeless-one-row-color-panel
+              .value=${color}
+              @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
+            ></edgeless-one-row-color-panel>
+          </div>
         </edgeless-slide-menu>
       </div>
     `;

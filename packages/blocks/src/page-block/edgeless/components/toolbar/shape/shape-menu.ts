@@ -29,6 +29,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px 8px 0 0;
+      border: 1px solid var(--affine-border-color);
       position: relative;
       cursor: default;
     }
@@ -39,11 +40,14 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
     .shape-type-container {
       display: flex;
       align-items: center;
+      justify-content: center;
       fill: none;
       stroke: currentColor;
+      gap: 14px;
     }
     menu-divider {
       height: 24px;
+      margin: 0 9px;
     }
   `;
   @property({ attribute: false })
@@ -95,7 +99,9 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                     <edgeless-tool-icon-button
                       .disabled=${disabled}
                       .tooltip=${tooltip}
+                      .tipPosition=${name === 'rect' ? 'top-end' : 'top'}
                       .active=${shape === name}
+                      .iconContainerPadding=${2}
                       @click=${() => {
                         if (disabled) return;
                         this._setShapeType(name);

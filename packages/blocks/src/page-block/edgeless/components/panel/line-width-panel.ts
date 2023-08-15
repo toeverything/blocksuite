@@ -43,8 +43,8 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: space-between;
       position: relative;
-      width: 100px;
-      margin: 4px;
+      width: 108px;
+      margin: 4px 0;
       cursor: default;
     }
 
@@ -109,6 +109,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
     tool-tip {
       z-index: 12;
+      top: -8px;
     }
   `;
 

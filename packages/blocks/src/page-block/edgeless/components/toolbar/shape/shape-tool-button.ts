@@ -1,13 +1,13 @@
 import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
-import { EdgelessShapeIcon } from '../../../../../icons/index.js';
+import { ArrowUpIcon, EdgelessShapeIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -111,7 +111,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._toggleShapeMenu();
         }}
       >
-        ${EdgelessShapeIcon}
+        <div>${EdgelessShapeIcon}
       </edgeless-toolbar-button>
     `;
   }

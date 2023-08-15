@@ -1,6 +1,6 @@
 import '../buttons/tool-icon-button.js';
 
-import { Slot } from '@blocksuite/store';
+import { Slot } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

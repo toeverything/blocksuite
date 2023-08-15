@@ -29,7 +29,7 @@ function createConnectorMenuPopper(
 
   // The connector menu should be positioned at the top of the connector button.
   // And it should be positioned at the top center of the toolbar all the time.
-  const x = 92;
+  const x = 86;
   const y = -44;
 
   Object.assign(menu.style, {
