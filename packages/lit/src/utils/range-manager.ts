@@ -28,10 +28,12 @@ export class RangeManager {
 
   private _range: Range | null = null;
 
-  clearRange() {
+  clearRange(sync = true) {
     this._range = null;
-    this.root.selectionManager.clear(['text']);
     window.getSelection()?.removeAllRanges();
+    if (sync) {
+      this.root.selectionManager.clear(['text']);
+    }
   }
 
   renderRange(start: Range, end?: Range | null) {
@@ -46,7 +48,8 @@ export class RangeManager {
 
   syncTextSelectionToRange(selection: TextSelection | null) {
     if (!selection) {
-      this.clearRange();
+      console.log('------');
+      this.clearRange(false);
       return;
     }
 
@@ -61,7 +64,7 @@ export class RangeManager {
     const endRange = to ? this.pointToRange(to) : null;
 
     if (!startRange) {
-      this.clearRange();
+      this.clearRange(false);
       return;
     }
     this.renderRange(startRange, endRange);

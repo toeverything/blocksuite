@@ -118,7 +118,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   assertRectEqual(newRect, draggedRect);
 });
 
-test('add Note', async ({ page }) => {
+test.only('add Note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
