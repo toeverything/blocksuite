@@ -5,6 +5,7 @@ import {
   getBookmarkInitialProps,
   getEdgelessPage,
   getServiceOrRegister,
+  PAGE_BLOCK_PADDING_BOTTOM,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
@@ -14,7 +15,6 @@ import {
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
-import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 

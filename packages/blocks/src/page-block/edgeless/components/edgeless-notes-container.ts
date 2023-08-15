@@ -1,4 +1,3 @@
-import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
@@ -7,6 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../__internal__/consts.js';
 import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
 import {
   DEFAULT_NOTE_COLOR,

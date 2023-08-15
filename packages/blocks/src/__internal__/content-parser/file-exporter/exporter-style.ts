@@ -1,6 +1,7 @@
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { lightCssVariables } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
+
+import { EDITOR_WIDTH } from '../../consts.js';
 
 const quoteCSSContent = `
   .quote {
