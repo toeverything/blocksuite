@@ -3,17 +3,12 @@ import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
 import * as Y from 'yjs';
 
-import type { BlockSchemaType } from '../base.js';
-import { BlockSchema } from '../base.js';
-import { toBlockMigrationData } from '../utils/utils.js';
+import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
+import { workspaceMigrations } from '../migration/index.js';
 import { ProxyManager } from '../yjs/index.js';
-import { workspaceMigrations } from './migration/migrate-workspace.js';
-
-export type MigrationRunner<BlockSchema extends BlockSchemaType> =
-  BlockSchema['onUpgrade'];
-
-const SCHEMA_NOT_FOUND_MESSAGE =
-  'Schema not found. The block flavour may not be registered.';
+import type { BlockSchemaType } from './base.js';
+import { BlockSchema } from './base.js';
+import { toBlockMigrationData } from './utils.js';
 
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();

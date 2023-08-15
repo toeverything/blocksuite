@@ -10,9 +10,10 @@ import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import { SchemaValidateError } from '../../../global/src/error/index.js';
-import { defineBlockSchema } from '../base';
-import { Generator } from '../store';
-import { Schema, Workspace } from '../workspace';
+import { Schema } from '../schema';
+import { defineBlockSchema } from '../schema/base';
+import { Workspace } from '../workspace';
+import { Generator } from '../workspace/store';
 
 function createTestOptions() {
   const idGenerator = Generator.AutoIncrement;

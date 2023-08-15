@@ -1,4 +1,4 @@
-import { BaseBlockModel } from '../base.js';
+import { BaseBlockModel } from '../schema/base.js';
 
 function isBaseBlockModel(a: unknown): a is BaseBlockModel {
   return a instanceof BaseBlockModel;
