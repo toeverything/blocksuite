@@ -71,6 +71,7 @@ test(scoped`clipboard copy paste`, async ({ page }) => {
 
   await type(page, 'test');
   await setVirgoSelection(page, 0, 3);
+  await waitNextFrame(page);
   await copyByKeyboard(page);
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
@@ -302,6 +303,7 @@ test(scoped`split block when paste`, async ({ page }) => {
 
   await setVirgoSelection(page, 1, 1);
   await pasteContent(page, clipData);
+  await waitNextFrame(page);
 
   await assertRichTexts(page, ['atext', 'h1c']);
   await assertSelection(page, 1, 2, 0);
@@ -370,7 +372,7 @@ test(scoped`copy clipItems format`, async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 });
-// FIXME
+
 test(scoped`copy partially selected text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -775,7 +777,7 @@ test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await pressArrowRight(page);
   await type(page, '555');
   await pasteByKeyboard(page, false);
-  await assertText(page, '1234555');
+  await assertText(page, '12345551234');
 });
 
 test(scoped`paste note block with background`, async ({ page }) => {
@@ -1010,7 +1012,7 @@ test(scoped`auto identify url`, async ({ page }) => {
   );
 });
 
-test.fixme(scoped`paste parent block`, async ({ page }) => {
+test(scoped`paste parent block`, async ({ page }) => {
   test.info().annotations.push({
     type: 'issue',
     description: 'https://github.com/toeverything/blocksuite/issues/3153',
