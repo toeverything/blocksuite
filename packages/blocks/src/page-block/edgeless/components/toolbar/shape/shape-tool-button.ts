@@ -7,7 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
-import { ArrowUpIcon, EdgelessShapeIcon } from '../../../../../icons/index.js';
+import { EdgelessShapeIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -111,7 +111,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._toggleShapeMenu();
         }}
       >
-        <div>${EdgelessShapeIcon}
+        ${EdgelessShapeIcon}
       </edgeless-toolbar-button>
     `;
   }
