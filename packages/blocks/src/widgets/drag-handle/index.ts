@@ -502,13 +502,12 @@ export class DragHandleWidget extends WidgetElement {
       const nativeSelection = document.getSelection();
       if (nativeSelection && nativeSelection.rangeCount > 0) {
         const range = nativeSelection.getRangeAt(0);
-        const blockElements = this._rangeManager
-          .findBlockElementsByRange(range)
-          .filter(element => element.flavour !== 'affine:note');
-        const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
-          blockElements
-        ) as BlockElement[];
-        this._setSelectedBlocks(blockElementsExcludingChildren);
+        const blockElements =
+          this._rangeManager.getSelectedBlockElementsByRange(range, {
+            match: el => el.model.role === 'content',
+            mode: 'highest',
+          });
+        this._setSelectedBlocks(blockElements);
         selections = this._selectedBlocks;
       }
     }
