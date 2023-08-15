@@ -6,7 +6,7 @@
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b --verbose",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
