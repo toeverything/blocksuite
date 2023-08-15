@@ -86,6 +86,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
           });
         },
+        f: () => {
+          if (!this.pageElement.selectionManager.empty)
+            this.pageElement.frame.createFrameOnSelected();
+        },
         'Mod-a': ctx => {
           if (this.pageElement.selectionManager.editing) {
             return;
