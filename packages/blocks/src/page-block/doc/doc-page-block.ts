@@ -2,7 +2,7 @@ import './meta-data/meta-data.js';
 
 import { type BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { matchFlavours, Slot } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
@@ -15,7 +15,7 @@ import {
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '../../__internal__/consts.js';
 import type { BlockHost, EditingState } from '../../__internal__/index.js';
-import { asyncFocusRichText } from '../../__internal__/index.js';
+import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import {
   getService,
   registerService,

@@ -1,4 +1,4 @@
-import type { UnionToIntersection } from '@blocksuite/global/types';
+import type { UnionToIntersection } from '@blocksuite/global/utils';
 
 import type { BaseService } from './__internal__/service/service.js';
 import { AttachmentBlockService } from './attachment-block/attachment-service.js';

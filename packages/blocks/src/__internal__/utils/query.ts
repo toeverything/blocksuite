@@ -1,8 +1,9 @@
-import { assertExists, clamp, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, clamp } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import { matchFlavours } from '../../__internal__/utils/model.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';

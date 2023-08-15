@@ -2,7 +2,7 @@ import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 import '../panel/color-panel.js';
 
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
@@ -10,6 +10,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
+import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import { HiddenIcon, NoteIcon } from '../../../../icons/index.js';
 import {

@@ -6,6 +6,7 @@ import {
   type UIEventHandler,
   type UIEventState,
 } from '@blocksuite/block-std';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { Bound } from '@blocksuite/phasor';
 import {
   getCommonBound,
@@ -14,7 +15,6 @@ import {
 } from '@blocksuite/phasor';
 
 import {
-  AbstractSelectionManager,
   type EdgelessTool,
   getEditorContainerByElement,
   isDatabaseInput,
@@ -75,7 +75,7 @@ export interface SelectionArea {
   end: DOMPoint;
 }
 
-export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageBlockComponent> {
+export class EdgelessToolsManager {
   private _edgelessTool: EdgelessTool = {
     type: 'default',
   };
@@ -140,12 +140,16 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     this.currentController.onPressShiftKey(pressed);
   }
 
-  constructor(
-    container: EdgelessPageBlockComponent,
-    dispatcher: UIEventDispatcher
-  ) {
-    super(container, dispatcher);
+  get page() {
+    return this.container.page;
+  }
 
+  protected readonly _disposables = new DisposableGroup();
+
+  constructor(
+    public readonly container: EdgelessPageBlockComponent,
+    protected readonly dispatcher: UIEventDispatcher
+  ) {
     this._controllers = {
       default: new DefaultToolController(this.container),
       text: new TextToolController(this.container),
@@ -289,7 +293,7 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
   }
 
   private _add = (name: EventName, fn: UIEventHandler) => {
-    this._disposables.add(this._dispatcher.add(name, fn));
+    this._disposables.add(this.dispatcher.add(name, fn));
   };
 
   private _onContainerDragStart = (e: PointerEventState) => {
@@ -344,7 +348,7 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
     e.event.preventDefault();
     const pointerEventState = new PointerEventState({
       event: e.event as PointerEvent,
-      rect: this._dispatcher.root.getBoundingClientRect(),
+      rect: this.dispatcher.root.getBoundingClientRect(),
       startX: 0,
       startY: 0,
       last: null,
@@ -378,12 +382,12 @@ export class EdgelessToolsManager extends AbstractSelectionManager<EdgelessPageB
       }
     };
 
-    this._dispatcher.disposables.addFromEvent(
+    this.dispatcher.disposables.addFromEvent(
       document,
       'pointerover',
       switchToPreMode
     );
-    this._dispatcher.disposables.addFromEvent(
+    this.dispatcher.disposables.addFromEvent(
       document,
       'pointerup',
       switchToPreMode
