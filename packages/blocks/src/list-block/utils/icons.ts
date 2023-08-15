@@ -169,22 +169,11 @@ export const checkboxUnchecked = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect
-        x="4"
-        y="4"
-        width="16"
-        height="16"
-        rx="2"
-        stroke="#77757D"
-        stroke-width="1.5"
-        stroke-linejoin="round"
-      />
       <path
-        d="M8.5 12.5L10.5 14.5L16 9"
-        stroke="#77757D"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M6 3.25C4.48122 3.25 3.25 4.48122 3.25 6V18C3.25 19.5188 4.48122 20.75 6 20.75H18C19.5188 20.75 20.75 19.5188 20.75 18V6C20.75 4.48122 19.5188 3.25 18 3.25H6ZM4.75 6C4.75 5.30964 5.30964 4.75 6 4.75H18C18.6904 4.75 19.25 5.30964 19.25 6V18C19.25 18.6904 18.6904 19.25 18 19.25H6C5.30964 19.25 4.75 18.6904 4.75 18V6Z"
+        fill="#77757D"
       />
     </svg>
   `;

@@ -30,6 +30,7 @@ import {
   BlockHubRoundedRectangleIcon,
   BookmarkIcon,
   BulletedListIcon,
+  CheckBoxIcon,
   CodeBlockIcon,
   CrossIcon,
   DatabaseTableViewIcon,
@@ -47,7 +48,6 @@ import {
   QuoteIcon,
   TextIcon,
   TextIconLarge,
-  TodoIcon,
 } from '../icons/index.js';
 import { type DragIndicator } from './drag-indicator.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
@@ -157,7 +157,7 @@ export const BLOCKHUB_LIST_ITEMS = [
     type: 'todo',
     name: 'To-do List',
     description: 'Track tasks with a to-do list.',
-    icon: TodoIcon,
+    icon: CheckBoxIcon,
     tooltip: 'Drag/Click to insert To-do List',
   },
 ];

@@ -38,8 +38,8 @@ export class LinkCell extends BaseCellRenderer<string> {
       height: 100%;
       outline: none;
       overflow: hidden;
-      font-size: 12px;
-      line-height: 20px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
     }
 
     affine-database-link-node {
@@ -112,16 +112,16 @@ export class LinkCell extends BaseCellRenderer<string> {
 export class LinkCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell-editing {
-      display: block;
       width: 100%;
       height: 100%;
       cursor: text;
+      display: flex;
+      align-items: center;
     }
 
     .affine-database-link-editing {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
@@ -129,8 +129,8 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
-      font-size: 12px;
-      line-height: 20px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
     }
 
     .affine-database-link-editing:focus {

@@ -37,10 +37,12 @@ export class DataViewPropertiesSettingView extends WithDisposable(
 
     .properties-group-header {
       user-select: none;
-      padding: 6px 4px;
+      padding: 4px 12px 12px 12px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      border-bottom: 1px solid var(--affine-divider-color);
     }
 
     .properties-group-title {
@@ -194,7 +196,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     const clickChangeAll = () => this.clickChangeAll(isAllShowed);
     return html`
       <div class="properties-group-header">
-        <div class="properties-group-title">Properties</div>
+        <div class="properties-group-title">PROPERTIES</div>
         <div class="properties-group-op" @click="${clickChangeAll}">
           ${isAllShowed ? 'Hide All' : 'Show All'}
         </div>

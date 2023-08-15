@@ -1,5 +1,10 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Middleware } from '@floating-ui/dom';
+import type {
+  ClientRectObject,
+  Middleware,
+  ReferenceElement,
+  VirtualElement,
+} from '@floating-ui/dom';
 import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
@@ -488,8 +493,24 @@ export const createModal = () => {
   document.body.querySelector('editor-container')?.append(div);
   return div;
 };
+export const positionToVRect = (x: number, y: number): VirtualElement => {
+  return {
+    getBoundingClientRect(): ClientRectObject {
+      return {
+        x: x,
+        y: y,
+        width: 0,
+        height: 0,
+        top: y,
+        bottom: y,
+        left: x,
+        right: x,
+      };
+    },
+  };
+};
 export const createPopup = (
-  target: HTMLElement,
+  target: ReferenceElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -521,13 +542,20 @@ export const createPopup = (
       options?.onClose?.();
     }
   };
+  modal.oncontextmenu = ev => {
+    ev.preventDefault();
+    if (ev.target === modal) {
+      modal.remove();
+      options?.onClose?.();
+    }
+  };
   return () => {
     modal.remove();
   };
 };
 
 export const popMenu = <T>(
-  target: HTMLElement,
+  target: ReferenceElement,
   props: {
     options: MenuOptions;
     middleware?: Array<Middleware | null | undefined | false>;
@@ -547,7 +575,7 @@ export const popMenu = <T>(
   });
 };
 export const popFilterableSimpleMenu = (
-  target: HTMLElement,
+  target: ReferenceElement,
   options: Menu[],
   onClose?: () => void
 ) => {

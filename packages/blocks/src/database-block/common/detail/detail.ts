@@ -1,17 +1,19 @@
 import './field.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import { PlusIcon } from '../../../icons/index.js';
+import { dataViewCssVariable } from '../css-variable.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`
+  ${unsafeCSS(dataViewCssVariable('affine-data-view-record-detail'))}
   affine-data-view-record-detail {
     display: flex;
     flex-direction: column;
@@ -24,10 +26,10 @@ const styles = css`
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 12px;
+    font-size: var(--data-view-cell-text-size);
     font-style: normal;
     font-weight: 400;
-    line-height: 20px;
+    line-height: var(--data-view-cell-text-line-height);
     color: var(--affine-text-secondary-color);
     border-radius: 4px;
     padding: 4px;

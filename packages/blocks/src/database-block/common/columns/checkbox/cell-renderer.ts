@@ -107,7 +107,7 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
 
 columnRenderer.register({
   type: checkboxPureColumnConfig.type,
-  icon: createIcon('TodoIcon'),
+  icon: createIcon('CheckBoxIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(CheckboxCell),
   },
