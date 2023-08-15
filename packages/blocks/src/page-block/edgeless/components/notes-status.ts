@@ -1,7 +1,7 @@
-import { matchFlavours } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { matchFlavours } from '../../../__internal__/index.js';
 import { HiddenIcon } from '../../../icons/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';

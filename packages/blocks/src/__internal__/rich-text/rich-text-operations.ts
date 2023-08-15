@@ -1,7 +1,6 @@
 // operations used in rich-text level
 
-import type { BlockModelProps } from '@blocksuite/global/types';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text, Utils } from '@blocksuite/store';
 
@@ -13,6 +12,8 @@ import {
   asyncFocusRichText,
   asyncSetVRange,
 } from '../utils/common-operations.js';
+import type { BlockModelProps } from '../utils/model.js';
+import { matchFlavours } from '../utils/model.js';
 import {
   getModelByElement,
   getNextBlock,

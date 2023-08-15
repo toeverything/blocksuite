@@ -1,10 +1,10 @@
 import { BlockService } from '@blocksuite/block-std';
-import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import { getService } from '../__internal__/service/index.js';
 import { BaseService } from '../__internal__/service/service.js';
+import type { BlockModels } from '../__internal__/utils/model.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
 import type { DataViewTypes } from './common/data-view.js';
 import { DatabaseSelection } from './common/selection.js';

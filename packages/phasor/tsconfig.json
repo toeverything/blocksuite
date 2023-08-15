@@ -6,5 +6,9 @@
     "noEmit": false
   },
   "include": ["./src"],
-  "references": []
+  "references": [
+    {
+      "path": "../global"
+    }
+  ]
 }
