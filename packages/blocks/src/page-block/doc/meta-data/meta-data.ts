@@ -31,6 +31,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
       cursor: pointer;
       justify-content: space-between;
       margin: 0 -12px;
+      margin-bottom: 8px;
     }
 
     .meta-data-content {
@@ -78,6 +79,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
       gap: 10px;
       background-color: var(--affine-hover-color-filled);
       border-radius: 8px;
+      margin-bottom: 8px;
     }
 
     .meta-data-expanded-title {
