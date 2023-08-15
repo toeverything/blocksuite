@@ -8,6 +8,12 @@ import { StringGroupView } from './renderer/string-group.js';
 
 groupByMatcher.register(tTag.create(), {
   name: 'select',
+  groupName: (type, value) => {
+    if (tTag.is(type) && type.data) {
+      return type.data.tags.find(v => v.id === value)?.value ?? '';
+    }
+    return '';
+  },
   defaultKeys: type => {
     if (tTag.is(type) && type.data) {
       return [
@@ -43,6 +49,12 @@ groupByMatcher.register(tTag.create(), {
 });
 groupByMatcher.register(tArray(tTag.create()), {
   name: 'multi-select',
+  groupName: (type, value) => {
+    if (tTag.is(type) && type.data) {
+      return type.data.tags.find(v => v.id === value)?.value ?? '';
+    }
+    return '';
+  },
   defaultKeys: type => {
     if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
       return [
@@ -95,6 +107,9 @@ groupByMatcher.register(tArray(tTag.create()), {
 });
 groupByMatcher.register(tString.create(), {
   name: 'text',
+  groupName: (type, value) => {
+    return `${value ?? ''}`;
+  },
   defaultKeys: type => {
     return [];
   },
@@ -118,6 +133,9 @@ groupByMatcher.register(tString.create(), {
 });
 groupByMatcher.register(tNumber.create(), {
   name: 'number',
+  groupName: (type, value) => {
+    return `${value ?? ''}`;
+  },
   defaultKeys: type => {
     return [];
   },

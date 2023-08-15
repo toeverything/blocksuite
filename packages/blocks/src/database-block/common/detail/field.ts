@@ -20,73 +20,71 @@ import type {
   DataViewManager,
 } from '../data-view-manager.js';
 
-const styles = css`
-  affine-data-view-record-field {
-    display: flex;
-    gap: 12px;
-  }
-
-  .field-left {
-    padding: 2px 4px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    line-height: 20px;
-    color: var(--affine-text-secondary-color);
-    width: 102px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .field-left:hover {
-    background-color: var(--affine-hover-color);
-  }
-
-  affine-data-view-record-field .icon {
-    display: flex;
-    align-items: center;
-    width: 16px;
-    height: 16px;
-  }
-
-  affine-data-view-record-field .icon svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--affine-icon-color);
-  }
-
-  .filed-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .field-content {
-    padding: 2px 4px;
-    border-radius: 4px;
-    flex: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    border: 1px solid transparent;
-  }
-
-  .field-content:hover {
-    background-color: var(--affine-hover-color);
-  }
-  .field-content.is-editing {
-    box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
-  }
-  .field-content.is-focus {
-    border: 1px solid var(--affine-primary-color);
-  }
-`;
-
 @customElement('affine-data-view-record-field')
 export class RecordField extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
+  static override styles = css`
+    affine-data-view-record-field {
+      display: flex;
+      gap: 12px;
+    }
+
+    .field-left {
+      padding: 4px 6px 4px 4px;
+      display: flex;
+      height: max-content;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      color: var(--affine-text-secondary-color);
+      width: 116px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .field-left:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    affine-data-view-record-field .icon {
+      display: flex;
+      align-items: center;
+      width: 16px;
+      height: 16px;
+    }
+
+    affine-data-view-record-field .icon svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--affine-icon-color);
+    }
+
+    .filed-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .field-content {
+      padding: 4px 6px;
+      border-radius: 4px;
+      flex: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      border: 1px solid transparent;
+    }
+
+    .field-content:hover {
+      background-color: var(--affine-hover-color);
+    }
+    .field-content.is-editing {
+      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
+    }
+    .field-content.is-focus {
+      border: 1px solid var(--affine-primary-color);
+    }
+  `;
 
   @property({ attribute: false })
   view!: DataViewManager;

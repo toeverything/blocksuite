@@ -87,7 +87,10 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         f: () => {
-          if (!this.pageElement.selectionManager.empty)
+          if (
+            this.pageElement.selectionManager.elements.length !== 0 &&
+            !this.pageElement.selectionManager.editing
+          )
             this.pageElement.frame.createFrameOnSelected();
         },
         'Mod-a': ctx => {

@@ -6,6 +6,7 @@ import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 
+import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -22,6 +23,7 @@ import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
   HandIcon,
+  PresentationFullScreenIcon,
   SelectIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -148,6 +150,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     },
   })
   private _currentFrameIndex = 0;
+  private _isFullScreen = false;
+  private _timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
@@ -250,6 +254,20 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   }
 
+  private _toggleFullScreen() {
+    if (this._isFullScreen) {
+      this._isFullScreen = false;
+      this._timer && clearTimeout(this._timer);
+      document.exitFullscreen();
+    } else {
+      this._isFullScreen = true;
+      launchIntoFullscreen(this.edgeless);
+      this._timer = setTimeout(() => {
+        this._currentFrameIndex = this._currentFrameIndex + 0;
+      }, 400);
+    }
+  }
+
   private get frameNavigatorContent() {
     const current = this._currentFrameIndex;
     const frames = this._frames;
@@ -299,10 +317,22 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         .edgeless=${this.edgeless}
       >
       </edgeless-frame-order-button>
+      <edgeless-tool-icon-button
+        .tooltip=${'Full Screen'}
+        @click=${() => {
+          this._toggleFullScreen();
+        }}
+      >
+        ${PresentationFullScreenIcon}
+      </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
         class="edgeless-frame-navigator-stop"
-        @click=${() => this.setEdgelessTool({ type: 'default' })}
+        @click=${() => {
+          this.setEdgelessTool({ type: 'default' });
+          this._isFullScreen = true;
+          this._toggleFullScreen();
+        }}
       >
         Stop
       </div>
@@ -329,7 +359,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         .tooltip=${'Prensentation'}
         @click=${() => {
           this.setEdgelessTool({ type: 'frameNavigator' });
-          this._currentFrameIndex = 0;
+          this._isFullScreen = false;
+          this._toggleFullScreen();
         }}
       >
         ${FrameNavigatorIcon}

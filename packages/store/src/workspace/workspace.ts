@@ -2,21 +2,22 @@ import type { Cell, Column } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { AwarenessStore } from '../awareness.js';
+import {
+  BacklinkIndexer,
+  BlockIndexer,
+  type QueryContent,
+  SearchIndexer,
+} from '../indexer/index.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
 import type { DocProviderCreator } from '../providers/type.js';
-import { Store, type StoreOptions } from '../store.js';
-import { Text } from '../text-adapter.js';
+import type { Schema } from '../schema/index.js';
 import { serializeYDoc } from '../utils/jsx.js';
-import { BacklinkIndexer } from './indexer/backlink.js';
-import { BlockIndexer } from './indexer/base.js';
-import type { QueryContent } from './indexer/search.js';
-import { SearchIndexer } from './indexer/search.js';
+import { type AwarenessStore, Text } from '../yjs/index.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
-import type { Schema } from './schema.js';
+import { Store, type StoreOptions } from './store.js';
 
 export type WorkspaceOptions = StoreOptions & {
   schema: Schema;
