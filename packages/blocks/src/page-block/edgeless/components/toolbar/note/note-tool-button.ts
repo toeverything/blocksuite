@@ -1,7 +1,7 @@
 import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
-import { assertExists } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';

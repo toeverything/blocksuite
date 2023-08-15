@@ -1,6 +1,7 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 
+import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -8,7 +9,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
-  groupBy,
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
@@ -19,7 +19,7 @@ import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  type: 'delete' | 'copy-as-png' | ReorderingType;
+  type: 'delete' | 'copy-as-png' | 'create-frame' | ReorderingType;
   disabled?: boolean;
 };
 
@@ -33,6 +33,7 @@ const ACTIONS: Action[] = [
   { name: 'Send backward', type: 'backward' },
   { name: 'Send to back', type: 'back' },
   { name: 'Copy as PNG', type: 'copy-as-png' },
+  { name: 'Create Frame', type: 'create-frame' },
   { name: 'Delete', type: 'delete' },
 ];
 
@@ -175,6 +176,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           notes,
           shapes,
         });
+        break;
+      }
+      case 'create-frame': {
+        this.edgeless.frame.createFrameOnSelected();
         break;
       }
       case 'front':

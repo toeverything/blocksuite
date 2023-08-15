@@ -136,6 +136,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
           (column, index) => {
             const style = styleMap({
               width: `${column.width}px`,
+              border: index === 0 ? 'none' : undefined,
             });
             return html` <affine-database-header-column
               style="${style}"

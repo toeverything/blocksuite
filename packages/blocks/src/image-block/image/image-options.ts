@@ -1,4 +1,4 @@
-import type { Slot } from '@blocksuite/store';
+import type { Slot } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -66,7 +66,6 @@ export function ImageOptionsTemplate({
       <div style=${styleMap(style)} class="embed-editing-state">
         <icon-button
           class="has-tool-tip"
-          data-testid="unlink"
           @click=${() => turnImageIntoCardView(model, blob)}
         >
           ${LinkToCardIcon}

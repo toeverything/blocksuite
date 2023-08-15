@@ -27,7 +27,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     }
 
     affine-database-cell-container uni-lit > *:first-child {
-      padding: 0 8px;
+      padding: 8px;
     }
 
     affine-database-multi-select-cell,

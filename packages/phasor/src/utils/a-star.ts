@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { Bound } from './bound.js';
 import { Graph } from './graph.js';

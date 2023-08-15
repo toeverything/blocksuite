@@ -1,7 +1,8 @@
 import '../loader.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists, type Page, type Workspace } from '@blocksuite/store';
+import { type Page, type Workspace } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';

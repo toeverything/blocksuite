@@ -2,19 +2,19 @@ import { assertExists } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
-import { AwarenessStore, type RawAwarenessState } from './awareness.js';
-import type { BlobStorage } from './persistence/blob/types.js';
-import type { DocProvider, DocProviderCreator } from './providers/type.js';
-import type { Space } from './space.js';
-import type { IdGenerator } from './utils/id-generator.js';
+import type { BlobStorage } from '../persistence/blob/types.js';
+import type { DocProvider, DocProviderCreator } from '../providers/type.js';
+import type { IdGenerator } from '../utils/id-generator.js';
 import {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
   nanoid,
   uuidv4,
-} from './utils/id-generator.js';
-import { serializeYDoc, yDocToJSXNode } from './utils/jsx.js';
-import { BlockSuiteDoc } from './yjs/index.js';
+} from '../utils/id-generator.js';
+import { serializeYDoc, yDocToJSXNode } from '../utils/jsx.js';
+import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
+import { BlockSuiteDoc } from '../yjs/index.js';
+import type { Space } from './space.js';
 
 export interface SerializedStore {
   [key: string]: {

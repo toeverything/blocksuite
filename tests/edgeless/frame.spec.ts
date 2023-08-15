@@ -21,17 +21,34 @@ import {
 import { test } from '../utils/playwright.js';
 
 test.describe('frame', () => {
-  async function addFrame(page) {
+  async function init(page) {
     await edgelessCommonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
     await selectAllByKeyboard(page);
-    await triggerComponentToolbarAction(page, 'addFrame');
   }
 
-  test('add frame', async ({ page }) => {
-    await addFrame(page);
-    await assertSelectedBound(page, [-300, -270, 800, 640]);
+  async function addFrame(page) {
+    await init(page);
+    await triggerComponentToolbarAction(page, 'addFrame');
+  }
+  test.describe('add frame', () => {
+    test('multi select add frame by component toolbar', async ({ page }) => {
+      await addFrame(page);
+      await assertSelectedBound(page, [-300, -270, 800, 640]);
+    });
+
+    test('add frame by shortcut F', async ({ page }) => {
+      await init(page);
+      await page.keyboard.press('f');
+      await assertSelectedBound(page, [-300, -270, 800, 640]);
+    });
+
+    test('add frame by more option create frame', async ({ page }) => {
+      await init(page);
+      await triggerComponentToolbarAction(page, 'createFrameOnMoreOption');
+      await assertSelectedBound(page, [-300, -270, 800, 640]);
+    });
   });
 
   test('drag frame to move', async ({ page }) => {

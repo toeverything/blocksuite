@@ -7,5 +7,24 @@
   },
   "include": ["./src"],
   "exclude": [""],
-  "references": []
+  "references": [
+    {
+      "path": "../global"
+    },
+    {
+      "path": "../store"
+    },
+    {
+      "path": "../block-std"
+    },
+    {
+      "path": "../lit"
+    },
+    {
+      "path": "../phasor"
+    },
+    {
+      "path": "../blocks"
+    }
+  ]
 }

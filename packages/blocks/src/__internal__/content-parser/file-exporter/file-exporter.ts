@@ -1,7 +1,7 @@
 /* eslint-disable no-control-regex */
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import type { BlobManager } from '@blocksuite/store';
 
+import { EDITOR_WIDTH } from '../../consts.js';
 import { globalCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's

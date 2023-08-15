@@ -2,14 +2,8 @@ import { Slot } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import type { Awareness as YAwareness } from 'y-protocols/awareness.js';
 
-import type { Space } from './space.js';
-import type { Store } from './store.js';
-
-export interface UserRange {
-  startOffset: number;
-  endOffset: number;
-  blockIds: string[];
-}
+import type { Space } from '../workspace/space.js';
+import type { Store } from '../workspace/store.js';
 
 export interface UserInfo {
   id: number;
@@ -21,7 +15,6 @@ export interface UserInfo {
 export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags
 > = {
-  rangeMap?: Record<string, UserRange>;
   user?: UserInfo;
   flags: Flags;
   selection: Array<Record<string, unknown>>;

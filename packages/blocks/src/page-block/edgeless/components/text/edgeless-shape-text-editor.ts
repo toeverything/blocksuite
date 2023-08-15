@@ -1,7 +1,7 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { SHAPE_TEXT_PADDING, ShapeElement } from '@blocksuite/phasor';
 import { Bound } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';

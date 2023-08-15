@@ -40,12 +40,7 @@ export const styles = css`
   }
   .affine-database-column-content:hover,
   .affine-database-column-content.edit {
-    background: linear-gradient(
-        0deg,
-        var(--affine-hover-color),
-        var(--affine-hover-color)
-      ),
-      var(--affine-white);
+    background: var(--affine-hover-color);
   }
   .affine-database-column-content.edit .affine-database-column-text-icon {
     opacity: 1;
@@ -59,7 +54,6 @@ export const styles = css`
     overflow: hidden;
     color: var(--affine-text-secondary-color);
     font-size: 14px;
-    font-weight: 600;
   }
   .affine-database-column-type-icon {
     display: flex;

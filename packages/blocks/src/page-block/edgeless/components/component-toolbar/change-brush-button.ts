@@ -2,6 +2,7 @@ import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../panel/line-width-panel.js';
 
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -10,7 +11,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {

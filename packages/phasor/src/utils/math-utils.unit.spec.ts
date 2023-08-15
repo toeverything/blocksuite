@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
 
 import {

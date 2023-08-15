@@ -2,6 +2,7 @@ import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
+import { noop, pick } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Bound } from '@blocksuite/phasor';
 import {
@@ -16,13 +17,12 @@ import {
   ShapeElement,
   TextElement,
 } from '@blocksuite/phasor';
-import { matchFlavours } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { noop, pick } from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
+import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../services/tools-manager.js';

@@ -1,4 +1,4 @@
-import { Slot } from '@blocksuite/store';
+import { Slot } from '@blocksuite/global/utils';
 
 import type { CssVariablesMap } from './css-variables.js';
 import { VARIABLES } from './css-variables.js';

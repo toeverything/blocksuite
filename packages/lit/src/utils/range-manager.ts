@@ -1,7 +1,6 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -19,8 +18,6 @@ type RangeSnapshot = {
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
-  private _reusedRange: Range | null = null;
-
   constructor(public root: BlockSuiteRoot) {
     new RangeSynchronizer(root);
   }
@@ -29,11 +26,14 @@ export class RangeManager {
     return this._range;
   }
 
-  private get _range() {
-    if (!this._reusedRange) {
-      this._reusedRange = document.createRange();
+  private _range: Range | null = null;
+
+  clearRange(sync = true) {
+    this._range = null;
+    window.getSelection()?.removeAllRanges();
+    if (sync) {
+      this.root.selectionManager.clear(['text']);
     }
-    return this._reusedRange;
   }
 
   renderRange(start: Range, end?: Range | null) {
@@ -42,23 +42,20 @@ export class RangeManager {
       ranges.push(end);
     }
 
-    const range = this._mergeRanges(ranges);
-    if (range) {
-      this._reusedRange = range;
-      this._renderRange();
-    }
+    this._range = this._mergeRanges(ranges);
+    this._renderRange();
   }
 
   syncTextSelectionToRange(selection: TextSelection | null) {
     if (!selection) {
-      this._reusedRange = null;
-      window.getSelection()?.removeAllRanges();
+      this.clearRange(false);
       return;
     }
 
     const { from, to } = selection;
     const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
     if (!fromBlock) {
+      this.clearRange();
       return;
     }
 
@@ -66,16 +63,22 @@ export class RangeManager {
     const endRange = to ? this.pointToRange(to) : null;
 
     if (!startRange) {
+      this.clearRange(false);
       return;
     }
     this.renderRange(startRange, endRange);
   }
 
-  syncRangeToTextSelection(range: Range) {
-    const selectionManager = this.root.selectionManager;
-    this._reusedRange = range;
+  syncRangeToTextSelection(range: Range | null) {
+    if (!range) {
+      this.clearRange();
+      return null;
+    }
 
-    const { startContainer, endContainer } = this._range;
+    const selectionManager = this.root.selectionManager;
+    this._range = range;
+
+    const { startContainer, endContainer } = range;
     const from = this._nodeToPoint(startContainer);
     const to = range.collapsed ? null : this._nodeToPoint(endContainer);
     if (!from) {
@@ -94,71 +97,65 @@ export class RangeManager {
     return selection;
   }
 
-  findBlockElementsByRange = (range: Range): BlockElement[] => {
-    const start = range.startContainer;
-    const end = range.endContainer;
-    const ancestor = range.commonAncestorContainer;
-    const getBlockView = (node: Node) =>
-      this.root.viewStore.getNodeView(node)?.view as BlockElement;
+  /**
+   * @example
+   * aaa
+   *   b[bb
+   *     ccc
+   * ddd
+   *   ee]e
+   *
+   * all mode: [aaa, bbb, ccc, ddd, eee]
+   * flat mode: [bbb, ccc, ddd, eee]
+   * highest mode: [bbb, ddd]
+   *
+   * match function will be evaluated before filtering using mode
+   */
+  getSelectedBlockElementsByRange(
+    range: Range,
+    options: {
+      match?: (el: BlockElement) => boolean;
+      mode?: 'all' | 'flat' | 'highest';
+    } = {}
+  ): BlockElement[] {
+    const { mode = 'all', match = () => true } = options;
 
-    if (ancestor.nodeType === Node.TEXT_NODE) {
-      const block = getBlockView(ancestor);
-      if (!block) return [];
-      return [block];
-    }
-    const nodes = new Set<Node>();
-
-    let startRecorded = false;
-    const dfsDOMSearch = (current: Node | null, ancestor: Node) => {
-      if (!current) {
-        return;
-      }
-      if (current === ancestor) {
-        return;
-      }
-      if (current === end) {
-        nodes.add(current);
-        startRecorded = false;
-        return;
-      }
-      if (current === start) {
-        startRecorded = true;
-      }
-      if (startRecorded) {
-        if (
-          current.nodeType === Node.TEXT_NODE ||
-          current.nodeType === Node.ELEMENT_NODE
-        ) {
-          nodes.add(current);
-        }
-      }
-      dfsDOMSearch(current.firstChild, ancestor);
-      dfsDOMSearch(current.nextSibling, ancestor);
-    };
-    dfsDOMSearch(ancestor.firstChild, ancestor);
-
-    const blocks = new Set<BlockElement>();
-    nodes.forEach(node => {
-      const blockView = getBlockView(node);
-      if (!blockView) {
-        return;
-      }
-      if (blocks.has(blockView)) {
-        return;
-      }
-      blocks.add(blockView);
-    });
-    return Array.from(blocks);
-  };
-
-  getSelectedBlocksIdByRange(range: Range): BaseBlockModel['id'][] {
-    return this.getSelectedBlockElementsByRange(range).map(el => el.model.id);
-  }
-
-  getSelectedBlockElementsByRange(range: Range): BlockElement[] {
-    return Array.from<BlockElement>(
+    let result = Array.from<BlockElement>(
       this.root.querySelectorAll(`[${this.root.blockIdAttr}]`)
-    ).filter(el => range.intersectsNode(el));
+    ).filter(el => range.intersectsNode(el) && match(el));
+
+    if (result.length === 0) {
+      return [];
+    }
+
+    const firstElement = range.startContainer.parentElement?.closest(
+      `[${this.root.blockIdAttr}]`
+    );
+    assertExists(firstElement);
+
+    if (mode === 'flat') {
+      result = result.filter(
+        el =>
+          firstElement.compareDocumentPosition(el) &
+            Node.DOCUMENT_POSITION_FOLLOWING || el === firstElement
+      );
+    } else if (mode === 'highest') {
+      let parent = result[0];
+      result = result.filter((node, index) => {
+        if (index === 0) return true;
+        if (
+          parent.compareDocumentPosition(node) &
+          Node.DOCUMENT_POSITION_CONTAINED_BY
+        ) {
+          return false;
+        } else {
+          parent = node;
+          return true;
+        }
+      });
+    }
+
+    return result;
   }
 
   textSelectionToRange(selection: TextSelection): Range | null {
@@ -223,7 +220,9 @@ export class RangeManager {
     if (!block) {
       return null;
     }
-    const vRange = virgoElement.virgoEditor.toVRange(this._range);
+    const vRange = this._range
+      ? virgoElement.virgoEditor.toVRange(this._range)
+      : null;
     if (!vRange) {
       return null;
     }
@@ -297,6 +296,7 @@ export class RangeManager {
   private _renderRange() {
     const selection = document.getSelection();
     if (!selection || !this._range) {
+      this.clearRange();
       return;
     }
 

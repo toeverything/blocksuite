@@ -1,6 +1,6 @@
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
+import { EDITOR_WIDTH } from '../__internal__/consts.js';
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
 
 export const NOTE_COLORS: CssVariableName[] = [

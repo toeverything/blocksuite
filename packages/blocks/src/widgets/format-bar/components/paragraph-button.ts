@@ -1,6 +1,7 @@
 import { TextSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { assertExists, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 

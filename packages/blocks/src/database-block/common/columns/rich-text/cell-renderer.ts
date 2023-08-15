@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { assertExists, Text } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -87,8 +88,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       width: 100%;
       height: 100%;
       outline: none;
-      font-size: 12px;
-      line-height: 20px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
     }
 
     .affine-database-rich-text v-line {

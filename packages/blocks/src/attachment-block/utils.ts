@@ -1,8 +1,5 @@
-import {
-  assertExists,
-  type BaseBlockModel,
-  type BlobManager,
-} from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
 
 import { downloadBlob } from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';

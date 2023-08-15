@@ -1,8 +1,8 @@
 import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { ConnectorMode } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

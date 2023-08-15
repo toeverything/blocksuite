@@ -1,18 +1,23 @@
+import { assertExists } from '@blocksuite/global/utils';
 import {
   Bound,
   FrameElement,
   Overlay,
   type RoughCanvas,
 } from '@blocksuite/phasor';
+import * as Y from 'yjs';
 
 import type { EdgelessElement } from '../../__internal__/utils/types.js';
 import type { NoteBlockModel } from '../../models.js';
 import { getGridBound } from './components/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import type { Selectable } from './services/tools-manager.js';
+import { getSelectedBound, type Selectable } from './services/tools-manager.js';
 import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
 import { isTopLevelBlock } from './utils/query.js';
 
+const MIN_FRAME_WIDTH = 800;
+const MIN_FRAME_HEIGHT = 640;
+const FRAME_PADDING = 40;
 class FrameOverlay extends Overlay {
   bound: Bound | null = null;
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
@@ -90,5 +95,33 @@ export class EdgelessFrameManager {
     color = color || NoteColor;
     frame.color = color;
     this._edgeless.surface.refresh();
+  }
+
+  createFrameOnSelected() {
+    const { _edgeless } = this;
+    const { surface } = _edgeless;
+    const frames = this.frames;
+    let bound = getSelectedBound(_edgeless.selectionManager.elements);
+    bound = bound.expand(FRAME_PADDING);
+    if (bound.w < MIN_FRAME_WIDTH) {
+      const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
+      bound = bound.expand(offset, 0);
+    }
+    if (bound.h < MIN_FRAME_HEIGHT) {
+      const offset = (MIN_FRAME_HEIGHT - bound.h) / 2;
+      bound = bound.expand(0, offset);
+    }
+    const id = _edgeless.surface.addElement('frame', {
+      title: new Y.Text(`Frame ${frames.length + 1}`),
+      batch: 'a0',
+      xywh: bound.serialize(),
+    });
+    _edgeless.page.captureSync();
+    const frame = surface.pickById(id);
+    assertExists(frame);
+    _edgeless.selectionManager.setSelection({
+      elements: [frame.id],
+      editing: false,
+    });
   }
 }

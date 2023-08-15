@@ -3,7 +3,6 @@ import {
   type UIEventHandler,
   type UIEventStateContext,
 } from '@blocksuite/block-std';
-import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -12,6 +11,7 @@ import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { DRAG_HANDLE_OFFSET_LEFT } from '../../__internal__/consts.js';
 import {
   calcDropTarget,
   findClosestBlockElement,
@@ -108,7 +108,14 @@ export class DragHandleWidget extends WidgetElement {
 
   // drag handle should show on the vertical middle of the first line of element
   private _show(point: Point, blockElement: BlockElement) {
-    const { left, top, width } = blockElement.getBoundingClientRect();
+    let { left, top } = blockElement.getBoundingClientRect();
+
+    // Some blocks have padding, should consider padding when calculating position
+    const computedStyle = getComputedStyle(blockElement);
+    const paddingTop = parseInt(computedStyle.paddingTop);
+    const paddingLeft = parseInt(computedStyle.paddingLeft);
+    left += paddingLeft;
+    top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
     this._dragHandleContainer.style.display = 'flex';
@@ -125,10 +132,6 @@ export class DragHandleWidget extends WidgetElement {
     const posTop = top;
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
-    this._dragHandleContainer.style.opacity = `${(
-      1 -
-      (point.x - left) / width
-    ).toFixed(2)}`;
 
     this._dragHandleGrabber.style.height = `${
       DRAG_HANDLE_GRABBER_HEIGHT * this._scale
@@ -296,7 +299,9 @@ export class DragHandleWidget extends WidgetElement {
     const padding = NOTE_CONTAINER_PADDING * this._scale;
     return rect
       ? isPageMode(this.page)
-        ? point.y < rect.top || point.y > rect.bottom
+        ? point.y < rect.top ||
+          point.y > rect.bottom ||
+          point.x > rect.right + padding
         : point.y < rect.top ||
           point.y > rect.bottom ||
           point.x < rect.left - padding ||
@@ -502,13 +507,12 @@ export class DragHandleWidget extends WidgetElement {
       const nativeSelection = document.getSelection();
       if (nativeSelection && nativeSelection.rangeCount > 0) {
         const range = nativeSelection.getRangeAt(0);
-        const blockElements = this._rangeManager
-          .findBlockElementsByRange(range)
-          .filter(element => element.flavour !== 'affine:note');
-        const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
-          blockElements
-        ) as BlockElement[];
-        this._setSelectedBlocks(blockElementsExcludingChildren);
+        const blockElements =
+          this._rangeManager.getSelectedBlockElementsByRange(range, {
+            match: el => el.model.role === 'content',
+            mode: 'highest',
+          });
+        this._setSelectedBlocks(blockElements);
         selections = this._selectedBlocks;
       }
     }

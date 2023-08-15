@@ -1,3 +1,4 @@
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
@@ -14,7 +15,6 @@ import {
   toDegree,
   Vec,
 } from '@blocksuite/phasor';
-import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -192,16 +192,32 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return this._selected[0] as ShapeElement;
   }
 
+  override firstUpdated() {
+    this._disposables.add(
+      this.edgeless.selectionManager.slots.updated.on(() => {
+        this._overlay.linePoints = [];
+        this._overlay.shapePoints = [];
+      })
+    );
+  }
+
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
     const { surface } = this.edgeless;
-    const start = surface.viewport.toModelCoord(e.clientX, e.clientY);
+    const viewportRect = surface.viewport.boundingClientRect;
+    const start = surface.viewport.toModelCoord(
+      e.clientX - viewportRect.left,
+      e.clientY - viewportRect.top
+    );
 
     if (!this.edgeless.dispatcher) return;
 
     let connector: ConnectorElement | null;
 
     this._disposables.addFromEvent(document, 'pointermove', e => {
-      const point = surface.viewport.toModelCoord(e.clientX, e.clientY);
+      const point = surface.viewport.toModelCoord(
+        e.clientX - viewportRect.left,
+        e.clientY - viewportRect.top
+      );
       if (Vec.dist(start, point) > 8 && !this._isMoving) {
         this._isMoving = true;
         const { startPosition } = getPosition(type);

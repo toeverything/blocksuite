@@ -1,12 +1,10 @@
-import type { BlockModels } from '@blocksuite/global/types';
-import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
+import { isPrimitive } from '@blocksuite/global/utils';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import type { BaseBlockModel, BlockSchema } from '../base.js';
-import { internalPrimitives } from '../base.js';
-import { Text } from '../text-adapter.js';
+import type { BaseBlockModel, BlockSchema } from '../schema/base.js';
+import { internalPrimitives } from '../schema/base.js';
 import type { Workspace } from '../workspace/index.js';
 import type {
   BlockProps,
@@ -18,7 +16,10 @@ import type { Page } from '../workspace/page.js';
 import type { ProxyConfig } from '../yjs/config.js';
 import type { ProxyManager } from '../yjs/index.js';
 import { isPureObject } from '../yjs/index.js';
+import { Text } from '../yjs/text-adapter.js';
 import { native2Y } from '../yjs/utils.js';
+
+const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 export function assertValidChildren(
   yBlocks: YBlocks,
@@ -118,6 +119,7 @@ export function toBlockProps(
   const config: ProxyConfig = { deep: true };
   const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
+
   Object.keys(prefixedProps).forEach(key => {
     if (prefixedProps[key] && key.startsWith('sys:')) {
       props[key.replace('sys:', '')] = prefixedProps[key];
@@ -125,36 +127,9 @@ export function toBlockProps(
   });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (SYS_KEYS.has(prefixedKey)) return;
-
-    const key = prefixedKey.replace('prop:', '');
-    const realValue = yBlock.get(prefixedKey);
-    if (realValue instanceof Y.Map) {
-      const value = proxy.createYProxy(realValue, config);
-      props[key] = value;
-    } else if (realValue instanceof Y.Array) {
-      const value = proxy.createYProxy(realValue, config);
-      props[key] = value;
-    } else {
-      props[key] = prefixedProps[prefixedKey];
-    }
-  });
-
-  return props;
-}
-
-export function toBlockMigrationData(
-  yBlock: YBlock,
-  proxy: ProxyManager
-): Partial<BlockProps> {
-  const config: ProxyConfig = { deep: true };
-  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
-
-  const props: Partial<BlockProps> = {};
-  Object.keys(prefixedProps).forEach(prefixedKey => {
     if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
-      const realValue = yBlock.get(prefixedKey);
       const key = prefixedKey.replace('prop:', '');
+      const realValue = yBlock.get(prefixedKey);
       if (realValue instanceof Y.Map) {
         const value = proxy.createYProxy(realValue, config);
         props[key] = value;
@@ -167,38 +142,7 @@ export function toBlockMigrationData(
     }
   });
 
-  return new Proxy(props, {
-    has: (target, p) => {
-      return Reflect.has(target, p);
-    },
-    set: (target, p, value, receiver) => {
-      if (typeof p !== 'string') {
-        throw new Error('key cannot be a symbol');
-      }
-
-      if (isPureObject(value) || Array.isArray(value)) {
-        const _y = native2Y(value as Record<string, unknown> | unknown[], true);
-        yBlock.set(`prop:${p}`, _y);
-        const _value = proxy.createYProxy(_y, config);
-
-        return Reflect.set(target, p, _value, receiver);
-      }
-
-      yBlock.set(`prop:${p}`, value);
-      return Reflect.set(target, p, value, receiver);
-    },
-    get: (target, p, receiver) => {
-      return Reflect.get(target, p, receiver);
-    },
-    deleteProperty: (target, p): boolean => {
-      if (typeof p !== 'string') {
-        throw new Error('key cannot be a symbol');
-      }
-
-      yBlock.delete(`prop:${p}`);
-      return Reflect.deleteProperty(target, p);
-    },
-  });
+  return props;
 }
 
 export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
@@ -212,12 +156,13 @@ export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
 export function isInsideBlockByFlavour(
   page: Page,
   block: BaseBlockModel | string,
-  flavour: keyof BlockModels
+  flavour: string
 ): boolean {
   const parent = page.getParent(block);
   if (parent === null) {
     return false;
-  } else if (matchFlavours(parent, [flavour])) {
+  }
+  if (flavour === parent.flavour) {
     return true;
   }
   return isInsideBlockByFlavour(page, parent, flavour);

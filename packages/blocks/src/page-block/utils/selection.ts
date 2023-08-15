@@ -1,67 +1,25 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { BlockSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import {
-  assertExists,
-  type BaseBlockModel,
-  matchFlavours,
-} from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import { matchFlavours } from '../../__internal__/utils/model.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export function getSelectedContentModels(
   blockElement: BlockElement,
   types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
 ): BaseBlockModel[] {
-  const { rangeManager } = blockElement.root;
-  const selectionManager = blockElement.root.selectionManager;
-  const selections = selectionManager.value;
-
-  if (selections.length === 0) {
-    return [];
-  }
-
-  const dirtyResult: BaseBlockModel[] = [];
-
-  const textSelection = selectionManager.find('text');
-  if (textSelection && types.includes('text')) {
-    assertExists(rangeManager);
-    const range = rangeManager.value;
-    const selectedBlocks = rangeManager
-      .getSelectedBlocksIdByRange(range)
-      .flatMap(id => {
-        const model = blockElement.page.getBlockById(id);
-        // model can be null if the block is deleted
-        return model ?? [];
-      });
-
-    dirtyResult.push(
-      ...selectedBlocks.filter(model => model.role === 'content')
-    );
-  }
-
-  const blockSelections = selectionManager.filter('block');
-  if (blockSelections.length > 0 && types.includes('block')) {
-    dirtyResult.push(
-      ...blockSelections
-        .map(selection => {
-          const model = blockElement.page.getBlockById(selection.blockId);
-          assertExists(model);
-          return model;
-        })
-        .filter(model => model.role === 'content')
-    );
-  }
-
-  // remove duplicate models
-  const result: BaseBlockModel[] = dirtyResult.filter(
-    (model, index) => dirtyResult.indexOf(model) === index
-  );
-
-  return result;
+  const selectedElements = getSelectedContentBlockElements(blockElement, types);
+  const selectedModels = selectedElements.map(element => element.model);
+  return selectedModels;
 }
 
+/**
+ * use `getSelectedBlockElementsByRange` with "flat" mode when in text selection
+ */
 export function getSelectedContentBlockElements(
   blockElement: BlockElement,
   types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
@@ -76,17 +34,21 @@ export function getSelectedContentBlockElements(
 
   const dirtyResult: BlockElement[] = [];
 
-  if (types.includes('text')) {
+  if (types.includes('text') && selectionManager.find('text')) {
     assertExists(rangeManager);
     const range = rangeManager.value;
-    const selectedBlockElements =
-      rangeManager.getSelectedBlockElementsByRange(range);
-    dirtyResult.push(
-      ...selectedBlockElements.filter(el => el.model.role === 'content')
+    assertExists(range);
+    const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
+      range,
+      {
+        match: (el: BlockElement) => el.model.role === 'content',
+        mode: 'flat',
+      }
     );
+    dirtyResult.push(...selectedBlockElements);
   }
 
-  if (types.includes('block')) {
+  if (types.includes('block') && selectionManager.find('block')) {
     const viewStore = blockElement.root.viewStore;
     const blockSelections = selectionManager.filter('block');
     dirtyResult.push(
@@ -98,9 +60,29 @@ export function getSelectedContentBlockElements(
   }
 
   // remove duplicate elements
-  const result: BlockElement[] = dirtyResult.filter(
-    (el, index) => dirtyResult.indexOf(el) === index
-  );
+  const result: BlockElement[] = dirtyResult
+    .filter((el, index) => dirtyResult.indexOf(el) === index)
+    // sort by document position
+    .sort((a, b) => {
+      if (a === b) {
+        return 0;
+      }
+
+      const position = a.compareDocumentPosition(b);
+      if (
+        position & Node.DOCUMENT_POSITION_FOLLOWING ||
+        position & Node.DOCUMENT_POSITION_CONTAINED_BY
+      ) {
+        return -1;
+      } else if (
+        position & Node.DOCUMENT_POSITION_PRECEDING ||
+        position & Node.DOCUMENT_POSITION_CONTAINS
+      ) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
 
   return result;
 }
@@ -146,16 +128,16 @@ export function getCombinedFormatInTextSelection(
   textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  const selectedModel = getSelectedContentModels(blockElement, [
+  const selectedModels = getSelectedContentModels(blockElement, [
     'text',
     'block',
   ]);
-  if (selectedModel.length === 0) {
+  if (selectedModels.length === 0) {
     return {};
   }
 
-  if (selectedModel.length === 1) {
-    const vEditor = getVirgoByModel(selectedModel[0]);
+  if (selectedModels.length === 1) {
+    const vEditor = getVirgoByModel(selectedModels[0]);
     assertExists(vEditor);
     const format = vEditor.getFormat(
       {
@@ -169,7 +151,7 @@ export function getCombinedFormatInTextSelection(
   const formatArr = [];
   // Start block
   // Skip code block or empty block
-  const startModel = selectedModel[0];
+  const startModel = selectedModels[0];
   if (
     !matchFlavours(startModel, ['affine:code']) &&
     startModel.text &&
@@ -187,7 +169,7 @@ export function getCombinedFormatInTextSelection(
     formatArr.push(startFormat);
   }
   // End block
-  const endModel = selectedModel[selectedModel.length - 1];
+  const endModel = selectedModels[selectedModels.length - 1];
   if (
     !matchFlavours(endModel, ['affine:code']) &&
     endModel.text &&
@@ -205,7 +187,7 @@ export function getCombinedFormatInTextSelection(
     formatArr.push(endFormat);
   }
   // Between blocks
-  selectedModel
+  selectedModels
     .slice(1, -1)
     .filter(model => !matchFlavours(model, ['affine:code']))
     .filter(model => model.text && model.text.length)

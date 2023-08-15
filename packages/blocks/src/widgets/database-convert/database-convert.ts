@@ -1,5 +1,5 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
 import { customElement } from 'lit/decorators.js';
 

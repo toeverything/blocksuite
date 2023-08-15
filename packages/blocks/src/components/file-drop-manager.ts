@@ -1,9 +1,5 @@
-import {
-  assertExists,
-  type BaseBlockModel,
-  matchFlavours,
-  type Page,
-} from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { AbstractEditor } from '../__internal__/index.js';
 import {
@@ -13,6 +9,7 @@ import {
   getBlockElementByModel,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
+  matchFlavours,
   Point,
 } from '../__internal__/index.js';
 import type {

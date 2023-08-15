@@ -1,5 +1,4 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
-import type { BlockModels } from '@blocksuite/global/types';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
@@ -11,6 +10,7 @@ import {
   focusBlockByModel,
   type SerializedBlock,
 } from '../utils/index.js';
+import type { BlockModels } from '../utils/model.js';
 import { getServiceOrRegister } from './index.js';
 
 export async function json2block(

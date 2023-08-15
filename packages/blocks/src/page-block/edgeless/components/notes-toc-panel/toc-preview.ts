@@ -1,14 +1,15 @@
-import type { BlockModels } from '@blocksuite/global/types';
+import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
-import { noop } from '../../../../__internal__/index.js';
+import type { BlockModels } from '../../../../__internal__/utils/model.js';
 import {
   AttachmentIcon,
   BookmarkIcon,
   BulletedListIcon,
+  CheckBoxIcon,
   CodeBlockIcon,
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
@@ -16,7 +17,6 @@ import {
   ImageIcon,
   NumberedListIcon,
   QuoteIcon,
-  TodoIcon,
 } from '../../../../icons/index.js';
 import type { DividerBlockModel } from '../../../../models.js';
 import {
@@ -41,7 +41,7 @@ const listIconMap: {
 } = {
   bulleted: BulletedListIcon,
   numbered: NumberedListIcon,
-  todo: TodoIcon,
+  todo: CheckBoxIcon,
   toggle: BulletedListIcon,
 };
 

@@ -1,4 +1,4 @@
-import type { NullablePartial } from '@blocksuite/global/types';
+import type { NullablePartial } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { html, render } from 'lit';
 import type * as Y from 'yjs';
