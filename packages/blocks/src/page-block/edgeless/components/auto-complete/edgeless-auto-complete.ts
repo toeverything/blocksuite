@@ -192,6 +192,15 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return this._selected[0] as ShapeElement;
   }
 
+  override firstUpdated() {
+    this._disposables.add(
+      this.edgeless.selectionManager.slots.updated.on(() => {
+        this._overlay.linePoints = [];
+        this._overlay.shapePoints = [];
+      })
+    );
+  }
+
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
     const { surface } = this.edgeless;
     const start = surface.viewport.toModelCoord(e.clientX, e.clientY);
