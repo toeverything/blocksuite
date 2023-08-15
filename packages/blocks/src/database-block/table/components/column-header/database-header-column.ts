@@ -7,6 +7,7 @@ import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
 import {
+  CheckBoxIcon,
   DatabaseDragIcon,
   DatabaseDuplicate,
   DatabaseInsertLeft,
@@ -21,7 +22,6 @@ import {
   DeleteIcon,
   LinkIcon,
   TextIcon,
-  TodoIcon,
 } from '../../../../icons/index.js';
 import type { InsertPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
@@ -498,7 +498,7 @@ const createDropPreview = (container: Element, height: number) => {
 export const columnTypeIconMap: ColumnTypeIcon = {
   select: DatabaseSelect,
   number: DatabaseNumber,
-  checkbox: TodoIcon,
+  checkbox: CheckBoxIcon,
   progress: DatabaseProgress,
   'rich-text': TextIcon,
   'multi-select': DatabaseMultiSelect,

@@ -44,5 +44,8 @@ function getPrefix(depth: number, index: number) {
 
 export function getNumberPrefix(index: number, depth: number) {
   const prefix = getPrefix(depth, index);
+  if (prefix.toString().length > 1) {
+    return `${prefix}.`;
+  }
   return `${prefix} .`;
 }

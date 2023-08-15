@@ -9,6 +9,7 @@ import {
   AttachmentIcon,
   BookmarkIcon,
   BulletedListIcon,
+  CheckBoxIcon,
   CodeBlockIcon,
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
@@ -16,7 +17,6 @@ import {
   ImageIcon,
   NumberedListIcon,
   QuoteIcon,
-  TodoIcon,
 } from '../../../../icons/index.js';
 import type { DividerBlockModel } from '../../../../models.js';
 import {
@@ -41,7 +41,7 @@ const listIconMap: {
 } = {
   bulleted: BulletedListIcon,
   numbered: NumberedListIcon,
-  todo: TodoIcon,
+  todo: CheckBoxIcon,
   toggle: BulletedListIcon,
 };
 
