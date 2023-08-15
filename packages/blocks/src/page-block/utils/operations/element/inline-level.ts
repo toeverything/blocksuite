@@ -1,7 +1,8 @@
 import type { TextSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { assertExists, matchFlavours } from '@blocksuite/store';
 
+import { matchFlavours } from '../../../../__internal__/index.js';
 import { LinkMockSelection } from '../../../../__internal__/rich-text/link-node/mock-selection.js';
 import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
 import {

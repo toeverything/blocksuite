@@ -1,6 +1,7 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 
+import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { PhasorElement } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -8,7 +9,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
-  groupBy,
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';

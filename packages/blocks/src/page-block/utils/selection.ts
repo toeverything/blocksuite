@@ -1,13 +1,11 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { BlockSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import {
-  assertExists,
-  type BaseBlockModel,
-  matchFlavours,
-} from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+import { matchFlavours } from '../../__internal__/utils/model.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export function getSelectedContentModels(

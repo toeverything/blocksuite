@@ -1,8 +1,7 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { BlockSuiteViewSpec } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
-// import { ShadowlessElement } from './shadowless-element.js';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 

@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { assertExists, Text } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';

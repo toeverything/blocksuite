@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists, type Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type Page } from '@blocksuite/store';
 
 import {
   handleNativeRangeAtPoint,

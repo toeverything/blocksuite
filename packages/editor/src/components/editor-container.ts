@@ -8,7 +8,6 @@ import {
   FileDropManager,
   getServiceOrRegister,
   type ImageProps,
-  noop,
   type PageBlockModel,
   pagePreset,
   readImageSize,
@@ -16,12 +15,13 @@ import {
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
+import { noop, Slot } from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { type Page, Slot } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';

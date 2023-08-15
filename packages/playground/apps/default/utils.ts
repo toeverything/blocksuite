@@ -5,10 +5,10 @@ import {
   disableDebuglog,
   enableDebugLog,
 } from '@blocksuite/global/debug';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlobStorage, Page } from '@blocksuite/store';
 import type { Y } from '@blocksuite/store';
 import {
-  assertExists,
   createIndexeddbStorage,
   Generator,
   Schema,

@@ -1,11 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type {
   FrameElement,
   IModelCoord,
   ShapeElement,
 } from '@blocksuite/phasor';
 import { Bound, TextElement } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
