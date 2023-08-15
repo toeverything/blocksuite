@@ -1,7 +1,8 @@
 import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists, type Text } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -38,7 +39,7 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        if (range && range.intersectsNode(this.root)) {
+        if (range === null || range.intersectsNode(this.root)) {
           this._prevSelection =
             this._rangeManager.syncRangeToTextSelection(range);
         } else {
@@ -94,7 +95,11 @@ export class RangeSynchronizer {
     const range = this._rangeManager.value;
     if (!range) return;
 
-    const blocks = this._rangeManager.findBlockElementsByRange(range);
+    const blocks = this._rangeManager.getSelectedBlockElementsByRange(range, {
+      match: element => element.model.role === 'content',
+      mode: 'flat',
+    });
+
     const start = blocks.at(0);
     const end = blocks.at(-1);
     if (!start || !end) return;

@@ -3,8 +3,8 @@ import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
 import './components/loader.js';
 
+import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { Slot } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 

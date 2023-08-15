@@ -14,7 +14,21 @@
     "moduleResolution": "bundler",
     "noEmit": true,
     "jsx": "react-jsx",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "composite": false,
+    "paths": {
+      // Why? See https://github.com/DimensionDev/Maskbook/blob/2a042633c5bde18dd97a21d34e4943c8c4efa514/tsconfig.json#L33-L67
+      "@blocksuite/editor": ["../editor/src"],
+      "@blocksuite/blocks": ["../blocks/src"],
+      "@blocksuite/blocks/*": ["../blocks/src/*"],
+      "@blocksuite/global/*": ["../global/src/*"],
+      "@blocksuite/store": ["../store/src"],
+      "@blocksuite/store/*": ["../store/src/*"],
+      "@blocksuite/phasor": ["../phasor/src"],
+      "@blocksuite/phasor/*": ["../phasor/src/*"],
+      "@blocksuite/virgo": ["../virgo/src"],
+      "@blocksuite/virgo/*": ["../virgo/src/*"]
+    }
   },
   "include": ["./apps", "./examples"],
   "references": [{ "path": "./tsconfig.node.json" }]

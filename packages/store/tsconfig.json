@@ -11,5 +11,9 @@
     "src/persistence/blob/__tests__",
     "src/workspace/migration/__tests__"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../global"
+    }
+  ]
 }

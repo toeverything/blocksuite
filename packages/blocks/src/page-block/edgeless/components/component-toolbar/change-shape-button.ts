@@ -4,6 +4,7 @@ import '../panel/shape-style-panel.js';
 import '../panel/shape-panel.js';
 import './change-text-menu.js';
 
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   type ShapeElement,
@@ -16,7 +17,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import {
   LineWidth,
   type ShapeTool,

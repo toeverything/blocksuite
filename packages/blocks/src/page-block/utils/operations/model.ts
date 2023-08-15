@@ -1,4 +1,5 @@
-import { assertExists, type BaseBlockModel, Text } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BaseBlockModel, Text } from '@blocksuite/store';
 
 import type { Flavour } from '../../../models.js';
 

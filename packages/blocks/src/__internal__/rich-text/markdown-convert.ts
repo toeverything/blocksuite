@@ -1,16 +1,17 @@
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import { assertExists, isEqual, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, isEqual } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
 import {
   asyncSetVRange,
   convertToDivider,
   convertToList,
   convertToParagraph,
   type ExtendedModel,
+  matchFlavours,
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 

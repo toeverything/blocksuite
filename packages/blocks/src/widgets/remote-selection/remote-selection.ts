@@ -3,8 +3,9 @@ import {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
-import { assertExists, type UserInfo } from '@blocksuite/store';
+import { type UserInfo } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

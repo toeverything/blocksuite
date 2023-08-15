@@ -468,6 +468,13 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           );
           return true;
         },
+        'Mod-a': () => {
+          const selection = this.selection;
+          if (selection?.isEditing) {
+            return true;
+          }
+          return;
+        },
       })
     );
   }

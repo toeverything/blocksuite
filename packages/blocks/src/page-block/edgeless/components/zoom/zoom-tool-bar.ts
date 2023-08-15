@@ -1,10 +1,10 @@
+import { clamp } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  clamp,
   type EdgelessTool,
   stopPropagation,
 } from '../../../../__internal__/index.js';

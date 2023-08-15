@@ -7,8 +7,8 @@ import type {
   ViewStore,
 } from '@blocksuite/block-std';
 import { BlockStore } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

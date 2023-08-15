@@ -6,9 +6,11 @@ import './components/edgeless-notes-container.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
-  BLOCK_ID_ATTR,
-  EDGELESS_BLOCK_CHILD_PADDING,
-} from '@blocksuite/global/config';
+  almostEqual,
+  assertExists,
+  Slot,
+  throttle,
+} from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
@@ -26,21 +28,19 @@ import {
   serializeXYWH,
   SurfaceManager,
 } from '@blocksuite/phasor';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type Page,
-  Slot,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import {
+  BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '../../__internal__/consts.js';
 import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
 import {
-  almostEqual,
   asyncFocusRichText,
   bringForward,
   getRectByBlockElement,
@@ -51,7 +51,6 @@ import {
   type ReorderingRange,
   reorderTo,
   sendBackward,
-  throttle,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {

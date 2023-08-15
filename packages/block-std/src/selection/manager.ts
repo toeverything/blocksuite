@@ -1,5 +1,5 @@
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
 
 import type { BlockStore } from '../store/index.js';
 import type { BaseSelection } from './base.js';

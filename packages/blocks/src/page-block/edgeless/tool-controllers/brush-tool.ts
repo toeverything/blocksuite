@@ -1,8 +1,8 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type { BrushTool, EdgelessTool } from '../../../__internal__/index.js';
-import { LineWidth, noop } from '../../../__internal__/index.js';
+import { LineWidth } from '../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
 

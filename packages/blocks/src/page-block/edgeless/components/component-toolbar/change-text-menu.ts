@@ -1,6 +1,7 @@
 import '../panel/font-family-panel.js';
 import '../panel/font-size-panel.js';
 
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
@@ -12,7 +13,6 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
 import {
   AlignCenterIcon,
   AlignLeftIcon,

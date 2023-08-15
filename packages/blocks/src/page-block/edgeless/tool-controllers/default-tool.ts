@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import {
   Bound,
   ConnectorElement,
@@ -18,7 +18,6 @@ import {
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
-  noop,
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';

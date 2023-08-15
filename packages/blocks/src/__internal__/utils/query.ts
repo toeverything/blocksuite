@@ -1,19 +1,19 @@
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
-  BLOCK_ID_ATTR as ATTR,
-} from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, clamp } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
+import { matchFlavours } from '../../__internal__/utils/model.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
+import {
+  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
+  BLOCK_ID_ATTR as ATTR,
+} from '../consts.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import { clamp } from './common.js';
 import type { Rect } from './rect.js';
 import { type Point } from './rect.js';
 

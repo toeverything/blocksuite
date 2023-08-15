@@ -626,7 +626,7 @@ export async function setVirgoSelection(
   index: number,
   length: number
 ) {
-  return await page.evaluate(
+  await page.evaluate(
     ({ index, length }) => {
       const selection = window.getSelection() as Selection;
 
@@ -640,6 +640,7 @@ export async function setVirgoSelection(
     },
     { index, length }
   );
+  await waitNextFrame(page);
 }
 
 export async function pasteContent(

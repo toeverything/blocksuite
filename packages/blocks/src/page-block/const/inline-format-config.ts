@@ -1,5 +1,5 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
@@ -70,6 +70,7 @@ export interface InlineFormatConfig {
 const INLINE_UNSUPPORTED_MODELS: Flavour[] = [
   'affine:code',
   'affine:attachment',
+  'affine:bookmark',
 ];
 
 export function noneInlineUnsupportedBlockSelected(

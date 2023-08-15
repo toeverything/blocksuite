@@ -1,5 +1,5 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStore } from '../store/index.js';

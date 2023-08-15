@@ -3,7 +3,7 @@ import type {
   TextSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../doc/doc-page-block.js';
@@ -179,7 +179,7 @@ export class Gesture {
 
   private _doubleClickHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const caret = caretFromPoint(state.x, state.y);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }

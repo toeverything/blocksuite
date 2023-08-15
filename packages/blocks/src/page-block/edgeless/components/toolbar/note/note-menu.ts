@@ -1,3 +1,4 @@
+import { throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -5,7 +6,6 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   type EdgelessTool,
   type NoteChildrenFlavour,
-  throttle,
 } from '../../../../../__internal__/index.js';
 import { nextItemIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
