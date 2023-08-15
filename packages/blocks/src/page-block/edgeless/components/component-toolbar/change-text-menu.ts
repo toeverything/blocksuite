@@ -88,7 +88,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       width: 72px;
       height: 24px;
       line-height: 24px;
-      border-radius: 4px;
     }
 
     .font-size-button-group .selected-font-size-label {
