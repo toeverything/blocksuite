@@ -195,7 +195,7 @@ export class ShapeOverlay extends ToolOverlay {
           ...options,
           stroke: strokeColor,
         };
-        console.log('stroke color: ', edgelessTool.strokeColor);
+
         this.shape = ShapeFactory.createShape(
           this.x,
           this.y,
