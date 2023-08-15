@@ -3,7 +3,7 @@ import './utils/declare-test-window.js';
 import { assertExists } from '@blocksuite/global/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
+import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
 import {
   activeNoteInEdgeless,
