@@ -1,6 +1,5 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 
@@ -126,7 +125,7 @@ export class RangeManager {
     }
 
     const firstElement = range.startContainer.parentElement?.closest(
-      `[${BLOCK_ID_ATTR}]`
+      `[${this.root.blockIdAttr}]`
     );
     assertExists(firstElement);
 
