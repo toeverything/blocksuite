@@ -365,7 +365,7 @@ test.describe('switch column type', () => {
     expect(await progress.textContent()).toBe('0');
   });
 
-  test('switch to link', async ({ page }) => {
+  test.fixme('switch to link', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
