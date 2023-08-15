@@ -230,7 +230,7 @@ export class DatabaseTable extends BaseDataView<
   };
 
   override render() {
-    const rowsTemplate = DataBaseRowContainer(this.view);
+    const rowsTemplate = DataBaseRowContainer(this.view, this.selection);
     const addRow = (position: InsertPosition) => {
       this._addRow(this.view, position);
     };

@@ -11,6 +11,9 @@ import type { AllPageDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class AllPageDatasource extends BaseDataSource {
+  public override propertyGetMain(): string | undefined {
+    return 'title';
+  }
   private workspace: Workspace;
 
   public get rows(): string[] {

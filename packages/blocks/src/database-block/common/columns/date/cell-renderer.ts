@@ -11,9 +11,10 @@ import { datePureColumnConfig } from './define.js';
 export class DateCell extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell {
-      display: block;
       width: 100%;
       height: 100%;
+      display: flex;
+      align-items: center;
     }
 
     .affine-database-date {
@@ -26,9 +27,9 @@ export class DateCell extends BaseCellRenderer<number> {
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
-      font-size: 12px;
-      line-height: 20px;
-      height: 20px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      height: var(--data-view-cell-text-line-height);
     }
   `;
 
@@ -42,10 +43,11 @@ export class DateCell extends BaseCellRenderer<number> {
 export class DateCellEditing extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell-editing {
-      display: block;
       width: 100%;
       height: 100%;
       cursor: text;
+      display: flex;
+      align-items: center;
     }
 
     .affine-database-date:focus {

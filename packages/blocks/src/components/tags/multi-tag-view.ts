@@ -31,9 +31,9 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-select-cell-container .select-selected {
-      height: 20px;
-      font-size: 12px;
-      line-height: 20px;
+      height: 22px;
+      font-size: 14px;
+      line-height: 22px;
       padding: 0 8px;
       border-radius: 4px;
       white-space: nowrap;

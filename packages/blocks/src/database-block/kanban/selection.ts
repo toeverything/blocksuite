@@ -11,6 +11,10 @@ import type { DataViewKanban } from './kanban-view.js';
 export class KanbanSelection {
   _selection?: KanbanViewSelection;
 
+  get view() {
+    return this.viewEle.view;
+  }
+
   constructor(private viewEle: DataViewKanban) {}
 
   run(): Disposable {
@@ -93,6 +97,7 @@ export class KanbanSelection {
     if (!selection.focus) {
       const selectCard = this.getSelectCard(selection);
       if (selectCard) {
+        selectCard.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         selectCard.isFocus = true;
       }
       return;
@@ -101,6 +106,7 @@ export class KanbanSelection {
     if (!container) {
       return;
     }
+    container.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     container.isFocus = true;
     const cell = container?.cell;
     if (selection.focus.isEditing) {
@@ -263,5 +269,53 @@ export class KanbanSelection {
         },
       };
     }
+  }
+
+  public insertRowBefore() {
+    const selection = this.selection;
+    if (!selection) {
+      return;
+    }
+    const id = this.view.addCard(
+      { before: true, id: selection.cardId },
+      selection.groupKey
+    );
+    requestAnimationFrame(() => {
+      this.selection = {
+        groupKey: selection.groupKey,
+        cardId: id,
+      };
+    });
+  }
+
+  public insertRowAfter() {
+    const selection = this.selection;
+    if (!selection) {
+      return;
+    }
+    const id = this.view.addCard(
+      { before: false, id: selection.cardId },
+      selection.groupKey
+    );
+    requestAnimationFrame(() => {
+      this.selection = {
+        groupKey: selection.groupKey,
+        cardId: id,
+      };
+    });
+  }
+
+  public moveCard(rowId: string, key: string) {
+    const selection = this.selection;
+    if (!selection) {
+      return;
+    }
+    this.view.groupHelper?.moveCardTo(rowId, selection.groupKey, key, 'start');
+    requestAnimationFrame(() => {
+      this.selection = {
+        ...selection,
+        groupKey: key,
+      };
+    });
   }
 }
