@@ -40,7 +40,7 @@ const styles = css`
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: var(--data-view-cell-text-size);
   }
   .group-header-name {
     flex: 1;
@@ -117,8 +117,8 @@ const styles = css`
     padding: 4px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--data-view-cell-text-size);
+    line-height: var(--data-view-cell-text-line-height);
     visibility: hidden;
     transition: visibility 100ms ease-in-out;
   }

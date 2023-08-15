@@ -11,7 +11,7 @@ import './kanban/renderer.js';
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -24,6 +24,7 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { registerService } from '../__internal__/service/index.js';
 import type { BaseDataView } from './common/base-data-view.js';
+import { dataViewCssVariable } from './common/css-variable.js';
 import { viewRendererManager } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
@@ -48,6 +49,7 @@ type ViewData = {
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   static override styles = css`
+    ${unsafeCSS(dataViewCssVariable('affine-database'))}
     affine-database {
       display: block;
       border-radius: 8px;

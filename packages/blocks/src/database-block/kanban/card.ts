@@ -17,7 +17,7 @@ const styles = css`
     box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     transition: background-color 100ms ease-in-out;
-    background-color: var(--affine-background-secondary-color);
+    background-color: var(--affine-background-kanban-card-color);
   }
 
   affine-data-view-kanban-card:hover {
@@ -33,8 +33,8 @@ const styles = css`
   }
 
   affine-data-view-kanban-card .card-header-title {
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--data-view-cell-text-size);
+    line-height: var(--data-view-cell-text-line-height);
   }
 
   affine-data-view-kanban-card .card-header-icon {
