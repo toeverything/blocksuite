@@ -1,5 +1,6 @@
+import { assertFlavours } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { assertFlavours, type BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import { asyncFocusRichText } from '../../../../__internal__/utils/common-operations.js';
 import type { Flavour } from '../../../../models.js';

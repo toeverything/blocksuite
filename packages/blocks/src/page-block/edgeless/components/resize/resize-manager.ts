@@ -1,9 +1,9 @@
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
   Bound,
   getQuadBoundsWithRotation,
   rotatePoints,
 } from '@blocksuite/phasor';
-import { assertExists, Slot } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';

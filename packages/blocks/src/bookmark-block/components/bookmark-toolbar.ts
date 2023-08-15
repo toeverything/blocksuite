@@ -1,7 +1,7 @@
 import '../../components/button.js';
 
+import { Slot } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Slot } from '@blocksuite/store';
 import { type BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';

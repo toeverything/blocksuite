@@ -1,10 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 import type { BlockModels } from '@blocksuite/global/types';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type Page,
-} from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import { getService } from '../__internal__/service/index.js';
 import { BaseService } from '../__internal__/service/service.js';

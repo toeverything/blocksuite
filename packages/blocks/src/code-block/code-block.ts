@@ -2,8 +2,8 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
+import { assertExists, clamp, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { assertExists, Slot } from '@blocksuite/store';
 import { css, html, nothing, render } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -16,11 +16,7 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import {
-  clamp,
-  getViewportElement,
-  queryCurrentMode,
-} from '../__internal__/index.js';
+import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService, registerService } from '../__internal__/service/index.js';

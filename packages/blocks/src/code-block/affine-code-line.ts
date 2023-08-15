@@ -1,5 +1,5 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';

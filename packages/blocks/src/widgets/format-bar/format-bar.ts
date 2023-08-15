@@ -1,6 +1,6 @@
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
-import { assertExists, DisposableGroup } from '@blocksuite/store';
 import {
   autoUpdate,
   computePosition,

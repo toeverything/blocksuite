@@ -1,5 +1,5 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { Workspace } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 
 import { ImportPage, type OnSuccessHandler } from './import-page.js';
 

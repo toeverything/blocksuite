@@ -1,6 +1,6 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
 
 import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
 import { BaseService } from '../__internal__/service/service.js';

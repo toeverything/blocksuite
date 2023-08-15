@@ -1,17 +1,15 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/lit';
 import {
   assertExists,
-  type BaseBlockModel,
   DisposableGroup,
   matchFlavours,
-} from '@blocksuite/store';
+  throttle,
+} from '@blocksuite/global/utils';
+import { WidgetElement } from '@blocksuite/lit';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
-import {
-  isControlledKeyboardEvent,
-  throttle,
-} from '../../__internal__/utils/common.js';
+import { isControlledKeyboardEvent } from '../../__internal__/utils/common.js';
 import {
   getViewportElement,
   getVirgoByModel,

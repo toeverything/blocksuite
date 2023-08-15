@@ -1,8 +1,8 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 

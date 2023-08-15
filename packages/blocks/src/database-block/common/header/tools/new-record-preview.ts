@@ -1,5 +1,5 @@
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { assertExists, DisposableGroup } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 

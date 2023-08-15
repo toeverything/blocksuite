@@ -25,7 +25,6 @@ export {
 } from './utils/id-generator.js';
 export * as Utils from './utils/utils.js';
 export * from './workspace/index.js';
-export * from '@blocksuite/global/utils';
 
 import './utils/formatter.js';
 

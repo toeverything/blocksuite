@@ -7,7 +7,8 @@ import { numberPureColumnConfig } from '@blocksuite/blocks/database-block/common
 import { progressPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/progress/define';
 import { richTextPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/rich-text/define';
 import type { DatabaseBlockModel } from '@blocksuite/blocks/models';
-import { assertExists, Text, type Workspace } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { Text, type Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 

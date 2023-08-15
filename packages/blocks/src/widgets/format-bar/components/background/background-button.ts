@@ -1,5 +1,5 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 

@@ -1,6 +1,7 @@
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
-import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

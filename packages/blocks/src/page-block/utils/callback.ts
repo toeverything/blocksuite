@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
