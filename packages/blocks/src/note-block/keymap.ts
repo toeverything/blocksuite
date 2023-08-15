@@ -221,7 +221,8 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
       return true;
     },
-    'Mod-a': () => {
+    'Mod-a': ctx => {
+      ctx.get('defaultState').event.preventDefault();
       const view = blockElement.root.viewStore;
       const selection = blockElement.root.selectionManager;
       const blocks: BlockSelection[] = [];

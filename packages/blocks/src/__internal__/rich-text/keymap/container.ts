@@ -72,7 +72,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return;
     },
-    'Mod-a': () => {
+    'Mod-a': ctx => {
+      ctx.get('defaultState').event.preventDefault();
       if (blockElement.selected?.is('text')) {
         return _selectBlock();
       }
