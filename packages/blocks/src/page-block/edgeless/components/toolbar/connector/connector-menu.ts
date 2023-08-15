@@ -172,8 +172,6 @@ export class EdgelessConnectorMenu extends LitElement {
   private _setConnectorStrokeWidth = (lineWidth: LineWidth) => {
     if (this.edgelessTool.type !== 'connector') return;
 
-    console.log('strokeWidth: ', lineWidth);
-
     const { color, mode } = this.edgelessTool;
     this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'connector',
