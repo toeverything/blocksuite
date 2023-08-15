@@ -4,10 +4,7 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import type { AwarenessStore } from '../awareness.js';
-import { BaseBlockModel, internalPrimitives } from '../base.js';
-import { Space } from '../space.js';
-import { Text } from '../text-adapter.js';
+import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
@@ -15,8 +12,11 @@ import {
   syncBlockProps,
   toBlockProps,
 } from '../utils/utils.js';
+import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { Text } from '../yjs/text-adapter.js';
 import type { PageMeta } from './meta.js';
+import { Space } from './space.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;

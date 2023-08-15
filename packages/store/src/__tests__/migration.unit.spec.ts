@@ -6,13 +6,13 @@ import { assert, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
-import { DatabaseBlockSchema } from '../../../../../blocks/src/database-block/database-model.js';
-import { NoteBlockSchema } from '../../../../../blocks/src/note-block/note-model.js';
-import { PageBlockSchema } from '../../../../../blocks/src/page-block/page-model.js';
-import { ParagraphBlockSchema } from '../../../../../blocks/src/paragraph-block/paragraph-model.js';
-import { SurfaceBlockSchema } from '../../../../../blocks/src/surface-block/surface-model.js';
+import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
+import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
+import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
+import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import { SurfaceBlockSchema } from '../../../blocks/src/surface-block/surface-model.js';
 // normal import
-import { Schema } from '../../schema.js';
+import { Schema } from '../schema/schema.js';
 
 async function loadBinary(name: string) {
   const url = new URL(`./ydocs/${name}.ydoc`, import.meta.url);
