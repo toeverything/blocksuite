@@ -119,6 +119,7 @@ export function toBlockProps(
   const config: ProxyConfig = { deep: true };
   const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
+
   Object.keys(prefixedProps).forEach(key => {
     if (prefixedProps[key] && key.startsWith('sys:')) {
       props[key.replace('sys:', '')] = prefixedProps[key];
@@ -126,18 +127,18 @@ export function toBlockProps(
   });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (SYS_KEYS.has(prefixedKey)) return;
-
-    const key = prefixedKey.replace('prop:', '');
-    const realValue = yBlock.get(prefixedKey);
-    if (realValue instanceof Y.Map) {
-      const value = proxy.createYProxy(realValue, config);
-      props[key] = value;
-    } else if (realValue instanceof Y.Array) {
-      const value = proxy.createYProxy(realValue, config);
-      props[key] = value;
-    } else {
-      props[key] = prefixedProps[prefixedKey];
+    if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
+      const key = prefixedKey.replace('prop:', '');
+      const realValue = yBlock.get(prefixedKey);
+      if (realValue instanceof Y.Map) {
+        const value = proxy.createYProxy(realValue, config);
+        props[key] = value;
+      } else if (realValue instanceof Y.Array) {
+        const value = proxy.createYProxy(realValue, config);
+        props[key] = value;
+      } else {
+        props[key] = prefixedProps[prefixedKey];
+      }
     }
   });
 
