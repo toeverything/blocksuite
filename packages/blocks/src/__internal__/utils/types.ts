@@ -14,6 +14,7 @@ import {
   type Slot,
 } from '@blocksuite/store';
 
+import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { PageBlockModel } from '../../models.js';
@@ -245,6 +246,7 @@ export type SerializedBlock = {
     rowIds: string[];
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];
+    views: DataViewDataType[];
   };
   // note block
   xywh?: string;

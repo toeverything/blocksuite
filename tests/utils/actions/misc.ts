@@ -398,6 +398,9 @@ export async function initEmptyDatabaseWithParagraphState(
       },
       noteId
     );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
     page.addBlock('affine:paragraph', {}, noteId);
     page.captureSync();
     return { pageId, noteId, databaseId };

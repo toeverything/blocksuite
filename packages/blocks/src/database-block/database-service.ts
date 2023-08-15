@@ -9,7 +9,7 @@ import {
 import { getService } from '../__internal__/service/index.js';
 import { BaseService } from '../__internal__/service/service.js';
 import type { SerializedBlock } from '../__internal__/utils/types.js';
-import type { DataViewTypes } from './common/data-view.js';
+import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import type { Column } from './table/types.js';
@@ -44,6 +44,10 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
     const columns = [...block.columns];
     const rowIds = block.children.map(child => child.id);
 
+    const children = block.children?.map(child => {
+      return getService(child.flavour).block2Json(child);
+    });
+
     return {
       flavour: block.flavour,
       databaseProps: {
@@ -52,20 +56,9 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
         rowIds,
         cells: block.cells,
         columns,
+        views: block.views,
       },
-      children: block.children
-        ?.filter(child => selectedModels?.has(child.id) ?? true)
-        .map((child, index, array) => {
-          if (index === array.length - 1) {
-            return getService(child.flavour).block2Json(
-              child,
-              selectedModels,
-              0,
-              end
-            );
-          }
-          return getService(child.flavour).block2Json(child, selectedModels);
-        }),
+      children,
     };
   }
 
@@ -75,9 +68,10 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
       rowIds: string[];
       columns: Column[];
       cells: Record<string, Record<string, Cell>>;
+      views: DataViewDataType[];
     }
   ) {
-    const { rowIds, columns, cells } = props;
+    const { rowIds, columns, cells, views } = props;
     const columnIds = columns.map(column => column.id);
     model.deleteColumn(model.id);
     const newColumnIds = columns.map(schema => {
@@ -98,6 +92,10 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
           value,
         });
       });
+    });
+
+    views.forEach(view => {
+      model.addView(view.mode);
     });
   }
 }

@@ -88,7 +88,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   addView(type: DataViewTypes) {
-    this.page.captureSync();
     const id = this.page.generateId();
     const viewConfig = viewManager.getView(type);
     const view = viewConfig.init(this, id, viewConfig.defaultName);

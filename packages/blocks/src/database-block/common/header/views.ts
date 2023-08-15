@@ -75,6 +75,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
             .uni=${viewRendererManager.getView(v.type).icon}
           ></uni-lit>`,
           select: () => {
+            this.model.page.captureSync();
             const view = this.model.addView(v.type);
             this.setViewId(view.id);
             this.model.applyViewsUpdate();
@@ -108,6 +109,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
                 .uni=${viewRendererManager.getView(v.type).icon}
               ></uni-lit>`,
               select: () => {
+                this.model.page.captureSync();
                 const view = this.model.addView(v.type);
                 this.setViewId(view.id);
                 this.model.applyViewsUpdate();
