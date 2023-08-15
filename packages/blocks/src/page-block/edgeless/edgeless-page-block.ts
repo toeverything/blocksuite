@@ -5,6 +5,12 @@ import './components/rects/edgeless-dragging-area-rect.js';
 import './components/edgeless-notes-container.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
+import {
+  almostEqual,
+  assertExists,
+  Slot,
+  throttle,
+} from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
@@ -22,12 +28,7 @@ import {
   serializeXYWH,
   SurfaceManager,
 } from '@blocksuite/phasor';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type Page,
-  Slot,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -40,7 +41,6 @@ import {
 } from '../../__internal__/consts.js';
 import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
 import {
-  almostEqual,
   asyncFocusRichText,
   bringForward,
   getRectByBlockElement,
@@ -51,7 +51,6 @@ import {
   type ReorderingRange,
   reorderTo,
   sendBackward,
-  throttle,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import {

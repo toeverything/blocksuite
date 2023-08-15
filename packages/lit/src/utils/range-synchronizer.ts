@@ -1,7 +1,8 @@
 import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
 import type { BaseSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists, type Text } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';

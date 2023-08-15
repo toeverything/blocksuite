@@ -1,3 +1,4 @@
+import { assertEquals, assertExists } from '@blocksuite/global/utils';
 import {
   almostEqual,
   AStarRunner,
@@ -23,7 +24,6 @@ import {
   type SurfaceManager,
   Vec,
 } from '@blocksuite/phasor';
-import { assertEquals, assertExists } from '@blocksuite/store';
 
 import {
   type Connectable,

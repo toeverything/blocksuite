@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import * as Y from 'yjs';

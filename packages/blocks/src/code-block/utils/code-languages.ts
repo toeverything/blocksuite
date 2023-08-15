@@ -1,4 +1,4 @@
-import type { Slot } from '@blocksuite/store';
+import type { Slot } from '@blocksuite/global/utils';
 import type { ILanguageRegistration, Lang } from 'shiki';
 import { BUNDLED_LANGUAGES } from 'shiki';
 

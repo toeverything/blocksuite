@@ -3,7 +3,7 @@ import type {
   TextSelection,
   UIEventHandler,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../doc/doc-page-block.js';

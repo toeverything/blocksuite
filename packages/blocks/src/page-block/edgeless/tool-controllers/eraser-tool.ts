@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 import {
   Bound,
   getStroke,
@@ -17,7 +18,6 @@ import type {
 import {
   type EraserTool,
   getBlockElementById,
-  noop,
 } from '../../../__internal__/utils/index.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './index.js';

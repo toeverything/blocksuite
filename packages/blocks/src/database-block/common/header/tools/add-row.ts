@@ -1,5 +1,5 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 

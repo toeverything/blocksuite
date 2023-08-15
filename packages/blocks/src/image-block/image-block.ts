@@ -2,14 +2,13 @@ import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { Slot } from '@blocksuite/global/utils';
+import { clamp, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { registerService } from '../__internal__/service/index.js';
-import { clamp } from '../__internal__/utils/common.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
 import { ImageOptionsTemplate } from './image/image-options.js';

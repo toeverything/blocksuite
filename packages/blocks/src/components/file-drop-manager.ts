@@ -1,9 +1,5 @@
-import {
-  assertExists,
-  type BaseBlockModel,
-  matchFlavours,
-  type Page,
-} from '@blocksuite/store';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { AbstractEditor } from '../__internal__/index.js';
 import {

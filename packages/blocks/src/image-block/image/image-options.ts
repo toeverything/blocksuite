@@ -1,4 +1,4 @@
-import type { Slot } from '@blocksuite/store';
+import type { Slot } from '@blocksuite/global/utils';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 

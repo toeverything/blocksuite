@@ -1,5 +1,5 @@
+import { matchFlavours } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { matchFlavours } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

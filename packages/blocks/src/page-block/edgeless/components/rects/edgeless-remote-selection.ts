@@ -1,10 +1,10 @@
+import { pick } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { pick } from '../../../../__internal__/utils/common.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../services/tools-manager.js';
 import { getSelectedRect, isTopLevelBlock } from '../../utils/query.js';

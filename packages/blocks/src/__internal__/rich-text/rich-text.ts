@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 import type { BaseTextAttributes, VHandlerContext } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';

@@ -1,4 +1,4 @@
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, clamp, matchFlavours } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
@@ -13,7 +13,6 @@ import {
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
 import type { RichText } from '../rich-text/rich-text.js';
-import { clamp } from './common.js';
 import type { Rect } from './rect.js';
 import { type Point } from './rect.js';
 

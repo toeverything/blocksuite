@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
@@ -6,7 +7,6 @@ import {
   type NoteTool,
   queryCurrentMode,
 } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,

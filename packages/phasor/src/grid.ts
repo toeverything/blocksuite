@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
 
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';

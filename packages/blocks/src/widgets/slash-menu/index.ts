@@ -1,18 +1,18 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   assertExists,
   DisposableGroup,
   matchFlavours,
-} from '@blocksuite/store';
+  throttle,
+} from '@blocksuite/global/utils';
+import { WidgetElement } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import {
   getCurrentNativeRange,
   getVirgoByModel,
   isControlledKeyboardEvent,
-  throttle,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';

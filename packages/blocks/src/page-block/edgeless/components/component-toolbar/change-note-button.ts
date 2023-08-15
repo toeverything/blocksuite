@@ -2,8 +2,9 @@ import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 import '../panel/color-panel.js';
 
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

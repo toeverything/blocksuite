@@ -1,11 +1,10 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 
 import {
   getDocPage,
   getModelByElement,
-  noop,
 } from '../../__internal__/utils/index.js';
 import { calcSafeCoordinate } from '../../page-block/utils/position.js';
 import { type LinkDetail, LinkPopover } from './link-popover.js';

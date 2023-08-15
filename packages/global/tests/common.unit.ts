@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import {
   atLeastNMatches,
   capitalize,
@@ -9,7 +7,8 @@ import {
   maxBy,
   toHex,
   uncapitalize,
-} from './common.js';
+} from '@blocksuite/global/utils';
+import { describe, expect, it } from 'vitest';
 
 describe('countBy', () => {
   it('basic', () => {

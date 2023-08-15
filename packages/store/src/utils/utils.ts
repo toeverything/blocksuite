@@ -1,5 +1,5 @@
 import type { BlockModels } from '@blocksuite/global/types';
-import { isPrimitive, matchFlavours, SYS_KEYS } from '@blocksuite/global/utils';
+import { isPrimitive, matchFlavours } from '@blocksuite/global/utils';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
@@ -19,6 +19,8 @@ import type { ProxyConfig } from '../yjs/config.js';
 import type { ProxyManager } from '../yjs/index.js';
 import { isPureObject } from '../yjs/index.js';
 import { native2Y } from '../yjs/utils.js';
+
+const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
 export function assertValidChildren(
   yBlocks: YBlocks,

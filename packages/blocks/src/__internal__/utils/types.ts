@@ -1,4 +1,5 @@
 import type { UIEventDispatcher } from '@blocksuite/block-std';
+import { DisposableGroup, type Slot } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type {
   BrushElement,
@@ -7,12 +8,7 @@ import type {
   PhasorElement,
   ShapeType,
 } from '@blocksuite/phasor';
-import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-  type Slot,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';

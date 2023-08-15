@@ -1,6 +1,6 @@
 import { BlockSelection } from '@blocksuite/block-std';
+import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists, matchFlavours } from '@blocksuite/store';
 import { type TemplateResult } from 'lit';
 
 import { copyBlocksInPage } from '../../__internal__/clipboard/utils/commons.js';

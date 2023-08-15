@@ -7,6 +7,7 @@ import './change-text-button.js';
 import './add-frame-button.js';
 import './more-button.js';
 
+import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type {
   BrushElement,
@@ -18,11 +19,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import {
-  atLeastNMatches,
-  groupBy,
-  pickValues,
-} from '../../../../__internal__/utils/common.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

@@ -1,3 +1,4 @@
+import { isFuzzyMatch } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
@@ -7,7 +8,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getRichTextByModel,
   isControlledKeyboardEvent,
-  isFuzzyMatch,
 } from '../../__internal__/utils/index.js';
 import {
   cleanSpecifiedTail,

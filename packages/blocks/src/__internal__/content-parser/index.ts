@@ -1,7 +1,7 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { nanoid, Slot } from '@blocksuite/store';
+import { nanoid } from '@blocksuite/store';
 import { marked } from 'marked';
 
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';

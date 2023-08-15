@@ -1,5 +1,5 @@
+import { assertExists, type Disposable } from '@blocksuite/global/utils';
 import { Bound, type IVec, normalizeDegAngle, Vec } from '@blocksuite/phasor';
-import { assertExists, type Disposable } from '@blocksuite/store';
 import { computePosition, flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 

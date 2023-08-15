@@ -2,8 +2,8 @@ import './meta-data/meta-data.js';
 
 import { type BlockService } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { matchFlavours, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { matchFlavours, Slot } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';

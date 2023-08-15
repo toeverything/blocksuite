@@ -1,14 +1,12 @@
+import { assertExists, matchFlavours, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
-import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  noop,
-  type TopLevelBlockModel,
-} from '../../../../__internal__/index.js';
+import { type TopLevelBlockModel } from '../../../../__internal__/index.js';
 import {
   CardIcon,
   DualLinkIcon,

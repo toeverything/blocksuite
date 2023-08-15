@@ -1,6 +1,9 @@
-import { assertExists } from '@blocksuite/store';
+import {
+  assertExists,
+  capitalize,
+  uncapitalize,
+} from '@blocksuite/global/utils';
 
-import { capitalize, uncapitalize } from '../utils/common.js';
 import type { CssVariableName, CssVariablesMap } from './css-variables.js';
 import type { ThemeObserver } from './theme-observer.js';
 
