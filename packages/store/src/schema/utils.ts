@@ -1,10 +1,5 @@
-import * as Y from 'yjs';
-
-import type {
-  BlockProps,
-  PrefixedBlockProps,
-  YBlock,
-} from '../workspace/page.js';
+import { toBlockProps } from '../utils/utils.js';
+import type { BlockProps, YBlock } from '../workspace/page.js';
 import type { ProxyConfig } from '../yjs/config.js';
 import type { ProxyManager } from '../yjs/index.js';
 import { isPureObject, native2Y } from '../yjs/index.js';
@@ -14,24 +9,8 @@ export function toBlockMigrationData(
   proxy: ProxyManager
 ): Partial<BlockProps> {
   const config: ProxyConfig = { deep: true };
-  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
 
-  const props: Partial<BlockProps> = {};
-  Object.keys(prefixedProps).forEach(prefixedKey => {
-    if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
-      const realValue = yBlock.get(prefixedKey);
-      const key = prefixedKey.replace('prop:', '');
-      if (realValue instanceof Y.Map) {
-        const value = proxy.createYProxy(realValue, config);
-        props[key] = value;
-      } else if (realValue instanceof Y.Array) {
-        const value = proxy.createYProxy(realValue, config);
-        props[key] = value;
-      } else {
-        props[key] = prefixedProps[prefixedKey];
-      }
-    }
-  });
+  const props = toBlockProps(yBlock, proxy);
 
   return new Proxy(props, {
     has: (target, p) => {
