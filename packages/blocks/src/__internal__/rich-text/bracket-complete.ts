@@ -1,6 +1,6 @@
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
 import type { KeyboardBindings } from './keyboard.js';
 
 type BracketPair = {

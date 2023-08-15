@@ -1,22 +1,19 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import {
-  EDITOR_WIDTH,
-  PAGE_VERSION,
-  WORKSPACE_VERSION,
-} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
+import { EDITOR_WIDTH } from '../../../blocks/src/__internal__/consts.js';
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts';
 import type { BaseBlockModel, Page, PassiveDocProvider } from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';

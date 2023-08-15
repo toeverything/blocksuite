@@ -15,6 +15,7 @@ import './image-block/index.js';
 import './surface-block/index.js';
 import './database-block/index.js';
 
+export * from './__internal__/consts.js';
 export * from './__internal__/rich-text/rich-text-operations.js';
 export { getServiceOrRegister } from './__internal__/service/index.js';
 export type { BaseService } from './__internal__/service/service.js';

@@ -1,7 +1,7 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { Page } from '@blocksuite/store';
 import { matchFlavours, Slot } from '@blocksuite/store';
 
+import { BLOCK_ID_ATTR } from '../../../__internal__/consts.js';
 import { almostEqual, throttle } from '../../../__internal__/utils/common.js';
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
 

@@ -24,9 +24,9 @@ import {
   SIZE_VARIABLES,
   VARIABLES,
 } from '@blocksuite/blocks';
+import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
