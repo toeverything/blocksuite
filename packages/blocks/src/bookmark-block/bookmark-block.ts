@@ -173,6 +173,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   @state()
   private _isLoading = false;
+  @state()
+  private _isIconError = false;
+  @state()
+  private _isImageError = false;
 
   private _toolbarHoverStateSlot = new Slot<{
     inBookmark?: boolean;
@@ -271,6 +275,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     window.open(link, '_blank');
   }
 
+  private _onIconError() {
+    this._isIconError = true;
+  }
+  private _onImageError() {
+    this._isImageError = true;
+  }
+
   private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
     type => {
       if (type === 'caption') {
@@ -282,6 +293,11 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
       if (type === 'edit') {
         this._showEditModal = true;
+      }
+
+      if (type === 'reload') {
+        this._isImageError = false;
+        this._isIconError = false;
       }
 
       this._toolbarHoverStateSlot.emit({ inBookmark: false, inToolbar: false });
@@ -350,7 +366,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">
           <div class="affine-bookmark-icon">
-            ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
+            ${icon && !this._isIconError
+              ? html`<img
+                  src="${icon}"
+                  alt="icon"
+                  @error="${this._onIconError}"
+                />`
+              : DefaultIcon}
           </div>
           <div class="affine-bookmark-title-content">
             ${bookmarkTitle || 'Bookmark'}
@@ -361,7 +383,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         <div class="affine-bookmark-url">${url}</div>
       </div>
       <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-        ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
+        ${image && !this._isImageError
+          ? html`<img
+              src="${image}"
+              alt="image"
+              @error="${this._onImageError}"
+            />`
+          : DefaultBanner}
       </div>
     </div>`;
 

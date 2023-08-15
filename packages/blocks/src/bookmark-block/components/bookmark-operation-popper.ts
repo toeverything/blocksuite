@@ -189,7 +189,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
       }
     );
 
-    return html` <div class="bookmark-operation-menu">${menuItems}</div> `;
+    return html`<div class="bookmark-operation-menu">${menuItems}</div> `;
   }
 }
 
