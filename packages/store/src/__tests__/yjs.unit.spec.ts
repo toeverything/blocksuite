@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
-import { NativeWrapper } from '../native-wrapper';
 import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
+import { NativeWrapper } from '../yjs/native-wrapper';
 
 const proxyManager = new ProxyManager();
 

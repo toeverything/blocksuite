@@ -2,8 +2,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap } from 'yjs';
 
-import { NativeWrapper } from '../native-wrapper.js';
 import type { ProxyConfig } from './config.js';
+import { NativeWrapper } from './native-wrapper.js';
 import type { UnRecord } from './utils.js';
 import { isPureObject, native2Y } from './utils.js';
 

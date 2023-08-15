@@ -2,10 +2,10 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
-import { NativeWrapper } from './native-wrapper.js';
-import { Text } from './text-adapter.js';
-import type { Page } from './workspace/index.js';
-import type { YBlock } from './workspace/page.js';
+import type { Page } from '../workspace/index.js';
+import type { YBlock } from '../workspace/page.js';
+import { NativeWrapper } from '../yjs/native-wrapper.js';
+import { Text } from '../yjs/text-adapter.js';
 
 const FlavourSchema = z.string();
 const ParentSchema = z.array(z.string()).optional();
