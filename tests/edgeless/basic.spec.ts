@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
+import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import {
   decreaseZoomLevel,
   getEdgelessBlockChild,
