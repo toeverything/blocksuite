@@ -326,7 +326,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         ${HandIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
-        .tooltip=${'Frame Navigator'}
+        .tooltip=${'Prensentation'}
         @click=${() => {
           this.setEdgelessTool({ type: 'frameNavigator' });
           this._currentFrameIndex = 0;
