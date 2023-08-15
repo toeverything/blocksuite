@@ -1,6 +1,4 @@
-import type { UIEventDispatcher } from '@blocksuite/block-std';
-import { DisposableGroup, type Slot } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import { type Slot } from '@blocksuite/global/utils';
 import type {
   BrushElement,
   ConnectorElement,
@@ -12,7 +10,6 @@ import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
-import type { PageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type {
   BlockServiceInstanceByKey,
@@ -287,24 +284,3 @@ export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
     : T extends keyof HTMLElementEventMap
     ? HTMLElementEventDetail<T>
     : never;
-
-export abstract class AbstractSelectionManager<
-  T extends BlockElement<PageBlockModel>
-> {
-  public readonly container: T;
-  protected readonly _dispatcher: UIEventDispatcher;
-  protected readonly _disposables = new DisposableGroup();
-
-  constructor(container: T, dispatcher: UIEventDispatcher) {
-    this.container = container;
-    this._dispatcher = dispatcher;
-  }
-
-  protected get page() {
-    return this.container.page;
-  }
-
-  abstract clear(): void;
-
-  abstract dispose(): void;
-}

@@ -2,7 +2,6 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import {
   assertExists,
   DisposableGroup,
-  matchFlavours,
   throttle,
 } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
@@ -13,6 +12,7 @@ import {
   getCurrentNativeRange,
   getVirgoByModel,
   isControlledKeyboardEvent,
+  matchFlavours,
 } from '../../__internal__/utils/index.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';

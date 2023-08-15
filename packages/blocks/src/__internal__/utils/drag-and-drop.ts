@@ -1,6 +1,7 @@
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { matchFlavours } from './model.js';
 import {
   type BlockComponentElement,
   DropFlags,

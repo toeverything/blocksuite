@@ -1,10 +1,10 @@
-import type { BlockModels } from '@blocksuite/global/types';
 import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
+import type { BlockModels } from '../../../../__internal__/utils/model.js';
 import {
   AttachmentIcon,
   BookmarkIcon,

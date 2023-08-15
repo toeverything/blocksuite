@@ -1,10 +1,11 @@
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import type { ListType } from '../../list-block/index.js';
+import { matchFlavours } from './model.js';
 import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 

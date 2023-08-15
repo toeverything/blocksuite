@@ -1,9 +1,9 @@
-import { matchFlavours } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { matchFlavours } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 

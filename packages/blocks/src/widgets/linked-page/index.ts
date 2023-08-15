@@ -2,13 +2,13 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import {
   assertExists,
   DisposableGroup,
-  matchFlavours,
   throttle,
 } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
+import { matchFlavours } from '../../__internal__/index.js';
 import { isControlledKeyboardEvent } from '../../__internal__/utils/common.js';
 import {
   getViewportElement,

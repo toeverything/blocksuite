@@ -1,6 +1,6 @@
-import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { matchFlavours } from './model.js';
 import type { Detail } from './types.js';
 
 /**
