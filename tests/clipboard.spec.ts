@@ -519,8 +519,10 @@ test('cut will delete all content, and copy will reappear content', async ({
   await waitNextFrame(page);
   await focusRichText(page);
 
-  await pasteByKeyboard(page);
+  // await pasteByKeyboard(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
   await waitNextFrame(page);
+  await page.waitForTimeout(100);
   await assertStoreMatchJSX(
     page,
     /*xml*/ `
