@@ -48,7 +48,6 @@ export class RangeManager {
 
   syncTextSelectionToRange(selection: TextSelection | null) {
     if (!selection) {
-      console.log('------');
       this.clearRange(false);
       return;
     }
