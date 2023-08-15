@@ -179,7 +179,7 @@ export class Gesture {
 
   private _doubleClickHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-    const caret = caretFromPoint(state.x, state.y);
+    const caret = caretFromPoint(state.raw.x, state.raw.y);
     if (!caret) {
       return;
     }

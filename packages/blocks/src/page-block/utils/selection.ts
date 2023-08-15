@@ -34,9 +34,10 @@ export function getSelectedContentBlockElements(
 
   const dirtyResult: BlockElement[] = [];
 
-  if (types.includes('text')) {
+  if (types.includes('text') && selectionManager.find('text')) {
     assertExists(rangeManager);
     const range = rangeManager.value;
+    assertExists(range);
     const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
       range,
       {
@@ -47,7 +48,7 @@ export function getSelectedContentBlockElements(
     dirtyResult.push(...selectedBlockElements);
   }
 
-  if (types.includes('block')) {
+  if (types.includes('block') && selectionManager.find('block')) {
     const viewStore = blockElement.root.viewStore;
     const blockSelections = selectionManager.filter('block');
     dirtyResult.push(

@@ -118,6 +118,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           if (this._rangeManager) {
             const e = ctx.get('pointerState');
             const range = this._rangeManager.value;
+            assertExists(range);
             const rangeRect = range.getBoundingClientRect();
             if (e.y < rangeRect.top + rangeRect.height / 2) {
               this._placement = 'top';
@@ -205,6 +206,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       if (this._displayType === 'text') {
         assertExists(this._rangeManager, 'range controller should exist');
         const range = this._rangeManager.value;
+        assertExists(range);
         const visualElement = {
           getBoundingClientRect: () => range.getBoundingClientRect(),
           getClientRects: () => range.getClientRects(),

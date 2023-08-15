@@ -108,7 +108,14 @@ export class DragHandleWidget extends WidgetElement {
 
   // drag handle should show on the vertical middle of the first line of element
   private _show(point: Point, blockElement: BlockElement) {
-    const { left, top, width } = blockElement.getBoundingClientRect();
+    let { left, top } = blockElement.getBoundingClientRect();
+
+    // Some blocks have padding, should consider padding when calculating position
+    const computedStyle = getComputedStyle(blockElement);
+    const paddingTop = parseInt(computedStyle.paddingTop);
+    const paddingLeft = parseInt(computedStyle.paddingLeft);
+    left += paddingLeft;
+    top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
     this._dragHandleContainer.style.display = 'flex';
@@ -125,10 +132,6 @@ export class DragHandleWidget extends WidgetElement {
     const posTop = top;
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
-    this._dragHandleContainer.style.opacity = `${(
-      1 -
-      (point.x - left) / width
-    ).toFixed(2)}`;
 
     this._dragHandleGrabber.style.height = `${
       DRAG_HANDLE_GRABBER_HEIGHT * this._scale
@@ -296,7 +299,9 @@ export class DragHandleWidget extends WidgetElement {
     const padding = NOTE_CONTAINER_PADDING * this._scale;
     return rect
       ? isPageMode(this.page)
-        ? point.y < rect.top || point.y > rect.bottom
+        ? point.y < rect.top ||
+          point.y > rect.bottom ||
+          point.x > rect.right + padding
         : point.y < rect.top ||
           point.y > rect.bottom ||
           point.x < rect.left - padding ||
