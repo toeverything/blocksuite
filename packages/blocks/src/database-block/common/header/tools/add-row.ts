@@ -1,9 +1,9 @@
-import { PlusIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { DisposableGroup } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { PlusIcon } from '../../../../icons/index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { InsertPosition } from '../../../types.js';
 import type { DataViewExpose } from '../../data-view.js';
@@ -20,14 +20,8 @@ const styles = css`
     padding: 6px 8px;
     border-radius: 8px;
     font-size: 14px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),
-      0px 0px 0px 0.5px var(--affine-black-10);
-    background: linear-gradient(
-        0deg,
-        var(--affine-hover-color),
-        var(--affine-hover-color)
-      ),
-      var(--affine-white);
+    background: var(--affine-white);
+    box-shadow: 0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
     cursor: pointer;
   }
 
@@ -35,8 +29,8 @@ const styles = css`
     max-width: 280px;
   }
   .new-record svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     fill: var(--affine-icon-color);
   }
 

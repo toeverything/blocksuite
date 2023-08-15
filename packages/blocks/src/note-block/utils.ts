@@ -1,10 +1,10 @@
 import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/global/config';
 import type { BlockElement } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../__internal__/consts.js';
 import { almostEqual } from '../__internal__/utils/common.js';
 import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import {

@@ -1,6 +1,5 @@
 import './database-header-column.js';
 
-import { DatabaseAddColumn } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -9,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { getDocPageByElement } from '../../../../__internal__/index.js';
+import { DatabaseAddColumn } from '../../../../icons/index.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';

@@ -1,8 +1,3 @@
-import {
-  CardIcon,
-  DualLinkIcon,
-  HiddenCardIcon,
-} from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
 import { assertExists, matchFlavours, type Page } from '@blocksuite/store';
@@ -14,6 +9,11 @@ import {
   noop,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
+import {
+  CardIcon,
+  DualLinkIcon,
+  HiddenCardIcon,
+} from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import {
   type DragEvent,

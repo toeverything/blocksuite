@@ -1,11 +1,12 @@
 import './tool-icon-button.js';
 
+import { css, html } from 'lit';
+
 import {
   BanIcon,
   DashLineIcon,
   StraightLineIcon,
-} from '@blocksuite/global/config';
-import { css, html } from 'lit';
+} from '../../../../icons/index.js';
 
 export const lineStyleButtonStyles = [
   css`

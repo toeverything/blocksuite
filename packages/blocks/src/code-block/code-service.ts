@@ -1,8 +1,8 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { assertExists } from '@blocksuite/store';
 
+import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
 import { BaseService } from '../__internal__/service/service.js';
 import type {
   BlockTransformContext,

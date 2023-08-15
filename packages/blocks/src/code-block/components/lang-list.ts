@@ -1,4 +1,3 @@
-import { SearchIcon } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -9,6 +8,7 @@ import {
 } from 'shiki';
 
 import { scrollbarStyle } from '../../components/utils.js';
+import { SearchIcon } from '../../icons/index.js';
 import {
   getLanguagePriority,
   type selectedLanguageChangedSlots,

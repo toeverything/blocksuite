@@ -1,3 +1,8 @@
+import type { BlockElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/store';
+import type { TemplateResult } from 'lit';
+
+import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   BoldIcon,
   InlineCodeIcon,
@@ -5,12 +10,7 @@ import {
   LinkIcon,
   StrikethroughIcon,
   UnderlineIcon,
-} from '@blocksuite/global/config';
-import type { BlockElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
-import type { TemplateResult } from 'lit';
-
-import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
+} from '../../icons/index.js';
 import type { Flavour } from '../../models.js';
 import type { PageBlockComponent } from '../types.js';
 import {

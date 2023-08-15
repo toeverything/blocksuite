@@ -1,8 +1,8 @@
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
+import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../../consts.js';
 import type { KeyboardBindings } from '../keyboard.js';
 import type { BindingContext } from '../keyboard.js';
 import { markdownConvert, tryMatchSpaceHotkey } from '../markdown-convert.js';

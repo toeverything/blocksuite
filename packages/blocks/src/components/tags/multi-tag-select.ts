@@ -1,8 +1,3 @@
-import {
-  DatabaseSearchClose,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nanoid } from '@blocksuite/store';
 import { autoPlacement, offset } from '@floating-ui/dom';
@@ -13,6 +8,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
+import {
+  DatabaseSearchClose,
+  MoreHorizontalIcon,
+  PlusIcon,
+} from '../../icons/index.js';
 import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';

@@ -1,9 +1,9 @@
-import { DualLinkIcon16 } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { scrollbarStyle } from '../../../../components/utils.js';
+import { DualLinkIcon16 } from '../../../../icons/index.js';
 import type { BacklinkData } from './backlink.js';
 import { DEFAULT_PAGE_NAME } from './backlink.js';
 

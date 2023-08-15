@@ -1,7 +1,6 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { assertExists } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
@@ -11,6 +10,7 @@ import {
   type EdgelessTool,
   LineWidth,
 } from '../../../../../__internal__/index.js';
+import { ArrowUpIcon, EdgelessPenIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';

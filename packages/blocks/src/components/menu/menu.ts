@@ -1,4 +1,3 @@
-import { ArrowDownIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Middleware } from '@floating-ui/dom';
 import { autoPlacement, computePosition } from '@floating-ui/dom';
@@ -11,6 +10,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
+import { ArrowDownIcon } from '../../icons/index.js';
 
 type MenuCommon = {
   hide?: () => boolean;

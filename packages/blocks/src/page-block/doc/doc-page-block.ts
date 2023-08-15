@@ -1,10 +1,6 @@
 import './meta-data/meta-data.js';
 
 import { type BlockService } from '@blocksuite/block-std';
-import {
-  PAGE_BLOCK_CHILD_PADDING,
-  PAGE_BLOCK_PADDING_BOTTOM,
-} from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { matchFlavours, Slot } from '@blocksuite/store';
@@ -14,6 +10,10 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
+import {
+  PAGE_BLOCK_CHILD_PADDING,
+  PAGE_BLOCK_PADDING_BOTTOM,
+} from '../../__internal__/consts.js';
 import type { BlockHost, EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText } from '../../__internal__/index.js';
 import {

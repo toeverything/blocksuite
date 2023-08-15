@@ -3,7 +3,6 @@ import {
   type UIEventHandler,
   type UIEventStateContext,
 } from '@blocksuite/block-std';
-import { DRAG_HANDLE_OFFSET_LEFT } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
@@ -12,6 +11,7 @@ import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { DRAG_HANDLE_OFFSET_LEFT } from '../../__internal__/consts.js';
 import {
   calcDropTarget,
   findClosestBlockElement,
@@ -502,13 +502,12 @@ export class DragHandleWidget extends WidgetElement {
       const nativeSelection = document.getSelection();
       if (nativeSelection && nativeSelection.rangeCount > 0) {
         const range = nativeSelection.getRangeAt(0);
-        const blockElements = this._rangeManager
-          .findBlockElementsByRange(range)
-          .filter(element => element.flavour !== 'affine:note');
-        const blockElementsExcludingChildren = getBlockElementsExcludeSubtrees(
-          blockElements
-        ) as BlockElement[];
-        this._setSelectedBlocks(blockElementsExcludingChildren);
+        const blockElements =
+          this._rangeManager.getSelectedBlockElementsByRange(range, {
+            match: el => el.model.role === 'content',
+            mode: 'highest',
+          });
+        this._setSelectedBlocks(blockElements);
         selections = this._selectedBlocks;
       }
     }

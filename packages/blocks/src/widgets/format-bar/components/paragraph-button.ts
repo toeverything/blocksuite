@@ -1,11 +1,11 @@
 import { TextSelection } from '@blocksuite/block-std';
-import { ArrowDownIcon } from '@blocksuite/global/config';
 import type { BlockElement } from '@blocksuite/lit';
 import { assertExists, type Page } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
+import { ArrowDownIcon } from '../../../icons/index.js';
 import type { Flavour } from '../../../models.js';
 import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
 import { onModelElementUpdated } from '../../../page-block/utils/callback.js';

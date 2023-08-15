@@ -1,4 +1,3 @@
-import { FontLinkedPageIcon, FontPageIcon } from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -11,6 +10,7 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+import { FontLinkedPageIcon, FontPageIcon } from '../../icons/index.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { getBlockElementById, getModelByElement } from '../utils/index.js';
 import { affineTextStyles } from './virgo/affine-text.js';

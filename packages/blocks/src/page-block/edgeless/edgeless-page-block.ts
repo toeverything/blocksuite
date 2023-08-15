@@ -5,10 +5,6 @@ import './components/rects/edgeless-dragging-area-rect.js';
 import './components/edgeless-notes-container.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import {
-  BLOCK_ID_ATTR,
-  EDGELESS_BLOCK_CHILD_PADDING,
-} from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
@@ -38,6 +34,10 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
+import {
+  BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '../../__internal__/consts.js';
 import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
 import {
   almostEqual,

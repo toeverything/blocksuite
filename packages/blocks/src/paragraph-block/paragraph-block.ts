@@ -1,9 +1,5 @@
 import '../__internal__/rich-text/rich-text.js';
 
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BlockHubIcon20,
-} from '@blocksuite/global/config';
 import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -12,6 +8,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
 import { isPageMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { RichText } from '../__internal__/rich-text/rich-text.js';
@@ -21,6 +18,7 @@ import {
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
 import { registerService } from '../__internal__/service/index.js';
+import { BlockHubIcon20 } from '../icons/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 import paragraphService from './paragraph-service.js';
 

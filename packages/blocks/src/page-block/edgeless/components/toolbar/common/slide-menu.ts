@@ -1,10 +1,11 @@
-import { ArrowRightSmallIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 const DEFAULT_MENU_WIDTH = 455;
+import { ArrowRightSmallIcon } from '../../../../../icons/index.js';
+
 @customElement('edgeless-slide-menu')
 export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   static override styles = css`

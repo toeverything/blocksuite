@@ -1,9 +1,10 @@
-import { IS_FIREFOX, SCROLL_THRESHOLD } from '@blocksuite/global/config';
+import { IS_FIREFOX } from '@blocksuite/global/config';
 import { assertExists, matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { type VirgoLine } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
+import { SCROLL_THRESHOLD } from '../consts.js';
 import {
   getBlockElementByModel,
   getDocPage,

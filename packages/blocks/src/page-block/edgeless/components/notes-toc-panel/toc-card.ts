@@ -1,4 +1,3 @@
-import { ArrowIcon, HiddenIcon } from '@blocksuite/global/config';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
@@ -11,6 +10,7 @@ import {
   pickArray,
   queryCurrentMode,
 } from '../../../../__internal__/index.js';
+import { ArrowIcon, HiddenIcon } from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';
 
