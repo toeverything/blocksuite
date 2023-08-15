@@ -203,14 +203,21 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
     const { surface } = this.edgeless;
-    const start = surface.viewport.toModelCoord(e.clientX, e.clientY);
+    const viewportRect = surface.viewport.boundingClientRect;
+    const start = surface.viewport.toModelCoord(
+      e.clientX - viewportRect.left,
+      e.clientY - viewportRect.top
+    );
 
     if (!this.edgeless.dispatcher) return;
 
     let connector: ConnectorElement | null;
 
     this._disposables.addFromEvent(document, 'pointermove', e => {
-      const point = surface.viewport.toModelCoord(e.clientX, e.clientY);
+      const point = surface.viewport.toModelCoord(
+        e.clientX - viewportRect.left,
+        e.clientY - viewportRect.top
+      );
       if (Vec.dist(start, point) > 8 && !this._isMoving) {
         this._isMoving = true;
         const { startPosition } = getPosition(type);
