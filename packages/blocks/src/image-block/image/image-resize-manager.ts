@@ -1,7 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 
-import { throttle } from '../../__internal__/utils/common.js';
 import {
   type BlockComponentElement,
   getClosestBlockElementByElement,

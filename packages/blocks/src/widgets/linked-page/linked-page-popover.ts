@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

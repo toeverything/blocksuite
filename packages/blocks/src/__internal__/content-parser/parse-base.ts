@@ -1,4 +1,3 @@
-import type { BlockSchemas } from '@blocksuite/global/types';
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
@@ -8,6 +7,7 @@ import { columnManager } from '../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
+import type { BlockSchemas } from '../utils/model.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
 
 export type FetchFileHandler = (

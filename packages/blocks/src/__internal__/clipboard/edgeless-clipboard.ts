@@ -1,3 +1,4 @@
+import { assertExists, groupBy } from '@blocksuite/global/utils';
 import type { IBound } from '@blocksuite/phasor';
 import {
   Bound,
@@ -10,7 +11,7 @@ import {
   type PhasorElementType,
   serializeXYWH,
 } from '@blocksuite/phasor';
-import { assertExists, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
@@ -32,7 +33,6 @@ import {
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
-import { groupBy } from '../utils/common.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,

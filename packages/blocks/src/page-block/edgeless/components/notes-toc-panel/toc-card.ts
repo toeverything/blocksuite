@@ -1,15 +1,11 @@
+import { noop, pickArray } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import {
-  noop,
-  once,
-  pickArray,
-  queryCurrentMode,
-} from '../../../../__internal__/index.js';
+import { once, queryCurrentMode } from '../../../../__internal__/index.js';
 import { ArrowIcon, HiddenIcon } from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';

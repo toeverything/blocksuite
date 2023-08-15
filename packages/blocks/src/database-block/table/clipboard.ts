@@ -1,6 +1,7 @@
 import type { TextSelection, UIEventStateContext } from '@blocksuite/block-std';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { assertExists, DisposableGroup, Text } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';

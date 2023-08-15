@@ -1,13 +1,9 @@
+import { assertExists, isFuzzyMatch } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import {
-  assertExists,
-  type BaseBlockModel,
-  type PageMeta,
-} from '@blocksuite/store';
+import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
-import { isFuzzyMatch } from '../../__internal__/utils/common.js';
 import { createPage } from '../../__internal__/utils/common-operations.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import { showImportModal } from '../../components/import-page/index.js';

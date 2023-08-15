@@ -1,4 +1,4 @@
-import { assertExists, isEqual, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists, isEqual } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
@@ -11,6 +11,7 @@ import {
   convertToList,
   convertToParagraph,
   type ExtendedModel,
+  matchFlavours,
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 

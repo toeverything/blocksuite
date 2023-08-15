@@ -1,9 +1,10 @@
 import { BlockSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { assertExists, matchFlavours } from '@blocksuite/store';
 import { type TemplateResult } from 'lit';
 
 import { copyBlocksInPage } from '../../__internal__/clipboard/utils/commons.js';
+import { matchFlavours } from '../../__internal__/utils/model.js';
 import { toast } from '../../components/toast.js';
 import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';
 import {

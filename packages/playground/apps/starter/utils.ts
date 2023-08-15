@@ -8,6 +8,7 @@ import {
   enableDebugLog,
 } from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type {
   BlobStorage,
   DocProviderCreator,
@@ -17,7 +18,6 @@ import type {
 import type { Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
-  assertExists,
   createIndexeddbStorage,
   createMemoryStorage,
   createSimpleServerStorage,

@@ -1,9 +1,12 @@
 import { IS_IOS, IS_MAC } from '@blocksuite/global/config';
-import { matchFlavours } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
-import { getCurrentNativeRange, hasNativeSelection } from '../utils/index.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  matchFlavours,
+} from '../utils/index.js';
 import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { createRichTextKeymap } from './keymap/index.js';
 import type { AffineVEditor } from './virgo/types.js';
