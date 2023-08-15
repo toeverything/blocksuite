@@ -19,6 +19,7 @@ import type { KanbanGroupProperty } from './define.js';
 
 export type KanbanGroupData = {
   key: string;
+  name: string;
   helper: GroupHelper;
   type: TType;
   value: unknown;
@@ -190,9 +191,9 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     );
   }
 
-  public addCard(position: InsertPosition, group: KanbanGroupData) {
+  public addCard(position: InsertPosition, group: string) {
     const id = this.rowAdd(position);
-    group.helper.addToGroup(id, group.key);
+    this.groupHelper?.addToGroup(id, group);
     return id;
   }
 
@@ -296,6 +297,7 @@ export class GroupHelper {
         key,
         {
           key,
+          name: config.groupName(type, value),
           helper: this,
           type,
           value,
@@ -310,6 +312,7 @@ export class GroupHelper {
         if (!this.groupMap[key]) {
           this.groupMap[key] = {
             key,
+            name: config.groupName(type, value),
             helper: this,
             value,
             rows: [],

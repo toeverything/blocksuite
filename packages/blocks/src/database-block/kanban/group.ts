@@ -20,7 +20,7 @@ import type {
 
 const styles = css`
   affine-data-view-kanban-group {
-    width: 252px;
+    width: 260px;
     flex-shrink: 0;
     border-radius: 8px;
     display: flex;
@@ -150,7 +150,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   group!: KanbanGroupData;
   private clickAddCard = () => {
-    const id = this.view.addCard('end', this.group);
+    const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
@@ -166,7 +166,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     });
   };
   private clickAddCardInStart = () => {
-    const id = this.view.addCard('start', this.group);
+    const id = this.view.addCard('start', this.group.key);
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {

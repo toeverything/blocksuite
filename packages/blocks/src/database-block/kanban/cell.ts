@@ -18,9 +18,10 @@ const styles = css`
     border-radius: 4px;
     display: flex;
     align-items: center;
-    padding: 3px;
+    padding: 4px;
     min-height: 20px;
     border: 1px solid transparent;
+    box-sizing: border-box;
   }
 
   affine-data-view-kanban-cell:hover {
@@ -33,7 +34,7 @@ const styles = css`
     justify-content: center;
     align-self: start;
     margin-right: 12px;
-    height: 20px;
+    height: var(--data-view-cell-text-line-height);
   }
 
   affine-data-view-kanban-cell .icon svg {
@@ -46,7 +47,7 @@ const styles = css`
   .kanban-cell {
     flex: 1;
     display: block;
-    overflow: hidden;
+    width: 196px;
   }
 `;
 

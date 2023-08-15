@@ -375,6 +375,20 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           };
           return true;
         },
+        'Shift-Enter': () => {
+          const selection = this.selection;
+          if (!selection || selection.isEditing) {
+            return false;
+          }
+          const cell = this.getCellContainer(
+            selection.focus.rowIndex,
+            selection.focus.columnIndex
+          );
+          if (cell) {
+            this.insertRowAfter(cell.rowId);
+          }
+          return true;
+        },
         Tab: ctx => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
@@ -695,6 +709,44 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     this.focusRef.value?.scrollIntoView({
       block: 'nearest',
       inline: 'nearest',
+    });
+  }
+
+  public insertRowBefore(rowId: string) {
+    const id = this.tableView.view.rowAdd({ before: true, id: rowId });
+    this.selection = {
+      focus: {
+        rowIndex: this.tableView.view.rows.findIndex(v => v === id),
+        columnIndex: this.selection?.focus.columnIndex ?? 0,
+      },
+      isEditing: false,
+    };
+  }
+
+  public insertRowAfter(rowId: string) {
+    const id = this.tableView.view.rowAdd({ before: false, id: rowId });
+    requestAnimationFrame(() => {
+      this.selection = {
+        focus: {
+          rowIndex: this.tableView.view.rows.findIndex(v => v === id),
+          columnIndex: this.selection?.focus.columnIndex ?? 0,
+        },
+        isEditing: true,
+      };
+    });
+  }
+
+  public deleteRow(rowId: string) {
+    const index = this.tableView.view.rows.findIndex(id => id === rowId);
+    this.tableView.view.rowDelete([rowId]);
+    requestAnimationFrame(() => {
+      this.selection = {
+        focus: {
+          rowIndex: index - 1,
+          columnIndex: this.selection?.focus.columnIndex ?? 0,
+        },
+        isEditing: true,
+      };
     });
   }
 }

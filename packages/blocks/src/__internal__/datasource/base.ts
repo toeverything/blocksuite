@@ -1,4 +1,5 @@
 import type { Disposable, Slot } from '@blocksuite/global/utils';
+import { undefined } from 'zod';
 
 import type {
   ColumnConfig,
@@ -23,6 +24,7 @@ export interface DataSource {
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
   rowAdd: (insertPosition: InsertPosition) => string;
   rowDelete: (ids: string[]) => void;
+  propertyGetMain: () => string | undefined;
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
   propertyGetType: (propertyId: string) => string;
@@ -140,6 +142,8 @@ export abstract class BaseDataSource implements DataSource {
 
   public columnConfigManager: ColumnConfigManager = columnManager;
   public abstract allPropertyConfig: ColumnConfig[];
+
+  public abstract propertyGetMain(): string | undefined;
 }
 
 export type DatabaseBlockDatasourceConfig = {

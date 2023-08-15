@@ -41,10 +41,9 @@ test.describe('focus', () => {
     await switchColumnType(page, 'Number');
     await initDatabaseDynamicRowWithData(page, '123', true);
 
-    const selectColumn = getDatabaseBodyCellContent(page, {
+    const selectColumn = getDatabaseBodyCell(page, {
       rowIndex: 1,
       columnIndex: 1,
-      cellClass: 'number',
     });
 
     const endBox = await getBoundingBox(selectColumn);
@@ -119,10 +118,9 @@ test.describe('row-level selection', () => {
     await switchColumnType(page, 'Number');
     await initDatabaseDynamicRowWithData(page, '123', true);
 
-    const selectColumn = getDatabaseBodyCellContent(page, {
+    const selectColumn = getDatabaseBodyCell(page, {
       rowIndex: 1,
       columnIndex: 1,
-      cellClass: 'number',
     });
 
     const endBox = await getBoundingBox(selectColumn);

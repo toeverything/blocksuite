@@ -343,6 +343,10 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       checkboxColumnConfig,
     ];
   }
+
+  public override propertyGetMain(): string | undefined {
+    return this._model.columns.find(v => v.type === 'title')?.id;
+  }
 }
 
 export const hiddenColumn = [titleColumnConfig, imageColumnConfig];

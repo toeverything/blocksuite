@@ -55,7 +55,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       border-radius: 8px;
       background-color: var(--affine-background-primary-color);
       padding: 8px;
-      margin: -8px;
+      margin: 8px -8px -8px;
     }
     .database-block-selected {
       background-color: var(--affine-hover-color);

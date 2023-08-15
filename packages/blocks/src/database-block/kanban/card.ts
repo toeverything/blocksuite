@@ -3,15 +3,23 @@ import './cell.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import { positionToVRect } from '../../components/menu/index.js';
+import { MoreHorizontalIcon, NewEditIcon } from '../../icons/index.js';
 import { popSideDetail } from '../common/detail/layout.js';
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
+import type {
+  DataViewKanbanColumnManager,
+  DataViewKanbanManager,
+} from './kanban-view-manager.js';
+import { openDetail, popCardMenu } from './menu.js';
 
 const styles = css`
   affine-data-view-kanban-card {
     display: flex;
+    position: relative;
     flex-direction: column;
     border: 1px solid var(--affine-border-color);
     box-shadow: 0px 2px 3px 0px rgba(0, 0, 0, 0.05);
@@ -29,6 +37,9 @@ const styles = css`
     display: flex;
     flex-direction: column;
     gap: 8px;
+  }
+
+  .card-header.has-divider {
     border-bottom: 0.5px solid var(--affine-border-color);
   }
 
@@ -59,6 +70,39 @@ const styles = css`
     padding: 8px;
     gap: 4px;
   }
+
+  affine-data-view-kanban-card:hover .card-ops {
+    visibility: visible;
+  }
+
+  .card-ops {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    visibility: hidden;
+    display: flex;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .card-op {
+    display: flex;
+    padding: 4px;
+    border-radius: 4px;
+    box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
+    background-color: var(--affine-background-primary-color);
+  }
+
+  .card-op:hover {
+    background-color: var(--affine-hover-color);
+  }
+
+  .card-op svg {
+    fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 @customElement('affine-data-view-kanban-card')
@@ -76,8 +120,11 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    this._disposables.addFromEvent(this, 'contextmenu', e => {
+      this.contextMenu(e);
+    });
     this._disposables.addFromEvent(this, 'click', e => {
-      const selection = this.closest('affine-data-view-kanban')?.selection;
+      const selection = this.getSelection();
       const preSelection = selection?.selection;
       if (selection) {
         selection.selection = undefined;
@@ -126,42 +173,104 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     </div>`;
   }
 
-  private renderHeader() {
+  private renderHeader(columns: DataViewKanbanColumnManager[]) {
     if (!this.view.hasHeader(this.cardId)) {
       return '';
     }
-
+    const classList = classMap({
+      'card-header': true,
+      'has-divider': columns.length > 0,
+    });
     return html`
-      <div class="card-header">${this.renderTitle()} ${this.renderIcon()}</div>
+      <div class="${classList}">${this.renderTitle()} ${this.renderIcon()}</div>
     `;
   }
 
+  private renderBody(columns: DataViewKanbanColumnManager[]) {
+    if (columns.length === 0) {
+      return '';
+    }
+    return html` <div class="card-body">
+      ${repeat(
+        columns,
+        v => v.id,
+        column => {
+          if (this.view.isInHeader(column.id)) {
+            return '';
+          }
+          return html` <affine-data-view-kanban-cell
+            .contentOnly="${false}"
+            data-column-id="${column.id}"
+            .view="${this.view}"
+            .groupKey="${this.groupKey}"
+            .column="${column}"
+            .cardId="${this.cardId}"
+          ></affine-data-view-kanban-cell>`;
+        }
+      )}
+    </div>`;
+  }
+
   override render() {
-    const columns = this.view.columnManagerList;
+    const columns = this.view.columnManagerList.filter(
+      v => !this.view.isInHeader(v.id)
+    );
     this.style.border = this.isFocus
       ? '1px solid var(--affine-primary-color)'
       : '';
-    return html` ${this.renderHeader()}
-      <div class="card-body">
-        ${repeat(
-          columns,
-          v => v.id,
-          column => {
-            if (this.view.isInHeader(column.id)) {
-              return '';
-            }
-            return html` <affine-data-view-kanban-cell
-              .contentOnly="${false}"
-              data-column-id="${column.id}"
-              .view="${this.view}"
-              .groupKey="${this.groupKey}"
-              .column="${column}"
-              .cardId="${this.cardId}"
-            ></affine-data-view-kanban-cell>`;
-          }
-        )}
-      </div>`;
+    return html`
+      ${this.renderHeader(columns)} ${this.renderBody(columns)}
+      ${this.renderOps()}
+    `;
   }
+
+  private renderOps() {
+    return html`
+      <div class="card-ops">
+        <div class="card-op" @click="${this.clickEdit}">${NewEditIcon}</div>
+        <div class="card-op" @click="${this.clickMore}">
+          ${MoreHorizontalIcon}
+        </div>
+      </div>
+    `;
+  }
+
+  private clickEdit = (e: MouseEvent) => {
+    e.stopPropagation();
+    const selection = this.getSelection();
+    if (selection) {
+      openDetail(this.cardId, selection);
+    }
+  };
+
+  private getSelection() {
+    return this.closest('affine-data-view-kanban')?.selection;
+  }
+
+  private clickMore = (e: MouseEvent) => {
+    e.stopPropagation();
+    const selection = this.getSelection();
+    const ele = e.currentTarget as HTMLElement;
+    if (selection) {
+      selection.selection = {
+        groupKey: this.groupKey,
+        cardId: this.cardId,
+      };
+      popCardMenu(ele, this.cardId, selection);
+    }
+  };
+  private contextMenu = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const selection = this.getSelection();
+    if (selection) {
+      selection.selection = {
+        groupKey: this.groupKey,
+        cardId: this.cardId,
+      };
+      popCardMenu(positionToVRect(e.x, e.y), this.cardId, selection);
+    }
+  };
 }
 
 declare global {
