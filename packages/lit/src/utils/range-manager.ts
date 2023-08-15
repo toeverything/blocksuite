@@ -18,8 +18,6 @@ type RangeSnapshot = {
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
-  private _reusedRange: Range | null = null;
-
   constructor(public root: BlockSuiteRoot) {
     new RangeSynchronizer(root);
   }
@@ -28,11 +26,12 @@ export class RangeManager {
     return this._range;
   }
 
-  private get _range() {
-    if (!this._reusedRange) {
-      this._reusedRange = document.createRange();
-    }
-    return this._reusedRange;
+  private _range: Range | null = null;
+
+  clearRange() {
+    this._range = null;
+    this.root.selectionManager.clear(['text']);
+    window.getSelection()?.removeAllRanges();
   }
 
   renderRange(start: Range, end?: Range | null) {
@@ -41,23 +40,20 @@ export class RangeManager {
       ranges.push(end);
     }
 
-    const range = this._mergeRanges(ranges);
-    if (range) {
-      this._reusedRange = range;
-      this._renderRange();
-    }
+    this._range = this._mergeRanges(ranges);
+    this._renderRange();
   }
 
   syncTextSelectionToRange(selection: TextSelection | null) {
     if (!selection) {
-      this._reusedRange = null;
-      window.getSelection()?.removeAllRanges();
+      this.clearRange();
       return;
     }
 
     const { from, to } = selection;
     const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
     if (!fromBlock) {
+      this.clearRange();
       return;
     }
 
@@ -65,16 +61,22 @@ export class RangeManager {
     const endRange = to ? this.pointToRange(to) : null;
 
     if (!startRange) {
+      this.clearRange();
       return;
     }
     this.renderRange(startRange, endRange);
   }
 
-  syncRangeToTextSelection(range: Range) {
-    const selectionManager = this.root.selectionManager;
-    this._reusedRange = range;
+  syncRangeToTextSelection(range: Range | null) {
+    if (!range) {
+      this.clearRange();
+      return null;
+    }
 
-    const { startContainer, endContainer } = this._range;
+    const selectionManager = this.root.selectionManager;
+    this._range = range;
+
+    const { startContainer, endContainer } = range;
     const from = this._nodeToPoint(startContainer);
     const to = range.collapsed ? null : this._nodeToPoint(endContainer);
     if (!from) {
@@ -216,7 +218,9 @@ export class RangeManager {
     if (!block) {
       return null;
     }
-    const vRange = virgoElement.virgoEditor.toVRange(this._range);
+    const vRange = this._range
+      ? virgoElement.virgoEditor.toVRange(this._range)
+      : null;
     if (!vRange) {
       return null;
     }
@@ -290,6 +294,7 @@ export class RangeManager {
   private _renderRange() {
     const selection = document.getSelection();
     if (!selection || !this._range) {
+      this.clearRange();
       return;
     }
 
