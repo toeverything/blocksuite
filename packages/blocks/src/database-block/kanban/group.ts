@@ -20,7 +20,7 @@ import type {
 
 const styles = css`
   affine-data-view-kanban-group {
-    width: 252px;
+    width: 260px;
     flex-shrink: 0;
     border-radius: 8px;
     display: flex;
@@ -40,7 +40,7 @@ const styles = css`
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: var(--data-view-cell-text-size);
   }
   .group-header-name {
     flex: 1;
@@ -117,8 +117,8 @@ const styles = css`
     padding: 4px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: var(--data-view-cell-text-size);
+    line-height: var(--data-view-cell-text-line-height);
     visibility: hidden;
     transition: visibility 100ms ease-in-out;
   }
@@ -150,7 +150,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   group!: KanbanGroupData;
   private clickAddCard = () => {
-    const id = this.view.addCard('end', this.group);
+    const id = this.view.addCard('end', this.group.key);
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
@@ -166,7 +166,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     });
   };
   private clickAddCardInStart = () => {
-    const id = this.view.addCard('start', this.group);
+    const id = this.view.addCard('start', this.group.key);
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {

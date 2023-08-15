@@ -16,6 +16,9 @@ import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class TagsDatasource extends BaseDataSource {
+  public override propertyGetMain(): string | undefined {
+    return 'value';
+  }
   private meta: Workspace['meta'];
 
   public get rows(): string[] {

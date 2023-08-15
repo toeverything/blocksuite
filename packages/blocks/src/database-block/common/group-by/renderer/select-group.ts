@@ -22,9 +22,8 @@ export class SelectGroupView extends BaseGroup<
     .tag {
       padding: 0 8px;
       border-radius: 4px;
-      font-size: 12px;
-      line-height: 20px;
-      height: 20px;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

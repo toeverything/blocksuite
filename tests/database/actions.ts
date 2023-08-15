@@ -405,9 +405,9 @@ export async function assertCellsSelection(
     const cellBox = await getBoundingBox(cell);
     expect(focusBox).toEqual({
       x: cellBox.x,
-      y: cellBox.y,
-      height: cellBox.height + 1,
-      width: cellBox.width,
+      y: cellBox.y - 1,
+      height: cellBox.height + 2,
+      width: cellBox.width + 1,
     });
   } else {
     // multi cells
