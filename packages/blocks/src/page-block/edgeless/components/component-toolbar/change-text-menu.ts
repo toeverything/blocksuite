@@ -85,7 +85,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
     .font-size-button-group {
       position: relative;
-      width: 76px;
+      width: 72px;
       height: 24px;
       line-height: 24px;
     }
@@ -97,6 +97,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
     .font-size-button-group .arrow-down-icon {
       position: absolute;
+      top: 2.5px;
       right: 4px;
     }
 
