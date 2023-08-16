@@ -37,7 +37,7 @@ export class ListBlockService extends BaseService<ListBlockModel> {
     }
     if (
       previousSiblingBlock?.flavour !== block.flavour ||
-      previousSiblingBlock.type !== block.type
+      (previousSiblingBlock as ListBlockModel).type !== block.type
     ) {
       switch (block.type) {
         case 'bulleted':
@@ -54,7 +54,7 @@ export class ListBlockService extends BaseService<ListBlockModel> {
     }
     if (
       nextSiblingBlock?.flavour !== block.flavour ||
-      nextSiblingBlock.type !== block.type
+      (nextSiblingBlock as ListBlockModel).type !== block.type
     ) {
       switch (block.type) {
         case 'bulleted':

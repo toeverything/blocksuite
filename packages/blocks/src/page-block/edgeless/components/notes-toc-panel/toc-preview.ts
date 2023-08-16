@@ -175,7 +175,7 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
           <span class="text">Divider</span>
         `;
       default:
-        return block.type;
+        return block.flavour;
     }
   }
 

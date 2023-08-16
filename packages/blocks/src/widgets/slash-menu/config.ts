@@ -41,6 +41,7 @@ import {
   onModelTextUpdated,
 } from '../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
+import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -452,7 +453,7 @@ export const menuGroups: {
           pageElement.page.addBlock(
             model.flavour,
             {
-              type: model.type,
+              type: (model as ParagraphBlockModel).type,
               text: pageElement.page.Text.fromDelta(model.text.toDelta()),
               // @ts-expect-error
               checked: model.checked,

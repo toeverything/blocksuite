@@ -171,16 +171,14 @@ export class BaseBlockModel<
   id!: string;
   yBlock!: YBlock;
 
+  // text is optional
+  text?: Text;
+
   propsUpdated = new Slot();
   childrenUpdated = new Slot();
   childMap = new Map<string, number>();
 
   children: BaseBlockModel[] = [];
-
-  // TODO: remove these
-  type?: string;
-  text?: Text;
-  sourceId?: string;
 
   // TODO: infer return type
   originProp(prop: string & keyof Props) {
