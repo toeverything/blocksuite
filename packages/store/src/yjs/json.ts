@@ -35,7 +35,21 @@ export function toJSON(value: unknown): unknown {
   return value;
 }
 
+export function docToJSON(doc: Y.Doc): object {
+  const json: Record<string, unknown> = {};
+  doc.share.forEach((value, key) => {
+    json[key] = toJSON(value);
+  });
+  return json;
+}
+
 export function fromJSON(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    const yArray = new Y.Array<unknown>();
+    const result = value.map(item => fromJSON(item));
+    yArray.insert(0, result);
+    return yArray;
+  }
   if (value instanceof Object) {
     if (Reflect.has(value, NATIVE_UNIQ_IDENTIFIER)) {
       return new NativeWrapper(Reflect.get(value, 'value'));
@@ -52,12 +66,18 @@ export function fromJSON(value: unknown): unknown {
 
     return yMap;
   }
-  if (Array.isArray(value)) {
-    const yArray = new Y.Array<unknown>();
-    const result = value.map(item => fromJSON(item));
-    yArray.insert(0, result);
-    return yArray;
-  }
 
   return value;
+}
+
+export function docFromJSON(value: object): Y.Doc {
+  const doc = new Y.Doc();
+  Object.entries(value).forEach(([k, v]) => {
+    const map = doc.getMap(k);
+    Object.entries(v).forEach(([k, v]) => {
+      map.set(k, fromJSON(v));
+    });
+  });
+  console.log(doc.toJSON());
+  return doc;
 }
