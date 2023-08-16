@@ -183,6 +183,28 @@ export class ShapeOverlay extends ToolOverlay {
   ) {
     super(edgeless);
     this.shape = ShapeFactory.createShape(this.x, this.y, type, options);
+    this.disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(edgelessTool => {
+        if (edgelessTool.type !== 'shape') return;
+        const shapeType = edgelessTool.shape;
+        const computedStyle = getComputedStyle(edgeless);
+        const strokeColor = computedStyle.getPropertyValue(
+          edgelessTool.strokeColor
+        );
+        const newOptions = {
+          ...options,
+          stroke: strokeColor,
+        };
+
+        this.shape = ShapeFactory.createShape(
+          this.x,
+          this.y,
+          shapeType,
+          newOptions
+        );
+        this.edgeless.surface.refresh();
+      })
+    );
   }
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {

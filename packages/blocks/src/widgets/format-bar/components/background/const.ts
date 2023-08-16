@@ -1,6 +1,6 @@
 interface BackgroundConfig {
   name: string;
-  color: string;
+  color: string | null;
   hotkey: string | null;
 }
 
@@ -18,7 +18,7 @@ const colors = [
 export const backgroundConfig: BackgroundConfig[] = [
   {
     name: 'Default Background',
-    color: 'unset',
+    color: null,
     hotkey: null,
   },
   ...colors.map(color => ({

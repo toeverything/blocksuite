@@ -1,5 +1,4 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
-import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { SerializedBlock } from '../__internal__/index.js';
 import type { BlockTransformContext } from '../__internal__/index.js';
@@ -35,7 +34,7 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
   }
 
   override async json2Block(
-    focusedBlockModel: BaseBlockModel,
+    focusedBlockModel: ParagraphBlockModel,
     pastedBlocks: SerializedBlock[],
     textRangePoint?: TextRangePoint
   ) {

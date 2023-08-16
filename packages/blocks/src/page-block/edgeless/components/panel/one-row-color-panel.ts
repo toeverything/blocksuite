@@ -9,9 +9,9 @@ export class EdgelessOneRowColorPanel extends EdgelessColorPanel {
   static override styles = css`
     :host {
       display: flex;
-      width: 400px;
-      padding: 8px 12px;
-      gap: 12px;
+      width: 442px;
+      padding: 0 2px;
+      gap: 18px;
       box-sizing: border-box;
       background: var(--affine-popover-background);
     }

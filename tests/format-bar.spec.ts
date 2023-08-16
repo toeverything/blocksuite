@@ -17,6 +17,7 @@ import {
   pressArrowUp,
   pressEnter,
   registerFormatBarCustomElements,
+  selectAllByKeyboard,
   setSelection,
   switchReadonly,
   type,
@@ -326,16 +327,25 @@ test('should format quick bar be able to change background color', async ({
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
-  // drag only the `456` paragraph
+  // select `456` paragraph by dragging
   await dragBetweenIndices(page, [1, 0], [1, 3]);
 
-  const paragraphBtn = page.locator('.background-button');
-  await paragraphBtn.hover();
+  const backgroundBtn = page.locator('.background-highlight-icon');
   const PinkBtn = page
     .locator(`.affine-format-bar-widget`)
     .getByTestId('var(--affine-text-highlight-pink)');
+  const DefaultColorBtn = page
+    .locator(`.affine-format-bar-widget`)
+    .getByTestId('unset');
+
+  await backgroundBtn.hover();
   await expect(PinkBtn).toBeVisible();
+  await expect(backgroundBtn).toHaveAttribute('data-last-used', 'unset');
   await PinkBtn.click();
+  await expect(backgroundBtn).toHaveAttribute(
+    'data-last-used',
+    'var(--affine-text-highlight-pink)'
+  );
 
   await assertStoreMatchJSX(
     page,
@@ -368,9 +378,11 @@ test('should format quick bar be able to change background color', async ({
     noteId
   );
 
-  // drag only the `123` paragraph
-  await dragBetweenIndices(page, [0, 0], [0, 3]);
-  await paragraphBtn.click();
+  // select `123` paragraph by ctrl + a
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
+  // use last used color
+  await backgroundBtn.click();
 
   await assertStoreMatchJSX(
     page,
@@ -409,11 +421,6 @@ test('should format quick bar be able to change background color', async ({
 </affine:note>`,
     noteId
   );
-
-  await paragraphBtn.hover();
-  const DefaultColorBtn = page
-    .locator(`.affine-format-bar-widget`)
-    .getByTestId('unset');
 
   await expect(DefaultColorBtn).toBeVisible();
   await DefaultColorBtn.click();

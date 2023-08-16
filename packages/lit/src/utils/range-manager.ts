@@ -60,7 +60,11 @@ export class RangeManager {
     }
 
     const startRange = this.pointToRange(from);
+    this._setUpRangePoint(from);
     const endRange = to ? this.pointToRange(to) : null;
+    if (to) {
+      this._setUpRangePoint(to);
+    }
 
     if (!startRange) {
       this.clearRange(false);
@@ -197,6 +201,29 @@ export class RangeManager {
     const length =
       index + point.length >= maxLength ? maxLength - index : point.length;
 
+    return startVirgoElement.virgoEditor.toDomRange({
+      index,
+      length,
+    });
+  }
+
+  private _setUpRangePoint(point: TextRangePoint) {
+    const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
+    if (!fromBlock) {
+      return;
+    }
+    const startVirgoElement =
+      fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
+    assertExists(
+      startVirgoElement,
+      `Cannot find virgo element in block ${point.path.join(' > ')}}`
+    );
+
+    const maxLength = startVirgoElement.virgoEditor.yText.length;
+    const index = point.index >= maxLength ? maxLength : point.index;
+    const length =
+      index + point.length >= maxLength ? maxLength - index : point.length;
+
     startVirgoElement.virgoEditor.setVRange(
       {
         index,
@@ -204,11 +231,6 @@ export class RangeManager {
       },
       false
     );
-
-    return startVirgoElement.virgoEditor.toDomRange({
-      index,
-      length,
-    });
   }
 
   private _nodeToPoint(node: Node) {

@@ -43,7 +43,6 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
     end?: number
   ): SerializedBlock {
     return {
-      type: block.type,
       sourceId: block.sourceId,
       width: block.width,
       height: block.height,

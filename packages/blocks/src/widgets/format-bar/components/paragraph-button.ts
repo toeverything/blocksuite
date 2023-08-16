@@ -7,7 +7,7 @@ import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
 import { ArrowDownIcon } from '../../../icons/index.js';
-import type { Flavour } from '../../../models.js';
+import type { Flavour, ParagraphBlockModel } from '../../../models.js';
 import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
 import { onModelElementUpdated } from '../../../page-block/utils/callback.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
@@ -35,12 +35,14 @@ const updateParagraphType = (
   }
   const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
   const targetFlavour = selectedBlockElements.every(
-    el => el.flavour === flavour && el.model.type === type
+    el =>
+      el.flavour === flavour && (el.model as ParagraphBlockModel).type === type
   )
     ? defaultFlavour
     : flavour;
   const targetType = selectedBlockElements.every(
-    el => el.flavour === flavour && el.model.type === type
+    el =>
+      el.flavour === flavour && (el.model as ParagraphBlockModel).type === type
   )
     ? defaultType
     : type;
@@ -111,7 +113,8 @@ export const ParagraphButton = ({
       : paragraphConfig.find(
           ({ flavour, type }) =>
             selectedBlockElements[0].flavour === flavour &&
-            selectedBlockElements[0].model.type === type
+            (selectedBlockElements[0].model as ParagraphBlockModel).type ===
+              type
         )?.icon ?? paragraphConfig[0].icon;
 
   const pageElement = formatBar.pageElement;

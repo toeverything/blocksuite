@@ -50,6 +50,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       padding: 0 12px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
+      border: 1px solid var(--affine-border-color);
       border-radius: 40px;
       fill: currentcolor;
       min-height: 52px;

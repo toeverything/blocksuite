@@ -373,9 +373,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let hasNote = false;
 
     for (const element of elements) {
-      if (isTopLevelBlock(element)) hasNote = true;
-      if (element.type !== 'connector') isAllConnector = false;
-      if (element.type !== 'shape') isAllShapes = false;
+      if (isTopLevelBlock(element)) {
+        hasNote = true;
+      } else {
+        if (element.type !== 'connector') isAllConnector = false;
+        if (element.type !== 'shape') isAllShapes = false;
+      }
     }
 
     if (hasNote) return 'edge';

@@ -1,7 +1,8 @@
 import type { ListBlockModel } from '../list-model.js';
 
 const getIndex = (model: ListBlockModel) => {
-  const siblings = model.page.getParent(model)?.children || [];
+  const siblings = (model.page.getParent(model)?.children ||
+    []) as ListBlockModel[];
   const fakeIndex = siblings.findIndex(v => v === model);
 
   // fakeIndex is the index of the model in the parent's children array

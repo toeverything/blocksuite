@@ -7,7 +7,7 @@ import { getBlockElementByModel } from '../../__internal__/utils/query.js';
 import { toast } from '../../components/toast.js';
 import type { ImageBlockModel } from '../image-model.js';
 
-async function getImageBlob(model: BaseBlockModel) {
+async function getImageBlob(model: ImageBlockModel) {
   const blob = await getBlobByModel(model);
 
   if (!blob) return null;
@@ -90,7 +90,7 @@ export async function copyImage(model: ImageBlockModel) {
   }
 }
 
-export async function downloadImage(model: BaseBlockModel) {
+export async function downloadImage(model: ImageBlockModel) {
   const blob = await getImageBlob(model);
   if (!blob) return;
   downloadBlob(blob, 'image');
@@ -106,7 +106,7 @@ export function focusCaption(model: BaseBlockModel) {
   dom.focus();
 }
 
-async function getBlobByModel(model: BaseBlockModel) {
+async function getBlobByModel(model: ImageBlockModel) {
   assertExists(model.sourceId);
   const store = model.page.blobs;
   const blob = await store.get(model.sourceId);

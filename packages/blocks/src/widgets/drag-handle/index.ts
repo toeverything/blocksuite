@@ -113,8 +113,8 @@ export class DragHandleWidget extends WidgetElement {
 
     // Some blocks have padding, should consider padding when calculating position
     const computedStyle = getComputedStyle(blockElement);
-    const paddingTop = parseInt(computedStyle.paddingTop);
-    const paddingLeft = parseInt(computedStyle.paddingLeft);
+    const paddingTop = parseInt(computedStyle.paddingTop) * this._scale;
+    const paddingLeft = parseInt(computedStyle.paddingLeft) * this._scale;
     left += paddingLeft;
     top += paddingTop;
 

@@ -35,7 +35,6 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       ) ?? [];
     return {
       flavour: block.flavour,
-      type: block.type as string,
       text: delta,
       xywh: block.xywh,
       background: block.background,
