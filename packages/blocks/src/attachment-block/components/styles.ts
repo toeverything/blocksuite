@@ -109,7 +109,8 @@ export const styles = css`
     background-color: var(--affine-border-color);
   }
 
-  .affine-attachment-options > div[hidden] {
+  .affine-attachment-options > div[hidden],
+  icon-button[hidden] {
     display: none;
   }
 
