@@ -21,6 +21,9 @@
     },
     {
       "path": "../phasor"
+    },
+    {
+      "path": "../virgo"
     }
   ]
 }
