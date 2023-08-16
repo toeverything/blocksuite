@@ -18,22 +18,6 @@
     "./config": "./src/config/index.ts",
     "./error": "./src/error/index.ts"
   },
-  "typesVersions": {
-    "*": {
-      "utils": [
-        "dist/utils.d.ts"
-      ],
-      "debug": [
-        "dist/debug.d.ts"
-      ],
-      "config": [
-        "dist/config/index.d.ts"
-      ],
-      "error": [
-        "dist/error/index.d.ts"
-      ]
-    }
-  },
   "author": "toeverything",
   "license": "MPL-2.0",
   "publishConfig": {
