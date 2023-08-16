@@ -1,7 +1,5 @@
 import { html, svg } from 'lit';
 
-import { icon } from './utils.js';
-
 // Edgeless toolbar
 
 export const SelectIcon = html`<svg
