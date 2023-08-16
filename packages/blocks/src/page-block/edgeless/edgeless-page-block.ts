@@ -1093,6 +1093,21 @@ export class EdgelessPageBlockComponent
     this._resizeObserver = resizeObserver;
   }
 
+  private _initPixelRatioChangeEffect() {
+    let media: MediaQueryList;
+
+    const onPixelRatioChange = () => {
+      this.surface.onResize();
+
+      if (media) media.removeEventListener('change', onPixelRatioChange);
+
+      media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      media.addEventListener('change', onPixelRatioChange);
+    };
+
+    onPixelRatioChange();
+  }
+
   private _initNoteHeightUpdate() {
     const resetNoteResizeObserver = throttle(
       () => {
@@ -1118,6 +1133,7 @@ export class EdgelessPageBlockComponent
   override firstUpdated() {
     this._initSlotEffects();
     this._initResizeEffect();
+    this._initPixelRatioChangeEffect();
     this._initNoteHeightUpdate();
     this.clipboard.init(this.page);
 
