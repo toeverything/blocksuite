@@ -242,6 +242,9 @@ importers:
       vitepress:
         specifier: 1.0.0-alpha.74
         version: 1.0.0-alpha.74(@types/node@18.17.1)(@types/react@18.2.17)(search-insights@2.7.0)
+      vue:
+        specifier: ^3.3.4
+        version: 3.3.4
 
   packages/editor:
     dependencies:
