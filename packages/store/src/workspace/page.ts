@@ -631,9 +631,9 @@ export class Page extends Space<FlatBlockMap> {
         bringChildrenTo.children.push(...model.children);
       }
     }
-    this._blockMap.delete(model.id);
 
-    model.propsUpdated.emit();
+    this._blockMap.delete(model.id);
+    model.deleted.emit();
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
@@ -654,6 +654,8 @@ export class Page extends Space<FlatBlockMap> {
             children: options.bringChildrenTo.children,
           });
         }
+
+        parent.childrenUpdated.emit();
       }
     });
 

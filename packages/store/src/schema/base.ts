@@ -175,6 +175,7 @@ export class BaseBlockModel<
   text?: Text;
 
   created = new Slot();
+  deleted = new Slot();
   propsUpdated = new Slot();
   childrenUpdated = new Slot();
 
@@ -217,6 +218,7 @@ export class BaseBlockModel<
 
   dispose() {
     this.created.dispose();
+    this.deleted.dispose();
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
   }
