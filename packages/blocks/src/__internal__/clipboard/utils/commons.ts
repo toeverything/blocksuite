@@ -2,9 +2,9 @@ import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import { getSelectedContentModels } from '../../../index.js';
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
 import { getServiceOrRegister } from '../../service/index.js';
 import {
