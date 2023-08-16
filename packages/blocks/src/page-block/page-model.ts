@@ -6,15 +6,16 @@ type PageProps = {
 };
 
 export class PageBlockModel extends BaseBlockModel<PageProps> {
-  override onCreated() {
-    super.onCreated();
-
-    this.page.slots.blockUpdated.on(({ type }) => {
-      if (type === 'add') {
-        this.page.workspace.setPageMeta(this.page.id, {
-          title: this.title.toString(),
-        });
-      }
+  constructor() {
+    super();
+    this.created.on(() => {
+      this.page.slots.blockUpdated.on(({ type }) => {
+        if (type === 'add') {
+          this.page.workspace.setPageMeta(this.page.id, {
+            title: this.title.toString(),
+          });
+        }
+      });
     });
   }
 }

@@ -757,7 +757,7 @@ export class Page extends Space<FlatBlockMap> {
     blockModel.flavour = schema.model.flavour;
     blockModel.role = schema.model.role;
 
-    blockModel.onCreated();
+    blockModel.created.emit();
 
     return blockModel;
   }

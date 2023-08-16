@@ -174,10 +174,11 @@ export class BaseBlockModel<
   // text is optional
   text?: Text;
 
+  created = new Slot();
   propsUpdated = new Slot();
   childrenUpdated = new Slot();
-  childMap = new Map<string, number>();
 
+  childMap = new Map<string, number>();
   children: BaseBlockModel[] = [];
 
   // TODO: infer return type
@@ -215,11 +216,8 @@ export class BaseBlockModel<
   }
 
   dispose() {
+    this.created.dispose();
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
-  }
-
-  onCreated() {
-    // Empty by default
   }
 }
