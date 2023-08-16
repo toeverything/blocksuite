@@ -83,36 +83,20 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   model.page.deleteBlock(model);
 }
 
-export async function appendAttachmentBlock(
-  file: File,
-  model: BaseBlockModel
-): Promise<AttachmentBlockModel | null> {
-  if (file.size > MAX_ATTACHMENT_SIZE) {
-    toast(
-      `You can only upload files less than ${humanFileSize(
-        MAX_ATTACHMENT_SIZE,
-        true,
-        0
-      )}`
+async function uploadFileForAttachment(
+  attachmentModel: AttachmentBlockModel,
+  file: File
+) {
+  const loadingKey = attachmentModel.loadingKey;
+  const isLoading = loadingKey ? isAttachmentLoading(loadingKey) : false;
+  if (!isLoading) {
+    console.warn(
+      'uploadAttachment: the attachment is not loading!',
+      attachmentModel
     );
-    return null;
   }
-
-  const page = model.page;
+  const page = attachmentModel.page;
   const storage = page.blobs;
-  const loadingKey = page.generateId();
-  setAttachmentLoading(loadingKey, true);
-  const props: AttachmentProps & { flavour: 'affine:attachment' } = {
-    flavour: 'affine:attachment',
-    name: file.name,
-    size: file.size,
-    type: file.type,
-    loadingKey,
-  };
-  const [newBlockId] = page.addSiblingBlocks(model, [props]);
-  assertExists(newBlockId);
-  const attachmentModel = page.getBlockById(newBlockId) as AttachmentBlockModel;
-
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
   // const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
@@ -139,6 +123,42 @@ export async function appendAttachmentBlock(
     } satisfies Partial<AttachmentProps>);
     return null;
   }
+}
+
+export async function appendAttachmentBlock(
+  file: File,
+  model: BaseBlockModel
+): Promise<void> {
+  if (file.size > MAX_ATTACHMENT_SIZE) {
+    toast(
+      `You can only upload files less than ${humanFileSize(
+        MAX_ATTACHMENT_SIZE,
+        true,
+        0
+      )}`
+    );
+    return;
+  }
+
+  const page = model.page;
+  const loadingKey = page.generateId();
+  setAttachmentLoading(loadingKey, true);
+  const props: AttachmentProps & { flavour: 'affine:attachment' } = {
+    flavour: 'affine:attachment',
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    loadingKey,
+  };
+  const [newBlockId] = page.addSiblingBlocks(model, [props]);
+
+  // Upload the file to the storage
+  const attachmentModel = page.getBlockById(
+    newBlockId
+  ) as AttachmentBlockModel | null;
+  assertExists(attachmentModel);
+  // Do not add await here, because upload may take a long time, we want to do it in the background.
+  uploadFileForAttachment(attachmentModel, file);
 }
 
 const attachmentLoadingMap = new Set<string>();
