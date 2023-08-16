@@ -582,7 +582,7 @@ test('cut will delete all content, and copy will reappear content', async ({
   );
 });
 
-test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
+test(scoped`should copy and paste of database work`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 
@@ -590,6 +590,8 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await pressEnter(page);
@@ -614,9 +616,6 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:database
       prop:columns="Array [2]"
       prop:title="Database 1"
@@ -652,12 +651,6 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
-    <affine:paragraph
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:paragraph
       prop:type="text"
     />
