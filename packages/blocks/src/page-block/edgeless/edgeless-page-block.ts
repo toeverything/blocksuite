@@ -71,6 +71,7 @@ import type {
   PageBlockModel,
   SurfaceBlockModel,
 } from '../../index.js';
+import { FontLoader } from '../font-loader/index.js';
 import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteCut } from './components/note-cut/index.js';
@@ -294,6 +295,8 @@ export class EdgelessPageBlockComponent
   };
 
   surface!: SurfaceManager;
+
+  fontLoader!: FontLoader;
 
   indexes: { max: string; min: string } = { max: 'a0', min: 'a0' };
 
@@ -1130,11 +1133,27 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initFontloader() {
+    if (!this.fontLoader) this.fontLoader = new FontLoader();
+
+    this._disposables.add(
+      this.fontLoader.slots.loaded.on(font => {
+        if (font !== 'Kalam:n4,n7' || !this.surface) return;
+
+        if (this.surface.getElementsByType('text').length > 0) {
+          this.surface.onResize();
+        }
+      })
+    );
+    this.fontLoader.load(['Kalam:n4,n7']);
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
     this._initNoteHeightUpdate();
+    this._initFontloader();
     this.clipboard.init(this.page);
 
     requestAnimationFrame(() => {
