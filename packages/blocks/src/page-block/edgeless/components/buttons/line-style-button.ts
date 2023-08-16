@@ -14,13 +14,12 @@ export const lineStyleButtonStyles = [
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 16px;
-      height: 16px;
       color: var(--affine-icon-color);
     }
 
-    .line-style-button {
-      margin: 0 4px;
+    .line-style-button:nth-of-type(2),
+    .line-style-button:nth-of-type(3) {
+      margin-left: 8px;
     }
   `,
 ];

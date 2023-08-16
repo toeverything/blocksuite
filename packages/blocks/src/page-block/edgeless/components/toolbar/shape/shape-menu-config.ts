@@ -56,3 +56,5 @@ export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
   },
   {} as Record<Config['name'], Config>
 );
+
+export const SHAPE_SUBMENU_WIDTH = 464;

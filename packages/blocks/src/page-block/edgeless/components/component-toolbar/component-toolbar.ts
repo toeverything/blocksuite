@@ -55,9 +55,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       padding: 0 8px;
     }
 
-    menu-divider {
-      height: 24px;
-      margin: 0 5px;
+    component-toolbar-menu-divider {
+      margin: 0 12px;
     }
   `;
 
@@ -211,7 +210,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     const divider = buttons.length
-      ? html`<menu-divider .vertical=${true}></menu-divider>`
+      ? html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       : nothing;
 
     return html`<div

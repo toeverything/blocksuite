@@ -3,6 +3,7 @@ import '../panel/color-panel.js';
 import '../panel/shape-style-panel.js';
 import '../panel/shape-panel.js';
 import './change-text-menu.js';
+import './component-toolbar-menu-divider.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -22,11 +23,11 @@ import {
   type ShapeTool,
 } from '../../../../__internal__/utils/types.js';
 import {
-  ArrowDownIcon,
   ChangeShapeIcon,
   GeneralShapeStyleIcon,
   LineStyleIcon,
   ScribbledShapeStyleIcon,
+  ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
@@ -165,11 +166,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         fill: currentColor;
       }
 
-      menu-divider {
-        height: 24px;
-        margin: 0 5px;
-      }
-
       edgeless-shape-panel {
         display: none;
       }
@@ -194,6 +190,15 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       .stroke-color-button {
         margin-left: 12px;
+      }
+
+      .fill-color-container,
+      .stroke-color-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 20px;
+        height: 20px;
       }
 
       .color-panel-container,
@@ -234,14 +239,19 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
       .line-style-panel {
         display: none;
+        padding: 6px;
       }
 
-      .line-style-panel menu-divider {
-        margin: 0 1px;
+      .line-style-panel component-toolbar-menu-divider {
+        margin: 0 8px;
       }
 
       .line-style-panel[data-show] {
         display: flex;
+      }
+
+      component-toolbar-menu-divider {
+        margin: 0 12px;
       }
     `,
   ];
@@ -447,13 +457,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           @click=${() => this._shapePanelPopper?.toggle()}
         >
           <div class="change-shape-button">
-            ${ChangeShapeIcon} ${ArrowDownIcon}
+            ${ChangeShapeIcon} ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>
         <edgeless-shape-panel .selectedShape=${selectedShape}>
         </edgeless-shape-panel>
 
-        <menu-divider .vertical=${true}></menu-divider>
+        <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
           .tooltip=${this._popperShow ? '' : 'Style'}
@@ -466,7 +476,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             ${selectedShapeStyle === ShapeStyle.General
               ? GeneralShapeStyleIcon
               : ScribbledShapeStyleIcon}
-            ${ArrowDownIcon}
+            ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>
         <div class="shape-style-panel-container">
@@ -479,7 +489,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           </edgeless-shape-style-panel>
         </div>
 
-        <menu-divider .vertical=${true}></menu-divider>
+        <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
           class="fill-color-button"
@@ -489,7 +499,9 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._fillColorMenuPopper?.toggle()}
         >
-          ${ColorUnit(selectedFillColor)}
+          <div class="fill-color-container">
+            ${ColorUnit(selectedFillColor)}
+          </div>
         </edgeless-tool-icon-button>
         <div class="color-panel-container fill-color">
           <edgeless-color-panel
@@ -508,7 +520,9 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           .iconContainerPadding=${ICON_BUTTON_PADDING_TWO}
           @click=${() => this._strokeColorMenuPopper?.toggle()}
         >
-          ${ColorUnit(selectedStrokeColor, { hollowCircle: true })}
+          <div class="stroke-color-container">
+            ${ColorUnit(selectedStrokeColor, { hollowCircle: true })}
+          </div>
         </edgeless-tool-icon-button>
         <div class="color-panel-container stroke-color">
           <edgeless-color-panel
@@ -520,7 +534,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           </edgeless-color-panel>
         </div>
 
-        <menu-divider .vertical=${true}></menu-divider>
+        <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
           .tooltip=${this._popperShow ? '' : 'Border style'}
@@ -530,7 +544,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
           @click=${() => this._lineStylesPanelPopper?.toggle()}
         >
           <div class="line-styles-button">
-            ${LineStyleIcon} ${ArrowDownIcon}
+            ${LineStyleIcon} ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>
         ${LineStylesPanel({

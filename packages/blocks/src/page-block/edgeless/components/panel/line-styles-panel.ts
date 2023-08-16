@@ -69,7 +69,7 @@ export function LineStylesPanel({
     className: 'line-style-panel',
     children: html`
       ${lineSizePanel}
-      <menu-divider .vertical=${true}></menu-divider>
+      <component-toolbar-menu-divider></component-toolbar-menu-divider>
       ${lineStyleButtons}
     `,
   });

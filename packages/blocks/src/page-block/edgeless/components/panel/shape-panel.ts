@@ -18,11 +18,14 @@ export class EdgelessShapePanel extends LitElement {
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
-      fill: none;
-      stroke: currentColor;
       padding: 0 8px;
       gap: 8px;
       z-index: 2;
+    }
+
+    .shape-panel-container svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
   `;
 
