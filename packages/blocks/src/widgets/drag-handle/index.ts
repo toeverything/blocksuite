@@ -84,6 +84,7 @@ export class DragHandleWidget extends WidgetElement {
 
   public hide(force = false) {
     if (!this._dragHandleContainer) return;
+
     this._dragHandleContainer.style.display = 'none';
     if (force) this.reset();
   }
@@ -119,6 +120,9 @@ export class DragHandleWidget extends WidgetElement {
     top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
+
+    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
+
     this._dragHandleContainer.style.display = 'flex';
     this._dragHandleContainer.style.height = `${
       containerHeight * this._scale
