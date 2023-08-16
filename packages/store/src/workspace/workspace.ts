@@ -14,7 +14,7 @@ import { sha } from '../persistence/blob/utils.js';
 import type { DocProviderCreator } from '../providers/type.js';
 import type { Schema } from '../schema/index.js';
 import { serializeYDoc } from '../utils/jsx.js';
-import { type AwarenessStore, Text } from '../yjs/index.js';
+import { type AwarenessStore, fromJSON, Text, toJSON } from '../yjs/index.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Store, type StoreOptions } from './store.js';
@@ -260,6 +260,31 @@ export class Workspace {
     return this.indexer.search.search(query);
   }
 
+  async importPageSnapshotV2(json: unknown, pageId: string) {
+    const blocks = fromJSON(json) as Y.Map<unknown>;
+
+    let page = this.getPage(pageId);
+    if (page) {
+      await page.waitForLoaded();
+      page.clear();
+    } else {
+      page = this.createPage({ id: pageId });
+      await page.waitForLoaded();
+    }
+    const doc = new Y.Doc();
+    const spaceBlocks = doc.getMap('blocks') as Y.Map<unknown>;
+
+    blocks.forEach((block, key) => {
+      spaceBlocks.set(key, block);
+    });
+
+    const update = Y.encodeStateAsUpdate(doc);
+
+    Y.applyUpdate(page.spaceDoc, update);
+
+    this.doc.spaces.set(pageId, page.spaceDoc);
+  }
+
   /**
    * @internal
    * Import an object expression of a page.
@@ -396,7 +421,8 @@ export class Workspace {
   exportPageSnapshot(pageId: string) {
     const page = this.getPage(pageId);
     assertExists(page, `page ${pageId} not found`);
-    return serializeYDoc(page.spaceDoc);
+    const blocks = page.spaceDoc.get('blocks');
+    return toJSON(blocks);
   }
 
   exportSnapshot() {
