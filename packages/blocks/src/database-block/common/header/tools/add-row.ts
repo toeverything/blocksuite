@@ -22,7 +22,7 @@ const styles = css`
     font-size: 14px;
     background: var(--affine-white);
     box-shadow: 0px 0px 0px 0.5px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
+    cursor: grab;
   }
 
   .new-record > tool-tip {
@@ -109,9 +109,6 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
       @click="${this._onAddNewRecord}"
     >
       ${PlusIcon}<span>New Record</span>
-      <tool-tip inert arrow tip-position="top" role="tooltip"
-        >You can drag this button to the desired location and add a record
-      </tool-tip>
     </div>`;
   }
 }
