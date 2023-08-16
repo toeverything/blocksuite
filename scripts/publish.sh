@@ -16,10 +16,11 @@ packages=(
 
 npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}"
 
+pnpm build:editor
+
 for package in "${packages[@]}"
 do
   cd "packages/$package"
-  pnpm build
 
   if [ "$NIGHTLY" = "true" ]; then
     pnpm publish --no-git-checks --tag nightly

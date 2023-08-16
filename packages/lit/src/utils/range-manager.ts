@@ -1,7 +1,7 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { VirgoRootElement } from '@blocksuite/virgo';
+import type { VEditor, VirgoRootElement, VRange } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 import type { BlockSuiteRoot } from '../element/lit-root.js';
@@ -60,7 +60,11 @@ export class RangeManager {
     }
 
     const startRange = this.pointToRange(from);
+    this._setUpRangePoint(from);
     const endRange = to ? this.pointToRange(to) : null;
+    if (to) {
+      this._setUpRangePoint(to);
+    }
 
     if (!startRange) {
       this.clearRange(false);
@@ -181,34 +185,49 @@ export class RangeManager {
   }
 
   pointToRange(point: TextRangePoint): Range | null {
-    const fromBlock = this.root.viewStore.viewFromPath('block', point.path);
-    if (!fromBlock) {
+    const result = this._calculateVirgo(point);
+    if (!result) {
       return null;
     }
-    const startVirgoElement =
-      fromBlock.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const [virgoEditor, vRange] = result;
+
+    return virgoEditor.toDomRange(vRange);
+  }
+
+  private _calculateVirgo(point: TextRangePoint): [VEditor, VRange] | null {
+    const block = this.root.viewStore.viewFromPath('block', point.path);
+    if (!block) {
+      return null;
+    }
+    const virgoRoot =
+      block.querySelector<VirgoRootElement>('[data-virgo-root]');
     assertExists(
-      startVirgoElement,
+      virgoRoot,
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
     );
 
-    const maxLength = startVirgoElement.virgoEditor.yText.length;
+    const maxLength = virgoRoot.virgoEditor.yText.length;
     const index = point.index >= maxLength ? maxLength : point.index;
     const length =
       index + point.length >= maxLength ? maxLength - index : point.length;
 
-    startVirgoElement.virgoEditor.setVRange(
+    return [
+      virgoRoot.virgoEditor,
       {
         index,
         length,
       },
-      false
-    );
+    ];
+  }
 
-    return startVirgoElement.virgoEditor.toDomRange({
-      index,
-      length,
-    });
+  private _setUpRangePoint(point: TextRangePoint) {
+    const result = this._calculateVirgo(point);
+    if (!result) {
+      return;
+    }
+    const [virgoEditor, vRange] = result;
+
+    virgoEditor.setVRange(vRange, false);
   }
 
   private _nodeToPoint(node: Node) {
