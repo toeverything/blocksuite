@@ -4,7 +4,6 @@ import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
 import { getServiceOrRegister } from '../../service/index.js';
 import {
@@ -130,10 +129,13 @@ async function createPageClipboardItems(
 }
 
 export async function copyBlocksInPage(pageElement: PageBlockComponent) {
-  const selectedModels = getSelectedContentModels(pageElement, [
-    'text',
-    'block',
-  ]);
+  const selectedModels = pageElement.root.selectionManager
+    .filter('block')
+    .flatMap(
+      selection =>
+        pageElement.root.viewStore.viewFromPath('block', selection.path)
+          ?.model ?? []
+    );
   const textSelection = pageElement.selection.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,

@@ -9,7 +9,8 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "vite-plugin-wasm": "^3.2.2",
-    "vitepress": "1.0.0-alpha.74"
+    "vitepress": "1.0.0-alpha.74",
+    "vue": "^3.3.4"
   },
   "scripts": {
     "dev": "vitepress dev --port 5200",

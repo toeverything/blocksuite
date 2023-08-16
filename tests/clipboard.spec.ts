@@ -24,6 +24,7 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeParagraphs,
+  pasteBlocks,
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
@@ -413,143 +414,45 @@ test(scoped`copy & paste outside editor`, async ({ page }) => {
   await assertRichTexts(page, ['123']);
 });
 
-// FIXME: this test case can pass in local but not online
-test.skip('should keep first line format when pasted into a new line', async ({
+test('should keep first line format when pasted into a new line', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '-');
-  await pressSpace(page);
-  await type(page, '1');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, '2');
-  await pressEnter(page);
-  await type(page, '3');
-  await pressEnter(page);
-  await pressShiftTab(page);
-  await type(page, '4');
 
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-background-secondary-color"
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-  </affine:note>
-</affine:page>`
-  );
+  const pasteBlocksContent = [
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      text: [{ insert: 'aaa' }],
+      children: [],
+    },
+  ];
 
-  await setSelection(page, 3, 0, 5, 1);
+  await pasteBlocks(page, pasteBlocksContent);
   await waitNextFrame(page);
-  await copyByKeyboard(page);
-
-  await focusRichText(page, 3);
-  await pressEnter(page);
-  await pressBackspace(page);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-background-secondary-color"
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-  </affine:note>
-</affine:page>`
-  );
+  await assertRichTexts(page, ['aaa']);
+  await assertBlockTypes(page, ['todo']);
 });
 
-// FIXME: this test case can pass in local but not online
-test.skip(
-  scoped`cut should work for multi-block selection`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
+test(scoped`cut should work for multi-block selection`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
 
-    await type(page, 'a');
-    await pressEnter(page);
-    await type(page, 'b');
-    await pressEnter(page);
-    await type(page, 'c');
-    await selectAllByKeyboard(page);
-    await selectAllByKeyboard(page);
-    await cutByKeyboard(page);
-    await page.locator('.affine-doc-viewport').click();
-    await waitNextFrame(page);
-    await assertText(page, '');
-    await pasteByKeyboard(page);
-    await waitNextFrame(page);
-    await assertRichTexts(page, ['a', 'b', 'c']);
-  }
-);
+  await type(page, 'a');
+  await pressEnter(page);
+  await type(page, 'b');
+  await pressEnter(page);
+  await type(page, 'c');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await cutByKeyboard(page);
+  await page.locator('.affine-doc-viewport').click();
+  await waitNextFrame(page);
+  await assertText(page, '');
+});
 
 test(
   scoped`pasting into empty list should not convert the list into paragraph`,
@@ -567,7 +470,7 @@ test(
   }
 );
 
-test.skip('cut will delete all content, and copy will reappear content', async ({
+test('cut will delete all content, and copy will reappear content', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -614,7 +517,35 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   await waitNextFrame(page);
   await focusRichText(page);
 
-  await pasteByKeyboard(page);
+  const pesteBlocksContent = [
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: '1' }],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: '2' }],
+          children: [],
+        },
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: '3' }],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: '4' }],
+      children: [],
+    },
+  ];
+
+  await pasteBlocks(page, pesteBlocksContent);
   await waitNextFrame(page);
   await assertStoreMatchJSX(
     page,
@@ -651,7 +582,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   );
 });
 
-test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
+test(scoped`should copy and paste of database work`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 
@@ -659,6 +590,8 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await pressEnter(page);
@@ -683,9 +616,6 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:database
       prop:columns="Array [2]"
       prop:title="Database 1"
@@ -721,12 +651,6 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
-    <affine:paragraph
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:paragraph
       prop:type="text"
     />

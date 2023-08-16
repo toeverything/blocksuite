@@ -1,4 +1,4 @@
-import type { TextSelection, UIEventStateContext } from '@blocksuite/block-std';
+import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { Text } from '@blocksuite/store';
@@ -71,7 +71,12 @@ export class TableViewClipboard implements BaseViewClipboard {
         focus.columnIndex
       );
 
-      if (!(event.target instanceof HTMLInputElement)) {
+      if (
+        !(
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement
+        )
+      ) {
         const data = (cellToStringMap[column.type]?.(container) ??
           '') as string;
         const textClipboardItem = new ClipboardItem(
@@ -80,7 +85,7 @@ export class TableViewClipboard implements BaseViewClipboard {
         );
         performNativeCopy([textClipboardItem]);
       } else {
-        // type === 'number'
+        // type === 'number' || type === 'title'
         // Execute browser default behavior
       }
       return true;
@@ -130,17 +135,7 @@ export class TableViewClipboard implements BaseViewClipboard {
 
     const selection = getDatabaseSelection(this._root);
     const tableSelection = selection?.getSelection('table');
-    // When the title column is edited, it is the `TextSelection`.
-    const titleSelection = getTextSelection(this._root, this._path);
-    if (titleSelection) {
-      // paste text
-      const textClipboardData = event.clipboardData?.getData(
-        CLIPBOARD_MIMETYPE.TEXT
-      );
-      if (!textClipboardData) return true;
-
-      pasteToTitleColumn(this._root, titleSelection, textClipboardData);
-    } else if (tableSelection) {
+    if (tableSelection) {
       const {
         isEditing,
         focus: { rowIndex, columnIndex },
@@ -149,7 +144,7 @@ export class TableViewClipboard implements BaseViewClipboard {
       // paste cells' content
       if (isEditing) {
         const column = model.columns[columnIndex];
-        if (column.type !== 'number') {
+        if (column.type !== 'number' && column.type !== 'title') {
           const textClipboardData = event.clipboardData?.getData(
             CLIPBOARD_MIMETYPE.TEXT
           );
@@ -170,7 +165,7 @@ export class TableViewClipboard implements BaseViewClipboard {
             data.cellUpdateValue(rowId, columnId, textClipboardData);
           }
         } else {
-          // type === 'number'
+          // type === 'number' || type === 'title'
           // Execute browser default behavior
         }
 
@@ -225,15 +220,6 @@ function getDatabaseSelection(root: BlockSuiteRoot) {
     (selection): selection is DatabaseSelection => selection.is('database')
   );
   return selection;
-}
-
-function getTextSelection(root: BlockSuiteRoot, path: string[]) {
-  const selection = root.selectionManager.value.find(
-    (selection): selection is TextSelection => selection.is('text')
-  );
-
-  const isDatabaseTitle = selection?.path.join('|').startsWith(path.join('|'));
-  return isDatabaseTitle ? selection : undefined;
 }
 
 function getColumnValue(container: DatabaseCellContainer | undefined) {
@@ -414,28 +400,6 @@ function getTargetRangeFromSelection(
     };
   }
   return range;
-}
-
-function pasteToTitleColumn(
-  root: BlockSuiteRoot,
-  titleSelection: TextSelection,
-  data: string
-) {
-  const view = root.viewStore.viewFromPath('block', titleSelection.path);
-  if (!view) return;
-
-  const text = view.model.text;
-  if (text) {
-    const {
-      from: { index },
-    } = titleSelection;
-    text.insert(data, index);
-    const richText = view.querySelector('rich-text');
-    richText?.vEditor?.setVRange({
-      index: index + data.length,
-      length: 0,
-    });
-  }
 }
 
 function pasteToRichText(
