@@ -462,7 +462,7 @@ export class ImportPage extends WithDisposable(LitElement) {
     }
     return html`
       <header @mousedown=${this._onMouseDown} @mouseup=${this._onMouseUp}>
-        <icon-button height="24px" @click=${this._onCloseClick}>
+        <icon-button height="28px" @click=${this._onCloseClick}>
           ${CloseIcon}
         </icon-button>
         <div>Import</div>
