@@ -405,7 +405,6 @@ test('slash menu should work in edgeless mode', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setEdgelessTool(page, 'note');
 
   await addNote(page, '/', 30, 40);
   await assertRichTexts(page, ['', '/']);
