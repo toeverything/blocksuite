@@ -2,6 +2,7 @@ import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -46,7 +47,7 @@ function createConnectorMenuPopper(
 }
 
 @customElement('edgeless-connector-tool-button')
-export class EdgelessConnectorToolButton extends LitElement {
+export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -96,6 +97,18 @@ export class EdgelessConnectorToolButton extends LitElement {
         this._connectorMenu.element.edgeless = this.edgeless;
       }
     }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+        if (newTool.type !== 'connector') {
+          this._connectorMenu?.dispose();
+          this._connectorMenu = null;
+        }
+      })
+    );
   }
 
   override disconnectedCallback() {

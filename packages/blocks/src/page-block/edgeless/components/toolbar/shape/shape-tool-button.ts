@@ -93,6 +93,24 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     }
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+        if (newTool.type !== 'shape') {
+          this._shapeMenu?.dispose();
+          this._shapeMenu = null;
+        }
+      })
+    );
+  }
+
+  override disconnectedCallback() {
+    this._shapeMenu?.dispose();
+    this._shapeMenu = null;
+    super.disconnectedCallback();
+  }
+
   override render() {
     const type = this.edgelessTool?.type;
 

@@ -163,6 +163,9 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type === 'brush') {
           this._setBrushColor(newTool.color);
+        } else {
+          this._brushMenu?.dispose();
+          this._brushMenu = null;
         }
       })
     );
@@ -170,6 +173,8 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
 
   override disconnectedCallback(): void {
     this._disposables.dispose();
+    this._brushMenu?.dispose();
+    this._brushMenu = null;
     super.disconnectedCallback();
   }
 
