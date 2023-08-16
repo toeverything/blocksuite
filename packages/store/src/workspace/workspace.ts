@@ -283,6 +283,12 @@ export class Workspace {
     page.resetHistory();
   }
 
+  exportPageSnapshotV2(pageId: string) {
+    const page = this.getPage(pageId);
+    assertExists(page, `page ${pageId} not found`);
+    return docToJSON(page.spaceDoc);
+  }
+
   /**
    * @internal
    * Import an object expression of a page.
@@ -419,7 +425,7 @@ export class Workspace {
   exportPageSnapshot(pageId: string) {
     const page = this.getPage(pageId);
     assertExists(page, `page ${pageId} not found`);
-    return docToJSON(page.spaceDoc);
+    return serializeYDoc(page.spaceDoc);
   }
 
   exportSnapshot() {
