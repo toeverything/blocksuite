@@ -21,7 +21,7 @@ export const MoreMenu = ({
     hidden
   >
     <icon-button
-      width="120px"
+      width="126px"
       height="32px"
       text="Download"
       @click="${() => downloadAttachment(model)}"
@@ -29,7 +29,7 @@ export const MoreMenu = ({
       ${DownloadIcon}
     </icon-button>
     <icon-button
-      width="120px"
+      width="126px"
       height="32px"
       text="Duplicate"
       ?disabled=${readonly}
@@ -44,7 +44,7 @@ export const MoreMenu = ({
       ${DuplicateIcon}
     </icon-button>
     <icon-button
-      width="120px"
+      width="126px"
       height="32px"
       text="Delete"
       class="danger"

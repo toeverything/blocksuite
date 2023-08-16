@@ -1,17 +1,14 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
-import {
-  addNote,
-  setEdgelessTool,
-  switchEditorMode,
-} from 'utils/actions/edgeless.js';
+
+import { addNote, switchEditorMode } from './utils/actions/edgeless.js';
 import {
   pressBackspace,
   pressEnter,
   SHORT_KEY,
   type,
   withPressKey,
-} from 'utils/actions/keyboard.js';
+} from './utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   focusRichText,
@@ -20,13 +17,12 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   waitNextFrame,
-} from 'utils/actions/misc.js';
+} from './utils/actions/misc.js';
 import {
   assertAlmostEqual,
   assertRichTexts,
   assertStoreMatchJSX,
-} from 'utils/asserts.js';
-
+} from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
 test.describe('slash menu should show and hide correctly', () => {
@@ -236,6 +232,16 @@ test.describe('slash menu should show and hide correctly', () => {
     await type(page, 'a');
     await assertRichTexts(page, ['/a']);
   });
+});
+
+test.fixme('should slash menu works with fast type', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'a/text', 10);
+  const slashMenu = page.locator(`.slash-menu`);
+  await expect(slashMenu).toBeVisible();
 });
 
 test('should clean slash string after soft enter', async ({ page }) => {
@@ -540,8 +546,11 @@ test('should insert database', async ({ page }) => {
   await focusRichText(page);
 
   await type(page, '/');
-  const todayBlock = page.getByTestId('Table View');
-  await todayBlock.click();
+  const tableBlock = page.getByTestId('Table View');
+  await tableBlock.click();
+
+  // Should remove empty paragraph
+  assertRichTexts(page, []);
 
   const database = page.locator('affine-database');
   expect(database).toBeVisible();
