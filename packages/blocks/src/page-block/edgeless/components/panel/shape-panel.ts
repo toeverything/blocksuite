@@ -10,20 +10,19 @@ import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 @customElement('edgeless-shape-panel')
 export class EdgelessShapePanel extends LitElement {
   static override styles = css`
-    :host {
-      display: block;
-      z-index: 2;
-    }
     .shape-panel-container {
       display: flex;
       align-items: center;
-      height: 48px;
+      justify-content: center;
+      height: 40px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       fill: none;
       stroke: currentColor;
       padding: 0 8px;
+      gap: 8px;
+      z-index: 2;
     }
   `;
 
@@ -53,6 +52,8 @@ export class EdgelessShapePanel extends LitElement {
               .disabled=${disabled}
               .tooltip=${tooltip}
               .active=${this.selectedShape === name}
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
               @click=${() => {
                 if (disabled) return;
                 this._onSelect(name);

@@ -175,7 +175,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       }
 
       edgeless-shape-panel[data-show] {
-        display: block;
+        display: flex;
       }
 
       .change-shape-button,
@@ -199,7 +199,6 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       .color-panel-container,
       .shape-style-panel-container {
         display: none;
-        padding: 4px;
         justify-content: center;
         align-items: center;
         background: var(--affine-background-overlay-panel-color);
@@ -207,9 +206,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         border-radius: 8px;
       }
 
+      .shape-style-panel-container {
+        padding: 8px;
+      }
+
       .color-panel-container[data-show],
       .shape-style-panel-container[data-show] {
-        display: block;
+        display: flex;
       }
 
       .shape-color-button-indicator {
@@ -232,6 +235,11 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
       .line-style-panel {
         display: none;
       }
+
+      .line-style-panel menu-divider {
+        margin: 0 1px;
+      }
+
       .line-style-panel[data-show] {
         display: flex;
       }

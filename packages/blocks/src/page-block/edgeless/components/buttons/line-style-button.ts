@@ -74,6 +74,7 @@ export function LineStyleButton({
     .active=${active ?? false}
     .activeMode=${'background'}
     .tooltip=${tooltip}
+    .iconContainerPadding=${2}
     @click=${onClick}
   >
     <div class=${classnames}>${icon}</div>
