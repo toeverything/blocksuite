@@ -671,21 +671,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
           <div>
             <sl-button-group label="Mode" style="margin-right: 12px">
-              <!-- switch to edgeless -->
-              <sl-tooltip content="Edgeless" placement="bottom" hoist>
-                <sl-button
-                  pill
-                  size="small"
-                  content="Edgeless"
-                  .disabled=${this.mode !== 'page'}
-                  @click=${this._switchEditorMode}
-                >
-                  <sl-icon
-                    name="bounding-box-circles"
-                    label="Edgeless"
-                  ></sl-icon>
-                </sl-button>
-              </sl-tooltip>
               <!-- switch to page -->
               <sl-tooltip content="Page" placement="bottom" hoist>
                 <sl-button
@@ -696,6 +681,18 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   @click=${this._switchEditorMode}
                 >
                   <sl-icon name="filetype-doc" label="Page"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+              <!-- switch to edgeless -->
+              <sl-tooltip content="Edgeless" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Edgeless"
+                  .disabled=${this.mode !== 'page'}
+                  @click=${this._switchEditorMode}
+                >
+                  <sl-icon name="palette" label="Edgeless"></sl-icon>
                 </sl-button>
               </sl-tooltip>
             </sl-button-group>
