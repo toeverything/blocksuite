@@ -1,7 +1,7 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../panel/shape-style-panel.js';
-import '../toolbar/shape/shape-menu.js';
+import '../panel/shape-panel.js';
 import './change-text-menu.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
@@ -38,8 +38,8 @@ import {
   type LineStylesPanelClickedButton,
   lineStylesPanelStyles,
 } from '../panel/line-styles-panel.js';
+import type { EdgelessShapePanel } from '../panel/shape-panel.js';
 import type { EdgelessShapeStylePanel } from '../panel/shape-style-panel.js';
-import type { EdgelessShapeMenu } from '../toolbar/shape/shape-menu.js';
 import { ShapeComponentConfigMap } from '../toolbar/shape/shape-menu-config.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -167,11 +167,11 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         height: 24px;
       }
 
-      edgeless-shape-menu {
+      edgeless-shape-panel {
         display: none;
       }
 
-      edgeless-shape-menu[data-show] {
+      edgeless-shape-panel[data-show] {
         display: block;
       }
 
@@ -243,9 +243,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   @query('.change-shape-button')
   private _changeShapeButton!: EdgelessToolIconButton;
-  @query('edgeless-shape-menu')
-  private _shapeMenu!: EdgelessShapeMenu;
-  private _shapeMenuPopper: ReturnType<typeof createButtonPopper> | null = null;
+  @query('edgeless-shape-panel')
+  private _shapePanel!: EdgelessShapePanel;
+  private _shapePanelPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
   @query('.shape-style-button')
   private _shapeStyleButton!: EdgelessToolIconButton;
@@ -342,16 +343,16 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._shapeMenuPopper = createButtonPopper(
+    this._shapePanelPopper = createButtonPopper(
       this._changeShapeButton,
-      this._shapeMenu,
+      this._shapePanel,
       ({ display }) => {
         this._popperShow = display === 'show';
       }
     );
-    _disposables.add(this._shapeMenuPopper);
+    _disposables.add(this._shapePanelPopper);
     _disposables.add(
-      this._shapeMenu.slots.select.on(shapeType => {
+      this._shapePanel.slots.select.on(shapeType => {
         const updatedProps =
           shapeType === 'roundedRect'
             ? ({ shapeType: 'rect', radius: 0.1 } as const)
@@ -425,12 +426,12 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         .tooltip=${this._popperShow ? '' : 'Shape type'}
         .tipPosition=${'bottom'}
         .active=${false}
-        @click=${() => this._shapeMenuPopper?.toggle()}
+        @click=${() => this._shapePanelPopper?.toggle()}
       >
         ${icon}
       </edgeless-tool-icon-button>
-      <edgeless-shape-menu .selectedShape=${selectedShape}>
-      </edgeless-shape-menu>
+      <edgeless-shape-panel .selectedShape=${selectedShape}>
+      </edgeless-shape-panel>
 
       <menu-divider .vertical=${true}></menu-divider>
 

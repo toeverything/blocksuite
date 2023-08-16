@@ -23,7 +23,6 @@ test('export html title', async ({ page }) => {
   await type(page, 'this is title');
 
   await switchEditorMode(page);
-  await setEdgelessTool(page, 'note');
 
   await addNote(page, 'hello', 30, 40);
   await addNote(page, 'world', 80, 40);

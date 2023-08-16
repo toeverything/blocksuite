@@ -234,9 +234,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'shape') return;
-    this._clearOverlay();
 
     const options = SHAPE_OVERLAY_OPTIONS;
+    const computedStyle = getComputedStyle(this._edgeless);
+    options.stroke = computedStyle.getPropertyValue(newTool.strokeColor);
     this._shapeOverlay = new ShapeOverlay(
       this._edgeless,
       newTool.shape,
