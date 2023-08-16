@@ -239,7 +239,7 @@ export type SerializedBlock = {
     rowIds: string[];
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];
-    views: DataViewDataType[];
+    views?: DataViewDataType[];
   };
   // note block
   xywh?: string;
