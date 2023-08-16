@@ -13,7 +13,10 @@ import type {
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
-import { ShapeComponentConfig } from './shape-menu-config.js';
+import {
+  SHAPE_SUBMENU_WIDTH,
+  ShapeComponentConfig,
+} from './shape-menu-config.js';
 
 @customElement('edgeless-shape-menu')
 export class EdgelessShapeMenu extends WithDisposable(LitElement) {
@@ -41,8 +44,8 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      fill: none;
-      stroke: currentColor;
+      fill: var(--affine-icon-color);
+      stroke: none;
       gap: 14px;
     }
     menu-divider {
@@ -90,7 +93,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
 
     return html`
       <div class="shape-menu-container">
-        <edgeless-slide-menu>
+        <edgeless-slide-menu .menuWidth=${SHAPE_SUBMENU_WIDTH}>
           <div class="menu-content">
             <div class="shape-type-container">
               ${ShapeComponentConfig.map(
