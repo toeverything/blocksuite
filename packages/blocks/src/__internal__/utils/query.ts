@@ -7,6 +7,7 @@ import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
@@ -417,8 +418,10 @@ export function isDefaultPage({ tagName }: Element) {
 /**
  * Returns `true` if element is edgeless page.
  */
-export function isEdgelessPage({ tagName }: Element) {
-  return tagName === 'AFFINE-EDGELESS-PAGE';
+export function isEdgelessPage(
+  element: Element
+): element is EdgelessPageBlockComponent {
+  return element.tagName === 'AFFINE-EDGELESS-PAGE';
 }
 
 /**

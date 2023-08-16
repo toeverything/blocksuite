@@ -5,8 +5,8 @@ import {
   type BlockComponentElement,
   getClosestBlockElementByElement,
   getModelByElement,
+  isEdgelessPage,
 } from '../../__internal__/utils/query.js';
-import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getClosestPageBlockComponent } from '../../page-block/utils/query.js';
 
 export class ImageResizeManager {
@@ -23,7 +23,7 @@ export class ImageResizeManager {
     ) as BlockComponentElement;
 
     const pageElement = getClosestPageBlockComponent(this._activeComponent);
-    if (pageElement instanceof EdgelessPageBlockComponent) {
+    if (pageElement && isEdgelessPage(pageElement)) {
       this._zoom = pageElement.surface.viewport.zoom;
     } else {
       this._zoom = 1;
