@@ -98,7 +98,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
 
     return html`
       <edgeless-toolbar-button
-        .tooltip=${getTooltipWithShortcut('Shape', 'S')}
+        .tooltip=${this._shapeMenu ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         .activeMode=${'background'}
         @click=${() => {

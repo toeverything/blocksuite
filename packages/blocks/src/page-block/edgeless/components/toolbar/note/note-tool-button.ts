@@ -78,9 +78,6 @@ export class EdgelessNoteToolButton extends LitElement {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  @state()
-  private _popperShow = false;
-
   private _noteMenu: NoteMenuPopper | null = null;
 
   private _toggleNoteMenu() {
@@ -118,7 +115,7 @@ export class EdgelessNoteToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Note', 'N')}
+        .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .active=${type === 'note'}
         .activeMode=${'background'}
         @click=${() => {

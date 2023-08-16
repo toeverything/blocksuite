@@ -72,35 +72,35 @@ export class EdgelessConnectorToolButton extends LitElement {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  private _menu: ConnectorMenuPopper | null = null;
+  private _connectorMenu: ConnectorMenuPopper | null = null;
 
   private _toggleMenu() {
-    if (this._menu) {
-      this._menu.dispose();
-      this._menu = null;
+    if (this._connectorMenu) {
+      this._connectorMenu.dispose();
+      this._connectorMenu = null;
     } else {
-      this._menu = createConnectorMenuPopper(this);
-      this._menu.element.edgelessTool = this.edgelessTool;
-      this._menu.element.edgeless = this.edgeless;
+      this._connectorMenu = createConnectorMenuPopper(this);
+      this._connectorMenu.element.edgelessTool = this.edgelessTool;
+      this._connectorMenu.element.edgeless = this.edgeless;
     }
   }
 
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('edgelessTool')) {
       if (this.edgelessTool.type !== 'connector') {
-        this._menu?.dispose();
-        this._menu = null;
+        this._connectorMenu?.dispose();
+        this._connectorMenu = null;
       }
-      if (this._menu) {
-        this._menu.element.edgelessTool = this.edgelessTool;
-        this._menu.element.edgeless = this.edgeless;
+      if (this._connectorMenu) {
+        this._connectorMenu.element.edgelessTool = this.edgelessTool;
+        this._connectorMenu.element.edgeless = this.edgeless;
       }
     }
   }
 
   override disconnectedCallback() {
-    this._menu?.dispose();
-    this._menu = null;
+    this._connectorMenu?.dispose();
+    this._connectorMenu = null;
     super.disconnectedCallback();
   }
 
@@ -109,7 +109,7 @@ export class EdgelessConnectorToolButton extends LitElement {
 
     return html`
       <edgeless-toolbar-button
-        .tooltip=${'Connector'}
+        .tooltip=${this._connectorMenu ? '' : 'Connector'}
         .active=${type === 'connector'}
         .activeMode=${'background'}
         class="edgeless-connector-button"
