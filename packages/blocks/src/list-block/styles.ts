@@ -3,7 +3,6 @@ import { css } from 'lit';
 const listPrefix = css`
   .affine-list-block__prefix {
     display: flex;
-    align-items: center;
     color: var(--affine-blue-700);
     font-size: var(--affine-font-sm);
     user-select: none;
@@ -17,6 +16,8 @@ const listPrefix = css`
   }
 
   .affine-list-block__todo-prefix {
+    display: flex;
+    align-items: center;
     cursor: pointer;
     width: 24px;
     height: 24px;
@@ -77,7 +78,6 @@ export const styles = css`
   }
   .affine-list-rich-text-wrapper {
     display: flex;
-    align-items: center;
     position: relative;
   }
   .affine-list-rich-text-wrapper rich-text {
