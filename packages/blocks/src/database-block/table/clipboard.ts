@@ -5,8 +5,10 @@ import { Text } from '@blocksuite/store';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
+import { getBlockClipboardInfo } from '../../__internal__/clipboard/index.js';
 import {
   CLIPBOARD_MIMETYPE,
+  createHTMLStringForCustomData,
   performNativeCopy,
 } from '../../__internal__/clipboard/utils/pure.js';
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
@@ -44,14 +46,20 @@ export class TableViewClipboard implements BaseViewClipboard {
     const { uiEventDispatcher } = this._root;
 
     this._disposables.add(
-      uiEventDispatcher.add('copy', this._onCopy, { path: this._path })
+      uiEventDispatcher.add(
+        'copy',
+        ctx => {
+          this._onCopy(ctx);
+        },
+        { path: this._path }
+      )
     );
     this._disposables.add(
       uiEventDispatcher.add('paste', this._onPaste, { path: this._path })
     );
   }
 
-  private _onCopy = (context: UIEventStateContext) => {
+  private _onCopy = async (context: UIEventStateContext) => {
     const event = context.get('clipboardState').raw;
     const selection = getDatabaseSelection(this._root);
     const tableSelection = selection?.getSelection('table');
@@ -94,8 +102,11 @@ export class TableViewClipboard implements BaseViewClipboard {
     if (rowsSelection && !columnsSelection) {
       // rows
       // When copying row to outside the database, it can be pasted as a `block`.
-      // The pasteboard data is the same as the external clipboard data.
-      // CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE
+      const { htmlClipboardItem, pageClipboardItem } =
+        await getPageClipboardItems(model, rowsSelection);
+      performNativeCopy([htmlClipboardItem, pageClipboardItem]);
+
+      return true;
     }
 
     // cells
@@ -213,6 +224,44 @@ export class TableViewClipboard implements BaseViewClipboard {
 
     return true;
   };
+}
+
+async function getPageClipboardItems(
+  model: DatabaseBlockModel,
+  rowsSelection: { start: number; end: number }
+) {
+  const selectedChildren = model.children.slice(
+    rowsSelection.start,
+    rowsSelection.end + 1
+  );
+
+  const selectedModelsMap = new Map();
+  selectedChildren.forEach((model, index) => {
+    selectedModelsMap.set(model.id, index);
+  });
+  const selectedInfo = await Promise.all(
+    selectedChildren.map(async model => {
+      return await getBlockClipboardInfo(model, selectedModelsMap);
+    })
+  );
+  const stringifiesData = JSON.stringify(
+    selectedInfo.filter(info => info.json).map(info => info.json)
+  );
+
+  const customClipboardFragment = createHTMLStringForCustomData(
+    stringifiesData,
+    CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE
+  );
+  const htmlClipboardItem = new ClipboardItem(
+    CLIPBOARD_MIMETYPE.HTML,
+    `${selectedInfo.map(info => info.html).join('')}${customClipboardFragment}`
+  );
+  const pageClipboardItem = new ClipboardItem(
+    CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
+    stringifiesData
+  );
+
+  return { htmlClipboardItem, pageClipboardItem };
 }
 
 function getDatabaseSelection(root: BlockSuiteRoot) {
