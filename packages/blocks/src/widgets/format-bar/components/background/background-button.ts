@@ -14,23 +14,36 @@ import { formatByTextSelection } from '../../../../page-block/utils/operations/e
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig } from './const.js';
 
-let lastUsedColor: string | undefined;
+let lastUsedColor: string | null = null;
 
-const updateBackground = (blockElement: BlockElement, color?: string) => {
+const updateBackground = (
+  blockElement: BlockElement,
+  color: string | null = null
+) => {
+  lastUsedColor = color;
+
   const textSelection = blockElement.selection.find('text');
-  assertExists(textSelection);
-  if (color) {
-    lastUsedColor = color;
+
+  if (!textSelection) {
+    const blockSelections = blockElement.selection.filter('block');
+    for (const blockSelection of blockSelections) {
+      const el = blockElement.root.viewStore.viewFromPath(
+        'block',
+        blockSelection.path
+      );
+      if (el && el.model.text) {
+        el.model.text.format(0, el.model.text.length, {
+          background: color,
+        });
+      }
+    }
+    return;
   }
-  formatByTextSelection(
-    blockElement,
-    textSelection,
-    'background',
-    !lastUsedColor || lastUsedColor === 'unset' ? null : lastUsedColor
-  );
+
+  formatByTextSelection(blockElement, textSelection, 'background', color);
 };
 
-const BackgroundPanel = (blockElement: BlockElement) => {
+const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
   return html`<div class="background-highlight-panel">
     ${backgroundConfig.map(
       ({ name, color }) => html`<icon-button
@@ -38,13 +51,15 @@ const BackgroundPanel = (blockElement: BlockElement) => {
         height="32px"
         style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
         text="${name}"
-        data-testid="${color}"
-        @click="${() => updateBackground(blockElement, color)}"
+        data-testid="${color ?? 'unset'}"
+        @click="${() => {
+          updateBackground(formatBar.pageElement, color);
+          formatBar.requestUpdate();
+        }}"
       >
         <span
-          style="color: ${color === 'unset'
-            ? 'rgba(0,0,0,0)'
-            : color}; display: flex; align-items: center;"
+          style="color: ${color ??
+          'rgba(0,0,0,0)'}; display: flex; align-items: center;"
         >
           ${TextBackgroundDuotoneIcon}
         </span>
@@ -63,7 +78,7 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
     return nothing;
   }
 
-  const backgroundHighlightPanel = BackgroundPanel(pageElement);
+  const backgroundHighlightPanel = BackgroundPanel(formatBar);
 
   const onHover = () => {
     const button = formatBar.shadowRoot?.querySelector(
@@ -103,12 +118,11 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
   >
     <icon-button
       class="background-highlight-icon"
-      style="color: ${lastUsedColor === 'unset'
-        ? 'rgba(0,0,0,0)'
-        : lastUsedColor}"
+      style="color: ${lastUsedColor ?? 'rgba(0,0,0,0)'}"
+      data-last-used="${lastUsedColor ?? 'unset'}"
       width="52px"
       height="32px"
-      @click="${() => updateBackground(pageElement)}"
+      @click="${() => updateBackground(pageElement, lastUsedColor)}"
     >
       ${HighLightDuotoneIcon} ${ArrowDownIcon}</icon-button
     >
