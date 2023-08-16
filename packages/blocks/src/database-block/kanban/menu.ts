@@ -4,10 +4,12 @@ import { html } from 'lit';
 import { popFilterableSimpleMenu } from '../../components/menu/index.js';
 import {
   ArrowRightBigIcon,
+  CopyIcon,
   DeleteIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  PasteIcon,
 } from '../../icons/index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type { KanbanSelection } from './selection.js';
@@ -30,6 +32,14 @@ export const popCardMenu = (
   selection: KanbanSelection
 ) => {
   popFilterableSimpleMenu(ele, [
+    {
+      type: 'action',
+      name: 'Expend card',
+      icon: ExpandFullIcon,
+      select: () => {
+        openDetail(rowId, selection);
+      },
+    },
     {
       type: 'sub-menu',
       name: 'Move to',
@@ -58,12 +68,26 @@ export const popCardMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Expend card',
-          icon: ExpandFullIcon,
+          name: 'Copy',
+          icon: CopyIcon,
           select: () => {
-            openDetail(rowId, selection);
+            //TODO
           },
         },
+        {
+          type: 'action',
+          name: 'Paste',
+          icon: PasteIcon,
+          select: () => {
+            //TODO
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      name: '',
+      children: () => [
         {
           type: 'action',
           name: 'Insert before',

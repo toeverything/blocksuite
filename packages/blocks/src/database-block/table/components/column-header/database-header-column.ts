@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../../components/menu/menu.js';
+import { popMenu, positionToVRect } from '../../../../components/menu/menu.js';
 import {
   CheckBoxIcon,
   DatabaseDragIcon,
@@ -228,7 +229,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
 
   private _clickColumn = () => {
-    popMenu(this, {
+    this.popMenu();
+  };
+  private _contextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    this.popMenu(positionToVRect(e.x, e.y));
+  };
+
+  private popMenu(ele?: ReferenceElement) {
+    popMenu(ele ?? this, {
       options: {
         input: {
           initValue: this.column.name,
@@ -369,7 +378,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         ],
       },
     });
-  };
+  }
 
   private _clickTypeIcon = (event: MouseEvent) => {
     event.stopPropagation();
@@ -407,6 +416,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         style=${style}
         class="affine-database-column-content"
         @click="${this._clickColumn}"
+        @contextmenu="${this._contextMenu}"
       >
         <div class="affine-database-column-text ${column.type}">
           <div

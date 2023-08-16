@@ -124,6 +124,10 @@ export function DataBaseRowContainer(
                   const openMenu = (e: MouseEvent) => {
                     const ele = e.currentTarget as HTMLElement;
                     selection.selection = {
+                      rowsSelection: {
+                        start: idx,
+                        end: idx,
+                      },
                       focus: {
                         rowIndex: idx,
                         columnIndex: i,

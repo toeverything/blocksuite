@@ -3,10 +3,13 @@ import { html } from 'lit';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import {
+  CopyIcon,
   DeleteIcon,
+  DuplicateIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
+  PasteIcon,
 } from '../../../icons/index.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { DatabaseSelectionView } from './selection.js';
@@ -38,20 +41,60 @@ export const popRowMenu = (
       },
     },
     {
-      type: 'action',
-      name: 'Insert before',
-      icon: html` <div style="transform: rotate(90deg)">${MoveLeftIcon}</div>`,
-      select: () => {
-        selection.insertRowBefore(rowId);
-      },
+      type: 'group',
+      name: '',
+      children: () => [
+        {
+          type: 'action',
+          name: 'Copy',
+          icon: CopyIcon,
+          select: () => {
+            //TODO
+          },
+        },
+        {
+          type: 'action',
+          name: 'Paste',
+          icon: PasteIcon,
+          select: () => {
+            //TODO
+          },
+        },
+      ],
     },
     {
-      type: 'action',
-      name: 'Insert after',
-      icon: html` <div style="transform: rotate(90deg)">${MoveRightIcon}</div>`,
-      select: () => {
-        selection.insertRowAfter(rowId);
-      },
+      type: 'group',
+      name: '',
+      children: () => [
+        {
+          type: 'action',
+          name: 'Insert before',
+          icon: html` <div style="transform: rotate(90deg)">
+            ${MoveLeftIcon}
+          </div>`,
+          select: () => {
+            selection.insertRowBefore(rowId);
+          },
+        },
+        {
+          type: 'action',
+          name: 'Insert after',
+          icon: html` <div style="transform: rotate(90deg)">
+            ${MoveRightIcon}
+          </div>`,
+          select: () => {
+            selection.insertRowAfter(rowId);
+          },
+        },
+        {
+          type: 'action',
+          name: 'Duplicate',
+          icon: DuplicateIcon,
+          select: () => {
+            //TODO
+          },
+        },
+      ],
     },
     {
       type: 'group',

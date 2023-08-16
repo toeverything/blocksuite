@@ -464,7 +464,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowUp: () => {
+        ArrowUp: context => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
             return false;
@@ -473,9 +473,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             selection.focus.rowIndex - 1,
             selection.focus.columnIndex
           );
+          context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowDown: () => {
+        ArrowDown: context => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
             return false;
@@ -484,11 +485,32 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             selection.focus.rowIndex + 1,
             selection.focus.columnIndex
           );
+          context.get('keyboardState').raw.preventDefault();
           return true;
         },
         'Mod-a': () => {
           const selection = this.selection;
           if (selection?.isEditing) {
+            return true;
+          }
+          if (selection) {
+            const start = 0;
+            const end = this.tableView.view.rows.length - 1;
+            if (
+              selection.rowsSelection?.start === start &&
+              selection.rowsSelection.end === end &&
+              !selection.columnsSelection
+            ) {
+              return false;
+            }
+            this.selection = {
+              rowsSelection: {
+                start: start,
+                end: end,
+              },
+              focus: selection.focus,
+              isEditing: false,
+            };
             return true;
           }
           return;
