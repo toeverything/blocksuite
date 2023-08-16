@@ -966,3 +966,21 @@ test(scoped`paste parent block`, async ({ page }) => {
     'This is child 2Thi',
   ]);
 });
+
+test(scoped`clipboard copy muti selection`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'abc');
+  await pressEnter(page);
+  await type(page, 'def');
+  await setSelection(page, 2, 1, 3, 1);
+  await waitNextFrame(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['abc', 'defbc', 'd']);
+});
