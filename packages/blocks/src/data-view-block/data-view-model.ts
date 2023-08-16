@@ -20,11 +20,13 @@ type Props = {
 };
 
 export class DataViewBlockModel extends BaseBlockModel<Props> {
-  override onCreated() {
-    super.onCreated();
-    if (!this.views.length) {
-      this.addView('table');
-    }
+  constructor() {
+    super();
+    this.created.on(() => {
+      if (!this.views.length) {
+        this.addView('table');
+      }
+    });
   }
 
   addView(mode: DataView['mode']) {

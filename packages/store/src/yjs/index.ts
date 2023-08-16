@@ -1,5 +1,6 @@
 export * from './awareness.js';
 export * from './doc.js';
+export * from './json.js';
 export * from './native-wrapper.js';
 export * from './proxy.js';
 export * from './text-adapter.js';

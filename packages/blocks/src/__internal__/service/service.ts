@@ -58,7 +58,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       ) ?? [];
     return {
       flavour: block.flavour,
-      type: block.type as string,
+      type: (block as BlockModel & { type: string }).type as string,
       text: delta,
       children: block.children
         ?.filter(child => selectedModels?.has(child.id) ?? true)

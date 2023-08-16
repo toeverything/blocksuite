@@ -14,7 +14,12 @@ import { sha } from '../persistence/blob/utils.js';
 import type { DocProviderCreator } from '../providers/type.js';
 import type { Schema } from '../schema/index.js';
 import { serializeYDoc } from '../utils/jsx.js';
-import { type AwarenessStore, Text } from '../yjs/index.js';
+import {
+  type AwarenessStore,
+  docFromJSON,
+  docToJSON,
+  Text,
+} from '../yjs/index.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Store, type StoreOptions } from './store.js';
@@ -258,6 +263,30 @@ export class Workspace {
 
   search(query: QueryContent) {
     return this.indexer.search.search(query);
+  }
+
+  async importPageSnapshotV2(json: object, pageId: string) {
+    const doc = docFromJSON(json);
+
+    let page = this.getPage(pageId);
+    if (page) {
+      await page.waitForLoaded();
+      page.clear();
+    } else {
+      page = this.createPage({ id: pageId });
+      await page.waitForLoaded();
+    }
+
+    const update = Y.encodeStateAsUpdate(doc);
+
+    Y.applyUpdate(page.spaceDoc, update);
+    page.resetHistory();
+  }
+
+  exportPageSnapshotV2(pageId: string) {
+    const page = this.getPage(pageId);
+    assertExists(page, `page ${pageId} not found`);
+    return docToJSON(page.spaceDoc);
   }
 
   /**
