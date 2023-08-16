@@ -1121,11 +1121,15 @@ export class EdgelessPageBlockComponent
   private _initFontloader() {
     if (!this.fontLoader) this.fontLoader = new FontLoader();
 
-    this.fontLoader.slots.loaded.once(font => {
-      if (font === 'Kalam') {
-        this.surface.onResize();
-      }
-    });
+    this._disposables.add(
+      this.fontLoader.slots.loaded.on(font => {
+        if (font !== 'Kalam:n4,n7' || !this.surface) return;
+
+        if (this.surface.getElementsByType('text').length > 0) {
+          this.surface.onResize();
+        }
+      })
+    );
     this.fontLoader.load(['Kalam:n4,n7']);
   }
 
