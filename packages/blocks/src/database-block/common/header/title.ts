@@ -1,7 +1,7 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
@@ -54,6 +54,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       pointer-events: none;
       color: var(--affine-text-primary-color);
     }
+
     .database-title-empty:focus::before {
       color: var(--affine-placeholder-color);
     }
@@ -67,7 +68,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   onPressEnterKey?: () => void;
-
+  @state()
+  compositionInput = false;
   @query('.database-title')
   private _titleContainer!: HTMLDivElement;
 
@@ -79,6 +81,12 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     disposables.addFromEvent(this._titleContainer, 'focus', this._onTitleFocus);
     disposables.addFromEvent(this._titleContainer, 'blur', this._onTitleBlur);
+    disposables.addFromEvent(this._titleContainer, 'compositionstart', () => {
+      this.compositionInput = true;
+    });
+    disposables.addFromEvent(this._titleContainer, 'compositionend', () => {
+      this.compositionInput = false;
+    });
 
     // prevent block selection
     const onStopPropagation = (event: Event) => event.stopPropagation();
@@ -120,7 +128,8 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    const isEmpty = !this.titleText || !this.titleText.length;
+    const isEmpty =
+      (!this.titleText || !this.titleText.length) && !this.compositionInput;
     const classList = classMap({
       'database-title': true,
       'database-title-empty': isEmpty,

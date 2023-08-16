@@ -669,6 +669,26 @@ export async function pasteContent(
   await waitNextFrame(page);
 }
 
+export async function pasteBlocks(page: Page, json: unknown) {
+  const createHTMLStringForCustomData = (data: string, type: string) => {
+    return `<blocksuite style="display: none" data-type="${type}" data-clipboard="${data.replace(
+      /"/g,
+      '&quot;'
+    )}"></blocksuite>`;
+  };
+  const stringifiesData = JSON.stringify(json);
+
+  const customClipboardFragment = createHTMLStringForCustomData(
+    stringifiesData,
+    'blocksuite/page'
+  );
+
+  await pasteContent(page, {
+    'text/html': customClipboardFragment,
+    'blocksuite/page': stringifiesData,
+  });
+}
+
 export async function importMarkdown(
   page: Page,
   focusedBlockId: string,

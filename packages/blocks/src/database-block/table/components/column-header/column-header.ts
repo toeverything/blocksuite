@@ -123,8 +123,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-database-header-column');
     const column = columns.item(columns.length - 1);
+    column.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     column.editTitle();
-    column.scrollIntoView();
   };
 
   override render() {
