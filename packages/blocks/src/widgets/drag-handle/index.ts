@@ -83,6 +83,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   public hide(force = false) {
+    if (!this._dragHandleContainer) return;
     this._dragHandleContainer.style.display = 'none';
     if (force) this.reset();
   }
