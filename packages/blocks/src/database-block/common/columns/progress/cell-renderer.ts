@@ -12,21 +12,19 @@ const styles = css`
   affine-database-progress-cell-editing {
     display: block;
     width: 100%;
-    height: 100%;
     padding: 0 4px;
   }
 
   affine-database-progress-cell {
     display: block;
     width: 100%;
-    height: 100%;
     padding: 0 4px;
   }
 
   .affine-database-progress {
     display: flex;
     align-items: center;
-    height: 100%;
+    height: var(--data-view-cell-text-line-height);
     gap: 4px;
   }
 

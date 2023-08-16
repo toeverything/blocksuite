@@ -26,7 +26,6 @@ export function DataBaseRowContainer(
 
       .affine-database-block-row {
         width: 100%;
-        min-height: 44px;
         display: flex;
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
@@ -140,6 +139,7 @@ export function DataBaseRowContainer(
                           width: `${column.width}px`,
                           border: i === 0 ? 'none' : undefined,
                         })}
+                        .view="${view}"
                         .column="${column}"
                         .rowId="${id}"
                         data-row-id="${id}"

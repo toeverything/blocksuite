@@ -118,6 +118,8 @@ export interface DataViewManager {
   get isDeleted(): boolean;
 
   isMainColumn(id: string): boolean;
+
+  mainColumnGet(): DataViewColumnManager | undefined;
 }
 
 export interface DataViewColumnManager<
@@ -426,6 +428,14 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public isMainColumn(id: string): boolean {
     return this.dataSource.propertyGetMain() === id;
+  }
+
+  public mainColumnGet(): DataViewColumnManager | undefined {
+    const id = this.dataSource.propertyGetMain();
+    if (!id) {
+      return;
+    }
+    return this.columnGet(id);
   }
 }
 

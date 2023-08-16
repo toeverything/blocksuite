@@ -12,9 +12,6 @@ export class DateCell extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell {
       width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
     }
 
     .affine-database-date {
@@ -44,10 +41,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   static override styles = css`
     affine-database-date-cell-editing {
       width: 100%;
-      height: 100%;
       cursor: text;
-      display: flex;
-      align-items: center;
     }
 
     .affine-database-date:focus {

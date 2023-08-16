@@ -1,5 +1,6 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { CellRenderer } from '../common/columns/manager.js';
 import type { RealDataViewDataTypeMap } from '../common/data-view.js';
 import {
   BaseDataViewColumnManager,
@@ -9,6 +10,7 @@ import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
+import { headerRenderer } from './components/header-cell.js';
 
 type TableViewData = RealDataViewDataTypeMap['table'];
 
@@ -169,6 +171,7 @@ export class DataViewTableManager extends BaseDataViewManager {
       };
     });
   }
+
   columnGetHide(columnId: string): boolean {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
@@ -176,8 +179,21 @@ export class DataViewTableManager extends BaseDataViewManager {
   public deleteView(): void {
     this.viewSource.delete();
   }
+
   public get isDeleted(): boolean {
     return this.viewSource.isDeleted();
+  }
+
+  public get header() {
+    return this.view.header;
+  }
+
+  public isInHeader(columnId: string) {
+    return Object.values(this.view.header).some(v => v === columnId);
+  }
+
+  public hasHeader(rowId: string): boolean {
+    return Object.values(this.view.header).some(v => v != null);
   }
 }
 
@@ -195,5 +211,12 @@ export class DataViewTableColumnManager extends BaseDataViewColumnManager {
 
   updateWidth(width: number): void {
     this.dataViewManager.columnUpdateWidth(this.id, width);
+  }
+
+  public override get renderer(): CellRenderer {
+    if (this.id === this.dataViewManager.header.titleColumn) {
+      return headerRenderer;
+    }
+    return super.renderer;
   }
 }

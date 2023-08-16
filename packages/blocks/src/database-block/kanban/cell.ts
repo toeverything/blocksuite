@@ -7,7 +7,10 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import type { UniLit } from '../../components/uni-component/uni-component.js';
-import type { DataViewCellLifeCycle } from '../common/columns/manager.js';
+import type {
+  CellRenderProps,
+  DataViewCellLifeCycle,
+} from '../common/columns/manager.js';
 import type {
   DataViewKanbanColumnManager,
   DataViewKanbanManager,
@@ -114,7 +117,8 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const props = {
+    const props: CellRenderProps = {
+      view: this.view,
       column: this.column,
       rowId: this.cardId,
       isEditing: this.editing,

@@ -15,6 +15,11 @@ export type TableViewColumn = {
 export type TableViewData = {
   columns: TableViewColumn[];
   filter: FilterGroup;
+  header: {
+    titleColumn?: string;
+    iconColumn?: string;
+    imageColumn?: string;
+  };
 };
 viewManager.register('table', {
   defaultName: 'Table View',
@@ -28,6 +33,10 @@ viewManager.register('table', {
         type: 'group',
         op: 'and',
         conditions: [],
+      },
+      header: {
+        titleColumn: model.columns.find(v => v.type === 'title')?.id,
+        iconColumn: 'type',
       },
     };
   },
