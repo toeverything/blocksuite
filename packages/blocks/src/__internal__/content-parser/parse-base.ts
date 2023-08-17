@@ -717,7 +717,8 @@ const getTextStyle = (
       } else if (colorKey === 'gray') {
         colorKey = 'grey';
       }
-      textStyle['background'] = highlightMap.get(colorKey ?? 'yellow');
+      colorKey = highlightMap.has(colorKey) ? colorKey : 'yellow';
+      textStyle['background'] = highlightMap.get(colorKey);
     }
   }
 
