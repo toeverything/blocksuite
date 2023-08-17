@@ -160,7 +160,7 @@ export class NoteCut extends WithDisposable(LitElement) {
   }
 
   private _show(
-    event: PointerEventState,
+    _event: PointerEventState,
     modelState: {
       note: NoteBlockModel;
       noteElement: BlockComponentElement;

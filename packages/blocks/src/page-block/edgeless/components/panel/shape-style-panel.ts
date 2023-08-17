@@ -10,15 +10,14 @@ import {
 @customElement('edgeless-shape-style-panel')
 export class EdgelessShapeStylePanel extends LitElement {
   static override styles = css`
-    :host {
-      display: flex;
-    }
-
     .shape-style-container {
       display: flex;
       align-items: center;
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
+      z-index: 2;
+      gap: 8px;
+      padding: 0;
     }
 
     edgeless-tool-icon-button svg {
@@ -48,6 +47,7 @@ export class EdgelessShapeStylePanel extends LitElement {
           .tipPosition=${'top'}
           .active=${this.value === ShapeStyle.General}
           .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect(ShapeStyle.General);
           }}
@@ -60,6 +60,7 @@ export class EdgelessShapeStylePanel extends LitElement {
           .tipPosition=${'top'}
           .active=${this.value === ShapeStyle.Scribbled}
           .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect(ShapeStyle.Scribbled);
           }}

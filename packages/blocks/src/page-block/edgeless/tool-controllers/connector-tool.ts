@@ -15,19 +15,19 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   private _source: Connection | null = null;
   private _startPoint: IVec | null = null;
 
-  onContainerClick(e: PointerEventState): void {
+  onContainerClick(): void {
     noop();
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
@@ -36,7 +36,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._source = this._edgeless.connector.searchConnection(this._startPoint);
   }
 
-  onContainerDragStart(e: PointerEventState) {
+  onContainerDragStart() {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     assertExists(this._source);
     assertExists(this._startPoint);
@@ -69,7 +69,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._surface.updateElement<'connector'>(this._connector.id, { target });
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     assertExists(this._connector);
     this._edgeless.connector.clear();
     this._page.captureSync();
@@ -87,7 +87,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     connector.searchConnection(point);
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 

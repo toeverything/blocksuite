@@ -827,7 +827,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClickCard = (e: MouseEvent, blockHubElement: HTMLElement) => {
+  private _onClickCard = (_: MouseEvent, blockHubElement: HTMLElement) => {
     const affineType = blockHubElement.getAttribute('affine-type');
     assertExists(affineType);
     const data: {

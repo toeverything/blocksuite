@@ -128,7 +128,7 @@ export async function importNotion(workspace: Workspace, file: File) {
           return (await zipFile.file(fileName)?.async('blob')) || new Blob();
         };
         const textStyleHandler = (
-          element: HTMLElement,
+          _element: HTMLElement,
           textStyle: Record<string, unknown>
         ) => {
           if (textStyle['link']) {
@@ -180,7 +180,7 @@ export async function importNotion(workspace: Workspace, file: File) {
               }
             });
 
-            const columns: Column[] = titles.slice(1).map((value, index) => {
+            const columns: Column[] = titles.slice(1).map(value => {
               return columnManager
                 .getColumn(richTextPureColumnConfig.type)
                 .createWithId('' + id++, value);

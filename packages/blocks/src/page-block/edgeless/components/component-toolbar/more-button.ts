@@ -12,7 +12,10 @@ import {
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
-import { MoreHorizontalIcon } from '../../../../icons/index.js';
+import {
+  MoreHorizontalIcon,
+  MoreVerticalIcon,
+} from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
@@ -108,6 +111,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  vertical = false;
 
   @state()
   private _popperShow = false;
@@ -225,9 +231,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'More'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._actionsMenuPopper?.toggle()}
       >
-        ${MoreHorizontalIcon}
+        ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
       </edgeless-tool-icon-button>
       <div class="more-actions-container">${actions}</div>
     `;

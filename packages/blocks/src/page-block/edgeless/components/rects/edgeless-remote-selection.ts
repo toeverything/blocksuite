@@ -129,7 +129,7 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
     _disposables.add(
       this.selection.slots.remoteUpdated.on(this._updateRemoteRects)
     );
-    _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
+    _disposables.add(page.slots.yBlockUpdated.on(this._updateOnElementChange));
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(this._updateRemoteRects)
     );

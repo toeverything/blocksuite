@@ -1,6 +1,5 @@
 import type * as Y from 'yjs';
 
-import type { IPhasorElementType } from '../elements/index.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import type { SurfaceManager } from '../surface.js';
@@ -165,13 +164,11 @@ export abstract class SurfaceElement<
     return this.yMap.toJSON() as T;
   }
 
-  hitTest(x: number, y: number, options?: HitTestOptions) {
+  hitTest(x: number, y: number, _options?: HitTestOptions) {
     return isPointIn(this, x, y);
   }
 
-  private _onMap = <T extends keyof IPhasorElementType>(
-    events: Y.YEvent<Y.Map<unknown>>[]
-  ) => {
+  private _onMap = (events: Y.YEvent<Y.Map<unknown>>[]) => {
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
     const e = events[0] as Y.YMapEvent<Y.Map<unknown>>;
@@ -197,7 +194,7 @@ export abstract class SurfaceElement<
     this.renderer = null;
   }
 
-  render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix, rc: RoughCanvas) {
+  render(_ctx: CanvasRenderingContext2D, _matrix: DOMMatrix, _rc: RoughCanvas) {
     return;
   }
 }

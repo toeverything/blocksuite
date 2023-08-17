@@ -26,7 +26,7 @@ abstract class Shape {
   type: string;
   options: Options;
 
-  constructor(x: number, y: number, type: string, options: Options) {
+  constructor(x: number, y: number, _type: string, options: Options) {
     this.x = x;
     this.y = y;
     this.type = 'rect';
@@ -37,7 +37,7 @@ abstract class Shape {
 }
 
 class RectShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  draw(_ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.rectangle(
       this.x + SHAPE_OVERLAY_OFFSET_X,
       this.y + SHAPE_OVERLAY_OFFSET_Y,
@@ -49,7 +49,7 @@ class RectShape extends Shape {
 }
 
 class TriangleShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  draw(_ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.polygon(
       [
         [this.x + SHAPE_OVERLAY_WIDTH / 2, this.y],
@@ -62,7 +62,7 @@ class TriangleShape extends Shape {
 }
 
 class DiamondShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  draw(_ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.polygon(
       [
         [this.x + SHAPE_OVERLAY_WIDTH / 2, this.y],
@@ -76,7 +76,7 @@ class DiamondShape extends Shape {
 }
 
 class EllipseShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  draw(_ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     rc.ellipse(
       this.x + SHAPE_OVERLAY_WIDTH / 2,
       this.y + SHAPE_OVERLAY_HEIGHT / 2,
@@ -88,7 +88,7 @@ class EllipseShape extends Shape {
 }
 
 class RoundedRectShape extends Shape {
-  draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  draw(_ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     const radius = 0.1;
     const r = Math.min(
       SHAPE_OVERLAY_WIDTH * radius,
@@ -168,7 +168,7 @@ class ToolOverlay extends Overlay {
     this.disposables.dispose();
   }
 
-  render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  render(_ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
     noop();
   }
 }

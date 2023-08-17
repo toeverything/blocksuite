@@ -184,8 +184,8 @@ export class EdgelessColorPanel extends LitElement {
   static override styles = css`
     :host {
       display: flex;
-      width: 204px;
-      padding: 8px 12px;
+      width: 200px;
+      padding: 10px;
       flex-direction: row;
       flex-wrap: wrap;
       gap: 12px;

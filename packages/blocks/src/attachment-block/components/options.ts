@@ -79,34 +79,28 @@ export function AttachmentOptionsTemplate({
       @mouseover=${onHover}
       @mouseleave=${onHoverLeave}
     >
-      <icon-button
-        class="has-tool-tip"
-        size="24px"
-        disabled
-        @click=${() => console.log('Coming soon...', model)}
-      >
+      <icon-button class="has-tool-tip" size="24px" disabled ?hidden=${true}>
         ${ViewIcon}
-        <tool-tip inert tip-position="top" role="tooltip"
-          >Preview(Coming soon)</tool-tip
-        >
+        <tool-tip inert tip-position="top" role="tooltip">Preview</tool-tip>
       </icon-button>
-      <div class="divider"></div>
+      <div class="divider" ?hidden=${true}></div>
 
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly || true}
-        @click=${() => console.log('Turn into Link view coming soon', model)}
+        ?disabled=${readonly}
+        ?hidden=${true}
       >
         ${LinkIcon}
         <tool-tip inert tip-position="top" role="tooltip"
-          >Turn into Link view(Coming soon)</tool-tip
+          >Turn into Link view</tool-tip
         >
       </icon-button>
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly || disableEmbed}
+        ?disabled=${readonly}
+        ?hidden=${disableEmbed}
         @click="${() => {
           turnIntoEmbedView(model);
           abortController.abort();
@@ -114,10 +108,10 @@ export function AttachmentOptionsTemplate({
       >
         ${EmbedWebIcon}
         <tool-tip inert tip-position="top" role="tooltip"
-          >Turn into Embed view${disableEmbed ? '(Images only)' : ''}</tool-tip
+          >Turn into Embed view</tool-tip
         >
       </icon-button>
-      <div class="divider"></div>
+      <div class="divider" ?hidden=${disableEmbed}></div>
 
       <icon-button
         class="has-tool-tip"

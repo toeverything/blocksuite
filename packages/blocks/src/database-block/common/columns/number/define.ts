@@ -31,7 +31,7 @@ export const numberPureColumnConfig = columnManager.register<
 });
 numberPureColumnConfig.registerConvert(
   richTextColumnTypeName,
-  (column, cells) => ({
+  (_column, cells) => ({
     column: {},
     cells: cells.map(v => new Text(v?.toString()).yText),
   })

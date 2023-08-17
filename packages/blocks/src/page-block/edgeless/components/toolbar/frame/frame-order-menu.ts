@@ -142,7 +142,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
         indicator.hidden = true;
       });
 
-      this._disposables.addFromEvent(document, 'pointerup', e => {
+      this._disposables.addFromEvent(document, 'pointerup', () => {
         if (
           newIndex !== -1 &&
           newIndex >= 0 &&

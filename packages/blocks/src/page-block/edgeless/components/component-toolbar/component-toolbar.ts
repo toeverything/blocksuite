@@ -48,15 +48,15 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     .edgeless-component-toolbar-container {
       display: flex;
       align-items: center;
-      height: 48px;
+      height: 40px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
       padding: 0 8px;
     }
 
-    menu-divider {
-      height: 24px;
+    component-toolbar-menu-divider {
+      margin: 0 12px;
     }
   `;
 
@@ -210,7 +210,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
 
     const divider = buttons.length
-      ? html`<menu-divider .vertical=${true}></menu-divider>`
+      ? html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       : nothing;
 
     return html`<div
@@ -218,7 +218,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       @pointerdown=${stopPropagation}
     >
       ${join(buttons, () => '')} ${divider}
-      <edgeless-more-button .edgeless=${edgeless}></edgeless-more-button>
+      <edgeless-more-button
+        .edgeless=${edgeless}
+        .vertical=${true}
+      ></edgeless-more-button>
     </div>`;
   }
 }

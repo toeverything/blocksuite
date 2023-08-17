@@ -29,7 +29,7 @@ groupByMatcher.register(tTag.create(), {
     }
     return [];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (value == null) {
       return [
         {
@@ -70,7 +70,7 @@ groupByMatcher.register(tArray(tTag.create()), {
     }
     return [];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (value == null) {
       return [
         {
@@ -107,13 +107,13 @@ groupByMatcher.register(tArray(tTag.create()), {
 });
 groupByMatcher.register(tString.create(), {
   name: 'text',
-  groupName: (type, value) => {
+  groupName: (_type, value) => {
     return `${value ?? ''}`;
   },
-  defaultKeys: type => {
+  defaultKeys: _type => {
     return [];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (value == null) {
       return [
         {
@@ -133,13 +133,13 @@ groupByMatcher.register(tString.create(), {
 });
 groupByMatcher.register(tNumber.create(), {
   name: 'number',
-  groupName: (type, value) => {
+  groupName: (_type, value) => {
     return `${value ?? ''}`;
   },
-  defaultKeys: type => {
+  defaultKeys: _type => {
     return [];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (typeof value !== 'number') {
       return [
         {

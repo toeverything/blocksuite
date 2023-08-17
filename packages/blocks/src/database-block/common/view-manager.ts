@@ -102,15 +102,15 @@ export const ViewOperationMap: {
         groupBy: defaultGroupBy(column.id, column.type, column.data),
       };
     },
-    addColumn(model, view, newColumn) {
+    addColumn(_model, _view, _newColumn) {
       //Nothing to do
     },
-    deleteColumn(model, view, id) {
+    deleteColumn(_model, _view, _id) {
       //Nothing to do
     },
   },
   table: {
-    init(model, id, name) {
+    init(_model, id, name) {
       return {
         id,
         name,
@@ -123,13 +123,13 @@ export const ViewOperationMap: {
         },
       };
     },
-    addColumn(model, view, newColumn, position) {
+    addColumn(_model, view, newColumn, position) {
       view.columns.splice(insertPositionToIndex(position, view.columns), 0, {
         id: newColumn.id,
         width: DEFAULT_COLUMN_WIDTH,
       });
     },
-    deleteColumn(model, view, id) {
+    deleteColumn(_model, view, id) {
       const index = view.columns.findIndex(c => c.id === id);
       if (index >= 0) {
         view.columns.splice(index, 1);

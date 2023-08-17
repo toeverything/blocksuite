@@ -123,7 +123,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     this._disposables.addFromEvent(this, 'contextmenu', e => {
       this.contextMenu(e);
     });
-    this._disposables.addFromEvent(this, 'click', e => {
+    this._disposables.addFromEvent(this, 'click', () => {
       const selection = this.getSelection();
       const preSelection = selection?.selection;
       if (selection) {

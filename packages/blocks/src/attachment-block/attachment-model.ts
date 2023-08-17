@@ -29,7 +29,7 @@ export const defaultAttachmentProps: AttachmentProps = {
 
 export const AttachmentBlockSchema = defineBlockSchema({
   flavour: 'affine:attachment',
-  props: (internal): AttachmentProps => defaultAttachmentProps,
+  props: (): AttachmentProps => defaultAttachmentProps,
   metadata: {
     version: 1,
     role: 'content',

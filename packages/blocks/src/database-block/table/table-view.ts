@@ -185,7 +185,7 @@ export class DatabaseTable extends BaseDataView<
     });
   }
 
-  private _onDatabaseScroll = (event: Event) => {
+  private _onDatabaseScroll = () => {
     this._columnHeaderComponent.showAddColumnButton();
   };
 

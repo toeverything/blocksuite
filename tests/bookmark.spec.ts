@@ -50,9 +50,6 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     prop:hidden={false}
     prop:index="a0"
   >
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:bookmark
       prop:bookmarkTitle=""
       prop:caption=""
@@ -123,9 +120,6 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
     prop:hidden={false}
     prop:index="a0"
   >
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:paragraph
       prop:text={
         <>

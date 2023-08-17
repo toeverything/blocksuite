@@ -187,7 +187,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   }
 
   // Handle click outside
-  private _onClickAway = (e: Event) => {
+  private _onClickAway = () => {
     // if (e.target === this) return;
     if (!this._hide) return;
     // If the slash menu is hidden, click anywhere will close the slash menu

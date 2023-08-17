@@ -35,7 +35,7 @@ class AutoCompleteOverlay extends Overlay {
   linePoints: IVec[] = [];
   shapePoints: IVec[] = [];
   stroke = '';
-  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
     if (this.linePoints.length && this.shapePoints.length) {
       ctx.setLineDash([2, 2]);
       ctx.strokeStyle = this.stroke;
@@ -237,7 +237,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
     });
 
-    this._disposables.addFromEvent(document, 'pointerup', e => {
+    this._disposables.addFromEvent(document, 'pointerup', () => {
       if (!this._isMoving) {
         this._generateShapeOnClick(type);
       } else if (connector && !connector.target.id) {
@@ -289,7 +289,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     });
   }
 
-  private _generateShapeOnDrag(type: Direction, connector: ConnectorElement) {
+  private _generateShapeOnDrag(_type: Direction, connector: ConnectorElement) {
     const { surface } = this.edgeless;
     const bound = Bound.deserialize(this._current.xywh);
     const { w, h } = bound;

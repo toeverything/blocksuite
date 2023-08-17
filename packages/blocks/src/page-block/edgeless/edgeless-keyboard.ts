@@ -1,4 +1,4 @@
-import { ConnectorMode } from '@blocksuite/phasor';
+import { Bound, ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 
 import {
   type Connectable,
@@ -18,7 +18,7 @@ import {
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
-import { isTopLevelBlock } from './utils/query.js';
+import { isPhasorElement, isTopLevelBlock } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -135,6 +135,18 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this._space(event);
           }
         },
+        ArrowUp: () => {
+          this._move('ArrowUp');
+        },
+        ArrowDown: () => {
+          this._move('ArrowDown');
+        },
+        ArrowLeft: () => {
+          this._move('ArrowLeft');
+        },
+        ArrowRight: () => {
+          this._move('ArrowRight');
+        },
       },
       {
         global: true,
@@ -231,5 +243,38 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
     edgeless.tools.setEdgelessTool(edgelessTool);
+  }
+
+  private _move(key: string) {
+    const edgeless = this.pageElement;
+
+    const { elements } = edgeless.selectionManager;
+    elements.forEach(element => {
+      const bound = Bound.deserialize(element.xywh).clone();
+
+      switch (key) {
+        case 'ArrowUp':
+          bound.y--;
+          break;
+        case 'ArrowLeft':
+          bound.x--;
+          break;
+        case 'ArrowRight':
+          bound.x++;
+          break;
+        case 'ArrowDown':
+          bound.y++;
+          break;
+      }
+
+      if (isPhasorElement(element)) {
+        if (element instanceof ConnectorElement) {
+          this.pageElement.connector.updateXYWH(element, bound);
+        }
+        this.pageElement.surface.setElementBound(element.id, bound);
+      } else {
+        this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
+      }
+    });
   }
 }

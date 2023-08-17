@@ -83,6 +83,8 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   public hide(force = false) {
+    if (!this._dragHandleContainer) return;
+
     this._dragHandleContainer.style.display = 'none';
     if (force) this.reset();
   }
@@ -107,7 +109,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   // drag handle should show on the vertical middle of the first line of element
-  private _show(point: Point, blockElement: BlockElement) {
+  private _show(_point: Point, blockElement: BlockElement) {
     let { left, top } = blockElement.getBoundingClientRect();
 
     // Some blocks have padding, should consider padding when calculating position
@@ -118,6 +120,9 @@ export class DragHandleWidget extends WidgetElement {
     top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
+
+    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
+
     this._dragHandleContainer.style.display = 'flex';
     this._dragHandleContainer.style.height = `${
       containerHeight * this._scale
