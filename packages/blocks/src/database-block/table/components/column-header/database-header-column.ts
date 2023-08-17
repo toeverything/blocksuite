@@ -7,20 +7,13 @@ import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../../components/menu/menu.js';
 import {
-  CheckBoxIcon,
   DatabaseDragIcon,
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
   DatabaseMoveLeft,
   DatabaseMoveRight,
-  DatabaseMultiSelect,
-  DatabaseNumber,
-  DatabaseProgress,
-  DatabaseSelect,
-  DateTime,
   DeleteIcon,
-  LinkIcon,
   TextIcon,
 } from '../../../../icons/index.js';
 import type { InsertPosition } from '../../../types.js';
@@ -33,7 +26,6 @@ import type {
   DataViewTableColumnManager,
   DataViewTableManager,
 } from '../../table-view-manager.js';
-import type { ColumnTypeIcon } from '../../types.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
@@ -493,17 +485,6 @@ const createDropPreview = (container: Element, height: number) => {
       div.remove();
     },
   };
-};
-
-export const columnTypeIconMap: ColumnTypeIcon = {
-  select: DatabaseSelect,
-  number: DatabaseNumber,
-  checkbox: CheckBoxIcon,
-  progress: DatabaseProgress,
-  'rich-text': TextIcon,
-  'multi-select': DatabaseMultiSelect,
-  link: LinkIcon,
-  date: DateTime,
 };
 
 declare global {

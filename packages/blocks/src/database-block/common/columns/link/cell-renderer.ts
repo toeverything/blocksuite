@@ -18,10 +18,7 @@ import { linkPureColumnConfig } from './define.js';
 export class LinkCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell {
-      display: flex;
-      align-items: center;
       width: 100%;
-      height: 100%;
       user-select: none;
       cursor: pointer;
     }
@@ -113,10 +110,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell-editing {
       width: 100%;
-      height: 100%;
       cursor: text;
-      display: flex;
-      align-items: center;
     }
 
     .affine-database-link-editing {

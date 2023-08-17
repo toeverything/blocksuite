@@ -118,6 +118,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   };
   public _clickLeft = (e: MouseEvent) => {
     const ele = e.currentTarget as HTMLElement;
+    const columns = this.view.detailColumns;
     popMenu(ele, {
       options: {
         input: {
@@ -169,14 +170,15 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
             >
               ${DatabaseMoveLeft}
             </div>`,
-            hide: () => this.column.isFirst,
+            hide: () => columns.findIndex(v => v === this.column.id) === 0,
             select: () => {
-              const preId = this.view.columnGetPreColumn(this.column.id)?.id;
-              if (!preId) {
+              const index = columns.findIndex(v => v === this.column.id);
+              const targetId = columns[index - 1];
+              if (!targetId) {
                 return;
               }
               this.view.columnMove(this.column.id, {
-                id: preId,
+                id: targetId,
                 before: true,
               });
             },
@@ -189,14 +191,17 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
             >
               ${DatabaseMoveRight}
             </div>`,
-            hide: () => this.column.isLast,
+            hide: () =>
+              columns.findIndex(v => v === this.column.id) ===
+              columns.length - 1,
             select: () => {
-              const nextId = this.view.columnGetNextColumn(this.column.id)?.id;
-              if (!nextId) {
+              const index = columns.findIndex(v => v === this.column.id);
+              const targetId = columns[index + 1];
+              if (!targetId) {
                 return;
               }
               this.view.columnMove(this.column.id, {
-                id: nextId,
+                id: targetId,
                 before: false,
               });
             },
@@ -231,7 +236,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       isEditing: this.editing,
       selectCurrentCell: this.changeEditing,
     };
-    const { view, edit } = this.column.detailRenderer;
+    const { view, edit } = this.column.renderer;
     const contentClass = classMap({
       'field-content': true,
       'is-editing': this.editing,

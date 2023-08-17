@@ -200,9 +200,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._updateLineNumbers();
   });
 
-  private _curLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
+  private _perviousLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: ILanguageRegistration) {
+    if (this._highlighter) {
+      const loadedLangs = this._highlighter.getLoadedLanguages();
+      if (!loadedLangs.includes(lang.id as Lang)) {
+        this._highlighter.loadLanguage(lang).then(() => {
+          const richText = this.querySelector('rich-text');
+          const vEditor = richText?.vEditor;
+          if (vEditor) {
+            vEditor.requestUpdate();
+          }
+        });
+      }
+      return;
+    }
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
@@ -239,7 +252,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     // set highlight options getter used by "exportToHtml"
     getService('affine:code').setHighlightOptionsGetter(() => {
       return {
-        lang: this._curLanguage.id as Lang,
+        lang: this._perviousLanguage.id as Lang,
         highlighter: this._highlighter,
       };
     });
@@ -297,24 +310,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override updated() {
-    if (this.model.language !== this._curLanguage.id) {
+    if (this.model.language !== this._perviousLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
-      this._curLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
+      this._perviousLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
       if (lang) {
-        if (this._highlighter) {
-          const currentLangs = this._highlighter.getLoadedLanguages();
-          if (!currentLangs.includes(lang.id as Lang)) {
-            this._highlighter.loadLanguage(lang).then(() => {
-              const richText = this.querySelector('rich-text');
-              const vEditor = richText?.vEditor;
-              if (vEditor) {
-                vEditor.requestUpdate();
-              }
-            });
-          }
-        } else {
-          this._startHighlight(lang);
-        }
+        this._startHighlight(lang);
       } else {
         this._highlighter = null;
       }
@@ -397,8 +397,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _langListTemplate() {
-    const curLanguageDisplayName =
-      this._curLanguage.displayName ?? this._curLanguage.id;
+    const curLanguage =
+      getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
+    const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
     return html`<div
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
@@ -416,7 +417,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       </icon-button>
       ${this._showLangList
         ? html`<lang-list
-            .currentLanguageId=${this._curLanguage.id as Lang}
+            .currentLanguageId=${this._perviousLanguage.id as Lang}
             .slots=${this._langListSlots}
           ></lang-list>`
         : nothing}
