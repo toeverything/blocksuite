@@ -171,6 +171,18 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   host!: Document | HTMLElement;
 
   private _noteElementHeight = 0;
+  private _changedFlag = false;
+  private _oldViewport?: {
+    zoom: number;
+    center: {
+      x: number;
+      y: number;
+    };
+  };
+
+  get edgeless() {
+    return this.ownerDocument.querySelector('affine-edgeless-page');
+  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -189,6 +201,22 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     });
 
     this._updateNotes();
+  }
+
+  override disconnectedCallback(): void {
+    super.disconnectedCallback();
+
+    if (!this._changedFlag && this._oldViewport) {
+      const edgeless = this.edgeless;
+
+      if (!edgeless) return;
+
+      edgeless.surface.viewport.setViewport(
+        this._oldViewport.zoom,
+        [this._oldViewport.center.x, this._oldViewport.center.y],
+        true
+      );
+    }
   }
 
   private _updateNotes() {
@@ -244,6 +272,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     assertExists(root);
 
+    this._changedFlag = true;
     this.page.moveBlocks(
       [note.note],
       root,
@@ -277,6 +306,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       .filter(block => !draggingBlocks.has(block));
     const newChildren = [...leftPart, ...blocks, ...rightPart];
 
+    this._changedFlag = true;
     this.page.updateBlock(this.page.root, {
       children: newChildren,
     });
@@ -287,15 +317,17 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     if (!selected) {
       this._selected = this._selected.filter(noteId => noteId !== id);
-      return;
-    }
-
-    if (multiselect) {
+    } else if (multiselect) {
       this._selected.push(id);
       this.requestUpdate('_selected');
     } else {
       this._selected = [id];
     }
+
+    this.edgeless?.selectionManager.setSelection({
+      elements: this._selected,
+      editing: false,
+    });
   }
 
   private _drag(e: DragEvent) {
@@ -352,15 +384,46 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     });
   }
 
-  private _fitView(e: FitViewEvent) {
-    const page = this.ownerDocument.querySelector('affine-edgeless-page');
+  override firstUpdated(): void {
+    this._zoomToFit();
+  }
 
-    if (!page) return;
+  private _zoomToFit() {
+    const edgeless = this.edgeless;
+
+    if (!edgeless) return;
+
+    const { surface } = edgeless;
+    const { centerX, centerY, zoom } = edgeless.getFitToScreenData([
+      undefined,
+      this.offsetWidth,
+      undefined,
+      287,
+    ]);
+
+    this._oldViewport = {
+      zoom: surface.viewport.zoom,
+      center: {
+        x: surface.viewport.center.x,
+        y: surface.viewport.center.y,
+      },
+    };
+    surface.viewport.setViewport(zoom, [centerX, centerY], true);
+  }
+
+  private _fitToElement(e: FitViewEvent) {
+    const edgeless = this.edgeless;
+
+    if (!edgeless) return;
 
     const { block } = e.detail;
     const bound = Bound.deserialize(block.xywh);
 
-    page.surface.viewport.setViewportByBound(bound, [100, 100, 100, 100], true);
+    edgeless.surface.viewport.setViewportByBound(
+      bound,
+      [50, 400, 50, 50],
+      true
+    );
   }
 
   private _jumpToHidden() {
@@ -441,7 +504,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                     @reorder=${this._reorder}
                     @select=${this._selectNote}
                     @drag=${this._drag}
-                    @fitview=${this._fitView}
+                    @fitview=${this._fitToElement}
                   ></edgeless-note-toc-card>
                 `
               )
@@ -463,7 +526,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
                   style=${this.insertIndex !== undefined
                     ? 'transform: translateY(20px)'
                     : ''}
-                  @fitview=${this._fitView}
+                  @fitview=${this._fitToElement}
                 ></edgeless-note-toc-card>`
               )
             : nothing}
