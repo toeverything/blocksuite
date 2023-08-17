@@ -558,9 +558,9 @@ export abstract class BaseParser {
           rowIds: Object.keys(cells),
           cells: cells,
           columns: columns,
-        },
+        } as SerializedBlock['databaseProps'],
         children: children,
-      } satisfies SerializedBlock,
+      },
     ];
   };
 
