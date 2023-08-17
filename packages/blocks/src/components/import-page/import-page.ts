@@ -96,6 +96,9 @@ export async function importNotion(workspace: Workspace, file: File) {
 
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+        if (file.endsWith('/index.html')) {
+          continue;
+        }
         if (lastSplitIndex !== -1) {
           const text = await zipFile.files[file].async('text');
           const doc = new DOMParser().parseFromString(text, 'text/html');
