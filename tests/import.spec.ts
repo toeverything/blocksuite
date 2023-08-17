@@ -438,6 +438,19 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
         id: '3',
         rowIds: ['4', '5'],
         title: 'Database',
+        views: [
+          {
+            id: '0',
+            name: 'Table View',
+            mode: 'table',
+            columns: [],
+            filter: {
+              type: 'group',
+              op: 'and',
+              conditions: [],
+            },
+          },
+        ],
       },
       flavour: 'affine:database',
     },
@@ -689,6 +702,19 @@ test(scoped`import notion html-format table`, async ({ page }) => {
         id: '7',
         rowIds: ['8', '9', '10'],
         title: 'Database',
+        views: [
+          {
+            id: '0',
+            name: 'Table View',
+            mode: 'table',
+            columns: [],
+            filter: {
+              type: 'group',
+              op: 'and',
+              'matchesReplaceMap[16]': [],
+            },
+          },
+        ],
       },
       flavour: 'affine:database',
     },
