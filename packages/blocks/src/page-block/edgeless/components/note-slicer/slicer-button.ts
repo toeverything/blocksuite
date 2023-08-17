@@ -19,8 +19,8 @@ const buttonStyle = css`
   }
 `;
 
-@customElement('note-scissors-button')
-export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
+@customElement('note-slicer-button')
+export class NoteSlicerButton extends WithDisposable(LitElement) {
   static override styles = [
     buttonStyle,
     css`
@@ -39,8 +39,6 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
   private _button!: HTMLButtonElement;
 
   private _externalButton: null | NoteScissorsButton = null;
-
-  private _zoom = 1;
 
   private _createExternalButton() {
     const externalButton = document.createElement(
@@ -69,7 +67,7 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
       const rect = this._button.getBoundingClientRect();
 
       this._button.style.visibility = 'hidden';
-      button.show(rect, this._zoom);
+      button.show(rect);
       button.addEventListener(
         'transitionend',
         () => {
@@ -81,7 +79,7 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
   };
 
   private _dispatchEnterButtonEvent() {
-    const e = new CustomEvent('mouseenterbutton');
+    const e = new CustomEvent('popupbutton');
 
     this.dispatchEvent(e);
   }
@@ -104,9 +102,7 @@ export class NoteScissorsVisualButton extends WithDisposable(LitElement) {
     }
   }
 
-  show(zoom: number) {
-    this._zoom = zoom;
-
+  show() {
     this._button.addEventListener('transitionend', this._popupButton, {
       once: true,
     });
@@ -148,15 +144,15 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
 
   private _rafId = 0;
 
-  show(rect: DOMRect, zoom: number) {
+  show(rect: DOMRect) {
     this.style.display = 'block';
-    this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0) scale(${zoom})`;
+    this.style.transform = `translate3d(${rect.x}px, ${rect.y}px, 0)`;
 
     const rafId = requestAnimationFrame(() => {
       this.style.transition = `transform 0.1s 0.1s ease-in-out`;
       this.style.transform = `translate3d(${rect.x + rect.width * 0.8}px, ${
-        rect.y - 2
-      }px, 0) scale(${zoom * 1.2})`;
+        rect.y
+      }px, 0)`;
 
       if (rafId === this._rafId) this._rafId = 0;
     });
@@ -177,7 +173,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'note-scissors-button': NoteScissorsVisualButton;
+    'note-scissors-button': NoteSlicerButton;
     'affine-note-scissors': NoteScissorsButton;
   }
 }

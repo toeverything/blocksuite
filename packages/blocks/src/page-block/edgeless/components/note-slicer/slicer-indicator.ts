@@ -2,10 +2,13 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-@customElement('note-cut-indicator')
-export class NoteCutIndicator extends WithDisposable(LitElement) {
+@customElement('note-slicer-indicator')
+export class NoteSlicerIndicator extends WithDisposable(LitElement) {
   @property({ attribute: false })
   width!: number;
+
+  @property({ attribute: false })
+  offset!: number;
 
   static override styles = css`
     :host {
@@ -28,6 +31,7 @@ export class NoteCutIndicator extends WithDisposable(LitElement) {
       this.style.visibility = 'visible';
 
       requestAnimationFrame(() => {
+        this.style.transform = `translate(${this.offset}px, 0)`;
         this.style.width = `${this.width}px`;
       });
     });
@@ -40,12 +44,12 @@ export class NoteCutIndicator extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<div class="indicator-line"></div>`;
+    return html` <div class="indicator-line"></div> `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'note-cut-indicator': NoteCutIndicator;
+    'note-slicer-indicator': NoteSlicerIndicator;
   }
 }

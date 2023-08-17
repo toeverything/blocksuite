@@ -323,7 +323,7 @@ test('drag handle should work across multiple notes', async ({ page }) => {
   await expect(page.locator('selected > *')).toHaveCount(0);
 });
 
-test('note clipping will add new note', async ({ page }) => {
+test('note slicer will add new note', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await initThreeParagraphs(page);
@@ -335,10 +335,10 @@ test('note clipping will add new note', async ({ page }) => {
 
   await hoverOnNote(page, ids.noteId);
   await waitNextFrame(page);
-  await expect(page.locator('affine-note-cut').isVisible()).toBeTruthy();
+  await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
   const buttonRect = await page
-    .locator('note-scissors-button .scissors-button')
+    .locator('note-slicer-button .scissors-button')
     .boundingBox();
 
   assertRectExist(buttonRect);
