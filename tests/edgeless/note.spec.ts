@@ -366,7 +366,7 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await waitNextFrame(page, 500);
 
   const buttonRect = await page
-    .locator('note-scissors-button .scissors-button')
+    .locator('note-slicer-button .scissors-button')
     .boundingBox();
 
   assertRectExist(buttonRect);
