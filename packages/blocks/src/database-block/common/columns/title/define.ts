@@ -14,7 +14,7 @@ export const titlePureColumnConfig = columnManager.register<string>(
     name: 'Title',
     type: () => tRichText.create(),
     defaultData: () => ({}),
-    cellToString: data => data ?? '',
+    cellToString: data => data?.toString() ?? '',
     cellFromString: data => {
       return {
         value: data,

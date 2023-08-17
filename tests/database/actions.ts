@@ -91,7 +91,7 @@ export async function assertDatabaseTitleColumnText(
     );
     const titleColumnCell = row?.querySelector('.database-cell:nth-child(1)');
     const titleSpan = titleColumnCell?.querySelector(
-      '.data-view-title'
+      '.data-view-header-area-rich-text'
     ) as HTMLElement;
     if (!titleSpan) throw new Error('Cannot find database title column editor');
     return titleSpan.innerText;

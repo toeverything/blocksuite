@@ -155,11 +155,13 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   }
 
   public override onExitEditMode() {
-    this.view.cellUpdateValue(
-      this.rowId,
-      this.titleColumn.id,
-      this.isRichText ? this.editor?.yText : this.editor?.yText.toString()
-    );
+    if (!this.isRichText) {
+      this.view.cellUpdateValue(
+        this.rowId,
+        this.titleColumn.id,
+        this.isRichText ? this.editor?.yText : this.editor?.yText.toString()
+      );
+    }
   }
 
   private get icon(): string | undefined {
