@@ -1,5 +1,8 @@
-import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
-import type { BaseSelection } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  TextRangePoint,
+  TextSelection,
+} from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type Text } from '@blocksuite/store';
@@ -13,6 +16,7 @@ import type { BlockSuiteRoot } from '../element/lit-root.js';
  */
 export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
+
   private get _selectionManager() {
     return this.root.selectionManager;
   }
@@ -39,6 +43,13 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        if (
+          range &&
+          range.startContainer.parentElement?.closest('side-layout-modal')
+        ) {
+          return;
+        }
+
         if (range === null || range.intersectsNode(this.root)) {
           this._prevSelection =
             this._rangeManager.syncRangeToTextSelection(range);

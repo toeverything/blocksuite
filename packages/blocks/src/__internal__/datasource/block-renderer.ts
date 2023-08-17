@@ -16,6 +16,22 @@ export class BlockRenderer
   @property({ attribute: false })
   public rowId!: string;
 
+  public override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.addFromEvent(
+      this,
+      'keydown',
+      e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.stopPropagation();
+          e.preventDefault();
+          return;
+        }
+      },
+      true
+    );
+  }
+
   protected override render(): unknown {
     const root = this.closest('block-suite-root');
     if (!root) {
