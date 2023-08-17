@@ -216,8 +216,8 @@ export class DebugMenu extends ShadowlessElement {
 
   private _updateBlockType(
     e: PointerEvent,
-    flavour: 'affine:paragraph' | 'affine:list',
-    type: string
+    _flavour: 'affine:paragraph' | 'affine:list',
+    _type: string
   ) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
