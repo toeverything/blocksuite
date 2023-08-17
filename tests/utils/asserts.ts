@@ -314,7 +314,7 @@ export async function assertTextFormat(
 export async function assertTypeFormat(page: Page, type: string) {
   const actual = await page.evaluate(() => {
     const richText = document.querySelectorAll('rich-text')[0];
-    return richText.model.type;
+    return (richText.model as BaseBlockModel<{ type: string }>).type;
   });
   expect(actual).toEqual(type);
 }
