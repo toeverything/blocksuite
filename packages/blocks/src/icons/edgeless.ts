@@ -550,7 +550,7 @@ export const ConnectorLWithArrowIcon = html`<svg
 export const DashLineIcon = html`<svg
   width="20"
   height="20"
-  viewBox="0 0 20 20"
+  viewBox="0 0 24 24"
   xmlns="http://www.w3.org/2000/svg"
 >
   <path
@@ -563,7 +563,7 @@ export const DashLineIcon = html`<svg
 export const StraightLineIcon = html`<svg
   width="20"
   height="20"
-  viewBox="0 0 20 20"
+  viewBox="0 0 24 24"
   xmlns="http://www.w3.org/2000/svg"
 >
   <path
@@ -576,7 +576,7 @@ export const StraightLineIcon = html`<svg
 export const BanIcon = html`<svg
   width="20"
   height="20"
-  viewBox="0 0 20 20"
+  viewBox="0 0 24 24"
   xmlns="http://www.w3.org/2000/svg"
 >
   <path
