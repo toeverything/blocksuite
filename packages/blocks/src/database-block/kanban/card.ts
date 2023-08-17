@@ -87,13 +87,21 @@ const styles = css`
 
   .card-op {
     display: flex;
+    position: relative;
     padding: 4px;
     border-radius: 4px;
     box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
     background-color: var(--affine-background-primary-color);
   }
 
-  .card-op:hover {
+  .card-op:hover:before {
+    content: '';
+    border-radius: 4px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     background-color: var(--affine-hover-color);
   }
 
@@ -169,7 +177,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       return;
     }
     return html` <div class="card-header-icon">
-      <img src="${icon.getValue(this.cardId) as string}" />
+      ${icon.getValue(this.cardId)}
     </div>`;
   }
 

@@ -45,7 +45,7 @@ export class TitleDetailCell extends BaseCellRenderer<string> {
 
 columnRenderer.register({
   type: titleColumnTypeName,
-  icon: createIcon('TextIcon'),
+  icon: createIcon('TitleIcon'),
   cellRenderer: {
     view: createFromBaseCellRenderer(RichTextCell),
     edit: createFromBaseCellRenderer(RichTextCellEditing),

@@ -27,6 +27,8 @@ export interface DataViewManager {
 
   get columns(): string[];
 
+  get detailColumns(): string[];
+
   get columnsWithoutFilter(): string[];
 
   get rows(): string[];
@@ -388,6 +390,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   public abstract get columns(): string[];
+  public abstract get detailColumns(): string[];
 
   public abstract get columnsWithoutFilter(): string[];
 

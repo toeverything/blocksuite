@@ -1,8 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { VRange } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
+import * as Y from 'yjs';
 import { Doc, Text as YText } from 'yjs';
 
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
@@ -11,6 +13,11 @@ import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import { BaseCellRenderer } from '../columns/base-cell.js';
 import { createFromBaseCellRenderer } from '../columns/renderer.js';
+
+interface StackItem {
+  meta: Map<'v-range', VRange | null | undefined>;
+  type: 'undo' | 'redo';
+}
 
 const styles = css`
   data-view-header-area-text {
@@ -45,15 +52,22 @@ const styles = css`
   .data-view-header-area-rich-text v-line > div {
     flex-grow: 1;
   }
+
   .data-view-header-area-icon {
     height: var(--data-view-cell-text-line-height);
     display: flex;
     align-items: center;
-    margin-right: 4px;
+    margin-right: 8px;
+    padding: 2px;
+    border-radius: 4px;
+    background-color: var(--affine-background-secondary-color);
   }
-  .data-view-header-area-icon img {
-    width: 20px;
-    height: 20px;
+
+  .data-view-header-area-icon svg {
+    width: 14px;
+    height: 14px;
+    fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
   }
 `;
 
@@ -74,7 +88,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   }
 
   editor?: VEditor;
-
+  undoManager?: Y.UndoManager;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
@@ -86,6 +100,42 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       active: () => activeEditorManager.isActive(this),
     });
     this.editor.mount(this.richText);
+    this.editor.bindHandlers({
+      keydown: e => {
+        if (
+          e instanceof KeyboardEvent &&
+          (e.ctrlKey || e.metaKey) &&
+          (e.key === 'z' || e.key === 'Z')
+        ) {
+          e.preventDefault();
+          if (e.shiftKey) {
+            this.undoManager?.redo();
+          } else {
+            this.undoManager?.undo();
+          }
+        }
+      },
+    });
+
+    this.undoManager = new Y.UndoManager(yText, {
+      trackedOrigins: new Set([yText.doc?.clientID]),
+    });
+    this.undoManager.on(
+      'stack-item-added',
+      (event: { stackItem: StackItem }) => {
+        const vRange = this.editor?.getVRange();
+        event.stackItem.meta.set('v-range', vRange);
+      }
+    );
+    this.undoManager.on(
+      'stack-item-popped',
+      (event: { stackItem: StackItem }) => {
+        const vRange = event.stackItem.meta.get('v-range');
+        if (vRange) {
+          this.editor?.setVRange(vRange);
+        }
+      }
+    );
     return this.editor;
   }
 
@@ -126,9 +176,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     if (!icon) {
       return;
     }
-    return html`<div class="data-view-header-area-icon">
-      <img src="${icon}" alt="" />
-    </div>`;
+    return html` <div class="data-view-header-area-icon">${icon}</div>`;
   }
 
   override render() {

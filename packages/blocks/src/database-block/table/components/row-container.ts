@@ -66,9 +66,17 @@ export function DataBaseRowContainer(
         border-radius: 4px;
         box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
         background-color: var(--affine-background-primary-color);
+        position: relative;
       }
 
-      .row-op:hover {
+      .row-op:hover:before {
+        content: '';
+        border-radius: 4px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
         background-color: var(--affine-hover-color);
       }
 
@@ -118,11 +126,26 @@ export function DataBaseRowContainer(
                 v => v.id,
                 (column, i) => {
                   const clickDetail = () => {
+                    selection.selection = {
+                      rowsSelection: {
+                        start: idx,
+                        end: idx,
+                      },
+                      focus: {
+                        rowIndex: idx,
+                        columnIndex: i,
+                      },
+                      isEditing: false,
+                    };
                     openDetail(id, selection);
                   };
                   const openMenu = (e: MouseEvent) => {
                     const ele = e.currentTarget as HTMLElement;
                     selection.selection = {
+                      rowsSelection: {
+                        start: idx,
+                        end: idx,
+                      },
                       focus: {
                         rowIndex: idx,
                         columnIndex: i,

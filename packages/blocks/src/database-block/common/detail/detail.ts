@@ -62,6 +62,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   rowId!: string;
   selection = new DetailSelection(this);
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -95,16 +96,19 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     );
   };
 
+  private get columns() {
+    return this.view.detailColumns.map(id => this.view.columnGet(id));
+  }
+
   override render() {
-    const columns = this.view.columnsWithoutFilter;
+    const columns = this.columns;
 
     return html`
       ${this.renderHeader()}
       ${repeat(
         columns,
         v => v,
-        id => {
-          const column = this.view.columnGet(id);
+        column => {
           return html` <affine-data-view-record-field
             .view="${this.view}"
             .column="${column}"

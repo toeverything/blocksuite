@@ -173,9 +173,12 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   }
 
   renderColumn = (column: DataViewColumnManager) => {
-    const icon = column.hide ? hidden : show;
+    const isTitle = column.type === 'title';
+    const icon = isTitle ? '' : column.hide ? hidden : show;
     const changeVisible = () => {
-      column.updateHide(!column.hide);
+      if (column.type !== 'title') {
+        column.updateHide(!column.hide);
+      }
     };
     return html` <div class="property-item">
       <div class="property-item-drag-bar"></div>
@@ -186,7 +189,9 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   };
   clickChangeAll = (allShow: boolean) => {
     this.view.columnsWithoutFilter.forEach(id => {
-      this.view.columnUpdateHide(id, allShow);
+      if (this.view.columnGetType(id) !== 'title') {
+        this.view.columnUpdateHide(id, allShow);
+      }
     });
   };
 

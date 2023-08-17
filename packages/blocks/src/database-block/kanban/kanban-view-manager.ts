@@ -1,5 +1,6 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { CellRenderer } from '../common/columns/manager.js';
 import type { RealDataViewDataTypeMap } from '../common/data-view.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import {
@@ -16,6 +17,7 @@ import type { TType } from '../logical/typesystem.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { KanbanGroupProperty } from './define.js';
+import { headerRenderer } from './header-cell.js';
 
 export type KanbanGroupData = {
   key: string;
@@ -115,6 +117,12 @@ export class DataViewKanbanManager extends BaseDataViewManager {
 
   public get columns(): string[] {
     return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
+  }
+
+  public get detailColumns(): string[] {
+    return this.columnsWithoutFilter.filter(
+      id => this.columnGetType(id) !== 'title'
+    );
   }
 
   public get columnsWithoutFilter(): string[] {
@@ -266,9 +274,11 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   columnGetHide(columnId: string): boolean {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
+
   public deleteView(): void {
     this.viewSource.delete();
   }
+
   public get isDeleted(): boolean {
     return this.viewSource.isDeleted();
   }
@@ -280,6 +290,13 @@ export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {
     override dataViewManager: DataViewKanbanManager
   ) {
     super(propertyId, dataViewManager);
+  }
+
+  public override get renderer(): CellRenderer {
+    if (this.id === this.dataViewManager.header.titleColumn) {
+      return headerRenderer;
+    }
+    return super.renderer;
   }
 }
 
@@ -481,6 +498,7 @@ export class GroupHelper {
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
   }
+
   get addGroup() {
     return this.viewManager.columnConfigManager.getColumn(this.column.type).ops
       .addGroup;

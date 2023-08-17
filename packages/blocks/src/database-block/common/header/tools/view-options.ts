@@ -118,6 +118,9 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
               },
               items: this.view.columnsWithoutFilter
                 .filter(id => {
+                  if (this.view.columnGet(id).type === 'title') {
+                    return false;
+                  }
                   return !!groupByMatcher.match(
                     this.view.columnGet(id).dataType
                   );
