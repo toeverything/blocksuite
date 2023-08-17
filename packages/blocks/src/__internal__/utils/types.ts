@@ -8,7 +8,7 @@ import type {
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { DefaultViewDataType } from '../../database-block/common/data-view.js';
+import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
@@ -239,7 +239,7 @@ export type SerializedBlock = {
     rowIds: string[];
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];
-    views?: DefaultViewDataType[];
+    views?: DataViewDataType[];
   };
   // note block
   xywh?: string;

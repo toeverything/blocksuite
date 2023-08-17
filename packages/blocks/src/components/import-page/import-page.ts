@@ -233,6 +233,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                       name: 'Table View',
                       mode: 'table',
                       columns: [],
+                      header: {},
                       filter: {
                         type: 'group',
                         op: 'and',
@@ -240,7 +241,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                       },
                     },
                   ],
-                } as SerializedBlock['databaseProps'],
+                },
                 children: children,
               },
             ];
