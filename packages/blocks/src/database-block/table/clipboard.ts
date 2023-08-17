@@ -47,6 +47,10 @@ export class TableViewClipboard implements BaseViewClipboard {
       uiEventDispatcher.add(
         'copy',
         ctx => {
+          const selection = getDatabaseSelection(this._root);
+          const tableSelection = selection?.getSelection('table');
+          if (!tableSelection) return false;
+
           this._onCopy(ctx);
           return true;
         },
