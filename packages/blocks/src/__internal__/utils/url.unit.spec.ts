@@ -15,14 +15,14 @@ describe('isValidUrl: determining whether a URL is valid is very complicated', (
 
   test('CAUTION: any link include allowed schema is a valid url!', () => {
     expect(isValidUrl('http://www.example.cm')).toEqual(true);
-    expect(isValidUrl('https://x')).toEqual(true);
-    expect(isValidUrl('https://')).toEqual(true);
-    expect(isValidUrl('http://w.... Anything !@#*(!!!!')).toEqual(true);
+    expect(isValidUrl('https://x ')).toEqual(true);
     expect(isValidUrl('mailto://w:80')).toEqual(true);
   });
 
   test('link include a unknown schema is not a valid url', () => {
     expect(isValidUrl('xxx://www.example.com')).toEqual(false);
+    expect(isValidUrl('https://')).toEqual(false);
+    expect(isValidUrl('http://w.... !@#*(!!!!')).toEqual(false);
   });
 
   test('URL without protocol is a valid URL', () => {
