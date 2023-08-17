@@ -5,10 +5,8 @@ import { Text } from '@blocksuite/store';
 import type { Ref } from 'lit/directives/ref.js';
 
 import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
-import { getBlockClipboardInfo } from '../../__internal__/clipboard/index.js';
 import {
   CLIPBOARD_MIMETYPE,
-  createHTMLStringForCustomData,
   performNativeCopy,
 } from '../../__internal__/clipboard/utils/pure.js';
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
@@ -50,6 +48,7 @@ export class TableViewClipboard implements BaseViewClipboard {
         'copy',
         ctx => {
           this._onCopy(ctx);
+          return true;
         },
         { path: this._path }
       )
@@ -68,8 +67,7 @@ export class TableViewClipboard implements BaseViewClipboard {
     const view = this._view.value as DatabaseTable;
     const model = this._model;
 
-    const { isEditing, focus, rowsSelection, columnsSelection } =
-      tableSelection;
+    const { isEditing, focus } = tableSelection;
 
     // copy cells' content
     if (isEditing) {
@@ -99,16 +97,6 @@ export class TableViewClipboard implements BaseViewClipboard {
       return true;
     }
 
-    if (rowsSelection && !columnsSelection) {
-      // rows
-      // When copying row to outside the database, it can be pasted as a `block`.
-      const { htmlClipboardItem, pageClipboardItem } =
-        await getPageClipboardItems(model, rowsSelection);
-      performNativeCopy([htmlClipboardItem, pageClipboardItem]);
-
-      return true;
-    }
-
     // cells
     // For database paste inside.
     const copyedValues = getCopyedValuesFromSelection(
@@ -117,13 +105,13 @@ export class TableViewClipboard implements BaseViewClipboard {
       view
     );
     const stringifiesData = JSON.stringify(copyedValues);
-    const htmlSelection = setHTMLStringForSelection(
+    const tableHtmlSelection = setHTMLStringForSelection(
       stringifiesData,
       CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
     );
-    const htmlClipboardItem = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.HTML,
-      htmlSelection
+    const tableClipboardItem = new ClipboardItem(
+      CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE,
+      tableHtmlSelection
     );
 
     // For database paste outside(raw text).
@@ -133,7 +121,7 @@ export class TableViewClipboard implements BaseViewClipboard {
       CLIPBOARD_MIMETYPE.TEXT,
       formatValue
     );
-    performNativeCopy([textClipboardItem, htmlClipboardItem]);
+    performNativeCopy([textClipboardItem, tableClipboardItem]);
 
     return true;
   };
@@ -183,9 +171,8 @@ export class TableViewClipboard implements BaseViewClipboard {
         return true;
       }
 
-      // paste cells
       const htmlClipboardData = event.clipboardData?.getData(
-        CLIPBOARD_MIMETYPE.HTML
+        CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
       );
       if (!htmlClipboardData) return true;
       const clipboardData = getSelectionFromHTMLString(
@@ -194,6 +181,7 @@ export class TableViewClipboard implements BaseViewClipboard {
       );
       if (!clipboardData) return true;
 
+      // paste cells
       const copyedSelectionData = JSON.parse(
         clipboardData
       ) as CopyedSelectionData;
@@ -224,44 +212,6 @@ export class TableViewClipboard implements BaseViewClipboard {
 
     return true;
   };
-}
-
-async function getPageClipboardItems(
-  model: DatabaseBlockModel,
-  rowsSelection: { start: number; end: number }
-) {
-  const selectedChildren = model.children.slice(
-    rowsSelection.start,
-    rowsSelection.end + 1
-  );
-
-  const selectedModelsMap = new Map();
-  selectedChildren.forEach((model, index) => {
-    selectedModelsMap.set(model.id, index);
-  });
-  const selectedInfo = await Promise.all(
-    selectedChildren.map(async model => {
-      return await getBlockClipboardInfo(model, selectedModelsMap);
-    })
-  );
-  const stringifiesData = JSON.stringify(
-    selectedInfo.filter(info => info.json).map(info => info.json)
-  );
-
-  const customClipboardFragment = createHTMLStringForCustomData(
-    stringifiesData,
-    CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE
-  );
-  const htmlClipboardItem = new ClipboardItem(
-    CLIPBOARD_MIMETYPE.HTML,
-    `${selectedInfo.map(info => info.html).join('')}${customClipboardFragment}`
-  );
-  const pageClipboardItem = new ClipboardItem(
-    CLIPBOARD_MIMETYPE.BLOCKSUITE_PAGE,
-    stringifiesData
-  );
-
-  return { htmlClipboardItem, pageClipboardItem };
 }
 
 function getDatabaseSelection(root: BlockSuiteRoot) {
@@ -418,6 +368,9 @@ function getTargetRangeFromSelection(
         length: model.columns.length,
       },
     };
+    if (rowsSelection.start === rowsSelection.end) {
+      range.anchor = true;
+    }
   } else if (rowsSelection && columnsSelection) {
     // multiple cells
     range = {
