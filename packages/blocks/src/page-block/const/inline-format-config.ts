@@ -5,7 +5,7 @@ import type { TemplateResult } from 'lit';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import {
   BoldIcon,
-  InlineCodeIcon,
+  CodeIcon,
   ItalicIcon,
   LinkIcon,
   StrikethroughIcon,
@@ -157,7 +157,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
   {
     id: 'code',
     name: 'Code',
-    icon: InlineCodeIcon,
+    icon: CodeIcon,
     hotkey: 'Mod-e',
     activeWhen: (format: AffineTextAttributes) => 'code' in format,
     showWhen: (pageElement: PageBlockComponent) =>
