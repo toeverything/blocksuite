@@ -375,7 +375,7 @@ test.describe('switch column type', () => {
 
     await switchColumnType(page, 'Link');
 
-    const linkText = 'http://';
+    const linkText = 'http://example.com';
     const cell = getFirstColumnCell(page, 'affine-database-link');
     await initDatabaseDynamicRowWithData(page, linkText);
     const link = cell.locator('affine-database-link-node > a');
