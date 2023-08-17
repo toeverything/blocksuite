@@ -16,7 +16,7 @@ export const checkboxPureColumnConfig = columnManager.register<boolean>(
     cellToString: data => (data ? 'True' : 'False'),
     cellFromString: data => {
       return {
-        value: !!data,
+        value: data === 'False' ? false : true,
       };
     },
     cellToJson: data => data ?? null,
