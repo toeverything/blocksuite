@@ -25,9 +25,21 @@ export class BlockElement<
   model!: Model;
 
   @property({ attribute: false })
-  content!: TemplateResult;
+  content: TemplateResult | null = null;
 
-  @property({ attribute: false })
+  @property({
+    attribute: false,
+    hasChanged(value, oldValue) {
+      if (!value || !oldValue) {
+        return value !== oldValue;
+      }
+      // Is empty object
+      if (!Object.keys(value).length && !Object.keys(oldValue).length) {
+        return false;
+      }
+      return value !== oldValue;
+    },
+  })
   widgets!: Record<WidgetName, TemplateResult>;
 
   @property({ attribute: false })
@@ -119,7 +131,7 @@ export class BlockElement<
     );
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BaseBlockModel): TemplateResult | null => {
     return this.root.renderModel(model);
   };
 

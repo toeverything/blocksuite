@@ -35,7 +35,8 @@ export class TitleDetailCell extends BaseCellRenderer<string> {
     model: BaseBlockModel;
     result: TemplateResult;
   } {
-    return this.column.getExtra(this.rowId) as never;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.column.getExtra(this.rowId) as any;
   }
 
   override render() {
