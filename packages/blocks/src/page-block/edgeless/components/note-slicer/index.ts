@@ -6,6 +6,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../__internal__/consts.js';
 import {
   type BlockComponentElement,
   getBlockElementByModel,
@@ -17,7 +18,6 @@ import type {
   EdgelessPageBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../index.js';
 import {
   DefaultModeDragType,
   type DefaultToolController,
