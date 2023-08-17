@@ -200,7 +200,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._updateLineNumbers();
   });
 
-  private _curLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
+  @state()
+  private get _curLanguage() {
+    return getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
+  }
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: ILanguageRegistration) {
     const mode = queryCurrentMode();
@@ -299,7 +302,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   override updated() {
     if (this.model.language !== this._curLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
-      this._curLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
       if (lang) {
         if (this._highlighter) {
           const currentLangs = this._highlighter.getLoadedLanguages();
