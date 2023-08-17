@@ -4,12 +4,10 @@ import { html } from 'lit';
 import { popFilterableSimpleMenu } from '../../components/menu/index.js';
 import {
   ArrowRightBigIcon,
-  CopyIcon,
   DeleteIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
-  PasteIcon,
 } from '../../icons/index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type { KanbanSelection } from './selection.js';
@@ -62,28 +60,28 @@ export const popCardMenu = (
             }) ?? [],
       },
     },
-    {
-      type: 'group',
-      name: '',
-      children: () => [
-        {
-          type: 'action',
-          name: 'Copy',
-          icon: CopyIcon,
-          select: () => {
-            //TODO
-          },
-        },
-        {
-          type: 'action',
-          name: 'Paste',
-          icon: PasteIcon,
-          select: () => {
-            //TODO
-          },
-        },
-      ],
-    },
+    // {
+    //   type: 'group',
+    //   name: '',
+    //   children: () => [
+    //     {
+    //       type: 'action',
+    //       name: 'Copy',
+    //       icon: CopyIcon,
+    //       select: () => {
+    //         //TODO
+    //       },
+    //     },
+    //     {
+    //       type: 'action',
+    //       name: 'Paste',
+    //       icon: PasteIcon,
+    //       select: () => {
+    //         //TODO
+    //       },
+    //     },
+    //   ],
+    // },
     {
       type: 'group',
       name: '',
@@ -91,7 +89,9 @@ export const popCardMenu = (
         {
           type: 'action',
           name: 'Insert before',
-          icon: html` <div style="transform: rotate(90deg)">
+          icon: html` <div
+            style="transform: rotate(90deg);display:flex;align-items:center;"
+          >
             ${MoveLeftIcon}
           </div>`,
           select: () => {
@@ -101,7 +101,9 @@ export const popCardMenu = (
         {
           type: 'action',
           name: 'Insert after',
-          icon: html` <div style="transform: rotate(90deg)">
+          icon: html` <div
+            style="transform: rotate(90deg);display:flex;align-items:center;"
+          >
             ${MoveRightIcon}
           </div>`,
           select: () => {

@@ -12,6 +12,7 @@ import type {
 import { startDrag } from '../../utils/drag.js';
 import type { DatabaseTable } from '../table-view.js';
 import type { DatabaseCellContainer } from './cell-container.js';
+import { popRowMenu } from './menu.js';
 
 @customElement('affine-database-selection')
 export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
@@ -516,6 +517,20 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
           return;
         },
+        '/': context => {
+          const selection = this.selection;
+          if (!selection || selection.columnsSelection) {
+            return;
+          }
+          const cell = this.getCellContainer(
+            selection.focus.rowIndex,
+            selection.focus.columnIndex
+          );
+          if (cell) {
+            context.get('keyboardState').raw.preventDefault();
+            popRowMenu(cell, cell.rowId, this);
+          }
+        },
       })
     );
   }
@@ -772,6 +787,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       };
     });
   }
+
+  // public duplicateRow(rowId: string) {
+  //   this.tableView.view.rowDuplicate(rowId)
+  // }
 }
 
 declare global {
