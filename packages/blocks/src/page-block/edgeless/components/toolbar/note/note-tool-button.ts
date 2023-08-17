@@ -3,7 +3,6 @@ import './note-menu.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -35,19 +34,12 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(noteMenu);
 
-  computePosition(reference, noteMenu, {
-    placement: 'top-start',
-    middleware: [
-      offset({
-        mainAxis: -20,
-        crossAxis: -30,
-      }),
-    ],
-  }).then(({ x, y }) => {
-    Object.assign(noteMenu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
+  const x = 90;
+  const y = -40;
+
+  Object.assign(noteMenu.style, {
+    left: `${x}px`,
+    top: `${y}px`,
   });
 
   return {

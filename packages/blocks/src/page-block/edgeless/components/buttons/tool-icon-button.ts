@@ -57,7 +57,8 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' = 'top';
+  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' | 'top-start' =
+    'top';
 
   @property({ attribute: false })
   arrow = true;

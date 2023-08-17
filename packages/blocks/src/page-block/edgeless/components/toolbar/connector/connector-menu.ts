@@ -37,30 +37,25 @@ function ConnectorModeButtonGroup(
    * So we put the lower button's tooltip as the first element of the button group container
    */
   return html`
-    <div class="connector-mode-button-group has-tool-tip">
-      <!-- This tooltip is for the last button(Thick) -->
-
-      <div
-        class="connector-mode-button has-tool-tip"
-        ?active=${mode === ConnectorMode.Straight}
+    <div class="connector-mode-button-group">
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Straight}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${straightLineTooltip}
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
         ${ConnectorLWithArrowIcon}
-        <tool-tip inert role="tooltip" tip-position="top-end" arrow>
-          ${straightLineTooltip}
-        </tool-tip>
-      </div>
-
-      <div
-        class="connector-mode-button has-tool-tip"
-        ?active=${mode === ConnectorMode.Orthogonal}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Orthogonal}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${orthogonalTooltip}
         @click=${() => setConnectorMode(ConnectorMode.Orthogonal)}
       >
         ${ConnectorXWithArrowIcon}
-        <tool-tip inert role="tooltip" tip-position="top" arrow>
-          ${orthogonalTooltip}
-        </tool-tip>
-      </div>
+      </edgeless-tool-icon-button>
     </div>
   `;
 }
@@ -93,35 +88,13 @@ export class EdgelessConnectorMenu extends LitElement {
 
     .connector-mode-button-group {
       display: flex;
+      justify-content: center;
+      align-items: center;
       gap: 14px;
     }
 
-    .connector-mode-button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-sizing: border-box;
-      color: var(--affine-icon-color);
-      padding: 2px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .connector-mode-button:hover {
-      background-color: var(--affine-hover-color);
-    }
-
-    .connector-mode-button div {
-      border-radius: 50%;
-      background-color: var(--affine-icon-color);
-    }
-
-    .connector-mode-button svg {
+    .connector-mode-button-group > edgeless-tool-icon-button svg {
       fill: var(--affine-icon-color);
-    }
-
-    .connector-mode-button[active] svg {
-      fill: var(--affine-primary-color);
     }
 
     .submenu-divider {
