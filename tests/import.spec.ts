@@ -443,6 +443,7 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
             id: '0',
             name: 'Table View',
             mode: 'table',
+            header: {},
             columns: [],
             filter: {
               type: 'group',
@@ -708,6 +709,7 @@ test(scoped`import notion html-format table`, async ({ page }) => {
             name: 'Table View',
             mode: 'table',
             columns: [],
+            header: {},
             filter: {
               type: 'group',
               op: 'and',
