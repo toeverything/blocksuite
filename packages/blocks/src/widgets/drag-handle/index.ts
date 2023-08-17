@@ -20,6 +20,7 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   isPageMode,
+  matchFlavours,
   Point,
   Rect,
 } from '../../__internal__/index.js';
@@ -83,6 +84,8 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   public hide(force = false) {
+    if (!this._dragHandleContainer) return;
+
     this._dragHandleContainer.style.display = 'none';
     if (force) this.reset();
   }
@@ -107,17 +110,20 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   // drag handle should show on the vertical middle of the first line of element
-  private _show(point: Point, blockElement: BlockElement) {
+  private _show(_point: Point, blockElement: BlockElement) {
     let { left, top } = blockElement.getBoundingClientRect();
 
     // Some blocks have padding, should consider padding when calculating position
     const computedStyle = getComputedStyle(blockElement);
-    const paddingTop = parseInt(computedStyle.paddingTop);
-    const paddingLeft = parseInt(computedStyle.paddingLeft);
+    const paddingTop = parseInt(computedStyle.paddingTop) * this._scale;
+    const paddingLeft = parseInt(computedStyle.paddingLeft) * this._scale;
     left += paddingLeft;
     top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
+
+    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
+
     this._dragHandleContainer.style.display = 'flex';
     this._dragHandleContainer.style.height = `${
       containerHeight * this._scale
@@ -343,6 +349,16 @@ export class DragHandleWidget extends WidgetElement {
     let rect = null;
     let targetElement = null;
     const model = getModelByBlockElement(closestBlockElement);
+
+    // Handle special case at this iteration
+    // TODO: should consider drop in database next iteration
+    const isDatabase = matchFlavours(model, ['affine:database'] as const);
+    if (isDatabase) {
+      this._indicatorRect = rect;
+      this._dropBlockId = '';
+      return;
+    }
+
     const result = calcDropTarget(
       point,
       model,

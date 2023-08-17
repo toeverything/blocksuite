@@ -71,6 +71,7 @@ import type {
   PageBlockModel,
   SurfaceBlockModel,
 } from '../../index.js';
+import { FontLoader } from '../font-loader/index.js';
 import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteCut } from './components/note-cut/index.js';
@@ -295,6 +296,8 @@ export class EdgelessPageBlockComponent
 
   surface!: SurfaceManager;
 
+  fontLoader!: FontLoader;
+
   indexes: { max: string; min: string } = { max: 'a0', min: 'a0' };
 
   getService = getService;
@@ -324,6 +327,15 @@ export class EdgelessPageBlockComponent
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
+  }
+
+  private _editorContainer: HTMLElement | null = null;
+
+  get editorContainer(): HTMLElement {
+    if (this._editorContainer) return this._editorContainer;
+    this._editorContainer = this.closest('editor-container');
+    assertExists(this._editorContainer);
+    return this._editorContainer;
   }
 
   private _resizeObserver: ResizeObserver | null = null;
@@ -1029,7 +1041,7 @@ export class EdgelessPageBlockComponent
    * Set selection state by giving noteId & blockId.
    * Not supports surface elements.
    */
-  setSelection(noteId: string, active = true, blockId: string, point?: Point) {
+  setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
     const noteBlock = this.notes.find(b => b.id === noteId);
     assertExists(noteBlock);
 
@@ -1093,6 +1105,21 @@ export class EdgelessPageBlockComponent
     this._resizeObserver = resizeObserver;
   }
 
+  private _initPixelRatioChangeEffect() {
+    let media: MediaQueryList;
+
+    const onPixelRatioChange = () => {
+      this.surface.onResize();
+
+      if (media) media.removeEventListener('change', onPixelRatioChange);
+
+      media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      media.addEventListener('change', onPixelRatioChange);
+    };
+
+    onPixelRatioChange();
+  }
+
   private _initNoteHeightUpdate() {
     const resetNoteResizeObserver = throttle(
       () => {
@@ -1115,10 +1142,27 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initFontloader() {
+    if (!this.fontLoader) this.fontLoader = new FontLoader();
+
+    this._disposables.add(
+      this.fontLoader.slots.loaded.on(font => {
+        if (font !== 'Kalam:n4,n7' || !this.surface) return;
+
+        if (this.surface.getElementsByType('text').length > 0) {
+          this.surface.onResize();
+        }
+      })
+    );
+    this.fontLoader.load(['Kalam:n4,n7']);
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initResizeEffect();
+    this._initPixelRatioChangeEffect();
     this._initNoteHeightUpdate();
+    this._initFontloader();
     this.clipboard.init(this.page);
 
     requestAnimationFrame(() => {

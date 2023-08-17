@@ -4,12 +4,6 @@
 
 import './declare-test-window.js';
 
-import type {
-  CssVariableName,
-  NoteBlockModel,
-  PageBlockModel,
-} from '@blocksuite/blocks';
-import { toHex } from '@blocksuite/global/utils';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -18,6 +12,13 @@ import {
 } from 'pretty-format';
 
 import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import type {
+  CssVariableName,
+  NoteBlockModel,
+  PageBlockModel,
+} from '../../packages/blocks/src/index.js';
+import { assertExists } from '../../packages/global/src/utils.js';
+import { toHex } from '../../packages/global/src/utils.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
   PAGE_VERSION,
@@ -52,6 +53,8 @@ import {
 } from './actions/misc.js';
 import { currentEditorIndex } from './multiple-editor.js';
 import { getStringFromRichText } from './virgo.js';
+
+export { assertExists };
 
 export const defaultStore: SerializedStore = {
   meta: {
@@ -311,7 +314,7 @@ export async function assertTextFormat(
 export async function assertTypeFormat(page: Page, type: string) {
   const actual = await page.evaluate(() => {
     const richText = document.querySelectorAll('rich-text')[0];
-    return richText.model.type;
+    return (richText.model as BaseBlockModel<{ type: string }>).type;
   });
   expect(actual).toEqual(type);
 }
@@ -562,9 +565,9 @@ export async function assertStoreMatchJSX(
 type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
 
 export async function assertClipItems(
-  page: Page,
-  key: MimeType,
-  value: unknown
+  _page: Page,
+  _key: MimeType,
+  _value: unknown
 ) {
   // FIXME: use original clipboard API
   // const clipItems = await page.evaluate(() => {

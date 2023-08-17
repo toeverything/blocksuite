@@ -1,4 +1,3 @@
-import type { Cell, Column } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
@@ -14,7 +13,12 @@ import { sha } from '../persistence/blob/utils.js';
 import type { DocProviderCreator } from '../providers/type.js';
 import type { Schema } from '../schema/index.js';
 import { serializeYDoc } from '../utils/jsx.js';
-import { type AwarenessStore, Text } from '../yjs/index.js';
+import {
+  type AwarenessStore,
+  docFromJSON,
+  docToJSON,
+  Text,
+} from '../yjs/index.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Store, type StoreOptions } from './store.js';
@@ -260,6 +264,30 @@ export class Workspace {
     return this.indexer.search.search(query);
   }
 
+  async importPageSnapshotV2(json: object, pageId: string) {
+    const doc = docFromJSON(json);
+
+    let page = this.getPage(pageId);
+    if (page) {
+      await page.waitForLoaded();
+      page.clear();
+    } else {
+      page = this.createPage({ id: pageId });
+      await page.waitForLoaded();
+    }
+
+    const update = Y.encodeStateAsUpdate(doc);
+
+    Y.applyUpdate(page.spaceDoc, update);
+    page.resetHistory();
+  }
+
+  exportPageSnapshotV2(pageId: string) {
+    const page = this.getPage(pageId);
+    assertExists(page, `page ${pageId} not found`);
+    return docToJSON(page.spaceDoc);
+  }
+
   /**
    * @internal
    * Import an object expression of a page.
@@ -326,7 +354,7 @@ export class Workspace {
       }
 
       if (props['sys:flavour'] === 'affine:database') {
-        const columns = props['prop:columns'] as Column[];
+        const columns = props['prop:columns'] as Record<string, string>[];
         const richTextColumns = columns.filter(
           cell => cell.type === 'rich-text'
         );
@@ -335,7 +363,10 @@ export class Workspace {
         richTextColumns.forEach(richText => {
           Object.keys(cells).forEach(key => {
             const cellValue = cells[key] as Record<string, unknown>;
-            const richTextValue = cellValue[richText.id] as Cell;
+            const richTextValue = cellValue[richText.id] as Record<
+              string,
+              unknown
+            >;
             if (!richTextValue) return;
             if (Array.isArray(richTextValue.value)) {
               const yText = new Y.Text();

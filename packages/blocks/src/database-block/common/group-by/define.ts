@@ -6,6 +6,10 @@ import { NumberGroupView } from './renderer/number-group.js';
 import { SelectGroupView } from './renderer/select-group.js';
 import { StringGroupView } from './renderer/string-group.js';
 
+const ungroups = {
+  key: 'Ungroups',
+  value: null,
+};
 groupByMatcher.register(tTag.create(), {
   name: 'select',
   groupName: (type, value) => {
@@ -17,26 +21,18 @@ groupByMatcher.register(tTag.create(), {
   defaultKeys: type => {
     if (tTag.is(type) && type.data) {
       return [
-        {
-          key: 'Ungroups',
-          value: null,
-        },
+        ungroups,
         ...type.data.tags.map(v => ({
           key: v.id,
           value: v.id,
         })),
       ];
     }
-    return [];
+    return [ungroups];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (value == null) {
-      return [
-        {
-          key: 'Ungroups',
-          value,
-        },
-      ];
+      return [ungroups];
     }
     return [
       {
@@ -58,26 +54,18 @@ groupByMatcher.register(tArray(tTag.create()), {
   defaultKeys: type => {
     if (isTArray(type) && tTag.is(type.ele) && type.ele.data) {
       return [
-        {
-          key: 'Ungroups',
-          value: null,
-        },
+        ungroups,
         ...type.ele.data.tags.map(v => ({
           key: v.id,
           value: v.id,
         })),
       ];
     }
-    return [];
+    return [ungroups];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (value == null) {
-      return [
-        {
-          key: 'Ungroups',
-          value,
-        },
-      ];
+      return [ungroups];
     }
     if (Array.isArray(value)) {
       if (value.length) {
@@ -86,14 +74,8 @@ groupByMatcher.register(tArray(tTag.create()), {
           value: id,
         }));
       }
-      return [
-        {
-          key: 'Ungroups',
-          value,
-        },
-      ];
     }
-    return [];
+    return [ungroups];
   },
   addToGroup: (value, old) =>
     Array.isArray(old) ? [...old, value] : value ? [value] : [],
@@ -107,24 +89,19 @@ groupByMatcher.register(tArray(tTag.create()), {
 });
 groupByMatcher.register(tString.create(), {
   name: 'text',
-  groupName: (type, value) => {
+  groupName: (_type, value) => {
     return `${value ?? ''}`;
   },
-  defaultKeys: type => {
-    return [];
+  defaultKeys: _type => {
+    return [ungroups];
   },
-  valuesGroup: (value, type) => {
-    if (value == null) {
-      return [
-        {
-          key: '',
-          value,
-        },
-      ];
+  valuesGroup: (value, _type) => {
+    if (!value) {
+      return [ungroups];
     }
     return [
       {
-        key: `${value}`,
+        key: `g:${value}`,
         value,
       },
     ];
@@ -133,24 +110,19 @@ groupByMatcher.register(tString.create(), {
 });
 groupByMatcher.register(tNumber.create(), {
   name: 'number',
-  groupName: (type, value) => {
+  groupName: (_type, value) => {
     return `${value ?? ''}`;
   },
-  defaultKeys: type => {
-    return [];
+  defaultKeys: _type => {
+    return [ungroups];
   },
-  valuesGroup: (value, type) => {
+  valuesGroup: (value, _type) => {
     if (typeof value !== 'number') {
-      return [
-        {
-          key: 'Empty',
-          value,
-        },
-      ];
+      return [ungroups];
     }
     return [
       {
-        key: `${Math.floor(value / 10)}`,
+        key: `g:${Math.floor(value / 10)}`,
         value: Math.floor(value / 10),
       },
     ];

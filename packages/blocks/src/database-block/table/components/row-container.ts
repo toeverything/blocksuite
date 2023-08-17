@@ -26,7 +26,6 @@ export function DataBaseRowContainer(
 
       .affine-database-block-row {
         width: 100%;
-        min-height: 44px;
         display: flex;
         flex-direction: row;
         border-bottom: 1px solid var(--affine-border-color);
@@ -67,9 +66,17 @@ export function DataBaseRowContainer(
         border-radius: 4px;
         box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
         background-color: var(--affine-background-primary-color);
+        position: relative;
       }
 
-      .row-op:hover {
+      .row-op:hover:before {
+        content: '';
+        border-radius: 4px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
         background-color: var(--affine-hover-color);
       }
 
@@ -119,6 +126,17 @@ export function DataBaseRowContainer(
                 v => v.id,
                 (column, i) => {
                   const clickDetail = () => {
+                    selection.selection = {
+                      rowsSelection: {
+                        start: idx,
+                        end: idx,
+                      },
+                      focus: {
+                        rowIndex: idx,
+                        columnIndex: i,
+                      },
+                      isEditing: false,
+                    };
                     openDetail(id, selection);
                   };
                   const openMenu = (e: MouseEvent) => {
@@ -144,6 +162,7 @@ export function DataBaseRowContainer(
                           width: `${column.width}px`,
                           border: i === 0 ? 'none' : undefined,
                         })}
+                        .view="${view}"
                         .column="${column}"
                         .rowId="${id}"
                         data-row-id="${id}"
@@ -156,7 +175,7 @@ export function DataBaseRowContainer(
                       >
                       </affine-database-cell-container>
                     </div>
-                    ${column.isMain
+                    ${column.dataViewManager.header.titleColumn === column.id
                       ? html` <div class="row-ops">
                           <div class="row-op" @click="${clickDetail}">
                             ${NewEditIcon}

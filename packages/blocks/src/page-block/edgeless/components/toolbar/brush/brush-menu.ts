@@ -29,6 +29,7 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
+      border: 1px solid var(--affine-border-color);
       border-radius: 8px 8px 0 0;
       position: relative;
       cursor: default;
@@ -41,6 +42,7 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
 
     menu-divider {
       height: 24px;
+      margin: 0 9px;
     }
   `;
 
@@ -86,7 +88,6 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
           <div class="menu-content">
             <edgeless-line-width-panel
               .selectedSize=${this.selectedSize}
-              .hasTooltip=${false}
               @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
             >
             </edgeless-line-width-panel>

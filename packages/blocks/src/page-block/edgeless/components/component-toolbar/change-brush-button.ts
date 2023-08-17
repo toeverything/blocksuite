@@ -23,13 +23,13 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonSize(elements: BrushElement[]): LineWidth {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
@@ -47,11 +47,11 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
     menu-divider {
       height: 24px;
+      margin: 0 5px;
     }
 
     .color-panel-container {
       display: none;
-      padding: 4px;
       justify-content: center;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
@@ -60,7 +60,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
 
     .color-panel-container[data-show] {
-      display: block;
+      display: flex;
     }
 
     .brush-size-button,
@@ -167,6 +167,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._colorPanelPopper?.toggle()}
       >
         <div class="brush-color-button">

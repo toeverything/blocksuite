@@ -37,7 +37,9 @@ export function getSelectedContentBlockElements(
   if (types.includes('text') && selectionManager.find('text')) {
     assertExists(rangeManager);
     const range = rangeManager.value;
-    assertExists(range);
+    if (!range) {
+      return [];
+    }
     const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
       range,
       {

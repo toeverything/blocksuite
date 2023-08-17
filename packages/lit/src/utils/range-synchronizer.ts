@@ -1,5 +1,8 @@
-import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
-import type { BaseSelection } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  TextRangePoint,
+  TextSelection,
+} from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { type Text } from '@blocksuite/store';
@@ -13,12 +16,9 @@ import type { BlockSuiteRoot } from '../element/lit-root.js';
  */
 export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
+
   private get _selectionManager() {
     return this.root.selectionManager;
-  }
-
-  private get _currentSelection() {
-    return this._selectionManager.value;
   }
 
   private get _rangeManager() {
@@ -39,6 +39,13 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        if (
+          range &&
+          range.startContainer.parentElement?.closest('side-layout-modal')
+        ) {
+          return;
+        }
+
         if (range === null || range.intersectsNode(this.root)) {
           this._prevSelection =
             this._rangeManager.syncRangeToTextSelection(range);
@@ -54,13 +61,11 @@ export class RangeSynchronizer {
         const event = ctx.get('defaultState').event as InputEvent;
         if (this.root.page.readonly) return;
 
-        const current = this._currentSelection.at(0);
+        const current = this._selectionManager.find('text');
         if (!current) return;
 
-        if (current.is('text')) {
-          this._beforeTextInput(current, event.isComposing);
-          return;
-        }
+        this._beforeTextInput(current, event.isComposing);
+        return;
       })
     );
   }

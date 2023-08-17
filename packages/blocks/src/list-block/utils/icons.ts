@@ -95,7 +95,7 @@ export const toggleDown = () => {
       width="1em"
       height="1em"
       viewBox="0 0 20 20"
-      @mousedown="${(e: MouseEvent) => {
+      @mousedown="${() => {
         // console.log('preventing def svg');
         // e.preventDefault();
       }}"

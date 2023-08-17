@@ -23,6 +23,7 @@ import {
   pathToBlock,
   selectBetween,
   setBlockSelection,
+  setTextSelectionBySide,
 } from './utils.js';
 
 export const bindHotKey = (blockElement: BlockElement) => {
@@ -112,6 +113,50 @@ export const bindHotKey = (blockElement: BlockElement) => {
       }
 
       setBlockSelection(prevBlock);
+
+      return true;
+    },
+    ArrowLeft: () => {
+      reset();
+
+      const textSelection = getTextSelection(blockElement);
+      if (!textSelection) {
+        return;
+      }
+
+      const start = textSelection.from;
+      const block = pathToBlock(blockElement, start.path);
+      if (!block) {
+        return;
+      }
+      const prevBlock = getPrevBlock(block, block => !!block.model.text);
+      if (!prevBlock) {
+        return;
+      }
+
+      setTextSelectionBySide(prevBlock, true);
+
+      return true;
+    },
+    ArrowRight: () => {
+      reset();
+
+      const textSelection = getTextSelection(blockElement);
+      if (!textSelection) {
+        return;
+      }
+
+      const start = textSelection.to ?? textSelection.from;
+      const block = pathToBlock(blockElement, start.path);
+      if (!block) {
+        return;
+      }
+      const nextBlock = getNextBlock(block, block => !!block.model.text);
+      if (!nextBlock) {
+        return;
+      }
+
+      setTextSelectionBySide(nextBlock, false);
 
       return true;
     },

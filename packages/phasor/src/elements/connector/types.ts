@@ -30,7 +30,7 @@ export interface IConnector extends ISurfaceElement {
   strokeStyle: StrokeStyle;
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
-
+  rough?: boolean;
   source: Connection;
   target: Connection;
 

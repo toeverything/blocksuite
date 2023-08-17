@@ -108,7 +108,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       : undefined;
   };
 
-  private _onClick(e: MouseEvent) {
+  private _onClick() {
     const refMeta = this._refMeta;
     const model = getModelByElement(this);
     if (!refMeta) {

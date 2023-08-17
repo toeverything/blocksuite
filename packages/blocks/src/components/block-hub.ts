@@ -36,12 +36,12 @@ import {
   DatabaseTableViewIcon,
   DividerIcon,
   EmbedIcon,
-  H1Icon,
-  H2Icon,
-  H3Icon,
-  H4Icon,
-  H5Icon,
-  H6Icon,
+  Heading1Icon,
+  Heading2Icon,
+  Heading3Icon,
+  Heading4Icon,
+  Heading5Icon,
+  Heading6Icon,
   ImageIcon,
   NumberedListIcon,
   NumberedListIconLarge,
@@ -66,7 +66,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     type: 'h1',
     name: 'Heading 1',
     description: 'Headings in the largest font.',
-    icon: H1Icon,
+    icon: Heading1Icon,
     tooltip: 'Drag/Click to insert Heading 1',
   },
   {
@@ -74,7 +74,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     type: 'h2',
     name: 'Heading 2',
     description: 'Headings in the 2nd font size.',
-    icon: H2Icon,
+    icon: Heading2Icon,
     tooltip: 'Drag/Click to insert Heading 2',
   },
   {
@@ -82,7 +82,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     type: 'h3',
     name: 'Heading 3',
     description: 'Headings in the 3rd font size.',
-    icon: H3Icon,
+    icon: Heading3Icon,
     tooltip: 'Drag/Click to insert Heading 3',
   },
   {
@@ -90,7 +90,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     type: 'h4',
     name: 'Heading 4',
     description: 'Heading in the 4th font size.',
-    icon: H4Icon,
+    icon: Heading4Icon,
     tooltip: 'Drag/Click to insert Heading 4',
   },
   {
@@ -98,7 +98,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     type: 'h5',
     name: 'Heading 5',
     description: 'Heading in the 5th font size.',
-    icon: H5Icon,
+    icon: Heading5Icon,
     tooltip: 'Drag/Click to insert Heading 5',
   },
   {
@@ -106,7 +106,7 @@ export const BLOCKHUB_TEXT_ITEMS = [
     type: 'h6',
     name: 'Heading 6',
     description: 'Heading in the 6th font size.',
-    icon: H6Icon,
+    icon: Heading6Icon,
     tooltip: 'Drag/Click to insert Heading 6',
   },
   {
@@ -827,7 +827,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _onClickCard = (e: MouseEvent, blockHubElement: HTMLElement) => {
+  private _onClickCard = (_: MouseEvent, blockHubElement: HTMLElement) => {
     const affineType = blockHubElement.getAttribute('affine-type');
     assertExists(affineType);
     const data: {

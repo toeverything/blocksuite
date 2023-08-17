@@ -84,19 +84,19 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     });
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
@@ -127,7 +127,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     this._resize(e.keys.shift || this._edgeless.tools.shiftKey);
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     const id = this._draggingElementId;
     assertExists(id);
 
@@ -234,9 +234,10 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
   afterModeSwitch(newTool: EdgelessTool) {
     if (newTool.type !== 'shape') return;
-    this._clearOverlay();
 
     const options = SHAPE_OVERLAY_OPTIONS;
+    const computedStyle = getComputedStyle(this._edgeless);
+    options.stroke = computedStyle.getPropertyValue(newTool.strokeColor);
     this._shapeOverlay = new ShapeOverlay(
       this._edgeless,
       newTool.shape,

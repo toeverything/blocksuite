@@ -29,6 +29,7 @@ export const styles = css`
     min-height: 44px;
     padding: 10px 8px;
     background: var(--affine-hover-color);
+    border-radius: 8px;
   }
 
   .select-input {

@@ -16,9 +16,6 @@ import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class TagsDatasource extends BaseDataSource {
-  public override propertyGetMain(): string | undefined {
-    return 'value';
-  }
   private meta: Workspace['meta'];
 
   public get rows(): string[] {
@@ -79,7 +76,7 @@ export class TagsDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: BlockSuiteRoot, config: TagsDatasourceConfig) {
+  constructor(root: BlockSuiteRoot, _config: TagsDatasourceConfig) {
     super();
     this.meta = root.page.workspace.meta;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
@@ -109,7 +106,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(tag);
   }
 
-  public propertyAdd(insertPosition: InsertPosition): string {
+  public propertyAdd(_insertPosition: InsertPosition): string {
     throw new Error('not support');
   }
 
@@ -120,19 +117,19 @@ export class TagsDatasource extends BaseDataSource {
     this.propertiesMap[propertyId]?.changeData?.(data);
   }
 
-  public propertyChangeName(propertyId: string, name: string): void {
+  public propertyChangeName(_propertyId: string, _name: string): void {
     // not support
   }
 
-  public propertyChangeType(propertyId: string, type: string): void {
+  public propertyChangeType(_propertyId: string, _type: string): void {
     // not support
   }
 
-  public propertyDelete(id: string): void {
+  public propertyDelete(_id: string): void {
     // not support
   }
 
-  public propertyDuplicate(columnId: string): string {
+  public propertyDuplicate(_columnId: string): string {
     throw new Error('not support');
   }
 
@@ -148,7 +145,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(insertPosition: InsertPosition): string {
+  public rowAdd(_insertPosition: InsertPosition): string {
     const id = nanoid();
     this.changeTags([
       ...this.tags,

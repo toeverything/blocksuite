@@ -41,12 +41,14 @@ import {
   onModelTextUpdated,
 } from '../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
+import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
   insertContent,
   insideDatabase,
   type SlashItem,
+  withRemoveEmptyLine,
 } from './utils.js';
 
 export const menuGroups: {
@@ -218,7 +220,7 @@ export const menuGroups: {
           }
           return true;
         },
-        async action({ pageElement, model }) {
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
@@ -236,7 +238,7 @@ export const menuGroups: {
             })
           );
           pageElement.page.addSiblingBlocks(model, props);
-        },
+        }),
       },
       {
         name: 'Bookmark',
@@ -247,7 +249,7 @@ export const menuGroups: {
           }
           return !insideDatabase(model);
         },
-        async action({ pageElement, model }) {
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
@@ -259,7 +261,7 @@ export const menuGroups: {
             url,
           } as const;
           pageElement.page.addSiblingBlocks(model, [props]);
-        },
+        }),
       },
       {
         name: 'File',
@@ -272,14 +274,14 @@ export const menuGroups: {
             return false;
           return !insideDatabase(model);
         },
-        action: async ({ pageElement, model }) => {
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
           const page = pageElement.page;
           const parent = page.getParent(model);
           if (!parent) return;
           const file = await openFileOrFiles();
           if (!file) return;
-          appendAttachmentBlock(file, model);
-        },
+          await appendAttachmentBlock(file, model);
+        }),
       },
     ],
   },
@@ -351,7 +353,7 @@ export const menuGroups: {
           }
           return true;
         },
-        action: async ({ pageElement, model }) => {
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -370,7 +372,7 @@ export const menuGroups: {
             'table',
             false
           );
-        },
+        }),
       },
       {
         name: 'Kanban View',
@@ -390,7 +392,7 @@ export const menuGroups: {
           }
           return true;
         },
-        action: async ({ model, pageElement }) => {
+        action: withRemoveEmptyLine(async ({ model, pageElement }) => {
           const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
@@ -409,7 +411,7 @@ export const menuGroups: {
             'kanban',
             false
           );
-        },
+        }),
       },
     ],
   },
@@ -452,7 +454,7 @@ export const menuGroups: {
           pageElement.page.addBlock(
             model.flavour,
             {
-              type: model.type,
+              type: (model as ParagraphBlockModel).type,
               text: pageElement.page.Text.fromDelta(model.text.toDelta()),
               // @ts-expect-error
               checked: model.checked,

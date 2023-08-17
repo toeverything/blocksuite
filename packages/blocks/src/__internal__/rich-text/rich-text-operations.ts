@@ -383,7 +383,7 @@ export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
 
 // When deleting at line end of a code block,
 // do nothing
-function handleCodeBlockForwardDelete(page: Page, model: ExtendedModel) {
+function handleCodeBlockForwardDelete(_page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:code'])) return false;
   return true;
 }

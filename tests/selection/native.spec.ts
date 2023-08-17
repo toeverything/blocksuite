@@ -263,11 +263,14 @@ test('cursor move left and right', async ({ page }) => {
   await type(page, 'arrow down test 1');
   await pressEnter(page);
   await type(page, 'arrow down test 2');
-  const indexOne = await getVirgoSelectionIndex(page);
-  expect(indexOne).toBe(17);
-  await pressArrowLeft(page, 18);
-  const indexTwo = await getVirgoSelectionIndex(page);
-  expect(indexTwo).toBe(0);
+  const index1 = await getVirgoSelectionIndex(page);
+  expect(index1).toBe(17);
+  await pressArrowLeft(page, 17);
+  const index2 = await getVirgoSelectionIndex(page);
+  expect(index2).toBe(0);
+  await pressArrowLeft(page);
+  const index3 = await getVirgoSelectionIndex(page);
+  expect(index3).toBe(17);
 });
 
 test('cursor move up at edge of the second line', async ({ page }) => {

@@ -48,6 +48,11 @@ export class Gesture {
     this.pageElement.handleEvent('click', this._clickHandler);
     this.pageElement.handleEvent('doubleClick', this._doubleClickHandler);
     this.pageElement.handleEvent('tripleClick', this._tripleClickHandler);
+    this.pageElement.handleEvent('beforeInput', () => {
+      const selection = document.getSelection();
+      this._startRange =
+        selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+    });
   }
 
   private _dragStartHandler: UIEventHandler = ctx => {
@@ -160,16 +165,16 @@ export class Gesture {
       return;
     }
 
-    const text =
-      this._selectionManager.value.find(
-        (selection): selection is TextSelection => selection.is('text')
-      ) ?? null;
-
     if (state.keys.shift) {
+      state.raw.preventDefault();
       this._updateRange(state);
       return;
     }
 
+    const text =
+      this._selectionManager.value.find(
+        (selection): selection is TextSelection => selection.is('text')
+      ) ?? null;
     if (!text) {
       return;
     }

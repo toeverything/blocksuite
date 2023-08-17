@@ -346,7 +346,7 @@ export class DocPageBlockComponent
           sel => sel.is('text') || sel.is('block')
         );
         if (!sel) return;
-        const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
+        const focus = view.findPrev(sel.path, (nodeView, _index, parent) => {
           if (nodeView.type === 'block' && parent.view === this) {
             return true;
           }
@@ -407,7 +407,7 @@ export class DocPageBlockComponent
           sel => sel.is('text') || sel.is('block')
         );
         if (!sel) return;
-        const focus = view.findPrev(sel.path, (nodeView, index, parent) => {
+        const focus = view.findPrev(sel.path, (nodeView, _index, parent) => {
           if (nodeView.type === 'block' && parent.view === this) {
             return true;
           }
@@ -516,7 +516,7 @@ export class DocPageBlockComponent
     `;
 
     const content = html`${repeat(
-      this.model?.children.filter(
+      this.model.children.filter(
         child => !(matchFlavours(child, ['affine:note']) && child.hidden)
       ),
       child => child.id,

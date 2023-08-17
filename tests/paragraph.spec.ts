@@ -14,6 +14,7 @@ import {
   pressArrowUp,
   pressBackspace,
   pressEnter,
+  pressEscape,
   pressShiftEnter,
   pressShiftTab,
   pressTab,
@@ -810,7 +811,6 @@ test('press arrow down should move caret to the start of line', async ({
   await pressArrowLeft(page);
   await pressArrowUp(page);
   await pressArrowDown(page);
-  await pressArrowLeft(page);
   await type(page, '2');
   await assertRichTexts(page, ['0'.repeat(100), '21']);
 });
@@ -825,7 +825,7 @@ test('press arrow up in the second line should move caret to the first line', as
       title: new page.Text(),
     });
     const note = page.addBlock('affine:note', {}, pageId);
-    const delta = Array.from({ length: 120 }, (v, i) => {
+    const delta = Array.from({ length: 120 }, (_, i) => {
       return i % 2 === 0
         ? { insert: 'i', attributes: { italic: true } }
         : { insert: 'b', attributes: { bold: true } };
@@ -838,7 +838,7 @@ test('press arrow up in the second line should move caret to the first line', as
   // Focus the empty paragraph
   await focusRichText(page, 1);
   await pressArrowUp(page);
-  await pressArrowUp(page);
+  await pressEscape(page);
   await pressArrowLeft(page);
   await type(page, '0');
   await pressArrowUp(page);
@@ -860,7 +860,6 @@ test('press arrow up in the second line should move caret to the first line', as
   await pressArrowLeft(page);
   await pressArrowUp(page);
   await pressArrowDown(page);
-  await pressArrowLeft(page);
   // Should be inserted at the start of the second paragraph
   await type(page, '3');
   await assertRichTexts(page, ['0' + 'ib'.repeat(60), '32']);

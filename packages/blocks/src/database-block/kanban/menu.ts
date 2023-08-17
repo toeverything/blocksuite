@@ -34,7 +34,7 @@ export const popCardMenu = (
   popFilterableSimpleMenu(ele, [
     {
       type: 'action',
-      name: 'Expend card',
+      name: 'Expand card',
       icon: ExpandFullIcon,
       select: () => {
         openDetail(rowId, selection);

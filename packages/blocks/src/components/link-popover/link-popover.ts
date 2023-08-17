@@ -110,16 +110,16 @@ export class LinkPopover extends LitElement {
     return;
   }
 
-  private _onCopy(e: MouseEvent) {
+  private _onCopy() {
     navigator.clipboard.writeText(this.previewLink);
     toast('Copied link to clipboard');
   }
 
-  private _onUnlink(e: MouseEvent) {
+  private _onUnlink() {
     this.dispatchEvent(createEvent('updateLink', { type: 'remove' }));
   }
 
-  private _onLinkToCard(e: MouseEvent) {
+  private _onLinkToCard() {
     this.dispatchEvent(
       new CustomEvent<LinkDetail>('updateLink', {
         detail: { type: 'toBookmark' },
@@ -127,12 +127,12 @@ export class LinkPopover extends LitElement {
     );
   }
 
-  private _onEdit(e: MouseEvent) {
+  private _onEdit() {
     this.dispatchEvent(createEvent('editLink', null));
     this._disableConfirm = false;
   }
 
-  private _onInput(e: InputEvent) {
+  private _onInput() {
     if (!this.linkInput) {
       throw new Error('Failed to update link! Link input not found!');
     }

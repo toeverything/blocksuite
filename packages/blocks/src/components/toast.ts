@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { html, type TemplateResult } from 'lit';
 
 let ToastContainer: HTMLDivElement | null = null;
@@ -33,9 +34,11 @@ const createToastContainer = () => {
     flex-direction: column-reverse;
     align-items: center;
   `;
-  const template = html`<div style="${styles}"></div>`;
+  const template = html`<div class="toast-container" style="${styles}"></div>`;
   const element = htmlToElement<HTMLDivElement>(template);
-  document.body.appendChild(element);
+  const container = document.body.querySelector('editor-container');
+  assertExists(container);
+  container.appendChild(element);
   return element;
 };
 

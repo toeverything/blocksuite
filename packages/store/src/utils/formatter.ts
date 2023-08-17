@@ -50,7 +50,7 @@ function initCustomFormatter() {
         ['span', typeStyle, obj.flavour],
       ];
     },
-    hasBody(obj: unknown) {
+    hasBody() {
       return true;
     },
     body(obj: unknown) {

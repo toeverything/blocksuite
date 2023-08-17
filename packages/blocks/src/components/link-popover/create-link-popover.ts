@@ -54,11 +54,11 @@ function bindHoverState(
   const hoverCloseDelay = 300;
   let timer: number | undefined;
 
-  const handleMouseEnter = (e: MouseEvent) => {
+  const handleMouseEnter = () => {
     clearTimeout(timer);
   };
 
-  const handleMouseLeave = (e: MouseEvent) => {
+  const handleMouseLeave = () => {
     // we want to leave the popover open
     // if the mouse entered the popover immediately
     // after leaving the target (or vice versa).
@@ -135,7 +135,7 @@ export async function showLinkPopover({
       res({ type: 'cancel' });
     });
 
-    editLinkEle.addEventListener('editLink', e => {
+    editLinkEle.addEventListener('editLink', () => {
       if (abortController.signal.aborted) {
         return;
       }

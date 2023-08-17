@@ -4,6 +4,7 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
+import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
 import {
   asyncSetVRange,
@@ -377,12 +378,15 @@ const matches: Match[] = [
     pattern: /^```([a-zA-Z0-9]*)$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: AffineVEditor,
+      _vEditor: AffineVEditor,
       text: string,
-      selection: VRange,
+      _selection: VRange,
       pattern: RegExp
     ) => {
-      if (model.flavour === 'affine:paragraph' && model.type === 'quote') {
+      if (
+        model.flavour === 'affine:paragraph' &&
+        (model as ParagraphBlockModel).type === 'quote'
+      ) {
         return false;
       }
       const match = pattern.exec(text);

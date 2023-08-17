@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
 import {
@@ -37,6 +36,7 @@ import {
   assertEdgelessNonHoverRect,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
+  assertExists,
   assertRichTexts,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';

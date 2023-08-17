@@ -31,6 +31,7 @@ export interface DataViewProps<
 
 export interface DataViewExpose {
   addRow?(position: InsertPosition): void;
+
   focusFirstCell(): void;
 }
 
@@ -48,11 +49,8 @@ export type RealDataViewDataTypeMap = {
       mode: K;
     };
 };
-type FallBack<T> = [T] extends [never]
-  ? CommonViewDataType & {
-      mode: string;
-    }
-  : T;
+export type DefaultViewDataType = CommonViewDataType & { mode: string };
+type FallBack<T> = [T] extends [never] ? DefaultViewDataType : T;
 export type DataViewDataType = FallBack<
   RealDataViewDataTypeMap[keyof RealDataViewDataTypeMap]
 >;
@@ -68,7 +66,7 @@ export interface DataViewConfig<
 }
 
 export interface DataViewRendererConfig<
-  Data extends DataViewDataType = DataViewDataType
+  _Data extends DataViewDataType = DataViewDataType
 > {
   type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;

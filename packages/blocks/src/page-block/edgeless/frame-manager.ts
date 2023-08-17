@@ -20,7 +20,7 @@ const MIN_FRAME_HEIGHT = 640;
 const FRAME_PADDING = 40;
 class FrameOverlay extends Overlay {
   bound: Bound | null = null;
-  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas): void {
     if (!this.bound) return;
     const { x, y, w, h } = this.bound;
     ctx.beginPath();

@@ -19,14 +19,15 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "yjs": "^13",
-    "@toeverything/theme": "^0.7.12"
+    "@toeverything/theme": "^0.7.12",
+    "yjs": "^13"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.1",
+    "@types/webfontloader": "^1.6.35",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "file-type": "^16.5.4",
@@ -38,6 +39,7 @@
     "shiki": "^0.14.3",
     "sortablejs": "^1.15.0",
     "turndown": "^7.1.2",
+    "webfontloader": "^1.6.28",
     "zod": "^3.21.4"
   },
   "exports": {
@@ -76,11 +78,11 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@toeverything/theme": "^0.7.12",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.3.1",
     "@types/sortablejs": "^1.15.1",
     "@types/turndown": "^5.0.1",
-    "yjs": "^13.6.7",
-    "@toeverything/theme": "^0.7.12"
+    "yjs": "^13.6.7"
   }
 }

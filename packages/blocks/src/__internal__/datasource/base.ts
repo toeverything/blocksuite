@@ -1,13 +1,21 @@
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { undefined } from 'zod';
 
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type {
   ColumnConfig,
   ColumnConfigManager,
 } from '../../database-block/common/columns/manager.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
+import type { DataViewManager } from '../../database-block/common/data-view-manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../database-block/table/consts.js';
+
+export type DetailSlotProps = { view: DataViewManager; rowId: string };
+
+export interface DetailSlots {
+  header?: UniComponent<DetailSlotProps>;
+}
 
 export interface DataSource {
   allPropertyConfig: ColumnConfig[];
@@ -24,7 +32,6 @@ export interface DataSource {
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
   rowAdd: (insertPosition: InsertPosition) => string;
   rowDelete: (ids: string[]) => void;
-  propertyGetMain: () => string | undefined;
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
   propertyGetType: (propertyId: string) => string;
@@ -56,6 +63,8 @@ export interface DataSource {
     propertyId: string,
     callback: () => void
   ) => Disposable;
+
+  detailSlots: DetailSlots;
 }
 
 export abstract class BaseDataSource implements DataSource {
@@ -77,7 +86,7 @@ export abstract class BaseDataSource implements DataSource {
     return this.cellGetValue(rowId, propertyId);
   }
 
-  public cellGetExtra(rowId: string, propertyId: string): unknown {
+  public cellGetExtra(_rowId: string, _propertyId: string): unknown {
     return undefined;
   }
 
@@ -102,18 +111,18 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetData(propertyId: string): Record<string, unknown>;
 
-  public propertyGetReadonly(propertyId: string): boolean {
+  public propertyGetReadonly(_propertyId: string): boolean {
     return false;
   }
 
-  public propertyGetDefaultWidth(propertyId: string): number {
+  public propertyGetDefaultWidth(_propertyId: string): number {
     return DEFAULT_COLUMN_WIDTH;
   }
 
   onCellUpdate(
-    rowId: string,
-    propertyId: string,
-    callback: () => void
+    _rowId: string,
+    _propertyId: string,
+    _callback: () => void
   ): Disposable {
     return {
       dispose: () => {
@@ -143,7 +152,9 @@ export abstract class BaseDataSource implements DataSource {
   public columnConfigManager: ColumnConfigManager = columnManager;
   public abstract allPropertyConfig: ColumnConfig[];
 
-  public abstract propertyGetMain(): string | undefined;
+  public get detailSlots(): DetailSlots {
+    return {};
+  }
 }
 
 export type DatabaseBlockDatasourceConfig = {

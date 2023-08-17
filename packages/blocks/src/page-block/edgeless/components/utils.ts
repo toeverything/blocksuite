@@ -74,7 +74,7 @@ export function createButtonPopper(
       placement: 'top',
       middleware: [
         offset({
-          mainAxis: 10,
+          mainAxis: 14,
         }),
         flip({
           fallbackPlacements: ['bottom'],

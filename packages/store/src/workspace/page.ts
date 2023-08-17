@@ -1,4 +1,3 @@
-import type { SerializedBlock } from '@blocksuite/blocks';
 import { debug } from '@blocksuite/global/debug';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
@@ -90,7 +89,7 @@ export class Page extends Space<FlatBlockMap> {
       props: { [key: string]: { old: unknown; new: unknown } };
     }>(),
     copied: new Slot(),
-    pasted: new Slot<SerializedBlock[]>(),
+    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({
@@ -631,9 +630,9 @@ export class Page extends Space<FlatBlockMap> {
         bringChildrenTo.children.push(...model.children);
       }
     }
-    this._blockMap.delete(model.id);
 
-    model.propsUpdated.emit();
+    this._blockMap.delete(model.id);
+    model.deleted.emit();
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
@@ -654,6 +653,8 @@ export class Page extends Space<FlatBlockMap> {
             children: options.bringChildrenTo.children,
           });
         }
+
+        parent.childrenUpdated.emit();
       }
     });
 
@@ -757,7 +758,7 @@ export class Page extends Space<FlatBlockMap> {
     blockModel.flavour = schema.model.flavour;
     blockModel.role = schema.model.role;
 
-    blockModel.onCreated();
+    blockModel.created.emit();
 
     return blockModel;
   }

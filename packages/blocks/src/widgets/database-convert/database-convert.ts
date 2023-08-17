@@ -60,11 +60,7 @@ export class AffineDatabaseConvertWidget extends WidgetElement {
       'block',
     ]);
 
-    if (
-      selectedModels.length === 0 ||
-      new Set(selectedModels.map(v => v.flavour)).size !== 1
-    )
-      return;
+    if (selectedModels.length === 0) return;
 
     this.page.captureSync();
 

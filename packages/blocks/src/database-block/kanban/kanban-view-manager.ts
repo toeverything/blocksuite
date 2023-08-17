@@ -1,5 +1,6 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { CellRenderer } from '../common/columns/manager.js';
 import type { RealDataViewDataTypeMap } from '../common/data-view.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import {
@@ -16,6 +17,7 @@ import type { TType } from '../logical/typesystem.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { KanbanGroupProperty } from './define.js';
+import { headerRenderer } from './header-cell.js';
 
 export type KanbanGroupData = {
   key: string;
@@ -80,9 +82,9 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     if (this.view.columns.length === this.columns.length) {
       return;
     }
-    this.viewSource.updateView(view => {
+    this.viewSource.updateView(_view => {
       return {
-        columns: this.columnsWithoutFilter.map((id, i) => {
+        columns: this.columnsWithoutFilter.map(id => {
           const column = this.columnGet(id);
           return {
             id: column.id,
@@ -115,6 +117,12 @@ export class DataViewKanbanManager extends BaseDataViewManager {
 
   public get columns(): string[] {
     return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
+  }
+
+  public get detailColumns(): string[] {
+    return this.columnsWithoutFilter.filter(
+      id => this.columnGetType(id) !== 'title'
+    );
   }
 
   public get columnsWithoutFilter(): string[] {
@@ -153,7 +161,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
 
   changeGroup(columnId: string) {
     const column = this.columnGet(columnId);
-    this.updateView(view => {
+    this.updateView(_view => {
       return {
         groupBy: defaultGroupBy(column.id, column.type, column.data),
       };
@@ -179,7 +187,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       groupBy,
       this.view.groupProperties,
       properties => {
-        this.updateView(v => {
+        this.updateView(_v => {
           return {
             groupProperties: properties,
           };
@@ -215,13 +223,13 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     );
   }
 
-  public hasHeader(rowId: string): boolean {
+  public hasHeader(_rowId: string): boolean {
     const hd = this.view.header;
     return !!hd.titleColumn || !!hd.iconColumn || !!hd.coverColumn;
   }
 
   public getHeaderTitle(
-    rowId: string
+    _rowId: string
   ): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.titleColumn;
     if (!columnId) {
@@ -230,7 +238,9 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     return this.columnGet(columnId);
   }
 
-  public getHeaderIcon(rowId: string): DataViewKanbanColumnManager | undefined {
+  public getHeaderIcon(
+    _rowId: string
+  ): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.iconColumn;
     if (!columnId) {
       return;
@@ -239,7 +249,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   }
 
   public getHeaderCover(
-    rowId: string
+    _rowId: string
   ): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.coverColumn;
     if (!columnId) {
@@ -266,9 +276,11 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   columnGetHide(columnId: string): boolean {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
+
   public deleteView(): void {
     this.viewSource.delete();
   }
+
   public get isDeleted(): boolean {
     return this.viewSource.isDeleted();
   }
@@ -280,6 +292,13 @@ export class DataViewKanbanColumnManager extends BaseDataViewColumnManager {
     override dataViewManager: DataViewKanbanManager
   ) {
     super(propertyId, dataViewManager);
+  }
+
+  public override get renderer(): CellRenderer {
+    if (this.id === this.dataViewManager.header.titleColumn) {
+      return headerRenderer;
+    }
+    return super.renderer;
   }
 }
 
@@ -481,6 +500,7 @@ export class GroupHelper {
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
   }
+
   get addGroup() {
     return this.viewManager.columnConfigManager.getColumn(this.column.type).ops
       .addGroup;

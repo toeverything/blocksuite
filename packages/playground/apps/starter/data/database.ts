@@ -1,3 +1,4 @@
+import type { ListType, ParagraphType } from '@blocksuite/blocks';
 import { getServiceOrRegister } from '@blocksuite/blocks';
 import { checkboxPureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/checkbox/define';
 import { datePureColumnConfig } from '@blocksuite/blocks/database-block/common/columns/date/define';
@@ -69,8 +70,34 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
     'end',
     multiSelectColumnConfig.create(multiSelectColumnConfig.name)
   );
+
+  const paragraphTypes: ParagraphType[] = [
+    'text',
+    'quote',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+  ];
+  paragraphTypes.forEach(type => {
+    page.addBlock(
+      'affine:paragraph',
+      { type: type, text: new Text(`Paragraph type ${type}`) },
+      databaseId
+    );
+  });
+  const listTypes: ListType[] = ['numbered', 'bulleted', 'todo', 'toggle'];
+
+  listTypes.forEach(type => {
+    page.addBlock(
+      'affine:list',
+      { type: type, text: new Text(`List type ${type}`) },
+      databaseId
+    );
+  });
   // Add a paragraph after database
-  page.addBlock('affine:paragraph', {}, noteId);
   page.addBlock('affine:paragraph', {}, noteId);
   page.addBlock('affine:paragraph', {}, noteId);
   page.addBlock('affine:paragraph', {}, noteId);

@@ -1,7 +1,10 @@
 import type { Disposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/global/utils';
 
-import type { DataSource } from '../../__internal__/datasource/base.js';
+import type {
+  DataSource,
+  DetailSlots,
+} from '../../__internal__/datasource/base.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { TType } from '../logical/typesystem.js';
 import type { ColumnDataUpdater, InsertPosition } from '../types.js';
@@ -23,6 +26,8 @@ export interface DataViewManager {
   get columnManagerList(): DataViewColumnManager[];
 
   get columns(): string[];
+
+  get detailColumns(): string[];
 
   get columnsWithoutFilter(): string[];
 
@@ -117,7 +122,7 @@ export interface DataViewManager {
 
   get isDeleted(): boolean;
 
-  isMainColumn(id: string): boolean;
+  get detailSlots(): DetailSlots;
 }
 
 export interface DataViewColumnManager<
@@ -137,8 +142,6 @@ export interface DataViewColumnManager<
   get name(): string;
 
   get hide(): boolean;
-
-  get isMain(): boolean;
 
   get data(): Data;
 
@@ -387,6 +390,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   public abstract get columns(): string[];
+  public abstract get detailColumns(): string[];
 
   public abstract get columnsWithoutFilter(): string[];
 
@@ -424,8 +428,8 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public abstract get isDeleted(): boolean;
 
-  public isMainColumn(id: string): boolean {
-    return this.dataSource.propertyGetMain() === id;
+  public get detailSlots(): DetailSlots {
+    return this.dataSource.detailSlots;
   }
 }
 
@@ -447,10 +451,6 @@ export abstract class BaseDataViewColumnManager
 
   get hide(): boolean {
     return this.dataViewManager.columnGetHide(this.id);
-  }
-
-  get isMain(): boolean {
-    return this.dataViewManager.isMainColumn(this.id);
   }
 
   get id(): string {
