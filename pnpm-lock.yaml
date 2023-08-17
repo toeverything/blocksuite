@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:packages/lit
       '@commitlint/cli':
         specifier: ^17.6.7
         version: 17.6.7

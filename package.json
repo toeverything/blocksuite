@@ -54,7 +54,6 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "devDependencies": {
-    "@blocksuite/lit": "workspace:*",
     "@commitlint/cli": "^17.6.7",
     "@commitlint/config-conventional": "^17.6.7",
     "@open-wc/dev-server-hmr": "^0.1.4",
