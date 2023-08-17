@@ -230,7 +230,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                   columns: columns,
                 },
                 children: children,
-              },
+              } as never,
             ];
             return result;
           }
