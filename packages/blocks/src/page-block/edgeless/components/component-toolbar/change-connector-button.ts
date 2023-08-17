@@ -163,6 +163,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
     return html`
       <edgeless-menu-button
+        class="connector-color-button"
         .iconInfo=${{
           icon: html`${ColorUnit(selectedColor)}`,
           tooltip: 'Color',
@@ -177,6 +178,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       <menu-divider .vertical=${true}></menu-divider>
 
       <edgeless-menu-button
+        class="line-styles-button"
         .iconInfo=${{
           icon: html`${LineStyleIcon}${SmallArrowDownIcon}`,
           tooltip: 'Border style',
@@ -189,12 +191,14 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
             }}
           ></edgeless-line-width-panel>
           <edgeless-tool-icon-button
+            class=${`edgeless-component-line-style-button-${StrokeStyle.Solid}`}
             .tooltip=${'Solid'}
             @click=${() => this._setConnectorStrokeStyle(StrokeStyle.Solid)}
           >
             ${StraightLineIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button
+            class=${`edgeless-component-line-style-button-${StrokeStyle.Dashed}`}
             .tooltip=${'Dash'}
             @click=${() => this._setConnectorStrokeStyle(StrokeStyle.Dashed)}
           >

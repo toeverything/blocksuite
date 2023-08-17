@@ -30,21 +30,18 @@ export class EdgelessMenuButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   menuChildren!: TemplateResult<1>;
 
-  @query('.edgeless-menu-button')
-  private _container!: HTMLElement;
   @query('.edgeless-component-panel-wrapper')
   private _panelWrapper!: HTMLDivElement;
 
   private _menuPopper!: ReturnType<typeof createButtonPopper>;
   override firstUpdated() {
-    this._menuPopper = createButtonPopper(this._container, this._panelWrapper);
+    this._menuPopper = createButtonPopper(this, this._panelWrapper);
     this._disposables.add(this._menuPopper);
   }
 
   override render() {
     const { iconInfo } = this;
     return html`<edgeless-tool-icon-button
-        class="edgeless-menu-button"
         .tooltip=${iconInfo.tooltip}
         .tipPosition=${'bottom'}
         @click=${() => this._menuPopper.toggle()}

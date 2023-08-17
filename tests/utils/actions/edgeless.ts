@@ -855,7 +855,7 @@ export async function changeConnectorStrokeColor(
 ) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
-    .locator('.color-panel-container')
+    .locator('edgeless-color-panel')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
@@ -866,7 +866,6 @@ export function locatorConnectorStrokeWidthButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator('.line-style-panel')
     .locator(`edgeless-line-width-panel`)
     .locator(`.line-width-button:nth-child(${buttonPosition})`);
 }
@@ -884,8 +883,7 @@ export function locatorConnectorStrokeStyleButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator('.line-style-panel')
-    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+    .locator(`.edgeless-component-line-style-button-${mode}`);
 }
 export async function changeConnectorStrokeStyle(
   page: Page,
