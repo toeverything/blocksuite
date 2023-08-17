@@ -54,7 +54,7 @@ const styles = css`
   }
 
   .data-view-header-area-icon {
-    height: var(--data-view-cell-text-line-height);
+    height: max-content;
     display: flex;
     align-items: center;
     margin-right: 8px;

@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { DataViewKanbanManager } from '../../database-block/kanban/kanban-view-manager.js';
@@ -11,6 +11,27 @@ export class BlockRenderer
   extends WithDisposable(ShadowlessElement)
   implements DetailSlotProps
 {
+  static override styles = css`
+    database-datasource-block-renderer {
+      padding-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--affine-border-color);
+    }
+    .database-block-detail-header-icon {
+      width: 20px;
+      height: 20px;
+      padding: 2px;
+      border-radius: 4px;
+      background-color: var(--affine-background-secondary-color);
+    }
+    .database-block-detail-header-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+  `;
   @property({ attribute: false })
   public view!: DataViewTableManager | DataViewKanbanManager;
   @property({ attribute: false })
@@ -32,6 +53,16 @@ export class BlockRenderer
     );
   }
 
+  renderIcon() {
+    const iconColumn = this.view.header.iconColumn;
+    if (!iconColumn) {
+      return;
+    }
+    return html` <div class="database-block-detail-header-icon">
+      ${this.view.cellGetValue(this.rowId, iconColumn)}
+    </div>`;
+  }
+
   protected override render(): unknown {
     const root = this.closest('block-suite-root');
     if (!root) {
@@ -41,6 +72,6 @@ export class BlockRenderer
     if (!model) {
       return;
     }
-    return html` <div>${root.renderModel(model)}</div> `;
+    return html` ${root.renderModel(model)} ${this.renderIcon()} `;
   }
 }
