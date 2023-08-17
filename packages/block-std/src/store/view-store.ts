@@ -17,7 +17,8 @@ export type NodeViewTree<T> = NodeViewLeaf<T> & {
 
 type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U> ? U : unknown;
 
-export interface BlockSuiteViewSpec<T = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface BlockSuiteViewSpec<T = any> {
   fromDOM: (node: Node) => null | NodeView<T>;
   toDOM: (nodeView: NodeView<T>) => Element;
   getChildren: (node: Element) => Element[];
@@ -335,6 +336,4 @@ export class ViewStore<NodeViewType = unknown> {
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface BlockSuiteView {}
-
-  type BlockSuiteViewValue<T extends keyof BlockSuiteView> = BlockSuiteView[T];
 }
