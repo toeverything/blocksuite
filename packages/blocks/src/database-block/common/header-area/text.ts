@@ -7,6 +7,8 @@ import { html } from 'lit/static-html.js';
 import * as Y from 'yjs';
 import { Doc, Text as YText } from 'yjs';
 
+import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
@@ -99,6 +101,8 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     this.editor = new VEditor(yText, {
       active: () => activeEditorManager.isActive(this),
     });
+    this.editor.setAttributeSchema(affineTextAttributes);
+    this.editor.setAttributeRenderer(attributeRenderer());
     this.editor.mount(this.richText);
     this.editor.bindHandlers({
       keydown: e => {
@@ -141,9 +145,11 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 
   private getYText(text?: string | YText) {
     if (this.isRichText && (text instanceof YText || text == null)) {
-      const yText = text ?? new YText();
-
-      this.titleColumn?.setValue(this.rowId, yText);
+      let yText = text;
+      if (!yText) {
+        yText = new YText();
+        this.titleColumn?.setValue(this.rowId, yText);
+      }
       return yText;
     }
     const yText = new Doc().getText('title');

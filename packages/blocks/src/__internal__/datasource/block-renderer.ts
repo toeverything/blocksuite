@@ -19,6 +19,8 @@ export class BlockRenderer
       gap: 12px;
       margin-bottom: 4px;
       border-bottom: 1px solid var(--affine-border-color);
+      font-size: var(--affine-font-base);
+      line-height: var(--affine-line-height);
     }
     .database-block-detail-header-icon {
       width: 20px;
