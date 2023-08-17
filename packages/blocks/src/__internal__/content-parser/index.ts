@@ -623,6 +623,9 @@ export class ContentParser {
   ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
+        if (childElement.tagName === 'STYLE') {
+          return [];
+        }
         return (
           (await this.withContext(context).getParserHtmlText2Block(
             'NodeParser'

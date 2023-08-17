@@ -1,4 +1,5 @@
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
+import { lightCssVariables } from '@toeverything/theme';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
@@ -65,6 +66,7 @@ export abstract class BaseParser {
   protected _customTableParserHandler?: TableParseHandler;
   protected _customTableTitleColumnHandler?: TableTitleColumnHandler;
   protected abstract _contextedContentParser: ContextedContentParser;
+  private _textHighlightColors?: Map<string, string>;
 
   constructor(
     contentParser: ContentParser,
@@ -113,6 +115,22 @@ export abstract class BaseParser {
   };
 
   public abstract registerParsers(): void;
+
+  protected _getTextHighlightColors(): Map<string, string> {
+    if (!this._textHighlightColors) {
+      const highlightPrefix = '--affine-text-highlight-';
+      this._textHighlightColors = new Map();
+      Object.keys(lightCssVariables).forEach(value => {
+        if (value.startsWith(highlightPrefix)) {
+          this._textHighlightColors?.set(
+            value.substring(highlightPrefix.length),
+            `var(${value})`
+          );
+        }
+      });
+    }
+    return this._textHighlightColors;
+  }
 
   // TODO parse children block
   protected _nodeParser = async (
@@ -391,7 +409,10 @@ export abstract class BaseParser {
       return [];
     }
     const childNodes = Array.from(htmlElement.childNodes);
-    const currentTextStyle = getTextStyle(htmlElement);
+    const currentTextStyle = getTextStyle(
+      htmlElement,
+      this._getTextHighlightColors()
+    );
     this._customTextStyleHandler &&
       this._customTextStyleHandler(htmlElement, currentTextStyle);
 
@@ -605,7 +626,10 @@ const getIsLink = (htmlElement: HTMLElement) => {
   return ['A'].includes(htmlElement.tagName);
 };
 
-const getTextStyle = (htmlElement: HTMLElement) => {
+const getTextStyle = (
+  htmlElement: HTMLElement,
+  highlightMap: Map<string, string>
+) => {
   const tagName = htmlElement.tagName;
   const textStyle: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -667,7 +691,20 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['strike'] = true;
   }
   if (tagName === 'MARK') {
-    textStyle['background'] = 'yellow';
+    const highlightClassName = Array.from(htmlElement.classList).find(
+      className => className.startsWith('highlight-')
+    );
+    // highlight-color or highlight-color_background
+    const varKeys = (highlightClassName ?? '').split(/[-_]/);
+    let colorKey = varKeys.length > 0 ? varKeys[1] : '';
+    if (colorKey && colorKey !== 'default') {
+      if (colorKey === 'red') {
+        colorKey = 'pink';
+      } else if (colorKey === 'gray') {
+        colorKey = 'grey';
+      }
+      textStyle['background'] = highlightMap.get(colorKey ?? 'yellow');
+    }
   }
 
   return textStyle;
