@@ -30,7 +30,7 @@ import {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
