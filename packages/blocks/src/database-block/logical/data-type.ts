@@ -9,6 +9,10 @@ export const tString = typesystem.defineData<{ value: string }>({
   name: 'String',
   supers: [],
 });
+export const tRichText = typesystem.defineData<{ value: string }>({
+  name: 'RichText',
+  supers: [tString],
+});
 export const tBoolean = typesystem.defineData<{ value: boolean }>({
   name: 'Boolean',
   supers: [],

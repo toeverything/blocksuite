@@ -362,7 +362,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
           return true;
         },
-        Enter: () => {
+        Enter: context => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
             return false;
@@ -373,6 +373,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             columnsSelection: undefined,
             isEditing: true,
           };
+          context.get('keyboardState').raw.preventDefault();
           return true;
         },
         'Shift-Enter': () => {

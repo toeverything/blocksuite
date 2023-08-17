@@ -16,7 +16,6 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     affine-database-checkbox-cell {
       display: block;
       width: 100%;
-      height: 100%;
       cursor: pointer;
     }
 
@@ -27,7 +26,7 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     .affine-database-checkbox {
       display: flex;
       align-items: center;
-      height: 100%;
+      height: var(--data-view-cell-text-line-height);
       width: 100%;
       position: relative;
     }

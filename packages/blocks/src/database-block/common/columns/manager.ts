@@ -1,6 +1,9 @@
 import type { UniComponent } from '../../../components/uni-component/uni-component.js';
 import type { TType } from '../../logical/typesystem.js';
-import type { DataViewColumnManager } from '../data-view-manager.js';
+import type {
+  DataViewColumnManager,
+  DataViewManager,
+} from '../data-view-manager.js';
 
 type JSON =
   | null
@@ -13,13 +16,15 @@ type JSON =
     };
 
 export interface CellRenderProps<
-  Data extends Record<string, unknown> = Record<string, never>,
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > {
+  view: DataViewManager;
   column: DataViewColumnManager<Value, Data>;
   rowId: string;
   isEditing: boolean;
   selectCurrentCell: (editing: boolean) => void;
+  onRectChange?: () => void;
 }
 
 export interface DataViewCellLifeCycle {

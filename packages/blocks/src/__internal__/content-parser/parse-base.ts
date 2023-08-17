@@ -579,6 +579,20 @@ export abstract class BaseParser {
           rowIds: Object.keys(cells),
           cells: cells,
           columns: columns,
+          views: [
+            {
+              id: this._page.generateId(),
+              name: 'Table View',
+              mode: 'table',
+              columns: [],
+              header: {},
+              filter: {
+                type: 'group',
+                op: 'and',
+                conditions: [],
+              },
+            },
+          ],
         },
         children: children,
       },

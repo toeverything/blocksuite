@@ -12,13 +12,11 @@ export class NumberCell extends BaseCellRenderer<number> {
     affine-database-number-cell {
       display: block;
       width: 100%;
-      height: 100%;
     }
 
     .affine-database-number {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
@@ -44,14 +42,12 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     affine-database-number-cell-editing {
       display: block;
       width: 100%;
-      height: 100%;
       cursor: text;
     }
 
     .affine-database-number {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
