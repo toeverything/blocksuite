@@ -1,4 +1,4 @@
-export function launchIntoFullscreen(element: HTMLElement) {
+export function launchIntoFullscreen(element: Element) {
   if (element.requestFullscreen) {
     element.requestFullscreen();
     // @ts-ignore
