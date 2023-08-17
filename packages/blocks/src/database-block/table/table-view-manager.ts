@@ -199,7 +199,9 @@ export class DataViewTableManager extends BaseDataViewManager {
   }
 
   public hasHeader(rowId: string): boolean {
-    return Object.values(this.view.header).some(v => v != null);
+    return Object.values(this.view.header).some(id =>
+      this.cellGetValue(rowId, id)
+    );
   }
 }
 

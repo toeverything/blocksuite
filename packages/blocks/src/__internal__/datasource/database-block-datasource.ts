@@ -21,7 +21,6 @@ import { titleColumnConfig } from '../../database-block/common/columns/title/cel
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
-import type { ListBlockModel } from '../../list-block/index.js';
 import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
 import { getIcon } from './block-icons.js';
