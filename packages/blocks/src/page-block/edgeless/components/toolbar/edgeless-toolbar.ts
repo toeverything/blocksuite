@@ -6,7 +6,7 @@ import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 
-import { assertExists, launchIntoFullscreen } from '@blocksuite/global/utils';
+import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
 import { css, html, LitElement, type PropertyValues } from 'lit';
