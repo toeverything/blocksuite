@@ -18,6 +18,7 @@ import {
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import * as Y from 'yjs';
 
 import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -262,13 +263,17 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return surface.pickById(id) as ConnectorElement;
   }
 
+  private _createShape() {
+    return this.edgeless.surface.addElement(this._current.type, {
+      ...this._current.serialize(),
+      text: new Y.Text(),
+    });
+  }
+
   private _generateShapeOnClick(type: Direction) {
     const { surface } = this.edgeless;
     const bound = this._computeNextShape(type);
-    const id = surface.addElement(
-      this._current.type,
-      this._current.serialize() as unknown as Record<string, unknown>
-    );
+    const id = this._createShape();
     surface.updateElement(id, { xywh: bound.serialize() });
 
     const { startPosition, endPosition } = getPosition(type);
@@ -299,10 +304,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const angle = normalizeDegAngle(
       toDegree(Vec.angle(connector.path[len - 2], connector.path[len - 1]))
     );
-    const id = surface.addElement(
-      this._current.type,
-      this._current.serialize() as unknown as Record<string, unknown>
-    );
+    const id = this._createShape();
     let nextBound: Bound;
     let position: Connection['position'];
 
