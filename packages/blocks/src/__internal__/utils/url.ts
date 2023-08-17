@@ -46,7 +46,8 @@ const URL_REGEX = new RegExp(
     '[a-z0-9\\u00a1-\\uffff]\\.' +
     ')+' +
     // TLD identifier name, may end with dot
-    '(?:[a-z\\u00a1-\\uffff]{2,}\\.?)' +
+    // Addition: We limit the TLD to 2-6 characters, because it can cover most of the cases.
+    '(?:[a-z\\u00a1-\\uffff]{2,6}\\.?)' +
     ')' +
     // port number (optional)
     '(?::\\d{2,5})?' +
@@ -57,10 +58,11 @@ const URL_REGEX = new RegExp(
 );
 
 export function normalizeUrl(url: string) {
-  const hasScheme = ALLOWED_SCHEMES.some(scheme =>
+  const includeScheme = ALLOWED_SCHEMES.find(scheme =>
     url.startsWith(scheme + ':')
   );
-  if (hasScheme) {
+  if (includeScheme && url.length > includeScheme.length + 1) {
+    // Any link include schema is a valid url
     return url;
   }
   const isEmail = MAIL_REGEX.test(url);
@@ -71,6 +73,8 @@ export function normalizeUrl(url: string) {
 }
 
 /**
+ * Assume user will input a url, we just need to check if it is valid.
+ *
  * For more detail see https://www.ietf.org/rfc/rfc1738.txt
  */
 export const isValidUrl = (str: string) => {
@@ -83,4 +87,50 @@ export const isValidUrl = (str: string) => {
     return true;
   }
   return URL_REGEX.test(url);
+};
+
+// https://en.wikipedia.org/wiki/Top-level_domain
+const COMMON_TLDS = [
+  'com',
+  'org',
+  'net',
+  'edu',
+  'gov',
+  'co',
+  'io',
+  'me',
+  'moe',
+  'mil',
+  'top',
+  'dev',
+  'xyz',
+  'info',
+  'cat',
+  'ru',
+  'de',
+  'jp',
+  'uk',
+  'pro',
+];
+
+const isCommonTLD = (url: URL) => {
+  const tld = url.hostname.split('.').pop();
+  if (!tld) {
+    return false;
+  }
+  return COMMON_TLDS.includes(tld);
+};
+
+/**
+ * Assuming the user will input anything, we need to check rigorously.
+ */
+export const isStrictUrl = (str: string) => {
+  if (!isValidUrl(str)) {
+    return false;
+  }
+  const url = new URL(normalizeUrl(str));
+  if (isCommonTLD(url)) {
+    return true;
+  }
+  return false;
 };

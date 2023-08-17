@@ -13,7 +13,7 @@ describe('isValidUrl: determining whether a URL is valid is very complicated', (
     );
   });
 
-  test('CAUTION: any link include schema is a valid url!', () => {
+  test('CAUTION: any link include allowed schema is a valid url!', () => {
     expect(isValidUrl('http://www.example.cm')).toEqual(true);
     expect(isValidUrl('https://x')).toEqual(true);
     expect(isValidUrl('https://')).toEqual(true);
@@ -74,5 +74,10 @@ describe('isValidUrl: determining whether a URL is valid is very complicated', (
 
     expect(isValidUrl('新华网.cn')).toEqual(true);
     expect(isValidUrl('example.com/中文/にほんご')).toEqual(true);
+
+    // It's a valid url, but we don't want to support it
+    // Longest TLD up to date is `.xn--vermgensberatung-pwb`, at 24 characters in Punycode and 17 when decoded [vermögensberatung].
+    // See also https://stackoverflow.com/questions/9238640/how-long-can-a-tld-possibly-be#:~:text=Longest%20TLD%20up%20to%20date,17%20when%20decoded%20%5Bverm%C3%B6gensberatung%5D.
+    expect(isValidUrl('example.xn--vermgensberatung-pwb')).toEqual(false);
   });
 });

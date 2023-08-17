@@ -7,7 +7,7 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { activeEditorManager } from '../utils/active-editor-manager.js';
-import { isValidUrl } from '../utils/url.js';
+import { isStrictUrl } from '../utils/url.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import { REFERENCE_NODE } from './reference-node.js';
 import {
@@ -51,7 +51,7 @@ const autoIdentifyLink = (
       delta.insert.slice(0, rangePositionInDelta) +
       context.data +
       delta.insert.slice(rangePositionInDelta);
-    const isUrl = isValidUrl(newText);
+    const isUrl = isStrictUrl(newText);
 
     // If the new text with original link text is not pattern matched, we should reset the text
     if (!isUrl) {
@@ -87,7 +87,7 @@ const autoIdentifyLink = (
 
   const verifyStr = verifyData[verifyData.length - 1];
 
-  const isUrl = isValidUrl(verifyStr);
+  const isUrl = isStrictUrl(verifyStr);
 
   if (!isUrl) {
     return;
