@@ -30,7 +30,7 @@ export const NOTE_MENU_ITEMS = BLOCKHUB_TEXT_ITEMS.concat(BLOCKHUB_LIST_ITEMS)
     } as NoteMenuItem;
   });
 
-export const NOTE_MENU_WIDTH = 456;
+export const NOTE_MENU_WIDTH = 442;
 
 export const TOP_END_TOOLTIP_TYPE = ['text', 'h1'];
 export const TOP_START_TOOLTIP_TYPE = ['bulleted', 'numbered', 'todo'];

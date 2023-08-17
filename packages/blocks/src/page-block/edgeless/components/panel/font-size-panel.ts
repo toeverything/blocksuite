@@ -18,6 +18,7 @@ export class EdgelessFontSizePanel extends LitElement {
       align-items: center;
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
+      gap: 2px;
     }
 
     .font-size-button {

@@ -20,6 +20,8 @@ export class EdgelessAlignPanel extends LitElement {
       align-items: flex-start;
       background: var(--affine-background-overlay-panel-color);
       border-radius: 8px;
+      padding: 2px;
+      gap: 8px;
       fill: none;
       stroke: currentColor;
     }
@@ -43,6 +45,8 @@ export class EdgelessAlignPanel extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${'Left'}
           .active=${this.value === 'left'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect('left');
           }}
@@ -52,6 +56,8 @@ export class EdgelessAlignPanel extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${'Center'}
           .active=${this.value === 'center'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect('center');
           }}
@@ -61,6 +67,8 @@ export class EdgelessAlignPanel extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${'Right'}
           .active=${this.value === 'right'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect('right');
           }}
