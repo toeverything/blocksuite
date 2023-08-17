@@ -9,8 +9,7 @@ import type {
 import { BlockStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { PropertyValues, TemplateResult } from 'lit';
-import { nothing } from 'lit';
+import { nothing, type PropertyValues, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
@@ -131,6 +130,14 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
         }, {})
       : {};
 
+    const content = children.length
+      ? html`${repeat(
+          children,
+          child => child.id,
+          child => this.renderModel(child)
+        )}`
+      : null;
+
     this._onLoadModel(model);
 
     return html`<${tag}
@@ -139,11 +146,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
-      .content=${html`${repeat(
-        children,
-        child => child.id,
-        child => this.renderModel(child)
-      )}`}
+      .content=${content}
     ></${tag}>`;
   };
 

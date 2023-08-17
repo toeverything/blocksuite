@@ -516,7 +516,7 @@ export class DocPageBlockComponent
     `;
 
     const content = html`${repeat(
-      this.model?.children.filter(
+      this.model.children.filter(
         child => !(matchFlavours(child, ['affine:note']) && child.hidden)
       ),
       child => child.id,
