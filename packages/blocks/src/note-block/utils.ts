@@ -1,4 +1,4 @@
-import type { BlockSelection, TextSelection } from '@blocksuite/block-std';
+import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { almostEqual } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
@@ -90,6 +90,25 @@ export function setBlockSelection(blockElement: BlockElement) {
   });
 }
 
+export function setTextSelectionBySide(
+  blockElement: BlockElement,
+  tail: boolean
+) {
+  const selection = getSelection(blockElement);
+  const path = blockElement.path;
+
+  selection.setGroup('note', [
+    selection.getInstance('text', {
+      from: {
+        path,
+        index: tail ? blockElement.model.text?.length ?? 0 : 0,
+        length: 0,
+      },
+      to: null,
+    }),
+  ]);
+}
+
 export function getBlockSelectionBySide(
   blockElement: BlockElement,
   tail: boolean
@@ -102,8 +121,7 @@ export function getBlockSelectionBySide(
 
 export function getTextSelection(blockElement: BlockElement) {
   const selection = getSelection(blockElement);
-  const sel = selection.value.find(sel => sel.is('text')) as TextSelection;
-  return sel ?? null;
+  return selection.find('text');
 }
 
 function getAnchorBlockSelection(blockElement: BlockElement) {
