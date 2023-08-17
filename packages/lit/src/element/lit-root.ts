@@ -10,7 +10,6 @@ import { BlockStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import type { PropertyValues, TemplateResult } from 'lit';
-import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
@@ -103,22 +102,22 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     return this.renderModel(root);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult => {
+  renderModel = (model: BaseBlockModel): TemplateResult | null => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
       console.warn(`Cannot find schema for ${flavour}.`);
-      return html`${nothing}`;
+      return null;
     }
 
     const view = this.blockStore.specStore.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
-      return html`${nothing}`;
+      return null;
     }
 
     const tag = view.component;
-    const widgets: Record<string, TemplateResult> = view.widgets
+    const widgets: Record<string, TemplateResult> | null = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(
             this.widgetIdAttr
@@ -131,6 +130,14 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
         }, {})
       : {};
 
+    const content = children.length
+      ? html`${repeat(
+          children,
+          child => child.id,
+          child => this.renderModel(child)
+        )}`
+      : null;
+
     this._onLoadModel(model);
 
     return html`<${tag}
@@ -139,11 +146,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
       .page=${this.page}
       .model=${model}
       .widgets=${widgets}
-      .content=${html`${repeat(
-        children,
-        child => child.id,
-        child => this.renderModel(child)
-      )}`}
+      .content=${content}
     ></${tag}>`;
   };
 
