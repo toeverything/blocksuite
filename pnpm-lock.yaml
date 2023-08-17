@@ -11,9 +11,6 @@ importers:
       '@blocksuite/block-std':
         specifier: workspace:*
         version: link:packages/block-std
-      '@blocksuite/blocks':
-        specifier: workspace:*
-        version: link:packages/blocks
       '@blocksuite/global':
         specifier: workspace:*
         version: link:packages/global
