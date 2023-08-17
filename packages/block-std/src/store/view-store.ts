@@ -9,7 +9,7 @@ export type NodeView<T = unknown> = {
   view: T;
 };
 export type NodeViewLeaf<T> = NodeView<T> & {
-  type: BlockSuiteViewType;
+  type: keyof BlockSuiteView;
 };
 export type NodeViewTree<T> = NodeViewLeaf<T> & {
   children: NodeViewTree<T>[];
@@ -17,7 +17,8 @@ export type NodeViewTree<T> = NodeViewLeaf<T> & {
 
 type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U> ? U : unknown;
 
-export interface BlockSuiteViewSpec<T = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface BlockSuiteViewSpec<T = any> {
   fromDOM: (node: Node) => null | NodeView<T>;
   toDOM: (nodeView: NodeView<T>) => Element;
   getChildren: (node: Element) => Element[];
@@ -32,7 +33,7 @@ export class ViewStore<NodeViewType = unknown> {
   private _cachedTree: NodeViewTree<NodeViewType> | null = null;
   private _cachedPath: Map<Node, NodeViewLeaf<NodeViewType>[]> = new Map();
   private _observer: MutationObserver;
-  readonly viewSpec = new Map<BlockSuiteViewType, BlockSuiteViewValue>();
+  readonly viewSpec = new Map<string, BlockSuiteViewSpec>();
 
   constructor(public blockStore: BlockStore) {
     this._observer = new MutationObserver(() => {
@@ -49,7 +50,7 @@ export class ViewStore<NodeViewType = unknown> {
     return node.children;
   };
 
-  register<T extends BlockSuiteViewType>(type: T, spec: BlockSuiteView[T]) {
+  register<T extends keyof BlockSuiteView>(type: T, spec: BlockSuiteView[T]) {
     this.viewSpec.set(type, spec);
   }
 
@@ -116,7 +117,7 @@ export class ViewStore<NodeViewType = unknown> {
 
       const children = spec
         .getChildren(spec.toDOM(nodeView as never))
-        .map(child => iterate(child));
+        .map((child: Node) => iterate(child));
 
       return {
         ...nodeView,
@@ -149,16 +150,24 @@ export class ViewStore<NodeViewType = unknown> {
     }, tree);
   };
 
-  viewFromPath = <T extends BlockSuiteViewType>(
+  viewFromPath<T extends keyof BlockSuiteView>(
     type: T,
     path: string[]
-  ): null | SpecToNodeView<BlockSuiteView[T]> => {
+  ): null | SpecToNodeView<BlockSuiteView[T]>;
+  viewFromPath<T extends BlockSuiteViewSpec>(
+    type: string,
+    path: string[]
+  ): null | SpecToNodeView<T>;
+  viewFromPath(
+    type: string,
+    path: string[]
+  ): null | SpecToNodeView<BlockSuiteViewSpec> {
     const tree = this.fromPath(path);
     if (!tree || tree.type !== type) {
       return null;
     }
-    return tree.view as SpecToNodeView<BlockSuiteView[T]>;
-  };
+    return tree.view as SpecToNodeView<BlockSuiteViewSpec>;
+  }
 
   walkThrough = (
     fn: (
@@ -327,8 +336,4 @@ export class ViewStore<NodeViewType = unknown> {
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface BlockSuiteView {}
-
-  type BlockSuiteViewType = string & keyof BlockSuiteView;
-  type BlockSuiteViewValue<T extends BlockSuiteViewType = BlockSuiteViewType> =
-    BlockSuiteView[T];
 }

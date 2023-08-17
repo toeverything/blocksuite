@@ -1,4 +1,3 @@
-import type { SerializedBlock } from '@blocksuite/blocks';
 import { debug } from '@blocksuite/global/debug';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
@@ -90,7 +89,7 @@ export class Page extends Space<FlatBlockMap> {
       props: { [key: string]: { old: unknown; new: unknown } };
     }>(),
     copied: new Slot(),
-    pasted: new Slot<SerializedBlock[]>(),
+    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({

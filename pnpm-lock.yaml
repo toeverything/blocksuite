@@ -8,24 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@blocksuite/block-std':
-        specifier: workspace:*
-        version: link:packages/block-std
-      '@blocksuite/blocks':
-        specifier: workspace:*
-        version: link:packages/blocks
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:packages/global
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:packages/lit
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:packages/store
-      '@blocksuite/virgo':
-        specifier: workspace:*
-        version: link:packages/virgo
       '@commitlint/cli':
         specifier: ^17.6.7
         version: 17.6.7
@@ -292,6 +274,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/virgo':
+        specifier: workspace:*
+        version: link:../virgo
       lit:
         specifier: ^2.7.6
         version: 2.7.6
