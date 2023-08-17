@@ -378,9 +378,9 @@ const matches: Match[] = [
     pattern: /^```([a-zA-Z0-9]*)$/g,
     action: (
       model: BaseBlockModel,
-      vEditor: AffineVEditor,
+      _vEditor: AffineVEditor,
       text: string,
-      selection: VRange,
+      _selection: VRange,
       pattern: RegExp
     ) => {
       if (

@@ -1,47 +1,46 @@
-import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import { type FrameNavigatorTool } from '../../../__internal__/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class PresentToolController extends EdgelessToolController<FrameNavigatorTool> {
-  override onContainerPointerDown(e: PointerEventState): void {
+  override onContainerPointerDown(): void {
     noop();
   }
-  override onContainerDragStart(e: PointerEventState): void {
+  override onContainerDragStart(): void {
     noop();
   }
-  override onContainerDragMove(e: PointerEventState): void {
+  override onContainerDragMove(): void {
     noop();
   }
-  override onContainerDragEnd(e: PointerEventState): void {
+  override onContainerDragEnd(): void {
     noop();
   }
-  override onContainerClick(e: PointerEventState): void {
+  override onContainerClick(): void {
     noop();
   }
-  override onContainerDblClick(e: PointerEventState): void {
+  override onContainerDblClick(): void {
     noop();
   }
-  override onContainerTripleClick(e: PointerEventState): void {
+  override onContainerTripleClick(): void {
     noop();
   }
-  override onContainerMouseMove(e: PointerEventState): void {
+  override onContainerMouseMove(): void {
     noop();
   }
-  override onContainerMouseOut(e: PointerEventState): void {
+  override onContainerMouseOut(): void {
     noop();
   }
-  override onContainerContextMenu(e: PointerEventState): void {
+  override onContainerContextMenu(): void {
     noop();
   }
-  override onPressShiftKey(pressed: boolean): void {
+  override onPressShiftKey(): void {
     noop();
   }
-  override beforeModeSwitch(prevMode: FrameNavigatorTool): void {
+  override beforeModeSwitch(): void {
     noop();
   }
-  override afterModeSwitch(newMode: FrameNavigatorTool): void {
+  override afterModeSwitch(): void {
     noop();
   }
   readonly tool = <FrameNavigatorTool>{

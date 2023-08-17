@@ -14,7 +14,7 @@ export const createKeydownObserver = ({
   onMove,
   onConfirm,
   onEsc,
-  interceptor = (e, next) => next(),
+  interceptor = (_, next) => next(),
   abortController,
 }: {
   target: RichText;

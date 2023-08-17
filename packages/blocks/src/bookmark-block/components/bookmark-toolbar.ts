@@ -64,7 +64,7 @@ const config: ConfigItem[] = [
     type: 'caption',
     icon: CaptionIcon,
     tooltip: 'Add Caption',
-    action: (model, callback) => {
+    action: (_model, callback) => {
       callback?.('caption');
     },
   },
@@ -72,7 +72,7 @@ const config: ConfigItem[] = [
     type: 'edit',
     icon: EditIcon,
     tooltip: 'Edit',
-    action: (model, callback) => {
+    action: (_model, callback) => {
       callback?.('edit');
     },
     divider: true,

@@ -29,7 +29,7 @@ export const progressPureColumnConfig = columnManager.register<number>(
 );
 progressPureColumnConfig.registerConvert(
   richTextColumnTypeName,
-  (column, cells) => ({
+  (_column, cells) => ({
     column: {},
     cells: cells.map(v => new Text(v?.toString()).yText),
   })

@@ -86,8 +86,8 @@ function drawDiamond(
 
 function drawEllipse(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
+  _x: number,
+  _y: number,
   width: number,
   height: number
 ) {

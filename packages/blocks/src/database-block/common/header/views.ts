@@ -134,7 +134,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         input: {
           initValue: view.name,
           onComplete: text => {
-            this.model.updateView(view.id, data => ({
+            this.model.updateView(view.id, _data => ({
               name: text,
             }));
             this.model.applyViewsUpdate();

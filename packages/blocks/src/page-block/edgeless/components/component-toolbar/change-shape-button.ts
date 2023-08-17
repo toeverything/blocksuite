@@ -55,7 +55,7 @@ function getMostCommonShape(
       ? 'roundedRect'
       : ele.shapeType;
   });
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (max[0] as ShapeTool['shape']) : null;
 }
 
@@ -65,7 +65,7 @@ function getMostCommonFillColor(
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.filled ? ele.fillColor : '--affine-palette-transparent';
   });
-  const max = maxBy(Object.entries(colors), ([k, count]) => count);
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as ShapeTool['fillColor']) : null;
 }
 
@@ -75,7 +75,7 @@ function getMostCommonStrokeColor(
   const colors = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeColor;
   });
-  const max = maxBy(Object.entries(colors), ([k, count]) => count);
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as ShapeTool['fillColor']) : null;
 }
 
@@ -83,7 +83,7 @@ function getMostCommonLineSize(elements: ShapeElement[]): LineWidth {
   const sizes = countBy(elements, (ele: ShapeElement) => {
     return ele.strokeWidth;
   });
-  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
@@ -103,7 +103,7 @@ function getMostCommonLineStyle(
       }
     }
   });
-  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
@@ -115,7 +115,7 @@ function getMostCommonShapeStyle(elements: ShapeElement[]): ShapeStyle {
   const roughnesses = countBy(elements, (ele: ShapeElement) => {
     return ele.shapeStyle;
   });
-  const max = maxBy(Object.entries(roughnesses), ([k, count]) => count);
+  const max = maxBy(Object.entries(roughnesses), ([_k, count]) => count);
   return max ? (max[0] as ShapeStyle) : ShapeStyle.Scribbled;
 }
 

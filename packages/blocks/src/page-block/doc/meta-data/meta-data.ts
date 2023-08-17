@@ -278,7 +278,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
 
   @state()
   showSelect = false;
-  _selectTags = (evt: MouseEvent) => {
+  _selectTags = () => {
     this._disposables.add({
       dispose: popTagSelect(this.shadowRoot?.querySelector('.tags') ?? this, {
         value: this.tags,

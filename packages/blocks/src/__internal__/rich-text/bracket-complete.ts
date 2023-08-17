@@ -112,7 +112,7 @@ export function createBracketAutoCompleteBindings(
   bindings['backtick'] = {
     key: '`',
     collapsed: false,
-    handler(range, context) {
+    handler(range) {
       if (!model.text) return ALLOW_DEFAULT;
       model.text.format(range.index, range.length, { code: true });
 

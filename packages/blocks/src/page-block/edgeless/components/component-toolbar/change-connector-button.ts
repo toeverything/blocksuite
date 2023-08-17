@@ -35,13 +35,13 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: ConnectorElement[]): CssVariableName {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
-  const max = maxBy(Object.entries(colors), ([k, count]) => count);
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
   const modes = countBy(elements, (ele: ConnectorElement) => ele.mode);
-  const max = maxBy(Object.entries(modes), ([k, count]) => count);
+  const max = maxBy(Object.entries(modes), ([_k, count]) => count);
   return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
@@ -49,7 +49,7 @@ function getMostCommonLineWidth(elements: ConnectorElement[]): LineWidth {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
     return ele.strokeWidth;
   });
-  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
@@ -69,7 +69,7 @@ function getMostCommonLineStyle(
       }
     }
   });
-  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 

@@ -107,7 +107,7 @@ export const EllipseMethods: ShapeMethods = {
     return points.some(point => bounds.containsPoint(point));
   },
 
-  getNearestPoint(point: IVec, element: ShapeElement) {
+  getNearestPoint(point: IVec, _element: ShapeElement) {
     // TODO: get real nearest point on ellipse
     return point;
   },

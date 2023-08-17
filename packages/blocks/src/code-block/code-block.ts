@@ -374,17 +374,17 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         this._optionPosition = null;
       }, HOVER_DELAY);
     });
-    this._disposables.addFromEvent(this, 'mouseenter', e => {
+    this._disposables.addFromEvent(this, 'mouseenter', () => {
       this.hoverState.emit(true);
     });
     const HOVER_DELAY = 300;
-    this._disposables.addFromEvent(this, 'mouseleave', e => {
+    this._disposables.addFromEvent(this, 'mouseleave', () => {
       this.hoverState.emit(false);
     });
 
     const viewportElement = getViewportElement(this.model.page);
     if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
+      this._disposables.addFromEvent(viewportElement, 'scroll', () => {
         if (!this._optionPosition) return;
         updatePosition();
       });

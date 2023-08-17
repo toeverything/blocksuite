@@ -136,7 +136,7 @@ export class DataViewHeaderToolsSearch extends WithDisposable(
     this.view.setSearch(inputValue);
   };
   preventBlur = false;
-  private _onSearchBlur = (e: Event) => {
+  private _onSearchBlur = () => {
     if (this._searchInput.value || this.preventBlur) {
       return;
     }

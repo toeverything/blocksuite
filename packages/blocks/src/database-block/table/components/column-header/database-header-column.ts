@@ -58,7 +58,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private _columnsOffset = (header: Element, scale: number) => {
+  private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
     const left: ColumnOffset[] = [];
     const right: ColumnOffset[] = [];

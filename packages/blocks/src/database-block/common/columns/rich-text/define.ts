@@ -32,7 +32,7 @@ export const richTextPureColumnConfig = columnManager.register<Text['yText']>(
 );
 richTextPureColumnConfig.registerConvert(
   selectColumnTypeName,
-  (column, cells) => {
+  (_column, cells) => {
     const options: Record<string, SelectTag> = {};
     const getTag = (name: string) => {
       if (options[name]) return options[name];
@@ -62,7 +62,7 @@ richTextPureColumnConfig.registerConvert(
 
 richTextPureColumnConfig.registerConvert(
   multiSelectColumnTypeName,
-  (column, cells) => {
+  (_column, cells) => {
     const options: Record<string, SelectTag> = {};
     const getTag = (name: string) => {
       if (options[name]) return options[name];

@@ -36,7 +36,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     addNote(this._edgeless, this._page, e, width, options);
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
@@ -51,16 +51,16 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._addNote(e, DEFAULT_NOTE_WIDTH, options);
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     // this._hideOverlay();
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 

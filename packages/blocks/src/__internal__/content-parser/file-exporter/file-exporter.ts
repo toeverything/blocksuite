@@ -90,7 +90,7 @@ export const FileExporter = {
         //@ts-ignore
         return undefined;
       },
-      anchor(name: string): string {
+      anchor(_name: string): string {
         return '';
       },
       big(): string {
@@ -102,53 +102,62 @@ export const FileExporter = {
       bold(): string {
         return '';
       },
-      charAt(pos: number): string {
+      charAt(_pos: number): string {
         return '';
       },
-      charCodeAt(index: number): number {
+      charCodeAt(_index: number): number {
         return 0;
       },
-      codePointAt(pos: number): number | undefined {
+      codePointAt(_pos: number): number | undefined {
         return undefined;
       },
-      concat(strings: string): string {
+      concat(_strings: string): string {
         return '';
       },
-      endsWith(searchString: string, endPosition: number | undefined): boolean {
+      endsWith(
+        _searchString: string,
+        _endPosition: number | undefined
+      ): boolean {
         return false;
       },
       fixed(): string {
         return '';
       },
-      fontcolor(color: string): string {
+      fontcolor(_color: string): string {
         return '';
       },
-      includes(searchString: string, position: number | undefined): boolean {
+      includes(_searchString: string, _position: number | undefined): boolean {
         return false;
       },
-      indexOf(searchString: string, position: number | undefined): number {
+      indexOf(_searchString: string, _position: number | undefined): number {
         return 0;
       },
       italics(): string {
         return '';
       },
-      lastIndexOf(searchString: string, position: number | undefined): number {
+      lastIndexOf(
+        _searchString: string,
+        _position: number | undefined
+      ): number {
         return 0;
       },
       length: 0,
-      link(url: string): string {
+      link(_url: string): string {
         return '';
       },
-      repeat(count: number): string {
+      repeat(_count: number): string {
         return '';
       },
-      slice(start: number | undefined, end: number | undefined): string {
+      slice(_start: number | undefined, _end: number | undefined): string {
         return '';
       },
       small(): string {
         return '';
       },
-      startsWith(searchString: string, position: number | undefined): boolean {
+      startsWith(
+        _searchString: string,
+        _position: number | undefined
+      ): boolean {
         return false;
       },
       strike(): string {
@@ -157,19 +166,19 @@ export const FileExporter = {
       sub(): string {
         return '';
       },
-      substr(from: number, length: number | undefined): string {
+      substr(_from: number, _length: number | undefined): string {
         return '';
       },
-      substring(start: number, end: number | undefined): string {
+      substring(_start: number, _end: number | undefined): string {
         return '';
       },
       sup(): string {
         return '';
       },
-      toLocaleLowerCase(locales: string | string[] | undefined): string {
+      toLocaleLowerCase(_locales: string | string[] | undefined): string {
         return '';
       },
-      toLocaleUpperCase(locales: string | string[] | undefined): string {
+      toLocaleUpperCase(_locales: string | string[] | undefined): string {
         return '';
       },
       toLowerCase(): string {
@@ -187,18 +196,18 @@ export const FileExporter = {
       valueOf(): string {
         return '';
       },
-      fontsize(size: string | number): string {
+      fontsize(_size: string | number): string {
         return '';
       },
       localeCompare(
-        that: string,
-        locales?: string | string[],
-        options?: Intl.CollatorOptions
+        _that: string,
+        _locales?: string | string[],
+        _options?: Intl.CollatorOptions
       ): number {
         return 0;
       },
       match(
-        matcher:
+        _matcher:
           | { [Symbol.match](string: string): RegExpMatchArray | null }
           | string
           | RegExp
@@ -206,11 +215,11 @@ export const FileExporter = {
         //@ts-ignore
         return undefined;
       },
-      normalize(form?: 'NFC' | 'NFD' | 'NFKC' | 'NFKD' | string): string {
+      normalize(_form?: 'NFC' | 'NFD' | 'NFKC' | 'NFKD' | string): string {
         return '';
       },
       replace(
-        searchValue:
+        _searchValue:
           | {
               [Symbol.replace](
                 string: string,
@@ -220,21 +229,21 @@ export const FileExporter = {
           | string
           | RegExp
           | { [Symbol.replace](string: string, replaceValue: string): string },
-        replacer: ((substring: string, ...args: unknown[]) => string) | string
+        _replacer: ((substring: string, ...args: unknown[]) => string) | string
       ): string {
         return '';
       },
       search(
-        regexp: string | RegExp | { [Symbol.search](string: string): number }
+        _regexp: string | RegExp | { [Symbol.search](string: string): number }
       ): number {
         return 0;
       },
       split(
-        separator:
+        _separator:
           | string
           | RegExp
           | { [Symbol.split](string: string, limit?: number): string[] },
-        limit?: number
+        _limit?: number
       ): string[] {
         return [];
       },

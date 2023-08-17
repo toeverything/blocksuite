@@ -19,7 +19,7 @@ const evalRef = (
   }
 };
 
-const evalValue = (value: Value, row: Record<string, unknown>): unknown => {
+const evalValue = (value: Value, _row: Record<string, unknown>): unknown => {
   return value.value;
   // TODO
   // switch (value.type) {
