@@ -106,8 +106,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       indicator.style.height = '1px';
       indicator.style.backgroundColor = 'blue';
       indicator.hidden = true;
-
-      document.body.appendChild(indicator);
+      this.edgeless.editorContainer.appendChild(indicator);
       const shiftX = e.clientX - rect.left;
       const shiftY = e.clientY - rect.top;
       moveAt(e.clientX, e.clientY);

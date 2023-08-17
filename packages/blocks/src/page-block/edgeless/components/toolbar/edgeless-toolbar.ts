@@ -6,7 +6,7 @@ import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 
-import { launchIntoFullscreen } from '@blocksuite/global/utils';
+import { assertExists, launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
 import { css, html, LitElement, type PropertyValues } from 'lit';
@@ -15,6 +15,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
+import { toast } from '../../../../components/toast.js';
 import {
   EdgelessEraserIcon,
   EdgelessImageIcon,
@@ -189,11 +190,50 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     this._frames = this.edgeless.frame.frames.sort(compare);
   }
 
+  private _nextFrame() {
+    const frames = this._frames;
+    const min = 0;
+    const max = frames.length - 1;
+    if (this._currentFrameIndex === frames.length - 1) {
+      toast('You have reached the last frame');
+    } else {
+      this._currentFrameIndex = clamp(this._currentFrameIndex + 1, min, max);
+    }
+  }
+
+  private _previousFrame() {
+    const frames = this._frames;
+    const min = 0;
+    const max = frames.length - 1;
+    if (this._currentFrameIndex === 0) {
+      toast('You have reached the first frame');
+    } else {
+      this._currentFrameIndex = clamp(this._currentFrameIndex - 1, min, max);
+    }
+  }
+
   override firstUpdated() {
-    const {
-      _disposables,
-      edgeless: { slots, surface },
-    } = this;
+    const { _disposables, edgeless } = this;
+    const { slots, surface } = edgeless;
+
+    edgeless.bindHotKey(
+      {
+        ArrowLeft: () => {
+          const { type } = this.edgelessTool;
+          if (type !== 'frameNavigator') return;
+          this._previousFrame();
+        },
+        ArrowRight: () => {
+          const { type } = this.edgelessTool;
+          if (type !== 'frameNavigator') return;
+          this._nextFrame();
+        },
+      },
+      {
+        global: true,
+      }
+    );
+
     _disposables.add(
       slots.edgelessToolUpdated.on(() => {
         this._trySaveBrushStateLocalRecord();
@@ -262,7 +302,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       document.exitFullscreen();
     } else {
       this._isFullScreen = true;
-      launchIntoFullscreen(this.edgeless);
+      launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {
         this._currentFrameIndex = this._currentFrameIndex + 0;
       }, 400);
@@ -273,18 +313,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     const current = this._currentFrameIndex;
     const frames = this._frames;
     const frame = frames[current];
-    const min = 0;
-    const max = frames.length - 1;
     return html`
       <edgeless-tool-icon-button
         .tooltip=${'Previous'}
-        .disabled=${current === min}
-        @click=${() =>
-          (this._currentFrameIndex = clamp(
-            this._currentFrameIndex - 1,
-            min,
-            max
-          ))}
+        @click=${() => this._previousFrame()}
       >
         ${FrameNavigatorPrevIcon}
       </edgeless-tool-icon-button>
@@ -301,13 +333,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       </div>
       <edgeless-tool-icon-button
         .tooltip=${'Next'}
-        .disabled=${current === max}
-        @click=${() =>
-          (this._currentFrameIndex = clamp(
-            this._currentFrameIndex + 1,
-            min,
-            max
-          ))}
+        @click=${() => this._nextFrame()}
       >
         ${FrameNavigatorNextIcon}
       </edgeless-tool-icon-button>
@@ -331,8 +357,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         class="edgeless-frame-navigator-stop"
         @click=${() => {
           this.setEdgelessTool({ type: 'default' });
-          this._isFullScreen = true;
-          this._toggleFullScreen();
+          this._isFullScreen === true && this._toggleFullScreen();
         }}
       >
         Stop

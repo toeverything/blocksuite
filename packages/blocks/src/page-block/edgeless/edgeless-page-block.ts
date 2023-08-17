@@ -329,6 +329,15 @@ export class EdgelessPageBlockComponent
     return this.service?.uiEventDispatcher;
   }
 
+  private _editorContainer: HTMLElement | null = null;
+
+  get editorContainer(): HTMLElement {
+    if (this._editorContainer) return this._editorContainer;
+    this._editorContainer = this.closest('editor-container');
+    assertExists(this._editorContainer);
+    return this._editorContainer;
+  }
+
   private _resizeObserver: ResizeObserver | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
