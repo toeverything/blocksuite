@@ -2,6 +2,7 @@ import type { BaseSelection } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import { DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT } from './config.js';
 
 const heightMap: { [key: string]: number } = {
@@ -13,7 +14,7 @@ const heightMap: { [key: string]: number } = {
   h5: 28,
   h6: 26,
   quote: 46,
-  list: 26,
+  list: 32,
   database: 28,
 };
 
@@ -21,8 +22,8 @@ export const getDragHandleContainerHeight = (model: BaseBlockModel) => {
   const flavour = model.flavour;
   const index = flavour.indexOf(':');
   let key = flavour.slice(index + 1);
-  if (key === 'paragraph' && model.type) {
-    key = model.type;
+  if (key === 'paragraph' && (model as ParagraphBlockModel).type) {
+    key = (model as ParagraphBlockModel).type;
   }
 
   const height = heightMap[key] ?? DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT;

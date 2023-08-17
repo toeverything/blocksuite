@@ -34,7 +34,7 @@ export function isEmpty(model: BaseBlockModel): boolean {
   }
   return (
     !model.text?.length &&
-    !model.sourceId &&
+    !(model as BaseBlockModel & { sourceId: string }).sourceId &&
     model.flavour !== 'affine:code' &&
     model.flavour !== 'affine:bookmark'
   );

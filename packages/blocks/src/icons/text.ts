@@ -814,6 +814,15 @@ export const ArrowDownIcon = html` <svg
   />
 </svg>`;
 
+export const ShapeArrowDownSmallIcon = svg`<svg 
+  width="16" 
+  height="16" 
+  viewBox="0 0 16 16" 
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M11.7202 5.98043C11.9154 6.17569 11.9154 6.49228 11.7202 6.68754L8.38684 10.0209C8.19158 10.2161 7.87499 10.2161 7.67973 10.0209L4.3464 6.68754C4.15114 6.49228 4.15114 6.17569 4.3464 5.98043C4.54166 5.78517 4.85824 5.78517 5.0535 5.98043L8.03328 8.96021L11.0131 5.98043C11.2083 5.78517 11.5249 5.78517 11.7202 5.98043Z"/>
+</svg>`;
+
 // Linked Page
 
 const PageIconSVG = svg`

@@ -38,7 +38,7 @@ export type SlashItem = {
   }: {
     pageElement: PageBlockComponent;
     model: BaseBlockModel;
-  }) => void;
+  }) => void | Promise<void>;
 };
 
 export type InternSlashItem = SlashItem & { groupName: string };
@@ -89,4 +89,16 @@ export function insideDatabase(model: BaseBlockModel) {
 
 export function insideDataView(model: BaseBlockModel) {
   return Utils.isInsideBlockByFlavour(model.page, model, 'affine:data-view');
+}
+
+export function withRemoveEmptyLine(
+  fn: SlashItem['action']
+): SlashItem['action'] {
+  return async args => {
+    await fn(args);
+    const { model } = args;
+    if (!model.text?.length) {
+      model.page.deleteBlock(model);
+    }
+  };
 }

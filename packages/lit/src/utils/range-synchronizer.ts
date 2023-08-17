@@ -21,10 +21,6 @@ export class RangeSynchronizer {
     return this.root.selectionManager;
   }
 
-  private get _currentSelection() {
-    return this._selectionManager.value;
-  }
-
   private get _rangeManager() {
     assertExists(this.root.rangeManager);
     return this.root.rangeManager;
@@ -65,13 +61,11 @@ export class RangeSynchronizer {
         const event = ctx.get('defaultState').event as InputEvent;
         if (this.root.page.readonly) return;
 
-        const current = this._currentSelection.at(0);
+        const current = this._selectionManager.find('text');
         if (!current) return;
 
-        if (current.is('text')) {
-          this._beforeTextInput(current, event.isComposing);
-          return;
-        }
+        this._beforeTextInput(current, event.isComposing);
+        return;
       })
     );
   }

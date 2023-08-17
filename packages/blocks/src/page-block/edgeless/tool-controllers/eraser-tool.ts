@@ -10,7 +10,6 @@ import {
 import { linePolygonIntersects } from '@blocksuite/phasor';
 
 import type {
-  EdgelessTool,
   Erasable,
   IPoint,
   TopLevelBlockModel,
@@ -81,7 +80,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
@@ -129,7 +128,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._prevPoint = currentPoint;
   }
 
-  override beforeModeSwitch(mode: EdgelessTool) {
+  override beforeModeSwitch() {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
         const ele = getBlockElementById(erasable.id);
@@ -148,7 +147,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._eraseTargets.clear();
   }
 
-  override onContainerDragEnd(e: PointerEventState): void {
+  override onContainerDragEnd(): void {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
         this._page.deleteBlock(erasable);
@@ -161,35 +160,35 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._page.captureSync();
   }
 
-  override onContainerClick(e: PointerEventState): void {
+  override onContainerClick(): void {
     noop();
   }
 
-  override onContainerDblClick(e: PointerEventState): void {
+  override onContainerDblClick(): void {
     noop();
   }
 
-  override onContainerTripleClick(e: PointerEventState): void {
+  override onContainerTripleClick(): void {
     noop();
   }
 
-  override onContainerMouseMove(e: PointerEventState): void {
+  override onContainerMouseMove(): void {
     noop();
   }
 
-  override onContainerMouseOut(e: PointerEventState): void {
+  override onContainerMouseOut(): void {
     noop();
   }
 
-  override onContainerContextMenu(e: PointerEventState): void {
+  override onContainerContextMenu(): void {
     noop();
   }
 
-  override onPressShiftKey(pressed: boolean): void {
+  override onPressShiftKey(_pressed: boolean): void {
     noop();
   }
 
-  override afterModeSwitch(newMode: EraserTool): void {
+  override afterModeSwitch(_newMode: EraserTool): void {
     noop();
   }
 }

@@ -259,7 +259,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     this._tipsPlaceholderTemplate = TipsPlaceholder(this.model, this.tipsPos);
   };
 
-  private _onFocusIn = (e: FocusEvent) => {
+  private _onFocusIn = () => {
     this._isFocus = true;
     this._updatePlaceholder();
 
@@ -278,7 +278,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     });
   };
 
-  private _onFocusOut = (e: FocusEvent) => {
+  private _onFocusOut = () => {
     this._isFocus = false;
     this._updatePlaceholder();
     // We should not observe text change when focus out

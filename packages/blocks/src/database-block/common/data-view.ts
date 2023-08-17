@@ -68,7 +68,7 @@ export interface DataViewConfig<
 }
 
 export interface DataViewRendererConfig<
-  Data extends DataViewDataType = DataViewDataType
+  _Data extends DataViewDataType = DataViewDataType
 > {
   type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;

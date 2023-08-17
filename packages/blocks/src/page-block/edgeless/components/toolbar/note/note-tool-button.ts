@@ -2,9 +2,10 @@ import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
@@ -58,7 +59,7 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
 }
 
 @customElement('edgeless-note-tool-button')
-export class EdgelessNoteToolButton extends LitElement {
+export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
@@ -77,9 +78,6 @@ export class EdgelessNoteToolButton extends LitElement {
 
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
-
-  @state()
-  private _popperShow = false;
 
   private _noteMenu: NoteMenuPopper | null = null;
 
@@ -107,6 +105,18 @@ export class EdgelessNoteToolButton extends LitElement {
     }
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+        if (newTool.type !== 'note') {
+          this._noteMenu?.dispose();
+          this._noteMenu = null;
+        }
+      })
+    );
+  }
+
   override disconnectedCallback() {
     this._noteMenu?.dispose();
     this._noteMenu = null;
@@ -118,7 +128,7 @@ export class EdgelessNoteToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Note', 'N')}
+        .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .active=${type === 'note'}
         .activeMode=${'background'}
         @click=${() => {

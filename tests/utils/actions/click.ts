@@ -1,6 +1,7 @@
-import type { IPoint } from '@blocksuite/blocks';
 import type { Page } from '@playwright/test';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { IPoint } from '../../../packages/blocks/src/index.js';
 import { toViewCoord } from './edgeless.js';
 import { waitNextFrame } from './misc.js';
 

@@ -23,7 +23,7 @@ export type TableViewData = {
 };
 viewManager.register('table', {
   defaultName: 'Table View',
-  init(model, id, name) {
+  init(_model, id, name) {
     return {
       id,
       name,

@@ -85,7 +85,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
     .font-size-button-group {
       position: relative;
-      width: 76px;
+      width: 72px;
       height: 24px;
       line-height: 24px;
     }
@@ -97,6 +97,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
     .font-size-button-group .arrow-down-icon {
       position: absolute;
+      top: 2.5px;
       right: 4px;
     }
 
@@ -160,7 +161,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       elements,
       (element: EdgelessCanvasTextElement) => element.fontFamily
     );
-    const max = maxBy(Object.entries(fontFamilies), ([k, count]) => count);
+    const max = maxBy(Object.entries(fontFamilies), ([_k, count]) => count);
     return max
       ? (max[0] as EdgelessCanvasTextElement['fontFamily'])
       : GENERAL_CANVAS_FONT_FAMILY;
@@ -173,7 +174,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       elements,
       (element: EdgelessCanvasTextElement) => element.fontSize
     );
-    const max = maxBy(Object.entries(fontSizes), ([k, count]) => count);
+    const max = maxBy(Object.entries(fontSizes), ([_k, count]) => count);
     return max
       ? (Number(max[0]) as EdgelessCanvasTextElement['fontSize'])
       : TEXT_FONT_SIZE.MEDIUM;
@@ -186,7 +187,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       elements,
       (element: EdgelessCanvasTextElement) => element.color
     );
-    const max = maxBy(Object.entries(colors), ([k, count]) => count);
+    const max = maxBy(Object.entries(colors), ([_k, count]) => count);
     return max
       ? (max[0] as EdgelessCanvasTextElement['color'])
       : GET_DEFAULT_LINE_COLOR();
@@ -199,7 +200,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       elements,
       (element: EdgelessCanvasTextElement) => element.textAlign
     );
-    const max = maxBy(Object.entries(aligns), ([k, count]) => count);
+    const max = maxBy(Object.entries(aligns), ([_k, count]) => count);
     return max ? (max[0] as EdgelessCanvasTextElement['textAlign']) : 'left';
   };
 

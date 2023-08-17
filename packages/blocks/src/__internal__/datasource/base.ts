@@ -86,7 +86,7 @@ export abstract class BaseDataSource implements DataSource {
     return this.cellGetValue(rowId, propertyId);
   }
 
-  public cellGetExtra(rowId: string, propertyId: string): unknown {
+  public cellGetExtra(_rowId: string, _propertyId: string): unknown {
     return undefined;
   }
 
@@ -111,18 +111,18 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetData(propertyId: string): Record<string, unknown>;
 
-  public propertyGetReadonly(propertyId: string): boolean {
+  public propertyGetReadonly(_propertyId: string): boolean {
     return false;
   }
 
-  public propertyGetDefaultWidth(propertyId: string): number {
+  public propertyGetDefaultWidth(_propertyId: string): number {
     return DEFAULT_COLUMN_WIDTH;
   }
 
   onCellUpdate(
-    rowId: string,
-    propertyId: string,
-    callback: () => void
+    _rowId: string,
+    _propertyId: string,
+    _callback: () => void
   ): Disposable {
     return {
       dispose: () => {

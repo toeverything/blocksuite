@@ -73,7 +73,7 @@ type Item = {
 };
 
 @customElement('affine-menu')
-export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
+export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-menu {
       display: flex;

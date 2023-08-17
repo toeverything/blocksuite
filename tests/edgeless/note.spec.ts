@@ -123,7 +123,6 @@ test('add Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await setEdgelessTool(page, 'note');
 
   await addNote(page, 'hello', 300, 300);
 

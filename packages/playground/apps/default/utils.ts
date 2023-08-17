@@ -182,12 +182,12 @@ export function isValidUrl(urlLike: string) {
 export async function testIDBExistence() {
   return new Promise<boolean>(resolve => {
     const request = indexedDB.open(INDEXED_DB_NAME);
-    request.onupgradeneeded = function (e) {
+    request.onupgradeneeded = function () {
       request.transaction?.abort();
       request.result.close();
       resolve(false);
     };
-    request.onsuccess = function (e) {
+    request.onsuccess = function () {
       request.result.close();
       resolve(true);
     };

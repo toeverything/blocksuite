@@ -150,7 +150,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     );
 
     this._disposables.add(
-      this.tableView.handleEvent('dragEnd', context => {
+      this.tableView.handleEvent('dragEnd', () => {
         isDragging = false;
         return false;
       })
@@ -317,7 +317,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   private bindKeyMap() {
     this._disposables.add(
       this.tableView.bindHotkey({
-        Backspace: ctx => {
+        Backspace: () => {
           const selection = this.selection;
           if (!selection) {
             return;

@@ -135,7 +135,7 @@ export class BlockIndexer {
 
   private _yPageObserver = (
     events: Y.YEvent<Y.AbstractType<unknown>>[],
-    transaction: Y.Transaction,
+    _transaction: Y.Transaction,
     { pageId, yPage }: { pageId: PageId; yPage: Y.Map<YBlock> }
   ) => {
     events.forEach(e => {

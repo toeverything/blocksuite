@@ -16,6 +16,7 @@
     "esModuleInterop": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
     "skipLibCheck": true,
@@ -33,6 +34,9 @@
   },
   "files": [],
   "references": [
+    {
+      "path": "./packages/block-std"
+    },
     {
       "path": "./packages/blocks"
     },

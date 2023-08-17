@@ -47,7 +47,7 @@ export const createAsyncCallRPCProviderCreator = (
     asyncCallOptions?: Omit<AsyncCallOptions, 'channel'>;
   }
 ): DocProviderCreator => {
-  return (id, doc, config): PassiveDocProvider => {
+  return (_id, doc, config): PassiveDocProvider => {
     const awareness = config.awareness;
     const docMap = new Map<string, Doc>();
     const cache = new Map<string, Uint8Array[]>();

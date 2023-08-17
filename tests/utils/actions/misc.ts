@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
-import {
-  type CssVariableName,
-  type ListType,
-  type PageBlockModel,
-  type ThemeObserver,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
+import type {
+  CssVariableName,
+  DatabaseBlockModel,
+  ListType,
+  PageBlockModel,
+  ThemeObserver,
+} from '../../../packages/blocks/src/index.js';
+import { assertExists } from '../../../packages/global/src/utils.js';
+import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -125,7 +126,7 @@ async function initEmptyEditor({
         if (multiEditor) {
           createEditor();
         }
-        const debugMenu = document.createElement('debug-menu');
+        const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
         document.body.appendChild(debugMenu);
@@ -398,6 +399,9 @@ export async function initEmptyDatabaseWithParagraphState(
       },
       noteId
     );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
     page.addBlock('affine:paragraph', {}, noteId);
     page.captureSync();
     return { pageId, noteId, databaseId };
@@ -503,7 +507,7 @@ export async function focusRichText(
 
 export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(
-    ([i, editorIndex]) => {
+    ([i]) => {
       const editor = document.querySelectorAll('editor-container')[i];
       const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
@@ -788,7 +792,7 @@ export const getCenterPositionByLocator: (
   page: Page,
   locator: Locator
 ) => Promise<{ x: number; y: number }> = async (
-  page: Page,
+  _page: Page,
   locator: Locator
 ) => {
   const box = await locator.boundingBox();
@@ -1021,7 +1025,10 @@ export async function export2Html(page: Page) {
   const promiseResult = await page.evaluate(() => {
     const contentParser = new window.ContentParser(window.page);
     const root = window.page.root as PageBlockModel;
-    return contentParser.block2Html([contentParser.getSelectedBlock(root)]);
+    return contentParser.block2Html(
+      [contentParser.getSelectedBlock(root)],
+      new Map()
+    );
   });
   return promiseResult;
 }

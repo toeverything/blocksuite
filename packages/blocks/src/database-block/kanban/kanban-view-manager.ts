@@ -82,9 +82,9 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     if (this.view.columns.length === this.columns.length) {
       return;
     }
-    this.viewSource.updateView(view => {
+    this.viewSource.updateView(_view => {
       return {
-        columns: this.columnsWithoutFilter.map((id, i) => {
+        columns: this.columnsWithoutFilter.map(id => {
           const column = this.columnGet(id);
           return {
             id: column.id,
@@ -161,7 +161,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
 
   changeGroup(columnId: string) {
     const column = this.columnGet(columnId);
-    this.updateView(view => {
+    this.updateView(_view => {
       return {
         groupBy: defaultGroupBy(column.id, column.type, column.data),
       };
@@ -187,7 +187,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       groupBy,
       this.view.groupProperties,
       properties => {
-        this.updateView(v => {
+        this.updateView(_v => {
           return {
             groupProperties: properties,
           };
@@ -223,13 +223,13 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     );
   }
 
-  public hasHeader(rowId: string): boolean {
+  public hasHeader(_rowId: string): boolean {
     const hd = this.view.header;
     return !!hd.titleColumn || !!hd.iconColumn || !!hd.coverColumn;
   }
 
   public getHeaderTitle(
-    rowId: string
+    _rowId: string
   ): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.titleColumn;
     if (!columnId) {
@@ -238,7 +238,9 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     return this.columnGet(columnId);
   }
 
-  public getHeaderIcon(rowId: string): DataViewKanbanColumnManager | undefined {
+  public getHeaderIcon(
+    _rowId: string
+  ): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.iconColumn;
     if (!columnId) {
       return;
@@ -247,7 +249,7 @@ export class DataViewKanbanManager extends BaseDataViewManager {
   }
 
   public getHeaderCover(
-    rowId: string
+    _rowId: string
   ): DataViewKanbanColumnManager | undefined {
     const columnId = this.view.header.coverColumn;
     if (!columnId) {

@@ -71,9 +71,9 @@ export class DataViewTableManager extends BaseDataViewManager {
     if (this.view.columns.length === this.columns.length) {
       return;
     }
-    this.viewSource.updateView(view => {
+    this.viewSource.updateView(_view => {
       return {
-        columns: this.columnsWithoutFilter.map((id, i) => {
+        columns: this.columnsWithoutFilter.map(id => {
           const column = this.columnGet(id);
           return {
             id: column.id,

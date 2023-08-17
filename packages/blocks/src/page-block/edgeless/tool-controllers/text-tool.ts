@@ -14,39 +14,39 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     addText(this._edgeless, e);
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
-  onContainerDragStart(e: PointerEventState) {
+  onContainerDragStart() {
     noop();
   }
 
-  onContainerDragMove(e: PointerEventState) {
+  onContainerDragMove() {
     noop();
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     noop();
   }
 
-  onContainerMouseMove(e: PointerEventState) {
+  onContainerMouseMove() {
     noop();
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 

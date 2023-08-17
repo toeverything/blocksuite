@@ -249,7 +249,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
@@ -265,7 +265,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._isDoubleClickedOnMask = false;
   }
 
-  onContainerContextMenu(e: PointerEventState) {
+  onContainerContextMenu() {
     // repairContextMenuRange(e);
     noop();
   }
@@ -308,7 +308,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     if (this._isDoubleClickedOnMask) return;
   }
 
@@ -329,7 +329,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   }
 
-  private async _cloneContent(e: PointerEventState) {
+  private async _cloneContent() {
     this._lock = true;
     const { surface } = this._edgeless;
     const elements = (await Promise.all(
@@ -399,7 +399,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     // If alt key is pressed and content is moving, clone the content
     if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
       dragType = DefaultModeDragType.AltCloning;
-      await this._cloneContent(e);
+      await this._cloneContent();
     }
 
     this._addFrames();
@@ -509,7 +509,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     };
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     if (this._lock) {
       this._page.captureSync();
       this._lock = false;
@@ -535,7 +535,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this.dragType = DefaultModeDragType.None;
   }
 
-  onContainerMouseMove(e: PointerEventState) {
+  onContainerMouseMove() {
     noop();
   }
 

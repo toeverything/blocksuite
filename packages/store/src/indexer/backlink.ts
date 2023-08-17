@@ -1,6 +1,5 @@
 import { diffArray, DisposableGroup, Slot } from '@blocksuite/global/utils';
-import type { BaseTextAttributes } from '@blocksuite/virgo';
-import type { DeltaInsert } from '@blocksuite/virgo/types';
+import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
 import { Text } from 'yjs';
 
 import type { BlockIndexer, IndexBlockEvent } from './base.js';

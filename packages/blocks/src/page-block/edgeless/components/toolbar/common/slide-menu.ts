@@ -3,7 +3,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-const DEFAULT_MENU_WIDTH = 455;
+const DEFAULT_MENU_WIDTH = 468;
 import { ArrowRightSmallIcon } from '../../../../../icons/index.js';
 
 @customElement('edgeless-slide-menu')
@@ -11,11 +11,25 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .menu-container {
       display: flex;
-      padding: 4px;
       align-items: center;
       width: var(--menu-width);
-      overflow: hidden;
+      overflow-x: clip;
       position: relative;
+      height: 44px;
+      background: transparent;
+      box-sizing: border-box;
+      padding: 0 18px;
+    }
+    .slide-menu-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 44px;
+      transition: left 0.5s ease-in-out;
+      padding: 0 16px;
     }
     .next-slide-button,
     .previous-slide-button {
@@ -59,55 +73,67 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   menuWidth = DEFAULT_MENU_WIDTH;
 
-  @query('.menu-container')
-  private _menuContainer!: HTMLDivElement;
-
   @query('.next-slide-button')
   private _nextSlideButton!: HTMLDivElement;
 
   @query('.previous-slide-button')
   private _previousSlideButton!: HTMLDivElement;
 
+  @query('.slide-menu-content')
+  private _slideMenuContent!: HTMLDivElement;
+
   private _onNextSlideButtonClick = () => {
     // Scroll to the right
-    const { scrollLeft, scrollWidth, clientWidth } = this._menuContainer;
-    // Scroll distance is the minimum of the distance to the right end and the client width
-    const scrollDistance = Math.min(
-      scrollWidth - clientWidth - scrollLeft,
-      clientWidth
+    const { clientWidth } = this._slideMenuContent;
+    const left = Math.abs(
+      parseInt(getComputedStyle(this._slideMenuContent).left)
     );
-
-    this._menuContainer.scrollBy({
-      left: scrollDistance,
-      behavior: 'smooth',
-    });
+    // If the slide menu content is not at the right end
+    // move the slide menu content to the right
+    if (left < clientWidth - this.menuWidth) {
+      // move the slide menu content to the right
+      const scrollDistance = Math.min(
+        clientWidth - this.menuWidth - left,
+        this.menuWidth
+      );
+      this._slideMenuContent.style.left = `${-(left + scrollDistance)}px`;
+    }
   };
 
   private _onPreviousSlideButtonClick = () => {
     // Scroll to the left
-    const { scrollLeft, clientWidth } = this._menuContainer;
-    // Scroll distance is the minimum of the distance to the left end and the client width
-    const scrollDistance = Math.min(scrollLeft, clientWidth);
-    this._menuContainer.scrollBy({
-      left: -scrollDistance,
-      behavior: 'smooth',
-    });
+    const left = Math.abs(
+      parseInt(getComputedStyle(this._slideMenuContent).left)
+    );
+    if (left > 0) {
+      // move the slide menu content to the left
+      const scrollDistance = Math.min(left, this.menuWidth);
+      this._slideMenuContent.style.left = `${-left + scrollDistance}px`;
+    }
   };
 
   override firstUpdated() {
-    this._disposables.addFromEvent(this._menuContainer, 'scroll', () => {
-      const { scrollLeft, scrollWidth, clientWidth } = this._menuContainer;
-      if (scrollLeft === 0) {
-        // if the scroll is at the beginning, hide the previous button
-        this._previousSlideButton.style.opacity = '0';
-      } else if (scrollLeft === scrollWidth - clientWidth) {
-        // if the scroll is at the right end, hide the next button
-        this._nextSlideButton.style.opacity = '0';
-      } else {
+    // Add a event listener to the slide menu content
+    // When the content position is changed, hide the corresponding button
+    this._disposables.addFromEvent(
+      this._slideMenuContent,
+      'transitionend',
+      () => {
         this._previousSlideButton.style.opacity = '1';
         this._nextSlideButton.style.opacity = '1';
+        const left = Math.abs(
+          parseInt(getComputedStyle(this._slideMenuContent).left)
+        );
+        if (left === 0) {
+          this._previousSlideButton.style.opacity = '0';
+        } else if (
+          left ===
+          this._slideMenuContent.clientWidth - this.menuWidth
+        ) {
+          this._nextSlideButton.style.opacity = '0';
+        }
       }
-    });
+    );
   }
 
   override disconnectedCallback() {
@@ -129,7 +155,9 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
           ${ArrowRightSmallIcon}
         </div>
         <div class="menu-container" style=${menuContainerStyles}>
-          <slot></slot>
+          <div class="slide-menu-content">
+            <slot></slot>
+          </div>
         </div>
         <div class="next-slide-button" @click=${this._onNextSlideButtonClick}>
           ${ArrowRightSmallIcon}

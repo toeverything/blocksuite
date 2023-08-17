@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { CssVariableName } from '@blocksuite/blocks';
-import type { IPoint } from '@blocksuite/blocks/std';
-import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { NoteBlockModel } from '../../../packages/blocks/src/index.js';
+import type {
+  CssVariableName,
+  IPoint,
+  NoteBlockModel,
+} from '../../../packages/blocks/src/index.js';
+import { assertExists, sleep } from '../../../packages/global/src/utils.js';
 import { Vec } from '../../../packages/phasor/src/utils/vec.js';
 import { dragBetweenCoords } from './drag.js';
 import {
@@ -222,10 +224,6 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
     return container.edgelessTool.type;
   });
   expect(type).toEqual(mode);
-}
-
-export async function switchShapeType(page: Page, shapeType: string) {
-  // TODO
 }
 
 export async function getEdgelessHoverRect(page: Page) {
@@ -855,7 +853,7 @@ export async function changeConnectorStrokeColor(
 ) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
-    .locator('.color-panel-container')
+    .locator('edgeless-color-panel')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
@@ -866,7 +864,6 @@ export function locatorConnectorStrokeWidthButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator('.line-style-panel')
     .locator(`edgeless-line-width-panel`)
     .locator(`.line-width-button:nth-child(${buttonPosition})`);
 }
@@ -884,8 +881,7 @@ export function locatorConnectorStrokeStyleButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator('.line-style-panel')
-    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+    .locator(`.edgeless-component-line-style-button-${mode}`);
 }
 export async function changeConnectorStrokeStyle(
   page: Page,

@@ -19,9 +19,9 @@ export async function copyBlock(model: BaseBlockModel) {
   const copyData: { data: SerializedBlock[] } = {
     data: [
       {
-        type: model.type,
+        type: (model as BaseBlockModel & { type: string }).type,
         flavour: model.flavour,
-        sourceId: model.sourceId,
+        sourceId: (model as BaseBlockModel & { sourceId: string }).sourceId,
         text: delta,
         children: [],
       },

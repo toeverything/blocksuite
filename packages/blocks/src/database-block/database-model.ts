@@ -88,7 +88,6 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   addView(type: DataViewTypes) {
-    this.page.captureSync();
     const id = this.page.generateId();
     const viewConfig = viewManager.getView(type);
     const view = viewConfig.init(this, id, viewConfig.defaultName);
@@ -242,7 +241,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 }
 
 const migration = {
-  toV3: (data, previousVersion, latestVersion) => {
+  toV3: data => {
     const id = nanoid();
     // @ts-expect-error
     const title = data['titleColumnName'];
@@ -288,7 +287,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   },
   onUpgrade: (data, previousVersion, latestVersion) => {
     if (previousVersion < 3 && latestVersion >= 3) {
-      migration.toV3(data, previousVersion, latestVersion);
+      migration.toV3(data);
     }
   },
 });
