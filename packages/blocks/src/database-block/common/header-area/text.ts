@@ -62,6 +62,7 @@ const styles = css`
     margin-right: 8px;
     padding: 2px;
     border-radius: 4px;
+    margin-top: 2px;
     background-color: var(--affine-background-secondary-color);
   }
 

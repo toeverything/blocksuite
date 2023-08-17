@@ -22,6 +22,9 @@ export class BlockRenderer
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
     }
+    database-datasource-block-renderer .tips-placeholder {
+      display: none;
+    }
     .database-block-detail-header-icon {
       width: 20px;
       height: 20px;
