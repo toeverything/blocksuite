@@ -24,6 +24,18 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
 
+    if (this._vRange === null) {
+      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selection = selectionRoot.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (range.intersectsNode(this._editor.rootElement)) {
+          selection.removeAllRanges();
+        }
+      }
+      return;
+    }
+
     if (
       this._editor.mounted &&
       newVRange &&
@@ -60,7 +72,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * the vRange is synced to the native selection asynchronically
    * if sync is true, the native selection will be synced immediately
    */
-  setVRange = (vRange: VRange, sync = true): void => {
+  setVRange = (vRange: VRange | null, sync = true): void => {
     this._editor.slots.vRangeUpdated.emit([vRange, sync ? 'other' : 'silent']);
   };
 
