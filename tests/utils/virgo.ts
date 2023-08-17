@@ -1,5 +1,7 @@
-import type { VEditor } from '@blocksuite/virgo';
 import type { Page } from '@playwright/test';
+
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { VEditor } from '../../packages/virgo/src/index.js';
 
 export async function getStringFromRichText(
   page: Page,

@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -28,6 +27,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertAlmostEqual,
+  assertExists,
   assertLocatorVisible,
   assertRichTexts,
   assertSelection,
