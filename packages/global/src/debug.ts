@@ -46,8 +46,8 @@ type AnyFunction = (...args: any[]) => any;
 export const debug = (tag: string) => {
   all.add(tag);
   return (
-    target: object,
-    name: string,
+    _target: object,
+    _name: string,
     descriptor: TypedPropertyDescriptor<AnyFunction>
   ) => {
     const original = descriptor.value;

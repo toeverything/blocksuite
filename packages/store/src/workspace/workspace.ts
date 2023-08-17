@@ -1,4 +1,3 @@
-import type { Cell, Column } from '@blocksuite/blocks';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
@@ -355,7 +354,7 @@ export class Workspace {
       }
 
       if (props['sys:flavour'] === 'affine:database') {
-        const columns = props['prop:columns'] as Column[];
+        const columns = props['prop:columns'] as Record<string, string>[];
         const richTextColumns = columns.filter(
           cell => cell.type === 'rich-text'
         );
@@ -364,7 +363,10 @@ export class Workspace {
         richTextColumns.forEach(richText => {
           Object.keys(cells).forEach(key => {
             const cellValue = cells[key] as Record<string, unknown>;
-            const richTextValue = cellValue[richText.id] as Cell;
+            const richTextValue = cellValue[richText.id] as Record<
+              string,
+              unknown
+            >;
             if (!richTextValue) return;
             if (Array.isArray(richTextValue.value)) {
               const yText = new Y.Text();

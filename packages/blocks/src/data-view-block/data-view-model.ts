@@ -72,7 +72,7 @@ export class DataViewBlockModel extends BaseBlockModel<Props> {
 
 export const DataViewBlockSchema = defineBlockSchema({
   flavour: 'affine:data-view',
-  props: (internal): Props => ({
+  props: (): Props => ({
     views: [],
   }),
   metadata: {

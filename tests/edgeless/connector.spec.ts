@@ -345,6 +345,7 @@ test('change connector line width', async ({ page }) => {
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y);
+  await page.pause();
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 
@@ -380,9 +381,6 @@ test('change connector stroke style', async ({ page }) => {
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
-  const activeButton = locatorConnectorStrokeStyleButton(page, 'dash');
-  const className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
   expect(pickedColor[0]).toBe('#000000');

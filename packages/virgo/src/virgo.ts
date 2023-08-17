@@ -330,7 +330,7 @@ export class VEditor<
 
     deltas
       .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
-      .forEach(([delta, deltaVRange]) => {
+      .forEach(([_delta, deltaVRange]) => {
         const targetVRange = intersectVRange(vRange, deltaVRange);
 
         if (!targetVRange) return;

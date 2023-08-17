@@ -10,7 +10,7 @@ import { ImageSelection } from './image-selection.js';
 export class ImageBlockService extends BaseService<ImageBlockModel> {
   override async block2html(
     block: ImageBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {},
+    _ctx: BlockTransformContext = {},
     blobMap?: Map<string, string>
   ) {
     const blobId = block.sourceId;
@@ -31,16 +31,16 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
 
   override block2Text(
     block: ImageBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    _ctx: BlockTransformContext = {}
   ): string {
     return block.caption ?? '';
   }
 
   override block2Json(
     block: ImageBlockModel,
-    selectedModels?: Map<string, number>,
-    begin?: number,
-    end?: number
+    _selectedModels?: Map<string, number>,
+    _begin?: number,
+    _end?: number
   ): SerializedBlock {
     return {
       sourceId: block.sourceId,

@@ -16,23 +16,23 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
-  onContainerClick(e: PointerEventState): void {
+  onContainerClick(): void {
     noop();
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
@@ -81,17 +81,17 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     });
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     this._draggingElementId = null;
     this._draggingPathPoints = null;
     this._page.captureSync();
   }
 
-  onContainerMouseMove(e: PointerEventState) {
+  onContainerMouseMove() {
     noop();
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 

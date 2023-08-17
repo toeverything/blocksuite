@@ -1,7 +1,4 @@
-import type {
-  BlockTransformContext,
-  SerializedBlock,
-} from '../__internal__/index.js';
+import type { SerializedBlock } from '../__internal__/index.js';
 import { BaseService } from '../__internal__/service/service.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import { DefaultBanner } from './images/banners.js';
@@ -9,10 +6,7 @@ import { DefaultIcon } from './images/icons.js';
 import { cloneBookmarkProperties } from './utils.js';
 
 export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
-  override async block2html(
-    block: BookmarkBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
-  ) {
+  override async block2html(block: BookmarkBlockModel) {
     const icon = block.icon
       ? `<img class="bookmark-icon" alt="icon" src="${block.icon}">`
       : this.templateResult2String(DefaultIcon);
@@ -47,19 +41,11 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   </figure>
 `;
   }
-  override block2Text(
-    block: BookmarkBlockModel,
-    { childText = '', begin = 0, end }: BlockTransformContext = {}
-  ): string {
+  override block2Text(block: BookmarkBlockModel): string {
     return block.url;
   }
 
-  override block2Json(
-    block: BookmarkBlockModel,
-    selectedModels?: Map<string, number>,
-    begin?: number,
-    end?: number
-  ): SerializedBlock {
+  override block2Json(block: BookmarkBlockModel): SerializedBlock {
     const clonedProps = cloneBookmarkProperties(block);
 
     return {

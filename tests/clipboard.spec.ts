@@ -1,7 +1,5 @@
 import './utils/declare-test-window.js';
 
-import { assertExists } from '@blocksuite/global/utils';
-
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
@@ -30,7 +28,6 @@ import {
   pressArrowDown,
   pressArrowRight,
   pressArrowUp,
-  pressBackspace,
   pressEnter,
   pressEscape,
   pressShiftTab,
@@ -56,6 +53,7 @@ import {
   assertClipItems,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
+  assertExists,
   assertRichImage,
   assertRichTexts,
   assertSelection,
@@ -965,4 +963,22 @@ test(scoped`paste parent block`, async ({ page }) => {
     'This is child 1',
     'This is child 2Thi',
   ]);
+});
+
+test(scoped`clipboard copy muti selection`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'abc');
+  await pressEnter(page);
+  await type(page, 'def');
+  await setSelection(page, 2, 1, 3, 1);
+  await waitNextFrame(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['abc', 'defbc', 'd']);
 });

@@ -8,24 +8,6 @@ importers:
 
   .:
     devDependencies:
-      '@blocksuite/block-std':
-        specifier: workspace:*
-        version: link:packages/block-std
-      '@blocksuite/blocks':
-        specifier: workspace:*
-        version: link:packages/blocks
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:packages/global
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:packages/lit
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:packages/store
-      '@blocksuite/virgo':
-        specifier: workspace:*
-        version: link:packages/virgo
       '@commitlint/cli':
         specifier: ^17.6.7
         version: 17.6.7
@@ -159,6 +141,9 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.5.1
         version: 1.5.1
+      '@types/webfontloader':
+        specifier: ^1.6.35
+        version: 1.6.35
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -192,6 +177,9 @@ importers:
       turndown:
         specifier: ^7.1.2
         version: 7.1.2
+      webfontloader:
+        specifier: ^1.6.28
+        version: 1.6.28
       zod:
         specifier: ^3.21.4
         version: 3.21.4
@@ -286,6 +274,9 @@ importers:
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/virgo':
+        specifier: workspace:*
+        version: link:../virgo
       lit:
         specifier: ^2.7.6
         version: 2.7.6
@@ -1851,6 +1842,10 @@ packages:
   /@types/web-bluetooth@0.0.17:
     resolution: {integrity: sha512-4p9vcSmxAayx72yn70joFoL44c9MO/0+iVEBIQXe3v2h2SiAsEIo/G5v6ObFWvNKRFjbrVadNf9LqEEZeQPzdA==}
     dev: true
+
+  /@types/webfontloader@1.6.35:
+    resolution: {integrity: sha512-IJlrsiDWq6KghQ7tPlL5tcwSUyOxLDceT+AFUY7Ylj0Fcv3/h3QkANqQxZ0B5mEpEKxhTw76vDmvrruSMV9n9Q==}
+    dev: false
 
   /@types/ws@7.4.7:
     resolution: {integrity: sha512-JQbbmxZTZehdc2iszGKs5oC3NFnjeay7mtAWrdt7qNtAVK0g19muApzAy4bm9byz79xa2ZnO/BOBC2R8RC5Lww==}
@@ -7891,6 +7886,10 @@ packages:
       typescript: 4.4.4
       yargs: 15.4.1
     dev: true
+
+  /webfontloader@1.6.28:
+    resolution: {integrity: sha512-Egb0oFEga6f+nSgasH3E0M405Pzn6y3/9tOVanv/DLfa1YBIgcv90L18YyWnvXkRbIM17v5Kv6IT2N6g1x5tvQ==}
+    dev: false
 
   /webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}

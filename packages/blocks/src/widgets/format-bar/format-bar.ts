@@ -213,21 +213,29 @@ export class AffineFormatBarWidget extends WidgetElement {
         };
 
         this._floatDisposables.add(
-          autoUpdate(visualElement, formatQuickBarElement, () => {
-            computePosition(visualElement, formatQuickBarElement, {
-              placement: this._placement,
-              middleware: [
-                offset(10),
-                inline(),
-                shift({
-                  padding: 6,
-                }),
-              ],
-            }).then(({ x, y }) => {
-              formatQuickBarElement.style.top = `${y}px`;
-              formatQuickBarElement.style.left = `${x}px`;
-            });
-          })
+          autoUpdate(
+            visualElement,
+            formatQuickBarElement,
+            () => {
+              computePosition(visualElement, formatQuickBarElement, {
+                placement: this._placement,
+                middleware: [
+                  offset(10),
+                  inline(),
+                  shift({
+                    padding: 6,
+                  }),
+                ],
+              }).then(({ x, y }) => {
+                formatQuickBarElement.style.top = `${y}px`;
+                formatQuickBarElement.style.left = `${x}px`;
+              });
+            },
+            {
+              // follow edgeless viewport update
+              animationFrame: true,
+            }
+          )
         );
       } else if (this._displayType === 'block') {
         const firstBlockElement = this._selectedBlockElements[0];
@@ -254,21 +262,29 @@ export class AffineFormatBarWidget extends WidgetElement {
         };
 
         this._floatDisposables.add(
-          autoUpdate(visualElement, formatQuickBarElement, () => {
-            computePosition(visualElement, formatQuickBarElement, {
-              placement: this._placement,
-              middleware: [
-                offset(10),
-                inline(),
-                shift({
-                  padding: 6,
-                }),
-              ],
-            }).then(({ x, y }) => {
-              formatQuickBarElement.style.top = `${y}px`;
-              formatQuickBarElement.style.left = `${x}px`;
-            });
-          })
+          autoUpdate(
+            visualElement,
+            formatQuickBarElement,
+            () => {
+              computePosition(visualElement, formatQuickBarElement, {
+                placement: this._placement,
+                middleware: [
+                  offset(10),
+                  inline(),
+                  shift({
+                    padding: 6,
+                  }),
+                ],
+              }).then(({ x, y }) => {
+                formatQuickBarElement.style.top = `${y}px`;
+                formatQuickBarElement.style.left = `${x}px`;
+              });
+            },
+            {
+              // follow edgeless viewport update
+              animationFrame: true,
+            }
+          )
         );
       }
     } else {

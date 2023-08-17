@@ -146,7 +146,7 @@ function isSoftEnterable(model: BaseBlockModel) {
 export function enterMarkdownMatch(
   model: BaseBlockModel,
   virgo: AffineVEditor,
-  range: VRange,
+  _range: VRange,
   context: BindingContext
 ) {
   const { prefix } = context;
@@ -157,7 +157,7 @@ export function enterMarkdownMatch(
 export function spaceMarkdownMatch(
   model: BaseBlockModel,
   virgo: AffineVEditor,
-  range: VRange,
+  _range: VRange,
   context: BindingContext
 ) {
   const { prefix } = context;
@@ -207,10 +207,10 @@ export function onForwardDelete(
 }
 
 export function onKeyLeft(
-  model: BaseBlockModel,
+  _model: BaseBlockModel,
   e: KeyboardEvent,
   range: VRange,
-  editableContainer: Element
+  _editableContainer: Element
 ) {
   // range.length === 0 means collapsed selection
   if (range.length !== 0) {
@@ -275,7 +275,7 @@ const commonRichTextKeymap = <T extends BaseBlockModel>(
     softEnter: {
       key: 'Enter',
       shiftKey: true,
-      handler(range, context) {
+      handler(range) {
         assertExists(virgo);
         return onSoftEnter(block, range, virgo);
       },
@@ -310,27 +310,27 @@ const commonRichTextKeymap = <T extends BaseBlockModel>(
     },
     backspace: {
       key: 'Backspace',
-      handler(range, context) {
+      handler(_range, context) {
         return onBackspace(block, context.event, this.vEditor);
       },
     },
     delete: {
       key: 'Delete',
-      handler(range, context) {
+      handler(_range, context) {
         return onForwardDelete(block, context.event, this.vEditor);
       },
     },
     up: {
       key: 'ArrowUp',
       shiftKey: false,
-      handler(range, context) {
+      handler(_range, context) {
         return handleKeyUp(context.event, this.vEditor.rootElement);
       },
     },
     down: {
       key: 'ArrowDown',
       shiftKey: false,
-      handler(range, context) {
+      handler(_range, context) {
         return handleKeyDown(block, context.event, this.vEditor.rootElement);
       },
     },
@@ -360,8 +360,8 @@ const commonRichTextKeymap = <T extends BaseBlockModel>(
 };
 
 const codeRichTextKeymap = <T extends BaseBlockModel>(
-  block: T,
-  virgo: AffineVEditor
+  _block: T,
+  _virgo: AffineVEditor
 ): KeyboardBindings => {
   const INDENT_SYMBOL = '  ';
   const LINE_BREAK_SYMBOL = '\n';

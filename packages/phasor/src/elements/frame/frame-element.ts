@@ -23,10 +23,10 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
       Bound.deserialize(this.xywh).points
     );
   }
-  override getRelativePointLocation(point: IVec): PointLocation {
+  override getRelativePointLocation(_point: IVec): PointLocation {
     throw new Error('Method not implemented.');
   }
-  override getNearestPoint(point: IVec): IVec {
+  override getNearestPoint(_point: IVec): IVec {
     throw new Error('Method not implemented.');
   }
 
@@ -76,7 +76,7 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
   override hitTest(
     x: number,
     y: number,
-    options?: HitTestOptions | undefined
+    _options?: HitTestOptions | undefined
   ): boolean {
     const bound = new Bound(
       this.x,
@@ -90,7 +90,7 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
   override render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
-    rc: RoughCanvas
+    _rc: RoughCanvas
   ) {
     const [, , w, h] = this.deserializeXYWH();
     ctx.setTransform(matrix);

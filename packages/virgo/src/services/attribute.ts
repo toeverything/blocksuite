@@ -54,7 +54,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     const deltas = this._editor.deltaService
       .getDeltasByVRange(vRange)
       .filter(
-        ([delta, position]) =>
+        ([_, position]) =>
           position.index + position.length > vRange.index &&
           position.index <= vRange.index + vRange.length
       );
@@ -101,7 +101,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     }
     return Object.fromEntries(
       // filter out undefined values
-      Object.entries(attributeResult.data).filter(([k, v]) => v)
+      Object.entries(attributeResult.data).filter(([_, v]) => v)
     ) as TextAttributes;
   };
 }

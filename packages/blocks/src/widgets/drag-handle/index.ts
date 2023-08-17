@@ -20,6 +20,7 @@ import {
   getClosestBlockElementByPoint,
   getModelByBlockElement,
   isPageMode,
+  matchFlavours,
   Point,
   Rect,
 } from '../../__internal__/index.js';
@@ -109,7 +110,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   // drag handle should show on the vertical middle of the first line of element
-  private _show(point: Point, blockElement: BlockElement) {
+  private _show(_point: Point, blockElement: BlockElement) {
     let { left, top } = blockElement.getBoundingClientRect();
 
     // Some blocks have padding, should consider padding when calculating position
@@ -348,6 +349,16 @@ export class DragHandleWidget extends WidgetElement {
     let rect = null;
     let targetElement = null;
     const model = getModelByBlockElement(closestBlockElement);
+
+    // Handle special case at this iteration
+    // TODO: should consider drop in database next iteration
+    const isDatabase = matchFlavours(model, ['affine:database'] as const);
+    if (isDatabase) {
+      this._indicatorRect = rect;
+      this._dropBlockId = '';
+      return;
+    }
+
     const result = calcDropTarget(
       point,
       model,

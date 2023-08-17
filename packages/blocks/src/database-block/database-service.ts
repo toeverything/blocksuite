@@ -32,12 +32,7 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
     blockModel.applyColumnUpdate();
   }
 
-  override block2Json(
-    block: BlockModels['affine:database'],
-    selectedModels?: Map<string, number>,
-    begin?: number,
-    end?: number
-  ): SerializedBlock {
+  override block2Json(block: BlockModels['affine:database']): SerializedBlock {
     const columns = [...block.columns];
     const rowIds = block.children.map(child => child.id);
 

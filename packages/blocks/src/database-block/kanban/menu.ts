@@ -58,7 +58,7 @@ export const popCardMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Expend card',
+          name: 'Expand card',
           icon: ExpandFullIcon,
           select: () => {
             openDetail(rowId, selection);

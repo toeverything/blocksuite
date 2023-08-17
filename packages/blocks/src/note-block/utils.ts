@@ -67,7 +67,7 @@ export function getPrevSibling(
 function getLastGrandChild(blockElement: BlockElement) {
   const view = getView(blockElement);
   let output = blockElement;
-  view.walkThrough((node, index, parent) => {
+  view.walkThrough((node, _index, parent) => {
     if (
       node.children.filter(n => n.type === 'block').length === 0 &&
       parent.children.filter(n => n.type === 'block').at(-1) === node

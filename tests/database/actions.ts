@@ -1,7 +1,7 @@
-import type { ColumnType } from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
 import { expect, type Locator, type Page } from '@playwright/test';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { ColumnType } from '../../packages/blocks/src/index.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
   pressEnter,
@@ -15,6 +15,7 @@ import {
   getEditorLocator,
   waitNextFrame,
 } from '../utils/actions/misc.js';
+import { assertExists } from '../utils/asserts.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
   const editor = getEditorLocator(page);

@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { DatabaseBlockModel } from '@blocksuite/blocks';
-import {
-  type CssVariableName,
-  type ListType,
-  type PageBlockModel,
-  type ThemeObserver,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
+import type {
+  CssVariableName,
+  DatabaseBlockModel,
+  ListType,
+  PageBlockModel,
+  ThemeObserver,
+} from '../../../packages/blocks/src/index.js';
+import { assertExists } from '../../../packages/global/src/utils.js';
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,

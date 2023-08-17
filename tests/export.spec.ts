@@ -11,7 +11,6 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   pressEnter,
-  setEdgelessTool,
   switchEditorMode,
   type,
 } from './utils/actions/index.js';

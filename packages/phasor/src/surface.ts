@@ -95,19 +95,32 @@ export class SurfaceManager {
 
   private _syncFromExistingContainer() {
     this._transact(() => {
+      const yConnnecotrs: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as keyof PhasorElementType;
-        const id = yElement.get('id') as id;
-        const ElementCtor = ElementCtors[type];
-        assertExists(ElementCtor);
-        const element = new ElementCtor(yElement, this);
-        element.computedValue = this._computedValue;
-        element.mount(this._renderer);
-        this._elements.set(element.id, element);
-        this._addToBatch(element);
-        this.slots.elementAdded.emit(id);
+        if (type === 'connector') {
+          yConnnecotrs.push(yElement);
+          return;
+        }
+        this._createElementFromYMap(yElement);
+      });
+      yConnnecotrs.forEach(yElement => {
+        this._createElementFromYMap(yElement);
       });
     });
+  }
+
+  private _createElementFromYMap(yElement: Y.Map<unknown>) {
+    const type = yElement.get('type') as keyof PhasorElementType;
+    const id = yElement.get('id') as id;
+    const ElementCtor = ElementCtors[type];
+    assertExists(ElementCtor);
+    const element = new ElementCtor(yElement, this);
+    element.computedValue = this._computedValue;
+    element.mount(this._renderer);
+    this._elements.set(element.id, element);
+    this._addToBatch(element);
+    this.slots.elementAdded.emit(id);
   }
 
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
