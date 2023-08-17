@@ -172,6 +172,21 @@ export class NotionHtmlParser extends BaseParser {
     let imgElement = null;
     let caption = '';
     if (element.tagName === 'FIGURE') {
+      if (
+        element.children.length === 1 &&
+        element.children[0].tagName === 'A'
+      ) {
+        const result =
+          await this._contextedContentParser.getParserHtmlText2Block(
+            'CommonParser'
+          )?.({
+            element: element,
+            flavour: 'affine:paragraph',
+            type: 'text',
+          });
+        return result;
+      }
+
       imgElement = element.querySelector('img');
       const captionText = await getCaptionText(
         element,
