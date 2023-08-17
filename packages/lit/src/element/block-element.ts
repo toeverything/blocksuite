@@ -40,7 +40,7 @@ export class BlockElement<
       return value !== oldValue;
     },
   })
-  widgets: Record<WidgetName, TemplateResult>;
+  widgets!: Record<WidgetName, TemplateResult>;
 
   @property({ attribute: false })
   page!: Page;

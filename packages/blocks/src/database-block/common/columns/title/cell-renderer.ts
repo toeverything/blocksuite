@@ -173,9 +173,10 @@ export class TitleDetailCell extends BaseCellRenderer<string> {
 
   extra(): {
     model: BaseBlockModel;
-    result: TemplateResult;
+    result: TemplateResult | null;
   } {
-    return this.column.getExtra(this.rowId) as never;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.column.getExtra(this.rowId) as any;
   }
 
   override render() {
