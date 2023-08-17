@@ -519,7 +519,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         },
         '/': context => {
           const selection = this.selection;
-          if (!selection || selection.columnsSelection) {
+          if (!selection || selection.columnsSelection || selection.isEditing) {
             return;
           }
           const cell = this.getCellContainer(

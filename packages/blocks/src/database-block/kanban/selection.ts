@@ -281,9 +281,16 @@ export class KanbanSelection {
       selection.groupKey
     );
     requestAnimationFrame(() => {
+      const columnId = this.view.header.titleColumn;
       this.selection = {
         groupKey: selection.groupKey,
         cardId: id,
+        focus: columnId
+          ? {
+              columnId: columnId,
+              isEditing: true,
+            }
+          : undefined,
       };
     });
   }
@@ -298,9 +305,16 @@ export class KanbanSelection {
       selection.groupKey
     );
     requestAnimationFrame(() => {
+      const columnId = this.view.header.titleColumn;
       this.selection = {
         groupKey: selection.groupKey,
         cardId: id,
+        focus: columnId
+          ? {
+              columnId: columnId,
+              isEditing: true,
+            }
+          : undefined,
       };
     });
   }
