@@ -12,6 +12,7 @@ import type {
 import { startDrag } from '../../utils/drag.js';
 import type { DatabaseTable } from '../table-view.js';
 import type { DatabaseCellContainer } from './cell-container.js';
+import { popRowMenu } from './menu.js';
 
 @customElement('affine-database-selection')
 export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
@@ -465,7 +466,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowUp: () => {
+        ArrowUp: context => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
             return false;
@@ -474,9 +475,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             selection.focus.rowIndex - 1,
             selection.focus.columnIndex
           );
+          context.get('keyboardState').raw.preventDefault();
           return true;
         },
-        ArrowDown: () => {
+        ArrowDown: context => {
           const selection = this.selection;
           if (!selection || selection.isEditing) {
             return false;
@@ -485,6 +487,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             selection.focus.rowIndex + 1,
             selection.focus.columnIndex
           );
+          context.get('keyboardState').raw.preventDefault();
           return true;
         },
         'Mod-a': () => {
@@ -492,7 +495,41 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           if (selection?.isEditing) {
             return true;
           }
+          if (selection) {
+            const start = 0;
+            const end = this.tableView.view.rows.length - 1;
+            if (
+              selection.rowsSelection?.start === start &&
+              selection.rowsSelection.end === end &&
+              !selection.columnsSelection
+            ) {
+              return false;
+            }
+            this.selection = {
+              rowsSelection: {
+                start: start,
+                end: end,
+              },
+              focus: selection.focus,
+              isEditing: false,
+            };
+            return true;
+          }
           return;
+        },
+        '/': context => {
+          const selection = this.selection;
+          if (!selection || selection.columnsSelection || selection.isEditing) {
+            return;
+          }
+          const cell = this.getCellContainer(
+            selection.focus.rowIndex,
+            selection.focus.columnIndex
+          );
+          if (cell) {
+            context.get('keyboardState').raw.preventDefault();
+            popRowMenu(cell, cell.rowId, this);
+          }
         },
       })
     );
@@ -750,6 +787,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       };
     });
   }
+
+  // public duplicateRow(rowId: string) {
+  //   this.tableView.view.rowDuplicate(rowId)
+  // }
 }
 
 declare global {

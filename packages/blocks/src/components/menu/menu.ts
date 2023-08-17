@@ -7,7 +7,7 @@ import type {
 } from '@floating-ui/dom';
 import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -79,7 +79,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       display: flex;
       flex-direction: column;
       user-select: none;
-      min-width: 160px;
+      min-width: 200px;
       box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
         0px 0px 0px 0.5px #e3e3e4 inset;
       border-radius: 8px;
@@ -95,15 +95,16 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     .affine-menu-body {
       display: flex;
       flex-direction: column;
+      gap: 4px;
     }
 
     .affine-menu-header input {
-      padding: 2px 8px;
       width: 100%;
       border-radius: 4px;
       outline: none;
-      font-size: 12px;
-      line-height: 20px;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 5px 12px;
       border: 1px solid var(--affine-border-color);
     }
 
@@ -113,7 +114,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
     .affine-menu-header input:focus {
       border: 1px solid var(--affine-primary-color);
-      box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
     }
 
     .affine-menu-divider {
@@ -123,10 +123,10 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-action {
-      padding: 4px;
+      padding: 4px 12px;
       cursor: pointer;
       display: flex;
-      gap: 8px;
+      gap: 4px;
       border-radius: 4px;
     }
 
@@ -181,6 +181,11 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       align-items: center;
       justify-content: center;
       margin-top: 8px;
+    }
+
+    .affine-menu-action-text {
+      flex: 1;
+      padding: 0 4px;
     }
   `;
   @property({ attribute: false })
@@ -278,10 +283,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     action: menu => {
       return [
         {
-          label: html` <div style="display: flex;align-items:center;">
-            <div class="icon">${menu.icon}</div>
-            ${menu.label ?? menu.name}
-          </div>`,
+          label: html` ${menu.icon
+              ? html` <div class="icon">${menu.icon}</div>`
+              : nothing}
+            <div class="affine-menu-action-text">
+              ${menu.label ?? menu.name}
+            </div>`,
           select: () => {
             menu.select();
             this._complete();
@@ -334,8 +341,10 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       };
       return [
         {
-          label: html` <div style="display:flex;align-items:center;">
-              <div class="icon">${menu.icon}</div>
+          label: html`${menu.icon
+              ? html` <div class="icon">${menu.icon}</div>`
+              : nothing}
+            <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
             </div>
             <div

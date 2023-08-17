@@ -37,21 +37,65 @@ export const popRowMenu = (
         openDetail(rowId, selection);
       },
     },
+    // {
+    //   type: 'group',
+    //   name: '',
+    //   children: () => [
+    //     {
+    //       type: 'action',
+    //       name: 'Copy',
+    //       icon: CopyIcon,
+    //       select: () => {
+    //         //TODO
+    //       },
+    //     },
+    //     {
+    //       type: 'action',
+    //       name: 'Paste',
+    //       icon: PasteIcon,
+    //       select: () => {
+    //         //TODO
+    //       },
+    //     },
+    //   ],
+    // },
     {
-      type: 'action',
-      name: 'Insert before',
-      icon: html` <div style="transform: rotate(90deg)">${MoveLeftIcon}</div>`,
-      select: () => {
-        selection.insertRowBefore(rowId);
-      },
-    },
-    {
-      type: 'action',
-      name: 'Insert after',
-      icon: html` <div style="transform: rotate(90deg)">${MoveRightIcon}</div>`,
-      select: () => {
-        selection.insertRowAfter(rowId);
-      },
+      type: 'group',
+      name: '',
+      children: () => [
+        {
+          type: 'action',
+          name: 'Insert before',
+          icon: html` <div
+            style="transform: rotate(90deg);display:flex;align-items:center;"
+          >
+            ${MoveLeftIcon}
+          </div>`,
+          select: () => {
+            selection.insertRowBefore(rowId);
+          },
+        },
+        {
+          type: 'action',
+          name: 'Insert after',
+          icon: html` <div
+            style="transform: rotate(90deg);display:flex;align-items:center;"
+          >
+            ${MoveRightIcon}
+          </div>`,
+          select: () => {
+            selection.insertRowAfter(rowId);
+          },
+        },
+        // {
+        //   type: 'action',
+        //   name: 'Duplicate',
+        //   icon: DuplicateIcon,
+        //   select: () => {
+        //     selection.duplicateRow(rowId);
+        //   },
+        // },
+      ],
     },
     {
       type: 'group',

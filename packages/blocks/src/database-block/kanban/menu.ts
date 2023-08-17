@@ -31,6 +31,14 @@ export const popCardMenu = (
 ) => {
   popFilterableSimpleMenu(ele, [
     {
+      type: 'action',
+      name: 'Expand card',
+      icon: ExpandFullIcon,
+      select: () => {
+        openDetail(rowId, selection);
+      },
+    },
+    {
       type: 'sub-menu',
       name: 'Move to',
       icon: ArrowRightBigIcon,
@@ -52,22 +60,38 @@ export const popCardMenu = (
             }) ?? [],
       },
     },
+    // {
+    //   type: 'group',
+    //   name: '',
+    //   children: () => [
+    //     {
+    //       type: 'action',
+    //       name: 'Copy',
+    //       icon: CopyIcon,
+    //       select: () => {
+    //         //TODO
+    //       },
+    //     },
+    //     {
+    //       type: 'action',
+    //       name: 'Paste',
+    //       icon: PasteIcon,
+    //       select: () => {
+    //         //TODO
+    //       },
+    //     },
+    //   ],
+    // },
     {
       type: 'group',
       name: '',
       children: () => [
         {
           type: 'action',
-          name: 'Expand card',
-          icon: ExpandFullIcon,
-          select: () => {
-            openDetail(rowId, selection);
-          },
-        },
-        {
-          type: 'action',
           name: 'Insert before',
-          icon: html` <div style="transform: rotate(90deg)">
+          icon: html` <div
+            style="transform: rotate(90deg);display:flex;align-items:center;"
+          >
             ${MoveLeftIcon}
           </div>`,
           select: () => {
@@ -77,7 +101,9 @@ export const popCardMenu = (
         {
           type: 'action',
           name: 'Insert after',
-          icon: html` <div style="transform: rotate(90deg)">
+          icon: html` <div
+            style="transform: rotate(90deg);display:flex;align-items:center;"
+          >
             ${MoveRightIcon}
           </div>`,
           select: () => {
