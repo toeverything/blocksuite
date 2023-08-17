@@ -61,7 +61,7 @@ export function normalizeUrl(url: string) {
   const includeScheme = ALLOWED_SCHEMES.find(scheme =>
     url.startsWith(scheme + ':')
   );
-  if (includeScheme && url.length > includeScheme.length + 1) {
+  if (includeScheme) {
     // Any link include schema is a valid url
     return url;
   }
@@ -84,6 +84,11 @@ export const isValidUrl = (str: string) => {
   const url = normalizeUrl(str);
   if (url === str) {
     // Skip check if user input scheme manually
+    try {
+      new URL(url);
+    } catch {
+      return false;
+    }
     return true;
   }
   return URL_REGEX.test(url);
