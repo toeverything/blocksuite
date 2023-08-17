@@ -41,11 +41,6 @@ export type DatabaseViewDataMap = {
     mode: K;
   };
 };
-type Pretty<T> = { [K in keyof T]: T[K] };
-export type TableViewData = Pretty<DatabaseViewDataMap['table']>;
-export type KanbanViewData = Pretty<DatabaseViewDataMap['kanban']>;
-
-export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
 type ViewOperation<Data> = {
   init(model: DatabaseBlockModel, id: string, name: string): Data;
