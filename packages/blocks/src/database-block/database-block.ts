@@ -91,7 +91,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         });
       })
     );
-    this.handleEvent('selectionChange', ctx => {
+    this.handleEvent('selectionChange', () => {
       const selection = this.service?.selectionManager.value.find(selection =>
         PathFinder.equals(selection.path, this.path)
       );

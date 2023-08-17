@@ -109,7 +109,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   // drag handle should show on the vertical middle of the first line of element
-  private _show(point: Point, blockElement: BlockElement) {
+  private _show(_point: Point, blockElement: BlockElement) {
     let { left, top } = blockElement.getBoundingClientRect();
 
     // Some blocks have padding, should consider padding when calculating position

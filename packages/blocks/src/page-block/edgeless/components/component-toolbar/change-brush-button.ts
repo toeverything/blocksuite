@@ -23,13 +23,13 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonSize(elements: BrushElement[]): LineWidth {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 

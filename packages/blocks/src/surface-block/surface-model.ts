@@ -6,7 +6,7 @@ type SurfaceBlockProps = {
 };
 
 const migration = {
-  toV4: (data, previousVersion, latestVersion) => {
+  toV4: data => {
     const { elements } = data;
     Object.keys(elements).forEach(key => {
       const element = elements[key] as Record<string, unknown>;
@@ -40,7 +40,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
   },
   onUpgrade: (data, previousVersion, version) => {
     if (previousVersion < 4 && version >= 4) {
-      migration.toV4(data, previousVersion, version);
+      migration.toV4(data);
     }
   },
 });

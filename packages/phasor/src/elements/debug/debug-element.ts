@@ -25,19 +25,19 @@ export class DebugElement extends SurfaceElement<IDebug> {
     return color;
   }
 
-  override containedByBounds(bounds: Bound): boolean {
+  override containedByBounds(_bounds: Bound): boolean {
     throw new Error('Method not implemented.');
   }
 
-  override getNearestPoint(point: IVec): IVec {
+  override getNearestPoint(_point: IVec): IVec {
     throw new Error('Method not implemented.');
   }
 
-  override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
+  override intersectWithLine(_start: IVec, _end: IVec): PointLocation[] | null {
     throw new Error('Method not implemented.');
   }
 
-  getRelativePointLocation(point: IVec): PointLocation {
+  getRelativePointLocation(_point: IVec): PointLocation {
     throw new Error('Method not implemented.');
   }
 

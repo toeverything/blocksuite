@@ -14,7 +14,7 @@ import type { PageBlockModel } from './page-model.js';
 export class PageBlockService extends BaseService<PageBlockModel> {
   override async block2html(
     block: PageBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    { childText = '' }: BlockTransformContext = {}
   ) {
     let pageMetaHtml = '';
     const tags = block.page.meta.tags ?? [];

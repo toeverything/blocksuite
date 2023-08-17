@@ -25,7 +25,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   async block2html(
     block: BlockModel,
     { childText = '', begin, end }: BlockTransformContext = {},
-    blobMap?: Map<string, string>
+    _blobMap?: Map<string, string>
   ): Promise<string> {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((html: string, item: DeltaOperation) => {
@@ -90,8 +90,8 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   }
 
   async onBlockPasted(
-    model: BlockModel,
-    clipboardData: Record<string, unknown>
+    _model: BlockModel,
+    _clipboardData: Record<string, unknown>
     // eslint-disable-next-line @typescript-eslint/no-empty-function
   ) {}
 

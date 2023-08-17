@@ -29,13 +29,13 @@ const datasourceMap: {
     constructor: DatabaseBlockDatasource,
   },
   'all-pages': {
-    title: (root: BlockSuiteRoot, config: AllPageDatasourceConfig) => {
+    title: (_root: BlockSuiteRoot, _config: AllPageDatasourceConfig) => {
       return 'All Pages';
     },
     constructor: AllPageDatasource,
   },
   tags: {
-    title: (root: BlockSuiteRoot, config: TagsDatasourceConfig) => {
+    title: (_root: BlockSuiteRoot, _config: TagsDatasourceConfig) => {
       return 'Tags';
     },
     constructor: TagsDatasource,

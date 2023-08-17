@@ -257,7 +257,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       })
     );
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragEnd', ctx => {
+      this.root.uiEventDispatcher.add('dragEnd', () => {
         if (dragging) {
           dragging = false;
           embedResizeManager.onEnd();

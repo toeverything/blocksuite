@@ -1032,7 +1032,7 @@ export class EdgelessPageBlockComponent
    * Set selection state by giving noteId & blockId.
    * Not supports surface elements.
    */
-  setSelection(noteId: string, active = true, blockId: string, point?: Point) {
+  setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
     const noteBlock = this.notes.find(b => b.id === noteId);
     assertExists(noteBlock);
 
