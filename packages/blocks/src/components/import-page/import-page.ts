@@ -218,7 +218,6 @@ export async function importNotion(workspace: Workspace, file: File) {
                 };
               });
             });
-
             result = [
               {
                 flavour: 'affine:database',
@@ -234,6 +233,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                       name: 'Table View',
                       mode: 'table',
                       columns: [],
+                      header: {},
                       filter: {
                         type: 'group',
                         op: 'and',
@@ -312,6 +312,7 @@ export async function importNotion(workspace: Workspace, file: File) {
   // });
   return pageIds;
 }
+
 /**
  * @deprecated Waiting for migration
  * See https://github.com/toeverything/blocksuite/issues/3316
@@ -461,8 +462,8 @@ export class ImportPage extends WithDisposable(LitElement) {
       return html`
         <header
           class="loading-header"
-          @mousedown=${this._onMouseDown}
-          @mouseup=${this._onMouseUp}
+          @mousedown="${this._onMouseDown}"
+          @mouseup="${this._onMouseUp}"
         >
           <div>Import</div>
           <loader-element width="50px"></loader-element>
@@ -474,8 +475,8 @@ export class ImportPage extends WithDisposable(LitElement) {
       `;
     }
     return html`
-      <header @mousedown=${this._onMouseDown} @mouseup=${this._onMouseUp}>
-        <icon-button height="28px" @click=${this._onCloseClick}>
+      <header @mousedown="${this._onMouseDown}" @mouseup="${this._onMouseUp}">
+        <icon-button height="28px" @click="${this._onCloseClick}">
           ${CloseIcon}
         </icon-button>
         <div>Import</div>
@@ -492,11 +493,15 @@ export class ImportPage extends WithDisposable(LitElement) {
         <icon-button
           class="button-item"
           text="Markdown"
-          @click=${this._importMarkDown}
+          @click="${this._importMarkDown}"
         >
           ${ExportToMarkdownIcon}
         </icon-button>
-        <icon-button class="button-item" text="HTML" @click=${this._importHtml}>
+        <icon-button
+          class="button-item"
+          text="HTML"
+          @click="${this._importHtml}"
+        >
           ${ExportToHTMLIcon}
         </icon-button>
       </div>
@@ -504,13 +509,13 @@ export class ImportPage extends WithDisposable(LitElement) {
         <icon-button
           class="button-item"
           text="Notion"
-          @click=${this._importNotion}
+          @click="${this._importNotion}"
         >
           ${NotionIcon}
           <div
             slot="suffix"
             class="has-tool-tip"
-            @click=${this._openLearnImportLink}
+            @click="${this._openLearnImportLink}"
           >
             ${HelpIcon}
             <tool-tip inert arrow tip-position="top" role="tooltip">

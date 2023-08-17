@@ -10,7 +10,6 @@ export const styles = css`
     position: relative;
     display: flex;
     flex-direction: row;
-    height: 40px;
     border-bottom: 1px solid var(--affine-border-color);
     box-sizing: border-box;
   }
@@ -49,7 +48,7 @@ export const styles = css`
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     /* https://stackoverflow.com/a/36247448/15443637 */
     overflow: hidden;
     color: var(--affine-text-secondary-color);
@@ -58,20 +57,8 @@ export const styles = css`
   .affine-database-column-type-icon {
     display: flex;
     align-items: center;
-    border: 1px solid transparent;
     border-radius: 4px;
-  }
-  .affine-database-column-type-icon.edit {
-    background: linear-gradient(
-        0deg,
-        var(--affine-hover-color),
-        var(--affine-hover-color)
-      ),
-      var(--affine-white);
-    border-color: var(--affine-border-color);
-  }
-  .affine-database-column-type-icon.edit:hover {
-    background: var(--affine-white);
+    padding: 2px;
   }
   .affine-database-column-type-icon svg {
     width: 16px;

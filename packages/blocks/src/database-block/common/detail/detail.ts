@@ -6,6 +6,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import type { DetailSlotProps } from '../../../__internal__/datasource/base.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import { PlusIcon } from '../../../icons/index.js';
 import { dataViewCssVariable } from '../css-variable.js';
@@ -61,6 +62,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   rowId!: string;
   selection = new DetailSelection(this);
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -94,15 +96,19 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     );
   };
 
+  private get columns() {
+    return this.view.detailColumns.map(id => this.view.columnGet(id));
+  }
+
   override render() {
-    const columns = this.view.columnsWithoutFilter;
+    const columns = this.columns;
 
     return html`
+      ${this.renderHeader()}
       ${repeat(
         columns,
         v => v,
-        id => {
-          const column = this.view.columnGet(id);
+        column => {
           return html` <affine-data-view-record-field
             .view="${this.view}"
             .column="${column}"
@@ -116,6 +122,18 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
         Add Property
       </div>
     `;
+  }
+
+  private renderHeader() {
+    const header = this.view.detailSlots.header;
+    if (header) {
+      const props: DetailSlotProps = {
+        view: this.view,
+        rowId: this.rowId,
+      };
+      return html` <uni-lit .uni="${header}" .props="${props}"></uni-lit> `;
+    }
+    return undefined;
   }
 }
 

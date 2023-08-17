@@ -1,4 +1,4 @@
-import { tString } from '../../../logical/data-type.js';
+import { tRichText } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 
 export const titleColumnTypeName = 'title';
@@ -12,9 +12,9 @@ export const titlePureColumnConfig = columnManager.register<string>(
   titleColumnTypeName,
   {
     name: 'Title',
-    type: () => tString.create(),
+    type: () => tRichText.create(),
     defaultData: () => ({}),
-    cellToString: data => data ?? '',
+    cellToString: data => data?.toString() ?? '',
     cellFromString: data => {
       return {
         value: data,

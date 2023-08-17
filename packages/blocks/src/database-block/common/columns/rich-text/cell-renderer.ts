@@ -77,7 +77,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       display: flex;
       align-items: center;
       width: 100%;
-      height: 100%;
       user-select: none;
     }
 
@@ -152,7 +151,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       display: flex;
       align-items: center;
       width: 100%;
-      height: 100%;
       cursor: text;
     }
 
@@ -222,7 +220,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.rectChanged?.();
+          this.onRectChange?.();
         } else {
           this.selectCurrentCell(false);
         }

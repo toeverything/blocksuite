@@ -564,6 +564,7 @@ export abstract class BaseParser {
               name: 'Table View',
               mode: 'table',
               columns: [],
+              header: {},
               filter: {
                 type: 'group',
                 op: 'and',
