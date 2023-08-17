@@ -490,7 +490,7 @@ export const createModal = () => {
   div.style.width = '100vw';
   div.style.height = '100vh';
   div.style.zIndex = '10';
-  document.body.querySelector('editor-container')?.append(div);
+  document.body.querySelector('block-suite-root')?.append(div);
   return div;
 };
 export const positionToVRect = (x: number, y: number): VirtualElement => {

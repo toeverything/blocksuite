@@ -30,6 +30,7 @@ const styles = css`
     width: 100%;
     height: 100%;
     outline: none;
+    word-break: break-all;
     font-size: var(--data-view-cell-text-size);
     line-height: var(--data-view-cell-text-line-height);
   }

@@ -4,6 +4,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 
+import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
 import { dateColumnConfig } from '../../database-block/common/columns/date/cell-renderer.js';
 import { imageColumnConfig } from '../../database-block/common/columns/image/cell-renderer.js';
@@ -20,9 +21,10 @@ import { titleColumnConfig } from '../../database-block/common/columns/title/cel
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
-import type { DatabaseBlockDatasourceConfig } from './base.js';
+import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
 import { getIcon } from './block-icons.js';
+import { BlockRenderer } from './block-renderer.js';
 
 export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;
@@ -309,8 +311,11 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     ];
   }
 
-  public override propertyGetMain(): string | undefined {
-    return this._model.columns.find(v => v.type === 'title')?.id;
+  public override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: createUniComponentFromWebComponent(BlockRenderer),
+    };
   }
 }
 

@@ -152,7 +152,7 @@ export function DataBaseRowContainer(
                       >
                       </affine-database-cell-container>
                     </div>
-                    ${column.isMain
+                    ${column.dataViewManager.header.titleColumn === column.id
                       ? html` <div class="row-ops">
                           <div class="row-op" @click="${clickDetail}">
                             ${NewEditIcon}

@@ -6,6 +6,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
+import type { DetailSlotProps } from '../../../__internal__/datasource/base.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import { PlusIcon } from '../../../icons/index.js';
 import { dataViewCssVariable } from '../css-variable.js';
@@ -98,6 +99,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
     const columns = this.view.columnsWithoutFilter;
 
     return html`
+      ${this.renderHeader()}
       ${repeat(
         columns,
         v => v,
@@ -116,6 +118,18 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
         Add Property
       </div>
     `;
+  }
+
+  private renderHeader() {
+    const header = this.view.detailSlots.header;
+    if (header) {
+      const props: DetailSlotProps = {
+        view: this.view,
+        rowId: this.rowId,
+      };
+      return html` <uni-lit .uni="${header}" .props="${props}"></uni-lit> `;
+    }
+    return undefined;
   }
 }
 

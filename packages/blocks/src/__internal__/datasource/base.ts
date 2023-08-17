@@ -1,13 +1,21 @@
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { undefined } from 'zod';
 
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type {
   ColumnConfig,
   ColumnConfigManager,
 } from '../../database-block/common/columns/manager.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
+import type { DataViewManager } from '../../database-block/common/data-view-manager.js';
 import type { InsertPosition } from '../../database-block/index.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../database-block/table/consts.js';
+
+export type DetailSlotProps = { view: DataViewManager; rowId: string };
+
+export interface DetailSlots {
+  header?: UniComponent<DetailSlotProps>;
+}
 
 export interface DataSource {
   allPropertyConfig: ColumnConfig[];
@@ -24,7 +32,6 @@ export interface DataSource {
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
   rowAdd: (insertPosition: InsertPosition) => string;
   rowDelete: (ids: string[]) => void;
-  propertyGetMain: () => string | undefined;
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
   propertyGetType: (propertyId: string) => string;
@@ -56,6 +63,8 @@ export interface DataSource {
     propertyId: string,
     callback: () => void
   ) => Disposable;
+
+  detailSlots: DetailSlots;
 }
 
 export abstract class BaseDataSource implements DataSource {
@@ -143,7 +152,9 @@ export abstract class BaseDataSource implements DataSource {
   public columnConfigManager: ColumnConfigManager = columnManager;
   public abstract allPropertyConfig: ColumnConfig[];
 
-  public abstract propertyGetMain(): string | undefined;
+  public get detailSlots(): DetailSlots {
+    return {};
+  }
 }
 
 export type DatabaseBlockDatasourceConfig = {
