@@ -68,7 +68,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
     .resizable-img {
       position: relative;
-      border: 1px solid var(--affine-white-90);
       border-radius: 8px;
     }
 

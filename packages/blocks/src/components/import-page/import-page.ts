@@ -227,6 +227,19 @@ export async function importNotion(workspace: Workspace, file: File) {
                   rowIds: Object.keys(cells),
                   cells: cells,
                   columns: columns,
+                  views: [
+                    {
+                      id: page.generateId(),
+                      name: 'Table View',
+                      mode: 'table',
+                      columns: [],
+                      filter: {
+                        type: 'group',
+                        op: 'and',
+                        conditions: [],
+                      },
+                    },
+                  ],
                 } as SerializedBlock['databaseProps'],
                 children: children,
               },

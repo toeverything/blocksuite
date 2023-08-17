@@ -45,7 +45,7 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await dragEmbedResizeByTopLeft(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 340, height: 255 });
+  await assertImageSize(page, { width: 342, height: 256 });
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
@@ -53,7 +53,7 @@ test('can drag resize image by left menu', async ({ page }) => {
 
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await assertImageSize(page, { width: 340, height: 255 });
+  await assertImageSize(page, { width: 342, height: 256 });
 });
 
 test('can drag resize image by right menu', async ({ page }) => {
@@ -66,13 +66,13 @@ test('can drag resize image by right menu', async ({ page }) => {
   await assertImageSize(page, { width: 736, height: 552 });
 
   await dragEmbedResizeByTopRight(page);
-  await assertImageSize(page, { width: 320, height: 240 });
+  await assertImageSize(page, { width: 322, height: 241 });
 
   await undoByKeyboard(page);
   await assertImageSize(page, { width: 736, height: 552 });
 
   await redoByKeyboard(page);
-  await assertImageSize(page, { width: 320, height: 240 });
+  await assertImageSize(page, { width: 322, height: 241 });
 });
 
 test('can click and delete image', async ({ page }) => {
