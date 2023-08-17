@@ -560,7 +560,7 @@ export abstract class BaseParser {
           columns: columns,
         },
         children: children,
-      },
+      } as never,
     ];
   };
 
