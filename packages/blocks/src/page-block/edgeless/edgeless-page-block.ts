@@ -8,6 +8,7 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   almostEqual,
   assertExists,
+  noop,
   Slot,
   throttle,
 } from '@blocksuite/global/utils';
@@ -29,7 +30,7 @@ import {
   SurfaceManager,
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -74,7 +75,7 @@ import type {
 import { FontLoader } from '../font-loader/index.js';
 import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
-import { NoteCut } from './components/note-cut/index.js';
+import { NoteSlicer } from './components/note-slicer/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize, updateNotesPosition } from './components/utils.js';
@@ -108,7 +109,7 @@ import {
 } from './utils/query.js';
 import { EdgelessSnapManager } from './utils/snap-manager.js';
 
-NoteCut;
+noop(NoteSlicer);
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot<{ zoom: number; center: IVec }>;
@@ -319,10 +320,6 @@ export class EdgelessPageBlockComponent
   // Gets the sorted notes.
   get sortedNotes() {
     return this.notes.sort(compare);
-  }
-
-  get enableNoteCut() {
-    return this.page.awarenessStore.getFlag('enable_note_cut');
   }
 
   get dispatcher() {
@@ -1302,6 +1299,7 @@ export class EdgelessPageBlockComponent
       </div>
       <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
+          <affine-note-slicer .edgelessPage=${this}></affine-note-slicer>
           <div
             class="affine-edgeless-layer"
             style=${styleMap({
@@ -1310,9 +1308,6 @@ export class EdgelessPageBlockComponent
                 : undefined,
             })}
           >
-            ${this.enableNoteCut
-              ? html`<affine-note-cut .edgelessPage=${this}></affine-note-cut>`
-              : nothing}
             <edgeless-notes-container
               .edgeless=${this}
               .notes=${sortedNotes}
