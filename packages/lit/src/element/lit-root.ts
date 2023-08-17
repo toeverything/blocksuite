@@ -9,7 +9,7 @@ import type {
 import { BlockStore } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { PropertyValues, TemplateResult } from 'lit';
+import { nothing, type PropertyValues, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
@@ -102,22 +102,22 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     return this.renderModel(root);
   }
 
-  renderModel = (model: BaseBlockModel): TemplateResult | null => {
+  renderModel = (model: BaseBlockModel): TemplateResult => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);
     if (!schema) {
       console.warn(`Cannot find schema for ${flavour}.`);
-      return null;
+      return html`${nothing}`;
     }
 
     const view = this.blockStore.specStore.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
-      return null;
+      return html`${nothing}`;
     }
 
     const tag = view.component;
-    const widgets: Record<string, TemplateResult> | null = view.widgets
+    const widgets: Record<string, TemplateResult> = view.widgets
       ? Object.entries(view.widgets).reduce((mapping, [key, tag]) => {
           const template = html`<${tag} ${unsafeStatic(
             this.widgetIdAttr
