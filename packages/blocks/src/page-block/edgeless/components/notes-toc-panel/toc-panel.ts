@@ -398,7 +398,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       undefined,
       this.offsetWidth,
       undefined,
-      287,
+      undefined,
     ]);
 
     this._oldViewport = {

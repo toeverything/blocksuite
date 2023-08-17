@@ -1195,9 +1195,7 @@ export class EdgelessPageBlockComponent
     return false;
   }
 
-  public getFitToScreenData(
-    viewportPadding: (number | undefined)[] = [0, 0, 0, 0]
-  ) {
+  public getFitToScreenData(padding: (number | undefined)[] = [0, 0, 0, 0]) {
     const bounds = [];
 
     this.notes.forEach(note => {
@@ -1209,7 +1207,7 @@ export class EdgelessPageBlockComponent
       bounds.push(surfaceElementsBound);
     }
 
-    const padding = viewportPadding.map(p => p ?? 0) as number[];
+    const [pt = 0, pr = 0, pb = 0, pl = 0] = padding;
     const { viewport } = this.surface;
     let { centerX, centerY, zoom } = viewport;
 
@@ -1219,14 +1217,12 @@ export class EdgelessPageBlockComponent
       assertExists(bound);
 
       zoom = Math.min(
-        (width - FIT_TO_SCREEN_PADDING - (padding[1] + padding[3])) / bound.w,
-        (height - FIT_TO_SCREEN_PADDING - (padding[0] + padding[2])) / bound.h
+        (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
+        (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
       );
 
-      centerX =
-        bound.x + (bound.w + padding[1] / zoom) / 2 - padding[3] / zoom / 2;
-      centerY =
-        bound.y + (bound.h + padding[2] / zoom) / 2 - padding[0] / zoom / 2;
+      centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
+      centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
     } else {
       zoom = 1;
     }
