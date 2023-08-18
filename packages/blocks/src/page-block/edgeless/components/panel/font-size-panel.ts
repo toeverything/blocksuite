@@ -8,27 +8,27 @@ const MAX_FONT_SIZE = 200;
 @customElement('edgeless-font-size-panel')
 export class EdgelessFontSizePanel extends LitElement {
   static override styles = css`
-    :host {
-      display: flex;
-    }
-
     .font-size-container {
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 80px;
+      height: 170px;
       justify-content: center;
+      padding: 8px;
       background: var(--affine-background-overlay-panel-color);
-      gap: 2px;
+      border-radius: 8px;
+      gap: 4px;
     }
 
     .font-size-button {
-      text-align: start;
-      font-size: var(--affine-font-base);
-      width: 48px;
-      height: 24px;
-      font-weight: 400;
-      padding: 4px 8px;
-      line-height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      width: 64px;
+      height: 32px;
+      padding: 0 8px;
+      border-radius: 4px;
     }
 
     .font-size-button:hover {
@@ -37,18 +37,34 @@ export class EdgelessFontSizePanel extends LitElement {
     }
 
     .font-size-button[active] {
-      color: var(--affine-primary-color);
+      background: var(--affine-hover-color);
+    }
+
+    .font-size-button-label {
+      text-align: justify;
+      font-size: 15px;
+      color: var(--light-text-color-text-primary-color, #424149);
+      font-family: 'Avenir Next';
+      font-style: normal;
+      width: 48px;
+      height: 24px;
+      font-weight: 400;
+      line-height: 24px;
     }
 
     .font-size-input-container {
       display: flex;
-      padding: 4px 8px;
+      align-items: center;
+      justify-content: center;
+      height: 28px;
     }
 
     .font-size-input {
-      width: 48px;
+      width: 64px;
+      height: 20px;
       border: 1px solid var(--affine-border-color);
-      border-radius: 4px;
+      border-radius: 8px;
+      padding: 4px 8px;
     }
 
     .font-size-input::placeholder {
@@ -121,7 +137,7 @@ export class EdgelessFontSizePanel extends LitElement {
             this._onSelect(TEXT_FONT_SIZE.SMALL);
           }}
         >
-          Small
+          <div class="font-size-button-label">Small</div>
         </div>
         <div
           class="font-size-button"
@@ -131,7 +147,7 @@ export class EdgelessFontSizePanel extends LitElement {
             this._onSelect(TEXT_FONT_SIZE.MEDIUM);
           }}
         >
-          Middle
+          <div class="font-size-button-label">Middle</div>
         </div>
         <div
           class="font-size-button"
@@ -141,7 +157,7 @@ export class EdgelessFontSizePanel extends LitElement {
             this._onSelect(TEXT_FONT_SIZE.LARGE);
           }}
         >
-          Large
+          <div class="font-size-button-label">Large</div>
         </div>
         <div
           class="font-size-button"
@@ -151,7 +167,7 @@ export class EdgelessFontSizePanel extends LitElement {
             this._onSelect(TEXT_FONT_SIZE.XLARGE);
           }}
         >
-          Huge
+          <div class="font-size-button-label">Huge</div>
         </div>
 
         <div

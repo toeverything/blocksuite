@@ -16,14 +16,16 @@ export class EdgelessAlignPanel extends LitElement {
     }
     .align-panel-container {
       display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
       background: var(--affine-background-overlay-panel-color);
       border-radius: 8px;
-      padding: 2px;
+      padding: 8px;
       gap: 8px;
-      fill: none;
-      stroke: currentColor;
+    }
+    .align-panel-container svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
   `;
 

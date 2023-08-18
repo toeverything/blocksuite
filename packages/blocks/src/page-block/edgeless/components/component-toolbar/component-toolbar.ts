@@ -207,6 +207,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         ].filter(b => !!b);
 
     if (this.selection.state.elements.length > 1) {
+      // Should add a divider if there is a frame button
+      buttons.unshift(
+        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+      );
       buttons.unshift(this._getFrameButton());
     }
 
