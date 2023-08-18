@@ -20,7 +20,6 @@ import {
   getService,
   registerService,
 } from '../../__internal__/service/index.js';
-import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
@@ -186,9 +185,7 @@ export class DocPageBlockComponent
     const { model } = this;
     const title = model.title;
 
-    this._titleVEditor = new VEditor(title.yText, {
-      active: () => activeEditorManager.isActive(this),
-    });
+    this._titleVEditor = new VEditor(title.yText);
     this._titleVEditor.mount(this._titleContainer);
     this._titleVEditor.bindHandlers({
       keydown: this._onTitleKeyDown,

@@ -59,7 +59,6 @@ export class VEditor<
   shouldLineScrollIntoView = true;
   shouldCursorScrollIntoView = true;
 
-  readonly isActive: () => boolean;
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
 
   slots: {
@@ -129,8 +128,7 @@ export class VEditor<
   constructor(
     yText: VEditor['yText'],
     ops?: {
-      active?: VEditor['isActive'];
-      embed?: (delta: DeltaInsert<TextAttributes>) => boolean;
+      isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
     }
   ) {
     if (!yText.doc) {
@@ -144,8 +142,7 @@ export class VEditor<
     }
 
     this._yText = yText;
-    this.isActive = ops?.active ?? (() => true);
-    this.isEmbed = ops?.embed ?? (() => false);
+    this.isEmbed = ops?.isEmbed ?? (() => false);
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),

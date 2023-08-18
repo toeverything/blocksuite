@@ -1,6 +1,5 @@
 import {
   type AbstractEditor,
-  activeEditorManager,
   type AttachmentProps,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -91,7 +90,6 @@ export class EditorContainer
 
   override connectedCallback() {
     super.connectedCallback();
-    activeEditorManager.setIfNoActive(this);
 
     const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
@@ -159,7 +157,6 @@ export class EditorContainer
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    activeEditorManager.clearActive();
   }
 
   override firstUpdated() {

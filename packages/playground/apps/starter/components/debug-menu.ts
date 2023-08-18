@@ -16,7 +16,6 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
-  activeEditorManager,
   COLOR_VARIABLES,
   createPage,
   extractCssVariables,
@@ -247,7 +246,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _switchEditorMode() {
-    const editor = activeEditorManager.getActiveEditor();
+    const editor = document.querySelector<EditorContainer>('editor-container');
     if (editor instanceof EditorContainer) {
       const mode = editor.mode === 'page' ? 'edgeless' : 'page';
       editor.mode = mode;

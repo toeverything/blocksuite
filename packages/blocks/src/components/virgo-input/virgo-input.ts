@@ -1,8 +1,6 @@
 import { VEditor, type VRange } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
-import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-
 interface StackItem {
   meta: Map<'v-range', VRange | null>;
   type: 'undo' | 'redo';
@@ -80,10 +78,7 @@ export class VirgoInput {
       }
     );
 
-    this.vEditor = new VEditor(this.yText, {
-      active: () =>
-        activeEditorManager.isActive(options.rootElement) && this.active,
-    });
+    this.vEditor = new VEditor(this.yText);
     this.vEditor.mount(rootElement);
     this.vEditor.bindHandlers({
       paste: (event: ClipboardEvent) => {
