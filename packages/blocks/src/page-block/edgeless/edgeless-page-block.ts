@@ -259,6 +259,7 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
+  @state()
   private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
@@ -491,7 +492,9 @@ export class EdgelessPageBlockComponent
     let resetWillChange: ReturnType<typeof setTimeout> | null = null;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this._edgelessLayerWillChange = true;
+        if (!this._edgelessLayerWillChange) {
+          this._edgelessLayerWillChange = true;
+        }
 
         if (resetWillChange) clearTimeout(resetWillChange);
         resetWillChange = setTimeout(() => {
@@ -1102,9 +1105,10 @@ export class EdgelessPageBlockComponent
     let media: MediaQueryList;
 
     const onPixelRatioChange = () => {
-      this.surface.onResize();
-
-      if (media) media.removeEventListener('change', onPixelRatioChange);
+      if (media) {
+        this.surface?.onResize();
+        media.removeEventListener('change', onPixelRatioChange);
+      }
 
       media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
       media.addEventListener('change', onPixelRatioChange);
@@ -1143,7 +1147,7 @@ export class EdgelessPageBlockComponent
         if (font !== 'Kalam:n4,n7' || !this.surface) return;
 
         if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.onResize();
+          this.surface.refresh();
         }
       })
     );
