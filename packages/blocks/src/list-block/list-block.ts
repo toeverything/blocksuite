@@ -13,9 +13,7 @@ import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { registerService } from '../__internal__/service/index.js';
 import type { ListBlockModel } from './list-model.js';
-import { ListBlockService } from './list-service.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
@@ -63,7 +61,6 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:list', ListBlockService);
     bindContainerHotkey(this);
   }
 

@@ -11,7 +11,7 @@ import {
   type SerializedBlock,
 } from '../utils/index.js';
 import type { BlockModels } from '../utils/model.js';
-import { getServiceOrRegister } from './index.js';
+import { getService } from './singleton.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
@@ -223,7 +223,7 @@ export async function addSerializedBlocks(
 
   for (const { model, json } of pendingModels) {
     const flavour = model.flavour as keyof BlockModels;
-    const service = await getServiceOrRegister(flavour);
+    const service = getService(flavour);
     service.onBlockPasted(model, {
       views: json.databaseProps?.views,
       rowIds: json.databaseProps?.rowIds,

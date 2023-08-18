@@ -107,6 +107,21 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
   }
 }
 
+export async function getBookmarkInitialProps(): Promise<null | string> {
+  const bookmarkCreateModal = new BookmarkCreateModal();
+  return new Promise(resolve => {
+    bookmarkCreateModal.onCancel = () => {
+      resolve(null);
+      document.body.removeChild(bookmarkCreateModal);
+    };
+    bookmarkCreateModal.onConfirm = ({ url }) => {
+      resolve(url);
+      document.body.removeChild(bookmarkCreateModal);
+    };
+    document.body.appendChild(bookmarkCreateModal);
+  });
+}
+
 declare global {
   interface HTMLElementTagNameMap {
     'bookmark-create-modal': BookmarkCreateModal;

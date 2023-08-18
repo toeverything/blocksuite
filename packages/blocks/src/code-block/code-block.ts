@@ -19,12 +19,11 @@ import { z } from 'zod';
 import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { getService, registerService } from '../__internal__/service/index.js';
+import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
-import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
@@ -248,7 +247,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:code', CodeBlockService);
     // set highlight options getter used by "exportToHtml"
     getService('affine:code').setHighlightOptionsGetter(() => {
       return {
