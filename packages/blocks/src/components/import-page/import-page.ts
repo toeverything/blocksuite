@@ -88,15 +88,11 @@ export async function importNotion(workspace: Workspace, file: File) {
     // allPageMap.push(pageMap);
     const files = Object.keys(zipFile.files);
     const promises: Promise<void>[] = [];
-    const csvFiles = files
-      .filter(file => file.endsWith('.csv'))
-      .map(file => file.substring(0, file.length - 4));
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.startsWith('__MACOSX/')) continue;
 
       const lastSplitIndex = file.lastIndexOf('/');
-      if (csvFiles.includes(file.substring(0, lastSplitIndex))) continue;
 
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
