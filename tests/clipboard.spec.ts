@@ -339,7 +339,6 @@ test(scoped`import markdown`, async ({ page }) => {
   const clipData = `# text
 # h1
 `;
-  await setVirgoSelection(page, 1, 1);
   await importMarkdown(page, noteId, clipData);
   await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);

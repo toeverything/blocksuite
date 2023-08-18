@@ -16,7 +16,6 @@ import {
 
 import {
   type EdgelessTool,
-  getEditorContainerByElement,
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
@@ -25,7 +24,6 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import { getGridBound } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
@@ -323,8 +321,6 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerClick = (e: PointerEventState) => {
-    const container = getEditorContainerByElement(this.container);
-    activeEditorManager.setActive(container);
     return this.currentController.onContainerClick(e);
   };
 

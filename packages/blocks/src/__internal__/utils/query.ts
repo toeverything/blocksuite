@@ -2,7 +2,6 @@ import { assertExists, clamp } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
-import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import { matchFlavours } from '../../__internal__/utils/model.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
@@ -254,31 +253,27 @@ export function getBlockElementByModel(
   model: BaseBlockModel
 ): BlockComponentElement | null {
   assertExists(model.page.root);
-  const editor = activeEditorManager.getActiveEditor();
-  const page = (editor ?? document).querySelector<PageBlockComponent>(
-    `[${ATTR}="${model.page.root.id}"]`
-  );
-  if (!page) return null;
+  const pageElement = getPageBlock(model);
+  if (!pageElement) return null;
 
   if (model.id === model.page.root.id) {
-    return page;
+    return pageElement;
   }
 
-  return page.querySelector<BlockComponentElement>(`[${ATTR}="${model.id}"]`);
+  return pageElement.querySelector<BlockComponentElement>(
+    `[${ATTR}="${model.id}"]`
+  );
 }
 
 export function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const editor = activeEditorManager.getActiveEditor();
-  const page = (editor ?? document).querySelector<PageBlockComponent>(
-    `[${ATTR}="${model.page.root.id}"]`
-  );
-  if (!page) return Promise.resolve(null);
+  const pageElement = getPageBlock(model);
+  if (!pageElement) return Promise.resolve(null);
 
   if (model.id === model.page.root.id) {
-    return Promise.resolve(page);
+    return Promise.resolve(pageElement);
   }
 
   let resolved = false;
@@ -299,7 +294,7 @@ export function asyncGetBlockElementByModel(
     };
 
     const observer = new MutationObserver(() => {
-      const blockElement = page.querySelector<BlockComponentElement>(
+      const blockElement = pageElement.querySelector<BlockComponentElement>(
         `[${ATTR}="${model.id}"]`
       );
       if (blockElement) {
@@ -307,7 +302,7 @@ export function asyncGetBlockElementByModel(
       }
     });
 
-    observer.observe(page, {
+    observer.observe(pageElement, {
       childList: true,
       subtree: true,
     });
@@ -370,7 +365,7 @@ export function getModelByElement(element: Element): BaseBlockModel {
 }
 
 export function isInsidePageTitle(element: unknown): boolean {
-  const editor = activeEditorManager.getActiveEditor();
+  const editor = document.querySelector('editor-container');
   const titleElement = (editor ?? document).querySelector(
     '[data-block-is-title="true"]'
   );
@@ -380,7 +375,7 @@ export function isInsidePageTitle(element: unknown): boolean {
 }
 
 export function isInsideEdgelessTextEditor(element: unknown): boolean {
-  const editor = activeEditorManager.getActiveEditor();
+  const editor = document.querySelector('editor-container');
   const textElement = getEdgelessCanvasTextEditor(editor ?? document);
   if (!textElement) return false;
 
@@ -715,10 +710,7 @@ export function getBlockElementsByElement(
  */
 export function getBlockElementById(
   id: string,
-  parent:
-    | BlockComponentElement
-    | Document
-    | Element = activeEditorManager.getActiveEditor() ?? document
+  parent: BlockComponentElement | Document | Element = document
 ) {
   return parent.querySelector(`[${ATTR}="${id}"]`);
 }

@@ -6,7 +6,6 @@ import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { isStrictUrl } from '../utils/url.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
 import {
@@ -145,8 +144,7 @@ export class RichText extends ShadowlessElement {
   override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
     this._vEditor = new VEditor<AffineTextAttributes>(this.model.text.yText, {
-      active: () => activeEditorManager.isActive(this),
-      embed: delta => !!delta.attributes?.reference,
+      isEmbed: delta => !!delta.attributes?.reference,
     });
     const textSchema = this.textSchema;
     assertExists(
