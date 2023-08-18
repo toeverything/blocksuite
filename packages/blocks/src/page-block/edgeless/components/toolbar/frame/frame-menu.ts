@@ -45,7 +45,6 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
       border: 1px solid rgba(227, 226, 228, 1);
       border-radius: 2px;
       cursor: pointer;
-      font-family: Inter;
       font-size: 10px;
       font-weight: 400;
       line-height: 12px;
@@ -98,7 +97,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     const { edgeless } = this;
     return html`
       <div class="frame-menu-container">
-        <edgeless-slide-menu .menuWidth=${280} .showNext=${false}>
+        <edgeless-slide-menu .menuWidth=${290} .showNext=${false}>
           <div class="menu-content">
             <div class="frame-add-button custom">Custom</div>
             <menu-divider .vertical=${true}></menu-divider>
