@@ -460,7 +460,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             ${ChangeShapeIcon} ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>
-        <edgeless-shape-panel .selectedShape=${selectedShape}>
+        <edgeless-shape-panel
+          .selectedShape=${selectedShape}
+          .shapeStyle=${selectedShapeStyle}
+        >
         </edgeless-shape-panel>
 
         <component-toolbar-menu-divider></component-toolbar-menu-divider>
