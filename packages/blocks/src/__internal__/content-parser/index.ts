@@ -426,38 +426,40 @@ export class ContentParser {
       ];
     }
 
-    if (file.size > MAX_ATTACHMENT_SIZE) {
-      toast(
-        `You can only upload files less than ${humanFileSize(
-          MAX_ATTACHMENT_SIZE,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
-    try {
-      const sourceId = await storage.set(
-        new File([file], file.name, { type: file.type })
-      );
-      const attachmentProps: AttachmentProps & {
-        flavour: 'affine:attachment';
-        children: [];
-      } = {
-        flavour: 'affine:attachment',
-        name: file.name,
-        sourceId,
-        size: file.size,
-        type: file.type,
-        children: [],
-      };
-      return [attachmentProps];
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
+    if (this._page.awarenessStore.getFlag('enable_attachment_block')) {
+      if (file.size > MAX_ATTACHMENT_SIZE) {
         toast(
-          `Failed to upload attachment! ${error.message || error.toString()}`
+          `You can only upload files less than ${humanFileSize(
+            MAX_ATTACHMENT_SIZE,
+            true,
+            0
+          )}`
         );
+        return [];
+      }
+      try {
+        const sourceId = await storage.set(
+          new File([file], file.name, { type: file.type })
+        );
+        const attachmentProps: AttachmentProps & {
+          flavour: 'affine:attachment';
+          children: [];
+        } = {
+          flavour: 'affine:attachment',
+          name: file.name,
+          sourceId,
+          size: file.size,
+          type: file.type,
+          children: [],
+        };
+        return [attachmentProps];
+      } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+          toast(
+            `Failed to upload attachment! ${error.message || error.toString()}`
+          );
+        }
       }
     }
     return [];

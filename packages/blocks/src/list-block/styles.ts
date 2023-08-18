@@ -21,46 +21,11 @@ const listPrefix = css`
     cursor: pointer;
     width: 24px;
     height: 24px;
-    transform: translate(1px);
   }
 
   .affine-list-block__todo-prefix > svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .affine-list-block__check-animation {
-    position: absolute;
     width: 20px;
     height: 20px;
-    border-radius: 50%;
-    transform: translateX(-1.5px);
-    animation: sparking 0.6s ease forwards;
-  }
-
-  @keyframes sparking {
-    0% {
-      width: 14px;
-      height: 14px;
-      left: 0px;
-    }
-    40% {
-      width: 20px;
-      height: 20px;
-      left: 0px;
-      box-shadow: 0 -18px 0 -8px #1e96eb, 16px -8px 0 -8px #1e96eb,
-        16px 8px 0 -8px #1e96eb, 0 18px 0 -8px #1e96eb, -16px 8px 0 -8px #1e96eb,
-        -16px -8px 0 -8px #1e96eb;
-    }
-
-    100% {
-      width: 20px;
-      height: 20px;
-      left: 0px;
-      box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent,
-        32px 16px 0 -10px transparent, 0 36px 0 -10px transparent,
-        -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
-    }
   }
 `;
 
@@ -82,6 +47,10 @@ export const styles = css`
   }
   .affine-list-rich-text-wrapper rich-text {
     flex: 1;
+  }
+
+  .affine-list--checked {
+    color: var(--affine-text-secondary-color);
   }
 
   ${listPrefix}

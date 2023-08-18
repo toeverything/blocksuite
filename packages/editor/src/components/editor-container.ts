@@ -187,32 +187,33 @@ export class EditorContainer
         };
       },
     });
-
-    this.fileDropManager.register({
-      name: 'Attachment',
-      matcher: (file: File) => {
-        // TODO limit size in blob
-        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
-        if (file.size > MAX_ATTACHMENT_SIZE) {
-          console.warn('You can only upload files less than 10M.');
-          return false;
-        }
-        return true;
-      },
-      handler: async (
-        file: File
-      ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
-        const storage = this.page.blobs;
-        const sourceId = await storage.set(file);
-        return {
-          flavour: 'affine:attachment',
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          sourceId,
-        };
-      },
-    });
+    if (this.page.awarenessStore.getFlag('enable_attachment_block')) {
+      this.fileDropManager.register({
+        name: 'Attachment',
+        matcher: (file: File) => {
+          // TODO limit size in blob
+          const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+          if (file.size > MAX_ATTACHMENT_SIZE) {
+            console.warn('You can only upload files less than 10M.');
+            return false;
+          }
+          return true;
+        },
+        handler: async (
+          file: File
+        ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+          const storage = this.page.blobs;
+          const sourceId = await storage.set(file);
+          return {
+            flavour: 'affine:attachment',
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            sourceId,
+          };
+        },
+      });
+    }
   }
 
   override updated(changedProperties: Map<string, unknown>) {

@@ -13,7 +13,6 @@ import {
   assertCellsSelection,
   assertRowsSelection,
   getDatabaseBodyCell,
-  getDatabaseBodyCellContent,
   initDatabaseColumn,
   switchColumnType,
 } from './actions.js';
