@@ -4,7 +4,6 @@ import type { Page } from '@blocksuite/store';
 
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { getService } from '../service/index.js';
-import { activeEditorManager } from '../utils/active-editor-manager.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
@@ -47,10 +46,6 @@ export class PageClipboard implements Clipboard {
   private _onPaste = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
 
-    if (!activeEditorManager.isActive(this._ele)) {
-      return;
-    }
-
     const textSelection = this._ele.selection.find('text');
 
     if (!e.clipboardData || !textSelection) {
@@ -88,10 +83,6 @@ export class PageClipboard implements Clipboard {
   private _onCopy = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
 
-    if (!activeEditorManager.isActive(this._ele)) {
-      return;
-    }
-
     e.preventDefault();
     this._page.captureSync();
 
@@ -105,9 +96,6 @@ export class PageClipboard implements Clipboard {
   private _onCut = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
 
-    if (!activeEditorManager.isActive(this._ele)) {
-      return;
-    }
     const textSelection = this._ele.selection.find('text');
     if (textSelection) {
       e.preventDefault();

@@ -73,6 +73,14 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * if sync is true, the native selection will be synced immediately
    */
   setVRange = (vRange: VRange | null, sync = true): void => {
+    if (
+      vRange &&
+      (vRange.index < 0 ||
+        vRange.index + vRange.length > this._editor.yText.length)
+    ) {
+      throw new Error('invalid vRange');
+    }
+
     this._editor.slots.vRangeUpdated.emit([vRange, sync ? 'other' : 'silent']);
   };
 
@@ -130,9 +138,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyVRange = (vRange: VRange): void => {
-    if (!this._editor.isActive()) {
-      return;
-    }
     const selectionRoot = findDocumentOrShadowRoot(this._editor);
     const selection = selectionRoot.getSelection();
     if (!selection) {
