@@ -44,7 +44,6 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     .frame-add-button {
       border: 1px solid rgba(227, 226, 228, 1);
       border-radius: 2px;
-      padding: 6px;
       cursor: pointer;
       font-family: Inter;
       font-size: 10px;
@@ -52,6 +51,29 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
       line-height: 12px;
       letter-spacing: 0px;
       text-align: center;
+      max-height: 20.49px;
+      height: 20.49px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .frame-add-button:nth-of-type(1) {
+      padding: 0px 3px;
+    }
+
+    .frame-add-button:nth-of-type(2) {
+      width: 20.49px;
+    }
+
+    .frame-add-button:nth-of-type(3) {
+      width: 27.31px;
+    }
+    .frame-add-button:nth-of-type(4) {
+      width: 36.42px;
+    }
+    .frame-add-button:nth-of-type(5) {
+      width: 40.97px;
     }
     .custom {
       background: rgba(0, 0, 0, 0.04);
@@ -76,14 +98,14 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     const { edgeless } = this;
     return html`
       <div class="frame-menu-container">
-        <edgeless-slide-menu .menuWidth=${270} .showNext=${false}>
+        <edgeless-slide-menu .menuWidth=${280} .showNext=${false}>
           <div class="menu-content">
             <div class="frame-add-button custom">Custom</div>
             <menu-divider .vertical=${true}></menu-divider>
             ${repeat(
               FrameConfig,
               item => item.name,
-              item => html`
+              (item, index) => html`
                 <div
                   @click=${() => {
                     const frames = edgeless.frame.frames;
@@ -108,7 +130,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                       editing: false,
                     });
                   }}
-                  class="frame-add-button"
+                  class="frame-add-button ${index}"
                 >
                   ${item.name}
                 </div>
