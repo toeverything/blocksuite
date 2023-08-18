@@ -6,7 +6,8 @@ import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/ed
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
-import { getServiceOrRegister } from '../../service/index.js';
+import { getService } from '../../service/index.js';
+import { registerAllBlocks } from '../../service/legacy-services/index.js';
 import {
   getCurrentNativeRange,
   getEdgelessCanvasTextEditor,
@@ -30,7 +31,8 @@ export async function getBlockClipboardInfo(
   begin?: number,
   end?: number
 ) {
-  const service = await getServiceOrRegister(model.flavour);
+  registerAllBlocks();
+  const service = await getService(model.flavour);
   const html = await service.block2html(model, { begin, end });
   const text = service.block2Text(model, { begin, end });
   // FIXME: the presence of children is not considered
