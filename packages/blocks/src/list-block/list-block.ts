@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import '../__internal__/rich-text/rich-text.js';
 
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -19,6 +20,7 @@ import { ListBlockService } from './list-service.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
+import { playCheckAnimation } from './utils/icons.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
@@ -51,6 +53,11 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
       this.model.page.captureSync();
       const checkedPropObj = { checked: !this.model.checked };
       this.model.page.updateBlock(this.model, checkedPropObj);
+      if (this.model.checked) {
+        const checkEl = this.querySelector('.affine-list-block__todo-prefix');
+        assertExists(checkEl);
+        playCheckAnimation(checkEl);
+      }
       return;
     }
     this._select();

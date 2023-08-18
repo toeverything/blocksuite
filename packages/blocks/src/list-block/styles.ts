@@ -27,39 +27,6 @@ const listPrefix = css`
     width: 20px;
     height: 20px;
   }
-
-  .affine-list-block__check-animation {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    animation: sparking 0.6s ease forwards;
-  }
-
-  @keyframes sparking {
-    0% {
-      width: 14px;
-      height: 14px;
-      left: 0px;
-    }
-    40% {
-      width: 20px;
-      height: 20px;
-      left: 0px;
-      box-shadow: 0 -18px 0 -8px #1e96eb, 16px -8px 0 -8px #1e96eb,
-        16px 8px 0 -8px #1e96eb, 0 18px 0 -8px #1e96eb, -16px 8px 0 -8px #1e96eb,
-        -16px -8px 0 -8px #1e96eb;
-    }
-
-    100% {
-      width: 20px;
-      height: 20px;
-      left: 0px;
-      box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent,
-        32px 16px 0 -10px transparent, 0 36px 0 -10px transparent,
-        -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
-    }
-  }
 `;
 
 export const styles = css`
