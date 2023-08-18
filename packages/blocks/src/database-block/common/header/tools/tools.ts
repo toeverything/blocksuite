@@ -9,7 +9,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { DataViewSelectionState } from '../../../../index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { BaseDataView } from '../../base-data-view.js';
 import { viewRendererManager } from '../../data-view.js';
