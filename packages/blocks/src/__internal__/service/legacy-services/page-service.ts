@@ -8,8 +8,8 @@ import type {
   BlockTransformContext,
   SerializedBlock,
 } from '../../utils/index.js';
-import { getService } from '../index.js';
 import { BaseService } from '../service.js';
+import { getService } from '../singleton.js';
 
 export class PageBlockService extends BaseService<PageBlockModel> {
   override async block2html(
@@ -97,7 +97,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     const noteModel = focusedBlockModel.page.getBlockById(noteId);
     assertExists(noteModel);
     const service = getService('affine:note');
-    return service.json2Block(noteModel, pastedBlocks);
+    service.json2Block(noteModel, pastedBlocks);
     // TODO: if page is not empty
   }
 }

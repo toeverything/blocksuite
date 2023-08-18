@@ -12,9 +12,11 @@ import { DividerBlockService } from './divider-service.js';
 import { ImageBlockService } from './image-service.js';
 import { ListBlockService } from './list-service.js';
 import { NoteBlockService } from './note-service.js';
+import { PageBlockService } from './page-service.js';
 import ParagraphBlockService from './paragraph-service.js';
 
 export const blockService = {
+  'affine:page': PageBlockService,
   'affine:code': CodeBlockService,
   'affine:database': LegacyDatabaseBlockService,
   'affine:paragraph': ParagraphBlockService,
