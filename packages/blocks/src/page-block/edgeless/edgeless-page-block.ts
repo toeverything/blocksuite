@@ -1105,9 +1105,10 @@ export class EdgelessPageBlockComponent
     let media: MediaQueryList;
 
     const onPixelRatioChange = () => {
-      this.surface.onResize();
-
-      if (media) media.removeEventListener('change', onPixelRatioChange);
+      if (media) {
+        this.surface?.onResize();
+        media.removeEventListener('change', onPixelRatioChange);
+      }
 
       media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
       media.addEventListener('change', onPixelRatioChange);
