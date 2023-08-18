@@ -1,7 +1,7 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
-import { type Page } from '@blocksuite/store';
+import { BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -222,6 +222,8 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   private _updateNotes() {
     const root = this.page.root;
 
+    if (this._dragging) return;
+
     if (!root) {
       this._notes = [];
       return;
@@ -285,18 +287,15 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     index: number,
     selected: string[],
     notesMap: Map<string, TOCNoteItem>,
-    notes: TOCNoteItem[]
+    notes: TOCNoteItem[],
+    children: NoteBlockModel[]
   ) {
-    const children = this.page.root?.children.slice() as NoteBlockModel[];
-
     if (!children || !this.page.root) return;
 
     const blocks = selected.map(id => (notesMap.get(id) as TOCNoteItem).note);
     const draggingBlocks = new Set(blocks);
     const targetIndex =
-      index === notes.length
-        ? this._notes[index - 1].index + 1
-        : this._notes[index].index;
+      index === notes.length ? notes[index - 1].index + 1 : notes[index].index;
 
     const leftPart = children
       .slice(0, targetIndex)
@@ -331,9 +330,13 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   }
 
   private _drag(e: DragEvent) {
+    if (!this._selected.length) return;
+
     this._dragging = true;
 
     // cache the notes in case it is changed by other peers
+    const children = (this.page.root?.children.slice() ??
+      []) as NoteBlockModel[];
     const notes = this._notes;
     const notesMap = this._notes.reduce((map, note, index) => {
       map.set(note.note.id, {
@@ -342,8 +345,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       });
       return map;
     }, new Map<string, TOCNoteItem>());
+    const selected = this._selected.slice();
 
-    const draggedNotesInfo = this._selected.map(id => {
+    const draggedNotesInfo = selected.map(id => {
       const note = notesMap.get(id) as TOCNoteItem;
 
       return {
@@ -355,9 +359,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
         number: note.number,
       };
     });
+    const width = draggedNotesInfo[0].element.clientWidth;
 
     this._noteElementHeight = draggedNotesInfo[0].element.offsetHeight;
-    const width = draggedNotesInfo[0].element.clientWidth;
 
     startDragging(draggedNotesInfo, {
       width,
@@ -376,7 +380,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
         if (insertIdx === undefined) return;
 
-        this._moveBlocks(insertIdx, this._selected, notesMap, notes);
+        this._moveBlocks(insertIdx, selected, notesMap, notes, children);
       },
       onDragMove: idx => {
         this.insertIndex = idx;
