@@ -14,7 +14,7 @@ import {
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { appendAttachmentBlock } from '../../attachment-block/utils.js';
-import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
+import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
 import { toast } from '../../components/toast.js';
 import {
   AttachmentIcon,

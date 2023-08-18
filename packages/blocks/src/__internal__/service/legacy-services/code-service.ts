@@ -2,19 +2,23 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
-import { BaseService } from '../__internal__/service/service.js';
+import type {
+  CodeBlockModel,
+  HighlightOptionsGetter,
+} from '../../../code-block/code-model.js';
+import { getStandardLanguage } from '../../../code-block/utils/code-languages.js';
+import {
+  DARK_THEME,
+  FALLBACK_LANG,
+  LIGHT_THEME,
+} from '../../../code-block/utils/consts.js';
+import { BLOCK_ID_ATTR } from '../../consts.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../__internal__/utils/index.js';
-import {
-  getVirgoByModel,
-  queryCurrentMode,
-} from '../__internal__/utils/index.js';
-import type { CodeBlockModel, HighlightOptionsGetter } from './code-model.js';
-import { getStandardLanguage } from './utils/code-languages.js';
-import { DARK_THEME, FALLBACK_LANG, LIGHT_THEME } from './utils/consts.js';
+} from '../../utils/index.js';
+import { getVirgoByModel, queryCurrentMode } from '../../utils/index.js';
+import { BaseService } from '../service.js';
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
   highlightOptionsGetter: HighlightOptionsGetter = null;

@@ -1,7 +1,4 @@
 {
-  "excludeRegExp": [
-    "(service*)"
-  ],
   "detectiveOptions": {
     "ts": {
       "skipTypeImports": true

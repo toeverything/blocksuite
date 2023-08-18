@@ -16,16 +16,12 @@ import {
 } from '../../__internal__/consts.js';
 import type { BlockHost, EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
-import {
-  getService,
-  registerService,
-} from '../../__internal__/service/index.js';
+import { getService } from '../../__internal__/service/index.js';
 import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
-import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 
 export interface PageViewport {
@@ -314,7 +310,6 @@ export class DocPageBlockComponent
   override connectedCallback() {
     super.connectedCallback();
 
-    registerService('affine:page', PageBlockService);
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
     this.clipboard.init(this.page);

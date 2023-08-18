@@ -1,7 +1,7 @@
-import type { SerializedBlock } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/service.js';
-import type { AttachmentBlockModel } from './attachment-model.js';
-import { cloneAttachmentProperties } from './utils.js';
+import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
+import { cloneAttachmentProperties } from '../../../attachment-block/utils.js';
+import type { SerializedBlock } from '../../index.js';
+import { BaseService } from '../service.js';
 
 export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
   override async block2html(block: AttachmentBlockModel) {
