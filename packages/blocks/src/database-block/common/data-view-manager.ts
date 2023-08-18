@@ -394,7 +394,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public abstract get columnsWithoutFilter(): string[];
 
-  public rowAdd(insertPosition: InsertPosition): string {
+  public rowAdd(insertPosition: InsertPosition | number): string {
     return this.dataSource.rowAdd(insertPosition);
   }
 

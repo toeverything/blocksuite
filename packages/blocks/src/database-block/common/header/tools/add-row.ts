@@ -4,9 +4,11 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { PlusIcon } from '../../../../icons/index.js';
+import type { TableViewSelection } from '../../../../index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { InsertPosition } from '../../../types.js';
 import type { DataViewExpose } from '../../data-view.js';
+import type { DatabaseSelection } from '../../selection.js';
 import { initAddNewRecordHandlers } from './new-record-preview.js';
 
 const styles = css`
@@ -49,6 +51,8 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
   viewMethod!: DataViewExpose;
   @property({ attribute: false })
   view!: DataViewTableManager;
+  @property({ attribute: false })
+  getSelection!: () => DatabaseSelection;
 
   @query('.new-record')
   private _newRecord!: HTMLDivElement;
@@ -76,7 +80,7 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
     }
   }
 
-  addRow = (position: InsertPosition) => {
+  addRow = (position: InsertPosition | number) => {
     this.viewMethod.addRow?.(position);
   };
 
@@ -99,7 +103,26 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    this.addRow('start');
+    const selection = this.getSelection();
+    if (!selection) {
+      this.addRow('start');
+    } else {
+      const { rowsSelection, columnsSelection, focus } =
+        selection.viewSelection as TableViewSelection;
+      let index = 0;
+      if (rowsSelection && !columnsSelection) {
+        // rows
+        index = rowsSelection.end;
+      } else if (rowsSelection && columnsSelection) {
+        // multiple cells
+        index = rowsSelection.end;
+      } else if (!rowsSelection && !columnsSelection && focus) {
+        // single cell
+        index = focus.rowIndex;
+      }
+
+      this.addRow(index + 1);
+    }
   };
 
   override render() {

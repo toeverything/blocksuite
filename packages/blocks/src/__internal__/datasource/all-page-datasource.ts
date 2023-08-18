@@ -87,7 +87,7 @@ export class AllPageDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(page);
   }
 
-  public propertyAdd(_insertPosition: InsertPosition): string {
+  public propertyAdd(_insertPosition: InsertPosition | number): string {
     throw new Error('not support');
   }
 
@@ -126,7 +126,7 @@ export class AllPageDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(_insertPosition: InsertPosition): string {
+  public rowAdd(_insertPosition: InsertPosition | number): string {
     return this.workspace.createPage().id;
   }
 

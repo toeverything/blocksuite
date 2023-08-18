@@ -7,6 +7,7 @@ import type { UniComponent } from '../../components/uni-component/uni-component.
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { InsertPosition } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
+import type { DatabaseSelection } from './selection.js';
 
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
@@ -24,13 +25,15 @@ export interface DataViewProps<
 
   setSelection: (selection?: Selection) => void;
 
+  getSelection: () => DatabaseSelection | undefined;
+
   selectionUpdated: Slot<Selection | undefined>;
 
   getFlag: Page['awarenessStore']['getFlag'];
 }
 
 export interface DataViewExpose {
-  addRow?(position: InsertPosition): void;
+  addRow?(position: InsertPosition | number): void;
 
   focusFirstCell(): void;
 }

@@ -195,13 +195,17 @@ export class DatabaseTable extends BaseDataView<
 
   private _addRow = (
     tableViewManager: DataViewTableManager,
-    position: InsertPosition
+    position: InsertPosition | number
   ) => {
     if (this.readonly) return;
-    const index = insertPositionToIndex(
-      position,
-      this.view.rows.map(id => ({ id }))
-    );
+
+    const index =
+      typeof position === 'number'
+        ? position
+        : insertPositionToIndex(
+            position,
+            this.view.rows.map(id => ({ id }))
+          );
     tableViewManager.rowAdd(position);
     requestAnimationFrame(() => {
       this.selection.selection = {

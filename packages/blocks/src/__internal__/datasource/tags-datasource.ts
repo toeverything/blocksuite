@@ -106,7 +106,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(tag);
   }
 
-  public propertyAdd(_insertPosition: InsertPosition): string {
+  public propertyAdd(_insertPosition: InsertPosition | number): string {
     throw new Error('not support');
   }
 
@@ -145,7 +145,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(_insertPosition: InsertPosition): string {
+  public rowAdd(_insertPosition: InsertPosition | number): string {
     const id = nanoid();
     this.changeTags([
       ...this.tags,
