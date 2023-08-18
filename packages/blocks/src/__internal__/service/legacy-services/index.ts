@@ -28,7 +28,7 @@ export const blockService = {
   [key in Flavour]?: { new (): BaseService };
 };
 
-export function registerAll() {
+export function registerAllBlocks() {
   Object.entries(blockService).forEach(([flavour, Constructor]) => {
     registerService(flavour, Constructor);
   });
