@@ -301,7 +301,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     notes: TOCNoteItem[],
     children: NoteBlockModel[]
   ) {
-    if (!children || !this.page.root) return;
+    if (!children.length || !this.page.root) return;
 
     const blocks = selected.map(id => (notesMap.get(id) as TOCNoteItem).note);
     const draggingBlocks = new Set(blocks);
@@ -341,13 +341,12 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   }
 
   private _drag(e: DragEvent) {
-    if (!this._selected.length) return;
+    if (!this._selected.length || !this.page.root) return;
 
     this._dragging = true;
 
     // cache the notes in case it is changed by other peers
-    const children = (this.page.root?.children.slice() ??
-      []) as NoteBlockModel[];
+    const children = this.page.root.children.slice() as NoteBlockModel[];
     const notes = this._notes;
     const notesMap = this._notes.reduce((map, note, index) => {
       map.set(note.note.id, {
