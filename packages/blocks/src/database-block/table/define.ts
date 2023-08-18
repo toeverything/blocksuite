@@ -15,7 +15,7 @@ export type TableViewColumn = {
 export type TableViewData = {
   columns: TableViewColumn[];
   filter: FilterGroup;
-  header: {
+  header?: {
     titleColumn?: string;
     iconColumn?: string;
     imageColumn?: string;
