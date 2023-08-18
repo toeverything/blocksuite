@@ -24,7 +24,7 @@ import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
   HandIcon,
-  PresentationIcon,
+  PresentationFullScreenIcon,
   SelectIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -350,7 +350,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           this._toggleFullScreen();
         }}
       >
-        ${PresentationIcon}
+        ${PresentationFullScreenIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
