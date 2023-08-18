@@ -54,6 +54,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       fill: currentColor;
     }
 
+    .text-color-unit-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 20px;
+      height: 20px;
+    }
+
     menu-divider {
       height: 24px;
     }
@@ -374,10 +382,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
               .tipPosition=${'bottom'}
               .active=${false}
+              .activeMode=${'background'}
               .iconContainerPadding=${2}
               @click=${() => this._colorSelectorPopper?.toggle()}
             >
-              ${ColorUnit(selectedColor)}
+              <div class="text-color-unit-container">
+                ${ColorUnit(selectedColor)}
+              </div>
             </edgeless-tool-icon-button>
             <div class="color-panel-container text-color">
               <edgeless-color-panel

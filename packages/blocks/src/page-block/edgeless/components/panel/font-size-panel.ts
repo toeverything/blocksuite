@@ -10,15 +10,19 @@ export class EdgelessFontSizePanel extends LitElement {
   static override styles = css`
     .font-size-container {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      width: 80px;
-      height: 170px;
       justify-content: center;
-      padding: 8px;
+      padding: 4px 8px;
       background: var(--affine-background-overlay-panel-color);
       border-radius: 8px;
-      gap: 4px;
+    }
+
+    .font-size-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
     }
 
     .font-size-button {
@@ -28,40 +32,39 @@ export class EdgelessFontSizePanel extends LitElement {
       width: 64px;
       height: 32px;
       padding: 0 8px;
-      border-radius: 4px;
     }
 
-    .font-size-button:hover {
-      cursor: pointer;
-      background: var(--affine-hover-color);
-    }
-
-    .font-size-button[active] {
+    .font-size-button[active] .font-size-button-label {
       background: var(--affine-hover-color);
     }
 
     .font-size-button-label {
       text-align: justify;
       font-size: 15px;
-      color: var(--light-text-color-text-primary-color, #424149);
-      font-family: 'Avenir Next';
       font-style: normal;
       width: 48px;
       height: 24px;
       font-weight: 400;
       line-height: 24px;
+      color: var(--affine-icon-color);
+      padding: 0 8px;
+      border-radius: 4px;
+    }
+
+    .font-size-button-label:hover {
+      cursor: pointer;
+      background: var(--affine-hover-color);
     }
 
     .font-size-input-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 28px;
     }
 
     .font-size-input {
-      width: 64px;
-      height: 20px;
+      width: 48px;
+      height: 18px;
       border: 1px solid var(--affine-border-color);
       border-radius: 8px;
       padding: 4px 8px;
@@ -129,62 +132,64 @@ export class EdgelessFontSizePanel extends LitElement {
   override render() {
     return html`
       <div class="font-size-container">
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.SMALL}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.SMALL);
-          }}
-        >
-          <div class="font-size-button-label">Small</div>
-        </div>
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.MEDIUM}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.MEDIUM);
-          }}
-        >
-          <div class="font-size-button-label">Middle</div>
-        </div>
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.LARGE}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.LARGE);
-          }}
-        >
-          <div class="font-size-button-label">Large</div>
-        </div>
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.XLARGE}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.XLARGE);
-          }}
-        >
-          <div class="font-size-button-label">Huge</div>
-        </div>
+        <div class="font-size-content">
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.SMALL}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.SMALL);
+            }}
+          >
+            <div class="font-size-button-label">Small</div>
+          </div>
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.MEDIUM}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.MEDIUM);
+            }}
+          >
+            <div class="font-size-button-label">Middle</div>
+          </div>
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.LARGE}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.LARGE);
+            }}
+          >
+            <div class="font-size-button-label">Large</div>
+          </div>
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.XLARGE}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.XLARGE);
+            }}
+          >
+            <div class="font-size-button-label">Huge</div>
+          </div>
 
-        <div
-          class="font-size-input-container"
-          @click=${(e: MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          <input
-            class="font-size-input"
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            placeholder=${Math.trunc(this.fontSize)}
-            @keypress=${this._onInputKeyPress}
-          />
+          <div
+            class="font-size-input-container"
+            @click=${(e: MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <input
+              class="font-size-input"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder=${Math.trunc(this.fontSize)}
+              @keypress=${this._onInputKeyPress}
+            />
+          </div>
         </div>
       </div>
     `;
