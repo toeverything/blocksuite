@@ -13,11 +13,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../icons/index.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { getBlockElementById, getModelByElement } from '../utils/index.js';
+import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from './consts.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
-
-export const REFERENCE_NODE = ' ';
-export const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
