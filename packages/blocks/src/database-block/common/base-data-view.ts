@@ -8,7 +8,6 @@ import type { DataViewSelection } from '../../__internal__/index.js';
 import type { InsertPosition } from '../types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
-import type { DatabaseSelection } from './selection.js';
 
 export abstract class BaseDataView<
     T extends DataViewManager = DataViewManager,
@@ -36,9 +35,6 @@ export abstract class BaseDataView<
   setSelection!: (selection?: Selection) => void;
 
   @property({ attribute: false })
-  getSelection!: () => DatabaseSelection | undefined;
-
-  @property({ attribute: false })
   selectionUpdated!: Slot<Selection | undefined>;
 
   @property({ attribute: false })
@@ -47,4 +43,5 @@ export abstract class BaseDataView<
   addRow?(position: InsertPosition): void;
 
   abstract focusFirstCell(): void;
+  abstract getSelection(): Selection | undefined;
 }

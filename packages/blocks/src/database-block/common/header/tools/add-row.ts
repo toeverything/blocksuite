@@ -8,7 +8,6 @@ import type { TableViewSelection } from '../../../../index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { InsertPosition } from '../../../types.js';
 import type { DataViewExpose } from '../../data-view.js';
-import type { DatabaseSelection } from '../../selection.js';
 import { initAddNewRecordHandlers } from './new-record-preview.js';
 
 const styles = css`
@@ -52,7 +51,7 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
   @property({ attribute: false })
   view!: DataViewTableManager;
   @property({ attribute: false })
-  getSelection!: () => DatabaseSelection;
+  getSelection!: () => TableViewSelection | undefined;
 
   @query('.new-record')
   private _newRecord!: HTMLDivElement;
@@ -107,8 +106,7 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
     if (!selection) {
       this.addRow('start');
     } else {
-      const { rowsSelection, columnsSelection, focus } =
-        selection.viewSelection as TableViewSelection;
+      const { rowsSelection, columnsSelection, focus } = selection;
       let index = 0;
       if (rowsSelection && !columnsSelection) {
         // rows
