@@ -400,6 +400,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     return html`
       <div
+        @mousedown=${this._dispatchDragEvent}
         data-invisible="${this.invisible ? 'true' : 'false'}"
         class="card-container ${this.status ?? ''} ${mode}"
         style=${
