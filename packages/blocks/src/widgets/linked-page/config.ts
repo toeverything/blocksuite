@@ -3,7 +3,7 @@ import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
 import { createPage } from '../../__internal__/utils/common-operations.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import { showImportModal } from '../../components/import-page/index.js';
