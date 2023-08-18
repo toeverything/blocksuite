@@ -17,10 +17,8 @@ import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { registerService } from '../__internal__/service/index.js';
 import { BlockHubIcon20 } from '../icons/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
-import paragraphService from './paragraph-service.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
@@ -218,7 +216,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     super.connectedCallback();
     // Initial placeholder state
     this._updatePlaceholder();
-    registerService('affine:paragraph', paragraphService);
     bindContainerHotkey(this);
   }
 

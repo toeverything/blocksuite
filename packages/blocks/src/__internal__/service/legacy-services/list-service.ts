@@ -1,11 +1,11 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { BlockTransformContext } from '../__internal__/index.js';
-import type { SerializedBlock } from '../__internal__/index.js';
-import { json2block } from '../__internal__/service/json2block.js';
-import { BaseService } from '../__internal__/service/service.js';
-import type { ListBlockModel } from './list-model.js';
+import type { ListBlockModel } from '../../../list-block/list-model.js';
+import type { BlockTransformContext } from '../../index.js';
+import type { SerializedBlock } from '../../index.js';
+import { json2block } from '../json2block.js';
+import { BaseService } from '../service.js';
 
 export class ListBlockService extends BaseService<ListBlockModel> {
   override async block2html(

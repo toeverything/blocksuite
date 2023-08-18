@@ -54,10 +54,7 @@ import {
   sendBackward,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import {
-  getService,
-  registerService,
-} from '../../__internal__/service/index.js';
+import { getService } from '../../__internal__/service/index.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import {
@@ -73,7 +70,6 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { FontLoader } from '../font-loader/index.js';
-import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteSlicer } from './components/note-slicer/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
@@ -1256,7 +1252,6 @@ export class EdgelessPageBlockComponent
       return;
     });
 
-    registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);

@@ -8,11 +8,9 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
-import { BookmarkBlockService } from './bookmark-service.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
@@ -209,7 +207,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:bookmark', BookmarkBlockService);
     reloadBookmarkBlock(this.model, this);
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
