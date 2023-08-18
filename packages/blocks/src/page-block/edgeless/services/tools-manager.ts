@@ -33,6 +33,7 @@ import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
 import { DefaultToolController } from '../tool-controllers/default-tool.js';
 import { EraserToolController } from '../tool-controllers/eraser-tool.js';
 import { PresentToolController } from '../tool-controllers/frame-navigator-tool.js';
+import { FrameToolController } from '../tool-controllers/frame-tool.js';
 import type { EdgelessToolController } from '../tool-controllers/index.js';
 import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
@@ -159,6 +160,7 @@ export class EdgelessToolsManager {
       note: new NoteToolController(this.container),
       connector: new ConnectorToolController(this.container),
       eraser: new EraserToolController(this.container),
+      frame: new FrameToolController(this.container),
       frameNavigator: new PresentToolController(this.container),
     };
 

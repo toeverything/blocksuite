@@ -118,8 +118,8 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
     });
     const lineWidth = getLineWidth(text, font);
 
-    const padding = [Math.min(10 / zoom, 10), Math.min(4 / zoom, 4)];
-    const radius = Math.min(4, lineHeight / 2);
+    const padding = [10 / zoom, 4 / zoom];
+    const radius = 4 / zoom;
 
     this._titleHeight = lineHeight + padding[1] * 2 + offset;
     this._titleWidth = lineWidth + padding[0] * 2;
