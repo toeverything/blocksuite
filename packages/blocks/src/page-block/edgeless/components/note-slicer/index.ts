@@ -63,6 +63,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     transformY: number;
     width: number;
     gapRect: DOMRect;
+    sliceVerticalPos: number;
   } | null = null;
 
   private _noteModel: NoteBlockModel | null = null;
@@ -158,7 +159,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       note: block,
       noteElement: noteBlockElement,
       upperBlock: onUpperPart ? nearbyBlock : currentBlock,
-      lowerBlock: onUpperPart ? currentBlock : nearbyBlock,
+      upperBlockElement: (onUpperPart
+        ? nearbyBlockElement
+        : element) as HTMLElement,
       gapRect: new DOMRect(
         upperBlockRect.x,
         upperBlockRect.y + upperBlockRect.height,
@@ -174,11 +177,12 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       note: NoteBlockModel;
       noteElement: BlockComponentElement;
       upperBlock: BaseBlockModel<object>;
-      lowerBlock: BaseBlockModel<object>;
+      upperBlockElement: HTMLElement;
       gapRect: DOMRect;
     }
   ) {
-    const { note, noteElement, upperBlock, gapRect } = modelState;
+    const { note, noteElement, upperBlock, upperBlockElement, gapRect } =
+      modelState;
 
     if (!noteElement.parentElement) {
       this._hide();
@@ -195,6 +199,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       noteContainerRect.top +
       gapRect.top +
       gapRect.height / 2;
+    const sliceVerticalPos =
+      baseY + upperBlockElement.offsetHeight + upperBlockElement.offsetTop;
 
     if (this._lastPosition) {
       if (
@@ -215,6 +221,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       transformY,
       width: noteElement.offsetWidth * this._zoom,
       gapRect,
+      sliceVerticalPos,
     };
 
     requestAnimationFrame(() => {
@@ -260,13 +267,18 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       block => block.id === this._blockModel?.id
     );
     const resetBlocks = children.slice(sliceIndex + 1);
-    const { transformY: y } = this._lastPosition;
+    const { sliceVerticalPos } = this._lastPosition;
     const [x, , width] = deserializeXYWH(xywh);
     const newNoteId = page.addBlock(
       'affine:note',
       {
         background,
-        xywh: serializeXYWH(x, y + 30, width, DEFAULT_NOTE_HEIGHT),
+        xywh: serializeXYWH(
+          x,
+          sliceVerticalPos + EDGELESS_BLOCK_CHILD_PADDING + 30,
+          width,
+          DEFAULT_NOTE_HEIGHT
+        ),
         index: originIndex + 1,
       },
       page.root?.id
