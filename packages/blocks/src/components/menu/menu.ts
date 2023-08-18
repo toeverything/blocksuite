@@ -498,7 +498,7 @@ export const createModal = () => {
   div.style.top = '0';
   div.style.width = '100vw';
   div.style.height = '100vh';
-  div.style.zIndex = '10';
+  div.style.zIndex = '1001';
   document.body.querySelector('block-suite-root')?.append(div);
   return div;
 };
