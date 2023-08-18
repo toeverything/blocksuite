@@ -9,7 +9,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { activeEditorManager } from '../utils/active-editor-manager.js';
 import { isStrictUrl } from '../utils/url.js';
 import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
-import { REFERENCE_NODE } from './reference-node.js';
 import {
   type AffineTextAttributes,
   type AffineTextSchema,
