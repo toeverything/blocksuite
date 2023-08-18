@@ -7,7 +7,7 @@ import { html } from 'lit/static-html.js';
 import * as Y from 'yjs';
 import { Doc, Text as YText } from 'yjs';
 
-import { REFERENCE_NODE } from '../../../__internal__/rich-text/reference-node.js';
+import { REFERENCE_NODE } from '../../../__internal__/rich-text/consts.js';
 import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
