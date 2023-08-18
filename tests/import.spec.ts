@@ -1670,7 +1670,10 @@ test(scoped`import notion html-format highlight`, async ({ page }) => {
           attributes: { background: 'var(--affine-text-highlight-grey)' },
         },
         { insert: 'e', attributes: {} },
-        { insert: 'f', attributes: {} },
+        {
+          insert: 'f',
+          attributes: { background: 'var(--affine-text-highlight-yellow)' },
+        },
         { insert: 'g', attributes: {} },
         {
           insert: 'h',
@@ -1719,7 +1722,10 @@ test(scoped`import notion html-format highlight`, async ({ page }) => {
           attributes: { background: 'var(--affine-text-highlight-grey)' },
         },
         { insert: 'e', attributes: {} },
-        { insert: 'f', attributes: {} },
+        {
+          insert: 'f',
+          attributes: { background: 'var(--affine-text-highlight-yellow)' },
+        },
         { insert: 'g', attributes: {} },
         {
           insert: 'h',

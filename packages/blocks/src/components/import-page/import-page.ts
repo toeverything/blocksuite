@@ -24,7 +24,10 @@ import type { Cell, Column } from '../../index.js';
 import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
-export type OnSuccessHandler = (pageIds: string[]) => void;
+export type OnSuccessHandler = (
+  pageIds: string[],
+  isWorkspaceFile: boolean
+) => void;
 
 const SHOW_LOADING_SIZE = 1024 * 200;
 
@@ -77,6 +80,7 @@ export async function importNotion(workspace: Workspace, file: File) {
   const pageIds: string[] = [];
   const allPageMap: Map<string, Page>[] = [];
   // const dataBaseSubPages = new Set<string>();
+  let isWorkspaceFile = false;
   const parseZipFile = async (file: File | Blob) => {
     const zip = new JSZip();
     const zipFile = await zip.loadAsync(file);
@@ -96,6 +100,10 @@ export async function importNotion(workspace: Workspace, file: File) {
 
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+        if (file.endsWith('/index.html')) {
+          isWorkspaceFile = true;
+          continue;
+        }
         if (lastSplitIndex !== -1) {
           const text = await zipFile.files[file].async('text');
           const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -310,7 +318,7 @@ export async function importNotion(workspace: Workspace, file: File) {
   //     }
   //   });
   // });
-  return pageIds;
+  return { pageIds, isWorkspaceFile };
 }
 
 /**
@@ -383,13 +391,13 @@ export class ImportPage extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _onImportSuccess(pageIds: string[]) {
+  private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
     toast(
       `Successfully imported ${pageIds.length} Page${
         pageIds.length > 1 ? 's' : ''
       }.`
     );
-    this.onSuccess?.(pageIds);
+    this.onSuccess?.(pageIds, isWorkspaceFile);
   }
 
   private async _importMarkDown() {
@@ -444,9 +452,12 @@ export class ImportPage extends WithDisposable(LitElement) {
     } else {
       this.abortController.abort();
     }
-    const pageIds = await importNotion(this.workspace, file);
+    const { pageIds, isWorkspaceFile } = await importNotion(
+      this.workspace,
+      file
+    );
     needLoading && this.abortController.abort();
-    this._onImportSuccess(pageIds);
+    this._onImportSuccess(pageIds, isWorkspaceFile);
   }
 
   private _openLearnImportLink(event: MouseEvent) {
