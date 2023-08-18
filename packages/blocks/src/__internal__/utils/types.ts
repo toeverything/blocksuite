@@ -175,6 +175,10 @@ export type EraserTool = {
   type: 'eraser';
 };
 
+export type FrameTool = {
+  type: 'frame';
+};
+
 export type FrameNavigatorTool = {
   type: 'frameNavigator';
 };
@@ -210,6 +214,7 @@ export type EdgelessTool =
   | NoteTool
   | ConnectorTool
   | EraserTool
+  | FrameTool
   | FrameNavigatorTool;
 
 export type SerializedBlock = {
