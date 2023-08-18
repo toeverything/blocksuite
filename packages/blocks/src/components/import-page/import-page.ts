@@ -2,7 +2,7 @@ import '../loader.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { type Page, type Workspace } from '@blocksuite/store';
+import { type Workspace } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -78,14 +78,14 @@ function joinWebPaths(...paths: string[]): string {
 
 export async function importNotion(workspace: Workspace, file: File) {
   const pageIds: string[] = [];
-  const allPageMap: Map<string, Page>[] = [];
+  // const allPageMap: Map<string, Page>[] = [];
   // const dataBaseSubPages = new Set<string>();
   let isWorkspaceFile = false;
   const parseZipFile = async (file: File | Blob) => {
     const zip = new JSZip();
     const zipFile = await zip.loadAsync(file);
-    const pageMap = new Map<string, Page>();
-    allPageMap.push(pageMap);
+    const pageMap = new Map<string, string>();
+    // allPageMap.push(pageMap);
     const files = Object.keys(zipFile.files);
     const promises: Promise<void>[] = [];
     const csvFiles = files
@@ -112,8 +112,7 @@ export async function importNotion(workspace: Workspace, file: File) {
             continue;
           }
         }
-        const page = await createPage(workspace);
-        pageMap.set(file, page);
+        pageMap.set(file, workspace.idGenerator());
       }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
@@ -123,7 +122,7 @@ export async function importNotion(workspace: Workspace, file: File) {
       }
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
-      const page = pageMap.get(file);
+      const page = await createPage(workspace, { id: pageMap.get(file) });
       if (!page) return;
       const lastSplitIndex = file.lastIndexOf('/');
       const folder = file.substring(0, lastSplitIndex) || '';
@@ -142,10 +141,10 @@ export async function importNotion(workspace: Workspace, file: File) {
           if (textStyle['link']) {
             const link = textStyle['link'] as string;
             const subPageLink = joinWebPaths(folder, decodeURI(link));
-            const linkPage = pageMap.get(subPageLink);
-            if (linkPage) {
+            const linkPageId = pageMap.get(subPageLink);
+            if (linkPageId) {
               textStyle['reference'] = {
-                pageId: linkPage.id,
+                pageId: linkPageId,
                 type: 'LinkedPage',
               };
               delete textStyle['link'];
@@ -270,9 +269,9 @@ export async function importNotion(workspace: Workspace, file: File) {
                 titleColumn.push(ele.textContent || '');
                 return;
               }
-              const linkPage = pageMap.get(decodeURI(subPageLink));
-              if (linkPage) {
-                titleColumn.push(`@AffineReference:(${linkPage.id})`);
+              const linkPageId = pageMap.get(decodeURI(subPageLink));
+              if (linkPageId) {
+                titleColumn.push(`@AffineReference:(${linkPageId})`);
               } else {
                 titleColumn.push(link?.textContent || '');
               }
