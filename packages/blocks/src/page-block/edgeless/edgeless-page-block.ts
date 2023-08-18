@@ -259,6 +259,7 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
+  @state()
   private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
@@ -491,7 +492,9 @@ export class EdgelessPageBlockComponent
     let resetWillChange: ReturnType<typeof setTimeout> | null = null;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this._edgelessLayerWillChange = true;
+        if (!this._edgelessLayerWillChange) {
+          this._edgelessLayerWillChange = true;
+        }
 
         if (resetWillChange) clearTimeout(resetWillChange);
         resetWillChange = setTimeout(() => {
