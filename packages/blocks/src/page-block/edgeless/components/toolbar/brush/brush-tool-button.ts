@@ -29,7 +29,7 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   // The brush menu should be positioned at the top of the brush button.
   // And it should be positioned at the top center of the toolbar all the time.
   const x = 90;
-  const y = -44;
+  const y = -40;
 
   Object.assign(brushMenu.style, {
     left: `${x}px`,

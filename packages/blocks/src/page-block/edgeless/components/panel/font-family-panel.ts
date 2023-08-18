@@ -20,6 +20,8 @@ export class EdgelessFontFamilyPanel extends LitElement {
       align-items: center;
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
+      gap: 8px;
+      padding: 4px;
     }
 
     .general-button {
@@ -50,6 +52,8 @@ export class EdgelessFontFamilyPanel extends LitElement {
         <edgeless-tool-icon-button
           class="general-button"
           .active=${this.value === GENERAL_CANVAS_FONT_FAMILY}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect(GENERAL_CANVAS_FONT_FAMILY);
           }}
@@ -59,6 +63,8 @@ export class EdgelessFontFamilyPanel extends LitElement {
         <edgeless-tool-icon-button
           class="scibbled-button"
           .active=${this.value === SCIBBLED_CANVAS_FONT_FANILY}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect(SCIBBLED_CANVAS_FONT_FANILY);
           }}

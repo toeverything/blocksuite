@@ -104,6 +104,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     .selected-font-size {
       align-self: end;
     }
+
+    .text-bold-button {
+      margin: 0 12px;
+    }
+
+    component-toolbar-menu-divider {
+      margin: 0 12px;
+    }
   `;
 
   @property({ attribute: false })
@@ -354,6 +362,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
         .tipPosition=${'bottom'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._colorSelectorPopper?.toggle()}
       >
         ${ColorUnit(selectedColor)}
@@ -368,13 +377,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         ></edgeless-color-panel>
       </div>
 
-      <menu-divider .vertical=${true}></menu-divider>
+      <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
       <edgeless-tool-icon-button
         class="text-font-size-button"
         .tooltip=${this._fontFamilyPopperShow ? '' : 'Font Size'}
         .tipPosition=${'bottom'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._textFontSizePopper?.toggle()}
       >
         <div class="font-size-button-group">
@@ -394,13 +404,14 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         ></edgeless-font-size-panel>
       </div>
 
-      <menu-divider .vertical=${true}></menu-divider>
+      <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
       <edgeless-tool-icon-button
         class="text-font-family-button"
         .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
         .tipPosition=${'bottom'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._textFontFamilyPopper?.toggle()}
       >
         <div class="button-with-arrow-group">
@@ -417,9 +428,12 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       </div>
 
       <edgeless-tool-icon-button
+        class="text-bold-button"
         .tooltip=${'Bold'}
         .tipPosition=${'bottom'}
         .active=${bold}
+        .iconContainerPadding=${2}
+        .activeMode=${'background'}
         @click=${() => this._setTextBold(!bold)}
       >
         ${BoldIcon}
@@ -428,18 +442,21 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         .tooltip=${'Italic'}
         .tipPosition=${'bottom'}
         .active=${italic}
+        .iconContainerPadding=${2}
+        .activeMode=${'background'}
         @click=${() => this._setTextItalic(!italic)}
       >
         ${ItalicIcon}
       </edgeless-tool-icon-button>
 
-      <menu-divider .vertical=${true}></menu-divider>
+      <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
       <edgeless-tool-icon-button
         class="text-align-button"
         .tooltip=${this._textAlignPopperShow ? '' : 'Alignment'}
         .tipPosition=${'bottom'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._textAlignPopper?.toggle()}
       >
         <div class="button-with-arrow-group">
