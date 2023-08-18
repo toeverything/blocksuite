@@ -110,36 +110,6 @@ const autoIdentifyLink = (
   };
 };
 
-const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
-  // @AffineReference:(id)
-  const referencePattern = /@AffineReference:\((.*)\)/g;
-
-  const match = referencePattern.exec(text);
-  if (!match) {
-    return;
-  }
-
-  const pageId = match[1];
-
-  editor.deleteText({
-    index: 0,
-    length: match[0].length,
-  });
-  editor.setVRange({
-    index: 0,
-    length: 0,
-  });
-
-  const vRange = {
-    index: match[0].length,
-    length: 0,
-  };
-
-  editor.insertText(vRange, REFERENCE_NODE, {
-    reference: { type: 'Subpage', pageId },
-  });
-};
-
 @customElement('rich-text')
 export class RichText extends ShadowlessElement {
   static override styles = css`
@@ -186,7 +156,6 @@ export class RichText extends ShadowlessElement {
     );
     this._vEditor.setAttributeSchema(textSchema.attributesSchema);
     this._vEditor.setAttributeRenderer(textSchema.textRenderer());
-    autoIdentifyReference(this._vEditor, this.model.text.yText.toString());
 
     const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
     const keyDownHandler = createKeyDownHandler(
