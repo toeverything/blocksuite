@@ -75,6 +75,10 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
     const top = shouldAddMarginTop ? 'affine-list-block-container--first' : '';
+    const checked =
+      this.model.type === 'todo' && this.model.checked
+        ? 'affine-list--checked'
+        : '';
 
     const children = html`<div
       class="affine-block-children-container"
@@ -85,7 +89,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
     return html`
       <div class=${`affine-list-block-container ${top}`}>
-        <div class="affine-list-rich-text-wrapper">
+        <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${listIcon}
           <rich-text
             .model=${this.model}

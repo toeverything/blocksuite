@@ -21,12 +21,11 @@ const listPrefix = css`
     cursor: pointer;
     width: 24px;
     height: 24px;
-    transform: translate(1px);
   }
 
   .affine-list-block__todo-prefix > svg {
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
   }
 
   .affine-list-block__check-animation {
@@ -34,7 +33,6 @@ const listPrefix = css`
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    transform: translateX(-1.5px);
     animation: sparking 0.6s ease forwards;
   }
 
@@ -82,6 +80,10 @@ export const styles = css`
   }
   .affine-list-rich-text-wrapper rich-text {
     flex: 1;
+  }
+
+  .affine-list--checked {
+    color: var(--affine-text-secondary-color);
   }
 
   ${listPrefix}
