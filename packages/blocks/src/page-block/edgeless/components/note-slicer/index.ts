@@ -187,9 +187,14 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
     const shouldTransition = note === this._noteModel;
     const noteContainer = noteElement.parentElement;
-    const [baseX] = deserializeXYWH(note.xywh);
-    const transformX = baseX;
-    const transformY = gapRect.top + gapRect.height / 2;
+    const noteContainerRect = noteContainer.getBoundingClientRect();
+    const [baseX, baseY] = deserializeXYWH(note.xywh);
+    const transformX = baseX * this._zoom;
+    const transformY =
+      baseY * this._zoom -
+      noteContainerRect.top +
+      gapRect.top +
+      gapRect.height / 2;
 
     if (this._lastPosition) {
       if (
@@ -220,7 +225,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         this.style.removeProperty('transition');
       }
 
-      this.style.transform = `translate3d(calc(var(--affine-edgeless-x) + ${transformX}px), calc(${transformY}px), 0) translate3d(0, -50%, 0)`;
+      this.style.transform = `translate3d(calc(var(--affine-edgeless-x) + ${transformX}px), calc(var(--affine-edgeless-y) + ${transformY}px), 0) translate3d(0, -50%, 0)`;
       this.style.zIndex = noteContainer.style.zIndex;
     });
   }
