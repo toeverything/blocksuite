@@ -5,6 +5,7 @@ import './brush/brush-tool-button.js';
 import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
+import './frame/frame-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -381,6 +382,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       >
         ${HandIcon}
       </edgeless-tool-icon-button>
+
+      <edgeless-frame-tool-button
+        .edgelessTool=${this.edgelessTool}
+        .setEdgelessTool=${this.setEdgelessTool}
+        .edgeless=${this.edgeless}
+      ></edgeless-frame-tool-button>
+
       <edgeless-tool-icon-button
         .tooltip=${'Prensentation'}
         @click=${() => {

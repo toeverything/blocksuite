@@ -90,8 +90,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           if (
             this.pageElement.selectionManager.elements.length !== 0 &&
             !this.pageElement.selectionManager.editing
-          )
+          ) {
             this.pageElement.frame.createFrameOnSelected();
+          } else if (!this.pageElement.selectionManager.editing) {
+            this._setEdgelessTool(pageElement, { type: 'frame' });
+          }
         },
         'Mod-a': ctx => {
           if (this.pageElement.selectionManager.editing) {
