@@ -257,9 +257,12 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return id;
   }
 
-  public rowAdd(insertPosition: InsertPosition): string {
+  public rowAdd(insertPosition: InsertPosition | number): string {
     this.page.captureSync();
-    const index = insertPositionToIndex(insertPosition, this._model.children);
+    const index =
+      typeof insertPosition === 'number'
+        ? insertPosition
+        : insertPositionToIndex(insertPosition, this._model.children);
     return this.page.addBlock('affine:paragraph', {}, this._model.id, index);
   }
 

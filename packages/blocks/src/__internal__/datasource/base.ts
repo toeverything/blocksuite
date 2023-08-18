@@ -30,7 +30,7 @@ export interface DataSource {
     value: unknown
   ) => unknown;
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
-  rowAdd: (insertPosition: InsertPosition) => string;
+  rowAdd: (insertPosition: InsertPosition | number) => string;
   rowDelete: (ids: string[]) => void;
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
@@ -135,7 +135,7 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetType(propertyId: string): string;
 
-  public abstract rowAdd(insertPosition: InsertPosition): string;
+  public abstract rowAdd(insertPosition: InsertPosition | number): string;
 
   public abstract rowDelete(ids: string[]): void;
 

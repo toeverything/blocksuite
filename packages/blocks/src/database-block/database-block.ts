@@ -272,11 +272,18 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         models.forEach(model => this.page.deleteBlock(model));
       },
     };
+    const getSelection = () => {
+      return this.root.selectionManager.value.find(selection =>
+        selection.is('database')
+      ) as DatabaseSelection;
+    };
+
     return html` <data-view-header-tools
       .viewEle="${this._view.value}"
       .copyBlock="${blockOperation.copy}"
       .deleteSelf="${blockOperation.delete}"
       .view="${view}"
+      .getSelection=${getSelection}
     ></data-view-header-tools>`;
   };
 

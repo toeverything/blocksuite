@@ -9,9 +9,11 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import type { DataViewSelectionState } from '../../../../index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { BaseDataView } from '../../base-data-view.js';
 import { viewRendererManager } from '../../data-view.js';
+import type { DatabaseSelection } from '../../selection.js';
 
 const styles = css`
   .affine-database-toolbar {
@@ -49,6 +51,9 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
   deleteSelf!: () => void;
 
   @property({ attribute: false })
+  getSelection!: () => DatabaseSelection;
+
+  @property({ attribute: false })
   view!: DataViewTableManager;
 
   @state()
@@ -68,6 +73,7 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
         const props = {
           view: this.view,
           viewMethod: this.viewEle,
+          getSelection: this.getSelection,
         };
         return html` <uni-lit .uni="${uni}" .props=${props}></uni-lit>`;
       })}
