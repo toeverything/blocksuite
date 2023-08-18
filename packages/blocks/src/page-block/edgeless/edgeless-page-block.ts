@@ -1147,7 +1147,7 @@ export class EdgelessPageBlockComponent
         if (font !== 'Kalam:n4,n7' || !this.surface) return;
 
         if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.onResize();
+          this.surface.refresh();
         }
       })
     );
