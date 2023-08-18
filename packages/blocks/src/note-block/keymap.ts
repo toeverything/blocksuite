@@ -29,6 +29,7 @@ import {
 export const bindHotKey = (blockElement: BlockElement) => {
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
+  let composition = false;
   const reset = () => {
     anchorSel = null;
     focusBlock = null;
@@ -41,9 +42,19 @@ export const bindHotKey = (blockElement: BlockElement) => {
     }
     reset();
   });
+  blockElement.handleEvent('compositionStart', () => {
+    composition = true;
+  });
+  blockElement.handleEvent('compositionEnd', () => {
+    composition = false;
+  });
   blockElement.bindHotKey({
     ArrowDown: () => {
       reset();
+
+      if (composition) {
+        return true;
+      }
 
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
@@ -82,6 +93,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
     ArrowUp: () => {
       reset();
 
+      if (composition) {
+        return true;
+      }
+
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
         const start = textSelection.from;
@@ -119,6 +134,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
     ArrowLeft: () => {
       reset();
 
+      if (composition) {
+        return true;
+      }
+
       const textSelection = getTextSelection(blockElement);
       if (!textSelection) {
         return;
@@ -140,6 +159,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
     },
     ArrowRight: () => {
       reset();
+
+      if (composition) {
+        return true;
+      }
 
       const textSelection = getTextSelection(blockElement);
       if (!textSelection) {
