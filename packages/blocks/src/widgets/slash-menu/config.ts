@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 
-import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
 import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
