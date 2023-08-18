@@ -1,7 +1,7 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound } from '@blocksuite/phasor';
-import { BaseBlockModel, type Page } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -170,6 +170,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: Document | HTMLElement;
 
+  @property({ attribute: false })
+  fitPadding!: number[];
+
   private _noteElementHeight = 0;
   private _changedFlag = false;
   private _oldViewport?: {
@@ -182,6 +185,14 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   get edgeless() {
     return this.ownerDocument.querySelector('affine-edgeless-page');
+  }
+
+  get viewportPadding(): [number, number, number, number] {
+    return this.fitPadding
+      ? ([0, 0, 0, 0].map((val, idx) =>
+          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
+        ) as [number, number, number, number])
+      : [0, 0, 0, 0];
   }
 
   override connectedCallback(): void {
@@ -398,12 +409,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     if (!edgeless) return;
 
     const { surface } = edgeless;
-    const { centerX, centerY, zoom } = edgeless.getFitToScreenData([
-      undefined,
-      this.offsetWidth,
-      undefined,
-      undefined,
-    ]);
+    const bound = edgeless.getElementsBound();
+
+    if (!bound) return;
 
     this._oldViewport = {
       zoom: surface.viewport.zoom,
@@ -412,7 +420,11 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
         y: surface.viewport.center.y,
       },
     };
-    surface.viewport.setViewport(zoom, [centerX, centerY], true);
+    surface.viewport.setViewportByBound(
+      new Bound(bound.x, bound.y, bound.w, bound.h),
+      this.viewportPadding,
+      true
+    );
   }
 
   private _fitToElement(e: FitViewEvent) {
@@ -425,7 +437,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     edgeless.surface.viewport.setViewportByBound(
       bound,
-      [50, 400, 50, 50],
+      this.viewportPadding,
       true
     );
   }
