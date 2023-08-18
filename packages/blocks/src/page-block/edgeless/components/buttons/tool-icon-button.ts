@@ -45,6 +45,10 @@ export class EdgelessToolIconButton extends LitElement {
     tool-tip {
       z-index: 12;
     }
+
+    tool-tip:is([arrow]):is([tip-position='top'])::before {
+      margin-top: -4px;
+    }
   `;
 
   @property({ attribute: false })
@@ -57,8 +61,7 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' | 'top-start' =
-    'top';
+  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' = 'top';
 
   @property({ attribute: false })
   arrow = true;
