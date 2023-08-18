@@ -191,7 +191,14 @@ export class DataViewTableManager extends BaseDataViewManager {
   }
 
   public get header() {
-    return this.view.header ?? {};
+    return (
+      this.view.header ?? {
+        titleColumn: this.columnsWithoutFilter.find(
+          id => this.columnGetType(id) === 'title'
+        ),
+        iconColumn: 'type',
+      }
+    );
   }
 
   public isInHeader(columnId: string) {
