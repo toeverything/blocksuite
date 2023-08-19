@@ -1,10 +1,10 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 
-import type { SerializedBlock } from '../__internal__/index.js';
-import type { BlockTransformContext } from '../__internal__/index.js';
-import { json2block } from '../__internal__/service/json2block.js';
-import { BaseService } from '../__internal__/service/service.js';
-import type { ParagraphBlockModel } from './paragraph-model.js';
+import type { ParagraphBlockModel } from '../../../paragraph-block/paragraph-model.js';
+import type { SerializedBlock } from '../../index.js';
+import type { BlockTransformContext } from '../../index.js';
+import { json2block } from '../json2block.js';
+import { BaseService } from '../service.js';
 
 export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
   override async block2html(

@@ -1,9 +1,9 @@
-import type { SerializedBlock } from '../__internal__/index.js';
-import { BaseService } from '../__internal__/service/service.js';
-import type { BookmarkBlockModel } from './bookmark-model.js';
-import { DefaultBanner } from './images/banners.js';
-import { DefaultIcon } from './images/icons.js';
-import { cloneBookmarkProperties } from './utils.js';
+import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
+import { DefaultBanner } from '../../../bookmark-block/images/banners.js';
+import { DefaultIcon } from '../../../bookmark-block/images/icons.js';
+import { cloneBookmarkProperties } from '../../../bookmark-block/utils.js';
+import type { SerializedBlock } from '../../index.js';
+import { BaseService } from '../service.js';
 
 export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   override async block2html(block: BookmarkBlockModel) {

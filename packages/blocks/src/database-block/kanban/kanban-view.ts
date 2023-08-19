@@ -171,6 +171,10 @@ export class DataViewKanban extends BaseDataView<
   focusFirstCell(): void {
     this.selection.focusFirstCell();
   }
+
+  getSelection() {
+    return this.selection.selection;
+  }
 }
 
 declare global {

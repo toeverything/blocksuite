@@ -5,6 +5,7 @@ import { createIcon } from '../../../../components/icon/uni-icon.js';
 import {
   checkboxChecked,
   checkboxUnchecked,
+  playCheckAnimation,
 } from '../../../../list-block/utils/icons.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -34,61 +35,18 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
       width: 16px;
       height: 16px;
     }
-
-    .affine-database-checkbox-animation {
-      width: 20px;
-      height: 20px;
-      position: absolute;
-      left: 0px;
-      border-radius: 50%;
-    }
-
-    .animation {
-      animation: sparking 0.6s ease forwards;
-    }
-
-    @keyframes sparking {
-      0% {
-        width: 14px;
-        height: 14px;
-        left: 3px;
-      }
-      40% {
-        width: 20px;
-        height: 20px;
-        left: 0px;
-        box-shadow: 0 -18px 0 -8px #1e96eb, 16px -8px 0 -8px #1e96eb,
-          16px 8px 0 -8px #1e96eb, 0 18px 0 -8px #1e96eb,
-          -16px 8px 0 -8px #1e96eb, -16px -8px 0 -8px #1e96eb;
-      }
-
-      100% {
-        width: 20px;
-        height: 20px;
-        left: 0px;
-        box-shadow: 0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent,
-          32px 16px 0 -10px transparent, 0 36px 0 -10px transparent,
-          -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent;
-      }
-    }
   `;
 
-  @query('.affine-database-checkbox-animation')
-  private _animation!: HTMLDivElement;
-
-  protected override firstUpdated() {
-    this._animation.addEventListener('animationend', () => {
-      this._animation.classList.remove('animation');
-    });
-  }
+  @query('.affine-database-checkbox')
+  private _checkbox!: HTMLDivElement;
 
   override beforeEnterEditMode() {
     const checked = !this.value;
 
-    if (checked) {
-      this._animation.classList.add('animation');
-    }
     this.onChange(checked);
+    if (checked) {
+      playCheckAnimation(this._checkbox, { left: -2 });
+    }
     return false;
   }
 
@@ -97,7 +55,6 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html` <div class="affine-database-checkbox-container">
       <div class="affine-database-checkbox checkbox ${checked && 'checked'}">
-        <div class="affine-database-checkbox-animation"></div>
         ${icon}
       </div>
     </div>`;

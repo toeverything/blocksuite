@@ -4,8 +4,8 @@ import type { TemplateResult } from 'lit';
 import { isTemplateResult } from 'lit/directive-helpers.js';
 
 import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
-import { getService } from './index.js';
 import { json2block } from './json2block.js';
+import { getService } from './singleton.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   templateResult2String(temp: TemplateResult): string {

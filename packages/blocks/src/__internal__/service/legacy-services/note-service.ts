@@ -1,10 +1,10 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getService } from '../__internal__/service/index.js';
-import { addSerializedBlocks } from '../__internal__/service/json2block.js';
-import { BaseService } from '../__internal__/service/service.js';
-import type { SerializedBlock } from '../__internal__/utils/index.js';
-import type { NoteBlockModel } from './note-model.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { SerializedBlock } from '../../utils/index.js';
+import { addSerializedBlocks } from '../json2block.js';
+import { BaseService } from '../service.js';
+import { getService } from '../singleton.js';
 
 export class NoteBlockService extends BaseService<NoteBlockModel> {
   override async json2Block(

@@ -22,7 +22,6 @@ import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelectionState } from '../__internal__/index.js';
-import { registerService } from '../__internal__/service/index.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCssVariable } from './common/css-variable.js';
 import { viewRendererManager } from './common/data-view.js';
@@ -30,7 +29,6 @@ import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { LegacyDatabaseBlockService } from './database-service.js';
 import { KanbanViewClipboard } from './kanban/clipboard.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
 import { TableViewClipboard } from './table/clipboard.js';
@@ -64,7 +62,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   `;
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:database', LegacyDatabaseBlockService);
     this._disposables.add(
       this.root.selectionManager.slots.changed.on(selections => {
         const databaseSelection = selections.find(
@@ -272,18 +269,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         models.forEach(model => this.page.deleteBlock(model));
       },
     };
-    const getSelection = () => {
-      return this.root.selectionManager.value.find(selection =>
-        selection.is('database')
-      ) as DatabaseSelection;
-    };
 
     return html` <data-view-header-tools
       .viewEle="${this._view.value}"
       .copyBlock="${blockOperation.copy}"
       .deleteSelf="${blockOperation.delete}"
       .view="${view}"
-      .getSelection=${getSelection}
+      .getSelection=${this._view.value?.getSelection}
     ></data-view-header-tools>`;
   };
 

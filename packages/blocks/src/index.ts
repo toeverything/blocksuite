@@ -22,7 +22,6 @@ export type { BaseService } from './__internal__/service/service.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/css-variables.js';
 export * from './__internal__/theme/theme-observer.js';
-export * from './__internal__/utils/active-editor-manager.js';
 export * from './__internal__/utils/common.js';
 export * from './__internal__/utils/common-operations.js';
 export * from './__internal__/utils/filesys.js';

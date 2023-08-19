@@ -7,13 +7,12 @@ import { html } from 'lit/static-html.js';
 import * as Y from 'yjs';
 import { Doc, Text as YText } from 'yjs';
 
-import { REFERENCE_NODE } from '../../../__internal__/rich-text/reference-node.js';
+import { REFERENCE_NODE } from '../../../__internal__/rich-text/consts.js';
 import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineVEditor,
 } from '../../../__internal__/rich-text/virgo/types.js';
-import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
@@ -133,9 +132,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
-    this.editor = new VEditor(yText, {
-      active: () => activeEditorManager.isActive(this),
-    });
+    this.editor = new VEditor(yText);
     this.editor.setAttributeSchema(affineTextAttributes);
     this.editor.setAttributeRenderer(attributeRenderer());
     autoIdentifyReference(this.editor, yText.toString());

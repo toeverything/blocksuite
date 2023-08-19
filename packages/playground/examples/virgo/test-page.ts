@@ -376,7 +376,7 @@ export class TestPage extends ShadowlessElement {
     const textA = yDocA.getText(TEXT_ID);
     const editorA = new VEditor(textA, {
       //@ts-ignore
-      embed: delta => delta.attributes?.embed,
+      isEmbed: delta => delta.attributes?.embed,
     });
     editorA.setAttributeSchema(
       baseTextAttributes.extend({
@@ -386,9 +386,7 @@ export class TestPage extends ShadowlessElement {
     editorA.setAttributeRenderer(attributeRenderer);
 
     const textB = yDocB.getText(TEXT_ID);
-    const editorB = new VEditor(textB, {
-      active: () => false,
-    });
+    const editorB = new VEditor(textB);
 
     const toolBarA = new ToolBar(editorA);
     const toolBarB = new ToolBar(editorB);

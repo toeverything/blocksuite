@@ -32,7 +32,6 @@ import {
 } from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
-import { activeEditorManager } from '../utils/active-editor-manager.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
@@ -125,9 +124,6 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _onCut = (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._edgeless)) {
-      return;
-    }
     e.preventDefault();
     this._onCopy(e);
 
@@ -160,9 +156,6 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onCopy = async (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._edgeless)) {
-      return;
-    }
     e.preventDefault();
     const { state, elements } = this.selection;
     // when note active, handle copy like page mode
@@ -181,10 +174,6 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onPaste = async (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._edgeless)) {
-      return;
-    }
-
     if (
       document.activeElement instanceof HTMLInputElement ||
       document.activeElement instanceof HTMLTextAreaElement

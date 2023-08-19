@@ -11,6 +11,7 @@ import { toast } from '../../components/toast.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
+import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -65,6 +66,7 @@ export class ContentParser {
       tableTitleColumnHandler?: TableTitleColumnHandler;
     } = {}
   ) {
+    registerAllBlocks();
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
     // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
@@ -424,38 +426,40 @@ export class ContentParser {
       ];
     }
 
-    if (file.size > MAX_ATTACHMENT_SIZE) {
-      toast(
-        `You can only upload files less than ${humanFileSize(
-          MAX_ATTACHMENT_SIZE,
-          true,
-          0
-        )}`
-      );
-      return [];
-    }
-    try {
-      const sourceId = await storage.set(
-        new File([file], file.name, { type: file.type })
-      );
-      const attachmentProps: AttachmentProps & {
-        flavour: 'affine:attachment';
-        children: [];
-      } = {
-        flavour: 'affine:attachment',
-        name: file.name,
-        sourceId,
-        size: file.size,
-        type: file.type,
-        children: [],
-      };
-      return [attachmentProps];
-    } catch (error) {
-      console.error(error);
-      if (error instanceof Error) {
+    if (this._page.awarenessStore.getFlag('enable_attachment_block')) {
+      if (file.size > MAX_ATTACHMENT_SIZE) {
         toast(
-          `Failed to upload attachment! ${error.message || error.toString()}`
+          `You can only upload files less than ${humanFileSize(
+            MAX_ATTACHMENT_SIZE,
+            true,
+            0
+          )}`
         );
+        return [];
+      }
+      try {
+        const sourceId = await storage.set(
+          new File([file], file.name, { type: file.type })
+        );
+        const attachmentProps: AttachmentProps & {
+          flavour: 'affine:attachment';
+          children: [];
+        } = {
+          flavour: 'affine:attachment',
+          name: file.name,
+          sourceId,
+          size: file.size,
+          type: file.type,
+          children: [],
+        };
+        return [attachmentProps];
+      } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+          toast(
+            `Failed to upload attachment! ${error.message || error.toString()}`
+          );
+        }
       }
     }
     return [];

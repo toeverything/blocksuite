@@ -15,21 +15,18 @@ import {
   createDatasource,
   getDatasourceTitle,
 } from '../__internal__/datasource/datasource-manager.js';
-import { registerService } from '../__internal__/service/index.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
 import type { ViewSource } from '../database-block/common/view-source.js';
 import type { BlockOperation } from '../database-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/index.js';
 import { DataViewTableManager } from '../database-block/table/table-view-manager.js';
 import type { DataViewBlockModel } from './data-view-model.js';
-import { DataViewBlockService } from './data-view-service.js';
 
 @customElement('affine-data-view')
 export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
 
-    registerService('affine:data-view', DataViewBlockService);
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.currentView = this.model.views[0].id;
   }

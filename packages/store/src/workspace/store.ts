@@ -71,6 +71,7 @@ const flagsPreset = {
   enable_surface: true,
   enable_edgeless_toolbar: true,
   enable_slash_menu: true,
+  enable_attachment_block: true,
 
   enable_database: true,
   enable_database_filter: false,
@@ -81,8 +82,6 @@ const flagsPreset = {
   enable_linked_page: false,
   enable_bookmark_operation: false,
   enable_note_index: false,
-
-  enable_attachment_block: false,
 
   readonly: {},
 } satisfies BlockSuiteFlags;

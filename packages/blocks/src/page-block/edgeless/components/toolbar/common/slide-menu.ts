@@ -73,6 +73,9 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   menuWidth = DEFAULT_MENU_WIDTH;
 
+  @property({ attribute: false })
+  showNext = true;
+
   @query('.next-slide-button')
   private _nextSlideButton!: HTMLDivElement;
 
@@ -159,7 +162,11 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
             <slot></slot>
           </div>
         </div>
-        <div class="next-slide-button" @click=${this._onNextSlideButtonClick}>
+        <div
+          style=${styleMap({ display: this.showNext ? 'normal' : 'none' })}
+          class="next-slide-button"
+          @click=${this._onNextSlideButtonClick}
+        >
           ${ArrowRightSmallIcon}
         </div>
       </div>

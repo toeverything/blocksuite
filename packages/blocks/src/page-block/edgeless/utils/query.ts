@@ -105,6 +105,7 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
     case 'eraser':
     case 'shape':
     case 'connector':
+    case 'frame':
       return 'crosshair';
     case 'text':
       return 'text';

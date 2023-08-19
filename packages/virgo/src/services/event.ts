@@ -371,13 +371,22 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _onKeyDown = (event: KeyboardEvent) => {
-    if (!event.shiftKey) {
+    if (
+      !event.shiftKey &&
+      (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+    ) {
       const vRange = this._editor.getVRange();
       if (!vRange || vRange.length !== 0) return;
+
+      const prevent = () => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
 
       const deltas = this._editor.getDeltasByVRange(vRange);
       if (deltas.length === 2) {
         if (event.key === 'ArrowLeft' && this._editor.isEmbed(deltas[0][0])) {
+          prevent();
           this._editor.setVRange({
             index: vRange.index - 1,
             length: 1,
@@ -386,6 +395,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
           event.key === 'ArrowRight' &&
           this._editor.isEmbed(deltas[1][0])
         ) {
+          prevent();
           this._editor.setVRange({
             index: vRange.index,
             length: 1,
@@ -394,12 +404,17 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       } else if (deltas.length === 1) {
         const delta = deltas[0][0];
         if (this._editor.isEmbed(delta)) {
-          if (event.key === 'ArrowLeft') {
+          if (event.key === 'ArrowLeft' && vRange.index - 1 >= 0) {
+            prevent();
             this._editor.setVRange({
               index: vRange.index - 1,
               length: 1,
             });
-          } else if (event.key === 'ArrowRight') {
+          } else if (
+            event.key === 'ArrowRight' &&
+            vRange.index + 1 <= this._editor.yText.length
+          ) {
+            prevent();
             this._editor.setVRange({
               index: vRange.index,
               length: 1,

@@ -54,10 +54,7 @@ import {
   sendBackward,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import {
-  getService,
-  registerService,
-} from '../../__internal__/service/index.js';
+import { getService } from '../../__internal__/service/index.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import {
@@ -73,7 +70,6 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { FontLoader } from '../font-loader/index.js';
-import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteSlicer } from './components/note-slicer/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
@@ -263,6 +259,7 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
+  @state()
   private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
@@ -495,7 +492,9 @@ export class EdgelessPageBlockComponent
     let resetWillChange: ReturnType<typeof setTimeout> | null = null;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this._edgelessLayerWillChange = true;
+        if (!this._edgelessLayerWillChange) {
+          this._edgelessLayerWillChange = true;
+        }
 
         if (resetWillChange) clearTimeout(resetWillChange);
         resetWillChange = setTimeout(() => {
@@ -1106,9 +1105,10 @@ export class EdgelessPageBlockComponent
     let media: MediaQueryList;
 
     const onPixelRatioChange = () => {
-      this.surface.onResize();
-
-      if (media) media.removeEventListener('change', onPixelRatioChange);
+      if (media) {
+        this.surface?.onResize();
+        media.removeEventListener('change', onPixelRatioChange);
+      }
 
       media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
       media.addEventListener('change', onPixelRatioChange);
@@ -1147,7 +1147,7 @@ export class EdgelessPageBlockComponent
         if (font !== 'Kalam:n4,n7' || !this.surface) return;
 
         if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.onResize();
+          this.surface.refresh();
         }
       })
     );
@@ -1256,7 +1256,6 @@ export class EdgelessPageBlockComponent
       return;
     });
 
-    registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
