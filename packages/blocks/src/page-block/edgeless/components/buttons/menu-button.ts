@@ -10,20 +10,20 @@ import { createButtonPopper } from '../utils.js';
 @customElement('edgeless-menu-button')
 export class EdgelessMenuButton extends WithDisposable(LitElement) {
   static override styles = css`
-     .edgeless-component-panel-wrapper {
-        display: none;
-        padding: 4px;
-        justify-content: center;
-        align-items: center;
-        background: var(--affine-background-overlay-panel-color);
-        box-shadow: var(--affine-shadow-2);
-        border-radius: 8px
-      }
+    .edgeless-component-panel-wrapper {
+      display: none;
+      padding: 4px;
+      justify-content: center;
+      align-items: center;
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px;
+    }
 
-      .edgeless-component-panel-wrapper[data-show] {
-        display: flex;
-      }
-    }`;
+    .edgeless-component-panel-wrapper[data-show] {
+      display: flex;
+    }
+  `;
   @property({ attribute: false })
   iconInfo!: { icon: TemplateResult<1>; tooltip: string };
 

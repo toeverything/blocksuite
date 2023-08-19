@@ -6,7 +6,7 @@ import { deserializeXYWH } from '@blocksuite/phasor';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../__internal__/consts.js';
-import { isEdgelessPage } from '../__internal__/utils/index.js';
+import { isEdgelessPage } from '../__internal__/utils/query.js';
 import {
   autoScroll,
   caretFromPoint,

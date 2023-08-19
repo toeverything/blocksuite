@@ -417,6 +417,8 @@ export function isDefaultPage({ tagName }: Element) {
 
 /**
  * Returns `true` if element is edgeless page.
+ *
+ * @deprecated Use context instead. The edgeless page may be customized by the user so it's not recommended to use this method. \
  */
 export function isEdgelessPage(
   element: Element
