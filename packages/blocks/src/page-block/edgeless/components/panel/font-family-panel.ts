@@ -3,7 +3,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import {
   GENERAL_CANVAS_FONT_FAMILY,
-  SCIBBLED_CANVAS_FONT_FANILY,
+  SCRIBBLED_CANVAS_FONT_FAMILY,
 } from '../../utils/consts.js';
 
 @customElement('edgeless-font-family-panel')
@@ -61,11 +61,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           class="scibbled-button"
-          .active=${this.value === SCIBBLED_CANVAS_FONT_FANILY}
+          .active=${this.value === SCRIBBLED_CANVAS_FONT_FAMILY}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(SCIBBLED_CANVAS_FONT_FANILY);
+            this._onSelect(SCRIBBLED_CANVAS_FONT_FAMILY);
           }}
         >
           <div class="font-family-button">Scribbled</div>

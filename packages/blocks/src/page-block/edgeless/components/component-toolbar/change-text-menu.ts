@@ -62,10 +62,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       height: 20px;
     }
 
-    menu-divider {
-      height: 24px;
-    }
-
     .color-panel-container,
     .align-panel-container.text-align,
     .font-size-panel-container,
@@ -327,14 +323,25 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._colorSelectorPopper = createButtonPopper(
-      this._textColorButton,
-      this._textColorMenu,
-      ({ display }) => {
-        this._textColorPopperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._colorSelectorPopper);
+    if (this.elementType === 'text') {
+      this._colorSelectorPopper = createButtonPopper(
+        this._textColorButton,
+        this._textColorMenu,
+        ({ display }) => {
+          this._textColorPopperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._colorSelectorPopper);
+
+      this._textFontFamilyPopper = createButtonPopper(
+        this._textFontFamilyButton,
+        this._textFontFamilyMenu,
+        ({ display }) => {
+          this._fontFamilyPopperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._textFontFamilyPopper);
+    }
 
     this._textAlignPopper = createButtonPopper(
       this._textAlignButton,
@@ -344,15 +351,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       }
     );
     _disposables.add(this._textAlignPopper);
-
-    this._textFontFamilyPopper = createButtonPopper(
-      this._textFontFamilyButton,
-      this._textFontFamilyMenu,
-      ({ display }) => {
-        this._fontFamilyPopperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._textFontFamilyPopper);
 
     this._textFontSizePopper = createButtonPopper(
       this._textFontSizeButton,
@@ -375,8 +373,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const italic = this._areAllelementsItalic(this.elements);
 
     return html`
-      ${this.elementType === 'text'
-        ? html`
+      ${this.elementType === 'shape'
+        ? nothing
+        : html`
             <edgeless-tool-icon-button
               class="text-color-button"
               .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
@@ -400,8 +399,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
               ></edgeless-color-panel>
             </div>
             <component-toolbar-menu-divider></component-toolbar-menu-divider>
-          `
-        : nothing}
+          `}
 
       <edgeless-tool-icon-button
         class="text-font-size-button"
@@ -431,8 +429,9 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
       <div class="font-style-container">
-        ${this.elementType === 'text'
-          ? html` <edgeless-tool-icon-button
+        ${this.elementType === 'shape'
+          ? nothing
+          : html`<edgeless-tool-icon-button
                 class="text-font-family-button"
                 .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
                 .tipPosition=${'bottom'}
@@ -451,8 +450,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                     this._setFontFamily(value);
                   }}
                 ></edgeless-font-family-panel>
-              </div>`
-          : nothing}
+              </div>`}
 
         <edgeless-tool-icon-button
           class="text-bold-button"

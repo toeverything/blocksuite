@@ -43,9 +43,17 @@ export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
   'affine-block-children-container',
 ];
 
-export const SCIBBLED_CANVAS_FONT_FANILY = "'Kalam', cursive";
+export const SCRIBBLED_CANVAS_FONT_FAMILY = "'Kalam', cursive";
 export const GENERAL_CANVAS_FONT_FAMILY = 'sans-serif';
 
 export const SurfaceColor = '#6046FE';
 export const NoteColor = '#1E96EB';
 export const BlendColor = '#7D91FF';
+
+export const SHAPE_FILLED_COLOR_WITH_BLACK_TEXT_COLOR = [
+  '--affine-palette-shape-white',
+  '--affine-palette-transparent',
+];
+
+export const SHAPE_TEXT_COLOR_WHITE = '--affine-palette-shape-white';
+export const SHAPE_TEXT_COLOR_BLACK = '--affine-palette-shape-black';
