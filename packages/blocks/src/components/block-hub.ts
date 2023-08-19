@@ -546,6 +546,7 @@ function BlockHubMenu(
           inert
           role="tooltip"
           tip-position="left"
+          arrow
           ?hidden=${!showTooltip}
           >Drag to insert blank line
         </tool-tip>
@@ -585,6 +586,7 @@ function BlockHubMenu(
                 inert
                 role="tooltip"
                 tip-position="left"
+                arrow
                 ?hidden=${!showTooltip}
               >
                 Drag to create a database
@@ -1074,6 +1076,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
             inert
             tip-position="left"
             role="tooltip"
+            arrow
             >Insert blocks
           </tool-tip>
         </div>

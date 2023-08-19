@@ -31,18 +31,6 @@ export const tooltipStyle = css`
     border-radius: 4px;
     transform: translate(0, calc(-100% - 8px));
   }
-  tool-tip::before {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 10px 0 10px 10px;
-    border-color: transparent transparent transparent var(--affine-tooltip);
-    right: -6px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
   tool-tip:is([tip-position='top']) {
     left: 50%;
     border-radius: 4px;
@@ -58,7 +46,7 @@ export const tooltipStyle = css`
     left: 0;
     top: 50%;
     transform: translate(calc(-100% - 8px), -50%);
-    border-radius: 4px 4px 4px 4px;
+    border-radius: 4px;
   }
   tool-tip:is([tip-position='bottom']) {
     top: unset;
@@ -108,11 +96,11 @@ export const tooltipStyle = css`
     transform: translate(calc(-100% - 16px), -50%);
   }
   tool-tip:is([arrow]):is([tip-position='left'])::before {
-    position: absolute;
     content: '';
-    right: 0;
+    position: absolute;
+    right: -4px;
     bottom: 50%;
-    transform: translate(100%, 50%);
+    transform: translateY(50%);
     width: 0;
     height: 0;
     border-top: 5px solid transparent;
@@ -125,11 +113,11 @@ export const tooltipStyle = css`
     transform: translate(-50%, calc(100% + 16px));
   }
   tool-tip:is([arrow]):is([tip-position='bottom'])::before {
-    position: absolute;
     content: '';
+    position: absolute;
     left: 50%;
-    top: 0;
-    transform: translate(-50%, -100%);
+    bottom: 100%; /* Place the arrow at the top */
+    transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 5px solid transparent;
@@ -153,7 +141,23 @@ export const tooltipStyle = css`
     border-right: 5px solid transparent;
     border-top: 6px solid var(--affine-tooltip);
   }
-
+  /* work for tip-position='top-start' */
+  tool-tip:is([arrow]):is([tip-position='top-start']) {
+    transform: translate(-75%, calc(-100% - 16px));
+  }
+  tool-tip:is([arrow]):is([tip-position='top-start'])::before {
+    position: absolute;
+    content: '';
+    right: 5%;
+    bottom: 0;
+    transform: translate(-50%, 100%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid var(--affine-tooltip);
+    margin-top: 10px;
+  }
   .has-tool-tip {
     position: relative;
   }
