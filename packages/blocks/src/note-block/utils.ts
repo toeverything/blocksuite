@@ -6,7 +6,7 @@ import { deserializeXYWH } from '@blocksuite/phasor';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../__internal__/consts.js';
-import { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { isEdgelessPage } from '../__internal__/utils/query.js';
 import {
   autoScroll,
   caretFromPoint,
@@ -378,7 +378,7 @@ export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
 
     let zoom = 1;
     const pageElement = getClosestPageBlockComponent(noteElement);
-    if (pageElement instanceof EdgelessPageBlockComponent) {
+    if (pageElement && isEdgelessPage(pageElement)) {
       zoom = pageElement.surface.viewport.zoom;
     }
 
