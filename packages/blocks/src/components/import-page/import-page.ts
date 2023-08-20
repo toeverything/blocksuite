@@ -21,7 +21,6 @@ import {
   NotionIcon,
 } from '../../icons/index.js';
 import type { Cell, Column } from '../../index.js';
-import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
 export type OnSuccessHandler = (
