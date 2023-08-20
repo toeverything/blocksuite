@@ -173,11 +173,11 @@ export async function importNotion(workspace: Workspace, file: File) {
             let id = 1;
             const titles: string[] = [];
             const rows: string[][] = [];
-            tableString?.split('\n').forEach((row, index) => {
+            tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
               if (index === 0) {
-                titles.push(...row.split(','));
+                titles.push(...row.split(/,\s*(?![^"]*",)/));
               } else {
-                const rowArray = row.split(',');
+                const rowArray = row.split(/,\s*(?![^"]*",)/);
                 rows.push(rowArray);
               }
             });
