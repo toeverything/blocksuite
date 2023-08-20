@@ -98,7 +98,7 @@ export const tooltipStyle = css`
   tool-tip:is([arrow]):is([tip-position='left'])::before {
     content: '';
     position: absolute;
-    right: -4px;
+    right: -5px;
     bottom: 50%;
     transform: translateY(50%);
     width: 0;
@@ -116,7 +116,7 @@ export const tooltipStyle = css`
     content: '';
     position: absolute;
     left: 50%;
-    bottom: 100%; /* Place the arrow at the top */
+    bottom: 100%; 
     transform: translateX(-50%);
     width: 0;
     height: 0;
@@ -125,7 +125,7 @@ export const tooltipStyle = css`
     border-bottom: 6px solid var(--affine-tooltip);
   }
 
-  /* work for tip-position='top-right' */
+  /* work for tip-position='top-end' */
   tool-tip:is([arrow]):is([tip-position='top-end']) {
     transform: translate(-15%, calc(-100% - 16px));
   }
