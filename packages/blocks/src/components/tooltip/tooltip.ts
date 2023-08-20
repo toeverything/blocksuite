@@ -116,7 +116,7 @@ export const tooltipStyle = css`
     content: '';
     position: absolute;
     left: 50%;
-    bottom: 100%; 
+    bottom: 100%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
