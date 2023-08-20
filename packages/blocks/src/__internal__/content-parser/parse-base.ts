@@ -556,7 +556,7 @@ export abstract class BaseParser {
     if (this._customTableTitleColumnHandler) {
       const titleColumn = await this._customTableTitleColumnHandler(element);
       if (titleColumn) {
-        for (let i = 1; i < rows.length; i++) {
+        for (let i = 0; i < rows.length; i++) {
           const originalContent = rows[i].shift();
           rows[i].unshift(titleColumn[i] || originalContent || '');
         }
