@@ -387,11 +387,6 @@ export class ImportPage extends WithDisposable(LitElement) {
   }
 
   private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
-    toast(
-      `Successfully imported ${pageIds.length} Page${
-        pageIds.length > 1 ? 's' : ''
-      }.`
-    );
     this.onSuccess?.(pageIds, isWorkspaceFile);
   }
 
