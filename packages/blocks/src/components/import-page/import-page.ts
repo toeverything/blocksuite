@@ -174,7 +174,7 @@ export async function importNotion(workspace: Workspace, file: File) {
             const titles: string[] = [];
             const rows: string[][] = [];
             tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
-              const rowArray = row.split(/,\s*(?![^"]*",)/);
+              const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
               for (let i = 0; i < rowArray.length; i++) {
                 rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
               }
