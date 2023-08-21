@@ -554,11 +554,12 @@ export abstract class BaseParser {
       columnMeta
     );
 
+    let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
+    titleIndex =
+      titleIndex !== -1 ? titleIndex : columnMeta.length > 0 ? 0 : -1;
     if (this._customTableTitleColumnHandler) {
       const titleColumn = await this._customTableTitleColumnHandler(element);
       if (titleColumn) {
-        const titleIndex =
-          columnMeta.findIndex(meta => meta.type === 'title') || 0;
         for (let i = 0; i < rows.length; i++) {
           if (titleIndex < rows[i].length) {
             const originalContent = rows[i][titleIndex];
@@ -594,7 +595,13 @@ export abstract class BaseParser {
               name: 'Table View',
               mode: 'table',
               columns: [],
-              header: {},
+              header:
+                titleIndex !== -1
+                  ? {
+                      titleColumn: columns[titleIndex].id,
+                      iconColumn: 'type',
+                    }
+                  : {},
               filter: {
                 type: 'group',
                 op: 'and',
