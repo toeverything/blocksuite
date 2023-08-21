@@ -6,7 +6,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../__internal__/consts.js';
+import {
+  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '../../../__internal__/consts.js';
 import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
 import {
   DEFAULT_NOTE_COLOR,
@@ -67,7 +70,7 @@ export class EdgelessChildNote extends LitElement {
   override render() {
     const { model, renderer, index } = this;
     const { xywh, background } = model;
-    const [modelX, modelY, modelW] = deserializeXYWH(xywh);
+    const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
 
     const style = {
@@ -76,7 +79,9 @@ export class EdgelessChildNote extends LitElement {
       width: modelW + 'px',
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-      border: `2px ${isHiddenNote ? 'dashed' : 'solid'} var(--affine-black-10)`,
+      border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${
+        isHiddenNote ? 'dashed' : 'solid'
+      } var(--affine-black-10)`,
       borderRadius: '8px',
       boxSizing: 'border-box',
       background: isHiddenNote
@@ -89,7 +94,11 @@ export class EdgelessChildNote extends LitElement {
     };
 
     return html`
-      <div class="affine-edgeless-child-note" style=${styleMap(style)}>
+      <div
+        class="affine-edgeless-child-note"
+        style=${styleMap(style)}
+        data-model-height="${modelH}"
+      >
         ${renderer(model)}
         <edgeless-note-mask .edgeless=${this.edgeless}></edgeless-note-mask>
       </div>
