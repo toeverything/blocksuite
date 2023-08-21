@@ -15,12 +15,12 @@ import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type {
   GENERAL_CANVAS_FONT_FAMILY,
-  SCIBBLED_CANVAS_FONT_FANILY,
+  SCRIBBLED_CANVAS_FONT_FAMILY,
 } from './consts.js';
 
 export type CANVAS_TEXT_FONT =
   | typeof GENERAL_CANVAS_FONT_FAMILY
-  | typeof SCIBBLED_CANVAS_FONT_FANILY;
+  | typeof SCRIBBLED_CANVAS_FONT_FAMILY;
 
 export function mountTextEditor(
   textElement: TextElement,

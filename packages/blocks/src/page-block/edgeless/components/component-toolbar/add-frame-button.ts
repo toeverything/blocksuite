@@ -14,6 +14,7 @@ export class EdgelessAddFrameButton extends WithDisposable(LitElement) {
 
   protected override render() {
     return html`<edgeless-tool-icon-button
+      .iconContainerPadding=${2}
       @click=${() => {
         this.edgeless.frame.createFrameOnSelected();
       }}

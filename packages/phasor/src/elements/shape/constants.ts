@@ -34,6 +34,7 @@ export interface GeneralShapeOptions {
   height: number;
   strokeWidth: number;
   strokeColor: string;
+  fillColor: string;
   strokeStyle: StrokeStyle;
   radius?: number;
 }

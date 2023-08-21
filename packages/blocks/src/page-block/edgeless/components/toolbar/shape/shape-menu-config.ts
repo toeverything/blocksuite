@@ -5,13 +5,19 @@ import {
   DiamondIcon,
   EllipseIcon,
   RoundedRectangleIcon,
+  ScribbledDiamondIcon,
+  ScribbledEllipseIcon,
+  ScribbledRoundedRectangleIcon,
+  ScribbledSquareIcon,
+  ScribbledTriangleIcon,
   SquareIcon,
   TriangleIcon,
 } from '../../../../../icons/index.js';
 
 type Config = {
   name: ShapeTool['shape'];
-  icon: TemplateResult<1>;
+  generalIcon: TemplateResult<1>;
+  scribbledIcon: TemplateResult<1>;
   tooltip: string;
   disabled: boolean;
 };
@@ -19,31 +25,36 @@ type Config = {
 export const ShapeComponentConfig: Config[] = [
   {
     name: 'rect',
-    icon: SquareIcon,
+    generalIcon: SquareIcon,
+    scribbledIcon: ScribbledSquareIcon,
     tooltip: 'Square',
     disabled: false,
   },
   {
     name: 'ellipse',
-    icon: EllipseIcon,
+    generalIcon: EllipseIcon,
+    scribbledIcon: ScribbledEllipseIcon,
     tooltip: 'Ellipse',
     disabled: false,
   },
   {
     name: 'diamond',
-    icon: DiamondIcon,
+    generalIcon: DiamondIcon,
+    scribbledIcon: ScribbledDiamondIcon,
     tooltip: 'Diamond',
     disabled: false,
   },
   {
     name: 'triangle',
-    icon: TriangleIcon,
+    generalIcon: TriangleIcon,
+    scribbledIcon: ScribbledTriangleIcon,
     tooltip: 'Triangle',
     disabled: false,
   },
   {
     name: 'roundedRect',
-    icon: RoundedRectangleIcon,
+    generalIcon: RoundedRectangleIcon,
+    scribbledIcon: ScribbledRoundedRectangleIcon,
     tooltip: 'Rounded rectangle',
     disabled: false,
   },

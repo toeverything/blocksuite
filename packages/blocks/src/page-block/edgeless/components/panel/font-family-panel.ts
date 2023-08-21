@@ -3,9 +3,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import {
   GENERAL_CANVAS_FONT_FAMILY,
-  SCIBBLED_CANVAS_FONT_FANILY,
+  SCRIBBLED_CANVAS_FONT_FAMILY,
 } from '../../utils/consts.js';
-import type { CANVAS_TEXT_FONT } from '../../utils/text.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -21,7 +20,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
       justify-content: center;
       background: var(--affine-background-overlay-panel-color);
       gap: 8px;
-      padding: 4px;
+      padding: 8px;
     }
 
     .general-button {
@@ -34,7 +33,7 @@ export class EdgelessFontFamilyPanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  value: CANVAS_TEXT_FONT = GENERAL_CANVAS_FONT_FAMILY;
+  value = GENERAL_CANVAS_FONT_FAMILY;
 
   @property({ attribute: false })
   onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
@@ -62,11 +61,11 @@ export class EdgelessFontFamilyPanel extends LitElement {
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           class="scibbled-button"
-          .active=${this.value === SCIBBLED_CANVAS_FONT_FANILY}
+          .active=${this.value === SCRIBBLED_CANVAS_FONT_FAMILY}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(SCIBBLED_CANVAS_FONT_FANILY);
+            this._onSelect(SCRIBBLED_CANVAS_FONT_FAMILY);
           }}
         >
           <div class="font-family-button">Scribbled</div>
