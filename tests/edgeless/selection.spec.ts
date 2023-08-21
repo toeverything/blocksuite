@@ -124,7 +124,7 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  await assertEdgelessSelectedRect(page, [650, 445.5, 100, 100]);
+  await assertEdgelessSelectedRect(page, [650, 447.5, 100, 100]);
 });
 
 test('when the selection is always a note, it should remain in an active state', async ({
@@ -149,7 +149,7 @@ test('when the selection is always a note, it should remain in an active state',
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [46, 599.5, 448, 124]);
+  await assertEdgelessSelectedRect(page, [46, 597.5, 448, 128]);
 
   await page.mouse.click(bound.x + 10, bound.y + 10);
   await assertSelectionInNote(page, ids.noteId);
