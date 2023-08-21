@@ -179,6 +179,9 @@ export async function importNotion(workspace: Workspace, file: File) {
               .getColumn(richTextPureColumnConfig.type)
               .createWithId('' + id++, value);
           });
+          if (columns.length > 0) {
+            columns[0].type = 'title';
+          }
           if (rows.length > 0) {
             let maxLen = rows[0].length;
             for (let i = 1; i < rows.length; i++) {
@@ -227,7 +230,13 @@ export async function importNotion(workspace: Workspace, file: File) {
                     name: 'Table View',
                     mode: 'table',
                     columns: [],
-                    header: {},
+                    header:
+                      columns.length > 0
+                        ? {
+                            titleColumn: columns[0].id,
+                            iconColumn: 'type',
+                          }
+                        : {},
                     filter: {
                       type: 'group',
                       op: 'and',
