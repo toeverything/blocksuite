@@ -34,7 +34,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       text-decoration: none;
       cursor: pointer;
       user-select: none;
-      padding: 0 2px;
+      padding: 1px 4px 1px 2px;
       margin: 0 2px;
     }
     .affine-reference:hover {
@@ -45,8 +45,12 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       background: var(--affine-hover-color);
     }
 
-    .affine-reference > svg {
-      margin-right: 4px;
+    .affine-reference-title {
+      margin-left: 4px;
+      border-bottom: 0.5px solid var(--affine-divider-color);
+    }
+    .affine-reference-title:hover {
+      border-bottom: 0.5px solid var(--affine-icon-color);
     }
 
     .affine-reference > span {
@@ -88,8 +92,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         this._updateRefMeta(page)
       )
     );
-
-    // TODO fix User may create a subpage ref node by paste or undo/redo.
   }
 
   private _updateRefMeta = (page: Page) => {
@@ -143,6 +145,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       unavailable
         ? {
             color: 'var(--affine-text-disable-color)',
+            textDecoration: 'line-through',
             fill: 'var(--affine-text-disable-color)',
           }
         : {}
