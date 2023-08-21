@@ -3,7 +3,7 @@ import '../toolbar/shape/shape-menu.js';
 
 import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { PhasorElement } from '@blocksuite/phasor';
+import { FrameElement, type PhasorElement } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -17,12 +17,21 @@ import {
   MoreVerticalIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { duplicate } from '../../utils/general.js';
 import { isTopLevelBlock } from '../../utils/query.js';
+import { mountFrameEditor } from '../../utils/text.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action = {
   name: string;
-  type: 'delete' | 'copy-as-png' | 'create-frame' | ReorderingType;
+  type:
+    | 'delete'
+    | 'copy-as-png'
+    | 'create-frame'
+    | 'rename'
+    | 'copy'
+    | 'duplicate'
+    | ReorderingType;
   disabled?: boolean;
 };
 
@@ -40,9 +49,17 @@ const ACTIONS: Action[] = [
   { name: 'Delete', type: 'delete' },
 ];
 
-function Actions(onClick: (action: Action) => void) {
+const FRAME_ACTIONS: Action[] = [
+  { name: 'Rename', type: 'rename' },
+  { name: 'Copy', type: 'copy' },
+  { name: 'Copy as PNG', type: 'copy-as-png' },
+  { name: 'Duplicate', type: 'duplicate' },
+  { name: 'Delete', type: 'delete' },
+];
+
+function Actions(actions: Action[], onClick: (action: Action) => void) {
   return repeat(
-    ACTIONS,
+    actions,
     action => action.type,
     action =>
       html`<div
@@ -170,8 +187,22 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _runAction = ({ type }: Action) => {
+  private _runAction = async ({ type }: Action) => {
+    const selection = this.edgeless.selectionManager;
     switch (type) {
+      case 'rename': {
+        if (selection.elements[0] instanceof FrameElement)
+          mountFrameEditor(selection.elements[0], this.edgeless);
+        break;
+      }
+      case 'copy': {
+        this.edgeless.clipboard.copy();
+        break;
+      }
+      case 'duplicate': {
+        await duplicate(this.edgeless, selection.elements);
+        break;
+      }
       case 'delete': {
         this._delete();
         break;
@@ -226,7 +257,15 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const actions = Actions(this._runAction);
+    const selection = this.edgeless.selectionManager;
+
+    const actions = Actions(
+      selection.elements.length === 1 &&
+        selection.elements[0] instanceof FrameElement
+        ? FRAME_ACTIONS
+        : ACTIONS,
+      this._runAction
+    );
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'More'}

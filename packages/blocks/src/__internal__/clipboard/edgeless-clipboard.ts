@@ -19,6 +19,7 @@ import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '../../page-block/edgeless/utils/consts.js';
+import { getCopyElements } from '../../page-block/edgeless/utils/general.js';
 import {
   isPhasorElementWithText,
   isTopLevelBlock,
@@ -157,7 +158,12 @@ export class EdgelessClipboard implements Clipboard {
 
   private _onCopy = async (e: ClipboardEvent) => {
     e.preventDefault();
-    const { state, elements } = this.selection;
+    await this.copy();
+  };
+
+  async copy() {
+    const { state } = this.selection;
+    const elements = getCopyElements(this._edgeless, this.selection.elements);
     // when note active, handle copy like page mode
     if (state.editing) {
       if (isPhasorElementWithText(elements[0])) {
@@ -171,7 +177,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
-  };
+  }
 
   private _onPaste = async (e: ClipboardEvent) => {
     if (

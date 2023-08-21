@@ -9,10 +9,10 @@ import * as Y from 'yjs';
 
 import type { EdgelessElement } from '../../__internal__/utils/types.js';
 import type { NoteBlockModel } from '../../models.js';
-import { getGridBound } from './components/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { getSelectedBound, type Selectable } from './services/tools-manager.js';
+import { type Selectable } from './services/tools-manager.js';
 import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
+import { edgelessElementsBound } from './utils/general.js';
 import { isTopLevelBlock } from './utils/query.js';
 
 const MIN_FRAME_WIDTH = 800;
@@ -43,9 +43,7 @@ export class EdgelessFrameManager {
   selectFrame(eles: Selectable[]) {
     const frames = this._edgeless.frame.frames;
     if (!eles.some(ele => ele instanceof FrameElement) && frames.length !== 0) {
-      const bound = eles.reduce((pre, ele) => {
-        return pre.unite(getGridBound(ele));
-      }, getGridBound(eles[0]));
+      const bound = edgelessElementsBound(eles);
       for (let i = frames.length - 1; i >= 0; i--) {
         const frame = frames[i];
         if (Bound.deserialize(frame.xywh).contains(bound)) {
@@ -101,7 +99,7 @@ export class EdgelessFrameManager {
     const { _edgeless } = this;
     const { surface } = _edgeless;
     const frames = this.frames;
-    let bound = getSelectedBound(_edgeless.selectionManager.elements);
+    let bound = edgelessElementsBound(_edgeless.selectionManager.elements);
     bound = bound.expand(FRAME_PADDING);
     if (bound.w < MIN_FRAME_WIDTH) {
       const offset = (MIN_FRAME_WIDTH - bound.w) / 2;
