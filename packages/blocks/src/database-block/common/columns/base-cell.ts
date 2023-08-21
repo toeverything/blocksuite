@@ -24,8 +24,6 @@ export abstract class BaseCellRenderer<
   isEditing!: boolean;
   @property({ attribute: false })
   selectCurrentCell!: (editing: boolean) => void;
-  @property({ attribute: false })
-  onRectChange?: () => void;
 
   get readonly(): boolean {
     return this.column.readonly;
