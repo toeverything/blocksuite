@@ -1192,7 +1192,9 @@ export class EdgelessPageBlockComponent
     return false;
   }
 
-  public getFitToScreenData(padding: (number | undefined)[] = [0, 0, 0, 0]) {
+  public getFitToScreenData(
+    padding: [number, number, number, number] = [0, 0, 0, 0]
+  ) {
     const bounds = [];
 
     this.notes.forEach(note => {
@@ -1204,7 +1206,7 @@ export class EdgelessPageBlockComponent
       bounds.push(surfaceElementsBound);
     }
 
-    const [pt = 0, pr = 0, pb = 0, pl = 0] = padding;
+    const [pt, pr, pb, pl] = padding;
     const { viewport } = this.surface;
     let { centerX, centerY, zoom } = viewport;
 
