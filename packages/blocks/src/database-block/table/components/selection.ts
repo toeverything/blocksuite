@@ -589,7 +589,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
 
   updateSelection(tableSelection?: TableViewSelection) {
     const update = () => {
-      console.log('update');
       this.updateSelectionStyle(
         tableSelection?.rowsSelection,
         tableSelection?.columnsSelection
