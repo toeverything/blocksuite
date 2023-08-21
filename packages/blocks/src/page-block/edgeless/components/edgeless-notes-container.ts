@@ -74,7 +74,6 @@ export class EdgelessChildNote extends LitElement {
       position: 'absolute',
       zIndex: `${index}`,
       width: modelW + 'px',
-      height: modelH + 'px',
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       border: `2px ${isHiddenNote ? 'dashed' : 'solid'} var(--affine-black-10)`,
