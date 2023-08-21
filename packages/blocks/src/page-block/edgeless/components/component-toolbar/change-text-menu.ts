@@ -5,7 +5,9 @@ import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
+  normalizeShapeBound,
   normalizeTextBound,
+  type ShapeElement,
   type SurfaceManager,
   type TextElement,
 } from '@blocksuite/phasor';
@@ -243,6 +245,28 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     return elements.every(element => element.italic);
   };
 
+  private _updateElementBound = (element: EdgelessCanvasTextElement) => {
+    const elementType = this.elementType;
+    if (elementType === 'text') {
+      // the change of font family will change the bound of the text
+      const newBound = normalizeTextBound(
+        element as TextElement,
+        new Bound(element.x, element.y, element.w, element.h)
+      );
+      this.surface.updateElement<typeof elementType>(element.id, {
+        xywh: newBound.serialize(),
+      });
+    } else {
+      const newBound = normalizeShapeBound(
+        element as ShapeElement,
+        new Bound(element.x, element.y, element.w, element.h)
+      );
+      this.surface.updateElement<typeof elementType>(element.id, {
+        xywh: newBound.serialize(),
+      });
+    }
+  };
+
   private _setTextColor = (color: CssVariableName) => {
     const elementType = this.elementType;
     this.elements.forEach(element => {
@@ -270,16 +294,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         fontFamily: fontFamily,
       });
 
-      if (this.elementType === 'text') {
-        // the change of font family will change the bound of the text
-        const newBound = normalizeTextBound(
-          element as TextElement,
-          new Bound(element.x, element.y, element.w, element.h)
-        );
-        this.surface.updateElement<typeof elementType>(element.id, {
-          xywh: newBound.serialize(),
-        });
-      }
+      this._updateElementBound(element);
     });
   };
 
@@ -289,6 +304,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.surface.updateElement<typeof elementType>(element.id, {
         fontSize: fontSize,
       });
+
+      this._updateElementBound(element);
     });
   };
 
@@ -298,6 +315,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.surface.updateElement<typeof elementType>(element.id, {
         bold,
       });
+
+      this._updateElementBound(element);
     });
   };
 
@@ -307,6 +326,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.surface.updateElement<typeof elementType>(element.id, {
         italic,
       });
+
+      this._updateElementBound(element);
     });
   };
 
