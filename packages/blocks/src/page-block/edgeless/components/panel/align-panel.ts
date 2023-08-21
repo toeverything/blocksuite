@@ -2,9 +2,9 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  AlignCenterIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
 } from '../../../../icons/index.js';
 
 @customElement('edgeless-align-panel')
@@ -53,7 +53,7 @@ export class EdgelessAlignPanel extends LitElement {
             this._onSelect('left');
           }}
         >
-          ${AlignLeftIcon}
+          ${TextAlignLeftIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Center'}
@@ -64,7 +64,7 @@ export class EdgelessAlignPanel extends LitElement {
             this._onSelect('center');
           }}
         >
-          ${AlignCenterIcon}
+          ${TextAlignCenterIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Right'}
@@ -75,7 +75,7 @@ export class EdgelessAlignPanel extends LitElement {
             this._onSelect('right');
           }}
         >
-          ${AlignRightIcon}
+          ${TextAlignRightIcon}
         </edgeless-tool-icon-button>
       </div>
     `;

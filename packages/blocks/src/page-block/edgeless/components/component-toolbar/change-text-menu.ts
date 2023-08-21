@@ -14,13 +14,13 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import {
-  AlignCenterIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
   BoldIcon,
   FontFamilyIcon,
   ItalicIcon,
   SmallArrowDownIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
@@ -121,6 +121,11 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       gap: 12px;
+    }
+
+    .text-align-button svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
 
     component-toolbar-menu-divider {
@@ -487,10 +492,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       >
         <div class="button-with-arrow-group">
           ${selectedAlign === 'left'
-            ? AlignLeftIcon
+            ? TextAlignLeftIcon
             : selectedAlign === 'center'
-            ? AlignCenterIcon
-            : AlignRightIcon}
+            ? TextAlignCenterIcon
+            : TextAlignRightIcon}
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>
