@@ -15,7 +15,7 @@ import type { IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShpae } from '../utils.js';
+import { drawGeneralShape } from '../utils.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -63,41 +63,8 @@ export const RectMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    rc.path(
-      `
-      M ${r} 0
-      L ${renderWidth - r} 0
-      C ${renderWidth - kRect * r} 0 ${renderWidth} ${
-        kRect * r
-      } ${renderWidth} ${r}
-      L ${renderWidth} ${renderHeight - r}
-      C ${renderWidth} ${renderHeight - kRect * r} ${
-        renderWidth - kRect * r
-      } ${renderHeight} ${renderWidth - r} ${renderHeight}
-      L ${r} ${renderHeight}
-      C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
-        renderHeight - r
-      }
-      L 0 ${r}
-      C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
-      Z
-      `,
-      {
-        seed,
-        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke:
-          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
-            ? 'none'
-            : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
-      }
-    );
-
     if (shapeStyle === ShapeStyle.General) {
-      drawGeneralShpae(ctx, 'rect', {
+      drawGeneralShape(ctx, 'rect', {
         x: 0,
         y: 0,
         width: renderWidth,
@@ -105,8 +72,39 @@ export const RectMethods: ShapeMethods = {
         strokeWidth,
         strokeColor: realStrokeColor,
         strokeStyle: strokeStyle,
+        fillColor: realFillColor,
         radius,
       });
+    } else {
+      rc.path(
+        `
+        M ${r} 0
+        L ${renderWidth - r} 0
+        C ${renderWidth - kRect * r} 0 ${renderWidth} ${
+          kRect * r
+        } ${renderWidth} ${r}
+        L ${renderWidth} ${renderHeight - r}
+        C ${renderWidth} ${renderHeight - kRect * r} ${
+          renderWidth - kRect * r
+        } ${renderHeight} ${renderWidth - r} ${renderHeight}
+        L ${r} ${renderHeight}
+        C ${kRect * r} ${renderHeight} 0 ${renderHeight - kRect * r} 0 ${
+          renderHeight - r
+        }
+        L 0 ${r}
+        C 0 ${kRect * r} ${kRect * r} 0 ${r} 0
+        Z
+        `,
+        {
+          seed,
+          roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+          strokeWidth,
+          fill: filled ? realFillColor : undefined,
+        }
+      );
     }
   },
 

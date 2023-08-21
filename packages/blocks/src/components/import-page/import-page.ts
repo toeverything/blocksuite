@@ -2,7 +2,7 @@ import '../loader.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { type Page, type Workspace } from '@blocksuite/store';
+import { type Workspace } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
@@ -21,7 +21,6 @@ import {
   NotionIcon,
 } from '../../icons/index.js';
 import type { Cell, Column } from '../../index.js';
-import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
 export type OnSuccessHandler = (
@@ -78,25 +77,21 @@ function joinWebPaths(...paths: string[]): string {
 
 export async function importNotion(workspace: Workspace, file: File) {
   const pageIds: string[] = [];
-  const allPageMap: Map<string, Page>[] = [];
+  // const allPageMap: Map<string, Page>[] = [];
   // const dataBaseSubPages = new Set<string>();
   let isWorkspaceFile = false;
   const parseZipFile = async (file: File | Blob) => {
     const zip = new JSZip();
     const zipFile = await zip.loadAsync(file);
-    const pageMap = new Map<string, Page>();
-    allPageMap.push(pageMap);
+    const pageMap = new Map<string, string>();
+    // allPageMap.push(pageMap);
     const files = Object.keys(zipFile.files);
     const promises: Promise<void>[] = [];
-    const csvFiles = files
-      .filter(file => file.endsWith('.csv'))
-      .map(file => file.substring(0, file.length - 4));
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.startsWith('__MACOSX/')) continue;
 
       const lastSplitIndex = file.lastIndexOf('/');
-      if (csvFiles.includes(file.substring(0, lastSplitIndex))) continue;
 
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
@@ -112,8 +107,10 @@ export async function importNotion(workspace: Workspace, file: File) {
             continue;
           }
         }
-        const page = await createPage(workspace);
-        pageMap.set(file, page);
+        pageMap.set(file, workspace.idGenerator());
+      }
+      if (i === 0 && fileName.endsWith('.csv')) {
+        pageMap.set(file, workspace.idGenerator());
       }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
@@ -123,12 +120,16 @@ export async function importNotion(workspace: Workspace, file: File) {
       }
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
-      const page = pageMap.get(file);
+      const page = await createPage(workspace, { id: pageMap.get(file) });
       if (!page) return;
       const lastSplitIndex = file.lastIndexOf('/');
       const folder = file.substring(0, lastSplitIndex) || '';
       const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+      if (
+        fileName.endsWith('.html') ||
+        fileName.endsWith('.md') ||
+        fileName.endsWith('.csv')
+      ) {
         const isHtml = fileName.endsWith('.html');
         const rootId = page.root?.id;
         const fetchFileHandler = async (url: string) => {
@@ -142,15 +143,134 @@ export async function importNotion(workspace: Workspace, file: File) {
           if (textStyle['link']) {
             const link = textStyle['link'] as string;
             const subPageLink = joinWebPaths(folder, decodeURI(link));
-            const linkPage = pageMap.get(subPageLink);
-            if (linkPage) {
+            const linkPageId = pageMap.get(subPageLink);
+            if (linkPageId) {
               textStyle['reference'] = {
-                pageId: linkPage.id,
+                pageId: linkPageId,
                 type: 'LinkedPage',
               };
               delete textStyle['link'];
             }
           }
+        };
+
+        const csvParseHandler = async (
+          tableString: string,
+          titleText: string
+        ) => {
+          let result: SerializedBlock[] | null = [];
+          let id = 1;
+          const titles: string[] = [];
+          const rows: string[][] = [];
+          tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
+            const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            for (let i = 0; i < rowArray.length; i++) {
+              rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
+            }
+            if (index === 0) {
+              titles.push(...rowArray);
+            } else {
+              rows.push(rowArray);
+            }
+          });
+
+          const columns: Column[] = titles.map(value => {
+            return columnManager
+              .getColumn(richTextPureColumnConfig.type)
+              .createWithId('' + id++, value);
+          });
+          if (rows.length > 0) {
+            let maxLen = rows[0].length;
+            for (let i = 1; i < rows.length; i++) {
+              maxLen = Math.max(maxLen, rows[i].length);
+            }
+            const addNum = maxLen - columns.length;
+            for (let i = 0; i < addNum; i++) {
+              columns.push(
+                columnManager
+                  .getColumn(richTextPureColumnConfig.type)
+                  .createWithId('' + id++, '')
+              );
+            }
+          }
+
+          if (columns.length === 0 || rows.length === 0) {
+            return [];
+          }
+
+          let titleIndex = 0;
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            let count = 0;
+            let index = 0;
+            for (let j = 0; j < row.length; j++) {
+              const value = row[j];
+              if (files.find(file => file.includes(value))) {
+                index = j;
+                count++;
+                if (count > 1) {
+                  break;
+                }
+              }
+            }
+            if (count === 1) {
+              titleIndex = index;
+              break;
+            }
+          }
+          titleIndex = titleIndex < columns.length ? titleIndex : 0;
+          columns[titleIndex].type = 'title';
+
+          const databasePropsId = id++;
+          const cells: Record<string, Record<string, Cell>> = {};
+          const children: SerializedBlock[] = [];
+          rows.forEach(row => {
+            children.push({
+              flavour: 'affine:paragraph',
+              type: 'text',
+              text: [{ insert: row[titleIndex] }],
+              children: [],
+            });
+            const rowId = '' + id++;
+            cells[rowId] = {};
+            row.forEach((value, index) => {
+              cells[rowId][columns[index].id] = {
+                columnId: columns[index].id,
+                value,
+              };
+            });
+          });
+          result = [
+            {
+              flavour: 'affine:database',
+              databaseProps: {
+                id: '' + databasePropsId,
+                title: titleText || 'Database',
+                rowIds: Object.keys(cells),
+                cells: cells,
+                columns: columns,
+                views: [
+                  {
+                    id: page.generateId(),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: [],
+                    header: {
+                      titleColumn: columns[titleIndex].id,
+                      iconColumn: 'type',
+                    },
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                  },
+                ],
+              },
+              children: children,
+            },
+          ];
+          return result;
         };
 
         const tableParseHandler = async (element: Element) => {
@@ -174,85 +294,10 @@ export async function importNotion(workspace: Workspace, file: File) {
             const href = element.getAttribute('href') || '';
             const fileName = joinWebPaths(folder, decodeURI(href));
             const tableString = await zipFile.file(fileName)?.async('string');
-
-            let result: SerializedBlock[] | null = [];
-            let id = 1;
-            const titles: string[] = [];
-            const rows: string[][] = [];
-            tableString?.split('\n').forEach((row, index) => {
-              if (index === 0) {
-                titles.push(...row.split(','));
-              } else {
-                const rowArray = row.split(',');
-                rows.push(rowArray);
-              }
-            });
-
-            const columns: Column[] = titles.slice(1).map(value => {
-              return columnManager
-                .getColumn(richTextPureColumnConfig.type)
-                .createWithId('' + id++, value);
-            });
-            if (rows.length > 0) {
-              let maxLen = rows[0].length;
-              for (let i = 1; i < rows.length; i++) {
-                maxLen = Math.max(maxLen, rows[i].length);
-              }
-              const addNum = maxLen - columns.length;
-              for (let i = 0; i < addNum; i++) {
-                columns.push(
-                  columnManager
-                    .getColumn(richTextPureColumnConfig.type)
-                    .createWithId('' + id++, '')
-                );
-              }
-            }
-            const databasePropsId = id++;
-            const cells: Record<string, Record<string, Cell>> = {};
-            const children: SerializedBlock[] = [];
-            rows.forEach(row => {
-              children.push({
-                flavour: 'affine:paragraph',
-                type: 'text',
-                text: [{ insert: row[0] }],
-                children: [],
-              });
-              const rowId = '' + id++;
-              cells[rowId] = {};
-              row.slice(1).forEach((value, index) => {
-                cells[rowId][columns[index].id] = {
-                  columnId: columns[index].id,
-                  value,
-                };
-              });
-            });
-            result = [
-              {
-                flavour: 'affine:database',
-                databaseProps: {
-                  id: '' + databasePropsId,
-                  title: element.textContent || 'Database',
-                  rowIds: Object.keys(cells),
-                  cells: cells,
-                  columns: columns,
-                  views: [
-                    {
-                      id: page.generateId(),
-                      name: 'Table View',
-                      mode: 'table',
-                      columns: [],
-                      header: {},
-                      filter: {
-                        type: 'group',
-                        op: 'and',
-                        conditions: [],
-                      },
-                    },
-                  ],
-                },
-                children: children,
-              },
-            ];
+            const result = await csvParseHandler(
+              tableString ?? '',
+              element.textContent || ''
+            );
             return result;
           }
           return null;
@@ -270,9 +315,9 @@ export async function importNotion(workspace: Workspace, file: File) {
                 titleColumn.push(ele.textContent || '');
                 return;
               }
-              const linkPage = pageMap.get(decodeURI(subPageLink));
-              if (linkPage) {
-                titleColumn.push(`@AffineReference:(${linkPage.id})`);
+              const linkPageId = pageMap.get(decodeURI(subPageLink));
+              if (linkPageId) {
+                titleColumn.push(`@AffineReference:(${linkPageId})`);
               } else {
                 titleColumn.push(link?.textContent || '');
               }
@@ -290,7 +335,16 @@ export async function importNotion(workspace: Workspace, file: File) {
         const text = (await zipFile.file(file)?.async('string')) || '';
         if (rootId) {
           pageIds.push(page.id);
-          if (isHtml) {
+          if (fileName.endsWith('.csv')) {
+            const lastSpace = fileName.lastIndexOf(' ');
+            const csvName =
+              lastSpace === -1 ? '' : fileName.substring(0, lastSpace);
+            const csvRealName = csvName === 'Undefined' ? '' : csvName;
+            const blocks = await csvParseHandler(text, csvRealName);
+            if (blocks) {
+              await contentParser.importBlocks(blocks, rootId);
+            }
+          } else if (isHtml) {
             await contentParser.importHtml(text, rootId);
           } else {
             await contentParser.importMarkdown(text, rootId);
@@ -392,11 +446,6 @@ export class ImportPage extends WithDisposable(LitElement) {
   }
 
   private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
-    toast(
-      `Successfully imported ${pageIds.length} Page${
-        pageIds.length > 1 ? 's' : ''
-      }.`
-    );
     this.onSuccess?.(pageIds, isWorkspaceFile);
   }
 

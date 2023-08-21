@@ -1,6 +1,7 @@
 import '../buttons/tool-icon-button.js';
 
 import { Slot } from '@blocksuite/global/utils';
+import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -32,6 +33,9 @@ export class EdgelessShapePanel extends LitElement {
   @property({ attribute: false })
   selectedShape?: ShapeTool['shape'] | null;
 
+  @property({ attribute: false })
+  shapeStyle?: ShapeStyle = ShapeStyle.Scribbled;
+
   slots = {
     select: new Slot<ShapeTool['shape']>(),
   };
@@ -49,23 +53,27 @@ export class EdgelessShapePanel extends LitElement {
   override render() {
     return html`
       <div class="shape-panel-container">
-        ${ShapeComponentConfig.map(({ name, icon, tooltip, disabled }) => {
-          return html`
-            <edgeless-tool-icon-button
-              .disabled=${disabled}
-              .tooltip=${tooltip}
-              .active=${this.selectedShape === name}
-              .activeMode=${'background'}
-              .iconContainerPadding=${2}
-              @click=${() => {
-                if (disabled) return;
-                this._onSelect(name);
-              }}
-            >
-              ${icon}
-            </edgeless-tool-icon-button>
-          `;
-        })}
+        ${ShapeComponentConfig.map(
+          ({ name, generalIcon, scribbledIcon, tooltip, disabled }) => {
+            return html`
+              <edgeless-tool-icon-button
+                .disabled=${disabled}
+                .tooltip=${tooltip}
+                .active=${this.selectedShape === name}
+                .activeMode=${'background'}
+                .iconContainerPadding=${2}
+                @click=${() => {
+                  if (disabled) return;
+                  this._onSelect(name);
+                }}
+              >
+                ${this.shapeStyle === ShapeStyle.General
+                  ? generalIcon
+                  : scribbledIcon}
+              </edgeless-tool-icon-button>
+            `;
+          }
+        )}
       </div>
     `;
   }

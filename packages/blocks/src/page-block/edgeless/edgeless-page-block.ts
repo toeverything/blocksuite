@@ -38,6 +38,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
 import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
@@ -54,10 +55,7 @@ import {
   sendBackward,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
-import {
-  getService,
-  registerService,
-} from '../../__internal__/service/index.js';
+import { getService } from '../../__internal__/service/index.js';
 import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
 import { isCssVariable } from '../../__internal__/theme/css-variables.js';
 import {
@@ -73,7 +71,6 @@ import type {
   SurfaceBlockModel,
 } from '../../index.js';
 import { FontLoader } from '../font-loader/index.js';
-import { PageBlockService } from '../page-service.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteSlicer } from './components/note-slicer/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
@@ -263,6 +260,7 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
+  @state()
   private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
@@ -495,7 +493,9 @@ export class EdgelessPageBlockComponent
     let resetWillChange: ReturnType<typeof setTimeout> | null = null;
     _disposables.add(
       slots.viewportUpdated.on(() => {
-        this._edgelessLayerWillChange = true;
+        if (!this._edgelessLayerWillChange) {
+          this._edgelessLayerWillChange = true;
+        }
 
         if (resetWillChange) clearTimeout(resetWillChange);
         resetWillChange = setTimeout(() => {
@@ -594,14 +594,15 @@ export class EdgelessPageBlockComponent
 
           // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
           const newModelHeight =
-            domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
+            domRect.height +
+            EDGELESS_BLOCK_CHILD_PADDING * 2 +
+            EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
 
           if (!almostEqual(newModelHeight, h)) {
             const updateBlock = () => {
               page.updateBlock(model, {
                 xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
               });
-              this.requestUpdate();
             };
 
             // Assume it's user-triggered resizing if both width and height change,
@@ -1106,9 +1107,10 @@ export class EdgelessPageBlockComponent
     let media: MediaQueryList;
 
     const onPixelRatioChange = () => {
-      this.surface.onResize();
-
-      if (media) media.removeEventListener('change', onPixelRatioChange);
+      if (media) {
+        this.surface?.onResize();
+        media.removeEventListener('change', onPixelRatioChange);
+      }
 
       media = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
       media.addEventListener('change', onPixelRatioChange);
@@ -1147,7 +1149,7 @@ export class EdgelessPageBlockComponent
         if (font !== 'Kalam:n4,n7' || !this.surface) return;
 
         if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.onResize();
+          this.surface.refresh();
         }
       })
     );
@@ -1192,7 +1194,9 @@ export class EdgelessPageBlockComponent
     return false;
   }
 
-  public getFitToScreenData(padding: (number | undefined)[] = [0, 0, 0, 0]) {
+  public getFitToScreenData(
+    padding: [number, number, number, number] = [0, 0, 0, 0]
+  ) {
     const bounds = [];
 
     this.notes.forEach(note => {
@@ -1204,7 +1208,7 @@ export class EdgelessPageBlockComponent
       bounds.push(surfaceElementsBound);
     }
 
-    const [pt = 0, pr = 0, pb = 0, pl = 0] = padding;
+    const [pt, pr, pb, pl] = padding;
     const { viewport } = this.surface;
     let { centerX, centerY, zoom } = viewport;
 
@@ -1256,7 +1260,6 @@ export class EdgelessPageBlockComponent
       return;
     });
 
-    registerService('affine:page', PageBlockService);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);

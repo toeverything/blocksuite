@@ -7,16 +7,10 @@ import {
   type UIEventState,
 } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { Bound } from '@blocksuite/phasor';
-import {
-  getCommonBound,
-  normalizeWheelDeltaY,
-  type PhasorElement,
-} from '@blocksuite/phasor';
+import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
 
 import {
   type EdgelessTool,
-  getEditorContainerByElement,
   isDatabaseInput,
   isInsideEdgelessTextEditor,
   isInsidePageTitle,
@@ -25,14 +19,13 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
-import { getGridBound } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
 import { DefaultToolController } from '../tool-controllers/default-tool.js';
 import { EraserToolController } from '../tool-controllers/eraser-tool.js';
 import { PresentToolController } from '../tool-controllers/frame-navigator-tool.js';
+import { FrameToolController } from '../tool-controllers/frame-tool.js';
 import type { EdgelessToolController } from '../tool-controllers/index.js';
 import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
@@ -42,11 +35,6 @@ import { getSelectionBoxBound, getXYWH, pickTopBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
-
-export function getSelectedBound(selected: Selectable[]) {
-  const bounds = selected.map(s => getGridBound(s));
-  return getCommonBound(bounds) as Bound;
-}
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;
@@ -159,6 +147,7 @@ export class EdgelessToolsManager {
       note: new NoteToolController(this.container),
       connector: new ConnectorToolController(this.container),
       eraser: new EraserToolController(this.container),
+      frame: new FrameToolController(this.container),
       frameNavigator: new PresentToolController(this.container),
     };
 
@@ -321,8 +310,6 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerClick = (e: PointerEventState) => {
-    const container = getEditorContainerByElement(this.container);
-    activeEditorManager.setActive(container);
     return this.currentController.onContainerClick(e);
   };
 

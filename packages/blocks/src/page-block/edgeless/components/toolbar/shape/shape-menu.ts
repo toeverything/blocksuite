@@ -2,7 +2,7 @@ import '../../buttons/tool-icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import type { ShapeType } from '@blocksuite/phasor';
+import { ShapeStyle, type ShapeType } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -44,9 +44,11 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 14px;
+    }
+    .shape-type-container svg {
       fill: var(--affine-icon-color);
       stroke: none;
-      gap: 14px;
     }
     menu-divider {
       height: 24px;
@@ -61,6 +63,9 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   selectedShape?: ShapeTool['shape'] | null;
+
+  @property({ attribute: false })
+  shapeStyle?: ShapeStyle = ShapeStyle.Scribbled;
 
   private _setShapeType = (shape: ShapeType | 'roundedRect') => {
     if (this.edgelessTool.type !== 'shape') return;
@@ -97,7 +102,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
           <div class="menu-content">
             <div class="shape-type-container">
               ${ShapeComponentConfig.map(
-                ({ name, icon, tooltip, disabled }) => {
+                ({ name, generalIcon, scribbledIcon, tooltip, disabled }) => {
                   return html`
                     <edgeless-tool-icon-button
                       .disabled=${disabled}
@@ -110,7 +115,9 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                         this._setShapeType(name);
                       }}
                     >
-                      ${icon}
+                      ${this.shapeStyle === ShapeStyle.General
+                        ? generalIcon
+                        : scribbledIcon}
                     </edgeless-tool-icon-button>
                   `;
                 }

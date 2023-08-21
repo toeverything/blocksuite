@@ -12,13 +12,13 @@ import type { DataViewDataType } from '../../database-block/common/data-view.js'
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import type {
-  BlockServiceInstanceByKey,
-  ServiceFlavour,
-} from '../../services.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
+import type {
+  BlockServiceInstanceByKey,
+  ServiceFlavour,
+} from '../service/legacy-services/index.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -175,6 +175,10 @@ export type EraserTool = {
   type: 'eraser';
 };
 
+export type FrameTool = {
+  type: 'frame';
+};
+
 export type FrameNavigatorTool = {
   type: 'frameNavigator';
 };
@@ -210,6 +214,7 @@ export type EdgelessTool =
   | NoteTool
   | ConnectorTool
   | EraserTool
+  | FrameTool
   | FrameNavigatorTool;
 
 export type SerializedBlock = {

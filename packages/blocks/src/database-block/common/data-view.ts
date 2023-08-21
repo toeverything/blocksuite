@@ -7,7 +7,6 @@ import type { UniComponent } from '../../components/uni-component/uni-component.
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { InsertPosition } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
-import type { DatabaseSelection } from './selection.js';
 
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
@@ -24,8 +23,6 @@ export interface DataViewProps<
   modalMode?: boolean;
 
   setSelection: (selection?: Selection) => void;
-
-  getSelection: () => DatabaseSelection | undefined;
 
   selectionUpdated: Slot<Selection | undefined>;
 

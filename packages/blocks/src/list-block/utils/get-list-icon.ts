@@ -34,12 +34,7 @@ export function ListIcon(
         class="affine-list-block__prefix affine-list-block__todo-prefix"
         @click=${onClick}
       >
-        ${model.checked
-          ? [
-              html`<div class="affine-list-block__check-animation"></div>`,
-              checkboxChecked(),
-            ]
-          : checkboxUnchecked()}
+        ${model.checked ? checkboxChecked() : checkboxUnchecked()}
       </div>`;
     case 'toggle':
       return html`<div class="affine-list-block__prefix" @click=${onClick}>

@@ -15,6 +15,7 @@ import { type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
+import { getCopyElements } from '../../page-block/edgeless/utils/clipboard-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
@@ -32,7 +33,6 @@ import {
 } from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
-import { activeEditorManager } from '../utils/active-editor-manager.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
@@ -125,9 +125,6 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   private _onCut = (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._edgeless)) {
-      return;
-    }
     e.preventDefault();
     this._onCopy(e);
 
@@ -160,11 +157,13 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private _onCopy = async (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._edgeless)) {
-      return;
-    }
     e.preventDefault();
-    const { state, elements } = this.selection;
+    await this.copy();
+  };
+
+  async copy() {
+    const { state } = this.selection;
+    const elements = getCopyElements(this._edgeless, this.selection.elements);
     // when note active, handle copy like page mode
     if (state.editing) {
       if (isPhasorElementWithText(elements[0])) {
@@ -178,13 +177,9 @@ export class EdgelessClipboard implements Clipboard {
 
     const clipboardItems = createSurfaceClipboardItems(data);
     performNativeCopy(clipboardItems);
-  };
+  }
 
   private _onPaste = async (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._edgeless)) {
-      return;
-    }
-
     if (
       document.activeElement instanceof HTMLInputElement ||
       document.activeElement instanceof HTMLTextAreaElement

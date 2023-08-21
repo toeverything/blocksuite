@@ -2,7 +2,6 @@ import { BlockElement, createLitPortal } from '@blocksuite/lit';
 import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { AttachmentIcon16 } from '../icons/index.js';
@@ -10,7 +9,6 @@ import type {
   AttachmentBlockModel,
   AttachmentProps,
 } from './attachment-model.js';
-import { AttachmentBlockService } from './attachment-service.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import {
   AttachmentBanner,
@@ -37,7 +35,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:attachment', AttachmentBlockService);
     if (this.model.caption) {
       this._showCaption = true;
     }

@@ -339,7 +339,6 @@ test(scoped`import markdown`, async ({ page }) => {
   const clipData = `# text
 # h1
 `;
-  await setVirgoSelection(page, 1, 1);
   await importMarkdown(page, noteId, clipData);
   await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);
@@ -680,13 +679,13 @@ test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
     { x: 800, y: 800 },
     { steps: 10 }
   );
-  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 461.5]);
+  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 463.5]);
 
   await copyByKeyboard(page);
   await page.mouse.move(800, 400);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [400, 169.25, EDITOR_WIDTH, 461.5]);
+  await assertEdgelessSelectedRect(page, [400, 168.25, EDITOR_WIDTH, 463.5]);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {

@@ -1,15 +1,15 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { DEFAULT_PAGE_NAME } from '../__internal__/rich-text/reference-node.js';
-import { getService } from '../__internal__/service/index.js';
-import { BaseService } from '../__internal__/service/service.js';
+import { TagsIcon } from '../../../icons/tags.js';
+import type { PageBlockModel } from '../../../page-block/page-model.js';
+import { DEFAULT_PAGE_NAME } from '../../rich-text/consts.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
-} from '../__internal__/utils/index.js';
-import { TagsIcon } from '../icons/index.js';
-import type { PageBlockModel } from './page-model.js';
+} from '../../utils/index.js';
+import { BaseService } from '../service.js';
+import { getService } from '../singleton.js';
 
 export class PageBlockService extends BaseService<PageBlockModel> {
   override async block2html(
@@ -97,7 +97,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     const noteModel = focusedBlockModel.page.getBlockById(noteId);
     assertExists(noteModel);
     const service = getService('affine:note');
-    return service.json2Block(noteModel, pastedBlocks);
+    service.json2Block(noteModel, pastedBlocks);
     // TODO: if page is not empty
   }
 }

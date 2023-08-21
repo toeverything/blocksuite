@@ -30,6 +30,13 @@ import {
   ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
+import {
+  GENERAL_CANVAS_FONT_FAMILY,
+  SCRIBBLED_CANVAS_FONT_FAMILY,
+  SHAPE_FILL_COLOR_BLACK,
+  SHAPE_TEXT_COLOR_PURE_BLACK,
+  SHAPE_TEXT_COLOR_PURE_WHITE,
+} from '../../utils/consts.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
@@ -306,12 +313,25 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
+  private _getTextColor(fillColor: CssVariableName) {
+    // When the shape is filled with black color, the text color should be white.
+    // Otherwise, the text color should be black.
+    const textColor =
+      fillColor === SHAPE_FILL_COLOR_BLACK
+        ? SHAPE_TEXT_COLOR_PURE_WHITE
+        : SHAPE_TEXT_COLOR_PURE_BLACK;
+
+    return textColor;
+  }
+
   private _setShapeFillColor(color: CssVariableName) {
+    const textColor = this._getTextColor(color);
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
       this.surface.updateElement<'shape'>(ele.id, {
         filled,
         fillColor: color,
+        color: textColor,
       });
     });
   }
@@ -366,6 +386,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'shape'>(ele.id, {
         shapeStyle: shapeStyle,
+        fontFamily:
+          shapeStyle === ShapeStyle.General
+            ? GENERAL_CANVAS_FONT_FAMILY
+            : SCRIBBLED_CANVAS_FONT_FAMILY,
       });
     });
   }
@@ -460,7 +484,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
             ${ChangeShapeIcon} ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>
-        <edgeless-shape-panel .selectedShape=${selectedShape}>
+        <edgeless-shape-panel
+          .selectedShape=${selectedShape}
+          .shapeStyle=${selectedShapeStyle}
+        >
         </edgeless-shape-panel>
 
         <component-toolbar-menu-divider></component-toolbar-menu-divider>

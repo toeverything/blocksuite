@@ -8,14 +8,12 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { registerService } from '../__internal__/service/index.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { getViewportElement } from '../__internal__/utils/query.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
-import { ImageBlockService } from './image-service.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
@@ -116,7 +114,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:image', ImageBlockService);
     this._imageState = 'loading';
     this._fetchImage();
     this._disposables.add(
@@ -141,8 +138,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
 
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
 

@@ -13,11 +13,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../icons/index.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { getBlockElementById, getModelByElement } from '../utils/index.js';
+import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from './consts.js';
 import { affineTextStyles } from './virgo/affine-text.js';
 import type { AffineTextAttributes } from './virgo/types.js';
-
-export const REFERENCE_NODE = ' ';
-export const DEFAULT_PAGE_NAME = 'Untitled';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
@@ -36,7 +34,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       text-decoration: none;
       cursor: pointer;
       user-select: none;
-      padding: 0 2px;
+      padding: 1px 4px 1px 2px;
       margin: 0 2px;
     }
     .affine-reference:hover {
@@ -47,8 +45,13 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       background: var(--affine-hover-color);
     }
 
-    .affine-reference > svg {
-      margin-right: 4px;
+    .affine-reference-title {
+      margin-left: 4px;
+      border-bottom: 0.5px solid var(--affine-divider-color);
+      transition: border 0.2s ease-out;
+    }
+    .affine-reference-title:hover {
+      border-bottom: 0.5px solid var(--affine-icon-color);
     }
 
     .affine-reference > span {
@@ -90,8 +93,6 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         this._updateRefMeta(page)
       )
     );
-
-    // TODO fix User may create a subpage ref node by paste or undo/redo.
   }
 
   private _updateRefMeta = (page: Page) => {
@@ -145,6 +146,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
       unavailable
         ? {
             color: 'var(--affine-text-disable-color)',
+            textDecoration: 'line-through',
             fill: 'var(--affine-text-disable-color)',
           }
         : {}

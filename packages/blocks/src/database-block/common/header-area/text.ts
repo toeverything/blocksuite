@@ -7,9 +7,12 @@ import { html } from 'lit/static-html.js';
 import * as Y from 'yjs';
 import { Doc, Text as YText } from 'yjs';
 
+import { REFERENCE_NODE } from '../../../__internal__/rich-text/consts.js';
 import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
-import { activeEditorManager } from '../../../__internal__/utils/active-editor-manager.js';
+import {
+  affineTextAttributes,
+  type AffineVEditor,
+} from '../../../__internal__/rich-text/virgo/types.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
@@ -74,6 +77,36 @@ const styles = css`
   }
 `;
 
+const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
+  // @AffineReference:(id)
+  const referencePattern = /@AffineReference:\((.*)\)/g;
+
+  const match = referencePattern.exec(text);
+  if (!match) {
+    return;
+  }
+
+  const pageId = match[1];
+
+  editor.deleteText({
+    index: 0,
+    length: match[0].length,
+  });
+  editor.setVRange({
+    index: 0,
+    length: 0,
+  });
+
+  const vRange = {
+    index: match[0].length,
+    length: 0,
+  };
+
+  editor.insertText(vRange, REFERENCE_NODE, {
+    reference: { type: 'Subpage', pageId },
+  });
+};
+
 class BaseTextCell extends BaseCellRenderer<unknown> {
   override view!: DataViewTableManager | DataViewKanbanManager;
   static override styles = styles;
@@ -99,11 +132,10 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
-    this.editor = new VEditor(yText, {
-      active: () => activeEditorManager.isActive(this),
-    });
+    this.editor = new VEditor(yText);
     this.editor.setAttributeSchema(affineTextAttributes);
     this.editor.setAttributeRenderer(attributeRenderer());
+    autoIdentifyReference(this.editor, yText.toString());
     this.editor.mount(this.richText);
     this.editor.bindHandlers({
       keydown: e => {
@@ -215,7 +247,6 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.onRectChange?.();
         } else {
           if (this.isEditing) {
             this.selectCurrentCell(false);

@@ -19,13 +19,14 @@ import {
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
   getModelByBlockElement,
+  isEdgelessPage,
   isPageMode,
   matchFlavours,
   Point,
   Rect,
 } from '../../__internal__/index.js';
 import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 import {
   DRAG_HANDLE_GRABBER_BORDER_RADIUS,
@@ -160,7 +161,7 @@ export class DragHandleWidget extends WidgetElement {
 
     // When current page is edgeless page
     // We need to remain surface selection and set editing as true
-    if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
+    if (isEdgelessPage(this._pageBlockElement)) {
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
       const surfaceSelection = selectionManager.getInstance(
         'surface',
@@ -733,7 +734,7 @@ export class DragHandleWidget extends WidgetElement {
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this.hide());
 
-    if (this._pageBlockElement instanceof EdgelessPageBlockComponent) {
+    if (isEdgelessPage(this._pageBlockElement)) {
       const edgelessPage = this._pageBlockElement;
       this._disposables.add(
         edgelessPage.slots.edgelessToolUpdated.on(newTool => {

@@ -15,7 +15,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShpae } from '../utils.js';
+import { drawGeneralShape } from '../utils.js';
 
 export const TriangleMethods: ShapeMethods = {
   points({ x, y, w, h }: IBound) {
@@ -57,28 +57,8 @@ export const TriangleMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    rc.polygon(
-      [
-        [renderWidth / 2, 0],
-        [renderWidth, renderHeight],
-        [0, renderHeight],
-      ],
-      {
-        seed,
-        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke:
-          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
-            ? 'none'
-            : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
-      }
-    );
-
     if (shapeStyle === ShapeStyle.General) {
-      drawGeneralShpae(ctx, 'triangle', {
+      drawGeneralShape(ctx, 'triangle', {
         x: 0,
         y: 0,
         width: renderWidth,
@@ -86,7 +66,25 @@ export const TriangleMethods: ShapeMethods = {
         strokeWidth,
         strokeColor: realStrokeColor,
         strokeStyle: strokeStyle,
+        fillColor: realFillColor,
       });
+    } else {
+      rc.polygon(
+        [
+          [renderWidth / 2, 0],
+          [renderWidth, renderHeight],
+          [0, renderHeight],
+        ],
+        {
+          seed,
+          roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+          strokeWidth,
+          fill: filled ? realFillColor : undefined,
+        }
+      );
     }
   },
 

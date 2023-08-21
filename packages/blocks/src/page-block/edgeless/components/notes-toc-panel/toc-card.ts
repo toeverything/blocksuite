@@ -5,7 +5,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { once, queryCurrentMode } from '../../../../__internal__/index.js';
+import { on, once, queryCurrentMode } from '../../../../__internal__/index.js';
 import { ArrowIcon, HiddenIcon } from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';
@@ -342,7 +342,14 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   private _dispatchDragEvent(e: MouseEvent) {
     e.preventDefault();
 
-    const dispose = once(this.ownerDocument, 'mousemove', () => {
+    const { clientX: startX, clientY: startY } = e;
+    const disposeDragStart = on(this.ownerDocument, 'mousemove', e => {
+      if (
+        Math.abs(startX - e.clientX) < 5 &&
+        Math.abs(startY - e.clientY) < 5
+      ) {
+        return;
+      }
       if (this.status !== 'selected') {
         this._dispatchSelectEvent(e);
       }
@@ -357,10 +364,11 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       });
 
       this.dispatchEvent(event);
+      disposeDragStart();
     });
 
     once(this.ownerDocument, 'mouseup', () => {
-      dispose();
+      disposeDragStart();
     });
   }
 
@@ -400,7 +408,6 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
 
     return html`
       <div
-        @mousedown=${this._dispatchDragEvent}
         data-invisible="${this.invisible ? 'true' : 'false'}"
         class="card-container ${this.status ?? ''} ${mode}"
         style=${
@@ -416,7 +423,10 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       >
         <div class="card-wrapper">
           <div class="action">
-            <div class="handle" @mousedown=${this._dispatchDragEvent}></div>
+            <div
+              class="handle"
+              @mousedown=${this._dispatchDragEvent}
+            ></div>
             <span
               class="switch"
               role="button"
@@ -434,6 +444,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
         </div>
         <div
           class="card-preview"
+          @mousedown=${this._dispatchDragEvent}
           @click=${this._dispatchSelectEvent}
           @dblclick=${this._dispatchFitViewEvent}
         >

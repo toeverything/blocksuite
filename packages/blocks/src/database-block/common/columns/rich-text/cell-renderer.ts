@@ -11,7 +11,6 @@ import type {
   AffineTextAttributes,
   AffineVEditor,
 } from '../../../../__internal__/rich-text/virgo/types.js';
-import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
@@ -132,9 +131,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value, {
-      active: () => activeEditorManager.isActive(this),
-    });
+    this.vEditor = new VEditor(value);
     this.vEditor.mount(this._container);
     this.vEditor.setReadonly(true);
   }
@@ -205,9 +202,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value, {
-      active: () => activeEditorManager.isActive(this),
-    });
+    this.vEditor = new VEditor(value);
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
@@ -220,7 +215,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.onRectChange?.();
         } else {
           this.selectCurrentCell(false);
         }

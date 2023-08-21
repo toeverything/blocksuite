@@ -112,7 +112,7 @@ function drawTriangle(
   ctx.closePath();
 }
 
-export function drawGeneralShpae(
+export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
   shapeType: ShapeType,
   options: GeneralShapeOptions
@@ -140,6 +140,7 @@ export function drawGeneralShpae(
 
   ctx.lineWidth = options.strokeWidth;
   ctx.strokeStyle = options.strokeColor;
+  ctx.fillStyle = options.fillColor;
   switch (options.strokeStyle) {
     case StrokeStyle.None:
       ctx.strokeStyle = 'transparent';
@@ -151,5 +152,6 @@ export function drawGeneralShpae(
     default:
       ctx.strokeStyle = options.strokeStyle;
   }
+  ctx.fill();
   ctx.stroke();
 }

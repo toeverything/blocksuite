@@ -373,6 +373,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   }
 
   private _clickTypeIcon = (event: MouseEvent) => {
+    if (this.column.type === 'title') {
+      return;
+    }
     event.stopPropagation();
     popMenu(this, {
       options: {

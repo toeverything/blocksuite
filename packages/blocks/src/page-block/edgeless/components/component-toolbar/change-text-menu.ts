@@ -5,22 +5,24 @@ import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import {
   Bound,
+  normalizeShapeBound,
   normalizeTextBound,
+  type ShapeElement,
   type SurfaceManager,
   type TextElement,
 } from '@blocksuite/phasor';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import {
-  AlignCenterIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
   BoldIcon,
   FontFamilyIcon,
   ItalicIcon,
   SmallArrowDownIcon,
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
@@ -39,6 +41,7 @@ import {
   TEXT_FONT_SIZE,
 } from '../text/types.js';
 import { createButtonPopper } from '../utils.js';
+import { ShapeArrowDownSmallIcon } from './../../../../icons/index.js';
 
 @customElement('edgeless-change-text-menu')
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
@@ -53,8 +56,12 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       fill: currentColor;
     }
 
-    menu-divider {
-      height: 24px;
+    .text-color-unit-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 20px;
+      height: 20px;
     }
 
     .color-panel-container,
@@ -62,7 +69,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     .font-size-panel-container,
     .font-family-panel-container {
       display: none;
-      padding: 4px;
       justify-content: center;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
@@ -84,29 +90,44 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     }
 
     .font-size-button-group {
-      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 72px;
       height: 24px;
-      line-height: 24px;
     }
 
     .font-size-button-group .selected-font-size-label {
-      position: absolute;
-      left: 4px;
+      width: 52px;
+      height: 20px;
+      line-height: 20px;
+      font-size: 16px;
+      font-family: 'Avenir Next';
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
     }
 
     .font-size-button-group .arrow-down-icon {
-      position: absolute;
-      top: 2.5px;
-      right: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .selected-font-size {
       align-self: end;
     }
 
-    .text-bold-button {
-      margin: 0 12px;
+    .font-style-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .text-align-button svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
 
     component-toolbar-menu-divider {
@@ -224,6 +245,28 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     return elements.every(element => element.italic);
   };
 
+  private _updateElementBound = (element: EdgelessCanvasTextElement) => {
+    const elementType = this.elementType;
+    if (elementType === 'text') {
+      // the change of font family will change the bound of the text
+      const newBound = normalizeTextBound(
+        element as TextElement,
+        new Bound(element.x, element.y, element.w, element.h)
+      );
+      this.surface.updateElement<typeof elementType>(element.id, {
+        xywh: newBound.serialize(),
+      });
+    } else {
+      const newBound = normalizeShapeBound(
+        element as ShapeElement,
+        new Bound(element.x, element.y, element.w, element.h)
+      );
+      this.surface.updateElement<typeof elementType>(element.id, {
+        xywh: newBound.serialize(),
+      });
+    }
+  };
+
   private _setTextColor = (color: CssVariableName) => {
     const elementType = this.elementType;
     this.elements.forEach(element => {
@@ -251,16 +294,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         fontFamily: fontFamily,
       });
 
-      if (this.elementType === 'text') {
-        // the change of font family will change the bound of the text
-        const newBound = normalizeTextBound(
-          element as TextElement,
-          new Bound(element.x, element.y, element.w, element.h)
-        );
-        this.surface.updateElement<typeof elementType>(element.id, {
-          xywh: newBound.serialize(),
-        });
-      }
+      this._updateElementBound(element);
     });
   };
 
@@ -270,6 +304,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.surface.updateElement<typeof elementType>(element.id, {
         fontSize: fontSize,
       });
+
+      this._updateElementBound(element);
     });
   };
 
@@ -279,6 +315,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.surface.updateElement<typeof elementType>(element.id, {
         bold,
       });
+
+      this._updateElementBound(element);
     });
   };
 
@@ -288,6 +326,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       this.surface.updateElement<typeof elementType>(element.id, {
         italic,
       });
+
+      this._updateElementBound(element);
     });
   };
 
@@ -309,14 +349,25 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   override firstUpdated(changedProperties: Map<string, unknown>) {
     const _disposables = this._disposables;
 
-    this._colorSelectorPopper = createButtonPopper(
-      this._textColorButton,
-      this._textColorMenu,
-      ({ display }) => {
-        this._textColorPopperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._colorSelectorPopper);
+    if (this.elementType === 'text') {
+      this._colorSelectorPopper = createButtonPopper(
+        this._textColorButton,
+        this._textColorMenu,
+        ({ display }) => {
+          this._textColorPopperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._colorSelectorPopper);
+
+      this._textFontFamilyPopper = createButtonPopper(
+        this._textFontFamilyButton,
+        this._textFontFamilyMenu,
+        ({ display }) => {
+          this._fontFamilyPopperShow = display === 'show';
+        }
+      );
+      _disposables.add(this._textFontFamilyPopper);
+    }
 
     this._textAlignPopper = createButtonPopper(
       this._textAlignButton,
@@ -326,15 +377,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       }
     );
     _disposables.add(this._textAlignPopper);
-
-    this._textFontFamilyPopper = createButtonPopper(
-      this._textFontFamilyButton,
-      this._textFontFamilyMenu,
-      ({ display }) => {
-        this._fontFamilyPopperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._textFontFamilyPopper);
 
     this._textFontSizePopper = createButtonPopper(
       this._textFontSizeButton,
@@ -357,27 +399,33 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const italic = this._areAllelementsItalic(this.elements);
 
     return html`
-      <edgeless-tool-icon-button
-        class="text-color-button"
-        .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
-        .tipPosition=${'bottom'}
-        .active=${false}
-        .iconContainerPadding=${2}
-        @click=${() => this._colorSelectorPopper?.toggle()}
-      >
-        ${ColorUnit(selectedColor)}
-      </edgeless-tool-icon-button>
-      <div class="color-panel-container text-color">
-        <edgeless-color-panel
-          .value=${selectedColor}
-          .options=${LINE_COLORS}
-          @select=${(event: ColorEvent) => {
-            this._setTextColor(event.detail);
-          }}
-        ></edgeless-color-panel>
-      </div>
-
-      <component-toolbar-menu-divider></component-toolbar-menu-divider>
+      ${this.elementType === 'shape'
+        ? nothing
+        : html`
+            <edgeless-tool-icon-button
+              class="text-color-button"
+              .tooltip=${this._textColorPopperShow ? '' : 'Text Color'}
+              .tipPosition=${'bottom'}
+              .active=${false}
+              .activeMode=${'background'}
+              .iconContainerPadding=${2}
+              @click=${() => this._colorSelectorPopper?.toggle()}
+            >
+              <div class="text-color-unit-container">
+                ${ColorUnit(selectedColor)}
+              </div>
+            </edgeless-tool-icon-button>
+            <div class="color-panel-container text-color">
+              <edgeless-color-panel
+                .value=${selectedColor}
+                .options=${LINE_COLORS}
+                @select=${(event: ColorEvent) => {
+                  this._setTextColor(event.detail);
+                }}
+              ></edgeless-color-panel>
+            </div>
+            <component-toolbar-menu-divider></component-toolbar-menu-divider>
+          `}
 
       <edgeless-tool-icon-button
         class="text-font-size-button"
@@ -388,10 +436,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         @click=${() => this._textFontSizePopper?.toggle()}
       >
         <div class="font-size-button-group">
-          <span class="selected-font-size-label"
-            >${this._getFontSizeLabel(selectedFontSize)}</span
-          >
-          <span class="arrow-down-icon">${SmallArrowDownIcon}</span>
+          <div class="selected-font-size-label">
+            ${this._getFontSizeLabel(selectedFontSize)}
+          </div>
+          <div class="arrow-down-icon">${ShapeArrowDownSmallIcon}</div>
         </div>
       </edgeless-tool-icon-button>
       <div class="font-size-panel-container text-font-size">
@@ -406,48 +454,52 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
-      <edgeless-tool-icon-button
-        class="text-font-family-button"
-        .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
-        .tipPosition=${'bottom'}
-        .active=${false}
-        .iconContainerPadding=${2}
-        @click=${() => this._textFontFamilyPopper?.toggle()}
-      >
-        <div class="button-with-arrow-group">
-          ${FontFamilyIcon} ${SmallArrowDownIcon}
-        </div>
-      </edgeless-tool-icon-button>
-      <div class="font-family-panel-container text-font-family">
-        <edgeless-font-family-panel
-          .value=${selectedFontFamily}
-          .onSelect=${(value: EdgelessFontFamilyPanel['value']) => {
-            this._setFontFamily(value);
-          }}
-        ></edgeless-font-family-panel>
-      </div>
+      <div class="font-style-container">
+        ${this.elementType === 'shape'
+          ? nothing
+          : html`<edgeless-tool-icon-button
+                class="text-font-family-button"
+                .tooltip=${this._fontSizePopperShow ? '' : 'Font'}
+                .tipPosition=${'bottom'}
+                .active=${false}
+                .iconContainerPadding=${2}
+                @click=${() => this._textFontFamilyPopper?.toggle()}
+              >
+                <div class="button-with-arrow-group">
+                  ${FontFamilyIcon} ${SmallArrowDownIcon}
+                </div>
+              </edgeless-tool-icon-button>
+              <div class="font-family-panel-container text-font-family">
+                <edgeless-font-family-panel
+                  .value=${selectedFontFamily}
+                  .onSelect=${(value: EdgelessFontFamilyPanel['value']) => {
+                    this._setFontFamily(value);
+                  }}
+                ></edgeless-font-family-panel>
+              </div>`}
 
-      <edgeless-tool-icon-button
-        class="text-bold-button"
-        .tooltip=${'Bold'}
-        .tipPosition=${'bottom'}
-        .active=${bold}
-        .iconContainerPadding=${2}
-        .activeMode=${'background'}
-        @click=${() => this._setTextBold(!bold)}
-      >
-        ${BoldIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .tooltip=${'Italic'}
-        .tipPosition=${'bottom'}
-        .active=${italic}
-        .iconContainerPadding=${2}
-        .activeMode=${'background'}
-        @click=${() => this._setTextItalic(!italic)}
-      >
-        ${ItalicIcon}
-      </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          class="text-bold-button"
+          .tooltip=${'Bold'}
+          .tipPosition=${'bottom'}
+          .active=${bold}
+          .iconContainerPadding=${2}
+          .activeMode=${'background'}
+          @click=${() => this._setTextBold(!bold)}
+        >
+          ${BoldIcon}
+        </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          .tooltip=${'Italic'}
+          .tipPosition=${'bottom'}
+          .active=${italic}
+          .iconContainerPadding=${2}
+          .activeMode=${'background'}
+          @click=${() => this._setTextItalic(!italic)}
+        >
+          ${ItalicIcon}
+        </edgeless-tool-icon-button>
+      </div>
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
@@ -461,10 +513,10 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       >
         <div class="button-with-arrow-group">
           ${selectedAlign === 'left'
-            ? AlignLeftIcon
+            ? TextAlignLeftIcon
             : selectedAlign === 'center'
-            ? AlignCenterIcon
-            : AlignRightIcon}
+            ? TextAlignCenterIcon
+            : TextAlignRightIcon}
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>
