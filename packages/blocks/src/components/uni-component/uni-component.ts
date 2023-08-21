@@ -16,20 +16,33 @@ export type UniComponent<
   Props = NonNullable<unknown>,
   Expose extends NonNullable<unknown> = NonNullable<unknown>
 > = (ele: HTMLElement, props: Props) => UniComponentReturn<Props, Expose>;
-
+export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
+  uni: UniComponent<Props, Expose> | undefined,
+  props: Props,
+  options?: {
+    ref?: Ref<Expose>;
+  }
+) => {
+  return html`<uni-lit
+    .uni=${uni}
+    .props=${props}
+    .ref=${options?.ref}
+  ></uni-lit>`;
+};
 @customElement('uni-lit')
 export class UniLit<
+  Props,
   Expose extends NonNullable<unknown>
 > extends ShadowlessElement {
   @property({ attribute: false })
-  uni?: UniComponent<unknown, Expose>;
+  uni?: UniComponent<Props, Expose>;
 
   @property({ attribute: false })
-  props!: NonNullable<unknown>;
+  props!: Props;
   @property({ attribute: false })
   ref?: Ref<Expose>;
 
-  uniReturn?: UniComponentReturn<unknown, Expose>;
+  uniReturn?: UniComponentReturn<Props, Expose>;
 
   get expose(): Expose | undefined {
     return this.uniReturn?.expose;

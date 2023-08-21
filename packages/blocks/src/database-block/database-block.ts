@@ -18,13 +18,16 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelectionState } from '../__internal__/index.js';
+import { renderUniLit } from '../components/uni-component/uni-component.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCssVariable } from './common/css-variable.js';
-import { viewRendererManager } from './common/data-view.js';
+import {
+  type DataViewExpose,
+  viewRendererManager,
+} from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
@@ -33,7 +36,6 @@ import { KanbanViewClipboard } from './kanban/clipboard.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
 import { TableViewClipboard } from './table/clipboard.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
-import type { BlockOperation } from './types.js';
 
 type ViewData = {
   view: DataViewManager;
@@ -105,7 +107,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   @state()
   currentView?: string;
 
-  private _view = createRef<BaseDataView>();
+  private _view = createRef<DataViewExpose>();
 
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
@@ -257,25 +259,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   };
 
   private renderTools = (view?: DataViewManager) => {
-    if (!view) {
+    if (!view || !this._view.value) {
       return;
     }
-    const blockOperation: BlockOperation = {
-      copy: () => {
-        copyBlocks([this.model]);
-      },
-      delete: () => {
-        const models = [this.model, ...this.model.children];
-        models.forEach(model => this.page.deleteBlock(model));
-      },
-    };
 
     return html` <data-view-header-tools
       .viewEle="${this._view.value}"
-      .copyBlock="${blockOperation.copy}"
-      .deleteSelf="${blockOperation.delete}"
       .view="${view}"
-      .getSelection=${this._view.value?.getSelection}
     ></data-view-header-tools>`;
   };
 
@@ -295,12 +285,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     };
     return keyed(
       viewData.view.id,
-      html` <uni-lit
-        .ref="${this._view}"
-        .uni="${viewRendererManager.getView(viewData.view.type).view}"
-        .props="${props}"
-        class="affine-block-element"
-      ></uni-lit>`
+      renderUniLit(
+        viewRendererManager.getView(viewData.view.type).view,
+        props,
+        { ref: this._view }
+      )
     );
   }
 

@@ -7,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../components/menu/index.js';
+import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import {
   AddCursorIcon,
   MoreHorizontalIcon,
@@ -215,7 +216,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       updateValue: value =>
         this.group.helper.updateValue(this.group.rows, value),
     };
-    return html` <uni-lit .uni="${data.view}" .props="${props}"></uni-lit>`;
+    return renderUniLit(data.view, props);
   };
 
   renderCount() {
