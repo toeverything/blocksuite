@@ -555,8 +555,7 @@ export abstract class BaseParser {
     );
 
     let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
-    titleIndex =
-      titleIndex !== -1 ? titleIndex : columnMeta.length > 0 ? 0 : -1;
+    titleIndex = titleIndex !== -1 ? titleIndex : 0;
     if (this._customTableTitleColumnHandler) {
       const titleColumn = await this._customTableTitleColumnHandler(element);
       if (titleColumn) {
@@ -760,9 +759,10 @@ const getTableCellsAndChildren = (
 ) => {
   const cells: Record<string, Record<string, Cell>> = {};
   const children: SerializedBlock[] = [];
-  const titleIndex = columnMeta.findIndex(meta => meta.type === 'title') || 0;
+  let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
+  titleIndex = titleIndex !== -1 ? titleIndex : 0;
   rows.forEach(row => {
-    const title = row[titleIndex];
+    const title = row[titleIndex] ?? 'Undefined';
     children.push({
       flavour: 'affine:paragraph',
       type: 'text',
