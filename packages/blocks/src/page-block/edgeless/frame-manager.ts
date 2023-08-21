@@ -11,8 +11,8 @@ import type { EdgelessElement } from '../../__internal__/utils/types.js';
 import type { NoteBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { type Selectable } from './services/tools-manager.js';
+import { edgelessElementsBound } from './utils/bound-utils.js';
 import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
-import { edgelessElementsBound } from './utils/general.js';
 import { isTopLevelBlock } from './utils/query.js';
 
 const MIN_FRAME_WIDTH = 800;

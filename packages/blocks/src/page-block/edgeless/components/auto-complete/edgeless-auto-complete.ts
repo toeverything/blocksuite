@@ -22,7 +22,7 @@ import * as Y from 'yjs';
 
 import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { getGridBound } from '../../utils/general.js';
+import { getGridBound } from '../../utils/bound-utils.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 enum Direction {

@@ -15,11 +15,11 @@ import { type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
+import { getCopyElements } from '../../page-block/edgeless/utils/clipboard-utils.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
 } from '../../page-block/edgeless/utils/consts.js';
-import { getCopyElements } from '../../page-block/edgeless/utils/general.js';
 import {
   isPhasorElementWithText,
   isTopLevelBlock,

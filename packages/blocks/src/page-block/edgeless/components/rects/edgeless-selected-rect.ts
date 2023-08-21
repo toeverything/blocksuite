@@ -26,8 +26,8 @@ import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../services/tools-manager.js';
+import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
-import { edgelessElementsBound } from '../../utils/general.js';
 import {
   getSelectableBounds,
   getSelectedRect,

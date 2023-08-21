@@ -17,7 +17,7 @@ import {
   MoreVerticalIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { duplicate } from '../../utils/general.js';
+import { duplicate } from '../../utils/clipboard-utils.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { mountFrameEditor } from '../../utils/text.js';
 import { createButtonPopper } from '../utils.js';
