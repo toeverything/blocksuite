@@ -179,9 +179,6 @@ export async function importNotion(workspace: Workspace, file: File) {
               .getColumn(richTextPureColumnConfig.type)
               .createWithId('' + id++, value);
           });
-          if (columns.length > 0) {
-            columns[0].type = 'title';
-          }
           if (rows.length > 0) {
             let maxLen = rows[0].length;
             for (let i = 1; i < rows.length; i++) {
@@ -196,6 +193,34 @@ export async function importNotion(workspace: Workspace, file: File) {
               );
             }
           }
+
+          if (columns.length === 0 || rows.length === 0) {
+            return [];
+          }
+
+          let titleIndex = 0;
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            let count = 0;
+            let index = 0;
+            for (let j = 0; j < row.length; j++) {
+              const value = row[j];
+              if (files.find(file => file.includes(value))) {
+                index = j;
+                count++;
+                if (count > 1) {
+                  break;
+                }
+              }
+            }
+            if (count === 1) {
+              titleIndex = index;
+              break;
+            }
+          }
+          titleIndex = titleIndex < columns.length ? titleIndex : 0;
+          columns[titleIndex].type = 'title';
+
           const databasePropsId = id++;
           const cells: Record<string, Record<string, Cell>> = {};
           const children: SerializedBlock[] = [];
@@ -203,7 +228,7 @@ export async function importNotion(workspace: Workspace, file: File) {
             children.push({
               flavour: 'affine:paragraph',
               type: 'text',
-              text: [{ insert: row[0] }],
+              text: [{ insert: row[titleIndex] }],
               children: [],
             });
             const rowId = '' + id++;
@@ -230,13 +255,10 @@ export async function importNotion(workspace: Workspace, file: File) {
                     name: 'Table View',
                     mode: 'table',
                     columns: [],
-                    header:
-                      columns.length > 0
-                        ? {
-                            titleColumn: columns[0].id,
-                            iconColumn: 'type',
-                          }
-                        : {},
+                    header: {
+                      titleColumn: columns[titleIndex].id,
+                      iconColumn: 'type',
+                    },
                     filter: {
                       type: 'group',
                       op: 'and',
