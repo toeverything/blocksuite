@@ -291,7 +291,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       const frame = this._frames[current];
       if (frame) {
         const bound = Bound.deserialize(frame.xywh);
-        viewport.setViewportByBound(bound, [40, 60], true);
+        viewport.setViewportByBound(bound, [40, 60, 40, 60], true);
       }
     }
   }

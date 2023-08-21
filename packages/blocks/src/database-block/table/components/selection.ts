@@ -48,7 +48,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   tableView!: DatabaseTable;
 
-  private _databaseSelection?: TableViewSelection;
+  private _tableViewSelection?: TableViewSelection;
   private focusRef = createRef<HTMLDivElement>();
   private selectionRef = createRef<HTMLDivElement>();
 
@@ -71,11 +71,11 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           this.selection = undefined;
           return;
         }
-        this.updateSelection(tableSelection);
+
+        const old = this._tableViewSelection;
         requestAnimationFrame(() => {
           this.scrollToFocus();
         });
-        const old = this._databaseSelection;
         if (old) {
           const container = this.getCellContainer(
             old.focus.rowIndex,
@@ -91,6 +91,8 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           }
         }
 
+        this.updateSelection(tableSelection);
+
         if (tableSelection) {
           const container = this.getCellContainer(
             tableSelection.focus.rowIndex,
@@ -105,8 +107,6 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
             }
           }
         }
-
-        this._databaseSelection = tableSelection;
       })
     );
   }
@@ -178,7 +178,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   }
 
   get selection(): TableViewSelection | undefined {
-    return this._databaseSelection;
+    return this._tableViewSelection;
   }
 
   set selection(data: Omit<TableViewSelection, 'viewId' | 'type'> | undefined) {
@@ -585,19 +585,35 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return this.tableContainer.querySelectorAll('.affine-database-block-row');
   }
 
-  updateSelection(tableSelection = this.selection) {
-    this.updateSelectionStyle(
-      tableSelection?.rowsSelection,
-      tableSelection?.columnsSelection
-    );
+  selectionStyleUpdateTask = 0;
 
-    const isRowSelection =
-      tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
-    this.updateFocusSelectionStyle(
-      tableSelection?.focus,
-      isRowSelection,
-      tableSelection?.isEditing
-    );
+  updateSelection(tableSelection?: TableViewSelection) {
+    const update = () => {
+      this.updateSelectionStyle(
+        tableSelection?.rowsSelection,
+        tableSelection?.columnsSelection
+      );
+
+      const isRowSelection =
+        tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
+      this.updateFocusSelectionStyle(
+        tableSelection?.focus,
+        isRowSelection,
+        tableSelection?.isEditing
+      );
+    };
+    if (!tableSelection) {
+      cancelAnimationFrame(this.selectionStyleUpdateTask);
+      update();
+    } else {
+      const task = () => {
+        update();
+        cancelAnimationFrame(this.selectionStyleUpdateTask);
+        this.selectionStyleUpdateTask = requestAnimationFrame(task);
+      };
+      task();
+    }
+    this._tableViewSelection = tableSelection;
   }
 
   updateSelectionStyle(
@@ -633,35 +649,32 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     isRowSelection?: boolean,
     isEditing = false
   ) {
-    // Calculate styles after dom update.
-    requestAnimationFrame(() => {
-      const div = this.focusRef.value;
-      if (!div) return;
-      if (focus && !isRowSelection) {
-        // Check if row is removed.
-        const rows = this.rows();
-        if (rows.length <= focus.rowIndex) return;
+    const div = this.focusRef.value;
+    if (!div) return;
+    if (focus && !isRowSelection) {
+      // Check if row is removed.
+      const rows = this.rows();
+      if (rows.length <= focus.rowIndex) return;
 
-        const { left, top, width, height, scale } = this.getRect(
-          focus.rowIndex,
-          focus.rowIndex,
-          focus.columnIndex,
-          focus.columnIndex
-        );
-        const tableRect = this.tableContainer.getBoundingClientRect();
-        div.style.left = `${left - tableRect.left / scale}px`;
-        div.style.top = `${top - 1 - tableRect.top / scale}px`;
-        div.style.width = `${width + 1}px`;
-        div.style.height = `${height + 1}px`;
-        div.style.borderColor = 'var(--affine-primary-color)';
-        div.style.boxShadow = isEditing
-          ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
-          : 'unset';
-        div.style.display = 'block';
-      } else {
-        div.style.display = 'none';
-      }
-    });
+      const { left, top, width, height, scale } = this.getRect(
+        focus.rowIndex,
+        focus.rowIndex,
+        focus.columnIndex,
+        focus.columnIndex
+      );
+      const tableRect = this.tableContainer.getBoundingClientRect();
+      div.style.left = `${left - tableRect.left / scale}px`;
+      div.style.top = `${top - 1 - tableRect.top / scale}px`;
+      div.style.width = `${width + 1}px`;
+      div.style.height = `${height + 1}px`;
+      div.style.borderColor = 'var(--affine-primary-color)';
+      div.style.boxShadow = isEditing
+        ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
+        : 'unset';
+      div.style.display = 'block';
+    } else {
+      div.style.display = 'none';
+    }
   }
 
   getRect(top: number, bottom: number, left: number, right: number) {

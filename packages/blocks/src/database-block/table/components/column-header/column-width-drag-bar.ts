@@ -85,7 +85,6 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
       },
       onDrop: ({ width }) => {
         this.column.updateWidth(width);
-        database.selection.updateSelection();
       },
       onClear: () => {
         tableContainer.style.pointerEvents = 'auto';

@@ -21,7 +21,6 @@ import {
   NotionIcon,
 } from '../../icons/index.js';
 import type { Cell, Column } from '../../index.js';
-import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
 export type OnSuccessHandler = (
@@ -174,16 +173,19 @@ export async function importNotion(workspace: Workspace, file: File) {
             let id = 1;
             const titles: string[] = [];
             const rows: string[][] = [];
-            tableString?.split('\n').forEach((row, index) => {
+            tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
+              const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+              for (let i = 0; i < rowArray.length; i++) {
+                rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
+              }
               if (index === 0) {
-                titles.push(...row.split(','));
+                titles.push(...rowArray);
               } else {
-                const rowArray = row.split(',');
                 rows.push(rowArray);
               }
             });
 
-            const columns: Column[] = titles.slice(1).map(value => {
+            const columns: Column[] = titles.map(value => {
               return columnManager
                 .getColumn(richTextPureColumnConfig.type)
                 .createWithId('' + id++, value);
@@ -214,7 +216,7 @@ export async function importNotion(workspace: Workspace, file: File) {
               });
               const rowId = '' + id++;
               cells[rowId] = {};
-              row.slice(1).forEach((value, index) => {
+              row.forEach((value, index) => {
                 cells[rowId][columns[index].id] = {
                   columnId: columns[index].id,
                   value,
@@ -387,11 +389,6 @@ export class ImportPage extends WithDisposable(LitElement) {
   }
 
   private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
-    toast(
-      `Successfully imported ${pageIds.length} Page${
-        pageIds.length > 1 ? 's' : ''
-      }.`
-    );
     this.onSuccess?.(pageIds, isWorkspaceFile);
   }
 

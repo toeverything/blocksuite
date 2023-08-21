@@ -1,23 +1,34 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists, throttle } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 
 import {
   type BlockComponentElement,
   getClosestBlockElementByElement,
   getModelByElement,
+  isEdgelessPage,
 } from '../../__internal__/utils/query.js';
+import { getClosestPageBlockComponent } from '../../page-block/utils/query.js';
 
 export class ImageResizeManager {
   private _activeComponent: BlockComponentElement | null = null;
   private _imageContainer: HTMLElement | null = null;
   private _imageCenterX = 0;
   private _dragMoveTarget = 'right';
+  private _zoom = 1;
 
   onStart(e: PointerEventState) {
     const eventTarget = e.raw.target as HTMLElement;
     this._activeComponent = getClosestBlockElementByElement(
       eventTarget
     ) as BlockComponentElement;
+
+    const pageElement = getClosestPageBlockComponent(this._activeComponent);
+    if (pageElement && isEdgelessPage(pageElement)) {
+      this._zoom = pageElement.surface.viewport.zoom;
+    } else {
+      this._zoom = 1;
+    }
+
     this._imageContainer = eventTarget.closest('.resizable-img');
     assertExists(this._imageContainer);
     const rect = this._imageContainer.getBoundingClientRect() as DOMRect;
@@ -57,11 +68,11 @@ export class ImageResizeManager {
     const containerRect = activeImgContainer.getBoundingClientRect();
     if (containerRect.width === width && containerRect.height === height)
       return;
-    const updateImg = throttle(() => {
-      activeImgContainer.style.width = width.toFixed(2) + 'px';
-      activeImgContainer.style.height = height.toFixed(2) + 'px';
-    }, 50);
-    requestAnimationFrame(updateImg);
+
+    requestAnimationFrame(() => {
+      activeImgContainer.style.width = (width / this._zoom).toFixed(2) + 'px';
+      activeImgContainer.style.height = (height / this._zoom).toFixed(2) + 'px';
+    });
   }
 
   onEnd() {
@@ -71,6 +82,9 @@ export class ImageResizeManager {
     const dragModel = getModelByElement(this._activeComponent);
     dragModel.page.captureSync();
     const { width, height } = this._imageContainer.getBoundingClientRect();
-    dragModel.page.updateBlock(dragModel, { width: width, height: height });
+    dragModel.page.updateBlock(dragModel, {
+      width: width / this._zoom,
+      height: height / this._zoom,
+    });
   }
 }

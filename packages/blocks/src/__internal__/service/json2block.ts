@@ -195,7 +195,19 @@ export async function addSerializedBlocks(
     let id: string;
     try {
       page.schema.validate(flavour, parent.flavour);
-      id = page.addBlock(flavour, blockProps, parent, index + i);
+      if (flavour === 'affine:database') {
+        id = page.addBlock(
+          flavour,
+          {
+            ...blockProps,
+            views: databaseProps?.views,
+          },
+          parent,
+          index + i
+        );
+      } else {
+        id = page.addBlock(flavour, blockProps, parent, index + i);
+      }
     } catch {
       id = page.addBlock(
         'affine:paragraph',

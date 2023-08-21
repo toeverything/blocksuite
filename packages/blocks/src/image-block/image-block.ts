@@ -138,8 +138,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
 
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
 
