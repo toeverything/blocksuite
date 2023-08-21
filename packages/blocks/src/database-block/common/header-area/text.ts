@@ -247,7 +247,6 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.onRectChange?.();
         } else {
           if (this.isEditing) {
             this.selectCurrentCell(false);

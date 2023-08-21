@@ -65,13 +65,10 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
       views: DataViewDataType[];
     }
   ) {
-    const { rowIds, columns, cells, views } = props;
+    const { rowIds, columns, cells } = props;
     const columnIds = columns.map(column => column.id);
     model.deleteColumn(model.id);
-    const newColumnIds = columns.map(schema => {
-      const { id, ...nonIdProps } = schema;
-      return model.addColumn('end', nonIdProps);
-    });
+    const newColumnIds = columns.map(schema => model.addColumn('end', schema));
     model.applyColumnUpdate();
 
     const newRowIds = model.children.map(child => child.id);
@@ -86,10 +83,6 @@ export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> 
           value,
         });
       });
-    });
-
-    views.forEach(view => {
-      model.addView(view.mode);
     });
   }
 }

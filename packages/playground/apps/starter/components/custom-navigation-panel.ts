@@ -43,6 +43,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   private _renderPanel() {
     return html`<edgeless-toc-notes-panel
       .page=${this.page}
+      .fitPadding=${[50, 300, 50, 50]}
     ></edgeless-toc-notes-panel>`;
   }
 
