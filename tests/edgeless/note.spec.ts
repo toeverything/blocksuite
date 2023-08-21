@@ -67,7 +67,7 @@ test('can drag selected non-active note', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -76,7 +76,7 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 95]);
 });
 
 test('resize note in edgeless mode', async ({ page }) => {
@@ -128,7 +128,7 @@ test('add Note', async ({ page }) => {
 
   await assertEdgelessTool(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 91]);
+  await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
 });
 
 test('add empty Note', async ({ page }) => {
@@ -146,7 +146,7 @@ test('add empty Note', async ({ page }) => {
 
   // assert add note success
   await page.mouse.move(320, 320);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 91]);
+  await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
 
   // click out of note
   await page.mouse.click(250, 200);
@@ -530,7 +530,7 @@ test('cursor for active and inactive state', async ({ page }) => {
   await assertNativeSelectionRangeCount(page, 1);
 });
 
-test('continuous undo and redo (note blcok add operation) should work', async ({
+test('continuous undo and redo (note block add operation) should work', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

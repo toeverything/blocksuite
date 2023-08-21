@@ -71,10 +71,10 @@ test('can zoom viewport', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
 
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 404.5, EDITOR_WIDTH, 91];
+  const original = [50, 404.5, EDITOR_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
   let box = await getEdgelessHoverRect(page);
 
@@ -97,10 +97,10 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 404.5, EDITOR_WIDTH, 91];
+  const original = [50, 404.5, EDITOR_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);

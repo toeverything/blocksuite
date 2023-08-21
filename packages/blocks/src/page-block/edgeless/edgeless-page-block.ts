@@ -603,7 +603,6 @@ export class EdgelessPageBlockComponent
               page.updateBlock(model, {
                 xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
               });
-              this.requestUpdate();
             };
 
             // Assume it's user-triggered resizing if both width and height change,
