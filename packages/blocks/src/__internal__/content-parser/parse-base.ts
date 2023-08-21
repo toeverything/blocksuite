@@ -553,12 +553,21 @@ export abstract class BaseParser {
       tbodyElement,
       columnMeta
     );
+
     if (this._customTableTitleColumnHandler) {
       const titleColumn = await this._customTableTitleColumnHandler(element);
       if (titleColumn) {
+        const titleIndex =
+          columnMeta.findIndex(meta => meta.type === 'title') || 0;
         for (let i = 0; i < rows.length; i++) {
-          const originalContent = rows[i].shift();
-          rows[i].unshift(titleColumn[i] || originalContent || '');
+          if (titleIndex < rows[i].length) {
+            const originalContent = rows[i][titleIndex];
+            rows[i].splice(
+              titleIndex,
+              1,
+              titleColumn[i] || originalContent || ''
+            );
+          }
         }
       }
     }
@@ -744,11 +753,13 @@ const getTableCellsAndChildren = (
 ) => {
   const cells: Record<string, Record<string, Cell>> = {};
   const children: SerializedBlock[] = [];
+  const titleIndex = columnMeta.findIndex(meta => meta.type === 'title') || 0;
   rows.forEach(row => {
+    const title = row[titleIndex];
     children.push({
       flavour: 'affine:paragraph',
       type: 'text',
-      text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
+      text: [{ insert: Array.isArray(title) ? title.join('') : title }],
       children: [],
     });
     const rowId = '' + idCounter.next();
