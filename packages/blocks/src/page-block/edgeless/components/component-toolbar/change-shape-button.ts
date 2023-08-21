@@ -33,9 +33,9 @@ import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   GENERAL_CANVAS_FONT_FAMILY,
   SCRIBBLED_CANVAS_FONT_FAMILY,
-  SHAPE_FILLED_COLOR_WITH_BLACK_TEXT_COLOR,
-  SHAPE_TEXT_COLOR_BLACK,
-  SHAPE_TEXT_COLOR_WHITE,
+  SHAPE_FILL_COLOR_BLACK,
+  SHAPE_TEXT_COLOR_PURE_BLACK,
+  SHAPE_TEXT_COLOR_PURE_WHITE,
 } from '../../utils/consts.js';
 import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
@@ -313,23 +313,21 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _getTextColor(color: CssVariableName) {
-    // When the shape is general style and filled with color besides white and transparent,
-    // The text color should be white, otherwise it should be black.
-    const textColor = SHAPE_FILLED_COLOR_WITH_BLACK_TEXT_COLOR.includes(color)
-      ? SHAPE_TEXT_COLOR_BLACK
-      : SHAPE_TEXT_COLOR_WHITE;
+  private _getTextColor(fillColor: CssVariableName) {
+    // When the shape is filled with black color, the text color should be white.
+    // Otherwise, the text color should be black.
+    const textColor =
+      fillColor === SHAPE_FILL_COLOR_BLACK
+        ? SHAPE_TEXT_COLOR_PURE_WHITE
+        : SHAPE_TEXT_COLOR_PURE_BLACK;
 
     return textColor;
   }
 
   private _setShapeFillColor(color: CssVariableName) {
-    let textColor = this._getTextColor(color);
+    const textColor = this._getTextColor(color);
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
-      const { shapeStyle } = ele;
-      if (shapeStyle === ShapeStyle.Scribbled)
-        textColor = SHAPE_TEXT_COLOR_BLACK;
       this.surface.updateElement<'shape'>(ele.id, {
         filled,
         fillColor: color,
@@ -385,18 +383,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   }
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
-    // When the shape is scribbled style, the text color should be black.
-    let textColor = SHAPE_TEXT_COLOR_BLACK;
     this.elements.forEach(ele => {
-      if (shapeStyle === ShapeStyle.General)
-        textColor = this._getTextColor(ele.fillColor);
       this.surface.updateElement<'shape'>(ele.id, {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
             ? GENERAL_CANVAS_FONT_FAMILY
             : SCRIBBLED_CANVAS_FONT_FAMILY,
-        color: textColor,
       });
     });
   }

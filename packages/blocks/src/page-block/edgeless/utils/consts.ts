@@ -50,10 +50,6 @@ export const SurfaceColor = '#6046FE';
 export const NoteColor = '#1E96EB';
 export const BlendColor = '#7D91FF';
 
-export const SHAPE_FILLED_COLOR_WITH_BLACK_TEXT_COLOR = [
-  '--affine-palette-shape-white',
-  '--affine-palette-transparent',
-];
-
-export const SHAPE_TEXT_COLOR_WHITE = '--affine-palette-shape-white';
-export const SHAPE_TEXT_COLOR_BLACK = '--affine-palette-shape-black';
+export const SHAPE_TEXT_COLOR_PURE_WHITE = 'white';
+export const SHAPE_TEXT_COLOR_PURE_BLACK = 'black';
+export const SHAPE_FILL_COLOR_BLACK = '--affine-palette-shape-black';
