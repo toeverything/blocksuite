@@ -1,3 +1,4 @@
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -22,9 +23,11 @@ export class BlockRenderer
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
     }
+
     database-datasource-block-renderer .tips-placeholder {
       display: none;
     }
+
     .database-block-detail-header-icon {
       width: 20px;
       height: 20px;
@@ -32,6 +35,7 @@ export class BlockRenderer
       border-radius: 4px;
       background-color: var(--affine-background-secondary-color);
     }
+
     .database-block-detail-header-icon svg {
       width: 16px;
       height: 16px;
@@ -41,14 +45,30 @@ export class BlockRenderer
   public view!: DataViewTableManager | DataViewKanbanManager;
   @property({ attribute: false })
   public rowId!: string;
+  root?: BlockSuiteRoot;
+
+  get model() {
+    return this.root?.page.getBlockById(this.rowId);
+  }
 
   public override connectedCallback() {
     super.connectedCallback();
+    this.root = this.closest('block-suite-root') ?? undefined;
     this._disposables.addFromEvent(
       this,
       'keydown',
       e => {
         if (e.key === 'Enter' && !e.shiftKey) {
+          e.stopPropagation();
+          e.preventDefault();
+          return;
+        }
+        if (
+          e.key === 'Backspace' &&
+          !e.shiftKey &&
+          !e.metaKey &&
+          this.model?.text?.length === 0
+        ) {
           e.stopPropagation();
           e.preventDefault();
           return;
@@ -69,14 +89,10 @@ export class BlockRenderer
   }
 
   protected override render(): unknown {
-    const root = this.closest('block-suite-root');
-    if (!root) {
-      return;
-    }
-    const model = root.page.getBlockById(this.rowId);
+    const model = this.model;
     if (!model) {
       return;
     }
-    return html` ${root.renderModel(model)} ${this.renderIcon()} `;
+    return html` ${this.root?.renderModel(model)} ${this.renderIcon()} `;
   }
 }
