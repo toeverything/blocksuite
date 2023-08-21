@@ -1,8 +1,10 @@
 import { ShadowlessElement } from '@blocksuite/lit';
-import type { LitElement, PropertyValues } from 'lit';
+import type { LitElement, PropertyValues, TemplateResult } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import type { Ref } from 'lit/directives/ref.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 export type UniComponentReturn<
   Props = NonNullable<unknown>,
@@ -21,18 +23,22 @@ export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
   props: Props,
   options?: {
     ref?: Ref<Expose>;
+    style?: Readonly<StyleInfo>;
+    class?: string;
   }
-) => {
-  return html`<uni-lit
-    .uni=${uni}
-    .props=${props}
-    .ref=${options?.ref}
+): TemplateResult => {
+  return html` <uni-lit
+    .uni="${uni}"
+    .props="${props}"
+    .ref="${options?.ref}"
+    style=${ifDefined(options?.style && styleMap(options?.style))}
   ></uni-lit>`;
 };
+
 @customElement('uni-lit')
 export class UniLit<
   Props,
-  Expose extends NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>
 > extends ShadowlessElement {
   @property({ attribute: false })
   uni?: UniComponent<Props, Expose>;
