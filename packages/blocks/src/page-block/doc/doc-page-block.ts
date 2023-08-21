@@ -453,6 +453,7 @@ export class DocPageBlockComponent
       let paragraphId: string;
       let index = 0;
       const lastNote = this.model.children
+        .slice()
         .reverse()
         .find(
           child =>
