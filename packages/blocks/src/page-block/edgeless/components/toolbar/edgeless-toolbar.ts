@@ -153,7 +153,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     },
   })
   private _currentFrameIndex = 0;
-  private _isFullScreen = false;
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
@@ -297,12 +296,10 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _toggleFullScreen() {
-    if (this._isFullScreen) {
-      this._isFullScreen = false;
+    if (document.fullscreenElement) {
       this._timer && clearTimeout(this._timer);
       document.exitFullscreen();
     } else {
-      this._isFullScreen = true;
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {
         this._currentFrameIndex = this._currentFrameIndex + 0;
@@ -358,7 +355,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         class="edgeless-frame-navigator-stop"
         @click=${() => {
           this.setEdgelessTool({ type: 'default' });
-          this._isFullScreen === true && this._toggleFullScreen();
+          document.fullscreenElement && this._toggleFullScreen();
         }}
       >
         Stop
@@ -393,7 +390,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         .tooltip=${'Prensentation'}
         @click=${() => {
           this.setEdgelessTool({ type: 'frameNavigator' });
-          this._isFullScreen = false;
           this._toggleFullScreen();
         }}
       >
