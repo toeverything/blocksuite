@@ -109,6 +109,9 @@ export async function importNotion(workspace: Workspace, file: File) {
         }
         pageMap.set(file, workspace.idGenerator());
       }
+      if (i === 0 && fileName.endsWith('.csv')) {
+        pageMap.set(file, workspace.idGenerator());
+      }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
         if (innerZipFile) {
@@ -122,7 +125,11 @@ export async function importNotion(workspace: Workspace, file: File) {
       const lastSplitIndex = file.lastIndexOf('/');
       const folder = file.substring(0, lastSplitIndex) || '';
       const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+      if (
+        fileName.endsWith('.html') ||
+        fileName.endsWith('.md') ||
+        fileName.endsWith('.csv')
+      ) {
         const isHtml = fileName.endsWith('.html');
         const rootId = page.root?.id;
         const fetchFileHandler = async (url: string) => {
@@ -147,6 +154,94 @@ export async function importNotion(workspace: Workspace, file: File) {
           }
         };
 
+        const csvParseHandler = async (
+          tableString: string,
+          titleText: string
+        ) => {
+          let result: SerializedBlock[] | null = [];
+          let id = 1;
+          const titles: string[] = [];
+          const rows: string[][] = [];
+          tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
+            const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            for (let i = 0; i < rowArray.length; i++) {
+              rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
+            }
+            if (index === 0) {
+              titles.push(...rowArray);
+            } else {
+              rows.push(rowArray);
+            }
+          });
+
+          const columns: Column[] = titles.map(value => {
+            return columnManager
+              .getColumn(richTextPureColumnConfig.type)
+              .createWithId('' + id++, value);
+          });
+          if (rows.length > 0) {
+            let maxLen = rows[0].length;
+            for (let i = 1; i < rows.length; i++) {
+              maxLen = Math.max(maxLen, rows[i].length);
+            }
+            const addNum = maxLen - columns.length;
+            for (let i = 0; i < addNum; i++) {
+              columns.push(
+                columnManager
+                  .getColumn(richTextPureColumnConfig.type)
+                  .createWithId('' + id++, '')
+              );
+            }
+          }
+          const databasePropsId = id++;
+          const cells: Record<string, Record<string, Cell>> = {};
+          const children: SerializedBlock[] = [];
+          rows.forEach(row => {
+            children.push({
+              flavour: 'affine:paragraph',
+              type: 'text',
+              text: [{ insert: row[0] }],
+              children: [],
+            });
+            const rowId = '' + id++;
+            cells[rowId] = {};
+            row.forEach((value, index) => {
+              cells[rowId][columns[index].id] = {
+                columnId: columns[index].id,
+                value,
+              };
+            });
+          });
+          result = [
+            {
+              flavour: 'affine:database',
+              databaseProps: {
+                id: '' + databasePropsId,
+                title: titleText || 'Database',
+                rowIds: Object.keys(cells),
+                cells: cells,
+                columns: columns,
+                views: [
+                  {
+                    id: page.generateId(),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: [],
+                    header: {},
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                  },
+                ],
+              },
+              children: children,
+            },
+          ];
+          return result;
+        };
+
         const tableParseHandler = async (element: Element) => {
           // if (element.tagName === 'TABLE') {
           //   const parentElement = element.parentElement;
@@ -168,88 +263,10 @@ export async function importNotion(workspace: Workspace, file: File) {
             const href = element.getAttribute('href') || '';
             const fileName = joinWebPaths(folder, decodeURI(href));
             const tableString = await zipFile.file(fileName)?.async('string');
-
-            let result: SerializedBlock[] | null = [];
-            let id = 1;
-            const titles: string[] = [];
-            const rows: string[][] = [];
-            tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
-              const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-              for (let i = 0; i < rowArray.length; i++) {
-                rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
-              }
-              if (index === 0) {
-                titles.push(...rowArray);
-              } else {
-                rows.push(rowArray);
-              }
-            });
-
-            const columns: Column[] = titles.map(value => {
-              return columnManager
-                .getColumn(richTextPureColumnConfig.type)
-                .createWithId('' + id++, value);
-            });
-            if (rows.length > 0) {
-              let maxLen = rows[0].length;
-              for (let i = 1; i < rows.length; i++) {
-                maxLen = Math.max(maxLen, rows[i].length);
-              }
-              const addNum = maxLen - columns.length;
-              for (let i = 0; i < addNum; i++) {
-                columns.push(
-                  columnManager
-                    .getColumn(richTextPureColumnConfig.type)
-                    .createWithId('' + id++, '')
-                );
-              }
-            }
-            const databasePropsId = id++;
-            const cells: Record<string, Record<string, Cell>> = {};
-            const children: SerializedBlock[] = [];
-            rows.forEach(row => {
-              children.push({
-                flavour: 'affine:paragraph',
-                type: 'text',
-                text: [{ insert: row[0] }],
-                children: [],
-              });
-              const rowId = '' + id++;
-              cells[rowId] = {};
-              row.forEach((value, index) => {
-                cells[rowId][columns[index].id] = {
-                  columnId: columns[index].id,
-                  value,
-                };
-              });
-            });
-            result = [
-              {
-                flavour: 'affine:database',
-                databaseProps: {
-                  id: '' + databasePropsId,
-                  title: element.textContent || 'Database',
-                  rowIds: Object.keys(cells),
-                  cells: cells,
-                  columns: columns,
-                  views: [
-                    {
-                      id: page.generateId(),
-                      name: 'Table View',
-                      mode: 'table',
-                      columns: [],
-                      header: {},
-                      filter: {
-                        type: 'group',
-                        op: 'and',
-                        conditions: [],
-                      },
-                    },
-                  ],
-                },
-                children: children,
-              },
-            ];
+            const result = await csvParseHandler(
+              tableString ?? '',
+              element.textContent || ''
+            );
             return result;
           }
           return null;
@@ -287,7 +304,16 @@ export async function importNotion(workspace: Workspace, file: File) {
         const text = (await zipFile.file(file)?.async('string')) || '';
         if (rootId) {
           pageIds.push(page.id);
-          if (isHtml) {
+          if (fileName.endsWith('.csv')) {
+            const lastSpace = fileName.lastIndexOf(' ');
+            const csvName =
+              lastSpace === -1 ? '' : fileName.substring(0, lastSpace);
+            const csvRealName = csvName === 'Undefined' ? '' : csvName;
+            const blocks = await csvParseHandler(text, csvRealName);
+            if (blocks) {
+              await contentParser.importBlocks(blocks, rootId);
+            }
+          } else if (isHtml) {
             await contentParser.importHtml(text, rootId);
           } else {
             await contentParser.importMarkdown(text, rootId);
