@@ -443,7 +443,10 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
             id: '0',
             name: 'Table View',
             mode: 'table',
-            header: {},
+            header: {
+              iconColumn: 'type',
+              titleColumn: '1',
+            },
             columns: [],
             filter: {
               type: 'group',
@@ -709,11 +712,14 @@ test(scoped`import notion html-format table`, async ({ page }) => {
             name: 'Table View',
             mode: 'table',
             columns: [],
-            header: {},
+            header: {
+              'matchesReplaceMap[16]': 'type',
+              titleColumn: '1',
+            },
             filter: {
               type: 'group',
               op: 'and',
-              'matchesReplaceMap[16]': [],
+              'matchesReplaceMap[17]': [],
             },
           },
         ],

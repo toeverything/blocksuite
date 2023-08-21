@@ -238,13 +238,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                       name: 'Table View',
                       mode: 'table',
                       columns: [],
-                      header:
-                        columns.length > 0
-                          ? {
-                              titleColumn: columns[0].id,
-                              iconColumn: 'type',
-                            }
-                          : {},
+                      header: {},
                       filter: {
                         type: 'group',
                         op: 'and',
