@@ -475,6 +475,7 @@ function BlockHubCards(
                       ? ''
                       : 'display: none'}; z-index: ${blockHubItems.length -
                     index}"
+                    arrow
                     >${tooltip}</tool-tip
                   >
                 </div>
