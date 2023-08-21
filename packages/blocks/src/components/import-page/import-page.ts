@@ -185,7 +185,7 @@ export async function importNotion(workspace: Workspace, file: File) {
               }
             });
 
-            const columns: Column[] = titles.slice(1).map(value => {
+            const columns: Column[] = titles.map(value => {
               return columnManager
                 .getColumn(richTextPureColumnConfig.type)
                 .createWithId('' + id++, value);
@@ -216,7 +216,7 @@ export async function importNotion(workspace: Workspace, file: File) {
               });
               const rowId = '' + id++;
               cells[rowId] = {};
-              row.slice(1).forEach((value, index) => {
+              row.forEach((value, index) => {
                 cells[rowId][columns[index].id] = {
                   columnId: columns[index].id,
                   value,
