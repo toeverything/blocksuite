@@ -67,7 +67,7 @@ export class EdgelessChildNote extends LitElement {
   override render() {
     const { model, renderer, index } = this;
     const { xywh, background } = model;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
+    const [modelX, modelY, modelW] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
 
     const style = {
