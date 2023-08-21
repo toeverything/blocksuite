@@ -24,7 +24,6 @@ export interface CellRenderProps<
   rowId: string;
   isEditing: boolean;
   selectCurrentCell: (editing: boolean) => void;
-  onRectChange?: () => void;
 }
 
 export interface DataViewCellLifeCycle {

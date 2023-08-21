@@ -68,10 +68,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     }
   };
 
-  private _rectChanged = () => {
-    this.selectionView?.updateSelection();
-  };
-
   private get readonly() {
     return this.column.readonly;
   }
@@ -111,7 +107,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       rowId: this.rowId,
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
-      onRectChange: this._rectChanged,
     };
     return html` <uni-lit
       ${ref(this._cell)}

@@ -170,6 +170,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   host!: Document | HTMLElement;
 
+  @property({ attribute: false })
+  fitPadding!: number[];
+
   private _noteElementHeight = 0;
   private _changedFlag = false;
   private _oldViewport?: {
@@ -182,6 +185,14 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   get edgeless() {
     return this.ownerDocument.querySelector('affine-edgeless-page');
+  }
+
+  get viewportPadding(): [number, number, number, number] {
+    return this.fitPadding
+      ? ([0, 0, 0, 0].map((val, idx) =>
+          Number.isFinite(this.fitPadding[idx]) ? this.fitPadding[idx] : val
+        ) as [number, number, number, number])
+      : [0, 0, 0, 0];
   }
 
   override connectedCallback(): void {
@@ -221,6 +232,8 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
   private _updateNotes() {
     const root = this.page.root;
+
+    if (this._dragging) return;
 
     if (!root) {
       this._notes = [];
@@ -285,18 +298,15 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     index: number,
     selected: string[],
     notesMap: Map<string, TOCNoteItem>,
-    notes: TOCNoteItem[]
+    notes: TOCNoteItem[],
+    children: NoteBlockModel[]
   ) {
-    const children = this.page.root?.children.slice() as NoteBlockModel[];
-
-    if (!children || !this.page.root) return;
+    if (!children.length || !this.page.root) return;
 
     const blocks = selected.map(id => (notesMap.get(id) as TOCNoteItem).note);
     const draggingBlocks = new Set(blocks);
     const targetIndex =
-      index === notes.length
-        ? this._notes[index - 1].index + 1
-        : this._notes[index].index;
+      index === notes.length ? notes[index - 1].index + 1 : notes[index].index;
 
     const leftPart = children
       .slice(0, targetIndex)
@@ -331,9 +341,12 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
   }
 
   private _drag(e: DragEvent) {
+    if (!this._selected.length || !this.page.root) return;
+
     this._dragging = true;
 
     // cache the notes in case it is changed by other peers
+    const children = this.page.root.children.slice() as NoteBlockModel[];
     const notes = this._notes;
     const notesMap = this._notes.reduce((map, note, index) => {
       map.set(note.note.id, {
@@ -342,8 +355,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       });
       return map;
     }, new Map<string, TOCNoteItem>());
+    const selected = this._selected.slice();
 
-    const draggedNotesInfo = this._selected.map(id => {
+    const draggedNotesInfo = selected.map(id => {
       const note = notesMap.get(id) as TOCNoteItem;
 
       return {
@@ -355,9 +369,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
         number: note.number,
       };
     });
+    const width = draggedNotesInfo[0].element.clientWidth;
 
     this._noteElementHeight = draggedNotesInfo[0].element.offsetHeight;
-    const width = draggedNotesInfo[0].element.clientWidth;
 
     startDragging(draggedNotesInfo, {
       width,
@@ -376,7 +390,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
         if (insertIdx === undefined) return;
 
-        this._moveBlocks(insertIdx, this._selected, notesMap, notes);
+        this._moveBlocks(insertIdx, selected, notesMap, notes, children);
       },
       onDragMove: idx => {
         this.insertIndex = idx;
@@ -394,12 +408,9 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     if (!edgeless) return;
 
     const { surface } = edgeless;
-    const { centerX, centerY, zoom } = edgeless.getFitToScreenData([
-      undefined,
-      this.offsetWidth,
-      undefined,
-      undefined,
-    ]);
+    const bound = edgeless.getElementsBound();
+
+    if (!bound) return;
 
     this._oldViewport = {
       zoom: surface.viewport.zoom,
@@ -408,7 +419,11 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
         y: surface.viewport.center.y,
       },
     };
-    surface.viewport.setViewport(zoom, [centerX, centerY], true);
+    surface.viewport.setViewportByBound(
+      new Bound(bound.x, bound.y, bound.w, bound.h),
+      this.viewportPadding,
+      true
+    );
   }
 
   private _fitToElement(e: FitViewEvent) {
@@ -421,7 +436,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     edgeless.surface.viewport.setViewportByBound(
       bound,
-      [50, 400, 50, 50],
+      this.viewportPadding,
       true
     );
   }

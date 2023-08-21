@@ -215,7 +215,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
           }
-          this.onRectChange?.();
         } else {
           this.selectCurrentCell(false);
         }
