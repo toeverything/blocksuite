@@ -102,7 +102,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
     .more-actions-container {
       display: none;
-      width: fit-content;
+      width: 164px;
       padding: 8px;
       justify-content: center;
       align-items: center;
@@ -122,6 +122,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       white-space: nowrap;
       height: 32px;
       box-sizing: border-box;
+      font-size: 14px;
       padding: 4px 8px;
       border-radius: 4px;
       overflow: hidden;
@@ -132,9 +133,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     }
 
     menu-divider {
-      width: 85%;
+      width: 88%;
       position: relative;
-      left: 12px;
+      left: 8px;
     }
 
     .action-item:hover {
