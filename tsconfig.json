@@ -4,7 +4,7 @@
     "target": "ES2020",
     "useDefineForClassFields": false,
     "experimentalDecorators": true,
-    "module": "ESNext",
+    "module": "NodeNext",
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "NodeNext",
     "strict": true,
