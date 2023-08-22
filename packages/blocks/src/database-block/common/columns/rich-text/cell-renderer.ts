@@ -106,10 +106,27 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
-
-  protected override firstUpdated() {
+  private init() {
+    if (this.vEditor) {
+      return;
+    }
     this._onInitVEditor();
     this.column.captureSync();
+  }
+  override firstUpdated() {
+    this.init();
+  }
+  override connectedCallback() {
+    super.connectedCallback();
+    if (this._container) {
+      this.init();
+    }
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.vEditor?.unmount();
+    this.vEditor = null;
   }
 
   private _initYText = (text?: string) => {
@@ -132,11 +149,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
 
     const vEditor = new VEditor(value);
-    this._disposables.add({
-      dispose: () => {
-        vEditor.unmount();
-      },
-    });
     this.vEditor = vEditor;
     this.vEditor.mount(this._container);
     this.vEditor.setReadonly(true);
@@ -209,13 +221,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     }
 
     const vEditor = new VEditor(value);
+    this.vEditor = vEditor;
+    this.vEditor.mount(this._container);
     this._disposables.add({
       dispose: () => {
         vEditor.unmount();
       },
     });
-    this.vEditor = vEditor;
-    this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
     });

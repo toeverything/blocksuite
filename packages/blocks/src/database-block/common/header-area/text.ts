@@ -128,20 +128,16 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
-  protected initVirgo(): VEditor {
+  protected initVirgo(container: HTMLElement): VEditor {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
     const vEditor = new VEditor(yText);
-    this._disposables.add({
-      dispose: () => vEditor.unmount(),
-    });
-    this.editor = vEditor;
-    this.editor.setAttributeSchema(affineTextAttributes);
-    this.editor.setAttributeRenderer(attributeRenderer());
-    autoIdentifyReference(this.editor, yText.toString());
-    this.editor.mount(this.richText);
-    this.editor.bindHandlers({
+    vEditor.setAttributeSchema(affineTextAttributes);
+    vEditor.setAttributeRenderer(attributeRenderer());
+    autoIdentifyReference(vEditor, yText.toString());
+    vEditor.mount(container);
+    vEditor.bindHandlers({
       keydown: e => {
         if (
           e instanceof KeyboardEvent &&
@@ -157,14 +153,13 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
         }
       },
     });
-
     this.undoManager = new Y.UndoManager(yText, {
       trackedOrigins: new Set([yText.doc?.clientID]),
     });
     this.undoManager.on(
       'stack-item-added',
       (event: { stackItem: StackItem }) => {
-        const vRange = this.editor?.getVRange();
+        const vRange = vEditor.getVRange();
         event.stackItem.meta.set('v-range', vRange);
       }
     );
@@ -173,11 +168,11 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       (event: { stackItem: StackItem }) => {
         const vRange = event.stackItem.meta.get('v-range');
         if (vRange) {
-          this.editor?.setVRange(vRange);
+          vEditor.setVRange(vRange);
         }
       }
     );
-    return this.editor;
+    return vEditor;
   }
 
   private getYText(text?: string | YText) {
@@ -232,18 +227,36 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 
 @customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
-  public override firstUpdated() {
+  private init() {
+    if (this.editor) {
+      return;
+    }
+    this.editor = this.initVirgo(this.richText);
+    this.editor.setReadonly(true);
+  }
+  override firstUpdated() {
+    this.init();
+  }
+  public override connectedCallback() {
     super.connectedCallback();
-    const editor = this.initVirgo();
-    editor.setReadonly(true);
+    if (this.richText) {
+      this.init();
+    }
+  }
+  public override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.editor?.unmount();
+    this.editor = undefined;
   }
 }
 
 @customElement('data-view-header-area-text-editing')
 export class HeaderAreaTextCellEditing extends BaseTextCell {
-  public override firstUpdated() {
-    super.connectedCallback();
-    const editor = this.initVirgo();
+  private init() {
+    if (this.editor) {
+      return;
+    }
+    const editor = this.initVirgo(this.richText);
     editor.focusEnd();
     this._disposables.add(
       editor.slots.vRangeUpdated.on(([range]) => {
@@ -258,6 +271,22 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         }
       })
     );
+  }
+
+  override firstUpdated() {
+    this.init();
+  }
+
+  public override connectedCallback() {
+    super.connectedCallback();
+    if (this.richText) {
+      this.init();
+    }
+  }
+  public override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.editor?.unmount();
+    this.editor = undefined;
   }
 }
 
