@@ -132,7 +132,11 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
-    this.editor = new VEditor(yText);
+    const vEditor = new VEditor(yText);
+    this._disposables.add({
+      dispose: () => vEditor.unmount(),
+    });
+    this.editor = vEditor;
     this.editor.setAttributeSchema(affineTextAttributes);
     this.editor.setAttributeRenderer(attributeRenderer());
     autoIdentifyReference(this.editor, yText.toString());

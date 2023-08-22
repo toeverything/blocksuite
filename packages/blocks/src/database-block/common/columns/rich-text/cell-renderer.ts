@@ -131,7 +131,13 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value);
+    const vEditor = new VEditor(value);
+    this._disposables.add({
+      dispose: () => {
+        vEditor.unmount();
+      },
+    });
+    this.vEditor = vEditor;
     this.vEditor.mount(this._container);
     this.vEditor.setReadonly(true);
   }
@@ -202,7 +208,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value);
+    const vEditor = new VEditor(value);
+    this._disposables.add({
+      dispose: () => {
+        vEditor.unmount();
+      },
+    });
+    this.vEditor = vEditor;
     this.vEditor.mount(this._container);
     this.vEditor.bindHandlers({
       keydown: this._handleKeyDown,
