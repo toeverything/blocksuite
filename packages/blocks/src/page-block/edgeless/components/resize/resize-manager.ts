@@ -609,7 +609,7 @@ export class HandleResizeManager {
     const _onPointerMove = ({ x, y, shiftKey }: PointerEvent) => {
       if (this._resizeMode === 'none') return;
 
-      this._shiftKey ||= shiftKey;
+      this._shiftKey = shiftKey;
       this._dragPos.end = { x, y };
 
       if (this._rotation) {
