@@ -12,6 +12,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import type {
   BrushElement,
   ConnectorElement,
+  FrameElement,
   ShapeElement,
   TextElement,
 } from '@blocksuite/phasor';
@@ -21,8 +22,10 @@ import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
+import { RenameIcon } from '../../../../icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
+import { mountFrameEditor } from '../../utils/text.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
@@ -30,6 +33,7 @@ type CategorizedElements = {
   note: TopLevelBlockModel[];
   connector: ConnectorElement[];
   text: TextElement[];
+  frame: FrameElement[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -151,6 +155,20 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
+  private _getFrameButton(frames: FrameElement[]) {
+    return frames?.length === 1
+      ? html`
+          <edgeless-tool-icon-button
+            .tooltip=${'Rename'}
+            .tipPosition=${'bottom'}
+            @click=${() => mountFrameEditor(frames[0], this.edgeless)}
+          >
+            ${RenameIcon}Rename
+          </edgeless-tool-icon-button>
+        `
+      : nothing;
+  }
+
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
 
@@ -179,7 +197,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     );
   }
 
-  private _getFrameButton() {
+  private _getCreateFrameButton() {
     return html`<edgeless-add-frame-button
       .edgeless=${this.edgeless}
     ></edgeless-add-frame-button>`;
@@ -188,7 +206,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless } = this;
-    const { shape, brush, connector, note, text } = groupedSelected;
+    const { shape, brush, connector, note, text, frame } = groupedSelected;
 
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
@@ -204,25 +222,30 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._getConnectorButton(connector),
           this._getNoteButton(note),
           this._getTextButton(text),
+          this._getFrameButton(frame),
         ].filter(b => !!b);
 
     if (this.selection.state.elements.length > 1) {
-      // Should add a divider if there is a frame button
       buttons.unshift(
         html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       );
-      buttons.unshift(this._getFrameButton());
+      buttons.unshift(this._getCreateFrameButton());
     }
-
-    const divider = buttons.length
-      ? html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      : nothing;
+    const last = buttons.at(-1);
+    if (
+      typeof last === 'symbol' ||
+      !last?.strings[0].includes('component-toolbar-menu-divider')
+    ) {
+      buttons.push(
+        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+      );
+    }
 
     return html`<div
       class="edgeless-component-toolbar-container"
       @pointerdown=${stopPropagation}
     >
-      ${join(buttons, () => '')} ${divider}
+      ${join(buttons, () => '')}
       <edgeless-more-button
         .edgeless=${edgeless}
         .vertical=${true}
