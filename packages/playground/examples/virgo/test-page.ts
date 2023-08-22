@@ -17,7 +17,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
 import { z } from 'zod';
 
-import { markdownMatches } from './markdown';
+import { markdownMatches } from './markdown.js';
 
 function virgoTextStyles(
   props: BaseTextAttributes

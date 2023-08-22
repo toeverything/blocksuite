@@ -16,7 +16,7 @@ interface MarkdownMatch {
 export const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bolditalic',
-    pattern: /(?:\*){3}([^\s]+)(?:\*){3}$/g,
+    pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -70,7 +70,7 @@ export const markdownMatches: MarkdownMatch[] = [
   },
   {
     name: 'bold',
-    pattern: /(?:\*){2}([^\s]+)(?:\*){2}$/g,
+    pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -122,7 +122,7 @@ export const markdownMatches: MarkdownMatch[] = [
   },
   {
     name: 'italic',
-    pattern: /(?:\*){1}([^\s]+)(?:\*){1}$/g,
+    pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -174,7 +174,7 @@ export const markdownMatches: MarkdownMatch[] = [
   },
   {
     name: 'strikethrough',
-    pattern: /(?:~~)([^\s]+)(?:~~)$/g,
+    pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -226,7 +226,7 @@ export const markdownMatches: MarkdownMatch[] = [
   },
   {
     name: 'underthrough',
-    pattern: /(?:~)([^\s]+)(?:~)$/g,
+    pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -278,7 +278,7 @@ export const markdownMatches: MarkdownMatch[] = [
   },
   {
     name: 'code',
-    pattern: /(?:`)([^\s]+)(?:`)$/g,
+    pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
