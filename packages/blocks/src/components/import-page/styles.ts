@@ -18,7 +18,7 @@ export const styles = css`
     background: var(--affine-background-primary-color);
     box-shadow: var(--affine-shadow-2);
     border-radius: 16px;
-    z-index: 9999;
+    z-index: var(--affine-z-index-popover);
   }
 
   :host([hidden]) {
