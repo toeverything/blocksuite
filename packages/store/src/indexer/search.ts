@@ -1,9 +1,9 @@
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
-import { Map as YMap, Text as YText } from 'yjs';
+import { Text as YText } from 'yjs';
 
-import type { YBlock } from '../workspace/page.js';
+import type { YBlock, YBlocks } from '../workspace/page.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 
 const DocumentIndexer = FlexSearch.Document;
@@ -81,7 +81,9 @@ export class SearchIndexer {
     doc.spaces.observe(event => {
       event.keysChanged.forEach(pageId => {
         const page = this._getPage(pageId);
-        this._handlePageIndexing(pageId, page);
+        if (page != null) {
+          this._handlePageIndexing(pageId, page);
+        }
       });
     });
   }
@@ -108,25 +110,17 @@ export class SearchIndexer {
   }
 
   public refreshPageIndex(pageId: string, page: Doc) {
-    const yBlocks = page.get('blocks');
-    if (!(yBlocks instanceof YMap)) {
-      return;
-    }
-    if (yBlocks instanceof YMap) {
-      yBlocks.forEach((_, key) => {
-        this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
-      });
-    }
+    const yBlocks = page.getMap('blocks') as YBlocks;
+    yBlocks.forEach((_, key) => {
+      this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
+    });
   }
 
-  private _handlePageIndexing(pageId: string, page?: Doc) {
+  private _handlePageIndexing(pageId: string, page: Doc) {
     if (!page) {
       return;
     }
-    const yBlocks = page.get('blocks');
-    if (!yBlocks) {
-      return;
-    }
+    const yBlocks = page.getMap('blocks') as YBlocks;
     this.refreshPageIndex(pageId, page);
     yBlocks.observeDeep(events => {
       const keys = events.flatMap(e => {
@@ -140,10 +134,6 @@ export class SearchIndexer {
       });
 
       if (keys.length) {
-        const yBlocks = page.get('blocks');
-        if (!(yBlocks instanceof YMap)) {
-          return;
-        }
         keys.forEach(([key, action]) => {
           this._refreshIndex(pageId, key, action, yBlocks.get(key));
         });
