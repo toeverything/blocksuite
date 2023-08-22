@@ -112,9 +112,11 @@ export class SearchIndexer {
     if (!(yBlocks instanceof YMap)) {
       return;
     }
-    yBlocks.forEach((_, key) => {
-      this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
-    });
+    if (yBlocks instanceof YMap) {
+      yBlocks.forEach((_, key) => {
+        this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
+      });
+    }
   }
 
   private _handlePageIndexing(pageId: string, page?: Doc) {
@@ -122,7 +124,7 @@ export class SearchIndexer {
       return;
     }
     const yBlocks = page.get('blocks');
-    if (!(yBlocks instanceof YMap)) {
+    if (!yBlocks) {
       return;
     }
     this.refreshPageIndex(pageId, page);
@@ -138,6 +140,10 @@ export class SearchIndexer {
       });
 
       if (keys.length) {
+        const yBlocks = page.get('blocks');
+        if (!(yBlocks instanceof YMap)) {
+          return;
+        }
         keys.forEach(([key, action]) => {
           this._refreshIndex(pageId, key, action, yBlocks.get(key));
         });
