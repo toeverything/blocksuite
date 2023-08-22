@@ -14,7 +14,6 @@ export const tooltipStyle = css`
   tool-tip {
     font-family: var(--affine-font-family);
     position: absolute;
-
     inline-size: max-content;
     text-align: center;
     font-size: var(--affine-font-sm);
@@ -29,33 +28,32 @@ export const tooltipStyle = css`
     /* Default is top-start */
     left: 0;
     top: 0;
-    border-radius: 10px;
+    border-radius: 4px;
     transform: translate(0, calc(-100% - 8px));
   }
-
   tool-tip:is([tip-position='top']) {
     left: 50%;
-    border-radius: 10px;
+    border-radius: 4px;
     transform: translate(-50%, calc(-100% - 8px));
   }
   tool-tip:is([tip-position='right']) {
     left: unset;
     right: 0;
     transform: translateX(calc(100% + 8px));
-    border-radius: 0 10px 10px 10px;
+    border-radius: 0 4px 4px 4px;
   }
   tool-tip:is([tip-position='left']) {
     left: 0;
     top: 50%;
     transform: translate(calc(-100% - 8px), -50%);
-    border-radius: 10px 10px 0 10px;
+    border-radius: 4px;
   }
   tool-tip:is([tip-position='bottom']) {
     top: unset;
     left: 50%;
     bottom: 0;
     transform: translate(-50%, calc(100% + 8px));
-    border-radius: 10px;
+    border-radius: 4px;
   }
 
   /* work for tip-position='top' */
@@ -73,6 +71,7 @@ export const tooltipStyle = css`
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 6px solid var(--affine-tooltip);
+    margin-top: -4px;
   }
 
   /* work for tip-position='right' */
@@ -97,11 +96,11 @@ export const tooltipStyle = css`
     transform: translate(calc(-100% - 16px), -50%);
   }
   tool-tip:is([arrow]):is([tip-position='left'])::before {
-    position: absolute;
     content: '';
-    right: 0;
+    position: absolute;
+    right: -5px;
     bottom: 50%;
-    transform: translate(100%, 50%);
+    transform: translateY(50%);
     width: 0;
     height: 0;
     border-top: 5px solid transparent;
@@ -114,11 +113,11 @@ export const tooltipStyle = css`
     transform: translate(-50%, calc(100% + 16px));
   }
   tool-tip:is([arrow]):is([tip-position='bottom'])::before {
-    position: absolute;
     content: '';
+    position: absolute;
     left: 50%;
-    top: 0;
-    transform: translate(-50%, -100%);
+    bottom: 100%;
+    transform: translateX(-50%);
     width: 0;
     height: 0;
     border-left: 5px solid transparent;
@@ -142,7 +141,6 @@ export const tooltipStyle = css`
     border-right: 5px solid transparent;
     border-top: 6px solid var(--affine-tooltip);
   }
-
   /* work for tip-position='top-start' */
   tool-tip:is([arrow]):is([tip-position='top-start']) {
     transform: translate(-75%, calc(-100% - 16px));
@@ -158,8 +156,8 @@ export const tooltipStyle = css`
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 6px solid var(--affine-tooltip);
+    margin-top: 10px;
   }
-
   .has-tool-tip {
     position: relative;
   }

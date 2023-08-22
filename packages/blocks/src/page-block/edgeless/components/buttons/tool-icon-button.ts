@@ -45,6 +45,10 @@ export class EdgelessToolIconButton extends LitElement {
     tool-tip {
       z-index: 12;
     }
+
+    tool-tip:is([arrow]):is([tip-position='top'])::before {
+      margin-top: -4px;
+    }
   `;
 
   @property({ attribute: false })
