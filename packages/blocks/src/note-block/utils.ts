@@ -5,7 +5,10 @@ import type { BlockElement } from '@blocksuite/lit';
 import { deserializeXYWH } from '@blocksuite/phasor';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../__internal__/consts.js';
+import {
+  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
+  EDGELESS_BLOCK_CHILD_PADDING,
+} from '../__internal__/consts.js';
 import { isEdgelessPage } from '../__internal__/utils/query.js';
 import {
   autoScroll,
@@ -385,7 +388,9 @@ export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
     const bound = noteElement.getBoundingClientRect();
     const [x, y, w, h] = deserializeXYWH(noteElement.model.xywh);
     const newModelHeight =
-      bound.height / zoom + EDGELESS_BLOCK_CHILD_PADDING * 2;
+      bound.height / zoom +
+      EDGELESS_BLOCK_CHILD_PADDING * 2 +
+      EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
     if (!almostEqual(newModelHeight, h)) {
       page.updateBlock(noteElement.model, {
         xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),

@@ -187,6 +187,7 @@ export class DocPageBlockComponent
       keydown: this._onTitleKeyDown,
       paste: this._onTitlePaste,
     });
+    this.addEventListener('copy', this._onTitleCopy);
 
     // Workaround for virgo skips composition event
     this._disposables.addFromEvent(
@@ -267,6 +268,18 @@ export class DocPageBlockComponent
     } else if (e.key === 'Tab') {
       e.preventDefault();
     }
+  };
+
+  private _onTitleCopy = (event: ClipboardEvent) => {
+    const vEditor = this._titleVEditor;
+    if (!vEditor) return;
+    const vRange = vEditor.getVRange();
+    if (!vRange) return;
+
+    const toBeCopiedText = vEditor.yText
+      .toString()
+      .substring(vRange.index, vRange.index + vRange.length);
+    event.clipboardData?.setData('text/plain', toBeCopiedText);
   };
 
   private _onTitlePaste = (event: ClipboardEvent) => {
@@ -453,6 +466,7 @@ export class DocPageBlockComponent
       let paragraphId: string;
       let index = 0;
       const lastNote = this.model.children
+        .slice()
         .reverse()
         .find(
           child =>

@@ -26,6 +26,7 @@ import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../services/tools-manager.js';
+import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -42,7 +43,6 @@ import {
   calcAngleEdgeWithRotation,
   calcAngleWithRotation,
   generateCursorUrl,
-  getGridBound,
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
@@ -548,10 +548,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       await this._componentToolbar.updateComplete;
 
     const componentToolbar = this._componentToolbar;
-    const elements = this.selection.elements;
-    const bound = elements.reduce((prev, element) => {
-      return prev.unite(getGridBound(element));
-    }, getGridBound(elements[0]));
+    const bound = edgelessElementsBound(this.selection.elements);
 
     const { viewport } = this.edgeless.surface;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
