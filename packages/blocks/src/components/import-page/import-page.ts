@@ -189,14 +189,16 @@ export async function importNotion(workspace: Workspace, file: File) {
           return true;
         };
 
-        const getSubPageId = async (
+        const getSubPageIds = async (
           columns: Column[],
           row: string[],
           titleIndex: number
         ) => {
+          const result: string[] = [];
           if (!row[titleIndex]) {
-            return null;
+            return result;
           }
+
           const curFiles = files.filter(
             file =>
               file.includes(row[titleIndex] + ' ') &&
@@ -211,10 +213,10 @@ export async function importNotion(workspace: Workspace, file: File) {
               titleIndex
             );
             if (isSubPage && pageMap.has(curFile)) {
-              return pageMap.get(curFile);
+              result.push(pageMap.get(curFile) ?? '');
             }
           }
-          return null;
+          return result;
         };
 
         const csvParseHandler = async (fileName: string, titleText: string) => {
@@ -261,14 +263,14 @@ export async function importNotion(workspace: Workspace, file: File) {
           }
 
           let titleIndex = 0;
-          let hasSubPage = true;
           for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             let rowHasSubPageCount = 0;
             let rowTitleIndex = 0;
+            let subPageIds = [];
             for (let j = 0; j < row.length; j++) {
-              const subPageId = await getSubPageId(columns, row, j);
-              if (subPageId) {
+              subPageIds = await getSubPageIds(columns, row, j);
+              if (subPageIds.length > 0) {
                 rowTitleIndex = j;
                 rowHasSubPageCount++;
                 if (rowHasSubPageCount > 1) {
@@ -276,31 +278,26 @@ export async function importNotion(workspace: Workspace, file: File) {
                 }
               }
             }
-            if (i === 0 && rowHasSubPageCount === 0) {
-              titleIndex = 0;
-              hasSubPage = false;
-              break;
-            }
             if (rowHasSubPageCount === 1) {
               titleIndex = rowTitleIndex;
-              break;
+              if (subPageIds.length === 1) {
+                break;
+              }
             }
           }
           titleIndex = titleIndex < columns.length ? titleIndex : 0;
           columns[titleIndex].type = 'title';
-          if (hasSubPage) {
-            for (let i = 0; i < rows.length; i++) {
-              if (titleIndex >= rows[i].length) {
-                continue;
-              }
-              const linkPageId = await getSubPageId(
-                columns,
-                rows[i],
-                titleIndex
-              );
-              if (linkPageId) {
-                rows[i][titleIndex] = `@AffineReference:(${linkPageId})`;
-              }
+          for (let i = 0; i < rows.length; i++) {
+            if (titleIndex >= rows[i].length) {
+              continue;
+            }
+            const linkPageIds = await getSubPageIds(
+              columns,
+              rows[i],
+              titleIndex
+            );
+            if (linkPageIds.length > 0) {
+              rows[i][titleIndex] = `@AffineReference:(${linkPageIds[0]})`;
             }
           }
 
