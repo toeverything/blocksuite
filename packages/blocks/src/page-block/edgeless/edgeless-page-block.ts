@@ -497,6 +497,8 @@ export class EdgelessPageBlockComponent
         if (!this._edgelessLayerWillChange) {
           this._edgelessLayerWillChange = true;
           requestAnimationFrame(() => {
+            if (!this.edgelessLayer) return;
+
             if (this.edgelessLayer.style.willChange !== 'transform') {
               this.edgelessLayer.style.willChange = 'transform';
             }
@@ -508,6 +510,8 @@ export class EdgelessPageBlockComponent
           this._edgelessLayerWillChange = false;
           resetWillChange = null;
           requestAnimationFrame(() => {
+            if (!this.edgelessLayer) return;
+
             this.edgelessLayer.style.removeProperty('will-change');
           });
         }, 150);
