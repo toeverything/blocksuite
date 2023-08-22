@@ -473,28 +473,31 @@ export class ContentParser {
   public async importMarkdown(text: string, insertPositionId: string) {
     const md2html = this._markdown2Html(text);
     const blocks = await this.htmlText2Block(md2html, 'Markdown');
-    const insertBlockModel = this._page.getBlockById(insertPositionId);
 
-    assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const service = await getServiceOrRegister(insertBlockModel.flavour);
-
-    service.json2Block(insertBlockModel, blocks);
+    await this.importBlocks(blocks, insertPositionId);
 
     this._importMetaDataFromHtml(md2html);
   }
 
   public async importHtml(text: string, insertPositionId: string) {
     const blocks = await this.htmlText2Block(text, 'NotionHtml');
+
+    await this.importBlocks(blocks, insertPositionId);
+
+    this._importMetaDataFromHtml(text);
+  }
+
+  public async importBlocks(
+    blocks: SerializedBlock[],
+    insertPositionId: string
+  ) {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
     const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
-    service.json2Block(insertBlockModel, blocks);
-
-    this._importMetaDataFromHtml(text);
+    await service.json2Block(insertBlockModel, blocks);
   }
 
   public registerParserHtmlText2Block(

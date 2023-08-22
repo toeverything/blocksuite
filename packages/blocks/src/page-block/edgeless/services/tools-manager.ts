@@ -7,12 +7,7 @@ import {
   type UIEventState,
 } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import type { Bound } from '@blocksuite/phasor';
-import {
-  getCommonBound,
-  normalizeWheelDeltaY,
-  type PhasorElement,
-} from '@blocksuite/phasor';
+import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
 
 import {
   type EdgelessTool,
@@ -24,7 +19,6 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import { getGridBound } from '../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
@@ -41,11 +35,6 @@ import { getSelectionBoxBound, getXYWH, pickTopBlock } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | PhasorElement;
-
-export function getSelectedBound(selected: Selectable[]) {
-  const bounds = selected.map(s => getGridBound(s));
-  return getCommonBound(bounds) as Bound;
-}
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;

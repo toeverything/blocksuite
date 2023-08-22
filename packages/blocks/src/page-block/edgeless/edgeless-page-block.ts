@@ -38,6 +38,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
   BLOCK_ID_ATTR,
+  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
 import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
@@ -593,14 +594,15 @@ export class EdgelessPageBlockComponent
 
           // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
           const newModelHeight =
-            domRect.height + EDGELESS_BLOCK_CHILD_PADDING * 2;
+            domRect.height +
+            EDGELESS_BLOCK_CHILD_PADDING * 2 +
+            EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
 
           if (!almostEqual(newModelHeight, h)) {
             const updateBlock = () => {
               page.updateBlock(model, {
                 xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
               });
-              this.requestUpdate();
             };
 
             // Assume it's user-triggered resizing if both width and height change,
