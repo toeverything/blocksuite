@@ -107,6 +107,16 @@ export class SearchIndexer {
     }
   }
 
+  public refreshPageIndex(pageId: string, page: Doc) {
+    const yBlocks = page.get('blocks');
+    if (!(yBlocks instanceof YMap)) {
+      return;
+    }
+    yBlocks.forEach((_, key) => {
+      this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
+    });
+  }
+
   private _handlePageIndexing(pageId: string, page?: Doc) {
     if (!page) {
       return;
@@ -115,10 +125,7 @@ export class SearchIndexer {
     if (!(yBlocks instanceof YMap)) {
       return;
     }
-    yBlocks.forEach((_, key) => {
-      this._refreshIndex(pageId, key, 'add', yBlocks.get(key));
-    });
-
+    this.refreshPageIndex(pageId, page);
     yBlocks.observeDeep(events => {
       const keys = events.flatMap(e => {
         // eslint-disable-next-line no-bitwise
