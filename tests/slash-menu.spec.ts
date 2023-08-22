@@ -199,8 +199,8 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).toBeVisible();
 
     const slashItems = slashMenu.locator('icon-button');
-    const maybeActivatedItem = slashItems.nth(-3);
-    await expect(maybeActivatedItem).toHaveText(['Copy']);
+    const maybeActivatedItem = slashItems.nth(-5);
+    await expect(maybeActivatedItem).toHaveText(['Move Up']);
     await expect(maybeActivatedItem).toHaveAttribute('hover', '');
     await assertRichTexts(page, ['/']);
   });
