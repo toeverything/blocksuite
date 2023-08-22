@@ -682,3 +682,21 @@ test.describe('slash menu with customize menu', () => {
     await expect(slashItems).toHaveCount(1);
   });
 });
+
+test('move block up and down by slash menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await assertRichTexts(page, ['hello', 'world']);
+  await type(page, '/');
+  const moveUp = page.getByTestId('Move Up');
+  await moveUp.click();
+  await assertRichTexts(page, ['world', 'hello']);
+  await type(page, '/');
+  const moveDown = page.getByTestId('Move Down');
+  await moveDown.click();
+  await assertRichTexts(page, ['hello', 'world']);
+});
