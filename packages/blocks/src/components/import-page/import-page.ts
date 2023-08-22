@@ -154,10 +154,72 @@ export async function importNotion(workspace: Workspace, file: File) {
           }
         };
 
-        const csvParseHandler = async (
-          tableString: string,
-          titleText: string
+        const checkFileIsSubPage = async (
+          fileName: string,
+          columns: Column[],
+          row: string[],
+          titleIndex: number
         ) => {
+          const fileString =
+            (await zipFile.file(fileName)?.async('string')) || '';
+          // no need to parse the whole text
+          const startText = fileString.substring(
+            0,
+            columns.join(': ').length + row.join('').length + 100
+          );
+          for (let i = 0; i < row.length; i++) {
+            if (i === titleIndex) {
+              if (!startText.includes(row[i])) {
+                return false;
+              }
+            } else {
+              // Replace non-visible characters with an empty string
+              const columnName = columns[i].name.replace(/[^\x20-\x7E]/g, '');
+              if (
+                row[i] !== '' &&
+                !startText.includes(columnName + ': ' + row[i])
+              ) {
+                return false;
+              }
+              if (row[i] === '' && startText.includes(columnName + ': ')) {
+                return false;
+              }
+            }
+          }
+          return true;
+        };
+
+        const getSubPageId = async (
+          columns: Column[],
+          row: string[],
+          titleIndex: number
+        ) => {
+          if (!row[titleIndex]) {
+            return null;
+          }
+          const curFiles = files.filter(
+            file =>
+              file.includes(row[titleIndex] + ' ') &&
+              (file.endsWith('.html') || file.endsWith('.md'))
+          );
+          for (let k = 0; k < curFiles.length; k++) {
+            const curFile = curFiles[k];
+            const isSubPage = await checkFileIsSubPage(
+              curFile,
+              columns,
+              row,
+              titleIndex
+            );
+            if (isSubPage && pageMap.has(curFile)) {
+              return pageMap.get(curFile);
+            }
+          }
+          return null;
+        };
+
+        const csvParseHandler = async (fileName: string, titleText: string) => {
+          const tableString =
+            (await zipFile.file(fileName)?.async('string')) ?? '';
           let result: SerializedBlock[] | null = [];
           let id = 1;
           const titles: string[] = [];
@@ -199,27 +261,48 @@ export async function importNotion(workspace: Workspace, file: File) {
           }
 
           let titleIndex = 0;
+          let hasSubPage = true;
           for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
-            let count = 0;
-            let index = 0;
+            let rowHasSubPageCount = 0;
+            let rowTitleIndex = 0;
             for (let j = 0; j < row.length; j++) {
-              const value = row[j];
-              if (files.find(file => file.includes(value))) {
-                index = j;
-                count++;
-                if (count > 1) {
+              const subPageId = await getSubPageId(columns, row, j);
+              if (subPageId) {
+                rowTitleIndex = j;
+                rowHasSubPageCount++;
+                if (rowHasSubPageCount > 1) {
                   break;
                 }
               }
             }
-            if (count === 1) {
-              titleIndex = index;
+            if (i === 0 && rowHasSubPageCount === 0) {
+              titleIndex = 0;
+              hasSubPage = false;
+              break;
+            }
+            if (rowHasSubPageCount === 1) {
+              titleIndex = rowTitleIndex;
               break;
             }
           }
           titleIndex = titleIndex < columns.length ? titleIndex : 0;
           columns[titleIndex].type = 'title';
+          if (hasSubPage) {
+            for (let i = 0; i < rows.length; i++) {
+              if (titleIndex >= rows[i].length) {
+                continue;
+              }
+              const linkPageId = await getSubPageId(
+                columns,
+                rows[i],
+                titleIndex
+              );
+              if (linkPageId) {
+                rows[i][titleIndex] = `@AffineReference:(${linkPageId})`;
+              }
+            }
+          }
 
           const databasePropsId = id++;
           const cells: Record<string, Record<string, Cell>> = {};
@@ -293,9 +376,8 @@ export async function importNotion(workspace: Workspace, file: File) {
           ) {
             const href = element.getAttribute('href') || '';
             const fileName = joinWebPaths(folder, decodeURI(href));
-            const tableString = await zipFile.file(fileName)?.async('string');
             const result = await csvParseHandler(
-              tableString ?? '',
+              fileName,
               element.textContent || ''
             );
             return result;
@@ -332,7 +414,6 @@ export async function importNotion(workspace: Workspace, file: File) {
           tableParseHandler,
           tableTitleColumnHandler,
         });
-        const text = (await zipFile.file(file)?.async('string')) || '';
         if (rootId) {
           pageIds.push(page.id);
           if (fileName.endsWith('.csv')) {
@@ -340,13 +421,15 @@ export async function importNotion(workspace: Workspace, file: File) {
             const csvName =
               lastSpace === -1 ? '' : fileName.substring(0, lastSpace);
             const csvRealName = csvName === 'Undefined' ? '' : csvName;
-            const blocks = await csvParseHandler(text, csvRealName);
+            const blocks = await csvParseHandler(file, csvRealName);
             if (blocks) {
               await contentParser.importBlocks(blocks, rootId);
             }
           } else if (isHtml) {
+            const text = (await zipFile.file(file)?.async('string')) ?? '';
             await contentParser.importHtml(text, rootId);
           } else {
+            const text = (await zipFile.file(file)?.async('string')) ?? '';
             await contentParser.importMarkdown(text, rootId);
           }
         }
