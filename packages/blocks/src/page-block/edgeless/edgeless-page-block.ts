@@ -260,7 +260,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  @state()
+  @query('.affine-edgeless-layer')
+  edgelessLayer!: HTMLDivElement;
+
   private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
@@ -495,12 +497,18 @@ export class EdgelessPageBlockComponent
       slots.viewportUpdated.on(() => {
         if (!this._edgelessLayerWillChange) {
           this._edgelessLayerWillChange = true;
+          requestAnimationFrame(() => {
+            this.edgelessLayer.style.willChange = 'transform';
+          });
         }
 
         if (resetWillChange) clearTimeout(resetWillChange);
         resetWillChange = setTimeout(() => {
           this._edgelessLayerWillChange = false;
           resetWillChange = null;
+          requestAnimationFrame(() => {
+            this.edgelessLayer.style.removeProperty('will-change');
+          });
         }, 150);
       })
     );
@@ -557,7 +565,6 @@ export class EdgelessPageBlockComponent
             getRectByBlockElement
           );
         });
-        // this.requestUpdate();
       })
     );
 
@@ -632,7 +639,6 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       slots.pressShiftKeyUpdated.on(pressed => {
         this.tools.shiftKey = pressed;
-        this.requestUpdate();
       })
     );
     _disposables.add(
@@ -1304,14 +1310,7 @@ export class EdgelessPageBlockComponent
       <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
           <affine-note-slicer .edgelessPage=${this}></affine-note-slicer>
-          <div
-            class="affine-edgeless-layer"
-            style=${styleMap({
-              willChange: this._edgelessLayerWillChange
-                ? 'transform'
-                : undefined,
-            })}
-          >
+          <div class="affine-edgeless-layer">
             <edgeless-notes-container
               .edgeless=${this}
               .notes=${sortedNotes}

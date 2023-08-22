@@ -30,7 +30,6 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
     this._disposables.add(
       this.model.childrenUpdated.on(() => this.requestUpdate())
     );
-    tryUpdateNoteSize(this);
   }
 
   override render() {

@@ -45,7 +45,15 @@ export class BlockElement<
   @property({ attribute: false })
   page!: Page;
 
-  @state()
+  @state({
+    hasChanged(value: BaseSelection | null, oldValue: BaseSelection | null) {
+      if (!value || !oldValue) {
+        return value !== oldValue;
+      }
+
+      return !value?.equals(oldValue);
+    },
+  })
   selected: BaseSelection | null = null;
 
   path!: string[];
