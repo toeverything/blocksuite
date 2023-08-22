@@ -2,7 +2,6 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import type { LitElement, PropertyValues, TemplateResult } from 'lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { ifDefined } from 'lit/directives/if-defined.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -31,7 +30,7 @@ export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
     .uni="${uni}"
     .props="${props}"
     .ref="${options?.ref}"
-    style=${ifDefined(options?.style && styleMap(options?.style))}
+    style=${options?.style && styleMap(options?.style)}
   ></uni-lit>`;
 };
 
