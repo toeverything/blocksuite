@@ -1,9 +1,10 @@
-import { createLitPortal } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/global/utils';
+import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
-import { getViewportElement } from '../../__internal__/utils/query.js';
+import { createLitPortal } from '../../components/portal.js';
 import {
   CaptionIcon,
   EditIcon,
@@ -46,28 +47,9 @@ export function AttachmentOptionsTemplate({
   });
 
   const containerRef = createRef<HTMLDivElement>();
-  const updatePosition = () => {
-    const container = containerRef.value;
-    if (!container) return;
-    const { top, left, width } = anchor.getBoundingClientRect();
-    container.style.transform = `translate(calc(${
-      left + width
-    }px - 100%), calc(${top}px - 100% - 4px))`;
-  };
-
-  const viewportElement = getViewportElement(model.page);
-  if (viewportElement) {
-    viewportElement.addEventListener('scroll', updatePosition);
-  }
-
-  setTimeout(() => {
-    // Wait for the portal to be attached to the DOM
-    updatePosition();
-  });
-
-  const moreMenuRef = createRef<HTMLDivElement>();
   const disableEmbed = !model.type?.startsWith('image/');
   const readonly = model.page.readonly;
+  let moreMenuAbortController: AbortController | null = null;
   return html`<style>
       ${styles}
     </style>
@@ -124,8 +106,14 @@ export function AttachmentOptionsTemplate({
             template: RenameModal({
               model,
               abortController: renameAbortController,
-              anchor,
             }),
+            computePosition: {
+              referenceElement: anchor,
+              placement: 'top-end',
+              middleware: [flip(), offset(4)],
+              // It has a overlay mask, so we don't need to update the position.
+              // autoUpdate: true,
+            },
             abortController: renameAbortController,
           });
         }}"
@@ -149,12 +137,29 @@ export function AttachmentOptionsTemplate({
         size="24px"
         class="has-tool-tip more-button"
         @click=${() => {
-          moreMenuRef.value?.toggleAttribute('hidden');
+          if (moreMenuAbortController) {
+            moreMenuAbortController.abort();
+            moreMenuAbortController = null;
+            return;
+          }
+          moreMenuAbortController = new AbortController();
+          const container = containerRef.value;
+          assertExists(container);
+          createLitPortal({
+            container,
+            template: MoreMenu({ model, abortController }),
+            abortController: moreMenuAbortController,
+            computePosition: {
+              referenceElement: container,
+              placement: 'top-end',
+              middleware: [flip(), offset(4)],
+              autoUpdate: true,
+            },
+          });
         }}
       >
         ${MoreIcon}
         <tool-tip inert role="tooltip">More</tool-tip>
       </icon-button>
-      ${MoreMenu({ model, abortController, ref: moreMenuRef })}
     </div>`;
 }
