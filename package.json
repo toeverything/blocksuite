@@ -90,6 +90,9 @@
     "vite-plugin-web-components-hmr": "^0.1.3",
     "vitest": "^0.28.5"
   },
+  "resolutions": {
+    "typescript": "^5"
+  },
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
