@@ -10,8 +10,8 @@ import {
   performNativeCopy,
 } from '../../__internal__/clipboard/utils/pure.js';
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
-import type { BaseDataView } from '../common/base-data-view.js';
 import type { BaseViewClipboard } from '../common/clipboard.js';
+import type { DataViewExpose } from '../common/data-view.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import type { DatabaseSelection } from '../common/selection.js';
 import type { DatabaseBlockModel } from '../database-model.js';
@@ -22,7 +22,7 @@ import type { DataViewTableManager } from './table-view-manager.js';
 type TableViewClipboardConfig = {
   path: string[];
   model: DatabaseBlockModel;
-  view: Ref<BaseDataView | undefined>;
+  view: Ref<DataViewExpose | undefined>;
   data: DataViewManager;
 };
 
@@ -30,7 +30,7 @@ export class TableViewClipboard implements BaseViewClipboard {
   private _disposables = new DisposableGroup();
   private _path: string[];
   private _model: DatabaseBlockModel;
-  private _view: Ref<BaseDataView | undefined>;
+  private _view: Ref<DataViewExpose | undefined>;
   private _data: DataViewTableManager;
 
   constructor(private _root: BlockSuiteRoot, config: TableViewClipboardConfig) {

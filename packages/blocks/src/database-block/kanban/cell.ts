@@ -3,10 +3,10 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
+import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import type { UniLit } from '../../components/uni-component/uni-component.js';
+import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
@@ -74,10 +74,10 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   @state()
   editing = false;
 
-  private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   public get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value?.expose;
+    return this._cell.value;
   }
 
   override connectedCallback() {
@@ -132,12 +132,10 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       ? '0px 0px 0px 2px rgba(30, 150, 235, 0.30)'
       : '';
     return html` ${this.renderIcon()}
-      <uni-lit
-        ${ref(this._cell)}
-        class="kanban-cell"
-        .uni="${this.editing && edit ? edit : view}"
-        .props="${props}"
-      ></uni-lit>`;
+    ${renderUniLit(this.editing && edit ? edit : view, props, {
+      ref: this._cell,
+      class: 'kanban-cell',
+    })}`;
   }
 }
 

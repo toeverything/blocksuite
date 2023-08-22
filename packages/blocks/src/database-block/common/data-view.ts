@@ -31,7 +31,7 @@ export interface DataViewProps<
 
 export interface DataViewExpose {
   addRow?(position: InsertPosition | number): void;
-
+  getSelection?(): DataViewSelection | undefined;
   focusFirstCell(): void;
 }
 
@@ -73,6 +73,7 @@ export interface DataViewRendererConfig<
   icon: UniComponent;
   tools?: UniComponent<{
     view: DataViewManager;
+    viewMethod: DataViewExpose;
   }>[];
 }
 

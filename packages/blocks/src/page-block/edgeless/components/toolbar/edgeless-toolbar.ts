@@ -387,9 +387,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       ></edgeless-frame-tool-button>
 
       <edgeless-tool-icon-button
-        .tooltip=${'Prensentation'}
+        .tooltip=${'Presentation'}
         @click=${() => {
           this.setEdgelessTool({ type: 'frameNavigator' });
+          if (this._frames.length === 0)
+            toast(
+              'The presentation requires at least 1 frame. You can firstly create a frame.',
+              5000
+            );
           this._toggleFullScreen();
         }}
       >

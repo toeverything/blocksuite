@@ -9,10 +9,9 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { TableViewSelection } from '../../../../index.js';
-import type { DataViewTableManager } from '../../../table/table-view-manager.js';
-import type { BaseDataView } from '../../base-data-view.js';
-import { viewRendererManager } from '../../data-view.js';
+import { renderUniLit } from '../../../../components/uni-component/uni-component.js';
+import { type DataViewExpose, viewRendererManager } from '../../data-view.js';
+import type { DataViewManager } from '../../data-view-manager.js';
 
 const styles = css`
   .affine-database-toolbar {
@@ -41,19 +40,10 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  viewEle!: BaseDataView;
+  viewEle!: DataViewExpose;
 
   @property({ attribute: false })
-  copyBlock!: () => void;
-
-  @property({ attribute: false })
-  deleteSelf!: () => void;
-
-  @property({ attribute: false })
-  getSelection!: () => TableViewSelection | undefined;
-
-  @property({ attribute: false })
-  view!: DataViewTableManager;
+  view!: DataViewManager;
 
   @state()
   public showToolBar = false;
@@ -72,9 +62,8 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
         const props = {
           view: this.view,
           viewMethod: this.viewEle,
-          getSelection: this.getSelection,
         };
-        return html` <uni-lit .uni="${uni}" .props=${props}></uni-lit>`;
+        return renderUniLit(uni, props);
       })}
     </div>`;
   }
