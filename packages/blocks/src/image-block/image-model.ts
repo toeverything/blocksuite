@@ -5,6 +5,7 @@ export type ImageProps = {
   sourceId: string;
   width?: number;
   height?: number;
+  name?: string;
 };
 
 const defaultImageProps: ImageProps = {
@@ -12,6 +13,7 @@ const defaultImageProps: ImageProps = {
   sourceId: '',
   width: 0,
   height: 0,
+  name: undefined,
 };
 
 export const ImageBlockSchema = defineBlockSchema({

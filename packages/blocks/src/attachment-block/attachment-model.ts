@@ -16,6 +16,12 @@ export type AttachmentProps = {
   // The `loadingKey` and `sourceId` should not be existed at the same time
   loadingKey?: string | null;
   sourceId?: string;
+
+  // This information comes from pictures.
+  // If the user switches between pictures and attachments,
+  // this information should be retained.
+  imageWidth?: number;
+  imageHeight?: number;
 };
 
 export const defaultAttachmentProps: AttachmentProps = {
@@ -25,6 +31,8 @@ export const defaultAttachmentProps: AttachmentProps = {
   sourceId: undefined,
   loadingKey: undefined,
   caption: undefined,
+  imageWidth: undefined,
+  imageHeight: undefined,
 };
 
 export const AttachmentBlockSchema = defineBlockSchema({

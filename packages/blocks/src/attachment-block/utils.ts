@@ -56,13 +56,16 @@ export async function downloadAttachment(
   downloadBlob(attachment, attachmentModel.name);
 }
 
-export function turnIntoEmbedView(model: AttachmentBlockModel) {
+export async function turnIntoEmbedView(model: AttachmentBlockModel) {
   const sourceId = model.sourceId;
   assertExists(sourceId);
   const imageProp: ImageProps & { flavour: 'affine:image' } = {
     flavour: 'affine:image',
     sourceId,
+    name: model.name,
     caption: model.caption,
+    width: model.imageWidth,
+    height: model.imageHeight,
   };
   model.page.addSiblingBlocks(model, [imageProp]);
   model.page.deleteBlock(model);
@@ -74,10 +77,12 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   const attachmentProp: AttachmentProps & { flavour: 'affine:attachment' } = {
     flavour: 'affine:attachment',
     sourceId,
-    name: blob.name,
+    name: model.name || blob.name,
     size: blob.size,
     type: blob.type,
     caption: model.caption,
+    imageHeight: model.height,
+    imageWidth: model.width,
   };
   model.page.addSiblingBlocks(model, [attachmentProp]);
   model.page.deleteBlock(model);
