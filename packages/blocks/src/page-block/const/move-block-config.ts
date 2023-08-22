@@ -33,7 +33,7 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           prevBlock.model,
           true
         );
-        return;
+        return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (blockSelection) {
@@ -49,7 +49,9 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           prevBlock.model,
           true
         );
+        return true;
       }
+      return;
     },
   },
   {
@@ -70,7 +72,7 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           nextBlock.model,
           false
         );
-        return;
+        return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (blockSelection) {
@@ -86,7 +88,9 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           nextBlock.model,
           false
         );
+        return true;
       }
+      return;
     },
   },
 ];
