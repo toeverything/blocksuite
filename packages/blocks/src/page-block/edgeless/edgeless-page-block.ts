@@ -497,7 +497,9 @@ export class EdgelessPageBlockComponent
         if (!this._edgelessLayerWillChange) {
           this._edgelessLayerWillChange = true;
           requestAnimationFrame(() => {
-            this.edgelessLayer.style.willChange = 'transform';
+            if (this.edgelessLayer.style.willChange !== 'transform') {
+              this.edgelessLayer.style.willChange = 'transform';
+            }
           });
         }
 
