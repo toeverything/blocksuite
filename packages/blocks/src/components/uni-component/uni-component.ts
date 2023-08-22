@@ -30,7 +30,7 @@ export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
     .uni="${uni}"
     .props="${props}"
     .ref="${options?.ref}"
-    style=${options?.style && styleMap(options?.style)}
+    style=${options?.style ? styleMap(options?.style) : ''}
   ></uni-lit>`;
 };
 
