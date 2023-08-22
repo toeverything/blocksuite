@@ -133,6 +133,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
     const vEditor = new VEditor(yText);
+    this.editor = vEditor;
     vEditor.setAttributeSchema(affineTextAttributes);
     vEditor.setAttributeRenderer(attributeRenderer());
     autoIdentifyReference(vEditor, yText.toString());
@@ -228,34 +229,30 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 @customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
   private init() {
-    if (this.editor) {
-      return;
-    }
-    this.editor = this.initVirgo(this.richText);
-    this.editor.setReadonly(true);
+    const editor = this.initVirgo(this.richText);
+    editor.setReadonly(true);
+    this._disposables.add({
+      dispose: () => {
+        editor.unmount();
+      },
+    });
   }
+
   override firstUpdated() {
     this.init();
   }
+
   public override connectedCallback() {
     super.connectedCallback();
     if (this.richText) {
       this.init();
     }
   }
-  public override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.editor?.unmount();
-    this.editor = undefined;
-  }
 }
 
 @customElement('data-view-header-area-text-editing')
 export class HeaderAreaTextCellEditing extends BaseTextCell {
   private init() {
-    if (this.editor) {
-      return;
-    }
     const editor = this.initVirgo(this.richText);
     editor.focusEnd();
     this._disposables.add(
@@ -271,6 +268,11 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         }
       })
     );
+    this._disposables.add({
+      dispose: () => {
+        editor.unmount();
+      },
+    });
   }
 
   override firstUpdated() {
@@ -282,11 +284,6 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     if (this.richText) {
       this.init();
     }
-  }
-  public override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.editor?.unmount();
-    this.editor = undefined;
   }
 }
 
