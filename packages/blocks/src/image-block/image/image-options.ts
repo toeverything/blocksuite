@@ -37,7 +37,7 @@ export function ImageOptionsTemplate({
       .affine-embed-editing-state-container > div {
         position: fixed;
         display: block;
-        z-index: var(--affine-z-index-popover);
+        z-index: var(--affine-z-index-image-popover);
       }
 
       .embed-editing-state {
