@@ -8,6 +8,7 @@ import { html } from 'lit/static-html.js';
 
 import type { DetailSlotProps } from '../../../__internal__/datasource/base.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
+import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import { PlusIcon } from '../../../icons/index.js';
 import { dataViewCssVariable } from '../css-variable.js';
 import type { DataViewManager } from '../data-view-manager.js';
@@ -131,7 +132,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
         view: this.view,
         rowId: this.rowId,
       };
-      return html` <uni-lit .uni="${header}" .props="${props}"></uni-lit> `;
+      return renderUniLit(header, props);
     }
     return undefined;
   }

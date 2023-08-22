@@ -387,7 +387,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       ></edgeless-frame-tool-button>
 
       <edgeless-tool-icon-button
-        .tooltip=${'Prensentation'}
+        .tooltip=${'Presentation'}
         @click=${() => {
           this.setEdgelessTool({ type: 'frameNavigator' });
           if (this._frames.length === 0)
