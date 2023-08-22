@@ -101,6 +101,12 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     });
   }
 
+  override firstUpdated() {
+    requestAnimationFrame(() => {
+      this.requestUpdate();
+    });
+  }
+
   @property({ attribute: false })
   modalMode?: boolean;
 
