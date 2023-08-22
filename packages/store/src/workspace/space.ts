@@ -126,9 +126,6 @@ export class Space<
    * If `shouldTransact` is `false`, the transaction will not be push to the history stack.
    */
   transact(fn: () => void, shouldTransact = true) {
-    this._ySpaceDoc.transact(
-      fn,
-      shouldTransact ? this.doc.clientID : undefined
-    );
+    this._ySpaceDoc.transact(fn, shouldTransact ? this.doc.clientID : null);
   }
 }
