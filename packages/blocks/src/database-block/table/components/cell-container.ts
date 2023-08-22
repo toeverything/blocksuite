@@ -2,11 +2,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { html } from 'lit/static-html.js';
+import { createRef } from 'lit/directives/ref.js';
 
-import type { UniLit } from '../../../components/uni-component/uni-component.js';
+import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
@@ -78,10 +76,10 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return table;
   }
 
-  private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   public get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value?.expose;
+    return this._cell.value;
   }
 
   override connectedCallback() {
@@ -98,9 +96,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     const { edit, view } = this.column.renderer;
 
     const uni = !this.readonly && this.isEditing && edit != null ? edit : view;
-    const style = styleMap({
-      display: 'contents',
-    });
     const props: CellRenderProps = {
       view: this.view,
       column: this.column,
@@ -108,12 +103,12 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       isEditing: this.isEditing,
       selectCurrentCell: this._selectCurrentCell,
     };
-    return html` <uni-lit
-      ${ref(this._cell)}
-      style=${style}
-      .uni="${uni}"
-      .props="${props}"
-    ></uni-lit>`;
+    return renderUniLit(uni, props, {
+      ref: this._cell,
+      style: {
+        display: 'contents',
+      },
+    });
   }
 }
 
