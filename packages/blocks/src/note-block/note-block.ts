@@ -5,7 +5,6 @@ import { customElement } from 'lit/decorators.js';
 
 import { bindHotKey } from './keymap.js';
 import type { NoteBlockModel } from './note-model.js';
-import { tryUpdateNoteSize } from './utils.js';
 
 @customElement('affine-note')
 export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
