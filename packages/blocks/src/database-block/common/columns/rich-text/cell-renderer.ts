@@ -12,6 +12,7 @@ import type {
   AffineVEditor,
 } from '../../../../__internal__/rich-text/virgo/types.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { addHistoryToVEditor } from '../../header-area/text.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
@@ -106,6 +107,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
+
   private init() {
     const editor = this._onInitVEditor();
     this.column.captureSync();
@@ -115,9 +117,11 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       },
     });
   }
+
   override firstUpdated() {
     this.init();
   }
+
   override connectedCallback() {
     super.connectedCallback();
     if (this._container) {
@@ -192,9 +196,26 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
 
-  protected override firstUpdated() {
-    this._onInitVEditor();
+  private init() {
+    const vEditor = this._onInitVEditor();
+    this.vEditor = vEditor;
     this.column.captureSync();
+    this.disposables.add({
+      dispose: () => {
+        vEditor.unmount();
+      },
+    });
+  }
+
+  protected override firstUpdated() {
+    this.init();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    if (this._container) {
+      this.init();
+    }
   }
 
   private _initYText = (text?: string) => {
@@ -218,20 +239,18 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     }
 
     const vEditor = new VEditor(value);
-    this.vEditor = vEditor;
-    this.vEditor.mount(this._container);
-    this._disposables.add({
-      dispose: () => {
-        vEditor.unmount();
+    vEditor.mount(this._container);
+    const historyHelper = addHistoryToVEditor(vEditor);
+    vEditor.bindHandlers({
+      keydown: e => {
+        historyHelper.handleKeyboardEvent(e);
+        this._handleKeyDown(e);
       },
     });
-    this.vEditor.bindHandlers({
-      keydown: this._handleKeyDown,
-    });
-    this.vEditor.focusEnd();
-    this.vEditor.setReadonly(this.readonly);
+    vEditor.focusEnd();
+    vEditor.setReadonly(this.readonly);
     this._disposables.add(
-      this.vEditor.slots.vRangeUpdated.on(([range]) => {
+      vEditor.slots.vRangeUpdated.on(([range]) => {
         if (range) {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
@@ -241,6 +260,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
         }
       })
     );
+    return vEditor;
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
