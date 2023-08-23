@@ -108,7 +108,7 @@ export function createVirgoKeyDownHandler(
       if (binding.suffix && !binding.suffix.test(currContext.suffixText)) {
         return false;
       }
-      return binding.handler(currContext);
+      return !binding.handler(currContext);
     });
     if (prevented) {
       evt.preventDefault();

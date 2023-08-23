@@ -1,4 +1,3 @@
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { VKeyboardBindingRecord } from '@blocksuite/virgo';
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
@@ -82,19 +81,19 @@ const bracketPairs: BracketPair[] = [
   },
 ];
 
-export function createBracketAutoCompleteBindings(
-  model: BaseBlockModel
-): VKeyboardBindingRecord {
+export function createBracketAutoCompleteBindings(): VKeyboardBindingRecord {
   const bindings: VKeyboardBindingRecord = {};
 
   bracketPairs.forEach(pair => {
     bindings[pair.name] = {
       key: pair.left,
       handler: ({ vRange, vEditor }) => {
-        if (!model.text || vRange.length > 0) return ALLOW_DEFAULT;
+        if (vRange.length === 0) return ALLOW_DEFAULT;
 
-        model.text.insert(pair.left, vRange.index);
-        model.text.insert(pair.right, vRange.index + vRange.length + 1);
+        const selectedText = vEditor.yText
+          .toString()
+          .slice(vRange.index, vRange.index + vRange.length);
+        vEditor.insertText(vRange, pair.left + selectedText + pair.right);
 
         vEditor.setVRange({
           index: vRange.index + 1,
@@ -109,8 +108,9 @@ export function createBracketAutoCompleteBindings(
   bindings['backtick'] = {
     key: '`',
     handler: ({ vRange, vEditor }) => {
-      if (!model.text || vRange.length > 0) return ALLOW_DEFAULT;
-      model.text.format(vRange.index, vRange.length, { code: true });
+      if (vRange.length === 0) return ALLOW_DEFAULT;
+
+      vEditor.formatText(vRange, { code: true });
 
       vEditor.setVRange({
         index: vRange.index,
