@@ -375,12 +375,7 @@ export class EdgelessPageBlockComponent
         const element = this.surface.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
-          const { source, target } = element;
-
-          if (
-            (source.id && !getEdgelessElement(this, source.id)) ||
-            (target.id && !getEdgelessElement(this, target.id))
-          ) {
+          if (!this.connector.isRelationElementExist(element)) {
             return;
           }
 
@@ -401,12 +396,7 @@ export class EdgelessPageBlockComponent
         assertExists(element);
 
         if (element instanceof ConnectorElement) {
-          const { source, target } = element;
-
-          if (
-            (source.id && !getEdgelessElement(this, source.id)) ||
-            (target.id && !getEdgelessElement(this, target.id))
-          ) {
+          if (!this.connector.isRelationElementExist(element)) {
             return;
           }
 
