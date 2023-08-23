@@ -139,6 +139,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           : this._element.color,
         zIndex: '10',
         textAlign: this._element.textAlign,
+        marginRight: '-100%',
       });
     }
 
