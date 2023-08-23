@@ -148,6 +148,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
               this.model.deleteView(view.id);
               this.model.applyViewsUpdate();
             },
+            class: 'delete-item',
           },
         ],
       },
