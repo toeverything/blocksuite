@@ -46,7 +46,11 @@ export class RangeSynchronizer {
           return;
         }
 
-        if (range === null || range.intersectsNode(this.root)) {
+        if (
+          range === null ||
+          (range.intersectsNode(this.root) &&
+            this._ifSyncRangeToTextSelection(range))
+        ) {
           this._prevSelection =
             this._rangeManager.syncRangeToTextSelection(range);
         } else {
@@ -69,6 +73,16 @@ export class RangeSynchronizer {
       })
     );
   }
+
+  // we just sync range in note element
+  private _ifSyncRangeToTextSelection = (range: Range) => {
+    const { startContainer, endContainer } = range;
+    const noteBlockElement =
+      startContainer.parentElement?.closest('affine-note') ??
+      endContainer.parentElement?.closest('affine-note');
+
+    return !!noteBlockElement;
+  };
 
   private _onSelectionModelChanged = (selections: BaseSelection[]) => {
     // wait for lit updated
