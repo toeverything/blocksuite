@@ -45,8 +45,8 @@ export const containChildBlock = (
   });
 };
 
-export const containBlock = (selections: BaseSelection[], blockId: string) => {
-  return selections.some(selection => selection.blockId === blockId);
+export const containBlock = (blockIDs: string[], targetID: string) => {
+  return blockIDs.some(blockID => blockID === targetID);
 };
 
 // TODO: this is a hack, need to find a better way

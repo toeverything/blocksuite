@@ -31,7 +31,10 @@ import { autoScroll } from '../../page-block/text-selection/utils.js';
 import {
   DRAG_HANDLE_GRABBER_BORDER_RADIUS,
   DRAG_HANDLE_GRABBER_HEIGHT,
+  DRAG_HANDLE_GRABBER_MARGIN,
   DRAG_HANDLE_GRABBER_WIDTH,
+  DRAG_HOVER_RECT_PADDING,
+  EXTENDED_DRAG_HANDLE_GRABBER_HEIGHT,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
@@ -122,6 +125,18 @@ export class DragHandleWidget extends WidgetElement {
     }
   }
 
+  private _resetDragHandleGrabber() {
+    this._dragHandleGrabber.style.height = `${
+      DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+    }px`;
+    this._dragHandleGrabber.style.width = `${
+      DRAG_HANDLE_GRABBER_WIDTH * this._scale
+    }px`;
+    this._dragHandleGrabber.style.borderRadius = `${
+      DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
+    }px`;
+  }
+
   // Single block: drag handle should show on the vertical middle of the first line of element
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
   private _show(blockElement: BlockElement) {
@@ -153,35 +168,74 @@ export class DragHandleWidget extends WidgetElement {
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
 
-    this._dragHandleGrabber.style.height = `${
-      DRAG_HANDLE_GRABBER_HEIGHT * this._scale
-    }px`;
-    this._dragHandleGrabber.style.width = `${
-      DRAG_HANDLE_GRABBER_WIDTH * this._scale
-    }px`;
-    this._dragHandleGrabber.style.borderRadius = `${
-      DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
-    }px`;
+    this._resetDragHandleGrabber();
   }
 
   private _showHoverRect(blockElement: BlockElement) {
-    const { left, top, width, height } = blockElement.getBoundingClientRect();
-    const posLeft =
-      left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
-    const posTop = top;
-    const hoverWidth =
-      width + (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
+    if (!this._hoveredBlockPath) return;
 
-    this._dragHoverRect = new Rect(
-      posLeft,
-      posTop,
-      posLeft + hoverWidth,
-      posTop + height
-    );
+    const selections = this._selectedBlocks;
+    // When hover block is in selected blocks, should show hover rect on the selected blocks
+    // Top: the top of the first selected block
+    // Left: the left of the first selected block
+    // Right: the largest right of the selected blocks
+    // Bottom: the bottom of the last selected block
+    let { left, top, right, bottom } = blockElement.getBoundingClientRect();
 
-    // setTimeout(() => {
-    //   this._dragHoverRect = null;
-    // }, 1000);
+    // When current selection is TextSelection, should cover all the blocks in native range
+    if (selections.length > 0 && includeTextSelection(selections)) {
+      const nativeSelection = document.getSelection();
+      if (nativeSelection && nativeSelection.rangeCount > 0) {
+        const range = nativeSelection.getRangeAt(0);
+        const blockElements =
+          this._rangeManager.getSelectedBlockElementsByRange(range, {
+            match: el => el.model.role === 'content',
+            mode: 'highest',
+          });
+
+        if (
+          containBlock(
+            blockElements.map(block => getBlockIdFromPath(block.path)),
+            getBlockIdFromPath(this._hoveredBlockPath)
+          )
+        ) {
+          blockElements.forEach(blockElement => {
+            left = Math.min(left, blockElement.getBoundingClientRect().left);
+            top = Math.min(top, blockElement.getBoundingClientRect().top);
+            right = Math.max(right, blockElement.getBoundingClientRect().right);
+            bottom = Math.max(
+              bottom,
+              blockElement.getBoundingClientRect().bottom
+            );
+          });
+        }
+      }
+    } else if (
+      containBlock(
+        selections.map(selection => selection.blockId),
+        getBlockIdFromPath(this._hoveredBlockPath)
+      )
+    ) {
+      this._selectedBlocks.forEach(block => {
+        const blockElement = this.root.viewStore.viewFromPath(
+          'block',
+          block.path as string[]
+        );
+        if (!blockElement) return;
+        left = Math.min(left, blockElement.getBoundingClientRect().left);
+        top = Math.min(top, blockElement.getBoundingClientRect().top);
+        right = Math.max(right, blockElement.getBoundingClientRect().right);
+        bottom = Math.max(bottom, blockElement.getBoundingClientRect().bottom);
+      });
+    }
+
+    // Add padding to hover rect
+    left -= (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
+    top -= DRAG_HOVER_RECT_PADDING * this._scale;
+    right += DRAG_HOVER_RECT_PADDING * this._scale;
+    bottom += DRAG_HOVER_RECT_PADDING * this._scale;
+
+    this._dragHoverRect = new Rect(left, top, right, bottom);
   }
 
   private _setSelectedBlocks(blockElements: BlockElement[], noteId?: string) {
@@ -371,7 +425,10 @@ export class DragHandleWidget extends WidgetElement {
     // neither within the selected block
     // nor a child-block of any selected block
     if (
-      containBlock(this._selectedBlocks, blockId) ||
+      containBlock(
+        this._selectedBlocks.map(selection => selection.blockId),
+        blockId
+      ) ||
       containChildBlock(this._selectedBlocks, blockPath)
     ) {
       this._dropBlockId = '';
@@ -526,8 +583,6 @@ export class DragHandleWidget extends WidgetElement {
     assertExists(blockElement);
     this._setSelectedBlocks([blockElement]);
 
-    this._showHoverRect(blockElement);
-
     return true;
   };
 
@@ -583,7 +638,10 @@ export class DragHandleWidget extends WidgetElement {
     // Set current hover block as selected
     if (
       selections.length === 0 ||
-      !containBlock(selections, this._hoveredBlockId)
+      !containBlock(
+        selections.map(selection => selection.blockId),
+        this._hoveredBlockId
+      )
     ) {
       const blockElement = this.root.viewStore.viewFromPath(
         'block',
@@ -686,7 +744,12 @@ export class DragHandleWidget extends WidgetElement {
     if (!targetBlockId) return;
 
     // Should make sure drop block id is not in selected blocks
-    if (containBlock(this._selectedBlocks, targetBlockId)) {
+    if (
+      containBlock(
+        this._selectedBlocks.map(selection => selection.blockId),
+        targetBlockId
+      )
+    ) {
       return;
     }
 
@@ -771,11 +834,14 @@ export class DragHandleWidget extends WidgetElement {
   override firstUpdated() {
     this.hide(true);
 
+    // When pointer enter drag handle grabber
+    // Extend drag handle grabber to the height of the hovered block
+    // And show drag hover rect on the all the blocks that can be dragged
     this._disposables.addFromEvent(
       this._dragHandleContainer,
       'pointerenter',
       () => {
-        if (!this._hoveredBlockPath) return;
+        if (!this._hoveredBlockPath || !this._dragHandleGrabber) return;
 
         const blockElement = this.root.viewStore.viewFromPath(
           'block',
@@ -783,76 +849,80 @@ export class DragHandleWidget extends WidgetElement {
         );
         if (!blockElement) return;
 
-        if (!this._dragHandleGrabber) return;
-
+        // This height has been multiplied by scale
         let { height } = blockElement.getBoundingClientRect();
+        height = Math.ceil(height);
 
-        // Handle Multi line block
-        // TODO: consider text selection
-        if (
-          containBlock(
-            this._selectedBlocks,
-            getBlockIdFromPath(this._hoveredBlockPath)
-          )
-        ) {
-          const margin = 8 * this._scale;
-          // add all the blocks height
-          // Should only add margin for n-1 blocks, but n height
-          // write the code in this way to avoid the last block margin
-          height = this._selectedBlocks.reduce((acc, block) => {
-            const blockElement = this.root.viewStore.viewFromPath(
-              'block',
-              block.path as string[]
-            );
-            if (!blockElement) return acc;
-            return acc + blockElement.getBoundingClientRect().height;
-          }, 0);
+        // TODO: consider multi-blocks drag handle height
+        // if (
+        //   containBlock(
+        //     this._selectedBlocks,
+        //     getBlockIdFromPath(this._hoveredBlockPath)
+        //   )
+        // ) {
+        //   const margin = 8 * this._scale;
+        //   // add all the blocks height
+        //   // Should only add margin for n-1 blocks, but n height
+        //   // write the code in this way to avoid the last block margin
+        //   height = this._selectedBlocks.reduce((acc, block) => {
+        //     const blockElement = this.root.viewStore.viewFromPath(
+        //       'block',
+        //       block.path as string[]
+        //     );
+        //     if (!blockElement) return acc;
+        //     return acc + blockElement.getBoundingClientRect().height;
+        //   }, 0);
 
-          height += margin * (this._selectedBlocks.length - 1);
-        }
+        //   height += margin * (this._selectedBlocks.length - 1);
+        // }
 
-        // TODO: three different drag handle animation type
-        // 1. transform form center
-        // 2. transform from top
-        // 3. transform from bottom
-        const containerHeight = getDragHandleContainerHeight(
-          blockElement.model
+        const containerHeight = Math.ceil(
+          getDragHandleContainerHeight(blockElement.model) * this._scale
         );
+
+        // TODO: consider multi-blocks drag handle height, should extend from bottom ?
+        // 1. Single line block: extend form center
+        // 2. Multi-line block: extend from top
         if (containerHeight === height) {
           // Single line block, transform fromm center
           this._dragHandleGrabber.style.height = `${height - 8}px`;
-          this._dragHandleGrabber.style.width = `${3 * this._scale}px`;
+          this._dragHandleGrabber.style.width = `${
+            EXTENDED_DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+          }px`;
           this._dragHandleGrabber.style.borderRadius = `${
             DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
           }px`;
         } else if (containerHeight < height) {
           // Multi line block, transform from top
           this._dragHandleGrabber.classList.add('from-top');
+          // TODO: need a better way to extend drag handle grabber
           this._dragHandleGrabber.style.transform = `scaleY(${
-            (height - 8) / DRAG_HANDLE_GRABBER_HEIGHT
+            (height - 2 * DRAG_HANDLE_GRABBER_MARGIN * this._scale) /
+            (DRAG_HANDLE_GRABBER_HEIGHT * this._scale)
           })`;
-          this._dragHandleGrabber.style.width = `${2 * this._scale}px`;
+          this._dragHandleGrabber.style.width = `${
+            EXTENDED_DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+          }px`;
+          this._dragHandleGrabber.style.borderRadius = `0px`;
         }
+
+        // Show hover rect for all the blocks can be dragged
+        this._showHoverRect(blockElement);
       }
     );
 
+    // When pointer leave drag handle grabber, should reset drag handle grabber style
     this._disposables.addFromEvent(
       this._dragHandleContainer,
       'pointerleave',
       () => {
         if (!this._dragHandleGrabber) return;
+
+        this._dragHoverRect = null;
         this._dragHandleGrabber.classList.remove('from-top');
 
         this._dragHandleGrabber.style.transform = `scaleY(${1})`;
-        this._dragHandleGrabber.style.height = `${
-          DRAG_HANDLE_GRABBER_HEIGHT * this._scale
-        }px`;
-        this._dragHandleGrabber.style.width = `${
-          DRAG_HANDLE_GRABBER_WIDTH * this._scale
-        }px`;
-        this._dragHandleGrabber.style.borderRadius = `${
-          DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
-        }px`;
+        this._resetDragHandleGrabber();
       }
     );
   }
