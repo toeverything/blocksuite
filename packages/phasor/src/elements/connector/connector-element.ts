@@ -145,7 +145,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       rc.linearPath(points as [number, number][], options);
     } else {
       ctx.save();
-      ctx.strokeStyle = this.stroke;
+      ctx.strokeStyle = realStrokeColor;
       ctx.lineWidth = this.strokeWidth;
       dash && ctx.setLineDash([12, 12]);
       ctx.beginPath();
