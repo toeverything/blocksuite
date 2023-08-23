@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, createDelayHoverSignal } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -30,15 +30,7 @@ export function AttachmentOptionsTemplate({
   showCaption: () => void;
   abortController: AbortController;
 }) {
-  let hoverTimeout = 0;
-  const onHover = () => clearTimeout(hoverTimeout);
-  const onHoverLeave = () => {
-    const HOVER_TIMEOUT = 300;
-    clearTimeout(hoverTimeout);
-    hoverTimeout = window.setTimeout(() => {
-      abortController.abort();
-    }, HOVER_TIMEOUT);
-  };
+  const { onHover, onHoverLeave } = createDelayHoverSignal(abortController);
   anchor.addEventListener('mouseover', onHover);
   anchor.addEventListener('mouseleave', onHoverLeave);
   abortController.signal.addEventListener('abort', () => {
