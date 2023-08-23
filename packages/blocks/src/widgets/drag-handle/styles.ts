@@ -41,7 +41,7 @@ export const styles = css`
     transition: all 0.3s ease-in-out;
   }
   .affine-drag-handle-grabber.from-top {
-    transform-origin: 0 0;
+    transform-origin: top center;
   }
   .affine-drag-handle-container:hover > .affine-drag-handle {
     cursor: grab;
@@ -65,7 +65,7 @@ export const styles = css`
     left: 0;
     border-radius: 6px;
     background: var(--affine-hover-color);
-    transition: width 0.5s ease-in-out, height 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
     transform-origin: left top;
     pointer-events: none;
     z-index: 2;
