@@ -61,9 +61,17 @@ declare global {
 }
 
 type PortalOptions = {
-  template: TemplateResult<1>;
+  template:
+    | TemplateResult<1>
+    | ((updatePortal: () => void) => TemplateResult<1>);
   container?: HTMLElement;
+  /**
+   * The portal is removed when the AbortSignal is aborted.
+   */
   abortController?: AbortController;
+  /**
+   * Defaults to `true`.
+   */
   shadowDom?: boolean;
   renderOptions?: RenderOptions;
   /**
@@ -72,10 +80,11 @@ type PortalOptions = {
    */
   identifyWrapper?: boolean;
 };
+
 /**
  * Similar to `<blocksuite-portal>`, but only renders once when called.
  *
- * The template should be a **static** template since it will not be re-rendered.
+ * The template should be a **static** template since it will not be re-rendered unless `updatePortal` is called.
  *
  * See {@link Portal} for more details.
  */
@@ -100,7 +109,15 @@ export function createSimplePortal({
 
   const root = shadowDom ? portalRoot.shadowRoot : portalRoot;
   assertExists(root);
-  render(template, root, renderOptions);
+
+  const updatePortal = () => {
+    const templateResult =
+      template instanceof Function ? template(updatePortal) : template;
+    assertExists(templateResult);
+    render(templateResult, root, renderOptions);
+  };
+
+  updatePortal();
   container.append(portalRoot);
   return portalRoot;
 }
