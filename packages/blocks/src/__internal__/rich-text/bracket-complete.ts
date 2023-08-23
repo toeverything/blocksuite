@@ -1,7 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { VKeyboardBindingRecord } from '@blocksuite/virgo';
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
-import type { KeyboardBindings } from './keyboard.js';
 
 type BracketPair = {
   name: string;
@@ -84,24 +84,21 @@ const bracketPairs: BracketPair[] = [
 
 export function createBracketAutoCompleteBindings(
   model: BaseBlockModel
-): KeyboardBindings {
-  const bindings: KeyboardBindings = {};
+): VKeyboardBindingRecord {
+  const bindings: VKeyboardBindingRecord = {};
 
   bracketPairs.forEach(pair => {
     bindings[pair.name] = {
       key: pair.left,
-      // Input some brackets need to press shift key
-      shiftKey: null,
-      collapsed: false,
-      handler(range) {
-        if (!model.text) return ALLOW_DEFAULT;
+      handler: ({ vRange, vEditor }) => {
+        if (!model.text || vRange.length > 0) return ALLOW_DEFAULT;
 
-        model.text.insert(pair.left, range.index);
-        model.text.insert(pair.right, range.index + range.length + 1);
+        model.text.insert(pair.left, vRange.index);
+        model.text.insert(pair.right, vRange.index + vRange.length + 1);
 
-        this.vEditor.setVRange({
-          index: range.index + 1,
-          length: range.length,
+        vEditor.setVRange({
+          index: vRange.index + 1,
+          length: vRange.length,
         });
 
         return PREVENT_DEFAULT;
@@ -111,14 +108,13 @@ export function createBracketAutoCompleteBindings(
 
   bindings['backtick'] = {
     key: '`',
-    collapsed: false,
-    handler(range) {
-      if (!model.text) return ALLOW_DEFAULT;
-      model.text.format(range.index, range.length, { code: true });
+    handler: ({ vRange, vEditor }) => {
+      if (!model.text || vRange.length > 0) return ALLOW_DEFAULT;
+      model.text.format(vRange.index, vRange.length, { code: true });
 
-      this.vEditor.setVRange({
-        index: range.index,
-        length: range.length,
+      vEditor.setVRange({
+        index: vRange.index,
+        length: vRange.length,
       });
 
       return PREVENT_DEFAULT;

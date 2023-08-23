@@ -1,20 +1,29 @@
+import type { UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { VirgoRootElement } from '@blocksuite/virgo';
+import type { VEditor, VirgoRootElement } from '@blocksuite/virgo';
 
+import { getNextBlock } from '../../../note-block/utils.js';
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   getCombinedFormatInTextSelection,
   getSelectedContentModels,
 } from '../../../page-block/utils/selection.js';
+import { tryConvertBlock } from '../markdown-convert.js';
 import {
+  handleIndent,
   handleMultiBlockIndent,
   handleMultiBlockUnindent,
+  handleUnindent,
 } from '../rich-text-operations.js';
+import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selectionManager;
+  const model = blockElement.model;
+
   const _selectBlock = () => {
     selection.update(selList => {
       return selList.map(sel => {
@@ -47,17 +56,115 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return true;
   };
 
+  const _getLines = (vEditor: VEditor) => {
+    return Array.from(vEditor.rootElement.querySelectorAll('v-line'));
+  };
+
+  const _getLineOffset = (vEditor: VEditor) => {
+    const vLines = _getLines(vEditor);
+    const vRange = vEditor.getVRange();
+    assertExists(vRange);
+    const [line] = vEditor.getLine(vRange.index);
+    return vLines.indexOf(line);
+  };
+
+  const _getVirgo = () => {
+    const vRoot =
+      blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
+    if (!vRoot) {
+      throw new Error('Virgo root not found');
+    }
+    return vRoot.virgoEditor;
+  };
+
+  const _preventDefault = (ctx: UIEventStateContext) => {
+    const state = ctx.get('defaultState');
+    state.event.preventDefault();
+  };
+
   blockElement.bindHotKey({
-    ArrowRight: () => {
+    ArrowUp: ctx => {
+      const vEditor = _getVirgo();
+      const vRange = vEditor.getVRange();
+      assertExists(vRange);
+
+      if (vRange.length !== 0) {
+        vEditor.setVRange({
+          index: vRange.index,
+          length: 0,
+        });
+      }
+
+      const offset = _getLineOffset(vEditor);
+
+      if (offset === 0) {
+        _preventDefault(ctx);
+        return;
+      }
+
+      return true;
+    },
+    ArrowDown: ctx => {
+      const vEditor = _getVirgo();
+      const vRange = vEditor.getVRange();
+      assertExists(vRange);
+
+      if (vRange.length !== 0) {
+        vEditor.setVRange({
+          index: vRange.index,
+          length: 0,
+        });
+      }
+
+      const lines = _getLines(vEditor);
+      const offset = _getLineOffset(vEditor);
+      if (lines.length - 1 === offset) {
+        if (getNextBlock(blockElement)) {
+          _preventDefault(ctx);
+        }
+        return;
+      }
+
+      return true;
+    },
+    ArrowRight: ctx => {
       if (blockElement.selected?.is('block')) {
         return _selectText(false);
       }
+
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+
+        if (vRange.length === 0 && vRange.index === vEditor.yText.length) {
+          _preventDefault(ctx);
+          return;
+        }
+
+        return true;
+      }
+
       return;
     },
-    ArrowLeft: () => {
+    ArrowLeft: ctx => {
       if (blockElement.selected?.is('block')) {
         return _selectText(true);
       }
+
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+
+        if (vRange.length === 0 && vRange.index === 0) {
+          _preventDefault(ctx);
+          return;
+        }
+
+        return true;
+      }
+
       return;
     },
     Escape: () => {
@@ -66,11 +173,73 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return;
     },
-    Enter: () => {
+    Enter: ctx => {
+      const state = ctx.get('keyboardState');
+
       if (blockElement.selected?.is('block')) {
         return _selectText(false);
       }
+
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          hardEnter(model, vRange, vEditor, state.raw);
+          _preventDefault(ctx);
+        }
+      }
+
       return;
+    },
+    'Shift-Enter': () => {
+      console.log(1);
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+        vEditor.insertText(vRange, '\n');
+        vEditor.setVRange({
+          index: vRange.index + 1,
+          length: 0,
+        });
+
+        return true;
+      }
+
+      return;
+    },
+    'Mod-Enter': ctx => {
+      const state = ctx.get('keyboardState');
+
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          hardEnter(model, vRange, vEditor, state.raw, true);
+          _preventDefault(ctx);
+        }
+      }
+
+      return;
+    },
+    ' ': ctx => {
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          if (
+            !tryConvertBlock(
+              model.page,
+              model,
+              vEditor,
+              vEditor.yText.toString().slice(0, vRange.index),
+              vRange
+            )
+          ) {
+            _preventDefault(ctx);
+          }
+        }
+      }
     },
     'Mod-a': ctx => {
       ctx.get('defaultState').event.preventDefault();
@@ -79,7 +248,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
       return;
     },
-    Tab: () => {
+    Tab: ctx => {
       if (
         blockElement.selected?.is('block') ||
         blockElement.selected?.is('text')
@@ -90,13 +259,26 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!page) {
           return;
         }
+
+        const textModels = getSelectedContentModels(page, ['text']);
+        if (textModels.length === 1) {
+          const vEditor = _getVirgo();
+          const vRange = vEditor.getVRange();
+          if (vRange) {
+            handleIndent(model.page, model, vRange.index);
+            _preventDefault(ctx);
+            ctx.get('defaultState').event.stopPropagation();
+          }
+          return true;
+        }
+
         const models = getSelectedContentModels(page, ['text', 'block']);
         handleMultiBlockIndent(blockElement.page, models);
         return true;
       }
       return;
     },
-    'Shift-Tab': () => {
+    'Shift-Tab': ctx => {
       if (
         blockElement.selected?.is('block') ||
         blockElement.selected?.is('text')
@@ -107,11 +289,40 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (!page) {
           return;
         }
+
+        const textModels = getSelectedContentModels(page, ['text']);
+        if (textModels.length === 1) {
+          const vEditor = _getVirgo();
+          const vRange = vEditor.getVRange();
+          if (vRange) {
+            handleUnindent(model.page, model, vRange.index);
+            _preventDefault(ctx);
+            ctx.get('defaultState').event.stopPropagation();
+          }
+          return true;
+        }
+
         const models = getSelectedContentModels(page, ['text', 'block']);
         handleMultiBlockUnindent(blockElement.page, models);
         return true;
       }
       return;
+    },
+    Backspace: ctx => {
+      const state = ctx.get('keyboardState');
+      const vEditor = _getVirgo();
+      if (!onBackspace(model, state.raw, vEditor)) {
+        _preventDefault(ctx);
+      }
+      return true;
+    },
+    Delete: ctx => {
+      const state = ctx.get('keyboardState');
+      const vEditor = _getVirgo();
+      if (!onForwardDelete(model, state.raw, vEditor)) {
+        _preventDefault(ctx);
+      }
+      return true;
     },
   });
 

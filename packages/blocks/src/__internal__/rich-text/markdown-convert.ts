@@ -1,6 +1,11 @@
 import { assertExists, isEqual } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
+import type { Page } from '@blocksuite/store';
+import type {
+  VEditor,
+  VKeyboardBindingContext,
+  VRange,
+} from '@blocksuite/virgo';
+import type * as Y from 'yjs';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
@@ -16,36 +21,30 @@ import {
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 
-type Match = {
+interface MarkdownMatch {
   name: string;
   pattern: RegExp;
-  action: (
-    model: BaseBlockModel,
-    vEditor: AffineVEditor,
-    text: string,
-    selection: VRange,
-    pattern: RegExp
-  ) => boolean;
-};
+  action: (props: {
+    vEditor: VEditor;
+    prefixText: string;
+    vRange: VRange;
+    pattern: RegExp;
+    undoManager: Y.UndoManager;
+  }) => boolean;
+}
 
-const matches: Match[] = [
+const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bolditalic',
     pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
       if (!match) {
         return false;
       }
 
       const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
+      const startIndex = vRange.index - annotatedText.length;
 
       vEditor.insertText(
         {
@@ -55,7 +54,7 @@ const matches: Match[] = [
         ' '
       );
 
-      model.page.captureSync();
+      undoManager.stopCapturing();
 
       vEditor.formatText(
         {
@@ -92,19 +91,13 @@ const matches: Match[] = [
   {
     name: 'bold',
     pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
       if (!match) {
         return false;
       }
       const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
+      const startIndex = vRange.index - annotatedText.length;
 
       vEditor.insertText(
         {
@@ -113,7 +106,9 @@ const matches: Match[] = [
         },
         ' '
       );
-      model.page.captureSync();
+
+      undoManager.stopCapturing();
+
       vEditor.formatText(
         {
           index: startIndex,
@@ -148,19 +143,13 @@ const matches: Match[] = [
   {
     name: 'italic',
     pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
       if (!match) {
         return false;
       }
       const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
+      const startIndex = vRange.index - annotatedText.length;
 
       vEditor.insertText(
         {
@@ -169,7 +158,9 @@ const matches: Match[] = [
         },
         ' '
       );
-      model.page.captureSync();
+
+      undoManager.stopCapturing();
+
       vEditor.formatText(
         {
           index: startIndex,
@@ -204,19 +195,13 @@ const matches: Match[] = [
   {
     name: 'strikethrough',
     pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
       if (!match) {
         return false;
       }
       const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
+      const startIndex = vRange.index - annotatedText.length;
 
       vEditor.insertText(
         {
@@ -225,7 +210,9 @@ const matches: Match[] = [
         },
         ' '
       );
-      model.page.captureSync();
+
+      undoManager.stopCapturing();
+
       vEditor.formatText(
         {
           index: startIndex,
@@ -260,19 +247,13 @@ const matches: Match[] = [
   {
     name: 'underthrough',
     pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
       if (!match) {
         return false;
       }
       const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
+      const startIndex = vRange.index - annotatedText.length;
 
       vEditor.insertText(
         {
@@ -281,7 +262,9 @@ const matches: Match[] = [
         },
         ' '
       );
-      model.page.captureSync();
+
+      undoManager.stopCapturing();
+
       vEditor.formatText(
         {
           index: startIndex,
@@ -297,7 +280,7 @@ const matches: Match[] = [
         length: 1,
       });
       vEditor.deleteText({
-        index: selection.index - 1,
+        index: vRange.index - 1,
         length: 1,
       });
       vEditor.deleteText({
@@ -316,21 +299,15 @@ const matches: Match[] = [
   {
     name: 'code',
     pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const match = pattern.exec(text);
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const match = pattern.exec(prefixText);
       if (!match) {
         return false;
       }
       const annotatedText = match[0];
-      const startIndex = selection.index - annotatedText.length;
+      const startIndex = vRange.index - annotatedText.length;
 
-      if (text.match(/^([* \n]+)$/g)) {
+      if (prefixText.match(/^([* \n]+)$/g)) {
         return false;
       }
 
@@ -341,7 +318,9 @@ const matches: Match[] = [
         },
         ' '
       );
-      model.page.captureSync();
+
+      undoManager.stopCapturing();
+
       vEditor.formatText(
         {
           index: startIndex,
@@ -374,72 +353,28 @@ const matches: Match[] = [
     },
   },
   {
-    name: 'codeblock',
-    pattern: /^```([a-zA-Z0-9]*)$/g,
-    action: (
-      model: BaseBlockModel,
-      _vEditor: AffineVEditor,
-      text: string,
-      _selection: VRange,
-      pattern: RegExp
-    ) => {
-      if (
-        model.flavour === 'affine:paragraph' &&
-        (model as ParagraphBlockModel).type === 'quote'
-      ) {
-        return false;
-      }
-      const match = pattern.exec(text);
-      const page = model.page;
-      page.captureSync();
-      const parent = page.getParent(model);
-      assertExists(parent);
-      const index = parent.children.indexOf(model);
-      page.deleteBlock(model);
-
-      const codeId = page.addBlock(
-        'affine:code',
-        {
-          language: getStandardLanguage(match?.[1] || '')?.id ?? FALLBACK_LANG,
-        },
-        parent,
-        index
-      );
-
-      const codeBlock = page.getBlockById(codeId);
-      assertExists(codeBlock);
-      asyncSetVRange(codeBlock, { index: 0, length: 0 });
-
-      return true;
-    },
-  },
-  {
     name: 'link',
     pattern: /(?:\[(.+?)\])(?:\((.+?)\))$/g,
-    action: (
-      model: BaseBlockModel,
-      vEditor: AffineVEditor,
-      text: string,
-      selection: VRange,
-      pattern: RegExp
-    ) => {
-      const startIndex = text.search(pattern);
-      const matchedText = text.match(pattern)?.[0];
-      const hrefText = text.match(/(?:\[(.*?)\])/g)?.[0];
-      const hrefLink = text.match(/(?:\((.*?)\))/g)?.[0];
+    action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
+      const startIndex = prefixText.search(pattern);
+      const matchedText = prefixText.match(pattern)?.[0];
+      const hrefText = prefixText.match(/(?:\[(.*?)\])/g)?.[0];
+      const hrefLink = prefixText.match(/(?:\((.*?)\))/g)?.[0];
       if (startIndex === -1 || !matchedText || !hrefText || !hrefLink) {
         return false;
       }
-      const start = selection.index - matchedText.length;
+      const start = vRange.index - matchedText.length;
 
       vEditor.insertText(
         {
-          index: selection.index,
+          index: vRange.index,
           length: 0,
         },
         ' '
       );
-      model.page.captureSync();
+
+      undoManager.stopCapturing();
+
       vEditor.formatText(
         {
           index: start,
@@ -451,11 +386,11 @@ const matches: Match[] = [
       );
 
       vEditor.deleteText({
-        index: selection.index + matchedText.length,
+        index: vRange.index + matchedText.length,
         length: 1,
       });
       vEditor.deleteText({
-        index: selection.index - hrefLink.length - 1,
+        index: vRange.index - hrefLink.length - 1,
         length: hrefLink.length + 1,
       });
       vEditor.deleteText({
@@ -476,34 +411,36 @@ const matches: Match[] = [
 /**
  * Returns true if markdown matches and converts to the appropriate format
  */
-export function markdownConvert(
-  vEditor: AffineVEditor,
-  model: BaseBlockModel,
-  prefix: string
-): boolean {
-  const vRange = vEditor.getVRange();
-  if (!vRange) {
-    return false;
-  }
-
-  for (const match of matches) {
-    const matchedText = prefix.match(match.pattern);
+export function tryFormatInlineStyle(
+  context: VKeyboardBindingContext,
+  undoManager: Y.UndoManager
+) {
+  const { vEditor, prefixText, vRange } = context;
+  for (const match of markdownMatches) {
+    const matchedText = prefixText.match(match.pattern);
     if (matchedText) {
-      return match.action(model, vEditor, prefix, vRange, match.pattern);
+      return match.action({
+        vEditor,
+        prefixText,
+        vRange,
+        pattern: match.pattern,
+        undoManager,
+      });
     }
   }
+
   return false;
 }
 
-export function tryMatchSpaceHotkey(
+export function tryConvertBlock(
   page: Page,
   model: ExtendedModel,
   vEditor: AffineVEditor,
-  prefix: string,
+  prefixText: string,
   range: { index: number; length: number }
 ) {
   const [, offset] = vEditor.getLine(range.index);
-  if (offset > prefix.length) {
+  if (offset > prefixText.length) {
     return ALLOW_DEFAULT;
   }
   const isParagraph = matchFlavours(model, ['affine:paragraph']);
@@ -513,50 +450,85 @@ export function tryMatchSpaceHotkey(
   if (isHeading || isParagraphQuoteBlock || isCodeBlock) {
     return ALLOW_DEFAULT;
   }
+
+  // try to add code block
+  const codeMatches = prefixText.match(/^```([a-zA-Z0-9]*)$/g);
+  if (codeMatches) {
+    if (
+      model.flavour === 'affine:paragraph' &&
+      (model as ParagraphBlockModel).type === 'quote'
+    ) {
+      return ALLOW_DEFAULT;
+    }
+
+    const page = model.page;
+    page.captureSync();
+    const parent = page.getParent(model);
+    assertExists(parent);
+    const index = parent.children.indexOf(model);
+    page.deleteBlock(model);
+
+    const codeId = page.addBlock(
+      'affine:code',
+      {
+        language:
+          getStandardLanguage(codeMatches?.[1] ?? '')?.id ?? FALLBACK_LANG,
+      },
+      parent,
+      index
+    );
+
+    const codeBlock = page.getBlockById(codeId);
+    assertExists(codeBlock);
+    asyncSetVRange(codeBlock, { index: 0, length: 0 });
+
+    return PREVENT_DEFAULT;
+  }
+
   let isConverted = false;
-  switch (prefix.trim()) {
+  switch (prefixText.trim()) {
     case '[]':
     case '[ ]':
-      isConverted = convertToList(page, model, 'todo', prefix, {
+      isConverted = convertToList(page, model, 'todo', prefixText, {
         checked: false,
       });
       break;
     case '[x]':
-      isConverted = convertToList(page, model, 'todo', prefix, {
+      isConverted = convertToList(page, model, 'todo', prefixText, {
         checked: true,
       });
       break;
     case '-':
     case '*':
-      isConverted = convertToList(page, model, 'bulleted', prefix);
+      isConverted = convertToList(page, model, 'bulleted', prefixText);
       break;
     case '***':
     case '---':
-      isConverted = convertToDivider(page, model, prefix);
+      isConverted = convertToDivider(page, model, prefixText);
       break;
     case '#':
-      isConverted = convertToParagraph(page, model, 'h1', prefix);
+      isConverted = convertToParagraph(page, model, 'h1', prefixText);
       break;
     case '##':
-      isConverted = convertToParagraph(page, model, 'h2', prefix);
+      isConverted = convertToParagraph(page, model, 'h2', prefixText);
       break;
     case '###':
-      isConverted = convertToParagraph(page, model, 'h3', prefix);
+      isConverted = convertToParagraph(page, model, 'h3', prefixText);
       break;
     case '####':
-      isConverted = convertToParagraph(page, model, 'h4', prefix);
+      isConverted = convertToParagraph(page, model, 'h4', prefixText);
       break;
     case '#####':
-      isConverted = convertToParagraph(page, model, 'h5', prefix);
+      isConverted = convertToParagraph(page, model, 'h5', prefixText);
       break;
     case '######':
-      isConverted = convertToParagraph(page, model, 'h6', prefix);
+      isConverted = convertToParagraph(page, model, 'h6', prefixText);
       break;
     case '>':
-      isConverted = convertToParagraph(page, model, 'quote', prefix);
+      isConverted = convertToParagraph(page, model, 'quote', prefixText);
       break;
     default:
-      isConverted = convertToList(page, model, 'numbered', prefix);
+      isConverted = convertToList(page, model, 'numbered', prefixText);
   }
 
   return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;

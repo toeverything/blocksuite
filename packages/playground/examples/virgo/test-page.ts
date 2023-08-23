@@ -6,7 +6,7 @@ import {
   type AttributeRenderer,
   type BaseTextAttributes,
   baseTextAttributes,
-  createKeyDownHandler,
+  createVirgoKeyDownHandler,
   type DeltaInsert,
   VEditor,
   ZERO_WIDTH_NON_JOINER,
@@ -144,7 +144,7 @@ export class RichText extends ShadowlessElement {
   override firstUpdated() {
     this.vEditor.mount(this._container);
 
-    const keydownHandler = createKeyDownHandler(this.vEditor, {
+    const keydownHandler = createVirgoKeyDownHandler(this.vEditor, {
       inputRule: {
         key: ' ',
         handler: context => {

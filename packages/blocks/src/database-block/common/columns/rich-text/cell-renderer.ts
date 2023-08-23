@@ -312,7 +312,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   };
 
   override render() {
-    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
+    return html`<div class="affine-database-rich-text virgo-editor"></div>`;
   }
 }
 

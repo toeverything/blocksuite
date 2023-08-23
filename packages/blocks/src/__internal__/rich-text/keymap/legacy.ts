@@ -4,15 +4,9 @@ import type { VRange } from '@blocksuite/virgo';
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../../consts.js';
 import { matchFlavours } from '../../utils/model.js';
-import type { KeyboardBindings } from '../keyboard.js';
-import type { BindingContext } from '../keyboard.js';
-import { markdownConvert, tryMatchSpaceHotkey } from '../markdown-convert.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
-  handleIndent,
-  handleKeyDown,
-  handleKeyUp,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
   handleSoftEnter,
@@ -20,12 +14,12 @@ import {
 } from '../rich-text-operations.js';
 import type { AffineVEditor } from '../virgo/types.js';
 
-export function isCollapsedAtBlockStart(vEditor: AffineVEditor) {
+function isCollapsedAtBlockStart(vEditor: AffineVEditor) {
   const vRange = vEditor.getVRange();
   return vRange?.index === 0 && vRange?.length === 0;
 }
 
-export function isCollapsedAtBlockEnd(vEditor: AffineVEditor) {
+function isCollapsedAtBlockEnd(vEditor: AffineVEditor) {
   const vRange = vEditor.getVRange();
   return vRange?.index === vEditor.yText.length && vRange?.length === 0;
 }
@@ -143,39 +137,6 @@ function isSoftEnterable(model: BaseBlockModel) {
   return false;
 }
 
-export function enterMarkdownMatch(
-  model: BaseBlockModel,
-  virgo: AffineVEditor,
-  _range: VRange,
-  context: BindingContext
-) {
-  const { prefix } = context;
-  markdownConvert(virgo, model, prefix);
-  return ALLOW_DEFAULT;
-}
-
-export function spaceMarkdownMatch(
-  model: BaseBlockModel,
-  virgo: AffineVEditor,
-  _range: VRange,
-  context: BindingContext
-) {
-  const { prefix } = context;
-  return markdownConvert(virgo, model, prefix)
-    ? PREVENT_DEFAULT
-    : ALLOW_DEFAULT;
-}
-
-export function onSpace(
-  model: BaseBlockModel,
-  virgo: AffineVEditor,
-  range: VRange,
-  context: BindingContext
-) {
-  const { prefix } = context;
-  return tryMatchSpaceHotkey(model.page, model, virgo, prefix, range);
-}
-
 export function onBackspace(
   model: BaseBlockModel,
   e: KeyboardEvent,
@@ -245,239 +206,3 @@ export function onKeyRight(
   // Need jump to next block
   return PREVENT_DEFAULT;
 }
-
-const commonRichTextKeymap = <T extends BaseBlockModel>(
-  block: T,
-  virgo: AffineVEditor
-): KeyboardBindings => {
-  return {
-    enterMarkdownMatch: {
-      key: 'Enter',
-      handler: (range, context) => {
-        assertExists(virgo);
-        return enterMarkdownMatch(block, virgo, range, context);
-      },
-    },
-    spaceMarkdownMatch: {
-      key: ' ',
-      handler(range, context) {
-        assertExists(virgo);
-        return spaceMarkdownMatch(block, virgo, range, context);
-      },
-    },
-    hardEnter: {
-      key: 'Enter',
-      handler(range, context) {
-        assertExists(virgo);
-        return hardEnter(block, range, virgo, context.event);
-      },
-    },
-    softEnter: {
-      key: 'Enter',
-      shiftKey: true,
-      handler(range) {
-        assertExists(virgo);
-        return onSoftEnter(block, range, virgo);
-      },
-    },
-    // shortKey+enter
-    insertLineAfter: {
-      key: 'Enter',
-      shortKey: true,
-      handler(range, context) {
-        assertExists(virgo);
-        return hardEnter(block, range, virgo, context.event, true);
-      },
-    },
-    tab: {
-      key: 'Tab',
-      handler(range, context) {
-        const index = range.index;
-        handleIndent(block.page, block, index);
-        context.event.stopPropagation();
-        return PREVENT_DEFAULT;
-      },
-    },
-    shiftTab: {
-      key: 'Tab',
-      shiftKey: true,
-      handler(range, context) {
-        const index = range.index;
-        handleUnindent(block.page, block, index);
-        context.event.stopPropagation();
-        return PREVENT_DEFAULT;
-      },
-    },
-    backspace: {
-      key: 'Backspace',
-      handler(_range, context) {
-        return onBackspace(block, context.event, this.vEditor);
-      },
-    },
-    delete: {
-      key: 'Delete',
-      handler(_range, context) {
-        return onForwardDelete(block, context.event, this.vEditor);
-      },
-    },
-    up: {
-      key: 'ArrowUp',
-      shiftKey: false,
-      handler(_range, context) {
-        return handleKeyUp(context.event, this.vEditor.rootElement);
-      },
-    },
-    down: {
-      key: 'ArrowDown',
-      shiftKey: false,
-      handler(_range, context) {
-        return handleKeyDown(block, context.event, this.vEditor.rootElement);
-      },
-    },
-    left: {
-      key: 'ArrowLeft',
-      shiftKey: false,
-      handler(range, context) {
-        return onKeyLeft(block, context.event, range, this.vEditor.rootElement);
-      },
-    },
-    right: {
-      key: 'ArrowRight',
-      shiftKey: false,
-      handler(range, context) {
-        return onKeyRight(block, context.event, range);
-      },
-    },
-    inputRule: {
-      key: ' ',
-      shiftKey: null,
-      prefix: /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/,
-      handler(range, context) {
-        return onSpace(block, virgo, range, context);
-      },
-    },
-  };
-};
-
-const codeRichTextKeymap = <T extends BaseBlockModel>(
-  _block: T,
-  _virgo: AffineVEditor
-): KeyboardBindings => {
-  const INDENT_SYMBOL = '  ';
-  const LINE_BREAK_SYMBOL = '\n';
-  const allIndexOf = (
-    text: string,
-    symbol: string,
-    start = 0,
-    end = text.length
-  ) => {
-    const indexArr: number[] = [];
-    let i = start;
-
-    while (i < end) {
-      const index = text.indexOf(symbol, i);
-      if (index === -1 || index > end) {
-        break;
-      }
-      indexArr.push(index);
-      i = index + 1;
-    }
-    return indexArr;
-  };
-
-  return {
-    tab: {
-      key: 'Tab',
-      handler(range, context) {
-        context.event.stopPropagation();
-        const text = this.vEditor.yText.toString();
-        const index = text.lastIndexOf(LINE_BREAK_SYMBOL, range.index - 1);
-        const indexArr = allIndexOf(
-          text,
-          LINE_BREAK_SYMBOL,
-          range.index,
-          range.index + range.length
-        )
-          .map(i => i + 1)
-          .reverse();
-        if (index !== -1) {
-          indexArr.push(index + 1);
-        } else {
-          indexArr.push(0);
-        }
-        indexArr.forEach(i => {
-          this.vEditor.insertText(
-            {
-              index: i,
-              length: 0,
-            },
-            INDENT_SYMBOL
-          );
-        });
-        this.vEditor.setVRange({
-          index: range.index + 2,
-          length: range.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
-        });
-
-        return PREVENT_DEFAULT;
-      },
-    },
-    shiftTab: {
-      key: 'Tab',
-      shiftKey: true,
-      handler: function (range, context) {
-        context.event.stopPropagation();
-        const text = this.vEditor.yText.toString();
-        const index = text.lastIndexOf(LINE_BREAK_SYMBOL, range.index - 1);
-        let indexArr = allIndexOf(
-          text,
-          LINE_BREAK_SYMBOL,
-          range.index,
-          range.index + range.length
-        )
-          .map(i => i + 1)
-          .reverse();
-        if (index !== -1) {
-          indexArr.push(index + 1);
-        } else {
-          indexArr.push(0);
-        }
-        indexArr = indexArr.filter(i => text.slice(i, i + 2) === INDENT_SYMBOL);
-        indexArr.forEach(i => {
-          this.vEditor.deleteText({
-            index: i,
-            length: 2,
-          });
-        });
-        if (indexArr.length > 0) {
-          this.vEditor.setVRange({
-            index:
-              range.index -
-              (indexArr[indexArr.length - 1] < range.index ? 2 : 0),
-            length: range.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
-          });
-        }
-
-        return PREVENT_DEFAULT;
-      },
-    },
-  };
-};
-
-// FIXME: this keymap file should be migrated to the new `bindHotkey` API
-// Please don't add new keymap here
-export const createRichTextKeymap = <T extends BaseBlockModel>(
-  block: T,
-  virgo: AffineVEditor
-): KeyboardBindings => {
-  const common = commonRichTextKeymap(block, virgo);
-  if (block.flavour === 'affine:code') {
-    const code = codeRichTextKeymap(block, virgo);
-    return {
-      ...common,
-      ...code,
-    };
-  }
-
-  return common;
-};

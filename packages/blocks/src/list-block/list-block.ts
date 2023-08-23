@@ -96,8 +96,10 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
           ${listIcon}
           <rich-text
-            .model=${this.model}
+            .yText=${this.model.text.yText}
+            .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
+            .readonly=${this.model.page.readonly}
           ></rich-text>
           ${when(
             this.selected?.is('block'),
