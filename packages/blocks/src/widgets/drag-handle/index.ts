@@ -235,6 +235,16 @@ export class DragHandleWidget extends WidgetElement {
     right += DRAG_HOVER_RECT_PADDING * this._scale;
     bottom += DRAG_HOVER_RECT_PADDING * this._scale;
 
+    // When current page is doc page, should consider scroll position
+    if (isPageMode(this.page)) {
+      const pageBlock = this._pageBlockElement as DocPageBlockComponent;
+      const { scrollLeft, scrollTop } = pageBlock.viewportElement;
+      left += scrollLeft;
+      top += scrollTop;
+      right += scrollLeft;
+      bottom += scrollTop;
+    }
+
     this._dragHoverRect = new Rect(left, top, right, bottom);
   }
 
