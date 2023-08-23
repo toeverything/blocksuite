@@ -27,27 +27,6 @@ import {
 } from './pure.js';
 
 export async function getBlockClipboardInfo(
-  model: BaseBlockModel,
-  selectedModels?: Map<string, number>,
-  begin?: number,
-  end?: number
-) {
-  const service = await getService(model.flavour);
-  const html = await service.block2html(model, { begin, end });
-  const text = service.block2Text(model, { begin, end });
-  // FIXME: the presence of children is not considered
-  // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
-  const json = service.block2Json(model, selectedModels, begin, end);
-
-  return {
-    html,
-    text,
-    json,
-    model,
-  };
-}
-
-export async function getBlockClipboardInfo1(
   block: SelectedBlock,
   blockModelMap: Map<string, BaseBlockModel>
 ): Promise<{ html: string; text: string; json: SerializedBlock }> {
@@ -62,7 +41,7 @@ export async function getBlockClipboardInfo1(
     currentIndex < block.children.length;
     currentIndex++
   ) {
-    const { html, text, json } = await getBlockClipboardInfo1(
+    const { html, text, json } = await getBlockClipboardInfo(
       block.children[currentIndex],
       blockModelMap
     );
@@ -153,46 +132,9 @@ async function createPageClipboardItems(
   registerAllBlocks();
   const clipGroups = await Promise.all(
     blocks.map(async block => {
-      return await getBlockClipboardInfo1(block, selectedModelMap);
+      return await getBlockClipboardInfo(block, selectedModelMap);
     })
   );
-
-  // const clipModels = selectedModels.filter((model, index) => {
-  //   if (uniqueModelsFilter.has(model.id)) {
-  //     uniqueModelsFilter.set(model.id, index);
-  //     return false;
-  //   }
-  //   addToFilter(model, index);
-  //   return true;
-  // });
-
-  // const clipGroups = await Promise.all(
-  //   clipModels.map(async (model, index, array) => {
-  //     if (index === 0) {
-  //       return await getBlockClipboardInfo(
-  //         model,
-  //         selectedModelsMap,
-  //         textSelection ? textSelection.from.index : undefined,
-  //         index === array.length - 1
-  //           ? textSelection
-  //             ? textSelection.from.index + textSelection.from.length
-  //             : undefined
-  //           : undefined
-  //       );
-  //     }
-  //     if (index === array.length - 1) {
-  //       return await getBlockClipboardInfo(
-  //         model,
-  //         selectedModelsMap,
-  //         undefined,
-  //         textSelection && textSelection.to
-  //           ? textSelection.to.index + textSelection.to.length
-  //           : undefined
-  //       );
-  //     }
-  //     return await getBlockClipboardInfo(model, selectedModelsMap);
-  //   })
-  // );
 
   const stringifiesData = JSON.stringify(
     clipGroups.filter(group => group.json).map(group => group.json)
