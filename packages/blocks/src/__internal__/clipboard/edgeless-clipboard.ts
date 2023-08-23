@@ -250,11 +250,13 @@ export class EdgelessClipboard implements Clipboard {
     return element;
   }
 
-  private _createPhasorElements(elements: Record<string, unknown>[]) {
+  private _createPhasorElements(
+    elements: Record<string, unknown>[],
+    idMap: Map<string, string>
+  ) {
     const result = groupBy(elements, item =>
       item.type === 'connector' ? 'connectors' : 'nonConnectors'
     );
-    const idMap = new Map<string, string>();
 
     return [
       ...(result.nonConnectors
@@ -270,11 +272,13 @@ export class EdgelessClipboard implements Clipboard {
       ...(result.connectors?.map(connector => {
         const sourceId = (<Connection>connector.source).id;
         if (sourceId) {
-          (<Connection>connector.source).id = idMap.get(sourceId) as string;
+          (<Connection>connector.source).id =
+            idMap.get(sourceId) ?? (sourceId as string);
         }
         const targetId = (<Connection>connector.target).id;
         if (targetId) {
-          (<Connection>connector.target).id = idMap.get(targetId) as string;
+          (<Connection>connector.target).id =
+            idMap.get(targetId) ?? (targetId as string);
         }
         return this._createPhasorElement(connector);
       }) ?? []),
@@ -285,10 +289,11 @@ export class EdgelessClipboard implements Clipboard {
     notes: SerializedBlock[],
     pasteX: number,
     pasteY: number,
-    oldCommonBound: Bound
+    oldCommonBound: Bound,
+    oldToNewIdMap: Map<string, string>
   ) {
     const noteIds = await Promise.all(
-      notes.map(async ({ xywh, children, background }) => {
+      notes.map(async ({ id, xywh, children, background }) => {
         const [oldX, oldY, oldW, oldH] = xywh
           ? deserializeXYWH(xywh)
           : [
@@ -312,6 +317,7 @@ export class EdgelessClipboard implements Clipboard {
           this._page.root?.id
         );
         const note = this._page.getBlockById(noteId);
+        if (id) oldToNewIdMap.set(id, noteId);
         assertExists(note);
 
         await addSerializedBlocks(this._page, children, note, 0);
@@ -325,14 +331,15 @@ export class EdgelessClipboard implements Clipboard {
     phasorElements: PhasorElement[],
     notes: SerializedBlock[]
   ) {
-    const commonBound = getCommonBound([
-      ...phasorElements,
-      ...(notes
+    const commonBound = getCommonBound(
+      [...phasorElements, ...notes]
         .map(({ xywh }) => {
           if (!xywh) {
             return;
           }
-          const [x, y, w, h] = deserializeXYWH(xywh);
+          const [x, y, w, h] =
+            typeof xywh === 'string' ? deserializeXYWH(xywh) : xywh;
+
           return {
             x,
             y,
@@ -340,8 +347,8 @@ export class EdgelessClipboard implements Clipboard {
             h,
           };
         })
-        .filter(b => !!b) as Bound[]),
-    ]);
+        .filter(b => !!b) as Bound[]
+    );
     assertExists(commonBound);
     return commonBound;
   }
@@ -373,10 +380,8 @@ export class EdgelessClipboard implements Clipboard {
       elements?: { type: PhasorElement['type'] }[];
     };
 
-    const elements = this._createPhasorElements(groupedByType.elements || []);
-
     const oldCommonBound = this._getOldCommonBound(
-      elements,
+      (groupedByType.elements ?? []) as PhasorElement[],
       groupedByType.notes || []
     );
 
@@ -387,6 +392,23 @@ export class EdgelessClipboard implements Clipboard {
     );
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
+
+    // map old id to new id to rebuild connector's source and target
+    const oldIdToNewIdMap = new Map<string, string>();
+
+    // create and add blocks to page
+    const noteIds = await this._createNoteBlocks(
+      groupedByType.notes || [],
+      pasteX,
+      pasteY,
+      oldCommonBound,
+      oldIdToNewIdMap
+    );
+
+    const elements = this._createPhasorElements(
+      groupedByType.elements || [],
+      oldIdToNewIdMap
+    );
 
     // update phasor elements' position to mouse position
     elements.forEach(ele => {
@@ -404,13 +426,6 @@ export class EdgelessClipboard implements Clipboard {
         });
       }
     });
-    // create and add blocks to page
-    const noteIds = await this._createNoteBlocks(
-      groupedByType.notes || [],
-      pasteX,
-      pasteY,
-      oldCommonBound
-    );
 
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),

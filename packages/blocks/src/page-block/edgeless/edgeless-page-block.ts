@@ -375,6 +375,15 @@ export class EdgelessPageBlockComponent
         const element = this.surface.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
+          const { source, target } = element;
+
+          if (
+            (source.id && !getEdgelessElement(this, source.id)) ||
+            (target.id && !getEdgelessElement(this, target.id))
+          ) {
+            return;
+          }
+
           this.connector.updatePath(element);
         } else if (element instanceof FrameElement) {
           this.frame.calculateFrameColor(element);
@@ -392,8 +401,17 @@ export class EdgelessPageBlockComponent
         assertExists(element);
 
         if (element instanceof ConnectorElement) {
+          const { source, target } = element;
+
+          if (
+            (source.id && !getEdgelessElement(this, source.id)) ||
+            (target.id && !getEdgelessElement(this, target.id))
+          ) {
+            return;
+          }
+
           if ('target' in props || 'source' in props || 'mode' in props) {
-            this.connector.updatePath(element as ConnectorElement);
+            this.connector.updatePath(element);
           }
         }
       })

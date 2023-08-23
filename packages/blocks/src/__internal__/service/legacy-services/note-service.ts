@@ -34,6 +34,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
         lastBlockId === block.id ? end : undefined
       ) ?? [];
     return {
+      id: block.id,
       flavour: block.flavour,
       text: delta,
       xywh: block.xywh,
