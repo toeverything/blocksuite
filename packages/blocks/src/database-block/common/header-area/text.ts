@@ -17,7 +17,6 @@ import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js'
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import { BaseCellRenderer } from '../columns/base-cell.js';
-import { createFromBaseCellRenderer } from '../columns/renderer.js';
 
 interface StackItem {
   meta: Map<'v-range', VRange | null | undefined>;
@@ -77,7 +76,7 @@ const styles = css`
   }
 `;
 
-const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
+export const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
   // @AffineReference:(id)
   const referencePattern = /@AffineReference:\((.*)\)/g;
 
@@ -106,6 +105,48 @@ const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
     reference: { type: 'Subpage', pageId },
   });
 };
+export const addHistoryToVEditor = (vEditor: VEditor) => {
+  let range: Range | null = null;
+  vEditor.slots.rangeUpdated.on(vRange => {
+    range = vRange;
+  });
+  const undoManager = new Y.UndoManager(vEditor.yText, {
+    trackedOrigins: new Set([vEditor.yText.doc?.clientID]),
+  });
+  undoManager.on('stack-item-added', (event: { stackItem: StackItem }) => {
+    const vRange = range && vEditor.mounted ? vEditor.toVRange(range) : null;
+    event.stackItem.meta.set('v-range', vRange);
+  });
+  undoManager.on('stack-item-popped', (event: { stackItem: StackItem }) => {
+    const vRange = event.stackItem.meta.get('v-range');
+    if (vRange) {
+      vEditor.setVRange(vRange);
+    }
+  });
+  undoManager.clear();
+  return {
+    undoManager,
+    handleKeyboardEvent: (e: KeyboardEvent) => {
+      if (
+        e instanceof KeyboardEvent &&
+        (e.ctrlKey || e.metaKey) &&
+        (e.key === 'z' || e.key === 'Z')
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.shiftKey) {
+          if (undoManager.canRedo()) {
+            undoManager.redo();
+          }
+        } else {
+          if (undoManager.canUndo()) {
+            undoManager.undo();
+          }
+        }
+      }
+    },
+  };
+};
 
 class BaseTextCell extends BaseCellRenderer<unknown> {
   override view!: DataViewTableManager | DataViewKanbanManager;
@@ -124,56 +165,43 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   }
 
   vEditor?: VEditor;
-  undoManager?: Y.UndoManager;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
-  protected initVirgo(): VEditor {
+  protected initVirgo(container: HTMLElement): VEditor {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
-    this.vEditor = new VEditor(yText);
-    this.vEditor.setAttributeSchema(affineTextAttributes);
-    this.vEditor.setAttributeRenderer(attributeRenderer());
-    autoIdentifyReference(this.vEditor, yText.toString());
-    this.vEditor.mount(this.richText);
-    this.vEditor.bindHandlers({
+    const vEditor = new VEditor(yText);
+    this.vEditor = vEditor;
+    vEditor.setAttributeSchema(affineTextAttributes);
+    vEditor.setAttributeRenderer(attributeRenderer());
+    vEditor.mount(container);
+    return vEditor;
+  }
+
+  protected initEditingMode(vEditor: VEditor) {
+    autoIdentifyReference(vEditor, vEditor.yText.toString());
+    const historyHelper = addHistoryToVEditor(vEditor);
+    vEditor.bindHandlers({
       keydown: e => {
-        if (
-          e instanceof KeyboardEvent &&
-          (e.ctrlKey || e.metaKey) &&
-          (e.key === 'z' || e.key === 'Z')
-        ) {
-          e.preventDefault();
-          if (e.shiftKey) {
-            this.undoManager?.redo();
-          } else {
-            this.undoManager?.undo();
-          }
-        }
+        historyHelper.handleKeyboardEvent(e);
       },
     });
-
-    this.undoManager = new Y.UndoManager(yText, {
-      trackedOrigins: new Set([yText.doc?.clientID]),
-    });
-    this.undoManager.on(
-      'stack-item-added',
-      (event: { stackItem: StackItem }) => {
-        const vRange = this.vEditor?.getVRange();
-        event.stackItem.meta.set('v-range', vRange);
-      }
-    );
-    this.undoManager.on(
-      'stack-item-popped',
-      (event: { stackItem: StackItem }) => {
-        const vRange = event.stackItem.meta.get('v-range');
-        if (vRange) {
-          this.vEditor?.setVRange(vRange);
+    vEditor.focusEnd();
+    this._disposables.add(
+      vEditor.slots.vRangeUpdated.on(([range]) => {
+        if (range) {
+          if (!this.isEditing) {
+            this.selectCurrentCell(true);
+          }
+        } else {
+          if (this.isEditing) {
+            this.selectCurrentCell(false);
+          }
         }
-      }
+      })
     );
-    return this.vEditor;
   }
 
   private getYText(text?: string | YText) {
@@ -228,32 +256,49 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 
 @customElement('data-view-header-area-text')
 export class HeaderAreaTextCell extends BaseTextCell {
-  public override firstUpdated() {
-    super.connectedCallback();
-    const editor = this.initVirgo();
+  private init() {
+    const editor = this.initVirgo(this.richText);
     editor.setReadonly(true);
+    this._disposables.add({
+      dispose: () => {
+        editor.unmount();
+      },
+    });
+  }
+
+  override firstUpdated() {
+    this.init();
+  }
+
+  public override connectedCallback() {
+    super.connectedCallback();
+    if (this.richText) {
+      this.init();
+    }
   }
 }
 
 @customElement('data-view-header-area-text-editing')
 export class HeaderAreaTextCellEditing extends BaseTextCell {
-  public override firstUpdated() {
+  private init() {
+    const editor = this.initVirgo(this.richText);
+    this.initEditingMode(editor);
+    this._disposables.add({
+      dispose: () => {
+        editor.unmount();
+      },
+    });
+  }
+
+  override firstUpdated() {
+    this.init();
+  }
+
+  public override connectedCallback() {
     super.connectedCallback();
-    const editor = this.initVirgo();
-    editor.focusEnd();
-    this._disposables.add(
-      editor.slots.vRangeUpdated.on(([range]) => {
-        if (range) {
-          if (!this.isEditing) {
-            this.selectCurrentCell(true);
-          }
-        } else {
-          if (this.isEditing) {
-            this.selectCurrentCell(false);
-          }
-        }
-      })
-    );
+    if (this.richText) {
+      this.init();
+    }
   }
 }
 
@@ -263,8 +308,3 @@ declare global {
     'data-view-header-area-text-editing': HeaderAreaTextCellEditing;
   }
 }
-
-export const textRenderer = {
-  view: createFromBaseCellRenderer(HeaderAreaTextCell),
-  edit: createFromBaseCellRenderer(HeaderAreaTextCellEditing),
-};
