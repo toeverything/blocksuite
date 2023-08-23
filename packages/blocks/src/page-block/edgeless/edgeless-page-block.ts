@@ -1264,7 +1264,7 @@ export class EdgelessPageBlockComponent
       if (!surface) return;
 
       const el = this.surface.pickById(surface.elements[0]);
-      if (el?.type === 'shape') {
+      if (el) {
         return true;
       }
 
