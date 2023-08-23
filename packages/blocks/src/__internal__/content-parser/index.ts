@@ -599,10 +599,7 @@ export class ContentParser {
   private async _getTextInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): Promise<string> {
-    const model = this._page.getBlockById(selectedBlock.id);
-    if (!model) {
-      return '';
-    }
+    const model = selectedBlock.model;
 
     const children: string[] = [];
     for (const child of selectedBlock.children) {
