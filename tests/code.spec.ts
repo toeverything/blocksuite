@@ -602,11 +602,11 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['const a = 10;']);
 
   await page.keyboard.press('Enter', { delay: 50 });
-  await type(page, 'const b = "NothingToSay";');
+  await type(page, 'const b = "NothingToSay');
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.press('Tab', { delay: 50 });
-  await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay";']);
+  await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay"']);
 });
 
 test('should code block wrap active after click', async ({ page }) => {
