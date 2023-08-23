@@ -38,6 +38,10 @@ export const styles = css`
     height: 12px;
     border-radius: 1px;
     background: var(--affine-placeholder-color);
+    transition: all 0.3s ease-in-out;
+  }
+  .affine-drag-handle-grabber.from-top {
+    transform-origin: 0 0;
   }
   .affine-drag-handle-container:hover > .affine-drag-handle {
     cursor: grab;
@@ -52,6 +56,17 @@ export const styles = css`
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: 0s;
     transform-origin: 0 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .affine-drag-hover-rect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 6px;
+    background: var(--affine-hover-color);
+    transition: width 0.5s ease-in-out, height 0.5s ease-in-out;
+    transform-origin: left top;
     pointer-events: none;
     z-index: 2;
   }

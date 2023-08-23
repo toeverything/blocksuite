@@ -75,3 +75,7 @@ export const getNoteId = (blockElement: BlockElement) => {
 export const includeTextSelection = (selections: BaseSelection[]) => {
   return selections.some(selection => selection.type === 'text');
 };
+
+export const getBlockIdFromPath = (path: string[]) => {
+  return path[path.length - 1];
+};
