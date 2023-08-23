@@ -552,14 +552,14 @@ export class ContentParser {
   public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
     if (model.flavour === 'affine:page') {
       return {
-        id: model.id,
+        model,
         children: model.children
           .filter(child => child.flavour === 'affine:note')
           .map(child => this.getSelectedBlock(child)),
       };
     }
     return {
-      id: model.id,
+      model,
       children: model.children.map(child => this.getSelectedBlock(child)),
     };
   }
@@ -568,11 +568,7 @@ export class ContentParser {
     block: SelectedBlock,
     blobMap: Map<string, string>
   ): Promise<string> {
-    const model = this._page.getBlockById(block.id);
-    if (!model) {
-      return '';
-    }
-
+    const model = block.model;
     const children: string[] = [];
     for (
       let currentIndex = 0;

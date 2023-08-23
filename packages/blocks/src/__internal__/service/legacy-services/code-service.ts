@@ -75,9 +75,14 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     }
   }
 
-  override block2Json(block: CodeBlockModel, begin?: number, end?: number) {
+  override block2Json(
+    block: CodeBlockModel,
+    children: SerializedBlock[],
+    begin?: number,
+    end?: number
+  ) {
     return {
-      ...super.block2Json(block, begin, end),
+      ...super.block2Json(block, children, begin, end),
       language: block.language,
     };
   }

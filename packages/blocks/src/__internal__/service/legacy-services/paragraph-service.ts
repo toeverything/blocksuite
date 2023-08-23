@@ -20,6 +20,9 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
     switch (model.type) {
       case 'text':
         resultText = `<p>${text}</p>`;
+        if (childText) {
+          resultText = `${resultText}<div style="padding-left: 26px">${childText}</div>`;
+        }
         break;
       case 'h1':
       case 'h2':
@@ -28,15 +31,18 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
       case 'h5':
       case 'h6':
         resultText = `<${model.type}>${text}</${model.type}>`;
+        if (childText) {
+          resultText = `${resultText}<div style="padding-left: 26px">${childText}</div>`;
+        }
         break;
       case 'quote':
         resultText = `<blockquote class="quote">${text}</blockquote>`;
+        if (childText) {
+          resultText = `<blockquote class="quote">${text}<div style="padding-left: 26px">${childText}</div></blockquote>`;
+        }
         break;
       default:
         resultText = text;
-    }
-    if (childText) {
-      resultText = `${resultText}<div style="padding-left: 26px">${childText}</div>`;
     }
     return resultText;
   }

@@ -41,13 +41,27 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     return `${text}${childText}`;
   }
 
-  block2Json(block: BlockModel, begin?: number, end?: number): SerializedBlock {
+  block2Json(
+    block: BlockModel,
+    children?: SerializedBlock[],
+    begin?: number,
+    end?: number
+  ): SerializedBlock {
     const delta = block.text?.sliceToDelta(begin ?? 0, end) ?? [];
     return {
       flavour: block.flavour,
       type: (block as BlockModel & { type: string }).type as string,
       text: delta,
-      children: [],
+      children:
+        children ??
+        block.children.map((child, index, array) => {
+          if (index === array.length - 1) {
+            // @ts-ignore
+            return getService(child.flavour).block2Json(child, 0, end);
+          }
+          // @ts-ignore
+          return getService(child.flavour).block2Json(child);
+        }),
     };
   }
 

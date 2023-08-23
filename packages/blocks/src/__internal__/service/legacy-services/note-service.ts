@@ -20,6 +20,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
 
   override block2Json(
     block: NoteBlockModel,
+    children?: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -29,7 +30,16 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       text: delta,
       xywh: block.xywh,
       background: block.background,
-      children: [],
+      children:
+        children ??
+        block.children.map((child, index, array) => {
+          if (index === array.length - 1) {
+            // @ts-ignore
+            return getService(child.flavour).block2Json(child, 0, end);
+          }
+          // @ts-ignore
+          return getService(child.flavour).block2Json(child);
+        }),
     };
   }
 }

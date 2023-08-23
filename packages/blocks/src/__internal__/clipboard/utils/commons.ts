@@ -1,6 +1,6 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import { BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
@@ -27,11 +27,20 @@ import {
 } from './pure.js';
 
 export async function getBlockClipboardInfo(
-  block: SelectedBlock,
-  blockModelMap: Map<string, BaseBlockModel>
+  block: SelectedBlock | BaseBlockModel
 ): Promise<{ html: string; text: string; json: SerializedBlock }> {
-  const model = blockModelMap.get(block.id);
-  assertExists(model);
+  registerAllBlocks();
+  if (block instanceof BaseBlockModel) {
+    const selectBlockInfo = blockModel2selectBlocksInfo(block);
+    return await generateClipboardInfo(selectBlockInfo);
+  }
+  return await generateClipboardInfo(block);
+}
+
+async function generateClipboardInfo(
+  block: SelectedBlock
+): Promise<{ html: string; text: string; json: SerializedBlock }> {
+  const model = block.model;
 
   const childrenHtml: string[] = [];
   const childrenText: string[] = [];
@@ -42,8 +51,7 @@ export async function getBlockClipboardInfo(
     currentIndex++
   ) {
     const { html, text, json } = await getBlockClipboardInfo(
-      block.children[currentIndex],
-      blockModelMap
+      block.children[currentIndex]
     );
     html && childrenHtml.push(html);
     text && childrenText.push(text);
@@ -64,8 +72,12 @@ export async function getBlockClipboardInfo(
     end: block.endPos,
   });
 
-  const json = service.block2Json(model, block.startPos, block.endPos);
-  json.children = childrenJson;
+  const json = service.block2Json(
+    model,
+    childrenJson,
+    block.startPos,
+    block.endPos
+  );
 
   return {
     html,
@@ -74,65 +86,73 @@ export async function getBlockClipboardInfo(
   };
 }
 
-async function createPageClipboardItems(
+function blockModel2selectBlocksInfo(
+  blockModel: BaseBlockModel
+): SelectedBlock {
+  return {
+    model: blockModel,
+    children: blockModel.children.map(child =>
+      blockModel2selectBlocksInfo(child)
+    ),
+  };
+}
+
+function selectedModels2selectBlocksInfo(
   selectedModels: BaseBlockModel[],
   textSelection?: TextSelection
-): Promise<ClipboardItem[]> {
-  const uniqueModelsFilter = new Map();
-  const addToFilter = (model: BaseBlockModel, index: number) => {
-    uniqueModelsFilter.set(model.id, index);
-    model.children?.forEach(child => addToFilter(child, index));
-  };
-
-  const selectedModelsMap = new Map();
-  selectedModels.forEach((model, index) => {
-    selectedModelsMap.set(model.id, index);
-  });
-
-  const selectedModelMap = new Map();
-  selectedModels.forEach(model => {
-    selectedModelMap.set(model.id, model);
-  });
+) {
+  const modelIdSet = new Set(selectedModels.map(model => model.id));
 
   const blocks: SelectedBlock[] = [];
   const parentIdMap = new Map<string, string>();
   const blocksMap = new Map<string, SelectedBlock>();
-  selectedModels.forEach(model => {
+  selectedModels.forEach((model, index) => {
     for (const child of model.children) {
-      if (selectedModelsMap.has(child.id)) {
+      if (modelIdSet.has(child.id)) {
         parentIdMap.set(child.id, model.id);
       } else {
         break;
       }
     }
-    const parentBlockChildren =
-      blocksMap.get(parentIdMap.get(model.id) ?? '')?.children ?? blocks;
-    const startPos =
-      selectedModelsMap.get(model.id) == 0
-        ? textSelection?.from.index
-        : undefined;
+
+    const startPos = index == 0 ? textSelection?.from.index : undefined;
     let endPos = undefined;
-    if (selectedModelsMap.get(model.id) == selectedModels.length - 1) {
+    if (index == selectedModels.length - 1) {
       if (textSelection?.to) {
         endPos = textSelection.to.index + textSelection.to.length;
       } else if (textSelection?.from) {
         endPos = textSelection?.from.index + textSelection?.from.length;
       }
     }
+
     const block: SelectedBlock = {
-      id: model.id,
+      model,
       startPos,
       endPos,
       children: [] as SelectedBlock[],
     };
     blocksMap.set(model.id, block);
+
+    const parentBlockChildren =
+      blocksMap.get(parentIdMap.get(model.id) ?? '')?.children ?? blocks;
     parentBlockChildren.push(block);
   });
+  return blocks;
+}
+
+async function createPageClipboardItems(
+  selectedModels: BaseBlockModel[],
+  textSelection?: TextSelection
+): Promise<ClipboardItem[]> {
+  const blocks: SelectedBlock[] = selectedModels2selectBlocksInfo(
+    selectedModels,
+    textSelection
+  );
 
   registerAllBlocks();
   const clipGroups = await Promise.all(
     blocks.map(async block => {
-      return await getBlockClipboardInfo(block, selectedModelMap);
+      return await getBlockClipboardInfo(block);
     })
   );
 
