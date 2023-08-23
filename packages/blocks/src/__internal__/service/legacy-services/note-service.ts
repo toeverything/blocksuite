@@ -21,36 +21,16 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
 
   override block2Json(
     block: NoteBlockModel,
-    selectedModels?: Map<string, number>,
     begin?: number,
     end?: number
   ): SerializedBlock {
-    const lastBlockId = selectedModels
-      ? [...selectedModels.entries()].reduce((p, c) => (c[1] > p[1] ? c : p))[0]
-      : '';
-    const delta =
-      block.text?.sliceToDelta(
-        begin ?? 0,
-        lastBlockId === block.id ? end : undefined
-      ) ?? [];
+    const delta = block.text?.sliceToDelta(begin ?? 0, end) ?? [];
     return {
       flavour: block.flavour,
       text: delta,
       xywh: block.xywh,
       background: block.background,
-      children: block.children
-        ?.filter(child => selectedModels?.has(child.id) ?? true)
-        .map((child, index, array) => {
-          if (index === array.length - 1) {
-            return getService(child.flavour).block2Json(
-              child,
-              selectedModels,
-              0,
-              end
-            );
-          }
-          return getService(child.flavour).block2Json(child, selectedModels);
-        }),
+      children: [],
     };
   }
 }

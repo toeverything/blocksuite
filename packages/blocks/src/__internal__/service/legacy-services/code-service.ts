@@ -75,14 +75,9 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     }
   }
 
-  override block2Json(
-    block: CodeBlockModel,
-    selectedModels?: Map<string, number>,
-    begin?: number,
-    end?: number
-  ) {
+  override block2Json(block: CodeBlockModel, begin?: number, end?: number) {
     return {
-      ...super.block2Json(block, selectedModels, begin, end),
+      ...super.block2Json(block, begin, end),
       language: block.language,
     };
   }
