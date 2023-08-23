@@ -4,6 +4,7 @@ import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 
 export const renameStyles = css`
   .affine-attachment-rename-container {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
