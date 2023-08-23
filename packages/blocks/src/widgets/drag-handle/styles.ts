@@ -69,5 +69,12 @@ export const styles = css`
     transform-origin: left top;
     pointer-events: none;
     z-index: 2;
+    animation: expand 0.5s forwards;
+  }
+  @keyframes expand {
+    0% {
+      width: 0;
+      height: 0;
+    }
   }
 `;
