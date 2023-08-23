@@ -147,7 +147,7 @@ export function createLitPortal({
   const portalRoot = createSimplePortal(portalOptions);
 
   if (computePositionOptions) {
-    portalRoot.style.position = 'absolute';
+    portalRoot.style.position = 'fixed';
     portalRoot.style.left = '0';
     portalRoot.style.top = '0';
     const { referenceElement, ...options } = computePositionOptions;
