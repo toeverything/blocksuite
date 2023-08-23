@@ -34,7 +34,7 @@ import {
   DRAG_HANDLE_GRABBER_MARGIN,
   DRAG_HANDLE_GRABBER_WIDTH,
   DRAG_HOVER_RECT_PADDING,
-  EXTENDED_DRAG_HANDLE_GRABBER_HEIGHT,
+  HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
@@ -59,6 +59,12 @@ export class DragHandleWidget extends WidgetElement {
 
   @query('.affine-drag-handle-grabber')
   private _dragHandleGrabber!: HTMLDivElement;
+
+  @query('.affine-drag-hover-rect')
+  private _dragHoverRectElement!: HTMLDivElement;
+
+  @query('.affine-drag-handle')
+  private _dragHandle!: HTMLDivElement;
 
   @state()
   private _indicatorRect: {
@@ -581,6 +587,7 @@ export class DragHandleWidget extends WidgetElement {
       selectedBlocks[0].blockId === this._hoveredBlockId
     ) {
       selectionManager.clear(['block']);
+      this._dragHoverRect = null;
       return;
     }
 
@@ -592,6 +599,7 @@ export class DragHandleWidget extends WidgetElement {
 
     assertExists(blockElement);
     this._setSelectedBlocks([blockElement]);
+    this._showHoverRect(blockElement);
 
     return true;
   };
@@ -897,7 +905,7 @@ export class DragHandleWidget extends WidgetElement {
           // Single line block, transform fromm center
           this._dragHandleGrabber.style.height = `${height - 8}px`;
           this._dragHandleGrabber.style.width = `${
-            EXTENDED_DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+            HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
           }px`;
           this._dragHandleGrabber.style.borderRadius = `${
             DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
@@ -911,7 +919,7 @@ export class DragHandleWidget extends WidgetElement {
             (DRAG_HANDLE_GRABBER_HEIGHT * this._scale)
           })`;
           this._dragHandleGrabber.style.width = `${
-            EXTENDED_DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+            HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
           }px`;
           this._dragHandleGrabber.style.borderRadius = `0px`;
         }
