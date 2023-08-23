@@ -17,6 +17,7 @@ import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js'
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import { BaseCellRenderer } from '../columns/base-cell.js';
+import { createFromBaseCellRenderer } from '../columns/renderer.js';
 
 interface StackItem {
   meta: Map<'v-range', VRange | null | undefined>;
@@ -164,7 +165,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     return tRichText.is(this.titleColumn.dataType);
   }
 
-  editor?: VEditor;
+  vEditor?: VEditor;
   undoManager?: Y.UndoManager;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
@@ -174,7 +175,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
     const vEditor = new VEditor(yText);
-    this.editor = vEditor;
+    this.vEditor = vEditor;
     vEditor.setAttributeSchema(affineTextAttributes);
     vEditor.setAttributeRenderer(attributeRenderer());
     vEditor.mount(container);
@@ -227,7 +228,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.view.cellUpdateValue(
         this.rowId,
         this.titleColumn.id,
-        this.isRichText ? this.editor?.yText : this.editor?.yText.toString()
+        this.isRichText ? this.vEditor?.yText : this.vEditor?.yText.toString()
       );
     }
   }
@@ -302,3 +303,15 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
     }
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'data-view-header-area-text': HeaderAreaTextCell;
+    'data-view-header-area-text-editing': HeaderAreaTextCellEditing;
+  }
+}
+
+export const textRenderer = {
+  view: createFromBaseCellRenderer(HeaderAreaTextCell),
+  edit: createFromBaseCellRenderer(HeaderAreaTextCellEditing),
+};

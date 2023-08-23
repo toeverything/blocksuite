@@ -1109,3 +1109,22 @@ test('should drag multiple block and input text works', async ({ page }) => {
   await undoByKeyboard(page);
   await assertRichTexts(page, ['123', '456', '789']);
 });
+
+test('keyboard operation to move Block up or down', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await pressEnter(page);
+  await type(page, 'foo');
+  await pressEnter(page);
+  await type(page, 'bar');
+  await assertRichTexts(page, ['hello', 'world', 'foo', 'bar']);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
+  await assertRichTexts(page, ['hello', 'bar', 'world', 'foo']);
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
+  await assertRichTexts(page, ['hello', 'world', 'bar', 'foo']);
+});

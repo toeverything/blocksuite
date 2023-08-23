@@ -2,11 +2,11 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { createRef, ref } from 'lit/directives/ref.js';
+import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../../components/menu/index.js';
-import type { UniLit } from '../../../components/uni-component/uni-component.js';
+import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import {
   DatabaseDuplicate,
   DatabaseMoveLeft,
@@ -14,7 +14,10 @@ import {
   DeleteIcon,
   TextIcon,
 } from '../../../icons/index.js';
-import type { DataViewCellLifeCycle } from '../columns/manager.js';
+import type {
+  CellRenderProps,
+  DataViewCellLifeCycle,
+} from '../columns/manager.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
@@ -78,9 +81,11 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
     .field-content:hover {
       background-color: var(--affine-hover-color);
     }
+
     .field-content.is-editing {
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
     }
+
     .field-content.is-focus {
       border: 1px solid var(--affine-primary-color);
     }
@@ -96,10 +101,10 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   isFocus = false;
   @state()
   editing = false;
-  private _cell = createRef<UniLit<DataViewCellLifeCycle>>();
+  private _cell = createRef<DataViewCellLifeCycle>();
 
   public get cell(): DataViewCellLifeCycle | undefined {
-    return this._cell.value?.expose;
+    return this._cell.value;
   }
 
   public changeEditing = (editing: boolean) => {
@@ -230,7 +235,8 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   override render() {
     const column = this.column;
 
-    const props = {
+    const props: CellRenderProps = {
+      view: this.view,
       column: this.column,
       rowId: this.rowId,
       isEditing: this.editing,
@@ -250,12 +256,10 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
         <div class="filed-name">${column.name}</div>
       </div>
       <div @click="${this._click}" class="${contentClass}">
-        <uni-lit
-          ${ref(this._cell)}
-          class="kanban-cell"
-          .uni="${this.editing && edit ? edit : view}"
-          .props="${props}"
-        ></uni-lit>
+        ${renderUniLit(this.editing && edit ? edit : view, props, {
+          ref: this._cell,
+          class: 'kanban-cell',
+        })}
       </div>
     `;
   }

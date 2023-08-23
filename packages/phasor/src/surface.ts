@@ -95,16 +95,16 @@ export class SurfaceManager {
 
   private _syncFromExistingContainer() {
     this._transact(() => {
-      const yConnnecotrs: Y.Map<unknown>[] = [];
+      const yConnectors: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as keyof PhasorElementType;
         if (type === 'connector') {
-          yConnnecotrs.push(yElement);
+          yConnectors.push(yElement);
           return;
         }
         this._createElementFromYMap(yElement);
       });
-      yConnnecotrs.forEach(yElement => {
+      yConnectors.forEach(yElement => {
         this._createElementFromYMap(yElement);
       });
     });

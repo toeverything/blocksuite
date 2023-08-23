@@ -268,7 +268,7 @@ export class EditorContainer
       this.model.id,
       html`<block-suite-root
         .page=${this.page}
-        .blocks=${this.mode === 'page' ? pagePreset : edgelessPreset}
+        .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
       ></block-suite-root>`
     );
 
