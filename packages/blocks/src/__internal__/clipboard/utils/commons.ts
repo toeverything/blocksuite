@@ -185,6 +185,8 @@ export async function copyBlocksInPage(pageElement: PageBlockComponent) {
   if (savedRange) {
     resetNativeSelection(savedRange);
   }
+
+  return clipboardItems;
 }
 
 export async function copyBlocks(models: BaseBlockModel[]) {
