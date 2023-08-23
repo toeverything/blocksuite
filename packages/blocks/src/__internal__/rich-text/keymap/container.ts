@@ -183,10 +183,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (blockElement.selected?.is('text')) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
-        if (vRange) {
-          hardEnter(model, vRange, vEditor, state.raw);
-          _preventDefault(ctx);
-        }
+        assertExists(vRange);
+        hardEnter(model, vRange, vEditor, state.raw);
+        _preventDefault(ctx);
       }
 
       return;
@@ -214,10 +213,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (blockElement.selected?.is('text')) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
-        if (vRange) {
-          hardEnter(model, vRange, vEditor, state.raw, true);
-          _preventDefault(ctx);
-        }
+        assertExists(vRange);
+        hardEnter(model, vRange, vEditor, state.raw, true);
+        _preventDefault(ctx);
       }
 
       return;
@@ -226,7 +224,15 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (blockElement.selected?.is('text')) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
-        if (vRange) {
+        assertExists(vRange);
+
+        const prefixText = vEditor.yText.toString().slice(0, vRange.index);
+
+        if (
+          prefixText.match(
+            /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/
+          )
+        ) {
           if (
             !tryConvertBlock(
               model.page,
@@ -264,11 +270,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (textModels.length === 1) {
           const vEditor = _getVirgo();
           const vRange = vEditor.getVRange();
-          if (vRange) {
-            handleIndent(model.page, model, vRange.index);
-            _preventDefault(ctx);
-            ctx.get('defaultState').event.stopPropagation();
-          }
+          assertExists(vRange);
+          handleIndent(model.page, model, vRange.index);
+          _preventDefault(ctx);
+          ctx.get('defaultState').event.stopPropagation();
+
           return true;
         }
 
@@ -294,11 +300,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         if (textModels.length === 1) {
           const vEditor = _getVirgo();
           const vRange = vEditor.getVRange();
-          if (vRange) {
-            handleUnindent(model.page, model, vRange.index);
-            _preventDefault(ctx);
-            ctx.get('defaultState').event.stopPropagation();
-          }
+          assertExists(vRange);
+          handleUnindent(model.page, model, vRange.index);
+          _preventDefault(ctx);
+          ctx.get('defaultState').event.stopPropagation();
+
           return true;
         }
 
