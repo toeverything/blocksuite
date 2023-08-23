@@ -250,6 +250,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   private _move(key: string) {
     const edgeless = this.pageElement;
+    if (edgeless.selectionManager.editing) return;
 
     const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
