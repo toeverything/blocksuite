@@ -429,7 +429,7 @@ export function tryFormatInlineStyle(
     }
   }
 
-  return false;
+  return ALLOW_DEFAULT;
 }
 
 export function tryConvertBlock(

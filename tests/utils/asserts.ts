@@ -11,7 +11,10 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import {
+  BLOCK_ID_ATTR,
+  EDITOR_WIDTH,
+} from '../../packages/blocks/src/__internal__/consts.js';
 import type {
   CssVariableName,
   NoteBlockModel,
@@ -19,6 +22,7 @@ import type {
 } from '../../packages/blocks/src/index.js';
 import { assertExists } from '../../packages/global/src/utils.js';
 import { toHex } from '../../packages/global/src/utils.js';
+import type { BlockElement } from '../../packages/lit/src/index.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
   PAGE_VERSION,
@@ -311,11 +315,23 @@ export async function assertTextFormat(
   expect(actual).toEqual(resultObj);
 }
 
-export async function assertTypeFormat(page: Page, type: string) {
-  const actual = await page.evaluate(() => {
-    const richText = document.querySelectorAll('rich-text')[0];
-    return (richText.model as BaseBlockModel<{ type: string }>).type;
-  });
+export async function assertRichTextModelType(
+  page: Page,
+  type: string,
+  index = 0
+) {
+  const actual = await page.evaluate(
+    ({ index, BLOCK_ID_ATTR }) => {
+      const richText = document.querySelectorAll('rich-text')[index];
+      const blockElement = richText.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+
+      if (!blockElement) {
+        throw new Error('blockElement is undefined');
+      }
+      return (blockElement.model as BaseBlockModel<{ type: string }>).type;
+    },
+    { index, BLOCK_ID_ATTR }
+  );
   expect(actual).toEqual(type);
 }
 
