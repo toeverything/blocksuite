@@ -10,14 +10,14 @@ import {
 
 interface MoveBlockConfig {
   name: string;
-  hotkey: string;
+  hotkey: string[];
   action: (blockElement: BlockElement) => void;
 }
 
 export const moveBlockConfig: MoveBlockConfig[] = [
   {
     name: 'Move Up',
-    hotkey: 'Mod-Alt-ArrowUp',
+    hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp'],
     action: blockElement => {
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
@@ -56,7 +56,7 @@ export const moveBlockConfig: MoveBlockConfig[] = [
   },
   {
     name: 'Move Down',
-    hotkey: 'Mod-Alt-ArrowDown',
+    hotkey: ['Mod-Alt-ArrowDown', 'Mod-Shift-ArrowDown'],
     action: blockElement => {
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {

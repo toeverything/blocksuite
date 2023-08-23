@@ -378,11 +378,13 @@ export const bindHotKey = (blockElement: BlockElement) => {
   });
 
   moveBlockConfig.forEach(config => {
-    blockElement.bindHotKey({
-      [config.hotkey]: context => {
-        context.get('defaultState').event.preventDefault();
-        config.action(blockElement);
-      },
+    config.hotkey.forEach(key => {
+      blockElement.bindHotKey({
+        [key]: context => {
+          context.get('defaultState').event.preventDefault();
+          config.action(blockElement);
+        },
+      });
     });
   });
 };

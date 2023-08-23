@@ -1123,11 +1123,8 @@ test('keyboard operation to move Block up or down', async ({ page }) => {
   await type(page, 'bar');
   await assertRichTexts(page, ['hello', 'world', 'foo', 'bar']);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
-  await page.waitForTimeout(100);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
-  await page.waitForTimeout(100);
   await assertRichTexts(page, ['hello', 'bar', 'world', 'foo']);
   await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
-  await page.waitForTimeout(100);
   await assertRichTexts(page, ['hello', 'world', 'bar', 'foo']);
 });
