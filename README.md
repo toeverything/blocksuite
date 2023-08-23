@@ -24,8 +24,7 @@ BlockSuite is the open-source editor project behind [AFFiNE](https://github.com/
 
 <p align="center">BlockSuite-based Editor in AFFiNE</p>
 
-- 👉 [Try BlockSuite-based AFFiNE online](https://app.affine.pro/)
-- 🚀 [Edit this page in BlockSuite](https://codesandbox.io/p/sandbox/blocksuite-starter-316rct?file=%2Fsrc%2Fmain.ts)
+👉 [Try BlockSuite-based AFFiNE online](https://app.affine.pro/)
 
 > ⚠️ This project is under heavy development and is in a stage of rapid evolution. Stay tuned or [see our roadmap here](https://github.com/orgs/toeverything/projects/10)!
 
