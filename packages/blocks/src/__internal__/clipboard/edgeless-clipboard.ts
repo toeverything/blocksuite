@@ -17,10 +17,6 @@ import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgel
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import { getCopyElements } from '../../page-block/edgeless/utils/clipboard-utils.js';
 import {
-  DEFAULT_NOTE_HEIGHT,
-  DEFAULT_NOTE_WIDTH,
-} from '../../page-block/edgeless/utils/consts.js';
-import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
