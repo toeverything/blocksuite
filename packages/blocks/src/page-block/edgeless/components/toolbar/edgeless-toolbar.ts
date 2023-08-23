@@ -49,12 +49,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       flex-direction: row;
-      padding: 0 12px;
+      padding: 0 20px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       border: 1px solid var(--affine-border-color);
       border-radius: 40px;
-      fill: currentcolor;
       min-height: 52px;
     }
     .edgeless-toolbar-container[level='second'] {
@@ -65,16 +64,26 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .edgeless-toolbar-container[hidden] {
       display: none;
     }
+    .edgeless-toolbar-left-part {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .edgeless-toolbar-left-part svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
+    }
     .short-divider {
       width: 1px;
       height: 24px;
-      margin: 0 7px;
+      margin: 0 10px;
       background-color: var(--affine-border-color);
     }
     .full-divider {
       width: 1px;
       height: 100%;
-      margin: 0 7px;
+      margin: 0 12px;
       background-color: var(--affine-border-color);
     }
     .brush-and-eraser {
@@ -97,7 +106,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     #edgeless-eraser-icon:hover {
       top: 2px;
     }
-    .edgeless-right-part {
+    .edgeless-toolbar-right-part {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -365,45 +374,53 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private get defaultContent() {
     const { type } = this.edgelessTool;
-    return html`<edgeless-tool-icon-button
-        .tooltip=${getTooltipWithShortcut('Select', 'V')}
-        .active=${type === 'default'}
-        @click=${() => this.setEdgelessTool({ type: 'default' })}
-      >
-        ${SelectIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-        .active=${type === 'pan'}
-        @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
-      >
-        ${HandIcon}
-      </edgeless-tool-icon-button>
+    return html` <div class="edgeless-toolbar-left-part">
+        <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Select', 'V')}
+          .active=${type === 'default'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${4}
+          @click=${() => this.setEdgelessTool({ type: 'default' })}
+        >
+          ${SelectIcon}
+        </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
+          .active=${type === 'pan'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${4}
+          @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
+        >
+          ${HandIcon}
+        </edgeless-tool-icon-button>
 
-      <edgeless-frame-tool-button
-        .edgelessTool=${this.edgelessTool}
-        .setEdgelessTool=${this.setEdgelessTool}
-        .edgeless=${this.edgeless}
-      ></edgeless-frame-tool-button>
+        <edgeless-frame-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .setEdgelessTool=${this.setEdgelessTool}
+          .edgeless=${this.edgeless}
+        ></edgeless-frame-tool-button>
 
-      <edgeless-tool-icon-button
-        .tooltip=${'Presentation'}
-        @click=${() => {
-          this.setEdgelessTool({ type: 'frameNavigator' });
-          if (this._frames.length === 0)
-            toast(
-              'The presentation requires at least 1 frame. You can firstly create a frame.',
-              5000
-            );
-          this._toggleFullScreen();
-        }}
-      >
-        ${FrameNavigatorIcon}
-      </edgeless-tool-icon-button>
+        <edgeless-tool-icon-button
+          .tooltip=${'Presentation'}
+          .iconContainerPadding=${4}
+          @click=${() => {
+            this.setEdgelessTool({ type: 'frameNavigator' });
+            if (this._frames.length === 0)
+              toast(
+                'The presentation requires at least 1 frame. You can firstly create a frame.',
+                5000
+              );
+            this._toggleFullScreen();
+          }}
+        >
+          ${FrameNavigatorIcon}
+        </edgeless-tool-icon-button>
+      </div>
       <div class="short-divider"></div>
       <edgeless-note-tool-button
         .edgelessTool=${this.edgelessTool}
         .edgeless=${this.edgeless}
+        .iconContainerPadding=${4}
         .setEdgelessTool=${this.setEdgelessTool}
       ></edgeless-note-tool-button>
       <div class="full-divider"></div>
@@ -422,7 +439,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           <div class="eraser-button">${EdgelessEraserIcon}</div>
         </edgeless-toolbar-button>
       </div>
-      <div class="edgeless-right-part">
+      <div class="edgeless-toolbar-right-part">
         <edgeless-toolbar-button
           class="transform-button"
           .tooltip=${getTooltipWithShortcut('Text', 'T')}

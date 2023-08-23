@@ -57,6 +57,11 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
+    edgeless-tool-icon-button svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
+    }
+
     edgeless-tool-icon-button svg + svg {
       margin-left: 8px;
     }

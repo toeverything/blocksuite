@@ -113,6 +113,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
         .active=${type === 'frame'}
         .activeMode=${'background'}
+        .iconContainerPadding=${4}
         @click=${() => {
           this.setEdgelessTool({
             type: 'frame',

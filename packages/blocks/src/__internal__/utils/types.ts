@@ -4,6 +4,7 @@ import type {
   ConnectorElement,
   ConnectorMode,
   PhasorElement,
+  ShapeStyle,
   ShapeType,
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
@@ -148,6 +149,7 @@ export type ShapeTool = {
   shape: ShapeType | 'roundedRect';
   fillColor: CssVariableName;
   strokeColor: CssVariableName;
+  shapeStyle: ShapeStyle;
 };
 
 export enum LineWidth {

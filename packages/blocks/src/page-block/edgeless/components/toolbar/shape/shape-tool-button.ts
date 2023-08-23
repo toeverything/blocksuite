@@ -3,11 +3,15 @@ import './shape-menu.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
-import { EdgelessShapeIcon } from '../../../../../icons/index.js';
+import {
+  EdgelessGeneralShapeIcon,
+  EdgelessScribbledShapeIcon,
+} from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -67,6 +71,9 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
+  @property({ attribute: false })
+  shapeStyle?: ShapeStyle = ShapeStyle.Scribbled;
+
   private _shapeMenu: ShapeMenuPopper | null = null;
 
   private _toggleShapeMenu() {
@@ -100,7 +107,11 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         if (newTool.type !== 'shape') {
           this._shapeMenu?.dispose();
           this._shapeMenu = null;
+          return;
         }
+
+        const { shapeStyle } = newTool;
+        this.shapeStyle = shapeStyle;
       })
     );
   }
@@ -125,11 +136,14 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
             shape: 'rect',
             fillColor: DEFAULT_SHAPE_FILL_COLOR,
             strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+            shapeStyle: ShapeStyle.General,
           });
           this._toggleShapeMenu();
         }}
       >
-        ${EdgelessShapeIcon}
+        ${this.shapeStyle === ShapeStyle.General
+          ? EdgelessGeneralShapeIcon
+          : EdgelessScribbledShapeIcon}
       </edgeless-toolbar-button>
     `;
   }

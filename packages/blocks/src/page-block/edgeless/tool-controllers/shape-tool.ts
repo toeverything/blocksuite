@@ -25,6 +25,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     shape: 'rect',
     fillColor: DEFAULT_SHAPE_FILL_COLOR,
     strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+    shapeStyle: ShapeStyle.General,
   };
 
   private _draggingElementId: string | null = null;
@@ -44,7 +45,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     // create a shape block when drag start
     const [modelX, modelY] = viewport.toModelCoord(e.point.x, e.point.y);
     const bound = new Bound(modelX, modelY, width, height);
-    const { shape, fillColor, strokeColor } = this.tool;
+    const { shape, fillColor, strokeColor, shapeStyle } = this.tool;
 
     const shapeType = shape === 'roundedRect' ? 'rect' : shape;
 
@@ -57,7 +58,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
       radius: shape === 'roundedRect' ? 0.1 : 0,
       strokeWidth: 4,
       strokeStyle: StrokeStyle.Solid,
-      shapeStyle: ShapeStyle.Scribbled,
+      shapeStyle,
     });
 
     return id;
