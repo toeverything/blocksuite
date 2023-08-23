@@ -488,7 +488,7 @@ const cellToStringMap: Record<
     return value ?? '';
   },
   title: container => {
-    const cell = container?.querySelector('rich-text');
+    const cell = container?.querySelector('data-view-header-area-text-editing');
     const value = getColumnValue(container);
     const range = cell?.vEditor?.getVRange();
     if (range) {

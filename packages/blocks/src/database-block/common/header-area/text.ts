@@ -123,7 +123,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     return tRichText.is(this.titleColumn.dataType);
   }
 
-  editor?: VEditor;
+  vEditor?: VEditor;
   undoManager?: Y.UndoManager;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
@@ -132,12 +132,12 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     const yText = this.getYText(
       this.titleColumn.getValue(this.rowId) as YText | string | undefined
     );
-    this.editor = new VEditor(yText);
-    this.editor.setAttributeSchema(affineTextAttributes);
-    this.editor.setAttributeRenderer(attributeRenderer());
-    autoIdentifyReference(this.editor, yText.toString());
-    this.editor.mount(this.richText);
-    this.editor.bindHandlers({
+    this.vEditor = new VEditor(yText);
+    this.vEditor.setAttributeSchema(affineTextAttributes);
+    this.vEditor.setAttributeRenderer(attributeRenderer());
+    autoIdentifyReference(this.vEditor, yText.toString());
+    this.vEditor.mount(this.richText);
+    this.vEditor.bindHandlers({
       keydown: e => {
         if (
           e instanceof KeyboardEvent &&
@@ -160,7 +160,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     this.undoManager.on(
       'stack-item-added',
       (event: { stackItem: StackItem }) => {
-        const vRange = this.editor?.getVRange();
+        const vRange = this.vEditor?.getVRange();
         event.stackItem.meta.set('v-range', vRange);
       }
     );
@@ -169,11 +169,11 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       (event: { stackItem: StackItem }) => {
         const vRange = event.stackItem.meta.get('v-range');
         if (vRange) {
-          this.editor?.setVRange(vRange);
+          this.vEditor?.setVRange(vRange);
         }
       }
     );
-    return this.editor;
+    return this.vEditor;
   }
 
   private getYText(text?: string | YText) {
@@ -198,7 +198,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
       this.view.cellUpdateValue(
         this.rowId,
         this.titleColumn.id,
-        this.isRichText ? this.editor?.yText : this.editor?.yText.toString()
+        this.isRichText ? this.vEditor?.yText : this.vEditor?.yText.toString()
       );
     }
   }
@@ -254,6 +254,13 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
         }
       })
     );
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'data-view-header-area-text': HeaderAreaTextCell;
+    'data-view-header-area-text-editing': HeaderAreaTextCellEditing;
   }
 }
 
