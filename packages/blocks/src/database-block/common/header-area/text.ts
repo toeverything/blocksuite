@@ -17,7 +17,6 @@ import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js'
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import { BaseCellRenderer } from '../columns/base-cell.js';
-import { createFromBaseCellRenderer } from '../columns/renderer.js';
 
 interface StackItem {
   meta: Map<'v-range', VRange | null | undefined>;
@@ -166,7 +165,6 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   }
 
   vEditor?: VEditor;
-  undoManager?: Y.UndoManager;
   @query('.data-view-header-area-rich-text')
   richText!: HTMLElement;
 
@@ -310,8 +308,3 @@ declare global {
     'data-view-header-area-text-editing': HeaderAreaTextCellEditing;
   }
 }
-
-export const textRenderer = {
-  view: createFromBaseCellRenderer(HeaderAreaTextCell),
-  edit: createFromBaseCellRenderer(HeaderAreaTextCellEditing),
-};
