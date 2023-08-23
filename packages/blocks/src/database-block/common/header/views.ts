@@ -8,7 +8,7 @@ import {
   popFilterableSimpleMenu,
   popMenu,
 } from '../../../components/menu/index.js';
-import { AddCursorIcon } from '../../../icons/index.js';
+import { AddCursorIcon, DeleteIcon } from '../../../icons/index.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import { viewManager, viewRendererManager } from '../data-view.js';
 
@@ -144,10 +144,12 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Delete',
+            icon: DeleteIcon,
             select: () => {
               this.model.deleteView(view.id);
               this.model.applyViewsUpdate();
             },
+            class: 'delete-item',
           },
         ],
       },
