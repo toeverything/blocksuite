@@ -83,7 +83,8 @@ const bracketPairs: BracketPair[] = [
 ];
 
 export function createBracketAutoCompleteBindings(
-  model: BaseBlockModel
+  model: BaseBlockModel,
+  isCodeBlock: boolean
 ): KeyboardBindings {
   const bindings: KeyboardBindings = {};
 
@@ -92,7 +93,7 @@ export function createBracketAutoCompleteBindings(
       key: pair.left,
       // Input some brackets need to press shift key
       shiftKey: null,
-      collapsed: false,
+      collapsed: isCodeBlock,
       handler(range) {
         if (!model.text) return ALLOW_DEFAULT;
 
