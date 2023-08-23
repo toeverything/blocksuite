@@ -60,12 +60,6 @@ export class DragHandleWidget extends WidgetElement {
   @query('.affine-drag-handle-grabber')
   private _dragHandleGrabber!: HTMLDivElement;
 
-  @query('.affine-drag-hover-rect')
-  private _dragHoverRectElement!: HTMLDivElement;
-
-  @query('.affine-drag-handle')
-  private _dragHandle!: HTMLDivElement;
-
   @state()
   private _indicatorRect: {
     width: number;
