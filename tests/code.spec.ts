@@ -695,3 +695,23 @@ test('multi-line indent', async ({ page }) => {
 
   await assertRichTexts(page, ['aaa\nbbb\nccc']);
 });
+
+test('should bracket complete works in code block', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1800',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'const a = "');
+  await assertRichTexts(page, ['const a = ""']);
+
+  await type(page, 'str');
+  await assertRichTexts(page, ['const a = "str"']);
+  await type(page, '(');
+  await assertRichTexts(page, ['const a = "str()"']);
+  await type(page, ']');
+  await assertRichTexts(page, ['const a = "str(])"']);
+});

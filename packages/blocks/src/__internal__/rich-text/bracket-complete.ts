@@ -1,6 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
+import { matchFlavours } from '../utils/model.js';
 import type { KeyboardBindings } from './keyboard.js';
 
 type BracketPair = {
@@ -83,8 +84,7 @@ const bracketPairs: BracketPair[] = [
 ];
 
 export function createBracketAutoCompleteBindings(
-  model: BaseBlockModel,
-  isCodeBlock: boolean
+  model: BaseBlockModel
 ): KeyboardBindings {
   const bindings: KeyboardBindings = {};
 
@@ -93,7 +93,7 @@ export function createBracketAutoCompleteBindings(
       key: pair.left,
       // Input some brackets need to press shift key
       shiftKey: null,
-      collapsed: isCodeBlock,
+      collapsed: matchFlavours(model, ['affine:code']),
       handler(range) {
         if (!model.text) return ALLOW_DEFAULT;
 

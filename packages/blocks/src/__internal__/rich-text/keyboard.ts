@@ -63,10 +63,7 @@ export function createKeyboardBindings(
 
   const keyboardBindings: KeyboardBindings = {
     ...blockKeyBinding,
-    ...createBracketAutoCompleteBindings(
-      model,
-      model.flavour === 'affine:code'
-    ),
+    ...createBracketAutoCompleteBindings(model),
   };
 
   return keyboardBindings;
