@@ -191,7 +191,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       return;
     },
     'Shift-Enter': () => {
-      console.log(1);
       if (blockElement.selected?.is('text')) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();

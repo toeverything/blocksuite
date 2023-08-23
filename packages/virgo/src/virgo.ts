@@ -1,6 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { html, render } from 'lit';
+import { html, nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
@@ -177,7 +177,7 @@ export class VEditor<
     this._eventService.unmount();
     this.yText.unobserve(this._onYTextChange);
 
-    this._rootElement?.replaceChildren();
+    render(nothing, this.rootElement);
     this._rootElement = null;
 
     this._mounted = false;
