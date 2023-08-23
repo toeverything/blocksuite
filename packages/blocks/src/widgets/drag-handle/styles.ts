@@ -65,10 +65,11 @@ export const styles = css`
     left: 0;
     border-radius: 6px;
     background: var(--affine-hover-color);
-    transition: all 0.5s ease-in-out;
-    transform-origin: left top;
     pointer-events: none;
     z-index: 2;
+    animation: expand 0.5s forwards;
+  }
+  .affine-drag-hover-rect.expand {
     animation: expand 0.5s forwards;
   }
   @keyframes expand {
