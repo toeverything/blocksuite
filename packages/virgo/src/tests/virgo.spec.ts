@@ -923,3 +923,28 @@ test('embed', async ({ page }) => {
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 3, 1);
 });
+
+test('markdown shortcut using keyboard util', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  await page.waitForTimeout(100);
+
+  await type(page, 'aaa**bbb** ccc');
+
+  const delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'aaa',
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'ccc',
+    },
+  ]);
+});
