@@ -1,8 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { autoPlacement, computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../..//components/toast.js';
@@ -17,52 +16,6 @@ import {
   RefreshIcon,
 } from '../images/icons.js';
 import { cloneBookmarkProperties, reloadBookmarkBlock } from '../utils.js';
-
-export type OperationMenuPopper = {
-  element: BookmarkOperationMenu;
-  dispose: () => void;
-};
-
-export function createBookmarkOperationMenu(
-  reference: HTMLElement,
-  props: {
-    model: BaseBlockModel<BookmarkBlockModel>;
-    onSelected?: MenuActionCallback;
-  }
-): OperationMenuPopper {
-  const menu = document.createElement('bookmark-operation-menu');
-  menu.model = props.model;
-  menu.onSelected = props.onSelected;
-
-  reference.appendChild(menu);
-  computePosition(reference, menu, {
-    middleware: [
-      autoPlacement({
-        allowedPlacements: ['top-start', 'top-end'],
-      }),
-      offset({
-        mainAxis: 6,
-      }),
-    ],
-  }).then(({ x, y, placement }) => {
-    const menuStyle = {
-      left: `${x}px`,
-      top: `${y}px`,
-      '--border-radius':
-        placement === 'top-end' ? '8px 8px 0 8px' : '8px 8px 8px 0',
-    };
-    Object.entries(menuStyle).forEach(([key, value]) => {
-      menu.style.setProperty(key, value);
-    });
-  });
-
-  return {
-    element: menu,
-    dispose: () => {
-      menu.remove();
-    },
-  };
-}
 
 export type MenuActionCallback = (type: Operation['type']) => void;
 
@@ -132,11 +85,8 @@ const operations: Operation[] = [
 @customElement('bookmark-operation-menu')
 export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      position: absolute;
-    }
     .bookmark-operation-menu {
-      border-radius: var(--border-radius);
+      border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
@@ -165,13 +115,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   model!: BaseBlockModel;
 
   @property({ attribute: false })
-  root!: BookmarkBlockComponent;
-
-  @property({ attribute: false })
   onSelected?: MenuActionCallback;
-
-  @query('.bookmark-bar')
-  formatQuickBarElement!: HTMLElement;
 
   override connectedCallback() {
     super.connectedCallback();
