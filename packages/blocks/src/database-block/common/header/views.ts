@@ -100,6 +100,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
       {
         type: 'group',
         name: '',
+        hide: () => this.model.page.readonly,
         children: () =>
           viewManager.all.map(v => {
             return {
@@ -123,6 +124,9 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   _clickView(event: MouseEvent, id: string) {
     if (this.currentView !== id) {
       this.setViewId(id);
+      return;
+    }
+    if (this.model.page.readonly) {
       return;
     }
     const view = this.model.views.find(v => v.id === id);
@@ -165,6 +169,9 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
 
   renderMore() {
     if (this.model.views.length <= 3) {
+      if (this.model.page.readonly) {
+        return;
+      }
       return html`<div
         class="database-view-button"
         @click="${this._addViewMenu}"

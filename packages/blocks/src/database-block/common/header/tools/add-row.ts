@@ -121,6 +121,9 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
   };
 
   override render() {
+    if (this.readonly) {
+      return;
+    }
     return html` <div
       class="has-tool-tip affine-database-toolbar-item new-record"
       draggable="true"

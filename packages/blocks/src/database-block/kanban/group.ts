@@ -1,7 +1,7 @@
 import './card.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
+import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
@@ -215,6 +215,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       updateData: this.group.helper.updateData,
       updateValue: value =>
         this.group.helper.updateValue(this.group.rows, value),
+      readonly: this.view.readonly,
     };
     return renderUniLit(data.view, props);
   };
@@ -243,14 +244,16 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
           <div class="group-header-name">${this.renderTitle()}</div>
           ${this.renderCount()}
         </div>
-        <div class="group-header-ops">
-          <div @click="${this.clickAddCardInStart}" class="group-header-op">
-            ${PlusIcon}
-          </div>
-          <div @click="${this.clickGroupOptions}" class="group-header-op">
-            ${MoreHorizontalIcon}
-          </div>
-        </div>
+        ${this.view.readonly
+          ? nothing
+          : html`<div class="group-header-ops">
+              <div @click="${this.clickAddCardInStart}" class="group-header-op">
+                ${PlusIcon}
+              </div>
+              <div @click="${this.clickGroupOptions}" class="group-header-op">
+                ${MoreHorizontalIcon}
+              </div>
+            </div>`}
       </div>
       <div class="group-body">
         ${repeat(
@@ -267,14 +270,16 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
             `;
           }
         )}
-        <div class="add-card" @click="${this.clickAddCard}">
-          <div
-            style="margin-right: 4px;width: 16px;height: 16px;display:flex;align-items:center;"
-          >
-            ${AddCursorIcon}
-          </div>
-          Add
-        </div>
+        ${this.view.readonly
+          ? nothing
+          : html`<div class="add-card" @click="${this.clickAddCard}">
+              <div
+                style="margin-right: 4px;width: 16px;height: 16px;display:flex;align-items:center;"
+              >
+                ${AddCursorIcon}
+              </div>
+              Add
+            </div>`}
       </div>
     `;
   }
