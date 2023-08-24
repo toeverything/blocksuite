@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import type { BaseTextAttributes, VHandlerContext } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
@@ -109,7 +109,7 @@ const autoIdentifyLink = (
 };
 
 @customElement('rich-text')
-export class RichText extends ShadowlessElement {
+export class RichText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-rich-text {
       height: 100%;
@@ -253,12 +253,11 @@ export class RichText extends ShadowlessElement {
     });
 
     this._vEditor.setReadonly(this.model.page.readonly);
-  }
-
-  override updated() {
-    if (this._vEditor) {
-      this._vEditor.setReadonly(this.model.page.readonly);
-    }
+    this._disposables.add(
+      this.model.page.awarenessStore.slots.update.on(() => {
+        this._vEditor?.setReadonly(this.model.page.readonly);
+      })
+    );
   }
 
   override render() {
