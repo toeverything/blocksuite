@@ -1,21 +1,32 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
-import { propertyMatcher } from '../../logical/property-matcher.js';
+import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import type { Variable, VariableOrProperty, VariableRef } from '../ast.js';
 
 @customElement('variable-ref-view')
 export class VariableRefView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .field-select {
+    variable-ref-view {
+      font-size: 12px;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 4px;
+      border-radius: 4px;
       cursor: pointer;
     }
-
-    .property-select {
-      cursor: pointer;
-      padding: 0 2px;
+    variable-ref-view:hover {
+      background-color: var(--affine-hover-color);
+    }
+    variable-ref-view svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--affine-icon-color);
+      color: var(--affine-icon-color);
     }
   `;
   @property({ attribute: false })
@@ -27,6 +38,16 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   vars!: Variable[];
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'click', () => {
+      popSelectField(this, {
+        vars: this.vars,
+        onSelect: ref => this.setData(ref),
+      });
+    });
+  }
+
   get field() {
     if (!this.data) {
       return;
@@ -37,12 +58,12 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     return this.data.ref.name;
   }
 
-  get fieldLabel() {
+  get fieldData() {
     const id = this.field;
     if (!id) {
       return;
     }
-    return this.vars.find(v => v.id === id)?.name;
+    return this.vars.find(v => v.id === id);
   }
 
   get property() {
@@ -55,64 +76,9 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
     return this.data.propertyFuncName;
   }
 
-  @query('.field-select')
-  fieldSelect!: HTMLElement;
-
-  @query('.property-select')
-  propertySelect!: HTMLElement;
-
-  selectField() {
-    popSelectField(this.fieldSelect, {
-      vars: this.vars,
-      onSelect: ref => this.setData(ref),
-    });
-  }
-
-  selectProperty() {
-    const field = this.field;
-    const fieldType = this.vars.find(v => v.id === field)?.type;
-    if (!fieldType || !field) {
-      return;
-    }
-    const properties = propertyMatcher.allMatchedData(fieldType);
-    popFilterableSimpleMenu(
-      this.propertySelect,
-      properties.map(v => ({
-        type: 'action',
-        name: v.name,
-        select: () => {
-          this.setData({
-            type: 'property',
-            ref: { type: 'ref', name: field },
-            propertyFuncName: v.name,
-          });
-        },
-      }))
-    );
-  }
-
   override render() {
-    // const property = html`<span class='property-select' @click='${this.selectProperty}'
-    //       >${this.property ?? '⋮'}</span>
-    //       `;
-    return html`
-      <div style="display:flex;align-items:center;">
-        <div style="display:flex;align-items:center;">
-          <span class="field-select" @click="${this.selectField}"
-            >${this.fieldLabel}</span
-          >
-        </div>
-        <div style="display:flex;align-items:center;">
-          ${this.property &&
-          html`<span style="margin-right: 4px;">${`'s`}</span>`}
-          <!-- <PlainSelect
-            :value="propertyName"
-            @update:value="setPropertyName"
-            :options="propertyOptions"
-          ></PlainSelect> -->
-        </div>
-      </div>
-    `;
+    const data = this.fieldData;
+    return html` ${renderUniLit(data?.icon, {})} ${data?.name} `;
   }
 }
 
@@ -133,6 +99,7 @@ export const popSelectField = (
     props.vars.map(v => ({
       type: 'action',
       name: v.name,
+      icon: renderUniLit(v.icon, {}),
       select: () => {
         props.onSelect({
           type: 'ref',

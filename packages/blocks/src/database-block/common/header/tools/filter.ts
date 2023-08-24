@@ -7,9 +7,9 @@ import { customElement, property } from 'lit/decorators.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { firstFilterByRef } from '../../../common/ast.js';
 import { columnManager } from '../../../common/columns/manager.js';
-import { popAdvanceFilter } from '../../../common/filter/filter-group.js';
 import { popSelectField } from '../../../common/ref/ref.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
+import { popAdvanceFilter } from '../../filter/filter-modal.js';
 import { viewOpIcons } from './view-options.js';
 
 const styles = css`
@@ -54,6 +54,7 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
       id: v.id,
       name: v.name,
       type: columnManager.getColumn(v.type).dataType(v.data),
+      icon: v.icon,
     }));
   }
 

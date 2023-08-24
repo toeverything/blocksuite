@@ -1,3 +1,4 @@
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import { filterMatcher } from '../logical/filter-matcher.js';
 import { propertyMatcher } from '../logical/property-matcher.js';
 import type { TType } from '../logical/typesystem.js';
@@ -6,6 +7,7 @@ export type Variable = {
   name: string;
   type: TType;
   id: string;
+  icon?: UniComponent;
 };
 export type FilterGroup = {
   type: 'group';

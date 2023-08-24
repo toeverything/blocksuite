@@ -2,11 +2,12 @@ import '../ref/ref.js';
 import '../literal/define.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { css, html, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
+import { CrossIcon } from '../../../icons/index.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { filterMatcher } from '../../logical/filter-matcher.js';
 import { typesystem } from '../../logical/typesystem.js';
@@ -16,7 +17,53 @@ import { renderLiteral } from '../literal/matcher.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
-  static override styles = css``;
+  static override styles = css`
+    filter-condition-view {
+      display: flex;
+      align-items: center;
+      padding: 4px 8px 4px 4px;
+      gap: 16px;
+      border: 1px solid var(--affine-border-color);
+      border-radius: 8px;
+    }
+
+    .filter-condition-expression {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .filter-condition-delete {
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: max-content;
+      cursor: pointer;
+    }
+
+    .filter-condition-delete:hover {
+      background-color: var(--affine-hover-color);
+    }
+
+    .filter-condition-delete svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .filter-condition-function-name {
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--affine-text-secondary-color);
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .filter-condition-function-name:hover {
+      background-color: var(--affine-hover-color);
+    }
+  `;
   @property({ attribute: false })
   data!: SingleFilter;
 
@@ -25,8 +72,8 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   vars!: Variable[];
-  @query('.filter-select')
-  filterSelect!: HTMLElement;
+  @property({ attribute: false })
+  showDelete = false;
 
   private _setRef = (ref: VariableOrProperty) => {
     this.setData(firstFilterByRef(this.vars, ref));
@@ -44,10 +91,11 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     return filterMatcher.allMatchedData(type);
   }
 
-  private _selectFilter() {
+  private _selectFilter(e: MouseEvent) {
+    const target = e.currentTarget as HTMLElement;
     const list = this._filterList();
     popFilterableSimpleMenu(
-      this.filterSelect,
+      target,
       list.map(v => ({
         type: 'action',
         name: v.name,
@@ -78,32 +126,34 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     const data = this.data;
 
     return html`
-      <div style="display:flex;align-items:center;white-space: nowrap">
+      <div class="filter-condition-expression">
         <variable-ref-view
           .data="${data.left}"
           .setData="${this._setRef}"
           .vars="${this.vars}"
-          style="margin-right: 4px;"
+          style="height: 24px"
         ></variable-ref-view>
-        <div style="margin-right: 4px;display:flex;align-items:center;">
-          <div class="filter-select" @click="${this._selectFilter}">
-            ${this._filterLabel()}
-          </div>
+        <div
+          class="filter-condition-function-name"
+          @click="${this._selectFilter}"
+        >
+          ${this._filterLabel()}
         </div>
-        <div>
-          ${repeat(this._args(), (v, i) => {
-            const value = this.data.args[i];
-            return renderLiteral(v, value?.value, value => {
-              const newArr = this.data.args.slice();
-              newArr[i] = { type: 'literal', value };
-              this.setData({
-                ...this.data,
-                args: newArr,
-              });
+        ${repeat(this._args(), (v, i) => {
+          const value = this.data.args[i];
+          return renderLiteral(v, value?.value, value => {
+            const newArr = this.data.args.slice();
+            newArr[i] = { type: 'literal', value };
+            this.setData({
+              ...this.data,
+              args: newArr,
             });
-          })}
-        </div>
+          });
+        })}
       </div>
+      ${this.showDelete
+        ? html`<div class="filter-condition-delete">${CrossIcon}</div>`
+        : nothing}
     `;
   }
 }

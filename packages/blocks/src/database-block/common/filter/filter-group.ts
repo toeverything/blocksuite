@@ -7,15 +7,81 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
+import { MoreHorizontalIcon, PlusIcon } from '../../../icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import { firstFilter, firstFilterInGroup } from '../ast.js';
-import { createDatabasePopup } from '../popup.js';
 
 @customElement('filter-group-view')
 export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-group-view {
-      background-color: white;
+      border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+    .filter-group-op {
+      width: 60px;
+      display: flex;
+      justify-content: end;
+      padding: 4px;
+      height: 34px;
+      align-items: center;
+    }
+    .filter-group-op-clickable {
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .filter-group-op-clickable:hover {
+      background-color: var(--affine-hover-color);
+    }
+    .filter-group-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .filter-group-button {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      line-height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .filter-group-button svg {
+      fill: var(--affine-icon-color);
+      color: var(--affine-icon-color);
+      width: 20px;
+      height: 20px;
+    }
+    .filter-group-button:hover {
+      background-color: var(--affine-hover-color);
+    }
+    .filter-group-item {
+      padding: 4px 0;
+      display: flex;
+      align-items: start;
+      gap: 8px;
+    }
+    .filter-group-item-delete {
+      margin-top: 4px;
+      padding: 4px;
+      border-radius: 4px;
+      height: max-content;
+      display: flex;
+      cursor: pointer;
+    }
+    .filter-group-item-delete:hover {
+      background-color: var(--affine-hover-color);
+    }
+    .filter-group-item-delete svg {
+      fill: var(--affine-icon-color);
+      color: var(--affine-icon-color);
+      width: 18px;
+      height: 18px;
     }
   `;
   @property({ attribute: false })
@@ -88,45 +154,56 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   override render() {
     const data = this.data;
     return html`
-      <div>
+      <div class="filter-group-container">
         ${repeat(data.conditions, (filter, i) => {
           let op: TemplateResult;
           if (i === 0) {
-            op = html` <div style="padding-left: 6px;">Where</div>`;
-          } else if (i === 1) {
-            op = html`
-              <div @click="${this._selectOp}">${this.opMap[data.op]}</div>
-            `;
+            op = html` <div class="filter-group-op">Where</div>`;
           } else {
             op = html`
-              <div style="padding-left: 6px;">${this.opMap[data.op]}</div>
+              <div
+                class="filter-group-op filter-group-op-clickable"
+                @click="${this._selectOp}"
+              >
+                ${this.opMap[data.op]}
+              </div>
             `;
           }
-          return html` <div
-            style="display: flex;align-items:start;margin-bottom: 4px;"
-          >
+          return html` <div class="filter-group-item">
             <div style="margin-right: 4px;display:flex;align-items:center;">
               ${op}
             </div>
-            ${filter.type === 'filter'
-              ? html`
-                  <filter-condition-view
-                    .setData="${(v: Filter) => this._setFilter(i, v)}"
-                    .vars="${this.vars}"
-                    .data="${filter}"
-                  ></filter-condition-view>
-                `
-              : html`
-                  <filter-group-view
-                    .setData="${(v: Filter) => this._setFilter(i, v)}"
-                    .vars="${this.vars}"
-                    .data="${filter}"
-                  ></filter-group-view>
-                `}
-            <div @click="${() => this._deleteCondition(i)}">x</div>
+            <div
+              style="flex:1;display:flex;align-items:start;justify-content: space-between;gap: 8px;"
+            >
+              ${filter.type === 'filter'
+                ? html`
+                    <filter-condition-view
+                      .setData="${(v: Filter) => this._setFilter(i, v)}"
+                      .vars="${this.vars}"
+                      .data="${filter}"
+                    ></filter-condition-view>
+                  `
+                : html`
+                    <filter-group-view
+                      style="background-color: var(--affine-hover-color);"
+                      .setData="${(v: Filter) => this._setFilter(i, v)}"
+                      .vars="${this.vars}"
+                      .data="${filter}"
+                    ></filter-group-view>
+                  `}
+              <div
+                class="filter-group-item-delete"
+                @click="${() => this._deleteCondition(i)}"
+              >
+                ${MoreHorizontalIcon}
+              </div>
+            </div>
           </div>`;
         })}
-        <span class="add-new" @click="${this._addNew}">Add New</span>
+      </div>
+      <div class="filter-group-button add-new" @click="${this._addNew}">
+        ${PlusIcon} Add filter
       </div>
     `;
   }
@@ -137,32 +214,6 @@ declare global {
     'filter-group-view': FilterGroupView;
   }
 }
-
-export const popAdvanceFilter = (
-  target: HTMLElement,
-  props: {
-    vars: Variable[];
-    value: FilterGroup;
-    onChange: (value: FilterGroup) => void;
-  }
-) => {
-  const div = document.createElement('div');
-  div.style.position = 'absolute';
-  div.style.zIndex = '999';
-  div.style.boxShadow = '3px 3px 10px rgba(0, 0, 0, 0.1)';
-  div.style.padding = '8px';
-  div.style.borderRadius = '4px';
-  div.style.backgroundColor = 'white';
-  const filter = new FilterGroupView();
-  filter.vars = props.vars;
-  filter.data = props.value;
-  filter.setData = group => {
-    props.onChange(group);
-    filter.data = group;
-  };
-  div.append(filter);
-  createDatabasePopup(target, div);
-};
 
 export const popAddNewFilter = (
   target: HTMLElement,
