@@ -835,3 +835,13 @@ export function assertBound(received: Bound, expected: Bound) {
   expect(received[2]).toBeCloseTo(expected[2], 0);
   expect(received[3]).toBeCloseTo(expected[3], 0);
 }
+
+export function assertClipData(
+  clipItems: { mimeType: string; data: unknown }[],
+  expectClipItems: { mimeType: string; data: unknown }[],
+  type: string
+) {
+  expect(clipItems.find(item => item.mimeType === type)?.data).toBe(
+    expectClipItems.find(item => item.mimeType === type)?.data
+  );
+}

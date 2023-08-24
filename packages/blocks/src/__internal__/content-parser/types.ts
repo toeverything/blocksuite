@@ -1,5 +1,7 @@
+import type { BaseBlockModel } from '@blocksuite/store';
+
 export interface SelectedBlock {
-  id: string;
+  model: BaseBlockModel;
   startPos?: number;
   endPos?: number;
   children: SelectedBlock[];
