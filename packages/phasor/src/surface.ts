@@ -57,7 +57,7 @@ export class SurfaceManager {
   constructor(
     yContainer: Y.Map<unknown>,
     computedValue: ComputedValue = v => v,
-    getReadonlyState: () => boolean
+    getReadonlyState: () => boolean = () => false
   ) {
     this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
