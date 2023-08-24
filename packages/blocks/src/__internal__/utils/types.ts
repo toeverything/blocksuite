@@ -218,6 +218,7 @@ export type EdgelessTool =
   | FrameNavigatorTool;
 
 export type SerializedBlock = {
+  id?: string;
   flavour: string;
   type?: string;
   text?: {
