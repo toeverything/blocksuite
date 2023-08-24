@@ -94,29 +94,38 @@ export function hardEnter(
   }
 
   const isEnd = model.text.length === range.index;
-  if (isEnd || shortKey) {
-    const softEnterable = isSoftEnterable(model);
+  const softEnterable = isSoftEnterable(model);
+  if (isEnd && softEnterable) {
+    if (matchFlavours(model, ['affine:code'])) {
+      if (shortKey) {
+        // shortKey+Enter to exit the block
+        handleBlockEndEnter(page, model);
+        return PREVENT_DEFAULT;
+      }
+
+      // add a new line to the block when press Enter solely
+      onSoftEnter(model, range, vEditor);
+      return PREVENT_DEFAULT;
+    }
+
     const textStr = model.text.toString();
     const endWithTwoBlankLines = textStr === '\n' || textStr.endsWith('\n');
     const shouldSoftEnter = softEnterable && !endWithTwoBlankLines;
 
-    if (shouldSoftEnter) {
-      // TODO handle ctrl+enter in code/quote block or other force soft enter block
+    if (shouldSoftEnter || shortKey) {
       onSoftEnter(model, range, vEditor);
       return PREVENT_DEFAULT;
     }
 
     // delete the \n at the end of block
-    if (softEnterable) {
-      // Before
-      // >
-      // > ↩ <-- press Enter
-      //
-      // After
-      // - line1
-      // - | <-- will unindent the block
-      model.text.delete(range.index - 1, 1);
-    }
+    // Before
+    // >
+    // > ↩ <-- press Enter
+    //
+    // After
+    // - line1
+    // - | <-- will unindent the block
+    model.text.delete(range.index - 1, 1);
     handleBlockEndEnter(page, model);
     return PREVENT_DEFAULT;
   }
