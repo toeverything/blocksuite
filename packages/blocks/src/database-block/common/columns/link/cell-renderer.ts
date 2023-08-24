@@ -37,10 +37,12 @@ export class LinkCell extends BaseCellRenderer<string> {
       overflow: hidden;
       font-size: var(--data-view-cell-text-size);
       line-height: var(--data-view-cell-text-line-height);
+      word-break: break-all;
     }
 
     affine-database-link-node {
       flex: 1;
+      word-break: break-all;
     }
 
     .affine-database-link-icon {
@@ -125,6 +127,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       background-color: transparent;
       font-size: var(--data-view-cell-text-size);
       line-height: var(--data-view-cell-text-line-height);
+      word-break: break-all;
     }
 
     .affine-database-link-editing:focus {

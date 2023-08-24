@@ -120,6 +120,13 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       this.strokeStyle === StrokeStyle.Dashed
     );
 
+    // points might not be build yet in some senarios
+    // eg. undo/redo, copy/paste
+    if (!points.length || points.length < 2) {
+      console.warn('connector points not ready yet, there is something wrong.');
+      return;
+    }
+
     const last = points[points.length - 1];
     const secondToLast = points[points.length - 2];
     const { sides, end } = getArrowPoints(secondToLast, last, 15);
@@ -145,7 +152,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       rc.linearPath(points as [number, number][], options);
     } else {
       ctx.save();
-      ctx.strokeStyle = this.stroke;
+      ctx.strokeStyle = realStrokeColor;
       ctx.lineWidth = this.strokeWidth;
       dash && ctx.setLineDash([12, 12]);
       ctx.beginPath();

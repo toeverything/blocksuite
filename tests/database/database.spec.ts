@@ -248,9 +248,10 @@ test('should database title and rich-text support undo/redo', async ({
   await initDatabaseColumn(page);
   await switchColumnType(page, 'Text');
   await initDatabaseDynamicRowWithData(page, '123', true);
-  await undoByClick(page);
+  await undoByKeyboard(page);
   await assertDatabaseCellRichTexts(page, { text: '' });
-  await redoByClick(page);
+  await pressEscape(page);
+  await redoByKeyboard(page);
   await assertDatabaseCellRichTexts(page, { text: '123' });
 
   await focusDatabaseTitle(page);

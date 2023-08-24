@@ -12,25 +12,39 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
     { childText = '', begin, end }: BlockTransformContext = {}
   ) {
     const text = await super.block2html(model, {
-      childText,
+      childText: '',
       begin,
       end,
     });
+    let resultText = '';
     switch (model.type) {
       case 'text':
-        return `<p>${text}</p>`;
+        resultText = `<p>${text}</p>`;
+        if (childText) {
+          resultText = `${resultText}<div style="padding-left: 26px">${childText}</div>`;
+        }
+        break;
       case 'h1':
       case 'h2':
       case 'h3':
       case 'h4':
       case 'h5':
       case 'h6':
-        return `<${model.type}>${text}</${model.type}>`;
+        resultText = `<${model.type}>${text}</${model.type}>`;
+        if (childText) {
+          resultText = `${resultText}<div style="padding-left: 26px">${childText}</div>`;
+        }
+        break;
       case 'quote':
-        return `<blockquote class="quote">${text}</blockquote>`;
+        resultText = `<blockquote class="quote">${text}</blockquote>`;
+        if (childText) {
+          resultText = `<blockquote class="quote">${text}<div style="padding-left: 26px">${childText}</div></blockquote>`;
+        }
+        break;
       default:
-        return text;
+        resultText = text;
     }
+    return resultText;
   }
 
   override async json2Block(

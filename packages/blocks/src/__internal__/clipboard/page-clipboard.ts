@@ -86,12 +86,16 @@ export class PageClipboard implements Clipboard {
     e.preventDefault();
     this._page.captureSync();
 
-    await copyBlocksInPage(this._ele);
+    await this._copyBlocksInPage();
 
     this._page.captureSync();
 
     this._page.slots.copied.emit();
   };
+
+  private async _copyBlocksInPage() {
+    return await copyBlocksInPage(this._ele);
+  }
 
   private _onCut = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
