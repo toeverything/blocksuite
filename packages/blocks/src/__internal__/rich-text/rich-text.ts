@@ -143,7 +143,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   override firstUpdated() {
     assertExists(this.model.text, 'rich-text need text to init.');
-    this._vEditor = new VEditor<AffineTextAttributes>(this.model.text.yText, {
+    const vEditor = new VEditor<AffineTextAttributes>(this.model.text.yText, {
       isEmbed: delta => !!delta.attributes?.reference,
     });
     const textSchema = this.textSchema;
@@ -151,6 +151,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       textSchema,
       'Failed to render rich-text! textSchema not found'
     );
+    this._vEditor = vEditor;
     this._vEditor.setAttributeSchema(textSchema.attributesSchema);
     this._vEditor.setAttributeRenderer(textSchema.textRenderer());
 
@@ -255,7 +256,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     this._vEditor.setReadonly(this.model.page.readonly);
     this._disposables.add(
       this.model.page.awarenessStore.slots.update.on(() => {
-        this._vEditor?.setReadonly(this.model.page.readonly);
+        if (vEditor.isReadonly !== this.model.page.readonly) {
+          vEditor.setReadonly(this.model.page.readonly);
+        }
       })
     );
   }
