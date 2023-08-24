@@ -441,6 +441,14 @@ export function tryConvertBlock(
   prefixText: string,
   range: { index: number; length: number }
 ) {
+  if (
+    !prefixText.match(
+      /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|```([a-zA-Z0-9]*))$/
+    )
+  ) {
+    return VKEYBOARD_ALLOW_DEFAULT;
+  }
+
   const [, offset] = vEditor.getLine(range.index);
   if (offset > prefixText.length) {
     return VKEYBOARD_ALLOW_DEFAULT;
@@ -530,6 +538,7 @@ export function tryConvertBlock(
       isConverted = convertToParagraph(page, model, 'quote', prefixText);
       break;
     default:
+      isConverted = convertToList(page, model, 'numbered', prefixText);
   }
 
   return isConverted ? VKEYBOARD_PREVENT_DEFAULT : VKEYBOARD_ALLOW_DEFAULT;

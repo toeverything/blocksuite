@@ -266,16 +266,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         const prefixText = _getPrefixText(vEditor);
 
-        if (
-          prefixText.match(
-            /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|```([a-zA-Z0-9]*))$/
-          )
-        ) {
-          if (
-            !tryConvertBlock(model.page, model, vEditor, prefixText, vRange)
-          ) {
-            _preventDefault(ctx);
-          }
+        if (!tryConvertBlock(model.page, model, vEditor, prefixText, vRange)) {
+          _preventDefault(ctx);
         }
 
         return true;
