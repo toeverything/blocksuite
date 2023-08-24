@@ -111,7 +111,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 10px;
       margin-left: 12px;
     }
     .transform-button svg {
@@ -129,7 +129,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
     }
 
-    .edgeless-frame-nativator-title {
+    .edgeless-frame-navigator-title {
       display: inline-block;
       cursor: pointer;
       color: #424149;
@@ -279,7 +279,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private _trySaveBrushStateLocalRecord = () => {
     const edgelessTool = this.edgeless.tools.edgelessTool;
-    if (edgelessTool.type === 'brush') {
+    const { type } = edgelessTool;
+    if (type === 'brush') {
       sessionStorage.setItem(
         'blocksuite:' + this.edgeless.page.id + ':edgelessBrush',
         JSON.stringify({
@@ -430,9 +431,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           ${FrameNavigatorIcon}
         </edgeless-tool-icon-button>
       </div>
-      
+
       <div class="short-divider"></div>
-      
+
       <edgeless-note-tool-button
         .edgelessTool=${this.edgelessTool}
         .edgeless=${this.edgeless}
@@ -465,11 +466,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessTextIcon}
         </edgeless-toolbar-button>
-        <edgeless-shape-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-shape-tool-button>
         <edgeless-toolbar-button
           class="transform-button"
           .disabled=${this._imageLoading}
@@ -479,6 +475,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
+        <edgeless-shape-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-shape-tool-button>
         <edgeless-connector-tool-button
           .edgelessTool=${this.edgelessTool}
           .edgeless=${this.edgeless}

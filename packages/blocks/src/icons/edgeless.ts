@@ -1443,12 +1443,12 @@ export const EdgelessGeneralShapeIcon = html`<svg
   viewBox="0 0 58 48"
   fill="none"
   xmlns="http://www.w3.org/2000/svg"
+  class="shape-icon-shape-group"
 >
   <g>
     <g>
       <path
         d="M21.3608 1.8C21.8227 0.999997 22.9774 1 23.4392 1.8L40.7597 31.8C41.2216 32.6 40.6443 33.6 39.7205 33.6H5.07949C4.15573 33.6 3.57838 32.6 4.04026 31.8L21.3608 1.8Z"
-        fill="#FFDE6B"
       />
       <path
         d="M21.7072 2C22.0151 1.46667 22.7849 1.46667 23.0928 2L40.4133 32C40.7212 32.5333 40.3363 33.2 39.7205 33.2H5.07949C4.46365 33.2 4.07875 32.5333 4.38667 32L21.7072 2Z"
@@ -1458,7 +1458,7 @@ export const EdgelessGeneralShapeIcon = html`<svg
       />
     </g>
     <g>
-      <circle cx="41.6001" cy="19.8008" r="16" fill="#FFDE6B" />
+      <circle cx="41.6001" cy="19.8008" r="16" />
       <circle
         cx="41.6001"
         cy="19.8008"
@@ -1469,7 +1469,7 @@ export const EdgelessGeneralShapeIcon = html`<svg
       />
     </g>
     <g>
-      <rect x="7" y="11.4004" width="45" height="36" rx="1.5" fill="#FFDE6B" />
+      <rect x="7" y="11.4004" width="45" height="36" rx="1.5" />
       <rect
         x="7.5"
         y="11.9004"

@@ -8,6 +8,7 @@ import {
 import {
   type EdgelessTool,
   LineWidth,
+  type ShapeToolState,
 } from '../../__internal__/utils/types.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import {
@@ -84,12 +85,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         s: () => {
+          const shapeToolLocalState = this._tryLoadShapeLocalState();
           this._setEdgelessTool(pageElement, {
             type: 'shape',
-            shape: 'rect',
-            fillColor: DEFAULT_SHAPE_FILL_COLOR,
-            strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-            shapeStyle: ShapeStyle.Scribbled,
+            shape: shapeToolLocalState?.shape ?? 'rect',
+            fillColor:
+              shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
+            strokeColor:
+              shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
+            shapeStyle: shapeToolLocalState?.shapeStyle ?? ShapeStyle.Scribbled,
           });
         },
         f: () => {
@@ -228,6 +232,17 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
+  }
+
+  private _tryLoadShapeLocalState(): ShapeToolState | null {
+    const key = 'blocksuite:' + this.pageElement.page.id + ':edgelessShape';
+    const shapeData = sessionStorage.getItem(key);
+    let shapeToolState = null;
+    if (shapeData) {
+      shapeToolState = JSON.parse(shapeData);
+    }
+
+    return shapeToolState;
   }
 
   private _setEdgelessTool(

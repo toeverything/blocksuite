@@ -1,11 +1,11 @@
 import { type Slot } from '@blocksuite/global/utils';
-import type {
-  BrushElement,
-  ConnectorElement,
-  ConnectorMode,
-  PhasorElement,
-  ShapeStyle,
-  ShapeType,
+import {
+  type BrushElement,
+  type ConnectorElement,
+  type ConnectorMode,
+  type PhasorElement,
+  type ShapeStyle,
+  type ShapeType,
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
@@ -149,6 +149,13 @@ export type ShapeTool = {
   shape: ShapeType | 'roundedRect';
   fillColor: CssVariableName;
   strokeColor: CssVariableName;
+  shapeStyle: ShapeStyle;
+};
+
+export type ShapeToolState = {
+  shape: ShapeType | 'roundedRect';
+  fillColor: string;
+  strokeColor: string;
   shapeStyle: ShapeStyle;
 };
 
