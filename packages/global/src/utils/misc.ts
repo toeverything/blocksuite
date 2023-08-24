@@ -19,6 +19,9 @@ export function launchIntoFullscreen(element: Element) {
   }
 }
 
+/**
+ * @deprecated Wait for API upgrade
+ */
 export const createDelayHoverSignal = (
   abortController: AbortController,
   hoverDelay = 300
