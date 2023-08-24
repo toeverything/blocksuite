@@ -23,7 +23,7 @@ import {
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
 
-interface MarkdownMatch {
+interface InlineMarkdownMatch {
   name: string;
   pattern: RegExp;
   action: (props: {
@@ -35,7 +35,7 @@ interface MarkdownMatch {
   }) => ReturnType<VKeyboardBindingHandler>;
 }
 
-const markdownMatches: MarkdownMatch[] = [
+const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'bolditalic',
     pattern: /(?:\*){3}([^ ](.+?)[^ ])(?:\*){3}$/g,
@@ -418,7 +418,7 @@ export function tryFormatInlineStyle(
   undoManager: Y.UndoManager
 ) {
   const { vEditor, prefixText, vRange } = context;
-  for (const match of markdownMatches) {
+  for (const match of inlineMarkdownMatches) {
     const matchedText = prefixText.match(match.pattern);
     if (matchedText) {
       return match.action({
@@ -454,8 +454,8 @@ export function tryConvertBlock(
   }
 
   // try to add code block
-  const codeMatches = prefixText.match(/^```([a-zA-Z0-9]*)$/g);
-  if (codeMatches) {
+  const codeMatch = prefixText.match(/^```([a-zA-Z0-9]*)$/g);
+  if (codeMatch) {
     if (
       model.flavour === 'affine:paragraph' &&
       (model as ParagraphBlockModel).type === 'quote'
@@ -474,7 +474,7 @@ export function tryConvertBlock(
       'affine:code',
       {
         language:
-          getStandardLanguage(codeMatches?.[1] ?? '')?.id ?? FALLBACK_LANG,
+          getStandardLanguage(codeMatch[0].slice(3))?.id ?? FALLBACK_LANG,
       },
       parent,
       index
