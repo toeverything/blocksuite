@@ -17,6 +17,7 @@ import {
   pressArrowLeft,
   pressArrowUp,
   pressEnter,
+  pressEnterWithShortkey,
   pressShiftTab,
   pressTab,
   redoByKeyboard,
@@ -330,8 +331,7 @@ test('use code block copy menu of code block copy whole code block', async ({
   await focusRichText(page);
 
   await page.keyboard.type('use');
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
 
   const codeBlockPosition = await getCenterPosition(page, 'affine-code');
   await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
@@ -458,21 +458,20 @@ test('drag select code block can delete it', async ({ page }) => {
   await expect(locator).toBeHidden();
 });
 
-test('press enter twice at end of code block can jump out', async ({
+test('press short key and enter at end of code block can jump out', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
 
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
 });
 
-test('press enter twice at end of code block with content can jump out', async ({
+test('press short key and enter at end of code block with content can jump out', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -480,8 +479,7 @@ test('press enter twice at end of code block with content can jump out', async (
   await focusRichText(page);
 
   await type(page, 'const a = 10;');
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
 
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
@@ -510,8 +508,7 @@ test('press backspace after code block can enter code block', async ({
   const code = 'const a = 1;';
   await type(page, code);
 
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
   await page.keyboard.press('Backspace');
 
   const index = await getVirgoSelectionIndex(page);
@@ -530,8 +527,7 @@ test('press ArrowUp after code block can enter code block', async ({
   const code = 'const a = 1;';
   await type(page, code);
 
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
   await page.keyboard.press('ArrowUp');
 
   const index = await getVirgoSelectionIndex(page);

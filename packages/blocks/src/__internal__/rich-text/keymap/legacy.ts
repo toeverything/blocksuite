@@ -130,6 +130,11 @@ export function hardEnter(
     return PREVENT_DEFAULT;
   }
 
+  if (shortKey) {
+    handleBlockEndEnter(page, model);
+    return PREVENT_DEFAULT;
+  }
+
   const isSoftEnterBlock = isSoftEnterable(model);
   if (isSoftEnterBlock) {
     onSoftEnter(model, range, vEditor);
