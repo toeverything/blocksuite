@@ -6,18 +6,18 @@ import { ShapeStyle, type ShapeType } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type {
-  EdgelessTool,
-  ShapeTool,
-} from '../../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import {
   GeneralShapeStyleIcon,
   ScribbledShapeStyleIcon,
 } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { DEFAULT_SHAPE_FILL_COLOR } from '../../component-toolbar/change-shape-button.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import {
+  LINE_COLOR_PREFIX,
+  SHAPE_COLOR_PREFIX,
   SHAPE_SUBMENU_WIDTH,
   ShapeComponentConfig,
 } from './shape-menu-config.js';
@@ -51,7 +51,8 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       justify-content: center;
       gap: 14px;
     }
-    .shape-type-container svg {
+    .shape-type-container svg,
+    .shape-style-container svg {
       fill: var(--affine-icon-color);
       stroke: none;
     }
@@ -65,12 +66,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
-
-  @property({ attribute: false })
-  selectedShape?: ShapeTool['shape'] | null;
-
-  @property({ attribute: false })
-  shapeStyle?: ShapeStyle = ShapeStyle.Scribbled;
 
   private _setShapeType = (shape: ShapeType | 'roundedRect') => {
     if (this.edgelessTool.type !== 'shape') return;
@@ -88,7 +83,12 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   private _setStrokeColor = (strokeColor: CssVariableName) => {
     if (this.edgelessTool.type !== 'shape') return;
 
-    const { shape, fillColor, shapeStyle } = this.edgelessTool;
+    const { shape, shapeStyle } = this.edgelessTool;
+    let { fillColor } = this.edgelessTool;
+    if (shapeStyle === ShapeStyle.General) {
+      fillColor = strokeColor.replace(LINE_COLOR_PREFIX, SHAPE_COLOR_PREFIX);
+    }
+
     this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'shape',
       shape,
@@ -101,7 +101,15 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
   private _setShapeStyle = (shapeStyle: ShapeStyle) => {
     if (this.edgelessTool.type !== 'shape') return;
 
-    const { shape, fillColor, strokeColor } = this.edgelessTool;
+    const { shape, strokeColor } = this.edgelessTool;
+
+    let { fillColor } = this.edgelessTool;
+    if (shapeStyle === ShapeStyle.General) {
+      fillColor = strokeColor.replace(LINE_COLOR_PREFIX, SHAPE_COLOR_PREFIX);
+    } else {
+      fillColor = DEFAULT_SHAPE_FILL_COLOR;
+    }
+
     this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'shape',
       shape,
@@ -109,14 +117,12 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       strokeColor,
       shapeStyle,
     });
-
-    this.shapeStyle = shapeStyle;
   };
 
   override render() {
     if (this.edgelessTool.type !== 'shape') return nothing;
 
-    const { shape, strokeColor } = this.edgelessTool;
+    const { shape, strokeColor, shapeStyle } = this.edgelessTool;
 
     return html`
       <div class="shape-menu-container">
@@ -127,7 +133,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                 .tooltip=${'General'}
                 .tipPosition=${'top-end'}
                 .iconContainerPadding=${2}
-                .active=${this.shapeStyle === ShapeStyle.General}
+                .active=${shapeStyle === ShapeStyle.General}
                 .activeMode=${'background'}
                 @click=${() => {
                   this._setShapeStyle(ShapeStyle.General);
@@ -138,7 +144,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
               <edgeless-tool-icon-button
                 .tooltip=${'Scribbled'}
                 .iconContainerPadding=${2}
-                .active=${this.shapeStyle === ShapeStyle.Scribbled}
+                .active=${shapeStyle === ShapeStyle.Scribbled}
                 .activeMode=${'background'}
                 @click=${() => {
                   this._setShapeStyle(ShapeStyle.Scribbled);
@@ -150,19 +156,18 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
             <menu-divider .vertical=${true}></menu-divider>
             <div class="shape-type-container">
               ${ShapeComponentConfig.map(
-                ({ name, generalIcon, scribbledIcon, tooltip, disabled }) => {
+                ({ name, generalIcon, scribbledIcon, tooltip }) => {
                   return html`
                     <edgeless-tool-icon-button
-                      .disabled=${disabled}
                       .tooltip=${tooltip}
                       .active=${shape === name}
+                      .activeMode=${'background'}
                       .iconContainerPadding=${2}
                       @click=${() => {
-                        if (disabled) return;
                         this._setShapeType(name);
                       }}
                     >
-                      ${this.shapeStyle === ShapeStyle.General
+                      ${shapeStyle === ShapeStyle.General
                         ? generalIcon
                         : scribbledIcon}
                     </edgeless-tool-icon-button>

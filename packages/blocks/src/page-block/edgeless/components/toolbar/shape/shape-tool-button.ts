@@ -1,4 +1,4 @@
-import '../../buttons/toolbar-button.js';
+import '../../buttons/tool-icon-button.js';
 import './shape-menu.js';
 
 import { assertExists } from '@blocksuite/global/utils';
@@ -9,8 +9,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import {
+  ArrowUpIcon,
   EdgelessGeneralShapeIcon,
-  EdgelessScribbledShapeIcon,
 } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
@@ -32,7 +32,7 @@ function createShapeMenuPopper(reference: HTMLElement): ShapeMenuPopper {
 
   // The brush menu should be positioned at the top of the brush button.
   // And it should be positioned at the top center of the toolbar all the time.
-  const x = 90;
+  const x = 110;
   const y = -40;
 
   Object.assign(shapeMenu.style, {
@@ -51,14 +51,25 @@ function createShapeMenuPopper(reference: HTMLElement): ShapeMenuPopper {
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      display: flex;
+    .shape-button-group {
+      display: block;
+      position: relative;
+      width: 72px;
+      height: 48px;
     }
-    edgeless-toolbar-button svg {
+
+    edgeless-tool-icon-button svg {
       transition: 0.3s ease-in-out;
     }
-    edgeless-toolbar-button:hover svg {
+
+    edgeless-tool-icon-button:hover svg {
       scale: 1.15;
+    }
+
+    edgeless-tool-icon-button svg + svg {
+      position: absolute;
+      top: 6px;
+      right: 4px;
     }
   `;
 
@@ -126,25 +137,26 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     const type = this.edgelessTool?.type;
 
     return html`
-      <edgeless-toolbar-button
+      <edgeless-tool-icon-button
         .tooltip=${this._shapeMenu ? '' : getTooltipWithShortcut('Shape', 'S')}
         .active=${type === 'shape'}
         .activeMode=${'background'}
+        .iconContainerPadding=${0}
         @click=${() => {
           this.setEdgelessTool({
             type: 'shape',
             shape: 'rect',
             fillColor: DEFAULT_SHAPE_FILL_COLOR,
             strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-            shapeStyle: ShapeStyle.General,
+            shapeStyle: ShapeStyle.Scribbled,
           });
           this._toggleShapeMenu();
         }}
       >
-        ${this.shapeStyle === ShapeStyle.General
-          ? EdgelessGeneralShapeIcon
-          : EdgelessScribbledShapeIcon}
-      </edgeless-toolbar-button>
+        <div class="shape-button-group">
+          ${EdgelessGeneralShapeIcon} ${ArrowUpIcon}
+        </div>
+      </edgeless-tool-icon-button>
     `;
   }
 }

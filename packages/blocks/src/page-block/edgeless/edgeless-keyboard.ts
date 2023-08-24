@@ -1,4 +1,9 @@
-import { Bound, ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
+import {
+  Bound,
+  ConnectorElement,
+  ConnectorMode,
+  ShapeStyle,
+} from '@blocksuite/phasor';
 
 import {
   type Connectable,
@@ -84,6 +89,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             shape: 'rect',
             fillColor: DEFAULT_SHAPE_FILL_COLOR,
             strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+            shapeStyle: ShapeStyle.Scribbled,
           });
         },
         f: () => {

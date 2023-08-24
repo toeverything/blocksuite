@@ -69,3 +69,5 @@ export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
 );
 
 export const SHAPE_SUBMENU_WIDTH = 464;
+export const SHAPE_COLOR_PREFIX = '--affine-palette-shape-';
+export const LINE_COLOR_PREFIX = '--affine-palette-line-';

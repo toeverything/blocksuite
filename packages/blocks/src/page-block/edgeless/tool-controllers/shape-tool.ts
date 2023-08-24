@@ -25,7 +25,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     shape: 'rect',
     fillColor: DEFAULT_SHAPE_FILL_COLOR,
     strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-    shapeStyle: ShapeStyle.General,
+    shapeStyle: ShapeStyle.Scribbled,
   };
 
   private _draggingElementId: string | null = null;
@@ -239,10 +239,12 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const options = SHAPE_OVERLAY_OPTIONS;
     const computedStyle = getComputedStyle(this._edgeless);
     options.stroke = computedStyle.getPropertyValue(newTool.strokeColor);
+    options.fill = computedStyle.getPropertyValue(newTool.fillColor);
     this._shapeOverlay = new ShapeOverlay(
       this._edgeless,
       newTool.shape,
-      options
+      options,
+      newTool.shapeStyle
     );
     this._edgeless.surface.viewport.addOverlay(this._shapeOverlay);
   }

@@ -7,7 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
-import { ArrowUpIcon, FrameIcon } from '../../../../../icons/index.js';
+import { ArrowUpIcon, LargeFrameIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { EdgelessFrameMenu } from './frame-menu.js';
@@ -45,10 +45,24 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
+    .frame-button-group {
+      display: flex;
+      position: relative;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+    }
+
+    edgeless-tool-icon-button svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
+    }
+
     edgeless-tool-icon-button svg + svg {
       position: absolute;
       top: 4px;
-      right: 4px;
+      right: 2px;
     }
   `;
 
@@ -113,7 +127,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
         .active=${type === 'frame'}
         .activeMode=${'background'}
-        .iconContainerPadding=${4}
+        .iconContainerPadding=${0}
         @click=${() => {
           this.setEdgelessTool({
             type: 'frame',
@@ -121,7 +135,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
           this._toggleFrameMenu();
         }}
       >
-        ${FrameIcon} ${ArrowUpIcon}
+        <div class="frame-button-group">${LargeFrameIcon} ${ArrowUpIcon}</div>
       </edgeless-tool-icon-button>
     `;
   }

@@ -34,7 +34,7 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(noteMenu);
 
-  const x = 90;
+  const x = 110;
   const y = -40;
 
   Object.assign(noteMenu.style, {

@@ -329,7 +329,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       </edgeless-tool-icon-button>
       <div class="edgeless-frame-navigator">
         <span
-          class="edgeless-frame-nativator-title"
+          class="edgeless-frame-navigator-title"
           @click=${() =>
             (this._currentFrameIndex = this._currentFrameIndex + 1 - 1)}
           >${frame?.title ?? 'no frame'}</span
