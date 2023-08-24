@@ -130,7 +130,7 @@ export function hardEnter(
     return PREVENT_DEFAULT;
   }
 
-  if (shortKey) {
+  if (isEnd || shortKey) {
     handleBlockEndEnter(page, model);
     return PREVENT_DEFAULT;
   }
