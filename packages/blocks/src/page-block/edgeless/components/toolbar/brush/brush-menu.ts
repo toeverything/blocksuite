@@ -6,8 +6,8 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  type EdgelessTool,
+import type {
+  EdgelessTool,
   LineWidth,
 } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
@@ -52,9 +52,6 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  selectedSize: LineWidth = LineWidth.LINE_WIDTH_FOUR;
-
   private _setBrushColor = (color: CssVariableName) => {
     if (this.edgelessTool.type !== 'brush') return;
 
@@ -80,14 +77,14 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
   override render() {
     if (this.edgelessTool.type !== 'brush') return nothing;
 
-    const { color } = this.edgelessTool;
+    const { color, lineWidth } = this.edgelessTool;
 
     return html`
       <div class="container">
         <edgeless-slide-menu>
           <div class="menu-content">
             <edgeless-line-width-panel
-              .selectedSize=${this.selectedSize}
+              .selectedSize=${lineWidth}
               @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
             >
             </edgeless-line-width-panel>

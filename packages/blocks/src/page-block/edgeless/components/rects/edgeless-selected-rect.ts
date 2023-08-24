@@ -57,6 +57,7 @@ export type SelectedRect = {
   height: number;
   borderWidth: number;
   borderStyle: string;
+  borderRadius: number;
   rotate: number;
 };
 
@@ -82,7 +83,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       border-color: var(--affine-blue);
       border-width: var(--affine-border-width);
       border-style: solid;
-      border-radius: 8px;
       transform: translate(0, 0) rotate(0);
     }
 
@@ -302,6 +302,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     height: 0,
     borderWidth: 0,
     borderStyle: 'solid',
+    borderRadius: 0,
     left: 0,
     top: 0,
     rotate: 0,
@@ -593,6 +594,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
+      borderRadius: 8 * zoom,
       left,
       top,
       rotate,
@@ -753,6 +755,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           height: `${_selectedRect.height}px`,
           borderWidth: `${_selectedRect.borderWidth}px`,
           borderStyle: _selectedRect.borderStyle,
+          borderRadius: `${_selectedRect.borderRadius}px`,
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"
