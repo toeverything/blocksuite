@@ -261,6 +261,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         return true;
       }
+
+      return;
     },
     'Mod-a': ctx => {
       ctx.get('defaultState').event.preventDefault();
