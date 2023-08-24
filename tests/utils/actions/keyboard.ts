@@ -79,6 +79,10 @@ export async function pressEnter(page: Page) {
   await page.keyboard.press('Enter', { delay: 50 });
 }
 
+export async function pressEnterWithShortkey(page: Page) {
+  await page.keyboard.press(`${SHORT_KEY}+Enter`, { delay: 50 });
+}
+
 export async function pressEscape(page: Page) {
   await page.keyboard.press('Escape');
 }

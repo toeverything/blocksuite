@@ -122,7 +122,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
 
     // points might not be build yet in some senarios
     // eg. undo/redo, copy/paste
-    if (!points.length) return;
+    if (!points.length || points.length < 2) {
+      console.warn('connector points not ready yet, there is something wrong.');
+      return;
+    }
 
     const last = points[points.length - 1];
     const secondToLast = points[points.length - 2];

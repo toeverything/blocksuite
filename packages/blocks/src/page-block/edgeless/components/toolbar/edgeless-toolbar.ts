@@ -25,6 +25,7 @@ import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
   HandIcon,
+  PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
   SelectIcon,
 } from '../../../../icons/index.js';
@@ -154,6 +155,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   })
   private _currentFrameIndex = 0;
   private _timer: ReturnType<typeof setTimeout> | null = null;
+  private _index = -1;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
@@ -307,7 +309,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     } else {
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {
-        this._currentFrameIndex = this._currentFrameIndex + 0;
+        this._currentFrameIndex = this._index;
       }, 400);
     }
   }
@@ -327,7 +329,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <span
           class="edgeless-frame-nativator-title"
           @click=${() =>
-            (this._currentFrameIndex = this._currentFrameIndex + 1 - 1)}
+            (this._currentFrameIndex = this._currentFrameIndex + 0)}
           >${frame?.title ?? 'no frame'}</span
         >
         <span class="edgeless-frame-navigator-count"
@@ -348,12 +350,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       >
       </edgeless-frame-order-button>
       <edgeless-tool-icon-button
-        .tooltip=${'Full Screen'}
+        .tooltip=${document.fullscreenElement
+          ? 'Exit Full Screen'
+          : 'Enter Full Screen'}
         @click=${() => {
           this._toggleFullScreen();
         }}
       >
-        ${PresentationFullScreenIcon}
+        ${document.fullscreenElement
+          ? PresentationExitFullScreenIcon
+          : PresentationFullScreenIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
@@ -445,7 +451,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
       ${page.readonly
         ? nothing
-        : html` <edgeless-frame-tool-button
+        : html` <edgeless-frame-tool-buttonz
             .edgelessTool=${this.edgelessTool}
             .setEdgelessTool=${this.setEdgelessTool}
             .edgeless=${this.edgeless}
@@ -454,6 +460,15 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${'Presentation'}
         @click=${() => {
+          this._index = this._currentFrameIndex;
+          if (
+            this.edgeless.selectionManager.elements[0] instanceof FrameElement
+          ) {
+            this._index = this._frames.findIndex(
+              frame =>
+                frame.id === this.edgeless.selectionManager.elements[0].id
+            );
+          }
           this.setEdgelessTool({ type: 'frameNavigator' });
           if (this._frames.length === 0)
             toast(
@@ -468,12 +483,14 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
       ${page.readonly
         ? nothing
-        : html` <div class="short-divider"></div>
+        : html`
+            <div class="short-divider"></div>
             <edgeless-note-tool-button
               .edgelessTool=${this.edgelessTool}
               .edgeless=${this.edgeless}
               .setEdgelessTool=${this.setEdgelessTool}
-            ></edgeless-note-tool-button>`}
+            ></edgeless-note-tool-button>
+          `}
       ${this._renderTools()} `;
   }
 

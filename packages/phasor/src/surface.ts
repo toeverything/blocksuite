@@ -129,39 +129,66 @@ export class SurfaceManager {
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
     // skip empty event
     if (event.changes.keys.size === 0) return;
+    const connectors: {
+      change: (typeof event)['changes']['keys'] extends Map<string, infer V>
+        ? V
+        : never;
+      id: string;
+    }[] = [];
     event.keysChanged.forEach(id => {
-      const type = event.changes.keys.get(id);
-      if (!type) {
+      const change = event.changes.keys.get(id);
+      if (!change) {
         console.error('invalid event', event);
         return;
       }
 
-      if (type.action === 'add') {
-        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-        const type = yElement.get('type') as keyof PhasorElementType;
-
-        const ElementCtor = ElementCtors[type];
-        assertExists(ElementCtor);
-        const element = new ElementCtor(yElement, this);
-        element.computedValue = this._computedValue;
-        element.mount(this._renderer);
-        this._elements.set(element.id, element);
-
-        this._addToBatch(element);
-        this.slots.elementAdded.emit(id);
-      } else if (type.action === 'update') {
-        console.error('update event on yElements is not supported', event);
-      } else if (type.action === 'delete') {
-        const element = this._elements.get(id);
-        assertExists(element);
-
-        element.unmount();
-        this._elements.delete(id);
-        this.deleteElementLocalRecord(id);
-        this._removeFromBatch(element);
-        this.slots.elementRemoved.emit({ id, element });
+      if (
+        change.action === 'add' &&
+        this._yContainer.get(id)?.get('type') === 'connector'
+      ) {
+        connectors.push({ change, id });
+        return;
+      } else {
+        this._onYEvent(change, id);
       }
     });
+    connectors.forEach(({ change, id }) => this._onYEvent(change, id));
+  };
+
+  private _onYEvent = (
+    type: Y.YMapEvent<Y.Map<unknown>>['changes']['keys'] extends Map<
+      string,
+      infer V
+    >
+      ? V
+      : never,
+    id: string
+  ) => {
+    if (type.action === 'add') {
+      const yElement = this._yContainer.get(id) as Y.Map<unknown>;
+      const type = yElement.get('type') as keyof PhasorElementType;
+
+      const ElementCtor = ElementCtors[type];
+      assertExists(ElementCtor);
+      const element = new ElementCtor(yElement, this);
+      element.computedValue = this._computedValue;
+      element.mount(this._renderer);
+      this._elements.set(element.id, element);
+
+      this._addToBatch(element);
+      this.slots.elementAdded.emit(id);
+    } else if (type.action === 'update') {
+      console.error('update event on yElements is not supported', event);
+    } else if (type.action === 'delete') {
+      const element = this._elements.get(id);
+      assertExists(element);
+
+      element.unmount();
+      this._elements.delete(id);
+      this.deleteElementLocalRecord(id);
+      this._removeFromBatch(element);
+      this.slots.elementRemoved.emit({ id, element });
+    }
   };
 
   private _transact(callback: () => void) {
