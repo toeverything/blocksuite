@@ -95,7 +95,6 @@ export const SIZE_VARIABLES = [
   '--affine-line-height',
   '--affine-z-index-modal',
   '--affine-z-index-popover',
-  '--affine-z-index-image-popover',
 ];
 
 export const FONT_FAMILY_VARIABLES = [
