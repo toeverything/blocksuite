@@ -300,7 +300,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'code',
-    pattern: /(?:`)(`{2,}?|[^`]+)(?:`)$/g,
+    pattern: /(?:`)([^ `](.+?)[^ `])(?:`)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {

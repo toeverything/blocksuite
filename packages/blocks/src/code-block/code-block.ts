@@ -319,14 +319,23 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     };
     this.bindHotKey({
       Backspace: () => {
-        if (!selection.find('text')) return;
+        const textSelection = selection.find('text');
+        if (!textSelection) {
+          return;
+        }
 
-        selection.update(selList => {
-          return selList
-            .filter(sel => !sel.is('text'))
-            .concat(selection.getInstance('block', { path: this.path }));
-        });
-        return true;
+        const from = textSelection.from;
+
+        if (from.index === 0 && from.length === 0) {
+          selection.update(selList => {
+            return selList
+              .filter(sel => !sel.is('text'))
+              .concat(selection.getInstance('block', { path: this.path }));
+          });
+          return true;
+        }
+
+        return;
       },
       Tab: ctx => {
         const state = ctx.get('keyboardState');
@@ -366,9 +375,13 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             length:
               vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
           });
+
+          return true;
         }
+
+        return;
       },
-      'Shift+Tab': ctx => {
+      'Shift-Tab': ctx => {
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const vEditor = this.vEditor;
@@ -410,7 +423,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
                 vRange.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
             });
           }
+
+          return true;
         }
+
+        return;
       },
     });
   }

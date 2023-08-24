@@ -101,20 +101,6 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   asyncFocusRichText(page, id);
 }
 
-export function handleSoftEnter(
-  page: Page,
-  model: ExtendedModel,
-  index: number,
-  length: number
-) {
-  if (!model.text) {
-    console.error('Failed to handle soft enter! No text found!', model);
-    return;
-  }
-  page.captureSync();
-  model.text.replace(index, length, '\n');
-}
-
 export function handleBlockSplit(
   page: Page,
   model: ExtendedModel,

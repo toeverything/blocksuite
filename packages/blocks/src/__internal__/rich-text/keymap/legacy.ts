@@ -12,7 +12,6 @@ import {
   handleBlockSplit,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
-  handleSoftEnter,
   handleUnindent,
 } from '../rich-text-operations.js';
 import type { AffineVEditor } from '../virgo/types.js';
@@ -27,14 +26,10 @@ function isCollapsedAtBlockEnd(vEditor: AffineVEditor) {
   return vRange?.index === vEditor.yText.length && vRange?.length === 0;
 }
 
-export function onSoftEnter(
-  model: BaseBlockModel,
-  range: VRange,
-  vEditor: AffineVEditor
-) {
-  handleSoftEnter(model.page, model, range.index, range.length);
+export function onSoftEnter(vRange: VRange, vEditor: AffineVEditor) {
+  vEditor.insertText(vRange, '\n');
   vEditor.setVRange({
-    index: range.index + 1,
+    index: vRange.index + 1,
     length: 0,
   });
   return VKEYBOARD_PREVENT_DEFAULT;
@@ -99,7 +94,7 @@ export function hardEnter(
 
     if (shouldSoftEnter) {
       // TODO handle ctrl+enter in code/quote block or other force soft enter block
-      onSoftEnter(model, range, vEditor);
+      onSoftEnter(range, vEditor);
       return VKEYBOARD_PREVENT_DEFAULT;
     }
 
@@ -120,7 +115,7 @@ export function hardEnter(
 
   const isSoftEnterBlock = isSoftEnterable(model);
   if (isSoftEnterBlock) {
-    onSoftEnter(model, range, vEditor);
+    onSoftEnter(range, vEditor);
     return VKEYBOARD_PREVENT_DEFAULT;
   }
 

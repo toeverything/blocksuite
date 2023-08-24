@@ -290,7 +290,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           assertExists(vRange);
           handleIndent(model.page, model, vRange.index);
           _preventDefault(ctx);
-          ctx.get('defaultState').event.stopPropagation();
 
           return true;
         }
@@ -320,7 +319,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           assertExists(vRange);
           handleUnindent(model.page, model, vRange.index);
           _preventDefault(ctx);
-          ctx.get('defaultState').event.stopPropagation();
 
           return true;
         }
@@ -368,7 +366,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const textSelection = blockElement.selection.find('text');
         if (!textSelection) return;
 
-        ctx.get('defaultState').event.preventDefault();
+        _preventDefault(ctx);
 
         const format = getCombinedFormatInTextSelection(
           blockElement,
@@ -393,7 +391,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         )
           return;
 
-        ctx.get('defaultState').event.preventDefault();
+        _preventDefault(ctx);
 
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
@@ -420,7 +418,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       const textSelection = blockElement.selection.find('text');
       if (!textSelection || textSelection.isCollapsed()) return;
 
-      ctx.get('defaultState').event.preventDefault();
+      _preventDefault(ctx);
 
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
