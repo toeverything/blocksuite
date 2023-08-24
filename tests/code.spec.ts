@@ -558,30 +558,19 @@ test('code block option can appear and disappear during mousemove', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const getPosition: (
-    selector: string
-  ) => Promise<{ x: number; y: number; right: number }> = async (
-    selector: string
-  ) => {
-    return await page.evaluate((selector: string) => {
-      const codeBlock = document.querySelector(selector);
-      const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
-      return {
-        x: bbox.left + bbox.width / 2,
-        y: bbox.top + bbox.height / 2,
-        right: bbox.right,
-      };
-    }, selector);
-  };
-
-  const position = await getPosition('affine-code');
+  const position = await page.locator('affine-code').boundingBox();
+  if (!position) throw new Error('Failed to get affine code position');
   await page.mouse.move(position.x, position.y);
 
-  const optionPosition = await getPosition('.affine-codeblock-option');
-  await page.mouse.move(optionPosition.x, optionPosition.y);
   const locator = page.locator('.affine-codeblock-option');
+  const optionPosition = await locator.boundingBox();
+  if (!optionPosition) throw new Error('Failed to get option position');
+  await page.mouse.move(optionPosition.x, optionPosition.y);
   await expect(locator).toBeVisible();
-  await page.mouse.move(optionPosition.right + 10, optionPosition.y);
+  await page.mouse.move(
+    optionPosition.x + optionPosition.width + 10,
+    optionPosition.y
+  );
   await expect(locator).toBeHidden();
 });
 
