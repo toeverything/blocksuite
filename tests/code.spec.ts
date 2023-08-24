@@ -602,11 +602,11 @@ test('should tab works in code block', async ({ page }) => {
   await assertRichTexts(page, ['const a = 10;']);
 
   await page.keyboard.press('Enter', { delay: 50 });
-  await type(page, 'const b = "NothingToSay";');
+  await type(page, 'const b = "NothingToSay');
   await page.keyboard.press('ArrowUp', { delay: 50 });
   await page.keyboard.press('Enter', { delay: 50 });
   await page.keyboard.press('Tab', { delay: 50 });
-  await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay";']);
+  await assertRichTexts(page, ['const a = 10;\n  \nconst b = "NothingToSay"']);
 });
 
 test('should code block wrap active after click', async ({ page }) => {
@@ -694,4 +694,24 @@ test('multi-line indent', async ({ page }) => {
   await pressShiftTab(page);
 
   await assertRichTexts(page, ['aaa\nbbb\nccc']);
+});
+
+test('should bracket complete works in code block', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/1800',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyCodeBlockState(page);
+  await focusRichText(page);
+
+  await type(page, 'const a = "');
+  await assertRichTexts(page, ['const a = ""']);
+
+  await type(page, 'str');
+  await assertRichTexts(page, ['const a = "str"']);
+  await type(page, '(');
+  await assertRichTexts(page, ['const a = "str()"']);
+  await type(page, ']');
+  await assertRichTexts(page, ['const a = "str(])"']);
 });

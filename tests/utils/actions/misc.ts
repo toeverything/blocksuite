@@ -1032,3 +1032,12 @@ export async function export2Html(page: Page) {
   });
   return promiseResult;
 }
+
+export async function getCopyClipItemsInPage(page: Page) {
+  const clipItems = await page.evaluate(() => {
+    return document
+      .getElementsByTagName('affine-doc-page')[0]
+      .clipboard['_copyBlocksInPage']();
+  });
+  return clipItems;
+}

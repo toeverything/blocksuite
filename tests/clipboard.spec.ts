@@ -14,6 +14,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getAllNoteIds,
+  getCopyClipItemsInPage,
   getEditorLocator,
   getRichTextBoundingBox,
   importMarkdown,
@@ -50,6 +51,7 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
+  assertClipData,
   assertClipItems,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
@@ -980,4 +982,97 @@ test(scoped`clipboard copy muti selection`, async ({ page }) => {
   await pasteByKeyboard(page);
   await waitNextFrame(page);
   await assertRichTexts(page, ['abc', 'defbc', 'd']);
+});
+
+test(scoped`clipboard copy nested items`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'abc');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'def');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'ghi');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await pressShiftTab(page);
+  await type(page, 'jkl');
+  await setSelection(page, 2, 1, 3, 1);
+  await waitNextFrame(page);
+  const clipItems = await getCopyClipItemsInPage(page);
+
+  const blockJson = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'bc' }],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: 'd' }],
+          children: [],
+        },
+      ],
+    },
+  ];
+  const htmlText =
+    `<p>bc</p><div style="padding-left: 26px"><p>d</p></div>` +
+    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
+      blockJson
+    ).replace(/"/g, '&quot;')}"></blocksuite>`;
+  const expectClipItems = [
+    { mimeType: 'text/plain', data: 'bcd' },
+    {
+      mimeType: 'text/html',
+      data: htmlText,
+    },
+    {
+      mimeType: 'blocksuite/page',
+      data: JSON.stringify(blockJson),
+    },
+  ];
+  assertClipData(clipItems, expectClipItems, 'text/plain');
+  assertClipData(clipItems, expectClipItems, 'text/html');
+  assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+
+  await setSelection(page, 4, 1, 5, 1);
+  await waitNextFrame(page);
+  const clipItems2 = await getCopyClipItemsInPage(page);
+  const blockJson2 = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'hi' }],
+      children: [],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'j' }],
+      children: [],
+    },
+  ];
+  const htmlText2 =
+    `<p>hi</p><p>j</p>` +
+    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
+      blockJson2
+    ).replace(/"/g, '&quot;')}"></blocksuite>`;
+  const expectClipItems2 = [
+    { mimeType: 'text/plain', data: 'hi\nj' },
+    {
+      mimeType: 'text/html',
+      data: htmlText2,
+    },
+    {
+      mimeType: 'blocksuite/page',
+      data: JSON.stringify(blockJson2),
+    },
+  ];
+  assertClipData(clipItems2, expectClipItems2, 'text/plain');
+  assertClipData(clipItems2, expectClipItems2, 'text/html');
+  assertClipData(clipItems2, expectClipItems2, 'blocksuite/page');
 });

@@ -375,6 +375,10 @@ export class EdgelessPageBlockComponent
         const element = this.surface.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
+          if (!this.connector.hasRelatedElement(element)) {
+            return;
+          }
+
           this.connector.updatePath(element);
         } else if (element instanceof FrameElement) {
           this.frame.calculateFrameColor(element);
@@ -392,8 +396,12 @@ export class EdgelessPageBlockComponent
         assertExists(element);
 
         if (element instanceof ConnectorElement) {
+          if (!this.connector.hasRelatedElement(element)) {
+            return;
+          }
+
           if ('target' in props || 'source' in props || 'mode' in props) {
-            this.connector.updatePath(element as ConnectorElement);
+            this.connector.updatePath(element);
           }
         }
       })
@@ -1264,7 +1272,7 @@ export class EdgelessPageBlockComponent
       if (!surface) return;
 
       const el = this.surface.pickById(surface.elements[0]);
-      if (el?.type === 'shape') {
+      if (el) {
         return true;
       }
 

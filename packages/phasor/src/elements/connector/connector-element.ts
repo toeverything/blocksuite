@@ -120,6 +120,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       this.strokeStyle === StrokeStyle.Dashed
     );
 
+    // points might not be build yet in some senarios
+    // eg. undo/redo, copy/paste
+    if (!points.length) return;
+
     const last = points[points.length - 1];
     const secondToLast = points[points.length - 2];
     const { sides, end } = getArrowPoints(secondToLast, last, 15);

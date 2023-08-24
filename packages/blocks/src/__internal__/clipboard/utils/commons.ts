@@ -1,11 +1,12 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import { BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
+import type { SelectedBlock } from '../../content-parser/types.js';
 import { getService } from '../../service/index.js';
 import { registerAllBlocks } from '../../service/legacy-services/index.js';
 import {
@@ -26,77 +27,132 @@ import {
 } from './pure.js';
 
 export async function getBlockClipboardInfo(
-  model: BaseBlockModel,
-  selectedModels?: Map<string, number>,
-  begin?: number,
-  end?: number
-) {
+  block: SelectedBlock | BaseBlockModel
+): Promise<{ html: string; text: string; json: SerializedBlock }> {
   registerAllBlocks();
+  if (block instanceof BaseBlockModel) {
+    const selectBlockInfo = blockModel2selectBlocksInfo(block);
+    return await generateClipboardInfo(selectBlockInfo);
+  }
+  return await generateClipboardInfo(block);
+}
+
+async function generateClipboardInfo(
+  block: SelectedBlock
+): Promise<{ html: string; text: string; json: SerializedBlock }> {
+  const model = block.model;
+
+  const childrenHtml: string[] = [];
+  const childrenText: string[] = [];
+  const childrenJson: SerializedBlock[] = [];
+  for (
+    let currentIndex = 0;
+    currentIndex < block.children.length;
+    currentIndex++
+  ) {
+    const { html, text, json } = await getBlockClipboardInfo(
+      block.children[currentIndex]
+    );
+    html && childrenHtml.push(html);
+    text && childrenText.push(text);
+    childrenJson.push(json);
+  }
+
   const service = await getService(model.flavour);
-  const html = await service.block2html(model, { begin, end });
-  const text = service.block2Text(model, { begin, end });
-  // FIXME: the presence of children is not considered
-  // Children json info is collected by its parent, but getCurrentBlockRange.models return parent and children at same time, it should be separated
-  const json = service.block2Json(model, selectedModels, begin, end);
+
+  const html = await service.block2html(model, {
+    childText: childrenHtml.join(''),
+    begin: block.startPos,
+    end: block.endPos,
+  });
+
+  const text = service.block2Text(model, {
+    childText: childrenText.join(''),
+    begin: block.startPos,
+    end: block.endPos,
+  });
+
+  const json = service.block2Json(
+    model,
+    childrenJson,
+    block.startPos,
+    block.endPos
+  );
 
   return {
     html,
     text,
     json,
-    model,
   };
+}
+
+function blockModel2selectBlocksInfo(
+  blockModel: BaseBlockModel
+): SelectedBlock {
+  return {
+    model: blockModel,
+    children: blockModel.children.map(child =>
+      blockModel2selectBlocksInfo(child)
+    ),
+  };
+}
+
+function selectedModels2selectBlocksInfo(
+  selectedModels: BaseBlockModel[],
+  textSelection?: TextSelection
+) {
+  const modelIdSet = new Set(selectedModels.map(model => model.id));
+
+  const blocks: SelectedBlock[] = [];
+  const parentIdMap = new Map<string, string>();
+  const blocksMap = new Map<string, SelectedBlock>();
+  selectedModels.forEach((model, index) => {
+    for (const child of model.children) {
+      if (modelIdSet.has(child.id)) {
+        parentIdMap.set(child.id, model.id);
+      } else {
+        break;
+      }
+    }
+
+    const startPos = index == 0 ? textSelection?.from.index : undefined;
+    let endPos = undefined;
+    if (index == selectedModels.length - 1) {
+      if (textSelection?.to) {
+        endPos = textSelection.to.index + textSelection.to.length;
+      } else if (textSelection?.from) {
+        endPos = textSelection?.from.index + textSelection?.from.length;
+      }
+    }
+
+    const block: SelectedBlock = {
+      model,
+      startPos,
+      endPos,
+      children: [] as SelectedBlock[],
+    };
+    blocksMap.set(model.id, block);
+
+    const parentBlockChildren =
+      blocksMap.get(parentIdMap.get(model.id) ?? '')?.children ?? blocks;
+    parentBlockChildren.push(block);
+  });
+  return blocks;
 }
 
 async function createPageClipboardItems(
   selectedModels: BaseBlockModel[],
   textSelection?: TextSelection
 ): Promise<ClipboardItem[]> {
-  const uniqueModelsFilter = new Map();
-  const addToFilter = (model: BaseBlockModel, index: number) => {
-    uniqueModelsFilter.set(model.id, index);
-    model.children?.forEach(child => addToFilter(child, index));
-  };
+  const blocks: SelectedBlock[] = selectedModels2selectBlocksInfo(
+    selectedModels,
+    textSelection
+  );
 
-  const selectedModelsMap = new Map();
-
-  selectedModels.forEach((model, index) => {
-    selectedModelsMap.set(model.id, index);
-  });
-
-  const clipModels = selectedModels.filter((model, index) => {
-    if (uniqueModelsFilter.has(model.id)) {
-      uniqueModelsFilter.set(model.id, index);
-      return false;
-    }
-    addToFilter(model, index);
-    return true;
-  });
-
+  registerAllBlocks();
   const clipGroups = await Promise.all(
-    clipModels.map(async (model, index, array) => {
-      if (index === 0) {
-        return await getBlockClipboardInfo(
-          model,
-          selectedModelsMap,
-          textSelection ? textSelection.from.index : undefined,
-          index === array.length - 1
-            ? textSelection
-              ? textSelection.from.index + textSelection.from.length
-              : undefined
-            : undefined
-        );
-      }
-      if (index === array.length - 1) {
-        return await getBlockClipboardInfo(
-          model,
-          selectedModelsMap,
-          undefined,
-          textSelection && textSelection.to
-            ? textSelection.to.index + textSelection.to.length
-            : undefined
-        );
-      }
-      return await getBlockClipboardInfo(model, selectedModelsMap);
+    blocks.map(async block => {
+      return await getBlockClipboardInfo(block);
     })
   );
 
@@ -149,6 +205,8 @@ export async function copyBlocksInPage(pageElement: PageBlockComponent) {
   if (savedRange) {
     resetNativeSelection(savedRange);
   }
+
+  return clipboardItems;
 }
 
 export async function copyBlocks(models: BaseBlockModel[]) {
