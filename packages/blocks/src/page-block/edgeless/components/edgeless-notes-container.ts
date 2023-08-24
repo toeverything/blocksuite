@@ -22,6 +22,9 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  @property({ attribute: false })
+  model!: NoteBlockModel;
+
   protected override createRenderRoot() {
     return this;
   }
@@ -35,7 +38,11 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.edgeless.selectionManager.state.editing) return nothing;
+    if (
+      this.edgeless.selectionManager.state.editing &&
+      this.edgeless.selectionManager.state.elements.includes(this.model.id)
+    )
+      return nothing;
     const style = {
       position: 'absolute',
       top: '0',
@@ -100,7 +107,10 @@ export class EdgelessChildNote extends LitElement {
         data-model-height="${modelH}"
       >
         ${renderer(model)}
-        <edgeless-note-mask .edgeless=${this.edgeless}></edgeless-note-mask>
+        <edgeless-note-mask
+          .edgeless=${this.edgeless}
+          .model=${this.model}
+        ></edgeless-note-mask>
       </div>
     `;
   }
