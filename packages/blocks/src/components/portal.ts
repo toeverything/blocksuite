@@ -1,9 +1,11 @@
+import { Slot } from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   type AutoUpdateOptions,
   computePosition,
   type ComputePositionConfig,
+  type ComputePositionReturn,
   type VirtualElement,
 } from '@floating-ui/dom';
 import { render, type RenderOptions, type TemplateResult } from 'lit';
@@ -163,7 +165,13 @@ export function createSimplePortal({
 export function createLitPortal({
   computePosition: computePositionOptions,
   ...portalOptions
-}: PortalOptions & {
+}: Omit<PortalOptions, 'template'> & {
+  template:
+    | Renderable
+    | ((context: {
+        positionSlot: Slot<ComputePositionReturn>;
+        updatePortal: () => void;
+      }) => Renderable);
   /**
    * See https://floating-ui.com/docs/computePosition
    */
@@ -175,7 +183,17 @@ export function createLitPortal({
     autoUpdate?: true | AutoUpdateOptions;
   } & Partial<ComputePositionConfig>;
 }) {
-  const portalRoot = createSimplePortal(portalOptions);
+  const positionSlot = new Slot<ComputePositionReturn>();
+  const template = portalOptions.template;
+  const templateWithPosition =
+    template instanceof Function
+      ? (updatePortal: () => void) => template({ updatePortal, positionSlot })
+      : template;
+
+  const portalRoot = createSimplePortal({
+    ...portalOptions,
+    template: templateWithPosition,
+  });
 
   if (computePositionOptions) {
     portalRoot.style.position = 'fixed';
@@ -185,11 +203,13 @@ export function createLitPortal({
     const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
     const update = () =>
       computePosition(referenceElement, portalRoot, options).then(
-        ({ x, y }) => {
+        positionReturn => {
+          const { x, y } = positionReturn;
           // Use transform maybe cause overlay-mask offset issue
           // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
           portalRoot.style.left = `${x}px`;
           portalRoot.style.top = `${y}px`;
+          positionSlot.emit(positionReturn);
         }
       );
     if (!maybeAutoUpdateOptions) {
