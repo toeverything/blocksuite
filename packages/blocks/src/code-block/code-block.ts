@@ -2,11 +2,11 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { offset, shift } from '@floating-ui/dom';
+import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
@@ -28,6 +28,7 @@ import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
+import { LangList } from './components/lang-list.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
@@ -176,17 +177,23 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   `;
 
   @state()
-  private _showLangList = false;
-
-  @state()
   private _wrap = false;
+
+  @query('.lang-button')
+  private _langButton!: HTMLButtonElement;
 
   private _optionsPortal: HTMLDivElement | null = null;
 
-  private _langListSlots = {
-    selectedLanguageChanged: new Slot<{ language: string | null }>(),
-    dispose: new Slot(),
-  };
+  @state()
+  private _langListAbortController?: AbortController;
+
+  private get _showLangList() {
+    return !!this._langListAbortController;
+  }
+
+  get readonly() {
+    return this.model.page.readonly;
+  }
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
@@ -241,12 +248,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
-  get readonly() {
-    return this.model.page.readonly;
-  }
-
-  hoverState = new Slot<boolean>();
-
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
@@ -277,14 +278,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
-    this._langListSlots.selectedLanguageChanged.on(({ language }) => {
-      getService('affine:code').setLang(this.model, language);
-      this._showLangList = false;
-    });
-    this._langListSlots.dispose.on(() => {
-      this._showLangList = false;
-    });
-
     this._observePosition();
     bindContainerHotkey(this);
 
@@ -305,7 +298,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
   }
 
@@ -344,7 +336,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       const abortController = new AbortController();
 
       this._optionsPortal = createLitPortal({
-        template: updatePortal =>
+        template: ({ updatePortal }) =>
           CodeOptionTemplate({
             anchor: this,
             model: this.model,
@@ -381,10 +373,50 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   private _onClickLangBtn() {
     if (this.readonly) return;
-    this._showLangList = !this._showLangList;
+    if (this._langListAbortController) return;
+    const abortController = new AbortController();
+    this._langListAbortController = abortController;
+    abortController.signal.addEventListener('abort', () => {
+      this._langListAbortController = undefined;
+    });
+
+    createLitPortal({
+      template: ({ positionSlot }) => {
+        const langList = new LangList();
+        langList.currentLanguageId = this._perviousLanguage.id as Lang;
+        langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
+          getService('affine:code').setLang(this.model, lang ? lang.id : null);
+          abortController.abort();
+        };
+        langList.onClose = () => abortController.abort();
+        positionSlot.on(({ placement }) => {
+          langList.placement = placement;
+        });
+        return langList;
+      },
+      computePosition: {
+        referenceElement: this._langButton,
+        placement: 'bottom-start',
+        middleware: [
+          offset(4),
+          flip(),
+          size({
+            padding: 12,
+            apply({ availableHeight, elements }) {
+              Object.assign(elements.floating.style, {
+                height: '100%',
+                maxHeight: `${availableHeight}px`,
+              });
+            },
+          }),
+        ],
+        autoUpdate: true,
+      },
+      abortController,
+    });
   }
 
-  private _langListTemplate() {
+  private _curLanguageButtonTemplate() {
     const curLanguage =
       getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
     const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
@@ -403,12 +435,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       >
         ${curLanguageDisplayName} ${!this.readonly ? ArrowDownIcon : nothing}
       </icon-button>
-      ${this._showLangList
-        ? html`<lang-list
-            .currentLanguageId=${this._perviousLanguage.id as Lang}
-            .slots=${this._langListSlots}
-          ></lang-list>`
-        : nothing}
     </div>`;
   }
 
@@ -427,7 +453,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override render() {
     return html`<div class="affine-code-block-container">
-      ${this._langListTemplate()}
+      ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
         <div id="line-numbers"></div>
         <rich-text .model=${this.model} .textSchema=${this.textSchema}>
