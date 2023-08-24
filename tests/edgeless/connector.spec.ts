@@ -10,8 +10,6 @@ import {
   deleteAllConnectors,
   dragBetweenViewCoords,
   edgelessCommonSetup as commonSetup,
-  locatorConnectorStrokeStyleButton,
-  locatorConnectorStrokeWidthButton,
   pickColorAtPoints,
   rotateElementByHandle,
   Shape,
@@ -26,7 +24,6 @@ import {
 import {
   assertConnectorPath,
   assertEdgelessHoverRect,
-  assertPointAlmostEqual,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
