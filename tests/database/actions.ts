@@ -161,12 +161,7 @@ export async function assertSelectedStyle(
   key: keyof CSSStyleDeclaration,
   value: string
 ) {
-  const style = await page.evaluate(key => {
-    const selectedTag = document.querySelector<HTMLElement>('.select-selected');
-    if (!selectedTag) throw new Error('Missing selected tag');
-    return selectedTag.style[key];
-  }, key);
-
+  const style = await getElementStyle(page, '.select-selected', key);
   expect(style).toBe(value);
 }
 
@@ -458,4 +453,24 @@ export async function assertCellsSelection(
       width,
     });
   }
+}
+
+export async function getElementStyle(
+  page: Page,
+  selector: string,
+  key: keyof CSSStyleDeclaration
+) {
+  const style = await page.evaluate(
+    ({ key, selector }) => {
+      const el = document.querySelector<HTMLElement>(selector);
+      if (!el) throw new Error(`Missing ${selector} tag`);
+      return window.getComputedStyle(el)[key];
+    },
+    {
+      key,
+      selector,
+    }
+  );
+
+  return style;
 }

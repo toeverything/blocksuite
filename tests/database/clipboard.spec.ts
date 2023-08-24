@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import {
   copyByKeyboard,
   pasteByKeyboard,
@@ -13,7 +15,12 @@ import {
 } from '../utils/actions/misc.js';
 import { assertRichTexts } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
-import { getDatabaseBodyCell, initDatabaseColumn } from './actions.js';
+import {
+  assertSelectedStyle,
+  getDatabaseBodyCell,
+  getElementStyle,
+  initDatabaseColumn,
+} from './actions.js';
 
 test.describe('copy&paste when editing', () => {
   test('should support copy&paste of the title column', async ({ page }) => {
@@ -39,7 +46,9 @@ test.describe('copy&paste when editing', () => {
     }
     await page.keyboard.up('Shift');
     await copyByKeyboard(page);
-    await pressEscape(page);
+
+    const bgValue = await getElementStyle(page, '.database-focus', 'boxShadow');
+    expect(bgValue).not.toBe('none');
 
     await focusRichText(page);
     await pasteByKeyboard(page);
