@@ -11,7 +11,10 @@ import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
-  assertExists(richText);
+  if (!richText) {
+    return;
+  }
+
   await richText.updateComplete;
   const vEditor = richText.vEditor;
   assertExists(vEditor);

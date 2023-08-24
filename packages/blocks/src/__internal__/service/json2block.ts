@@ -157,7 +157,10 @@ export async function json2block(
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
   const vEditor = await asyncGetVirgoByModel(model);
-  assertExists(vEditor);
+  if (!vEditor) {
+    return;
+  }
+
   vEditor.setVRange(vRange);
   // mount new dom range in this trick
   vEditor.syncVRange();
