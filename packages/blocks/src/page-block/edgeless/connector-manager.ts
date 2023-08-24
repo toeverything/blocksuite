@@ -876,7 +876,7 @@ export class EdgelessConnectorManager {
     return result;
   }
 
-  isRelationElementExist(connecter: ConnectorElement) {
+  hasRelatedElement(connecter: ConnectorElement) {
     const { source, target } = connecter;
 
     if (

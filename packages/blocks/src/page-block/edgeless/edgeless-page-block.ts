@@ -375,7 +375,7 @@ export class EdgelessPageBlockComponent
         const element = this.surface.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
-          if (!this.connector.isRelationElementExist(element)) {
+          if (!this.connector.hasRelatedElement(element)) {
             return;
           }
 
@@ -396,7 +396,7 @@ export class EdgelessPageBlockComponent
         assertExists(element);
 
         if (element instanceof ConnectorElement) {
-          if (!this.connector.isRelationElementExist(element)) {
+          if (!this.connector.hasRelatedElement(element)) {
             return;
           }
 
