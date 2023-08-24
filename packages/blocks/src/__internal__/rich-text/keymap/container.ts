@@ -231,7 +231,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         if (
           prefixText.match(
-            /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>)$/
+            /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|```([a-zA-Z0-9]*))$/
           )
         ) {
           if (
