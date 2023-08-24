@@ -79,6 +79,15 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return vRoot.virgoEditor;
   };
 
+  const _getPrefixText = (vEditor: VEditor) => {
+    const vRange = vEditor.getVRange();
+    assertExists(vRange);
+    const [leafStart, offsetStart] = vEditor.getTextPoint(vRange.index);
+    return leafStart.textContent
+      ? leafStart.textContent.slice(0, offsetStart)
+      : '';
+  };
+
   const _preventDefault = (ctx: UIEventStateContext) => {
     const state = ctx.get('defaultState');
     state.event.preventDefault();
@@ -191,9 +200,25 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       }
 
       if (blockElement.selected?.is('text')) {
+        blockElement.model.page.captureSync();
+
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
         assertExists(vRange);
+
+        if (
+          !tryConvertBlock(
+            model.page,
+            model,
+            vEditor,
+            _getPrefixText(vEditor),
+            vRange
+          )
+        ) {
+          _preventDefault(ctx);
+          return true;
+        }
+
         hardEnter(model, vRange, vEditor, state.raw);
         _preventDefault(ctx);
 
@@ -239,7 +264,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const vRange = vEditor.getVRange();
         assertExists(vRange);
 
-        const prefixText = vEditor.yText.toString().slice(0, vRange.index);
+        const prefixText = _getPrefixText(vEditor);
 
         if (
           prefixText.match(
@@ -247,13 +272,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           )
         ) {
           if (
-            !tryConvertBlock(
-              model.page,
-              model,
-              vEditor,
-              vEditor.yText.toString().slice(0, vRange.index),
-              vRange
-            )
+            !tryConvertBlock(model.page, model, vEditor, prefixText, vRange)
           ) {
             _preventDefault(ctx);
           }

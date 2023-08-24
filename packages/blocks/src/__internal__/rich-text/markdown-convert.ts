@@ -38,7 +38,7 @@ interface InlineMarkdownMatch {
 const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'bolditalic',
-    pattern: /(?:\*){3}([^ ](.+?)[^ ])(?:\*){3}$/g,
+    pattern: /(?:\*){3}([^ *](.+?)[^ *])(?:\*){3}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -92,7 +92,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'bold',
-    pattern: /(?:\*){2}([^ ](.+?)[^ ])(?:\*){2}$/g,
+    pattern: /(?:\*){2}([^ *](.+?)[^ *])(?:\*){2}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -144,7 +144,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'italic',
-    pattern: /(?:\*){1}([^ ](.+?)[^ ])(?:\*){1}$/g,
+    pattern: /(?:\*){1}([^ *](.+?)[^ *])(?:\*){1}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -196,7 +196,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'strikethrough',
-    pattern: /(?:~~)([^ ](.+?)[^ ])(?:~~)$/g,
+    pattern: /(?:~~)([^ ~](.+?)[^ ~])(?:~~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -248,7 +248,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'underthrough',
-    pattern: /(?:~)([^ ](.+?)[^ ])(?:~)$/g,
+    pattern: /(?:~)([^ ~](.+?)[^ ~])(?:~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -530,7 +530,6 @@ export function tryConvertBlock(
       isConverted = convertToParagraph(page, model, 'quote', prefixText);
       break;
     default:
-      isConverted = convertToList(page, model, 'numbered', prefixText);
   }
 
   return isConverted ? VKEYBOARD_PREVENT_DEFAULT : VKEYBOARD_ALLOW_DEFAULT;
