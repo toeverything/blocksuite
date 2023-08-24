@@ -26,6 +26,7 @@ import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { Selectable } from '../../services/tools-manager.js';
+import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -42,7 +43,6 @@ import {
   calcAngleEdgeWithRotation,
   calcAngleWithRotation,
   generateCursorUrl,
-  getGridBound,
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
@@ -57,6 +57,7 @@ export type SelectedRect = {
   height: number;
   borderWidth: number;
   borderStyle: string;
+  borderRadius: number;
   rotate: number;
 };
 
@@ -82,7 +83,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       border-color: var(--affine-blue);
       border-width: var(--affine-border-width);
       border-style: solid;
-      border-radius: 8px;
       transform: translate(0, 0) rotate(0);
     }
 
@@ -302,6 +302,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     height: 0,
     borderWidth: 0,
     borderStyle: 'solid',
+    borderRadius: 0,
     left: 0,
     top: 0,
     rotate: 0,
@@ -548,10 +549,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       await this._componentToolbar.updateComplete;
 
     const componentToolbar = this._componentToolbar;
-    const elements = this.selection.elements;
-    const bound = elements.reduce((prev, element) => {
-      return prev.unite(getGridBound(element));
-    }, getGridBound(elements[0]));
+    const bound = edgelessElementsBound(this.selection.elements);
 
     const { viewport } = this.edgeless.surface;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
@@ -596,6 +594,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
+      borderRadius: 8 * zoom,
       left,
       top,
       rotate,
@@ -756,6 +755,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           height: `${_selectedRect.height}px`,
           borderWidth: `${_selectedRect.borderWidth}px`,
           borderStyle: _selectedRect.borderStyle,
+          borderRadius: `${_selectedRect.borderRadius}px`,
           transform: `translate(${_selectedRect.left}px, ${_selectedRect.top}px) rotate(${_selectedRect.rotate}deg)`,
         })}
         disabled="true"

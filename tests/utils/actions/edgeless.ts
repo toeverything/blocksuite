@@ -681,7 +681,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Create Frame',
+          hasText: 'Frame Section',
         });
       await actionButton.click();
       break;

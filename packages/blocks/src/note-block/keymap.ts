@@ -5,6 +5,7 @@ import type { BlockElement } from '@blocksuite/lit';
 
 import { getBlockElementByModel } from '../__internal__/utils/query.js';
 import { actionConfig } from '../page-block/const/action-config.js';
+import { moveBlockConfig } from '../page-block/const/move-block-config.js';
 import { paragraphConfig } from '../page-block/const/paragraph-config.js';
 import type { PageBlockComponent } from '../page-block/types.js';
 import {
@@ -371,6 +372,17 @@ export const bindHotKey = (blockElement: BlockElement) => {
           });
 
           return true;
+        },
+      });
+    });
+  });
+
+  moveBlockConfig.forEach(config => {
+    config.hotkey.forEach(key => {
+      blockElement.bindHotKey({
+        [key]: context => {
+          context.get('defaultState').event.preventDefault();
+          config.action(blockElement);
         },
       });
     });

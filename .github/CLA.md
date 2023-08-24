@@ -92,3 +92,6 @@ Example:
 - Tomoyuki Yamada @tomoyukiy 2023/08/11
 - devlzl @devlzl 2023/08/12
 - WBbug @WBbug 2023/08/16
+- Quan Deng @dengquan 2023/08/21
+- Ayaka Rizumu @LittleSound 2023/08/22
+- Michael Salim @Vija02 2023/08/22

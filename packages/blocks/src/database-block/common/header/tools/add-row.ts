@@ -4,7 +4,6 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { PlusIcon } from '../../../../icons/index.js';
-import type { TableViewSelection } from '../../../../index.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import type { InsertPosition } from '../../../types.js';
 import type { DataViewExpose } from '../../data-view.js';
@@ -50,8 +49,6 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
   viewMethod!: DataViewExpose;
   @property({ attribute: false })
   view!: DataViewTableManager;
-  @property({ attribute: false })
-  getSelection!: () => TableViewSelection | undefined;
 
   @query('.new-record')
   private _newRecord!: HTMLDivElement;
@@ -102,10 +99,10 @@ export class DataViewHeaderToolsAddRow extends WithDisposable(
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
-    const selection = this.getSelection();
+    const selection = this.viewMethod.getSelection?.();
     if (!selection) {
       this.addRow('start');
-    } else {
+    } else if (selection.type === 'table') {
       const { rowsSelection, columnsSelection, focus } = selection;
       let index = 0;
       if (rowsSelection && !columnsSelection) {

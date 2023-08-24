@@ -9,9 +9,14 @@ import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
 } from '../../__internal__/clipboard/utils/pure.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../__internal__/utils/index.js';
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
-import type { BaseDataView } from '../common/base-data-view.js';
 import type { BaseViewClipboard } from '../common/clipboard.js';
+import type { DataViewExpose } from '../common/data-view.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
 import type { DatabaseSelection } from '../common/selection.js';
 import type { DatabaseBlockModel } from '../database-model.js';
@@ -22,7 +27,7 @@ import type { DataViewTableManager } from './table-view-manager.js';
 type TableViewClipboardConfig = {
   path: string[];
   model: DatabaseBlockModel;
-  view: Ref<BaseDataView | undefined>;
+  view: Ref<DataViewExpose | undefined>;
   data: DataViewManager;
 };
 
@@ -30,7 +35,7 @@ export class TableViewClipboard implements BaseViewClipboard {
   private _disposables = new DisposableGroup();
   private _path: string[];
   private _model: DatabaseBlockModel;
-  private _view: Ref<BaseDataView | undefined>;
+  private _view: Ref<DataViewExpose | undefined>;
   private _data: DataViewTableManager;
 
   constructor(private _root: BlockSuiteRoot, config: TableViewClipboardConfig) {
@@ -93,7 +98,14 @@ export class TableViewClipboard implements BaseViewClipboard {
           CLIPBOARD_MIMETYPE.TEXT,
           data
         );
+
+        const savedRange = hasNativeSelection()
+          ? getCurrentNativeRange()
+          : null;
         performNativeCopy([textClipboardItem]);
+        if (savedRange) {
+          resetNativeSelection(savedRange);
+        }
       } else {
         // type === 'number' || type === 'title'
         // Execute browser default behavior
@@ -125,7 +137,12 @@ export class TableViewClipboard implements BaseViewClipboard {
       CLIPBOARD_MIMETYPE.TEXT,
       formatValue
     );
+
+    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
     performNativeCopy([textClipboardItem, tableClipboardItem]);
+    if (savedRange) {
+      resetNativeSelection(savedRange);
+    }
 
     return true;
   };
@@ -488,7 +505,7 @@ const cellToStringMap: Record<
     return value ?? '';
   },
   title: container => {
-    const cell = container?.querySelector('rich-text');
+    const cell = container?.querySelector('data-view-header-area-text-editing');
     const value = getColumnValue(container);
     const range = cell?.vEditor?.getVRange();
     if (range) {

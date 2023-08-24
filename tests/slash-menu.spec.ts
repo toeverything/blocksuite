@@ -199,8 +199,8 @@ test.describe('slash menu should show and hide correctly', () => {
     await expect(slashMenu).toBeVisible();
 
     const slashItems = slashMenu.locator('icon-button');
-    const maybeActivatedItem = slashItems.nth(-3);
-    await expect(maybeActivatedItem).toHaveText(['Copy']);
+    const maybeActivatedItem = slashItems.nth(-5);
+    await expect(maybeActivatedItem).toHaveText(['Move Up']);
     await expect(maybeActivatedItem).toHaveAttribute('hover', '');
     await assertRichTexts(page, ['/']);
   });
@@ -681,4 +681,22 @@ test.describe('slash menu with customize menu', () => {
     await expect(slashMenu).toBeVisible();
     await expect(slashItems).toHaveCount(1);
   });
+});
+
+test('move block up and down by slash menu', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await pressEnter(page);
+  await type(page, 'world');
+  await assertRichTexts(page, ['hello', 'world']);
+  await type(page, '/');
+  const moveUp = page.getByTestId('Move Up');
+  await moveUp.click();
+  await assertRichTexts(page, ['world', 'hello']);
+  await type(page, '/');
+  const moveDown = page.getByTestId('Move Down');
+  await moveDown.click();
+  await assertRichTexts(page, ['hello', 'world']);
 });

@@ -473,28 +473,31 @@ export class ContentParser {
   public async importMarkdown(text: string, insertPositionId: string) {
     const md2html = this._markdown2Html(text);
     const blocks = await this.htmlText2Block(md2html, 'Markdown');
-    const insertBlockModel = this._page.getBlockById(insertPositionId);
 
-    assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const service = await getServiceOrRegister(insertBlockModel.flavour);
-
-    service.json2Block(insertBlockModel, blocks);
+    await this.importBlocks(blocks, insertPositionId);
 
     this._importMetaDataFromHtml(md2html);
   }
 
   public async importHtml(text: string, insertPositionId: string) {
     const blocks = await this.htmlText2Block(text, 'NotionHtml');
+
+    await this.importBlocks(blocks, insertPositionId);
+
+    this._importMetaDataFromHtml(text);
+  }
+
+  public async importBlocks(
+    blocks: SerializedBlock[],
+    insertPositionId: string
+  ) {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
     const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
-    service.json2Block(insertBlockModel, blocks);
-
-    this._importMetaDataFromHtml(text);
+    await service.json2Block(insertBlockModel, blocks);
   }
 
   public registerParserHtmlText2Block(
@@ -549,14 +552,14 @@ export class ContentParser {
   public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
     if (model.flavour === 'affine:page') {
       return {
-        id: model.id,
+        model,
         children: model.children
           .filter(child => child.flavour === 'affine:note')
           .map(child => this.getSelectedBlock(child)),
       };
     }
     return {
-      id: model.id,
+      model,
       children: model.children.map(child => this.getSelectedBlock(child)),
     };
   }
@@ -565,11 +568,7 @@ export class ContentParser {
     block: SelectedBlock,
     blobMap: Map<string, string>
   ): Promise<string> {
-    const model = this._page.getBlockById(block.id);
-    if (!model) {
-      return '';
-    }
-
+    const model = block.model;
     const children: string[] = [];
     for (
       let currentIndex = 0;
@@ -600,10 +599,7 @@ export class ContentParser {
   private async _getTextInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): Promise<string> {
-    const model = this._page.getBlockById(selectedBlock.id);
-    if (!model) {
-      return '';
-    }
+    const model = selectedBlock.model;
 
     const children: string[] = [];
     for (const child of selectedBlock.children) {

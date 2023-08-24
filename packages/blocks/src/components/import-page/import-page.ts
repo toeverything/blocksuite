@@ -109,6 +109,9 @@ export async function importNotion(workspace: Workspace, file: File) {
         }
         pageMap.set(file, workspace.idGenerator());
       }
+      if (i === 0 && fileName.endsWith('.csv')) {
+        pageMap.set(file, workspace.idGenerator());
+      }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
         if (innerZipFile) {
@@ -122,7 +125,11 @@ export async function importNotion(workspace: Workspace, file: File) {
       const lastSplitIndex = file.lastIndexOf('/');
       const folder = file.substring(0, lastSplitIndex) || '';
       const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+      if (
+        fileName.endsWith('.html') ||
+        fileName.endsWith('.md') ||
+        fileName.endsWith('.csv')
+      ) {
         const isHtml = fileName.endsWith('.html');
         const rootId = page.root?.id;
         const fetchFileHandler = async (url: string) => {
@@ -147,6 +154,205 @@ export async function importNotion(workspace: Workspace, file: File) {
           }
         };
 
+        const checkFileIsSubPage = async (
+          fileName: string,
+          columns: Column[],
+          row: string[],
+          titleIndex: number
+        ) => {
+          const fileString =
+            (await zipFile.file(fileName)?.async('string')) || '';
+          // no need to parse the whole text
+          const startText = fileString.substring(
+            0,
+            columns.join(': ').length + row.join('').length + 100
+          );
+          for (let i = 0; i < row.length; i++) {
+            if (i === titleIndex) {
+              if (!startText.includes(row[i])) {
+                return false;
+              }
+            } else {
+              // Replace non-visible characters with an empty string
+              const columnName = columns[i].name.replace(/[^\x20-\x7E]/g, '');
+              if (
+                row[i] !== '' &&
+                !startText.includes(columnName + ': ' + row[i])
+              ) {
+                return false;
+              }
+              if (row[i] === '' && startText.includes(columnName + ': ')) {
+                return false;
+              }
+            }
+          }
+          return true;
+        };
+
+        const getSubPageIds = async (
+          columns: Column[],
+          row: string[],
+          titleIndex: number
+        ) => {
+          const result: string[] = [];
+          if (!row[titleIndex]) {
+            return result;
+          }
+
+          const curFiles = files.filter(
+            file =>
+              file.includes(row[titleIndex] + ' ') &&
+              (file.endsWith('.html') || file.endsWith('.md'))
+          );
+          for (let k = 0; k < curFiles.length; k++) {
+            const curFile = curFiles[k];
+            const isSubPage = await checkFileIsSubPage(
+              curFile,
+              columns,
+              row,
+              titleIndex
+            );
+            if (isSubPage && pageMap.has(curFile)) {
+              result.push(pageMap.get(curFile) ?? '');
+            }
+          }
+          return result;
+        };
+
+        const csvParseHandler = async (fileName: string, titleText: string) => {
+          const tableString =
+            (await zipFile.file(fileName)?.async('string')) ?? '';
+          let result: SerializedBlock[] | null = [];
+          let id = 1;
+          const titles: string[] = [];
+          const rows: string[][] = [];
+          tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
+            const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            for (let i = 0; i < rowArray.length; i++) {
+              rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
+            }
+            if (index === 0) {
+              titles.push(...rowArray);
+            } else {
+              rows.push(rowArray);
+            }
+          });
+
+          const columns: Column[] = titles.map(value => {
+            return columnManager
+              .getColumn(richTextPureColumnConfig.type)
+              .createWithId('' + id++, value);
+          });
+          if (rows.length > 0) {
+            let maxLen = rows[0].length;
+            for (let i = 1; i < rows.length; i++) {
+              maxLen = Math.max(maxLen, rows[i].length);
+            }
+            const addNum = maxLen - columns.length;
+            for (let i = 0; i < addNum; i++) {
+              columns.push(
+                columnManager
+                  .getColumn(richTextPureColumnConfig.type)
+                  .createWithId('' + id++, '')
+              );
+            }
+          }
+
+          if (columns.length === 0 || rows.length === 0) {
+            return [];
+          }
+
+          let titleIndex = 0;
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            let rowHasSubPageCount = 0;
+            let rowTitleIndex = 0;
+            let subPageIds = [];
+            for (let j = 0; j < row.length; j++) {
+              subPageIds = await getSubPageIds(columns, row, j);
+              if (subPageIds.length > 0) {
+                rowTitleIndex = j;
+                rowHasSubPageCount++;
+                if (rowHasSubPageCount > 1) {
+                  break;
+                }
+              }
+            }
+            if (rowHasSubPageCount === 1) {
+              titleIndex = rowTitleIndex;
+              if (subPageIds.length === 1) {
+                break;
+              }
+            }
+          }
+          titleIndex = titleIndex < columns.length ? titleIndex : 0;
+          columns[titleIndex].type = 'title';
+          for (let i = 0; i < rows.length; i++) {
+            if (titleIndex >= rows[i].length) {
+              continue;
+            }
+            const linkPageIds = await getSubPageIds(
+              columns,
+              rows[i],
+              titleIndex
+            );
+            if (linkPageIds.length > 0) {
+              rows[i][titleIndex] = `@AffineReference:(${linkPageIds[0]})`;
+            }
+          }
+
+          const databasePropsId = id++;
+          const cells: Record<string, Record<string, Cell>> = {};
+          const children: SerializedBlock[] = [];
+          rows.forEach(row => {
+            children.push({
+              flavour: 'affine:paragraph',
+              type: 'text',
+              text: [{ insert: row[titleIndex] }],
+              children: [],
+            });
+            const rowId = '' + id++;
+            cells[rowId] = {};
+            row.forEach((value, index) => {
+              cells[rowId][columns[index].id] = {
+                columnId: columns[index].id,
+                value,
+              };
+            });
+          });
+          result = [
+            {
+              flavour: 'affine:database',
+              databaseProps: {
+                id: '' + databasePropsId,
+                title: titleText || 'Database',
+                rowIds: Object.keys(cells),
+                cells: cells,
+                columns: columns,
+                views: [
+                  {
+                    id: page.generateId(),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: [],
+                    header: {
+                      titleColumn: columns[titleIndex].id,
+                      iconColumn: 'type',
+                    },
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                  },
+                ],
+              },
+              children: children,
+            },
+          ];
+          return result;
+        };
+
         const tableParseHandler = async (element: Element) => {
           // if (element.tagName === 'TABLE') {
           //   const parentElement = element.parentElement;
@@ -167,89 +373,10 @@ export async function importNotion(workspace: Workspace, file: File) {
           ) {
             const href = element.getAttribute('href') || '';
             const fileName = joinWebPaths(folder, decodeURI(href));
-            const tableString = await zipFile.file(fileName)?.async('string');
-
-            let result: SerializedBlock[] | null = [];
-            let id = 1;
-            const titles: string[] = [];
-            const rows: string[][] = [];
-            tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
-              const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-              for (let i = 0; i < rowArray.length; i++) {
-                rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
-              }
-              if (index === 0) {
-                titles.push(...rowArray);
-              } else {
-                rows.push(rowArray);
-              }
-            });
-
-            const columns: Column[] = titles.map(value => {
-              return columnManager
-                .getColumn(richTextPureColumnConfig.type)
-                .createWithId('' + id++, value);
-            });
-            if (rows.length > 0) {
-              let maxLen = rows[0].length;
-              for (let i = 1; i < rows.length; i++) {
-                maxLen = Math.max(maxLen, rows[i].length);
-              }
-              const addNum = maxLen - columns.length;
-              for (let i = 0; i < addNum; i++) {
-                columns.push(
-                  columnManager
-                    .getColumn(richTextPureColumnConfig.type)
-                    .createWithId('' + id++, '')
-                );
-              }
-            }
-            const databasePropsId = id++;
-            const cells: Record<string, Record<string, Cell>> = {};
-            const children: SerializedBlock[] = [];
-            rows.forEach(row => {
-              children.push({
-                flavour: 'affine:paragraph',
-                type: 'text',
-                text: [{ insert: row[0] }],
-                children: [],
-              });
-              const rowId = '' + id++;
-              cells[rowId] = {};
-              row.forEach((value, index) => {
-                cells[rowId][columns[index].id] = {
-                  columnId: columns[index].id,
-                  value,
-                };
-              });
-            });
-            result = [
-              {
-                flavour: 'affine:database',
-                databaseProps: {
-                  id: '' + databasePropsId,
-                  title: element.textContent || 'Database',
-                  rowIds: Object.keys(cells),
-                  cells: cells,
-                  columns: columns,
-                  views: [
-                    {
-                      id: page.generateId(),
-                      name: 'Table View',
-                      mode: 'table',
-                      columns: [],
-                      header: {},
-                      filter: {
-                        type: 'group',
-                        op: 'and',
-                        conditions: [],
-                      },
-                    },
-                  ],
-                },
-                children: children,
-              },
-            ];
+            const result = await csvParseHandler(
+              fileName,
+              element.textContent || ''
+            );
             return result;
           }
           return null;
@@ -284,12 +411,22 @@ export async function importNotion(workspace: Workspace, file: File) {
           tableParseHandler,
           tableTitleColumnHandler,
         });
-        const text = (await zipFile.file(file)?.async('string')) || '';
         if (rootId) {
           pageIds.push(page.id);
-          if (isHtml) {
+          if (fileName.endsWith('.csv')) {
+            const lastSpace = fileName.lastIndexOf(' ');
+            const csvName =
+              lastSpace === -1 ? '' : fileName.substring(0, lastSpace);
+            const csvRealName = csvName === 'Undefined' ? '' : csvName;
+            const blocks = await csvParseHandler(file, csvRealName);
+            if (blocks) {
+              await contentParser.importBlocks(blocks, rootId);
+            }
+          } else if (isHtml) {
+            const text = (await zipFile.file(file)?.async('string')) ?? '';
             await contentParser.importHtml(text, rootId);
           } else {
+            const text = (await zipFile.file(file)?.async('string')) ?? '';
             await contentParser.importMarkdown(text, rootId);
           }
         }

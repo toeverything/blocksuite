@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 import { describe, expect, it } from 'vitest';
+import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
@@ -67,6 +68,25 @@ describe('workspace.search works', () => {
         new Map([['2', `space:${id}`]])
       );
       expect(workspace.search('索尼')).toStrictEqual(
+        new Map([['3', `space:${id}`]])
+      );
+    });
+
+    const update = encodeStateAsUpdate(page.spaceDoc);
+    const schema = new Schema();
+    const workspace2 = new Workspace({
+      schema,
+    });
+    const page2 = workspace2.createPage({
+      id: 'page0',
+    });
+    applyUpdate(page2.spaceDoc, update);
+    expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
+    queueMicrotask(() => {
+      expect(workspace2.search('处理器')).toStrictEqual(
+        new Map([['2', `space:${id}`]])
+      );
+      expect(workspace2.search('索尼')).toStrictEqual(
         new Map([['3', `space:${id}`]])
       );
     });

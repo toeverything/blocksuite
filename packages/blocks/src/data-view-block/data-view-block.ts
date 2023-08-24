@@ -9,7 +9,6 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DatabaseBlockDatasourceConfig } from '../__internal__/datasource/base.js';
 import {
   createDatasource,
@@ -17,7 +16,6 @@ import {
 } from '../__internal__/datasource/datasource-manager.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
 import type { ViewSource } from '../database-block/common/view-source.js';
-import type { BlockOperation } from '../database-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/index.js';
 import { DataViewTableManager } from '../database-block/table/table-view-manager.js';
 import type { DataViewBlockModel } from './data-view-model.js';
@@ -122,15 +120,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
           .model="${this.model}"
         ></database-view-header>`
       : '';
-    const blockOperation: BlockOperation = {
-      copy: () => {
-        copyBlocks([this.model]);
-      },
-      delete: () => {
-        const models = [this.model, ...this.model.children];
-        models.forEach(model => this.page.deleteBlock(model));
-      },
-    };
     if (!current.dataSource) {
       return html`
         <div class="toolbar-hover-container">
@@ -158,7 +147,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
             getDatasourceTitle(this.root, current.dataSource)
           )}'
           .root='${this.root}'
-          .blockOperation='${blockOperation}'
           .tableViewManager='${currentViewManager}'
           .modalMode='${this.modalMode}'
           class='affine-block-element'

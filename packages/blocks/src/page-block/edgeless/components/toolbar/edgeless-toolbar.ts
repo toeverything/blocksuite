@@ -153,8 +153,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     },
   })
   private _currentFrameIndex = 0;
-  private _isFullScreen = false;
   private _timer: ReturnType<typeof setTimeout> | null = null;
+  private _index = -1;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
@@ -297,15 +297,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _toggleFullScreen() {
-    if (this._isFullScreen) {
-      this._isFullScreen = false;
+    if (document.fullscreenElement) {
       this._timer && clearTimeout(this._timer);
       document.exitFullscreen();
     } else {
-      this._isFullScreen = true;
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {
-        this._currentFrameIndex = this._currentFrameIndex + 0;
+        this._currentFrameIndex = this._index;
       }, 400);
     }
   }
@@ -325,7 +323,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <span
           class="edgeless-frame-nativator-title"
           @click=${() =>
-            (this._currentFrameIndex = this._currentFrameIndex + 1 - 1)}
+            (this._currentFrameIndex = this._currentFrameIndex + 0)}
           >${frame?.title ?? 'no frame'}</span
         >
         <span class="edgeless-frame-navigator-count"
@@ -358,7 +356,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         class="edgeless-frame-navigator-stop"
         @click=${() => {
           this.setEdgelessTool({ type: 'default' });
-          this._isFullScreen === true && this._toggleFullScreen();
+          document.fullscreenElement && this._toggleFullScreen();
         }}
       >
         Stop
@@ -390,10 +388,23 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       ></edgeless-frame-tool-button>
 
       <edgeless-tool-icon-button
-        .tooltip=${'Prensentation'}
+        .tooltip=${'Presentation'}
         @click=${() => {
+          this._index = this._currentFrameIndex;
+          if (
+            this.edgeless.selectionManager.elements[0] instanceof FrameElement
+          ) {
+            this._index = this._frames.findIndex(
+              frame =>
+                frame.id === this.edgeless.selectionManager.elements[0].id
+            );
+          }
           this.setEdgelessTool({ type: 'frameNavigator' });
-          this._isFullScreen = false;
+          if (this._frames.length === 0)
+            toast(
+              'The presentation requires at least 1 frame. You can firstly create a frame.',
+              5000
+            );
           this._toggleFullScreen();
         }}
       >

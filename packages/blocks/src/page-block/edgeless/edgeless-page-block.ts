@@ -33,7 +33,6 @@ import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import {
@@ -260,7 +259,9 @@ export class EdgelessPageBlockComponent
   @query('.affine-edgeless-page-block-container')
   pageBlockContainer!: HTMLDivElement;
 
-  @state()
+  @query('.affine-edgeless-layer')
+  edgelessLayer!: HTMLDivElement;
+
   private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
@@ -374,6 +375,9 @@ export class EdgelessPageBlockComponent
         const element = this.surface.pickById(id);
         assertExists(element);
         if (element instanceof ConnectorElement) {
+          // FIXME waiting for refactor
+          if (!this.connector.hasRelatedElement(element)) return;
+
           this.connector.updatePath(element);
         } else if (element instanceof FrameElement) {
           this.frame.calculateFrameColor(element);
@@ -392,7 +396,7 @@ export class EdgelessPageBlockComponent
 
         if (element instanceof ConnectorElement) {
           if ('target' in props || 'source' in props || 'mode' in props) {
-            this.connector.updatePath(element as ConnectorElement);
+            this.connector.updatePath(element);
           }
         }
       })
@@ -495,12 +499,24 @@ export class EdgelessPageBlockComponent
       slots.viewportUpdated.on(() => {
         if (!this._edgelessLayerWillChange) {
           this._edgelessLayerWillChange = true;
+          requestAnimationFrame(() => {
+            if (!this.edgelessLayer) return;
+
+            if (this.edgelessLayer.style.willChange !== 'transform') {
+              this.edgelessLayer.style.willChange = 'transform';
+            }
+          });
         }
 
         if (resetWillChange) clearTimeout(resetWillChange);
         resetWillChange = setTimeout(() => {
           this._edgelessLayerWillChange = false;
           resetWillChange = null;
+          requestAnimationFrame(() => {
+            if (!this.edgelessLayer) return;
+
+            this.edgelessLayer.style.removeProperty('will-change');
+          });
         }, 150);
       })
     );
@@ -557,7 +573,6 @@ export class EdgelessPageBlockComponent
             getRectByBlockElement
           );
         });
-        // this.requestUpdate();
       })
     );
 
@@ -632,7 +647,6 @@ export class EdgelessPageBlockComponent
     _disposables.add(
       slots.pressShiftKeyUpdated.on(pressed => {
         this.tools.shiftKey = pressed;
-        this.requestUpdate();
       })
     );
     _disposables.add(
@@ -1253,7 +1267,7 @@ export class EdgelessPageBlockComponent
       if (!surface) return;
 
       const el = this.surface.pickById(surface.elements[0]);
-      if (el?.type === 'shape') {
+      if (el) {
         return true;
       }
 
@@ -1304,14 +1318,7 @@ export class EdgelessPageBlockComponent
       <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
           <affine-note-slicer .edgelessPage=${this}></affine-note-slicer>
-          <div
-            class="affine-edgeless-layer"
-            style=${styleMap({
-              willChange: this._edgelessLayerWillChange
-                ? 'transform'
-                : undefined,
-            })}
-          >
+          <div class="affine-edgeless-layer">
             <edgeless-notes-container
               .edgeless=${this}
               .notes=${sortedNotes}

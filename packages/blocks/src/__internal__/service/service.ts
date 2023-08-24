@@ -5,7 +5,6 @@ import { isTemplateResult } from 'lit/directive-helpers.js';
 
 import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
-import { getService } from './singleton.js';
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   templateResult2String(temp: TemplateResult): string {
@@ -44,36 +43,24 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
 
   block2Json(
     block: BlockModel,
-    selectedModels?: Map<string, number>,
+    children?: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
-    const lastBlockId = selectedModels
-      ? [...selectedModels.entries()].reduce((p, c) => (c[1] > p[1] ? c : p))[0]
-      : '';
-    const delta =
-      block.text?.sliceToDelta(
-        begin ?? 0,
-        lastBlockId === block.id ? end : undefined
-      ) ?? [];
+    const delta = block.text?.sliceToDelta(begin ?? 0, end) ?? [];
     return {
       flavour: block.flavour,
       type: (block as BlockModel & { type: string }).type as string,
       text: delta,
-      children: block.children
-        ?.filter(child => selectedModels?.has(child.id) ?? true)
-        .map((child, index, array) => {
+      children:
+        children ??
+        block.children.map((child, index, array) => {
           if (index === array.length - 1) {
             // @ts-ignore
-            return getService(child.flavour).block2Json(
-              child,
-              selectedModels,
-              0,
-              end
-            );
+            return getService(child.flavour).block2Json(child, 0, end);
           }
           // @ts-ignore
-          return getService(child.flavour).block2Json(child, selectedModels);
+          return getService(child.flavour).block2Json(child);
         }),
     };
   }

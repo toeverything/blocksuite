@@ -1,12 +1,17 @@
 import { css } from 'lit';
 
 export const styles = css`
-  .overlay-mask {
+  :host {
     position: fixed;
+    inset: 0;
+    z-index: var(--affine-z-index-modal);
+  }
+  .overlay-mask {
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.6);
     z-index: var(--affine-z-index-modal);
   }
@@ -89,7 +94,6 @@ export const styles = css`
     padding: 18px 0;
     gap: 6px;
     width: 108px;
-    height: 108px;
     border: 2px solid var(--affine-border-color);
     border-radius: 8px;
   }

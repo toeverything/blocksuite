@@ -6,7 +6,9 @@ import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,
+  getNextBlock,
   getPageBlock,
+  getPreviousBlock,
   getVirgoByModel,
   openFileOrFiles,
   resetNativeSelection,
@@ -17,6 +19,8 @@ import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
 import { toast } from '../../components/toast.js';
 import {
+  ArrowDownBigIcon,
+  ArrowUpBigIcon,
   AttachmentIcon,
   BookmarkIcon,
   CopyIcon,
@@ -418,6 +422,30 @@ export const menuGroups: {
   {
     name: 'Actions',
     items: [
+      {
+        name: 'Move Up',
+        icon: ArrowUpBigIcon,
+        action: async ({ pageElement, model }) => {
+          const page = pageElement.page;
+          const previousBlock = getPreviousBlock(model);
+          if (!previousBlock) return;
+          const parent = page.getParent(previousBlock);
+          if (!parent) return;
+          page.moveBlocks([model], parent, previousBlock, true);
+        },
+      },
+      {
+        name: 'Move Down',
+        icon: ArrowDownBigIcon,
+        action: async ({ pageElement, model }) => {
+          const page = pageElement.page;
+          const nextBlock = getNextBlock(model);
+          if (!nextBlock) return;
+          const parent = page.getParent(nextBlock);
+          if (!parent) return;
+          page.moveBlocks([model], parent, nextBlock, false);
+        },
+      },
       {
         name: 'Copy',
         icon: CopyIcon,
