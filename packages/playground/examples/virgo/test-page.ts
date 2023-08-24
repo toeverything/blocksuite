@@ -162,7 +162,7 @@ export class RichText extends ShadowlessElement {
             }
           }
 
-          return true;
+          return false;
         },
       },
     });
