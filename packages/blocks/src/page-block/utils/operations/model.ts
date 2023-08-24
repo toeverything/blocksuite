@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, Text } from '@blocksuite/store';
 
 import type { Flavour } from '../../../models.js';
@@ -41,7 +42,7 @@ export function mergeToCodeModel(models: BaseBlockModel[]) {
 export function transformModel(
   model: BaseBlockModel,
   flavour: Flavour,
-  type?: string
+  props?: Parameters<Page['addBlock']>[1]
 ) {
   const page = model.page;
   const parent = page.getParent(model);
@@ -51,9 +52,9 @@ export function transformModel(
     text?: Text;
     children?: BaseBlockModel[];
   } = {
-    type,
     text: model?.text?.clone(), // should clone before `deleteBlock`
     children: model.children,
+    ...props,
   };
   const index = parent.children.indexOf(model);
   page.deleteBlock(model);
