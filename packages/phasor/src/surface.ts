@@ -127,7 +127,7 @@ export class SurfaceManager {
     // skip empty event
     if (event.changes.keys.size === 0) return;
     const connectors: {
-      change: (typeof event)['changes']['keys'] extends Map<any, infer V>
+      change: (typeof event)['changes']['keys'] extends Map<string, infer V>
         ? V
         : never;
       id: string;
@@ -154,7 +154,7 @@ export class SurfaceManager {
 
   private _onYEvent = (
     type: Y.YMapEvent<Y.Map<unknown>>['changes']['keys'] extends Map<
-      any,
+      string,
       infer V
     >
       ? V
