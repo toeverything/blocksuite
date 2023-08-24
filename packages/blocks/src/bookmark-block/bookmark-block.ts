@@ -169,6 +169,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   @state()
   private _isImageError = false;
 
+  private _optionsAbortController?: AbortController;
+
   set loading(value: boolean) {
     this._isLoading = value;
   }
@@ -210,16 +212,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }
   }
 
-  private _optionsPortal?: HTMLElement;
   private _onHover() {
-    if (this._optionsPortal?.isConnected) return;
-    const abortController = new AbortController();
-    this._optionsPortal = createLitPortal({
+    if (this._optionsAbortController) return;
+    this._optionsAbortController = new AbortController();
+    this._optionsAbortController.signal.addEventListener('abort', () => {
+      this._optionsAbortController = undefined;
+    });
+    createLitPortal({
       template: html`<bookmark-toolbar
         .model=${this.model}
         .onSelected=${this._onToolbarSelected}
         .root=${this}
-        .abortController=${abortController}
+        .abortController=${this._optionsAbortController}
       ></bookmark-toolbar>`,
       computePosition: {
         referenceElement: this,
@@ -227,7 +231,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         middleware: [flip(), offset(4)],
         autoUpdate: true,
       },
-      abortController,
+      abortController: this._optionsAbortController,
     });
   }
 
@@ -272,6 +276,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         this._isImageError = false;
         this._isIconError = false;
       }
+      this._optionsAbortController?.abort();
     };
 
   override render() {
