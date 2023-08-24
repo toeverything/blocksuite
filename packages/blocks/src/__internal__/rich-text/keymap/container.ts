@@ -5,12 +5,14 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { VEditor, VirgoRootElement } from '@blocksuite/virgo';
 
 import { getNextBlock } from '../../../note-block/utils.js';
+import { bracketPairs } from '../../../page-block/const/bracket-pairs.js';
 import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   getCombinedFormatInTextSelection,
   getSelectedContentModels,
 } from '../../../page-block/utils/selection.js';
+import { matchFlavours } from '../../utils/model.js';
 import { tryConvertBlock } from '../markdown-convert.js';
 import {
   handleIndent,
@@ -351,5 +353,61 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       },
     });
+  });
+
+  bracketPairs.forEach(pair => {
+    blockElement.bindHotKey({
+      [pair.left]: ctx => {
+        if (blockElement.page.readonly) return;
+
+        const textSelection = blockElement.selection.find('text');
+        if (
+          !textSelection ||
+          (textSelection.isCollapsed() &&
+            !matchFlavours(blockElement.model, ['affine:code']))
+        )
+          return;
+
+        ctx.get('defaultState').event.preventDefault();
+
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+        const selectedText = vEditor.yText
+          .toString()
+          .slice(vRange.index, vRange.index + vRange.length);
+        vEditor.insertText(vRange, pair.left + selectedText + pair.right);
+
+        vEditor.setVRange({
+          index: vRange.index + 1,
+          length: vRange.length,
+        });
+
+        return true;
+      },
+    });
+  });
+
+  blockElement.bindHotKey({
+    '`': ctx => {
+      if (blockElement.page.readonly) return;
+
+      const textSelection = blockElement.selection.find('text');
+      if (!textSelection || textSelection.isCollapsed()) return;
+
+      ctx.get('defaultState').event.preventDefault();
+
+      const vEditor = _getVirgo();
+      const vRange = vEditor.getVRange();
+      assertExists(vRange);
+      vEditor.formatText(vRange, { code: true });
+
+      vEditor.setVRange({
+        index: vRange.index,
+        length: vRange.length,
+      });
+
+      return true;
+    },
   });
 };

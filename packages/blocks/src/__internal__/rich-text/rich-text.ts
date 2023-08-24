@@ -7,7 +7,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import type * as Y from 'yjs';
 
 import { isStrictUrl } from '../utils/url.js';
-import { createBracketAutoCompleteBindings } from './bracket-complete.js';
 import { tryFormatInlineStyle } from './markdown-convert.js';
 import {
   type AffineTextAttributes,
@@ -166,7 +165,6 @@ export class RichText extends ShadowlessElement {
         key: ' ',
         handler: context => tryFormatInlineStyle(context, this.undoManager),
       },
-      ...createBracketAutoCompleteBindings(),
     });
 
     assertExists(this.virgoContainer);
