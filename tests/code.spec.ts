@@ -46,7 +46,7 @@ function getCodeBlock(page: Page) {
     await languageButton.click({ delay: 50 });
   };
 
-  const langList = codeBlock.locator('lang-list');
+  const langList = page.locator('lang-list');
   const codeOption = page.locator('.affine-codeblock-option');
   const copyButton = codeOption.getByTestId('copy-button');
   const wrapButton = codeOption.getByTestId('wrap-button');
@@ -217,12 +217,9 @@ test('language select list can disappear when click other place', async ({
   const locator = codeBlock.langList;
   await expect(locator).toBeVisible();
 
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('.lang-list-button-container');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right + 10, y: bbox.top + 10 };
-  });
-  await page.mouse.click(position.x, position.y);
+  const rect = await page.locator('.lang-list-button-container').boundingBox();
+  if (!rect) throw new Error('Failed to get bounding box of code block.');
+  await page.mouse.click(rect.x + 10, rect.y + 10);
 
   await expect(locator).toBeHidden();
 });
