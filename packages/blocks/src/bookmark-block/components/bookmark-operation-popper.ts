@@ -7,14 +7,14 @@ import { repeat } from 'lit/directives/repeat.js';
 import { toast } from '../..//components/toast.js';
 import { copyBlocks } from '../../__internal__/clipboard/utils/commons.js';
 import { getBlockElementByModel } from '../../__internal__/index.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
 import {
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
   RefreshIcon,
-} from '../images/icons.js';
+} from '../../icons/index.js';
+import type { BookmarkBlockComponent } from '../bookmark-block.js';
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import { cloneBookmarkProperties, reloadBookmarkBlock } from '../utils.js';
 
 export type MenuActionCallback = (type: Operation['type']) => void;
@@ -127,7 +127,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
       ({ type }) => type,
       ({ type, icon, label, action, divider }) => {
         return html`<icon-button
-            width="130px"
+            width="126px"
             height="32px"
             class="menu-item ${type}"
             @click=${() => {

@@ -12,15 +12,12 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { createLitPortal } from '../components/portal.js';
+import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
-import {
-  DarkLoadingBanner,
-  DefaultIcon,
-  LoadingBanner,
-} from './images/icons.js';
+import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -84,9 +81,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       margin-left: 8px;
     }
     .affine-bookmark-icon {
+      display: flex;
+      align-items: center;
       width: 18px;
       height: 18px;
       color: var(--affine-text-secondary-color);
+      fill: var(--affine-text-secondary-color);
       flex-shrink: 0;
     }
     .affine-bookmark-icon img {
@@ -338,7 +338,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
                   alt="icon"
                   @error="${this._onIconError}"
                 />`
-              : DefaultIcon}
+              : WebIcon16}
           </div>
           <div class="affine-bookmark-title-content">
             ${bookmarkTitle || 'Bookmark'}

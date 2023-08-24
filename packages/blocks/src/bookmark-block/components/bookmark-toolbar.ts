@@ -10,8 +10,13 @@ import * as Y from 'yjs';
 
 import { createLitPortal } from '../../components/portal.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import {
+  CaptionIcon,
+  EditIcon,
+  LinkIcon,
+  MoreIcon,
+} from '../../icons/index.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { CaptionIcon, EditIcon, LinkIcon, MoreIcon } from '../images/icons.js';
 import {
   BookmarkOperationMenu,
   type MenuActionCallback,
@@ -61,19 +66,19 @@ const config: ConfigItem[] = [
     divider: true,
   },
   {
-    type: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Add Caption',
-    action: (_model, callback) => {
-      callback?.('caption');
-    },
-  },
-  {
     type: 'edit',
     icon: EditIcon,
     tooltip: 'Edit',
     action: (_model, callback) => {
       callback?.('edit');
+    },
+  },
+  {
+    type: 'caption',
+    icon: CaptionIcon,
+    tooltip: 'Add Caption',
+    action: (_model, callback) => {
+      callback?.('caption');
     },
     divider: true,
   },
@@ -164,8 +169,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       ({ type }) => type,
       ({ type, icon, tooltip, action, divider }) => {
         return html`<icon-button
-            width="32px"
-            height="32px"
+            size="24px"
             class="bookmark-toolbar-button has-tool-tip ${type}"
             @click=${() => {
               action(this.model, this.onSelected, this);
