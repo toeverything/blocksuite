@@ -97,7 +97,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
       clone.style.position = 'absolute';
       clone.style.zIndex = '1000';
       clone.style.fontFamily = 'sans-serif';
-      document.body.appendChild(clone);
+      this.edgeless.editorContainer.appendChild(clone);
       const rect = draggable.getBoundingClientRect();
       const indicator = document.createElement('div');
       indicator.style.position = 'absolute';
