@@ -1,5 +1,5 @@
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
-import { ShadowlessElement } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseTextAttributes, VHandlerContext } from '@blocksuite/virgo';
 import { createVirgoKeyDownHandler, VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
@@ -109,7 +109,7 @@ const autoIdentifyLink = (
 };
 
 @customElement('rich-text')
-export class RichText extends ShadowlessElement {
+export class RichText extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-rich-text {
       height: 100%;
@@ -123,11 +123,6 @@ export class RichText extends ShadowlessElement {
       scroll-margin-bottom: 30px;
     }
   `;
-
-  protected _disposables = new DisposableGroup();
-  get disposables() {
-    return this._disposables;
-  }
 
   @query('.affine-rich-text')
   private _virgoContainer!: HTMLDivElement;
@@ -270,10 +265,6 @@ export class RichText extends ShadowlessElement {
     assertExists(this.undoManager, 'rich-text need undoManager to init.');
     assertExists(this.textSchema, 'rich-text need textSchema to init.');
 
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-
     this.updateComplete.then(() => {
       if (this._vEditor?.mounted) {
         this._vEditor.unmount();
@@ -288,11 +279,6 @@ export class RichText extends ShadowlessElement {
         },
       });
     });
-  }
-
-  override disconnectedCallback(): void {
-    super.disconnectedCallback();
-    this._disposables.dispose();
   }
 
   override updated() {
