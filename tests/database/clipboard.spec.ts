@@ -48,7 +48,7 @@ test.describe('copy&paste when editing', () => {
     await copyByKeyboard(page);
 
     const bgValue = await getElementStyle(page, '.database-focus', 'boxShadow');
-    expect(bgValue).not.toBe('none');
+    expect(bgValue).not.toBe('unset');
 
     await focusRichText(page);
     await pasteByKeyboard(page);

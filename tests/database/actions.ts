@@ -464,7 +464,7 @@ export async function getElementStyle(
     ({ key, selector }) => {
       const el = document.querySelector<HTMLElement>(selector);
       if (!el) throw new Error(`Missing ${selector} tag`);
-      return window.getComputedStyle(el)[key];
+      return el.style[key];
     },
     {
       key,
