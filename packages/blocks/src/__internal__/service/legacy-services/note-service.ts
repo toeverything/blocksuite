@@ -26,6 +26,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
   ): SerializedBlock {
     const delta = block.text?.sliceToDelta(begin ?? 0, end) ?? [];
     return {
+      id: block.id,
       flavour: block.flavour,
       text: delta,
       xywh: block.xywh,

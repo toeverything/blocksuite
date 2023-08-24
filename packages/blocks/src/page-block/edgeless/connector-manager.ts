@@ -876,6 +876,19 @@ export class EdgelessConnectorManager {
     return result;
   }
 
+  hasRelatedElement(connecter: ConnectorElement) {
+    const { source, target } = connecter;
+
+    if (
+      (source.id && !getEdgelessElement(this._edgeless, source.id)) ||
+      (target.id && !getEdgelessElement(this._edgeless, target.id))
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   clear() {
     this._connectionOverlay.points = [];
     this._connectionOverlay.highlightPoint = null;
