@@ -11,7 +11,6 @@ import { html, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { DRAG_HANDLE_OFFSET_LEFT } from '../../__internal__/consts.js';
 import {
   calcDropTarget,
   findClosestBlockElement,
@@ -31,14 +30,14 @@ import { autoScroll } from '../../page-block/text-selection/utils.js';
 import {
   DRAG_HANDLE_GRABBER_BORDER_RADIUS,
   DRAG_HANDLE_GRABBER_HEIGHT,
-  DRAG_HANDLE_GRABBER_MARGIN,
   DRAG_HANDLE_GRABBER_WIDTH,
+  DRAG_HANDLE_OFFSET_LEFT,
   DRAG_HOVER_RECT_PADDING,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
-import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
+import { DRAG_HANDLE_HEIGHT, DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
   captureEventTarget,
   containBlock,
@@ -154,17 +153,27 @@ export class DragHandleWidget extends WidgetElement {
     if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
 
     this._dragHandleContainer.style.display = 'flex';
+    this._dragHandleContainer.style.transform = ``;
     this._dragHandleContainer.style.height = `${
       containerHeight * this._scale
     }px`;
+    const padding = (containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2;
+    this._dragHandleContainer.style.padding = `${padding}px 0`;
     this._dragHandleContainer.style.width = `${
       DRAG_HANDLE_WIDTH * this._scale
     }px`;
 
-    // TODO: optimize drag handle position with different hover block
-    const posLeft =
-      left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
-    const posTop = top;
+    let posLeft =
+      left - (DRAG_HANDLE_WIDTH - DRAG_HANDLE_OFFSET_LEFT) * this._scale;
+    let posTop = top;
+
+    if (isPageMode(this.page)) {
+      const pageBlock = this._pageBlockElement as DocPageBlockComponent;
+      const { scrollLeft, scrollTop } = pageBlock.viewportElement;
+      posLeft += scrollLeft;
+      posTop += scrollTop;
+    }
+
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
 
@@ -865,61 +874,34 @@ export class DragHandleWidget extends WidgetElement {
         let { height } = blockElement.getBoundingClientRect();
         height = Math.ceil(height);
 
-        // TODO: consider multi-blocks drag handle height
-        // if (
-        //   containBlock(
-        //     this._selectedBlocks,
-        //     getBlockIdFromPath(this._hoveredBlockPath)
-        //   )
-        // ) {
-        //   const margin = 8 * this._scale;
-        //   // add all the blocks height
-        //   // Should only add margin for n-1 blocks, but n height
-        //   // write the code in this way to avoid the last block margin
-        //   height = this._selectedBlocks.reduce((acc, block) => {
-        //     const blockElement = this.root.viewStore.viewFromPath(
-        //       'block',
-        //       block.path as string[]
-        //     );
-        //     if (!blockElement) return acc;
-        //     return acc + blockElement.getBoundingClientRect().height;
-        //   }, 0);
-
-        //   height += margin * (this._selectedBlocks.length - 1);
-        // }
-
-        const containerHeight = Math.ceil(
-          getDragHandleContainerHeight(blockElement.model) * this._scale
-        );
-
-        // TODO: consider multi-blocks drag handle height, should extend from bottom ?
-        // 1. Single line block: extend form center
-        // 2. Multi-line block: extend from top
-        if (containerHeight === height) {
-          // Single line block, transform fromm center
-          this._dragHandleGrabber.style.height = `${height - 8}px`;
-          this._dragHandleGrabber.style.width = `${
-            HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
-          }px`;
-          this._dragHandleGrabber.style.borderRadius = `${
-            DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
-          }px`;
-        } else if (containerHeight < height) {
-          // Multi line block, transform from top
-          this._dragHandleGrabber.classList.add('from-top');
-          // TODO: need a better way to extend drag handle grabber
-          this._dragHandleGrabber.style.transform = `scaleY(${
-            (height - 2 * DRAG_HANDLE_GRABBER_MARGIN * this._scale) /
-            (DRAG_HANDLE_GRABBER_HEIGHT * this._scale)
-          })`;
-          this._dragHandleGrabber.style.width = `${
-            HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
-          }px`;
-          this._dragHandleGrabber.style.borderRadius = `0px`;
-        }
-
         // Show hover rect for all the blocks can be dragged
         this._showHoverRect(blockElement);
+
+        if (!this._dragHoverRect) return;
+
+        height = this._dragHoverRect.height - 16;
+        const top = this._dragHoverRect.top + 8;
+
+        this._dragHandleContainer.style.height = `${height}px`;
+        const lastTop = this._dragHandleContainer.getBoundingClientRect().top;
+        let translateY = top - lastTop;
+
+        if (isPageMode(this.page)) {
+          const pageBlock = this._pageBlockElement as DocPageBlockComponent;
+          const { scrollTop } = pageBlock.viewportElement;
+          translateY -= scrollTop;
+        }
+
+        this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
+        this._dragHandleContainer.style.padding = `0`;
+
+        this._dragHandleGrabber.style.height = `100%`;
+        this._dragHandleGrabber.style.width = `${
+          HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
+        }px`;
+        this._dragHandleGrabber.style.borderRadius = `${
+          DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
+        }px`;
       }
     );
 
@@ -931,10 +913,13 @@ export class DragHandleWidget extends WidgetElement {
         if (!this._dragHandleGrabber) return;
 
         this._dragHoverRect = null;
-        this._dragHandleGrabber.classList.remove('from-top');
+        const blockElement = this.root.viewStore.viewFromPath(
+          'block',
+          this._hoveredBlockPath as string[]
+        );
+        if (!blockElement) return;
 
-        this._dragHandleGrabber.style.transform = `scaleY(${1})`;
-        this._resetDragHandleGrabber();
+        this._show(blockElement);
       }
     );
   }
@@ -1001,9 +986,7 @@ export class DragHandleWidget extends WidgetElement {
     return html`
       <div class="affine-drag-handle-widget">
         <div class="affine-drag-handle-container">
-          <div class="affine-drag-handle">
-            <div class="affine-drag-handle-grabber"></div>
-          </div>
+          <div class="affine-drag-handle-grabber"></div>
         </div>
         <div class="affine-drag-indicator" style=${indicatorStyle}></div>
         <div class="affine-drag-hover-rect" style=${hoverRectStyle}></div>

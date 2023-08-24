@@ -10,41 +10,27 @@ export const styles = css`
   .affine-drag-handle-container {
     top: 0;
     left: 0;
-    position: fixed;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: ${DRAG_HANDLE_WIDTH + 8}px;
-    transform-origin: 0 0;
-    pointer-events: none;
-    user-select: none;
-  }
-  .affine-drag-handle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute;
     width: ${DRAG_HANDLE_WIDTH}px;
-    min-height: ${DRAG_HANDLE_HEIGHT}px;
+    min-height: 12px;
     pointer-events: auto;
-    color: var(--affine-icon-color);
+    user-select: none;
+    transition: transform 0.25s ease;
+  }
+  .affine-drag-handle-grabber {
+    width: 4px;
+    height: 100%;
+    border-radius: 1px;
+    background: var(--affine-placeholder-color);
+    transition: height 0.25s ease, width 0.25s ease;
+  }
+  .affine-drag-handle-container:hover {
+    cursor: grab;
   }
   @media print {
     .affine-drag-handle {
       display: none;
     }
-  }
-  .affine-drag-handle-grabber {
-    width: 4px;
-    height: 12px;
-    border-radius: 1px;
-    background: var(--affine-placeholder-color);
-    transition: all 0.3s ease-in-out;
-  }
-  .affine-drag-handle-grabber.from-top {
-    transform-origin: top center;
-  }
-  .affine-drag-handle-container:hover > .affine-drag-handle {
-    cursor: grab;
   }
   .affine-drag-indicator {
     position: fixed;
@@ -67,10 +53,7 @@ export const styles = css`
     background: var(--affine-hover-color);
     pointer-events: none;
     z-index: 2;
-    animation: expand 0.5s forwards;
-  }
-  .affine-drag-hover-rect.expand {
-    animation: expand 0.5s forwards;
+    animation: expand 0.25s forwards;
   }
   @keyframes expand {
     0% {
