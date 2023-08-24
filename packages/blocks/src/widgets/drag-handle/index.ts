@@ -162,6 +162,7 @@ export class DragHandleWidget extends WidgetElement {
     const padding =
       ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
     this._dragHandleContainer.style.padding = `${padding}px 0`;
+
     this._dragHandleContainer.style.width = `${
       DRAG_HANDLE_WIDTH * this._scale
     }px`;
@@ -888,7 +889,9 @@ export class DragHandleWidget extends WidgetElement {
 
         this._dragHandleContainer.style.height = `${height}px`;
         const lastTop = this._dragHandleContainer.getBoundingClientRect().top;
-        let translateY = top - lastTop;
+        const paddingTop =
+          parseInt(this._dragHandleContainer.style.paddingTop) ?? 0;
+        let translateY = top - lastTop - paddingTop;
 
         if (isPageMode(this.page)) {
           const pageBlock = this._pageBlockElement as DocPageBlockComponent;
@@ -897,7 +900,6 @@ export class DragHandleWidget extends WidgetElement {
         }
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
-        this._dragHandleContainer.style.padding = `0`;
 
         this._dragHandleGrabber.style.height = `100%`;
         this._dragHandleGrabber.style.width = `${
