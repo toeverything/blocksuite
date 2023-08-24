@@ -8,6 +8,7 @@ import type {
   ImageBlockModel,
   ImageProps,
 } from '../image-block/image-model.js';
+import { transformModel } from '../page-block/utils/operations/model.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
@@ -56,36 +57,98 @@ export async function downloadAttachment(
   downloadBlob(attachment, attachmentModel.name);
 }
 
+// Use lru strategy is a better choice, but it's just a temporary solution.
+const MAX_TEMP_DATA_SIZE = 100;
+/**
+ * TODO @Saul-Mirone use some other way to store the temp data
+ *
+ * @deprecated Waiting for migration
+ */
+const tempAttachmentMap = new Map<
+  string,
+  {
+    // name for the attachment
+    name: string;
+  }
+>();
+const tempImageMap = new Map<
+  string,
+  {
+    // This information comes from pictures.
+    // If the user switches between pictures and attachments,
+    // this information should be retained.
+    width: number | undefined;
+    height: number | undefined;
+  }
+>();
+
+const withTempConvertData = () => {
+  const saveAttachmentData = (newId: string, model: AttachmentBlockModel) => {
+    if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) tempAttachmentMap.clear();
+
+    const { name } = model;
+    tempAttachmentMap.set(newId, { name });
+  };
+  const getAttachmentData = (blockId: string) => {
+    const data = tempAttachmentMap.get(blockId);
+    tempAttachmentMap.delete(blockId);
+    return data;
+  };
+
+  const saveImageData = (newId: string, model: ImageBlockModel) => {
+    if (tempImageMap.size > MAX_TEMP_DATA_SIZE) tempImageMap.clear();
+
+    const { width, height } = model;
+    tempImageMap.set(newId, { width, height });
+  };
+  const getImageData = (blockId: string) => {
+    const data = tempImageMap.get(blockId);
+    tempImageMap.delete(blockId);
+    return data;
+  };
+  return {
+    saveAttachmentData,
+    getAttachmentData,
+    saveImageData,
+    getImageData,
+  };
+};
+
+/**
+ * Turn the attachment block into an image block.
+ */
 export async function turnIntoEmbedView(model: AttachmentBlockModel) {
   const sourceId = model.sourceId;
   assertExists(sourceId);
-  const imageProp: ImageProps & { flavour: 'affine:image' } = {
-    flavour: 'affine:image',
+  const { saveAttachmentData, getImageData } = withTempConvertData();
+  const imageConvertData = getImageData(model.id);
+  const imageProp: ImageProps = {
     sourceId,
-    name: model.name,
     caption: model.caption,
-    width: model.imageWidth,
-    height: model.imageHeight,
+    ...imageConvertData,
   };
-  model.page.addSiblingBlocks(model, [imageProp]);
-  model.page.deleteBlock(model);
+  const id = transformModel(model, 'affine:image', imageProp);
+  saveAttachmentData(id, model);
 }
 
+/**
+ * Turn the image block into a attachment block.
+ */
 export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   const sourceId = model.sourceId;
   assertExists(sourceId);
-  const attachmentProp: AttachmentProps & { flavour: 'affine:attachment' } = {
-    flavour: 'affine:attachment',
+  const { saveImageData, getAttachmentData } = withTempConvertData();
+  const attachmentConvertData = getAttachmentData(model.id);
+  const attachmentProp: AttachmentProps = {
     sourceId,
-    name: model.name || blob.name,
+    name: blob.name,
     size: blob.size,
     type: blob.type,
     caption: model.caption,
-    imageHeight: model.height,
-    imageWidth: model.width,
+    ...attachmentConvertData,
   };
-  model.page.addSiblingBlocks(model, [attachmentProp]);
-  model.page.deleteBlock(model);
+  const id = transformModel(model, 'affine:attachment', attachmentProp);
+  saveImageData(id, model);
 }
 
 async function uploadFileForAttachment(
