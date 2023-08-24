@@ -4,7 +4,7 @@ import './components/lang-list.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { flip, offset, shift } from '@floating-ui/dom';
+import { offset, shift } from '@floating-ui/dom';
 import { css, html, nothing, render } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -17,6 +17,7 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
+import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
@@ -338,10 +339,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _observePosition() {
-    // At AFFiNE, avoid the option element to be covered by the header
-    // we need to reserve the space for the header
-    const HEADER_HEIGHT = 64;
-
     this._disposables.addFromEvent(this, 'mouseenter', () => {
       if (this._optionsPortal?.isConnected) return;
       const abortController = new AbortController();
@@ -360,9 +357,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           }),
         computePosition: {
           referenceElement: this,
-          placement: 'right',
+          placement: 'right-start',
           middleware: [
-            flip(),
             offset({
               mainAxis: 12,
               crossAxis: 10,
@@ -370,8 +366,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             shift({
               crossAxis: true,
               padding: {
-                top: HEADER_HEIGHT,
-                bottom: 10,
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
                 right: 12,
               },
             }),
