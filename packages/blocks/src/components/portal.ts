@@ -79,7 +79,7 @@ type Renderable =
   | undefined;
 
 type PortalOptions = {
-  template: Renderable | ((updatePortal: () => void) => Renderable);
+  template: Renderable | ((ctx: { updatePortal: () => void }) => Renderable);
   container?: HTMLElement;
   /**
    * The portal is removed when the AbortSignal is aborted.
@@ -126,14 +126,25 @@ export function createSimplePortal({
   const root = shadowDom ? portalRoot.shadowRoot : portalRoot;
   assertExists(root);
 
-  const updatePortal = () => {
+  let updateId = 0;
+  const updatePortal: (id: number) => void = id => {
+    if (id !== updateId) {
+      console.warn(
+        'Potentially infinite recursion! Please clean up the old event listeners before `updatePortal`'
+      );
+      return;
+    }
+    updateId++;
+    const curId = updateId;
     const templateResult =
-      template instanceof Function ? template(updatePortal) : template;
+      template instanceof Function
+        ? template({ updatePortal: () => updatePortal(curId) })
+        : template;
     assertExists(templateResult);
     render(templateResult, root, renderOptions);
   };
 
-  updatePortal();
+  updatePortal(updateId);
   container.append(portalRoot);
   return portalRoot;
 }
@@ -187,7 +198,8 @@ export function createLitPortal({
   const template = portalOptions.template;
   const templateWithPosition =
     template instanceof Function
-      ? (updatePortal: () => void) => template({ updatePortal, positionSlot })
+      ? ({ updatePortal }: { updatePortal: () => void }) =>
+          template({ updatePortal, positionSlot })
       : template;
 
   const portalRoot = createSimplePortal({
