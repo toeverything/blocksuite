@@ -3,7 +3,7 @@ import './shape-menu.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { ShapeStyle, type ShapeType } from '@blocksuite/phasor';
+import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
