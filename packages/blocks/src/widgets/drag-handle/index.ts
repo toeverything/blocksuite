@@ -37,7 +37,7 @@ import {
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
-import { DRAG_HANDLE_HEIGHT, DRAG_HANDLE_WIDTH, styles } from './styles.js';
+import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
   captureEventTarget,
   containBlock,
@@ -78,6 +78,7 @@ export class DragHandleWidget extends WidgetElement {
   private _hoveredBlockId = '';
   private _hoveredBlockPath: string[] | null = null;
   private _lastHoveredBlockPath: string[] | null = null;
+  private _hoverDragHandle = false;
   private _dropBlockId = '';
   private _dropBefore = false;
 
@@ -110,6 +111,7 @@ export class DragHandleWidget extends WidgetElement {
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
     this._lastHoveredBlockPath = null;
+    this._hoverDragHandle = false;
     this._draggingElements = [];
     this._dropBlockId = '';
     this._dropBefore = false;
@@ -157,7 +159,8 @@ export class DragHandleWidget extends WidgetElement {
     this._dragHandleContainer.style.height = `${
       containerHeight * this._scale
     }px`;
-    const padding = (containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2;
+    const padding =
+      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
     this._dragHandleContainer.style.padding = `${padding}px 0`;
     this._dragHandleContainer.style.width = `${
       DRAG_HANDLE_WIDTH * this._scale
@@ -520,10 +523,11 @@ export class DragHandleWidget extends WidgetElement {
 
     // If current block is not the last hovered block, show drag handle beside the hovered block
     if (
-      !this._lastHoveredBlockPath ||
-      this._hoveredBlockPath.join('|') !==
-        this._lastHoveredBlockPath?.join('|') ||
-      this._dragHandleContainer.style.display === 'none'
+      (!this._lastHoveredBlockPath ||
+        this._hoveredBlockPath.join('|') !==
+          this._lastHoveredBlockPath?.join('|') ||
+        this._dragHandleContainer.style.display === 'none') &&
+      !this._hoverDragHandle
     ) {
       this._show(closestBlockElement);
       this._lastHoveredBlockPath = this._hoveredBlockPath;
@@ -902,6 +906,8 @@ export class DragHandleWidget extends WidgetElement {
         this._dragHandleGrabber.style.borderRadius = `${
           DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
         }px`;
+
+        this._hoverDragHandle = true;
       }
     );
 
@@ -920,6 +926,7 @@ export class DragHandleWidget extends WidgetElement {
         if (!blockElement) return;
 
         this._show(blockElement);
+        this._hoverDragHandle = false;
       }
     );
   }
