@@ -70,7 +70,7 @@ export function updateBlockElementType(
       newModels.push(model);
       return;
     }
-    const newId = transformModel(model, flavour, type);
+    const newId = transformModel(model, flavour, { type });
     const newModel = page.getBlockById(newId);
     if (!newModel) {
       throw new Error('Failed to get new model after transform block!');

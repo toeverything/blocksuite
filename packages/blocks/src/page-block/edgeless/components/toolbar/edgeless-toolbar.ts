@@ -25,6 +25,7 @@ import {
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
   HandIcon,
+  PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
   SelectIcon,
 } from '../../../../icons/index.js';
@@ -344,12 +345,16 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       >
       </edgeless-frame-order-button>
       <edgeless-tool-icon-button
-        .tooltip=${'Full Screen'}
+        .tooltip=${document.fullscreenElement
+          ? 'Exit Full Screen'
+          : 'Enter Full Screen'}
         @click=${() => {
           this._toggleFullScreen();
         }}
       >
-        ${PresentationFullScreenIcon}
+        ${document.fullscreenElement
+          ? PresentationExitFullScreenIcon
+          : PresentationFullScreenIcon}
       </edgeless-tool-icon-button>
       <div class="short-divider"></div>
       <div
