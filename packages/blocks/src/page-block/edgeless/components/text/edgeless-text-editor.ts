@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-text-editor')
@@ -98,13 +99,13 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   private _unmount() {
     this.vEditor?.unmount();
     assertExists(this._element);
+    assertExists(this._edgeless);
     this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
       display: true,
     });
 
     if (this._element?.text.length === 0) {
-      this._edgeless?.connector.detachConnectors([this._element]);
-      this._edgeless?.surface.removeElement(this._element?.id);
+      deleteElements(this._edgeless, [this._element]);
     }
 
     this.remove();

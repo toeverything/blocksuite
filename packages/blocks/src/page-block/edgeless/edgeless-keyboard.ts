@@ -1,7 +1,6 @@
 import { Bound, ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
 
 import {
-  type Connectable,
   type EdgelessTool,
   LineWidth,
 } from '../../__internal__/utils/types.js';
@@ -18,7 +17,8 @@ import {
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
-import { isPhasorElement, isTopLevelBlock } from './utils/query.js';
+import { deleteElements } from './utils/crud.js';
+import { isPhasorElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -218,19 +218,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    const { elements } = edgeless.selectionManager;
-    elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = edgeless.page.root?.children ?? [];
-        // FIXME: should always keep at least 1 note
-        if (children.length > 1) {
-          edgeless.page.deleteBlock(element);
-        }
-      } else {
-        edgeless.connector.detachConnectors([element as Connectable]);
-        edgeless.surface.removeElement(element.id);
-      }
-    });
+    deleteElements(edgeless, edgeless.selectionManager.elements);
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);

@@ -154,6 +154,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   })
   private _currentFrameIndex = 0;
   private _timer: ReturnType<typeof setTimeout> | null = null;
+  private _index = -1;
 
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
@@ -302,7 +303,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     } else {
       launchIntoFullscreen(this.edgeless.editorContainer);
       this._timer = setTimeout(() => {
-        this._currentFrameIndex = this._currentFrameIndex + 0;
+        this._currentFrameIndex = this._index;
       }, 400);
     }
   }
@@ -322,7 +323,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <span
           class="edgeless-frame-nativator-title"
           @click=${() =>
-            (this._currentFrameIndex = this._currentFrameIndex + 1 - 1)}
+            (this._currentFrameIndex = this._currentFrameIndex + 0)}
           >${frame?.title ?? 'no frame'}</span
         >
         <span class="edgeless-frame-navigator-count"
@@ -389,6 +390,15 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${'Presentation'}
         @click=${() => {
+          this._index = this._currentFrameIndex;
+          if (
+            this.edgeless.selectionManager.elements[0] instanceof FrameElement
+          ) {
+            this._index = this._frames.findIndex(
+              frame =>
+                frame.id === this.edgeless.selectionManager.elements[0].id
+            );
+          }
           this.setEdgelessTool({ type: 'frameNavigator' });
           if (this._frames.length === 0)
             toast(

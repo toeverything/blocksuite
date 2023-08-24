@@ -18,6 +18,7 @@ import {
   type EraserTool,
   getBlockElementById,
 } from '../../../__internal__/utils/index.js';
+import { deleteElements } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './index.js';
 
@@ -148,14 +149,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   }
 
   override onContainerDragEnd(): void {
-    this._eraseTargets.forEach(erasable => {
-      if (isTopLevelBlock(erasable)) {
-        this._page.deleteBlock(erasable);
-      } else {
-        this._edgeless.connector.detachConnectors([erasable]);
-        this._surface.removeElement(erasable.id);
-      }
-    });
+    deleteElements(this._edgeless, Array.from(this._eraseTargets));
     this._reset();
     this._page.captureSync();
   }
