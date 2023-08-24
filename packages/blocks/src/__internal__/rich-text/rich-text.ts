@@ -275,15 +275,14 @@ export class RichText extends ShadowlessElement {
     }
 
     this.updateComplete.then(() => {
-      if (this._vEditor) {
+      if (this._vEditor?.mounted) {
         this._vEditor.unmount();
-        this._vEditor = null;
       }
       this._initVEditor();
 
       this.disposables.add({
         dispose: () => {
-          if (this._vEditor) {
+          if (this._vEditor?.mounted) {
             this._vEditor.unmount();
           }
         },

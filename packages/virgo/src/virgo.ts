@@ -1,6 +1,6 @@
 import type { NullablePartial } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import { html, nothing, render } from 'lit';
+import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
@@ -71,6 +71,14 @@ export class VEditor<
   };
   get yText() {
     return this._yText;
+  }
+
+  get yTextString() {
+    return this.yText.toString();
+  }
+
+  get yTextLength() {
+    return this.yText.length;
   }
 
   get rootElement() {
@@ -160,7 +168,7 @@ export class VEditor<
     const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
     virgoElement.virgoEditor = this;
     this._rootElement = virgoElement;
-    this._rootElement.replaceChildren();
+    render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
     this.yText.observe(this._onYTextChange);
@@ -395,7 +403,7 @@ export class VEditor<
   };
 
   rerenderWholeEditor() {
-    render(html`<div></div>`, this.rootElement);
+    render(nothing, this.rootElement);
     this._deltaService.render();
   }
 
