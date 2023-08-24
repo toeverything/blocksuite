@@ -60,10 +60,24 @@ declare global {
   }
 }
 
+/**
+ * See https://lit.dev/docs/templates/expressions/#child-expressions
+ */
+type Renderable =
+  | TemplateResult<1>
+  // Any DOM node can be passed to a child expression.
+  | HTMLElement
+  // Numbers values like 5 will render the string '5'. Bigints are treated similarly.
+  | number
+  // A boolean value true will render 'true', and false will render 'false', but rendering a boolean like this is uncommon.
+  | boolean
+  // The empty string '', null, and undefined are specially treated and render nothing.
+  | string
+  | null
+  | undefined;
+
 type PortalOptions = {
-  template:
-    | TemplateResult<1>
-    | ((updatePortal: () => void) => TemplateResult<1>);
+  template: Renderable | ((updatePortal: () => void) => Renderable);
   container?: HTMLElement;
   /**
    * The portal is removed when the AbortSignal is aborted.

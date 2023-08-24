@@ -145,7 +145,6 @@ export function AttachmentOptionsTemplate({
               referenceElement: container,
               placement: 'top-end',
               middleware: [flip(), offset(4)],
-              autoUpdate: true,
             },
           });
         }}
