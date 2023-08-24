@@ -286,7 +286,8 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerDragStart = (e: PointerEventState) => {
-    if (this.page.readonly) return;
+    // only allow pan tool in readonly mode
+    if (this.page.readonly && this.edgelessTool.type !== 'pan') return;
     // do nothing when holding right-key and not in pan mode
     if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
 
@@ -294,7 +295,8 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerDragMove = (e: PointerEventState) => {
-    if (this.page.readonly) return;
+    // only allow pan tool in readonly mode
+    if (this.page.readonly && this.edgelessTool.type !== 'pan') return;
     // do nothing when holding right-key and not in pan mode
     if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
 
@@ -302,7 +304,8 @@ export class EdgelessToolsManager {
   };
 
   private _onContainerDragEnd = (e: PointerEventState) => {
-    if (this.page.readonly) return;
+    // only allow pan tool in readonly mode
+    if (this.page.readonly && this.edgelessTool.type !== 'pan') return;
     // do nothing when holding right-key and not in pan mode
     if (e.button === 2 && this.edgelessTool.type !== 'pan') return;
 

@@ -539,7 +539,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private async _updateToolbarPosition() {
-    if (!this._toolbarVisible || !this._shouldRenderSelection()) return;
+    if (
+      !this._toolbarVisible ||
+      !this._shouldRenderSelection() ||
+      this.page.readonly
+    )
+      return;
 
     if (!this._selectedRectEl || !this._componentToolbar) {
       await this.updateComplete;
@@ -650,7 +655,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, page, slots, selection, surface } = this;
+    const { _disposables, page, slots, selection, surface, edgeless } = this;
 
     _disposables.add(
       // vewport zooming / scrolling
@@ -671,6 +676,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
+    );
   }
 
   protected override updated(
@@ -762,12 +770,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       >
         ${resizeHandles} ${connectorHandle}
       </div>
-      <edgeless-auto-complete
-        .edgeless=${edgeless}
-        .selectedRect=${_selectedRect}
-      >
-      </edgeless-auto-complete>
-      ${this._toolbarVisible
+      ${page.readonly
+        ? nothing
+        : html`<edgeless-auto-complete
+            .edgeless=${edgeless}
+            .selectedRect=${_selectedRect}
+          >
+          </edgeless-auto-complete>`}
+      ${this._toolbarVisible && !page.readonly
         ? html`<edgeless-component-toolbar
             style=${styleMap({
               left: `${_toolbarPosition.x}px`,
