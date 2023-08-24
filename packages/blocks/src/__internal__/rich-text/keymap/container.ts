@@ -86,48 +86,56 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   blockElement.bindHotKey({
     ArrowUp: ctx => {
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
 
-      if (vRange.length !== 0) {
-        vEditor.setVRange({
-          index: vRange.index,
-          length: 0,
-        });
+        if (vRange.length !== 0) {
+          vEditor.setVRange({
+            index: vRange.index,
+            length: 0,
+          });
+        }
+
+        const offset = _getLineOffset(vEditor);
+
+        if (offset === 0) {
+          _preventDefault(ctx);
+          return;
+        }
+
+        return true;
       }
 
-      const offset = _getLineOffset(vEditor);
-
-      if (offset === 0) {
-        _preventDefault(ctx);
-        return;
-      }
-
-      return true;
+      return;
     },
     ArrowDown: ctx => {
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (blockElement.selected?.is('text')) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
 
-      if (vRange.length !== 0) {
-        vEditor.setVRange({
-          index: vRange.index,
-          length: 0,
-        });
-      }
-
-      const lines = _getLines(vEditor);
-      const offset = _getLineOffset(vEditor);
-      if (lines.length - 1 === offset) {
-        if (getNextBlock(blockElement)) {
-          _preventDefault(ctx);
+        if (vRange.length !== 0) {
+          vEditor.setVRange({
+            index: vRange.index,
+            length: 0,
+          });
         }
-        return;
+
+        const lines = _getLines(vEditor);
+        const offset = _getLineOffset(vEditor);
+        if (lines.length - 1 === offset) {
+          if (getNextBlock(blockElement)) {
+            _preventDefault(ctx);
+          }
+          return;
+        }
+
+        return true;
       }
 
-      return true;
+      return;
     },
     ArrowRight: ctx => {
       if (blockElement.selected?.is('block')) {
@@ -188,6 +196,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         assertExists(vRange);
         hardEnter(model, vRange, vEditor, state.raw);
         _preventDefault(ctx);
+
+        return true;
       }
 
       return;
@@ -217,6 +227,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         assertExists(vRange);
         hardEnter(model, vRange, vEditor, state.raw, true);
         _preventDefault(ctx);
+
+        return true;
       }
 
       return;
@@ -246,6 +258,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
             _preventDefault(ctx);
           }
         }
+
+        return true;
       }
     },
     'Mod-a': ctx => {
@@ -316,20 +330,29 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       return;
     },
     Backspace: ctx => {
-      const state = ctx.get('keyboardState');
-      const vEditor = _getVirgo();
-      if (!onBackspace(model, state.raw, vEditor)) {
-        _preventDefault(ctx);
+      if (blockElement.selected?.is('text')) {
+        const state = ctx.get('keyboardState');
+        const vEditor = _getVirgo();
+        if (!onBackspace(model, state.raw, vEditor)) {
+          _preventDefault(ctx);
+        }
+
+        return true;
       }
-      return true;
+
+      return;
     },
     Delete: ctx => {
-      const state = ctx.get('keyboardState');
-      const vEditor = _getVirgo();
-      if (!onForwardDelete(model, state.raw, vEditor)) {
-        _preventDefault(ctx);
+      if (blockElement.selected?.is('text')) {
+        const state = ctx.get('keyboardState');
+        const vEditor = _getVirgo();
+        if (!onForwardDelete(model, state.raw, vEditor)) {
+          _preventDefault(ctx);
+        }
+        return true;
       }
-      return true;
+
+      return;
     },
   });
 

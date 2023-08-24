@@ -5,6 +5,9 @@ import type { VEditor } from '../virgo.js';
 
 const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
+export const VKEYBOARD_PREVENT_DEFAULT = false;
+export const VKEYBOARD_ALLOW_DEFAULT = true;
+
 export interface VKeyboardBinding {
   key: number | string | string[];
   handler: VKeyboardBindingHandler;
@@ -28,7 +31,7 @@ export interface VKeyboardBindingContext {
 }
 export type VKeyboardBindingHandler = (
   context: VKeyboardBindingContext
-) => boolean;
+) => typeof VKEYBOARD_PREVENT_DEFAULT | typeof VKEYBOARD_ALLOW_DEFAULT;
 
 export function createVirgoKeyDownHandler(
   vEditor: VEditor,
@@ -108,7 +111,7 @@ export function createVirgoKeyDownHandler(
       if (binding.suffix && !binding.suffix.test(currContext.suffixText)) {
         return false;
       }
-      return !binding.handler(currContext);
+      return binding.handler(currContext) === VKEYBOARD_PREVENT_DEFAULT;
     });
     if (prevented) {
       evt.preventDefault();

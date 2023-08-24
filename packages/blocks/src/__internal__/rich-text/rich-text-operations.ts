@@ -5,8 +5,6 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
-import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import { supportsChildren } from '../utils/common.js';
 import {
   asyncFocusRichText,
@@ -20,11 +18,7 @@ import {
   getPreviousBlock,
   getVirgoByModel,
 } from '../utils/query.js';
-import {
-  focusBlockByModel,
-  focusTitle,
-  getCurrentNativeRange,
-} from '../utils/selection.js';
+import { focusBlockByModel, focusTitle } from '../utils/selection.js';
 import type { ExtendedModel } from '../utils/types.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -784,50 +778,4 @@ export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
     return;
   }
   handleUnknownBlockForwardDelete(model);
-}
-
-export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
-  const range = getCurrentNativeRange();
-  if (!range.collapsed) {
-    // If the range is not collapsed,
-    // we assume that the caret is at the start of the range.
-    range.collapse(true);
-  }
-  const isFirstLine = checkFirstLine(range, editableContainer);
-  if (isFirstLine) {
-    // If the caret is at the first line of the block,
-    // default behavior will move the caret to the start of the line,
-    // which is not expected. so we need to prevent default behavior.
-    return PREVENT_DEFAULT;
-  }
-  // Avoid triggering hotkey bindings
-  event.stopPropagation();
-  return ALLOW_DEFAULT;
-}
-
-export function handleKeyDown(
-  block: BaseBlockModel,
-  event: KeyboardEvent,
-  editableContainer: HTMLElement
-) {
-  const range = getCurrentNativeRange();
-  if (!range.collapsed) {
-    // If the range is not collapsed,
-    // we assume that the caret is at the end of the range.
-    range.collapse();
-  }
-  const isLastLine = checkLastLine(range, editableContainer);
-  if (isLastLine) {
-    // When the cursor is at the last line of the block,
-    // default ArrowDown behavior will move the cursor to the end of the line
-    // If the block is the last block of the page,
-    // we want the cursor to move to next block instead of the end of the line,
-    // thus we should prevent the default behavior.
-    // If the block is the last block of the page,
-    // let the cursor move to the end of line as default.
-    return getNextBlock(block) ? PREVENT_DEFAULT : ALLOW_DEFAULT;
-  }
-  // Avoid triggering hotkey bindings
-  event.stopPropagation();
-  return ALLOW_DEFAULT;
 }

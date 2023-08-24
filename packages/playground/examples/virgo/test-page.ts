@@ -9,6 +9,7 @@ import {
   createVirgoKeyDownHandler,
   type DeltaInsert,
   VEditor,
+  VKEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/virgo';
 import { css, html, nothing } from 'lit';
@@ -162,7 +163,7 @@ export class RichText extends ShadowlessElement {
             }
           }
 
-          return false;
+          return VKEYBOARD_ALLOW_DEFAULT;
         },
       },
     });

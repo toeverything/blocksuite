@@ -1,16 +1,18 @@
 import { assertExists, isEqual } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import type {
-  VEditor,
-  VKeyboardBindingContext,
-  VRange,
+import {
+  type VEditor,
+  VKEYBOARD_ALLOW_DEFAULT,
+  VKEYBOARD_PREVENT_DEFAULT,
+  type VKeyboardBindingContext,
+  type VKeyboardBindingHandler,
+  type VRange,
 } from '@blocksuite/virgo';
 import type * as Y from 'yjs';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../consts.js';
 import {
   asyncSetVRange,
   convertToDivider,
@@ -30,17 +32,17 @@ interface MarkdownMatch {
     vRange: VRange;
     pattern: RegExp;
     undoManager: Y.UndoManager;
-  }) => boolean;
+  }) => ReturnType<VKeyboardBindingHandler>;
 }
 
 const markdownMatches: MarkdownMatch[] = [
   {
     name: 'bolditalic',
-    pattern: /(?:\*){3}([^* \n](.+?[^* \n])?)(?:\*){3}$/g,
+    pattern: /(?:\*){3}([^ ](.+?)[^ ])(?:\*){3}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
 
       const annotatedText = match[0];
@@ -85,16 +87,16 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'bold',
-    pattern: /(?:\*){2}([^* \n](.+?[^* \n])?)(?:\*){2}$/g,
+    pattern: /(?:\*){2}([^ ](.+?)[^ ])(?:\*){2}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -137,16 +139,16 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'italic',
-    pattern: /(?:\*){1}([^* \n](.+?[^* \n])?)(?:\*){1}$/g,
+    pattern: /(?:\*){1}([^ ](.+?)[^ ])(?:\*){1}$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -189,16 +191,16 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'strikethrough',
-    pattern: /(?:~~)([^~ \n](.+?[^~ \n])?)(?:~~)$/g,
+    pattern: /(?:~~)([^ ](.+?)[^ ])(?:~~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -241,16 +243,16 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
     name: 'underthrough',
-    pattern: /(?:~)([^~ \n](.+?[^~ \n])?)(?:~)$/g,
+    pattern: /(?:~)([^ ](.+?)[^ ])(?:~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
@@ -293,7 +295,7 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -302,13 +304,13 @@ const markdownMatches: MarkdownMatch[] = [
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
       const annotatedText = match[0];
       const startIndex = vRange.index - annotatedText.length;
 
       if (prefixText.match(/^([* \n]+)$/g)) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
 
       vEditor.insertText(
@@ -349,7 +351,7 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
   {
@@ -361,7 +363,7 @@ const markdownMatches: MarkdownMatch[] = [
       const hrefText = prefixText.match(/(?:\[(.*?)\])/g)?.[0];
       const hrefLink = prefixText.match(/(?:\((.*?)\))/g)?.[0];
       if (startIndex === -1 || !matchedText || !hrefText || !hrefLink) {
-        return false;
+        return VKEYBOARD_ALLOW_DEFAULT;
       }
       const start = vRange.index - matchedText.length;
 
@@ -403,7 +405,7 @@ const markdownMatches: MarkdownMatch[] = [
         length: 0,
       });
 
-      return true;
+      return VKEYBOARD_PREVENT_DEFAULT;
     },
   },
 ];
@@ -429,7 +431,7 @@ export function tryFormatInlineStyle(
     }
   }
 
-  return ALLOW_DEFAULT;
+  return VKEYBOARD_ALLOW_DEFAULT;
 }
 
 export function tryConvertBlock(
@@ -441,14 +443,14 @@ export function tryConvertBlock(
 ) {
   const [, offset] = vEditor.getLine(range.index);
   if (offset > prefixText.length) {
-    return ALLOW_DEFAULT;
+    return VKEYBOARD_ALLOW_DEFAULT;
   }
   const isParagraph = matchFlavours(model, ['affine:paragraph']);
   const isHeading = isParagraph && model.type.startsWith('h');
   const isParagraphQuoteBlock = isParagraph && isEqual(model.type, 'quote');
   const isCodeBlock = matchFlavours(model, ['affine:code']);
   if (isHeading || isParagraphQuoteBlock || isCodeBlock) {
-    return ALLOW_DEFAULT;
+    return VKEYBOARD_ALLOW_DEFAULT;
   }
 
   // try to add code block
@@ -458,7 +460,7 @@ export function tryConvertBlock(
       model.flavour === 'affine:paragraph' &&
       (model as ParagraphBlockModel).type === 'quote'
     ) {
-      return ALLOW_DEFAULT;
+      return VKEYBOARD_ALLOW_DEFAULT;
     }
 
     const page = model.page;
@@ -482,7 +484,7 @@ export function tryConvertBlock(
     assertExists(codeBlock);
     asyncSetVRange(codeBlock, { index: 0, length: 0 });
 
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
 
   let isConverted = false;
@@ -531,5 +533,5 @@ export function tryConvertBlock(
       isConverted = convertToList(page, model, 'numbered', prefixText);
   }
 
-  return isConverted ? PREVENT_DEFAULT : ALLOW_DEFAULT;
+  return isConverted ? VKEYBOARD_PREVENT_DEFAULT : VKEYBOARD_ALLOW_DEFAULT;
 }

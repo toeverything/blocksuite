@@ -1,8 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
+import {
+  VKEYBOARD_ALLOW_DEFAULT,
+  VKEYBOARD_PREVENT_DEFAULT,
+  type VRange,
+} from '@blocksuite/virgo';
 
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '../../consts.js';
 import { matchFlavours } from '../../utils/model.js';
 import {
   handleBlockEndEnter,
@@ -34,7 +37,7 @@ export function onSoftEnter(
     index: range.index + 1,
     length: 0,
   });
-  return PREVENT_DEFAULT;
+  return VKEYBOARD_PREVENT_DEFAULT;
 }
 
 export function hardEnter(
@@ -73,7 +76,7 @@ export function hardEnter(
     // - list
     // |   <-- will replace with a new text block
     handleLineStartBackspace(page, model);
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
   if (isEmptyList && isLastChild) {
     // Before
@@ -84,7 +87,7 @@ export function hardEnter(
     // - line1
     // - | <-- will unindent the block
     handleUnindent(page, model, range.index);
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
 
   const isEnd = model.text.length === range.index;
@@ -97,7 +100,7 @@ export function hardEnter(
     if (shouldSoftEnter) {
       // TODO handle ctrl+enter in code/quote block or other force soft enter block
       onSoftEnter(model, range, vEditor);
-      return PREVENT_DEFAULT;
+      return VKEYBOARD_PREVENT_DEFAULT;
     }
 
     // delete the \n at the end of block
@@ -112,17 +115,17 @@ export function hardEnter(
       model.text.delete(range.index - 1, 1);
     }
     handleBlockEndEnter(page, model);
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
 
   const isSoftEnterBlock = isSoftEnterable(model);
   if (isSoftEnterBlock) {
     onSoftEnter(model, range, vEditor);
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
 
   handleBlockSplit(page, model, range.index, range.length);
-  return PREVENT_DEFAULT;
+  return VKEYBOARD_PREVENT_DEFAULT;
 }
 
 // If a block is soft enterable, the rule is:
@@ -144,14 +147,14 @@ export function onBackspace(
 ) {
   if (isCollapsedAtBlockStart(vEditor)) {
     if (model.flavour === 'affine:code') {
-      return ALLOW_DEFAULT;
+      return VKEYBOARD_ALLOW_DEFAULT;
     }
     e.stopPropagation();
     handleLineStartBackspace(model.page, model);
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
   e.stopPropagation();
-  return ALLOW_DEFAULT;
+  return VKEYBOARD_ALLOW_DEFAULT;
 }
 
 export function onForwardDelete(
@@ -162,9 +165,9 @@ export function onForwardDelete(
   e.stopPropagation();
   if (isCollapsedAtBlockEnd(vEditor)) {
     handleLineEndForwardDelete(model.page, model);
-    return PREVENT_DEFAULT;
+    return VKEYBOARD_PREVENT_DEFAULT;
   }
-  return ALLOW_DEFAULT;
+  return VKEYBOARD_ALLOW_DEFAULT;
 }
 
 export function onKeyLeft(
@@ -176,15 +179,15 @@ export function onKeyLeft(
   // range.length === 0 means collapsed selection
   if (range.length !== 0) {
     e.stopPropagation();
-    return ALLOW_DEFAULT;
+    return VKEYBOARD_ALLOW_DEFAULT;
   }
   const lineStart = range.index === 0;
   if (!lineStart) {
     e.stopPropagation();
-    return ALLOW_DEFAULT;
+    return VKEYBOARD_ALLOW_DEFAULT;
   }
   // Need jump to previous block
-  return PREVENT_DEFAULT;
+  return VKEYBOARD_PREVENT_DEFAULT;
 }
 
 export function onKeyRight(
@@ -194,15 +197,15 @@ export function onKeyRight(
 ) {
   if (range.length !== 0) {
     e.stopPropagation();
-    return ALLOW_DEFAULT;
+    return VKEYBOARD_ALLOW_DEFAULT;
   }
   assertExists(model.text, 'Failed to onKeyRight! model.text not exists!');
   const textLength = model.text.length;
   const lineEnd = textLength === range.index;
   if (!lineEnd) {
     e.stopPropagation();
-    return ALLOW_DEFAULT;
+    return VKEYBOARD_ALLOW_DEFAULT;
   }
   // Need jump to next block
-  return PREVENT_DEFAULT;
+  return VKEYBOARD_PREVENT_DEFAULT;
 }
