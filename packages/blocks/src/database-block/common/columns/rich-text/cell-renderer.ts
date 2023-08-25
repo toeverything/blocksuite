@@ -1,74 +1,24 @@
-import { assertExists } from '@blocksuite/global/utils';
+import '../../../../__internal__/rich-text/rich-text.js';
+
 import type { Y } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
-import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import { Text as YText } from 'yjs';
+import { Text as YText, UndoManager } from 'yjs';
 
-import type {
-  AffineTextAttributes,
-  AffineVEditor,
-} from '../../../../__internal__/rich-text/virgo/types.js';
+import type { RichText } from '../../../../__internal__/rich-text/rich-text.js';
+import { attributeRenderer } from '../../../../__internal__/rich-text/virgo/attribute-renderer.js';
+import type { AffineTextSchema } from '../../../../__internal__/rich-text/virgo/types.js';
+import { affineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
-import { addHistoryToVEditor } from '../../header-area/text.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
 
-function toggleStyle(
-  vEditor: AffineVEditor,
-  attrs: AffineTextAttributes
-): void {
-  const vRange = vEditor.getVRange();
-  if (!vRange) {
-    return;
-  }
-
-  const root = vEditor.rootElement;
-  if (!root) {
-    return;
-  }
-
-  const deltas = vEditor.getDeltasByVRange(vRange);
-  let oldAttributes: AffineTextAttributes = {};
-
-  for (const [delta] of deltas) {
-    const attributes = delta.attributes;
-
-    if (!attributes) {
-      continue;
-    }
-
-    oldAttributes = { ...attributes };
-  }
-
-  const newAttributes = Object.fromEntries(
-    Object.entries(attrs).map(([k, v]) => {
-      if (
-        typeof v === 'boolean' &&
-        v ===
-          (
-            oldAttributes as {
-              [k: string]: unknown;
-            }
-          )[k]
-      ) {
-        return [k, !v];
-      } else {
-        return [k, v];
-      }
-    })
-  );
-
-  vEditor.formatText(vRange, newAttributes, {
-    mode: 'merge',
-  });
-  root.blur();
-
-  vEditor.syncVRange();
-}
+const textSchema: AffineTextSchema = {
+  textRenderer: attributeRenderer,
+  attributesSchema: affineTextAttributes,
+};
 
 @customElement('affine-database-rich-text-cell')
 export class RichTextCell extends BaseCellRenderer<Y.Text> {
@@ -103,30 +53,15 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  vEditor: AffineVEditor | null = null;
-
-  @query('.affine-database-rich-text')
-  private _container!: HTMLDivElement;
-
-  private init() {
-    const editor = this._onInitVEditor();
-    this.column.captureSync();
-    this.disposables.add({
-      dispose: () => {
-        editor.unmount();
-      },
-    });
-  }
-
-  override firstUpdated() {
-    this.init();
-  }
+  private yText!: Y.Text;
+  private undoManager!: UndoManager;
 
   override connectedCallback() {
     super.connectedCallback();
-    if (this._container) {
-      this.init();
-    }
+    this.yText = this.getYText();
+    this.undoManager = new UndoManager(this.yText, {
+      trackedOrigins: new Set([this.yText.doc?.clientID]),
+    });
   }
 
   private _initYText = (text?: string) => {
@@ -135,7 +70,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     return yText;
   };
 
-  private _onInitVEditor() {
+  private getYText() {
     let value: Y.Text;
     if (!this.value) {
       value = this._initYText();
@@ -148,15 +83,17 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    const vEditor = new VEditor(value);
-    this.vEditor = vEditor;
-    vEditor.mount(this._container);
-    vEditor.setReadonly(true);
-    return vEditor;
+    return value;
   }
 
   override render() {
-    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
+    return html` <rich-text
+      class="affine-database-rich-text"
+      .yText="${this.yText}"
+      .undoManager="${this.undoManager}"
+      .textSchema="${textSchema}"
+      .readonly="${true}"
+    ></rich-text>`;
   }
 }
 
@@ -191,41 +128,30 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  vEditor: AffineVEditor | null = null;
+  @query('rich-text')
+  private richText!: RichText;
 
-  @query('.affine-database-rich-text')
-  private _container!: HTMLDivElement;
-
-  private init() {
-    const vEditor = this._onInitVEditor();
-    this.vEditor = vEditor;
-    this.column.captureSync();
-    this.disposables.add({
-      dispose: () => {
-        vEditor.unmount();
-      },
-    });
-  }
-
-  protected override firstUpdated() {
-    this.init();
-  }
+  private yText!: Y.Text;
+  private undoManager!: UndoManager;
 
   override connectedCallback() {
     super.connectedCallback();
-    if (this._container) {
-      this.init();
-    }
+    this.yText = this.getYText();
+    this.undoManager = new UndoManager(this.yText, {
+      trackedOrigins: new Set([this.yText.doc]),
+    });
+    requestAnimationFrame(() => {
+      this.richText.vEditor?.focusEnd();
+    });
   }
 
   private _initYText = (text?: string) => {
     const yText = new YText(text);
-
     this.onChange(yText);
     return yText;
   };
 
-  private _onInitVEditor() {
+  private getYText() {
     let value: Y.Text;
     if (!this.value) {
       value = this._initYText();
@@ -238,122 +164,17 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    const vEditor = new VEditor(value);
-    vEditor.mount(this._container);
-    const historyHelper = addHistoryToVEditor(vEditor);
-    vEditor.bindHandlers({
-      keydown: e => {
-        historyHelper.handleKeyboardEvent(e);
-        this._handleKeyDown(e);
-      },
-    });
-    vEditor.focusEnd();
-    vEditor.setReadonly(this.readonly);
-    this._disposables.add(
-      vEditor.slots.vRangeUpdated.on(([range]) => {
-        if (range) {
-          if (!this.isEditing) {
-            this.selectCurrentCell(true);
-          }
-        } else {
-          this.selectCurrentCell(false);
-        }
-      })
-    );
-    return vEditor;
+    return value;
   }
 
-  private _handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape') {
-      if (event.key === 'Tab') {
-        event.preventDefault();
-        return;
-      }
-      event.stopPropagation();
-    } else {
-      // this._setEditing(false);
-      // this._container.blur();
-    }
-
-    if (!this.vEditor) return;
-    if (event.key === 'Enter') {
-      if (event.shiftKey) {
-        // soft enter
-        this._onSoftEnter();
-      } else {
-        // exit editing
-        this.selectCurrentCell(false);
-        this._container.blur();
-      }
-      event.preventDefault();
-      return;
-    }
-
-    const vEditor = this.vEditor;
-
-    switch (event.key) {
-      // bold ctrl+b
-      case 'B':
-      case 'b':
-        if (event.metaKey || event.ctrlKey) {
-          event.preventDefault();
-          toggleStyle(this.vEditor, { bold: true });
-        }
-        break;
-      // italic ctrl+i
-      case 'I':
-      case 'i':
-        if (event.metaKey || event.ctrlKey) {
-          event.preventDefault();
-          toggleStyle(this.vEditor, { italic: true });
-        }
-        break;
-      // underline ctrl+u
-      case 'U':
-      case 'u':
-        if (event.metaKey || event.ctrlKey) {
-          event.preventDefault();
-          toggleStyle(this.vEditor, { underline: true });
-        }
-        break;
-      // strikethrough ctrl+shift+s
-      case 'S':
-      case 's':
-        if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
-          event.preventDefault();
-          toggleStyle(vEditor, { strike: true });
-        }
-        break;
-      // inline code ctrl+shift+e
-      case 'E':
-      case 'e':
-        if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
-          event.preventDefault();
-          toggleStyle(vEditor, { code: true });
-        }
-        break;
-      default:
-        break;
-    }
-  };
-
-  private _onSoftEnter = () => {
-    if (this.value && this.vEditor) {
-      const vRange = this.vEditor.getVRange();
-      assertExists(vRange);
-
-      this.column.captureSync();
-      const text = new Text(this.vEditor.yText);
-      text.replace(vRange.index, length, '\n');
-      this.vEditor.setVRange({
-        index: vRange.index + 1,
-        length: 0,
-      });
-    }
-  };
-
   override render() {
-    return html`<div class="affine-database-rich-text virgo-editor"></div>`;
+    return html` <rich-text
+      class="affine-database-rich-text"
+      .yText="${this.yText}"
+      .undoManager="${this.undoManager}"
+      .textSchema="${textSchema}"
+      .readonly="${this.readonly}"
+    ></rich-text>`;
   }
 }
 
