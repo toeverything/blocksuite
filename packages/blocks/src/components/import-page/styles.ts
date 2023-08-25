@@ -3,7 +3,7 @@ import { css } from 'lit';
 import { tooltipStyle } from '../tooltip/tooltip.js';
 
 export const styles = css`
-  :host {
+  .container {
     position: absolute;
     width: 480px;
     left: calc(50% - 480px / 2);
@@ -21,7 +21,7 @@ export const styles = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  :host([hidden]) {
+  .container[hidden] {
     display: none;
   }
 
@@ -76,6 +76,15 @@ export const styles = css`
   .has-tool-tip {
     display: flex;
     margin-left: auto;
+  }
+
+  .overlay-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--affine-z-index-popover);
   }
 
   ${tooltipStyle}

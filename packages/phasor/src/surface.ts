@@ -43,6 +43,7 @@ export class SurfaceManager {
   private _computedValue: ComputedValue;
   private _defaultBatch = 'a1';
   private _batches = new Map<string, Batch<SurfaceElement>>();
+  private _isReadonly: () => boolean;
 
   slots = {
     elementUpdated: new Slot<{
@@ -55,11 +56,13 @@ export class SurfaceManager {
 
   constructor(
     yContainer: Y.Map<unknown>,
-    computedValue: ComputedValue = v => v
+    computedValue: ComputedValue = v => v,
+    getReadonlyState: () => boolean = () => false
   ) {
     this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
     this._computedValue = computedValue;
+    this._isReadonly = getReadonlyState;
     this._yContainer.observe(this._onYContainer);
   }
 
@@ -234,6 +237,10 @@ export class SurfaceManager {
     type: T,
     properties: IElementCreateProps<T>
   ): PhasorElement['id'] {
+    if (this._isReadonly()) {
+      throw new Error('Cannot add element in readonly mode');
+    }
+
     const id = generateElementId();
 
     const yMap = new Y.Map();
@@ -266,6 +273,10 @@ export class SurfaceManager {
     id: string,
     properties: IElementUpdateProps<T>
   ) {
+    if (this._isReadonly()) {
+      throw new Error('Cannot update element in readonly mode');
+    }
+
     this._transact(() => {
       const element = this._elements.get(id);
       assertExists(element);
@@ -284,6 +295,10 @@ export class SurfaceManager {
   }
 
   removeElement(id: string) {
+    if (this._isReadonly()) {
+      throw new Error('Cannot remove element in readonly mode');
+    }
+
     this._transact(() => {
       this._yContainer.delete(id);
     });

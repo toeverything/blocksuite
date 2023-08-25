@@ -14,7 +14,7 @@ test.describe('auto-complete', () => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
-      await clickView(page, [105, 50]);
+      await clickView(page, [120, 50]);
       await assertSelectedBound(page, [200, 0, 100, 100]);
       await page.pause();
     });
@@ -22,21 +22,21 @@ test.describe('auto-complete', () => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
-      await clickView(page, [50, 105]);
+      await clickView(page, [50, 120]);
       await assertSelectedBound(page, [0, 200, 100, 100]);
     });
     test('click on left auto-complete button', async ({ page }) => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
-      await clickView(page, [-5, 50]);
+      await clickView(page, [-20, 50]);
       await assertSelectedBound(page, [-200, 0, 100, 100]);
     });
     test('click on top auto-complete button', async ({ page }) => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
-      await clickView(page, [50, -5]);
+      await clickView(page, [50, -20]);
       await assertSelectedBound(page, [0, -200, 100, 100]);
     });
   });
@@ -46,7 +46,7 @@ test.describe('auto-complete', () => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await assertSelectedBound(page, [0, 0, 100, 100]);
-      await dragBetweenViewCoords(page, [105, 50], [200, 0]);
+      await dragBetweenViewCoords(page, [120, 50], [200, 0]);
       await assertSelectedBound(page, [200, -50, 100, 100]);
     });
   });

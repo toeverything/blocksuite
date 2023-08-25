@@ -1,22 +1,27 @@
-import '../../components/button.js';
-
-import { Slot } from '@blocksuite/global/utils';
+import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
+import { flip, offset } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
 
+import { createLitPortal } from '../../components/portal.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import {
+  CaptionIcon,
+  EditIcon,
+  LinkIcon,
+  MoreIcon,
+} from '../../icons/index.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { CaptionIcon, EditIcon, LinkIcon, MoreIcon } from '../images/icons.js';
-import type {
-  MenuActionCallback,
-  OperationMenuPopper,
+import {
+  BookmarkOperationMenu,
+  type MenuActionCallback,
 } from './bookmark-operation-popper.js';
-import { createBookmarkOperationMenu } from './bookmark-operation-popper.js';
+
 export type ConfigItem = {
   type: 'link' | 'edit' | 'caption';
   icon: TemplateResult;
@@ -61,19 +66,19 @@ const config: ConfigItem[] = [
     divider: true,
   },
   {
-    type: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Add Caption',
-    action: (_model, callback) => {
-      callback?.('caption');
-    },
-  },
-  {
     type: 'edit',
     icon: EditIcon,
     tooltip: 'Edit',
     action: (_model, callback) => {
       callback?.('edit');
+    },
+  },
+  {
+    type: 'caption',
+    icon: CaptionIcon,
+    tooltip: 'Add Caption',
+    action: (_model, callback) => {
+      callback?.('caption');
     },
     divider: true,
   },
@@ -85,7 +90,6 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     ${tooltipStyle}
     .bookmark-bar {
       box-sizing: border-box;
-      position: fixed;
       display: flex;
       align-items: center;
       padding: 4px 8px;
@@ -115,61 +119,47 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   root!: HTMLElement;
 
   @property({ attribute: false })
-  private toolbarHoverStateSlot = new Slot<{
-    inBookmark?: boolean;
-    inToolbar?: boolean;
-  }>();
+  abortController!: AbortController;
 
   @query('.bookmark-bar')
-  formatQuickBarElement!: HTMLElement;
+  bookmarkBarElement!: HTMLElement;
 
   @query('.more-button-wrapper')
   moreButton!: HTMLElement;
 
-  private _menu: OperationMenuPopper | null = null;
-  private _timer: ReturnType<typeof setTimeout> | null = null;
-
-  @state()
-  private _position: { x: number; y: number } = { x: 0, y: 0 };
-  private _toggleMenu() {
-    if (this._menu) {
-      this._menu.dispose();
-      this._menu = null;
-    } else {
-      this._menu = createBookmarkOperationMenu(this.moreButton, {
-        model: this.model,
-        onSelected: type => {
-          this._toggleMenu();
-          this.onSelected?.(type);
-        },
-      });
-    }
-  }
-
-  private _calculatePosition() {
-    const { right, top } = this.root.getBoundingClientRect();
-    const { width, height } =
-      this.formatQuickBarElement.getBoundingClientRect();
-
-    this._position = { x: right - width, y: top - height };
-  }
-
-  private _onHover() {
-    this._timer && clearTimeout(this._timer);
-    this.toolbarHoverStateSlot.emit({ inToolbar: true });
-  }
-
-  private _onHoverOut() {
-    this._timer = setTimeout(() => {
-      this.toolbarHoverStateSlot.emit({ inToolbar: false });
-    }, 100);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
+    const { onHover, onHoverLeave } = createDelayHoverSignal(
+      this.abortController
+    );
+    this.disposables.addFromEvent(this, 'mouseover', onHover);
+    this.disposables.addFromEvent(this, 'mouseleave', onHoverLeave);
+    this.disposables.addFromEvent(this.root, 'mouseover', onHover);
+    this.disposables.addFromEvent(this.root, 'mouseleave', onHoverLeave);
+  }
 
-    requestAnimationFrame(() => {
-      this._calculatePosition();
+  private _moreMenuAbortController: AbortController | null = null;
+
+  private _toggleMenu() {
+    if (this._moreMenuAbortController) {
+      this._moreMenuAbortController.abort();
+      this._moreMenuAbortController = null;
+      return;
+    }
+    this._moreMenuAbortController = new AbortController();
+    const bookmarkOperationMenu = new BookmarkOperationMenu();
+    bookmarkOperationMenu.model = this.model;
+    bookmarkOperationMenu.onSelected = this.onSelected;
+
+    createLitPortal({
+      template: bookmarkOperationMenu,
+      container: this.bookmarkBarElement,
+      computePosition: {
+        referenceElement: this.bookmarkBarElement,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+      },
+      abortController: this._moreMenuAbortController,
     });
   }
 
@@ -179,8 +169,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       ({ type }) => type,
       ({ type, icon, tooltip, action, divider }) => {
         return html`<icon-button
-            width="32px"
-            height="32px"
+            size="24px"
             class="bookmark-toolbar-button has-tool-tip ${type}"
             @click=${() => {
               action(this.model, this.onSelected, this);
@@ -194,12 +183,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     );
 
     return html`
-      <div
-        class="bookmark-bar"
-        style="left:${this._position.x}px;top:${this._position.y}px"
-        @mouseover="${this._onHover}"
-        @mouseout="${this._onHoverOut}"
-      >
+      <div class="bookmark-bar">
         ${buttons}
 
         <div class="more-button-wrapper">

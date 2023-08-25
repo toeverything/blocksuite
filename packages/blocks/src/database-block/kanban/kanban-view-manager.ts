@@ -151,6 +151,10 @@ export class DataViewKanbanManager extends BaseDataViewManager {
     return true;
   }
 
+  override get readonly(): boolean {
+    return this.viewSource.readonly;
+  }
+
   checkGroup(columnId: string, type: TType, target: TType): boolean {
     if (!groupByMatcher.isMatched(type, target)) {
       this.changeGroup(columnId);

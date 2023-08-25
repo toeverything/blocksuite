@@ -57,11 +57,13 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       padding: 8px;
       margin: 8px -8px -8px;
     }
+
     .database-block-selected {
       background-color: var(--affine-hover-color);
       border-radius: 4px;
     }
   `;
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -150,7 +152,11 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
 
   private viewSource(id: string, viewUpdated: Slot): ViewSource {
     const getViewDataById = this.getViewDataById;
+    const model = this.model;
     return {
+      get readonly() {
+        return model.page.readonly;
+      },
       get view() {
         const view = getViewDataById(id);
         if (!view) {

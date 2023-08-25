@@ -80,6 +80,9 @@ export class ProgressCell extends BaseCellRenderer<number> {
   static override styles = styles;
 
   _bgClick(e: MouseEvent) {
+    if (this.column.readonly) {
+      return;
+    }
     this.onChange(
       Math.round(
         (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth

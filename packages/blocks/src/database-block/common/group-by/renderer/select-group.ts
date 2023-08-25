@@ -35,6 +35,9 @@ export class SelectGroupView extends BaseGroup<
   }
 
   private _click = () => {
+    if (this.readonly) {
+      return;
+    }
     popMenu(this, {
       options: {
         input: {

@@ -46,7 +46,7 @@ function getCodeBlock(page: Page) {
     await languageButton.click({ delay: 50 });
   };
 
-  const langList = codeBlock.locator('lang-list');
+  const langList = page.locator('lang-list');
   const codeOption = page.locator('.affine-codeblock-option');
   const copyButton = codeOption.getByTestId('copy-button');
   const wrapButton = codeOption.getByTestId('wrap-button');
@@ -217,12 +217,9 @@ test('language select list can disappear when click other place', async ({
   const locator = codeBlock.langList;
   await expect(locator).toBeVisible();
 
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('.lang-list-button-container');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right + 10, y: bbox.top + 10 };
-  });
-  await page.mouse.click(position.x, position.y);
+  const rect = await page.locator('.lang-list-button-container').boundingBox();
+  if (!rect) throw new Error('Failed to get bounding box of code block.');
+  await page.mouse.click(rect.x + 10, rect.y + 10);
 
   await expect(locator).toBeHidden();
 });
@@ -558,30 +555,19 @@ test('code block option can appear and disappear during mousemove', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const getPosition: (
-    selector: string
-  ) => Promise<{ x: number; y: number; right: number }> = async (
-    selector: string
-  ) => {
-    return await page.evaluate((selector: string) => {
-      const codeBlock = document.querySelector(selector);
-      const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
-      return {
-        x: bbox.left + bbox.width / 2,
-        y: bbox.top + bbox.height / 2,
-        right: bbox.right,
-      };
-    }, selector);
-  };
-
-  const position = await getPosition('affine-code');
+  const position = await page.locator('affine-code').boundingBox();
+  if (!position) throw new Error('Failed to get affine code position');
   await page.mouse.move(position.x, position.y);
 
-  const optionPosition = await getPosition('.affine-codeblock-option');
-  await page.mouse.move(optionPosition.x, optionPosition.y);
   const locator = page.locator('.affine-codeblock-option');
+  const optionPosition = await locator.boundingBox();
+  if (!optionPosition) throw new Error('Failed to get option position');
+  await page.mouse.move(optionPosition.x, optionPosition.y);
   await expect(locator).toBeVisible();
-  await page.mouse.move(optionPosition.right + 10, optionPosition.y);
+  await page.mouse.move(
+    optionPosition.x + optionPosition.width + 10,
+    optionPosition.y
+  );
   await expect(locator).toBeHidden();
 });
 

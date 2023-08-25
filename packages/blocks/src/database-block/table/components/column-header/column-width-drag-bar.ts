@@ -95,6 +95,9 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
+    if (this.column.dataViewManager.readonly) {
+      return;
+    }
     const style = styleMap({
       left: `${this.left - dragBarWidth / 2 + this.dragLeft}px`,
       width: `${dragBarWidth}px`,

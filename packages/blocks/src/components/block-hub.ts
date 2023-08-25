@@ -332,7 +332,7 @@ const styles = css`
     position: relative;
     border-radius: 4px;
     fill: var(--affine-icon-color);
-    color: var(--affine-icon-color);
+    color: var(--affine-popover-color);
     height: 36px;
   }
   .block-hub-icon-container svg {

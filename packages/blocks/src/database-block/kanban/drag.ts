@@ -30,6 +30,9 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    if (this.kanbanView.view.readonly) {
+      return;
+    }
     this._disposables.add(
       this.kanbanView.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;

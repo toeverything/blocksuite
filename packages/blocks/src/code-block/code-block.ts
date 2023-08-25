@@ -2,10 +2,11 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
-import { assertExists, clamp, Slot } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
@@ -16,15 +17,18 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import { getViewportElement, queryCurrentMode } from '../__internal__/index.js';
+import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
+import { queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
+import { createLitPortal } from '../components/portal.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
+import { LangList } from './components/lang-list.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
@@ -173,18 +177,23 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   `;
 
   @state()
-  private _showLangList = false;
-
-  @state()
-  private _optionPosition: { x: number; y: number } | null = null;
-
-  @state()
   private _wrap = false;
 
-  private _langListSlots = {
-    selectedLanguageChanged: new Slot<{ language: string | null }>(),
-    dispose: new Slot(),
-  };
+  @query('.lang-button')
+  private _langButton!: HTMLButtonElement;
+
+  private _optionsPortal: HTMLDivElement | null = null;
+
+  @state()
+  private _langListAbortController?: AbortController;
+
+  private get _showLangList() {
+    return !!this._langListAbortController;
+  }
+
+  get readonly() {
+    return this.model.page.readonly;
+  }
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
@@ -239,12 +248,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
-  get readonly() {
-    return this.model.page.readonly;
-  }
-
-  hoverState = new Slot<boolean>();
-
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
@@ -275,14 +278,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
-    this._langListSlots.selectedLanguageChanged.on(({ language }) => {
-      getService('affine:code').setLang(this.model, language);
-      this._showLangList = false;
-    });
-    this._langListSlots.dispose.on(() => {
-      this._showLangList = false;
-    });
-
     this._observePosition();
     bindContainerHotkey(this);
 
@@ -303,7 +298,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
   }
 
@@ -337,64 +331,92 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _observePosition() {
-    // At AFFiNE, avoid the option element to be covered by the header
-    // we need to reserve the space for the header
-    const HEADER_HEIGHT = 64;
-    // The height of the option element
-    // You need to change this value manually if you change the style of the option element
-    const OPTION_ELEMENT_HEIGHT = 96;
-    const TOP_EDGE = 10;
-    const LEFT_EDGE = 12;
-
-    let timer: number;
-    const updatePosition = () => {
-      // Update option position when scrolling
-      const rect = this.getBoundingClientRect();
-      this._optionPosition = {
-        x: rect.right + LEFT_EDGE,
-        y: clamp(
-          rect.top + TOP_EDGE,
-          Math.min(
-            HEADER_HEIGHT + LEFT_EDGE,
-            rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-          ),
-          rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-        ),
-      };
-    };
-    this.hoverState.on(hover => {
-      clearTimeout(timer);
-      if (hover) {
-        updatePosition();
-        return;
-      }
-      timer = window.setTimeout(() => {
-        this._optionPosition = null;
-      }, HOVER_DELAY);
-    });
     this._disposables.addFromEvent(this, 'mouseenter', () => {
-      this.hoverState.emit(true);
-    });
-    const HOVER_DELAY = 300;
-    this._disposables.addFromEvent(this, 'mouseleave', () => {
-      this.hoverState.emit(false);
-    });
+      if (this._optionsPortal?.isConnected) return;
+      const abortController = new AbortController();
 
-    const viewportElement = getViewportElement(this.model.page);
-    if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', () => {
-        if (!this._optionPosition) return;
-        updatePosition();
+      this._optionsPortal = createLitPortal({
+        template: ({ updatePortal }) =>
+          CodeOptionTemplate({
+            anchor: this,
+            model: this.model,
+            wrap: this._wrap,
+            onClickWrap: () => {
+              this._onClickWrapBtn();
+              updatePortal();
+            },
+            abortController,
+          }),
+        computePosition: {
+          referenceElement: this,
+          placement: 'right-start',
+          middleware: [
+            offset({
+              mainAxis: 12,
+              crossAxis: 10,
+            }),
+            shift({
+              crossAxis: true,
+              padding: {
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
+                right: 12,
+              },
+            }),
+          ],
+          autoUpdate: true,
+        },
+        abortController,
       });
-    }
+    });
   }
 
   private _onClickLangBtn() {
     if (this.readonly) return;
-    this._showLangList = !this._showLangList;
+    if (this._langListAbortController) return;
+    const abortController = new AbortController();
+    this._langListAbortController = abortController;
+    abortController.signal.addEventListener('abort', () => {
+      this._langListAbortController = undefined;
+    });
+
+    createLitPortal({
+      template: ({ positionSlot }) => {
+        const langList = new LangList();
+        langList.currentLanguageId = this._perviousLanguage.id as Lang;
+        langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
+          getService('affine:code').setLang(this.model, lang ? lang.id : null);
+          abortController.abort();
+        };
+        langList.onClose = () => abortController.abort();
+        positionSlot.on(({ placement }) => {
+          langList.placement = placement;
+        });
+        return langList;
+      },
+      computePosition: {
+        referenceElement: this._langButton,
+        placement: 'bottom-start',
+        middleware: [
+          offset(4),
+          flip(),
+          size({
+            padding: 12,
+            apply({ availableHeight, elements }) {
+              Object.assign(elements.floating.style, {
+                height: '100%',
+                maxHeight: `${availableHeight}px`,
+              });
+            },
+          }),
+        ],
+        autoUpdate: true,
+      },
+      abortController,
+    });
   }
 
-  private _langListTemplate() {
+  private _curLanguageButtonTemplate() {
     const curLanguage =
       getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
     const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
@@ -413,26 +435,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       >
         ${curLanguageDisplayName} ${!this.readonly ? ArrowDownIcon : nothing}
       </icon-button>
-      ${this._showLangList
-        ? html`<lang-list
-            .currentLanguageId=${this._perviousLanguage.id as Lang}
-            .slots=${this._langListSlots}
-          ></lang-list>`
-        : nothing}
     </div>`;
-  }
-
-  private _codeOptionTemplate() {
-    if (!this._optionPosition) return '';
-    return html`<blocksuite-portal
-      .template=${CodeOptionTemplate({
-        model: this.model,
-        position: this._optionPosition,
-        hoverState: this.hoverState,
-        wrap: this._wrap,
-        onClickWrap: () => this._onClickWrapBtn(),
-      })}
-    ></blocksuite-portal>`;
   }
 
   private _updateLineNumbers() {
@@ -450,18 +453,17 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override render() {
     return html`<div class="affine-code-block-container">
-        ${this._langListTemplate()}
-        <div class="rich-text-container">
-          <div id="line-numbers"></div>
-          <rich-text .model=${this.model} .textSchema=${this.textSchema}>
-          </rich-text>
-        </div>
-        ${this.content}
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
-          : null}
+      ${this._curLanguageButtonTemplate()}
+      <div class="rich-text-container">
+        <div id="line-numbers"></div>
+        <rich-text .model=${this.model} .textSchema=${this.textSchema}>
+        </rich-text>
       </div>
-      ${this._codeOptionTemplate()}`;
+      ${this.content}
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection></affine-block-selection>`
+        : null}
+    </div>`;
   }
 }
 
