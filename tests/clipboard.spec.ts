@@ -447,6 +447,7 @@ test(scoped`cut should work for multi-block selection`, async ({ page }) => {
   await type(page, 'c');
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
   await cutByKeyboard(page);
   await page.locator('.affine-doc-viewport').click();
   await waitNextFrame(page);
@@ -793,6 +794,7 @@ test(
     );
 
     // when pasting a quote into a text paragraph block, the paragraph type should be text
+    await selectAllByKeyboard(page);
     await selectAllByKeyboard(page);
     await copyByKeyboard(page);
     await waitNextFrame(page);
