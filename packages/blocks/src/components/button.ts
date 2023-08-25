@@ -97,8 +97,8 @@ export class IconButton extends LitElement {
   text: string | null = null;
 
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
-  @property({ attribute: true })
-  disabled?: '' = undefined;
+  @property({ attribute: true, type: Boolean })
+  disabled?: boolean = undefined;
 
   constructor() {
     super();
@@ -115,8 +115,7 @@ export class IconButton extends LitElement {
     this.addEventListener(
       'click',
       event => {
-        // when disabled is '', it means the attribute is present
-        if (this.disabled === '') {
+        if (this.disabled === true) {
           event.preventDefault();
           event.stopPropagation();
         }
