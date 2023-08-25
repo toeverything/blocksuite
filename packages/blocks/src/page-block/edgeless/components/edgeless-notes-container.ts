@@ -41,8 +41,10 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
     if (
       this.edgeless.selectionManager.state.editing &&
       this.edgeless.selectionManager.state.elements.includes(this.model.id)
-    )
+    ) {
       return nothing;
+    }
+
     const style = {
       position: 'absolute',
       top: '0',
