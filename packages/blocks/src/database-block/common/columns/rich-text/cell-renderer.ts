@@ -131,6 +131,10 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   @query('rich-text')
   private richText!: RichText;
 
+  get vEditor() {
+    return this.richText.vEditor;
+  }
+
   private yText!: Y.Text;
   private undoManager!: UndoManager;
 
