@@ -180,16 +180,16 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
     .edgeless-auto-complete-arrow-wrapper:hover
       > .edgeless-auto-complete-arrow {
-      border: 1px solid rgba(227, 226, 228, 1);
-      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
+      border: 1px solid var(--affine-border-color);
+      box-shadow: var(--affine-shadow-1);
       background: var(--affine-white);
     }
 
     .edgeless-auto-complete-arrow-wrapper
       > .edgeless-auto-complete-arrow:hover {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
-      background: rgba(30, 150, 235, 1);
+      border: 1px solid var(--affine-white-10);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-primary-color);
     }
 
     .edgeless-auto-complete-arrow svg {
