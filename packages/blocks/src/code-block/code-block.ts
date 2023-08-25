@@ -587,7 +587,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
         <div id="line-numbers"></div>
-        <rich-text .model=${this.model} .textSchema=${this.textSchema}>
+        <rich-text
+          .yText=${this.model.text.yText}
+          .undoManager=${this.model.page.history}
+          .textSchema=${this.textSchema}
+          .readonly=${this.model.page.readonly}
+        >
         </rich-text>
       </div>
       ${this.content}

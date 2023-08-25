@@ -80,8 +80,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _preventDefault = (ctx: UIEventStateContext) => {
     const state = ctx.get('defaultState');
     state.event.preventDefault();
-  }
-  
+  };
+
   const _selectAllText = () => {
     selection.update(selList => {
       return selList.map(sel => {
