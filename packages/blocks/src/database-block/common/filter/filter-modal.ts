@@ -4,7 +4,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { createModal, createPopup } from '../../../components/menu/index.js';
+import { createPopup } from '../../../components/menu/index.js';
 import type { FilterGroup, Variable } from '../ast.js';
 
 @customElement('advanced-filter-modal')
@@ -81,7 +81,6 @@ export const popAdvanceFilter = (
     onChange: (value: FilterGroup) => void;
   }
 ) => {
-  const modal = createModal();
   const filter = new AdvancedFilterModal();
   filter.vars = props.vars;
   filter.data = props.value;
@@ -89,6 +88,5 @@ export const popAdvanceFilter = (
     props.onChange(group);
     filter.data = group;
   };
-  modal.append(filter);
   createPopup(target, filter);
 };
