@@ -8,6 +8,7 @@ import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
@@ -305,12 +306,32 @@ export async function importNotion(workspace: Workspace, file: File) {
           const cells: Record<string, Record<string, Cell>> = {};
           const children: SerializedBlock[] = [];
           rows.forEach(row => {
-            children.push({
-              flavour: 'affine:paragraph',
-              type: 'text',
-              text: [{ insert: row[titleIndex] }],
-              children: [],
-            });
+            const title = row[titleIndex];
+            const referencePattern = /@AffineReference:\((.*)\)/g;
+            const match = referencePattern.exec(title);
+            if (match) {
+              const pageId = match[1];
+              children.push({
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: [
+                  {
+                    insert: REFERENCE_NODE,
+                    attributes: {
+                      reference: { type: 'Subpage', pageId },
+                    },
+                  },
+                ],
+                children: [],
+              });
+            } else {
+              children.push({
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: [{ insert: title }],
+                children: [],
+              });
+            }
             const rowId = '' + id++;
             cells[rowId] = {};
             row.forEach((value, index) => {
