@@ -95,3 +95,4 @@ Example:
 - Quan Deng @dengquan 2023/08/21
 - Ayaka Rizumu @LittleSound 2023/08/22
 - Michael Salim @Vija02 2023/08/22
+- BangKk @bangkk5 2023/08/24

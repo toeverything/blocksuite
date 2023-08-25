@@ -7,6 +7,7 @@ import { getTagColor } from '../../components/tags/colors.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
+import { REFERENCE_NODE } from '../rich-text/consts.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { BlockSchemas } from '../utils/model.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
@@ -762,13 +763,33 @@ const getTableCellsAndChildren = (
   let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
   titleIndex = titleIndex !== -1 ? titleIndex : 0;
   rows.forEach(row => {
-    const title = row[titleIndex] ?? 'Undefined';
-    children.push({
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: Array.isArray(title) ? title.join('') : title }],
-      children: [],
-    });
+    const rawTitle = row[titleIndex] ?? 'Undefined';
+    const title = Array.isArray(rawTitle) ? rawTitle.join('') : rawTitle;
+    const referencePattern = /@AffineReference:\((.*)\)/g;
+    const match = referencePattern.exec(title);
+    if (match) {
+      const pageId = match[1];
+      children.push({
+        flavour: 'affine:paragraph',
+        type: 'text',
+        text: [
+          {
+            insert: REFERENCE_NODE,
+            attributes: {
+              reference: { type: 'Subpage', pageId },
+            },
+          },
+        ],
+        children: [],
+      });
+    } else {
+      children.push({
+        flavour: 'affine:paragraph',
+        type: 'text',
+        text: [{ insert: title }],
+        children: [],
+      });
+    }
     const rowId = '' + idCounter.next();
     cells[rowId] = {};
     row.forEach((value, index) => {

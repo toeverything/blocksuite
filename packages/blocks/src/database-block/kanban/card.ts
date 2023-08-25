@@ -128,6 +128,14 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+    this._disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+    if (this.view.readonly) {
+      return;
+    }
     this._disposables.addFromEvent(this, 'contextmenu', e => {
       this.contextMenu(e);
     });
@@ -147,11 +155,6 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
         },
       });
     });
-    this._disposables.add(
-      this.view.slots.update.on(() => {
-        this.requestUpdate();
-      })
-    );
   }
 
   private renderTitle() {
@@ -233,6 +236,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   }
 
   private renderOps() {
+    if (this.view.readonly) {
+      return;
+    }
     return html`
       <div class="card-ops">
         <div class="card-op" @click="${this.clickEdit}">${NewEditIcon}</div>

@@ -1,7 +1,7 @@
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import { DefaultBanner } from '../../../bookmark-block/images/banners.js';
-import { DefaultIcon } from '../../../bookmark-block/images/icons.js';
 import { cloneBookmarkProperties } from '../../../bookmark-block/utils.js';
+import { WebIcon16 } from '../../../icons/text.js';
 import type { SerializedBlock } from '../../index.js';
 import { BaseService } from '../service.js';
 
@@ -9,7 +9,7 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
   override async block2html(block: BookmarkBlockModel) {
     const icon = block.icon
       ? `<img class="bookmark-icon" alt="icon" src="${block.icon}">`
-      : this.templateResult2String(DefaultIcon);
+      : this.templateResult2String(WebIcon16);
     const bookmarkCaption = block.caption
       ? `<figcaption class="affine-bookmark-caption">${block.caption}</figcaption>`
       : '';

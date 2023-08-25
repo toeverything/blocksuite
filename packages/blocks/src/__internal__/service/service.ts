@@ -1,5 +1,6 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
+import { Buffer } from 'buffer';
 import type { TemplateResult } from 'lit';
 import { isTemplateResult } from 'lit/directive-helpers.js';
 
@@ -130,5 +131,20 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       text = `<a href="${referenceLink}">${referenceTitle}</a>`;
     }
     return text;
+  }
+
+  protected async getBlobType(blob: Blob): Promise<string> {
+    if (blob.type) {
+      return blob.type;
+    }
+    // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
+    // @ts-ignore
+    const FileType = await import('file-type/browser.js');
+    if (window.Buffer === undefined) {
+      window.Buffer = Buffer;
+    }
+    const buffer = await blob.arrayBuffer();
+    const fileType = await FileType.fromBuffer(buffer);
+    return fileType?.mime ?? 'image/png';
   }
 }

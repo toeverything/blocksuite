@@ -175,7 +175,8 @@ export function DataBaseRowContainer(
                       >
                       </affine-database-cell-container>
                     </div>
-                    ${column.dataViewManager.header.titleColumn === column.id
+                    ${column.dataViewManager.header.titleColumn === column.id &&
+                    !view.readonly
                       ? html` <div class="row-ops">
                           <div class="row-op" @click="${clickDetail}">
                             ${NewEditIcon}

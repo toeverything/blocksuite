@@ -20,6 +20,9 @@ export class StringGroupView extends BaseGroup<NonNullable<unknown>, string> {
   `;
 
   private _click = () => {
+    if (this.readonly) {
+      return;
+    }
     popMenu(this, {
       options: {
         input: {

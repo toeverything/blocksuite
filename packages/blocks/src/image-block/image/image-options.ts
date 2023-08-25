@@ -1,9 +1,7 @@
-import type { Slot } from '@blocksuite/global/utils';
+import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import { html } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
-import type { IPoint } from '../../__internal__/utils/types.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
@@ -17,35 +15,37 @@ import type { ImageBlockModel } from '../image-model.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function ImageOptionsTemplate({
+  anchor,
   model,
   blob,
-  position,
-  hoverState,
+  abortController,
 }: {
+  anchor: HTMLElement;
   model: ImageBlockModel;
   blob: Blob;
-  position: IPoint;
-  hoverState: Slot<boolean>;
+  abortController: AbortController;
 }) {
-  const style = {
-    left: position.x + 'px',
-    top: position.y + 'px',
-  };
+  const { onHover, onHoverLeave } = createDelayHoverSignal(abortController);
+  anchor.addEventListener('mouseover', onHover);
+  anchor.addEventListener('mouseleave', onHoverLeave);
+  abortController.signal.addEventListener('abort', () => {
+    anchor.removeEventListener('mouseover', onHover);
+    anchor.removeEventListener('mouseleave', onHoverLeave);
+  });
 
   return html`
     <style>
       .affine-embed-editing-state-container > div {
-        position: fixed;
         display: block;
         z-index: var(--affine-z-index-popover);
       }
 
       .embed-editing-state {
+        box-sizing: border-box;
         box-shadow: var(--affine-shadow-2);
         border-radius: 8px;
         list-style: none;
         padding: 4px;
-        width: 40px;
         background-color: var(--affine-background-overlay-panel-color);
         margin: 0;
       }
@@ -60,21 +60,24 @@ export function ImageOptionsTemplate({
     <div
       class="affine-embed-editing-state-container"
       @pointerdown=${stopPropagation}
-      @mouseover=${() => hoverState.emit(true)}
-      @mouseout=${() => hoverState.emit(false)}
+      @mouseover=${onHover}
+      @mouseout=${onHoverLeave}
     >
-      <div style=${styleMap(style)} class="embed-editing-state">
+      <div class="embed-editing-state">
         <icon-button
           class="has-tool-tip"
-          @click=${() => turnImageIntoCardView(model, blob)}
+          size="32px"
+          @click=${() => {
+            abortController.abort();
+            turnImageIntoCardView(model, blob);
+          }}
         >
           ${LinkToCardIcon}
           <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
         </icon-button>
         <icon-button
           class="has-tool-tip"
-          width="100%"
-          height="32px"
+          size="32px"
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
@@ -82,8 +85,7 @@ export function ImageOptionsTemplate({
         </icon-button>
         <icon-button
           class="has-tool-tip"
-          width="100%"
-          height="32px"
+          size="32px"
           @click=${() => downloadImage(model)}
         >
           ${DownloadIcon}
@@ -93,8 +95,7 @@ export function ImageOptionsTemplate({
         </icon-button>
         <icon-button
           class="has-tool-tip"
-          width="100%"
-          height="32px"
+          size="32px"
           @click=${() => copyImage(model)}
         >
           ${CopyIcon}
@@ -104,9 +105,11 @@ export function ImageOptionsTemplate({
         </icon-button>
         <icon-button
           class="has-tool-tip delete-image-button"
-          width="100%"
-          height="32px"
-          @click="${() => model.page.deleteBlock(model)}"
+          size="32px"
+          @click="${() => {
+            abortController.abort();
+            model.page.deleteBlock(model);
+          }}"
         >
           ${DeleteIcon}
           <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>

@@ -6,7 +6,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { toast } from '../../components/toast.js';
-import { CloseIcon } from '../images/icons.js';
+import { CloseIcon } from '../../icons/index.js';
 import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 
 @customElement('bookmark-create-modal')

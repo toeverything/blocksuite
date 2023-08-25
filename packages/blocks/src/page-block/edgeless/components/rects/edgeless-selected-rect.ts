@@ -539,7 +539,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private async _updateToolbarPosition() {
-    if (!this._toolbarVisible || !this._shouldRenderSelection()) return;
+    if (
+      !this._toolbarVisible ||
+      !this._shouldRenderSelection() ||
+      this.page.readonly
+    )
+      return;
 
     if (!this._selectedRectEl || !this._componentToolbar) {
       await this.updateComplete;
@@ -554,7 +559,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const rect = componentToolbar.getBoundingClientRect();
-    const offset = 18;
+    const offset = 34;
     let top = y - rect.height - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
@@ -650,7 +655,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, page, slots, selection, surface } = this;
+    const { _disposables, page, slots, selection, surface, edgeless } = this;
 
     _disposables.add(
       // vewport zooming / scrolling
@@ -671,6 +676,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
+    );
   }
 
   protected override updated(
@@ -748,6 +756,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         .edgeless=${edgeless}
         .remoteColorMap=${_remoteColorMap}
       ></edgeless-remote-selection>
+      ${page.readonly
+        ? nothing
+        : html`<edgeless-auto-complete
+            .edgeless=${edgeless}
+            .selectedRect=${_selectedRect}
+          >
+          </edgeless-auto-complete>`}
       <div
         class="affine-edgeless-selected-rect"
         style=${styleMap({
@@ -762,12 +777,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       >
         ${resizeHandles} ${connectorHandle}
       </div>
-      <edgeless-auto-complete
-        .edgeless=${edgeless}
-        .selectedRect=${_selectedRect}
-      >
-      </edgeless-auto-complete>
-      ${this._toolbarVisible
+      ${this._toolbarVisible && !page.readonly
         ? html`<edgeless-component-toolbar
             style=${styleMap({
               left: `${_toolbarPosition.x}px`,
