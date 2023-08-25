@@ -55,10 +55,7 @@ function drawRect(
   height: number,
   radius: number
 ) {
-  const r =
-    Math.min(width * radius, height * radius) > 0
-      ? Math.min(width * radius, height * radius)
-      : 4;
+  const r = Math.max(Math.min(width * radius, height * radius), 0);
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + width - r, y);
