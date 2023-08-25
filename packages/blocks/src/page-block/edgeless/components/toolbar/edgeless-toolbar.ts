@@ -451,7 +451,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
       ${page.readonly
         ? nothing
-        : html` <edgeless-frame-tool-buttonz
+        : html`<edgeless-frame-tool-button
             .edgelessTool=${this.edgelessTool}
             .setEdgelessTool=${this.setEdgelessTool}
             .edgeless=${this.edgeless}
