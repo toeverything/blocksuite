@@ -404,7 +404,7 @@ export class DragHandleWidget extends WidgetElement {
     this._hoveredBlockId = blockId;
     this._hoveredBlockPath = blockPath;
 
-    if (insideDatabaseTable(closestBlockElement)) {
+    if (insideDatabaseTable(closestBlockElement) || this.page.readonly) {
       this.hide();
       return;
     }

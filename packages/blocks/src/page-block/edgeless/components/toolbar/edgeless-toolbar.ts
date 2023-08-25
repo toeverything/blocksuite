@@ -10,7 +10,7 @@ import './frame/frame-tool-button.js';
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
@@ -266,6 +266,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   private _trySaveBrushStateLocalRecord = () => {
@@ -369,58 +374,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     `;
   }
 
-  private get defaultContent() {
+  private _renderTools() {
+    const { page } = this.edgeless;
     const { type } = this.edgelessTool;
-    return html`<edgeless-tool-icon-button
-        .tooltip=${getTooltipWithShortcut('Select', 'V')}
-        .active=${type === 'default'}
-        @click=${() => this.setEdgelessTool({ type: 'default' })}
-      >
-        ${SelectIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-        .active=${type === 'pan'}
-        @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
-      >
-        ${HandIcon}
-      </edgeless-tool-icon-button>
 
-      <edgeless-frame-tool-button
-        .edgelessTool=${this.edgelessTool}
-        .setEdgelessTool=${this.setEdgelessTool}
-        .edgeless=${this.edgeless}
-      ></edgeless-frame-tool-button>
+    if (page.readonly) return nothing;
 
-      <edgeless-tool-icon-button
-        .tooltip=${'Presentation'}
-        @click=${() => {
-          this._index = this._currentFrameIndex;
-          if (
-            this.edgeless.selectionManager.elements[0] instanceof FrameElement
-          ) {
-            this._index = this._frames.findIndex(
-              frame =>
-                frame.id === this.edgeless.selectionManager.elements[0].id
-            );
-          }
-          this.setEdgelessTool({ type: 'frameNavigator' });
-          if (this._frames.length === 0)
-            toast(
-              'The presentation requires at least 1 frame. You can firstly create a frame.',
-              5000
-            );
-          this._toggleFullScreen();
-        }}
-      >
-        ${FrameNavigatorIcon}
-      </edgeless-tool-icon-button>
-      <div class="short-divider"></div>
-      <edgeless-note-tool-button
-        .edgelessTool=${this.edgelessTool}
-        .edgeless=${this.edgeless}
-        .setEdgelessTool=${this.setEdgelessTool}
-      ></edgeless-note-tool-button>
+    return html`
       <div class="full-divider"></div>
       <div class="brush-and-eraser">
         <edgeless-brush-tool-button
@@ -466,7 +426,72 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-connector-tool-button>
-      </div>`;
+      </div>
+    `;
+  }
+
+  private get defaultContent() {
+    const { page } = this.edgeless;
+    const { type } = this.edgelessTool;
+
+    return html`<edgeless-tool-icon-button
+        .tooltip=${getTooltipWithShortcut('Select', 'V')}
+        .active=${type === 'default'}
+        @click=${() => this.setEdgelessTool({ type: 'default' })}
+      >
+        ${SelectIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .tooltip=${getTooltipWithShortcut('Hand', 'H')}
+        .active=${type === 'pan'}
+        @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
+      >
+        ${HandIcon}
+      </edgeless-tool-icon-button>
+
+      ${page.readonly
+        ? nothing
+        : html` <edgeless-frame-tool-buttonz
+            .edgelessTool=${this.edgelessTool}
+            .setEdgelessTool=${this.setEdgelessTool}
+            .edgeless=${this.edgeless}
+          ></edgeless-frame-tool-button>`}
+
+      <edgeless-tool-icon-button
+        .tooltip=${'Presentation'}
+        @click=${() => {
+          this._index = this._currentFrameIndex;
+          if (
+            this.edgeless.selectionManager.elements[0] instanceof FrameElement
+          ) {
+            this._index = this._frames.findIndex(
+              frame =>
+                frame.id === this.edgeless.selectionManager.elements[0].id
+            );
+          }
+          this.setEdgelessTool({ type: 'frameNavigator' });
+          if (this._frames.length === 0)
+            toast(
+              'The presentation requires at least 1 frame. You can firstly create a frame.',
+              5000
+            );
+          this._toggleFullScreen();
+        }}
+      >
+        ${FrameNavigatorIcon}
+      </edgeless-tool-icon-button>
+
+      ${page.readonly
+        ? nothing
+        : html`
+            <div class="short-divider"></div>
+            <edgeless-note-tool-button
+              .edgelessTool=${this.edgelessTool}
+              .edgeless=${this.edgeless}
+              .setEdgelessTool=${this.setEdgelessTool}
+            ></edgeless-note-tool-button>
+          `}
+      ${this._renderTools()} `;
   }
 
   override render() {
