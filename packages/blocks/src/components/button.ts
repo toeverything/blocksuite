@@ -36,8 +36,7 @@ export class IconButton extends LitElement {
       cursor: pointer;
       user-select: none;
       font-family: var(--affine-font-family);
-      fill: var(--affine-icon-color);
-      color: var(--affine-popover-color);
+      color: var(--affine-text-primary-color);
       pointer-events: auto;
     }
 
