@@ -11,10 +11,17 @@ import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
-  richText?.vEditor?.setVRange(vRange);
+  if (!richText) {
+    return;
+  }
+
+  await richText.updateComplete;
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  vEditor.setVRange(vRange);
 
   return new Promise<void>(resolve => {
-    richText?.vEditor?.slots.rangeUpdated.once(() => {
+    vEditor.slots.rangeUpdated.once(() => {
       resolve();
     });
   });

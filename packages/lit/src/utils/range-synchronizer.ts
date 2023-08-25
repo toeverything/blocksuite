@@ -39,6 +39,7 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+        //FIXME(flrande): skip it before we support render multiple elements for one block
         if (
           range &&
           range.startContainer.parentElement?.closest('side-layout-modal')

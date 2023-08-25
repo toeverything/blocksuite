@@ -57,12 +57,12 @@ import {
   assertEdgelessSelectedRect,
   assertExists,
   assertRichImage,
+  assertRichTextModelType,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
-  assertTypeFormat,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
@@ -466,7 +466,7 @@ test(
     await type(page, '- ');
     await page.keyboard.press(`${SHORT_KEY}+v`);
     await assertRichTexts(page, ['test']);
-    await assertTypeFormat(page, 'bulleted');
+    await assertRichTextModelType(page, 'bulleted');
   }
 );
 

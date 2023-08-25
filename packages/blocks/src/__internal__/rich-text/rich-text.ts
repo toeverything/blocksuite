@@ -1,13 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
 import type { BaseTextAttributes, VHandlerContext } from '@blocksuite/virgo';
-import { VEditor } from '@blocksuite/virgo';
+import { createVirgoKeyDownHandler, VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import type * as Y from 'yjs';
 
 import { isStrictUrl } from '../utils/url.js';
-import { createKeyboardBindings, createKeyDownHandler } from './keyboard.js';
+import { tryFormatInlineStyle } from './markdown-convert.js';
 import {
   type AffineTextAttributes,
   type AffineTextSchema,
@@ -131,42 +131,48 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  model!: BaseBlockModel;
+  yText!: Y.Text;
 
   @property({ attribute: false })
-  textSchema?: AffineTextSchema;
+  undoManager!: Y.UndoManager;
+
+  @property({ attribute: false })
+  textSchema!: AffineTextSchema;
+
+  @property({ attribute: false })
+  readonly = false;
 
   private _vEditor: AffineVEditor | null = null;
   get vEditor() {
     return this._vEditor;
   }
 
-  override firstUpdated() {
-    assertExists(this.model.text, 'rich-text need text to init.');
-    const vEditor = new VEditor<AffineTextAttributes>(this.model.text.yText, {
+  private _init() {
+    if (this._vEditor) {
+      throw new Error('vEditor already exists.');
+    }
+
+    this._vEditor = new VEditor<AffineTextAttributes>(this.yText, {
       isEmbed: delta => !!delta.attributes?.reference,
     });
-    const textSchema = this.textSchema;
-    assertExists(
-      textSchema,
-      'Failed to render rich-text! textSchema not found'
-    );
-    this._vEditor = vEditor;
-    this._vEditor.setAttributeSchema(textSchema.attributesSchema);
-    this._vEditor.setAttributeRenderer(textSchema.textRenderer());
+    this._vEditor.setAttributeSchema(this.textSchema.attributesSchema);
+    this._vEditor.setAttributeRenderer(this.textSchema.textRenderer());
 
-    const keyboardBindings = createKeyboardBindings(this.model, this._vEditor);
-    const keyDownHandler = createKeyDownHandler(
-      this._vEditor,
-      keyboardBindings,
-      this.model
-    );
+    assertExists(this._vEditor);
+    const keyDownHandler = createVirgoKeyDownHandler(this._vEditor, {
+      inputRule: {
+        key: ' ',
+        handler: context => tryFormatInlineStyle(context, this.undoManager),
+      },
+    });
+
+    assertExists(this.virgoContainer);
+    this.virgoContainer.addEventListener('keydown', keyDownHandler);
 
     let ifPrefixSpace = false;
 
     this._vEditor.mount(this._virgoContainer);
     this._vEditor.bindHandlers({
-      keydown: keyDownHandler,
       virgoInput: ctx => {
         const vEditor = this._vEditor;
         assertExists(vEditor);
@@ -253,14 +259,39 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       },
     });
 
-    this._vEditor.setReadonly(this.model.page.readonly);
-    this._disposables.add(
-      this.model.page.awarenessStore.slots.update.on(() => {
-        if (vEditor.isReadonly !== this.model.page.readonly) {
-          vEditor.setReadonly(this.model.page.readonly);
-        }
-      })
-    );
+    this._vEditor.setReadonly(this.readonly);
+  }
+
+  _unmount() {
+    if (this.vEditor?.mounted) {
+      this.vEditor.unmount();
+    }
+    this._vEditor = null;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    assertExists(this.yText, 'rich-text need yText to init.');
+    assertExists(this.undoManager, 'rich-text need undoManager to init.');
+    assertExists(this.textSchema, 'rich-text need textSchema to init.');
+
+    this.updateComplete.then(() => {
+      this._unmount();
+      this._init();
+
+      this.disposables.add({
+        dispose: () => {
+          this._unmount();
+        },
+      });
+    });
+  }
+
+  override updated() {
+    if (this._vEditor) {
+      this._vEditor.setReadonly(this.readonly);
+    }
   }
 
   override render() {

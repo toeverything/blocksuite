@@ -4,6 +4,7 @@ import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import type { VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -248,6 +249,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
+  get vEditor() {
+    const vRoot = this.querySelector<VirgoRootElement>('[data-virgo-root]');
+    if (!vRoot) {
+      throw new Error('Virgo root not found');
+    }
+    return vRoot.virgoEditor;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
@@ -282,16 +291,138 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     bindContainerHotkey(this);
 
     const selection = this.root.selectionManager;
+    const INDENT_SYMBOL = '  ';
+    const LINE_BREAK_SYMBOL = '\n';
+    const allIndexOf = (
+      text: string,
+      symbol: string,
+      start = 0,
+      end = text.length
+    ) => {
+      const indexArr: number[] = [];
+      let i = start;
+
+      while (i < end) {
+        const index = text.indexOf(symbol, i);
+        if (index === -1 || index > end) {
+          break;
+        }
+        indexArr.push(index);
+        i = index + 1;
+      }
+      return indexArr;
+    };
     this.bindHotKey({
       Backspace: () => {
-        if (!selection.find('text')) return;
+        const textSelection = selection.find('text');
+        if (!textSelection) {
+          return;
+        }
 
-        selection.update(selList => {
-          return selList
-            .filter(sel => !sel.is('text'))
-            .concat(selection.getInstance('block', { path: this.path }));
-        });
-        return true;
+        const from = textSelection.from;
+
+        if (from.index === 0 && from.length === 0) {
+          selection.update(selList => {
+            return selList
+              .filter(sel => !sel.is('text'))
+              .concat(selection.getInstance('block', { path: this.path }));
+          });
+          return true;
+        }
+
+        return;
+      },
+      Tab: ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const vEditor = this.vEditor;
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.vEditor.yText.toString();
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          const indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            vRange.index,
+            vRange.index + vRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr.forEach(i => {
+            this.vEditor.insertText(
+              {
+                index: i,
+                length: 0,
+              },
+              INDENT_SYMBOL
+            );
+          });
+          this.vEditor.setVRange({
+            index: vRange.index + 2,
+            length:
+              vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
+          });
+
+          return true;
+        }
+
+        return;
+      },
+      'Shift-Tab': ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const vEditor = this.vEditor;
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.vEditor.yText.toString();
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          let indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            vRange.index,
+            vRange.index + vRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr = indexArr.filter(
+            i => text.slice(i, i + 2) === INDENT_SYMBOL
+          );
+          indexArr.forEach(i => {
+            this.vEditor.deleteText({
+              index: i,
+              length: 2,
+            });
+          });
+          if (indexArr.length > 0) {
+            this.vEditor.setVRange({
+              index:
+                vRange.index -
+                (indexArr[indexArr.length - 1] < vRange.index ? 2 : 0),
+              length:
+                vRange.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
+            });
+          }
+
+          return true;
+        }
+
+        return;
       },
     });
   }
@@ -456,7 +587,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
         <div id="line-numbers"></div>
-        <rich-text .model=${this.model} .textSchema=${this.textSchema}>
+        <rich-text
+          .yText=${this.model.text.yText}
+          .undoManager=${this.model.page.history}
+          .textSchema=${this.textSchema}
+          .readonly=${this.model.page.readonly}
+        >
         </rich-text>
       </div>
       ${this.content}
