@@ -380,8 +380,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       '@toeverything/y-indexeddb':
-        specifier: 0.8.0-canary.4
-        version: 0.8.0-canary.4(yjs@13.6.7)
+        specifier: 0.9.0-canary.0
+        version: 0.9.0-canary.0(yjs@13.6.7)
       async-call-rpc:
         specifier: ^6.3.1
         version: 6.3.1
@@ -1529,85 +1529,85 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@nolyfill/array-includes@1.0.14:
-    resolution: {integrity: sha512-OSpmCvGNRTWtUELVfflVDIEDbXUpX55TT5ubbsZ1N8hCFlHiBKJmtqW0WurV3C2y3OjrewHlP3sA7N1flCuzEg==}
+  /@nolyfill/array-includes@1.0.15:
+    resolution: {integrity: sha512-KKCTRI0DTnZ/jb/HrDa7+8l+RgaFc49KOryzaoaNtNibspKqzCLTZ0/TQixz5emz8945HF67NwH1iLFt0jhDeQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/array.prototype.flat@1.0.14:
-    resolution: {integrity: sha512-uB85CfbyiRoymiWOWhKAKbzZ7mZhNUbGkR3rZ53hJ0dg9zX96arZPcBzE87nTt7aulomR3JO088T1sxb08iELw==}
+  /@nolyfill/array.prototype.flat@1.0.15:
+    resolution: {integrity: sha512-dZWTpH8CWjcF4ZAwqJ0eAvs+nlnkeb+ItM6rZHFTif7/Duc62n7h171RZAt4rBexCd7K7hinKjEimH3syAMoSw==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/array.prototype.flatmap@1.0.14:
-    resolution: {integrity: sha512-Pjc3E/s1djnP4PLx2VN7kHYCQwy4WkY7Pf24yRMo5foKALQAF3uT6oI9WHzmGY90hbUkXrv2P9/vlAz/0nKFeA==}
+  /@nolyfill/array.prototype.flatmap@1.0.15:
+    resolution: {integrity: sha512-SW+qzfEvR+8h4Ekh0cEaCf0a0jkapv1CyF3lsFm+XL4gt4OWkjlzzgME428v4x1D0ZAkOP3bgEao1e12cfrpig==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/array.prototype.tosorted@1.0.14:
-    resolution: {integrity: sha512-IGGwoYMO6juhiqDAhM+pfDNrkfpT7+92wXeEJKfFi1SNoxShHQIX08FxBGZGZbz2B37/feabl92IGQc2p5cFSg==}
+  /@nolyfill/array.prototype.tosorted@1.0.15:
+    resolution: {integrity: sha512-coMaklKp8snHDex8yne+isQlN31q+0Nxe0+VFomGRlwgHYev6St1ciVg1cCs7Qw11lCRNd5i9umY1wMSIXY1Pw==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/has@1.0.14:
-    resolution: {integrity: sha512-iElQvWO1HdyyurSquJj67lHXdxjfR0RA4k9as4as/sxnjixc0thuQc/kWbfKInUGh0rqwJWmlIE+86ijy/xEVA==}
+  /@nolyfill/has@1.0.15:
+    resolution: {integrity: sha512-m7625foC6CrsALQ1j0JxrCjHIwySanKNMnAI5xCxaUvM0CILsGQtSOsDooGk0tV7McR7RrR3Ry+Oz7WpgpXgjQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/object.assign@1.0.14:
-    resolution: {integrity: sha512-lgZaAlXstYs9w0sOeIxzJ5i9OYk4qigBicuw/lnC298VV97n9cFENHIHUbAYfs1MfRIN0yKyojM+a9SRnxH19A==}
+  /@nolyfill/object.assign@1.0.15:
+    resolution: {integrity: sha512-Q/jYV2r++8VDFHmCW8RQdQnqsSM5CMaFJXUssXxOJbbkhn25kT6JlJ8argCBTJnf1qhuaFdiZ3vjHsAdQHm9Mg==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/object.entries@1.0.14:
-    resolution: {integrity: sha512-gP7jriQw2wzT7wBIXSiq4WfVkfCha9oaAQV637SbW4He7Lx4z2bawoZsicVD6WpAZWWUhRLh228NFBjSkEii7g==}
+  /@nolyfill/object.entries@1.0.15:
+    resolution: {integrity: sha512-nIWwas9It3ZyeNd+zTWJjUAzmVjAuDEh3FycqSF0X8pQuLYvsL/kZHLEy8+w9VSg/dvDGuwcMzMuTpQrtIHklQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/object.fromentries@1.0.14:
-    resolution: {integrity: sha512-KEnj8AMr216ESAzPNnX/AdSt/VXXM3antFcz/Aenwk79NpmenbwSQeDfkkTZFuX99cUexevlgkt4+Ghe1csPow==}
+  /@nolyfill/object.fromentries@1.0.15:
+    resolution: {integrity: sha512-4kM7bCxO7VjqiKWDYgUumJL/jnX3dKhCsEaFRRZ0eYalHpM3fZQr045F1/8uvZ0pVQoC3emgegmszNR981ACiw==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/object.hasown@1.0.14:
-    resolution: {integrity: sha512-fTBiOxns1cgnzOyCZkd/hx+xoVXlQu6/cwSNqToD8dB0oVHa01xbDiEKdcLmBmT/6UFMCRo1wBz4rsRX3bvWqg==}
+  /@nolyfill/object.hasown@1.0.15:
+    resolution: {integrity: sha512-nhhz5UXUP7uDWWCKUJ36oChn5Kjqxo0jsW/9uaOwryzTv2/Qi5t0Xl7Ug4c9TWe8yyByKSAPQpudMwKp47E9Mw==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/object.values@1.0.14:
-    resolution: {integrity: sha512-EFEo3FeJmMW52QgnRMplR7gwhhhShVHUyB2I5ofGvKoXdHmy2e4UVWcSDw25TqyV/lDoo6FkBzO+7M/Qq+GY/Q==}
+  /@nolyfill/object.values@1.0.15:
+    resolution: {integrity: sha512-q58UbBMLgvWGeCXjtft/Bpc1TlIxTZkWA9X0WkepmVtbxoIOTeD/3JH+xOY4I7vHVjnaMlypij5yUlcigeGL3Q==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
-  /@nolyfill/shared@1.0.14:
-    resolution: {integrity: sha512-LiFjeoJ8l6j02L/nxk+j/pW9vQjEat4hcgQKsBrPzWtBW/f4vSdpkTavR03dSzx/OGTId+9y1OOXhLsybCmOug==}
+  /@nolyfill/shared@1.0.15:
+    resolution: {integrity: sha512-OQZDjf0BxV6QgcCH04IBlwiiebGZ71OOqvCPUeXWNmPl8byjtmy2NgndO7z7KwqAbCMUuv0wlLheIciTY8KZ/w==}
     dev: true
 
-  /@nolyfill/string.prototype.matchall@1.0.14:
-    resolution: {integrity: sha512-DFpZbkzkpL/wOe2ep2RIDm0xApVKHltImcV+W6GWQd6iTj4ddaTlUGiY6N5nWSjgQkPV1OCuXHJpdliJoMJoIA==}
+  /@nolyfill/string.prototype.matchall@1.0.15:
+    resolution: {integrity: sha512-tCS1uIYgUdfA4ahTdSJm3ht0tJN0ICAilxUkKdmMXSHbEEma6LbRGPCpgLW0rK4lsdMz0ZFot1jMOXQwIyAIkA==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.14
+      '@nolyfill/shared': 1.0.15
     dev: true
 
   /@open-wc/dev-server-hmr@0.1.4:
@@ -1722,8 +1722,8 @@ packages:
     resolution: {integrity: sha512-PJeFrNrYSYiVYbdq7ACEia3RVmOBDdqJ8zBM074HT/mhV9vNsO18TNuXyCxCGjkMJ1M7IGwbg2daiivyFyJ2iw==}
     dev: true
 
-  /@toeverything/y-indexeddb@0.8.0-canary.4(yjs@13.6.7):
-    resolution: {integrity: sha512-PQhuZhGYfydQy8+AZghdu/mtQ2vf1hQIZz4YW+7HE9X10RN0f4Sc3u2vlhvM3Y+exdK0E12iqhTvQ2kaskQ4hg==}
+  /@toeverything/y-indexeddb@0.9.0-canary.0(yjs@13.6.7):
+    resolution: {integrity: sha512-Jz3b1USNqethCAZBCIreTVJ7JzvUNQDDHym1FFGUCns+zEZJRS0xUXxA3AecN/e6lkBOp8BITSYhfILcTTosXA==}
     peerDependencies:
       yjs: ^13.5.51
     dependencies:
@@ -3630,22 +3630,22 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
     dependencies:
-      array-includes: /@nolyfill/array-includes@1.0.14
-      array.prototype.flatmap: /@nolyfill/array.prototype.flatmap@1.0.14
-      array.prototype.tosorted: /@nolyfill/array.prototype.tosorted@1.0.14
+      array-includes: /@nolyfill/array-includes@1.0.15
+      array.prototype.flatmap: /@nolyfill/array.prototype.flatmap@1.0.15
+      array.prototype.tosorted: /@nolyfill/array.prototype.tosorted@1.0.15
       doctrine: 2.1.0
       eslint: 8.46.0
       estraverse: 5.3.0
       jsx-ast-utils: 3.3.5
       minimatch: 3.1.2
-      object.entries: /@nolyfill/object.entries@1.0.14
-      object.fromentries: /@nolyfill/object.fromentries@1.0.14
-      object.hasown: /@nolyfill/object.hasown@1.0.14
-      object.values: /@nolyfill/object.values@1.0.14
+      object.entries: /@nolyfill/object.entries@1.0.15
+      object.fromentries: /@nolyfill/object.fromentries@1.0.15
+      object.hasown: /@nolyfill/object.hasown@1.0.15
+      object.values: /@nolyfill/object.values@1.0.15
       prop-types: 15.8.1
       resolve: 2.0.0-next.4
       semver: 6.3.1
-      string.prototype.matchall: /@nolyfill/string.prototype.matchall@1.0.14
+      string.prototype.matchall: /@nolyfill/string.prototype.matchall@1.0.15
     dev: true
 
   /eslint-plugin-simple-import-sort@10.0.0(eslint@8.46.0):
@@ -4459,7 +4459,7 @@ packages:
   /is-core-module@2.12.1:
     resolution: {integrity: sha512-Q4ZuBAe2FUsKtyQJoQHlvP8OvBERxO3jEmy1I7hcRXcJBGGHFh/aJBswbXuS9sgrDH2QUO8ilkwNPHvHMd8clg==}
     dependencies:
-      has: /@nolyfill/has@1.0.14
+      has: /@nolyfill/has@1.0.15
     dev: true
 
   /is-data-descriptor@0.1.4:
@@ -4838,10 +4838,10 @@ packages:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
     dependencies:
-      array-includes: /@nolyfill/array-includes@1.0.14
-      array.prototype.flat: /@nolyfill/array.prototype.flat@1.0.14
-      object.assign: /@nolyfill/object.assign@1.0.14
-      object.values: /@nolyfill/object.values@1.0.14
+      array-includes: /@nolyfill/array-includes@1.0.15
+      array.prototype.flat: /@nolyfill/array.prototype.flat@1.0.15
+      object.assign: /@nolyfill/object.assign@1.0.15
+      object.values: /@nolyfill/object.values@1.0.15
     dev: true
 
   /jszip@3.10.1:
