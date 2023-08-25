@@ -50,8 +50,8 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       position: relative;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
     }
 
     edgeless-tool-icon-button svg {
@@ -61,8 +61,8 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
 
     edgeless-tool-icon-button svg + svg {
       position: absolute;
-      top: 4px;
-      right: 2px;
+      top: 2px;
+      right: 0px;
     }
   `;
 
