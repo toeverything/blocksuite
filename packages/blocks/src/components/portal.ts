@@ -1,15 +1,19 @@
-import { Slot } from '@blocksuite/global/utils';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
   autoUpdate,
   type AutoUpdateOptions,
   computePosition,
   type ComputePositionConfig,
   type ComputePositionReturn,
-  type VirtualElement,
+  type ReferenceElement,
 } from '@floating-ui/dom';
-import { render, type RenderOptions, type TemplateResult } from 'lit';
-import { html, LitElement } from 'lit';
+import {
+  html,
+  LitElement,
+  render,
+  type RenderOptions,
+  type TemplateResult,
+} from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -175,6 +179,7 @@ export function createSimplePortal({
  */
 export function createLitPortal({
   computePosition: computePositionOptions,
+  abortController = new AbortController(),
   ...portalOptions
 }: Omit<PortalOptions, 'template'> & {
   template:
@@ -187,11 +192,15 @@ export function createLitPortal({
    * See https://floating-ui.com/docs/computePosition
    */
   computePosition?: {
-    referenceElement: VirtualElement;
+    referenceElement: ReferenceElement;
     /**
      * Default `false`.
      */
     autoUpdate?: true | AutoUpdateOptions;
+    /**
+     * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
+     */
+    abortWhenRefRemoved?: boolean;
   } & Partial<ComputePositionConfig>;
 }) {
   const positionSlot = new Slot<ComputePositionReturn>();
@@ -204,6 +213,7 @@ export function createLitPortal({
 
   const portalRoot = createSimplePortal({
     ...portalOptions,
+    abortController,
     template: templateWithPosition,
   });
 
@@ -213,7 +223,14 @@ export function createLitPortal({
     portalRoot.style.top = '0';
     const { referenceElement, ...options } = computePositionOptions;
     const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
-    const update = () =>
+    const update = () => {
+      if (
+        computePositionOptions.abortWhenRefRemoved !== false &&
+        referenceElement instanceof Element &&
+        !referenceElement.isConnected
+      ) {
+        abortController.abort();
+      }
       computePosition(referenceElement, portalRoot, options).then(
         positionReturn => {
           const { x, y } = positionReturn;
@@ -224,12 +241,21 @@ export function createLitPortal({
           positionSlot.emit(positionReturn);
         }
       );
+    };
     if (!maybeAutoUpdateOptions) {
       update();
     } else {
       const autoUpdateOptions =
         maybeAutoUpdateOptions === true ? {} : maybeAutoUpdateOptions;
-      autoUpdate(referenceElement, portalRoot, update, autoUpdateOptions);
+      const cleanup = autoUpdate(
+        referenceElement,
+        portalRoot,
+        update,
+        autoUpdateOptions
+      );
+      abortController.signal.addEventListener('abort', () => {
+        cleanup();
+      });
     }
   }
 

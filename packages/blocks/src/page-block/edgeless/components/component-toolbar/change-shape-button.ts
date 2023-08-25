@@ -156,7 +156,7 @@ const STROKE_COLORS: CssVariableName[] = [
   '--affine-palette-line-white',
   '--affine-palette-transparent',
 ];
-export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[9];
+export const DEFAULT_SHAPE_STROKE_COLOR = STROKE_COLORS[0];
 
 @customElement('edgeless-change-shape-button')
 export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {

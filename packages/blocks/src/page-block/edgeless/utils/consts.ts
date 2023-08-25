@@ -27,6 +27,7 @@ export const SHAPE_OVERLAY_OPTIONS = {
   strokeLineDash: [0, 0],
   stroke: 'black',
   strokeWidth: 4,
+  fill: 'transparent',
 };
 
 export const DEFAULT_NOTE_CHILD_FLAVOUR = 'affine:paragraph';
