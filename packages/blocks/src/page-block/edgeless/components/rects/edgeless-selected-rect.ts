@@ -559,7 +559,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const rect = componentToolbar.getBoundingClientRect();
-    const offset = 18;
+    const offset = 34;
     let top = y - rect.height - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
@@ -756,6 +756,13 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         .edgeless=${edgeless}
         .remoteColorMap=${_remoteColorMap}
       ></edgeless-remote-selection>
+      ${page.readonly
+        ? nothing
+        : html`<edgeless-auto-complete
+            .edgeless=${edgeless}
+            .selectedRect=${_selectedRect}
+          >
+          </edgeless-auto-complete>`}
       <div
         class="affine-edgeless-selected-rect"
         style=${styleMap({
@@ -770,13 +777,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       >
         ${resizeHandles} ${connectorHandle}
       </div>
-      ${page.readonly
-        ? nothing
-        : html`<edgeless-auto-complete
-            .edgeless=${edgeless}
-            .selectedRect=${_selectedRect}
-          >
-          </edgeless-auto-complete>`}
       ${this._toolbarVisible && !page.readonly
         ? html`<edgeless-component-toolbar
             style=${styleMap({
