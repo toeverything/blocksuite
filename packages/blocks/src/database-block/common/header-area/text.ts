@@ -93,6 +93,10 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   @query('rich-text')
   richText!: RichText;
 
+  get vEditor() {
+    return this.richText.vEditor;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this.yText = this.getYText(
