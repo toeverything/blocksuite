@@ -37,6 +37,7 @@ import {
   pressForwardDelete,
   pressShiftTab,
   redoByKeyboard,
+  selectAllByKeyboard,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -372,6 +373,34 @@ test('select all text with dragging and delete by forwardDelete', async ({
   await type(page, 'abc');
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('abc');
+});
+
+test('select all text with keyboard delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  const text1 = await getVirgoSelectionText(page);
+  expect(text1).toBe('');
+  await type(page, 'abc');
+  const text2 = await getVirgoSelectionText(page);
+  expect(text2).toBe('abc');
+
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['', '456', '789']);
+
+  await type(page, 'abc');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['']);
 });
 
 test('select text leaving a few words in the last line and delete', async ({

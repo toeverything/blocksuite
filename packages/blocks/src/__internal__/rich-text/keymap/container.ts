@@ -80,6 +80,25 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const _preventDefault = (ctx: UIEventStateContext) => {
     const state = ctx.get('defaultState');
     state.event.preventDefault();
+  }
+  
+  const _selectAllText = () => {
+    selection.update(selList => {
+      return selList.map(sel => {
+        if (PathFinder.equals(sel.path, blockElement.path)) {
+          return selection.getInstance('text', {
+            from: {
+              path: blockElement.path,
+              index: 0,
+              length: blockElement.model.text?.length ?? 0,
+            },
+            to: null,
+          });
+        }
+        return sel;
+      });
+    });
+    return true;
   };
 
   blockElement.bindHotKey({
@@ -273,7 +292,17 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     'Mod-a': ctx => {
       ctx.get('defaultState').event.preventDefault();
       if (blockElement.selected?.is('text')) {
-        return _selectBlock();
+        const text = blockElement.selected;
+        const virgo =
+          blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
+        if (
+          text.from.index === 0 &&
+          text.from.length === virgo?.virgoEditor.yText.length
+        ) {
+          return _selectBlock();
+        }
+
+        return _selectAllText();
       }
       return;
     },
