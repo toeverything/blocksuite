@@ -177,11 +177,11 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     vEditor.setAttributeSchema(affineTextAttributes);
     vEditor.setAttributeRenderer(attributeRenderer());
     vEditor.mount(container);
+    autoIdentifyReference(vEditor, vEditor.yText.toString());
     return vEditor;
   }
 
   protected initEditingMode(vEditor: VEditor) {
-    autoIdentifyReference(vEditor, vEditor.yText.toString());
     const historyHelper = addHistoryToVEditor(vEditor);
     vEditor.bindHandlers({
       keydown: e => {
