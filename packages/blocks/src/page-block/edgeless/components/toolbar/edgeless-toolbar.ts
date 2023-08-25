@@ -442,7 +442,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private get defaultContent() {
     const { page } = this.edgeless;
-    const { type } = this.edgelessTool;     
+    const { type } = this.edgelessTool;
 
     return html`<div class="edgeless-toolbar-left-part">
         <edgeless-tool-icon-button
@@ -466,7 +466,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
         ${page.readonly
           ? nothing
-          : html` <edgeless-frame-tool-buttonz
+          : html` <edgeless-frame-tool-button
               .edgelessTool=${this.edgelessTool}
               .setEdgelessTool=${this.setEdgelessTool}
               .edgeless=${this.edgeless}
