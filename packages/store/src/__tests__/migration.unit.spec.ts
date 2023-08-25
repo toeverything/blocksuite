@@ -95,7 +95,7 @@ describe('block migration', () => {
     assert.equal(shape.get('italic'), true);
   });
 
-  test.only('fix wrong connector data', async () => {
+  test('fix wrong connector data', async () => {
     const doc = await loadBinary('connector');
     // @ts-ignore
     const surfaceElements = doc
