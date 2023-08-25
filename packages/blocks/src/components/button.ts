@@ -40,11 +40,15 @@ export class IconButton extends LitElement {
       pointer-events: auto;
     }
 
-    :host > span {
+    :host > .text {
       flex: 1;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+    }
+
+    ::slotted(svg) {
+      color: var(--affine-icon-color);
     }
 
     :host(:hover) {
@@ -152,7 +156,7 @@ export class IconButton extends LitElement {
   override render() {
     return html`<slot></slot>${this.text
         ? // wrap a span around the text so we can ellipsis it automatically
-          html`<span>${this.text}</span>`
+          html`<span class="text">${this.text}</span>`
         : ''}<slot name="suffix"></slot>`;
   }
 }
