@@ -81,6 +81,10 @@ export class VEditor<
     return this.yText.length;
   }
 
+  get yTextDeltas() {
+    return this.yText.toDelta();
+  }
+
   get rootElement() {
     assertExists(this._rootElement);
     return this._rootElement;

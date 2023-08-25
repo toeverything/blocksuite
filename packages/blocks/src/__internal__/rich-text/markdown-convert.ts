@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import { assertExists, isEqual } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import {
@@ -35,10 +36,16 @@ interface InlineMarkdownMatch {
   }) => ReturnType<VKeyboardBindingHandler>;
 }
 
+// inline markdown match rules:
+// covert: ***test*** + space
+// covert: ***t est*** + space
+// not convert: *** test*** + space
+// not convert: ***test *** + space
+// not convert: *** test *** + space
 const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   {
     name: 'bolditalic',
-    pattern: /(?:\*){3}([^ *](.+?)[^ *])(?:\*){3}$/g,
+    pattern: /(?:\*\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*\*)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -92,7 +99,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'bold',
-    pattern: /(?:\*){2}([^ *](.+?)[^ *])(?:\*){2}$/g,
+    pattern: /(?:\*\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*\*)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -144,7 +151,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'italic',
-    pattern: /(?:\*){1}([^ *](.+?)[^ *])(?:\*){1}$/g,
+    pattern: /(?:\*)([^\s\*](?:[^*]*?[^\s\*])?)(?:\*)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -196,7 +203,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'strikethrough',
-    pattern: /(?:~~)([^ ~](.+?)[^ ~])(?:~~)$/g,
+    pattern: /(?:~~)([^\s~](?:[^~]*?[^\s~])?)(?:~~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -248,7 +255,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'underthrough',
-    pattern: /(?:~)([^ ~](.+?)[^ ~])(?:~)$/g,
+    pattern: /(?:~)([^\s~](?:[^~]*?[^\s~])?)(?:~)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {
@@ -300,7 +307,7 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
   },
   {
     name: 'code',
-    pattern: /(?:`)([^ `](.+?)[^ `])(?:`)$/g,
+    pattern: /(?:`)([^\s`](?:[^`]*?[^\s`])?)(?:`)$/g,
     action: ({ vEditor, prefixText, vRange, pattern, undoManager }) => {
       const match = pattern.exec(prefixText);
       if (!match) {

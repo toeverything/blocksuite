@@ -34,6 +34,7 @@ import type {
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
+import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getConnectorPath,
   getSelectedBound,
@@ -132,6 +133,20 @@ export async function assertTitle(page: Page, text: string) {
   const vEditor = editor.locator('[data-block-is-title="true"]').first();
   const vText = virgoEditorInnerTextToString(await vEditor.innerText());
   expect(vText).toBe(text);
+}
+
+export async function assertRichTextVirgoDeltas(
+  page: Page,
+  deltas: unknown[],
+  i = 0
+) {
+  const actual = await page.evaluate(i => {
+    const vRoot = document.querySelectorAll<VirgoRootElement>(
+      'rich-text [data-virgo-root="true"]'
+    )[i];
+    return vRoot.virgoEditor.yTextDeltas;
+  }, i);
+  expect(actual).toEqual(deltas);
 }
 
 export async function assertText(page: Page, text: string, i = 0) {

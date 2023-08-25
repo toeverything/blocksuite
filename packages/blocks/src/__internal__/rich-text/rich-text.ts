@@ -147,7 +147,11 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     return this._vEditor;
   }
 
-  private _initVEditor() {
+  private _init() {
+    if (this._vEditor) {
+      throw new Error('vEditor already exists.');
+    }
+
     this._vEditor = new VEditor<AffineTextAttributes>(this.yText, {
       isEmbed: delta => !!delta.attributes?.reference,
     });
@@ -258,6 +262,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     this._vEditor.setReadonly(this.readonly);
   }
 
+  _unmount() {
+    if (this.vEditor?.mounted) {
+      this.vEditor.unmount();
+    }
+    this._vEditor = null;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -266,16 +277,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     assertExists(this.textSchema, 'rich-text need textSchema to init.');
 
     this.updateComplete.then(() => {
-      if (this._vEditor?.mounted) {
-        this._vEditor.unmount();
-      }
-      this._initVEditor();
+      this._unmount();
+      this._init();
 
       this.disposables.add({
         dispose: () => {
-          if (this._vEditor?.mounted) {
-            this._vEditor.unmount();
-          }
+          this._unmount();
         },
       });
     });
