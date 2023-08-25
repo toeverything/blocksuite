@@ -12,6 +12,7 @@ import {
   getCombinedFormatInTextSelection,
   getSelectedContentModels,
 } from '../../../page-block/utils/selection.js';
+import { checkFirstLine, checkLastLine } from '../../utils/check-line.js';
 import { matchFlavours } from '../../utils/model.js';
 import { tryConvertBlock } from '../markdown-convert.js';
 import {
@@ -58,18 +59,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     return true;
   };
 
-  const _getLines = (vEditor: VEditor) => {
-    return Array.from(vEditor.rootElement.querySelectorAll('v-line'));
-  };
-
-  const _getLineOffset = (vEditor: VEditor) => {
-    const vLines = _getLines(vEditor);
-    const vRange = vEditor.getVRange();
-    assertExists(vRange);
-    const [line] = vEditor.getLine(vRange.index);
-    return vLines.indexOf(line);
-  };
-
   const _getVirgo = () => {
     const vRoot =
       blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
@@ -107,9 +96,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           });
         }
 
-        const offset = _getLineOffset(vEditor);
-
-        if (offset === 0) {
+        const range = vEditor.toDomRange({
+          index: vRange.index,
+          length: 0,
+        });
+        assertExists(range);
+        if (checkFirstLine(range, vEditor.rootElement)) {
           _preventDefault(ctx);
           return;
         }
@@ -132,9 +124,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           });
         }
 
-        const lines = _getLines(vEditor);
-        const offset = _getLineOffset(vEditor);
-        if (lines.length - 1 === offset) {
+        const range = vEditor.toDomRange({
+          index: vRange.index,
+          length: 0,
+        });
+        assertExists(range);
+        if (checkLastLine(range, vEditor.rootElement)) {
           if (getNextBlock(blockElement)) {
             _preventDefault(ctx);
           }
@@ -258,7 +253,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       return;
     },
-    ' ': ctx => {
+    Space: ctx => {
       if (blockElement.selected?.is('text')) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
