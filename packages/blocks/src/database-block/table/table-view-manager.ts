@@ -149,7 +149,9 @@ export class DataViewTableManager extends BaseDataViewManager {
     result.push(...needShow);
     return result;
   }
-
+  override get readonly(): boolean {
+    return this.viewSource.readonly;
+  }
   public isShow(rowId: string): boolean {
     if (this.filter.conditions.length) {
       const rowMap = Object.fromEntries(

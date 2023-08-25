@@ -85,7 +85,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     this._disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       if (!this.editing) {
-        this.selectCurrentCell(true);
+        this.selectCurrentCell(!this.column.readonly);
       }
     });
   }

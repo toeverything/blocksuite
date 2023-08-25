@@ -313,8 +313,23 @@ export class DocPageBlockComponent
     );
   }
 
+  private _initReadonlyListener() {
+    const page = this.page;
+
+    let readonly = page.readonly;
+    this._disposables.add(
+      page.awarenessStore.slots.update.on(() => {
+        if (readonly !== page.readonly) {
+          readonly = page.readonly;
+          this._titleVEditor?.setReadonly(readonly);
+        }
+      })
+    );
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
+    this._initReadonlyListener();
   }
 
   override connectedCallback() {

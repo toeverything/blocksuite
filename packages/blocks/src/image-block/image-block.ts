@@ -1,15 +1,16 @@
-import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
+import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { clamp, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import { offset, shift } from '@floating-ui/dom';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { getViewportElement } from '../__internal__/utils/query.js';
+import { createLitPortal } from '../components/portal.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
@@ -103,14 +104,9 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     'loading';
 
   @state()
-  private _optionPosition: { x: number; y: number } | null = null;
-
-  @state()
   _focused = false;
 
   private _retryCount = 0;
-
-  private hoverState = new Slot<boolean>();
 
   override connectedCallback() {
     super.connectedCallback();
@@ -263,93 +259,41 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _observePosition() {
-    // At AFFiNE, avoid the option element to be covered by the header
-    // we need to reserve the space for the header
-    const HEADER_HEIGHT = 64;
-    // The height of the option element
-    // You need to change this value manually if you change the style of the option element
-    const OPTION_ELEMENT_WEIGHT = 50;
-    const OPTION_ELEMENT_HEIGHT = 136;
-    const HOVER_DELAY = 300;
-    const TOP_EDGE = 10;
-    const LEFT_EDGE = 12;
     const ANCHOR_EL: HTMLElement = this.resizeImg;
 
-    let isHover = false;
-    let isClickHold = false;
-    let timer: number;
-
-    const updateOptionsPosition = () => {
-      if (isClickHold) {
-        this._optionPosition = null;
-        return;
-      }
-      clearTimeout(timer);
-      if (!isHover) {
-        // delay hiding the option element
-        timer = window.setTimeout(
-          () => (this._optionPosition = null),
-          HOVER_DELAY
-        );
-        if (!this._optionPosition) return;
-      }
-      // Update option position when scrolling
-      const rect = ANCHOR_EL.getBoundingClientRect();
-      const showInside =
-        rect.width > 680 ||
-        rect.right + LEFT_EDGE + OPTION_ELEMENT_WEIGHT > window.innerWidth;
-      this._optionPosition = {
-        x: showInside
-          ? // when image size is too large, the option popup should show inside
-            rect.right - OPTION_ELEMENT_WEIGHT
-          : rect.right + LEFT_EDGE,
-        y:
-          rect.height < OPTION_ELEMENT_HEIGHT
-            ? // when image size is too small,
-              // the option popup should always show align with the top edge
-              rect.top
-            : clamp(
-                rect.top + TOP_EDGE,
-                Math.min(
-                  HEADER_HEIGHT + LEFT_EDGE,
-                  rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-                ),
-                rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-              ),
-      };
-    };
-
-    this.hoverState.on(newHover => {
-      if (isHover === newHover) return;
-      isHover = newHover;
-      updateOptionsPosition();
+    let portal: HTMLElement | null = null;
+    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () => {
+      if (portal?.isConnected) return;
+      const abortController = new AbortController();
+      portal = createLitPortal({
+        template: ImageOptionsTemplate({
+          anchor: ANCHOR_EL,
+          model: this.model,
+          blob: this._blob,
+          abortController,
+        }),
+        computePosition: {
+          referenceElement: ANCHOR_EL,
+          placement: 'right-start',
+          middleware: [
+            offset({
+              mainAxis: 12,
+              crossAxis: 10,
+            }),
+            shift({
+              crossAxis: true,
+              padding: {
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
+                right: 12,
+              },
+            }),
+          ],
+          autoUpdate: true,
+        },
+        abortController,
+      });
     });
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () =>
-      this.hoverState.emit(true)
-    );
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', () =>
-      this.hoverState.emit(false)
-    );
-
-    // When the resize handler is clicked, the image option should be hidden
-    this._disposables.addFromEvent(this, 'pointerdown', () => {
-      isClickHold = true;
-      updateOptionsPosition();
-    });
-    this._disposables.addFromEvent(window, 'pointerup', () => {
-      isClickHold = false;
-      updateOptionsPosition();
-    });
-
-    this._disposables.add(
-      this.model.propsUpdated.on(() => updateOptionsPosition())
-    );
-    const viewportElement = getViewportElement(this.model.page);
-    if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', () =>
-        updateOptionsPosition()
-      );
-    }
   }
 
   private _handleSelection() {
@@ -457,18 +401,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     });
   }
 
-  private _imageOptionsTemplate() {
-    if (!this._optionPosition) return null;
-    return html`<blocksuite-portal
-      .template=${ImageOptionsTemplate({
-        model: this.model,
-        blob: this._blob,
-        position: this._optionPosition,
-        hoverState: this.hoverState,
-      })}
-    ></blocksuite-portal>`;
-  }
-
   private _imageResizeBoardTemplate() {
     const isFocused = this._focused;
     if (!isFocused || this._imageState !== 'ready') return null;
@@ -501,8 +433,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       <div style="position: relative;">
         <div class="affine-image-wrapper">
           <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
-            ${img} ${this._imageOptionsTemplate()}
-            ${this._imageResizeBoardTemplate()}
+            ${img} ${this._imageResizeBoardTemplate()}
           </div>
         </div>
         ${this.selected?.is('block')

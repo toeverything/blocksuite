@@ -3,7 +3,7 @@ import '../../../components/tags/multi-tag-view.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -376,7 +376,11 @@ export class PageMetaData extends WithDisposable(LitElement) {
               </div>`;
             }
           )}
-          <div class="add-tag" @click="${this._selectTags}">${PlusIcon}</div>
+          ${this.page.readonly
+            ? nothing
+            : html`<div class="add-tag" @click="${this._selectTags}">
+                ${PlusIcon}
+              </div>`}
         </div>
       </div>
     </div>`;

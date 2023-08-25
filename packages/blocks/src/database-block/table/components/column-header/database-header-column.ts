@@ -221,6 +221,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
 
   private _clickColumn = () => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
     this.popMenu();
   };
   private _contextMenu = (e: MouseEvent) => {
@@ -373,6 +376,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   }
 
   private _clickTypeIcon = (event: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
     if (this.column.type === 'title') {
       return;
     }

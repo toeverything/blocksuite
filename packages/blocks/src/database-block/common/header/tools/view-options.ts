@@ -189,6 +189,9 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
   };
 
   override render() {
+    if (this.view.readonly) {
+      return;
+    }
     return html` <div
       class="affine-database-toolbar-item more-action"
       @click="${this._clickMoreAction}"

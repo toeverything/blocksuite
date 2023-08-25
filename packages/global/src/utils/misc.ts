@@ -18,3 +18,44 @@ export function launchIntoFullscreen(element: Element) {
     element.msRequestFullscreen();
   }
 }
+
+/**
+ * @deprecated Wait for API upgrade
+ */
+export const createDelayHoverSignal = (
+  abortController: AbortController,
+  hoverDelay = 300
+) => {
+  let hoverState = false;
+  let hoverTimeout = 0;
+
+  const onHover = () => {
+    if (abortController.signal.aborted) {
+      console.warn(
+        'AbortSignal has been aborted! Did you forget to remove the listener?'
+      );
+    }
+    if (!hoverState) {
+      hoverState = true;
+      // abortController.signal.dispatchEvent(new Event('hover'));
+    }
+    clearTimeout(hoverTimeout);
+  };
+  const onHoverLeave = () => {
+    if (abortController.signal.aborted) {
+      console.warn(
+        'AbortSignal has been aborted! Did you forget to remove the listener?'
+      );
+    }
+    clearTimeout(hoverTimeout);
+    hoverTimeout = window.setTimeout(() => {
+      abortController.abort();
+      hoverState = false;
+      // abortController.signal.dispatchEvent(new Event('hoverleave'));
+    }, hoverDelay);
+  };
+  return {
+    onHover,
+    onHoverLeave,
+  };
+};
