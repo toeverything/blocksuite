@@ -813,7 +813,6 @@ const getTableCellsAndChildren = (
       };
     });
   });
-  console.log(children);
   return { cells, children };
 };
 
