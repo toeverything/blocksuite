@@ -4,9 +4,7 @@ import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 
 export const renameStyles = css`
   .affine-attachment-rename-container {
-    position: fixed;
-    top: 0;
-
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -55,13 +53,8 @@ export const renameStyles = css`
   }
 `;
 
-const moreMenuStyles = css`
+export const moreMenuStyles = css`
   .affine-attachment-options-more {
-    position: absolute;
-    right: 0;
-    top: 0;
-    transform: translateY(calc(-100% - 4px));
-
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -89,10 +82,6 @@ const moreMenuStyles = css`
 
 export const styles = css`
   .affine-attachment-options {
-    position: fixed;
-    left: 0;
-    top: 0;
-
     display: flex;
     align-items: center;
     padding: 8px;
@@ -101,6 +90,26 @@ export const styles = css`
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
     z-index: var(--affine-z-index-popover);
+  }
+
+  /* hover guardian */
+  .affine-attachment-options::before {
+    position: absolute;
+    content: ' ';
+    left: 0;
+    top: 0;
+    transform: translateY(-100%);
+    width: 100%;
+    height: 4px;
+  }
+  .affine-attachment-options::after {
+    position: absolute;
+    content: ' ';
+    left: 0;
+    bottom: 0;
+    transform: translateY(100%);
+    width: 100%;
+    height: 4px;
   }
 
   .affine-attachment-options .divider {
@@ -115,5 +124,4 @@ export const styles = css`
   }
 
   ${tooltipStyle}
-  ${moreMenuStyles}
 `;

@@ -6,8 +6,8 @@ import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { CloseIcon } from '../../icons/index.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { CloseIcon } from '../images/icons.js';
 
 export const bookmarkModalStyles = html`
   <style>
