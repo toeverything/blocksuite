@@ -176,25 +176,20 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       border-radius: 19px;
       cursor: pointer;
       pointer-events: auto;
+      transition: background 0.3s linear, box-shadow 0.2s linear;
     }
     .edgeless-auto-complete-arrow-wrapper:hover
       > .edgeless-auto-complete-arrow {
-      border: 1px solid rgba(227, 226, 228, 1);
-      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
-      background: linear-gradient(0deg, #e3e2e4, #e3e2e4),
-        linear-gradient(0deg, #ffffff, #ffffff);
+      border: 1px solid var(--affine-border-color);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-white);
     }
 
     .edgeless-auto-complete-arrow-wrapper
       > .edgeless-auto-complete-arrow:hover {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0px 0px 4px 0px rgba(66, 65, 73, 0.14);
-      background: linear-gradient(0deg, #1e96eb, #1e96eb),
-        linear-gradient(
-          0deg,
-          rgba(255, 255, 255, 0.1),
-          rgba(255, 255, 255, 0.1)
-        );
+      border: 1px solid var(--affine-white-10);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-primary-color);
     }
 
     .edgeless-auto-complete-arrow svg {

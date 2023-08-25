@@ -15,6 +15,7 @@ import {
 import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
+  clamp,
   compare,
   ConnectorElement,
   deserializeXYWH,
@@ -28,6 +29,8 @@ import {
   type PhasorElement,
   serializeXYWH,
   SurfaceManager,
+  ZOOM_MAX,
+  ZOOM_MIN,
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
@@ -1261,6 +1264,7 @@ export class EdgelessPageBlockComponent
         (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
         (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
       );
+      zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
 
       centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
       centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
