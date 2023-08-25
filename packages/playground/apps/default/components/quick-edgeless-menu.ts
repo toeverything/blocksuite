@@ -58,7 +58,12 @@ const basePath = import.meta.env.DEV
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
+function init_css_debug_menu(styleMenu: Pane) {
+  if (styleMenu.title !== 'Waiting') {
+    return;
+  }
+  const style = document.documentElement.style;
+  styleMenu.title = 'CSS Debug Menu';
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({
     title: 'Font Family',
@@ -382,6 +387,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _toggleStyleDebugMenu() {
+    init_css_debug_menu(this._styleMenu);
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
     this._showStyleDebugMenu
       ? (this._styleMenu.hidden = false)
@@ -470,11 +476,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new Pane({ title: 'CSS Debug Menu' });
+    this._styleMenu = new Pane({ title: 'Waiting' });
     this._styleMenu.hidden = true;
     this._styleMenu.element.style.width = '650';
-    const style = document.documentElement.style;
-    init_css_debug_menu(this._styleMenu, style);
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -570,7 +574,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   <sl-dropdown
                     id="test-operations-dropdown"
                     placement="right-start"
-                    .distance=${42}
+                    .distance=${41.5}
                     hoist
                   >
                     <span slot="trigger">Test operations</span>
