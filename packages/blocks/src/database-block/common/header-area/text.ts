@@ -258,6 +258,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 export class HeaderAreaTextCell extends BaseTextCell {
   private init() {
     const editor = this.initVirgo(this.richText);
+    autoIdentifyReference(editor, editor.yText.toString());
     editor.setReadonly(true);
     this._disposables.add({
       dispose: () => {
