@@ -371,11 +371,11 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1
       '@rich-data/json-plugin':
-        specifier: 3.0.0-20230404235326-387ed97
-        version: 3.0.0-20230404235326-387ed97(@rich-data/viewer@3.0.0-20230404235326-387ed97)(react-dom@18.2.0)(react@18.2.0)
+        specifier: 3.0.0-20230826094703-d698646
+        version: 3.0.0-20230826094703-d698646(@rich-data/viewer@3.0.0-20230826094703-d698646)(react-dom@18.2.0)(react@18.2.0)
       '@rich-data/viewer':
-        specifier: 3.0.0-20230404235326-387ed97
-        version: 3.0.0-20230404235326-387ed97(react-dom@18.2.0)(react@18.2.0)
+        specifier: 3.0.0-20230826094703-d698646
+        version: 3.0.0-20230826094703-d698646(react-dom@18.2.0)(react@18.2.0)
       '@shoelace-style/shoelace':
         specifier: 2.0.0
         version: 2.0.0
@@ -1529,85 +1529,85 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@nolyfill/array-includes@1.0.15:
-    resolution: {integrity: sha512-KKCTRI0DTnZ/jb/HrDa7+8l+RgaFc49KOryzaoaNtNibspKqzCLTZ0/TQixz5emz8945HF67NwH1iLFt0jhDeQ==}
+  /@nolyfill/array-includes@1.0.16:
+    resolution: {integrity: sha512-lSmwBddSJwZmiq9us5XbhWk2Ge+NgDMPPLQ0jcHI7aH7Wv6h/401oGE15AFcvm2GjRoP8Fsi0AoThm/AEd6Cyg==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/array.prototype.flat@1.0.15:
-    resolution: {integrity: sha512-dZWTpH8CWjcF4ZAwqJ0eAvs+nlnkeb+ItM6rZHFTif7/Duc62n7h171RZAt4rBexCd7K7hinKjEimH3syAMoSw==}
+  /@nolyfill/array.prototype.flat@1.0.16:
+    resolution: {integrity: sha512-h7gLT+8pizkbHHth+plgt0/EAL8rWn+FOcOJc3oitetIZ/cX8wT3J6/ml6SkRBEe0UEV/xTYRAcYLIAk990wOA==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/array.prototype.flatmap@1.0.15:
-    resolution: {integrity: sha512-SW+qzfEvR+8h4Ekh0cEaCf0a0jkapv1CyF3lsFm+XL4gt4OWkjlzzgME428v4x1D0ZAkOP3bgEao1e12cfrpig==}
+  /@nolyfill/array.prototype.flatmap@1.0.16:
+    resolution: {integrity: sha512-TlgL6EU8z++01KYrECsEe+GzK/LwHP1qBBj1dVk/1FF8fPKT9RozjKRYoAmi58xdafNepFnhGm2XhL9E3dCOuQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/array.prototype.tosorted@1.0.15:
-    resolution: {integrity: sha512-coMaklKp8snHDex8yne+isQlN31q+0Nxe0+VFomGRlwgHYev6St1ciVg1cCs7Qw11lCRNd5i9umY1wMSIXY1Pw==}
+  /@nolyfill/array.prototype.tosorted@1.0.16:
+    resolution: {integrity: sha512-NN+oLGLCiyknKHDpcD/ZjeZGGxhoe40u3m/mDTsydBX+ERGEQ84cDjhaAWGjQefAlVyscNZZ6w7JAco9+qzK7w==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/has@1.0.15:
-    resolution: {integrity: sha512-m7625foC6CrsALQ1j0JxrCjHIwySanKNMnAI5xCxaUvM0CILsGQtSOsDooGk0tV7McR7RrR3Ry+Oz7WpgpXgjQ==}
+  /@nolyfill/has@1.0.16:
+    resolution: {integrity: sha512-Zqo75Es2D/iNqHYKJqOM+KjT2J3iBV9PJiuXKQYlz6HLPwfD1C/inGBAM4eLAu8SKuxn+nmK7vd5WBProo5zVQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/object.assign@1.0.15:
-    resolution: {integrity: sha512-Q/jYV2r++8VDFHmCW8RQdQnqsSM5CMaFJXUssXxOJbbkhn25kT6JlJ8argCBTJnf1qhuaFdiZ3vjHsAdQHm9Mg==}
+  /@nolyfill/object.assign@1.0.16:
+    resolution: {integrity: sha512-NAvbPoey13F5HqElj6Siy/lkSktZJqV5zOfHX5BcDwhG9VrYCrtH2QLxmzRVEVwg2CDpnKdhc36z676ERP3u7w==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/object.entries@1.0.15:
-    resolution: {integrity: sha512-nIWwas9It3ZyeNd+zTWJjUAzmVjAuDEh3FycqSF0X8pQuLYvsL/kZHLEy8+w9VSg/dvDGuwcMzMuTpQrtIHklQ==}
+  /@nolyfill/object.entries@1.0.16:
+    resolution: {integrity: sha512-sswIVQMnduxIRdbs6pY4WzwdzgbYiR1U3zaKjx1GHnkcm9h4eMhg5kIJyd3cqB8h9AqqqJQnK4y/YpunAGBpsA==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/object.fromentries@1.0.15:
-    resolution: {integrity: sha512-4kM7bCxO7VjqiKWDYgUumJL/jnX3dKhCsEaFRRZ0eYalHpM3fZQr045F1/8uvZ0pVQoC3emgegmszNR981ACiw==}
+  /@nolyfill/object.fromentries@1.0.16:
+    resolution: {integrity: sha512-fmG7WZiNr0S8B/VsvNIhQwpYIYX1wVpGDif3NppkXxPY130UIIeb8LARxZjOmCmlQDNWHyclQD6xh15AT8tBjQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/object.hasown@1.0.15:
-    resolution: {integrity: sha512-nhhz5UXUP7uDWWCKUJ36oChn5Kjqxo0jsW/9uaOwryzTv2/Qi5t0Xl7Ug4c9TWe8yyByKSAPQpudMwKp47E9Mw==}
+  /@nolyfill/object.hasown@1.0.16:
+    resolution: {integrity: sha512-gBRvMBGzopEBtyTVNMZ8VkKa7CZN4Xf4DEoRCy6qErkNZbFbfcCdXpK9fDs8xw1MeIca2ZrdjtSTDL1aGzMz1A==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/object.values@1.0.15:
-    resolution: {integrity: sha512-q58UbBMLgvWGeCXjtft/Bpc1TlIxTZkWA9X0WkepmVtbxoIOTeD/3JH+xOY4I7vHVjnaMlypij5yUlcigeGL3Q==}
+  /@nolyfill/object.values@1.0.16:
+    resolution: {integrity: sha512-iFKa5ZY/VhzkTSUbqYXxQeKH+wp8jJ13m2P7WTXl7LhFb2NWJufTvnXpQ8OJJU3vkjI1zUnEEsosT6/+PIJG1Q==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
-  /@nolyfill/shared@1.0.15:
-    resolution: {integrity: sha512-OQZDjf0BxV6QgcCH04IBlwiiebGZ71OOqvCPUeXWNmPl8byjtmy2NgndO7z7KwqAbCMUuv0wlLheIciTY8KZ/w==}
+  /@nolyfill/shared@1.0.16:
+    resolution: {integrity: sha512-wHe8hBWo1I5LFyGB8ncme7Hp9G3NAiPlp0h513UNSyCtMUqEDiLamydTRuTbndJDWJOZ82TFfuL09kV6+2OPfA==}
     dev: true
 
-  /@nolyfill/string.prototype.matchall@1.0.15:
-    resolution: {integrity: sha512-tCS1uIYgUdfA4ahTdSJm3ht0tJN0ICAilxUkKdmMXSHbEEma6LbRGPCpgLW0rK4lsdMz0ZFot1jMOXQwIyAIkA==}
+  /@nolyfill/string.prototype.matchall@1.0.16:
+    resolution: {integrity: sha512-PbWV43ng6Jg0VYIm6fANUzWjQ9ndl/V9j/y17qvA42CsBiwGYdZqDYplZZILWiq4x3HID+I7Iq9UDsCH1OpEgQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
-      '@nolyfill/shared': 1.0.15
+      '@nolyfill/shared': 1.0.16
     dev: true
 
   /@open-wc/dev-server-hmr@0.1.4:
@@ -1653,22 +1653,21 @@ packages:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
 
-  /@rich-data/json-plugin@3.0.0-20230404235326-387ed97(@rich-data/viewer@3.0.0-20230404235326-387ed97)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-jLEkTzOPttUByY3VjXYeB0BItN6Kb0FClOnjmH227OQQuLJw9ikeJiz19huMenPjqrNLTt7CGD6WqqbiruZAtA==}
+  /@rich-data/json-plugin@3.0.0-20230826094703-d698646(@rich-data/viewer@3.0.0-20230826094703-d698646)(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-2/z3c4xz9IQTLP8Ic4q0GP4fs+A5I8dpGLvzlxfvWGVhaaUDY3hEtJlIepZl99fi6kHg2idoqaOAAE4uE8qs0w==}
     peerDependencies:
-      '@rich-data/viewer': ^3.0.0-20230404235326-387ed97
+      '@rich-data/viewer': ^3.0.0-20230826094703-d698646
       react: ^18
       react-dom: ^18
     dependencies:
-      '@rich-data/viewer': 3.0.0-20230404235326-387ed97(react-dom@18.2.0)(react@18.2.0)
-      '@tabler/icons-react': 2.30.0(react@18.2.0)
+      '@rich-data/viewer': 3.0.0-20230826094703-d698646(react-dom@18.2.0)(react@18.2.0)
       clsx: 1.2.1
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@rich-data/viewer@3.0.0-20230404235326-387ed97(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-8c2OIQ+/iQAAfL5BcfrQhOkRTgnc2moKD8IOHOxSLWmnZBBgxmSA4Y8RT8m0o3Y0GtVoBzVjf3aRvB3GGxIsBg==}
+  /@rich-data/viewer@3.0.0-20230826094703-d698646(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-vuWoV52fE4I52JEeynEpjEcjo+BClV3j+DDBu1j/sScPFjUUuVAeRp66ndRrxIiS9GJXQP+c5zmSjN+H8kp8sA==}
     peerDependencies:
       react: ^18
       react-dom: ^18
@@ -1703,20 +1702,6 @@ packages:
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
-
-  /@tabler/icons-react@2.30.0(react@18.2.0):
-    resolution: {integrity: sha512-aYggXusHW133L4KujJkVf4GIIrjg7tIRHgNf/n37mnoHqMjwNP+PjmVdrBM1Z8Ywx9PKFRlrwM0eUMDcG+I4HA==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0
-    dependencies:
-      '@tabler/icons': 2.30.0
-      prop-types: 15.8.1
-      react: 18.2.0
-    dev: false
-
-  /@tabler/icons@2.30.0:
-    resolution: {integrity: sha512-tvtmkI4ALjKThVVORh++sB9JnkFY7eGInKxNy+Df7WVQiF7T85tlvGADzlgX4Ic+CK5MIUzZ0jhOlQ/RRlgXpg==}
-    dev: false
 
   /@toeverything/theme@0.7.12:
     resolution: {integrity: sha512-PJeFrNrYSYiVYbdq7ACEia3RVmOBDdqJ8zBM074HT/mhV9vNsO18TNuXyCxCGjkMJ1M7IGwbg2daiivyFyJ2iw==}
@@ -3630,22 +3615,22 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8
     dependencies:
-      array-includes: /@nolyfill/array-includes@1.0.15
-      array.prototype.flatmap: /@nolyfill/array.prototype.flatmap@1.0.15
-      array.prototype.tosorted: /@nolyfill/array.prototype.tosorted@1.0.15
+      array-includes: /@nolyfill/array-includes@1.0.16
+      array.prototype.flatmap: /@nolyfill/array.prototype.flatmap@1.0.16
+      array.prototype.tosorted: /@nolyfill/array.prototype.tosorted@1.0.16
       doctrine: 2.1.0
       eslint: 8.46.0
       estraverse: 5.3.0
       jsx-ast-utils: 3.3.5
       minimatch: 3.1.2
-      object.entries: /@nolyfill/object.entries@1.0.15
-      object.fromentries: /@nolyfill/object.fromentries@1.0.15
-      object.hasown: /@nolyfill/object.hasown@1.0.15
-      object.values: /@nolyfill/object.values@1.0.15
+      object.entries: /@nolyfill/object.entries@1.0.16
+      object.fromentries: /@nolyfill/object.fromentries@1.0.16
+      object.hasown: /@nolyfill/object.hasown@1.0.16
+      object.values: /@nolyfill/object.values@1.0.16
       prop-types: 15.8.1
       resolve: 2.0.0-next.4
       semver: 6.3.1
-      string.prototype.matchall: /@nolyfill/string.prototype.matchall@1.0.15
+      string.prototype.matchall: /@nolyfill/string.prototype.matchall@1.0.16
     dev: true
 
   /eslint-plugin-simple-import-sort@10.0.0(eslint@8.46.0):
@@ -4459,7 +4444,7 @@ packages:
   /is-core-module@2.12.1:
     resolution: {integrity: sha512-Q4ZuBAe2FUsKtyQJoQHlvP8OvBERxO3jEmy1I7hcRXcJBGGHFh/aJBswbXuS9sgrDH2QUO8ilkwNPHvHMd8clg==}
     dependencies:
-      has: /@nolyfill/has@1.0.15
+      has: /@nolyfill/has@1.0.16
     dev: true
 
   /is-data-descriptor@0.1.4:
@@ -4838,10 +4823,10 @@ packages:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
     engines: {node: '>=4.0'}
     dependencies:
-      array-includes: /@nolyfill/array-includes@1.0.15
-      array.prototype.flat: /@nolyfill/array.prototype.flat@1.0.15
-      object.assign: /@nolyfill/object.assign@1.0.15
-      object.values: /@nolyfill/object.values@1.0.15
+      array-includes: /@nolyfill/array-includes@1.0.16
+      array.prototype.flat: /@nolyfill/array.prototype.flat@1.0.16
+      object.assign: /@nolyfill/object.assign@1.0.16
+      object.values: /@nolyfill/object.values@1.0.16
     dev: true
 
   /jszip@3.10.1:
@@ -5640,6 +5625,7 @@ packages:
   /object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
+    dev: true
 
   /object-copy@0.1.0:
     resolution: {integrity: sha512-79LYn6VAb63zgtmAteVOWo9Vdj71ZVBy3Pbse+VqxDpEP83XuujMrGqHIwAXJ5I/aM0zU7dIyIAhifVTPrNItQ==}
@@ -6071,6 +6057,7 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+    dev: true
 
   /punycode@2.3.0:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
@@ -6121,6 +6108,7 @@ packages:
 
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+    dev: true
 
   /react-is@17.0.2:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==}
