@@ -16,17 +16,17 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.12"
+    "@toeverything/theme": "^0.7.13"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "lit": "^2.7.6"
+    "lit": "^2.8.0"
   },
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.12"
+    "@toeverything/theme": "^0.7.13"
   },
   "exports": {
     ".": "./src/index.ts",
