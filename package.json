@@ -80,7 +80,7 @@
     "madge": "^6.1.0",
     "micromatch": "^4.0.5",
     "nyc": "^15.1.0",
-    "prettier": "^3.0.2",
+    "prettier": "^2.8.8",
     "pretty-format": "^29.6.3",
     "ts-lit-plugin": "^1.2.1",
     "ts-node": "^10.9.1",
