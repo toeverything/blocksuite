@@ -78,10 +78,63 @@ export class VirgoInput {
       }
     );
 
-    this.vEditor = new VEditor(this.yText);
-    this.vEditor.mount(rootElement);
-    this.vEditor.bindHandlers({
-      paste: (event: ClipboardEvent) => {
+    this.vEditor = new VEditor(this.yText, {
+      hooks: {
+        beforeinput: ctx => {
+          const { vRange } = ctx;
+
+          let originalText = this.vEditor.yTextString;
+          if (vRange.length > 0) {
+            originalText = `${originalText.substring(
+              0,
+              vRange.index
+            )}${originalText.substring(vRange.index + vRange.length)}`;
+          }
+          const tmpText = `${originalText.substring(0, vRange.index)}${
+            ctx.data ?? ''
+          }${originalText.substring(vRange.index)}`;
+
+          if (tmpText.length >= this.maxLength) {
+            return null;
+          }
+
+          this.undoManager.stopCapturing();
+          return ctx;
+        },
+        compositionEnd: ctx => {
+          const { vRange } = ctx;
+
+          let originalText = this.vEditor.yText.toString();
+          if (vRange.length > 0) {
+            originalText = `${originalText.substring(
+              0,
+              vRange.index
+            )}${originalText.substring(vRange.index + vRange.length)}`;
+          }
+          const tmpText = `${originalText.substring(0, vRange.index)}${
+            ctx.data
+          }${originalText.substring(vRange.index)}`;
+
+          let flag = true;
+
+          if (tmpText.length >= this.maxLength) {
+            // We should not directly return null because we need to clear text node from IME.
+            ctx.data = '';
+            flag = false;
+          }
+
+          if (flag) {
+            this.undoManager.stopCapturing();
+          }
+
+          return ctx;
+        },
+      },
+    });
+    this.vEditor.disposables.addFromEvent(
+      rootElement,
+      'paste',
+      (event: ClipboardEvent) => {
         event.stopPropagation();
 
         const data = event.clipboardData
@@ -111,82 +164,23 @@ export class VirgoInput {
           });
           this.undoManager.stopCapturing();
         }
-      },
-      virgoInput: ctx => {
-        const vRange = this.vEditor.getVRange();
-        if (!vRange) {
-          return ctx;
+      }
+    );
+    this.vEditor.disposables.addFromEvent(rootElement, 'keydown', event => {
+      if (
+        event instanceof KeyboardEvent &&
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === 'z' || event.key === 'Z')
+      ) {
+        event.preventDefault();
+        if (event.shiftKey) {
+          this.redo();
+        } else {
+          this.undo();
         }
-
-        let originalText = this.vEditor.yText.toString();
-        if (vRange.length > 0) {
-          originalText = `${originalText.substring(
-            0,
-            vRange.index
-          )}${originalText.substring(vRange.index + vRange.length)}`;
-        }
-        const tmpText = `${originalText.substring(0, vRange.index)}${
-          ctx.data ?? ''
-        }${originalText.substring(vRange.index)}`;
-
-        let flag = true;
-
-        if (tmpText.length >= this.maxLength) {
-          ctx.skipDefault = true;
-          flag = false;
-        }
-
-        if (flag) {
-          this.undoManager.stopCapturing();
-        }
-        return ctx;
-      },
-      virgoCompositionEnd: ctx => {
-        const vRange = this.vEditor.getVRange();
-        if (!vRange) {
-          return ctx;
-        }
-
-        let originalText = this.vEditor.yText.toString();
-        if (vRange.length > 0) {
-          originalText = `${originalText.substring(
-            0,
-            vRange.index
-          )}${originalText.substring(vRange.index + vRange.length)}`;
-        }
-        const tmpText = `${originalText.substring(0, vRange.index)}${
-          ctx.data
-        }${originalText.substring(vRange.index)}`;
-
-        let flag = true;
-
-        if (tmpText.length >= this.maxLength) {
-          // We should not use `skipDefault` because we need to clear text node from IME.
-          ctx.data = '';
-          flag = false;
-        }
-
-        if (flag) {
-          this.undoManager.stopCapturing();
-        }
-
-        return ctx;
-      },
-      keydown: e => {
-        if (
-          e instanceof KeyboardEvent &&
-          (e.ctrlKey || e.metaKey) &&
-          (e.key === 'z' || e.key === 'Z')
-        ) {
-          e.preventDefault();
-          if (e.shiftKey) {
-            this.redo();
-          } else {
-            this.undo();
-          }
-        }
-      },
+      }
     });
+    this.vEditor.mount(rootElement);
 
     rootElement.addEventListener('blur', () => {
       if (this.type === 'number') {
