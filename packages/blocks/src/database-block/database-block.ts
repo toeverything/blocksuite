@@ -23,7 +23,7 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { renderUniLit } from '../components/uni-component/uni-component.js';
 import type { BaseDataView } from './common/base-data-view.js';
-import { dataViewCssVariable } from './common/css-variable.js';
+import { dataViewCommonStyle } from './common/css-variable.js';
 import {
   type DataViewExpose,
   viewRendererManager,
@@ -49,7 +49,7 @@ type ViewData = {
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   static override styles = css`
-    ${unsafeCSS(dataViewCssVariable('affine-database'))}
+    ${unsafeCSS(dataViewCommonStyle('affine-database'))}
     affine-database {
       display: block;
       border-radius: 8px;

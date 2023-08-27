@@ -1,4 +1,5 @@
 import './filter-group.js';
+import './filter-root.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
@@ -14,15 +15,18 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-background-primary-color);
       position: absolute;
       border-radius: 8px;
-      box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
-        0px 0px 0px 0.5px #e3e3e4 inset;
+      box-shadow: var(--affine-shadow-2);
+      min-width: 500px;
     }
+
     .filter-modal-container {
     }
+
     .filter-modal-bottom {
       border-top: 1px solid var(--affine-border-color);
       padding: 8px;
     }
+
     .filter-modal-button {
       padding: 8px 12px;
       display: flex;
@@ -33,16 +37,28 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       border-radius: 4px;
       cursor: pointer;
     }
+
     .filter-modal-button:hover {
       background-color: var(--affine-hover-color);
     }
+
     .filter-modal-button svg {
       fill: var(--affine-icon-color);
       color: var(--affine-icon-color);
       width: 20px;
       height: 20px;
     }
+
+    .filter-exactly-hover-container {
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .filter-exactly-hover-background {
+      background-color: var(--affine-hover-color);
+    }
   `;
+  @property({ attribute: false })
+  isRoot = false;
   @property({ attribute: false })
   data!: FilterGroup;
 
@@ -52,17 +68,47 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   setData!: (filter: FilterGroup) => void;
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'mouseover', e => {
+      let current: HTMLElement | null = e.target as HTMLElement;
+      while (current && current !== this) {
+        if (current.classList.contains('filter-exactly-hover-container')) {
+          current.classList.add('filter-exactly-hover-background');
+          break;
+        }
+        current = current.parentElement;
+      }
+    });
+    this.disposables.addFromEvent(this, 'mouseout', e => {
+      let current: HTMLElement | null = e.target as HTMLElement;
+      while (current && current !== this) {
+        if (current.classList.contains('filter-exactly-hover-container')) {
+          current.classList.remove('filter-exactly-hover-background');
+          break;
+        }
+        current = current.parentElement;
+      }
+    });
+  }
+
   override render() {
     return html`
       <div class="filter-modal-container">
-        <filter-group-view
-          .vars=${this.vars}
-          .data=${this.data}
-          .setData=${this.setData}
-        ></filter-group-view>
+        ${this.isRoot
+          ? html` <filter-root-view
+              .vars="${this.vars}"
+              .data="${this.data}"
+              .setData="${this.setData}"
+            ></filter-root-view>`
+          : html` <filter-group-view
+              .vars="${this.vars}"
+              .data="${this.data}"
+              .setData="${this.setData}"
+            ></filter-group-view>`}
       </div>
       <div class="filter-modal-bottom">
-        <div class="filter-modal-button">Delete filter</div>
+        <div class="filter-modal-button">Delete</div>
       </div>
     `;
   }
@@ -84,6 +130,7 @@ export const popAdvanceFilter = (
   const filter = new AdvancedFilterModal();
   filter.vars = props.vars;
   filter.data = props.value;
+  filter.isRoot = true;
   filter.setData = group => {
     props.onChange(group);
     filter.data = group;

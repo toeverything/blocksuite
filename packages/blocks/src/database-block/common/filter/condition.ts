@@ -11,8 +11,18 @@ import { CrossIcon } from '../../../icons/index.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { filterMatcher } from '../../logical/filter-matcher.js';
 import { typesystem } from '../../logical/typesystem.js';
-import type { SingleFilter, Variable, VariableOrProperty } from '../ast.js';
-import { firstFilterByRef, getRefType } from '../ast.js';
+import type {
+  FilterGroup,
+  SingleFilter,
+  Variable,
+  VariableOrProperty,
+} from '../ast.js';
+import {
+  firstFilter,
+  firstFilterByRef,
+  firstFilterInGroup,
+  getRefType,
+} from '../ast.js';
 import { renderLiteral } from '../literal/matcher.js';
 
 @customElement('filter-condition-view')
@@ -25,6 +35,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       gap: 16px;
       border: 1px solid var(--affine-border-color);
       border-radius: 8px;
+      background-color: var(--affine-white);
     }
 
     .filter-condition-expression {
@@ -163,3 +174,37 @@ declare global {
     'filter-condition-view': FilterConditionView;
   }
 }
+export const popAddNewFilter = (
+  target: HTMLElement,
+  props: {
+    value: FilterGroup;
+    onChange: (value: FilterGroup) => void;
+    vars: Variable[];
+  }
+) => {
+  popFilterableSimpleMenu(target, [
+    {
+      type: 'action',
+      name: 'Add filter',
+      select: () => {
+        props.onChange({
+          ...props.value,
+          conditions: [...props.value.conditions, firstFilter(props.vars)],
+        });
+      },
+    },
+    {
+      type: 'action',
+      name: 'Add filter group',
+      select: () => {
+        props.onChange({
+          ...props.value,
+          conditions: [
+            ...props.value.conditions,
+            firstFilterInGroup(props.vars),
+          ],
+        });
+      },
+    },
+  ]);
+};

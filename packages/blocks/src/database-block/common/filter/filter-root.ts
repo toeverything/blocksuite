@@ -2,7 +2,6 @@ import './condition.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { ReferenceElement } from '@floating-ui/dom';
-import type { TemplateResult } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -11,7 +10,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   popFilterableSimpleMenu,
   positionToVRect,
-} from '../../../components/menu/menu.js';
+} from '../../../components/menu/index.js';
 import {
   DeleteIcon,
   DuplicateIcon,
@@ -20,19 +19,21 @@ import {
 } from '../../../icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import { popAddNewFilter } from './condition.js';
+import type { FilterGroupView } from './filter-group.js';
 
-@customElement('filter-group-view')
-export class FilterGroupView extends WithDisposable(ShadowlessElement) {
+@customElement('filter-root-view')
+export class FilterRootView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    filter-group-view {
+    filter-root-view {
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
       user-select: none;
+      gap: 4px;
     }
 
-    .filter-group-op {
+    .filter-root-op {
       width: 60px;
       display: flex;
       justify-content: end;
@@ -41,22 +42,24 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       align-items: center;
     }
 
-    .filter-group-op-clickable {
+    .filter-root-op-clickable {
       border-radius: 4px;
       cursor: pointer;
     }
 
-    .filter-group-op-clickable:hover {
+    .filter-root-op-clickable:hover {
       background-color: var(--affine-hover-color);
     }
 
-    .filter-group-container {
+    .filter-root-container {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      max-height: 400px;
+      overflow: auto;
     }
 
-    .filter-group-button {
+    .filter-root-button {
       padding: 8px 12px;
       display: flex;
       align-items: center;
@@ -67,25 +70,25 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
 
-    .filter-group-button svg {
+    .filter-root-button svg {
       fill: var(--affine-icon-color);
       color: var(--affine-icon-color);
       width: 20px;
       height: 20px;
     }
 
-    .filter-group-button:hover {
+    .filter-root-button:hover {
       background-color: var(--affine-hover-color);
     }
 
-    .filter-group-item {
+    .filter-root-item {
       padding: 4px 0;
       display: flex;
       align-items: start;
       gap: 8px;
     }
 
-    .filter-group-item-ops {
+    .filter-root-item-ops {
       margin-top: 4px;
       padding: 4px;
       border-radius: 4px;
@@ -94,22 +97,25 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       cursor: pointer;
     }
 
-    .filter-group-item-ops:hover {
+    .filter-root-item-ops:hover {
       background-color: var(--affine-hover-color);
     }
 
-    .filter-group-item-ops svg {
+    .filter-root-item-ops svg {
       fill: var(--affine-icon-color);
       color: var(--affine-icon-color);
       width: 18px;
       height: 18px;
     }
-
     .delete-style {
       background-color: var(--affine-background-error-color);
     }
-    .filter-group-border {
-      border: 1px dashed var(--affine-border-color);
+    .filter-root-grabber {
+      cursor: grab;
+      width: 4px;
+      height: 12px;
+      background-color: var(--affine-placeholder-color);
+      border-radius: 1px;
     }
   `;
   @property({ attribute: false })
@@ -120,12 +126,8 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   setData!: (filter: FilterGroup) => void;
-
-  private opMap = {
-    and: 'And',
-    or: 'Or',
-  };
-
+  @state()
+  deleteIndex?: number;
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -142,33 +144,6 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       vars: this.vars,
     });
   };
-  private _selectOp = (event: MouseEvent) => {
-    popFilterableSimpleMenu(event.target as HTMLElement, [
-      {
-        type: 'action',
-        name: 'And',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'and',
-          });
-        },
-      },
-      {
-        type: 'action',
-        name: 'Or',
-        select: () => {
-          this.setData({
-            ...this.data,
-            op: 'or',
-          });
-        },
-      },
-    ]);
-  };
-
-  @state()
-  deleteIndex?: number;
 
   private _clickConditionOps(target: ReferenceElement, i: number) {
     popFilterableSimpleMenu(target, [
@@ -216,65 +191,66 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   override render() {
     const data = this.data;
     return html`
-      <div class="filter-group-container">
+      <div class="filter-root-container">
         ${repeat(data.conditions, (filter, i) => {
           const clickOps = (e: MouseEvent) => {
             e.stopPropagation();
             e.preventDefault();
             this._clickConditionOps(positionToVRect(e.x, e.y), i);
           };
-          let op: TemplateResult;
-          if (i === 0) {
-            op = html` <div class="filter-group-op">Where</div>`;
-          } else {
-            op = html`
-              <div
-                class="filter-group-op filter-group-op-clickable"
-                @click="${this._selectOp}"
-              >
-                ${this.opMap[data.op]}
-              </div>
-            `;
-          }
-          const classList = classMap({
-            'filter-exactly-hover-container': true,
-            'hover-pd-round': true,
-            'delete-style': this.deleteIndex === i,
-            'filter-group-border': filter.type !== 'filter',
-          });
-          return html` <div class="filter-root-item">
-            <div style="margin-right: 4px;display:flex;align-items:center;">
-              ${op}
+          const ops = html`
+            <div class="filter-root-item-ops" @click="${clickOps}">
+              ${MoreHorizontalIcon}
             </div>
-            <div
-              @contextmenu=${clickOps}
-              class="${classList}"
-              style="flex:1;display:flex;align-items:start;justify-content: space-between;gap: 8px;"
-            >
-              ${filter.type === 'filter'
-                ? html`
-                    <filter-condition-view
-                      .setData="${(v: Filter) => this._setFilter(i, v)}"
-                      .vars="${this.vars}"
-                      .data="${filter}"
-                    ></filter-condition-view>
-                  `
-                : html`
+          `;
+          const content =
+            filter.type === 'filter'
+              ? html`
+                  <div
+                    style="display:flex;align-items:center;justify-content: space-between;width: 100%;gap:8px"
+                  >
+                    <div style="display:flex;align-items:center;gap:6px">
+                      <div class="filter-root-grabber"></div>
+                      <filter-condition-view
+                        .setData="${(v: Filter) => this._setFilter(i, v)}"
+                        .vars="${this.vars}"
+                        .data="${filter}"
+                      ></filter-condition-view>
+                    </div>
+                    ${ops}
+                  </div>
+                `
+              : html`
+                  <div style="width: 100%;">
+                    <div
+                      style="display:flex;align-items:center;justify-content: space-between;gap:8px"
+                    >
+                      <div style="display:flex;align-items:center;gap: 6px;">
+                        <div class="filter-root-grabber"></div>
+                        Filter group
+                      </div>
+                      ${ops}
+                    </div>
                     <filter-group-view
-                      style="width: 100%;"
+                      style="padding: 0"
                       .setData="${(v: Filter) => this._setFilter(i, v)}"
                       .vars="${this.vars}"
                       .data="${filter}"
                     ></filter-group-view>
-                  `}
-              <div class="filter-group-item-ops" @click="${clickOps}">
-                ${MoreHorizontalIcon}
-              </div>
-            </div>
+                  </div>
+                `;
+          const classList = classMap({
+            'filter-root-item': true,
+            'filter-exactly-hover-container': true,
+            'hover-pd-round': true,
+            'delete-style': this.deleteIndex === i,
+          });
+          return html` <div @contextmenu=${clickOps} class="${classList}">
+            ${content}
           </div>`;
         })}
       </div>
-      <div class="filter-group-button add-new" @click="${this._addNew}">
+      <div class="filter-root-button add-new" @click="${this._addNew}">
         ${PlusIcon} Add
       </div>
     `;
@@ -283,6 +259,6 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'filter-group-view': FilterGroupView;
+    'filter-root-view': FilterGroupView;
   }
 }

@@ -33,6 +33,7 @@ type NormalMenu = MenuCommon &
         label?: TemplateResult;
         icon?: TemplateResult;
         select: () => void;
+        onHover?: (hover: boolean) => void;
         class?: string;
       }
     | {
@@ -69,6 +70,7 @@ type Item = {
   upDivider?: boolean;
   downDivider?: boolean;
   mouseEnter?: () => void;
+  onHover?: (hover: boolean) => void;
   class?: string;
 };
 
@@ -80,8 +82,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       flex-direction: column;
       user-select: none;
       min-width: 200px;
-      box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
-        0px 0px 0px 0.5px #e3e3e4 inset;
+      box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
       background-color: var(--affine-background-primary-color);
       padding: 8px;
@@ -207,11 +208,16 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   }
 
   private set selectedIndex(index: number | undefined) {
-    this._selectedIndex = regularizationNumberInRange(
+    const old =
+      this._selectedIndex != null ? this.items[this._selectedIndex] : undefined;
+    old?.onHover?.(false);
+    const newIndex = regularizationNumberInRange(
       index ?? this.minIndex,
       this.minIndex,
       this.items.length
     );
+    this._selectedIndex = newIndex;
+    this.items[newIndex]?.onHover?.(true);
   }
 
   private get text() {
@@ -268,6 +274,11 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     }
   }
 
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.selectedItem?.onHover?.(false);
+  }
+
   private show(item: Menu): boolean {
     if (this.isSearchMode) {
       if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
@@ -289,6 +300,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
             </div>`,
+          onHover: menu.onHover,
           select: () => {
             menu.select();
             this._complete();

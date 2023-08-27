@@ -10,12 +10,12 @@ import type { DetailSlotProps } from '../../../__internal__/datasource/base.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import { PlusIcon } from '../../../icons/index.js';
-import { dataViewCssVariable } from '../css-variable.js';
+import { dataViewCommonStyle } from '../css-variable.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`
-  ${unsafeCSS(dataViewCssVariable('affine-data-view-record-detail'))}
+  ${unsafeCSS(dataViewCommonStyle('affine-data-view-record-detail'))}
   affine-data-view-record-detail {
     display: flex;
     flex-direction: column;
