@@ -19,7 +19,7 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "lit": "^2.7.6"
+    "lit": "^2.8.0"
   },
   "devDependencies": {
     "@blocksuite/block-std": "workspace:*",

@@ -166,7 +166,9 @@ export enum LineWidth {
   LINE_WIDTH_EIGHT = 8,
   LINE_WIDTH_TEN = 10,
   LINE_WIDTH_TWELVE = 12,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Thin = 4,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Thick = 10,
 }
 
