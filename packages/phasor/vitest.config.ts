@@ -18,6 +18,11 @@ export default defineConfig({
       console.warn(`Unexpected ${type} log`, log);
       throw new Error(log);
     },
-    browser: true,
+    browser: {
+      enabled: true,
+      provider: 'playwright',
+      name: 'chromium',
+      headless: true,
+    },
   },
 });
