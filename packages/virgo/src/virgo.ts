@@ -203,8 +203,8 @@ export class VEditor<
   unmount() {
     render(nothing, this.rootElement);
     this._rootElement = null;
-
     this._mounted = false;
+    this.disposables.dispose();
     this.slots.unmounted.emit();
   }
 
