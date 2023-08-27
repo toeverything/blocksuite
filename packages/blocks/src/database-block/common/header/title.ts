@@ -99,7 +99,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       yText: this.titleText.yText,
       maxLength: DATABASE_TITLE_LENGTH,
     });
-    this.titleVInput.vEditor.setReadonly(this.readonly);
+
     this.titleVInput.vEditor.disposables.addFromEvent(
       this._titleContainer,
       'keydown',
@@ -112,6 +112,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     });
 
     this.titleVInput.mount(this._titleContainer);
+    this.titleVInput.vEditor.setReadonly(this.readonly);
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
@@ -139,7 +140,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       'database-title': true,
       'database-title-empty': isEmpty,
     });
-    return html` <div class="affine-database-title">
+    return html`<div class="affine-database-title">
       <div
         class="${classList}"
         data-block-is-database-title="true"
