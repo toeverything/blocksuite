@@ -7,7 +7,7 @@ interface StackItem {
 }
 
 export class VirgoInput {
-  static YTEXT_NAME = 'YTEXT_NAME';
+  static Y_TEXT_NAME = 'Y_TEXT_NAME';
 
   yDoc: Y.Doc = new Y.Doc();
   yText: Y.Text;
@@ -22,14 +22,12 @@ export class VirgoInput {
   readonly undoManager: Y.UndoManager;
 
   constructor(options: {
-    rootElement: HTMLElement;
     yText?: Y.Text | string;
     maxLength?: number;
     type?: 'number';
   }) {
     const {
-      rootElement,
-      yText = this.yDoc.getText(VirgoInput.YTEXT_NAME),
+      yText = this.yDoc.getText(VirgoInput.Y_TEXT_NAME),
       maxLength,
       type,
     } = options;
@@ -51,10 +49,10 @@ export class VirgoInput {
         this.yText = yText;
         this.yDoc = yText.doc;
       } else {
-        throw new Error('Y.Text should be binded to Y.Doc.');
+        throw new Error('Y.Text should be bind to Y.Doc.');
       }
     } else {
-      this.yText = this.yDoc.getText(VirgoInput.YTEXT_NAME);
+      this.yText = this.yDoc.getText(VirgoInput.Y_TEXT_NAME);
       this.yText.insert(0, text);
     }
 
@@ -131,6 +129,9 @@ export class VirgoInput {
         },
       },
     });
+  }
+
+  mount(rootElement: HTMLElement) {
     this.vEditor.disposables.addFromEvent(
       rootElement,
       'paste',
@@ -180,9 +181,7 @@ export class VirgoInput {
         }
       }
     });
-    this.vEditor.mount(rootElement);
-
-    rootElement.addEventListener('blur', () => {
+    this.vEditor.disposables.addFromEvent(rootElement, 'blur', () => {
       if (this.type === 'number') {
         const text = this.yText.toString();
         const num = parseFloat(text);
@@ -197,6 +196,12 @@ export class VirgoInput {
         }
       }
     });
+
+    this.vEditor.mount(rootElement);
+  }
+
+  unmount() {
+    this.vEditor.unmount();
   }
 
   get value() {
