@@ -6,7 +6,6 @@ import type { UIEventHandler } from './base.js';
 import { UIEventState, UIEventStateContext } from './base.js';
 import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
-import { PassiveControl } from './control/passive.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
 import { bindKeymap } from './keymap.js';
@@ -19,6 +18,7 @@ const bypassEventNames = [
   'focus',
   'drop',
   'contextMenu',
+  'wheel',
 ] as const;
 
 const eventNames = [
@@ -46,8 +46,6 @@ const eventNames = [
   'cut',
   'copy',
   'paste',
-
-  'wheel',
 
   ...bypassEventNames,
 ] as const;
@@ -80,14 +78,12 @@ export class UIEventDispatcher {
   private _keyboardControl: KeyboardControl;
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
-  private _passiveControl: PassiveControl;
 
   constructor(public blockStore: BlockStore) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
     this._clipboardControl = new ClipboardControl(this);
-    this._passiveControl = new PassiveControl(this);
   }
 
   mount() {
@@ -257,6 +253,5 @@ export class UIEventDispatcher {
     this._keyboardControl.listen();
     this._rangeControl.listen();
     this._clipboardControl.listen();
-    this._passiveControl.listen();
   }
 }
