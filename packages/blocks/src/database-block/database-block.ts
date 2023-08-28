@@ -7,6 +7,7 @@ import './table/define.js';
 import './table/renderer.js';
 import './kanban/define.js';
 import './kanban/renderer.js';
+import './common/filter/filter-bar.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
@@ -299,6 +300,17 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     );
   }
 
+  renderFilterBar(viewData?: ViewData) {
+    if (!viewData) {
+      return;
+    }
+    return html`<filter-bar
+      .vars=${viewData.view.vars}
+      .data=${viewData.view.filter}
+      .setData=${viewData.view.updateFilter.bind(viewData.view)}
+    ></filter-bar>`;
+  }
+
   override render() {
     const viewData = this.model.views
       .map(view => this.getView(view.id))
@@ -325,6 +337,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           >
             ${this.renderViews()} ${this.renderTools(viewData?.view)}
           </div>
+          ${this.renderFilterBar(viewData)}
         </div>
         ${this.renderView(viewData)}
       </div>

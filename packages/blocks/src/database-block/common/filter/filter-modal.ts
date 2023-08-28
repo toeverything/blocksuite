@@ -36,17 +36,28 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       line-height: 24px;
       border-radius: 4px;
       cursor: pointer;
+      color: var(--affine-text-secondary-color);
+    }
+
+    .filter-modal-button svg {
+      fill: var(--affine-text-secondary-color);
+      color: var(--affine-text-secondary-color);
+      width: 20px;
+      height: 20px;
     }
 
     .filter-modal-button:hover {
       background-color: var(--affine-hover-color);
+      color: var(--affine-text-primary-color);
+    }
+    .filter-modal-button:hover svg {
+      fill: var(--affine-text-primary-color);
+      color: var(--affine-text-primary-color);
     }
 
-    .filter-modal-button svg {
-      fill: var(--affine-icon-color);
-      color: var(--affine-icon-color);
-      width: 20px;
-      height: 20px;
+    .filter-delete-button:hover {
+      background-color: var(--affine-background-error-color);
+      color: var(--affine-error-color);
     }
 
     .filter-exactly-hover-container {
@@ -108,7 +119,7 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
             ></filter-group-view>`}
       </div>
       <div class="filter-modal-bottom">
-        <div class="filter-modal-button">Delete</div>
+        <div class="filter-modal-button filter-delete-button">Delete</div>
       </div>
     `;
   }

@@ -8,6 +8,7 @@ import type {
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { TType } from '../logical/typesystem.js';
 import type { ColumnDataUpdater, InsertPosition } from '../types.js';
+import type { FilterGroup, Variable } from './ast.js';
 import type {
   CellRenderer,
   ColumnConfig,
@@ -32,6 +33,12 @@ export interface DataViewManager {
   get columnsWithoutFilter(): string[];
 
   get rows(): string[];
+
+  get filter(): FilterGroup;
+
+  get vars(): Variable[];
+
+  updateFilter(filter: FilterGroup): void;
 
   cellGetValue(rowId: string, columnId: string): unknown;
 
@@ -390,6 +397,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   public abstract get columns(): string[];
+
   public abstract get detailColumns(): string[];
 
   public abstract get columnsWithoutFilter(): string[];
@@ -430,6 +438,22 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public get detailSlots(): DetailSlots {
     return this.dataSource.detailSlots;
+  }
+
+  abstract get filter(): FilterGroup;
+
+  abstract updateFilter(filter: FilterGroup): void;
+
+  get vars(): Variable[] {
+    return this.columnsWithoutFilter.map(id => {
+      const v = this.columnGet(id);
+      return {
+        id: v.id,
+        name: v.name,
+        type: columnManager.getColumn(v.type).dataType(v.data),
+        icon: v.icon,
+      };
+    });
   }
 }
 

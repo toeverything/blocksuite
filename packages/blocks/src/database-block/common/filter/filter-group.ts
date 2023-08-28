@@ -3,7 +3,7 @@ import './condition.js';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { ReferenceElement } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -13,12 +13,14 @@ import {
   popFilterableSimpleMenu,
 } from '../../../components/menu/menu.js';
 import {
+  ArrowDownSmallIcon,
   DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../../icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
+import { firstFilter } from '../ast.js';
 import { popAddNewFilter } from './condition.js';
 
 @customElement('filter-group-view')
@@ -26,7 +28,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-group-view {
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 8px 4px 4px;
       display: flex;
       flex-direction: column;
       user-select: none;
@@ -39,6 +41,10 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       padding: 4px;
       height: 34px;
       align-items: center;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
     }
 
     .filter-group-op-clickable {
@@ -65,17 +71,23 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       line-height: 24px;
       border-radius: 4px;
       cursor: pointer;
+      color: var(--affine-text-secondary-color);
     }
 
     .filter-group-button svg {
-      fill: var(--affine-icon-color);
-      color: var(--affine-icon-color);
+      fill: var(--affine-text-secondary-color);
+      color: var(--affine-text-secondary-color);
       width: 20px;
       height: 20px;
     }
 
     .filter-group-button:hover {
       background-color: var(--affine-hover-color);
+      color: var(--affine-text-primary-color);
+    }
+    .filter-group-button:hover svg {
+      fill: var(--affine-text-primary-color);
+      color: var(--affine-text-primary-color);
     }
 
     .filter-group-item {
@@ -113,9 +125,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     }
     .filter-group-bg-1 {
       background-color: var(--affine-background-secondary-color);
+      border: 1px solid var(--affine-border-color);
     }
     .filter-group-bg-2 {
       background-color: var(--affine-background-tertiary-color);
+      border: 1px solid var(--affine-border-color);
     }
   `;
   @property({ attribute: false })
@@ -144,6 +158,13 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   private _addNew = (e: MouseEvent) => {
+    if (this.isMaxDepth) {
+      this.setData({
+        ...this.data,
+        conditions: [...this.data.conditions, firstFilter(this.vars)],
+      });
+      return;
+    }
     popAddNewFilter(eventToVRect(e), {
       value: this.data,
       onChange: this.setData,
@@ -220,7 +241,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       },
     ]);
   }
-
+  private get isMaxDepth() {
+    return this.depth === 3;
+  }
   override render() {
     const data = this.data;
     return html`
@@ -245,19 +268,17 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             `;
           }
           const classList = classMap({
+            'filter-root-item': true,
             'filter-exactly-hover-container': true,
             'hover-pd-round': true,
             'delete-style': this.deleteIndex === i,
-            'filter-group-border': filter.type !== 'filter',
-            // [`filter-group-bg-${this.depth}`]: filter.type !== 'filter',
           });
-          return html` <div class="filter-root-item">
-            <div style="margin-right: 4px;display:flex;align-items:center;">
-              ${op}
-            </div>
+          const groupClassList = classMap({
+            [`filter-group-bg-${this.depth}`]: filter.type !== 'filter',
+          });
+          return html` <div class="${classList}" @contextmenu=${clickOps}>
+            ${op}
             <div
-              @contextmenu=${clickOps}
-              class="${classList}"
               style="flex:1;display:flex;align-items:start;justify-content: space-between;gap: 8px;"
             >
               ${filter.type === 'filter'
@@ -270,6 +291,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                   `
                 : html`
                     <filter-group-view
+                      class=${groupClassList}
                       style="width: 100%;"
                       .depth=${this.depth + 1}
                       .setData="${(v: Filter) => this._setFilter(i, v)}"
@@ -285,7 +307,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         })}
       </div>
       <div class="filter-group-button add-new" @click="${this._addNew}">
-        ${PlusIcon} Add
+        ${PlusIcon} Add ${this.isMaxDepth ? nothing : ArrowDownSmallIcon}
       </div>
     `;
   }
