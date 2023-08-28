@@ -126,7 +126,7 @@ export async function dragHandleFromBlockToBlockBottomById(
     sourceBlock.y + sourceBlock.height / 2
   );
   const handle = await page
-    .locator('affine-drag-handle-container')
+    .locator('.affine-drag-handle-container')
     .boundingBox();
   if (!handle) {
     throw new Error();
