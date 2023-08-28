@@ -256,8 +256,6 @@ export class EdgelessToolsManager {
       const e = state.event;
       if (!(e instanceof WheelEvent)) return;
 
-      e.preventDefault();
-
       const container = this.container;
       const { viewport } = container.surface;
       // pan

@@ -183,10 +183,16 @@ export class DocPageBlockComponent
 
     this._titleVEditor = new VEditor(title.yText);
     this._titleVEditor.mount(this._titleContainer);
-    this._titleVEditor.bindHandlers({
-      keydown: this._onTitleKeyDown,
-      paste: this._onTitlePaste,
-    });
+    this._titleVEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'keydown',
+      this._onTitleKeyDown
+    );
+    this._titleVEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'paste',
+      this._onTitlePaste
+    );
     this.addEventListener('copy', this._onTitleCopy);
 
     // Workaround for virgo skips composition event
@@ -334,6 +340,14 @@ export class DocPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    this.root.rangeManager?.setConfig({
+      shouldSyncSelection: range => {
+        const insideModal = Boolean(
+          range?.startContainer.parentElement?.closest('side-layout-modal')
+        );
+        return !insideModal;
+      },
+    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);

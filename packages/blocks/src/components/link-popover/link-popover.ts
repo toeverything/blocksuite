@@ -4,9 +4,9 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { createEvent } from '../../__internal__/utils/index.js';
 import { isValidUrl, normalizeUrl } from '../../__internal__/utils/url.js';
 import {
+  BookmarkIcon,
   ConfirmIcon,
   EditIcon,
-  LinkToCardIcon,
   UnlinkIcon,
 } from '../../icons/index.js';
 import { toast } from '../toast.js';
@@ -188,7 +188,7 @@ export class LinkPopover extends LitElement {
               data-testid="unlink"
               @click=${this._onLinkToCard}
             >
-              ${LinkToCardIcon}
+              ${BookmarkIcon}
               <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
             </icon-button>
             <span class="affine-link-popover-dividing-line"></span>`

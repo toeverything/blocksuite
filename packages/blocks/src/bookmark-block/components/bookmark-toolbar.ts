@@ -92,8 +92,8 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       box-sizing: border-box;
       display: flex;
       align-items: center;
-      padding: 4px 8px;
-      gap: 4px;
+      padding: 8px;
+      gap: 8px;
       height: 40px;
 
       border-radius: 8px;
@@ -188,8 +188,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <div class="more-button-wrapper">
           <icon-button
-            width="32px"
-            height="32px"
+            size="24px"
             class="has-tool-tip more-button"
             @click=${() => {
               this._toggleMenu();

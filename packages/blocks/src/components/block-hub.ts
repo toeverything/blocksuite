@@ -331,8 +331,7 @@ const styles = css`
     margin-bottom: 8px;
     position: relative;
     border-radius: 4px;
-    fill: var(--affine-icon-color);
-    color: var(--affine-popover-color);
+    color: var(--affine-icon-color);
     height: 36px;
   }
   .block-hub-icon-container svg {
@@ -357,7 +356,7 @@ const styles = css`
     justify-content: center;
     align-items: center;
     border-radius: 8px;
-    fill: var(--affine-icon-color);
+    color: var(--affine-icon-color);
   }
 
   .new-icon-in-edgeless {

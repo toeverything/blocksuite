@@ -103,9 +103,7 @@ export async function getVirgoRichTextLine(
 ): Promise<readonly [string, number]> {
   return await page.evaluate(
     ([index, i]) => {
-      const richTexts = document
-        .querySelector('test-page')
-        ?.querySelectorAll('virgo-test-rich-text');
+      const richTexts = document.querySelectorAll('virgo-test-rich-text');
 
       if (!richTexts) {
         throw new Error('Cannot find virgo-test-rich-text');

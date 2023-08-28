@@ -6,9 +6,10 @@ import {
   type AttributeRenderer,
   type BaseTextAttributes,
   baseTextAttributes,
-  createKeyDownHandler,
+  createVirgoKeyDownHandler,
   type DeltaInsert,
   VEditor,
+  VKEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/virgo';
 import { css, html, nothing } from 'lit';
@@ -144,7 +145,7 @@ export class RichText extends ShadowlessElement {
   override firstUpdated() {
     this.vEditor.mount(this._container);
 
-    const keydownHandler = createKeyDownHandler(this.vEditor, {
+    const keydownHandler = createVirgoKeyDownHandler(this.vEditor, {
       inputRule: {
         key: ' ',
         handler: context => {
@@ -162,7 +163,7 @@ export class RichText extends ShadowlessElement {
             }
           }
 
-          return false;
+          return VKEYBOARD_ALLOW_DEFAULT;
         },
       },
     });

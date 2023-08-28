@@ -1,3 +1,4 @@
+import type { Connection } from '@blocksuite/phasor';
 import type { MigrationRunner } from '@blocksuite/store';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
@@ -21,6 +22,17 @@ const migration = {
         }
         if (isItalic) {
           element.italic = true;
+        }
+      } else if (type === 'connector') {
+        const source = element.source as Connection;
+        const target = element.target as Connection;
+        if (!source.position && (!source.id || !elements[source.id])) {
+          delete elements[key];
+          return;
+        }
+        if (!target.id && (!target.id || !elements[target.id])) {
+          delete elements[key];
+          return;
         }
       }
     });

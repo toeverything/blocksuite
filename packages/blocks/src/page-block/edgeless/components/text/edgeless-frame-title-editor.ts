@@ -6,11 +6,11 @@ import {
   getLineHeight,
   getLineWidth,
 } from '@blocksuite/phasor';
-import { VEditor } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-frame-title-editor')
@@ -20,45 +20,47 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
-  private _vEditor: VEditor | null = null;
+  private _vInput: VirgoInput | null = null;
+  get vEditor() {
+    assertExists(this._vInput);
+    return this._vInput.vEditor;
+  }
 
   private _frame: FrameElement | null = null;
   private _edgeless: EdgelessPageBlockComponent | null = null;
-
-  get vEditor() {
-    return this._vEditor;
-  }
 
   mount(frame: FrameElement, edgeless: EdgelessPageBlockComponent) {
     this._frame = frame;
     this._edgeless = edgeless;
 
-    this._vEditor = new VEditor(this._frame.title);
+    this._vInput = new VirgoInput({
+      yText: this._frame.title,
+    });
 
     this.requestUpdate();
     requestAnimationFrame(() => {
-      assertExists(this._vEditor);
+      assertExists(this._vInput);
       assertExists(this._frame);
-      this._vEditor.mount(this._virgoContainer);
+      this._vInput.mount(this._virgoContainer);
       this._edgeless?.surface.updateElementLocalRecord(this._frame.id, {
         titleHide: true,
       });
       const dispatcher = this._edgeless?.dispatcher;
       assertExists(dispatcher);
-      this._disposables.addFromEvent(this._virgoContainer, 'blur', () => {
+      this.disposables.addFromEvent(this._virgoContainer, 'blur', () => {
         this._unmount();
       });
-      this._disposables.add(
+      this.disposables.add(
         dispatcher.add('click', () => {
           return true;
         })
       );
-      this._disposables.add(
+      this.disposables.add(
         dispatcher.add('doubleClick', () => {
           return true;
         })
       );
-      this._disposables.add(
+      this.disposables.add(
         dispatcher.add('keyDown', ctx => {
           const state = ctx.get('keyboardState');
           if (state.raw.key === 'Enter') {
@@ -80,7 +82,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   private _unmount() {
-    this.vEditor?.unmount();
+    this._vInput?.unmount();
     this._disposables.dispose();
     assertExists(this._frame);
     this._edgeless?.surface.updateElementLocalRecord(this._frame.id, {

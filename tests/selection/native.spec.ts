@@ -37,6 +37,7 @@ import {
   pressForwardDelete,
   pressShiftTab,
   redoByKeyboard,
+  selectAllByKeyboard,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -47,6 +48,7 @@ import {
   assertBlockCount,
   assertClipItems,
   assertDivider,
+  assertExists,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -371,6 +373,34 @@ test('select all text with dragging and delete by forwardDelete', async ({
   await type(page, 'abc');
   const textOne = await getVirgoSelectionText(page);
   expect(textOne).toBe('abc');
+});
+
+test('select all text with keyboard delete', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  const text1 = await getVirgoSelectionText(page);
+  expect(text1).toBe('');
+  await type(page, 'abc');
+  const text2 = await getVirgoSelectionText(page);
+  expect(text2).toBe('abc');
+
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['', '456', '789']);
+
+  await type(page, 'abc');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['']);
 });
 
 test('select text leaving a few words in the last line and delete', async ({
@@ -771,6 +801,7 @@ test('the cursor should move to closest editor block when clicking outside conta
 
   const text2 = page.locator('[data-block-id="3"] .virgo-editor');
   const rect = await text2.boundingBox();
+  assertExists(rect);
 
   // The behavior of mouse click is similar to touch in mobile device
   // await page.mouse.click(rect.x - 50, rect.y + 5);
@@ -983,8 +1014,6 @@ test('should add a new line when clicking the bottom of the last non-text block'
 
     return secondRichText.getBoundingClientRect();
   });
-  await page.mouse.click(rect.left + rect.width / 2, rect.bottom + 10);
-  await waitNextFrame(page);
   await type(page, 'ABC');
   await waitNextFrame(page);
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);

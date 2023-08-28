@@ -7,6 +7,7 @@ import * as Y from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
+import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
@@ -30,6 +31,7 @@ schema.register([
   SurfaceBlockSchema,
   NoteBlockSchema,
   ParagraphBlockSchema,
+  ListBlockSchema,
   DatabaseBlockSchema,
 ]);
 
@@ -91,6 +93,34 @@ describe('block migration', () => {
     assert.isUndefined(shape.get('isItalic'));
     assert.equal(shape.get('bold'), true);
     assert.equal(shape.get('italic'), true);
+  });
+
+  test('fix wrong connector data', async () => {
+    const doc = await loadBinary('connector');
+    // @ts-ignore
+    const surfaceElements = doc
+      .getMap('blocks')
+      .get('BOpLR3siGx')
+      .get('prop:elements') as Y.Map<unknown>;
+
+    let connector = surfaceElements.get('Gt8_2oZB8h') as Y.Map<unknown>;
+
+    assert.exists(connector);
+
+    schema.upgradePage(
+      {
+        'affine:list': 1,
+        'affine:page': 1,
+        'affine:note': 1,
+        'affine:paragraph': 1,
+        'affine:surface': 3,
+      },
+      doc
+    );
+
+    connector = surfaceElements.get('Gt8_2oZB8h') as Y.Map<unknown>;
+
+    assert.notExists(connector);
   });
 
   test('update database block title data', async () => {

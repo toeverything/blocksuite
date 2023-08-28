@@ -149,10 +149,8 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 
   protected initEditingMode(vEditor: VEditor) {
     const historyHelper = addHistoryToVEditor(vEditor);
-    vEditor.bindHandlers({
-      keydown: e => {
-        historyHelper.handleKeyboardEvent(e);
-      },
+    vEditor.disposables.addFromEvent(vEditor.rootElement, 'keydown', e => {
+      historyHelper.handleKeyboardEvent(e);
     });
     vEditor.focusEnd();
     this._disposables.add(
