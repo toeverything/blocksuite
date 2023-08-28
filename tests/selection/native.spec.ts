@@ -1519,7 +1519,7 @@ test('should select when clicking on blank area in edgeless mode', async ({
     throw new Error();
   }
 
-  await click(page, { x: r3.x - 5, y: r3.y + r3.height + 5 });
+  await click(page, { x: r3.x - 1, y: r3.y + r3.height + 5 });
   await waitNextFrame(page);
 
   expect(await getVirgoSelectionText(page)).toBe('789');
