@@ -114,7 +114,7 @@ test.describe('copy&paste when selecting', () => {
     await pressArrowDown(page);
     await pressArrowDown(page);
     await waitNextFrame(page);
-    await pasteByKeyboard(page);
+    await pasteByKeyboard(page, false);
 
     await assertDatabaseTitleColumnText(page, 'text1', 2);
     await assertDatabaseTitleColumnText(page, 'text2', 3);
