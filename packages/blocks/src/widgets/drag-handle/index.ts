@@ -970,8 +970,10 @@ export class DragHandleWidget extends WidgetElement {
         );
         if (!blockElement) return;
 
-        this._show(blockElement);
         this._hoverDragHandle = false;
+
+        if (this._dragging) return;
+        this._show(blockElement);
       }
     );
   }
