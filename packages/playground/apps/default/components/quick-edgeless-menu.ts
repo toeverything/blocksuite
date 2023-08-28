@@ -30,7 +30,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
