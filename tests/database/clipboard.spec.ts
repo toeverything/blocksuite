@@ -8,6 +8,7 @@ import {
   pressArrowUp,
   pressEnter,
   pressEscape,
+  SHORT_KEY,
   type,
 } from '../utils/actions/keyboard.js';
 import {
@@ -18,6 +19,7 @@ import {
   initDatabaseRowWithData,
   initEmptyDatabaseState,
   initEmptyDatabaseWithParagraphState,
+  waitNextFrame,
 } from '../utils/actions/misc.js';
 import { assertRichTexts } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -25,7 +27,6 @@ import {
   assertDatabaseTitleColumnText,
   getDatabaseBodyCell,
   getElementStyle,
-  getFirstColumnCell,
   initDatabaseColumn,
   switchColumnType,
 } from './actions.js';
@@ -70,6 +71,7 @@ test.describe('copy&paste when selecting', () => {
     await copyByKeyboard(page);
     await pressArrowDown(page);
     await pasteByKeyboard(page);
+    await waitNextFrame(page);
     await assertDatabaseTitleColumnText(page, 'abc123', 1);
   });
 
@@ -111,6 +113,7 @@ test.describe('copy&paste when selecting', () => {
 
     await pressArrowDown(page);
     await pressArrowDown(page);
+    await waitNextFrame(page);
     await pasteByKeyboard(page);
 
     await assertDatabaseTitleColumnText(page, 'text1', 2);
@@ -142,6 +145,7 @@ test.describe('copy&paste when selecting', () => {
       columnIndex: 2,
     });
     await numberCell.click();
+    await waitNextFrame(page);
     await type(page, '123');
     await pressEscape(page);
     await pressEscape(page);
@@ -150,6 +154,7 @@ test.describe('copy&paste when selecting', () => {
     await initDatabaseRowWithData(page, '');
     await pressEscape(page);
     await pasteByKeyboard(page);
+    await waitNextFrame(page);
 
     await assertDatabaseTitleColumnText(page, 'text1', 1);
     const selectCell = getDatabaseBodyCell(page, {
