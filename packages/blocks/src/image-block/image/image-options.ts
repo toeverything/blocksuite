@@ -5,11 +5,11 @@ import { stopPropagation } from '../../__internal__/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
+  BookmarkIcon,
   CaptionIcon,
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
-  LinkToCardIcon,
 } from '../../icons/index.js';
 import type { ImageBlockModel } from '../image-model.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
@@ -72,7 +72,7 @@ export function ImageOptionsTemplate({
             turnImageIntoCardView(model, blob);
           }}
         >
-          ${LinkToCardIcon}
+          ${BookmarkIcon}
           <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
         </icon-button>
         <icon-button
