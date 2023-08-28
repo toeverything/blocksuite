@@ -13,6 +13,7 @@ import {
 } from '../../../components/menu/index.js';
 import {
   ArrowDownSmallIcon,
+  ConvertIcon,
   DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
@@ -37,6 +38,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       font-size: 15px;
       font-weight: 600;
       line-height: 24px;
+      color: var(--affine-text-primary-color);
     }
 
     .filter-root-op {
@@ -109,6 +111,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       line-height: 22px;
       display: flex;
       align-items: center;
+      color: var(--affine-text-primary-color);
       gap: 6px;
     }
 
@@ -187,6 +190,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: 'Wrap with group',
+        icon: ConvertIcon,
         select: () => {
           //
         },

@@ -14,6 +14,7 @@ import {
 } from '../../../components/menu/menu.js';
 import {
   ArrowDownSmallIcon,
+  ConvertIcon,
   DeleteIcon,
   DuplicateIcon,
   MoreHorizontalIcon,
@@ -45,6 +46,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       font-style: normal;
       font-weight: 400;
       line-height: 22px;
+      color: var(--affine-text-primary-color);
     }
 
     .filter-group-op-clickable {
@@ -208,6 +210,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       {
         type: 'action',
         name: 'Wrap with group',
+        icon: ConvertIcon,
         select: () => {
           //
         },
