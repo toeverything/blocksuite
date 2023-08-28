@@ -111,10 +111,14 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     }
 
     .filter-group-item-ops svg {
-      fill: var(--affine-icon-color);
-      color: var(--affine-icon-color);
+      fill: var(--affine-text-secondary-color);
+      color: var(--affine-text-secondary-color);
       width: 18px;
       height: 18px;
+    }
+    .filter-group-item-ops:hover svg {
+      fill: var(--affine-text-primary-color);
+      color: var(--affine-text-primary-color);
     }
 
     .delete-style {

@@ -126,10 +126,14 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     }
 
     .filter-root-item-ops svg {
-      fill: var(--affine-icon-color);
-      color: var(--affine-icon-color);
+      fill: var(--affine-text-secondary-color);
+      color: var(--affine-text-secondary-color);
       width: 18px;
       height: 18px;
+    }
+    .filter-root-item-ops:hover svg {
+      fill: var(--affine-text-primary-color);
+      color: var(--affine-text-primary-color);
     }
 
     .delete-style {
