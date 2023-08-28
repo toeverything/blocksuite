@@ -11,6 +11,8 @@ export const styles = css`
     top: 0;
     left: 0;
     position: absolute;
+    display: flex;
+    justify-content: center;
     width: ${DRAG_HANDLE_WIDTH}px;
     min-height: 12px;
     pointer-events: auto;

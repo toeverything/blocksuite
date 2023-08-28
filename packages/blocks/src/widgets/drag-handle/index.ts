@@ -174,7 +174,7 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
 
     let posLeft =
-      left - (DRAG_HANDLE_WIDTH - DRAG_HANDLE_OFFSET_LEFT) * this._scale;
+      left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
     let posTop = top;
 
     if (isPageMode(this.page)) {

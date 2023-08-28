@@ -262,20 +262,20 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   const [x, y] = [noteBox.x + 26, noteBox.y + noteBox.height / 2];
 
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle-container')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await page.mouse.dblclick(x, y);
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle-container')).toBeVisible();
+  await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 
   await page.mouse.move(0, 0);
   await setEdgelessTool(page, 'shape');
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle-container')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
 
   await page.mouse.move(0, 0);
   await setEdgelessTool(page, 'default');
   await page.mouse.move(x, y);
-  await expect(page.locator('affine-drag-handle-container')).toBeVisible();
+  await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 });
 
 test('drag handle should work inside one note', async ({ page }) => {
