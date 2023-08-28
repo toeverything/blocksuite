@@ -530,6 +530,9 @@ export const positionToVRect = (x: number, y: number): VirtualElement => {
     },
   };
 };
+export const eventToVRect = (e: MouseEvent): VirtualElement => {
+  return positionToVRect(e.x, e.y);
+};
 export const createPopup = (
   target: ReferenceElement,
   content: HTMLElement,

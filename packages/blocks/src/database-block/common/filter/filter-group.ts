@@ -9,8 +9,8 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
+  eventToVRect,
   popFilterableSimpleMenu,
-  positionToVRect,
 } from '../../../components/menu/menu.js';
 import {
   DeleteIcon,
@@ -111,7 +111,15 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     .filter-group-border {
       border: 1px dashed var(--affine-border-color);
     }
+    .filter-group-bg-1 {
+      background-color: var(--affine-background-secondary-color);
+    }
+    .filter-group-bg-2 {
+      background-color: var(--affine-background-tertiary-color);
+    }
   `;
+  @property({ attribute: false })
+  depth = 1;
   @property({ attribute: false })
   data!: FilterGroup;
 
@@ -136,14 +144,14 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   private _addNew = (e: MouseEvent) => {
-    popAddNewFilter(e.currentTarget as HTMLElement, {
+    popAddNewFilter(eventToVRect(e), {
       value: this.data,
       onChange: this.setData,
       vars: this.vars,
     });
   };
   private _selectOp = (event: MouseEvent) => {
-    popFilterableSimpleMenu(event.target as HTMLElement, [
+    popFilterableSimpleMenu(eventToVRect(event), [
       {
         type: 'action',
         name: 'And',
@@ -221,7 +229,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           const clickOps = (e: MouseEvent) => {
             e.stopPropagation();
             e.preventDefault();
-            this._clickConditionOps(positionToVRect(e.x, e.y), i);
+            this._clickConditionOps(eventToVRect(e), i);
           };
           let op: TemplateResult;
           if (i === 0) {
@@ -241,6 +249,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             'hover-pd-round': true,
             'delete-style': this.deleteIndex === i,
             'filter-group-border': filter.type !== 'filter',
+            // [`filter-group-bg-${this.depth}`]: filter.type !== 'filter',
           });
           return html` <div class="filter-root-item">
             <div style="margin-right: 4px;display:flex;align-items:center;">
@@ -262,6 +271,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                 : html`
                     <filter-group-view
                       style="width: 100%;"
+                      .depth=${this.depth + 1}
                       .setData="${(v: Filter) => this._setFilter(i, v)}"
                       .vars="${this.vars}"
                       .data="${filter}"

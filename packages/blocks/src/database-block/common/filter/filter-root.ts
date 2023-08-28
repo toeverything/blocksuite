@@ -138,7 +138,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   };
 
   private _addNew = (e: MouseEvent) => {
-    popAddNewFilter(e.currentTarget as HTMLElement, {
+    popAddNewFilter(positionToVRect(e.x, e.y), {
       value: this.data,
       onChange: this.setData,
       vars: this.vars,
