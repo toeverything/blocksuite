@@ -173,7 +173,7 @@ export class EdgelessClipboard implements Clipboard {
       if (!isPhasorElementWithText(elements[0])) {
         this._pasteInTextNote(e);
       }
-      // use build-in paste handler in virgo when paste in surface text element
+      // use build-in paste handler in virgo-input when paste in surface text element
       return;
     }
 

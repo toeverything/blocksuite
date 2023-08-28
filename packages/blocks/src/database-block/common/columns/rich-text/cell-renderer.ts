@@ -241,11 +241,9 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     const vEditor = new VEditor(value);
     vEditor.mount(this._container);
     const historyHelper = addHistoryToVEditor(vEditor);
-    vEditor.bindHandlers({
-      keydown: e => {
-        historyHelper.handleKeyboardEvent(e);
-        this._handleKeyDown(e);
-      },
+    vEditor.disposables.addFromEvent(this._container, 'keydown', e => {
+      historyHelper.handleKeyboardEvent(e);
+      this._handleKeyDown(e);
     });
     vEditor.focusEnd();
     vEditor.setReadonly(this.readonly);
