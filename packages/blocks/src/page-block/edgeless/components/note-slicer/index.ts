@@ -68,6 +68,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   private _noteModel: NoteBlockModel | null = null;
   private _blockModel: BaseBlockModel<object> | null = null;
+  private _lastPointerState: PointerEventState | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -77,12 +78,20 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgelessPage.service.uiEventDispatcher.add('pointerMove', ctx => {
         const e = ctx.get('pointerState');
-        this._updateVisibility(e);
+        this._lastPointerState = e;
+        this._updateVisibility(this._lastPointerState);
       })
     );
     this._disposables.add(
       this.edgelessPage.service.uiEventDispatcher.add('wheel', () => {
         this._hide();
+      })
+    );
+    this._disposables.add(
+      this.edgelessPage.page.slots.blockUpdated.on(() => {
+        if (this._lastPointerState) {
+          this._updateVisibility(this._lastPointerState);
+        }
       })
     );
   }
@@ -244,6 +253,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._lastPosition = null;
     this._blockModel = null;
     this._noteModel = null;
+    this._lastPointerState = null;
   }
 
   private _showIndicator() {

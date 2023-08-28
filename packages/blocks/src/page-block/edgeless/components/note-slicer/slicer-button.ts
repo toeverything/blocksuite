@@ -137,7 +137,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: calc(var(--affine-z-index-popover, 0) + 2);
-        transform-origin: top left;
+        transform-origin: center center;
       }
     `,
   ];
@@ -152,7 +152,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
       this.style.transition = `transform 0.1s 0.1s ease-in-out`;
       this.style.transform = `translate3d(${rect.x + rect.width * 0.8}px, ${
         rect.y
-      }px, 0)`;
+      }px, 0) scale(1.2)`;
 
       if (rafId === this._rafId) this._rafId = 0;
     });
