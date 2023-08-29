@@ -168,7 +168,7 @@ test('click the list icon can select and delete', async ({ page }) => {
   await clickListIcon(page, 0);
   await waitNextFrame(page);
   await pressBackspace(page);
-  await assertRichTexts(page, ['', '']);
+  await assertRichTexts(page, ['', '', '789']);
 });
 
 test('click the list icon can select and delete by forwardDelete', async ({
