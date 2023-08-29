@@ -1,7 +1,7 @@
 import { SchemaValidateError } from '@blocksuite/global/error';
 import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
-import * as Y from 'yjs';
+import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
 import { workspaceMigrations } from '../migration/index.js';
@@ -115,8 +115,7 @@ export class Schema {
   };
 
   upgradePage = (oldVersions: Record<string, number>, pageData: Y.Doc) => {
-    const blocks = pageData.get('blocks') as Y.Map<unknown>;
-    assertExists(blocks instanceof Y.Map, 'blocks must be a Y.Map');
+    const blocks = pageData.getMap('blocks');
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
       const currentVersion = oldVersions[flavour];
