@@ -1375,12 +1375,12 @@ export class EdgelessPageBlockComponent
       </div>
       <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
-          ${readonly
-            ? nothing
-            : html`<affine-note-slicer
-                .edgelessPage=${this}
-              ></affine-note-slicer>`}
           <div class="affine-edgeless-layer">
+            ${readonly
+              ? nothing
+              : html`<affine-note-slicer
+                  .edgelessPage=${this}
+                ></affine-note-slicer>`}
             <edgeless-notes-container
               .edgeless=${this}
               .notes=${sortedNotes}
