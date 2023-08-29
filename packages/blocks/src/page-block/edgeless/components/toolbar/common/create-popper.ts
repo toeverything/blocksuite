@@ -40,7 +40,7 @@ export function createPopper<T extends keyof HTMLElementTagNameMap>(
     assertExists(popper);
     popper.cancel?.();
     requestAnimationFrame(() => animateEnter(popper.element));
-    return popper;
+    return popper as MenuPopper<HTMLElementTagNameMap[T]>;
   }
 
   const menu = document.createElement(tagName);
