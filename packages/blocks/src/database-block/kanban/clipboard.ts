@@ -1,58 +1,39 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import {
   BaseViewClipboard,
   type BaseViewClipboardConfig,
-  getDatabaseSelection,
 } from '../common/clipboard.js';
-import type { DataViewManager } from '../common/data-view-manager.js';
+import type { DataViewKanban } from './kanban-view.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
-interface KanbanViewClipboardConfig extends BaseViewClipboardConfig {
-  data: DataViewManager;
+interface KanbanViewClipboardConfig
+  extends BaseViewClipboardConfig<DataViewKanbanManager> {
+  view: DataViewKanban;
 }
 
-export class KanbanViewClipboard extends BaseViewClipboard {
-  private _data: DataViewKanbanManager;
+export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager> {
+  private _view: DataViewKanban;
 
-  constructor(
-    private _root: BlockSuiteRoot,
-    config: KanbanViewClipboardConfig
-  ) {
+  constructor(config: KanbanViewClipboardConfig) {
     super(config);
 
-    this._data = config.data as DataViewKanbanManager;
+    this._view = config.view;
   }
 
   override init() {
-    const { uiEventDispatcher } = this._root;
-
     this._disposables.add(
-      uiEventDispatcher.add(
-        'copy',
-        ctx => {
-          if (!this.isCurrentView(this._data.id)) return false;
-
-          const selection = getDatabaseSelection(this._root);
-          const kanbanSelection = selection?.getSelection('kanban');
-          if (!kanbanSelection) return false;
-          this._onCopy(ctx);
-          return true;
-        },
-        { path: this._path }
-      )
+      this._view.handleEvent('copy', ctx => {
+        this._onCopy(ctx);
+        return true;
+      })
     );
-    this._disposables.add(
-      uiEventDispatcher.add(
-        'paste',
-        ctx => {
-          if (!this.isCurrentView(this._data.id)) return false;
 
-          return this._onPaste(ctx);
-        },
-        { path: this._path }
-      )
+    this._disposables.add(
+      this._view.handleEvent('paste', ctx => {
+        this._onPaste(ctx);
+        return true;
+      })
     );
   }
 

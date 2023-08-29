@@ -23,7 +23,6 @@ import { DatabaseBlockDatasource } from '../__internal__/datasource/database-blo
 import type { DataViewSelectionState } from '../__internal__/index.js';
 import { renderUniLit } from '../components/uni-component/uni-component.js';
 import type { BaseDataView } from './common/base-data-view.js';
-import type { BaseViewClipboard } from './common/clipboard.js';
 import { dataViewCssVariable } from './common/css-variable.js';
 import {
   type DataViewExpose,
@@ -33,9 +32,7 @@ import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { KanbanViewClipboard } from './kanban/clipboard.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
-import { TableViewClipboard } from './table/clipboard.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
 
 type ViewData = {
@@ -117,7 +114,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   currentView?: string;
 
   private _view = createRef<DataViewExpose>();
-  private _clipboards = new Set<BaseViewClipboard>();
 
   _setViewId = (viewId: string) => {
     if (this.currentView !== viewId) {
@@ -128,8 +124,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           this.requestUpdate();
         });
       });
-
-      this._clipboards.forEach(clipboard => (clipboard.currentView = viewId));
     }
   };
 
@@ -238,19 +232,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           };
         },
       };
-
-      // init clipboard
-      const clipboard = new {
-        table: TableViewClipboard,
-        kanban: KanbanViewClipboard,
-      }[this.getViewDataById(id)?.mode ?? 'table'](this.root, {
-        path: this.path,
-        model: this.model,
-        view: this._view,
-        data: view,
-      });
-      clipboard.init();
-      this._clipboards.add(clipboard);
     }
     return this.viewMap[id];
   }
@@ -317,7 +298,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     if (!viewData && this.model.views.length !== 0) {
       const viewId = this.model.views[0].id;
       this.currentView = viewId;
-      this._clipboards.forEach(clipboard => (clipboard.currentView = viewId));
       return;
     }
     const containerClass = classMap({

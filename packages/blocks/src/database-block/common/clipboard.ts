@@ -1,29 +1,23 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import type { Ref } from 'lit/directives/ref.js';
+import type { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { DatabaseBlockModel } from '../database-model.js';
-import type { DataViewExpose } from './data-view.js';
-import type { DatabaseSelection } from './selection.js';
+import type { BaseDataViewManager } from './data-view-manager.js';
 
-export interface BaseViewClipboardConfig {
-  path: string[];
-  model: DatabaseBlockModel;
-  view: Ref<DataViewExpose | undefined>;
+export interface BaseViewClipboardConfig<
+  Data extends BaseDataViewManager = BaseDataViewManager
+> {
+  data: Data;
+  disposables: DisposableGroup;
 }
 
-export class BaseViewClipboard {
+export class BaseViewClipboard<Data extends BaseDataViewManager> {
   public currentView: string | undefined;
 
-  protected _disposables = new DisposableGroup();
-  protected _path: string[];
-  protected _model: DatabaseBlockModel;
-  protected _view: Ref<DataViewExpose | undefined>;
+  protected _data: Data;
+  protected _disposables: DisposableGroup;
 
-  constructor(config: BaseViewClipboardConfig) {
-    this._path = config.path;
-    this._model = config.model;
-    this._view = config.view;
+  constructor(config: BaseViewClipboardConfig<Data>) {
+    this._data = config.data;
+    this._disposables = config.disposables;
   }
 
   public init() {
@@ -33,11 +27,4 @@ export class BaseViewClipboard {
   public isCurrentView(viewId: string) {
     return this.currentView === viewId;
   }
-}
-
-export function getDatabaseSelection(root: BlockSuiteRoot) {
-  const selection = root.selectionManager.value.find(
-    (selection): selection is DatabaseSelection => selection.is('database')
-  );
-  return selection;
 }
