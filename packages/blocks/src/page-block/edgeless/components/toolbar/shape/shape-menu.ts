@@ -30,16 +30,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       position: absolute;
       z-index: -1;
     }
-    .shape-menu-container {
-      display: flex;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px 8px 0 0;
-      border: 1px solid var(--affine-border-color);
-      position: relative;
-      cursor: default;
-    }
     .menu-content {
       display: flex;
       align-items: center;
@@ -125,64 +115,62 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
     const { shape, strokeColor, shapeStyle } = this.edgelessTool;
 
     return html`
-      <div class="shape-menu-container">
-        <edgeless-slide-menu .menuWidth=${SHAPE_SUBMENU_WIDTH}>
-          <div class="menu-content">
-            <div class="shape-style-container">
-              <edgeless-tool-icon-button
-                .tooltip=${'General'}
-                .tipPosition=${'top-end'}
-                .iconContainerPadding=${2}
-                .active=${shapeStyle === ShapeStyle.General}
-                .activeMode=${'background'}
-                @click=${() => {
-                  this._setShapeStyle(ShapeStyle.General);
-                }}
-              >
-                ${GeneralShapeStyleIcon}
-              </edgeless-tool-icon-button>
-              <edgeless-tool-icon-button
-                .tooltip=${'Scribbled'}
-                .iconContainerPadding=${2}
-                .active=${shapeStyle === ShapeStyle.Scribbled}
-                .activeMode=${'background'}
-                @click=${() => {
-                  this._setShapeStyle(ShapeStyle.Scribbled);
-                }}
-              >
-                ${ScribbledShapeStyleIcon}
-              </edgeless-tool-icon-button>
-            </div>
-            <menu-divider .vertical=${true}></menu-divider>
-            <div class="shape-type-container">
-              ${ShapeComponentConfig.map(
-                ({ name, generalIcon, scribbledIcon, tooltip }) => {
-                  return html`
-                    <edgeless-tool-icon-button
-                      .tooltip=${tooltip}
-                      .active=${shape === name}
-                      .activeMode=${'background'}
-                      .iconContainerPadding=${2}
-                      @click=${() => {
-                        this._setShapeType(name);
-                      }}
-                    >
-                      ${shapeStyle === ShapeStyle.General
-                        ? generalIcon
-                        : scribbledIcon}
-                    </edgeless-tool-icon-button>
-                  `;
-                }
-              )}
-            </div>
-            <menu-divider .vertical=${true}></menu-divider>
-            <edgeless-one-row-color-panel
-              .value=${strokeColor}
-              @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
-            ></edgeless-one-row-color-panel>
+      <edgeless-slide-menu .menuWidth=${SHAPE_SUBMENU_WIDTH}>
+        <div class="menu-content">
+          <div class="shape-style-container">
+            <edgeless-tool-icon-button
+              .tooltip=${'General'}
+              .tipPosition=${'top-end'}
+              .iconContainerPadding=${2}
+              .active=${shapeStyle === ShapeStyle.General}
+              .activeMode=${'background'}
+              @click=${() => {
+                this._setShapeStyle(ShapeStyle.General);
+              }}
+            >
+              ${GeneralShapeStyleIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Scribbled'}
+              .iconContainerPadding=${2}
+              .active=${shapeStyle === ShapeStyle.Scribbled}
+              .activeMode=${'background'}
+              @click=${() => {
+                this._setShapeStyle(ShapeStyle.Scribbled);
+              }}
+            >
+              ${ScribbledShapeStyleIcon}
+            </edgeless-tool-icon-button>
           </div>
-        </edgeless-slide-menu>
-      </div>
+          <menu-divider .vertical=${true}></menu-divider>
+          <div class="shape-type-container">
+            ${ShapeComponentConfig.map(
+              ({ name, generalIcon, scribbledIcon, tooltip }) => {
+                return html`
+                  <edgeless-tool-icon-button
+                    .tooltip=${tooltip}
+                    .active=${shape === name}
+                    .activeMode=${'background'}
+                    .iconContainerPadding=${2}
+                    @click=${() => {
+                      this._setShapeType(name);
+                    }}
+                  >
+                    ${shapeStyle === ShapeStyle.General
+                      ? generalIcon
+                      : scribbledIcon}
+                  </edgeless-tool-icon-button>
+                `;
+              }
+            )}
+          </div>
+          <menu-divider .vertical=${true}></menu-divider>
+          <edgeless-one-row-color-panel
+            .value=${strokeColor}
+            @select=${(e: ColorEvent) => this._setStrokeColor(e.detail)}
+          ></edgeless-one-row-color-panel>
+        </div>
+      </edgeless-slide-menu>
     `;
   }
 }
