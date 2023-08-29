@@ -40,7 +40,9 @@ export class AllPageDatasource extends BaseDataSource {
       setValue: (page, value) => {
         page.meta.tags = value as string[];
       },
-      getData: () => this.workspace.meta.properties.tags,
+      getData: () => ({
+        options: this.workspace.meta.properties.tags?.options ?? [],
+      }),
       changeData: data => {
         this.workspace.meta.setProperties({
           ...this.workspace.meta.properties,

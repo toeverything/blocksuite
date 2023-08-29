@@ -19,7 +19,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     let pageMetaHtml = '';
     const tags = block.page.meta.tags ?? [];
     if (tags.length > 0) {
-      const options = block.page.workspace.meta.properties.tags.options;
+      const options = block.page.workspace.meta.properties.tags?.options ?? [];
       const optionMap = Object.fromEntries(options.map(v => [v.id, v]));
       pageMetaHtml = `
         <div class="page-meta-data meta-data-expanded">

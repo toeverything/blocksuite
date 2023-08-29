@@ -38,8 +38,6 @@ Based on this framework, BlockSuite has already implemented editing capabilities
 - [Whiteboard editor](https://blocksuite-toeverything.vercel.app/)
 - [Table editor (with kanban view support)](https://blocksuite-toeverything.vercel.app/starter/?init=database)
 
-Visit [blocksuite.affine.pro](https://blocksuite.affine.pro/blocksuite-overview.html) for a more detailed overview!
-
 ## Resources
 
 - 🎁 Examples

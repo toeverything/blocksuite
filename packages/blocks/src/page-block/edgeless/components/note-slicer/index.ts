@@ -52,7 +52,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   edgelessPage!: EdgelessPageBlockComponent;
 
   @query('note-slicer-button')
-  private _scissorsButton!: NoteSlicerButton;
+  private _slicerButton!: NoteSlicerButton;
 
   @query('note-slicer-indicator')
   private _indicatorLine!: NoteSlicerIndicator;
@@ -68,6 +68,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   private _noteModel: NoteBlockModel | null = null;
   private _blockModel: BaseBlockModel<object> | null = null;
+  private _lastPointerState: PointerEventState | null = null;
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -77,12 +78,20 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgelessPage.service.uiEventDispatcher.add('pointerMove', ctx => {
         const e = ctx.get('pointerState');
-        this._updateVisibility(e);
+        this._lastPointerState = e;
+        this._updateVisibility(this._lastPointerState);
       })
     );
     this._disposables.add(
       this.edgelessPage.service.uiEventDispatcher.add('wheel', () => {
         this._hide();
+      })
+    );
+    this._disposables.add(
+      this.edgelessPage.page.slots.blockUpdated.on(() => {
+        if (this._lastPointerState) {
+          this._updateVisibility(this._lastPointerState);
+        }
       })
     );
   }
@@ -207,7 +216,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         !almostEqual(transformX, this._lastPosition.transformX) ||
         !almostEqual(transformY, this._lastPosition.transformY)
       ) {
-        this._scissorsButton?.reset();
+        if (this.style.zIndex) this.style.removeProperty('z-index');
+        this._slicerButton?.reset();
         this._indicatorLine?.reset();
       } else {
         return;
@@ -233,28 +243,30 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       }
 
       this.style.transform = `translate3d(calc(var(--affine-edgeless-x) + ${transformX}px), calc(var(--affine-edgeless-y) + ${transformY}px), 0) translate3d(0, -50%, 0)`;
-      this.style.zIndex = noteContainer.style.zIndex;
     });
   }
 
   private _hide() {
+    this.style.removeProperty('z-index');
     this.style.removeProperty('display');
-    this._scissorsButton?.reset();
+
+    this._slicerButton?.reset();
     this._indicatorLine?.reset();
     this._lastPosition = null;
     this._blockModel = null;
     this._noteModel = null;
+    this._lastPointerState = null;
   }
 
   private _showIndicator() {
     if (this._lastPosition) {
-      this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
       this._indicatorLine?.show();
     }
   }
 
   private _popupButton() {
-    this._scissorsButton.show();
+    this.style.zIndex = '1';
+    this._slicerButton.show();
   }
 
   private _clipNote() {
