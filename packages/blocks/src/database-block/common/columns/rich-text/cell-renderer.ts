@@ -89,6 +89,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       outline: none;
       font-size: var(--data-view-cell-text-size);
       line-height: var(--data-view-cell-text-line-height);
+      word-break: break-all;
     }
 
     .affine-database-rich-text v-line {
