@@ -324,12 +324,12 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
               fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
             })}
           ></rich-text>
-          ${when(
-            this.selected?.is('block'),
-            () => html`<affine-block-selection></affine-block-selection>`
-          )}
         </div>
         ${children}
+        ${when(
+          this.selected?.is('block'),
+          () => html`<affine-block-selection></affine-block-selection>`
+        )}
       </div>
     `;
   }
