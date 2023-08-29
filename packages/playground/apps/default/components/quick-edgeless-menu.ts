@@ -30,7 +30,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
@@ -547,7 +547,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <div>
+          <div style="display: flex; gap: 12px">
             <sl-dropdown placement="bottom" hoist>
               <sl-button
                 class="dots-menu"
@@ -623,11 +623,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   ></sl-icon>
                 </sl-menu-item>
                 <sl-divider></sl-divider>
-                <sl-menu-item @click=${this._startCollaboration}>
-                  Start Collaboration
-                  <sl-icon slot="prefix" name="people"></sl-icon>
-                </sl-menu-item>
-                <sl-divider></sl-divider>
                 <a
                   target="_blank"
                   href="https://github.com/toeverything/blocksuite"
@@ -641,7 +636,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
             </sl-dropdown>
 
             <!-- undo/redo group -->
-            <sl-button-group label="History" style="margin-right: 12px">
+            <sl-button-group label="History">
               <!-- undo -->
               <sl-tooltip content="Undo" placement="bottom" hoist>
                 <sl-button
@@ -671,6 +666,17 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 </sl-button>
               </sl-tooltip>
             </sl-button-group>
+
+            <sl-tooltip content="Start collaboration" placement="bottom" hoist>
+              <sl-button
+                @click=${this._startCollaboration}
+                size="small"
+                .loading=${this._initws}
+                circle
+              >
+                <sl-icon name="people" label="Collaboration"></sl-icon>
+              </sl-button>
+            </sl-tooltip>
           </div>
 
           <div>
@@ -701,12 +707,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
               </sl-tooltip>
             </sl-button-group>
 
-            ${this._initws
-              ? html`<div class="ws-indicator">
-                  <sl-icon name="people" label="Collaboration"></sl-icon>
-                  <sl-spinner></sl-spinner>
-                </div>`
-              : nothing}
             ${this._showTabMenu
               ? getTabGroupTemplate({
                   workspace: this.workspace,
