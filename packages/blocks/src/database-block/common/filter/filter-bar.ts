@@ -3,6 +3,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import { CrossIcon, FilterIcon } from '../../../icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 
 @customElement('filter-bar')
@@ -12,7 +13,16 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       display: flex;
       gap: 8px;
     }
-    .filter-group {
+
+    .filter-group-tag {
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      background-color: var(--affine-white);
     }
   `;
   @property({ attribute: false })
@@ -40,9 +50,27 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
             .vars=${this.vars}
             .data=${condition}
             .setData="${(v: Filter) => this._setFilter(i, v)}"
+            .showDelete=${true}
           ></filter-condition-view>`;
         }
-        return html`${condition.conditions.length}`;
+        const length = condition.conditions.length;
+        const text = length > 1 ? `${length} rules` : `${length} rule`;
+        return html` <div
+          class="filter-group-tag dv-icon-16 dv-border dv-round-8"
+        >
+          <div
+            class="dv-round-4 dv-hover"
+            style="display:flex;gap: 6px;padding: 0 4px;align-items:center;height: 100%;"
+          >
+            ${FilterIcon} ${text}
+          </div>
+          <div
+            class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
+            style="display:flex;align-items:center;margin-left: 16px;"
+          >
+            ${CrossIcon}
+          </div>
+        </div>`;
       })}
     `;
   }

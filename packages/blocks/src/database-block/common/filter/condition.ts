@@ -32,7 +32,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     filter-condition-view {
       display: flex;
       align-items: center;
-      padding: 4px 8px 4px 4px;
+      padding: 4px;
       gap: 16px;
       border: 1px solid var(--affine-border-color);
       border-radius: 8px;
@@ -164,7 +164,12 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
         })}
       </div>
       ${this.showDelete
-        ? html`<div class="filter-condition-delete">${CrossIcon}</div>`
+        ? html`<div
+            class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
+            style="display:flex;align-items:center;"
+          >
+            ${CrossIcon}
+          </div>`
         : nothing}
     `;
   }

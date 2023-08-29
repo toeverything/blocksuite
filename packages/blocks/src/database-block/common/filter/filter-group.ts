@@ -277,7 +277,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           const classList = classMap({
             'filter-root-item': true,
             'filter-exactly-hover-container': true,
-            'hover-pd-round': true,
+            'dv-pd-4 dv-round-4': true,
             'delete-style': this.deleteIndex === i,
           });
           const groupClassList = classMap({
