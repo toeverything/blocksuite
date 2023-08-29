@@ -608,8 +608,8 @@ export class DragHandleWidget extends WidgetElement {
     );
 
     assertExists(blockElement);
+    if (selectedBlocks.length > 1) this._show(blockElement);
     this._setSelectedBlocks([blockElement]);
-    this._show(blockElement);
 
     return true;
   };
