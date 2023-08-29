@@ -1,7 +1,6 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -14,35 +13,8 @@ import { ArrowUpIcon, EdgelessPenIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
-
-interface BrushMenuPopper {
-  element: EdgelessBrushMenu;
-  dispose: () => void;
-}
-
-function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
-  const brushMenu = document.createElement('edgeless-brush-menu');
-  assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(brushMenu);
-
-  // The brush menu should be positioned at the top of the brush button.
-  // And it should be positioned at the top center of the toolbar all the time.
-  const x = 110;
-  const y = -40;
-
-  Object.assign(brushMenu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
-  });
-
-  return {
-    element: brushMenu,
-    dispose: () => {
-      brushMenu.remove();
-    },
-  };
-}
 
 @customElement('edgeless-brush-tool-button')
 export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
@@ -108,14 +80,17 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
   @query('.brush-midline-stroke')
   private _brushMidlineStroke!: SVGElement;
 
-  private _brushMenu: BrushMenuPopper | null = null;
+  private _brushMenu: MenuPopper<EdgelessBrushMenu> | null = null;
 
   private _toggleBrushMenu() {
     if (this._brushMenu) {
       this._brushMenu.dispose();
       this._brushMenu = null;
     } else {
-      this._brushMenu = createBrushMenuPopper(this);
+      this._brushMenu = createPopper('edgeless-brush-menu', this, {
+        x: 110,
+        y: -40,
+      });
       this._brushMenu.element.edgelessTool = this.edgelessTool;
       this._brushMenu.element.edgeless = this.edgeless;
     }

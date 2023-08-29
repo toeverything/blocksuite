@@ -1,7 +1,6 @@
 import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -14,37 +13,8 @@ import {
 import { EdgelessConnectorIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessConnectorMenu } from './connector-menu.js';
-
-interface ConnectorMenuPopper {
-  element: EdgelessConnectorMenu;
-  dispose: () => void;
-}
-
-function createConnectorMenuPopper(
-  reference: HTMLElement
-): ConnectorMenuPopper {
-  const menu = document.createElement('edgeless-connector-menu');
-  assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(menu);
-
-  // The connector menu should be positioned at the top of the connector button.
-  // And it should be positioned at the top center of the toolbar all the time.
-  const x = 110;
-  const y = -40;
-
-  Object.assign(menu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
-  });
-
-  return {
-    element: menu,
-    dispose: () => {
-      menu.remove();
-    },
-  };
-}
 
 @customElement('edgeless-connector-tool-button')
 export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
@@ -73,14 +43,17 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  private _connectorMenu: ConnectorMenuPopper | null = null;
+  private _connectorMenu: MenuPopper<EdgelessConnectorMenu> | null = null;
 
   private _toggleMenu() {
     if (this._connectorMenu) {
       this._connectorMenu.dispose();
       this._connectorMenu = null;
     } else {
-      this._connectorMenu = createConnectorMenuPopper(this);
+      this._connectorMenu = createPopper('edgeless-connector-menu', this, {
+        x: 110,
+        y: -40,
+      });
       this._connectorMenu.element.edgelessTool = this.edgelessTool;
       this._connectorMenu.element.edgeless = this.edgeless;
     }
