@@ -45,9 +45,8 @@ export function CodeOptionTemplate({
         z-index: var(--affine-z-index-popover);
         background: var(--affine-background-overlay-panel-color);
       }
-      .has-tool-tip.delete-code-button:hover {
+      .delete-code-button:hover {
         background: var(--affine-background-error-color);
-        fill: var(--affine-error-color);
         color: var(--affine-error-color);
       }
       ${tooltipStyle}
@@ -77,7 +76,9 @@ export function CodeOptionTemplate({
         @click=${onClickWrap}
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
-        <tool-tip inert tip-position="right" role="tooltip">Wrap code</tool-tip>
+        <tool-tip inert tip-position="right" role="tooltip"
+          >${wrap ? 'Cancel wrap' : 'Wrap code'}</tool-tip
+        >
       </icon-button>
       ${readonly
         ? nothing

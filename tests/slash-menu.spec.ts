@@ -16,6 +16,7 @@ import {
   getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  insertThreeLevelLists,
   waitNextFrame,
 } from './utils/actions/misc.js';
 import {
@@ -686,17 +687,60 @@ test.describe('slash menu with customize menu', () => {
 test('move block up and down by slash menu', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
+  const slashMenu = page.locator(`.slash-menu`);
+
   await focusRichText(page);
   await type(page, 'hello');
   await pressEnter(page);
   await type(page, 'world');
   await assertRichTexts(page, ['hello', 'world']);
   await type(page, '/');
+  await expect(slashMenu).toBeVisible();
+
   const moveUp = page.getByTestId('Move Up');
   await moveUp.click();
   await assertRichTexts(page, ['world', 'hello']);
   await type(page, '/');
+  await expect(slashMenu).toBeVisible();
+
   const moveDown = page.getByTestId('Move Down');
   await moveDown.click();
   await assertRichTexts(page, ['hello', 'world']);
+});
+
+test('delete block by slash menu should keep children', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await insertThreeLevelLists(page);
+  const slashMenu = page.locator(`.slash-menu`);
+  const slashItems = slashMenu.locator('icon-button');
+
+  await focusRichText(page, 1);
+  await type(page, '/');
+
+  await expect(slashMenu).toBeVisible();
+  await type(page, 'remove');
+  await expect(slashItems).toHaveCount(1);
+  await pressEnter(page);
+  await assertStoreMatchJSX(
+    page,
+    `<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:list
+    prop:checked={false}
+    prop:text="123"
+    prop:type="bulleted"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:text="789"
+      prop:type="bulleted"
+    />
+  </affine:list>
+</affine:note>`,
+    noteId
+  );
 });
