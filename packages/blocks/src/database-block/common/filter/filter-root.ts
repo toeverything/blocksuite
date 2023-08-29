@@ -116,7 +116,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     }
 
     .filter-root-item-ops {
-      margin-top: 4px;
+      margin-top: 2px;
       padding: 4px;
       border-radius: 4px;
       height: max-content;
