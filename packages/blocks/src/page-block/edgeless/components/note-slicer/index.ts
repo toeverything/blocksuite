@@ -216,6 +216,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         !almostEqual(transformX, this._lastPosition.transformX) ||
         !almostEqual(transformY, this._lastPosition.transformY)
       ) {
+        if (this.style.zIndex) this.style.removeProperty('z-index');
         this._slicerButton?.reset();
         this._indicatorLine?.reset();
       } else {
@@ -242,12 +243,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       }
 
       this.style.transform = `translate3d(calc(var(--affine-edgeless-x) + ${transformX}px), calc(var(--affine-edgeless-y) + ${transformY}px), 0) translate3d(0, -50%, 0)`;
-      this.style.zIndex = noteContainer.style.zIndex;
     });
   }
 
   private _hide() {
+    this.style.removeProperty('z-index');
     this.style.removeProperty('display');
+
     this._slicerButton?.reset();
     this._indicatorLine?.reset();
     this._lastPosition = null;
@@ -258,12 +260,12 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   private _showIndicator() {
     if (this._lastPosition) {
-      this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
       this._indicatorLine?.show();
     }
   }
 
   private _popupButton() {
+    this.style.zIndex = '1';
     this._slicerButton.show();
   }
 
