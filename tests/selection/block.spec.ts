@@ -329,7 +329,7 @@ test('should unindent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.move(coord.x - 26 - 15, coord.y - 10, { steps: 20 });
   await page.mouse.down();
   // ←
   await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
