@@ -30,7 +30,7 @@ export const styles = css`
     cursor: grab;
   }
   @media print {
-    .affine-drag-handle {
+    .affine-drag-handle-widget {
       display: none;
     }
   }
