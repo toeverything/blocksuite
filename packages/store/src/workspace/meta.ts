@@ -19,7 +19,7 @@ type Tag = {
   color: string;
 };
 type PagesPropertiesMeta = {
-  tags: {
+  tags?: {
     options: Tag[];
   };
 };
