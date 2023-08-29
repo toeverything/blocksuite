@@ -7,6 +7,16 @@ import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 import { Text as YText } from 'yjs';
 
+import { ClipboardItem } from '../../../../__internal__/clipboard/clipboard-item.js';
+import {
+  CLIPBOARD_MIMETYPE,
+  performNativeCopy,
+} from '../../../../__internal__/clipboard/utils/pure.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../../../__internal__/index.js';
 import type {
   AffineTextAttributes,
   AffineVEditor,
@@ -167,6 +177,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       display: flex;
       align-items: center;
       width: 100%;
+      min-width: 1px;
       cursor: text;
     }
 
@@ -349,6 +360,41 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       });
     }
   };
+
+  override onCopy(_e: ClipboardEvent) {
+    let data = '';
+    const range = this.vEditor?.getVRange();
+    if (range) {
+      const start = range.index;
+      const end = range.index + range.length;
+      const value = this.column.getStringValue(this.rowId);
+      data = value?.slice(start, end) ?? '';
+    }
+    const textClipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, data);
+
+    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
+    performNativeCopy([textClipboardItem]);
+    if (savedRange) {
+      resetNativeSelection(savedRange);
+    }
+  }
+
+  override onPaste(e: ClipboardEvent) {
+    const textClipboardData = e.clipboardData?.getData(CLIPBOARD_MIMETYPE.TEXT);
+    if (!textClipboardData) return;
+
+    const range = this.vEditor?.getVRange();
+    const yText = this.vEditor?.yText;
+    if (yText) {
+      const text = new Text(yText);
+      const index = range?.index ?? yText.length;
+      text.insert(textClipboardData, index);
+      this.vEditor?.setVRange({
+        index: index + textClipboardData.length,
+        length: 0,
+      });
+    }
+  }
 
   override render() {
     return html`<div class="affine-database-rich-text virgo-editor"></div>`;

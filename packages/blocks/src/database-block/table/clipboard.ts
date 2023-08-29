@@ -1,8 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
-import { Text } from '@blocksuite/store';
-import type { Ref } from 'lit/directives/ref.js';
 
 import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
 import {
@@ -15,47 +13,42 @@ import {
   resetNativeSelection,
 } from '../../__internal__/utils/index.js';
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
-import type { BaseViewClipboard } from '../common/clipboard.js';
-import type { DataViewExpose } from '../common/data-view.js';
+import {
+  BaseViewClipboard,
+  type BaseViewClipboardConfig,
+  getDatabaseSelection,
+} from '../common/clipboard.js';
 import type { DataViewManager } from '../common/data-view-manager.js';
-import type { DatabaseSelection } from '../common/selection.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { DatabaseCellContainer } from '../table/components/cell-container.js';
 import type { DatabaseTable } from '../table/table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
-type TableViewClipboardConfig = {
-  path: string[];
-  model: DatabaseBlockModel;
-  view: Ref<DataViewExpose | undefined>;
+interface TableViewClipboardConfig extends BaseViewClipboardConfig {
   data: DataViewManager;
-};
+}
 
-export class TableViewClipboard implements BaseViewClipboard {
-  private _disposables = new DisposableGroup();
-  private _path: string[];
-  private _model: DatabaseBlockModel;
-  private _view: Ref<DataViewExpose | undefined>;
+export class TableViewClipboard extends BaseViewClipboard {
   private _data: DataViewTableManager;
 
   constructor(private _root: BlockSuiteRoot, config: TableViewClipboardConfig) {
-    this._path = config.path;
-    this._model = config.model;
-    this._view = config.view;
+    super(config);
+
     this._data = config.data as DataViewTableManager;
   }
 
-  init(): void {
+  override init() {
     const { uiEventDispatcher } = this._root;
 
     this._disposables.add(
       uiEventDispatcher.add(
         'copy',
         ctx => {
+          if (!this.isCurrentView(this._data.id)) return false;
+
           const selection = getDatabaseSelection(this._root);
           const tableSelection = selection?.getSelection('table');
           if (!tableSelection) return false;
-
           this._onCopy(ctx);
           return true;
         },
@@ -63,55 +56,26 @@ export class TableViewClipboard implements BaseViewClipboard {
       )
     );
     this._disposables.add(
-      uiEventDispatcher.add('paste', this._onPaste, { path: this._path })
+      uiEventDispatcher.add(
+        'paste',
+        ctx => {
+          if (!this.isCurrentView(this._data.id)) return false;
+
+          this._onPaste(ctx);
+          return true;
+        },
+        { path: this._path }
+      )
     );
   }
 
-  private _onCopy = async (context: UIEventStateContext) => {
-    const event = context.get('clipboardState').raw;
+  private _onCopy = async (_context: UIEventStateContext) => {
     const selection = getDatabaseSelection(this._root);
     const tableSelection = selection?.getSelection('table');
     if (!tableSelection) return;
 
     const view = this._view.value as DatabaseTable;
     const model = this._model;
-
-    const { isEditing, focus } = tableSelection;
-
-    // copy cells' content
-    if (isEditing) {
-      const column = model.columns[focus.columnIndex];
-      const container = view.selection.getCellContainer(
-        focus.rowIndex,
-        focus.columnIndex
-      );
-
-      if (
-        !(
-          event.target instanceof HTMLInputElement ||
-          event.target instanceof HTMLTextAreaElement
-        )
-      ) {
-        const data = (cellToStringMap[column.type]?.(container) ??
-          '') as string;
-        const textClipboardItem = new ClipboardItem(
-          CLIPBOARD_MIMETYPE.TEXT,
-          data
-        );
-
-        const savedRange = hasNativeSelection()
-          ? getCurrentNativeRange()
-          : null;
-        performNativeCopy([textClipboardItem]);
-        if (savedRange) {
-          resetNativeSelection(savedRange);
-        }
-      } else {
-        // type === 'number' || type === 'title'
-        // Execute browser default behavior
-      }
-      return true;
-    }
 
     // cells
     // For database paste inside.
@@ -156,42 +120,6 @@ export class TableViewClipboard implements BaseViewClipboard {
     const selection = getDatabaseSelection(this._root);
     const tableSelection = selection?.getSelection('table');
     if (tableSelection) {
-      const {
-        isEditing,
-        focus: { rowIndex, columnIndex },
-      } = tableSelection;
-
-      // paste cells' content
-      if (isEditing) {
-        const column = model.columns[columnIndex];
-        if (column.type !== 'number' && column.type !== 'title') {
-          const textClipboardData = event.clipboardData?.getData(
-            CLIPBOARD_MIMETYPE.TEXT
-          );
-          if (!textClipboardData) return true;
-
-          const targetContainer = view.selection.getCellContainer(
-            rowIndex,
-            columnIndex
-          );
-          const rowId = targetContainer?.dataset.rowId;
-          const columnId = targetContainer?.dataset.columnId;
-          assertExists(rowId);
-          assertExists(columnId);
-
-          if (column.type === 'rich-text') {
-            pasteToRichText(targetContainer, textClipboardData);
-          } else {
-            data.cellUpdateValue(rowId, columnId, textClipboardData);
-          }
-        } else {
-          // type === 'number' || type === 'title'
-          // Execute browser default behavior
-        }
-
-        return true;
-      }
-
       const htmlClipboardData = event.clipboardData?.getData(
         CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
       );
@@ -233,13 +161,6 @@ export class TableViewClipboard implements BaseViewClipboard {
 
     return true;
   };
-}
-
-function getDatabaseSelection(root: BlockSuiteRoot) {
-  const selection = root.selectionManager.value.find(
-    (selection): selection is DatabaseSelection => selection.is('database')
-  );
-  return selection;
 }
 
 function getColumnValue(container: DatabaseCellContainer | undefined) {
@@ -423,26 +344,6 @@ function getTargetRangeFromSelection(
     };
   }
   return range;
-}
-
-function pasteToRichText(
-  container: DatabaseCellContainer | undefined,
-  data: string
-) {
-  const cell = container?.querySelector(
-    'affine-database-rich-text-cell-editing'
-  );
-  const range = cell?.vEditor?.getVRange();
-  const yText = cell?.vEditor?.yText;
-  if (yText) {
-    const text = new Text(yText);
-    const index = range?.index ?? yText.length;
-    text.insert(data, index);
-    cell?.vEditor?.setVRange({
-      index: index + data.length,
-      length: 0,
-    });
-  }
 }
 
 function pasteToCells(
