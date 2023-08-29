@@ -851,8 +851,6 @@ export class DragHandleWidget extends WidgetElement {
     if (outOfPageViewPort && !inDragHandle && !inPage) {
       this._hide();
     }
-
-    return true;
   };
 
   override firstUpdated() {
