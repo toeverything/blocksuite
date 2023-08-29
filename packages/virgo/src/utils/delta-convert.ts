@@ -60,5 +60,5 @@ export function deltaInsertsToChunks<TextAttributes extends BaseTextAttributes>(
     }
   }
 
-  return [...chunksGenerator(transformedDelta)];
+  return Array.from(chunksGenerator(transformedDelta));
 }

@@ -14,7 +14,7 @@ export class AllPageDatasource extends BaseDataSource {
   private workspace: Workspace;
 
   public get rows(): string[] {
-    return [...this.workspace.pages.keys()];
+    return Array.from(this.workspace.pages.keys());
   }
 
   private propertiesMap: Record<
