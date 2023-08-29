@@ -52,7 +52,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   edgelessPage!: EdgelessPageBlockComponent;
 
   @query('note-slicer-button')
-  private _scissorsButton!: NoteSlicerButton;
+  private _slicerButton!: NoteSlicerButton;
 
   @query('note-slicer-indicator')
   private _indicatorLine!: NoteSlicerIndicator;
@@ -216,7 +216,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         !almostEqual(transformX, this._lastPosition.transformX) ||
         !almostEqual(transformY, this._lastPosition.transformY)
       ) {
-        this._scissorsButton?.reset();
+        this._slicerButton?.reset();
         this._indicatorLine?.reset();
       } else {
         return;
@@ -248,7 +248,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   private _hide() {
     this.style.removeProperty('display');
-    this._scissorsButton?.reset();
+    this._slicerButton?.reset();
     this._indicatorLine?.reset();
     this._lastPosition = null;
     this._blockModel = null;
@@ -264,7 +264,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _popupButton() {
-    this._scissorsButton.show();
+    this._slicerButton.show();
   }
 
   private _clipNote() {
