@@ -30,7 +30,6 @@ import {
   resetHistory,
   selectAllByKeyboard,
   shamefullyBlurActiveElement,
-  SHORT_KEY,
   type,
   undoByClick,
   undoByKeyboard,
@@ -186,7 +185,7 @@ test('click the list icon can select and delete by forwardDelete', async ({
   await clickListIcon(page, 0);
   await waitNextFrame(page);
   await pressForwardDelete(page);
-  await assertRichTexts(page, ['', '']);
+  await assertRichTexts(page, ['', '', '789']);
 });
 
 test('selection on heavy page', async ({ page }) => {
