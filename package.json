@@ -114,6 +114,6 @@
     }
   },
   "stackblitz": {
-    "startCommand": "pnpm --filter='./packages/playground' run dev"
+    "startCommand": "pnpm run dev"
   }
 }

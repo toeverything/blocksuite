@@ -100,7 +100,7 @@ export class ViewManager {
   }
 
   get all() {
-    return [...this.map.values()];
+    return Array.from(this.map.values());
   }
 }
 
@@ -129,7 +129,7 @@ export class ViewRendererManager {
   }
 
   get all() {
-    return [...this.map.values()];
+    return Array.from(this.map.values());
   }
 }
 

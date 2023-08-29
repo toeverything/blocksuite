@@ -81,7 +81,7 @@ export function enableDebugLog(tags?: string | string[]) {
   } else if (tags) {
     whitelist.add(tags);
   } else {
-    [...all.values()].forEach(tag => whitelist.add(tag));
+    Array.from(all.values()).forEach(tag => whitelist.add(tag));
   }
 }
 
