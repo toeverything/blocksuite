@@ -404,7 +404,7 @@ export async function importNotion(workspace: Workspace, file: File) {
         };
         const tableTitleColumnHandler = async (element: Element) => {
           if (element.tagName === 'TABLE') {
-            const titleColumn: string[] = [];
+            const titleColumn: SerializedBlock[] = [];
             element.querySelectorAll('.cell-title').forEach(ele => {
               const link = ele.querySelector('a');
               const subPageLink = link?.getAttribute('href') || '';
@@ -412,14 +412,36 @@ export async function importNotion(workspace: Workspace, file: File) {
                 subPageLink.startsWith('http://') ||
                 subPageLink.startsWith('https://')
               ) {
-                titleColumn.push(ele.textContent || '');
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [{ insert: ele?.textContent || '' }],
+                  children: [],
+                });
                 return;
               }
               const linkPageId = pageMap.get(decodeURI(subPageLink));
               if (linkPageId) {
-                titleColumn.push(`@AffineReference:(${linkPageId})`);
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [
+                    {
+                      insert: REFERENCE_NODE,
+                      attributes: {
+                        reference: { type: 'Subpage', pageId: linkPageId },
+                      },
+                    },
+                  ],
+                  children: [],
+                });
               } else {
-                titleColumn.push(link?.textContent || '');
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [{ insert: link?.textContent || '' }],
+                  children: [],
+                });
               }
             });
             return titleColumn;
