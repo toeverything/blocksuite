@@ -97,16 +97,22 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   private _initTitleVEditor() {
     this.titleVInput = new VirgoInput({
       yText: this.titleText.yText,
-      rootElement: this._titleContainer,
       maxLength: DATABASE_TITLE_LENGTH,
     });
-    this.titleVInput.vEditor.setReadonly(this.readonly);
-    this._titleContainer.addEventListener('keydown', this._handleKeyDown);
+
+    this.titleVInput.vEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'keydown',
+      this._handleKeyDown
+    );
 
     // for title placeholder
     this.titleText.yText.observe(() => {
       this.requestUpdate();
     });
+
+    this.titleVInput.mount(this._titleContainer);
+    this.titleVInput.vEditor.setReadonly(this.readonly);
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
@@ -134,7 +140,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       'database-title': true,
       'database-title-empty': isEmpty,
     });
-    return html` <div class="affine-database-title">
+    return html`<div class="affine-database-title">
       <div
         class="${classList}"
         data-block-is-database-title="true"

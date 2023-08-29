@@ -27,6 +27,7 @@ import {
 } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
+import { deleteElements } from '../../utils/crud.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
@@ -198,17 +199,8 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _delete() {
     this.page.captureSync();
-    this.selection.elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = this.page.root?.children ?? [];
-        if (children.length > 1) {
-          this.page.deleteBlock(element);
-        }
-      } else if (element) {
-        this.edgeless.connector.detachConnectors([element as PhasorElement]);
-        this.surface.removeElement(element.id);
-      }
-    });
+    deleteElements(this.edgeless, this.selection.elements);
+
     this.selection.setSelection({
       elements: [],
       editing: false,

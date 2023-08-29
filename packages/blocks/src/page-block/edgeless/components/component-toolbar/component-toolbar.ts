@@ -132,7 +132,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   private _getNoteButton(blocks?: TopLevelBlockModel[]) {
-    return blocks?.length
+    return blocks?.length === 1
       ? html`<edgeless-change-note-button
           .notes=${blocks}
           .page=${this.page}
@@ -223,7 +223,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._getNoteButton(note),
           this._getTextButton(text),
           this._getFrameButton(frame),
-        ].filter(b => !!b);
+        ].filter(b => !!b && b !== nothing);
 
     if (this.selection.state.elements.length > 1) {
       buttons.unshift(

@@ -7,12 +7,8 @@ import { html } from 'lit/static-html.js';
 import * as Y from 'yjs';
 import { Doc, Text as YText } from 'yjs';
 
-import { REFERENCE_NODE } from '../../../__internal__/rich-text/consts.js';
 import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
-import {
-  affineTextAttributes,
-  type AffineVEditor,
-} from '../../../__internal__/rich-text/virgo/types.js';
+import { affineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
@@ -76,35 +72,6 @@ const styles = css`
   }
 `;
 
-export const autoIdentifyReference = (editor: AffineVEditor, text: string) => {
-  // @AffineReference:(id)
-  const referencePattern = /@AffineReference:\((.*)\)/g;
-
-  const match = referencePattern.exec(text);
-  if (!match) {
-    return;
-  }
-
-  const pageId = match[1];
-
-  editor.deleteText({
-    index: 0,
-    length: match[0].length,
-  });
-  editor.setVRange({
-    index: 0,
-    length: 0,
-  });
-
-  const vRange = {
-    index: match[0].length,
-    length: 0,
-  };
-
-  editor.insertText(vRange, REFERENCE_NODE, {
-    reference: { type: 'Subpage', pageId },
-  });
-};
 export const addHistoryToVEditor = (vEditor: VEditor) => {
   let range: Range | null = null;
   vEditor.slots.rangeUpdated.on(vRange => {
@@ -181,12 +148,9 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
   }
 
   protected initEditingMode(vEditor: VEditor) {
-    autoIdentifyReference(vEditor, vEditor.yText.toString());
     const historyHelper = addHistoryToVEditor(vEditor);
-    vEditor.bindHandlers({
-      keydown: e => {
-        historyHelper.handleKeyboardEvent(e);
-      },
+    vEditor.disposables.addFromEvent(vEditor.rootElement, 'keydown', e => {
+      historyHelper.handleKeyboardEvent(e);
     });
     vEditor.focusEnd();
     this._disposables.add(

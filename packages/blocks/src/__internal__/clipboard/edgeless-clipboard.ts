@@ -16,17 +16,14 @@ import { type Page } from '@blocksuite/store';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import { getCopyElements } from '../../page-block/edgeless/utils/clipboard-utils.js';
+import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { ContentParser } from '../content-parser/index.js';
-import {
-  type Connectable,
-  type SerializedBlock,
-  type TopLevelBlockModel,
-} from '../index.js';
+import { type SerializedBlock, type TopLevelBlockModel } from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import type { Clipboard } from './type.js';
@@ -124,26 +121,14 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     this._onCopy(e);
 
-    const { state } = this.selection;
+    const { state, elements } = this.selection;
     if (state.editing) {
       deleteModelsByTextSelection(this._edgeless);
       return;
     }
 
     this._page.transact(() => {
-      state.elements.forEach(id => {
-        const selectedModel = this._edgeless.getElementModel(id);
-        if (!selectedModel) return;
-
-        if (isTopLevelBlock(selectedModel)) {
-          this._page.deleteBlock(selectedModel);
-        } else {
-          this._edgeless.connector.detachConnectors([
-            selectedModel as Connectable,
-          ]);
-          this.surface.removeElement(id);
-        }
-      });
+      deleteElements(this._edgeless, elements);
     });
 
     this.selection.setSelection({
@@ -188,7 +173,7 @@ export class EdgelessClipboard implements Clipboard {
       if (!isPhasorElementWithText(elements[0])) {
         this._pasteInTextNote(e);
       }
-      // use build-in paste handler in virgo when paste in surface text element
+      // use build-in paste handler in virgo-input when paste in surface text element
       return;
     }
 

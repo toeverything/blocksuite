@@ -7,6 +7,7 @@ import {
   pressBackspace,
   pressEnter,
   pressSpace,
+  redoByKeyboard,
   resetHistory,
   type,
   undoByClick,
@@ -16,8 +17,8 @@ import {
 import {
   assertBlockType,
   assertRichTexts,
+  assertRichTextVirgoDeltas,
   assertText,
-  assertTextFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -196,37 +197,92 @@ test.describe('markdown inline-text', async () => {
   });
 
   test('bolditalic', async ({ page }) => {
-    await type(page, '***test*** ');
-    await assertTextFormat(page, 0, 0, { bold: true, italic: true });
-    await type(page, 'test');
-    await assertTextFormat(page, 0, 6, { bold: true, italic: true });
+    await type(page, 'aa***bb*** ');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          bold: true,
+          italic: true,
+        },
+      },
+    ]);
     await undoByKeyboard(page);
-    await assertRichTexts(page, ['***test*** ']);
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa***bb*** ',
+      },
+    ]);
+    await redoByKeyboard(page);
+    await type(page, 'cc');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bbcc',
+        attributes: {
+          bold: true,
+          italic: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
     await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
-
-    // '*** ' will be converted to divider, so needn't test this case here
 
     await waitNextFrame(page);
     await type(page, '***test *** ');
     await assertRichTexts(page, ['***test *** ']);
     await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
+
+    // *** + space will be converted to divider, so needn't test this case here
+    // await waitNextFrame(page);
+    // await type(page, '*** test*** ');
+    // await assertRichTexts(page, ['*** test*** ']);
+    // await undoByKeyboard(page);
+    // await assertRichTexts(page, ['']);
   });
 
   test('bold', async ({ page }) => {
-    await type(page, '**test** ');
-    await assertTextFormat(page, 0, 0, { bold: true });
-    await type(page, 'test');
-    await assertTextFormat(page, 0, 6, { bold: true });
-    await undoByClick(page);
-    await assertRichTexts(page, ['**test** ']);
-    await undoByClick(page);
-    await assertRichTexts(page, ['']);
-
-    await waitNextFrame(page);
-    await type(page, '** test** ');
-    await assertRichTexts(page, ['** test** ']);
+    await type(page, 'aa**bb** ');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          bold: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa**bb** ',
+      },
+    ]);
+    await redoByKeyboard(page);
+    await type(page, 'cc');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bbcc',
+        attributes: {
+          bold: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
     await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
 
@@ -237,100 +293,213 @@ test.describe('markdown inline-text', async () => {
     await assertRichTexts(page, ['']);
 
     await waitNextFrame(page);
-    await type(page, '** test ** ');
-    await assertRichTexts(page, ['** test ** ']);
+    await type(page, '** test** ');
+    await assertRichTexts(page, ['** test** ']);
     await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
   });
 
   test('italic', async ({ page }) => {
-    await type(page, '*test* ');
-    await assertTextFormat(page, 0, 0, { italic: true });
-    await type(page, 'test');
-    await assertTextFormat(page, 0, 6, { italic: true });
-    await undoByClick(page);
-    await assertRichTexts(page, ['*test* ']);
-    await undoByClick(page);
+    await type(page, 'aa*bb* ');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          italic: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa*bb* ',
+      },
+    ]);
+    await redoByKeyboard(page);
+    await type(page, 'cc');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bbcc',
+        attributes: {
+          italic: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
-
-    // '* ' will be converted to bulleted list, so needn't test this case here
 
     await waitNextFrame(page);
     await type(page, '*test * ');
     await assertRichTexts(page, ['*test * ']);
     await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
+
+    // * + space will be converted to bulleted list, so needn't test this case here
+    // await waitNextFrame(page);
+    // await type(page, '* test* ');
+    // await assertRichTexts(page, ['* test* ']);
+    // await undoByKeyboard(page);
+    // await assertRichTexts(page, ['']);
   });
 
   test('strike', async ({ page }) => {
-    await type(page, '~~test~~ ');
-    await assertTextFormat(page, 0, 0, { strike: true });
-    await type(page, 'test');
-    await assertTextFormat(page, 0, 6, { strike: true });
-    await undoByClick(page);
-    await waitNextFrame(page);
-    await assertRichTexts(page, ['~~test~~ ']);
-    await undoByClick(page);
-    await assertRichTexts(page, ['']);
-
-    await waitNextFrame(page);
-    await type(page, '~~ test~~ ');
-    await assertRichTexts(page, ['~~ test~~ ']);
-    await undoByClick(page);
+    await type(page, 'aa~~bb~~ ');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          strike: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa~~bb~~ ',
+      },
+    ]);
+    await redoByKeyboard(page);
+    await type(page, 'cc');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bbcc',
+        attributes: {
+          strike: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
 
     await waitNextFrame(page);
     await type(page, '~~test ~~ ');
     await assertRichTexts(page, ['~~test ~~ ']);
-    await undoByClick(page);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
 
     await waitNextFrame(page);
-    await type(page, '~~ test ~~ ');
-    await assertRichTexts(page, ['~~ test ~~ ']);
-    await undoByClick(page);
+    await type(page, '~~ test~~ ');
+    await assertRichTexts(page, ['~~ test~~ ']);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
   });
 
   test('underline', async ({ page }) => {
-    await type(page, '~test~ ');
-    await assertTextFormat(page, 0, 0, { underline: true });
-    await type(page, 'test');
-    await assertTextFormat(page, 0, 6, { underline: true });
-    await undoByClick(page);
-    await waitNextFrame(page);
-    await assertRichTexts(page, ['~test~ ']);
-    await undoByClick(page);
-    await assertRichTexts(page, ['']);
-
-    await waitNextFrame(page);
-    await type(page, '~ test~ ');
-    await assertRichTexts(page, ['~ test~ ']);
-    await undoByClick(page);
+    await type(page, 'aa~bb~ ');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          underline: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa~bb~ ',
+      },
+    ]);
+    await redoByKeyboard(page);
+    await type(page, 'cc');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bbcc',
+        attributes: {
+          underline: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
 
     await waitNextFrame(page);
     await type(page, '~test ~ ');
     await assertRichTexts(page, ['~test ~ ']);
-    await undoByClick(page);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
 
     await waitNextFrame(page);
-    await type(page, '~ test ~ ');
-    await assertRichTexts(page, ['~ test ~ ']);
-    await undoByClick(page);
+    await type(page, '~ test~ ');
+    await assertRichTexts(page, ['~ test~ ']);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
   });
 
   test('code', async ({ page }) => {
+    await type(page, 'aa`bb` ');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          code: true,
+        },
+      },
+    ]);
+    await undoByKeyboard(page);
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa`bb` ',
+      },
+    ]);
+    await redoByKeyboard(page);
+    await type(page, 'cc');
+    assertRichTextVirgoDeltas(page, [
+      {
+        insert: 'aa',
+      },
+      {
+        insert: 'bb',
+        attributes: {
+          code: true,
+        },
+      },
+      {
+        insert: 'cc',
+      },
+    ]);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
+
     await waitNextFrame(page);
-    await type(page, '`test` ');
-    await assertTextFormat(page, 0, 0, { code: true });
-    await type(page, 'test');
-    await assertTextFormat(page, 0, 6, {});
-    await undoByClick(page);
-    await assertRichTexts(page, ['`test` ']);
-    await undoByClick(page);
+    await type(page, '`test ` ');
+    await assertRichTexts(page, ['`test ` ']);
+    await undoByKeyboard(page);
+    await assertRichTexts(page, ['']);
+
+    await waitNextFrame(page);
+    await type(page, '` test` ');
+    await assertRichTexts(page, ['` test` ']);
+    await undoByKeyboard(page);
     await assertRichTexts(page, ['']);
   });
 });

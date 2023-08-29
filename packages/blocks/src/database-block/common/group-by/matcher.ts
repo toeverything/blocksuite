@@ -10,6 +10,7 @@ export interface GroupRenderProps<
   updateData?: (data: Data) => void;
   value: Value;
   updateValue?: (value: Value) => void;
+  readonly: boolean;
 }
 
 export type GroupByConfig = {

@@ -32,12 +32,12 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertRichTextModelType,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
   assertTextFormat,
   assertTitle,
-  assertTypeFormat,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
@@ -800,11 +800,11 @@ test('format list to h1', async ({ page }) => {
   await type(page, 'aa');
   await focusRichText(page, 0);
   await updateBlockType(page, 'affine:paragraph', 'h1');
-  await assertTypeFormat(page, 'h1');
+  await assertRichTextModelType(page, 'h1');
   await undoByClick(page);
-  await assertTypeFormat(page, 'bulleted');
+  await assertRichTextModelType(page, 'bulleted');
   await redoByClick(page);
-  await assertTypeFormat(page, 'h1');
+  await assertRichTextModelType(page, 'h1');
 });
 
 test('should cut work single line', async ({ page }) => {

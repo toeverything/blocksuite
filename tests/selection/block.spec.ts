@@ -11,7 +11,6 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   getCenterPosition,
-  getCenterPositionByLocator,
   getIndexCoordinate,
   getRichTextBoundingBox,
   initEmptyParagraphState,
@@ -29,8 +28,8 @@ import {
   redoByClick,
   redoByKeyboard,
   resetHistory,
+  selectAllByKeyboard,
   shamefullyBlurActiveElement,
-  shiftClick,
   SHORT_KEY,
   type,
   undoByClick,
@@ -104,10 +103,11 @@ test('select all and delete', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
   await shamefullyBlurActiveElement(page);
-  await page.keyboard.press('Backspace');
+  await pressBackspace(page);
   await focusRichText(page, 0);
   await type(page, 'abc');
   await assertRichTexts(page, ['abc']);
@@ -118,8 +118,9 @@ test('select all and delete by forwardDelete', async ({ page }) => {
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
   await shamefullyBlurActiveElement(page);
   await pressForwardDelete(page);
   await focusRichText(page, 0);
@@ -328,7 +329,7 @@ test('should unindent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.move(coord.x - 26 - 15, coord.y - 10, { steps: 20 });
   await page.mouse.down();
   // ←
   await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
@@ -1241,8 +1242,9 @@ test('should be cleared when dragging block card from BlockHub', async ({
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
 
-  await page.keyboard.press(`${SHORT_KEY}+a`);
-  await page.keyboard.press(`${SHORT_KEY}+a`);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
 
   await expect(page.locator('.selected,affine-block-selection')).toHaveCount(3);
 

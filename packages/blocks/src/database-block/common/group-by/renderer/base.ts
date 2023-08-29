@@ -15,4 +15,6 @@ export class BaseGroup<Data extends NonNullable<unknown>, Value>
   value!: Value;
   @property({ attribute: false })
   updateValue?: (value: Value) => void;
+  @property({ attribute: false })
+  readonly!: boolean;
 }

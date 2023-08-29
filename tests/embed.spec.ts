@@ -188,7 +188,7 @@ test('popup menu should follow position of image when scrolling', async ({
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
   expect(imageRect.y).toBeCloseTo(-115, -0.325);
-  expect(menuRect.y).toBeCloseTo(76, -0.325);
+  expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 
 test('select image should not show format bar', async ({ page }) => {

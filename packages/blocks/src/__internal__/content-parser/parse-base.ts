@@ -32,7 +32,7 @@ export type ColumnMeta = {
 
 export type TableTitleColumnHandler = (
   element: Element
-) => Promise<string[] | null>;
+) => Promise<SerializedBlock[] | null>;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -556,29 +556,28 @@ export abstract class BaseParser {
 
     let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
     titleIndex = titleIndex !== -1 ? titleIndex : 0;
+    let children: SerializedBlock[] = rows
+      .map(row => row[titleIndex] ?? '')
+      .map(rawTitle => (Array.isArray(rawTitle) ? rawTitle.join('') : rawTitle))
+      .map(title => ({
+        flavour: 'affine:paragraph',
+        type: 'text',
+        text: [
+          {
+            insert: title,
+          },
+        ],
+        children: [],
+      }));
     if (this._customTableTitleColumnHandler) {
-      const titleColumn = await this._customTableTitleColumnHandler(element);
-      if (titleColumn) {
-        for (let i = 0; i < rows.length; i++) {
-          if (titleIndex < rows[i].length) {
-            const originalContent = rows[i][titleIndex];
-            rows[i].splice(
-              titleIndex,
-              1,
-              titleColumn[i] || originalContent || ''
-            );
-          }
-        }
-      }
+      const customTitleColumn = await this._customTableTitleColumnHandler(
+        element
+      );
+      children = customTitleColumn ?? children;
     }
     const columns: Column[] = getTableColumns(columnMeta, rows, idCounter);
     const databasePropsId = idCounter.next();
-    const { cells, children } = getTableCellsAndChildren(
-      rows,
-      idCounter,
-      columnMeta,
-      columns
-    );
+    const cells = getTableCells(rows, idCounter, columnMeta, columns);
     return [
       {
         flavour: 'affine:database',
@@ -749,7 +748,7 @@ const checkWebComponentIfInline = (element: Element) => {
   );
 };
 
-const getTableCellsAndChildren = (
+const getTableCells = (
   rows: (string | string[])[][],
   idCounter: {
     next: () => number;
@@ -758,17 +757,9 @@ const getTableCellsAndChildren = (
   columns: Column<Record<string, unknown>>[]
 ) => {
   const cells: Record<string, Record<string, Cell>> = {};
-  const children: SerializedBlock[] = [];
   let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
   titleIndex = titleIndex !== -1 ? titleIndex : 0;
   rows.forEach(row => {
-    const title = row[titleIndex] ?? 'Undefined';
-    children.push({
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: Array.isArray(title) ? title.join('') : title }],
-      children: [],
-    });
     const rowId = '' + idCounter.next();
     cells[rowId] = {};
     row.forEach((value, index) => {
@@ -792,7 +783,7 @@ const getTableCellsAndChildren = (
       };
     });
   });
-  return { cells, children };
+  return cells;
 };
 
 const getTableColumns = (

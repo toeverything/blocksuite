@@ -62,6 +62,10 @@ export class Gesture {
       return;
     }
 
+    if (state.button !== 0) {
+      return;
+    }
+
     this.isNativeSelection = true;
     this._selectByCaret(ctx);
     state.raw.preventDefault();

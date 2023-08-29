@@ -88,7 +88,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange = (): void => {
-    if (this._vRange) {
+    if (this._vRange && this._editor.mounted) {
       this._applyVRange(this._vRange);
     }
   };

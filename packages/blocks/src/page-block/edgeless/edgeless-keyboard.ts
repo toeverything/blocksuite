@@ -1,9 +1,14 @@
-import { Bound, ConnectorElement, ConnectorMode } from '@blocksuite/phasor';
+import {
+  Bound,
+  ConnectorElement,
+  ConnectorMode,
+  ShapeStyle,
+} from '@blocksuite/phasor';
 
 import {
-  type Connectable,
   type EdgelessTool,
   LineWidth,
+  type ShapeToolState,
 } from '../../__internal__/utils/types.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import {
@@ -18,7 +23,8 @@ import {
   DEFAULT_NOTE_CHILD_TYPE,
   DEFAULT_NOTE_TIP,
 } from './utils/consts.js';
-import { isPhasorElement, isTopLevelBlock } from './utils/query.js';
+import { deleteElements } from './utils/crud.js';
+import { isPhasorElement } from './utils/query.js';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   constructor(override pageElement: EdgelessPageBlockComponent) {
@@ -79,11 +85,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           });
         },
         s: () => {
+          const shapeToolLocalState = this._tryLoadShapeLocalState();
           this._setEdgelessTool(pageElement, {
             type: 'shape',
-            shape: 'rect',
-            fillColor: DEFAULT_SHAPE_FILL_COLOR,
-            strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+            shape: shapeToolLocalState?.shape ?? 'rect',
+            fillColor:
+              shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
+            strokeColor:
+              shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
+            shapeStyle: shapeToolLocalState?.shapeStyle ?? ShapeStyle.Scribbled,
           });
         },
         f: () => {
@@ -218,22 +228,21 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    const { elements } = edgeless.selectionManager;
-    elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = edgeless.page.root?.children ?? [];
-        // FIXME: should always keep at least 1 note
-        if (children.length > 1) {
-          edgeless.page.deleteBlock(element);
-        }
-      } else {
-        edgeless.connector.detachConnectors([element as Connectable]);
-        edgeless.surface.removeElement(element.id);
-      }
-    });
+    deleteElements(edgeless, edgeless.selectionManager.elements);
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
+  }
+
+  private _tryLoadShapeLocalState(): ShapeToolState | null {
+    const key = 'blocksuite:' + this.pageElement.page.id + ':edgelessShape';
+    const shapeData = sessionStorage.getItem(key);
+    let shapeToolState = null;
+    if (shapeData) {
+      shapeToolState = JSON.parse(shapeData);
+    }
+
+    return shapeToolState;
   }
 
   private _setEdgelessTool(
@@ -279,6 +288,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       } else {
         this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
       }
+      this.pageElement.slots.hoverUpdated.emit();
     });
   }
 }
