@@ -323,33 +323,113 @@ test('drag handle should work across multiple notes', async ({ page }) => {
   await expect(page.locator('selected > *')).toHaveCount(0);
 });
 
-test('note slicer will add new note', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.describe('note slicer', () => {
+  test('note slicer will add new note', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await switchEditorMode(page);
+    await switchEditorMode(page);
 
-  await selectNoteInEdgeless(page, ids.noteId);
+    await selectNoteInEdgeless(page, ids.noteId);
 
-  await hoverOnNote(page, ids.noteId);
-  await waitNextFrame(page);
-  await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
+    await hoverOnNote(page, ids.noteId);
+    await waitNextFrame(page);
+    await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
-  const buttonRect = await page
-    .locator('note-slicer-button .scissors-button')
-    .boundingBox();
+    const buttonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
 
-  assertRectExist(buttonRect);
+    assertRectExist(buttonRect);
 
-  await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
+    await page.mouse.move(
+      buttonRect.x + 1,
+      buttonRect.y + buttonRect.height / 2
+    );
 
-  await waitNextFrame(page, 2000);
-  await expect(page.locator('affine-note-scissors').isVisible()).toBeTruthy();
-  await page.locator('affine-note-scissors').click();
+    await waitNextFrame(page, 2000);
+    await expect(
+      page.locator('affine-note-slicer-popupbutton').isVisible()
+    ).toBeTruthy();
+    await page.locator('affine-note-slicer-popupbutton').click();
 
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+    await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+  });
+
+  test('note slicer button should appears at right position', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+
+    await switchEditorMode(page);
+    await selectNoteInEdgeless(page, ids.noteId);
+
+    const blockes = await page
+      .locator(`[data-block-id="${ids.noteId}"] [data-block-id]`)
+      .all();
+    expect(blockes.length).toBe(3);
+
+    const firstBlockRect = await blockes[0].boundingBox();
+    assertRectExist(firstBlockRect);
+    const secondblockRect = await blockes[1].boundingBox();
+    assertRectExist(secondblockRect);
+    await page.mouse.move(
+      secondblockRect.x + 1,
+      secondblockRect.y + secondblockRect.height / 2
+    );
+
+    const slicerButtonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
+    assertRectExist(slicerButtonRect);
+
+    const buttonRectMiddle = slicerButtonRect.y + slicerButtonRect.height / 2;
+
+    expect(buttonRectMiddle).toBeGreaterThan(
+      firstBlockRect.y + firstBlockRect.height
+    );
+    expect(buttonRectMiddle).toBeLessThan(secondblockRect.y);
+  });
+
+  test('note slicer button should scale when hovers on it', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+
+    await switchEditorMode(page);
+
+    await selectNoteInEdgeless(page, ids.noteId);
+
+    await hoverOnNote(page, ids.noteId);
+    await waitNextFrame(page);
+    await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
+
+    const buttonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
+
+    assertRectExist(buttonRect);
+
+    await page.mouse.move(
+      buttonRect.x + 1,
+      buttonRect.y + buttonRect.height / 2
+    );
+
+    await waitNextFrame(page, 2000);
+    const popupButtonRect = await page
+      .locator('affine-note-slicer-popupbutton')
+      .boundingBox();
+    assertRectExist(popupButtonRect);
+    expect(popupButtonRect.width / buttonRect.width).toBeCloseTo(1.2);
+  });
 });
 
 test('undo/redo should work correctly after clipping', async ({ page }) => {
@@ -366,7 +446,7 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await waitNextFrame(page, 500);
 
   const buttonRect = await page
-    .locator('note-slicer-button .scissors-button')
+    .locator('note-slicer-button .slicer-button')
     .boundingBox();
 
   assertRectExist(buttonRect);
@@ -374,7 +454,7 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
 
   await waitNextFrame(page, 2000);
-  await page.locator('affine-note-scissors').click();
+  await page.locator('affine-note-slicer-popupbutton').click();
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
