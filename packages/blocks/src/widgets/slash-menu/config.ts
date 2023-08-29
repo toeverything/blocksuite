@@ -494,9 +494,10 @@ export const menuGroups: {
       },
       {
         name: 'Delete',
+        alias: ['remove'],
         icon: DeleteIcon,
         action: ({ pageElement, model }) => {
-          pageElement.page.deleteBlock(model);
+          pageElement.page.deleteBlock(model, { bringChildrenTo: 'parent' });
         },
       },
     ],

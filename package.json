@@ -1,6 +1,6 @@
 {
   "name": "blocksuite",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "//": "ALL_PACKAGES",
   "workspaces": [
     "packages/block-std",
@@ -114,6 +114,6 @@
     }
   },
   "stackblitz": {
-    "startCommand": "pnpm --filter='./packages/playground' run dev"
+    "startCommand": "pnpm run dev"
   }
 }

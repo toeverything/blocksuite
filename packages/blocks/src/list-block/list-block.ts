@@ -101,12 +101,12 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
           ></rich-text>
-          ${when(
-            this.selected?.is('block'),
-            () => html`<affine-block-selection></affine-block-selection>`
-          )}
         </div>
         ${this.showChildren ? children : nothing}
+        ${when(
+          this.selected?.is('block'),
+          () => html`<affine-block-selection></affine-block-selection>`
+        )}
       </div>
     `;
   }

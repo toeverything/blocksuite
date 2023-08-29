@@ -35,6 +35,7 @@ export const styles = css`
     box-sizing: border-box;
     border-radius: 4px;
     padding: 4px 0;
+    position: relative;
   }
   .affine-list-block-container--first {
     margin-top: 14px;
