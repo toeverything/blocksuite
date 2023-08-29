@@ -177,13 +177,6 @@ export class DragHandleWidget extends WidgetElement {
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
     const posTop = top;
 
-    // if (isPageMode(this.page)) {
-    //   const pageBlock = this._pageBlockElement as DocPageBlockComponent;
-    //   const { scrollLeft, scrollTop } = pageBlock.viewportElement;
-    //   posLeft += scrollLeft;
-    //   posTop += scrollTop;
-    // }
-
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
 
