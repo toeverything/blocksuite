@@ -16,6 +16,8 @@ const heightMap: { [key: string]: number } = {
   quote: 46,
   list: 32,
   database: 28,
+  image: 28,
+  divider: 36,
 };
 
 export const getDragHandleContainerHeight = (model: BaseBlockModel) => {
@@ -45,8 +47,8 @@ export const containChildBlock = (
   });
 };
 
-export const containBlock = (selections: BaseSelection[], blockId: string) => {
-  return selections.some(selection => selection.blockId === blockId);
+export const containBlock = (blockIDs: string[], targetID: string) => {
+  return blockIDs.some(blockID => blockID === targetID);
 };
 
 // TODO: this is a hack, need to find a better way
@@ -74,4 +76,8 @@ export const getNoteId = (blockElement: BlockElement) => {
 
 export const includeTextSelection = (selections: BaseSelection[]) => {
   return selections.some(selection => selection.type === 'text');
+};
+
+export const getBlockIdFromPath = (path: string[]) => {
+  return path[path.length - 1];
 };
