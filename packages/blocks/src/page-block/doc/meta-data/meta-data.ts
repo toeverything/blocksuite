@@ -237,7 +237,7 @@ export class PageMetaData extends WithDisposable(LitElement) {
   }
 
   get options() {
-    return this.meta.properties.tags.options;
+    return this.meta.properties.tags?.options ?? [];
   }
 
   set options(tags: SelectTag[]) {
