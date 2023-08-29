@@ -724,7 +724,7 @@ export const AddCursorIcon = html`<svg
 >
   <path
     d="M6 12H18M12 6V18"
-    stroke="black"
+    stroke="currentColor"
     stroke-linecap="round"
     stroke-linejoin="round"
   />

@@ -1,10 +1,16 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
+import {
+  eventToVRect,
+  popFilterableSimpleMenu,
+} from '../../../components/menu/menu.js';
 import { renderUniLit } from '../../../components/uni-component/uni-component.js';
-import type { Variable, VariableOrProperty, VariableRef } from '../ast.js';
+import { AddCursorIcon } from '../../../icons/index.js';
+import type { Filter, Variable, VariableOrProperty } from '../ast.js';
+import { firstFilterByRef, firstFilterInGroup } from '../ast.js';
 
 @customElement('variable-ref-view')
 export class VariableRefView extends WithDisposable(ShadowlessElement) {
@@ -19,9 +25,11 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
       border-radius: 4px;
       cursor: pointer;
     }
+
     variable-ref-view:hover {
       background-color: var(--affine-hover-color);
     }
+
     variable-ref-view svg {
       width: 16px;
       height: 16px;
@@ -40,11 +48,21 @@ export class VariableRefView extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.disposables.addFromEvent(this, 'click', () => {
-      popSelectField(this, {
-        vars: this.vars,
-        onSelect: ref => this.setData(ref),
-      });
+    this.disposables.addFromEvent(this, 'click', e => {
+      popFilterableSimpleMenu(
+        eventToVRect(e),
+        this.vars.map(v => ({
+          type: 'action',
+          name: v.name,
+          icon: renderUniLit(v.icon, {}),
+          select: () => {
+            this.setData({
+              type: 'ref',
+              name: v.id,
+            });
+          },
+        }))
+      );
     });
   }
 
@@ -87,25 +105,45 @@ declare global {
     'variable-ref-view': VariableRefView;
   }
 }
-export const popSelectField = (
-  target: HTMLElement,
+export const popCreateFilter = (
+  target: ReferenceElement,
   props: {
     vars: Variable[];
-    onSelect: (ref: VariableRef) => void;
+    onSelect: (filter: Filter) => void;
+    onClose?: () => void;
   }
 ) => {
   popFilterableSimpleMenu(
     target,
-    props.vars.map(v => ({
-      type: 'action',
-      name: v.name,
-      icon: renderUniLit(v.icon, {}),
-      select: () => {
-        props.onSelect({
-          type: 'ref',
-          name: v.id,
-        });
+    [
+      ...props.vars.map(v => ({
+        type: 'action' as const,
+        name: v.name,
+        icon: renderUniLit(v.icon, {}),
+        select: () => {
+          props.onSelect(
+            firstFilterByRef(props.vars, {
+              type: 'ref',
+              name: v.id,
+            })
+          );
+        },
+      })),
+      {
+        type: 'group',
+        name: '',
+        children: () => [
+          {
+            type: 'action',
+            name: 'Add filter group',
+            icon: AddCursorIcon,
+            select: () => {
+              props.onSelect(firstFilterInGroup(props.vars));
+            },
+          },
+        ],
       },
-    }))
+    ],
+    props.onClose
   );
 };

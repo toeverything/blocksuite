@@ -36,6 +36,10 @@ export interface DataViewManager {
 
   get filter(): FilterGroup;
 
+  get filterVisible(): boolean;
+
+  filterSetVisible(visible: boolean): void;
+
   get vars(): Variable[];
 
   updateFilter(filter: FilterGroup): void;
@@ -196,6 +200,7 @@ export interface DataViewColumnManager<
 
 export abstract class BaseDataViewManager implements DataViewManager {
   private searchString = '';
+  private _filterVisible = true;
 
   get rows(): string[] {
     return this.filteredRows(this.searchString);
@@ -454,6 +459,15 @@ export abstract class BaseDataViewManager implements DataViewManager {
         icon: v.icon,
       };
     });
+  }
+
+  filterSetVisible(visible: boolean): void {
+    this._filterVisible = visible;
+    this.slots.update.emit();
+  }
+
+  get filterVisible(): boolean {
+    return this._filterVisible;
   }
 }
 

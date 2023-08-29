@@ -307,7 +307,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   }
 
   renderFilterBar(viewData?: ViewData) {
-    if (!viewData) {
+    if (!viewData || viewData.view.filter.conditions.length === 0) {
       return;
     }
     return html`<filter-bar
@@ -350,7 +350,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     `;
   }
 }
-
 declare global {
   interface HTMLElementTagNameMap {
     'affine-database': DatabaseBlockComponent;

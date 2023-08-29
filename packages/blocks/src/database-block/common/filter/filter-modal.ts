@@ -2,6 +2,7 @@ import './filter-group.js';
 import './filter-root.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -130,9 +131,10 @@ declare global {
     'advanced-filter-modal': AdvancedFilterModal;
   }
 }
-export const popAdvanceFilter = (
-  target: HTMLElement,
+export const popFilterModal = (
+  target: ReferenceElement,
   props: {
+    isRoot: boolean;
     vars: Variable[];
     value: FilterGroup;
     onChange: (value: FilterGroup) => void;
@@ -141,7 +143,7 @@ export const popAdvanceFilter = (
   const filter = new AdvancedFilterModal();
   filter.vars = props.vars;
   filter.data = props.value;
-  filter.isRoot = true;
+  filter.isRoot = props.isRoot;
   filter.setData = group => {
     props.onChange(group);
     filter.data = group;

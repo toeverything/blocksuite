@@ -24,7 +24,7 @@ import {
   firstFilterInGroup,
   getRefType,
 } from '../ast.js';
-import { renderLiteral } from '../literal/matcher.js';
+import { popLiteralEdit, renderLiteral } from '../literal/matcher.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
@@ -75,6 +75,16 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     .filter-condition-function-name:hover {
       background-color: var(--affine-hover-color);
     }
+
+    .filter-condition-arg {
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 600;
+      padding: 0 4px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
   `;
   @property({ attribute: false })
   data!: SingleFilter;
@@ -85,7 +95,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   vars!: Variable[];
   @property({ attribute: false })
-  showDelete = false;
+  onDelete?: () => void;
 
   private _setRef = (ref: VariableOrProperty) => {
     this.setData(firstFilterByRef(this.vars, ref));
@@ -153,18 +163,33 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
         </div>
         ${repeat(this._args(), (v, i) => {
           const value = this.data.args[i];
-          return renderLiteral(v, value?.value, value => {
+          const onChange = (value: unknown) => {
             const newArr = this.data.args.slice();
             newArr[i] = { type: 'literal', value };
             this.setData({
               ...this.data,
               args: newArr,
             });
-          });
+          };
+          const click = (e: MouseEvent) => {
+            popLiteralEdit(
+              e.currentTarget as HTMLElement,
+              v,
+              value?.value,
+              onChange
+            );
+          };
+          return html` <div
+            class="dv-hover dv-round-4 filter-condition-arg"
+            @click="${click}"
+          >
+            ${renderLiteral(v, value?.value, onChange)}
+          </div>`;
         })}
       </div>
-      ${this.showDelete
-        ? html`<div
+      ${this.onDelete
+        ? html` <div
+            @click="${this.onDelete}"
             class="dv-icon-16 dv-round-4 dv-pd-4 dv-hover"
             style="display:flex;align-items:center;"
           >

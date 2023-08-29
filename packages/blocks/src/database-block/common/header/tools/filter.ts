@@ -4,11 +4,10 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { eventToVRect } from '../../../../components/menu/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
-import { firstFilterByRef } from '../../../common/ast.js';
-import { popSelectField } from '../../../common/ref/ref.js';
+import { popCreateFilter } from '../../../common/ref/ref.js';
 import type { DataViewManager } from '../../data-view-manager.js';
-import { popAdvanceFilter } from '../../filter/filter-modal.js';
 import { viewOpIcons } from './view-options.js';
 
 const styles = css`
@@ -22,9 +21,11 @@ const styles = css`
     border-radius: 4px;
     cursor: pointer;
   }
+
   .affine-database-filter-button:hover {
     background-color: var(--affine-hover-color);
   }
+
   .affine-database-filter-button svg {
     width: 20px;
     height: 20px;
@@ -39,6 +40,15 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
 
   @property({ attribute: false })
   view!: DataViewManager;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
+      this.view.slots.update.on(() => {
+        this.requestUpdate();
+      })
+    );
+  }
 
   private get _filter() {
     return this.view.filter;
@@ -55,33 +65,24 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
     }
   }
 
-  private _showFilter(event: MouseEvent) {
-    this.showToolBar(true);
-    const popAdvance = () => {
-      popAdvanceFilter(event.target as HTMLElement, {
-        vars: this.view.vars,
-        value: this._filter,
-        onChange: group => {
-          this._filter = group;
-        },
-      });
-    };
+  private addFilter(event: MouseEvent) {
     if (!this._filter.conditions.length) {
-      popSelectField(event.target as HTMLElement, {
+      this.showToolBar(true);
+      popCreateFilter(eventToVRect(event), {
         vars: this.view.vars,
-        onSelect: ref => {
+        onSelect: filter => {
           this._filter = {
             ...this._filter,
-            conditions: [firstFilterByRef(this.view.vars, ref)],
+            conditions: [filter],
           };
-          setTimeout(() => {
-            popAdvance();
-          });
+        },
+        onClose: () => {
+          this.showToolBar(false);
         },
       });
       return;
     }
-    popAdvance();
+    this.view.filterSetVisible(!this.view.filterVisible);
   }
 
   override render() {
@@ -91,8 +92,8 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
     if (!showFilter) {
       return;
     }
-    return html`<div
-      @click="${this._showFilter}"
+    return html` <div
+      @click="${this.addFilter}"
       class="affine-database-filter-button"
     >
       ${viewOpIcons.filter} Filter

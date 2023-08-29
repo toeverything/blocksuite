@@ -1,33 +1,20 @@
 import { html } from 'lit';
-import { query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { LiteralElement } from './literal-element.js';
 
+@customElement('data-view-literal-number-view')
 export class NumberLiteral extends LiteralElement<number> {
-  @query('input')
-  private _inputEle!: HTMLInputElement;
-
-  override doneValue(): number {
-    return Number.parseFloat(this._inputEle.value);
+  override render() {
+    return html` ${this.value || 'Empty'} `;
   }
-
+}
+@customElement('data-view-literal-number-edit')
+export class NumberLiteralEdit extends LiteralElement<number> {
   override firstUpdated() {
-    this._inputEle?.focus();
+    this.querySelector('input')?.focus();
   }
-
-  private _keydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      this.done();
-    }
-  }
-
-  override edit() {
-    return html`
-      <input
-        type="number"
-        .value=${this.value ?? ''}
-        @keydown=${this._keydown}
-      />
-    `;
+  override render() {
+    return html` <input type="text" /> `;
   }
 }
