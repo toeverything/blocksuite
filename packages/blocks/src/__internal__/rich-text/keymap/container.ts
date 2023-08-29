@@ -397,6 +397,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
           !matchFlavours(blockElement.model, ['affine:code'])
         )
           return;
+        if (!textSelection.isInSameBlock()) return;
 
         _preventDefault(ctx);
 
@@ -425,6 +426,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const textSelection = blockElement.selection.find('text');
       if (!textSelection || textSelection.isCollapsed()) return;
+      if (!textSelection.isInSameBlock()) return;
 
       _preventDefault(ctx);
       const vEditor = _getVirgo();
