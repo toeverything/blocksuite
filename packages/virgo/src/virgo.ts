@@ -1,9 +1,10 @@
 import type { NullablePartial } from '@blocksuite/global/utils';
-import { assertExists, Slot } from '@blocksuite/global/utils';
-import { html, render } from 'lit';
+import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
+import { VirgoHookService } from './services/hook.js';
 import {
   VirgoAttributeService,
   VirgoDeltaService,
@@ -38,6 +39,11 @@ export class VEditor<
   static textPointToDomPoint = textPointToDomPoint;
   static getTextNodesFromElement = getTextNodesFromElement;
 
+  private _disposables = new DisposableGroup();
+  get disposables() {
+    return this._disposables;
+  }
+
   private readonly _yText: Y.Text;
   private _rootElement: VirgoRootElement<TextAttributes> | null = null;
   private _isReadonly = false;
@@ -53,6 +59,8 @@ export class VEditor<
 
   private _deltaService: VirgoDeltaService<TextAttributes> =
     new VirgoDeltaService<TextAttributes>(this);
+
+  private _hooksService: VirgoHookService<TextAttributes>;
 
   private _mounted = false;
 
@@ -71,6 +79,18 @@ export class VEditor<
   };
   get yText() {
     return this._yText;
+  }
+
+  get yTextString() {
+    return this.yText.toString();
+  }
+
+  get yTextLength() {
+    return this.yText.length;
+  }
+
+  get yTextDeltas() {
+    return this.yText.toDelta();
   }
 
   get rootElement() {
@@ -109,9 +129,6 @@ export class VEditor<
   resetMarks = this._attributeService.resetMarks;
   getFormat = this._attributeService.getFormat;
 
-  // Expose event service API
-  bindHandlers = this._eventService.bindHandlers;
-
   // Expose range service API
   toDomRange = this.rangeService.toDomRange;
   toVRange = this.rangeService.toVRange;
@@ -125,11 +142,17 @@ export class VEditor<
   mapDeltasInVRange = this.deltaService.mapDeltasInVRange;
   isNormalizedDeltaSelected = this.deltaService.isNormalizedDeltaSelected;
 
+  // Expose hook service API
+  get hooks() {
+    return this._hooksService.hooks;
+  }
+
   constructor(
     yText: VEditor['yText'],
-    ops?: {
+    ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
-    }
+      hooks?: VirgoHookService<TextAttributes>['hooks'];
+    } = {}
   ) {
     if (!yText.doc) {
       throw new Error('yText must be attached to a Y.Doc');
@@ -141,8 +164,11 @@ export class VEditor<
       );
     }
 
+    const { isEmbed = () => false, hooks = {} } = ops;
     this._yText = yText;
-    this.isEmbed = ops?.isEmbed ?? (() => false);
+    this.isEmbed = isEmbed;
+    this._hooksService = new VirgoHookService(this, hooks);
+
     this.slots = {
       mounted: new Slot(),
       unmounted: new Slot(),
@@ -160,10 +186,11 @@ export class VEditor<
     const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
     virgoElement.virgoEditor = this;
     this._rootElement = virgoElement;
-    this._rootElement.replaceChildren();
+    render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
     this._rootElement.dataset.virgoRoot = 'true';
-    this.yText.observe(this._onYTextChange);
+
+    this._bindYTextObserver();
 
     this._deltaService.render();
 
@@ -174,13 +201,10 @@ export class VEditor<
   }
 
   unmount() {
-    this._eventService.unmount();
-    this.yText.unobserve(this._onYTextChange);
-
-    this._rootElement?.replaceChildren();
+    render(nothing, this.rootElement);
     this._rootElement = null;
-
     this._mounted = false;
+    this.disposables.dispose();
     this.slots.unmounted.emit();
   }
 
@@ -380,6 +404,11 @@ export class VEditor<
     });
   }
 
+  rerenderWholeEditor() {
+    render(nothing, this.rootElement);
+    this._deltaService.render();
+  }
+
   private _onYTextChange = () => {
     if (this.yText.toString().includes('\r')) {
       throw new Error(
@@ -394,11 +423,6 @@ export class VEditor<
     });
   };
 
-  rerenderWholeEditor() {
-    render(html`<div></div>`, this.rootElement);
-    this._deltaService.render();
-  }
-
   private _transact(fn: () => void): void {
     const doc = this.yText.doc;
     if (!doc) {
@@ -406,5 +430,14 @@ export class VEditor<
     }
 
     doc.transact(fn, doc.clientID);
+  }
+
+  private _bindYTextObserver() {
+    this.yText.observe(this._onYTextChange);
+    this.disposables.add({
+      dispose: () => {
+        this.yText.unobserve(this._onYTextChange);
+      },
+    });
   }
 }

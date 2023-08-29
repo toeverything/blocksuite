@@ -157,19 +157,46 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       z-index: 1;
       pointer-events: none;
     }
-    .edgeless-auto-complete-arrow {
-      width: 16px;
-      height: 16px;
+    .edgeless-auto-complete-arrow-wrapper {
+      width: 72px;
+      height: 44px;
       position: absolute;
       z-index: 1;
-      opacity: 0.6;
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .edgeless-auto-complete-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 19px;
       cursor: pointer;
       pointer-events: auto;
+      transition: background 0.3s linear, box-shadow 0.2s linear;
     }
-    .edgeless-auto-complete-arrow:hover {
-      opacity: 1;
-      background: #0000000a;
-      border-radius: 4px;
+    .edgeless-auto-complete-arrow-wrapper:hover
+      > .edgeless-auto-complete-arrow {
+      border: 1px solid var(--affine-border-color);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-white);
+    }
+
+    .edgeless-auto-complete-arrow-wrapper
+      > .edgeless-auto-complete-arrow:hover {
+      border: 1px solid var(--affine-white-10);
+      box-shadow: var(--affine-shadow-1);
+      background: var(--affine-primary-color);
+    }
+
+    .edgeless-auto-complete-arrow svg {
+      fill: #77757d;
+    }
+    .edgeless-auto-complete-arrow:hover svg {
+      fill: #ffffff;
     }
   `;
 
@@ -396,56 +423,65 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       return nothing;
     }
     const { selectedRect } = this;
+
+    const width = 72;
+    const height = 44;
     const Arrows = [
       Direction.Right,
       Direction.Bottom,
       Direction.Left,
       Direction.Top,
     ].map(type => {
-      let top = 0,
-        left = 0,
-        transform = '';
-      const width = 16;
-      const offset = 4;
+      let transform = '';
+
       switch (type) {
+        case Direction.Top:
+          transform += `translate(${selectedRect.width / 2}px, ${
+            -height / 2
+          }px)`;
+          break;
         case Direction.Right:
-          top = selectedRect.height / 2 - width / 2;
-          left = selectedRect.width + offset;
+          transform += `translate(${selectedRect.width + height / 2}px, ${
+            selectedRect.height / 2
+          }px)`;
+          transform += `rotate(90deg)`;
           break;
         case Direction.Bottom:
-          top = selectedRect.height + offset;
-          left = selectedRect.width / 2 - width / 2;
-          transform = `rotate(90deg)`;
+          transform += `translate(${selectedRect.width / 2}px, ${
+            selectedRect.height + height / 2
+          }px)`;
+          transform += `rotate(180deg)`;
           break;
         case Direction.Left:
-          top = selectedRect.height / 2 - width / 2 + 1;
-          left = -width - offset;
-          transform = `rotate(180deg)`;
+          transform += `translate(${-height / 2}px, ${
+            selectedRect.height / 2
+          }px)`;
+          transform += `rotate(-90deg)`;
           break;
-        case Direction.Top:
-          top = -width - offset;
-          left = selectedRect.width / 2 - width / 2;
-          transform = `rotate(-90deg)`;
       }
+      transform += `translate(${-width / 2}px, ${-height / 2}px)`;
       return html`<div
-        class="edgeless-auto-complete-arrow"
+        class="edgeless-auto-complete-arrow-wrapper"
         style=${styleMap({
-          top: top + 'px',
-          left: left + 'px',
           transform,
+          transformOrigin: 'left top',
         })}
-        @mouseenter=${() => {
-          this._timer = setTimeout(() => this._showNextShape(type), 300);
-        }}
-        @mouseleave=${() => {
-          this._timer && clearTimeout(this._timer);
-          this.edgeless.surface.viewport.removeOverlay(this._overlay);
-        }}
-        @pointerdown=${(e: PointerEvent) => {
-          this._onPointerDown(e, type);
-        }}
       >
-        ${AutoCompleteArrowIcon}
+        <div
+          class="edgeless-auto-complete-arrow"
+          @mouseenter=${() => {
+            this._timer = setTimeout(() => this._showNextShape(type), 300);
+          }}
+          @mouseleave=${() => {
+            this._timer && clearTimeout(this._timer);
+            this.edgeless.surface.viewport.removeOverlay(this._overlay);
+          }}
+          @pointerdown=${(e: PointerEvent) => {
+            this._onPointerDown(e, type);
+          }}
+        >
+          ${AutoCompleteArrowIcon}
+        </div>
       </div>`;
     });
     return html`<div

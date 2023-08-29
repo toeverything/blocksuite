@@ -1,7 +1,6 @@
-import type { Slot } from '@blocksuite/global/utils';
+import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
@@ -14,26 +13,28 @@ import { copyCode } from '../../page-block/doc/utils.js';
 import type { CodeBlockModel } from '../code-model.js';
 
 export function CodeOptionTemplate({
+  anchor,
   model,
-  position,
-  hoverState,
   wrap,
+  abortController,
   onClickWrap,
 }: {
-  position: { x: number; y: number };
+  anchor: HTMLElement;
   model: BaseBlockModel;
-  hoverState: Slot<boolean>;
   wrap: boolean;
+  abortController: AbortController;
   onClickWrap: () => void;
 }) {
   const page = model.page;
   const readonly = page.readonly;
 
-  const style = {
-    position: 'fixed',
-    left: position.x + 'px',
-    top: position.y + 'px',
-  };
+  const { onHover, onHoverLeave } = createDelayHoverSignal(abortController);
+  anchor.addEventListener('mouseover', onHover);
+  anchor.addEventListener('mouseleave', onHoverLeave);
+  abortController.signal.addEventListener('abort', () => {
+    anchor.removeEventListener('mouseover', onHover);
+    anchor.removeEventListener('mouseleave', onHoverLeave);
+  });
 
   return html`
     <style>
@@ -54,9 +55,8 @@ export function CodeOptionTemplate({
 
     <div
       class="affine-codeblock-option"
-      style=${styleMap(style)}
-      @mouseover=${() => hoverState.emit(true)}
-      @mouseout=${() => hoverState.emit(false)}
+      @mouseover=${onHover}
+      @mouseleave=${onHoverLeave}
     >
       <icon-button
         size="32px"

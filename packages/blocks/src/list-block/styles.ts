@@ -21,6 +21,7 @@ const listPrefix = css`
     cursor: pointer;
     width: 24px;
     height: 24px;
+    color: var(--affine-icon-color);
   }
 
   .affine-list-block__todo-prefix > svg {

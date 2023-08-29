@@ -314,8 +314,10 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
         <div class="affine-paragraph-rich-text-wrapper">
           ${tipsPlaceholderTemplate}
           <rich-text
-            .model=${this.model}
+            .yText=${this.model.text.yText}
+            .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
+            .readonly=${this.model.page.readonly}
             @focusin=${this._onFocusIn}
             @focusout=${this._onFocusOut}
             style=${styleMap({

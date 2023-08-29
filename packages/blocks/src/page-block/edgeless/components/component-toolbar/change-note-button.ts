@@ -206,7 +206,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    if (this.notes.length !== 1) return null;
+    if (this.notes.length !== 1) return nothing;
     const note = this.notes[0];
     const noteParent = this.page.getParent(note);
     assertExists(noteParent);

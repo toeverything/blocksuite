@@ -5,9 +5,12 @@ import type { VEditor } from '../virgo.js';
 
 const SHORT_KEY_PROPERTY = IS_IOS || IS_MAC ? 'metaKey' : 'ctrlKey';
 
-interface KeyboardBinding {
+export const VKEYBOARD_PREVENT_DEFAULT = false;
+export const VKEYBOARD_ALLOW_DEFAULT = true;
+
+export interface VKeyboardBinding {
   key: number | string | string[];
-  handler: KeyboardBindingHandler;
+  handler: VKeyboardBindingHandler;
   prefix?: RegExp;
   suffix?: RegExp;
   shortKey?: boolean;
@@ -16,9 +19,9 @@ interface KeyboardBinding {
   metaKey?: boolean;
   ctrlKey?: boolean;
 }
-type KeyboardBindingRecord = Record<string, KeyboardBinding>;
+export type VKeyboardBindingRecord = Record<string, VKeyboardBinding>;
 
-interface KeyboardBindingContext {
+export interface VKeyboardBindingContext {
   vRange: VRange;
   vEditor: VEditor;
   collapsed: boolean;
@@ -26,15 +29,17 @@ interface KeyboardBindingContext {
   suffixText: string;
   raw: KeyboardEvent;
 }
-type KeyboardBindingHandler = (context: KeyboardBindingContext) => boolean;
+export type VKeyboardBindingHandler = (
+  context: VKeyboardBindingContext
+) => typeof VKEYBOARD_PREVENT_DEFAULT | typeof VKEYBOARD_ALLOW_DEFAULT;
 
-export function createKeyDownHandler(
+export function createVirgoKeyDownHandler(
   vEditor: VEditor,
-  bindings: KeyboardBindingRecord
+  bindings: VKeyboardBindingRecord
 ): (evt: KeyboardEvent) => void {
-  const bindingStore: Record<string, KeyboardBinding[]> = {};
+  const bindingStore: Record<string, VKeyboardBinding[]> = {};
 
-  function normalize(binding: KeyboardBinding): KeyboardBinding {
+  function normalize(binding: VKeyboardBinding): VKeyboardBinding {
     if (binding.shortKey) {
       binding[SHORT_KEY_PROPERTY] = binding.shortKey;
       delete binding.shortKey;
@@ -42,7 +47,7 @@ export function createKeyDownHandler(
     return binding;
   }
 
-  function keyMatch(evt: KeyboardEvent, binding: KeyboardBinding) {
+  function keyMatch(evt: KeyboardEvent, binding: VKeyboardBinding) {
     if (
       (['altKey', 'ctrlKey', 'metaKey', 'shiftKey'] as const).some(
         key => Object.hasOwn(binding, key) && binding[key] !== evt[key]
@@ -53,7 +58,7 @@ export function createKeyDownHandler(
     return binding.key === evt.key;
   }
 
-  function addBinding(keyBinding: KeyboardBinding) {
+  function addBinding(keyBinding: VKeyboardBinding) {
     const binding = normalize(keyBinding);
     const keys = Array.isArray(binding.key) ? binding.key : [binding.key];
     keys.forEach(key => {
@@ -91,7 +96,7 @@ export function createKeyDownHandler(
     const suffixText = leafEnd.textContent
       ? leafEnd.textContent.slice(offsetEnd)
       : '';
-    const currContext: KeyboardBindingContext = {
+    const currContext: VKeyboardBindingContext = {
       vRange,
       vEditor,
       collapsed: vRange.length === 0,
@@ -106,7 +111,7 @@ export function createKeyDownHandler(
       if (binding.suffix && !binding.suffix.test(currContext.suffixText)) {
         return false;
       }
-      return binding.handler(currContext);
+      return binding.handler(currContext) === VKEYBOARD_PREVENT_DEFAULT;
     });
     if (prevented) {
       evt.preventDefault();

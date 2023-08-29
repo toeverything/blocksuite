@@ -9,6 +9,11 @@ import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
 } from '../../__internal__/clipboard/utils/pure.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../__internal__/utils/index.js';
 import type { TableViewSelection } from '../../__internal__/utils/types.js';
 import type { BaseViewClipboard } from '../common/clipboard.js';
 import type { DataViewExpose } from '../common/data-view.js';
@@ -93,7 +98,14 @@ export class TableViewClipboard implements BaseViewClipboard {
           CLIPBOARD_MIMETYPE.TEXT,
           data
         );
+
+        const savedRange = hasNativeSelection()
+          ? getCurrentNativeRange()
+          : null;
         performNativeCopy([textClipboardItem]);
+        if (savedRange) {
+          resetNativeSelection(savedRange);
+        }
       } else {
         // type === 'number' || type === 'title'
         // Execute browser default behavior
@@ -125,7 +137,12 @@ export class TableViewClipboard implements BaseViewClipboard {
       CLIPBOARD_MIMETYPE.TEXT,
       formatValue
     );
+
+    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
     performNativeCopy([textClipboardItem, tableClipboardItem]);
+    if (savedRange) {
+      resetNativeSelection(savedRange);
+    }
 
     return true;
   };

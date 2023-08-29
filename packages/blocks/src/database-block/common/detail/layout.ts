@@ -17,7 +17,7 @@ const close = html`<svg
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M4.55806 4.55806C4.80214 4.31398 5.19786 4.31398 5.44194 4.55806L10 9.11612L14.5581 4.55806C14.8021 4.31398 15.1979 4.31398 15.4419 4.55806C15.686 4.80214 15.686 5.19786 15.4419 5.44194L10.8839 10L15.4419 14.5581C15.686 14.8021 15.686 15.1979 15.4419 15.4419C15.1979 15.686 14.8021 15.686 14.5581 15.4419L10 10.8839L5.44194 15.4419C5.19786 15.686 4.80214 15.686 4.55806 15.4419C4.31398 15.1979 4.31398 14.8021 4.55806 14.5581L9.11612 10L4.55806 5.44194C4.31398 5.19786 4.31398 4.80214 4.55806 4.55806Z"
-    fill="#77757D"
+    fill="currentColor"
   />
 </svg> `;
 // const arrowUp = svg`<svg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'>
@@ -36,7 +36,7 @@ class SideLayoutModal extends ShadowlessElement {
       bottom: 0;
       width: 500px;
       background-color: var(--affine-background-primary-color);
-      border-left: 0.5px solid var(--affine-divider-color, #e3e2e4);
+      border-left: 0.5px solid var(--affine-border-color);
       box-shadow: -5px 0px 10px 0px rgba(0, 0, 0, 0.05);
     }
 

@@ -319,6 +319,16 @@ export class Workspace {
             yText.applyDelta(_element['text']);
             _element['text'] = yText;
           }
+          if (_element['type'] === 'frame') {
+            const yText = new Y.Text();
+            yText.applyDelta(_element['title']);
+            _element['title'] = yText;
+          }
+          if (_element['type'] === 'shape' && _element['text']) {
+            const yText = new Y.Text();
+            yText.applyDelta(_element['text']);
+            _element['text'] = yText;
+          }
         });
       }
 

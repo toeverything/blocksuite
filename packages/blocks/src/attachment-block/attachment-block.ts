@@ -1,9 +1,11 @@
-import { BlockElement, createLitPortal } from '@blocksuite/lit';
+import { BlockElement } from '@blocksuite/lit';
+import { flip, offset } from '@floating-ui/dom';
 import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
+import { createLitPortal } from '../components/portal.js';
 import { AttachmentIcon16 } from '../icons/index.js';
 import type {
   AttachmentBlockModel,
@@ -83,6 +85,12 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         },
         abortController,
       }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
       abortController,
     });
   };

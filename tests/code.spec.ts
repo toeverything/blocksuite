@@ -17,6 +17,7 @@ import {
   pressArrowLeft,
   pressArrowUp,
   pressEnter,
+  pressEnterWithShortkey,
   pressShiftTab,
   pressTab,
   redoByKeyboard,
@@ -45,7 +46,7 @@ function getCodeBlock(page: Page) {
     await languageButton.click({ delay: 50 });
   };
 
-  const langList = codeBlock.locator('lang-list');
+  const langList = page.locator('lang-list');
   const codeOption = page.locator('.affine-codeblock-option');
   const copyButton = codeOption.getByTestId('copy-button');
   const wrapButton = codeOption.getByTestId('wrap-button');
@@ -216,12 +217,9 @@ test('language select list can disappear when click other place', async ({
   const locator = codeBlock.langList;
   await expect(locator).toBeVisible();
 
-  const position = await page.evaluate(() => {
-    const code = document.querySelector('.lang-list-button-container');
-    const bbox = code?.getBoundingClientRect() as DOMRect;
-    return { x: bbox.right + 10, y: bbox.top + 10 };
-  });
-  await page.mouse.click(position.x, position.y);
+  const rect = await page.locator('.lang-list-button-container').boundingBox();
+  if (!rect) throw new Error('Failed to get bounding box of code block.');
+  await page.mouse.click(rect.x + 10, rect.y + 10);
 
   await expect(locator).toBeHidden();
 });
@@ -330,8 +328,7 @@ test('use code block copy menu of code block copy whole code block', async ({
   await focusRichText(page);
 
   await page.keyboard.type('use');
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
 
   const codeBlockPosition = await getCenterPosition(page, 'affine-code');
   await page.mouse.move(codeBlockPosition.x, codeBlockPosition.y);
@@ -458,21 +455,20 @@ test('drag select code block can delete it', async ({ page }) => {
   await expect(locator).toBeHidden();
 });
 
-test('press enter twice at end of code block can jump out', async ({
+test('press short key and enter at end of code block can jump out', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
 
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
 });
 
-test('press enter twice at end of code block with content can jump out', async ({
+test('press short key and enter at end of code block with content can jump out', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -480,8 +476,7 @@ test('press enter twice at end of code block with content can jump out', async (
   await focusRichText(page);
 
   await type(page, 'const a = 10;');
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
 
   const locator = page.locator('affine-paragraph');
   await expect(locator).toBeVisible();
@@ -510,8 +505,7 @@ test('press backspace after code block can enter code block', async ({
   const code = 'const a = 1;';
   await type(page, code);
 
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
   await page.keyboard.press('Backspace');
 
   const index = await getVirgoSelectionIndex(page);
@@ -530,8 +524,7 @@ test('press ArrowUp after code block can enter code block', async ({
   const code = 'const a = 1;';
   await type(page, code);
 
-  await pressEnter(page);
-  await pressEnter(page);
+  await pressEnterWithShortkey(page);
   await page.keyboard.press('ArrowUp');
 
   const index = await getVirgoSelectionIndex(page);
@@ -562,30 +555,19 @@ test('code block option can appear and disappear during mousemove', async ({
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
-  const getPosition: (
-    selector: string
-  ) => Promise<{ x: number; y: number; right: number }> = async (
-    selector: string
-  ) => {
-    return await page.evaluate((selector: string) => {
-      const codeBlock = document.querySelector(selector);
-      const bbox = codeBlock?.getBoundingClientRect() as DOMRect;
-      return {
-        x: bbox.left + bbox.width / 2,
-        y: bbox.top + bbox.height / 2,
-        right: bbox.right,
-      };
-    }, selector);
-  };
-
-  const position = await getPosition('affine-code');
+  const position = await page.locator('affine-code').boundingBox();
+  if (!position) throw new Error('Failed to get affine code position');
   await page.mouse.move(position.x, position.y);
 
-  const optionPosition = await getPosition('.affine-codeblock-option');
-  await page.mouse.move(optionPosition.x, optionPosition.y);
   const locator = page.locator('.affine-codeblock-option');
+  const optionPosition = await locator.boundingBox();
+  if (!optionPosition) throw new Error('Failed to get option position');
+  await page.mouse.move(optionPosition.x, optionPosition.y);
   await expect(locator).toBeVisible();
-  await page.mouse.move(optionPosition.right + 10, optionPosition.y);
+  await page.mouse.move(
+    optionPosition.x + optionPosition.width + 10,
+    optionPosition.y
+  );
   await expect(locator).toBeHidden();
 });
 

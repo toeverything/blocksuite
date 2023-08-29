@@ -47,7 +47,12 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
 
   private viewSource(id: string): ViewSource {
     const getViewDataById = this.getViewDataById;
+    const getReadonly = () => this.model.page.readonly;
+
     return {
+      get readonly() {
+        return getReadonly();
+      },
       get view() {
         const view = getViewDataById(id);
         if (!view) {

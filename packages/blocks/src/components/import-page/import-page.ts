@@ -5,9 +5,10 @@ import { WithDisposable } from '@blocksuite/lit';
 import { type Workspace } from '@blocksuite/store';
 import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
 import { ContentParser } from '../../__internal__/content-parser/index.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
 import type { SerializedBlock } from '../../__internal__/utils/index.js';
 import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
@@ -305,12 +306,32 @@ export async function importNotion(workspace: Workspace, file: File) {
           const cells: Record<string, Record<string, Cell>> = {};
           const children: SerializedBlock[] = [];
           rows.forEach(row => {
-            children.push({
-              flavour: 'affine:paragraph',
-              type: 'text',
-              text: [{ insert: row[titleIndex] }],
-              children: [],
-            });
+            const title = row[titleIndex];
+            const referencePattern = /@AffineReference:\((.*)\)/g;
+            const match = referencePattern.exec(title);
+            if (match) {
+              const pageId = match[1];
+              children.push({
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: [
+                  {
+                    insert: REFERENCE_NODE,
+                    attributes: {
+                      reference: { type: 'Subpage', pageId },
+                    },
+                  },
+                ],
+                children: [],
+              });
+            } else {
+              children.push({
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: [{ insert: title }],
+                children: [],
+              });
+            }
             const rowId = '' + id++;
             cells[rowId] = {};
             row.forEach((value, index) => {
@@ -383,7 +404,7 @@ export async function importNotion(workspace: Workspace, file: File) {
         };
         const tableTitleColumnHandler = async (element: Element) => {
           if (element.tagName === 'TABLE') {
-            const titleColumn: string[] = [];
+            const titleColumn: SerializedBlock[] = [];
             element.querySelectorAll('.cell-title').forEach(ele => {
               const link = ele.querySelector('a');
               const subPageLink = link?.getAttribute('href') || '';
@@ -391,14 +412,36 @@ export async function importNotion(workspace: Workspace, file: File) {
                 subPageLink.startsWith('http://') ||
                 subPageLink.startsWith('https://')
               ) {
-                titleColumn.push(ele.textContent || '');
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [{ insert: ele?.textContent || '' }],
+                  children: [],
+                });
                 return;
               }
               const linkPageId = pageMap.get(decodeURI(subPageLink));
               if (linkPageId) {
-                titleColumn.push(`@AffineReference:(${linkPageId})`);
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [
+                    {
+                      insert: REFERENCE_NODE,
+                      attributes: {
+                        reference: { type: 'Subpage', pageId: linkPageId },
+                      },
+                    },
+                  ],
+                  children: [],
+                });
               } else {
-                titleColumn.push(link?.textContent || '');
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [{ insert: link?.textContent || '' }],
+                  children: [],
+                });
               }
             });
             return titleColumn;
@@ -478,6 +521,9 @@ export class ImportPage extends WithDisposable(LitElement) {
   @state()
   _startY = 0;
 
+  @query('.container')
+  containerEl!: HTMLElement;
+
   constructor(
     private workspace: Workspace,
     private onSuccess?: OnSuccessHandler,
@@ -495,13 +541,9 @@ export class ImportPage extends WithDisposable(LitElement) {
     this._onMouseMove = this._onMouseMove.bind(this);
   }
 
-  loading(): boolean {
-    return this._loading;
-  }
-
   override updated(changedProps: PropertyValues) {
     if (changedProps.has('x') || changedProps.has('y')) {
-      this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      this.containerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
     }
   }
 
@@ -600,76 +642,85 @@ export class ImportPage extends WithDisposable(LitElement) {
   override render() {
     if (this._loading) {
       return html`
-        <header
-          class="loading-header"
-          @mousedown="${this._onMouseDown}"
-          @mouseup="${this._onMouseUp}"
-        >
-          <div>Import</div>
-          <loader-element width="50px"></loader-element>
-        </header>
-        <div>
-          Importing the file may take some time. It depends on document size and
-          complexity.
+        <div class="overlay-mask"></div>
+        <div class="container">
+          <header
+            class="loading-header"
+            @mousedown="${this._onMouseDown}"
+            @mouseup="${this._onMouseUp}"
+          >
+            <div>Import</div>
+            <loader-element width="50px"></loader-element>
+          </header>
+          <div>
+            Importing the file may take some time. It depends on document size
+            and complexity.
+          </div>
         </div>
       `;
     }
     return html`
-      <header @mousedown="${this._onMouseDown}" @mouseup="${this._onMouseUp}">
-        <icon-button height="28px" @click="${this._onCloseClick}">
-          ${CloseIcon}
-        </icon-button>
-        <div>Import</div>
-      </header>
-      <div>
-        AFFiNE will gradually support more file formats for import.
-        <a
-          href="https://community.affine.pro/c/feature-requests/import-export"
-          target="_blank"
-          >Provide feedback.</a
-        >
-      </div>
-      <div class="button-container">
-        <icon-button
-          class="button-item"
-          text="Markdown"
-          @click="${this._importMarkDown}"
-        >
-          ${ExportToMarkdownIcon}
-        </icon-button>
-        <icon-button
-          class="button-item"
-          text="HTML"
-          @click="${this._importHtml}"
-        >
-          ${ExportToHTMLIcon}
-        </icon-button>
-      </div>
-      <div class="button-container">
-        <icon-button
-          class="button-item"
-          text="Notion"
-          @click="${this._importNotion}"
-        >
-          ${NotionIcon}
-          <div
-            slot="suffix"
-            class="has-tool-tip"
-            @click="${this._openLearnImportLink}"
+      <div
+        class="overlay-mask"
+        @click="${() => this.abortController.abort()}"
+      ></div>
+      <div class="container">
+        <header @mousedown="${this._onMouseDown}" @mouseup="${this._onMouseUp}">
+          <icon-button height="28px" @click="${this._onCloseClick}">
+            ${CloseIcon}
+          </icon-button>
+          <div>Import</div>
+        </header>
+        <div>
+          AFFiNE will gradually support more file formats for import.
+          <a
+            href="https://community.affine.pro/c/feature-requests/import-export"
+            target="_blank"
+            >Provide feedback.</a
           >
-            ${HelpIcon}
-            <tool-tip inert arrow tip-position="top" role="tooltip">
-              Learn how to Import your Notion pages into AFFiNE.
-            </tool-tip>
-          </div>
-        </icon-button>
-        <icon-button class="button-item" text="Coming soon..." disabled>
-          ${NewIcon}
-        </icon-button>
-      </div>
-      <!-- <div class="footer">
+        </div>
+        <div class="button-container">
+          <icon-button
+            class="button-item"
+            text="Markdown"
+            @click="${this._importMarkDown}"
+          >
+            ${ExportToMarkdownIcon}
+          </icon-button>
+          <icon-button
+            class="button-item"
+            text="HTML"
+            @click="${this._importHtml}"
+          >
+            ${ExportToHTMLIcon}
+          </icon-button>
+        </div>
+        <div class="button-container">
+          <icon-button
+            class="button-item"
+            text="Notion"
+            @click="${this._importNotion}"
+          >
+            ${NotionIcon}
+            <div
+              slot="suffix"
+              class="has-tool-tip"
+              @click="${this._openLearnImportLink}"
+            >
+              ${HelpIcon}
+              <tool-tip inert arrow tip-position="top" role="tooltip">
+                Learn how to Import your Notion pages into AFFiNE.
+              </tool-tip>
+            </div>
+          </icon-button>
+          <icon-button class="button-item" text="Coming soon..." disabled>
+            ${NewIcon}
+          </icon-button>
+        </div>
+        <!-- <div class="footer">
         <div>Migrate from other versions of AFFiNE?</div>
       </div> -->
+      </div>
     `;
   }
 }

@@ -5,7 +5,7 @@ import { customElement, query } from 'lit/decorators.js';
 import { CutIcon } from '../../../../icons/index.js';
 
 const buttonStyle = css`
-  .scissors-button {
+  .slicer-button {
     display: flex;
     box-sizing: border-box;
     border-radius: 10px;
@@ -24,26 +24,26 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
   static override styles = [
     buttonStyle,
     css`
-      .scissors-button {
+      .slicer-button {
         transform: translate3d(-50%, 0, 0);
         transition: transform 0.1s ease-out;
       }
 
-      .scissors-button.slideout {
+      .slicer-button.slideout {
         transform: translate3d(-150%, 0, 0) translate3d(3px, 0, 0);
       }
     `,
   ];
 
-  @query('.scissors-button')
+  @query('.slicer-button')
   private _button!: HTMLButtonElement;
 
-  private _externalButton: null | NoteScissorsButton = null;
+  private _externalButton: null | PopupNoteSlicerButton = null;
 
   private _createExternalButton() {
     const externalButton = document.createElement(
-      'affine-note-scissors'
-    ) as NoteScissorsButton;
+      'affine-note-slicer-popupbutton'
+    ) as PopupNoteSlicerButton;
 
     document.body.appendChild(externalButton);
     this._externalButton = externalButton;
@@ -118,7 +118,7 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
 
   override render() {
     return html`<button
-      class="scissors-button"
+      class="slicer-button"
       @mouseenter=${this._dispatchEnterButtonEvent}
     >
       ${CutIcon}
@@ -126,8 +126,8 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
   }
 }
 
-@customElement('affine-note-scissors')
-export class NoteScissorsButton extends WithDisposable(LitElement) {
+@customElement('affine-note-slicer-popupbutton')
+export class PopupNoteSlicerButton extends WithDisposable(LitElement) {
   static override styles = [
     buttonStyle,
     css`
@@ -137,7 +137,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: calc(var(--affine-z-index-popover, 0) + 2);
-        transform-origin: top left;
+        transform-origin: center center;
       }
     `,
   ];
@@ -152,7 +152,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
       this.style.transition = `transform 0.1s 0.1s ease-in-out`;
       this.style.transform = `translate3d(${rect.x + rect.width * 0.8}px, ${
         rect.y
-      }px, 0)`;
+      }px, 0) scale(1.2)`;
 
       if (rafId === this._rafId) this._rafId = 0;
     });
@@ -167,13 +167,13 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<button class="scissors-button">${CutIcon}</button>`;
+    return html`<button class="slicer-button">${CutIcon}</button>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'note-scissors-button': NoteSlicerButton;
-    'affine-note-scissors': NoteScissorsButton;
+    'note-slicer-button': NoteSlicerButton;
+    'affine-note-slicer-popupbutton': PopupNoteSlicerButton;
   }
 }

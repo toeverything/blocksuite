@@ -113,7 +113,7 @@ export class BlockIndexer {
   }
 
   private _indexPage(pageId: string, yPage: Y.Doc) {
-    const yBlocks = yPage.get('blocks') as Y.Map<YBlock>;
+    const yBlocks = yPage.getMap<YBlock>('blocks');
     yBlocks.forEach((block, blockId) => {
       this._indexBlock({ action: 'add', pageId, blockId, block });
     });

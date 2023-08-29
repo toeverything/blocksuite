@@ -109,38 +109,6 @@ export const toggleDown = () => {
   `;
 };
 
-export const chevronCircleRight = (enabled = true) => {
-  return html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 512 512"
-    >
-      <path
-        fill="currentColor"
-        opacity="${!enabled ? '0.6' : '1'}"
-        d="M256 8c137 0 248 111 248 248S393 504 256 504S8 393 8 256S119 8 256 8zm113.9 231L234.4 103.5c-9.4-9.4-24.6-9.4-33.9 0l-17 17c-9.4 9.4-9.4 24.6 0 33.9L285.1 256L183.5 357.6c-9.4 9.4-9.4 24.6 0 33.9l17 17c9.4 9.4 24.6 9.4 33.9 0L369.9 273c9.4-9.4 9.4-24.6 0-34z"
-      />
-    </svg>
-  `;
-};
-export const chevronCircleDown = () => {
-  return html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 512 512"
-    >
-      <path
-        fill="currentColor"
-        d="M504 256c0 137-111 248-248 248S8 393 8 256S119 8 256 8s248 111 248 248zM273 369.9l135.5-135.5c9.4-9.4 9.4-24.6 0-33.9l-17-17c-9.4-9.4-24.6-9.4-33.9 0L256 285.1L154.4 183.5c-9.4-9.4-24.6-9.4-33.9 0l-17 17c-9.4 9.4-9.4 24.6 0 33.9L239 369.9c9.4 9.4 24.6 9.4 34 0z"
-      />
-    </svg>
-  `;
-};
-
 export const checkboxChecked = () => {
   return html`
     <svg
@@ -173,7 +141,7 @@ export const checkboxUnchecked = () => {
         fill-rule="evenodd"
         clip-rule="evenodd"
         d="M6 3.25C4.48122 3.25 3.25 4.48122 3.25 6V18C3.25 19.5188 4.48122 20.75 6 20.75H18C19.5188 20.75 20.75 19.5188 20.75 18V6C20.75 4.48122 19.5188 3.25 18 3.25H6ZM4.75 6C4.75 5.30964 5.30964 4.75 6 4.75H18C18.6904 4.75 19.25 5.30964 19.25 6V18C19.25 18.6904 18.6904 19.25 18 19.25H6C5.30964 19.25 4.75 18.6904 4.75 18V6Z"
-        fill="#77757D"
+        fill="currentColor"
       />
     </svg>
   `;

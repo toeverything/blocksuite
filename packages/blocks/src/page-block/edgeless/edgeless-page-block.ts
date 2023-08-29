@@ -15,6 +15,7 @@ import {
 import { BlockElement } from '@blocksuite/lit';
 import {
   Bound,
+  clamp,
   compare,
   ConnectorElement,
   deserializeXYWH,
@@ -28,9 +29,11 @@ import {
   type PhasorElement,
   serializeXYWH,
   SurfaceManager,
+  ZOOM_MAX,
+  ZOOM_MIN,
 } from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -126,6 +129,7 @@ export interface EdgelessSelectionSlots {
     notes: NoteBlockModel[];
     shapes: PhasorElement[];
   }>;
+  readonlyUpdated: Slot<boolean>;
 }
 
 export interface EdgelessContainer extends HTMLElement {
@@ -264,6 +268,10 @@ export class EdgelessPageBlockComponent
 
   private _edgelessLayerWillChange = false;
 
+  private get readonly() {
+    return this.page.readonly;
+  }
+
   clipboard = new EdgelessClipboard(this.page, this);
 
   slots = {
@@ -292,6 +300,7 @@ export class EdgelessPageBlockComponent
     subpageUnlinked: new Slot<{ pageId: string }>(),
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
     tagClicked: new Slot<{ tagId: string }>(),
+    readonlyUpdated: new Slot<boolean>(),
   };
 
   surface!: SurfaceManager;
@@ -368,7 +377,11 @@ export class EdgelessPageBlockComponent
     const yContainer = surfaceBlock.originProp('elements') as InstanceType<
       typeof page.YMap
     >;
-    this.surface = new SurfaceManager(yContainer, this.computeValue.bind(this));
+    this.surface = new SurfaceManager(
+      yContainer,
+      this.computeValue.bind(this),
+      () => this.readonly
+    );
     const { surface } = this;
     this._disposables.add(
       surface.slots.elementAdded.on(id => {
@@ -1170,12 +1183,28 @@ export class EdgelessPageBlockComponent
     this.fontLoader.load(['Kalam:n4,n7']);
   }
 
+  private _initReadonlyListener() {
+    const page = this.page;
+
+    let readonly = page.readonly;
+    this._disposables.add(
+      page.awarenessStore.slots.update.on(() => {
+        if (readonly !== page.readonly) {
+          readonly = page.readonly;
+          this.slots.readonlyUpdated.emit(readonly);
+          this.requestUpdate();
+        }
+      })
+    );
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
     this._initNoteHeightUpdate();
     this._initFontloader();
+    this._initReadonlyListener();
     this.clipboard.init(this.page);
 
     requestAnimationFrame(() => {
@@ -1235,6 +1264,7 @@ export class EdgelessPageBlockComponent
         (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
         (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
       );
+      zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
 
       centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
       centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
@@ -1256,6 +1286,14 @@ export class EdgelessPageBlockComponent
 
   override connectedCallback() {
     super.connectedCallback();
+    this.root.rangeManager?.setConfig({
+      shouldSyncSelection: range => {
+        const insideModal = Boolean(
+          range?.startContainer.parentElement?.closest('side-layout-modal')
+        );
+        return !insideModal;
+      },
+    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
@@ -1300,7 +1338,7 @@ export class EdgelessPageBlockComponent
   override render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    const { _rectsOfSelectedBlocks, sortedNotes, surface } = this;
+    const { _rectsOfSelectedBlocks, sortedNotes, surface, readonly } = this;
     const { viewport } = surface;
 
     const { left, top } = viewport;
@@ -1317,7 +1355,11 @@ export class EdgelessPageBlockComponent
       </div>
       <div class="affine-edgeless-page-block-container">
         <div class="affine-block-children-container edgeless">
-          <affine-note-slicer .edgelessPage=${this}></affine-note-slicer>
+          ${readonly
+            ? nothing
+            : html`<affine-note-slicer
+                .edgelessPage=${this}
+              ></affine-note-slicer>`}
           <div class="affine-edgeless-layer">
             <edgeless-notes-container
               .edgeless=${this}

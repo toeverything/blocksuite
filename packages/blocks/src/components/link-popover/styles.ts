@@ -85,7 +85,7 @@ export const linkPopoverStyle = css`
     font-size: var(--affine-font-base);
     font-style: normal;
     line-height: 24px;
-    color: var(--affine-popover-color);
+    color: var(--affine-text-primary-color);
     z-index: var(--affine-z-index-popover);
     animation: affine-popover-fade-in 0.2s ease;
   }

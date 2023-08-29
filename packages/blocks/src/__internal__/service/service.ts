@@ -1,10 +1,22 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
+import { Buffer } from 'buffer';
 import type { TemplateResult } from 'lit';
-import { isTemplateResult } from 'lit/directive-helpers.js';
+import type { TemplateResultType } from 'lit/directive-helpers.js';
 
 import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
+
+// Breaking change introduced in lit@2.8.0
+// https://github.com/lit/lit/pull/3993
+const isTemplateResult = (
+  value: unknown,
+  type?: TemplateResultType
+): value is TemplateResult =>
+  type === undefined
+    ? // This property needs to remain unminified.
+      (value as TemplateResult)?.['_$litType$'] !== undefined
+    : (value as TemplateResult)?.['_$litType$'] === type;
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   templateResult2String(temp: TemplateResult): string {
@@ -130,5 +142,20 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       text = `<a href="${referenceLink}">${referenceTitle}</a>`;
     }
     return text;
+  }
+
+  protected async getBlobType(blob: Blob): Promise<string> {
+    if (blob.type) {
+      return blob.type;
+    }
+    // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
+    // @ts-ignore
+    const FileType = await import('file-type/browser.js');
+    if (window.Buffer === undefined) {
+      window.Buffer = Buffer;
+    }
+    const buffer = await blob.arrayBuffer();
+    const fileType = await FileType.fromBuffer(buffer);
+    return fileType?.mime ?? 'image/png';
   }
 }

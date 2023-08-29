@@ -61,7 +61,7 @@ export class TagsDatasource extends BaseDataSource {
     },
     parent: {
       type: selectPureColumnConfig.type,
-      getData: () => ({ options: this.meta.properties.tags.options }),
+      getData: () => ({ options: this.meta.properties.tags?.options ?? [] }),
       getValue: tag => tag.parentId,
       setValue: (tag, value) => {
         this.changeTag({
@@ -167,7 +167,7 @@ export class TagsDatasource extends BaseDataSource {
   };
 
   private get tags() {
-    return this.meta.properties.tags.options;
+    return this.meta.properties.tags?.options ?? [];
   }
 
   private changeTags = (tags: SelectTag[]) => {

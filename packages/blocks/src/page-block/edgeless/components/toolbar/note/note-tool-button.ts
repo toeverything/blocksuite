@@ -34,7 +34,7 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(noteMenu);
 
-  const x = 90;
+  const x = 110;
   const y = -40;
 
   Object.assign(noteMenu.style, {
@@ -55,6 +55,11 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
+    }
+
+    edgeless-tool-icon-button svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
 
     edgeless-tool-icon-button svg + svg {

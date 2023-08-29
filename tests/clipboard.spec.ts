@@ -57,12 +57,12 @@ import {
   assertEdgelessSelectedRect,
   assertExists,
   assertRichImage,
+  assertRichTextModelType,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
-  assertTypeFormat,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
@@ -447,6 +447,7 @@ test(scoped`cut should work for multi-block selection`, async ({ page }) => {
   await type(page, 'c');
   await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
   await cutByKeyboard(page);
   await page.locator('.affine-doc-viewport').click();
   await waitNextFrame(page);
@@ -465,7 +466,7 @@ test(
     await type(page, '- ');
     await page.keyboard.press(`${SHORT_KEY}+v`);
     await assertRichTexts(page, ['test']);
-    await assertTypeFormat(page, 'bulleted');
+    await assertRichTextModelType(page, 'bulleted');
   }
 );
 
@@ -793,6 +794,7 @@ test(
     );
 
     // when pasting a quote into a text paragraph block, the paragraph type should be text
+    await selectAllByKeyboard(page);
     await selectAllByKeyboard(page);
     await copyByKeyboard(page);
     await waitNextFrame(page);

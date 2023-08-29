@@ -7,28 +7,13 @@ import type { AttachmentBlockModel } from '../attachment-model.js';
 import { renameStyles } from './styles.js';
 
 export const RenameModal = ({
-  anchor,
   model,
   abortController,
 }: {
-  anchor: HTMLElement;
   model: AttachmentBlockModel;
   abortController: AbortController;
 }) => {
   const containerRef = createRef<HTMLDivElement>();
-  const updatePosition = () => {
-    const container = containerRef.value;
-    if (!container) return;
-    const { top, left, width } = anchor.getBoundingClientRect();
-    container.style.transform = `translate(calc(${
-      left + width
-    }px - 100%), calc(${top}px - 100% - 4px))`;
-  };
-  setTimeout(() => {
-    // Wait for the portal to be attached to the DOM
-    updatePosition();
-  });
-
   const originalName = model.name;
   const nameWithoutExtension = originalName.slice(
     0,
