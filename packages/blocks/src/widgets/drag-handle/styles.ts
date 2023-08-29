@@ -10,7 +10,7 @@ export const styles = css`
   .affine-drag-handle-container {
     top: 0;
     left: 0;
-    position: absolute;
+    position: fixed;
     display: flex;
     justify-content: center;
     width: ${DRAG_HANDLE_WIDTH}px;
@@ -48,7 +48,7 @@ export const styles = css`
     z-index: 2;
   }
   .affine-drag-hover-rect {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     border-radius: 6px;

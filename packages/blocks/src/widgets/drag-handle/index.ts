@@ -173,16 +173,16 @@ export class DragHandleWidget extends WidgetElement {
       DRAG_HANDLE_WIDTH * this._scale
     }px`;
 
-    let posLeft =
+    const posLeft =
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
-    let posTop = top;
+    const posTop = top;
 
-    if (isPageMode(this.page)) {
-      const pageBlock = this._pageBlockElement as DocPageBlockComponent;
-      const { scrollLeft, scrollTop } = pageBlock.viewportElement;
-      posLeft += scrollLeft;
-      posTop += scrollTop;
-    }
+    // if (isPageMode(this.page)) {
+    //   const pageBlock = this._pageBlockElement as DocPageBlockComponent;
+    //   const { scrollLeft, scrollTop } = pageBlock.viewportElement;
+    //   posLeft += scrollLeft;
+    //   posTop += scrollTop;
+    // }
 
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
@@ -253,16 +253,6 @@ export class DragHandleWidget extends WidgetElement {
     top -= DRAG_HOVER_RECT_PADDING * this._scale;
     right += DRAG_HOVER_RECT_PADDING * this._scale;
     bottom += DRAG_HOVER_RECT_PADDING * this._scale;
-
-    // When current page is doc page, should consider scroll position
-    if (isPageMode(this.page)) {
-      const pageBlock = this._pageBlockElement as DocPageBlockComponent;
-      const { scrollLeft, scrollTop } = pageBlock.viewportElement;
-      left += scrollLeft;
-      top += scrollTop;
-      right += scrollLeft;
-      bottom += scrollTop;
-    }
 
     return new Rect(left, top, right, bottom);
   }
@@ -834,7 +824,10 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _wheelHandler: UIEventHandler = ctx => {
     this._hide();
-    if (!this._dragging || this._draggingElements.length === 0) {
+    if (
+      (!this._dragging || this._draggingElements.length === 0) &&
+      !this._dragHandlePointerDown
+    ) {
       return;
     }
 
@@ -886,30 +879,18 @@ export class DragHandleWidget extends WidgetElement {
         );
         if (!blockElement) return;
 
-        // This height has been multiplied by scale
-        let { height } = blockElement.getBoundingClientRect();
-        height = Math.ceil(height);
-
-        // Show hover rect for all the blocks can be dragged
         const draggingAreaRect = this._getDraggingAreaRect(blockElement);
-        // this._showHoverRect(blockElement);
-
         if (!draggingAreaRect) return;
 
-        height = draggingAreaRect.height - 16;
+        const height = draggingAreaRect.height - 16;
         const top = draggingAreaRect.top + 8;
 
         this._dragHandleContainer.style.height = `${height}px`;
         const lastTop = this._dragHandleContainer.getBoundingClientRect().top;
+
         const paddingTop =
           parseInt(this._dragHandleContainer.style.paddingTop) ?? 0;
-        let translateY = top - lastTop - paddingTop;
-
-        if (isPageMode(this.page)) {
-          const pageBlock = this._pageBlockElement as DocPageBlockComponent;
-          const { scrollTop } = pageBlock.viewportElement;
-          translateY -= scrollTop;
-        }
+        const translateY = top - lastTop - paddingTop;
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
 
@@ -962,15 +943,14 @@ export class DragHandleWidget extends WidgetElement {
       'pointerleave',
       () => {
         if (this._dragHandlePointerDown) this._removeHoverRect();
+        this._hoverDragHandle = false;
 
-        if (!this._dragHandleGrabber || !this._hoveredBlockPath) return;
+        if (!this._hoveredBlockPath) return;
 
         const blockElement = this._getBlockElementFromViewStore(
           this._hoveredBlockPath
         );
         if (!blockElement) return;
-
-        this._hoverDragHandle = false;
 
         if (this._dragging) return;
         this._show(blockElement);

@@ -17,6 +17,7 @@ const heightMap: { [key: string]: number } = {
   list: 32,
   database: 28,
   image: 28,
+  divider: 36,
 };
 
 export const getDragHandleContainerHeight = (model: BaseBlockModel) => {
