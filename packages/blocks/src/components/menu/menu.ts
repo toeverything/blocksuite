@@ -16,6 +16,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
 import { ArrowDownIcon } from '../../icons/index.js';
+import {
+  checkboxChecked,
+  checkboxUnchecked,
+} from '../../list-block/utils/icons.js';
 
 type MenuCommon = {
   hide?: () => boolean;
@@ -34,6 +38,14 @@ type NormalMenu = MenuCommon &
         icon?: TemplateResult;
         select: () => void;
         onHover?: (hover: boolean) => void;
+        class?: string;
+      }
+    | {
+        type: 'checkbox';
+        name: string;
+        checked: boolean;
+        label?: TemplateResult;
+        select: (checked: boolean) => boolean;
         class?: string;
       }
     | {
@@ -198,6 +210,16 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   private subMenu?: HTMLElement;
   private inputRef = createRef<HTMLInputElement>();
   private items!: Array<Item>;
+  private _checked: Record<string, boolean> = {};
+
+  private setChecked(name: string, checked: boolean) {
+    this._checked[name] = checked;
+    this.requestUpdate();
+  }
+
+  private getChecked(name: string): boolean {
+    return this._checked[name];
+  }
 
   private get minIndex() {
     return this.isSearchMode ? 0 : -1;
@@ -304,6 +326,23 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           select: () => {
             menu.select();
             this._complete();
+          },
+          class: menu.class ?? '',
+        },
+      ];
+    },
+    checkbox: menu => {
+      const checked = this.getChecked(menu.name) ?? menu.checked;
+      return [
+        {
+          label: html` <div class="icon">
+              ${checked ? checkboxChecked() : checkboxUnchecked()}
+            </div>
+            <div class="affine-menu-action-text">
+              ${menu.label ?? menu.name}
+            </div>`,
+          select: () => {
+            this.setChecked(menu.name, menu.select(checked));
           },
           class: menu.class ?? '',
         },

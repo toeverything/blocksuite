@@ -10,7 +10,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
 import { CrossIcon } from '../../../icons/index.js';
 import { tBoolean } from '../../logical/data-type.js';
-import { filterMatcher } from '../../logical/filter-matcher.js';
 import { typesystem } from '../../logical/typesystem.js';
 import type {
   FilterGroup,
@@ -25,6 +24,7 @@ import {
   getRefType,
 } from '../ast.js';
 import { popLiteralEdit, renderLiteral } from '../literal/matcher.js';
+import { filterMatcher } from './matcher/matcher.js';
 
 @customElement('filter-condition-view')
 export class FilterConditionView extends WithDisposable(ShadowlessElement) {
@@ -102,7 +102,8 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
   };
 
   private _filterLabel() {
-    return this.data.function;
+    return filterMatcher.find(v => v.data.name === this.data.function)?.data
+      .label;
   }
 
   private _filterList() {
@@ -120,7 +121,7 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
       target,
       list.map(v => ({
         type: 'action',
-        name: v.name,
+        name: v.label,
         select: () => {
           this.setData({
             ...this.data,

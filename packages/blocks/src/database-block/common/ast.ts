@@ -1,7 +1,7 @@
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
-import { filterMatcher } from '../logical/filter-matcher.js';
 import { propertyMatcher } from '../logical/property-matcher.js';
 import type { TType } from '../logical/typesystem.js';
+import { filterMatcher } from './filter/matcher/matcher.js';
 
 export type Variable = {
   name: string;
