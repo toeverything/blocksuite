@@ -10,18 +10,23 @@ export type Command<Options = void> = (
   options?: Options
 ) => boolean;
 
-type CommandMap = Record<BlockSuite.CommandName, Command>;
+type ToInnerCommand<T> = T extends Command<infer Options>
+  ? InnerCommand<Options>
+  : never;
 
-type InnerCommand<Options = void> = (options?: Options) => CommandMap;
+type InnerCommands = {
+  [Key in BlockSuite.CommandName]: ToInnerCommand<BlockSuite.Commands[Key]>;
+};
 
-type InlineCommand = (fn: Command) => CommandMap;
+type InnerCommand<Options = void> = (options?: Options) => Chain;
+
+type InlineCommand = (fn: Command) => InnerCommands;
 
 type RunCommand = () => boolean;
 
-interface Chain {
+interface Chain extends InnerCommands {
   run: RunCommand;
   inline: InlineCommand;
-  [key: string]: InnerCommand | InlineCommand | RunCommand;
 }
 
 export class CommandManager {
@@ -44,6 +49,7 @@ export class CommandManager {
   chain = () => {
     const ctx = this._getCommandCtx();
     const queue: Array<() => boolean> = [];
+    // @ts-ignore
     const mapping: Chain = {
       run: () => {
         for (const command of queue) {
@@ -69,6 +75,7 @@ export class CommandManager {
         });
         return mapping;
       };
+      // @ts-expect-error force inject command
       mapping[commandName] = innerCommand;
     }
 
