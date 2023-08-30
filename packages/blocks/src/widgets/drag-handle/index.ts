@@ -102,10 +102,28 @@ export class DragHandleWidget extends WidgetElement {
     return this.root.viewStore.viewFromPath('block', path);
   }
 
+  private get _viewportOffset() {
+    if (!isPageMode(this.page)) {
+      const pageBlock = this.pageElement as EdgelessPageBlockComponent;
+      return {
+        left: -pageBlock.surface.viewport.left,
+        top: -pageBlock.surface.viewport.top,
+      };
+    } else {
+      const pageBlock = this.pageElement as DocPageBlockComponent;
+      return {
+        left: pageBlock.viewport.scrollLeft - pageBlock.viewport.left,
+        top: pageBlock.viewport.scrollTop - pageBlock.viewport.top,
+      };
+    }
+  }
+
   private _hide(force = false) {
     if (!this._dragHandleContainer) return;
 
-    this._dragHandleContainer.style.display = 'none';
+    if (this._dragHandleContainer.style.display !== 'none')
+      this._dragHandleContainer.style.display = 'none';
+
     if (force) this._reset();
   }
 
@@ -173,9 +191,12 @@ export class DragHandleWidget extends WidgetElement {
       DRAG_HANDLE_WIDTH * this._scale
     }px`;
 
-    const posLeft =
+    let posLeft =
       left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
-    const posTop = top;
+    let posTop = top;
+
+    posLeft += this._viewportOffset.left;
+    posTop += this._viewportOffset.top;
 
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
@@ -253,6 +274,11 @@ export class DragHandleWidget extends WidgetElement {
     top -= DRAG_HOVER_RECT_PADDING * this._scale;
     right += DRAG_HOVER_RECT_PADDING * this._scale;
     bottom += DRAG_HOVER_RECT_PADDING * this._scale;
+
+    left += this._viewportOffset.left;
+    right += this._viewportOffset.left;
+    top += this._viewportOffset.top;
+    bottom += this._viewportOffset.top;
 
     return new Rect(left, top, right, bottom);
   }
@@ -886,7 +912,8 @@ export class DragHandleWidget extends WidgetElement {
 
         const paddingTop =
           parseInt(this._dragHandleContainer.style.paddingTop) ?? 0;
-        const translateY = top - lastTop - paddingTop;
+        const translateY =
+          top - lastTop - paddingTop - this._viewportOffset.top;
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
         this._dragHandleContainer.style.height = `${height}px`;
@@ -965,6 +992,10 @@ export class DragHandleWidget extends WidgetElement {
     this.handleEvent('wheel', this._wheelHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
+    this.handleEvent('selectionChange', () => {
+      if (this.root.selectionManager.find('block')) return;
+      this._hide();
+    });
 
     if (isEdgelessPage(this._pageBlockElement)) {
       const edgelessPage = this._pageBlockElement;
@@ -978,6 +1009,11 @@ export class DragHandleWidget extends WidgetElement {
           this._hide();
           this._scale = edgelessPage.surface.viewport.zoom;
         })
+      );
+    } else {
+      const docPage = this._pageBlockElement;
+      this._disposables.add(
+        docPage.slots.viewportUpdated.on(() => this._hide())
       );
     }
   }
