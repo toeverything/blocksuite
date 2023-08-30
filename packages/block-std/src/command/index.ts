@@ -41,7 +41,10 @@ export class CommandManager {
     };
   };
 
-  register = (name: string, command: Command) => {
+  register = <N extends BlockSuite.CommandName>(
+    name: N,
+    command: BlockSuite.Commands[N]
+  ) => {
     this._commands.set(name, command);
     return this;
   };
