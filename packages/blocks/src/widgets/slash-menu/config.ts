@@ -43,6 +43,7 @@ import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
+  transformModel,
 } from '../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
@@ -496,8 +497,8 @@ export const menuGroups: {
         name: 'Delete',
         alias: ['remove'],
         icon: DeleteIcon,
-        action: ({ pageElement, model }) => {
-          pageElement.page.deleteBlock(model, { bringChildrenTo: 'parent' });
+        action: ({ model }) => {
+          transformModel(model, 'affine:paragraph', { text: new Text('') });
         },
       },
     ],
