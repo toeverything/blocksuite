@@ -20,7 +20,7 @@ type InnerCommands = {
 
 type InnerCommand<Options = void> = (options?: Options) => Chain;
 
-type InlineCommand = (fn: Command) => InnerCommands;
+type InlineCommand = (fn: Command) => Chain;
 
 type RunCommand = () => boolean;
 
