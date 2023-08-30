@@ -1,5 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 
+import type { KanbanViewSelection } from '../../index.js';
 import {
   BaseViewClipboard,
   type BaseViewClipboardConfig,
@@ -24,7 +25,10 @@ export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager
   override init() {
     this._disposables.add(
       this._view.handleEvent('copy', ctx => {
-        this._onCopy(ctx);
+        const kanbanSelection = this._view.selection.selection;
+        if (!kanbanSelection) return false;
+
+        this._onCopy(ctx, kanbanSelection);
         return true;
       })
     );
@@ -37,7 +41,10 @@ export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager
     );
   }
 
-  private _onCopy = async (_context: UIEventStateContext) => {
+  private _onCopy = async (
+    _context: UIEventStateContext,
+    _kanbanSelection: KanbanViewSelection
+  ) => {
     // todo
     return true;
   };

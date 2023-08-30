@@ -37,7 +37,10 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
   override init() {
     this._disposables.add(
       this._view.handleEvent('copy', ctx => {
-        this._onCopy(ctx);
+        const tableSelection = this._view.selection.selection;
+        if (!tableSelection) return false;
+
+        this._onCopy(ctx, tableSelection);
         return true;
       })
     );
@@ -50,10 +53,10 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
     );
   }
 
-  private _onCopy = async (_context: UIEventStateContext) => {
-    const tableSelection = this._view.selection.selection;
-    if (!tableSelection) return;
-
+  private _onCopy = async (
+    _context: UIEventStateContext,
+    tableSelection: TableViewSelection
+  ) => {
     const view = this._view as DatabaseTable;
     const data = this._data;
 
