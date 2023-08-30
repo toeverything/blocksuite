@@ -59,18 +59,13 @@
     "@open-wc/dev-server-hmr": "^0.2.0",
     "@playwright/test": "^1.37.1",
     "@types/node": "^18.17.11",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.4.1",
     "@typescript-eslint/parser": "^6.4.1",
-    "@vitejs/plugin-react": "^4.0.4",
     "@vitest/coverage-istanbul": "^0.28.5",
     "@vitest/ui": "^0.28.5",
     "es-module-lexer": "^1.3.0",
     "eslint": "^8.48.0",
     "eslint-plugin-lit": "^1.9.1",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-wc": "^1.5.0",
     "happy-dom": "^10.11.0",
@@ -110,7 +105,9 @@
       "object.fromentries": "npm:@nolyfill/object.fromentries@latest",
       "object.hasown": "npm:@nolyfill/object.hasown@latest",
       "object.values": "npm:@nolyfill/object.values@latest",
-      "string.prototype.matchall": "npm:@nolyfill/string.prototype.matchall@latest"
+      "string.prototype.matchall": "npm:@nolyfill/string.prototype.matchall@latest",
+      "has": "npm:@nolyfill/has@latest",
+      "is-generator-function": "npm:@nolyfill/is-generator-function@latest"
     }
   },
   "stackblitz": {
