@@ -185,6 +185,14 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     });
   };
 
+  override onCopy(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
+  override onPaste(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
   protected override render() {
     const progress = this._value;
     let backgroundColor = progressColors.processing;
