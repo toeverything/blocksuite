@@ -53,9 +53,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
     'plugin:wc/recommended',
     'plugin:lit/recommended',
   ],
@@ -72,12 +70,11 @@ module.exports = {
   ],
   overrides: [
     {
-      plugins: ['react', '@typescript-eslint'],
-      files: ['*.ts', '*.tsx'],
+      plugins: ['@typescript-eslint'],
+      files: ['*.ts'],
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
-        'react/react-in-jsx-scope': 'off',
       },
     },
     ...allPackages.map(pkg => ({
@@ -92,17 +89,12 @@ module.exports = {
       },
     })),
   ],
-  settings: {
-    react: {
-      version: '18',
-    },
-  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react', '@typescript-eslint', 'simple-import-sort'],
+  plugins: ['@typescript-eslint', 'simple-import-sort'],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',
