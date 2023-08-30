@@ -1,7 +1,6 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 
 export class PageKeyboardManager {
   constructor(public pageElement: BlockElement) {
@@ -70,15 +69,12 @@ export class PageKeyboardManager {
   };
 
   private _deleteBlocksBySelection(selections: BlockSelection[]) {
-    const children: BaseBlockModel[] = [];
     selections.forEach(selection => {
       const block = this._page.getBlockById(selection.blockId);
       if (block) {
-        children.push(...block.children);
         this._page.deleteBlock(block);
       }
     });
-    return children;
   }
 
   private _replaceBlocksBySelection(
@@ -104,13 +100,8 @@ export class PageKeyboardManager {
     const parent = this._page.getParent(first);
     const index = parent?.children.indexOf(first);
 
-    const children = this._deleteBlocksBySelection(selections);
-    const blockId = this._page.addBlock(
-      flavour,
-      { props, children },
-      parent,
-      index
-    );
+    this._deleteBlocksBySelection(selections);
+    const blockId = this._page.addBlock(flavour, props, parent, index);
 
     return {
       blockId,

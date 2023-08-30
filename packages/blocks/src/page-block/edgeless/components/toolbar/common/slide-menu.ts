@@ -48,7 +48,9 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       border: 1px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      transition: transform 0.3s ease-in-out, opacity 0.5s ease-in-out;
+      transition:
+        transform 0.3s ease-in-out,
+        opacity 0.5s ease-in-out;
       z-index: 12;
     }
     .next-slide-button {

@@ -62,7 +62,7 @@ export type SchemaToModel<
       props: PropsGetter<object>;
       flavour: string;
     };
-  }
+  },
 > = BaseBlockModel<PropsFromGetter<Schema['model']['props']>> &
   ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
@@ -79,7 +79,7 @@ export function defineBlockSchema<
     parent?: string[];
     children?: string[];
   }>,
-  Model extends BaseBlockModel<Props>
+  Model extends BaseBlockModel<Props>,
 >(options: {
   flavour: Flavour;
   metadata: Metadata;
@@ -162,7 +162,7 @@ function MagicProps(): {
 
 // @ts-ignore
 export class BaseBlockModel<
-  Props extends object = object
+  Props extends object = object,
 > extends MagicProps()<Props> {
   static version: number;
   flavour!: string;

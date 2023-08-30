@@ -5,7 +5,7 @@ import type { CellRenderer, DataViewCellComponent } from './manager.js';
 
 export interface Renderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
-  Value = unknown
+  Value = unknown,
 > {
   type: string;
   icon?: UniComponent;
@@ -41,7 +41,7 @@ export const columnRenderer = new ColumnRendererHelper();
 
 export const createFromBaseCellRenderer = <
   Value,
-  Data extends Record<string, unknown> = Record<string, unknown>
+  Data extends Record<string, unknown> = Record<string, unknown>,
 >(
   renderer: new () => BaseCellRenderer<Value, Data>
 ): DataViewCellComponent => {

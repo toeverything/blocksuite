@@ -139,12 +139,13 @@ export class EdgelessNotesContainer extends WithDisposable(LitElement) {
       ${repeat(
         notes,
         child => child.id,
-        (child, index) => html`<edgeless-child-note
-          .index=${index}
-          .model=${child}
-          .renderer=${renderer}
-          .edgeless=${this.edgeless}
-        ></edgeless-child-note>`
+        (child, index) =>
+          html`<edgeless-child-note
+            .index=${index}
+            .model=${child}
+            .renderer=${renderer}
+            .edgeless=${this.edgeless}
+          ></edgeless-child-note>`
       )}
     `;
   }

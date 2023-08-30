@@ -3,9 +3,12 @@ export * from './surface.js';
 export * from './text.js';
 
 declare global {
-  type BlockSuiteSelectionType = keyof BlockSuiteSelection;
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace BlockSuite {
+    type SelectionType = keyof Selection;
 
-  type BlockSuiteSelectionInstance = {
-    [P in BlockSuiteSelectionType]: InstanceType<BlockSuiteSelection[P]>;
-  };
+    type SelectionInstance = {
+      [P in SelectionType]: InstanceType<Selection[P]>;
+    };
+  }
 }

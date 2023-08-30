@@ -73,7 +73,10 @@ export class WidgetElement extends WithDisposable(LitElement) {
 }
 
 declare global {
-  interface BlockSuiteView {
-    widget: BlockSuiteViewSpec<WidgetElement>;
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace BlockSuite {
+    interface View {
+      widget: BlockSuiteViewSpec<WidgetElement>;
+    }
   }
 }

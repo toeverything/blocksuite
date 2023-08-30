@@ -174,7 +174,7 @@ export type DataSourceConfig =
   | TagsDatasourceConfig;
 export type GetConfig<
   K extends DataSourceConfig['type'],
-  T = DataSourceConfig
+  T = DataSourceConfig,
 > = T extends {
   type: K;
 }

@@ -24,7 +24,7 @@ export type AffineDeltaInsert = DeltaInsert<AffineTextAttributes>;
 export type AffineVEditor = VEditor<AffineTextAttributes>;
 
 export type AffineTextSchema<
-  TextAttributes extends BaseTextAttributes = AffineTextAttributes
+  TextAttributes extends BaseTextAttributes = AffineTextAttributes,
 > = {
   attributesSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
   textRenderer: () => AttributeRenderer<TextAttributes>;

@@ -7,11 +7,9 @@ export type NodeView<T = unknown> = {
   id: string;
   path: string[];
   view: T;
+  type: BlockSuite.ViewType;
 };
-export type NodeViewLeaf<T> = NodeView<T> & {
-  type: keyof BlockSuiteView;
-};
-export type NodeViewTree<T> = NodeViewLeaf<T> & {
+export type NodeViewTree<T> = NodeView<T> & {
   children: NodeViewTree<T>[];
 };
 
@@ -19,6 +17,7 @@ type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U> ? U : unknown;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface BlockSuiteViewSpec<T = any> {
+  type: BlockSuite.ViewType;
   fromDOM: (node: Node) => null | NodeView<T>;
   toDOM: (nodeView: NodeView<T>) => Element;
   getChildren: (node: Element) => Element[];
@@ -31,9 +30,9 @@ const observeOptions = {
 
 export class ViewStore<NodeViewType = unknown> {
   private _cachedTree: NodeViewTree<NodeViewType> | null = null;
-  private _cachedPath: Map<Node, NodeViewLeaf<NodeViewType>[]> = new Map();
+  private _cachedPath: Map<Node, NodeView<NodeViewType>[]> = new Map();
   private _observer: MutationObserver;
-  readonly viewSpec = new Map<string, BlockSuiteViewSpec>();
+  readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
   constructor(public blockStore: BlockStore) {
     this._observer = new MutationObserver(() => {
@@ -50,44 +49,47 @@ export class ViewStore<NodeViewType = unknown> {
     return node.children;
   };
 
-  register<T extends keyof BlockSuiteView>(type: T, spec: BlockSuiteView[T]) {
-    this.viewSpec.set(type, spec);
+  register<T extends BlockSuite.ViewType>(spec: BlockSuite.View[T]) {
+    this.viewSpec.add(spec);
   }
 
-  getNodeView = (node: Node): NodeViewLeaf<NodeViewType> | null => {
-    for (const [type, spec] of this.viewSpec.entries()) {
+  getNodeView = (node: Node): NodeView<NodeViewType> | null => {
+    for (const [_, spec] of this.viewSpec.entries()) {
       const view = spec.fromDOM(node);
       if (view) {
         return {
-          type,
           ...view,
-        } as NodeViewLeaf<NodeViewType>;
+        } as NodeView<NodeViewType>;
       }
     }
     return null;
   };
 
   calculatePath = (node: Node) => {
-    const path = this.calculateNodeViewPath(node);
+    const path = this._calculateNodeViewPath(node);
     return path.map(x => x.id);
   };
 
-  calculateNodeViewPath = (node: Node) => {
+  private _getViewSpec = (type: string) => {
+    return Array.from(this.viewSpec).find(spec => spec.type === type);
+  };
+
+  private _calculateNodeViewPath = (node: Node) => {
     if (this._cachedPath.has(node)) {
-      return this._cachedPath.get(node) as NodeViewLeaf<NodeViewType>[];
+      return this._cachedPath.get(node) as NodeView<NodeViewType>[];
     }
     const root = this.blockStore.root;
 
     const iterate = (
       node: Node | null,
-      path: Array<NodeViewLeaf<NodeViewType>>
-    ): Array<NodeViewLeaf<NodeViewType>> => {
+      path: Array<NodeView<NodeViewType>>
+    ): Array<NodeView<NodeViewType>> => {
       if (!node || node === root) return path;
       const nodeView = this.getNodeView(node);
       if (!nodeView) {
         return path;
       }
-      const spec = this.viewSpec.get(nodeView.type);
+      const spec = this._getViewSpec(nodeView.type);
       assertExists(spec);
       const next = spec.toDOM(nodeView as never).parentElement;
       if (!next) {
@@ -112,7 +114,7 @@ export class ViewStore<NodeViewType = unknown> {
         throw new Error('nodeView not found');
       }
 
-      const spec = this.viewSpec.get(nodeView.type);
+      const spec = this._getViewSpec(nodeView.type);
       assertExists(spec);
 
       const children = spec
@@ -150,10 +152,10 @@ export class ViewStore<NodeViewType = unknown> {
     }, tree);
   };
 
-  viewFromPath<T extends keyof BlockSuiteView>(
+  viewFromPath<T extends BlockSuite.ViewType>(
     type: T,
     path: string[]
-  ): null | SpecToNodeView<BlockSuiteView[T]>;
+  ): null | SpecToNodeView<BlockSuite.View[T]>;
   viewFromPath<T extends BlockSuiteViewSpec>(
     type: string,
     path: string[]
@@ -321,6 +323,7 @@ export class ViewStore<NodeViewType = unknown> {
   mount() {
     this._observer.observe(this.blockStore.root, observeOptions);
   }
+
   unmount() {
     this._cachedPath.clear();
     this._cachedTree = null;
@@ -334,6 +337,11 @@ export class ViewStore<NodeViewType = unknown> {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface BlockSuiteView {}
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace BlockSuite {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface View {}
+
+    type ViewType = keyof View;
+  }
 }
