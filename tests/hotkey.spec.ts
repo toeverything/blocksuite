@@ -919,35 +919,49 @@ test('should ctrl+enter create new block', async ({ page }) => {
   await assertRichTexts(page, ['1', '23', '']);
 });
 
-test('should bracket complete works', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, '([{');
-  // type without selection should not trigger bracket complete
-  await assertRichTexts(page, ['([{']);
+test.describe('bracket auto complete', () => {
+  test('should bracket complete works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, '([{');
+    // type without selection should not trigger bracket complete
+    await assertRichTexts(page, ['([{']);
 
-  await dragBetweenIndices(page, [0, 1], [0, 2]);
-  await type(page, '(');
-  await assertRichTexts(page, ['(([){']);
+    await dragBetweenIndices(page, [0, 1], [0, 2]);
+    await type(page, '(');
+    await assertRichTexts(page, ['(([){']);
 
-  await type(page, ')');
-  // Should not trigger bracket complete when type right bracket
-  await assertRichTexts(page, ['(()){']);
-});
+    await type(page, ')');
+    // Should not trigger bracket complete when type right bracket
+    await assertRichTexts(page, ['(()){']);
+  });
 
-test('should bracket complete with backtick works', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const { paragraphId } = await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'hello world');
-
-  await dragBetweenIndices(page, [0, 2], [0, 5]);
-  await resetHistory(page);
-  await type(page, '`');
-  await assertStoreMatchJSX(
+  test('bracket complete should not work when selecting mutiple lines', async ({
     page,
-    `
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+
+    // 1(23 45)6 789
+    await dragBetweenIndices(page, [0, 1], [1, 2]);
+    await type(page, '(');
+    await assertRichTexts(page, ['1(6', '789']);
+  });
+
+  test('should bracket complete with backtick works', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const { paragraphId } = await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, 'hello world');
+
+    await dragBetweenIndices(page, [0, 2], [0, 5]);
+    await resetHistory(page);
+    await type(page, '`');
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text={
     <>
@@ -965,19 +979,20 @@ test('should bracket complete with backtick works', async ({ page }) => {
   }
   prop:type="text"
 />`,
-    paragraphId
-  );
+      paragraphId
+    );
 
-  await undoByClick(page);
-  await assertStoreMatchJSX(
-    page,
-    `
+    await undoByClick(page);
+    await assertStoreMatchJSX(
+      page,
+      `
 <affine:paragraph
   prop:text="hello world"
   prop:type="text"
 />`,
-    paragraphId
-  );
+      paragraphId
+    );
+  });
 });
 
 // FIXME: getCurrentBlockRange need to handle comment node

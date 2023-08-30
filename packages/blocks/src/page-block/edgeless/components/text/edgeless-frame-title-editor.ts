@@ -1,11 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import {
-  type FrameElement,
-  getFontString,
-  getLineHeight,
-  getLineWidth,
-} from '@blocksuite/phasor';
+import { type FrameElement } from '@blocksuite/phasor';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -104,25 +99,12 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       const padding = this._frame.padding;
       const zoom = viewport.zoom;
       const bound = this._frame.gridBound;
-      const fontSize = 16;
-      const fontFamily = 'sans-serif';
-      const lineHeight = getLineHeight(fontFamily, fontSize);
-      const font = getFontString({
-        fontSize,
-        fontFamily,
-        lineHeight: lineHeight + 'px',
-      });
-      const width =
-        getLineWidth(this._frame.title.toJSON(), font) +
-        padding[0] * 2 * zoom +
-        2;
       const radius = this._frame.radius;
       const [x, y] = viewport.toViewCoord(bound.x, bound.y);
       virgoStyle = styleMap({
         position: 'absolute',
         left: x + 'px',
         top: y + 'px',
-        width: width + 'px',
         minWidth: '8px',
         borderRadius: radius + 'px',
         fontSize: '16px',

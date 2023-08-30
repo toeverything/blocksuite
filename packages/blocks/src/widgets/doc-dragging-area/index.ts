@@ -133,6 +133,9 @@ export class DocDraggingAreaWidget extends WidgetElement {
       'dragStart',
       ctx => {
         const state = ctx.get('pointerState');
+        const { button } = state.raw;
+        if (button !== 0) return;
+
         if (isBlankArea(state)) {
           this._dragging = true;
           const viewportElement = this._viewportElement;

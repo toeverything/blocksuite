@@ -327,7 +327,7 @@ export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
     }
   }
 
-  return [...chunksGenerator(transformedDelta)];
+  return Array.from(chunksGenerator(transformedDelta));
 }
 
 export function normalizeTextBound(text: TextElement, bound: Bound): Bound {

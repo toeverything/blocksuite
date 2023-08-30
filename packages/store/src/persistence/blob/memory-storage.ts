@@ -15,7 +15,7 @@ export const createMemoryStorage = (): BlobStorage => {
         memoryStorage.delete(key);
       },
       list: async () => {
-        return [...memoryStorage.keys()];
+        return Array.from(memoryStorage.keys());
       },
     },
   };

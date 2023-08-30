@@ -183,6 +183,13 @@ export class DragHandleWidget extends WidgetElement {
     this._resetDragHandleGrabber();
   }
 
+  private _showDragHandleOnHoverBlock(blockPath: string[]) {
+    const blockElement = this._getBlockElementFromViewStore(blockPath);
+
+    assertExists(blockElement);
+    this._show(blockElement);
+  }
+
   private _getDraggingAreaRect(blockElement: BlockElement) {
     if (!this._hoveredBlockPath) return;
 
@@ -590,6 +597,7 @@ export class DragHandleWidget extends WidgetElement {
     ) {
       selectionManager.clear(['block']);
       this._dragHoverRect = null;
+      this._showDragHandleOnHoverBlock(this._hoveredBlockPath);
       return;
     }
 
@@ -600,9 +608,8 @@ export class DragHandleWidget extends WidgetElement {
     );
 
     assertExists(blockElement);
+    if (selectedBlocks.length > 1) this._show(blockElement);
     this._setSelectedBlocks([blockElement]);
-    // this._showHoverRect(blockElement);
-    // this._dragHoverRect = this._getDraggingAreaRect(blockElement) ?? null;
 
     return true;
   };
@@ -858,7 +865,6 @@ export class DragHandleWidget extends WidgetElement {
 
     // When pointer enter drag handle grabber
     // Extend drag handle grabber to the height of the hovered block
-    // And show drag hover rect on the all the blocks that can be dragged
     this._disposables.addFromEvent(
       this._dragHandleContainer,
       'pointerenter',
@@ -876,7 +882,6 @@ export class DragHandleWidget extends WidgetElement {
         const height = draggingAreaRect.height - 16;
         const top = draggingAreaRect.top + 8;
 
-        this._dragHandleContainer.style.height = `${height}px`;
         const lastTop = this._dragHandleContainer.getBoundingClientRect().top;
 
         const paddingTop =
@@ -884,6 +889,7 @@ export class DragHandleWidget extends WidgetElement {
         const translateY = top - lastTop - paddingTop;
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
+        this._dragHandleContainer.style.height = `${height}px`;
 
         this._dragHandleGrabber.style.height = `100%`;
         this._dragHandleGrabber.style.width = `${

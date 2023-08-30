@@ -33,7 +33,7 @@ export class ColumnRendererHelper {
   }
 
   list(): Renderer[] {
-    return [...this._columns.values()];
+    return Array.from(this._columns.values());
   }
 }
 

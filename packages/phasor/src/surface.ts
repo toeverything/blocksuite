@@ -230,7 +230,7 @@ export class SurfaceManager {
   }
 
   getElementsBound(): IBound | null {
-    return getCommonBound([...this._elements.values()]);
+    return getCommonBound(Array.from(this._elements.values()));
   }
 
   addElement<T extends keyof IPhasorElementType>(
@@ -389,7 +389,7 @@ export class SurfaceManager {
   }
 
   getElements() {
-    return [...this._elements.values()];
+    return Array.from(this._elements.values());
   }
 
   getElementsByType<T extends keyof IPhasorElementType>(

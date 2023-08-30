@@ -209,7 +209,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   getBlockByFlavour(blockFlavour: string) {
-    return [...this._blockMap.values()].filter(
+    return Array.from(this._blockMap.values()).filter(
       ({ flavour }) => flavour === blockFlavour
     );
   }
