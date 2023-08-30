@@ -171,16 +171,13 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     const items = repeat(
       this.frames,
       frame => frame.id,
-      (frame, index) => html` <div
-        class="draggable"
-        id=${frame.id}
-        index=${index}
-      >
-        <div class="draggable-bar"></div>
-        <div class="draggable-title">${frame.title}</div>
-        <div class="draggable-index">${index + 1}</div>
-        <div></div>
-      </div>`
+      (frame, index) =>
+        html` <div class="draggable" id=${frame.id} index=${index}>
+          <div class="draggable-bar"></div>
+          <div class="draggable-title">${frame.title}</div>
+          <div class="draggable-index">${index + 1}</div>
+          <div></div>
+        </div>`
     );
     return html`
       <div class="container">

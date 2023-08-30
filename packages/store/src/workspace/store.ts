@@ -54,7 +54,7 @@ export interface SSROptions {
 }
 
 export interface StoreOptions<
-  Flags extends Record<string, unknown> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
 > extends SSROptions {
   id: string;
   providerCreators?: DocProviderCreator[];

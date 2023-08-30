@@ -2,7 +2,7 @@ export const startDrag = <
   T extends Record<string, unknown> | void,
   P = {
     x: number;
-  }
+  },
 >(
   evt: PointerEvent,
   ops: {

@@ -21,7 +21,9 @@ export const tooltipStyle = css`
     color: var(--affine-white);
     background: var(--affine-tooltip);
     opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
     pointer-events: none;
     user-select: none;
 
