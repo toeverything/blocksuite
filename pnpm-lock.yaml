@@ -328,15 +328,6 @@ importers:
       '@blocksuite/virgo':
         specifier: workspace:*
         version: link:../virgo
-      '@lit-labs/react':
-        specifier: ^1.2.1
-        version: 1.2.1
-      '@rich-data/json-plugin':
-        specifier: 3.0.0-20230826094703-d698646
-        version: 3.0.0-20230826094703-d698646(@rich-data/viewer@3.0.0-20230826094703-d698646)(react-dom@18.2.0)(react@18.2.0)
-      '@rich-data/viewer':
-        specifier: 3.0.0-20230826094703-d698646
-        version: 3.0.0-20230826094703-d698646(react-dom@18.2.0)(react@18.2.0)
       '@shoelace-style/shoelace':
         specifier: 2.0.0
         version: 2.0.0
@@ -1444,8 +1435,8 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@nolyfill/deep-equal@1.0.20:
-    resolution: {integrity: sha512-fv52RPOgKqx+hCok9s3ejJlcJ8+AHWf7xHI/zry/VauNqNl+DslLaaMAHChj5a+vXQI0gLDwIK1ugSY+B+Lwaw==}
+  /@nolyfill/deep-equal@1.0.21:
+    resolution: {integrity: sha512-SjS1Sv6twG52Pj7EbjcJjt4Fn5e/mYo7v4alPJG2bOmGgXO+jB1JkN4hiHj+p2eLCzCE1wX4xN9/4q4sZLW2QQ==}
     engines: {node: '>=12.4.0'}
     dependencies:
       dequal: 2.0.3
@@ -1498,31 +1489,6 @@ packages:
   /@polka/url@1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
     dev: true
-
-  /@rich-data/json-plugin@3.0.0-20230826094703-d698646(@rich-data/viewer@3.0.0-20230826094703-d698646)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-2/z3c4xz9IQTLP8Ic4q0GP4fs+A5I8dpGLvzlxfvWGVhaaUDY3hEtJlIepZl99fi6kHg2idoqaOAAE4uE8qs0w==}
-    peerDependencies:
-      '@rich-data/viewer': ^3.0.0-20230826094703-d698646
-      react: ^18
-      react-dom: ^18
-    dependencies:
-      '@rich-data/viewer': 3.0.0-20230826094703-d698646(react-dom@18.2.0)(react@18.2.0)
-      clsx: 1.2.1
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
-
-  /@rich-data/viewer@3.0.0-20230826094703-d698646(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-vuWoV52fE4I52JEeynEpjEcjo+BClV3j+DDBu1j/sScPFjUUuVAeRp66ndRrxIiS9GJXQP+c5zmSjN+H8kp8sA==}
-    peerDependencies:
-      react: ^18
-      react-dom: ^18
-    dependencies:
-      clsx: 1.2.1
-      jotai: 2.2.2(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: false
 
   /@shoelace-style/animations@1.1.0:
     resolution: {integrity: sha512-Be+cahtZyI2dPKRm8EZSx3YJQ+jLvEcn3xzRP7tM4tqBnvd/eW/64Xh0iOf0t2w5P8iJKfdBbpVNE9naCaOf2g==}
@@ -2794,11 +2760,6 @@ packages:
     resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
     engines: {node: '>=0.8'}
     dev: true
-
-  /clsx@1.2.1:
-    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
-    engines: {node: '>=6'}
-    dev: false
 
   /co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
@@ -4106,7 +4067,7 @@ packages:
     resolution: {integrity: sha512-uPpH7OKX4H25hBmU6G1jWNaqJGpTXxey+YOUizJUAgu0AjLUeC8D73hTrhvDS5D+GJN1DN1+hhc/eF/wpxtp0w==}
     engines: {node: '>= 0.8'}
     dependencies:
-      deep-equal: /@nolyfill/deep-equal@1.0.20
+      deep-equal: /@nolyfill/deep-equal@1.0.21
       http-errors: 1.8.1
     dev: true
 
@@ -4539,18 +4500,6 @@ packages:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
     dev: true
-
-  /jotai@2.2.2(react@18.2.0):
-    resolution: {integrity: sha512-Cn8hnBg1sc5ppFwEgVGTfMR5WSM0hbAasd/bdAwIwTaum0j3OUPqBSC4tyk3jtB95vicML+RRWgKFOn6gtfN0A==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      react: '>=17.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
-    dependencies:
-      react: 18.2.0
-    dev: false
 
   /js-levenshtein-esm@1.2.0:
     resolution: {integrity: sha512-fzreKVq1eD7eGcQr7MtRpQH94f8gIfhdrc7yeih38xh684TNMK9v5aAu2wxfIRMk/GpAJRrzcirMAPIaSDaByQ==}

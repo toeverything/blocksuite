@@ -36,7 +36,6 @@ import { Pane } from 'tweakpane';
 
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import type { CustomNavigationPanel } from './custom-navigation-panel';
-import { createViewer } from './doc-inspector';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -328,10 +327,6 @@ export class DebugMenu extends ShadowlessElement {
       }
     };
     input.click();
-  }
-
-  private async _inspect() {
-    await createViewer(this.workspace.doc.toJSON());
   }
 
   private _shareUrl() {
@@ -638,7 +633,6 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
