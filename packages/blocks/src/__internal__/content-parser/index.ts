@@ -200,7 +200,8 @@ export class ContentParser {
     ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const elementToSvgElementFunc = this._elementToSvgElement.bind(this);
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -230,17 +231,7 @@ export class ContentParser {
           }
         });
 
-        const richList = element.querySelectorAll('.affine-rich-text');
-        const promises = Array.from(richList).map(async rich => {
-          const svgEle = await elementToSvgElementFunc(
-            rich.cloneNode(true) as HTMLElement,
-            rich.clientWidth,
-            rich.clientHeight
-          );
-          rich.parentElement?.appendChild(svgEle);
-          rich.parentElement?.removeChild(rich);
-        });
-        await promises;
+        await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
@@ -287,7 +278,8 @@ export class ContentParser {
     );
     if (!pageContainer) return;
 
-    const elementToSvgElementFunc = this._elementToSvgElement.bind(this);
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -310,18 +302,8 @@ export class ContentParser {
           return false;
         }
       },
-      onclone: async function (documentClone: Document, element: HTMLElement) {
-        const richList = element.querySelectorAll('.affine-rich-text');
-        const promises = Array.from(richList).map(async rich => {
-          const svgEle = await elementToSvgElementFunc(
-            rich.cloneNode(true) as HTMLElement,
-            rich.clientWidth,
-            rich.clientHeight
-          );
-          rich.parentElement?.appendChild(svgEle);
-          rich.parentElement?.removeChild(rich);
-        });
-        await promises;
+      onclone: async function (_documentClone: Document, element: HTMLElement) {
+        await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
@@ -334,6 +316,21 @@ export class ContentParser {
     );
     this._checkCanContinueToCanvas(pathname, pageMode);
     return data;
+  }
+
+  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+    const richList = Array.from(element.querySelectorAll('.affine-rich-text'));
+    await Promise.all(
+      richList.map(async rich => {
+        const svgEle = await this._elementToSvgElement(
+          rich.cloneNode(true) as HTMLElement,
+          rich.clientWidth,
+          rich.clientHeight + 1
+        );
+        rich.parentElement?.appendChild(svgEle);
+        rich.parentElement?.removeChild(rich);
+      })
+    );
   }
 
   private async _elementToSvgElement(
