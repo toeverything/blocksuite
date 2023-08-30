@@ -38,7 +38,10 @@ export class TableViewClipboard implements BaseViewClipboard {
   private _view: Ref<DataViewExpose | undefined>;
   private _data: DataViewTableManager;
 
-  constructor(private _root: BlockSuiteRoot, config: TableViewClipboardConfig) {
+  constructor(
+    private _root: BlockSuiteRoot,
+    config: TableViewClipboardConfig
+  ) {
     this._path = config.path;
     this._model = config.model;
     this._view = config.view;

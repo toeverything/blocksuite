@@ -1006,7 +1006,7 @@ export class EdgelessConnectorManager {
     Bound | null,
     Bound | null,
     Bound | null,
-    Bound | null
+    Bound | null,
   ] {
     const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 

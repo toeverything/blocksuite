@@ -587,7 +587,7 @@ test.describe('slash menu with customize menu', () => {
         ({
           ['_$litStatic$']: strings[0],
           r: Symbol.for(''),
-        } as const);
+        }) as const;
 
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
@@ -632,7 +632,7 @@ test.describe('slash menu with customize menu', () => {
         ({
           ['_$litStatic$']: strings[0],
           r: Symbol.for(''),
-        } as const);
+        }) as const;
 
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");

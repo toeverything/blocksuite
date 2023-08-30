@@ -9,7 +9,7 @@ import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<
     Value,
-    Data extends Record<string, unknown> = Record<string, unknown>
+    Data extends Record<string, unknown> = Record<string, unknown>,
   >
   extends WithDisposable(ShadowlessElement)
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>

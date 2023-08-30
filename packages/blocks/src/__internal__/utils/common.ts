@@ -41,7 +41,7 @@ export function isEmpty(model: BaseBlockModel): boolean {
 }
 
 export function createEvent<
-  T extends keyof WindowEventMap | keyof HTMLElementEventMap
+  T extends keyof WindowEventMap | keyof HTMLElementEventMap,
 >(type: T, detail: Detail<T>) {
   return new CustomEvent<Detail<T>>(type, { detail });
 }
@@ -53,7 +53,7 @@ export function isControlledKeyboardEvent(e: KeyboardEvent) {
 export function on<
   T extends HTMLElement,
   K extends keyof M,
-  M = HTMLElementEventMap
+  M = HTMLElementEventMap,
 >(
   element: T,
   event: K,
@@ -68,7 +68,7 @@ export function on<T extends Document, K extends keyof M, M = DocumentEventMap>(
 ): () => void;
 export function on<
   T extends HTMLElement | Document,
-  K extends keyof HTMLElementEventMap
+  K extends keyof HTMLElementEventMap,
 >(
   element: T,
   event: K,
@@ -95,7 +95,7 @@ export function on<
 export function once<
   T extends HTMLElement,
   K extends keyof M,
-  M = HTMLElementEventMap
+  M = HTMLElementEventMap,
 >(
   element: T,
   event: K,
@@ -105,7 +105,7 @@ export function once<
 export function once<
   T extends Document,
   K extends keyof M,
-  M = DocumentEventMap
+  M = DocumentEventMap,
 >(
   element: T,
   event: K,
@@ -114,7 +114,7 @@ export function once<
 ): () => void;
 export function once<
   T extends HTMLElement,
-  K extends keyof HTMLElementEventMap
+  K extends keyof HTMLElementEventMap,
 >(
   element: T,
   event: K,

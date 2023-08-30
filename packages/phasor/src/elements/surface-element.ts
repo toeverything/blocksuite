@@ -42,7 +42,7 @@ export type ComputedValue = (value: string) => string;
 
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement,
-  L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord
+  L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord,
 > {
   abstract containedByBounds(bounds: Bound): boolean;
 

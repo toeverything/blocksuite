@@ -83,13 +83,14 @@ export class AffineSelectedBlocks extends WithDisposable(LitElement) {
       const { x, y } = firstRect;
       return repeat(
         rects,
-        ({ width, height, left, top }) => html`<div
-          style=${styleMap({
-            width: `${width}px`,
-            height: `${height}px`,
-            transform: `translate(${left - x}px, ${top - y}px)`,
-          })}
-        ></div>`
+        ({ width, height, left, top }) =>
+          html`<div
+            style=${styleMap({
+              width: `${width}px`,
+              height: `${height}px`,
+              transform: `translate(${left - x}px, ${top - y}px)`,
+            })}
+          ></div>`
       );
     }
 

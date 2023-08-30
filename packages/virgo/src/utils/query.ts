@@ -4,7 +4,7 @@ import type { VEditor, VirgoRootElement } from '../virgo.js';
 import type { BaseTextAttributes } from './base-attributes.js';
 
 export function findDocumentOrShadowRoot<
-  TextAttributes extends BaseTextAttributes
+  TextAttributes extends BaseTextAttributes,
 >(editor: VEditor<TextAttributes>): Document {
   const el = editor.rootElement;
 

@@ -8,7 +8,7 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { SelectionArea } from '../services/tools-manager.js';
 
 export abstract class EdgelessToolController<
-  Tool extends EdgelessTool = EdgelessTool
+  Tool extends EdgelessTool = EdgelessTool,
 > {
   protected readonly _edgeless: EdgelessPageBlockComponent;
 

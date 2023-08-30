@@ -127,7 +127,7 @@ export interface DataViewManager {
 
 export interface DataViewColumnManager<
   Value = unknown,
-  Data extends Record<string, unknown> = Record<string, unknown>
+  Data extends Record<string, unknown> = Record<string, unknown>,
 > {
   get dataViewManager(): DataViewManager;
 
