@@ -2,7 +2,7 @@ import '../buttons/menu-button.js';
 import '../../../../components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound } from '@blocksuite/phasor';
+import { Bound, ConnectorElement } from '@blocksuite/phasor';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -45,6 +45,8 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       this.edgeless.page.updateBlock(ele, {
         xywh: bound.serialize(),
       });
+    } else if (ele instanceof ConnectorElement) {
+      this.edgeless.connector.updateXYWH(ele, bound);
     } else {
       this.edgeless.surface.updateElement(ele.id, {
         xywh: bound.serialize(),
