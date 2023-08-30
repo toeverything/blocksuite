@@ -16,7 +16,7 @@ export const currentTextBlock: Command = ctx => {
     return false;
   }
 
-  ctx.user.selectedText = nodeView;
+  ctx.data.selectedText = nodeView;
 
   return true;
 };
@@ -24,7 +24,7 @@ export const currentTextBlock: Command = ctx => {
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
-    interface UserCommandCtx {
+    interface CommandData {
       selectedText: BlockElement;
     }
 

@@ -2,7 +2,7 @@ import type { BlockStore } from '../store/index.js';
 
 export interface CommandCtx {
   blockStore: BlockStore;
-  user: Partial<BlockSuite.UserCommandCtx>;
+  data: Partial<BlockSuite.CommandData>;
 }
 
 export type Command<Options = void> = (
@@ -37,7 +37,7 @@ export class CommandManager {
   private _getCommandCtx = () => {
     return {
       blockStore: this.blockStore,
-      user: {},
+      data: {},
     };
   };
 
@@ -86,7 +86,7 @@ export class CommandManager {
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
-    interface UserCommandCtx {}
+    interface CommandData {}
     interface Commands {}
 
     type CommandName = keyof Commands;
