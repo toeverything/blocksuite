@@ -404,7 +404,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   private _imageResizeBoardTemplate() {
     const isFocused = this._focused;
     if (!isFocused || this._imageState !== 'ready') return null;
-    return ImageSelectedRectsContainer();
+    const readonly = this.model.page.readonly;
+    return ImageSelectedRectsContainer(readonly);
   }
 
   override render() {
