@@ -3,7 +3,11 @@
 The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nightly` versions are released daily based on the master branch, and they are always tested on CI. This means that the `nightly` versions can already be used in real-world projects like AFFiNE at any time:
 
 ```sh
-pnpm i @blocksuite/editor@nightly
+pnpm i \
+  @blocksuite/editor@nightly \
+  @blocksuite/lit \
+  @blocksuite/block-std \
+  @toeverything/theme
 ```
 
 If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](https://github.com/toeverything/blocksuite/blob/master/packages/playground/examples/basic/index.html)):
