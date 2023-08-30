@@ -3,7 +3,7 @@ import type { DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseDataViewManager } from './data-view-manager.js';
 
 export interface BaseViewClipboardConfig<
-  Data extends BaseDataViewManager = BaseDataViewManager
+  Data extends BaseDataViewManager = BaseDataViewManager,
 > {
   data: Data;
   disposables: DisposableGroup;
