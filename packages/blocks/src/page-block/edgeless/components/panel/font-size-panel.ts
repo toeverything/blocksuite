@@ -8,46 +8,66 @@ const MAX_FONT_SIZE = 200;
 @customElement('edgeless-font-size-panel')
 export class EdgelessFontSizePanel extends LitElement {
   static override styles = css`
-    :host {
+    .font-size-container {
       display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 8px;
+      background: var(--affine-background-overlay-panel-color);
+      border-radius: 8px;
     }
 
-    .font-size-container {
+    .font-size-content {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: var(--affine-background-overlay-panel-color);
+      width: 64px;
     }
 
     .font-size-button {
-      text-align: start;
-      font-size: var(--affine-font-base);
+      display: flex;
+      align-items: center;
+      justify-content: start;
+      width: 64px;
+      height: 32px;
+      padding: 0 8px;
+    }
+
+    .font-size-button[active] .font-size-button-label {
+      background: var(--affine-hover-color);
+    }
+
+    .font-size-button-label {
+      text-align: justify;
+      font-size: 15px;
+      font-style: normal;
       width: 48px;
       height: 24px;
       font-weight: 400;
-      padding: 4px 8px;
       line-height: 24px;
+      color: var(--affine-icon-color);
+      padding: 0 8px;
+      border-radius: 4px;
     }
 
-    .font-size-button:hover {
+    .font-size-button-label:hover {
       cursor: pointer;
       background: var(--affine-hover-color);
     }
 
-    .font-size-button[active] {
-      color: var(--affine-primary-color);
-    }
-
     .font-size-input-container {
       display: flex;
-      padding: 4px 8px;
+      align-items: center;
+      justify-content: center;
     }
 
     .font-size-input {
       width: 48px;
+      height: 18px;
       border: 1px solid var(--affine-border-color);
-      border-radius: 4px;
+      border-radius: 8px;
+      padding: 4px 8px;
     }
 
     .font-size-input::placeholder {
@@ -112,62 +132,64 @@ export class EdgelessFontSizePanel extends LitElement {
   override render() {
     return html`
       <div class="font-size-container">
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.SMALL}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.SMALL);
-          }}
-        >
-          Small
-        </div>
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.MEDIUM}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.MEDIUM);
-          }}
-        >
-          Middle
-        </div>
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.LARGE}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.LARGE);
-          }}
-        >
-          Large
-        </div>
-        <div
-          class="font-size-button"
-          role="button"
-          ?active=${this.fontSize === TEXT_FONT_SIZE.XLARGE}
-          @click=${() => {
-            this._onSelect(TEXT_FONT_SIZE.XLARGE);
-          }}
-        >
-          Huge
-        </div>
+        <div class="font-size-content">
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.SMALL}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.SMALL);
+            }}
+          >
+            <div class="font-size-button-label">Small</div>
+          </div>
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.MEDIUM}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.MEDIUM);
+            }}
+          >
+            <div class="font-size-button-label">Middle</div>
+          </div>
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.LARGE}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.LARGE);
+            }}
+          >
+            <div class="font-size-button-label">Large</div>
+          </div>
+          <div
+            class="font-size-button"
+            role="button"
+            ?active=${this.fontSize === TEXT_FONT_SIZE.XLARGE}
+            @click=${() => {
+              this._onSelect(TEXT_FONT_SIZE.XLARGE);
+            }}
+          >
+            <div class="font-size-button-label">Huge</div>
+          </div>
 
-        <div
-          class="font-size-input-container"
-          @click=${(e: MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          <input
-            class="font-size-input"
-            type="text"
-            inputmode="numeric"
-            pattern="[0-9]*"
-            placeholder=${Math.trunc(this.fontSize)}
-            @keypress=${this._onInputKeyPress}
-          />
+          <div
+            class="font-size-input-container"
+            @click=${(e: MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <input
+              class="font-size-input"
+              type="text"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              placeholder=${Math.trunc(this.fontSize)}
+              @keypress=${this._onInputKeyPress}
+            />
+          </div>
         </div>
       </div>
     `;

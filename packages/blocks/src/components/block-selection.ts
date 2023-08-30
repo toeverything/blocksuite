@@ -1,5 +1,5 @@
 import { css, LitElement } from 'lit';
-import { customElement } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 /**
  * Renders a the block selection.
@@ -31,9 +31,26 @@ export class BlockSelection extends LitElement {
       height: 100%;
       pointer-events: none;
       background-color: var(--affine-hover-color);
-      border-radius: 5px;
+      border-color: transparent;
+      border-style: solid;
     }
   `;
+
+  @property({ attribute: false })
+  borderRadius?: number = 5;
+
+  @property({ attribute: false })
+  borderWidth?: number = 0;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.style.borderRadius = `${this.borderRadius}px`;
+    if (this.borderWidth !== 0) {
+      this.style.boxSizing = 'content-box';
+      this.style.transform = `translate(-${this.borderWidth}px, -${this.borderWidth}px)`;
+    }
+    this.style.borderWidth = `${this.borderWidth}px`;
+  }
 }
 
 declare global {

@@ -1,12 +1,18 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
 
 export type SlashMenuOptions = {
-  isTriggerKey: (e: KeyboardEvent) => boolean;
+  /**
+   * If return false, the slash menu will not show
+   *
+   * If return string, the slash menu will show and the string will be clear after the slash menu is activated
+   */
+  isTriggerKey: (e: KeyboardEvent) => false | string;
   menus: {
     name: string;
     items: SlashItem[];
@@ -26,7 +32,13 @@ export type SlashItem = {
   suffix?: TemplateResult<1>;
   showWhen?: (model: BaseBlockModel) => boolean;
   disabled?: boolean;
-  action: ({ page, model }: { page: Page; model: BaseBlockModel }) => void;
+  action: ({
+    pageElement,
+    model,
+  }: {
+    pageElement: PageBlockComponent;
+    model: BaseBlockModel;
+  }) => void | Promise<void>;
 };
 
 export type InternSlashItem = SlashItem & { groupName: string };
@@ -77,4 +89,16 @@ export function insideDatabase(model: BaseBlockModel) {
 
 export function insideDataView(model: BaseBlockModel) {
   return Utils.isInsideBlockByFlavour(model.page, model, 'affine:data-view');
+}
+
+export function withRemoveEmptyLine(
+  fn: SlashItem['action']
+): SlashItem['action'] {
+  return async args => {
+    await fn(args);
+    const { model } = args;
+    if (!model.text?.length) {
+      model.page.deleteBlock(model);
+    }
+  };
 }

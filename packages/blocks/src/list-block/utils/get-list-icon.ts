@@ -17,32 +17,31 @@ export function ListIcon(
   showChildren: boolean,
   onClick: (e: MouseEvent) => void
 ) {
-  const icon = (() => {
-    switch (model.type) {
-      case 'bulleted':
-        return points[depth % points.length];
-      case 'numbered':
-        return getNumberPrefix(index, depth);
-      case 'todo':
-        return model.checked ? checkboxChecked() : checkboxUnchecked();
-      case 'toggle':
-        return showChildren
-          ? toggleDown()
-          : toggleRight(model.children.length > 0);
-      default:
-        return '';
-    }
-  })();
-
-  return html`
-    <div
-      class="affine-list-block__prefix ${model.type === 'todo'
-        ? 'affine-list-block__todo-prefix'
-        : ''}"
-      @click="${(e: MouseEvent) => onClick(e)}"
-    >
-      <div class="affine-list-block__todo-checked-prefix"></div>
-      ${icon}
-    </div>
-  `;
+  switch (model.type) {
+    case 'bulleted':
+      return html`<div class="affine-list-block__prefix" @click=${onClick}>
+        ${points[depth % points.length]}
+      </div>`;
+    case 'numbered':
+      return html`<div
+        class="affine-list-block__prefix affine-list-block__numbered"
+        @click=${onClick}
+      >
+        ${getNumberPrefix(index, depth)}
+      </div>`;
+    case 'todo':
+      return html`<div
+        class="affine-list-block__prefix affine-list-block__todo-prefix"
+        @click=${onClick}
+      >
+        ${model.checked ? checkboxChecked() : checkboxUnchecked()}
+      </div>`;
+    case 'toggle':
+      return html`<div class="affine-list-block__prefix" @click=${onClick}>
+        ${showChildren ? toggleDown() : toggleRight(model.children.length > 0)}
+      </div>`;
+    default:
+      console.error('Unknown list type', model.type, model);
+      return null;
+  }
 }

@@ -1,8 +1,7 @@
-import { PathMap } from '../../store/path-map.js';
+import { PathFinder } from '../../utils/path-finder.js';
 import { BaseSelection } from '../base.js';
 
 export type TextRangePoint = {
-  blockId: string;
   path: string[];
   index: number;
   length: number;
@@ -15,6 +14,7 @@ export type TextSelectionProps = {
 
 export class TextSelection extends BaseSelection {
   static override type = 'text';
+  static override group = 'note';
 
   from: TextRangePoint;
 
@@ -22,11 +22,11 @@ export class TextSelection extends BaseSelection {
 
   constructor({ from, to }: TextSelectionProps) {
     super({
-      blockId: from.blockId,
       path: from.path,
     });
     this.from = from;
-    this.to = to;
+
+    this.to = this._equalPoint(from, to) ? null : to;
   }
 
   empty(): boolean {
@@ -39,7 +39,9 @@ export class TextSelection extends BaseSelection {
   ): boolean {
     if (a && b) {
       return (
-        a.blockId === b.blockId && a.index === b.index && a.length === b.length
+        PathFinder.equals(a.path, b.path) &&
+        a.index === b.index &&
+        a.length === b.length
       );
     }
 
@@ -49,7 +51,7 @@ export class TextSelection extends BaseSelection {
   override equals(other: BaseSelection): boolean {
     if (other instanceof TextSelection) {
       return (
-        other.blockId === this.blockId &&
+        PathFinder.equals(this.path, other.path) &&
         this._equalPoint(other.from, this.from) &&
         this._equalPoint(other.to, this.to)
       );
@@ -72,11 +74,11 @@ export class TextSelection extends BaseSelection {
   }
 
   isCollapsed(): boolean {
-    return this.to === null;
+    return this.to === null && this.from.length === 0;
   }
 
   isInSameBlock(): boolean {
-    return this.to === null || PathMap.equals(this.from.path, this.to.path);
+    return this.to === null || PathFinder.equals(this.from.path, this.to.path);
   }
 }
 

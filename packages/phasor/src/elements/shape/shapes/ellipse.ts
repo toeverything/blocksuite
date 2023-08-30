@@ -11,18 +11,17 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShpae } from '../utils.js';
-
-function ellipsePoints({ x, y, w, h }: IBound): IVec[] {
-  return [
-    [x, y + h / 2],
-    [x + w / 2, y],
-    [x + w, y + h / 2],
-    [x + w / 2, y + h],
-  ];
-}
+import { drawGeneralShape } from '../utils.js';
 
 export const EllipseMethods: ShapeMethods = {
+  points({ x, y, w, h }: IBound) {
+    return [
+      [x, y + h / 2],
+      [x + w / 2, y],
+      [x + w, y + h / 2],
+      [x + w / 2, y + h],
+    ];
+  },
   render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
@@ -55,21 +54,8 @@ export const EllipseMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    rc.ellipse(cx, cy, renderWidth, renderHeight, {
-      seed,
-      roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
-      strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-      stroke:
-        strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
-          ? 'none'
-          : realStrokeColor,
-      strokeWidth,
-      fill: filled ? realFillColor : undefined,
-      curveFitting: 1,
-    });
-
     if (shapeStyle === ShapeStyle.General) {
-      drawGeneralShpae(ctx, 'ellipse', {
+      drawGeneralShape(ctx, 'ellipse', {
         x: 0,
         y: 0,
         width: renderWidth,
@@ -77,6 +63,18 @@ export const EllipseMethods: ShapeMethods = {
         strokeWidth,
         strokeColor: realStrokeColor,
         strokeStyle: strokeStyle,
+        fillColor: realFillColor,
+      });
+    } else {
+      rc.ellipse(cx, cy, renderWidth, renderHeight, {
+        seed,
+        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+        strokeLineDash:
+          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+        stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+        strokeWidth,
+        fill: filled ? realFillColor : undefined,
+        curveFitting: 1,
       });
     }
   },
@@ -101,11 +99,14 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
-    const points = getPointsFromBoundsWithRotation(element, ellipsePoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      EllipseMethods.points
+    );
     return points.some(point => bounds.containsPoint(point));
   },
 
-  getNearestPoint(point: IVec, element: ShapeElement) {
+  getNearestPoint(point: IVec, _element: ShapeElement) {
     // TODO: get real nearest point on ellipse
     return point;
   },

@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 
 import type { TextTool } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
 import { addText } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
@@ -14,39 +14,39 @@ export class TextToolController extends EdgelessToolController<TextTool> {
     addText(this._edgeless, e);
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
-  onContainerDragStart(e: PointerEventState) {
+  onContainerDragStart() {
     noop();
   }
 
-  onContainerDragMove(e: PointerEventState) {
+  onContainerDragMove() {
     noop();
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     noop();
   }
 
-  onContainerMouseMove(e: PointerEventState) {
+  onContainerMouseMove() {
     noop();
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 

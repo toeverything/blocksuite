@@ -2,6 +2,7 @@ import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../panel/line-width-panel.js';
 
+import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BrushElement, SurfaceManager } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
@@ -10,10 +11,8 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
-import { BrushSize } from '../../../../__internal__/utils/types.js';
+import { LineWidth } from '../../../../__internal__/utils/types.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 import {
   type ColorEvent,
   type EdgelessColorPanel,
@@ -24,14 +23,14 @@ import { createButtonPopper } from '../utils.js';
 
 function getMostCommonColor(elements: BrushElement[]): CssVariableName | null {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.color);
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
-function getMostCommonSize(elements: BrushElement[]): BrushSize {
+function getMostCommonSize(elements: BrushElement[]): LineWidth {
   const shapeTypes = countBy(elements, (ele: BrushElement) => ele.lineWidth);
-  const max = maxBy(Object.entries(shapeTypes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
+  const max = maxBy(Object.entries(shapeTypes), ([_k, count]) => count);
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
 @customElement('edgeless-change-brush-button')
@@ -48,11 +47,11 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
 
     menu-divider {
       height: 24px;
+      margin: 0 5px;
     }
 
     .color-panel-container {
       display: none;
-      padding: 4px;
       justify-content: center;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
@@ -61,7 +60,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     }
 
     .color-panel-container[data-show] {
-      display: block;
+      display: flex;
     }
 
     .brush-size-button,
@@ -91,9 +90,6 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   elements: BrushElement[] = [];
 
-  @property({ type: Object })
-  selectionState!: EdgelessSelectionState;
-
   @property({ attribute: false })
   page!: Page;
 
@@ -110,7 +106,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _selectedColor: string | null = null;
 
   @state()
-  private _selectedSize: BrushSize | null = BrushSize.LINE_WIDTH_FOUR;
+  private _selectedSize: LineWidth | null = LineWidth.LINE_WIDTH_FOUR;
 
   @query('.color-panel-container')
   private _colorPanel!: EdgelessColorPanel;
@@ -118,15 +114,13 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _setBrushSize(size: BrushSize) {
+  private _setLineWidth(size: LineWidth) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
         this.surface.updateElement<'brush'>(element.id, { lineWidth: size });
       }
     });
-    // FIXME: force update selection, because brush size changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
   }
 
   private _setBrushColor(color: CssVariableName) {
@@ -166,13 +160,14 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-line-width-panel
         .selectedSize=${this._selectedSize}
-        @select=${(e: LineWidthEvent) => this._setBrushSize(e.detail)}
+        @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
       >
       </edgeless-line-width-panel>
       <menu-divider .vertical=${true}></menu-divider>
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'Color'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._colorPanelPopper?.toggle()}
       >
         <div class="brush-color-button">

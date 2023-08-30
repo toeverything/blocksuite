@@ -10,12 +10,15 @@ import {
   focusRichText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  pressArrowRight,
   pressEnter,
+  selectAllByKeyboard,
   setVirgoSelection,
   SHORT_KEY,
   switchEditorMode,
   type,
   waitForVirgoStateUpdated,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import { assertStoreMatchJSX } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
@@ -47,9 +50,6 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     prop:hidden={false}
     prop:index="a0"
   >
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:bookmark
       prop:bookmarkTitle=""
       prop:caption=""
@@ -120,9 +120,6 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
     prop:hidden={false}
     prop:index="a0"
   >
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:paragraph
       prop:text={
         <>
@@ -195,9 +192,10 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
 
   await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
-  await setVirgoSelection(page, 0, 18);
+  await selectAllByKeyboard(page);
   await copyByKeyboard(page);
-  await focusRichText(page);
+  await pressArrowRight(page);
+  await waitNextFrame(page);
   await type(page, '/bookmark');
   await pressEnter(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);

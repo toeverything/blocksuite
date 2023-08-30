@@ -13,6 +13,8 @@ export type { Controller } from './elements/connector/types.js';
 export { type Connection, ConnectorMode } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
 export * from './elements/index.js';
+export { ShapeMethodsMap } from './elements/shape/shapes/index.js';
+export { type ComputedValue } from './elements/surface-element.js';
 export { compare } from './grid.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export type { SurfaceViewport } from './renderer.js';
@@ -42,6 +44,7 @@ export {
   polyLineNearestPoint,
   rotatePoints,
   sign,
+  toDegree,
   toRadian,
 } from './utils/math-utils.js';
 export { PointLocation } from './utils/point-location.js';

@@ -1,75 +1,43 @@
-import { dragBetweenCoords } from '../utils/actions/drag.js';
+import { undoByClick } from '../utils/actions/click.js';
 import {
-  addBasicRectShapeElement,
-  deleteAll,
-  switchEditorMode,
+  dragBetweenViewCoords,
+  edgelessCommonSetup,
+  Shape,
 } from '../utils/actions/edgeless.js';
-import {
-  enterPlaygroundRoom,
-  initEmptyEdgelessState,
-} from '../utils/actions/misc.js';
+import { createShapeElement } from '../utils/actions/edgeless.js';
 import { waitNextFrame } from '../utils/actions/misc.js';
-import { assertEdgelessHoverRect } from '../utils/asserts.js';
+import { assertSelectedBound } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('snap', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
+  await edgelessCommonSetup(page);
 
-  await deleteAll(page);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [300, 0], [300 + 100, 100], Shape.Square);
 
-  await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
-  await addBasicRectShapeElement(
-    page,
-    { x: 300, y: 200 },
-    { x: 300 + 100, y: 200 + 100 }
-  );
+  await assertSelectedBound(page, [300, 0, 100, 100]);
 
-  await assertEdgelessHoverRect(page, [300, 200, 100, 100]);
+  await dragBetweenViewCoords(page, [300 + 5, 50], [300 + 5, 50 + 5]);
+  await assertSelectedBound(page, [300, 5, 100, 100]);
 
-  await dragBetweenCoords(
-    page,
-    {
-      x: 90,
-      y: 90,
-    },
-    {
-      x: 390,
-      y: 290,
-    }
-  );
-  await assertEdgelessHoverRect(page, [300, 200, 100, 100]);
+  await undoByClick(page);
+  await dragBetweenViewCoords(page, [300 + 5, 50], [300 + 5, 50 + 3]);
+  await assertSelectedBound(page, [300, 0, 100, 100]);
 });
 
 test('snapDistribute', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
+  await edgelessCommonSetup(page);
 
-  await deleteAll(page);
+  await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
+  await createShapeElement(page, [300, 0], [300 + 100, 100], Shape.Square);
+  await createShapeElement(page, [144, 0], [144 + 100, 100], Shape.Square);
 
-  await addBasicRectShapeElement(page, { x: 0, y: 0 }, { x: 100, y: 100 });
-  await addBasicRectShapeElement(
+  await assertSelectedBound(page, [144, 0, 100, 100]);
+  await dragBetweenViewCoords(
     page,
-    { x: 300, y: 0 },
-    { x: 300 + 100, y: 100 }
+    [144 + 100 - 9, 100 - 9],
+    [144 + 100 - 9 + 3, 100 - 9]
   );
-  await addBasicRectShapeElement(
-    page,
-    { x: 144, y: 0 },
-    { x: 144 + 100, y: 100 }
-  );
-
-  await assertEdgelessHoverRect(page, [144, 0, 100, 100]);
-  await dragBetweenCoords(
-    page,
-    { x: 144 + 100 - 9, y: 100 - 9 },
-    {
-      x: 144 + 100 - 9 + 3,
-      y: 100 - 9,
-    }
-  );
-  await assertEdgelessHoverRect(page, [150, 0, 100, 100]);
+  await assertSelectedBound(page, [150, 0, 100, 100]);
   await waitNextFrame(page);
 });

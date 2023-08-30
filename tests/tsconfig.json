@@ -2,7 +2,8 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "noEmit": true
+    "noEmit": true,
+    "composite": false
   },
   "include": ["**.spec.ts", "**.test.ts"]
 }

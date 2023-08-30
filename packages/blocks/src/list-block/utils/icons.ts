@@ -95,7 +95,7 @@ export const toggleDown = () => {
       width="1em"
       height="1em"
       viewBox="0 0 20 20"
-      @mousedown="${(e: MouseEvent) => {
+      @mousedown="${() => {
         // console.log('preventing def svg');
         // e.preventDefault();
       }}"
@@ -104,38 +104,6 @@ export const toggleDown = () => {
         data-is-toggle-icon="true"
         fill="currentColor"
         d="m8.728 15.795l-5-8A1.5 1.5 0 0 1 5 5.5h10a1.5 1.5 0 0 1 1.272 2.295l-5 8a1.5 1.5 0 0 1-2.544 0Z"
-      />
-    </svg>
-  `;
-};
-
-export const chevronCircleRight = (enabled = true) => {
-  return html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 512 512"
-    >
-      <path
-        fill="currentColor"
-        opacity="${!enabled ? '0.6' : '1'}"
-        d="M256 8c137 0 248 111 248 248S393 504 256 504S8 393 8 256S119 8 256 8zm113.9 231L234.4 103.5c-9.4-9.4-24.6-9.4-33.9 0l-17 17c-9.4 9.4-9.4 24.6 0 33.9L285.1 256L183.5 357.6c-9.4 9.4-9.4 24.6 0 33.9l17 17c9.4 9.4 24.6 9.4 33.9 0L369.9 273c9.4-9.4 9.4-24.6 0-34z"
-      />
-    </svg>
-  `;
-};
-export const chevronCircleDown = () => {
-  return html`
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="1em"
-      height="1em"
-      viewBox="0 0 512 512"
-    >
-      <path
-        fill="currentColor"
-        d="M504 256c0 137-111 248-248 248S8 393 8 256S119 8 256 8s248 111 248 248zM273 369.9l135.5-135.5c9.4-9.4 9.4-24.6 0-33.9l-17-17c-9.4-9.4-24.6-9.4-33.9 0L256 285.1L154.4 183.5c-9.4-9.4-24.6-9.4-33.9 0l-17 17c-9.4 9.4-9.4 24.6 0 33.9L239 369.9c9.4 9.4 24.6 9.4 34 0z"
       />
     </svg>
   `;
@@ -150,12 +118,11 @@ export const checkboxChecked = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect x="3" y="5" width="14" height="14" rx="4" fill="#1E96EB" />
       <path
         fill-rule="evenodd"
         clip-rule="evenodd"
-        d="M13.4242 9.57576C13.6585 9.81007 13.6585 10.19 13.4242 10.4243L9.42417 14.4243C9.1977 14.6508 8.83329 14.6594 8.5963 14.444L6.5963 12.6258C6.35111 12.4029 6.33304 12.0234 6.55594 11.7782C6.77885 11.533 7.15832 11.515 7.40351 11.7379L8.98018 13.1712L12.5756 9.57576C12.81 9.34145 13.1899 9.34145 13.4242 9.57576Z"
-        fill="white"
+        d="M3.25 6C3.25 4.48122 4.48122 3.25 6 3.25H18C19.5188 3.25 20.75 4.48122 20.75 6V18C20.75 19.5188 19.5188 20.75 18 20.75H6C4.48122 20.75 3.25 19.5188 3.25 18V6ZM16.5303 9.53033C16.8232 9.23744 16.8232 8.76256 16.5303 8.46967C16.2374 8.17678 15.7626 8.17678 15.4697 8.46967L10.5 13.4393L9.03033 11.9697C8.73744 11.6768 8.26256 11.6768 7.96967 11.9697C7.67678 12.2626 7.67678 12.7374 7.96967 13.0303L9.96967 15.0303C10.2626 15.3232 10.7374 15.3232 11.0303 15.0303L16.5303 9.53033Z"
+        fill="#1E96EB"
       />
     </svg>
   `;
@@ -173,11 +140,51 @@ export const checkboxUnchecked = () => {
       <path
         fill-rule="evenodd"
         clip-rule="evenodd"
-        d="M13 6.2H7C5.4536 6.2 4.2 7.4536 4.2 9V15C4.2 16.5464 5.4536 17.8 7 17.8H13C14.5464 17.8 15.8 16.5464 15.8 15V9C15.8 7.4536 14.5464 6.2 13 6.2ZM7 5C4.79086 5 3 6.79086 3 9V15C3 17.2091 4.79086 19 7 19H13C15.2091 19 17 17.2091 17 15V9C17 6.79086 15.2091 5 13 5H7Z"
-        fill="#77757D"
+        d="M6 3.25C4.48122 3.25 3.25 4.48122 3.25 6V18C3.25 19.5188 4.48122 20.75 6 20.75H18C19.5188 20.75 20.75 19.5188 20.75 18V6C20.75 4.48122 19.5188 3.25 18 3.25H6ZM4.75 6C4.75 5.30964 5.30964 4.75 6 4.75H18C18.6904 4.75 19.25 5.30964 19.25 6V18C19.25 18.6904 18.6904 19.25 18 19.25H6C5.30964 19.25 4.75 18.6904 4.75 18V6Z"
+        fill="currentColor"
       />
     </svg>
   `;
+};
+
+export const playCheckAnimation = async (
+  refElement: Element,
+  { left = 0, size = 20 }: { left?: number; size?: number } = {}
+) => {
+  const sparkingEl = document.createElement('div');
+  sparkingEl.classList.add('affine-check-animation');
+  if (size < 20) {
+    console.warn('If the size is less than 20, the animation may be abnormal.');
+  }
+  sparkingEl.style.cssText = `
+    position: absolute;
+    width: ${size}px;
+    height: ${size}px;
+    border-radius: 50%;
+  `;
+  sparkingEl.style.left = `${left}px`;
+  refElement.appendChild(sparkingEl);
+
+  await sparkingEl.animate(
+    [
+      {
+        boxShadow:
+          '0 -18px 0 -8px #1e96eb, 16px -8px 0 -8px #1e96eb, 16px 8px 0 -8px #1e96eb, 0 18px 0 -8px #1e96eb, -16px 8px 0 -8px #1e96eb, -16px -8px 0 -8px #1e96eb',
+      },
+    ],
+    { duration: 240, easing: 'ease', fill: 'forwards' }
+  ).finished;
+  await sparkingEl.animate(
+    [
+      {
+        boxShadow:
+          '0 -36px 0 -10px transparent, 32px -16px 0 -10px transparent, 32px 16px 0 -10px transparent, 0 36px 0 -10px transparent, -32px 16px 0 -10px transparent, -32px -16px 0 -10px transparent',
+      },
+    ],
+    { duration: 360, easing: 'ease', fill: 'forwards' }
+  ).finished;
+
+  sparkingEl.remove();
 };
 
 export const points = [point1(), point2(), point3(), point4()];

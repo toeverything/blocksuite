@@ -59,6 +59,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
   }
 
+  get rough() {
+    return (this.yMap.get('rough') as IConnector['rough']) ?? false;
+  }
+
   get target() {
     return this.yMap.get('target') as IConnector['target'];
   }
@@ -104,43 +108,64 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     matrix: DOMMatrix,
     rc: RoughCanvas
   ) {
-    const {
-      seed,
-      stroke,
-      strokeStyle,
-      strokeWidth,
-      roughness,
-      absolutePath: points,
-    } = this;
+    const { absolutePath: points } = this;
     const [x, y] = this.deserializeXYWH();
 
     ctx.setTransform(matrix.translateSelf(-x, -y));
 
-    const realStrokeColor = this.computedValue(stroke);
+    this._renderPoints(
+      ctx,
+      rc,
+      points,
+      this.strokeStyle === StrokeStyle.Dashed
+    );
 
-    const options = {
-      seed,
-      roughness,
-      strokeLineDash: strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-      stroke: realStrokeColor,
-      strokeWidth,
-    };
-
-    rc.linearPath(points.map(p => p) as [number, number][], options);
+    // points might not be build yet in some senarios
+    // eg. undo/redo, copy/paste
+    if (!points.length || points.length < 2) {
+      console.warn('connector points not ready yet, there is something wrong.');
+      return;
+    }
 
     const last = points[points.length - 1];
     const secondToLast = points[points.length - 2];
+    const { sides, end } = getArrowPoints(secondToLast, last, 15);
+    this._renderPoints(ctx, rc, [sides[0], end, sides[1]], false);
+  }
 
-    if (last && secondToLast) {
-      const { sides, end } = getArrowPoints(secondToLast, last, 15);
-      rc.linearPath(
-        [
-          [sides[0][0], sides[0][1]],
-          [end[0], end[1]],
-          [sides[1][0], sides[1][1]],
-        ],
-        options
-      );
+  private _renderPoints(
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    points: IVec[],
+    dash: boolean
+  ) {
+    const { seed, stroke, strokeWidth, roughness, rough } = this;
+    const realStrokeColor = this.computedValue(stroke);
+    if (rough) {
+      const options = {
+        seed,
+        roughness,
+        strokeLineDash: dash ? [12, 12] : undefined,
+        stroke: realStrokeColor,
+        strokeWidth,
+      };
+      rc.linearPath(points as [number, number][], options);
+    } else {
+      ctx.save();
+      ctx.strokeStyle = realStrokeColor;
+      ctx.lineWidth = this.strokeWidth;
+      dash && ctx.setLineDash([12, 12]);
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        if (index === 0) {
+          ctx.moveTo(point[0], point[1]);
+        } else {
+          ctx.lineTo(point[0], point[1]);
+        }
+      });
+      ctx.stroke();
+      ctx.closePath();
+      ctx.restore();
     }
   }
 

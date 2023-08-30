@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import { expect } from '@playwright/test';
 
+import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import { assertExists } from '../../packages/global/src/utils.js';
 import {
   decreaseZoomLevel,
   getEdgelessBlockChild,
@@ -71,10 +71,10 @@ test('can zoom viewport', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
 
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 404.5, EDITOR_WIDTH, 91];
+  const original = [50, 402.5, EDITOR_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
   let box = await getEdgelessHoverRect(page);
 
@@ -97,16 +97,16 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 91]);
+  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 404.5, EDITOR_WIDTH, 91];
+  const original = [50, 402.5, EDITOR_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const zoomed = [150, 415.875, original[2] * 0.75, original[3] * 0.75];
+  const zoomed = [150, 414.375, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
 });
 
@@ -231,12 +231,12 @@ test('shift click multi select and de-select', async ({ page }) => {
   await click(page, { x: 90, y: 90 });
   await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
 
-  shiftClick(page, { x: 110, y: 50 });
+  await shiftClick(page, { x: 190, y: 90 });
   await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
 
   // we will try to write text on a shape element when we dbclick it
   await waitNextFrame(page, 500);
-  shiftClick(page, { x: 110, y: 50 });
+  await shiftClick(page, { x: 190, y: 90 });
   await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
 });
 

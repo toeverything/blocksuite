@@ -1,5 +1,4 @@
 import '../../components/button.js';
-import '../../components/portal.js';
 import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -7,7 +6,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { toast } from '../../components/toast.js';
-import { CloseIcon } from '../images/icons.js';
+import { CloseIcon } from '../../icons/index.js';
 import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 
 @customElement('bookmark-create-modal')
@@ -104,8 +103,23 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
           </div>
         </div>
       </div>`;
-    return html`<affine-portal .template=${modal}></affine-portal>`;
+    return html`<blocksuite-portal .template=${modal}></blocksuite-portal>`;
   }
+}
+
+export async function getBookmarkInitialProps(): Promise<null | string> {
+  const bookmarkCreateModal = new BookmarkCreateModal();
+  return new Promise(resolve => {
+    bookmarkCreateModal.onCancel = () => {
+      resolve(null);
+      document.body.removeChild(bookmarkCreateModal);
+    };
+    bookmarkCreateModal.onConfirm = ({ url }) => {
+      resolve(url);
+      document.body.removeChild(bookmarkCreateModal);
+    };
+    document.body.appendChild(bookmarkCreateModal);
+  });
 }
 
 declare global {

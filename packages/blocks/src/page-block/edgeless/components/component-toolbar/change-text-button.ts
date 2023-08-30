@@ -8,7 +8,6 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
 
 @customElement('edgeless-change-text-button')
 export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
@@ -19,7 +18,6 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
 
     .change-text-container {
       display: flex;
-      padding-left: 8px;
     }
   `;
 
@@ -33,9 +31,6 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   surface!: SurfaceManager;
 
   @property({ attribute: false })
-  selectionState!: EdgelessSelectionState;
-
-  @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
 
   override render() {
@@ -44,7 +39,6 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
         .elements=${this.texts}
         .elementType=${'text'}
         .surface=${this.surface}
-        .selectionState=${this.selectionState}
         .slots=${this.slots}
       ></edgeless-change-text-menu>
     </div>`;

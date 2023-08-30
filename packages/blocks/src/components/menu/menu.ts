@@ -1,15 +1,21 @@
-import { ArrowDownIcon } from '@blocksuite/global/config';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Middleware } from '@floating-ui/dom';
+import type {
+  ClientRectObject,
+  Middleware,
+  ReferenceElement,
+  VirtualElement,
+} from '@floating-ui/dom';
 import { autoPlacement, computePosition } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
+import { ArrowDownIcon } from '../../icons/index.js';
 
 type MenuCommon = {
   hide?: () => boolean;
@@ -67,42 +73,61 @@ type Item = {
 };
 
 @customElement('affine-menu')
-export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
+export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-menu {
       display: flex;
       flex-direction: column;
       user-select: none;
-      min-width: 160px;
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 4px;
+      min-width: 200px;
+      box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
+        0px 0px 0px 0.5px #e3e3e4 inset;
+      border-radius: 8px;
       background-color: var(--affine-background-primary-color);
-      padding: 2px 0;
+      padding: 8px;
       position: absolute;
       z-index: 999;
     }
 
     .affine-menu-header {
-      padding: 4px 4px;
+    }
+
+    .affine-menu-body {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
 
     .affine-menu-header input {
-      padding: 8px 8px;
       width: 100%;
       border-radius: 4px;
-      border: 1px solid var(--affine-secondary-color);
       outline: none;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 5px 12px;
+      border: 1px solid var(--affine-border-color);
+    }
+
+    .affine-menu-header input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
+
+    .affine-menu-header input:focus {
+      border: 1px solid var(--affine-primary-color);
     }
 
     .affine-menu-divider {
       height: 0.5px;
       background: var(--affine-divider-color);
-      margin: 2px 0;
+      margin: 7px 0;
     }
 
     .affine-menu-action {
-      padding: 2px 4px;
+      padding: 4px 12px;
       cursor: pointer;
+      display: flex;
+      gap: 4px;
+      border-radius: 4px;
     }
 
     .affine-menu-action svg {
@@ -120,20 +145,22 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-action .content {
-      padding: 8px;
       border-radius: 4px;
       cursor: pointer;
       white-space: nowrap;
       justify-content: space-between;
       display: flex;
       align-items: center;
+      font-size: 14px;
+      line-height: 22px;
+      flex: 1;
     }
 
-    .affine-menu-action.selected .content {
+    .affine-menu-action.selected {
       background-color: var(--affine-hover-color);
     }
 
-    .affine-menu-action.selected.delete-item .content {
+    .affine-menu-action.selected.delete-item {
       background-color: var(--affine-background-error-color);
       color: var(--affine-error-color);
     }
@@ -145,25 +172,44 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     .database-menu-component-action-button:hover {
       background-color: rgba(0, 0, 0, 0.1);
     }
+
+    .no-results {
+      font-size: 12px;
+      line-height: 20px;
+      color: var(--affine-text-secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .affine-menu-action-text {
+      flex: 1;
+      padding: 0 4px;
+    }
   `;
   @property({ attribute: false })
   options!: MenuOptions;
   @state()
   private _text?: string;
   @state()
-  private _selectedIndex = -1;
+  private _selectedIndex?: number;
   private subMenu?: HTMLElement;
   private inputRef = createRef<HTMLInputElement>();
   private items!: Array<Item>;
 
-  private get selectedIndex() {
-    return this._selectedIndex;
+  private get minIndex() {
+    return this.isSearchMode ? 0 : -1;
   }
 
-  private set selectedIndex(index: number) {
+  private get selectedIndex(): number {
+    return this._selectedIndex ?? this.minIndex;
+  }
+
+  private set selectedIndex(index: number | undefined) {
     this._selectedIndex = regularizationNumberInRange(
-      index,
-      -1,
+      index ?? this.minIndex,
+      this.minIndex,
       this.items.length
     );
   }
@@ -223,7 +269,7 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
   }
 
   private show(item: Menu): boolean {
-    if (this.options.input?.search) {
+    if (this.isSearchMode) {
       if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
         return false;
       }
@@ -237,10 +283,12 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     action: menu => {
       return [
         {
-          label: html` <div style="display: flex;align-items:center;">
-            <div class="icon">${menu.icon}</div>
-            ${menu.label ?? menu.name}
-          </div>`,
+          label: html` ${menu.icon
+              ? html` <div class="icon">${menu.icon}</div>`
+              : nothing}
+            <div class="affine-menu-action-text">
+              ${menu.label ?? menu.name}
+            </div>`,
           select: () => {
             menu.select();
             this._complete();
@@ -293,8 +341,10 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
       };
       return [
         {
-          label: html` <div style="display:flex;align-items:center;">
-              <div class="icon">${menu.icon}</div>
+          label: html`${menu.icon
+              ? html` <div class="icon">${menu.icon}</div>`
+              : nothing}
+            <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
             </div>
             <div
@@ -360,15 +410,29 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
     this.focusInput();
   }
 
+  mouseEnterHeader = () => {
+    if (this.isSearchMode) {
+      return;
+    }
+    this._mouseEnter(-1);
+  };
+
   override render() {
     this.items = this.options.items.flatMap(item => this.process(item));
     this.selectedIndex = this._selectedIndex;
+    const showHeader = this.showHeader();
+    const headerStyle = styleMap({
+      opacity: showHeader ? '1' : '0',
+      height: showHeader ? undefined : '0',
+      overflow: showHeader ? undefined : 'hidden',
+    });
     return html`
       <div class="affine-menu" @click="${this._clickContainer}">
         ${this.options.input
           ? html` <div
                 class="affine-menu-header"
-                @mouseenter="${() => this._mouseEnter(-1)}"
+                style=${headerStyle}
+                @mouseenter="${this.mouseEnterHeader}"
               >
                 <input
                   ${ref(this.inputRef)}
@@ -378,32 +442,47 @@ export class MenuComponent<T> extends WithDisposable(ShadowlessElement) {
                   @input="${this._inputText}"
                 />
               </div>
-              <div class="affine-menu-divider"></div>`
+              ${this.items.length && showHeader
+                ? html` <div class="affine-menu-divider"></div>`
+                : null}`
           : null}
-        ${repeat(this.items, (menu, i) => {
-          const divider = menu.upDivider || this.items[i - 1]?.downDivider;
-          const mouseEnter = () => {
-            this._mouseEnter(i);
-          };
-          const itemClass = menu.class ?? '';
-          const classes = classMap({
-            'affine-menu-action': true,
-            selected: this._selectedIndex === i,
-            [itemClass]: true,
-          });
-          return html`
-            ${divider ? html` <div class="affine-menu-divider"></div>` : null}
-            <div
-              class="${classes}"
-              @click="${menu.select}"
-              @mouseenter="${mouseEnter}"
-            >
-              <div class="content">${menu.label}</div>
-            </div>
-          `;
-        })}
+        <div class="affine-menu-body">
+          ${this.items.length === 0 && this.isSearchMode
+            ? html` <div class="no-results">No Results</div>`
+            : ''}
+          ${repeat(this.items, (menu, i) => {
+            const divider = menu.upDivider || this.items[i - 1]?.downDivider;
+            const mouseEnter = () => {
+              this._mouseEnter(i);
+            };
+            const itemClass = menu.class ?? '';
+            const classes = classMap({
+              'affine-menu-action': true,
+              selected: this._selectedIndex === i,
+              [itemClass]: true,
+            });
+            return html`
+              ${divider ? html` <div class="affine-menu-divider"></div>` : null}
+              <div
+                class="${classes}"
+                @click="${menu.select}"
+                @mouseenter="${mouseEnter}"
+              >
+                <div class="content">${menu.label}</div>
+              </div>
+            `;
+          })}
+        </div>
       </div>
     `;
+  }
+
+  private showHeader() {
+    return !this.isSearchMode || !!this.text;
+  }
+
+  private get isSearchMode() {
+    return this.options.input?.search;
   }
 }
 
@@ -419,12 +498,28 @@ export const createModal = () => {
   div.style.top = '0';
   div.style.width = '100vw';
   div.style.height = '100vh';
-  div.style.zIndex = '10';
-  document.body.querySelector('editor-container')?.append(div);
+  div.style.zIndex = '1001';
+  document.body.querySelector('block-suite-root')?.append(div);
   return div;
 };
+export const positionToVRect = (x: number, y: number): VirtualElement => {
+  return {
+    getBoundingClientRect(): ClientRectObject {
+      return {
+        x: x,
+        y: y,
+        width: 0,
+        height: 0,
+        top: y,
+        bottom: y,
+        left: x,
+        right: x,
+      };
+    },
+  };
+};
 export const createPopup = (
-  target: HTMLElement,
+  target: ReferenceElement,
   content: HTMLElement,
   options?: {
     onClose?: () => void;
@@ -456,16 +551,22 @@ export const createPopup = (
       options?.onClose?.();
     }
   };
+  modal.oncontextmenu = ev => {
+    ev.preventDefault();
+    if (ev.target === modal) {
+      modal.remove();
+      options?.onClose?.();
+    }
+  };
   return () => {
     modal.remove();
   };
 };
 
 export const popMenu = <T>(
-  target: HTMLElement,
+  target: ReferenceElement,
   props: {
     options: MenuOptions;
-    container?: Element;
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
@@ -483,8 +584,9 @@ export const popMenu = <T>(
   });
 };
 export const popFilterableSimpleMenu = (
-  target: HTMLElement,
-  options: Menu[]
+  target: ReferenceElement,
+  options: Menu[],
+  onClose?: () => void
 ) => {
   popMenu(target, {
     options: {
@@ -493,6 +595,7 @@ export const popFilterableSimpleMenu = (
         search: true,
       },
       items: options,
+      onClose,
     },
   });
 };

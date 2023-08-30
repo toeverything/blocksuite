@@ -55,7 +55,7 @@ function drawRect(
   height: number,
   radius: number
 ) {
-  const r = Math.min(width * radius, height * radius);
+  const r = Math.max(Math.min(width * radius, height * radius), 0);
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + width - r, y);
@@ -86,8 +86,8 @@ function drawDiamond(
 
 function drawEllipse(
   ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
+  _x: number,
+  _y: number,
   width: number,
   height: number
 ) {
@@ -112,7 +112,7 @@ function drawTriangle(
   ctx.closePath();
 }
 
-export function drawGeneralShpae(
+export function drawGeneralShape(
   ctx: CanvasRenderingContext2D,
   shapeType: ShapeType,
   options: GeneralShapeOptions
@@ -140,6 +140,7 @@ export function drawGeneralShpae(
 
   ctx.lineWidth = options.strokeWidth;
   ctx.strokeStyle = options.strokeColor;
+  ctx.fillStyle = options.fillColor;
   switch (options.strokeStyle) {
     case StrokeStyle.None:
       ctx.strokeStyle = 'transparent';
@@ -151,5 +152,6 @@ export function drawGeneralShpae(
     default:
       ctx.strokeStyle = options.strokeStyle;
   }
+  ctx.fill();
   ctx.stroke();
 }

@@ -1,26 +1,26 @@
 import {
   type AbstractEditor,
-  activeEditorManager,
   type AttachmentProps,
-  type DefaultPageBlockComponent,
+  type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
   edgelessPreset,
   FileDropManager,
   getServiceOrRegister,
   type ImageProps,
-  noop,
   type PageBlockModel,
   pagePreset,
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
+import { IS_FIREFOX } from '@blocksuite/global/config';
+import { noop, Slot } from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
   WithDisposable,
 } from '@blocksuite/lit';
-import { isFirefox, type Page, Slot } from '@blocksuite/store';
+import { type Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -65,8 +65,8 @@ export class EditorContainer
   /**
    * @deprecated This property is unreliable since pagePreset can be overridden.
    */
-  @query('affine-default-page')
-  private _defaultPageBlock?: DefaultPageBlockComponent;
+  @query('affine-doc-page')
+  private _defaultPageBlock?: DocPageBlockComponent;
 
   /**
    * @deprecated This property is unreliable since edgelessPreset can be overridden.
@@ -90,7 +90,6 @@ export class EditorContainer
 
   override connectedCallback() {
     super.connectedCallback();
-    activeEditorManager.setIfNoActive(this);
 
     const keydown = (e: KeyboardEvent) => {
       if (e.altKey && e.metaKey && e.code === 'KeyC') {
@@ -117,7 +116,7 @@ export class EditorContainer
     };
 
     // Question: Why do we prevent this?
-    if (isFirefox) {
+    if (IS_FIREFOX) {
       this._disposables.addFromEvent(document.body, 'keydown', keydown);
     } else {
       this._disposables.addFromEvent(window, 'keydown', keydown);
@@ -144,18 +143,6 @@ export class EditorContainer
         this.requestUpdate('page');
       })
     );
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(async ({ type, id }) => {
-        const block = this.page.getBlockById(id);
-
-        if (!block) return;
-
-        if (type === 'update') {
-          const service = await getServiceOrRegister(block.flavour);
-          service.updateEffect(block);
-        }
-      })
-    );
 
     this._disposables.addFromEvent(
       this,
@@ -170,7 +157,6 @@ export class EditorContainer
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    activeEditorManager.clearActive();
   }
 
   override firstUpdated() {
@@ -201,31 +187,33 @@ export class EditorContainer
         };
       },
     });
-
-    this.fileDropManager.register({
-      name: 'Attachment',
-      matcher: (file: File) => {
-        // TODO limit size in blob
-        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
-        if (file.size > MAX_ATTACHMENT_SIZE) {
-          console.warn('You can only upload files less than 10M.');
-          return false;
-        }
-        return true;
-      },
-      handler: async (
-        file: File
-      ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
-        const storage = this.page.blobs;
-        const sourceId = await storage.set(file);
-        return {
-          flavour: 'affine:attachment',
-          name: file.name,
-          size: file.size,
-          sourceId,
-        };
-      },
-    });
+    if (this.page.awarenessStore.getFlag('enable_attachment_block')) {
+      this.fileDropManager.register({
+        name: 'Attachment',
+        matcher: (file: File) => {
+          // TODO limit size in blob
+          const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+          if (file.size > MAX_ATTACHMENT_SIZE) {
+            console.warn('You can only upload files less than 10M.');
+            return false;
+          }
+          return true;
+        },
+        handler: async (
+          file: File
+        ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+          const storage = this.page.blobs;
+          const sourceId = await storage.set(file);
+          return {
+            flavour: 'affine:attachment',
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            sourceId,
+          };
+        },
+      });
+    }
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -280,13 +268,9 @@ export class EditorContainer
       this.model.id,
       html`<block-suite-root
         .page=${this.page}
-        .blocks=${this.mode === 'page' ? pagePreset : edgelessPreset}
+        .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
       ></block-suite-root>`
     );
-
-    const remoteSelectionContainer = html`
-      <remote-selection .page=${this.page}></remote-selection>
-    `;
 
     return html`
       <style>
@@ -309,7 +293,7 @@ export class EditorContainer
           }
         }
       </style>
-      ${rootContainer} ${remoteSelectionContainer}
+      ${rootContainer}
     `;
   }
 }

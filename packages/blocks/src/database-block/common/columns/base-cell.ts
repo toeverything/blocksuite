@@ -1,16 +1,21 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
-import type { DataViewColumnManager } from '../data-view-manager.js';
-import type { DataViewCellLifeCycle } from './manager.js';
+import type {
+  DataViewColumnManager,
+  DataViewManager,
+} from '../data-view-manager.js';
+import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<
     Value,
     Data extends Record<string, unknown> = Record<string, unknown>
   >
   extends WithDisposable(ShadowlessElement)
-  implements DataViewCellLifeCycle
+  implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
 {
+  @property({ attribute: false })
+  view!: DataViewManager;
   @property({ attribute: false })
   column!: DataViewColumnManager<Value, Data>;
   @property()
@@ -18,7 +23,7 @@ export abstract class BaseCellRenderer<
   @property({ attribute: false })
   isEditing!: boolean;
   @property({ attribute: false })
-  public selectCurrentCell!: (editing: boolean) => void;
+  selectCurrentCell!: (editing: boolean) => void;
 
   get readonly(): boolean {
     return this.column.readonly;
@@ -55,7 +60,6 @@ export abstract class BaseCellRenderer<
   override connectedCallback() {
     super.connectedCallback();
     this.style.width = '100%';
-    this.style.height = '100%';
     this._disposables.addFromEvent(this, 'click', e => {
       if (this.isEditing) {
         e.stopPropagation();
@@ -66,5 +70,17 @@ export abstract class BaseCellRenderer<
         e.stopPropagation();
       }
     });
+    const type = this.column.type;
+    this._disposables.add(
+      this.column.onCellUpdate(this.rowId, () => {
+        if (this.column.type === type) {
+          this.requestUpdate();
+        }
+      })
+    );
+  }
+
+  forceUpdate(): void {
+    this.requestUpdate();
   }
 }

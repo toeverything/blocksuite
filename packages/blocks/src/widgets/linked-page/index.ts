@@ -1,17 +1,15 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/lit';
 import {
   assertExists,
-  type BaseBlockModel,
   DisposableGroup,
-  matchFlavours,
-} from '@blocksuite/store';
+  throttle,
+} from '@blocksuite/global/utils';
+import { WidgetElement } from '@blocksuite/lit';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
-import {
-  isControlledKeyboardEvent,
-  throttle,
-} from '../../__internal__/utils/common.js';
+import { matchFlavours } from '../../__internal__/index.js';
+import { isControlledKeyboardEvent } from '../../__internal__/utils/common.js';
 import {
   getViewportElement,
   getVirgoByModel,
@@ -27,18 +25,21 @@ export function showLinkedPagePopover({
   container = document.body,
   abortController = new AbortController(),
   options,
+  triggerKey,
 }: {
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
   options: LinkedPageOptions;
+  triggerKey: string;
 }) {
   const disposables = new DisposableGroup();
   abortController.signal.addEventListener('abort', () => disposables.dispose());
 
   const linkedPage = new LinkedPagePopover(model, abortController);
   linkedPage.options = options;
+  linkedPage.triggerKey = triggerKey;
   // Mount
   container.appendChild(linkedPage);
   disposables.add(() => linkedPage.remove());
@@ -95,9 +96,14 @@ export class LinkedPageWidget extends WidgetElement {
     this.handleEvent('keyDown', this._onKeyDown);
   }
 
-  public showLinkedPage(model: BaseBlockModel) {
+  public showLinkedPage(model: BaseBlockModel, triggerKey: string) {
     const curRange = getCurrentNativeRange();
-    showLinkedPagePopover({ model, range: curRange, options: this.options });
+    showLinkedPagePopover({
+      model,
+      range: curRange,
+      options: this.options,
+      triggerKey,
+    });
   }
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
@@ -157,11 +163,11 @@ export class LinkedPageWidget extends WidgetElement {
           length: 0,
         });
         vEditor.slots.rangeUpdated.once(() => {
-          this.showLinkedPage(model);
+          this.showLinkedPage(model, primaryTriggerKey);
         });
         return;
       }
-      this.showLinkedPage(model);
+      this.showLinkedPage(model, matchedKey);
     });
   };
 }

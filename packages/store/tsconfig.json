@@ -1,11 +1,22 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "rootDir": "./src/",
     "outDir": "./dist/",
     "noEmit": false
   },
   "include": ["./src"],
-  "exclude": ["./src/__tests__", "src/persistence/blob/__tests__"],
-  "references": []
+  "exclude": [
+    "./src/__tests__",
+    "src/persistence/blob/__tests__",
+    "src/workspace/migration/__tests__"
+  ],
+  "references": [
+    {
+      "path": "../global"
+    },
+    {
+      "path": "../virgo"
+    }
+  ]
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import '@shoelace-style/shoelace';
 
 import { ShadowlessElement } from '@blocksuite/lit';
@@ -5,15 +6,19 @@ import {
   type AttributeRenderer,
   type BaseTextAttributes,
   baseTextAttributes,
+  createVirgoKeyDownHandler,
   type DeltaInsert,
   VEditor,
+  VKEYBOARD_ALLOW_DEFAULT,
   ZERO_WIDTH_NON_JOINER,
 } from '@blocksuite/virgo';
-import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { css, html, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
 import { z } from 'zod';
+
+import { markdownMatches } from './markdown.js';
 
 function virgoTextStyles(
   props: BaseTextAttributes
@@ -128,18 +133,41 @@ function toggleStyle(
 
 @customElement('virgo-test-rich-text')
 export class RichText extends ShadowlessElement {
-  vEditor: VEditor;
-
   @query('.rich-text-container')
   private _container!: HTMLDivElement;
 
-  constructor(vEditor: VEditor) {
-    super();
-    this.vEditor = vEditor;
-  }
+  @property({ attribute: false })
+  vEditor!: VEditor;
+
+  @property({ attribute: false })
+  undoManager!: Y.UndoManager;
 
   override firstUpdated() {
     this.vEditor.mount(this._container);
+
+    const keydownHandler = createVirgoKeyDownHandler(this.vEditor, {
+      inputRule: {
+        key: ' ',
+        handler: context => {
+          const { vEditor, prefixText, vRange } = context;
+          for (const match of markdownMatches) {
+            const matchedText = prefixText.match(match.pattern);
+            if (matchedText) {
+              return match.action({
+                vEditor,
+                prefixText,
+                vRange,
+                pattern: match.pattern,
+                undoManager: this.undoManager,
+              });
+            }
+          }
+
+          return VKEYBOARD_ALLOW_DEFAULT;
+        },
+      },
+    });
+    this._container.addEventListener('keydown', keydownHandler);
 
     this.vEditor.slots.updated.on(() => {
       const el = this.querySelector('.y-text');
@@ -209,6 +237,18 @@ export class RichText extends ShadowlessElement {
   }
 }
 
+const TEXT_ID = 'virgo';
+const yDocA = new Y.Doc();
+const yDocB = new Y.Doc();
+
+yDocA.on('update', update => {
+  Y.applyUpdate(yDocB, update);
+});
+
+yDocB.on('update', update => {
+  Y.applyUpdate(yDocA, update);
+});
+
 @customElement('tool-bar')
 export class ToolBar extends ShadowlessElement {
   static override styles = css`
@@ -219,12 +259,11 @@ export class ToolBar extends ShadowlessElement {
     }
   `;
 
-  vEditor: VEditor;
+  @property({ attribute: false })
+  vEditor!: VEditor;
 
-  constructor(vEditor: VEditor) {
-    super();
-    this.vEditor = vEditor;
-  }
+  @property({ attribute: false })
+  undoManager!: Y.UndoManager;
 
   override firstUpdated() {
     const boldButton = this.querySelector('.bold');
@@ -360,65 +399,67 @@ export class TestPage extends ShadowlessElement {
     }
   `;
 
+  private _editorA: VEditor | null = null;
+  private _editorB: VEditor | null = null;
+  private _undoManagerA: Y.UndoManager | null = null;
+  private _undoManagerB: Y.UndoManager | null = null;
+
   override firstUpdated() {
-    const TEXT_ID = 'virgo';
-    const yDocA = new Y.Doc();
-    const yDocB = new Y.Doc();
-
-    yDocA.on('update', update => {
-      Y.applyUpdate(yDocB, update);
-    });
-
-    yDocB.on('update', update => {
-      Y.applyUpdate(yDocA, update);
-    });
-
     const textA = yDocA.getText(TEXT_ID);
-    const editorA = new VEditor(textA, {
-      //@ts-ignore
-      embed: delta => delta.attributes?.embed,
+    this._editorA = new VEditor<
+      BaseTextAttributes & {
+        embed?: true;
+      }
+    >(textA, {
+      isEmbed: delta => !!delta.attributes?.embed,
     });
-    editorA.setAttributeSchema(
+    this._editorA.setAttributeSchema(
       baseTextAttributes.extend({
         embed: z.literal(true).optional().catch(undefined),
       })
     );
-    editorA.setAttributeRenderer(attributeRenderer);
-
-    const textB = yDocB.getText(TEXT_ID);
-    const editorB = new VEditor(textB, {
-      active: () => false,
+    this._editorA.setAttributeRenderer(attributeRenderer);
+    this._undoManagerA = new Y.UndoManager(textA, {
+      trackedOrigins: new Set([textA.doc?.clientID]),
     });
 
-    const toolBarA = new ToolBar(editorA);
-    const toolBarB = new ToolBar(editorB);
+    const textB = yDocB.getText(TEXT_ID);
+    this._editorB = new VEditor(textB);
+    this._undoManagerB = new Y.UndoManager(textB, {
+      trackedOrigins: new Set([textB.doc?.clientID]),
+    });
 
-    if (!this) {
-      throw new Error('Cannot find shadow root');
-    }
-
-    const docA = this.querySelector('.doc-a');
-    const docB = this.querySelector('.doc-b');
-
-    if (!docA || !docB) {
-      throw new Error('Cannot find doc');
-    }
-
-    docA.appendChild(toolBarA);
-    docB.appendChild(toolBarB);
-
-    const richTextA = new RichText(editorA);
-    const richTextB = new RichText(editorB);
-    docA.appendChild(richTextA);
-    docB.appendChild(richTextB);
+    this.requestUpdate();
   }
 
   override render() {
+    if (!this._editorA) {
+      return nothing;
+    }
+
     return html`
       <div class="container">
         <div class="editors">
-          <div class="doc-a"></div>
-          <div class="doc-b"></div>
+          <div class="doc-a">
+            <tool-bar
+              .vEditor=${this._editorA}
+              .undoManager=${this._undoManagerA}
+            ></tool-bar>
+            <virgo-test-rich-text
+              .vEditor=${this._editorA}
+              .undoManager=${this._undoManagerA!}
+            ></virgo-test-rich-text>
+          </div>
+          <div class="doc-b">
+            <tool-bar
+              .vEditor=${this._editorB}
+              .undoManager=${this._undoManagerB!}
+            ></tool-bar>
+            <virgo-test-rich-text
+              .vEditor=${this._editorB}
+              .undoManager=${this._undoManagerB}
+            ></virgo-test-rich-text>
+          </div>
         </div>
       </div>
     `;

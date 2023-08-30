@@ -23,7 +23,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
   onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
-    document.dispatchEvent(new CustomEvent('virgo-vrange-updated'));
 
     if (
       this._editor.mounted &&
@@ -37,6 +36,18 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     this._prevVRange = newVRange;
 
     if (origin !== 'other') {
+      return;
+    }
+
+    if (this._vRange === null) {
+      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selection = selectionRoot.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        if (range.intersectsNode(this._editor.rootElement)) {
+          selection.removeAllRanges();
+        }
+      }
       return;
     }
 
@@ -61,7 +72,15 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * the vRange is synced to the native selection asynchronically
    * if sync is true, the native selection will be synced immediately
    */
-  setVRange = (vRange: VRange, sync = true): void => {
+  setVRange = (vRange: VRange | null, sync = true): void => {
+    if (
+      vRange &&
+      (vRange.index < 0 ||
+        vRange.index + vRange.length > this._editor.yText.length)
+    ) {
+      throw new Error('invalid vRange');
+    }
+
     this._editor.slots.vRangeUpdated.emit([vRange, sync ? 'other' : 'silent']);
   };
 
@@ -69,7 +88,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange = (): void => {
-    if (this._vRange) {
+    if (this._vRange && this._editor.mounted) {
       this._applyVRange(this._vRange);
     }
   };
@@ -119,9 +138,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyVRange = (vRange: VRange): void => {
-    if (!this._editor.isActive()) {
-      return;
-    }
     const selectionRoot = findDocumentOrShadowRoot(this._editor);
     const selection = selectionRoot.getSelection();
     if (!selection) {

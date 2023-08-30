@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
 import istanbul from 'vite-plugin-istanbul';
+import wasm from 'vite-plugin-wasm';
 
 import { hmrPlugin } from './scripts/hmr-plugin';
 
@@ -25,8 +26,10 @@ export default defineConfig({
         ],
         forceBuildInstrument: true,
       }),
+    wasm(),
   ],
   build: {
+    target: 'ES2022',
     sourcemap: true,
     rollupOptions: {
       input: {
@@ -34,11 +37,6 @@ export default defineConfig({
         'starter/': resolve(__dirname, 'starter/index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
         'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
-        'examples/counter': resolve(__dirname, 'examples/counter/index.html'),
-        'examples/workspace': resolve(
-          __dirname,
-          'examples/workspace/index.html'
-        ),
         'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
         'examples/store': resolve(__dirname, 'examples/store/index.html'),
       },

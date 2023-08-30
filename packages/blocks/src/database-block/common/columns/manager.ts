@@ -1,6 +1,9 @@
 import type { UniComponent } from '../../../components/uni-component/uni-component.js';
 import type { TType } from '../../logical/typesystem.js';
-import type { DataViewColumnManager } from '../data-view-manager.js';
+import type {
+  DataViewColumnManager,
+  DataViewManager,
+} from '../data-view-manager.js';
 
 type JSON =
   | null
@@ -13,9 +16,10 @@ type JSON =
     };
 
 export interface CellRenderProps<
-  Data extends Record<string, unknown> = Record<string, never>,
+  Data extends NonNullable<unknown> = NonNullable<unknown>,
   Value = unknown
 > {
+  view: DataViewManager;
   column: DataViewColumnManager<Value, Data>;
   rowId: string;
   isEditing: boolean;
@@ -32,6 +36,8 @@ export interface DataViewCellLifeCycle {
   focusCell(): boolean;
 
   blurCell(): boolean;
+
+  forceUpdate(): void;
 }
 
 export type DataViewCellComponent<
@@ -55,7 +61,12 @@ type ColumnOps<
   type: (data: Data) => TType;
   formatValue?: (value: unknown, colData: Data) => Value;
   cellToString: (data: Value, colData: Data) => string;
+  cellFromString: (
+    data: string,
+    colData: Data
+  ) => { value: unknown; data?: Record<string, unknown> };
   cellToJson: (data: Value, colData: Data) => JSON;
+  addGroup?: (text: string, oldData: Data) => Data;
 };
 
 type ConvertFunction<From extends ColumnConfig, To extends ColumnConfig> = (
@@ -168,6 +179,10 @@ export class ColumnConfig<
     return cellData === undefined
       ? undefined
       : this.ops.formatValue?.(cellData, colData) ?? cellData;
+  }
+
+  fromString(cellData: string, colData: T) {
+    return this.ops.cellFromString(cellData, colData);
   }
 
   convertCell(to: string, column: Record<string, unknown>, cells: unknown[]) {

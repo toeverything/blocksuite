@@ -1,27 +1,23 @@
-import './components/bookmark-toolbar.js';
-import './components/bookmark-edit-modal.js';
 import './components/bookmark-create-modal.js';
+import './components/bookmark-edit-modal.js';
+import './components/bookmark-toolbar.js';
 import './components/loader.js';
-import '../components/portal.js';
 
+import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { Slot } from '@blocksuite/store';
+import { flip, offset } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
+import { createLitPortal } from '../components/portal.js';
+import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
-import { BookmarkBlockService } from './bookmark-service.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
 import { DefaultBanner } from './images/banners.js';
-import {
-  DarkLoadingBanner,
-  DefaultIcon,
-  LoadingBanner,
-} from './images/icons.js';
+import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
 
 @customElement('affine-bookmark')
@@ -85,9 +81,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       margin-left: 8px;
     }
     .affine-bookmark-icon {
+      display: flex;
+      align-items: center;
       width: 18px;
       height: 18px;
       color: var(--affine-text-secondary-color);
+      fill: var(--affine-text-secondary-color);
       flex-shrink: 0;
     }
     .affine-bookmark-icon img {
@@ -158,15 +157,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   private _showCreateModal = false;
 
   @state()
-  private _toolbarHoverState: {
-    inBookmark: boolean;
-    inToolbar: boolean;
-  } = {
-    inBookmark: false,
-    inToolbar: false,
-  };
-
-  @state()
   private _showEditModal = false;
 
   @state()
@@ -174,13 +164,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   @state()
   private _isLoading = false;
+  @state()
+  private _isIconError = false;
+  @state()
+  private _isImageError = false;
 
-  private _toolbarHoverStateSlot = new Slot<{
-    inBookmark?: boolean;
-    inToolbar?: boolean;
-  }>();
-
-  private _timer: ReturnType<typeof setTimeout> | null = null;
+  private _optionsAbortController?: AbortController;
 
   set loading(value: boolean) {
     this._isLoading = value;
@@ -206,30 +195,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:bookmark', BookmarkBlockService);
     reloadBookmarkBlock(this.model, this);
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
-    });
-
-    this._toolbarHoverStateSlot.on(({ inToolbar, inBookmark }) => {
-      const {
-        inBookmark: currentBookmarkState,
-        inToolbar: currentToolbarState,
-      } = this._toolbarHoverState;
-
-      if (
-        inBookmark === currentBookmarkState &&
-        inToolbar === currentToolbarState
-      ) {
-        return;
-      }
-
-      this._toolbarHoverState = {
-        inToolbar: inToolbar === undefined ? currentToolbarState : inToolbar,
-        inBookmark:
-          inBookmark === undefined ? currentBookmarkState : inBookmark,
-      };
     });
   }
 
@@ -245,23 +213,50 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onHover() {
-    this._timer && clearTimeout(this._timer);
-    this._toolbarHoverStateSlot.emit({ inBookmark: true });
-  }
-
-  private _onHoverOut() {
-    this._timer = setTimeout(() => {
-      this._toolbarHoverStateSlot.emit({ inBookmark: false });
-    }, 100);
+    if (this._optionsAbortController) return;
+    this._optionsAbortController = new AbortController();
+    this._optionsAbortController.signal.addEventListener('abort', () => {
+      this._optionsAbortController = undefined;
+    });
+    createLitPortal({
+      template: html`<bookmark-toolbar
+        .model=${this.model}
+        .onSelected=${this._onToolbarSelected}
+        .root=${this}
+        .abortController=${this._optionsAbortController}
+      ></bookmark-toolbar>`,
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+      abortController: this._optionsAbortController,
+    });
   }
 
   private _onCardClick() {
+    const selectionManager = this.root.selectionManager;
+    const blockSelection = selectionManager.getInstance('block', {
+      path: this.path,
+    });
+    selectionManager.setGroup('note', [blockSelection]);
+  }
+
+  private _onCardDbClick() {
     let link = this.model.url;
 
     if (!link.match(/^[a-zA-Z]+:\/\//)) {
       link = 'https://' + link;
     }
     window.open(link, '_blank');
+  }
+
+  private _onIconError() {
+    this._isIconError = true;
+  }
+  private _onImageError() {
+    this._isImageError = true;
   }
 
   private _onToolbarSelected: ToolbarActionCallback & MenuActionCallback =
@@ -277,14 +272,16 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         this._showEditModal = true;
       }
 
-      this._toolbarHoverStateSlot.emit({ inBookmark: false, inToolbar: false });
+      if (type === 'reload') {
+        this._isImageError = false;
+        this._isIconError = false;
+      }
+      this._optionsAbortController?.abort();
     };
 
   override render() {
     const { url, bookmarkTitle, description, icon, image } = this.model;
     const mode = queryCurrentMode();
-    const showToolbar =
-      this._toolbarHoverState.inToolbar || this._toolbarHoverState.inBookmark;
 
     const createModal = this._showCreateModal
       ? html`<bookmark-create-modal
@@ -309,14 +306,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           }}
         ></bookmark-edit-modal>`
       : nothing;
-    const toolbar = showToolbar
-      ? html`<bookmark-toolbar
-          .model=${this.model}
-          .onSelected=${this._onToolbarSelected}
-          .root=${this}
-          .toolbarHoverStateSlot=${this._toolbarHoverStateSlot}
-        ></bookmark-toolbar>`
-      : nothing;
 
     const loading = this._isLoading
       ? html`<div
@@ -338,11 +327,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     const linkCard = html`<div
       class="affine-bookmark-link"
       @click=${this._onCardClick}
+      @dblclick=${this._onCardDbClick}
     >
       <div class="affine-bookmark-content-wrapper">
         <div class="affine-bookmark-title">
           <div class="affine-bookmark-icon">
-            ${icon ? html`<img src="${icon}" alt="icon" />` : DefaultIcon}
+            ${icon && !this._isIconError
+              ? html`<img
+                  src="${icon}"
+                  alt="icon"
+                  @error="${this._onIconError}"
+                />`
+              : WebIcon16}
           </div>
           <div class="affine-bookmark-title-content">
             ${bookmarkTitle || 'Bookmark'}
@@ -353,7 +349,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         <div class="affine-bookmark-url">${url}</div>
       </div>
       <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-        ${image ? html`<img src="${image}" alt="image" />` : DefaultBanner}
+        ${image && !this._isImageError
+          ? html`<img
+              src="${image}"
+              alt="image"
+              @error="${this._onImageError}"
+            />`
+          : DefaultBanner}
       </div>
     </div>`;
 
@@ -366,9 +368,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       <div
         class="affine-bookmark-block-container"
         @mouseover="${this._onHover}"
-        @mouseout="${this._onHoverOut}"
       >
-        <affine-portal .template=${toolbar}></affine-portal>
         ${this._isLoading ? loading : linkCard}
         <input
           .disabled=${this.model.page.readonly}
@@ -377,7 +377,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           value=${this._caption}
           @input=${this._onInputChange}
           @blur=${this._onInputBlur}
-          @click=${stopPropagation}
+          @pointerdown=${stopPropagation}
         />
         ${this.selected?.is('block')
           ? html`<affine-block-selection></affine-block-selection>`

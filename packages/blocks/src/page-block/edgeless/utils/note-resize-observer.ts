@@ -1,8 +1,8 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/global/config';
+import { almostEqual, Slot, throttle } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import { matchFlavours, Slot } from '@blocksuite/store';
 
-import { almostEqual, throttle } from '../../../__internal__/utils/common.js';
+import { BLOCK_ID_ATTR } from '../../../__internal__/consts.js';
+import { matchFlavours } from '../../../__internal__/utils/model.js';
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
 
 export class NoteResizeObserver {

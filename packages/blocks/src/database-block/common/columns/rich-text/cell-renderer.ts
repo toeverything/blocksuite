@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { assertExists, Text } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -10,9 +11,8 @@ import type {
   AffineTextAttributes,
   AffineVEditor,
 } from '../../../../__internal__/rich-text/virgo/types.js';
-import { activeEditorManager } from '../../../../__internal__/utils/active-editor-manager.js';
-import { setupVirgoScroll } from '../../../../__internal__/utils/virgo.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { addHistoryToVEditor } from '../../header-area/text.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';
@@ -77,7 +77,6 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       display: flex;
       align-items: center;
       width: 100%;
-      height: 100%;
       user-select: none;
     }
 
@@ -88,6 +87,9 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       width: 100%;
       height: 100%;
       outline: none;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      word-break: break-all;
     }
 
     .affine-database-rich-text v-line {
@@ -107,14 +109,29 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
 
-  protected override firstUpdated() {
-    this._onInitVEditor();
+  private init() {
+    const editor = this._onInitVEditor();
     this.column.captureSync();
+    this.disposables.add({
+      dispose: () => {
+        editor.unmount();
+      },
+    });
+  }
+
+  override firstUpdated() {
+    this.init();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    if (this._container) {
+      this.init();
+    }
   }
 
   private _initYText = (text?: string) => {
     const yText = new YText(text);
-
     this.onChange(yText);
     return yText;
   };
@@ -132,12 +149,11 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value, {
-      active: () => activeEditorManager.isActive(this),
-    });
-    setupVirgoScroll(this, this.vEditor);
-    this.vEditor.mount(this._container);
-    this.vEditor.setReadonly(true);
+    const vEditor = new VEditor(value);
+    this.vEditor = vEditor;
+    vEditor.mount(this._container);
+    vEditor.setReadonly(true);
+    return vEditor;
   }
 
   override render() {
@@ -152,7 +168,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       display: flex;
       align-items: center;
       width: 100%;
-      height: 100%;
       cursor: text;
     }
 
@@ -182,9 +197,26 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   @query('.affine-database-rich-text')
   private _container!: HTMLDivElement;
 
-  protected override firstUpdated() {
-    this._onInitVEditor();
+  private init() {
+    const vEditor = this._onInitVEditor();
+    this.vEditor = vEditor;
     this.column.captureSync();
+    this.disposables.add({
+      dispose: () => {
+        vEditor.unmount();
+      },
+    });
+  }
+
+  protected override firstUpdated() {
+    this.init();
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    if (this._container) {
+      this.init();
+    }
   }
 
   private _initYText = (text?: string) => {
@@ -207,18 +239,17 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       }
     }
 
-    this.vEditor = new VEditor(value, {
-      active: () => activeEditorManager.isActive(this),
+    const vEditor = new VEditor(value);
+    vEditor.mount(this._container);
+    const historyHelper = addHistoryToVEditor(vEditor);
+    vEditor.disposables.addFromEvent(this._container, 'keydown', e => {
+      historyHelper.handleKeyboardEvent(e);
+      this._handleKeyDown(e);
     });
-    setupVirgoScroll(this, this.vEditor);
-    this.vEditor.mount(this._container);
-    this.vEditor.bindHandlers({
-      keydown: this._handleKeyDown,
-    });
-    this.vEditor.focusEnd();
-    this.vEditor.setReadonly(this.readonly);
+    vEditor.focusEnd();
+    vEditor.setReadonly(this.readonly);
     this._disposables.add(
-      this.vEditor.slots.vRangeUpdated.on(([range]) => {
+      vEditor.slots.vRangeUpdated.on(([range]) => {
         if (range) {
           if (!this.isEditing) {
             this.selectCurrentCell(true);
@@ -228,6 +259,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
         }
       })
     );
+    return vEditor;
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
@@ -320,7 +352,13 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   };
 
   override render() {
-    return html` <div class="affine-database-rich-text virgo-editor"></div>`;
+    return html`<div class="affine-database-rich-text virgo-editor"></div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-database-rich-text-cell-editing': RichTextCellEditing;
   }
 }
 

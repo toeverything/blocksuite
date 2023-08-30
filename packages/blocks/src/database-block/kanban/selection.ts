@@ -11,6 +11,10 @@ import type { DataViewKanban } from './kanban-view.js';
 export class KanbanSelection {
   _selection?: KanbanViewSelection;
 
+  get view() {
+    return this.viewEle.view;
+  }
+
   constructor(private viewEle: DataViewKanban) {}
 
   run(): Disposable {
@@ -42,7 +46,7 @@ export class KanbanSelection {
       viewId: this.viewEle.view.id,
       type: 'kanban',
     };
-    if (selection.focus) {
+    if (selection.focus && selection.focus.isEditing) {
       const focus = selection.focus;
       const container = this.getFocusCellContainer(selection);
       const cell = container?.cell;
@@ -93,6 +97,7 @@ export class KanbanSelection {
     if (!selection.focus) {
       const selectCard = this.getSelectCard(selection);
       if (selectCard) {
+        selectCard.scrollIntoView({ block: 'nearest', inline: 'nearest' });
         selectCard.isFocus = true;
       }
       return;
@@ -101,6 +106,7 @@ export class KanbanSelection {
     if (!container) {
       return;
     }
+    container.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     container.isFocus = true;
     const cell = container?.cell;
     if (selection.focus.isEditing) {
@@ -238,5 +244,92 @@ export class KanbanSelection {
 
   public focusRight() {
     //
+  }
+
+  public deleteCard() {
+    const selection = this.selection;
+    if (!selection || !!selection.focus) {
+      return;
+    }
+    this.viewEle.view.rowDelete([selection.cardId]);
+    this.selection = undefined;
+  }
+
+  focusFirstCell() {
+    const group = this.viewEle.groupHelper?.groups[0];
+    const card = group?.rows[0];
+    const columnId = card && this.viewEle.view.getHeaderTitle(card)?.id;
+    if (group && card && columnId) {
+      this.selection = {
+        groupKey: group.key,
+        cardId: card,
+        focus: {
+          columnId,
+          isEditing: true,
+        },
+      };
+    }
+  }
+
+  public insertRowBefore() {
+    const selection = this.selection;
+    if (!selection) {
+      return;
+    }
+    const id = this.view.addCard(
+      { before: true, id: selection.cardId },
+      selection.groupKey
+    );
+    requestAnimationFrame(() => {
+      const columnId = this.view.header.titleColumn;
+      this.selection = {
+        groupKey: selection.groupKey,
+        cardId: id,
+        focus: columnId
+          ? {
+              columnId: columnId,
+              isEditing: true,
+            }
+          : undefined,
+      };
+    });
+  }
+
+  public insertRowAfter() {
+    const selection = this.selection;
+    if (!selection) {
+      return;
+    }
+    const id = this.view.addCard(
+      { before: false, id: selection.cardId },
+      selection.groupKey
+    );
+    requestAnimationFrame(() => {
+      const columnId = this.view.header.titleColumn;
+      this.selection = {
+        groupKey: selection.groupKey,
+        cardId: id,
+        focus: columnId
+          ? {
+              columnId: columnId,
+              isEditing: true,
+            }
+          : undefined,
+      };
+    });
+  }
+
+  public moveCard(rowId: string, key: string) {
+    const selection = this.selection;
+    if (!selection) {
+      return;
+    }
+    this.view.groupHelper?.moveCardTo(rowId, selection.groupKey, key, 'start');
+    requestAnimationFrame(() => {
+      this.selection = {
+        ...selection,
+        groupKey: key,
+      };
+    });
   }
 }

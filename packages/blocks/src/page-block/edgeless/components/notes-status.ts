@@ -1,13 +1,12 @@
-import { HiddenIcon } from '@blocksuite/global/config';
-import { assertExists, matchFlavours } from '@blocksuite/store';
-import { computePosition, flip, offset } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getBlockElementById } from '../../../__internal__/utils/query.js';
+import { matchFlavours } from '../../../__internal__/index.js';
+import { HiddenIcon } from '../../../icons/index.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { isTopLevelBlock } from '../utils/query.js';
+import { updateNotesPosition } from './utils.js';
 
 export function EdgelessNotesStatus(
   edgeless: EdgelessPageBlockComponent,
@@ -16,9 +15,9 @@ export function EdgelessNotesStatus(
   if (!edgeless.page.awarenessStore.getFlag('enable_note_index'))
     return nothing;
 
-  const state = edgeless.selection.state;
-  const isSelectOne = state.selected.length === 1;
-  const singleSelected = state.selected[0];
+  const state = edgeless.selectionManager.state;
+  const isSelectOne = state.elements.length === 1;
+  const singleSelected = edgeless.getElementModel(state.elements[0]);
 
   if (
     !isSelectOne ||
@@ -35,29 +34,7 @@ export function EdgelessNotesStatus(
   const visibleNotes = notes.filter(note => !note.hidden);
 
   requestAnimationFrame(() => {
-    for (const note of notesWithoutSelected) {
-      const noteStatusElement = edgeless.querySelector(
-        `[data-note-id="${note.id}"]`
-      );
-      if (noteStatusElement instanceof HTMLElement) {
-        const noteElement = getBlockElementById(note.id);
-        assertExists(noteElement);
-        computePosition(noteElement, noteStatusElement, {
-          placement: 'top-start',
-          middleware: [
-            flip(),
-            offset({
-              // 24 is `EDGELESS_BLOCK_CHILD_PADDING`
-              mainAxis: (8 + 24) * edgeless.surface.viewport.zoom,
-              crossAxis: (4 - 24) * edgeless.surface.viewport.zoom,
-            }),
-          ],
-        }).then(({ x, y }) => {
-          noteStatusElement.style.top = y + 'px';
-          noteStatusElement.style.left = x + 'px';
-        });
-      }
-    }
+    updateNotesPosition(edgeless, notesWithoutSelected);
   });
 
   return html`<div class="affine-edgeless-notes-status">

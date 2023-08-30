@@ -1,50 +1,63 @@
+import type { UIEventStateContext } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
-import { assertExists } from '@blocksuite/store';
 
-import { getService } from '../../__internal__/service.js';
-import { deleteModelsByRange } from '../../page-block/index.js';
-import { activeEditorManager } from '../utils/active-editor-manager.js';
-import { getCurrentBlockRange } from '../utils/index.js';
+import type { DocPageBlockComponent } from '../../page-block/index.js';
+import { getService } from '../service/index.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
-  copyBlocks,
+  copyBlocksInPage,
   textedClipboardData2Blocks,
 } from './utils/commons.js';
-
-// TODO: getCurrentBlockRange can not get embed block when selection is native, so clipboard can not copy embed block
+import { deleteModelsByTextSelection } from './utils/operation.js';
 
 export class PageClipboard implements Clipboard {
   _page!: Page;
-  _ele: Element;
-  constructor(pageEle: Element) {
+  _ele: DocPageBlockComponent;
+  constructor(pageEle: DocPageBlockComponent) {
     this._ele = pageEle;
   }
+
   init(page: Page) {
     this._page = page;
-    document.body.addEventListener('cut', this._onCut);
-    document.body.addEventListener('copy', this._onCopy);
-    document.body.addEventListener('paste', this._onPaste);
+
+    this._ele.handleEvent('cut', ctx => {
+      this._onCut(ctx);
+    });
+    this._ele.handleEvent('copy', ctx => {
+      this._onCopy(ctx);
+    });
+    this._ele.handleEvent(
+      'paste',
+      ctx => {
+        this._onPaste(ctx);
+      },
+      {
+        global: true,
+      }
+    );
   }
 
   dispose() {
-    document.body.removeEventListener('cut', this._onCut);
-    document.body.removeEventListener('copy', this._onCopy);
-    document.body.removeEventListener('paste', this._onPaste);
+    // Empty
   }
 
-  private _onPaste = async (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._ele)) {
-      return;
-    }
-    const range = getCurrentBlockRange(this._page);
-    if (!e.clipboardData || !range) {
+  private _onPaste = async (ctx: UIEventStateContext) => {
+    const e = ctx.get('clipboardState').raw;
+
+    const textSelection = this._ele.selection.find('text');
+
+    if (!e.clipboardData || !textSelection) {
       return;
     }
     e.preventDefault();
 
     let blocks = [];
-    const focusedBlockModel = deleteModelsByRange(this._page, range);
+    const focusedBlockModel = deleteModelsByTextSelection(
+      this._ele,
+      textSelection
+    );
     // This assert is unreliable
     // but it's reasonable to paste nothing when focus block is not found
     assertExists(focusedBlockModel);
@@ -60,44 +73,49 @@ export class PageClipboard implements Clipboard {
     this._page.captureSync();
 
     const service = getService(focusedBlockModel.flavour);
-    assertExists(range);
-    await service.json2Block(focusedBlockModel, blocks, range);
+    await service.json2Block(focusedBlockModel, blocks, textSelection.from);
 
     this._page.captureSync();
 
     this._page.slots.pasted.emit(blocks);
   };
 
-  private _onCopy = (
-    e: ClipboardEvent,
-    range = getCurrentBlockRange(this._page)
-  ) => {
-    if (!activeEditorManager.isActive(this._ele)) {
-      return;
-    }
-    if (!range) {
-      return;
-    }
+  private _onCopy = async (ctx: UIEventStateContext) => {
+    const e = ctx.get('clipboardState').raw;
+
     e.preventDefault();
     this._page.captureSync();
 
-    copyBlocks(range);
+    await this._copyBlocksInPage();
 
     this._page.captureSync();
 
     this._page.slots.copied.emit();
   };
 
-  private _onCut = (e: ClipboardEvent) => {
-    if (!activeEditorManager.isActive(this._ele)) {
+  private async _copyBlocksInPage() {
+    return await copyBlocksInPage(this._ele);
+  }
+
+  private _onCut = async (ctx: UIEventStateContext) => {
+    const e = ctx.get('clipboardState').raw;
+
+    const textSelection = this._ele.selection.find('text');
+    if (textSelection) {
+      e.preventDefault();
+      await this._onCopy(ctx);
+      deleteModelsByTextSelection(this._ele, textSelection);
       return;
     }
-    const range = getCurrentBlockRange(this._page);
-    if (!range) {
-      return;
-    }
+    const blockSelections = this._ele.selection.filter('block');
     e.preventDefault();
-    this._onCopy(e, range);
-    deleteModelsByRange(this._page, range);
+    await this._onCopy(ctx);
+    blockSelections.forEach(block => {
+      const model = this._page.getBlockById(block.blockId);
+      if (!model) {
+        return;
+      }
+      this._page.deleteBlock(model);
+    });
   };
 }

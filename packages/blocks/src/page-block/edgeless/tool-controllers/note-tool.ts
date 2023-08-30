@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
@@ -6,7 +7,6 @@ import {
   type NoteTool,
   queryCurrentMode,
 } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -36,7 +36,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     addNote(this._edgeless, this._page, e, width, options);
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
@@ -51,16 +51,16 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     this._addNote(e, DEFAULT_NOTE_WIDTH, options);
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     // this._hideOverlay();
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 

@@ -1,6 +1,4 @@
-import type { Text } from '@blocksuite/store';
-
-import { tString } from '../../../logical/data-type.js';
+import { tRichText } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 
 export const titleColumnTypeName = 'title';
@@ -10,13 +8,18 @@ declare global {
     [titleColumnTypeName]: typeof titlePureColumnConfig;
   }
 }
-export const titlePureColumnConfig = columnManager.register<Text['yText']>(
+export const titlePureColumnConfig = columnManager.register<string>(
   titleColumnTypeName,
   {
     name: 'Title',
-    type: () => tString.create(),
+    type: () => tRichText.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellFromString: data => {
+      return {
+        value: data,
+      };
+    },
     cellToJson: data => data?.toString() ?? null,
   }
 );

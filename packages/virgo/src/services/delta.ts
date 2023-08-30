@@ -79,7 +79,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     if (vRange.length >= 1) {
       this._editor.mapDeltasInVRange(
         vRange,
-        (a, rangeIndex, deltaIndex) => {
+        (_, rangeIndex, deltaIndex) => {
           if (
             deltaIndex === normalizedDeltaIndex &&
             rangeIndex >= vRange.index

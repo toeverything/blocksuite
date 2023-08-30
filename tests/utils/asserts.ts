@@ -4,16 +4,6 @@
 
 import './declare-test-window.js';
 
-import type {
-  CssVariableName,
-  NoteBlockModel,
-  PageBlockModel,
-} from '@blocksuite/blocks';
-import {
-  EDITOR_WIDTH,
-  PAGE_VERSION,
-  WORKSPACE_VERSION,
-} from '@blocksuite/global/config';
 import type { Locator } from '@playwright/test';
 import { expect, type Page } from '@playwright/test';
 import {
@@ -21,15 +11,35 @@ import {
   plugins as prettyFormatPlugins,
 } from 'pretty-format';
 
-import { toHex } from '../../packages/blocks/src/__internal__/utils/common.js';
+import {
+  BLOCK_ID_ATTR,
+  EDITOR_WIDTH,
+} from '../../packages/blocks/src/__internal__/consts.js';
+import type {
+  CssVariableName,
+  NoteBlockModel,
+  PageBlockModel,
+} from '../../packages/blocks/src/index.js';
+import { assertExists } from '../../packages/global/src/utils.js';
+import { toHex } from '../../packages/global/src/utils.js';
+import type { BlockElement } from '../../packages/lit/src/index.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
+import {
+  PAGE_VERSION,
+  WORKSPACE_VERSION,
+} from '../../packages/store/src/consts.js';
 import type {
   BaseBlockModel,
   SerializedStore,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
-import { getConnectorPath, getZoomLevel } from './actions/edgeless.js';
+import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
+import {
+  getConnectorPath,
+  getSelectedBound,
+  getZoomLevel,
+} from './actions/edgeless.js';
 import {
   pressArrowLeft,
   pressArrowRight,
@@ -49,6 +59,8 @@ import {
 import { currentEditorIndex } from './multiple-editor.js';
 import { getStringFromRichText } from './virgo.js';
 
+export { assertExists };
+
 export const defaultStore: SerializedStore = {
   meta: {
     properties: {
@@ -66,7 +78,7 @@ export const defaultStore: SerializedStore = {
     blockVersions: {
       'affine:paragraph': 1,
       'affine:page': 2,
-      'affine:database': 2,
+      'affine:database': 3,
       'affine:data-view': 1,
       'affine:list': 1,
       'affine:note': 1,
@@ -93,7 +105,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+          'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
@@ -110,6 +122,8 @@ export const defaultStore: SerializedStore = {
   },
 };
 
+type Bound = [x: number, y: number, w: number, h: number];
+
 export async function assertEmpty(page: Page) {
   await assertRichTexts(page, ['']);
 }
@@ -119,6 +133,20 @@ export async function assertTitle(page: Page, text: string) {
   const vEditor = editor.locator('[data-block-is-title="true"]').first();
   const vText = virgoEditorInnerTextToString(await vEditor.innerText());
   expect(vText).toBe(text);
+}
+
+export async function assertRichTextVirgoDeltas(
+  page: Page,
+  deltas: unknown[],
+  i = 0
+) {
+  const actual = await page.evaluate(i => {
+    const vRoot = document.querySelectorAll<VirgoRootElement>(
+      'rich-text [data-virgo-root="true"]'
+    )[i];
+    return vRoot.virgoEditor.yTextDeltas;
+  }, i);
+  expect(actual).toEqual(deltas);
 }
 
 export async function assertText(page: Page, text: string, i = 0) {
@@ -148,7 +176,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
     const editor = document.querySelector(
-      'edgeless-text-editor,edgeless-shape-text-editor'
+      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor'
     );
     if (!editor) {
       throw new Error('editor not found');
@@ -195,7 +223,7 @@ export async function assertImageOption(page: Page) {
 }
 
 export async function assertPageTitleFocus(page: Page) {
-  const locator = page.locator('.affine-default-page-block-title').nth(0);
+  const locator = page.locator('.affine-doc-page-block-title').nth(0);
   await expect(locator).toBeFocused();
 }
 
@@ -224,6 +252,10 @@ export async function assertBlockCount(
   count: number
 ) {
   const actual = await page.locator(`affine-${flavour}`).count();
+  expect(actual).toBe(count);
+}
+export async function assertRowCount(page: Page, count: number) {
+  const actual = await page.locator('.affine-database-block-row').count();
   expect(actual).toBe(count);
 }
 
@@ -298,11 +330,23 @@ export async function assertTextFormat(
   expect(actual).toEqual(resultObj);
 }
 
-export async function assertTypeFormat(page: Page, type: string) {
-  const actual = await page.evaluate(() => {
-    const richText = document.querySelectorAll('rich-text')[0];
-    return richText.model.type;
-  });
+export async function assertRichTextModelType(
+  page: Page,
+  type: string,
+  index = 0
+) {
+  const actual = await page.evaluate(
+    ({ index, BLOCK_ID_ATTR }) => {
+      const richText = document.querySelectorAll('rich-text')[index];
+      const blockElement = richText.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+
+      if (!blockElement) {
+        throw new Error('blockElement is undefined');
+      }
+      return (blockElement.model as BaseBlockModel<{ type: string }>).type;
+    },
+    { index, BLOCK_ID_ATTR }
+  );
   expect(actual).toEqual(type);
 }
 
@@ -552,9 +596,9 @@ export async function assertStoreMatchJSX(
 type MimeType = 'text/plain' | 'blocksuite/x-c+w' | 'text/html';
 
 export async function assertClipItems(
-  page: Page,
-  key: MimeType,
-  value: unknown
+  _page: Page,
+  _key: MimeType,
+  _value: unknown
 ) {
   // FIXME: use original clipboard API
   // const clipItems = await page.evaluate(() => {
@@ -805,4 +849,30 @@ export function assertRectExist(
   rect: { x: number; y: number; width: number; height: number } | null
 ): asserts rect is { x: number; y: number; width: number; height: number } {
   expect(rect).not.toBe(null);
+}
+
+export async function assertSelectedBound(
+  page: Page,
+  expected: Bound,
+  index = 0
+) {
+  const bound = await getSelectedBound(page, index);
+  assertBound(bound, expected);
+}
+
+export function assertBound(received: Bound, expected: Bound) {
+  expect(received[0]).toBeCloseTo(expected[0], 0);
+  expect(received[1]).toBeCloseTo(expected[1], 0);
+  expect(received[2]).toBeCloseTo(expected[2], 0);
+  expect(received[3]).toBeCloseTo(expected[3], 0);
+}
+
+export function assertClipData(
+  clipItems: { mimeType: string; data: unknown }[],
+  expectClipItems: { mimeType: string; data: unknown }[],
+  type: string
+) {
+  expect(clipItems.find(item => item.mimeType === type)?.data).toBe(
+    expectClipItems.find(item => item.mimeType === type)?.data
+  );
 }

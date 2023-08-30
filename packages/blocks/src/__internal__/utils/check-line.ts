@@ -183,8 +183,7 @@ export function checkFirstLine(range: Range, container: Element) {
   const lineHeight = rangeRect.height;
   // If the caret at the start of second line, as known as line edge,
   // the range bounding rect may be incorrect, we need to check the scenario.
-  const isFirstLine =
-    containerRect.top > rangeRect.top - lineHeight / 2 && !isAtLineEdge(range);
+  const isFirstLine = containerRect.top > rangeRect.top - lineHeight / 2;
   return isFirstLine;
 }
 

@@ -10,6 +10,7 @@ export interface Renderer<
   type: string;
   icon?: UniComponent;
   cellRenderer: CellRenderer<Data, Value>;
+  detailCellRenderer?: CellRenderer<Data, Value>;
 }
 
 export class ColumnRendererHelper {
@@ -32,7 +33,7 @@ export class ColumnRendererHelper {
   }
 
   list(): Renderer[] {
-    return [...this._columns.values()];
+    return Array.from(this._columns.values());
   }
 }
 

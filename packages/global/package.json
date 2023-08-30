@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/global",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "types": "./index.d.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
@@ -13,11 +13,26 @@
   "sideEffects": false,
   "exports": {
     ".": "./index.d.ts",
-    "./types": "./src/types.ts",
     "./utils": "./src/utils.ts",
     "./debug": "./src/debug.ts",
     "./config": "./src/config/index.ts",
     "./error": "./src/error/index.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "utils": [
+        "dist/utils.d.ts"
+      ],
+      "debug": [
+        "dist/debug.d.ts"
+      ],
+      "config": [
+        "dist/config/index.d.ts"
+      ],
+      "error": [
+        "dist/error/index.d.ts"
+      ]
+    }
   },
   "author": "toeverything",
   "license": "MPL-2.0",
@@ -37,10 +52,10 @@
   },
   "dependencies": {
     "ansi-colors": "^4.1.3",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   },
   "devDependencies": {
-    "lit": "^2.7.6"
+    "lit": "^2.8.0"
   },
   "peerDependencies": {
     "lit": "^2.7"

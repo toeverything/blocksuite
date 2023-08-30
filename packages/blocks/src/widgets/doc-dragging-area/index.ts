@@ -1,11 +1,13 @@
+import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isBlankArea } from '../../__internal__/index.js';
-import type { DefaultPageBlockComponent } from '../../page-block/index.js';
+import type { DocPageBlockComponent } from '../../page-block/index.js';
+import { autoScroll } from '../../page-block/text-selection/utils.js';
 
 type Rect = {
   left: number;
@@ -32,6 +34,11 @@ function rectIncludes(a: Rect, b: Rect) {
   );
 }
 
+function isBlankArea(e: PointerEventState) {
+  const { cursor } = window.getComputedStyle(e.raw.target as Element);
+  return cursor !== 'text';
+}
+
 @customElement('affine-doc-dragging-area-widget')
 export class DocDraggingAreaWidget extends WidgetElement {
   @state()
@@ -39,7 +46,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private _rafID = 0;
 
-  static excludeFlavours: string[] = ['affine:note'];
+  static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
 
   private _dragging = false;
 
@@ -53,31 +60,45 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   private get _allBlocksRect() {
     const viewportElement = this._viewportElement;
-    return [...this.root.blockViewMap.entries()]
-      .filter(([_, element]) => {
-        const model = element.model;
-        return (
-          model.role !== 'root' &&
-          !DocDraggingAreaWidget.excludeFlavours.includes(model.flavour)
-        );
-      })
-      .map(([_, element]) => {
-        const bounding = element.getBoundingClientRect();
-        return {
-          id: element.model.id,
-          path: element.path,
-          rect: {
-            left: bounding.left + viewportElement.scrollLeft,
-            top: bounding.top + viewportElement.scrollTop,
-            width: bounding.width,
-            height: bounding.height,
-          },
-        };
+
+    const getAllNodeFromTree = (): BlockElement[] => {
+      const blockElement: BlockElement[] = [];
+      this.root.viewStore.walkThrough(node => {
+        const view = node.view;
+        if (!(view instanceof BlockElement)) {
+          return true;
+        }
+        if (
+          view.model.role !== 'root' &&
+          !DocDraggingAreaWidget.excludeFlavours.includes(view.model.flavour)
+        ) {
+          blockElement.push(view);
+        }
+        return;
       });
+      return blockElement;
+    };
+
+    const elements = getAllNodeFromTree();
+
+    const rootRect = this.root.getBoundingClientRect();
+    return elements.map(element => {
+      const bounding = element.getBoundingClientRect();
+      return {
+        id: element.model.id,
+        path: element.path,
+        rect: {
+          left: bounding.left + viewportElement.scrollLeft - rootRect.left,
+          top: bounding.top + viewportElement.scrollTop - rootRect.top,
+          width: bounding.width,
+          height: bounding.height,
+        },
+      };
+    });
   }
 
   private get _viewportElement() {
-    const pageBlock = this.hostElement as DefaultPageBlockComponent;
+    const pageBlock = this.pageElement as DocPageBlockComponent;
 
     assertExists(pageBlock);
 
@@ -92,12 +113,11 @@ export class DocDraggingAreaWidget extends WidgetElement {
       )
       .map(rectWithId => {
         return this.root.selectionManager.getInstance('block', {
-          blockId: rectWithId.id,
           path: rectWithId.path,
         });
       });
 
-    this.root.selectionManager.set(selections);
+    this.root.selectionManager.setGroup('note', selections);
   }
 
   private _clearRaf() {
@@ -107,40 +127,15 @@ export class DocDraggingAreaWidget extends WidgetElement {
     }
   }
 
-  private _autoScroll = (y: number): boolean => {
-    const { scrollHeight, clientHeight, scrollTop } = this._viewportElement;
-    let _scrollTop = scrollTop;
-    const threshold = 50;
-    const max = scrollHeight - clientHeight;
-
-    let d = 0;
-    let flag = false;
-
-    if (Math.ceil(scrollTop) < max && clientHeight - y < threshold) {
-      // ↓
-      d = threshold - (clientHeight - y);
-      flag = Math.ceil(_scrollTop) < max;
-    } else if (scrollTop > 0 && y < threshold) {
-      // ↑
-      d = y - threshold;
-      flag = _scrollTop > 0;
-    }
-
-    _scrollTop += d * 0.25;
-
-    if (this._viewportElement && flag && scrollTop !== _scrollTop) {
-      this._viewportElement.scrollTop = _scrollTop;
-      return true;
-    }
-    return false;
-  };
-
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent(
       'dragStart',
       ctx => {
         const state = ctx.get('pointerState');
+        const { button } = state.raw;
+        if (button !== 0) return;
+
         if (isBlankArea(state)) {
           this._dragging = true;
           const viewportElement = this._viewportElement;
@@ -162,6 +157,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
         if (!this._dragging) {
           return;
         }
+        ctx.get('defaultState').event.preventDefault();
 
         const runner = () => {
           const state = ctx.get('pointerState');
@@ -182,7 +178,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
           this.rect = userRect;
           this._selectBlocksByRect(userRect);
 
-          const result = this._autoScroll(y);
+          const result = autoScroll(this._viewportElement, y);
           if (!result) {
             this._clearRaf();
             return;

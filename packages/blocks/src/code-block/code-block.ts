@@ -1,13 +1,13 @@
 import '../__internal__/rich-text/rich-text.js';
-import '../components/portal.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
-import { ArrowDownIcon } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { assertExists, Slot } from '@blocksuite/store';
+import type { VirgoRootElement } from '@blocksuite/virgo';
+import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
@@ -18,18 +18,18 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import {
-  clamp,
-  getViewportElement,
-  queryCurrentMode,
-} from '../__internal__/index.js';
+import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
+import { queryCurrentMode } from '../__internal__/index.js';
+import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
-import { getService, registerService } from '../__internal__/service.js';
+import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
+import { createLitPortal } from '../components/portal.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
+import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
-import { CodeBlockService } from './code-service.js';
 import { CodeOptionTemplate } from './components/code-option.js';
+import { LangList } from './components/lang-list.js';
 import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
@@ -117,7 +117,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
     .affine-code-block-container .rich-text-container {
       position: relative;
-      border-radius: 5px;
+      border-radius: 4px;
       padding: 4px 12px 4px 60px;
     }
 
@@ -178,13 +178,23 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   `;
 
   @state()
-  private _showLangList = false;
-
-  @state()
-  private _optionPosition: { x: number; y: number } | null = null;
-
-  @state()
   private _wrap = false;
+
+  @query('.lang-button')
+  private _langButton!: HTMLButtonElement;
+
+  private _optionsPortal: HTMLDivElement | null = null;
+
+  @state()
+  private _langListAbortController?: AbortController;
+
+  private get _showLangList() {
+    return !!this._langListAbortController;
+  }
+
+  get readonly() {
+    return this.model.page.readonly;
+  }
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: z.object({}),
@@ -199,9 +209,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._updateLineNumbers();
   });
 
-  private _curLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
+  private _perviousLanguage: ILanguageRegistration = PLAIN_TEXT_REGISTRATION;
   private _highlighter: Highlighter | null = null;
   private async _startHighlight(lang: ILanguageRegistration) {
+    if (this._highlighter) {
+      const loadedLangs = this._highlighter.getLoadedLanguages();
+      if (!loadedLangs.includes(lang.id as Lang)) {
+        this._highlighter.loadLanguage(lang).then(() => {
+          const richText = this.querySelector('rich-text');
+          const vEditor = richText?.vEditor;
+          if (vEditor) {
+            vEditor.requestUpdate();
+          }
+        });
+      }
+      return;
+    }
     const mode = queryCurrentMode();
     this._highlighter = await getHighlighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
@@ -226,15 +249,23 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
-  get readonly() {
-    return this.model.page.readonly;
+  get vEditor() {
+    const vRoot = this.querySelector<VirgoRootElement>('[data-virgo-root]');
+    if (!vRoot) {
+      throw new Error('Virgo root not found');
+    }
+    return vRoot.virgoEditor;
   }
-
-  hoverState = new Slot<boolean>();
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:code', CodeBlockService);
+    // set highlight options getter used by "exportToHtml"
+    getService('affine:code').setHighlightOptionsGetter(() => {
+      return {
+        lang: this._perviousLanguage.id as Lang,
+        highlighter: this._highlighter,
+      };
+    });
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
     );
@@ -257,33 +288,156 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     );
 
     this._observePosition();
+    bindContainerHotkey(this);
+
+    const selection = this.root.selectionManager;
+    const INDENT_SYMBOL = '  ';
+    const LINE_BREAK_SYMBOL = '\n';
+    const allIndexOf = (
+      text: string,
+      symbol: string,
+      start = 0,
+      end = text.length
+    ) => {
+      const indexArr: number[] = [];
+      let i = start;
+
+      while (i < end) {
+        const index = text.indexOf(symbol, i);
+        if (index === -1 || index > end) {
+          break;
+        }
+        indexArr.push(index);
+        i = index + 1;
+      }
+      return indexArr;
+    };
+    this.bindHotKey({
+      Backspace: () => {
+        const textSelection = selection.find('text');
+        if (!textSelection) {
+          return;
+        }
+
+        const from = textSelection.from;
+
+        if (from.index === 0 && from.length === 0) {
+          selection.update(selList => {
+            return selList
+              .filter(sel => !sel.is('text'))
+              .concat(selection.getInstance('block', { path: this.path }));
+          });
+          return true;
+        }
+
+        return;
+      },
+      Tab: ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const vEditor = this.vEditor;
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.vEditor.yText.toString();
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          const indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            vRange.index,
+            vRange.index + vRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr.forEach(i => {
+            this.vEditor.insertText(
+              {
+                index: i,
+                length: 0,
+              },
+              INDENT_SYMBOL
+            );
+          });
+          this.vEditor.setVRange({
+            index: vRange.index + 2,
+            length:
+              vRange.length + (indexArr.length - 1) * INDENT_SYMBOL.length,
+          });
+
+          return true;
+        }
+
+        return;
+      },
+      'Shift-Tab': ctx => {
+        const state = ctx.get('keyboardState');
+        const event = state.raw;
+        const vEditor = this.vEditor;
+        const vRange = vEditor.getVRange();
+        if (vRange) {
+          event.stopPropagation();
+          event.preventDefault();
+
+          const text = this.vEditor.yText.toString();
+          const index = text.lastIndexOf(LINE_BREAK_SYMBOL, vRange.index - 1);
+          let indexArr = allIndexOf(
+            text,
+            LINE_BREAK_SYMBOL,
+            vRange.index,
+            vRange.index + vRange.length
+          )
+            .map(i => i + 1)
+            .reverse();
+          if (index !== -1) {
+            indexArr.push(index + 1);
+          } else {
+            indexArr.push(0);
+          }
+          indexArr = indexArr.filter(
+            i => text.slice(i, i + 2) === INDENT_SYMBOL
+          );
+          indexArr.forEach(i => {
+            this.vEditor.deleteText({
+              index: i,
+              length: 2,
+            });
+          });
+          if (indexArr.length > 0) {
+            this.vEditor.setVRange({
+              index:
+                vRange.index -
+                (indexArr[indexArr.length - 1] < vRange.index ? 2 : 0),
+              length:
+                vRange.length - (indexArr.length - 1) * INDENT_SYMBOL.length,
+            });
+          }
+
+          return true;
+        }
+
+        return;
+      },
+    });
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.hoverState.dispose();
     this._richTextResizeObserver.disconnect();
   }
 
   override updated() {
-    if (this.model.language !== this._curLanguage.id) {
+    if (this.model.language !== this._perviousLanguage.id) {
       const lang = getStandardLanguage(this.model.language);
-      this._curLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
+      this._perviousLanguage = lang ?? PLAIN_TEXT_REGISTRATION;
       if (lang) {
-        if (this._highlighter) {
-          const currentLangs = this._highlighter.getLoadedLanguages();
-          if (!currentLangs.includes(lang.id as Lang)) {
-            this._highlighter.loadLanguage(lang).then(() => {
-              const richText = this.querySelector('rich-text');
-              const vEditor = richText?.vEditor;
-              if (vEditor) {
-                vEditor.requestUpdate();
-              }
-            });
-          }
-        } else {
-          this._startHighlight(lang);
-        }
+        this._startHighlight(lang);
       } else {
         this._highlighter = null;
       }
@@ -308,66 +462,95 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   private _observePosition() {
-    // At AFFiNE, avoid the option element to be covered by the header
-    // we need to reserve the space for the header
-    const HEADER_HEIGHT = 64;
-    // The height of the option element
-    // You need to change this value manually if you change the style of the option element
-    const OPTION_ELEMENT_HEIGHT = 96;
-    const TOP_EDGE = 10;
-    const LEFT_EDGE = 12;
+    this._disposables.addFromEvent(this, 'mouseenter', () => {
+      if (this._optionsPortal?.isConnected) return;
+      const abortController = new AbortController();
 
-    let timer: number;
-    const updatePosition = () => {
-      // Update option position when scrolling
-      const rect = this.getBoundingClientRect();
-      this._optionPosition = {
-        x: rect.right + LEFT_EDGE,
-        y: clamp(
-          rect.top + TOP_EDGE,
-          Math.min(
-            HEADER_HEIGHT + LEFT_EDGE,
-            rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-          ),
-          rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-        ),
-      };
-    };
-    this.hoverState.on(hover => {
-      clearTimeout(timer);
-      if (hover) {
-        updatePosition();
-        return;
-      }
-      timer = window.setTimeout(() => {
-        this._optionPosition = null;
-      }, HOVER_DELAY);
-    });
-    this._disposables.addFromEvent(this, 'mouseenter', e => {
-      this.hoverState.emit(true);
-    });
-    const HOVER_DELAY = 300;
-    this._disposables.addFromEvent(this, 'mouseleave', e => {
-      this.hoverState.emit(false);
-    });
-
-    const viewportElement = getViewportElement(this.model.page);
-    if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', e => {
-        if (!this._optionPosition) return;
-        updatePosition();
+      this._optionsPortal = createLitPortal({
+        template: ({ updatePortal }) =>
+          CodeOptionTemplate({
+            anchor: this,
+            model: this.model,
+            wrap: this._wrap,
+            onClickWrap: () => {
+              this._onClickWrapBtn();
+              updatePortal();
+            },
+            abortController,
+          }),
+        computePosition: {
+          referenceElement: this,
+          placement: 'right-start',
+          middleware: [
+            offset({
+              mainAxis: 12,
+              crossAxis: 10,
+            }),
+            shift({
+              crossAxis: true,
+              padding: {
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
+                right: 12,
+              },
+            }),
+          ],
+          autoUpdate: true,
+        },
+        abortController,
       });
-    }
+    });
   }
 
   private _onClickLangBtn() {
     if (this.readonly) return;
-    this._showLangList = !this._showLangList;
+    if (this._langListAbortController) return;
+    const abortController = new AbortController();
+    this._langListAbortController = abortController;
+    abortController.signal.addEventListener('abort', () => {
+      this._langListAbortController = undefined;
+    });
+
+    createLitPortal({
+      template: ({ positionSlot }) => {
+        const langList = new LangList();
+        langList.currentLanguageId = this._perviousLanguage.id as Lang;
+        langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
+          getService('affine:code').setLang(this.model, lang ? lang.id : null);
+          abortController.abort();
+        };
+        langList.onClose = () => abortController.abort();
+        positionSlot.on(({ placement }) => {
+          langList.placement = placement;
+        });
+        return langList;
+      },
+      computePosition: {
+        referenceElement: this._langButton,
+        placement: 'bottom-start',
+        middleware: [
+          offset(4),
+          flip(),
+          size({
+            padding: 12,
+            apply({ availableHeight, elements }) {
+              Object.assign(elements.floating.style, {
+                height: '100%',
+                maxHeight: `${availableHeight}px`,
+              });
+            },
+          }),
+        ],
+        autoUpdate: true,
+      },
+      abortController,
+    });
   }
 
-  private _langListTemplate() {
-    const curLanguageDisplayName =
-      this._curLanguage.displayName ?? this._curLanguage.id;
+  private _curLanguageButtonTemplate() {
+    const curLanguage =
+      getStandardLanguage(this.model.language) ?? PLAIN_TEXT_REGISTRATION;
+    const curLanguageDisplayName = curLanguage.displayName ?? curLanguage.id;
     return html`<div
       class="lang-list-wrapper"
       style="${this._showLangList ? 'visibility: visible;' : ''}"
@@ -383,32 +566,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       >
         ${curLanguageDisplayName} ${!this.readonly ? ArrowDownIcon : nothing}
       </icon-button>
-      ${this._showLangList
-        ? html`<lang-list
-            .currentLanguageId=${this._curLanguage.id as Lang}
-            @selected-language-changed=${(e: CustomEvent) => {
-              getService('affine:code').setLang(this.model, e.detail.language);
-              this._showLangList = false;
-            }}
-            @dispose=${() => {
-              this._showLangList = false;
-            }}
-          ></lang-list>`
-        : nothing}
     </div>`;
-  }
-
-  private _codeOptionTemplate() {
-    if (!this._optionPosition) return '';
-    return html`<affine-portal
-      .template=${CodeOptionTemplate({
-        model: this.model,
-        position: this._optionPosition,
-        hoverState: this.hoverState,
-        wrap: this._wrap,
-        onClickWrap: () => this._onClickWrapBtn(),
-      })}
-    ></affine-portal>`;
   }
 
   private _updateLineNumbers() {
@@ -426,18 +584,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
 
   override render() {
     return html`<div class="affine-code-block-container">
-        ${this._langListTemplate()}
-        <div class="rich-text-container">
-          <div id="line-numbers"></div>
-          <rich-text .model=${this.model} .textSchema=${this.textSchema}>
-          </rich-text>
-        </div>
-        ${this.content}
-        ${this.selected?.is('block')
-          ? html`<affine-block-selection></affine-block-selection>`
-          : null}
+      ${this._curLanguageButtonTemplate()}
+      <div class="rich-text-container">
+        <div id="line-numbers"></div>
+        <rich-text
+          .yText=${this.model.text.yText}
+          .undoManager=${this.model.page.history}
+          .textSchema=${this.textSchema}
+          .readonly=${this.model.page.readonly}
+        >
+        </rich-text>
       </div>
-      ${this._codeOptionTemplate()}`;
+      ${this.content}
+      ${this.selected?.is('block')
+        ? html`<affine-block-selection></affine-block-selection>`
+        : null}
+    </div>`;
   }
 }
 

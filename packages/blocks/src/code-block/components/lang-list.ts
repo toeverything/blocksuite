@@ -1,6 +1,5 @@
-import { SearchIcon } from '@blocksuite/global/config';
-import { ShadowlessElement } from '@blocksuite/lit';
-import { css, html } from 'lit';
+import type { Placement } from '@floating-ui/dom';
+import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BUNDLED_LANGUAGES,
@@ -8,43 +7,46 @@ import {
   type Lang,
 } from 'shiki';
 
-import { createEvent } from '../../__internal__/index.js';
 import { scrollbarStyle } from '../../components/utils.js';
+import { SearchIcon } from '../../icons/index.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
 // TODO extract to a common list component
 @customElement('lang-list')
-export class LangList extends ShadowlessElement {
+export class LangList extends LitElement {
   static override get styles() {
     return css`
-      lang-list {
+      :host {
+        height: 100%;
         display: flex;
         flex-direction: column;
-        position: absolute;
         background: var(--affine-background-overlay-panel-color);
+        color: var(--affine-text-primary-color);
         border-radius: 12px;
-        top: 24px;
         z-index: var(--affine-z-index-popover);
       }
 
       .lang-list-container {
+        box-sizing: border-box;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
         box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
         padding: 12px 8px;
       }
 
       .lang-list-button-container {
-        position: relative;
+        flex: 1;
         overflow: scroll;
         height: 424px;
-        width: 200px;
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
       }
 
-      ${scrollbarStyle}
+      ${scrollbarStyle('.lang-list-button-container')}
 
       .lang-item {
         display: flex;
@@ -54,22 +56,23 @@ export class LangList extends ShadowlessElement {
       }
 
       .input-wrapper {
-        position: relative;
         display: flex;
         margin-top: 8px;
         margin-left: 4px;
+        border: 1px solid var(--affine-border-color);
+        border-radius: 8px;
+        padding: 4px 10px;
+        gap: 4px;
       }
 
       #filter-input {
-        display: flex;
+        flex: 1;
         align-items: center;
-        height: 32px;
-        width: 192px;
-        border: 1px solid var(--affine-border-color);
+        height: 20px;
+        width: 140px;
         border-radius: 8px;
-        padding-left: 44px;
-        padding-top: 4px;
-
+        padding-top: 2px;
+        border: none;
         font-family: var(--affine-font-family);
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
@@ -87,15 +90,24 @@ export class LangList extends ShadowlessElement {
       }
 
       .search-icon {
-        position: absolute;
-        left: 8px;
-        height: 100%;
         display: flex;
         align-items: center;
-        fill: var(--affine-icon-color);
+        color: var(--affine-icon-color);
       }
     `;
   }
+
+  @property({ attribute: false })
+  currentLanguageId!: Lang;
+
+  @property({ attribute: false })
+  onClose?: () => void;
+
+  @property({ attribute: false })
+  onSelectLanguage?: (lang: ILanguageRegistration | null) => void;
+
+  @property({ attribute: false })
+  placement?: Placement;
 
   @state()
   private _filterText = '';
@@ -106,16 +118,12 @@ export class LangList extends ShadowlessElement {
   @query('#filter-input')
   filterInput!: HTMLInputElement;
 
-  @property({ attribute: false })
-  currentLanguageId!: Lang;
-
-  @property({ attribute: false })
-  delay = 150;
-
   override async connectedCallback() {
     super.connectedCallback();
     // Avoid triggering click away listener on initial render
-    document.addEventListener('click', this._clickAwayListener);
+    setTimeout(() =>
+      document.addEventListener('click', this._clickAwayListener)
+    );
 
     setTimeout(() => {
       this.filterInput?.focus();
@@ -131,19 +139,16 @@ export class LangList extends ShadowlessElement {
     if (this.renderRoot.parentElement?.contains(e.target as Node)) {
       return;
     }
-    this.dispatchEvent(createEvent('dispose', null));
+    this.onClose?.();
   };
 
   private _onLanguageClicked(language: ILanguageRegistration | null) {
-    // TODO use slot instead
-    this.dispatchEvent(
-      createEvent('selected-language-changed', {
-        language: language?.id ?? null,
-      })
-    );
+    this.onSelectLanguage?.(language);
   }
 
   override render() {
+    const isFlip = this.placement?.startsWith('top');
+
     const filteredLanguages = [PLAIN_TEXT_REGISTRATION, ...BUNDLED_LANGUAGES]
       .filter(language => {
         if (!this._filterText) {
@@ -187,7 +192,10 @@ export class LangList extends ShadowlessElement {
     };
 
     return html`
-      <div class="lang-list-container">
+      <div
+        class="lang-list-container"
+        style="${isFlip ? 'flex-direction: column-reverse;' : ''}"
+      >
         <div class="input-wrapper">
           <div class="search-icon">${SearchIcon}</div>
           <input
@@ -224,13 +232,5 @@ export class LangList extends ShadowlessElement {
 declare global {
   interface HTMLElementTagNameMap {
     'lang-list': LangList;
-  }
-
-  interface HTMLElementEventMap {
-    /**
-     * @deprecated Use slot instead
-     */
-    'selected-language-changed': CustomEvent<{ language: string | null }>;
-    dispose: CustomEvent<null>;
   }
 }

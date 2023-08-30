@@ -16,31 +16,26 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 
 import {
-  activeEditorManager,
   COLOR_VARIABLES,
   createPage,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
-  getCurrentBlockRange,
-  SelectionUtils,
   SIZE_VARIABLES,
-  updateBlockType,
   VARIABLES,
 } from '@blocksuite/blocks';
+import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import { GUI } from 'dat.gui';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { Pane } from 'tweakpane';
 
 import { registerFormatBarCustomElement } from './custom-format-bar';
-import { createViewer } from './doc-inspector';
+import type { CustomNavigationPanel } from './custom-navigation-panel';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -59,62 +54,68 @@ const basePath = import.meta.env.DEV
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
-  const sizeFolder = styleMenu.addFolder('Size');
-  const fontFamilyFolder = styleMenu.addFolder('FontFamily');
-  const colorFolder = styleMenu.addFolder('Color');
-  const othersFolder = styleMenu.addFolder('Others');
-  sizeFolder.open();
-  fontFamilyFolder.open();
-  colorFolder.open();
-  othersFolder.open();
+function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
+  const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
+  const fontFamilyFolder = styleMenu.addFolder({
+    title: 'Font Family',
+    expanded: false,
+  });
+  const colorFolder = styleMenu.addFolder({ title: 'Color', expanded: false });
+  const othersFolder = styleMenu.addFolder({
+    title: 'Others',
+    expanded: false,
+  });
   SIZE_VARIABLES.forEach(name => {
     sizeFolder
-      .add(
+      .addInput(
         {
           [name]: isNaN(parseFloat(cssVariablesMap[name]))
             ? 0
             : parseFloat(cssVariablesMap[name]),
         },
         name,
-        0,
-        100
+        {
+          min: 0,
+          max: 100,
+        }
       )
-      .onChange(e => {
-        style.setProperty(name, `${Math.round(e)}px`);
+      .on('change', e => {
+        style.setProperty(name, `${Math.round(e.value)}px`);
       });
   });
   FONT_FAMILY_VARIABLES.forEach(name => {
     fontFamilyFolder
-      .add(
+      .addInput(
         {
           [name]: cssVariablesMap[name],
         },
         name
       )
-      .onChange(e => {
-        style.setProperty(name, e);
+      .on('change', e => {
+        style.setProperty(name, e.value);
       });
   });
   OTHER_CSS_VARIABLES.forEach(name => {
-    othersFolder.add({ [name]: cssVariablesMap[name] }, name).onChange(e => {
-      style.setProperty(name, e);
-    });
+    othersFolder
+      .addInput({ [name]: cssVariablesMap[name] }, name)
+      .on('change', e => {
+        style.setProperty(name, e.value);
+      });
   });
   fontFamilyFolder
-    .add(
+    .addInput(
       {
         '--affine-font-family':
           'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
       },
       '--affine-font-family'
     )
-    .onChange(e => {
-      style.setProperty('--affine-font-family', e);
+    .on('change', e => {
+      style.setProperty('--affine-font-family', e.value);
     });
   for (const plateKey in plate) {
-    colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
-      style.setProperty(plateKey, color);
+    colorFolder.addInput(plate, plateKey).on('change', e => {
+      style.setProperty(plateKey, e.value);
     });
   }
 }
@@ -141,6 +142,9 @@ export class DebugMenu extends ShadowlessElement {
   @property({ attribute: false })
   contentParser!: ContentParser;
 
+  @property({ attribute: false })
+  navigationPanel!: CustomNavigationPanel;
+
   @state()
   private _connected = true;
 
@@ -162,7 +166,7 @@ export class DebugMenu extends ShadowlessElement {
   @query('#block-type-dropdown')
   blockTypeDropdown!: SlDropdown;
 
-  private _styleMenu!: GUI;
+  private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
 
   @state()
@@ -210,41 +214,38 @@ export class DebugMenu extends ShadowlessElement {
 
   private _updateBlockType(
     e: PointerEvent,
-    flavour: 'affine:paragraph' | 'affine:list',
-    type: string
+    _flavour: 'affine:paragraph' | 'affine:list',
+    _type: string
   ) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      return;
-    }
-    updateBlockType(blockRange.models, flavour, type);
+    // FIXME: fix this
   }
 
   private _addCodeBlock(e: PointerEvent) {
     e.preventDefault();
     this.blockTypeDropdown.hide();
 
-    const blockRange = getCurrentBlockRange(this.page);
-    if (!blockRange) {
-      throw new Error("Can't add code block without a selection");
-    }
-    const startModel = blockRange.models[0];
-    const parent = this.page.getParent(startModel);
-    const index = parent?.children.indexOf(startModel);
-    const blockProps = {
-      text: startModel.text?.clone(),
-    };
-    assertExists(parent);
-    this.page.captureSync();
-    this.page.deleteBlock(startModel);
-    this.page.addBlock('affine:code', blockProps, parent, index);
+    // FIXME: fix this
+    // const blockRange = getCurrentBlockRange(this.page);
+    // if (!blockRange) {
+    //   throw new Error("Can't add code block without a selection");
+    // }
+    // const startModel = blockRange.models[0];
+    // const parent = this.page.getParent(startModel);
+    // const index = parent?.children.indexOf(startModel);
+    // const blockProps = {
+    //   text: startModel.text?.clone(),
+    // };
+    // assertExists(parent);
+    // this.page.captureSync();
+    // this.page.deleteBlock(startModel);
+    // this.page.addBlock('affine:code', blockProps, parent, index);
   }
 
   private _switchEditorMode() {
-    const editor = activeEditorManager.getActiveEditor();
+    const editor = document.querySelector<EditorContainer>('editor-container');
     if (editor instanceof EditorContainer) {
       const mode = editor.mode === 'page' ? 'edgeless' : 'page';
       editor.mode = mode;
@@ -252,6 +253,10 @@ export class DebugMenu extends ShadowlessElement {
       const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
       this.mode = mode;
     }
+  }
+
+  private _toggleNavigationPanel() {
+    this.navigationPanel.toggleDisplay();
   }
 
   private _switchOffsetMode() {
@@ -266,7 +271,7 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},${EDITOR_WIDTH},480]`;
+    const xywh = `[0,${count * 60},${EDITOR_WIDTH},95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);
@@ -324,10 +329,6 @@ export class DebugMenu extends ShadowlessElement {
     input.click();
   }
 
-  private async _inspect() {
-    await createViewer(this.workspace.doc.toJSON());
-  }
-
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -337,7 +338,14 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleStyleDebugMenu() {
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
-    this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
+    this._showStyleDebugMenu
+      ? (this._styleMenu.hidden = false)
+      : (this._styleMenu.hidden = true);
+  }
+
+  private _toggleReadonly() {
+    const page = this.page;
+    page.awarenessStore.setReadonly(page, !page.readonly);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -400,11 +408,11 @@ export class DebugMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new GUI({ hideable: false });
-    this._styleMenu.width = 650;
+    this._styleMenu = new Pane({ title: 'CSS Debug Menu' });
+    this._styleMenu.hidden = true;
+    this._styleMenu.element.style.width = '650';
     const style = document.documentElement.style;
     init_css_debug_menu(this._styleMenu, style);
-    this._styleMenu.hide();
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -490,7 +498,6 @@ export class DebugMenu extends ShadowlessElement {
                 content="Undo"
                 .disabled=${!this._canUndo}
                 @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
                   this.page.undo();
                 }}
               >
@@ -504,7 +511,6 @@ export class DebugMenu extends ShadowlessElement {
                 content="Redo"
                 .disabled=${!this._canRedo}
                 @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
                   this.page.redo();
                 }}
               >
@@ -601,7 +607,7 @@ export class DebugMenu extends ShadowlessElement {
           </sl-dropdown>
 
           <!-- test operations -->
-          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
+          <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
               Test Operations
             </sl-button>
@@ -628,11 +634,13 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._importSnapshot}>
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}>Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
+              <sl-menu-item @click=${this._toggleReadonly}>
+                Toggle Readonly
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
@@ -685,6 +693,20 @@ export class DebugMenu extends ShadowlessElement {
               @click=${() => createPageBlock(this.workspace)}
             >
               <sl-icon name="file-earmark-plus"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip
+            content="Toggle navigation panel"
+            placement="bottom"
+            hoist
+          >
+            <sl-button
+              size="small"
+              content=""
+              @click=${this._toggleNavigationPanel}
+            >
+              <sl-icon name="list"></sl-icon>
             </sl-button>
           </sl-tooltip>
 

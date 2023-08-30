@@ -3,7 +3,7 @@ import { css } from 'lit';
 import { tooltipStyle } from '../tooltip/tooltip.js';
 
 export const styles = css`
-  :host {
+  .container {
     position: absolute;
     width: 480px;
     left: calc(50% - 480px / 2);
@@ -11,8 +11,8 @@ export const styles = css`
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
-    padding: 20px 40px 24px 40px;
-    gap: 19px;
+    padding: 12px 40px 36px;
+    gap: 20px;
     display: flex;
     flex-direction: column;
     background: var(--affine-background-primary-color);
@@ -21,7 +21,7 @@ export const styles = css`
     z-index: var(--affine-z-index-popover);
   }
 
-  :host([hidden]) {
+  .container[hidden] {
     display: none;
   }
 
@@ -43,6 +43,8 @@ export const styles = css`
 
   header icon-button {
     margin-left: auto;
+    position: relative;
+    left: 24px;
   }
 
   .button-container {
@@ -51,12 +53,13 @@ export const styles = css`
   }
 
   .button-container icon-button {
-    padding: 8px;
+    padding: 8px 12px;
     justify-content: flex-start;
-    gap: 8px;
+    gap: 12px;
     width: 190px;
     height: 40px;
     box-shadow: var(--affine-shadow-1);
+    border-radius: 10px;
   }
 
   .footer {
@@ -73,6 +76,15 @@ export const styles = css`
   .has-tool-tip {
     display: flex;
     margin-left: auto;
+  }
+
+  .overlay-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: var(--affine-z-index-popover);
   }
 
   ${tooltipStyle}

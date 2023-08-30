@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists, type Page } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import { type Page } from '@blocksuite/store';
 
 import {
   handleNativeRangeAtPoint,
@@ -41,9 +42,9 @@ export function addNote(
       ) as TopLevelBlockModel[]) ?? [];
     const element = blocks.find(b => b.id === noteId);
     if (element) {
-      edgeless.slots.selectionUpdated.emit({
-        selected: [element],
-        active: true,
+      edgeless.selectionManager.setSelection({
+        elements: [element.id],
+        editing: true,
       });
 
       // Waiting dom updated, `note mask` is removed
@@ -54,10 +55,10 @@ export function addNote(
 
         // Waiting dom updated, remove note if it is empty
         requestAnimationFrame(() => {
-          edgeless.slots.selectionUpdated.once(({ active }) => {
+          edgeless.selectionManager.slots.updated.once(({ editing }) => {
             const block = page.getBlockById(noteId);
             assertExists(block);
-            if (!active && isEmpty(block)) {
+            if (!editing && isEmpty(block)) {
               page.deleteBlock(element);
             }
           });

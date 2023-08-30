@@ -4,7 +4,6 @@ import {
   assertDatabaseColumnOrder,
   dragBetweenCoords,
   enterPlaygroundRoom,
-  focusDatabaseTitle,
   getBoundingBox,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseState,
@@ -18,13 +17,11 @@ import {
 } from '../utils/actions/index.js';
 import { test } from '../utils/playwright.js';
 import {
-  assertDatabaseCellLink,
   assertDatabaseCellNumber,
   assertDatabaseCellRichTexts,
   assertSelectedStyle,
   clickDatabaseOutside,
   clickSelectOption,
-  focusDatabaseHeader,
   getDatabaseHeaderColumn,
   getFirstColumnCell,
   initDatabaseColumn,
@@ -201,7 +198,7 @@ test.describe('switch column type', () => {
     expect((await cell.textContent())?.trim()).toBe('123');
   });
 
-  test.fixme('switch to rich-text', async ({ page }) => {
+  test('switch to rich-text', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
@@ -256,7 +253,7 @@ test.describe('switch column type', () => {
     expect(await cell.innerText()).toBe('888');
   });
 
-  test.fixme('switch between number and rich-text', async ({ page }) => {
+  test('switch between number and rich-text', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
@@ -317,6 +314,7 @@ test.describe('switch column type', () => {
     const checkbox = getFirstColumnCell(page, 'checkbox');
     await expect(checkbox).not.toHaveClass('checked');
 
+    await waitNextFrame(page, 500);
     await checkbox.click();
     await expect(checkbox).toHaveClass(/checked/);
 
@@ -335,7 +333,7 @@ test.describe('switch column type', () => {
 
     const progress = getFirstColumnCell(page, 'progress');
     expect(await progress.textContent()).toBe('0');
-
+    await waitNextFrame(page, 500);
     const progressBg = page.locator('.affine-database-progress-bg');
     const {
       x: progressBgX,
@@ -377,7 +375,7 @@ test.describe('switch column type', () => {
 
     await switchColumnType(page, 'Link');
 
-    const linkText = 'http://';
+    const linkText = 'http://example.com';
     const cell = getFirstColumnCell(page, 'affine-database-link');
     await initDatabaseDynamicRowWithData(page, linkText);
     const link = cell.locator('affine-database-link-node > a');
@@ -455,6 +453,7 @@ test.describe('select column tag action', () => {
     await initDatabaseColumn(page);
     await initDatabaseDynamicRowWithData(page, '123', true);
     await performSelectColumnTagAction(page, 'Red');
+    await pressEscape(page);
     await assertSelectedStyle(page, 'backgroundColor', 'var(--affine-tag-red)');
   });
 });

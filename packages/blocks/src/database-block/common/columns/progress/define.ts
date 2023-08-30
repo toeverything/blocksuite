@@ -18,12 +18,18 @@ export const progressPureColumnConfig = columnManager.register<number>(
     type: () => tNumber.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellFromString: data => {
+      const num = data ? Number(data) : NaN;
+      return {
+        value: isNaN(num) ? null : num,
+      };
+    },
     cellToJson: data => data ?? null,
   }
 );
 progressPureColumnConfig.registerConvert(
   richTextColumnTypeName,
-  (column, cells) => ({
+  (_column, cells) => ({
     column: {},
     cells: cells.map(v => new Text(v?.toString()).yText),
   })

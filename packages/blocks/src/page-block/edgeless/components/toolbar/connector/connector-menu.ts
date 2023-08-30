@@ -1,17 +1,26 @@
-import '../../panel/color-panel.js';
-import '../../buttons/tool-icon-button.js';
+import '../../panel/one-row-color-panel.js';
+import '../common/slide-menu.js';
 
-import { ConnectorLIcon, ConnectorXIcon } from '@blocksuite/global/config';
 import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
+import {
+  type EdgelessTool,
+  type LineWidth,
+} from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
+import {
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
+} from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
+import type { LineWidthEvent } from '../../panel/line-width-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+
+const CONNECTOR_SUBMENU_WIDTH = 474;
 
 function ConnectorModeButtonGroup(
   edgelessTool: EdgelessTool,
@@ -28,30 +37,25 @@ function ConnectorModeButtonGroup(
    * So we put the lower button's tooltip as the first element of the button group container
    */
   return html`
-    <div class="connector-mode-button-group has-tool-tip">
-      <!-- This tooltip is for the last button(Thick) -->
-      <tool-tip inert role="tooltip" tip-position="top" arrow>
-        ${orthogonalTooltip}
-      </tool-tip>
-
-      <div
-        class="connector-mode-button has-tool-tip"
-        ?active=${mode === ConnectorMode.Straight}
+    <div class="connector-mode-button-group">
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Straight}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${straightLineTooltip}
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
-        ${ConnectorLIcon}
-        <tool-tip inert role="tooltip" tip-position="top" arrow>
-          ${straightLineTooltip}
-        </tool-tip>
-      </div>
-
-      <div
-        class="connector-mode-button"
-        ?active=${mode === ConnectorMode.Orthogonal}
+        ${ConnectorLWithArrowIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Orthogonal}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${orthogonalTooltip}
         @click=${() => setConnectorMode(ConnectorMode.Orthogonal)}
       >
-        ${ConnectorXIcon}
-      </div>
+        ${ConnectorXWithArrowIcon}
+      </edgeless-tool-icon-button>
     </div>
   `;
 }
@@ -61,51 +65,51 @@ export class EdgelessConnectorMenu extends LitElement {
   static override styles = css`
     :host {
       position: absolute;
-      height: 76px;
-      width: 260px;
-      z-index: 1;
-    }
-    .container {
       display: flex;
-      padding: 4px;
-      justify-content: center;
+      z-index: -1;
+    }
+
+    .connector-submenu-container {
+      display: flex;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
+      border: 1px solid var(--affine-border-color);
+      border-radius: 8px 8px 0 0;
+      cursor: default;
+    }
+
+    .connector-submenu-content {
+      display: flex;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
     }
 
     .connector-mode-button-group {
       display: flex;
-      flex-direction: column;
-    }
-
-    .connector-mode-button {
-      display: flex;
       justify-content: center;
       align-items: center;
-      width: 32px;
-      height: 32px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      cursor: pointer;
+      gap: 14px;
     }
 
-    .connector-mode-button[active],
-    .connector-mode-button:hover {
-      background-color: var(--affine-hover-color);
+    .connector-mode-button-group > edgeless-tool-icon-button svg {
+      fill: var(--affine-icon-color);
     }
 
-    .connector-mode-button div {
-      border-radius: 50%;
-      background-color: var(--affine-icon-color);
-    }
-
-    menu-divider {
-      height: 62px;
+    .submenu-divider {
+      width: 1px;
+      height: 24px;
+      margin: 0 16px;
+      background-color: var(--affine-border-color);
+      display: inline-block;
     }
 
     ${tooltipStyle}
+
+    tool-tip {
+      z-index: 12;
+    }
   `;
 
   @property({ attribute: false })
@@ -117,42 +121,67 @@ export class EdgelessConnectorMenu extends LitElement {
   private _setConnectorColor = (color: CssVariableName) => {
     if (this.edgelessTool.type !== 'connector') return;
 
-    const { mode } = this.edgelessTool;
+    const { mode, strokeWidth } = this.edgelessTool;
     this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'connector',
       color,
       mode,
+      strokeWidth,
     });
   };
 
   private _setConnectorMode = (mode: ConnectorMode) => {
     if (this.edgelessTool.type !== 'connector') return;
 
-    const { color } = this.edgelessTool;
+    const { color, strokeWidth } = this.edgelessTool;
     this.edgeless.slots.edgelessToolUpdated.emit({
       type: 'connector',
       color,
       mode,
+      strokeWidth,
+    });
+  };
+
+  private _setConnectorStrokeWidth = (lineWidth: LineWidth) => {
+    if (this.edgelessTool.type !== 'connector') return;
+
+    const { color, mode } = this.edgelessTool;
+    this.edgeless.slots.edgelessToolUpdated.emit({
+      type: 'connector',
+      color,
+      mode,
+      strokeWidth: lineWidth,
     });
   };
 
   override render() {
     if (this.edgelessTool.type !== 'connector') return nothing;
 
-    const { color } = this.edgelessTool;
-    const brushSizeButtonGroup = ConnectorModeButtonGroup(
+    const { color, strokeWidth } = this.edgelessTool;
+    const connectorModeButtonGroup = ConnectorModeButtonGroup(
       this.edgelessTool,
       this._setConnectorMode
     );
 
     return html`
-      <div class="container">
-        ${brushSizeButtonGroup}
-        <menu-divider .vertical=${true}></menu-divider>
-        <edgeless-color-panel
-          .value=${color}
-          @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
-        ></edgeless-color-panel>
+      <div class="connector-submenu-container">
+        <edgeless-slide-menu .menuWidth=${CONNECTOR_SUBMENU_WIDTH}>
+          <div class="connector-submenu-content">
+            ${connectorModeButtonGroup}
+            <div class="submenu-divider"></div>
+            <edgeless-line-width-panel
+              .selectedSize=${strokeWidth}
+              @select=${(e: LineWidthEvent) =>
+                this._setConnectorStrokeWidth(e.detail)}
+            >
+            </edgeless-line-width-panel>
+            <div class="submenu-divider"></div>
+            <edgeless-one-row-color-panel
+              .value=${color}
+              @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
+            ></edgeless-one-row-color-panel>
+          </div>
+        </edgeless-slide-menu>
       </div>
     `;
   }

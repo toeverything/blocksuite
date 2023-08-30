@@ -1,12 +1,13 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
 import { type DeltaInsert, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import type { Highlighter, IThemedToken, Lang } from 'shiki';
+import type { IThemedToken } from 'shiki';
 
 import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
+import type { HighlightOptionsGetter } from './code-model.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
   highlightCache,
@@ -21,12 +22,7 @@ export class AffineCodeLine extends ShadowlessElement {
   };
 
   @property({ attribute: false })
-  highlightOptionsGetter:
-    | (() => {
-        lang: Lang;
-        highlighter: Highlighter | null;
-      })
-    | null = null;
+  highlightOptionsGetter: HighlightOptionsGetter = null;
 
   override render() {
     assertExists(

@@ -1,10 +1,9 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import type { Connection, ConnectorElement, IVec } from '@blocksuite/phasor';
 import { StrokeStyle } from '@blocksuite/phasor';
 
 import type { ConnectorTool } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {
@@ -16,19 +15,19 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   private _source: Connection | null = null;
   private _startPoint: IVec | null = null;
 
-  onContainerClick(e: PointerEventState): void {
+  onContainerClick(): void {
     noop();
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
@@ -37,24 +36,23 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._source = this._edgeless.connector.searchConnection(this._startPoint);
   }
 
-  onContainerDragStart(e: PointerEventState) {
+  onContainerDragStart() {
     if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     assertExists(this._source);
     assertExists(this._startPoint);
     this._page.captureSync();
-    const { mode, color } = this.tool;
+    const { mode, color, strokeWidth } = this.tool;
     const { _surface } = this;
     const id = _surface.addElement('connector', {
       stroke: color,
       mode,
       controllers: [],
-      strokeWidth: 2,
+      strokeWidth,
       strokeStyle: StrokeStyle.Solid,
       source: this._source,
       target: { position: this._startPoint },
     });
     this._connector = _surface.pickById(id) as unknown as ConnectorElement;
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -69,16 +67,15 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       this._connector.source.id ? [this._connector.source.id] : []
     ) as Connection;
     this._surface.updateElement<'connector'>(this._connector.id, { target });
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     assertExists(this._connector);
     this._edgeless.connector.clear();
     this._page.captureSync();
-    this._edgeless.selection.switchToDefaultMode({
-      selected: [this._connector],
-      active: false,
+    this._edgeless.tools.switchToDefaultMode({
+      elements: [this._connector.id],
+      editing: false,
     });
     this._connector = null;
   }
@@ -90,7 +87,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     connector.searchConnection(point);
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 

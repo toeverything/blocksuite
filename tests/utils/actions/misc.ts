@@ -1,18 +1,20 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import {
-  type CssVariableName,
-  type ListType,
-  type PageBlockModel,
-  type ThemeObserver,
-} from '@blocksuite/blocks';
-import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
+import type {
+  CssVariableName,
+  DatabaseBlockModel,
+  ListType,
+  PageBlockModel,
+  ThemeObserver,
+} from '../../../packages/blocks/src/index.js';
+import { assertExists } from '../../../packages/global/src/utils.js';
+import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
+import type { BaseBlockModel } from '../../../packages/store/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -124,7 +126,7 @@ async function initEmptyEditor({
         if (multiEditor) {
           createEditor();
         }
-        const debugMenu = document.createElement('debug-menu');
+        const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
         document.body.appendChild(debugMenu);
@@ -231,7 +233,7 @@ export async function enterPlaygroundRoom(
 }
 
 export async function waitDefaultPageLoaded(page: Page) {
-  await page.waitForSelector('affine-default-page[data-block-id="0"]');
+  await page.waitForSelector('affine-doc-page[data-block-id="0"]');
 }
 
 export async function waitEmbedLoaded(page: Page) {
@@ -359,16 +361,18 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
       });
     }
     const noteId = page.addBlock('affine:note', {}, pageId);
-    const paragraphId = page.addBlock(
+    const databaseId = page.addBlock(
       'affine:database',
       {
         title: new page.Text('Database 1'),
-        titleColumnName: 'Title',
       },
       noteId
     );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
     page.captureSync();
-    return { pageId, noteId, paragraphId };
+    return { pageId, noteId, databaseId };
   }, pageId);
   return ids;
 }
@@ -395,6 +399,9 @@ export async function initEmptyDatabaseWithParagraphState(
       },
       noteId
     );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
     page.addBlock('affine:paragraph', {}, noteId);
     page.captureSync();
     return { pageId, noteId, databaseId };
@@ -416,10 +423,6 @@ export async function initDatabaseRow(page: Page) {
 
 export async function initDatabaseRowWithData(page: Page, data: string) {
   await initDatabaseRow(page);
-
-  const lastRow = page.locator('.affine-database-block-row').last();
-  const cell = lastRow.locator('affine-paragraph');
-  await cell.click();
   await type(page, data);
 }
 
@@ -445,6 +448,16 @@ export async function initDatabaseDynamicRowWithData(
 export async function focusDatabaseTitle(page: Page) {
   const dbTitle = page.locator('[data-block-is-database-title="true"]');
   await dbTitle.click();
+
+  await page.evaluate(() => {
+    const dbTitle = document.querySelector('affine-database-title');
+    if (!dbTitle) {
+      throw new Error('Cannot find database title');
+    }
+
+    dbTitle.titleVInput?.vEditor.focusEnd();
+  });
+  await waitNextFrame(page);
 }
 
 export async function assertDatabaseColumnOrder(page: Page, order: string[]) {
@@ -494,7 +507,7 @@ export async function focusRichText(
 
 export async function focusRichTextEnd(page: Page, i = 0) {
   await page.evaluate(
-    ([i, editorIndex]) => {
+    ([i]) => {
       const editor = document.querySelectorAll('editor-container')[i];
       const richTexts = Array.from(editor.querySelectorAll('rich-text'));
 
@@ -617,7 +630,7 @@ export async function setVirgoSelection(
   index: number,
   length: number
 ) {
-  return await page.evaluate(
+  await page.evaluate(
     ({ index, length }) => {
       const selection = window.getSelection() as Selection;
 
@@ -631,6 +644,7 @@ export async function setVirgoSelection(
     },
     { index, length }
   );
+  await waitNextFrame(page);
 }
 
 export async function pasteContent(
@@ -644,16 +658,36 @@ export async function pasteContent(
       });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       Object.keys(clipData).forEach(key => {
         e.clipboardData?.setData(key, clipData[key] as string);
       });
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
   await waitNextFrame(page);
+}
+
+export async function pasteBlocks(page: Page, json: unknown) {
+  const createHTMLStringForCustomData = (data: string, type: string) => {
+    return `<blocksuite style="display: none" data-type="${type}" data-clipboard="${data.replace(
+      /"/g,
+      '&quot;'
+    )}"></blocksuite>`;
+  };
+  const stringifiesData = JSON.stringify(json);
+
+  const customClipboardFragment = createHTMLStringForCustomData(
+    stringifiesData,
+    'blocksuite/page'
+  );
+
+  await pasteContent(page, {
+    'text/html': customClipboardFragment,
+    'blocksuite/page': stringifiesData,
+  });
 }
 
 export async function importMarkdown(
@@ -758,7 +792,7 @@ export const getCenterPositionByLocator: (
   page: Page,
   locator: Locator
 ) => Promise<{ x: number; y: number }> = async (
-  page: Page,
+  _page: Page,
   locator: Locator
 ) => {
   const box = await locator.boundingBox();
@@ -838,15 +872,14 @@ export async function focusTitle(page: Page) {
   // click to ensure editor is active
   await page.mouse.move(0, 0);
   const editor = getEditorLocator(page);
-  const locator = editor.locator('affine-default-page').first();
+  const locator = editor.locator('affine-doc-page').first();
   // need to set `force` to true when clicking on `affine-selected-blocks`
   await locator.click({ force: true });
   // avoid trigger double click
   await page.waitForTimeout(500);
   await page.evaluate(i => {
-    const defaultPageComponent = document.querySelectorAll(
-      'affine-default-page'
-    )[i];
+    const defaultPageComponent =
+      document.querySelectorAll('affine-doc-page')[i];
     if (!defaultPageComponent) {
       throw new Error('default page component not found');
     }
@@ -921,7 +954,7 @@ export async function initImageState(page: Page) {
     Object.entries(clipData).forEach(([key, value]) => {
       e.clipboardData?.setData(key, value);
     });
-    document.body.dispatchEvent(e);
+    document.dispatchEvent(e);
   });
 
   // due to pasting img calls fetch, so we need timeout for downloading finished.
@@ -992,7 +1025,19 @@ export async function export2Html(page: Page) {
   const promiseResult = await page.evaluate(() => {
     const contentParser = new window.ContentParser(window.page);
     const root = window.page.root as PageBlockModel;
-    return contentParser.block2Html([contentParser.getSelectedBlock(root)]);
+    return contentParser.block2Html(
+      [contentParser.getSelectedBlock(root)],
+      new Map()
+    );
   });
   return promiseResult;
+}
+
+export async function getCopyClipItemsInPage(page: Page) {
+  const clipItems = await page.evaluate(() => {
+    return document
+      .getElementsByTagName('affine-doc-page')[0]
+      .clipboard['_copyBlocksInPage']();
+  });
+  return clipItems;
 }

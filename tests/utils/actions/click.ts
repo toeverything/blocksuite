@@ -1,6 +1,8 @@
-import type { IPoint } from '@blocksuite/blocks';
 import type { Page } from '@playwright/test';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type { IPoint } from '../../../packages/blocks/src/index.js';
+import { toViewCoord } from './edgeless.js';
 import { waitNextFrame } from './misc.js';
 
 function getDebugMenu(page: Page) {
@@ -21,6 +23,16 @@ function getDebugMenu(page: Page) {
 
 export async function click(page: Page, point: IPoint) {
   await page.mouse.click(point.x, point.y);
+}
+
+export async function clickView(page: Page, point: [number, number]) {
+  const [x, y] = await toViewCoord(page, point);
+  await page.mouse.click(x, y);
+}
+
+export async function dblclickView(page: Page, point: [number, number]) {
+  const [x, y] = await toViewCoord(page, point);
+  await page.mouse.dblclick(x, y);
 }
 
 export async function undoByClick(page: Page) {
@@ -91,27 +103,10 @@ export async function clickTestOperationsMenuItem(page: Page, name: string) {
   await menuItem.waitFor({ state: 'hidden' }); // wait for animation ended
 }
 
-export async function clickBlockTypeMenuItem(page: Page, name: string) {
-  const menuButton = getDebugMenu(page).blockTypeButton;
-  await menuButton.click();
-
-  const menuItem = page.getByRole('menuitem', { name });
-  await menuItem.click();
-  await menuItem.waitFor({ state: 'hidden' });
-}
-
-export async function addCodeBlock(page: Page) {
-  await clickBlockTypeMenuItem(page, 'Code');
-  await page.waitForFunction(() => {
-    const loader = document.querySelector('affine-code loader-element');
-    return !loader;
-  });
-}
-
 export async function switchReadonly(page: Page) {
   page.evaluate(() => {
     const defaultPage = document.querySelector(
-      'affine-default-page'
+      'affine-doc-page'
     ) as HTMLElement & {
       page: {
         awarenessStore: { setFlag: (key: string, value: unknown) => void };

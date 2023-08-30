@@ -1,14 +1,14 @@
-import {
-  ConfirmIcon,
-  EditIcon,
-  LinkToCardIcon,
-  UnlinkIcon,
-} from '@blocksuite/global/config';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { createEvent } from '../../__internal__/utils/index.js';
 import { isValidUrl, normalizeUrl } from '../../__internal__/utils/url.js';
+import {
+  BookmarkIcon,
+  ConfirmIcon,
+  EditIcon,
+  UnlinkIcon,
+} from '../../icons/index.js';
 import { toast } from '../toast.js';
 import { linkPopoverStyle } from './styles.js';
 
@@ -110,16 +110,16 @@ export class LinkPopover extends LitElement {
     return;
   }
 
-  private _onCopy(e: MouseEvent) {
+  private _onCopy() {
     navigator.clipboard.writeText(this.previewLink);
     toast('Copied link to clipboard');
   }
 
-  private _onUnlink(e: MouseEvent) {
+  private _onUnlink() {
     this.dispatchEvent(createEvent('updateLink', { type: 'remove' }));
   }
 
-  private _onLinkToCard(e: MouseEvent) {
+  private _onLinkToCard() {
     this.dispatchEvent(
       new CustomEvent<LinkDetail>('updateLink', {
         detail: { type: 'toBookmark' },
@@ -127,12 +127,12 @@ export class LinkPopover extends LitElement {
     );
   }
 
-  private _onEdit(e: MouseEvent) {
+  private _onEdit() {
     this.dispatchEvent(createEvent('editLink', null));
     this._disableConfirm = false;
   }
 
-  private _onInput(e: InputEvent) {
+  private _onInput() {
     if (!this.linkInput) {
       throw new Error('Failed to update link! Link input not found!');
     }
@@ -188,7 +188,7 @@ export class LinkPopover extends LitElement {
               data-testid="unlink"
               @click=${this._onLinkToCard}
             >
-              ${LinkToCardIcon}
+              ${BookmarkIcon}
               <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
             </icon-button>
             <span class="affine-link-popover-dividing-line"></span>`

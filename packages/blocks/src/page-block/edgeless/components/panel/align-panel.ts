@@ -1,10 +1,11 @@
-import {
-  AlignCenterIcon,
-  AlignLeftIcon,
-  AlignRightIcon,
-} from '@blocksuite/global/config';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+
+import {
+  TextAlignCenterIcon,
+  TextAlignLeftIcon,
+  TextAlignRightIcon,
+} from '../../../../icons/index.js';
 
 @customElement('edgeless-align-panel')
 export class EdgelessAlignPanel extends LitElement {
@@ -15,12 +16,16 @@ export class EdgelessAlignPanel extends LitElement {
     }
     .align-panel-container {
       display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
       background: var(--affine-background-overlay-panel-color);
       border-radius: 8px;
-      fill: none;
-      stroke: currentColor;
+      padding: 8px;
+      gap: 8px;
+    }
+    .align-panel-container svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
   `;
 
@@ -42,29 +47,35 @@ export class EdgelessAlignPanel extends LitElement {
         <edgeless-tool-icon-button
           .tooltip=${'Left'}
           .active=${this.value === 'left'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect('left');
           }}
         >
-          ${AlignLeftIcon}
+          ${TextAlignLeftIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Center'}
           .active=${this.value === 'center'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect('center');
           }}
         >
-          ${AlignCenterIcon}
+          ${TextAlignCenterIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           .tooltip=${'Right'}
           .active=${this.value === 'right'}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
           @click=${() => {
             this._onSelect('right');
           }}
         >
-          ${AlignRightIcon}
+          ${TextAlignRightIcon}
         </edgeless-tool-icon-button>
       </div>
     `;

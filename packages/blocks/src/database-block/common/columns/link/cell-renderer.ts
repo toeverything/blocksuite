@@ -1,6 +1,5 @@
 import './components/link-node.js';
 
-import { PenIcon } from '@blocksuite/global/config';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
@@ -10,6 +9,7 @@ import {
   normalizeUrl,
 } from '../../../../__internal__/utils/url.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { PenIcon } from '../../../../icons/index.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { linkPureColumnConfig } from './define.js';
@@ -18,10 +18,7 @@ import { linkPureColumnConfig } from './define.js';
 export class LinkCell extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell {
-      display: flex;
-      align-items: center;
       width: 100%;
-      height: 100%;
       user-select: none;
       cursor: pointer;
     }
@@ -38,10 +35,14 @@ export class LinkCell extends BaseCellRenderer<string> {
       height: 100%;
       outline: none;
       overflow: hidden;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      word-break: break-all;
     }
 
     affine-database-link-node {
       flex: 1;
+      word-break: break-all;
     }
 
     .affine-database-link-icon {
@@ -51,7 +52,11 @@ export class LinkCell extends BaseCellRenderer<string> {
       align-items: center;
       visibility: hidden;
       cursor: pointer;
-      background: var(--affine-white);
+      background: var(--affine-background-primary-color);
+      border-radius: 4px;
+    }
+    .affine-database-link-icon:hover {
+      background: var(--affine-hover-color);
     }
 
     .affine-database-link-icon svg {
@@ -106,25 +111,23 @@ export class LinkCell extends BaseCellRenderer<string> {
 export class LinkCellEditing extends BaseCellRenderer<string> {
   static override styles = css`
     affine-database-link-cell-editing {
-      display: block;
       width: 100%;
-      height: 100%;
       cursor: text;
     }
 
     .affine-database-link-editing {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
+      word-break: break-all;
     }
 
     .affine-database-link-editing:focus {

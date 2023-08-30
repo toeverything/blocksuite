@@ -1,8 +1,8 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type { BrushTool, EdgelessTool } from '../../../__internal__/index.js';
-import { BrushSize, noop } from '../../../__internal__/index.js';
+import { LineWidth } from '../../../__internal__/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
 
@@ -16,23 +16,23 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   private _draggingElementId: string | null = null;
   protected _draggingPathPoints: number[][] | null = null;
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
-  onContainerClick(e: PointerEventState): void {
+  onContainerClick(): void {
     noop();
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
@@ -55,8 +55,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     this._draggingElementId = id;
     this._draggingPathPoints = points;
-
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -81,22 +79,19 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
       points,
       lineWidth,
     });
-
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerDragEnd(e: PointerEventState) {
+  onContainerDragEnd() {
     this._draggingElementId = null;
     this._draggingPathPoints = null;
     this._page.captureSync();
-    this._edgeless.slots.surfaceUpdated.emit();
   }
 
-  onContainerMouseMove(e: PointerEventState) {
+  onContainerMouseMove() {
     noop();
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 
@@ -122,7 +117,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
         this._edgeless.slots.edgelessToolUpdated.emit({
           type: 'brush',
           color: color ?? 'black',
-          lineWidth: lineWidth ?? BrushSize.Thin,
+          lineWidth: lineWidth ?? LineWidth.Thin,
         });
       } catch (e) {
         noop();

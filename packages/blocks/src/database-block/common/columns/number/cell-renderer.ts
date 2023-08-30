@@ -12,19 +12,17 @@ export class NumberCell extends BaseCellRenderer<number> {
     affine-database-number-cell {
       display: block;
       width: 100%;
-      height: 100%;
     }
 
     .affine-database-number {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
@@ -44,20 +42,18 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
     affine-database-number-cell-editing {
       display: block;
       width: 100%;
-      height: 100%;
       cursor: text;
     }
 
     .affine-database-number {
       display: flex;
       align-items: center;
-      height: 100%;
       width: 100%;
       padding: 0;
       border: none;
       font-family: var(--affine-font-family);
-      font-size: var(--affine-font-base);
-      line-height: var(--affine-line-height);
+      font-size: var(--data-view-cell-text-size);
+      line-height: var(--data-view-cell-text-line-height);
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
@@ -119,8 +115,9 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   }
 
   override render() {
+    const value = `${this.value ?? ''}`;
     return html`<input
-      .value="${this.value ?? ''}"
+      .value="${value}"
       @keydown="${this._keydown}"
       @blur="${this._blur}"
       @focus="${this._focus}"

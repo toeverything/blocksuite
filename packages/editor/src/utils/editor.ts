@@ -5,18 +5,16 @@ import {
   getBookmarkInitialProps,
   getEdgelessPage,
   getServiceOrRegister,
-  tryUpdateNoteSize,
+  PAGE_BLOCK_PADDING_BOTTOM,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
   getClosestNoteBlockElementById,
-  getCurrentBlockRange,
   getHoveringNote,
   type Point,
   Rect,
 } from '@blocksuite/blocks/std';
-import { PAGE_BLOCK_PADDING_BOTTOM } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -44,9 +42,6 @@ export const createBlockHub: (
         return;
       }
 
-      // In some cases, like insert bookmark block, range in editor will blur, so we need to get range before insert.
-      const range = getCurrentBlockRange(page);
-
       if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(
           ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
@@ -56,7 +51,11 @@ export const createBlockHub: (
         );
       } else if (data.flavour === 'affine:bookmark') {
         const url = await getBookmarkInitialProps();
-        url && models.push({ flavour: 'affine:bookmark', url });
+        url &&
+          models.push({
+            flavour: 'affine:bookmark',
+            url,
+          });
       } else {
         models.push(data);
       }
@@ -66,23 +65,16 @@ export const createBlockHub: (
           block => block.flavour === 'affine:note'
         ) ?? page.addBlock('affine:note', {}, page.root?.id);
 
-      if (range) {
-        const lastModel = range.models[range.models.length - 1];
-        const arr = page.addSiblingBlocks(lastModel, models, 'after');
-        const lastId = arr[arr.length - 1];
-        asyncFocusRichText(page, lastId);
-      } else {
-        // add to end
-        let lastId;
-        models.forEach(model => {
-          lastId = page.addBlock(
-            model.flavour ?? 'affine:paragraph',
-            model,
-            defaultNoteBlock
-          );
-        });
-        lastId && asyncFocusRichText(page, lastId);
-      }
+      // add to end
+      let lastId;
+      models.forEach(model => {
+        lastId = page.addBlock(
+          model.flavour ?? 'affine:paragraph',
+          model,
+          defaultNoteBlock
+        );
+      });
+      lastId && asyncFocusRichText(page, lastId);
     },
     onDrop: async (e, point, end, type) => {
       // To make sure get the current page
@@ -106,7 +98,11 @@ export const createBlockHub: (
         );
       } else if (props.flavour === 'affine:bookmark') {
         const url = await getBookmarkInitialProps();
-        url && models.push({ flavour: 'affine:bookmark', url });
+        url &&
+          models.push({
+            flavour: 'affine:bookmark',
+            url,
+          });
       } else {
         models.push(props);
       }
@@ -138,14 +134,13 @@ export const createBlockHub: (
           const service = await getServiceOrRegister<'affine:database'>(
             props.flavour
           );
-          service.initDatabaseBlock(page, model, focusId);
+          service.initDatabaseBlock(page, model, focusId, 'table');
         }
       }
 
       if (editor.mode === 'page') {
         if (focusId) {
           asyncFocusRichText(page, focusId);
-          tryUpdateNoteSize(page, 1);
         }
         return;
       }
@@ -177,24 +172,24 @@ export const createBlockHub: (
           const service = await getServiceOrRegister<'affine:database'>(
             props.flavour
           );
-          service.initDatabaseBlock(page, model, model.id);
+          service.initDatabaseBlock(page, model, model.id, 'table');
         }
       }
       pageBlock.setSelection(noteId, true, focusId, point);
     },
     onDragStart: () => {
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
         // FIXME:
         // defaultPageBlock.selection?.clear();
       }
     },
     getAllowedBlocks: () => {
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
-        return getAllowSelectedBlocks(defaultPageBlock.model);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
+        return getAllowSelectedBlocks(docPageBlock.model);
       } else {
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
@@ -204,13 +199,17 @@ export const createBlockHub: (
     getHoveringNoteState: (point: Point) => {
       const state = {
         scale: 1,
-      } as { container?: Element; rect?: Rect; scale: number };
+      } as {
+        container?: Element;
+        rect?: Rect;
+        scale: number;
+      };
 
       if (editor.mode === 'page') {
-        const defaultPageBlock = editor.querySelector('affine-default-page');
-        assertExists(defaultPageBlock);
+        const docPageBlock = editor.querySelector('affine-doc-page');
+        assertExists(docPageBlock);
         const rect = Rect.fromDOMRect(
-          defaultPageBlock.pageBlockContainer.getBoundingClientRect()
+          docPageBlock.pageBlockContainer.getBoundingClientRect()
         );
         rect.height -= PAGE_BLOCK_PADDING_BOTTOM;
         state.rect = rect;

@@ -1,25 +1,31 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import type { AwarenessStore } from '../awareness.js';
-import type { BlockSchemaType } from '../base.js';
-import { BlockSchema } from '../base.js';
+import {
+  BacklinkIndexer,
+  BlockIndexer,
+  type QueryContent,
+  SearchIndexer,
+} from '../indexer/index.js';
 import { createMemoryStorage } from '../persistence/blob/memory-storage.js';
 import type { BlobManager, BlobStorage } from '../persistence/blob/types.js';
 import { sha } from '../persistence/blob/utils.js';
 import type { DocProviderCreator } from '../providers/type.js';
-import { Store, type StoreOptions } from '../store.js';
-import { Text } from '../text-adapter.js';
+import type { Schema } from '../schema/index.js';
 import { serializeYDoc } from '../utils/jsx.js';
-import { BacklinkIndexer } from './indexer/backlink.js';
-import { BlockIndexer } from './indexer/base.js';
-import type { QueryContent } from './indexer/search.js';
-import { SearchIndexer } from './indexer/search.js';
+import {
+  type AwarenessStore,
+  docFromJSON,
+  docToJSON,
+  Text,
+} from '../yjs/index.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
-import { Schema } from './schema.js';
+import { Store, type StoreOptions } from './store.js';
 
-export type WorkspaceOptions = StoreOptions;
+export type WorkspaceOptions = StoreOptions & {
+  schema: Schema;
+};
 
 export class Workspace {
   static Y = Y;
@@ -47,7 +53,7 @@ export class Workspace {
   };
 
   constructor(storeOptions: WorkspaceOptions) {
-    this._schema = new Schema(this);
+    this._schema = storeOptions.schema;
 
     this._store = new Store(storeOptions);
 
@@ -120,7 +126,7 @@ export class Workspace {
 
     let flag = false;
     if (this.doc.store.clients.size === 1) {
-      const items = [...this.doc.store.clients.values()][0];
+      const items = Array.from(this.doc.store.clients.values())[0];
       // workspaceVersion and pageVersion were set when we init the workspace
       if (items.length <= 2) {
         flag = true;
@@ -164,14 +170,6 @@ export class Workspace {
 
   registerProvider(providerCreator: DocProviderCreator, id?: string) {
     return this._store.registerProvider(providerCreator, id);
-  }
-
-  register(blockSchema: BlockSchemaType[]) {
-    blockSchema.forEach(schema => {
-      BlockSchema.parse(schema);
-      this.schema.flavourSchemaMap.set(schema.model.flavour, schema);
-    });
-    return this;
   }
 
   private _hasPage(pageId: string) {
@@ -266,6 +264,30 @@ export class Workspace {
     return this.indexer.search.search(query);
   }
 
+  async importPageSnapshotV2(json: object, pageId: string) {
+    const doc = docFromJSON(json);
+
+    let page = this.getPage(pageId);
+    if (page) {
+      await page.waitForLoaded();
+      page.clear();
+    } else {
+      page = this.createPage({ id: pageId });
+      await page.waitForLoaded();
+    }
+
+    const update = Y.encodeStateAsUpdate(doc);
+
+    Y.applyUpdate(page.spaceDoc, update);
+    page.resetHistory();
+  }
+
+  exportPageSnapshotV2(pageId: string) {
+    const page = this.getPage(pageId);
+    assertExists(page, `page ${pageId} not found`);
+    return docToJSON(page.spaceDoc);
+  }
+
   /**
    * @internal
    * Import an object expression of a page.
@@ -293,6 +315,16 @@ export class Workspace {
         Object.values(props['prop:elements']).forEach(element => {
           const _element = element as Record<string, unknown>;
           if (_element['type'] === 'text') {
+            const yText = new Y.Text();
+            yText.applyDelta(_element['text']);
+            _element['text'] = yText;
+          }
+          if (_element['type'] === 'frame') {
+            const yText = new Y.Text();
+            yText.applyDelta(_element['title']);
+            _element['title'] = yText;
+          }
+          if (_element['type'] === 'shape' && _element['text']) {
             const yText = new Y.Text();
             yText.applyDelta(_element['text']);
             _element['text'] = yText;
@@ -329,6 +361,30 @@ export class Workspace {
             console.error(e);
           }
         }
+      }
+
+      if (props['sys:flavour'] === 'affine:database') {
+        const columns = props['prop:columns'] as Record<string, string>[];
+        const richTextColumns = columns.filter(
+          cell => cell.type === 'rich-text'
+        );
+
+        const cells = props['prop:cells'] as Record<string, unknown>;
+        richTextColumns.forEach(richText => {
+          Object.keys(cells).forEach(key => {
+            const cellValue = cells[key] as Record<string, unknown>;
+            const richTextValue = cellValue[richText.id] as Record<
+              string,
+              unknown
+            >;
+            if (!richTextValue) return;
+            if (Array.isArray(richTextValue.value)) {
+              const yText = new Y.Text();
+              yText.applyDelta(richTextValue.value);
+              richTextValue.value = new Text(yText).yText;
+            }
+          });
+        });
       }
 
       Object.keys(props).forEach(key => {

@@ -8,8 +8,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { startDrag } from '../../../utils/drag.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../consts.js';
-import { getTableContainer } from '../../table-view.js';
 import type { DataViewTableColumnManager } from '../../table-view-manager.js';
+import { getTableContainer } from '../../types.js';
 
 const dragBarWidth = 16;
 
@@ -84,15 +84,20 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
         };
       },
       onDrop: ({ width }) => {
+        this.column.updateWidth(width);
+      },
+      onClear: () => {
         tableContainer.style.pointerEvents = 'auto';
         this.dragLeft = 0;
-        this.column.updateWidth(width);
         preview.remove();
       },
     });
   };
 
   override render() {
+    if (this.column.dataViewManager.readonly) {
+      return;
+    }
     const style = styleMap({
       left: `${this.left - dragBarWidth / 2 + this.dragLeft}px`,
       width: `${dragBarWidth}px`,

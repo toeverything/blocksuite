@@ -1,7 +1,14 @@
 import { defineConfig } from 'vitepress';
+import wasm from 'vite-plugin-wasm';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  vite: {
+    build: {
+      target: 'ES2022',
+    },
+    plugins: [wasm()],
+  },
   lang: 'en-US',
   title: 'BlockSuite',
   description: 'The Block-Based Collaborative Framework',
@@ -23,13 +30,7 @@ export default defineConfig({
     sidebar: [
       {
         text: 'Introduction',
-        items: [
-          { text: 'BlockSuite Overview', link: '/blocksuite-overview' },
-          {
-            text: 'The Local-First Paradigm',
-            link: '/the-local-first-paradigm',
-          },
-        ],
+        items: [{ text: 'BlockSuite Overview', link: '/blocksuite-overview' }],
       },
       {
         text: 'Using BlockSuite',
@@ -51,6 +52,10 @@ export default defineConfig({
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
+          },
+          {
+            text: 'The Local-First Paradigm',
+            link: '/the-local-first-paradigm',
           },
           {
             text: 'Editor UI Architecture',

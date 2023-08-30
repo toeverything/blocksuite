@@ -172,23 +172,60 @@ export class NotionHtmlParser extends BaseParser {
     let imgElement = null;
     let caption = '';
     if (element.tagName === 'FIGURE') {
+      if (
+        element.children.length === 1 &&
+        element.children[0].tagName === 'A'
+      ) {
+        const result =
+          await this._contextedContentParser.getParserHtmlText2Block(
+            'CommonParser'
+          )?.({
+            element: element,
+            flavour: 'affine:paragraph',
+            type: 'text',
+          });
+        return result;
+      }
+
       imgElement = element.querySelector('img');
       const captionText = await getCaptionText(
         element,
         this._contextedContentParser
       );
       texts.push(...(captionText || []));
-      if (captionText) {
+      if (captionText && captionText.length > 0) {
         caption = captionText[0].insert || '';
       }
       const bookmarkUrlElement = element.querySelector('.bookmark.source');
       if (bookmarkUrlElement) {
         const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
+        const bookmarkTitle =
+          bookmarkUrlElement?.querySelector('.bookmark-title')?.textContent ??
+          'Bookmark';
+        const bookmarDescription =
+          bookmarkUrlElement?.querySelector('.bookmark-description')
+            ?.textContent ?? bookmarkUrl;
+        const bookmarIcon =
+          bookmarkUrlElement
+            ?.querySelector('.bookmark-icon')
+            ?.getAttribute('src') ?? '';
+        const bookmarImage =
+          bookmarkUrlElement
+            ?.querySelector('.bookmark-image')
+            ?.getAttribute('src') ?? '';
+        const bookmarCaption =
+          bookmarkUrlElement?.querySelector('figcaption')?.textContent ?? '';
+
         return [
           {
             flavour: 'affine:bookmark',
             children: [],
             url: bookmarkUrl,
+            bookmarkTitle: bookmarkTitle,
+            description: bookmarDescription,
+            icon: bookmarIcon,
+            image: bookmarImage,
+            caption: bookmarCaption,
           },
         ];
       }

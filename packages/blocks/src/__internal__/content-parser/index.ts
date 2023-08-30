@@ -1,13 +1,17 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Slot } from '@blocksuite/store';
+import { nanoid } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
+import { getTagColor } from '../../components/tags/colors.js';
+import { toast } from '../../components/toast.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
-import { getFileFromClipboard } from '../clipboard/utils/pure.js';
+import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -16,6 +20,7 @@ import {
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../utils/index.js';
+import { humanFileSize } from '../utils/math.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,
@@ -61,6 +66,7 @@ export class ContentParser {
       tableTitleColumnHandler?: TableTitleColumnHandler;
     } = {}
   ) {
+    registerAllBlocks();
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
     // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
@@ -95,20 +101,38 @@ export class ContentParser {
   public async exportHtml() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
+
+    const blobMap = new Map<string, string>();
+    const htmlContent = await this.block2Html(
+      [this.getSelectedBlock(root)],
+      blobMap
+    );
+
     FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
-      htmlContent
+      root.id,
+      htmlContent,
+      blobMap,
+      this._page.blobs
     );
   }
 
   public async exportMarkdown() {
     const root = this._page.root;
     if (!root) return;
-    const htmlContent = await this.block2Html([this.getSelectedBlock(root)]);
+
+    const blobMap = new Map<string, string>();
+    const htmlContent = await this.block2Html(
+      [this.getSelectedBlock(root)],
+      blobMap
+    );
+
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
-      htmlContent
+      root.id,
+      htmlContent,
+      blobMap,
+      this._page.blobs
     );
   }
 
@@ -196,12 +220,12 @@ export class ContentParser {
           layer.style.setProperty('transform', 'none');
         }
 
-        const childNodes = documentClone.querySelectorAll(
-          '.affine-edgeless-child-note'
+        const boxShadowEles = documentClone.querySelectorAll(
+          "[style*='box-shadow']"
         );
-        childNodes.forEach(childNode => {
-          if (childNode instanceof HTMLElement) {
-            childNode.style.setProperty('box-shadow', 'none');
+        boxShadowEles.forEach(function (element) {
+          if (element instanceof HTMLElement) {
+            element.style.setProperty('box-shadow', 'none');
           }
         });
       },
@@ -246,7 +270,7 @@ export class ContentParser {
 
     const editorContainer = getEditorContainer(this._page);
     const pageContainer = editorContainer.querySelector(
-      '.affine-default-page-block-container'
+      '.affine-doc-page-block-container'
     );
     if (!pageContainer) return;
 
@@ -348,12 +372,15 @@ export class ContentParser {
     );
   }
 
-  public async block2Html(blocks: SelectedBlock[]): Promise<string> {
+  public async block2Html(
+    blocks: SelectedBlock[],
+    blobMap: Map<string, string>
+  ): Promise<string> {
     let htmlText = '';
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
       htmlText =
         htmlText +
-        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex]));
+        (await this._getHtmlInfoBySelectionInfo(blocks[currentIndex], blobMap));
     }
     return htmlText;
   }
@@ -379,139 +406,98 @@ export class ContentParser {
   }
 
   async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
-    const file = getFileFromClipboard(clipboardData);
-    if (file) {
-      if (file.type.includes('image')) {
-        // TODO: upload file to file server
-        // XXX: should use blob storage here?
-        const storage = this._page.blobs;
-        assertExists(storage);
-        // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
-        const id = await storage.set(
+    const files = clipboardData.files;
+    if (!files) return [];
+    const file = files[0];
+    if (!file) return [];
+
+    const storage = this._page.blobs;
+    if (file.type.includes('image')) {
+      // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
+      const id = await storage.set(
+        new File([file], file.name, { type: file.type })
+      );
+      return [
+        {
+          flavour: 'affine:image',
+          sourceId: id,
+          children: [],
+        },
+      ];
+    }
+
+    if (this._page.awarenessStore.getFlag('enable_attachment_block')) {
+      if (file.size > MAX_ATTACHMENT_SIZE) {
+        toast(
+          `You can only upload files less than ${humanFileSize(
+            MAX_ATTACHMENT_SIZE,
+            true,
+            0
+          )}`
+        );
+        return [];
+      }
+      try {
+        const sourceId = await storage.set(
           new File([file], file.name, { type: file.type })
         );
-        return [
-          {
-            flavour: 'affine:image',
-            sourceId: id,
-            children: [],
-          },
-        ];
+        const attachmentProps: AttachmentProps & {
+          flavour: 'affine:attachment';
+          children: [];
+        } = {
+          flavour: 'affine:attachment',
+          name: file.name,
+          sourceId,
+          size: file.size,
+          type: file.type,
+          children: [],
+        };
+        return [attachmentProps];
+      } catch (error) {
+        console.error(error);
+        if (error instanceof Error) {
+          toast(
+            `Failed to upload attachment! ${error.message || error.toString()}`
+          );
+        }
       }
     }
     return [];
   }
 
   public async markdown2Block(text: string): Promise<SerializedBlock[]> {
-    const underline = {
-      name: 'underline',
-      level: 'inline',
-      start(src: string) {
-        return src.indexOf('~');
-      },
-      tokenizer(src: string) {
-        const rule = /^~([^~]+)~/;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'underline',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<u>${token.text}</u>`;
-      },
-    };
-    const inlineCode = {
-      name: 'inlineCode',
-      level: 'inline',
-      start(src: string) {
-        return src.indexOf('`');
-      },
-      tokenizer(src: string) {
-        const rule = /^(?:`)(`{2,}?|[^`]+)(?:`)$/g;
-        const match = rule.exec(src);
-        if (match) {
-          return {
-            type: 'inlineCode',
-            raw: match[0], // This is the text that you want your token to consume from the source
-            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
-          };
-        }
-        return;
-      },
-      renderer(token: marked.Tokens.Generic) {
-        return `<code>${token.text}</code>`;
-      },
-    };
-
-    const walkTokens = (token: marked.Token) => {
-      // fix: https://github.com/toeverything/blocksuite/issues/3304
-      if (
-        token.type === 'list_item' &&
-        token.tokens.length > 0 &&
-        token.tokens[0].type === 'list' &&
-        token.tokens[0].items.length === 1
-      ) {
-        const fistItem = token.tokens[0].items[0];
-        if (
-          fistItem.tokens.length === 0 ||
-          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
-        ) {
-          // transform list_item to text
-          const newToken =
-            fistItem.tokens.length === 1
-              ? (fistItem.tokens[0] as marked.Tokens.Text)
-              : ({
-                  raw: '',
-                  text: '',
-                  type: 'text',
-                  tokens: [],
-                } as marked.Tokens.Text);
-          const preText = fistItem.raw.substring(
-            0,
-            fistItem.raw.length - fistItem.text.length
-          );
-          newToken.raw = preText + newToken.raw;
-          newToken.text = preText + newToken.text;
-          newToken.tokens = newToken.tokens || [];
-          newToken.tokens.unshift({
-            type: 'text',
-            text: preText,
-            raw: preText,
-          });
-          token.tokens[0] = newToken;
-        }
-      }
-    };
-    marked.use({ extensions: [underline, inlineCode], walkTokens });
-    const md2html = marked.parse(text);
+    const md2html = this._markdown2Html(text);
     return this.htmlText2Block(md2html, 'Markdown');
   }
 
   public async importMarkdown(text: string, insertPositionId: string) {
-    const blocks = await this.markdown2Block(text);
-    const insertBlockModel = this._page.getBlockById(insertPositionId);
+    const md2html = this._markdown2Html(text);
+    const blocks = await this.htmlText2Block(md2html, 'Markdown');
 
-    assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service.js');
-    const service = await getServiceOrRegister(insertBlockModel.flavour);
+    await this.importBlocks(blocks, insertPositionId);
 
-    service.json2Block(insertBlockModel, blocks);
+    this._importMetaDataFromHtml(md2html);
   }
 
   public async importHtml(text: string, insertPositionId: string) {
     const blocks = await this.htmlText2Block(text, 'NotionHtml');
+
+    await this.importBlocks(blocks, insertPositionId);
+
+    this._importMetaDataFromHtml(text);
+  }
+
+  public async importBlocks(
+    blocks: SerializedBlock[],
+    insertPositionId: string
+  ) {
     const insertBlockModel = this._page.getBlockById(insertPositionId);
 
     assertExists(insertBlockModel);
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(insertBlockModel.flavour);
 
-    service.json2Block(insertBlockModel, blocks);
+    await service.json2Block(insertBlockModel, blocks);
   }
 
   public registerParserHtmlText2Block(
@@ -566,26 +552,23 @@ export class ContentParser {
   public getSelectedBlock(model: BaseBlockModel): SelectedBlock {
     if (model.flavour === 'affine:page') {
       return {
-        id: model.id,
+        model,
         children: model.children
           .filter(child => child.flavour === 'affine:note')
           .map(child => this.getSelectedBlock(child)),
       };
     }
     return {
-      id: model.id,
+      model,
       children: model.children.map(child => this.getSelectedBlock(child)),
     };
   }
 
   private async _getHtmlInfoBySelectionInfo(
-    block: SelectedBlock
+    block: SelectedBlock,
+    blobMap: Map<string, string>
   ): Promise<string> {
-    const model = this._page.getBlockById(block.id);
-    if (!model) {
-      return '';
-    }
-
+    const model = block.model;
     const children: string[] = [];
     for (
       let currentIndex = 0;
@@ -593,27 +576,30 @@ export class ContentParser {
       currentIndex++
     ) {
       const childText = await this._getHtmlInfoBySelectionInfo(
-        block.children[currentIndex]
+        block.children[currentIndex],
+        blobMap
       );
       childText && children.push(childText);
     }
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(model.flavour);
 
-    return service.block2html(model, {
-      childText: children.join(''),
-      begin: block.startPos,
-      end: block.endPos,
-    });
+    const text = await service.block2html(
+      model,
+      {
+        childText: children.join(''),
+        begin: block.startPos,
+        end: block.endPos,
+      },
+      blobMap
+    );
+    return text;
   }
 
   private async _getTextInfoBySelectionInfo(
     selectedBlock: SelectedBlock
   ): Promise<string> {
-    const model = this._page.getBlockById(selectedBlock.id);
-    if (!model) {
-      return '';
-    }
+    const model = selectedBlock.model;
 
     const children: string[] = [];
     for (const child of selectedBlock.children) {
@@ -621,7 +607,7 @@ export class ContentParser {
       childText && children.push(childText);
     }
 
-    const { getServiceOrRegister } = await import('../service.js');
+    const { getServiceOrRegister } = await import('../service/index.js');
     const service = await getServiceOrRegister(model.flavour);
 
     return service.block2Text(model, {
@@ -637,6 +623,9 @@ export class ContentParser {
   ): Promise<SerializedBlock[]> {
     const openBlockPromises = Array.from(element.children).map(
       async childElement => {
+        if (childElement.tagName === 'STYLE') {
+          return [];
+        }
         return (
           (await this.withContext(context).getParserHtmlText2Block(
             'NodeParser'
@@ -651,5 +640,162 @@ export class ContentParser {
     }
 
     return results.flat().filter(v => v);
+  }
+
+  private _markdown2Html(text: string): string {
+    const underline = {
+      name: 'underline',
+      level: 'inline',
+      start(src: string) {
+        return src.indexOf('~');
+      },
+      tokenizer(src: string) {
+        const rule = /^~([^~]+)~/;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'underline',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      renderer(token: marked.Tokens.Generic) {
+        return `<u>${token.text}</u>`;
+      },
+    };
+    const inlineCode = {
+      name: 'inlineCode',
+      level: 'inline',
+      start(src: string) {
+        return src.indexOf('`');
+      },
+      tokenizer(src: string) {
+        const rule = /^(?:`)(`{2,}?|[^`]+)(?:`)$/g;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'inlineCode',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      renderer(token: marked.Tokens.Generic) {
+        return `<code>${token.text}</code>`;
+      },
+    };
+
+    const pageMetaTags = {
+      name: 'pageMetaTags',
+      level: 'block',
+      start(src: string) {
+        return src.indexOf('Tags: ');
+      },
+      tokenizer(src: string) {
+        const rule = /^Tags: (.*)$/g;
+        const match = rule.exec(src);
+        if (match) {
+          return {
+            type: 'pageMetaTags',
+            raw: match[0], // This is the text that you want your token to consume from the source
+            text: match[1].trim(), // You can add additional properties to your tokens to pass along to the renderer
+          };
+        }
+        return;
+      },
+      renderer(token: marked.Tokens.Generic) {
+        return `<div class="page-meta-data">
+          <div class="value">
+            <div class="tags">
+              ${(token.text as string)
+                .split(',')
+                .map(tag => {
+                  return `<div class="tag">${tag}</div>`;
+                })
+                .join('')}
+            </div>
+          </div>
+        </div>`;
+      },
+    };
+
+    const walkTokens = (token: marked.Token) => {
+      // fix: https://github.com/toeverything/blocksuite/issues/3304
+      if (
+        token.type === 'list_item' &&
+        token.tokens.length > 0 &&
+        token.tokens[0].type === 'list' &&
+        token.tokens[0].items.length === 1
+      ) {
+        const fistItem = token.tokens[0].items[0];
+        if (
+          fistItem.tokens.length === 0 ||
+          (fistItem.tokens.length === 1 && fistItem.tokens[0].type === 'text')
+        ) {
+          // transform list_item to text
+          const newToken =
+            fistItem.tokens.length === 1
+              ? (fistItem.tokens[0] as marked.Tokens.Text)
+              : ({
+                  raw: '',
+                  text: '',
+                  type: 'text',
+                  tokens: [],
+                } as marked.Tokens.Text);
+          const preText = fistItem.raw.substring(
+            0,
+            fistItem.raw.length - fistItem.text.length
+          );
+          newToken.raw = preText + newToken.raw;
+          newToken.text = preText + newToken.text;
+          newToken.tokens = newToken.tokens || [];
+          newToken.tokens.unshift({
+            type: 'text',
+            text: preText,
+            raw: preText,
+          });
+          token.tokens[0] = newToken;
+        }
+      }
+    };
+    marked.use({
+      extensions: [underline, inlineCode, pageMetaTags],
+      walkTokens,
+    });
+    const md2html = marked.parse(text);
+    return md2html;
+  }
+
+  private _importMetaDataFromHtml(text: string) {
+    const pageMetaData = this._getMetaDataFromhtmlText(text);
+    const tags = pageMetaData.tags.map(tag => {
+      return {
+        id: nanoid(),
+        value: tag.trim(),
+        color: getTagColor(),
+      };
+    });
+    this._page.meta.tags.push(...tags.map(tag => tag.id));
+    this._page.workspace.meta.setProperties({
+      ...this._page.workspace.meta.properties,
+      tags: {
+        ...this._page.workspace.meta.properties.tags,
+        options: tags,
+      },
+    });
+  }
+
+  private _getMetaDataFromhtmlText(html: string) {
+    const htmlEl = document.createElement('html');
+    htmlEl.innerHTML = html;
+    const tags = htmlEl.querySelectorAll('.page-meta-data .tags .tag');
+    return {
+      tags: Array.from(tags)
+        .map(tag => tag.textContent ?? '')
+        .filter(tag => tag !== ''),
+    };
   }
 }

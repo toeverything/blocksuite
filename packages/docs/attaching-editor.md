@@ -5,7 +5,7 @@ In the [Getting Started](./getting-started) section, we used a `SimpleAffineEdit
 ```ts
 import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Workspace, Schema } from '@blocksuite/store';
 import { LitElement } from 'lit';
 import { EditorContainer } from './editor-container.js';
 
@@ -16,7 +16,10 @@ export class SimpleAffineEditor extends LitElement {
   constructor() {
     super();
 
-    this.workspace = new Workspace({ id: 'foo' }).register(AffineSchemas);
+    const schema = new Schema();
+    schema.register(AffineSchemas);
+
+    this.workspace = new Workspace({ id: 'foo', schema });
     this.page = this.workspace.createPage({ init: true });
   }
 

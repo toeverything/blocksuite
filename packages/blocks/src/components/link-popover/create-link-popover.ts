@@ -1,11 +1,10 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Utils } from '@blocksuite/store';
 
 import {
-  getDefaultPage,
+  getDocPage,
   getModelByElement,
-  noop,
 } from '../../__internal__/utils/index.js';
 import { calcSafeCoordinate } from '../../page-block/utils/position.js';
 import { type LinkDetail, LinkPopover } from './link-popover.js';
@@ -55,11 +54,11 @@ function bindHoverState(
   const hoverCloseDelay = 300;
   let timer: number | undefined;
 
-  const handleMouseEnter = (e: MouseEvent) => {
+  const handleMouseEnter = () => {
     clearTimeout(timer);
   };
 
-  const handleMouseLeave = (e: MouseEvent) => {
+  const handleMouseLeave = () => {
     // we want to leave the popover open
     // if the mouse entered the popover immediately
     // after leaving the target (or vice versa).
@@ -79,7 +78,7 @@ function bindHoverState(
   popover.addEventListener('mouseout', handleMouseLeave);
 
   const model = getModelByElement(target);
-  const pageBlock = getDefaultPage(model.page);
+  const pageBlock = getDocPage(model.page);
   const viewport = pageBlock?.viewportElement;
   viewport?.addEventListener('scroll', abortHandler);
   return () => {
@@ -136,7 +135,7 @@ export async function showLinkPopover({
       res({ type: 'cancel' });
     });
 
-    editLinkEle.addEventListener('editLink', e => {
+    editLinkEle.addEventListener('editLink', () => {
       if (abortController.signal.aborted) {
         return;
       }

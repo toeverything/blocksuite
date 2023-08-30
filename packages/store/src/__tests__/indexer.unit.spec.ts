@@ -1,18 +1,14 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 import { describe, expect, it } from 'vitest';
+import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
 import type { Page } from '../index.js';
-import { Generator, Workspace } from '../index.js';
-
-function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
-  return { id: 'test-workspace', idGenerator, isSSR: true };
-}
+import { Generator, Schema, Workspace } from '../index.js';
 
 export const BlockSchemas = [
   ParagraphBlockSchema,
@@ -20,15 +16,22 @@ export const BlockSchemas = [
   NoteBlockSchema,
 ];
 
+function createTestOptions() {
+  const idGenerator = Generator.AutoIncrement;
+  const schema = new Schema();
+  schema.register(BlockSchemas);
+  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+}
+
 async function createTestPage(pageId = 'page0', workspace?: Workspace) {
   const options = createTestOptions();
-  const _workspace = workspace || new Workspace(options).register(BlockSchemas);
+  const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
   await page.waitForLoaded();
   return page;
 }
 
-describe.skip('workspace.search works', () => {
+describe('workspace.search works', () => {
   it('workspace search matching', async () => {
     const page = await createTestPage();
     const workspace = page.workspace;
@@ -58,11 +61,34 @@ describe.skip('workspace.search works', () => {
       noteId
     );
 
-    const id = page.id.replace('space:', '');
+    const id = page.id;
 
     queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(new Map([['2', id]]));
-      expect(workspace.search('索尼')).toStrictEqual(new Map([['3', id]]));
+      expect(workspace.search('处理器')).toStrictEqual(
+        new Map([['2', `space:${id}`]])
+      );
+      expect(workspace.search('索尼')).toStrictEqual(
+        new Map([['3', `space:${id}`]])
+      );
+    });
+
+    const update = encodeStateAsUpdate(page.spaceDoc);
+    const schema = new Schema();
+    const workspace2 = new Workspace({
+      schema,
+    });
+    const page2 = workspace2.createPage({
+      id: 'page0',
+    });
+    applyUpdate(page2.spaceDoc, update);
+    expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
+    queueMicrotask(() => {
+      expect(workspace2.search('处理器')).toStrictEqual(
+        new Map([['2', `space:${id}`]])
+      );
+      expect(workspace2.search('索尼')).toStrictEqual(
+        new Map([['3', `space:${id}`]])
+      );
     });
   });
 });

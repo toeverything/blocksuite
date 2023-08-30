@@ -1,9 +1,13 @@
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
-import { DisposableGroup, Slot } from '@blocksuite/store';
 
 import type { BlockStore } from '../store/index.js';
 import type { BaseSelection } from './base.js';
-import { BlockSelection, TextSelection } from './variants/index.js';
+import {
+  BlockSelection,
+  SurfaceSelection,
+  TextSelection,
+} from './variants/index.js';
 
 interface SelectionConstructor {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,7 +42,7 @@ export class SelectionManager {
   }
 
   private _setupDefaultSelections() {
-    this.register([TextSelection, BlockSelection]);
+    this.register([TextSelection, BlockSelection, SurfaceSelection]);
   }
 
   private _jsonToSelection = (json: Record<string, unknown>) => {
@@ -71,13 +75,41 @@ export class SelectionManager {
     this.slots.changed.emit(selections);
   }
 
+  setGroup(group: string, selections: BaseSelection[]) {
+    const current = this.value.filter(s => s.group !== group);
+    this.set([...current, ...selections]);
+  }
+
+  getGroup(group: string) {
+    return this.value.filter(s => s.group === group);
+  }
+
   update(fn: (currentSelections: BaseSelection[]) => BaseSelection[]) {
     const selections = fn(this.value);
     this.set(selections);
   }
 
-  clear() {
-    this.set([]);
+  clear(types?: string[]) {
+    if (types) {
+      const values = this.value.filter(
+        selection => !types.includes(selection.type)
+      );
+      this.set(values);
+    } else {
+      this.set([]);
+    }
+  }
+
+  find<T extends BlockSuiteSelectionType>(type: T) {
+    return this.value.find((sel): sel is BlockSuiteSelectionInstance[T] =>
+      sel.is(type)
+    );
+  }
+
+  filter<T extends BlockSuiteSelectionType>(type: T) {
+    return this.value.filter((sel): sel is BlockSuiteSelectionInstance[T] =>
+      sel.is(type)
+    );
   }
 
   get remoteSelections() {

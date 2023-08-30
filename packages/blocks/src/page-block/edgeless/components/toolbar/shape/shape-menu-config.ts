@@ -1,17 +1,23 @@
+import type { TemplateResult } from 'lit';
+
+import type { ShapeTool } from '../../../../../__internal__/index.js';
 import {
   DiamondIcon,
   EllipseIcon,
   RoundedRectangleIcon,
+  ScribbledDiamondIcon,
+  ScribbledEllipseIcon,
+  ScribbledRoundedRectangleIcon,
+  ScribbledSquareIcon,
+  ScribbledTriangleIcon,
   SquareIcon,
   TriangleIcon,
-} from '@blocksuite/global/config';
-import type { TemplateResult } from 'lit';
-
-import type { ShapeTool } from '../../../../../__internal__/index.js';
+} from '../../../../../icons/index.js';
 
 type Config = {
   name: ShapeTool['shape'];
-  icon: TemplateResult<1>;
+  generalIcon: TemplateResult<1>;
+  scribbledIcon: TemplateResult<1>;
   tooltip: string;
   disabled: boolean;
 };
@@ -19,31 +25,36 @@ type Config = {
 export const ShapeComponentConfig: Config[] = [
   {
     name: 'rect',
-    icon: SquareIcon,
+    generalIcon: SquareIcon,
+    scribbledIcon: ScribbledSquareIcon,
     tooltip: 'Square',
     disabled: false,
   },
   {
     name: 'ellipse',
-    icon: EllipseIcon,
+    generalIcon: EllipseIcon,
+    scribbledIcon: ScribbledEllipseIcon,
     tooltip: 'Ellipse',
     disabled: false,
   },
   {
     name: 'diamond',
-    icon: DiamondIcon,
+    generalIcon: DiamondIcon,
+    scribbledIcon: ScribbledDiamondIcon,
     tooltip: 'Diamond',
     disabled: false,
   },
   {
     name: 'triangle',
-    icon: TriangleIcon,
+    generalIcon: TriangleIcon,
+    scribbledIcon: ScribbledTriangleIcon,
     tooltip: 'Triangle',
     disabled: false,
   },
   {
     name: 'roundedRect',
-    icon: RoundedRectangleIcon,
+    generalIcon: RoundedRectangleIcon,
+    scribbledIcon: ScribbledRoundedRectangleIcon,
     tooltip: 'Rounded rectangle',
     disabled: false,
   },
@@ -56,3 +67,7 @@ export const ShapeComponentConfigMap = ShapeComponentConfig.reduce(
   },
   {} as Record<Config['name'], Config>
 );
+
+export const SHAPE_SUBMENU_WIDTH = 464;
+export const SHAPE_COLOR_PREFIX = '--affine-palette-shape-';
+export const LINE_COLOR_PREFIX = '--affine-palette-line-';

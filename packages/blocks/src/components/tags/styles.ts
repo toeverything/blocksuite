@@ -1,4 +1,5 @@
 import { css } from 'lit';
+
 export const styles = css`
   affine-multi-tag-select {
     position: absolute;
@@ -28,6 +29,7 @@ export const styles = css`
     min-height: 44px;
     padding: 10px 8px;
     background: var(--affine-hover-color);
+    border-radius: 8px;
   }
 
   .select-input {
@@ -52,6 +54,8 @@ export const styles = css`
     padding: 8px;
     color: var(--affine-black-90);
     fill: var(--affine-black-90);
+    max-height: 400px;
+    overflow-y: auto;
   }
 
   .select-option-container-header {

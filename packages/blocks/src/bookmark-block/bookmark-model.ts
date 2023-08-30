@@ -26,7 +26,7 @@ export const defaultBookmarkProps: BookmarkProps = {
 
 export const BookmarkBlockSchema = defineBlockSchema({
   flavour: 'affine:bookmark',
-  props: (internal): BookmarkProps => defaultBookmarkProps,
+  props: (): BookmarkProps => defaultBookmarkProps,
   metadata: {
     version: 1,
     role: 'content',

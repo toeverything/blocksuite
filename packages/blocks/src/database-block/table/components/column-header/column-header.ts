@@ -1,6 +1,5 @@
 import './database-header-column.js';
 
-import { DatabaseAddColumn } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { customElement, property, query } from 'lit/decorators.js';
@@ -8,7 +7,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getDefaultPageByElement } from '../../../../__internal__/index.js';
+import { getDocPageByElement } from '../../../../__internal__/index.js';
+import { DatabaseAddColumn } from '../../../../icons/index.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
@@ -52,7 +52,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
 
   private _initResizeEffect(element: Element) {
-    const pageBlock = getDefaultPageByElement(this);
+    const pageBlock = getDocPageByElement(this);
     const viewportElement = pageBlock?.viewportElement;
     if (viewportElement) {
       const resizeObserver = new ResizeObserver(
@@ -115,7 +115,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   private _onAddColumn = () => {
     if (this.readonly) return;
     this.tableViewManager.columnAdd('end');
-    Promise.resolve().then(() => {
+    requestAnimationFrame(() => {
       this.editLastColumnTitle();
     });
   };
@@ -123,8 +123,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   editLastColumnTitle = () => {
     const columns = this.querySelectorAll('affine-database-header-column');
     const column = columns.item(columns.length - 1);
+    column.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     column.editTitle();
-    column.scrollIntoView();
   };
 
   override render() {
@@ -136,6 +136,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
           (column, index) => {
             const style = styleMap({
               width: `${column.width}px`,
+              border: index === 0 ? 'none' : undefined,
             });
             return html` <affine-database-header-column
               style="${style}"

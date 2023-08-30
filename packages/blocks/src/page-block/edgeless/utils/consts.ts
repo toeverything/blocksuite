@@ -12,8 +12,8 @@ export const NOTE_OVERLAY_OFFSET_Y = 6;
 export const NOTE_OVERLAY_WIDTH = 100;
 export const NOTE_OVERLAY_HEIGHT = 50;
 export const NOTE_OVERLAY_CORNER_RADIUS = 6;
-export const NOTE_OVERLAY_STOKE_COLOR = '#E3E2E4';
-export const NOTE_OVERLAY_TEXT_COLOR = '#77757D';
+export const NOTE_OVERLAY_STOKE_COLOR = '--affine-border-color';
+export const NOTE_OVERLAY_TEXT_COLOR = '--affine-icon-color';
 export const NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR = 'rgba(252, 252, 253, 1)';
 export const NOTE_OVERLAY_DARK_BACKGROUND_COLOR = 'rgb(32, 32, 32)';
 
@@ -27,6 +27,7 @@ export const SHAPE_OVERLAY_OPTIONS = {
   strokeLineDash: [0, 0],
   stroke: 'black',
   strokeWidth: 4,
+  fill: 'transparent',
 };
 
 export const DEFAULT_NOTE_CHILD_FLAVOUR = 'affine:paragraph';
@@ -43,5 +44,13 @@ export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
   'affine-block-children-container',
 ];
 
-export const SCIBBLED_CANVAS_FONT_FANILY = "'Kalam', cursive";
+export const SCRIBBLED_CANVAS_FONT_FAMILY = "'Kalam', cursive";
 export const GENERAL_CANVAS_FONT_FAMILY = 'sans-serif';
+
+export const SurfaceColor = '#6046FE';
+export const NoteColor = '#1E96EB';
+export const BlendColor = '#7D91FF';
+
+export const SHAPE_TEXT_COLOR_PURE_WHITE = 'white';
+export const SHAPE_TEXT_COLOR_PURE_BLACK = 'black';
+export const SHAPE_FILL_COLOR_BLACK = '--affine-palette-shape-black';

@@ -235,12 +235,21 @@ export class Renderer implements SurfaceViewport {
     }
   }
 
-  setViewportByBound(bound: Bound, padding = [0, 0], smooth = false) {
+  setViewportByBound(
+    bound: Bound,
+    padding: [number, number, number, number] = [0, 0, 0, 0],
+    smooth = false
+  ) {
+    const [pt, pr, pb, pl] = padding;
     const zoom = Math.min(
-      (this.width - padding[0]) / bound.w,
-      (this.height - padding[1]) / bound.h
+      (this.width - (pr + pl)) / bound.w,
+      (this.height - (pt + pb)) / bound.h
     );
-    const center = bound.center;
+    const center = [
+      bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2,
+      bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2,
+    ];
+
     this.setViewport(zoom, center, smooth);
   }
 

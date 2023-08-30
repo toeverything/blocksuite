@@ -1,9 +1,9 @@
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import {
   Bound,
   getQuadBoundsWithRotation,
   rotatePoints,
 } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
 
 import type { IPoint } from '../../../../__internal__/utils/types.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
@@ -27,6 +27,10 @@ type ResizeMoveHandler = (
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
 
 export class HandleResizeManager {
+  slots = {
+    resizeEnd: new Slot(),
+  };
+
   private _onDragStart: DragStartHandler;
   private _onResizeMove: ResizeMoveHandler;
   private _onRotateMove: RotateMoveHandler;
@@ -41,10 +45,19 @@ export class HandleResizeManager {
   };
 
   private _rotate = 0;
+
+  /**
+   * Record inital rect of selected elements
+   */
   private _originalRect = new DOMRect();
+
+  /**
+   * Current rect of selected elements, it may change during resizing or moving
+   */
   private _currentRect = new DOMRect();
+
   private _origin: { x: number; y: number } = { x: 0, y: 0 };
-  private _resizeMode = 'none';
+  private _resizeMode: ResizeMode = 'none';
   private _zoom = 1;
 
   private _bounds = new Map<
@@ -81,32 +94,37 @@ export class HandleResizeManager {
     return this._originalRect;
   }
 
-  set originalRect(rect: DOMRect) {
-    this._originalRect = rect;
-    this._aspectRatio = rect.width / rect.height;
-    this._currentRect = DOMRect.fromRect(rect);
-  }
-
   updateState(
     resizeMode: ResizeMode,
     rotate: number,
     zoom: number,
+    position?: { x: number; y: number },
     originalRect?: DOMRect
   ) {
     this._resizeMode = resizeMode;
     this._rotate = rotate;
     this._zoom = zoom;
 
+    if (position) {
+      this._currentRect.x = position.x;
+      this._currentRect.y = position.y;
+      this._originalRect.x = this._currentRect.x;
+      this._originalRect.y = this._currentRect.y;
+    }
+
     if (originalRect) {
-      this.originalRect = originalRect;
+      this._originalRect = originalRect;
+      this._aspectRatio = originalRect.width / originalRect.height;
+      this._currentRect = DOMRect.fromRect(originalRect);
     }
   }
 
-  updateRect(delta: { x: number; y: number }) {
+  updateRectPosition(delta: { x: number; y: number }) {
     this._currentRect.x += delta.x;
     this._currentRect.y += delta.y;
     this._originalRect.x = this._currentRect.x;
     this._originalRect.y = this._currentRect.y;
+
     return this._originalRect;
   }
 
@@ -160,6 +178,7 @@ export class HandleResizeManager {
     const draggingPoint = new DOMPoint(0, 0);
 
     const deltaX = (endX - startX) / _zoom;
+    const deltaY = (endY - startY) / _zoom;
 
     const m0 = new DOMMatrix()
       .translateSelf(original.cx, original.cy)
@@ -247,7 +266,6 @@ export class HandleResizeManager {
       // force adjustment by aspect ratio
       shiftKey ||= this._bounds.size > 1;
 
-      const deltaY = (endY - startY) / _zoom;
       const fp = fixedPoint.matrixTransform(m0);
       let dp = draggingPoint.matrixTransform(m0);
 
@@ -397,8 +415,6 @@ export class HandleResizeManager {
 
       rect.cx = (draggingPoint.x + fixedPoint.x) / 2;
     }
-
-    // const { x: flipX, y: flipY } = flip;
 
     const width = Math.abs(rect.w);
     const height = Math.abs(rect.h);
@@ -593,7 +609,7 @@ export class HandleResizeManager {
     const _onPointerMove = ({ x, y, shiftKey }: PointerEvent) => {
       if (this._resizeMode === 'none') return;
 
-      this._shiftKey ||= shiftKey;
+      this._shiftKey = shiftKey;
       this._dragPos.end = { x, y };
 
       if (this._rotation) {
@@ -617,6 +633,8 @@ export class HandleResizeManager {
         start: { x: 0, y: 0 },
         end: { x: 0, y: 0 },
       };
+
+      this.slots.resizeEnd.emit();
 
       document.removeEventListener('pointermove', _onPointerMove);
       document.removeEventListener('pointerup', _onPointerUp);

@@ -43,27 +43,26 @@ export class SurfaceManager {
   private _computedValue: ComputedValue;
   private _defaultBatch = 'a1';
   private _batches = new Map<string, Batch<SurfaceElement>>();
+  private _isReadonly: () => boolean;
 
   slots = {
     elementUpdated: new Slot<{
       id: id;
-      props:
-        | IElementUpdateProps<'shape'>
-        | IElementUpdateProps<'connector'>
-        | IElementUpdateProps<'brush'>
-        | IElementUpdateProps<'shape'>;
+      props: { [index: string]: { old: unknown; new: unknown } };
     }>(),
     elementAdded: new Slot<id>(),
-    elementRemoved: new Slot<id>(),
+    elementRemoved: new Slot<{ id: id; element: SurfaceElement }>(),
   };
 
   constructor(
     yContainer: Y.Map<unknown>,
-    computedValue: ComputedValue = v => v
+    computedValue: ComputedValue = v => v,
+    getReadonlyState: () => boolean = () => false
   ) {
     this._renderer = new Renderer();
     this._yContainer = yContainer as Y.Map<Y.Map<unknown>>;
     this._computedValue = computedValue;
+    this._isReadonly = getReadonlyState;
     this._yContainer.observe(this._onYContainer);
   }
 
@@ -99,57 +98,97 @@ export class SurfaceManager {
 
   private _syncFromExistingContainer() {
     this._transact(() => {
+      const yConnectors: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as keyof PhasorElementType;
-        const id = yElement.get('id') as id;
-        const ElementCtor = ElementCtors[type];
-        assertExists(ElementCtor);
-        const element = new ElementCtor(yElement, this);
-        element.computedValue = this._computedValue;
-        element.mount(this._renderer);
-        this._elements.set(element.id, element);
-        this._addToBatch(element);
-        this.slots.elementAdded.emit(id);
+        if (type === 'connector') {
+          yConnectors.push(yElement);
+          return;
+        }
+        this._createElementFromYMap(yElement);
+      });
+      yConnectors.forEach(yElement => {
+        this._createElementFromYMap(yElement);
       });
     });
+  }
+
+  private _createElementFromYMap(yElement: Y.Map<unknown>) {
+    const type = yElement.get('type') as keyof PhasorElementType;
+    const id = yElement.get('id') as id;
+    const ElementCtor = ElementCtors[type];
+    assertExists(ElementCtor);
+    const element = new ElementCtor(yElement, this);
+    element.computedValue = this._computedValue;
+    element.mount(this._renderer);
+    this._elements.set(element.id, element);
+    this._addToBatch(element);
+    this.slots.elementAdded.emit(id);
   }
 
   private _onYContainer = (event: Y.YMapEvent<Y.Map<unknown>>) => {
     // skip empty event
     if (event.changes.keys.size === 0) return;
+    const connectors: {
+      change: (typeof event)['changes']['keys'] extends Map<string, infer V>
+        ? V
+        : never;
+      id: string;
+    }[] = [];
     event.keysChanged.forEach(id => {
-      const type = event.changes.keys.get(id);
-      if (!type) {
+      const change = event.changes.keys.get(id);
+      if (!change) {
         console.error('invalid event', event);
         return;
       }
 
-      if (type.action === 'add') {
-        const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-        const type = yElement.get('type') as keyof PhasorElementType;
-
-        const ElementCtor = ElementCtors[type];
-        assertExists(ElementCtor);
-        const element = new ElementCtor(yElement, this);
-        element.computedValue = this._computedValue;
-        element.mount(this._renderer);
-        this._elements.set(element.id, element);
-
-        this._addToBatch(element);
-        this.slots.elementAdded.emit(id);
-      } else if (type.action === 'update') {
-        console.error('update event on yElements is not supported', event);
-      } else if (type.action === 'delete') {
-        const element = this._elements.get(id);
-        assertExists(element);
-        element.xywh;
-        element.unmount();
-        this._elements.delete(id);
-        this.deleteElementLocalRecord(id);
-        this._removeFromBatch(element);
-        this.slots.elementRemoved.emit(id);
+      if (
+        change.action === 'add' &&
+        this._yContainer.get(id)?.get('type') === 'connector'
+      ) {
+        connectors.push({ change, id });
+        return;
+      } else {
+        this._onYEvent(change, id);
       }
     });
+    connectors.forEach(({ change, id }) => this._onYEvent(change, id));
+  };
+
+  private _onYEvent = (
+    type: Y.YMapEvent<Y.Map<unknown>>['changes']['keys'] extends Map<
+      string,
+      infer V
+    >
+      ? V
+      : never,
+    id: string
+  ) => {
+    if (type.action === 'add') {
+      const yElement = this._yContainer.get(id) as Y.Map<unknown>;
+      const type = yElement.get('type') as keyof PhasorElementType;
+
+      const ElementCtor = ElementCtors[type];
+      assertExists(ElementCtor);
+      const element = new ElementCtor(yElement, this);
+      element.computedValue = this._computedValue;
+      element.mount(this._renderer);
+      this._elements.set(element.id, element);
+
+      this._addToBatch(element);
+      this.slots.elementAdded.emit(id);
+    } else if (type.action === 'update') {
+      console.error('update event on yElements is not supported', event);
+    } else if (type.action === 'delete') {
+      const element = this._elements.get(id);
+      assertExists(element);
+
+      element.unmount();
+      this._elements.delete(id);
+      this.deleteElementLocalRecord(id);
+      this._removeFromBatch(element);
+      this.slots.elementRemoved.emit({ id, element });
+    }
   };
 
   private _transact(callback: () => void) {
@@ -164,7 +203,7 @@ export class SurfaceManager {
   updateIndexes(
     keys: string[],
     elements: PhasorElement[],
-    callback: (keys: string[]) => void
+    callback?: (keys: string[]) => void
   ) {
     this._transact(() => {
       let newIndex;
@@ -178,7 +217,7 @@ export class SurfaceManager {
         yElement.set('index', newIndex);
       }
 
-      callback(keys);
+      callback && callback(keys);
     });
   }
 
@@ -191,13 +230,17 @@ export class SurfaceManager {
   }
 
   getElementsBound(): IBound | null {
-    return getCommonBound([...this._elements.values()]);
+    return getCommonBound(Array.from(this._elements.values()));
   }
 
   addElement<T extends keyof IPhasorElementType>(
     type: T,
     properties: IElementCreateProps<T>
   ): PhasorElement['id'] {
+    if (this._isReadonly()) {
+      throw new Error('Cannot add element in readonly mode');
+    }
+
     const id = generateElementId();
 
     const yMap = new Y.Map();
@@ -214,7 +257,7 @@ export class SurfaceManager {
 
     this._transact(() => {
       for (const [key, value] of Object.entries(props)) {
-        if (key === 'text' && !(value instanceof Y.Text)) {
+        if ((key === 'text' || key === 'title') && !(value instanceof Y.Text)) {
           yMap.set(key, new Y.Text(value));
         } else {
           yMap.set(key, value);
@@ -230,6 +273,10 @@ export class SurfaceManager {
     id: string,
     properties: IElementUpdateProps<T>
   ) {
+    if (this._isReadonly()) {
+      throw new Error('Cannot update element in readonly mode');
+    }
+
     this._transact(() => {
       const element = this._elements.get(id);
       assertExists(element);
@@ -248,6 +295,10 @@ export class SurfaceManager {
   }
 
   removeElement(id: string) {
+    if (this._isReadonly()) {
+      throw new Error('Cannot remove element in readonly mode');
+    }
+
     this._transact(() => {
       this._yContainer.delete(id);
     });
@@ -338,7 +389,7 @@ export class SurfaceManager {
   }
 
   getElements() {
-    return [...this._elements.values()];
+    return Array.from(this._elements.values());
   }
 
   getElementsByType<T extends keyof IPhasorElementType>(
@@ -362,10 +413,10 @@ export class SurfaceManager {
     this.refresh();
   }
 
-  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
-    id: id
-  ): IPhasorElementLocalRecord[T] | undefined {
-    return this._elementLocalRecords.get(id);
+  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(id: id) {
+    return this._elementLocalRecords.get(id) as
+      | IPhasorElementLocalRecord[T]
+      | undefined;
   }
 
   deleteElementLocalRecord(id: id) {

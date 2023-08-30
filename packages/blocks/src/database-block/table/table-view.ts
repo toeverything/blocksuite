@@ -2,11 +2,8 @@
 import './components/column-header/column-header.js';
 import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
-import './components/toolbar/toolbar.js';
-import './components/database-title.js';
 import './components/selection.js';
 
-import { PlusIcon } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -15,6 +12,7 @@ import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import { PlusIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
@@ -26,7 +24,6 @@ import type { DataViewTableManager } from './table-view-manager.js';
 const styles = css`
   affine-database-table {
     position: relative;
-    margin-top: 32px;
   }
 
   affine-database-table * {
@@ -169,36 +166,46 @@ export class DatabaseTable extends BaseDataView<
     return this.view.readonly;
   }
 
-  override firstUpdated() {
+  override connectedCallback() {
+    super.connectedCallback();
     this._disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-
     if (this.readonly) return;
-    const tableContent = this._tableContainer.parentElement;
-    assertExists(tableContent);
-    this._disposables.addFromEvent(
-      tableContent,
-      'scroll',
-      this._onDatabaseScroll
-    );
+    requestAnimationFrame(() => {
+      const tableContent = this._tableContainer.parentElement;
+      assertExists(tableContent);
+      this._disposables.addFromEvent(
+        tableContent,
+        'scroll',
+        this._onDatabaseScroll
+      );
+    });
   }
 
-  private _onDatabaseScroll = (event: Event) => {
+  private _onDatabaseScroll = () => {
     this._columnHeaderComponent.showAddColumnButton();
   };
 
+  public override addRow(position: InsertPosition) {
+    this._addRow(this.view, position);
+  }
+
   private _addRow = (
     tableViewManager: DataViewTableManager,
-    position: InsertPosition
+    position: InsertPosition | number
   ) => {
     if (this.readonly) return;
-    const index = insertPositionToIndex(
-      position,
-      this.view.rows.map(id => ({ id }))
-    );
+
+    const index =
+      typeof position === 'number'
+        ? position
+        : insertPositionToIndex(
+            position,
+            this.view.rows.map(id => ({ id }))
+          );
     tableViewManager.rowAdd(position);
     requestAnimationFrame(() => {
       this.selection.selection = {
@@ -227,26 +234,12 @@ export class DatabaseTable extends BaseDataView<
   };
 
   override render() {
-    const rowsTemplate = DataBaseRowContainer(this.view);
+    const rowsTemplate = DataBaseRowContainer(this.view, this.selection);
     const addRow = (position: InsertPosition) => {
       this._addRow(this.view, position);
     };
     return html`
       <div class="affine-database-table">
-        <div class="affine-database-block-title-container">
-          <affine-database-title
-            .titleText="${this.titleText}"
-            .addRow="${() => addRow('start')}"
-            .readonly="${this.readonly}"
-          ></affine-database-title>
-          <affine-database-toolbar
-            .tableView="${this}"
-            .copyBlock="${this.blockOperation.copy}"
-            .deleteSelf="${this.blockOperation.delete}"
-            .view="${this.view}"
-            .addRow="${addRow}"
-          ></affine-database-toolbar>
-        </div>
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">
             <affine-database-column-header
@@ -273,6 +266,14 @@ export class DatabaseTable extends BaseDataView<
       </div>
     `;
   }
+
+  focusFirstCell(): void {
+    this.selection.focusFirstCell();
+  }
+
+  getSelection = () => {
+    return this.selection.selection;
+  };
 }
 
 declare global {
@@ -280,11 +281,3 @@ declare global {
     'affine-database-table': DatabaseTable;
   }
 }
-
-export const getTableContainer = (ele: HTMLElement) => {
-  const element = ele.closest(
-    '.affine-database-table-container'
-  ) as HTMLElement;
-  assertExists(element);
-  return element;
-};

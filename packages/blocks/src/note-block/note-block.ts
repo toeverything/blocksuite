@@ -3,9 +3,8 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { bindHotKey } from './keymap.js';
 import type { NoteBlockModel } from './note-model.js';
-import { NoteBlockService } from './note-service.js';
 
 @customElement('affine-note')
 export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
@@ -20,12 +19,16 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:note', NoteBlockService);
+    bindHotKey(this);
   }
 
   override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
+    this._disposables.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   override render() {

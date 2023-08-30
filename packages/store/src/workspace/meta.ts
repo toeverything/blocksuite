@@ -1,7 +1,7 @@
-import { PAGE_VERSION, WORKSPACE_VERSION } from '@blocksuite/global/config';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 
+import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
 import type { Workspace } from './workspace.js';
 
@@ -19,7 +19,7 @@ type Tag = {
   color: string;
 };
 type PagesPropertiesMeta = {
-  tags: {
+  tags?: {
     options: Tag[];
   };
 };

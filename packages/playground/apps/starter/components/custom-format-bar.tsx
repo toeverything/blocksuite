@@ -1,29 +1,32 @@
-import { FormatQuickBar } from '@blocksuite/blocks';
+import { AffineFormatBarWidget } from '@blocksuite/blocks';
 import { createRoot } from 'react-dom/client';
 
 export function registerFormatBarCustomElement() {
-  FormatQuickBar.customElements.push((page, getBlockRange) => {
-    const element = document.createElement('div');
-    createRoot(element).render(
-      <div
-        style={{
-          height: '32px',
-          width: '32px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-        }}
-        data-testid="custom-format-bar-element"
-        onClick={() => {
-          const range = getBlockRange();
-          console.log('range', range);
-        }}
-      >
-        <div>X</div>
-      </div>
-    );
+  AffineFormatBarWidget.customElements.add(
+    (formatBar: AffineFormatBarWidget) => {
+      const element = document.createElement('div');
+      createRoot(element).render(
+        <div
+          style={{
+            height: '32px',
+            width: '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+          }}
+          data-testid="custom-format-bar-element"
+          onClick={() => {
+            const root = formatBar.root;
+            const selectionManager = root.selectionManager;
+            console.log('selections', selectionManager.value);
+          }}
+        >
+          <div>X</div>
+        </div>
+      );
 
-    return element;
-  });
+      return element;
+    }
+  );
 }

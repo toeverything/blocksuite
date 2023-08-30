@@ -1,14 +1,14 @@
-import { MinusIcon, PlusIcon, ViewBarIcon } from '@blocksuite/global/config';
+import { clamp } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  clamp,
   type EdgelessTool,
   stopPropagation,
 } from '../../../../__internal__/index.js';
+import { MinusIcon, PlusIcon, ViewBarIcon } from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';
@@ -64,8 +64,8 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       height: 32px;
       line-height: 22px;
       padding: 5px;
-      border-radius: 5px;
-      font-size: 14px;
+      border-radius: 4px;
+      font-size: 12px;
       font-weight: 500;
       text-align: center;
       cursor: pointer;
@@ -115,7 +115,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   }
 
   setEdgelessTool = (edgelessTool: EdgelessTool) => {
-    this.edgeless.selection.setEdgelessTool(edgelessTool);
+    this.edgeless.tools.setEdgelessTool(edgelessTool);
   };
 
   setZoomByAction(action: ZoomAction) {

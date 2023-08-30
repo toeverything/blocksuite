@@ -15,18 +15,17 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../surface-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShpae } from '../utils.js';
-
-function diamondPoints({ x, y, w, h }: IBound): IVec[] {
-  return [
-    [x, y + h / 2],
-    [x + w / 2, y],
-    [x + w, y + h / 2],
-    [x + w / 2, y + h],
-  ];
-}
+import { drawGeneralShape } from '../utils.js';
 
 export const DiamondMethods: ShapeMethods = {
+  points({ x, y, w, h }: IBound) {
+    return [
+      [x, y + h / 2],
+      [x + w / 2, y],
+      [x + w, y + h / 2],
+      [x + w / 2, y + h],
+    ];
+  },
   render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
@@ -59,29 +58,8 @@ export const DiamondMethods: ShapeMethods = {
         .translateSelf(-cx, -cy)
     );
 
-    rc.polygon(
-      [
-        [renderWidth / 2, 0],
-        [renderWidth, renderHeight / 2],
-        [renderWidth / 2, renderHeight],
-        [0, renderHeight / 2],
-      ],
-      {
-        seed,
-        roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
-        strokeLineDash:
-          strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
-        stroke:
-          strokeStyle === StrokeStyle.None || shapeStyle === ShapeStyle.General
-            ? 'none'
-            : realStrokeColor,
-        strokeWidth,
-        fill: filled ? realFillColor : undefined,
-      }
-    );
-
     if (shapeStyle === ShapeStyle.General) {
-      drawGeneralShpae(ctx, 'diamond', {
+      drawGeneralShape(ctx, 'diamond', {
         x: 0,
         y: 0,
         width: renderWidth,
@@ -89,12 +67,31 @@ export const DiamondMethods: ShapeMethods = {
         strokeWidth,
         strokeColor: realStrokeColor,
         strokeStyle: strokeStyle,
+        fillColor: realFillColor,
       });
+    } else {
+      rc.polygon(
+        [
+          [renderWidth / 2, 0],
+          [renderWidth, renderHeight / 2],
+          [renderWidth / 2, renderHeight],
+          [0, renderHeight / 2],
+        ],
+        {
+          seed,
+          roughness: shapeStyle === ShapeStyle.Scribbled ? roughness : 0,
+          strokeLineDash:
+            strokeStyle === StrokeStyle.Dashed ? [12, 12] : undefined,
+          stroke: strokeStyle === StrokeStyle.None ? 'none' : realStrokeColor,
+          strokeWidth,
+          fill: filled ? realFillColor : undefined,
+        }
+      );
     }
   },
 
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
-    const points = getPointsFromBoundsWithRotation(this, diamondPoints);
+    const points = getPointsFromBoundsWithRotation(this, DiamondMethods.points);
 
     let hited = pointOnPolygonStoke(
       [x, y],
@@ -110,24 +107,33 @@ export const DiamondMethods: ShapeMethods = {
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(element, diamondPoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      DiamondMethods.points
+    );
     return points.some(point => bounds.containsPoint(point));
   },
 
   getNearestPoint(point: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(element, diamondPoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      DiamondMethods.points
+    );
     return polygonNearestPoint(points, point);
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
-    const points = getPointsFromBoundsWithRotation(element, diamondPoints);
+    const points = getPointsFromBoundsWithRotation(
+      element,
+      DiamondMethods.points
+    );
     return linePolygonIntersects(start, end, points);
   },
 
   getRelativePointLocation(position, element) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
-    let points = diamondPoints(bound);
+    let points = DiamondMethods.points(bound);
     points.push(point);
 
     points = rotatePoints(points, bound.center, element.rotate);

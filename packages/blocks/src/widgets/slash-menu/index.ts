@@ -1,19 +1,21 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { WidgetElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import {
   assertExists,
   DisposableGroup,
-  matchFlavours,
-} from '@blocksuite/store';
+  throttle,
+} from '@blocksuite/global/utils';
+import { WidgetElement } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
 import {
   getCurrentNativeRange,
   getVirgoByModel,
   isControlledKeyboardEvent,
-  throttle,
+  matchFlavours,
 } from '../../__internal__/utils/index.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
+import { isPageComponent } from '../../page-block/utils/guard.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
 import { menuGroups } from './config.js';
 import { SlashMenu } from './slash-menu-popover.js';
@@ -22,17 +24,21 @@ import type { SlashMenuOptions } from './utils.js';
 let globalAbortController = new AbortController();
 
 function showSlashMenu({
+  pageElement,
   model,
   range,
   container = document.body,
   abortController = new AbortController(),
   options,
+  triggerKey,
 }: {
+  pageElement: PageBlockComponent;
   model: BaseBlockModel;
   range: Range;
   container?: HTMLElement;
   abortController?: AbortController;
   options: SlashMenuOptions;
+  triggerKey: string;
 }) {
   // Abort previous format quick bar
   globalAbortController.abort();
@@ -45,6 +51,8 @@ function showSlashMenu({
   slashMenu.model = model;
   slashMenu.abortController = abortController;
   slashMenu.options = options;
+  slashMenu.pageElement = pageElement;
+  slashMenu.triggerKey = triggerKey;
 
   // Handle position
   const updatePosition = throttle(() => {
@@ -69,7 +77,7 @@ function showSlashMenu({
 @customElement('affine-slash-menu-widget')
 export class SlashMenuWidget extends WidgetElement {
   static DEFAULT_OPTIONS: SlashMenuOptions = {
-    isTriggerKey: (event: KeyboardEvent) => {
+    isTriggerKey: (event: KeyboardEvent): false | string => {
       const triggerKeys = [
         '/',
         // Compatible with CJK IME
@@ -83,13 +91,13 @@ export class SlashMenuWidget extends WidgetElement {
         // Description: The `Process` key. Instructs the IME to process the conversion.
         // See also https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values#common_ime_keys
         // https://stackoverflow.com/questions/71961563/keyboard-event-has-key-process-on-chromebook
-        return true;
+        return '/';
       }
-      return (
-        !isControlledKeyboardEvent(event) &&
-        event.key.length === 1 &&
-        triggerKeys.includes(event.key)
-      );
+      if (isControlledKeyboardEvent(event) || event.key.length !== 1)
+        return false;
+      const triggerKey = triggerKeys.find(key => key === event.key);
+      if (!triggerKey) return false;
+      return triggerKey;
     },
     menus: menuGroups,
   };
@@ -107,7 +115,8 @@ export class SlashMenuWidget extends WidgetElement {
 
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
-    if (!this.options.isTriggerKey(event)) return;
+    const triggerKey = this.options.isTriggerKey(event);
+    if (triggerKey === false) return;
     const text = this.root.selectionManager.value.find(selection =>
       selection.is('text')
     );
@@ -123,12 +132,19 @@ export class SlashMenuWidget extends WidgetElement {
     const vEditor = getVirgoByModel(model);
     if (!vEditor) return;
     vEditor.slots.rangeUpdated.once(() => {
+      const pageElement = this.pageElement;
+      if (!isPageComponent(pageElement)) {
+        throw new Error('SlashMenuWidget should be used in PageBlock');
+      }
+
       // Wait for dom update, see this case https://github.com/toeverything/blocksuite/issues/2611
       requestAnimationFrame(() => {
         const curRange = getCurrentNativeRange();
         showSlashMenu({
+          pageElement,
           model,
           range: curRange,
+          triggerKey,
           options: this.options,
         });
       });

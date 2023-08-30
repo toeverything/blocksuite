@@ -1,14 +1,14 @@
 import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
-import { ArrowUpIcon, NoteIcon } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
+import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
+import { ArrowUpIcon, NoteIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
@@ -34,19 +34,12 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(noteMenu);
 
-  computePosition(reference, noteMenu, {
-    placement: 'top-start',
-    middleware: [
-      offset({
-        mainAxis: -20,
-        crossAxis: -30,
-      }),
-    ],
-  }).then(({ x, y }) => {
-    Object.assign(noteMenu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
+  const x = 110;
+  const y = -40;
+
+  Object.assign(noteMenu.style, {
+    left: `${x}px`,
+    top: `${y}px`,
   });
 
   return {
@@ -58,10 +51,15 @@ function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
 }
 
 @customElement('edgeless-note-tool-button')
-export class EdgelessNoteToolButton extends LitElement {
+export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       display: flex;
+    }
+
+    edgeless-tool-icon-button svg {
+      fill: var(--affine-icon-color);
+      stroke: none;
     }
 
     edgeless-tool-icon-button svg + svg {
@@ -77,9 +75,6 @@ export class EdgelessNoteToolButton extends LitElement {
 
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
-
-  @state()
-  private _popperShow = false;
 
   private _noteMenu: NoteMenuPopper | null = null;
 
@@ -107,6 +102,18 @@ export class EdgelessNoteToolButton extends LitElement {
     }
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.edgeless.slots.edgelessToolUpdated.on(newTool => {
+        if (newTool.type !== 'note') {
+          this._noteMenu?.dispose();
+          this._noteMenu = null;
+        }
+      })
+    );
+  }
+
   override disconnectedCallback() {
     this._noteMenu?.dispose();
     this._noteMenu = null;
@@ -118,7 +125,7 @@ export class EdgelessNoteToolButton extends LitElement {
 
     return html`
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : getTooltipWithShortcut('Note', 'N')}
+        .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .active=${type === 'note'}
         .activeMode=${'background'}
         @click=${() => {

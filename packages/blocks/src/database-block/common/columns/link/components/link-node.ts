@@ -8,8 +8,7 @@ import { isValidUrl } from '../../../../../__internal__/utils/url.js';
 export class LinkNode extends ShadowlessElement {
   static override styles = css`
     .link-node {
-      white-space: nowrap;
-      word-break: break-word;
+      word-break: break-all;
       color: var(--affine-link-color);
       fill: var(--affine-link-color);
       cursor: pointer;

@@ -1,61 +1,21 @@
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../..//components/toast.js';
-import { copyBlocks } from '../../__internal__/clipboard/index.js';
+import { copyBlocks } from '../../__internal__/clipboard/utils/commons.js';
 import { getBlockElementByModel } from '../../__internal__/index.js';
-import type { BookmarkBlockComponent } from '../bookmark-block.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
 import {
   CopyIcon,
   DeleteIcon,
   DuplicateIcon,
   RefreshIcon,
-} from '../images/icons.js';
+} from '../../icons/index.js';
+import type { BookmarkBlockComponent } from '../bookmark-block.js';
+import type { BookmarkBlockModel } from '../bookmark-model.js';
 import { cloneBookmarkProperties, reloadBookmarkBlock } from '../utils.js';
-
-export type OperationMenuPopper = {
-  element: BookmarkOperationMenu;
-  dispose: () => void;
-};
-
-export function createBookmarkOperationMenu(
-  reference: HTMLElement,
-  props: {
-    model: BaseBlockModel<BookmarkBlockModel>;
-    onSelected?: MenuActionCallback;
-  }
-): OperationMenuPopper {
-  const menu = document.createElement('bookmark-operation-menu');
-  menu.model = props.model;
-  menu.onSelected = props.onSelected;
-
-  reference.appendChild(menu);
-  computePosition(reference, menu, {
-    placement: 'top-start',
-    middleware: [
-      offset({
-        mainAxis: 6,
-      }),
-    ],
-  }).then(({ x, y }) => {
-    Object.assign(menu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
-  });
-
-  return {
-    element: menu,
-    dispose: () => {
-      menu.remove();
-    },
-  };
-}
 
 export type MenuActionCallback = (type: Operation['type']) => void;
 
@@ -75,13 +35,8 @@ const operations: Operation[] = [
     type: 'copy',
     icon: CopyIcon,
     label: 'Copy',
-    action: (model, callback) => {
-      copyBlocks({
-        type: 'Block',
-        models: [model],
-        startOffset: 0,
-        endOffset: 0,
-      });
+    action: async (model, callback) => {
+      await copyBlocks([model]);
       toast('Copied link to clipboard');
       callback?.('copy');
     },
@@ -130,11 +85,8 @@ const operations: Operation[] = [
 @customElement('bookmark-operation-menu')
 export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      position: absolute;
-    }
     .bookmark-operation-menu {
-      border-radius: 8px 8px 8px 0;
+      border-radius: 8px;
       padding: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
@@ -163,13 +115,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
   model!: BaseBlockModel;
 
   @property({ attribute: false })
-  root!: BookmarkBlockComponent;
-
-  @property({ attribute: false })
   onSelected?: MenuActionCallback;
-
-  @query('.bookmark-bar')
-  formatQuickBarElement!: HTMLElement;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -181,7 +127,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
       ({ type }) => type,
       ({ type, icon, label, action, divider }) => {
         return html`<icon-button
-            width="130px"
+            width="126px"
             height="32px"
             class="menu-item ${type}"
             @click=${() => {
@@ -194,7 +140,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
       }
     );
 
-    return html` <div class="bookmark-operation-menu">${menuItems}</div> `;
+    return html`<div class="bookmark-operation-menu">${menuItems}</div> `;
   }
 }
 

@@ -1,15 +1,13 @@
 import { VEditor, type VRange } from '@blocksuite/virgo';
 import * as Y from 'yjs';
 
-import { activeEditorManager } from '../../__internal__/utils/active-editor-manager.js';
-
 interface StackItem {
   meta: Map<'v-range', VRange | null>;
   type: 'undo' | 'redo';
 }
 
 export class VirgoInput {
-  static YTEXT_NAME = 'YTEXT_NAME';
+  static Y_TEXT_NAME = 'Y_TEXT_NAME';
 
   yDoc: Y.Doc = new Y.Doc();
   yText: Y.Text;
@@ -24,14 +22,12 @@ export class VirgoInput {
   readonly undoManager: Y.UndoManager;
 
   constructor(options: {
-    rootElement: HTMLElement;
     yText?: Y.Text | string;
     maxLength?: number;
     type?: 'number';
   }) {
     const {
-      rootElement,
-      yText = this.yDoc.getText(VirgoInput.YTEXT_NAME),
+      yText = this.yDoc.getText(VirgoInput.Y_TEXT_NAME),
       maxLength,
       type,
     } = options;
@@ -53,10 +49,10 @@ export class VirgoInput {
         this.yText = yText;
         this.yDoc = yText.doc;
       } else {
-        throw new Error('Y.Text should be binded to Y.Doc.');
+        throw new Error('Y.Text should be bind to Y.Doc.');
       }
     } else {
-      this.yText = this.yDoc.getText(VirgoInput.YTEXT_NAME);
+      this.yText = this.yDoc.getText(VirgoInput.Y_TEXT_NAME);
       this.yText.insert(0, text);
     }
 
@@ -81,12 +77,65 @@ export class VirgoInput {
     );
 
     this.vEditor = new VEditor(this.yText, {
-      active: () =>
-        activeEditorManager.isActive(options.rootElement) && this.active,
+      hooks: {
+        beforeinput: ctx => {
+          const { vRange } = ctx;
+
+          let originalText = this.vEditor.yTextString;
+          if (vRange.length > 0) {
+            originalText = `${originalText.substring(
+              0,
+              vRange.index
+            )}${originalText.substring(vRange.index + vRange.length)}`;
+          }
+          const tmpText = `${originalText.substring(0, vRange.index)}${
+            ctx.data ?? ''
+          }${originalText.substring(vRange.index)}`;
+
+          if (tmpText.length >= this.maxLength) {
+            return null;
+          }
+
+          this.undoManager.stopCapturing();
+          return ctx;
+        },
+        compositionEnd: ctx => {
+          const { vRange } = ctx;
+
+          let originalText = this.vEditor.yText.toString();
+          if (vRange.length > 0) {
+            originalText = `${originalText.substring(
+              0,
+              vRange.index
+            )}${originalText.substring(vRange.index + vRange.length)}`;
+          }
+          const tmpText = `${originalText.substring(0, vRange.index)}${
+            ctx.data
+          }${originalText.substring(vRange.index)}`;
+
+          let flag = true;
+
+          if (tmpText.length >= this.maxLength) {
+            // We should not directly return null because we need to clear text node from IME.
+            ctx.data = '';
+            flag = false;
+          }
+
+          if (flag) {
+            this.undoManager.stopCapturing();
+          }
+
+          return ctx;
+        },
+      },
     });
-    this.vEditor.mount(rootElement);
-    this.vEditor.bindHandlers({
-      paste: (event: ClipboardEvent) => {
+  }
+
+  mount(rootElement: HTMLElement) {
+    this.vEditor.disposables.addFromEvent(
+      rootElement,
+      'paste',
+      (event: ClipboardEvent) => {
         event.stopPropagation();
 
         const data = event.clipboardData
@@ -116,84 +165,23 @@ export class VirgoInput {
           });
           this.undoManager.stopCapturing();
         }
-      },
-      virgoInput: ctx => {
-        const vRange = this.vEditor.getVRange();
-        if (!vRange) {
-          return ctx;
+      }
+    );
+    this.vEditor.disposables.addFromEvent(rootElement, 'keydown', event => {
+      if (
+        event instanceof KeyboardEvent &&
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === 'z' || event.key === 'Z')
+      ) {
+        event.preventDefault();
+        if (event.shiftKey) {
+          this.redo();
+        } else {
+          this.undo();
         }
-
-        let originalText = this.vEditor.yText.toString();
-        if (vRange.length > 0) {
-          originalText = `${originalText.substring(
-            0,
-            vRange.index
-          )}${originalText.substring(vRange.index + vRange.length)}`;
-        }
-        const tmpText = `${originalText.substring(0, vRange.index)}${
-          ctx.data ?? ''
-        }${originalText.substring(vRange.index)}`;
-
-        let flag = true;
-
-        if (tmpText.length >= this.maxLength) {
-          ctx.skipDefault = true;
-          flag = false;
-        }
-
-        if (flag) {
-          this.undoManager.stopCapturing();
-        }
-        return ctx;
-      },
-      virgoCompositionEnd: ctx => {
-        const vRange = this.vEditor.getVRange();
-        if (!vRange) {
-          return ctx;
-        }
-
-        let originalText = this.vEditor.yText.toString();
-        if (vRange.length > 0) {
-          originalText = `${originalText.substring(
-            0,
-            vRange.index
-          )}${originalText.substring(vRange.index + vRange.length)}`;
-        }
-        const tmpText = `${originalText.substring(0, vRange.index)}${
-          ctx.data
-        }${originalText.substring(vRange.index)}`;
-
-        let flag = true;
-
-        if (tmpText.length >= this.maxLength) {
-          // We should not use `skipDefault` because we need to clear text node from IME.
-          ctx.data = '';
-          flag = false;
-        }
-
-        if (flag) {
-          this.undoManager.stopCapturing();
-        }
-
-        return ctx;
-      },
-      keydown: e => {
-        if (
-          e instanceof KeyboardEvent &&
-          (e.ctrlKey || e.metaKey) &&
-          (e.key === 'z' || e.key === 'Z')
-        ) {
-          e.preventDefault();
-          if (e.shiftKey) {
-            this.redo();
-          } else {
-            this.undo();
-          }
-        }
-      },
+      }
     });
-
-    rootElement.addEventListener('blur', () => {
+    this.vEditor.disposables.addFromEvent(rootElement, 'blur', () => {
       if (this.type === 'number') {
         const text = this.yText.toString();
         const num = parseFloat(text);
@@ -208,6 +196,12 @@ export class VirgoInput {
         }
       }
     });
+
+    this.vEditor.mount(rootElement);
+  }
+
+  unmount() {
+    this.vEditor.unmount();
   }
 
   get value() {

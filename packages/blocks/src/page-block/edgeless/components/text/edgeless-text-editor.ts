@@ -1,13 +1,14 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { Bound, type TextElement } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
-import { VEditor } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
+import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-text-editor')
@@ -15,15 +16,15 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
-  private _vEditor: VEditor | null = null;
+  private _vInput: VirgoInput | null = null;
+  get vEditor() {
+    assertExists(this._vInput);
+    return this._vInput.vEditor;
+  }
 
   private _element: TextElement | null = null;
   private _edgeless: EdgelessPageBlockComponent | null = null;
   private _keeping = false;
-
-  get vEditor() {
-    return this._vEditor;
-  }
 
   setKeeping(keeping: boolean) {
     this._keeping = keeping;
@@ -46,19 +47,17 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           (vLines.length / edgeless.surface.viewport.zoom) * lineHeight
         ).serialize(),
       });
-      edgeless.slots.selectionUpdated.emit({
-        selected: [element],
-        active: true,
-      });
     }
   }
 
   mount(element: TextElement, edgeless: EdgelessPageBlockComponent) {
     this._element = element;
     this._edgeless = edgeless;
-    this._vEditor = new VEditor(element.text);
+    this._vInput = new VirgoInput({
+      yText: this._element.text,
+    });
 
-    this._vEditor.slots.updated.on(() => {
+    this._vInput.vEditor.slots.updated.on(() => {
       this._syncRect();
     });
 
@@ -73,12 +72,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.requestUpdate();
     requestAnimationFrame(() => {
-      assertExists(this._vEditor);
+      assertExists(this._vInput);
       assertExists(this._element);
       this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
         display: false,
       });
-      this._vEditor.mount(this._virgoContainer);
+      this._vInput.mount(this._virgoContainer);
 
       const dispatcher = this._edgeless?.dispatcher;
       assertExists(dispatcher);
@@ -100,22 +99,22 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   private _unmount() {
-    this.vEditor?.unmount();
+    this._vInput?.unmount();
     assertExists(this._element);
+    assertExists(this._edgeless);
     this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
       display: true,
     });
 
     if (this._element?.text.length === 0) {
-      this._edgeless?.connector.detachConnectors([this._element]);
-      this._edgeless?.surface.removeElement(this._element?.id);
+      deleteElements(this._edgeless, [this._element]);
     }
 
     this.remove();
     assertExists(this._edgeless);
-    this._edgeless.slots.selectionUpdated.emit({
-      selected: [],
-      active: false,
+    this._edgeless.selectionManager.setSelection({
+      elements: [],
+      editing: false,
     });
   }
 
@@ -143,6 +142,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           : this._element.color,
         zIndex: '10',
         textAlign: this._element.textAlign,
+        marginRight: '-100%',
       });
     }
 

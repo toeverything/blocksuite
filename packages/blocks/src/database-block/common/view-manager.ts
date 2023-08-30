@@ -6,7 +6,7 @@ import type { Column, InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
 import { columnManager } from './columns/manager.js';
-import { groupByMatcher } from './groupBy/matcher.js';
+import { groupByMatcher } from './group-by/matcher.js';
 
 export type TableViewColumn = {
   id: string;
@@ -41,11 +41,6 @@ export type DatabaseViewDataMap = {
     mode: K;
   };
 };
-type Pretty<T> = { [K in keyof T]: T[K] };
-export type TableViewData = Pretty<DatabaseViewDataMap['table']>;
-export type KanbanViewData = Pretty<DatabaseViewDataMap['kanban']>;
-
-export type DatabaseViewData = DatabaseViewDataMap[keyof DatabaseViewDataMap];
 
 type ViewOperation<Data> = {
   init(model: DatabaseBlockModel, id: string, name: string): Data;
@@ -102,15 +97,15 @@ export const ViewOperationMap: {
         groupBy: defaultGroupBy(column.id, column.type, column.data),
       };
     },
-    addColumn(model, view, newColumn) {
+    addColumn(_model, _view, _newColumn) {
       //Nothing to do
     },
-    deleteColumn(model, view, id) {
+    deleteColumn(_model, _view, _id) {
       //Nothing to do
     },
   },
   table: {
-    init(model, id, name) {
+    init(_model, id, name) {
       return {
         id,
         name,
@@ -123,13 +118,13 @@ export const ViewOperationMap: {
         },
       };
     },
-    addColumn(model, view, newColumn, position) {
+    addColumn(_model, view, newColumn, position) {
       view.columns.splice(insertPositionToIndex(position, view.columns), 0, {
         id: newColumn.id,
         width: DEFAULT_COLUMN_WIDTH,
       });
     },
-    deleteColumn(model, view, id) {
+    deleteColumn(_model, view, id) {
       const index = view.columns.findIndex(c => c.id === id);
       if (index >= 0) {
         view.columns.splice(index, 1);

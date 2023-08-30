@@ -1,5 +1,7 @@
-import { Text } from '@blocksuite/store';
+import { nanoid, Text } from '@blocksuite/store';
 
+import { getTagColor } from '../../../../components/tags/colors.js';
+import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
 import { tTag } from '../../../logical/data-type.js';
 import { tArray } from '../../../logical/typesystem.js';
 import { columnManager } from '../manager.js';
@@ -21,6 +23,14 @@ export const multiSelectPureColumnConfig = columnManager.register<
   defaultData: () => ({
     options: [],
   }),
+  addGroup: (text, oldData) => {
+    return {
+      options: [
+        ...oldData.options,
+        { id: nanoid(), value: text, color: getTagColor() },
+      ],
+    };
+  },
   formatValue: v => {
     if (Array.isArray(v)) {
       return v.filter(v => v != null);
@@ -29,6 +39,35 @@ export const multiSelectPureColumnConfig = columnManager.register<
   },
   cellToString: (data, colData) =>
     data?.map(id => colData.options.find(v => v.id === id)?.value).join(' '),
+  cellFromString: (data, colData) => {
+    const optionMap = Object.fromEntries(
+      colData.options.map(v => [v.value, v])
+    );
+    const optionNames = data
+      .split(',')
+      .map(v => v.trim())
+      .filter(v => v);
+
+    const value: string[] = [];
+    optionNames.forEach(name => {
+      if (!optionMap[name]) {
+        const newOption: SelectTag = {
+          id: nanoid(),
+          value: name,
+          color: getTagColor(),
+        };
+        colData.options.push(newOption);
+        value.push(newOption.id);
+      } else {
+        value.push(optionMap[name].id);
+      }
+    });
+
+    return {
+      value,
+      data: colData,
+    };
+  },
   cellToJson: data => data ?? null,
 });
 multiSelectPureColumnConfig.registerConvert('select', (column, cells) => ({

@@ -15,7 +15,6 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
       align-items: center;
       width: 100%;
       height: 100%;
-      padding: 2px 0;
     }
 
     .affine-select-cell-container * {
@@ -32,11 +31,15 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-select-cell-container .select-selected {
-      height: 28px;
-      padding: 2px 10px;
+      height: 22px;
+      font-size: 14px;
+      line-height: 22px;
+      padding: 0 8px;
       border-radius: 4px;
       white-space: nowrap;
       background: var(--affine-tag-white);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   `;
 
@@ -51,7 +54,7 @@ export class MultiTagView extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const values = this.value;
-    const map = new Map<string, SelectTag>(this.options.map(v => [v.id, v]));
+    const map = new Map<string, SelectTag>(this.options?.map(v => [v.id, v]));
     return html`
       <div class="affine-select-cell-container">
         ${repeat(values, id => {

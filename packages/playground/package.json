@@ -1,7 +1,7 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -18,28 +18,30 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "@lit-labs/react": "^1.2.1",
-    "@rich-data/json-plugin": "3.0.0-20230404235326-387ed97",
-    "@rich-data/viewer": "3.0.0-20230404235326-387ed97",
     "@shoelace-style/shoelace": "2.0.0",
-    "@toeverything/y-indexeddb": "0.8.0-canary.4",
+    "@toeverything/y-indexeddb": "0.9.0-canary.0",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
     "async-call-rpc": "^6.3.1",
     "browser-fs-access": "^0.32.1",
+    "intl-segmenter-polyfill-rs": "^0.1.6",
     "jszip": "^3.10.1",
-    "lit": "^2.7.6",
+    "lit": "^2.8.0",
     "merge": "^2.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "ses": "^0.18.5",
+    "ses": "^0.18.7",
+    "tweakpane": "^3.1.10",
     "y-protocols": "^1.0.5",
     "yjs": "^13.6.7",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   },
   "license": "MPL-2.0",
   "devDependencies": {
-    "@types/dat.gui": "^0.7.10",
+    "@tweakpane/core": "^1.1.9",
     "@types/micromatch": "^4.0.2",
-    "dat.gui": "^0.7.9",
-    "magic-string": "^0.29.0"
+    "magic-string": "^0.29.0",
+    "vite-plugin-wasm": "^3.2.2"
   }
 }

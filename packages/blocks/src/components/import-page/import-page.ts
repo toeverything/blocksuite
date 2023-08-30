@@ -1,5 +1,18 @@
 import '../loader.js';
 
+import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
+import { type Workspace } from '@blocksuite/store';
+import JSZip from 'jszip';
+import { html, LitElement, type PropertyValues } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
+
+import { ContentParser } from '../../__internal__/content-parser/index.js';
+import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
+import type { SerializedBlock } from '../../__internal__/utils/index.js';
+import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
+import { columnManager } from '../../database-block/common/columns/manager.js';
+import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import {
   CloseIcon,
   ExportToHTMLIcon,
@@ -7,23 +20,14 @@ import {
   HelpIcon,
   NewIcon,
   NotionIcon,
-} from '@blocksuite/global/config';
-import { WithDisposable } from '@blocksuite/lit';
-import { assertExists, type Page, type Workspace } from '@blocksuite/store';
-import JSZip from 'jszip';
-import { html, LitElement, type PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
-
-import { ContentParser } from '../../__internal__/content-parser/index.js';
-import type { SerializedBlock } from '../../__internal__/utils/index.js';
-import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
-import { columnManager } from '../../database-block/common/columns/manager.js';
-import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
+} from '../../icons/index.js';
 import type { Cell, Column } from '../../index.js';
-import { toast } from '../toast.js';
 import { styles } from './styles.js';
 
-export type OnSuccessHandler = (pageIds: string[]) => void;
+export type OnSuccessHandler = (
+  pageIds: string[],
+  isWorkspaceFile: boolean
+) => void;
 
 const SHOW_LOADING_SIZE = 1024 * 200;
 
@@ -74,27 +78,28 @@ function joinWebPaths(...paths: string[]): string {
 
 export async function importNotion(workspace: Workspace, file: File) {
   const pageIds: string[] = [];
-  const allPageMap: Map<string, Page>[] = [];
+  // const allPageMap: Map<string, Page>[] = [];
   // const dataBaseSubPages = new Set<string>();
+  let isWorkspaceFile = false;
   const parseZipFile = async (file: File | Blob) => {
     const zip = new JSZip();
     const zipFile = await zip.loadAsync(file);
-    const pageMap = new Map<string, Page>();
-    allPageMap.push(pageMap);
+    const pageMap = new Map<string, string>();
+    // allPageMap.push(pageMap);
     const files = Object.keys(zipFile.files);
     const promises: Promise<void>[] = [];
-    const csvFiles = files
-      .filter(file => file.endsWith('.csv'))
-      .map(file => file.substring(0, file.length - 4));
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.startsWith('__MACOSX/')) continue;
 
       const lastSplitIndex = file.lastIndexOf('/');
-      if (csvFiles.includes(file.substring(0, lastSplitIndex))) continue;
 
       const fileName = file.substring(lastSplitIndex + 1);
       if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+        if (file.endsWith('/index.html')) {
+          isWorkspaceFile = true;
+          continue;
+        }
         if (lastSplitIndex !== -1) {
           const text = await zipFile.files[file].async('text');
           const doc = new DOMParser().parseFromString(text, 'text/html');
@@ -103,8 +108,10 @@ export async function importNotion(workspace: Workspace, file: File) {
             continue;
           }
         }
-        const page = await createPage(workspace);
-        pageMap.set(file, page);
+        pageMap.set(file, workspace.idGenerator());
+      }
+      if (i === 0 && fileName.endsWith('.csv')) {
+        pageMap.set(file, workspace.idGenerator());
       }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
@@ -114,12 +121,16 @@ export async function importNotion(workspace: Workspace, file: File) {
       }
     }
     const pagePromises = Array.from(pageMap.keys()).map(async file => {
-      const page = pageMap.get(file);
+      const page = await createPage(workspace, { id: pageMap.get(file) });
       if (!page) return;
       const lastSplitIndex = file.lastIndexOf('/');
       const folder = file.substring(0, lastSplitIndex) || '';
       const fileName = file.substring(lastSplitIndex + 1);
-      if (fileName.endsWith('.html') || fileName.endsWith('.md')) {
+      if (
+        fileName.endsWith('.html') ||
+        fileName.endsWith('.md') ||
+        fileName.endsWith('.csv')
+      ) {
         const isHtml = fileName.endsWith('.html');
         const rootId = page.root?.id;
         const fetchFileHandler = async (url: string) => {
@@ -127,21 +138,240 @@ export async function importNotion(workspace: Workspace, file: File) {
           return (await zipFile.file(fileName)?.async('blob')) || new Blob();
         };
         const textStyleHandler = (
-          element: HTMLElement,
+          _element: HTMLElement,
           textStyle: Record<string, unknown>
         ) => {
           if (textStyle['link']) {
             const link = textStyle['link'] as string;
             const subPageLink = joinWebPaths(folder, decodeURI(link));
-            const linkPage = pageMap.get(subPageLink);
-            if (linkPage) {
+            const linkPageId = pageMap.get(subPageLink);
+            if (linkPageId) {
               textStyle['reference'] = {
-                pageId: linkPage.id,
+                pageId: linkPageId,
                 type: 'LinkedPage',
               };
               delete textStyle['link'];
             }
           }
+        };
+
+        const checkFileIsSubPage = async (
+          fileName: string,
+          columns: Column[],
+          row: string[],
+          titleIndex: number
+        ) => {
+          const fileString =
+            (await zipFile.file(fileName)?.async('string')) || '';
+          // no need to parse the whole text
+          const startText = fileString.substring(
+            0,
+            columns.join(': ').length + row.join('').length + 100
+          );
+          for (let i = 0; i < row.length; i++) {
+            if (i === titleIndex) {
+              if (!startText.includes(row[i])) {
+                return false;
+              }
+            } else {
+              // Replace non-visible characters with an empty string
+              const columnName = columns[i].name.replace(/[^\x20-\x7E]/g, '');
+              if (
+                row[i] !== '' &&
+                !startText.includes(columnName + ': ' + row[i])
+              ) {
+                return false;
+              }
+              if (row[i] === '' && startText.includes(columnName + ': ')) {
+                return false;
+              }
+            }
+          }
+          return true;
+        };
+
+        const getSubPageIds = async (
+          columns: Column[],
+          row: string[],
+          titleIndex: number
+        ) => {
+          const result: string[] = [];
+          if (!row[titleIndex]) {
+            return result;
+          }
+
+          const curFiles = files.filter(
+            file =>
+              file.includes(row[titleIndex] + ' ') &&
+              (file.endsWith('.html') || file.endsWith('.md'))
+          );
+          for (let k = 0; k < curFiles.length; k++) {
+            const curFile = curFiles[k];
+            const isSubPage = await checkFileIsSubPage(
+              curFile,
+              columns,
+              row,
+              titleIndex
+            );
+            if (isSubPage && pageMap.has(curFile)) {
+              result.push(pageMap.get(curFile) ?? '');
+            }
+          }
+          return result;
+        };
+
+        const csvParseHandler = async (fileName: string, titleText: string) => {
+          const tableString =
+            (await zipFile.file(fileName)?.async('string')) ?? '';
+          let result: SerializedBlock[] | null = [];
+          let id = 1;
+          const titles: string[] = [];
+          const rows: string[][] = [];
+          tableString?.split(/\r\n|\r|\n/).forEach((row, index) => {
+            const rowArray = row.split(/,\s*(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            for (let i = 0; i < rowArray.length; i++) {
+              rowArray[i] = rowArray[i].replace(/^"|"$/g, '');
+            }
+            if (index === 0) {
+              titles.push(...rowArray);
+            } else {
+              rows.push(rowArray);
+            }
+          });
+
+          const columns: Column[] = titles.map(value => {
+            return columnManager
+              .getColumn(richTextPureColumnConfig.type)
+              .createWithId('' + id++, value);
+          });
+          if (rows.length > 0) {
+            let maxLen = rows[0].length;
+            for (let i = 1; i < rows.length; i++) {
+              maxLen = Math.max(maxLen, rows[i].length);
+            }
+            const addNum = maxLen - columns.length;
+            for (let i = 0; i < addNum; i++) {
+              columns.push(
+                columnManager
+                  .getColumn(richTextPureColumnConfig.type)
+                  .createWithId('' + id++, '')
+              );
+            }
+          }
+
+          if (columns.length === 0 || rows.length === 0) {
+            return [];
+          }
+
+          let titleIndex = 0;
+          for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            let rowHasSubPageCount = 0;
+            let rowTitleIndex = 0;
+            let subPageIds = [];
+            for (let j = 0; j < row.length; j++) {
+              subPageIds = await getSubPageIds(columns, row, j);
+              if (subPageIds.length > 0) {
+                rowTitleIndex = j;
+                rowHasSubPageCount++;
+                if (rowHasSubPageCount > 1) {
+                  break;
+                }
+              }
+            }
+            if (rowHasSubPageCount === 1) {
+              titleIndex = rowTitleIndex;
+              if (subPageIds.length === 1) {
+                break;
+              }
+            }
+          }
+          titleIndex = titleIndex < columns.length ? titleIndex : 0;
+          columns[titleIndex].type = 'title';
+          for (let i = 0; i < rows.length; i++) {
+            if (titleIndex >= rows[i].length) {
+              continue;
+            }
+            const linkPageIds = await getSubPageIds(
+              columns,
+              rows[i],
+              titleIndex
+            );
+            if (linkPageIds.length > 0) {
+              rows[i][titleIndex] = `@AffineReference:(${linkPageIds[0]})`;
+            }
+          }
+
+          const databasePropsId = id++;
+          const cells: Record<string, Record<string, Cell>> = {};
+          const children: SerializedBlock[] = [];
+          rows.forEach(row => {
+            const title = row[titleIndex];
+            const referencePattern = /@AffineReference:\((.*)\)/g;
+            const match = referencePattern.exec(title);
+            if (match) {
+              const pageId = match[1];
+              children.push({
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: [
+                  {
+                    insert: REFERENCE_NODE,
+                    attributes: {
+                      reference: { type: 'Subpage', pageId },
+                    },
+                  },
+                ],
+                children: [],
+              });
+            } else {
+              children.push({
+                flavour: 'affine:paragraph',
+                type: 'text',
+                text: [{ insert: title }],
+                children: [],
+              });
+            }
+            const rowId = '' + id++;
+            cells[rowId] = {};
+            row.forEach((value, index) => {
+              cells[rowId][columns[index].id] = {
+                columnId: columns[index].id,
+                value,
+              };
+            });
+          });
+          result = [
+            {
+              flavour: 'affine:database',
+              databaseProps: {
+                id: '' + databasePropsId,
+                title: titleText || 'Database',
+                rowIds: Object.keys(cells),
+                cells: cells,
+                columns: columns,
+                views: [
+                  {
+                    id: page.generateId(),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: [],
+                    header: {
+                      titleColumn: columns[titleIndex].id,
+                      iconColumn: 'type',
+                    },
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                  },
+                ],
+              },
+              children: children,
+            },
+          ];
+          return result;
         };
 
         const tableParseHandler = async (element: Element) => {
@@ -164,80 +394,17 @@ export async function importNotion(workspace: Workspace, file: File) {
           ) {
             const href = element.getAttribute('href') || '';
             const fileName = joinWebPaths(folder, decodeURI(href));
-            const tableString = await zipFile.file(fileName)?.async('string');
-
-            let result: SerializedBlock[] | null = [];
-            let id = 1;
-            const titles: string[] = [];
-            const rows: string[][] = [];
-            tableString?.split('\n').forEach((row, index) => {
-              if (index === 0) {
-                titles.push(...row.split(','));
-              } else {
-                const rowArray = row.split(',');
-                rows.push(rowArray);
-              }
-            });
-
-            const columns: Column[] = titles.slice(1).map((value, index) => {
-              return columnManager
-                .getColumn(richTextPureColumnConfig.type)
-                .createWithId('' + id++, value);
-            });
-            if (rows.length > 0) {
-              let maxLen = rows[0].length;
-              for (let i = 1; i < rows.length; i++) {
-                maxLen = Math.max(maxLen, rows[i].length);
-              }
-              const addNum = maxLen - columns.length;
-              for (let i = 0; i < addNum; i++) {
-                columns.push(
-                  columnManager
-                    .getColumn(richTextPureColumnConfig.type)
-                    .createWithId('' + id++, '')
-                );
-              }
-            }
-            const databasePropsId = id++;
-            const cells: Record<string, Record<string, Cell>> = {};
-            const children: SerializedBlock[] = [];
-            rows.forEach(row => {
-              children.push({
-                flavour: 'affine:paragraph',
-                type: 'text',
-                text: [{ insert: row[0] }],
-                children: [],
-              });
-              const rowId = '' + id++;
-              cells[rowId] = {};
-              row.slice(1).forEach((value, index) => {
-                cells[rowId][columns[index].id] = {
-                  columnId: columns[index].id,
-                  value,
-                };
-              });
-            });
-
-            result = [
-              {
-                flavour: 'affine:database',
-                databaseProps: {
-                  id: '' + databasePropsId,
-                  title: element.textContent || 'Database',
-                  rowIds: Object.keys(cells),
-                  cells: cells,
-                  columns: columns,
-                },
-                children: children,
-              },
-            ];
+            const result = await csvParseHandler(
+              fileName,
+              element.textContent || ''
+            );
             return result;
           }
           return null;
         };
         const tableTitleColumnHandler = async (element: Element) => {
           if (element.tagName === 'TABLE') {
-            const titleColumn: string[] = [];
+            const titleColumn: SerializedBlock[] = [];
             element.querySelectorAll('.cell-title').forEach(ele => {
               const link = ele.querySelector('a');
               const subPageLink = link?.getAttribute('href') || '';
@@ -245,14 +412,36 @@ export async function importNotion(workspace: Workspace, file: File) {
                 subPageLink.startsWith('http://') ||
                 subPageLink.startsWith('https://')
               ) {
-                titleColumn.push(ele.textContent || '');
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [{ insert: ele?.textContent || '' }],
+                  children: [],
+                });
                 return;
               }
-              const linkPage = pageMap.get(decodeURI(subPageLink));
-              if (linkPage) {
-                titleColumn.push(`@AffineReference:(${linkPage.id})`);
+              const linkPageId = pageMap.get(decodeURI(subPageLink));
+              if (linkPageId) {
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [
+                    {
+                      insert: REFERENCE_NODE,
+                      attributes: {
+                        reference: { type: 'Subpage', pageId: linkPageId },
+                      },
+                    },
+                  ],
+                  children: [],
+                });
               } else {
-                titleColumn.push(link?.textContent || '');
+                titleColumn.push({
+                  flavour: 'affine:paragraph',
+                  type: 'text',
+                  text: [{ insert: link?.textContent || '' }],
+                  children: [],
+                });
               }
             });
             return titleColumn;
@@ -265,12 +454,22 @@ export async function importNotion(workspace: Workspace, file: File) {
           tableParseHandler,
           tableTitleColumnHandler,
         });
-        const text = (await zipFile.file(file)?.async('string')) || '';
         if (rootId) {
           pageIds.push(page.id);
-          if (isHtml) {
+          if (fileName.endsWith('.csv')) {
+            const lastSpace = fileName.lastIndexOf(' ');
+            const csvName =
+              lastSpace === -1 ? '' : fileName.substring(0, lastSpace);
+            const csvRealName = csvName === 'Undefined' ? '' : csvName;
+            const blocks = await csvParseHandler(file, csvRealName);
+            if (blocks) {
+              await contentParser.importBlocks(blocks, rootId);
+            }
+          } else if (isHtml) {
+            const text = (await zipFile.file(file)?.async('string')) ?? '';
             await contentParser.importHtml(text, rootId);
           } else {
+            const text = (await zipFile.file(file)?.async('string')) ?? '';
             await contentParser.importMarkdown(text, rootId);
           }
         }
@@ -296,8 +495,9 @@ export async function importNotion(workspace: Workspace, file: File) {
   //     }
   //   });
   // });
-  return pageIds;
+  return { pageIds, isWorkspaceFile };
 }
+
 /**
  * @deprecated Waiting for migration
  * See https://github.com/toeverything/blocksuite/issues/3316
@@ -321,6 +521,9 @@ export class ImportPage extends WithDisposable(LitElement) {
   @state()
   _startY = 0;
 
+  @query('.container')
+  containerEl!: HTMLElement;
+
   constructor(
     private workspace: Workspace,
     private onSuccess?: OnSuccessHandler,
@@ -338,13 +541,9 @@ export class ImportPage extends WithDisposable(LitElement) {
     this._onMouseMove = this._onMouseMove.bind(this);
   }
 
-  loading(): boolean {
-    return this._loading;
-  }
-
   override updated(changedProps: PropertyValues) {
     if (changedProps.has('x') || changedProps.has('y')) {
-      this.style.transform = `translate(${this.x}px, ${this.y}px)`;
+      this.containerEl.style.transform = `translate(${this.x}px, ${this.y}px)`;
     }
   }
 
@@ -368,13 +567,8 @@ export class ImportPage extends WithDisposable(LitElement) {
     this.abortController.abort();
   }
 
-  private _onImportSuccess(pageIds: string[]) {
-    toast(
-      `Successfully imported ${pageIds.length} Page${
-        pageIds.length > 1 ? 's' : ''
-      }.`
-    );
-    this.onSuccess?.(pageIds);
+  private _onImportSuccess(pageIds: string[], isWorkspaceFile = false) {
+    this.onSuccess?.(pageIds, isWorkspaceFile);
   }
 
   private async _importMarkDown() {
@@ -429,9 +623,12 @@ export class ImportPage extends WithDisposable(LitElement) {
     } else {
       this.abortController.abort();
     }
-    const pageIds = await importNotion(this.workspace, file);
+    const { pageIds, isWorkspaceFile } = await importNotion(
+      this.workspace,
+      file
+    );
     needLoading && this.abortController.abort();
-    this._onImportSuccess(pageIds);
+    this._onImportSuccess(pageIds, isWorkspaceFile);
   }
 
   private _openLearnImportLink(event: MouseEvent) {
@@ -445,76 +642,85 @@ export class ImportPage extends WithDisposable(LitElement) {
   override render() {
     if (this._loading) {
       return html`
-        <header
-          class="loading-header"
-          @mousedown=${this._onMouseDown}
-          @mouseup=${this._onMouseUp}
-        >
-          <div>Import</div>
-          <loader-element width="50px"></loader-element>
-        </header>
-        <div>
-          Importing the file may take some time. It depends on document size and
-          complexity.
+        <div class="overlay-mask"></div>
+        <div class="container">
+          <header
+            class="loading-header"
+            @mousedown="${this._onMouseDown}"
+            @mouseup="${this._onMouseUp}"
+          >
+            <div>Import</div>
+            <loader-element width="50px"></loader-element>
+          </header>
+          <div>
+            Importing the file may take some time. It depends on document size
+            and complexity.
+          </div>
         </div>
       `;
     }
     return html`
-      <header @mousedown=${this._onMouseDown} @mouseup=${this._onMouseUp}>
-        <icon-button height="16px" @click=${this._onCloseClick}>
-          ${CloseIcon}
-        </icon-button>
-        <div>Import</div>
-      </header>
-      <div>
-        AFFiNE will gradually support more and more file types for import.
-        <a
-          href="https://community.affine.pro/c/feature-requests/import-export"
-          target="_blank"
-          >Provide feedback.</a
-        >
-      </div>
-      <div class="button-container">
-        <icon-button
-          class="button-item"
-          text="Markdown"
-          @click=${this._importMarkDown}
-        >
-          ${ExportToMarkdownIcon}
-        </icon-button>
-        <icon-button class="button-item" text="HTML" @click=${this._importHtml}>
-          ${ExportToHTMLIcon}
-        </icon-button>
-      </div>
-      <div class="button-container">
-        <icon-button
-          class="button-item"
-          text="Notion"
-          @click=${this._importNotion}
-        >
-          ${NotionIcon}
-          <div
-            slot="suffix"
-            class="has-tool-tip"
-            @click=${this._openLearnImportLink}
+      <div
+        class="overlay-mask"
+        @click="${() => this.abortController.abort()}"
+      ></div>
+      <div class="container">
+        <header @mousedown="${this._onMouseDown}" @mouseup="${this._onMouseUp}">
+          <icon-button height="28px" @click="${this._onCloseClick}">
+            ${CloseIcon}
+          </icon-button>
+          <div>Import</div>
+        </header>
+        <div>
+          AFFiNE will gradually support more file formats for import.
+          <a
+            href="https://community.affine.pro/c/feature-requests/import-export"
+            target="_blank"
+            >Provide feedback.</a
           >
-            ${HelpIcon}
-            <tool-tip inert arrow tip-position="top" role="tooltip">
-              Learn how to Import your Notion pages into AFFiNE.
-            </tool-tip>
-          </div>
-        </icon-button>
-        <icon-button
-          class="button-item"
-          text="Coming soon..."
-          ?disabled=${true}
-        >
-          ${NewIcon}
-        </icon-button>
-      </div>
-      <!-- <div class="footer">
+        </div>
+        <div class="button-container">
+          <icon-button
+            class="button-item"
+            text="Markdown"
+            @click="${this._importMarkDown}"
+          >
+            ${ExportToMarkdownIcon}
+          </icon-button>
+          <icon-button
+            class="button-item"
+            text="HTML"
+            @click="${this._importHtml}"
+          >
+            ${ExportToHTMLIcon}
+          </icon-button>
+        </div>
+        <div class="button-container">
+          <icon-button
+            class="button-item"
+            text="Notion"
+            @click="${this._importNotion}"
+          >
+            ${NotionIcon}
+            <div
+              slot="suffix"
+              class="has-tool-tip"
+              @click="${this._openLearnImportLink}"
+            >
+              ${HelpIcon}
+              <tool-tip inert arrow tip-position="top" role="tooltip">
+                Learn how to Import your Notion pages into AFFiNE.
+              </tool-tip>
+            </div>
+          </icon-button>
+          <icon-button class="button-item" text="Coming soon..." disabled>
+            ${NewIcon}
+          </icon-button>
+        </div>
+        <!-- <div class="footer">
         <div>Migrate from other versions of AFFiNE?</div>
       </div> -->
+      </div>
     `;
   }
 }

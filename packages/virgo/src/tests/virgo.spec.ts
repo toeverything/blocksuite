@@ -178,6 +178,35 @@ test('basic input', async ({ page }) => {
   expect(await editorB.innerText()).toBe('abbbc\n' + ZERO_WIDTH_SPACE + '\ndd');
 });
 
+test('chinese input', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  const editorA = page.locator('[data-virgo-root="true"]').nth(0);
+  const editorB = page.locator('[data-virgo-root="true"]').nth(1);
+
+  expect(await editorA.innerText()).toBe(ZERO_WIDTH_SPACE);
+  expect(await editorB.innerText()).toBe(ZERO_WIDTH_SPACE);
+
+  await page.waitForTimeout(100);
+  const client = await page.context().newCDPSession(page);
+  await client.send('Input.imeSetComposition', {
+    selectionStart: 0,
+    selectionEnd: 0,
+    text: 'n',
+  });
+  await client.send('Input.imeSetComposition', {
+    selectionStart: 0,
+    selectionEnd: 1,
+    text: 'ni',
+  });
+  await client.send('Input.insertText', {
+    text: '你',
+  });
+  expect(await editorA.innerText()).toBe('你');
+  expect(await editorB.innerText()).toBe('你');
+});
+
 test('type many times in one moment', async ({ page }) => {
   await enterVirgoPlayground(page);
   await focusVirgoRichText(page);
@@ -893,4 +922,29 @@ test('embed', async ({ page }) => {
   rect = await getVRangeIndexRect(page, [0, 3]);
   await page.mouse.click(rect.x + 3, rect.y);
   await assertSelection(page, 0, 3, 1);
+});
+
+test('markdown shortcut using keyboard util', async ({ page }) => {
+  await enterVirgoPlayground(page);
+  await focusVirgoRichText(page);
+
+  await page.waitForTimeout(100);
+
+  await type(page, 'aaa**bbb** ccc');
+
+  const delta = await getDeltaFromVirgoRichText(page);
+  expect(delta).toEqual([
+    {
+      insert: 'aaa',
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        bold: true,
+      },
+    },
+    {
+      insert: 'ccc',
+    },
+  ]);
 });

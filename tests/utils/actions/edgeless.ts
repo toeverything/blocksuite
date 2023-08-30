@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '../declare-test-window.js';
 
-import type { CssVariableName } from '@blocksuite/blocks';
-import type { IPoint } from '@blocksuite/blocks/std';
-import { assertExists, sleep } from '@blocksuite/global/utils';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { NoteBlockModel } from '../../../packages/blocks/src/index.js';
+import type {
+  CssVariableName,
+  IPoint,
+  NoteBlockModel,
+} from '../../../packages/blocks/src/index.js';
+import { assertExists, sleep } from '../../../packages/global/src/utils.js';
 import { Vec } from '../../../packages/phasor/src/utils/vec.js';
 import { dragBetweenCoords } from './drag.js';
 import {
@@ -22,7 +24,6 @@ import {
   enterPlaygroundRoom,
   getEditorLocator,
   initEmptyEdgelessState,
-  waitForVirgoStateUpdated,
   waitNextFrame,
 } from './misc.js';
 
@@ -225,10 +226,6 @@ export async function assertEdgelessTool(page: Page, mode: EdgelessTool) {
   expect(type).toEqual(mode);
 }
 
-export async function switchShapeType(page: Page, shapeType: string) {
-  // TODO
-}
-
 export async function getEdgelessHoverRect(page: Page) {
   const hoverRect = page.locator('.affine-edgeless-hover-rect');
   const box = await hoverRect.boundingBox();
@@ -316,7 +313,7 @@ export async function addBasicConnectorElement(
 export async function addNote(page: Page, text: string, x: number, y: number) {
   await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
   await type(page, text);
 }
 
@@ -387,10 +384,17 @@ export async function selectBrushColor(page: Page, color: CssVariableName) {
   await colorButton.click();
 }
 
-export async function selectBrushSize(page: Page, size: 4 | 10) {
-  const sizeMap = { 4: 'thin', 10: 'thick' };
+export async function selectBrushSize(page: Page, size: string) {
+  const sizeIndexMap: { [key: string]: number } = {
+    two: 6,
+    four: 5,
+    six: 4,
+    eight: 3,
+    ten: 2,
+    twelve: 1,
+  };
   const sizeButton = page.locator(
-    `edgeless-brush-menu .brush-size-button .${sizeMap[size]}`
+    `edgeless-brush-menu .line-width-panel .line-width-button:nth-child(${sizeIndexMap[size]})`
   );
   await sizeButton.click();
 }
@@ -433,9 +437,11 @@ export async function getNoteBoundBoxInEdgeless(page: Page, noteId: string) {
   return bound;
 }
 
-export async function getAllNotes(page: Page) {
+export async function getAllNoteIds(page: Page) {
   return await page.evaluate(() => {
-    return document.querySelectorAll('affine-note');
+    return Array.from(document.querySelectorAll('affine-note')).map(
+      note => note.model.id
+    );
   });
 }
 
@@ -450,7 +456,10 @@ export async function countBlock(page: Page, flavour: string) {
 
 export async function activeNoteInEdgeless(page: Page, noteId: string) {
   const bound = await getNoteBoundBoxInEdgeless(page, noteId);
-  await page.mouse.dblclick(bound.x + 8, bound.y + 8);
+  await page.mouse.dblclick(
+    bound.x + bound.width / 2,
+    bound.y + bound.height / 2
+  );
 }
 
 export async function selectNoteInEdgeless(page: Page, noteId: string) {
@@ -596,7 +605,9 @@ type Action =
   | 'changeShapeStrokeColor'
   | 'changeShapeStrokeStyles'
   | 'changeConnectorStrokeColor'
-  | 'changeConnectorStrokeStyles';
+  | 'changeConnectorStrokeStyles'
+  | 'addFrame'
+  | 'createFrameOnMoreOption';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -663,6 +674,18 @@ export async function triggerComponentToolbarAction(
       await actionButton.click();
       break;
     }
+    case 'createFrameOnMoreOption': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Frame Section',
+        });
+      await actionButton.click();
+      break;
+    }
     case 'changeNoteColor': {
       const button = locatorComponentToolbar(page).locator(
         'edgeless-change-note-button edgeless-tool-icon-button'
@@ -709,6 +732,13 @@ export async function triggerComponentToolbarAction(
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-connector-button')
         .locator('.line-styles-button');
+      await button.click();
+      break;
+    }
+    case 'addFrame': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-add-frame-button'
+      );
       await button.click();
       break;
     }
@@ -823,7 +853,7 @@ export async function changeConnectorStrokeColor(
 ) {
   const colorButton = page
     .locator('edgeless-change-connector-button')
-    .locator('.color-panel-container')
+    .locator('edgeless-color-panel')
     .locator(`.color-unit[aria-label="${color}"]`);
   await colorButton.click();
 }
@@ -834,7 +864,6 @@ export function locatorConnectorStrokeWidthButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator('.line-style-panel')
     .locator(`edgeless-line-width-panel`)
     .locator(`.line-width-button:nth-child(${buttonPosition})`);
 }
@@ -852,8 +881,7 @@ export function locatorConnectorStrokeStyleButton(
 ) {
   return page
     .locator('edgeless-change-connector-button')
-    .locator('.line-style-panel')
-    .locator(`.edgeless-component-line-style-button.mode-${mode}`);
+    .locator(`.edgeless-component-line-style-button-${mode}`);
 }
 export async function changeConnectorStrokeStyle(
   page: Page,
@@ -945,6 +973,18 @@ export async function getConnectorPath(page: Page, index = 0) {
       if (!container) throw new Error('container not found');
       const connectors = container.surface.getElementsByType('connector');
       return connectors[index].absolutePath;
+    },
+    [index]
+  );
+}
+
+export async function getSelectedBound(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      const selected = container.selectionManager.elements[index];
+      return JSON.parse(selected.xywh);
     },
     [index]
   );

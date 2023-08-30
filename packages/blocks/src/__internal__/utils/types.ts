@@ -1,30 +1,25 @@
-import type { UIEventDispatcher } from '@blocksuite/block-std';
-import type { BlockElement } from '@blocksuite/lit';
-import type {
-  BrushElement,
-  ConnectorElement,
-  ConnectorMode,
-  PhasorElement,
-  ShapeType,
-} from '@blocksuite/phasor';
+import { type Slot } from '@blocksuite/global/utils';
 import {
-  type BaseBlockModel,
-  DisposableGroup,
-  type Page,
-  type Slot,
-} from '@blocksuite/store';
+  type BrushElement,
+  type ConnectorElement,
+  type ConnectorMode,
+  type PhasorElement,
+  type ShapeStyle,
+  type ShapeType,
+} from '@blocksuite/phasor';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
+import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
-import type { PageBlockModel } from '../../models.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import type {
-  BlockServiceInstanceByKey,
-  ServiceFlavour,
-} from '../../services.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
+import type {
+  BlockServiceInstanceByKey,
+  ServiceFlavour,
+} from '../service/legacy-services/index.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -135,9 +130,11 @@ export type ExtendedModel = BaseBlockModel & Record<string, any>;
 // blocks that would only appear under the edgeless container root
 export type TopLevelBlockModel = NoteBlockModel;
 
-export type Alignable = NoteBlockModel | PhasorElement;
+export type EdgelessElement = TopLevelBlockModel | PhasorElement;
 
-export type Erasable = NoteBlockModel | PhasorElement;
+export type Alignable = EdgelessElement;
+
+export type Erasable = EdgelessElement;
 
 export type Connectable =
   | NoteBlockModel
@@ -152,16 +149,26 @@ export type ShapeTool = {
   shape: ShapeType | 'roundedRect';
   fillColor: CssVariableName;
   strokeColor: CssVariableName;
+  shapeStyle: ShapeStyle;
 };
 
-export enum BrushSize {
+export type ShapeToolState = {
+  shape: ShapeType | 'roundedRect';
+  fillColor: string;
+  strokeColor: string;
+  shapeStyle: ShapeStyle;
+};
+
+export enum LineWidth {
   LINE_WIDTH_TWO = 2,
   LINE_WIDTH_FOUR = 4,
   LINE_WIDTH_SIX = 6,
   LINE_WIDTH_EIGHT = 8,
   LINE_WIDTH_TEN = 10,
   LINE_WIDTH_TWELVE = 12,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Thin = 4,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Thick = 10,
 }
 
@@ -172,11 +179,19 @@ export type TextTool = {
 export type BrushTool = {
   type: 'brush';
   color: CssVariableName;
-  lineWidth: BrushSize;
+  lineWidth: LineWidth;
 };
 
 export type EraserTool = {
   type: 'eraser';
+};
+
+export type FrameTool = {
+  type: 'frame';
+};
+
+export type FrameNavigatorTool = {
+  type: 'frameNavigator';
 };
 
 export type PanTool = {
@@ -198,6 +213,7 @@ export type ConnectorTool = {
   type: 'connector';
   mode: ConnectorMode;
   color: CssVariableName;
+  strokeWidth: LineWidth;
 };
 
 export type EdgelessTool =
@@ -208,9 +224,12 @@ export type EdgelessTool =
   | PanTool
   | NoteTool
   | ConnectorTool
-  | EraserTool;
+  | EraserTool
+  | FrameTool
+  | FrameNavigatorTool;
 
 export type SerializedBlock = {
+  id?: string;
   flavour: string;
   type?: string;
   text?: {
@@ -237,6 +256,7 @@ export type SerializedBlock = {
     rowIds: string[];
     cells: Record<string, Record<string, Cell>>;
     columns: Column[];
+    views?: DataViewDataType[];
   };
   // note block
   xywh?: string;
@@ -248,6 +268,7 @@ export type SerializedBlock = {
   url?: string;
   crawled?: boolean;
   background?: string;
+  bookmarkTitle?: string;
 };
 
 export type EmbedBlockDoubleClickData = {
@@ -282,24 +303,3 @@ export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
     : T extends keyof HTMLElementEventMap
     ? HTMLElementEventDetail<T>
     : never;
-
-export abstract class AbstractSelectionManager<
-  T extends BlockElement<PageBlockModel>
-> {
-  public readonly container: T;
-  protected readonly _dispatcher: UIEventDispatcher;
-  protected readonly _disposables = new DisposableGroup();
-
-  constructor(container: T, dispatcher: UIEventDispatcher) {
-    this.container = container;
-    this._dispatcher = dispatcher;
-  }
-
-  protected get page() {
-    return this.container.page;
-  }
-
-  abstract clear(): void;
-
-  abstract dispose(): void;
-}

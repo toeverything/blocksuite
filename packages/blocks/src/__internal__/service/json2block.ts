@@ -1,29 +1,29 @@
-import type { BlockModels } from '@blocksuite/global/types';
+import type { TextRangePoint } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
-import { getServiceOrRegister } from '../service.js';
 import {
   asyncGetVirgoByModel,
-  type BlockRange,
   focusBlockByModel,
   type SerializedBlock,
 } from '../utils/index.js';
+import type { BlockModels } from '../utils/model.js';
+import { getService } from './singleton.js';
 
 export async function json2block(
   focusedBlockModel: BaseBlockModel,
   pastedBlocks: SerializedBlock[],
   options?: {
     convertToPastedIfEmpty?: boolean;
-    range?: BlockRange;
+    textRangePoint?: TextRangePoint;
   }
 ) {
-  const { convertToPastedIfEmpty = false, range } = options ?? {};
+  const { convertToPastedIfEmpty = false, textRangePoint } = options ?? {};
 
-  assertExists(range);
+  assertExists(textRangePoint);
 
   const { page } = focusedBlockModel;
   // After deleteModelsByRange, selected block is must only, and selection is must caret
@@ -44,15 +44,22 @@ export async function json2block(
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
 
-    const shouldSplitBlock = focusedBlockModel.text?.length !== range.endOffset;
+    const shouldSplitBlock =
+      focusedBlockModel.text?.length !==
+      textRangePoint.index + textRangePoint.length;
 
     shouldSplitBlock &&
-      (await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0));
+      (await handleBlockSplit(
+        page,
+        focusedBlockModel,
+        textRangePoint.index,
+        0
+      ));
 
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
         firstBlock.text || [],
-        range?.startOffset || 0
+        textRangePoint.index || 0
       );
 
       await addSerializedBlocks(
@@ -63,7 +70,7 @@ export async function json2block(
       );
 
       await setRange(focusedBlockModel, {
-        index: (range?.startOffset ?? 0) + textLength,
+        index: (textRangePoint.index ?? 0) + textLength,
         length: 0,
       });
     } else {
@@ -89,12 +96,12 @@ export async function json2block(
     return;
   }
 
-  await handleBlockSplit(page, focusedBlockModel, range.startOffset, 0);
+  await handleBlockSplit(page, focusedBlockModel, textRangePoint.index, 0);
 
   if (shouldMergeFirstBlock) {
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
-      range?.startOffset || 0
+      textRangePoint.index || 0
     );
     await addSerializedBlocks(
       page,
@@ -150,7 +157,10 @@ export async function json2block(
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
   const vEditor = await asyncGetVirgoByModel(model);
-  assertExists(vEditor);
+  if (!vEditor) {
+    return;
+  }
+
   vEditor.setVRange(vRange);
   // mount new dom range in this trick
   vEditor.syncVRange();
@@ -169,28 +179,38 @@ export async function addSerializedBlocks(
     const json = serializedBlocks[i];
     const flavour = json.flavour as keyof BlockModels;
     // XXX: block props should not be written here !!!
+    const {
+      // Omit block props
+      children,
+      text,
+      rawText,
+      databaseProps,
+      xywh,
+
+      ...blockPropsJson
+    } = json;
+
     const blockProps = {
-      flavour,
-      type: json.type as string,
-      checked: json.checked,
-      sourceId: json.sourceId,
-      caption: json.caption,
-      width: json.width,
-      height: json.height,
-      language: json.language,
+      ...blockPropsJson,
       title: json.databaseProps?.title || json.title,
-      // bookmark
-      url: json.url,
-      description: json.description,
-      icon: json.icon,
-      image: json.image,
-      crawled: json.crawled,
     };
 
     let id: string;
     try {
       page.schema.validate(flavour, parent.flavour);
-      id = page.addBlock(flavour, blockProps, parent, index + i);
+      if (flavour === 'affine:database') {
+        id = page.addBlock(
+          flavour,
+          {
+            ...blockProps,
+            views: databaseProps?.views,
+          },
+          parent,
+          index + i
+        );
+      } else {
+        id = page.addBlock(flavour, blockProps, parent, index + i);
+      }
     } catch {
       id = page.addBlock(
         'affine:paragraph',
@@ -218,8 +238,9 @@ export async function addSerializedBlocks(
 
   for (const { model, json } of pendingModels) {
     const flavour = model.flavour as keyof BlockModels;
-    const service = await getServiceOrRegister(flavour);
+    const service = getService(flavour);
     service.onBlockPasted(model, {
+      views: json.databaseProps?.views,
       rowIds: json.databaseProps?.rowIds,
       cells: json.databaseProps?.cells,
       columns: json.databaseProps?.columns,

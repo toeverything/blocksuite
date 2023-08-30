@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/blocks",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Default BlockSuite editable blocks.",
   "main": "src/index.ts",
   "type": "module",
@@ -19,6 +19,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@toeverything/theme": "^0.7.13",
     "yjs": "^13"
   },
   "dependencies": {
@@ -26,18 +27,20 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.1",
+    "@types/webfontloader": "^1.6.35",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "file-type": "^16.5.4",
-    "hotkeys-js": "^3.11.2",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
-    "lit": "^2.7.6",
+    "lit": "^2.8.0",
     "marked": "^4.3.0",
     "pdf-lib": "^1.17.1",
     "shiki": "^0.14.3",
+    "sortablejs": "^1.15.0",
     "turndown": "^7.1.2",
-    "zod": "^3.21.4"
+    "webfontloader": "^1.6.28",
+    "zod": "^3.22.2"
   },
   "exports": {
     "./dist/*": "./dist/*",
@@ -75,8 +78,10 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
+    "@toeverything/theme": "^0.7.13",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.3.1",
+    "@types/sortablejs": "^1.15.1",
     "@types/turndown": "^5.0.1",
     "yjs": "^13.6.7"
   }

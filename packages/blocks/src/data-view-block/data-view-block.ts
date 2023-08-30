@@ -1,6 +1,5 @@
 // related component
 import '../database-block/table/table-view.js';
-import '../database-block/common/database-view-header.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
@@ -10,27 +9,22 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DatabaseBlockDatasourceConfig } from '../__internal__/datasource/base.js';
 import {
   createDatasource,
   getDatasourceTitle,
 } from '../__internal__/datasource/datasource-manager.js';
-import { registerService } from '../__internal__/service.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
 import type { ViewSource } from '../database-block/common/view-source.js';
-import type { BlockOperation } from '../database-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/index.js';
 import { DataViewTableManager } from '../database-block/table/table-view-manager.js';
 import type { DataViewBlockModel } from './data-view-model.js';
-import { DataViewBlockService } from './data-view-service.js';
 
 @customElement('affine-data-view')
 export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
 
-    registerService('affine:data-view', DataViewBlockService);
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.currentView = this.model.views[0].id;
   }
@@ -53,7 +47,12 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
 
   private viewSource(id: string): ViewSource {
     const getViewDataById = this.getViewDataById;
+    const getReadonly = () => this.model.page.readonly;
+
     return {
+      get readonly() {
+        return getReadonly();
+      },
       get view() {
         const view = getViewDataById(id);
         if (!view) {
@@ -63,6 +62,12 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
       },
       updateView: updater => {
         this.model.updateView(id, updater as never);
+      },
+      delete: () => {
+        this.model.deleteView(id);
+      },
+      isDeleted: () => {
+        return !getViewDataById(id);
       },
       updateSlot: this.model.propsUpdated,
     };
@@ -93,7 +98,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
             type: 'database-block',
             pageId: page.id,
             blockId: model.id,
-            path: this.path,
           });
         }
         model.children.forEach(findDatabase);
@@ -121,20 +125,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
           .model="${this.model}"
         ></database-view-header>`
       : '';
-    const blockOperation: BlockOperation = {
-      copy: () => {
-        copyBlocks({
-          type: 'Block',
-          models: [this.model],
-          startOffset: 0,
-          endOffset: 0,
-        });
-      },
-      delete: () => {
-        const models = [this.model, ...this.model.children];
-        models.forEach(model => this.page.deleteBlock(model));
-      },
-    };
     if (!current.dataSource) {
       return html`
         <div class="toolbar-hover-container">
@@ -162,7 +152,6 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
             getDatasourceTitle(this.root, current.dataSource)
           )}'
           .root='${this.root}'
-          .blockOperation='${blockOperation}'
           .tableViewManager='${currentViewManager}'
           .modalMode='${this.modalMode}'
           class='affine-block-element'

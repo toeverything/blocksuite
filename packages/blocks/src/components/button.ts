@@ -31,21 +31,24 @@ export class IconButton extends LitElement {
       border: none;
       width: var(--button-width);
       height: var(--button-height);
-      border-radius: 5px;
+      border-radius: 4px;
       background: transparent;
       cursor: pointer;
       user-select: none;
       font-family: var(--affine-font-family);
-      fill: var(--affine-icon-color);
-      color: var(--affine-popover-color);
+      color: var(--affine-text-primary-color);
       pointer-events: auto;
     }
 
-    :host > span {
+    :host > .text {
       flex: 1;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+    }
+
+    ::slotted(svg) {
+      color: var(--affine-icon-color);
     }
 
     :host(:hover) {
@@ -93,8 +96,9 @@ export class IconButton extends LitElement {
   @property()
   text: string | null = null;
 
-  @property({ attribute: false })
-  disabled = false;
+  // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
+  @property({ attribute: true, type: Boolean })
+  disabled?: boolean = undefined;
 
   constructor() {
     super();
@@ -111,7 +115,7 @@ export class IconButton extends LitElement {
     this.addEventListener(
       'click',
       event => {
-        if (this.disabled) {
+        if (this.disabled === true) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -151,7 +155,7 @@ export class IconButton extends LitElement {
   override render() {
     return html`<slot></slot>${this.text
         ? // wrap a span around the text so we can ellipsis it automatically
-          html`<span>${this.text}</span>`
+          html`<span class="text">${this.text}</span>`
         : ''}<slot name="suffix"></slot>`;
   }
 }

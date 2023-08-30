@@ -1,19 +1,27 @@
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
-import type { VEditor, VRange } from '@blocksuite/virgo';
+import type { VRange } from '@blocksuite/virgo';
 
 import type { ListType } from '../../list-block/index.js';
+import { matchFlavours } from './model.js';
 import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
 import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
-  richText?.vEditor?.setVRange(vRange);
+  if (!richText) {
+    return;
+  }
+
+  await richText.updateComplete;
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  vEditor.setVRange(vRange);
 
   return new Promise<void>(resolve => {
-    richText?.vEditor?.slots.rangeUpdated.once(() => {
+    vEditor.slots.rangeUpdated.once(() => {
       resolve();
     });
   });
@@ -28,16 +36,6 @@ export function asyncFocusRichText(
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'])) return;
   return asyncSetVRange(model, vRange);
-}
-
-export function isCollapsedAtBlockStart(vEditor: VEditor) {
-  const vRange = vEditor.getVRange();
-  return vRange?.index === 0 && vRange?.length === 0;
-}
-
-export function isCollapsedAtBlockEnd(vEditor: VEditor) {
-  const vRange = vEditor.getVRange();
-  return vRange?.index === vEditor.yText.length && vRange?.length === 0;
 }
 
 export function isInSamePath(

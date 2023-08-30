@@ -54,7 +54,7 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
-export function pointAlmostEqual(a: IVec, b: IVec, epsilon = 0.0001) {
+export function pointAlmostEqual(a: IVec, b: IVec, _epsilon = 0.0001) {
   return a.length === b.length && a.every((v, i) => almostEqual(v, b[i]));
 }
 
@@ -476,6 +476,10 @@ export function normalizeDegAngle(angle: number) {
 
 export function toRadian(angle: number) {
   return (angle * Math.PI) / 180;
+}
+
+export function toDegree(radian: number) {
+  return (radian * 180) / Math.PI;
 }
 
 // 0 means x axis, 1 means y axis

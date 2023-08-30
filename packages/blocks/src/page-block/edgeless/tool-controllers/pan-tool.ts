@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 
 import type { PanTool } from '../../../__internal__/index.js';
-import { noop } from '../../../__internal__/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class PanToolController extends EdgelessToolController<PanTool> {
@@ -11,23 +11,23 @@ export class PanToolController extends EdgelessToolController<PanTool> {
 
   private _lastPoint: [number, number] | null = null;
 
-  onContainerClick(e: PointerEventState): void {
+  onContainerClick(): void {
     noop();
   }
 
-  onContainerContextMenu(e: PointerEventState): void {
+  onContainerContextMenu(): void {
     noop();
   }
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
-  onContainerDblClick(e: PointerEventState): void {
+  onContainerDblClick(): void {
     noop();
   }
 
-  onContainerTripleClick(e: PointerEventState) {
+  onContainerTripleClick() {
     noop();
   }
 
@@ -65,11 +65,11 @@ export class PanToolController extends EdgelessToolController<PanTool> {
     });
   }
 
-  onContainerMouseMove(e: PointerEventState) {
+  onContainerMouseMove() {
     noop();
   }
 
-  onContainerMouseOut(e: PointerEventState) {
+  onContainerMouseOut() {
     noop();
   }
 

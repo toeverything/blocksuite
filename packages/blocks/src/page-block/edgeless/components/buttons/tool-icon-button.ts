@@ -1,6 +1,7 @@
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 
@@ -11,9 +12,9 @@ export class EdgelessToolIconButton extends LitElement {
       position: relative;
       display: flex;
       align-items: center;
-      padding: 6px;
+      padding: var(--icon-container-padding);
       color: var(--affine-icon-color);
-      border-radius: 5px;
+      border-radius: 4px;
       cursor: pointer;
     }
 
@@ -44,6 +45,10 @@ export class EdgelessToolIconButton extends LitElement {
     tool-tip {
       z-index: 12;
     }
+
+    tool-tip:is([arrow]):is([tip-position='top'])::before {
+      margin-top: -4px;
+    }
   `;
 
   @property({ attribute: false })
@@ -56,7 +61,8 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' = 'top';
+  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' | 'top-start' =
+    'top';
 
   @property({ attribute: false })
   arrow = true;
@@ -66,6 +72,9 @@ export class EdgelessToolIconButton extends LitElement {
 
   @property({ attribute: false })
   activeMode: 'color' | 'background' = 'color';
+
+  @property({ attribute: false })
+  iconContainerPadding = 6;
 
   constructor() {
     super();
@@ -85,10 +94,14 @@ export class EdgelessToolIconButton extends LitElement {
   override render() {
     const tooltip = this.coming ? '(Coming soon)' : this.tooltip;
     const classnames = `icon-container has-tool-tip active-mode-${this.activeMode}`;
+    const iconContainerStyles = styleMap({
+      '--icon-container-padding': `${this.iconContainerPadding}px`,
+    });
 
     return html`
       <div
         class=${classnames}
+        style=${iconContainerStyles}
         role="button"
         ?disabled=${this.disabled}
         ?active=${this.active}

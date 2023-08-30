@@ -1,32 +1,24 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
-import {
-  EDITOR_WIDTH,
-  PAGE_VERSION,
-  WORKSPACE_VERSION,
-} from '@blocksuite/global/config';
 import type { Slot } from '@blocksuite/global/utils';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
+import { EDITOR_WIDTH } from '../../../blocks/src/__internal__/consts.js';
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
+import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts';
 import type { BaseBlockModel, Page, PassiveDocProvider } from '../index.js';
-import { Generator, Workspace } from '../index.js';
+import { Generator, Schema, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
 import type { BlockSuiteDoc } from '../yjs';
 import { assertExists } from './test-utils-dom';
-
-function createTestOptions() {
-  const idGenerator = Generator.AutoIncrement;
-  return { id: 'test-workspace', idGenerator, isSSR: true };
-}
 
 export const BlockSchemas = [
   ParagraphBlockSchema,
@@ -35,6 +27,13 @@ export const BlockSchemas = [
   NoteBlockSchema,
   DividerBlockSchema,
 ];
+
+function createTestOptions() {
+  const idGenerator = Generator.AutoIncrement;
+  const schema = new Schema();
+  schema.register(BlockSchemas);
+  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+}
 
 const defaultPageId = 'page0';
 const spaceId = `space:${defaultPageId}`;
@@ -67,7 +66,7 @@ function createRoot(page: Page) {
 
 async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
-  const workspace = new Workspace(options).register(BlockSchemas);
+  const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
   await page.waitForLoaded();
   return page;
@@ -100,7 +99,13 @@ describe('basic', () => {
         ],
         workspaceVersion: WORKSPACE_VERSION,
         pageVersion: PAGE_VERSION,
-        blockVersions: {},
+        blockVersions: {
+          'affine:divider': 1,
+          'affine:list': 1,
+          'affine:note': 1,
+          'affine:page': 2,
+          'affine:paragraph': 1,
+        },
       },
       spaces: {
         [spaceId]: {
@@ -139,8 +144,8 @@ describe('basic', () => {
 
   it('workspace pages with yjs applyUpdate', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
-    const workspace2 = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
+    const workspace2 = new Workspace(options);
     const page = workspace.createPage({
       id: '0',
     });
@@ -254,7 +259,7 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -323,7 +328,7 @@ describe('addBlock', () => {
 
   it('can add and remove multi pages', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
 
     const page0 = workspace.createPage({ id: 'page0' });
     const page1 = workspace.createPage({ id: 'page1' });
@@ -350,7 +355,7 @@ describe('addBlock', () => {
 
   it('can remove page that has not been loaded', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
 
     const page0 = workspace.createPage({ id: 'page0' });
 
@@ -360,7 +365,7 @@ describe('addBlock', () => {
 
   it('can set page state', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
     workspace.createPage({ id: 'page0' });
 
     assert.deepEqual(
@@ -455,7 +460,7 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -483,7 +488,7 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${EDITOR_WIDTH},480]`,
+        'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -548,7 +553,7 @@ describe('getBlock', () => {
 describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page0' });
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
@@ -562,7 +567,7 @@ describe('workspace.exportJSX works', () => {
 
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
     workspace.createPage({ id: 'page0' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
@@ -570,7 +575,7 @@ describe('workspace.exportJSX works', () => {
 
   it('workspace with multiple blocks children matches snapshot', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page0' });
     await page.waitForLoaded();
 
@@ -603,7 +608,7 @@ describe('workspace.exportJSX works', () => {
 describe('workspace search', () => {
   it('search page meta title', async () => {
     const options = createTestOptions();
-    const workspace = new Workspace(options).register(BlockSchemas);
+    const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page0' });
     await page.waitForLoaded();
     const pageId = page.addBlock('affine:page', {

@@ -1,5 +1,5 @@
-import type { BlockSchemas } from '@blocksuite/global/types';
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
+import { lightCssVariables } from '@toeverything/theme';
 
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
@@ -8,6 +8,7 @@ import { columnManager } from '../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
 import type { SerializedBlock } from '../utils/index.js';
+import type { BlockSchemas } from '../utils/model.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
 
 export type FetchFileHandler = (
@@ -31,7 +32,7 @@ export type ColumnMeta = {
 
 export type TableTitleColumnHandler = (
   element: Element
-) => Promise<string[] | null>;
+) => Promise<SerializedBlock[] | null>;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -65,6 +66,7 @@ export abstract class BaseParser {
   protected _customTableParserHandler?: TableParseHandler;
   protected _customTableTitleColumnHandler?: TableTitleColumnHandler;
   protected abstract _contextedContentParser: ContextedContentParser;
+  private _textHighlightColors?: Map<string, string>;
 
   constructor(
     contentParser: ContentParser,
@@ -113,6 +115,22 @@ export abstract class BaseParser {
   };
 
   public abstract registerParsers(): void;
+
+  protected _getTextHighlightColors(): Map<string, string> {
+    if (!this._textHighlightColors) {
+      const highlightPrefix = '--affine-text-highlight-';
+      this._textHighlightColors = new Map();
+      Object.keys(lightCssVariables).forEach(value => {
+        if (value.startsWith(highlightPrefix)) {
+          this._textHighlightColors?.set(
+            value.substring(highlightPrefix.length),
+            `var(${value})`
+          );
+        }
+      });
+    }
+    return this._textHighlightColors;
+  }
 
   // TODO parse children block
   protected _nodeParser = async (
@@ -391,7 +409,10 @@ export abstract class BaseParser {
       return [];
     }
     const childNodes = Array.from(htmlElement.childNodes);
-    const currentTextStyle = getTextStyle(htmlElement);
+    const currentTextStyle = getTextStyle(
+      htmlElement,
+      this._getTextHighlightColors()
+    );
     this._customTextStyleHandler &&
       this._customTextStyleHandler(htmlElement, currentTextStyle);
 
@@ -532,23 +553,31 @@ export abstract class BaseParser {
       tbodyElement,
       columnMeta
     );
+
+    let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
+    titleIndex = titleIndex !== -1 ? titleIndex : 0;
+    let children: SerializedBlock[] = rows
+      .map(row => row[titleIndex] ?? '')
+      .map(rawTitle => (Array.isArray(rawTitle) ? rawTitle.join('') : rawTitle))
+      .map(title => ({
+        flavour: 'affine:paragraph',
+        type: 'text',
+        text: [
+          {
+            insert: title,
+          },
+        ],
+        children: [],
+      }));
     if (this._customTableTitleColumnHandler) {
-      const titleColumn = await this._customTableTitleColumnHandler(element);
-      if (titleColumn) {
-        for (let i = 1; i < rows.length; i++) {
-          const originalContent = rows[i].shift();
-          rows[i].unshift(titleColumn[i] || originalContent || '');
-        }
-      }
+      const customTitleColumn = await this._customTableTitleColumnHandler(
+        element
+      );
+      children = customTitleColumn ?? children;
     }
     const columns: Column[] = getTableColumns(columnMeta, rows, idCounter);
     const databasePropsId = idCounter.next();
-    const { cells, children } = getTableCellsAndChildren(
-      rows,
-      idCounter,
-      columnMeta,
-      columns
-    );
+    const cells = getTableCells(rows, idCounter, columnMeta, columns);
     return [
       {
         flavour: 'affine:database',
@@ -558,6 +587,26 @@ export abstract class BaseParser {
           rowIds: Object.keys(cells),
           cells: cells,
           columns: columns,
+          views: [
+            {
+              id: this._page.generateId(),
+              name: 'Table View',
+              mode: 'table',
+              columns: [],
+              header:
+                titleIndex !== -1
+                  ? {
+                      titleColumn: columns[titleIndex].id,
+                      iconColumn: 'type',
+                    }
+                  : {},
+              filter: {
+                type: 'group',
+                op: 'and',
+                conditions: [],
+              },
+            },
+          ],
         },
         children: children,
       },
@@ -594,6 +643,7 @@ const getCorrespondingTableColumnType = (htmlElement?: SVGSVGElement) => {
     typesNumber: 'number',
     typesCheckbox: 'checkbox',
     typesText: 'rich-text',
+    typesTitle: 'title',
   };
 
   const className = htmlElement?.classList[0] ?? 'typesText';
@@ -604,7 +654,10 @@ const getIsLink = (htmlElement: HTMLElement) => {
   return ['A'].includes(htmlElement.tagName);
 };
 
-const getTextStyle = (htmlElement: HTMLElement) => {
+const getTextStyle = (
+  htmlElement: HTMLElement,
+  highlightMap: Map<string, string>
+) => {
   const tagName = htmlElement.tagName;
   const textStyle: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -666,7 +719,21 @@ const getTextStyle = (htmlElement: HTMLElement) => {
     textStyle['strike'] = true;
   }
   if (tagName === 'MARK') {
-    textStyle['background'] = 'yellow';
+    const highlightClassName = Array.from(htmlElement.classList).find(
+      className => className.startsWith('highlight-')
+    );
+    // highlight-color or highlight-color_background
+    const varKeys = (highlightClassName ?? '').split(/[-_]/);
+    let colorKey = varKeys.length > 0 ? varKeys[1] : '';
+    if (colorKey && colorKey !== 'default') {
+      if (colorKey === 'red') {
+        colorKey = 'pink';
+      } else if (colorKey === 'gray') {
+        colorKey = 'grey';
+      }
+      colorKey = highlightMap.has(colorKey) ? colorKey : 'yellow';
+      textStyle['background'] = highlightMap.get(colorKey);
+    }
   }
 
   return textStyle;
@@ -681,7 +748,7 @@ const checkWebComponentIfInline = (element: Element) => {
   );
 };
 
-const getTableCellsAndChildren = (
+const getTableCells = (
   rows: (string | string[])[][],
   idCounter: {
     next: () => number;
@@ -690,31 +757,23 @@ const getTableCellsAndChildren = (
   columns: Column<Record<string, unknown>>[]
 ) => {
   const cells: Record<string, Record<string, Cell>> = {};
-  const children: SerializedBlock[] = [];
+  let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
+  titleIndex = titleIndex !== -1 ? titleIndex : 0;
   rows.forEach(row => {
-    children.push({
-      flavour: 'affine:paragraph',
-      type: 'text',
-      text: [{ insert: Array.isArray(row[0]) ? row[0].join('') : row[0] }],
-      children: [],
-    });
     const rowId = '' + idCounter.next();
     cells[rowId] = {};
-    row.slice(1).forEach((value, index) => {
-      if (
-        columnMeta[index + 1]?.type === 'multi-select' &&
-        Array.isArray(value)
-      ) {
+    row.forEach((value, index) => {
+      if (columnMeta[index]?.type === 'multi-select' && Array.isArray(value)) {
         cells[rowId][columns[index].id] = {
           columnId: columns[index].id,
-          value: value.map(v => columnMeta[index + 1]?.optionsMap.get(v) || ''),
+          value: value.map(v => columnMeta[index]?.optionsMap.get(v) || ''),
         };
         return;
       }
-      if (columnMeta[index + 1]?.type === 'select' && !Array.isArray(value)) {
+      if (columnMeta[index]?.type === 'select' && !Array.isArray(value)) {
         cells[rowId][columns[index].id] = {
           columnId: columns[index].id,
-          value: columnMeta[index + 1]?.optionsMap.get(value) || '',
+          value: columnMeta[index]?.optionsMap.get(value) || '',
         };
         return;
       }
@@ -724,7 +783,7 @@ const getTableCellsAndChildren = (
       };
     });
   });
-  return { cells, children };
+  return cells;
 };
 
 const getTableColumns = (
@@ -734,10 +793,10 @@ const getTableColumns = (
     next: () => number;
   }
 ): Column<Record<string, unknown>>[] => {
-  const columns: Column[] = columnMeta.slice(1).map((value, index) => {
+  const columns: Column[] = columnMeta.map((value, index) => {
     if (['select', 'multi-select'].includes(value.type)) {
       const options = rows
-        .map(row => row[index + 1])
+        .map(row => row[index])
         .flat()
         .filter((value, index, array) => array.indexOf(value) === index)
         .map(uniqueValue => {
@@ -748,7 +807,7 @@ const getTableColumns = (
           };
         });
       options.map(option =>
-        columnMeta[index + 1].optionsMap.set(option.value, option.id)
+        columnMeta[index].optionsMap.set(option.value, option.id)
       );
       return columnManager
         .getColumn(value.type)

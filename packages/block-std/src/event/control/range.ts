@@ -80,12 +80,10 @@ export class RangeControl {
   };
 
   private _buildEventScopeByNativeRange(name: EventName, range: Range) {
-    const blocks = this._findBlockElement(range);
+    const blocks = this._findBlockElementPath(range);
     const paths = blocks
       .map(blockView => {
-        return this._dispatcher.blockStore.viewStore.blockViewMap.getPath(
-          blockView
-        );
+        return blockView;
       })
       .filter((path): path is string[] => !!path);
     const flavours = Array.from(
@@ -106,13 +104,16 @@ export class RangeControl {
     return this._dispatcher.buildEventScope(name, flavours, paths);
   }
 
-  private _findBlockElement(range: Range): unknown[] {
+  private _findBlockElementPath(range: Range): string[][] {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this._dispatcher.blockStore.config.getBlockViewByNode;
+    const getBlockView = this._dispatcher.blockStore.viewStore.getNodeView;
     if (ancestor.nodeType === Node.TEXT_NODE) {
-      return [getBlockView(ancestor)];
+      const leaf = getBlockView(ancestor);
+      if (leaf) {
+        return [leaf.path];
+      }
     }
     const nodes = new Set<Node>();
 
@@ -145,16 +146,16 @@ export class RangeControl {
     };
     dfsDOMSearch(ancestor.firstChild, ancestor);
 
-    const blocks = new Set<unknown>();
+    const blocks = new Set<string[]>();
     nodes.forEach(node => {
       const blockView = getBlockView(node);
       if (!blockView) {
         return;
       }
-      if (blocks.has(blockView)) {
+      if (blocks.has(blockView.path)) {
         return;
       }
-      blocks.add(blockView);
+      blocks.add(blockView.path);
     });
     return Array.from(blocks);
   }

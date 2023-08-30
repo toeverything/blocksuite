@@ -11,7 +11,7 @@ export const tUnion = (list: TType[]): TUnion => ({
 });
 
 // TODO treat as data type
-export interface TArray<Ele extends TType = TType> {
+export interface TArray<_Ele extends TType = TType> {
   type: 'array';
   ele: TType;
   title: 'array';
@@ -142,7 +142,7 @@ export class DataDefine<Data extends DataTypeShape = Record<string, unknown>> {
 // type DataTypeVar = {};
 
 // TODO support generic data type
-interface DataDefineConfig<T extends DataTypeShape> {
+interface DataDefineConfig<_T extends DataTypeShape> {
   name: string;
   supers: DataDefine[];
 }

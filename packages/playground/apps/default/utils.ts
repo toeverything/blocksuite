@@ -5,12 +5,13 @@ import {
   disableDebuglog,
   enableDebugLog,
 } from '@blocksuite/global/debug';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlobStorage, Page } from '@blocksuite/store';
 import type { Y } from '@blocksuite/store';
 import {
-  assertExists,
   createIndexeddbStorage,
   Generator,
+  Schema,
   Utils,
   Workspace,
   type WorkspaceOptions,
@@ -78,11 +79,12 @@ Object.defineProperty(globalThis, 'debugFromFile', {
       extensions: ['.ydoc'],
     });
     const buffer = await file.arrayBuffer();
+    const schema = new Schema();
+    schema.register(AffineSchemas).register(__unstableSchemas);
     const workspace = new Workspace({
+      schema,
       id: 'temporary',
-    })
-      .register(AffineSchemas)
-      .register(__unstableSchemas);
+    });
     Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
     globalThis.debugWorkspace = workspace;
   },
@@ -141,9 +143,12 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     createIndexeddbStorage,
   ];
   const idGenerator: Generator = Generator.NanoID;
+  const schema = new Schema();
+  schema.register(AffineSchemas).register(__unstableSchemas);
 
   return {
     id: 'quickEdgeless',
+    schema,
     providerCreators: [],
     idGenerator,
     blobStorages,
@@ -175,31 +180,18 @@ export function isValidUrl(urlLike: string) {
 }
 
 export async function testIDBExistence() {
-  let databaseExists = false;
-  try {
-    databaseExists =
-      (await indexedDB.databases()).find(db => db.name === INDEXED_DB_NAME) !==
-      undefined;
-  } catch (e) {
+  return new Promise<boolean>(resolve => {
     const request = indexedDB.open(INDEXED_DB_NAME);
-    databaseExists = await new Promise(resolve => {
-      const unlisten = () => {
-        request.removeEventListener('success', success);
-        request.removeEventListener('error', error);
-      };
-      const success = () => {
-        resolve(true);
-        unlisten();
-      };
-      const error = () => {
-        resolve(false);
-        unlisten();
-      };
-      request.addEventListener('success', success);
-      request.addEventListener('error', error);
-    });
-  }
-  return databaseExists;
+    request.onupgradeneeded = function () {
+      request.transaction?.abort();
+      request.result.close();
+      resolve(false);
+    };
+    request.onsuccess = function () {
+      request.result.close();
+      resolve(true);
+    };
+  });
 }
 
 export const createEditor = (page: Page, element: HTMLElement) => {

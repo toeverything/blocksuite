@@ -1,8 +1,13 @@
+import type { Disposable } from '@blocksuite/global/utils';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { Text, type Y } from '@blocksuite/store';
 
+import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
 import { dateColumnConfig } from '../../database-block/common/columns/date/cell-renderer.js';
+import { imageColumnConfig } from '../../database-block/common/columns/image/cell-renderer.js';
 import { linkColumnConfig } from '../../database-block/common/columns/link/cell-renderer.js';
 import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
@@ -15,13 +20,15 @@ import { selectColumnConfig } from '../../database-block/common/columns/select/c
 import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
-import { insertPositionToIndex } from '../../database-block/index.js';
-import type { DatabaseBlockDatasourceConfig } from './base.js';
+import { insertPositionToIndex } from '../../database-block/utils/insert.js';
+import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
+import { getIcon } from './block-icons.js';
+import { BlockRenderer } from './block-renderer.js';
 
 export class DatabaseBlockDatasource extends BaseDataSource {
   private _model: DatabaseBlockModel;
-  private _path: string[];
+  private _batch = 0;
 
   get page() {
     return this._model.page;
@@ -36,8 +43,6 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       .getPage(config.pageId)
       ?.getBlockById(config.blockId) as DatabaseBlockModel;
     this._model.childrenUpdated.pipe(this.slots.update);
-    this._model.propsUpdated.pipe(this.slots.update);
-    this._path = config.path;
   }
 
   public get rows(): string[] {
@@ -45,38 +50,68 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   }
 
   public get properties(): string[] {
-    return this._model.columns.map(column => column.id);
+    return [...this._model.columns.map(column => column.id)];
   }
 
   public slots = {
     update: new Slot(),
   };
 
+  private _runCapture() {
+    if (this._batch) {
+      return;
+    }
+
+    this._batch = requestAnimationFrame(() => {
+      this.page.captureSync();
+      this._batch = 0;
+    });
+  }
+
   public cellChangeValue(
     rowId: string,
     propertyId: string,
     value: unknown
   ): void {
-    this.page.captureSync();
-    if (
-      this.propertyGetType(propertyId) === 'title' &&
-      typeof value === 'string'
-    ) {
-      const text =
-        this._model.children[this._model.childMap.get(rowId) ?? 0].text;
+    this._runCapture();
+
+    const type = this.propertyGetType(propertyId);
+    if (type === 'title' && typeof value === 'string') {
+      const text = this.getModelById(rowId)?.text;
       if (text) {
         text.replace(0, text.length, value);
       }
       this.slots.update.emit();
       return;
+    } else if (type === 'rich-text' && typeof value === 'string') {
+      const cell = this._model.getCell(rowId, propertyId);
+      const yText = cell?.value as Y.Text | undefined;
+      if (yText) {
+        const text = new Text(yText);
+        text.replace(0, text.length, value);
+      }
+      return;
     }
-    this._model.updateCell(rowId, { columnId: propertyId, value });
+    if (this._model.columns.find(v => v.id === propertyId)) {
+      this._model.updateCell(rowId, {
+        columnId: propertyId,
+        value,
+      });
+      this._model.applyColumnUpdate();
+    }
   }
 
   public cellGetValue(rowId: string, propertyId: string): unknown {
+    if (propertyId === 'type') {
+      const model = this.getModelById(rowId);
+      if (!model) {
+        return;
+      }
+      return getIcon(model);
+    }
     const type = this.propertyGetType(propertyId);
     if (type === 'title') {
-      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
+      const model = this.getModelById(rowId);
       if (model) {
         return model.text?.yText;
       }
@@ -85,19 +120,28 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return this._model.getCell(rowId, propertyId)?.value;
   }
 
+  override cellGetExtra(rowId: string, propertyId: string): unknown {
+    if (this.propertyGetType(propertyId) === 'title') {
+      const model = this.getModelById(rowId);
+      if (model) {
+        return {
+          result: this.root.renderModel(model),
+          model,
+        };
+      }
+    }
+    return super.cellGetExtra(rowId, propertyId);
+  }
+
+  private getModelById(rowId: string): BaseBlockModel | undefined {
+    return this._model.children[this._model.childMap.get(rowId) ?? -1];
+  }
+
   public override cellGetRenderValue(
     rowId: string,
     propertyId: string
   ): unknown {
-    const type = this.propertyGetType(propertyId);
-    if (type === 'title') {
-      const model = this._model.children[this._model.childMap.get(rowId) ?? -1];
-      if (model) {
-        return this.root.renderModel(model, this._path);
-      }
-      return;
-    }
-    return this._model.getCell(rowId, propertyId)?.value;
+    return this.cellGetValue(rowId, propertyId);
   }
 
   private newColumnName() {
@@ -108,12 +152,12 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return `Column ${i}`;
   }
 
-  public propertyAdd(insertPosition: InsertPosition): string {
+  public propertyAdd(insertPosition: InsertPosition, type?: string): string {
     this.page.captureSync();
     return this._model.addColumn(
       insertPosition,
       columnManager
-        .getColumn(multiSelectPureColumnConfig.type)
+        .getColumn(type ?? multiSelectPureColumnConfig.type)
         .create(this.newColumnName())
     );
   }
@@ -124,11 +168,13 @@ export class DatabaseBlockDatasource extends BaseDataSource {
   ): void {
     this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({ data }));
+    this._model.applyColumnUpdate();
   }
 
   public propertyChangeName(propertyId: string, name: string): void {
     this.page.captureSync();
     this._model.updateColumn(propertyId, () => ({ name }));
+    this._model.applyColumnUpdate();
   }
 
   public propertyChangeType(propertyId: string, toType: string): void {
@@ -156,6 +202,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       }
     });
     this._model.updateCells(propertyId, cells);
+    this._model.applyColumnUpdate();
   }
 
   public propertyDelete(id: string): void {
@@ -166,17 +213,29 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     this.page.transact(() => {
       this._model.columns.splice(index, 1);
     });
+    this._model.applyColumnUpdate();
   }
 
   public propertyGetData(propertyId: string): Record<string, unknown> {
     return this._model.columns.find(v => v.id === propertyId)?.data ?? {};
   }
 
+  public override propertyGetReadonly(propertyId: string): boolean {
+    if (propertyId === 'type') return true;
+    return false;
+  }
+
   public propertyGetName(propertyId: string): string {
+    if (propertyId === 'type') {
+      return 'Block Type';
+    }
     return this._model.columns.find(v => v.id === propertyId)?.name ?? '';
   }
 
   public propertyGetType(propertyId: string): string {
+    if (propertyId === 'type') {
+      return 'image';
+    }
     return this._model.columns.find(v => v.id === propertyId)?.type ?? '';
   }
 
@@ -186,15 +245,24 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     assertExists(currentSchema);
     const { id: copyId, ...nonIdProps } = currentSchema;
     const schema = { ...nonIdProps };
-    const id = this._model.addColumn({ before: false, id: columnId }, schema);
-    this._model.applyColumnUpdate();
+    const id = this._model.addColumn(
+      {
+        before: false,
+        id: columnId,
+      },
+      schema
+    );
     this._model.copyCellsByColumn(copyId, id);
+    this._model.applyColumnUpdate();
     return id;
   }
 
-  public rowAdd(insertPosition: InsertPosition): string {
+  public rowAdd(insertPosition: InsertPosition | number): string {
     this.page.captureSync();
-    const index = insertPositionToIndex(insertPosition, this._model.children);
+    const index =
+      typeof insertPosition === 'number'
+        ? insertPosition
+        : insertPositionToIndex(insertPosition, this._model.children);
     return this.page.addBlock('affine:paragraph', {}, this._model.id, index);
   }
 
@@ -211,9 +279,25 @@ export class DatabaseBlockDatasource extends BaseDataSource {
 
   public override propertyGetDefaultWidth(propertyId: string): number {
     if (this.propertyGetType(propertyId) === 'title') {
-      return 432;
+      return 260;
     }
     return super.propertyGetDefaultWidth(propertyId);
+  }
+
+  override onCellUpdate(
+    rowId: string,
+    propertyId: string,
+    callback: () => void
+  ): Disposable {
+    if (this.propertyGetType(propertyId) === 'title') {
+      this.getModelById(rowId)?.text?.yText.observe(callback);
+      return {
+        dispose: () => {
+          this.getModelById(rowId)?.text?.yText.unobserve(callback);
+        },
+      };
+    }
+    return this._model.propsUpdated.on(callback);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,5 +313,13 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       checkboxColumnConfig,
     ];
   }
+
+  public override get detailSlots(): DetailSlots {
+    return {
+      ...super.detailSlots,
+      header: createUniComponentFromWebComponent(BlockRenderer),
+    };
+  }
 }
-export const hiddenColumn = [titleColumnConfig];
+
+export const hiddenColumn = [titleColumnConfig, imageColumnConfig];

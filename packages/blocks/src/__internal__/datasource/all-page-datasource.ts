@@ -14,7 +14,7 @@ export class AllPageDatasource extends BaseDataSource {
   private workspace: Workspace;
 
   public get rows(): string[] {
-    return [...this.workspace.pages.keys()];
+    return Array.from(this.workspace.pages.keys());
   }
 
   private propertiesMap: Record<
@@ -40,7 +40,9 @@ export class AllPageDatasource extends BaseDataSource {
       setValue: (page, value) => {
         page.meta.tags = value as string[];
       },
-      getData: () => this.workspace.meta.properties.tags,
+      getData: () => ({
+        options: this.workspace.meta.properties.tags?.options ?? [],
+      }),
       changeData: data => {
         this.workspace.meta.setProperties({
           ...this.workspace.meta.properties,
@@ -58,7 +60,7 @@ export class AllPageDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: BlockSuiteRoot, config: AllPageDatasourceConfig) {
+  constructor(root: BlockSuiteRoot, _config: AllPageDatasourceConfig) {
     super();
     this.workspace = root.page.workspace;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
@@ -87,7 +89,7 @@ export class AllPageDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(page);
   }
 
-  public propertyAdd(insertPosition: InsertPosition): string {
+  public propertyAdd(_insertPosition: InsertPosition | number): string {
     throw new Error('not support');
   }
 
@@ -98,19 +100,19 @@ export class AllPageDatasource extends BaseDataSource {
     this.propertiesMap[propertyId]?.changeData?.(data);
   }
 
-  public propertyChangeName(propertyId: string, name: string): void {
+  public propertyChangeName(_propertyId: string, _name: string): void {
     // not support
   }
 
-  public propertyChangeType(propertyId: string, type: string): void {
+  public propertyChangeType(_propertyId: string, _type: string): void {
     // not support
   }
 
-  public propertyDelete(id: string): void {
+  public propertyDelete(_id: string): void {
     // not support
   }
 
-  public propertyDuplicate(columnId: string): string {
+  public propertyDuplicate(_columnId: string): string {
     throw new Error('not support');
   }
 
@@ -126,7 +128,7 @@ export class AllPageDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(insertPosition: InsertPosition): string {
+  public rowAdd(_insertPosition: InsertPosition | number): string {
     return this.workspace.createPage().id;
   }
 

@@ -3,7 +3,7 @@ import { nanoid } from '@blocksuite/store';
 
 import { getTagColor } from '../../../../components/tags/colors.js';
 import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
-import { tString } from '../../../logical/data-type.js';
+import { tRichText } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { multiSelectColumnTypeName } from '../multi-select/define.js';
 import { selectColumnTypeName } from '../select/define.js';
@@ -19,15 +19,20 @@ export const richTextPureColumnConfig = columnManager.register<Text['yText']>(
   richTextColumnTypeName,
   {
     name: 'Text',
-    type: () => tString.create(),
+    type: () => tRichText.create(),
     defaultData: () => ({}),
     cellToString: data => data?.toString() ?? '',
+    cellFromString: data => {
+      return {
+        value: data,
+      };
+    },
     cellToJson: data => data?.toString() ?? null,
   }
 );
 richTextPureColumnConfig.registerConvert(
   selectColumnTypeName,
-  (column, cells) => {
+  (_column, cells) => {
     const options: Record<string, SelectTag> = {};
     const getTag = (name: string) => {
       if (options[name]) return options[name];
@@ -57,7 +62,7 @@ richTextPureColumnConfig.registerConvert(
 
 richTextPureColumnConfig.registerConvert(
   multiSelectColumnTypeName,
-  (column, cells) => {
+  (_column, cells) => {
     const options: Record<string, SelectTag> = {};
     const getTag = (name: string) => {
       if (options[name]) return options[name];

@@ -1,46 +1,19 @@
-import { SHORT_KEY } from './consts/platform.js';
+const agent = globalThis.navigator?.userAgent ?? '';
+const platform = globalThis.navigator?.platform;
 
-export * from './consts/block-hub.js';
-export * from './consts/event.js';
-export * from './consts/platform.js';
+export const IS_WEB = typeof window !== 'undefined';
 
-export const BLOCK_ID_ATTR = 'data-block-id';
-export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';
-export const PREVENT_DEFAULT = false;
-export type PREVENT_DEFAULT = typeof PREVENT_DEFAULT;
-export const ALLOW_DEFAULT = true;
-export type ALLOW_DEFAULT = typeof ALLOW_DEFAULT;
+const IS_SAFARI = /Apple Computer/.test(globalThis.navigator?.vendor);
 
-export const HOTKEYS = {
-  ANY_KEY: '*',
-  UNDO: `${SHORT_KEY}+z`,
-  REDO: `${SHORT_KEY}+shift+z,ctrl+y`,
-  BACKSPACE: 'backspace',
-  DELETE: 'delete',
-  DElETE_INDENT: `${SHORT_KEY}+backspace`,
-  SELECT_ALL: `${SHORT_KEY}+a`,
-  SHIFT_UP: 'shift+up',
-  SHIFT_DOWN: 'shift+down',
-  SHIFT_TAB: 'shift+tab',
+export const IS_FIREFOX =
+  IS_WEB && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
-  UP: 'up',
-  DOWN: 'down',
-  LEFT: 'left',
-  RIGHT: 'right',
-  ENTER: 'enter',
-  TAB: 'tab',
-  SPACE: 'space',
-  ESC: 'esc',
-};
+export const IS_ANDROID = /Android \d/.test(agent);
 
-export const MOVE_DETECT_THRESHOLD = 2;
-export const SCROLL_THRESHOLD = 100;
+export const IS_IOS =
+  IS_SAFARI &&
+  (/Mobile\/\w+/.test(agent) || globalThis.navigator?.maxTouchPoints > 2);
 
-export const EDITOR_WIDTH = 800;
-export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
-export const PAGE_BLOCK_PADDING_BOTTOM = 150;
-export const PAGE_BLOCK_CHILD_PADDING = 24;
-export const DRAG_HANDLE_OFFSET_LEFT = 1;
-export const EDGELESS_BLOCK_CHILD_PADDING = 24;
-export const WORKSPACE_VERSION = 2;
-export const PAGE_VERSION = 1;
+export const IS_MAC = /Mac/i.test(platform);
+
+export const IS_WINDOWS = /Win/.test(platform);

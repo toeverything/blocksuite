@@ -1,13 +1,9 @@
-import type { SerializedBlock } from '@blocksuite/blocks';
 import { debug } from '@blocksuite/global/debug';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import type { AwarenessStore } from '../awareness.js';
-import { BaseBlockModel, internalPrimitives } from '../base.js';
-import { Space } from '../space.js';
-import { Text } from '../text-adapter.js';
+import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
@@ -15,8 +11,11 @@ import {
   syncBlockProps,
   toBlockProps,
 } from '../utils/utils.js';
+import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { Text } from '../yjs/text-adapter.js';
 import type { PageMeta } from './meta.js';
+import { Space } from './space.js';
 import type { Workspace } from './workspace.js';
 
 export type YBlock = Y.Map<unknown>;
@@ -85,8 +84,12 @@ export class Page extends Space<FlatBlockMap> {
           props: Partial<BlockProps>;
         }
     >(),
+    yBlockUpdated: new Slot<{
+      id: string;
+      props: { [key: string]: { old: unknown; new: unknown } };
+    }>(),
     copied: new Slot(),
-    pasted: new Slot<SerializedBlock[]>(),
+    pasted: new Slot<Record<string, unknown>[]>(),
   };
 
   constructor({
@@ -206,7 +209,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   getBlockByFlavour(blockFlavour: string) {
-    return [...this._blockMap.values()].filter(
+    return Array.from(this._blockMap.values()).filter(
       ({ flavour }) => flavour === blockFlavour
     );
   }
@@ -627,9 +630,9 @@ export class Page extends Space<FlatBlockMap> {
         bringChildrenTo.children.push(...model.children);
       }
     }
-    this._blockMap.delete(model.id);
 
-    model.propsUpdated.emit();
+    this._blockMap.delete(model.id);
+    model.deleted.emit();
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
@@ -650,6 +653,8 @@ export class Page extends Space<FlatBlockMap> {
             children: options.bringChildrenTo.children,
           });
         }
+
+        parent.childrenUpdated.emit();
       }
     });
 
@@ -753,7 +758,7 @@ export class Page extends Space<FlatBlockMap> {
     blockModel.flavour = schema.model.flavour;
     blockModel.role = schema.model.role;
 
-    blockModel.onCreated();
+    blockModel.created.emit();
 
     return blockModel;
   }
@@ -761,7 +766,7 @@ export class Page extends Space<FlatBlockMap> {
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
 
-    const props = toBlockProps(yBlock, this.doc);
+    const props = toBlockProps(yBlock, this.doc.proxy);
     const model = this._createBlockModel({ ...props, id }, yBlock);
     this._blockMap.set(id, model);
 
@@ -816,6 +821,7 @@ export class Page extends Space<FlatBlockMap> {
     if (!model) return;
 
     const props: Partial<BlockProps> = {};
+    const yProps: { [key: string]: { old: unknown; new: unknown } } = {};
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
     for (const key of event.keysChanged) {
@@ -840,6 +846,7 @@ export class Page extends Space<FlatBlockMap> {
         continue;
       }
       const value = event.target.get(key);
+      yProps[key] = { old: event.changes.keys.get(key)?.oldValue, new: value };
       hasPropsUpdate = true;
       if (value instanceof Y.Map || value instanceof Y.Array) {
         props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value, {
@@ -853,6 +860,7 @@ export class Page extends Space<FlatBlockMap> {
     if (hasPropsUpdate) {
       Object.assign(model, props);
       model.propsUpdated.emit();
+      this.slots.yBlockUpdated.emit({ id: model.id, props: yProps });
     }
     hasChildrenUpdate && model.childrenUpdated.emit();
   }
@@ -940,8 +948,9 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async waitForLoaded() {
+  override async waitForLoaded(onLoaded?: () => void) {
     await super.waitForLoaded();
+    onLoaded?.();
     if (!this._synced) {
       this.trySyncFromExistingDoc();
     }

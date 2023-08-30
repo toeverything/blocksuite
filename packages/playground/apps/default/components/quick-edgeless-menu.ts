@@ -20,22 +20,20 @@ import {
   COLOR_VARIABLES,
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
-  SelectionUtils,
   SIZE_VARIABLES,
   VARIABLES,
 } from '@blocksuite/blocks';
+import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import { GUI } from 'dat.gui';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import { Pane } from 'tweakpane';
 
-import { createViewer } from '../../starter/components/doc-inspector';
 import {
   generateRoomId,
   initCollaborationSocket,
@@ -59,62 +57,73 @@ const basePath = import.meta.env.DEV
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(styleMenu: GUI, style: CSSStyleDeclaration) {
-  const sizeFolder = styleMenu.addFolder('Size');
-  const fontFamilyFolder = styleMenu.addFolder('FontFamily');
-  const colorFolder = styleMenu.addFolder('Color');
-  const othersFolder = styleMenu.addFolder('Others');
-  sizeFolder.open();
-  fontFamilyFolder.open();
-  colorFolder.open();
-  othersFolder.open();
+function init_css_debug_menu(styleMenu: Pane) {
+  if (styleMenu.title !== 'Waiting') {
+    return;
+  }
+  const style = document.documentElement.style;
+  styleMenu.title = 'CSS Debug Menu';
+  const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
+  const fontFamilyFolder = styleMenu.addFolder({
+    title: 'Font Family',
+    expanded: false,
+  });
+  const colorFolder = styleMenu.addFolder({ title: 'Color', expanded: false });
+  const othersFolder = styleMenu.addFolder({
+    title: 'Others',
+    expanded: false,
+  });
   SIZE_VARIABLES.forEach(name => {
     sizeFolder
-      .add(
+      .addInput(
         {
           [name]: isNaN(parseFloat(cssVariablesMap[name]))
             ? 0
             : parseFloat(cssVariablesMap[name]),
         },
         name,
-        0,
-        100
+        {
+          min: 0,
+          max: 100,
+        }
       )
-      .onChange(e => {
-        style.setProperty(name, `${Math.round(e)}px`);
+      .on('change', e => {
+        style.setProperty(name, `${Math.round(e.value)}px`);
       });
   });
   FONT_FAMILY_VARIABLES.forEach(name => {
     fontFamilyFolder
-      .add(
+      .addInput(
         {
           [name]: cssVariablesMap[name],
         },
         name
       )
-      .onChange(e => {
-        style.setProperty(name, e);
+      .on('change', e => {
+        style.setProperty(name, e.value);
       });
   });
   OTHER_CSS_VARIABLES.forEach(name => {
-    othersFolder.add({ [name]: cssVariablesMap[name] }, name).onChange(e => {
-      style.setProperty(name, e);
-    });
+    othersFolder
+      .addInput({ [name]: cssVariablesMap[name] }, name)
+      .on('change', e => {
+        style.setProperty(name, e.value);
+      });
   });
   fontFamilyFolder
-    .add(
+    .addInput(
       {
         '--affine-font-family':
           'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
       },
       '--affine-font-family'
     )
-    .onChange(e => {
-      style.setProperty('--affine-font-family', e);
+    .on('change', e => {
+      style.setProperty('--affine-font-family', e.value);
     });
   for (const plateKey in plate) {
-    colorFolder.addColor(plate, plateKey).onChange((color: string | null) => {
-      style.setProperty(plateKey, color);
+    colorFolder.addInput(plate, plateKey).on('change', e => {
+      style.setProperty(plateKey, e.value);
     });
   }
 }
@@ -221,10 +230,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @property({ attribute: false })
   readonly = false;
 
-  @query('#block-type-dropdown')
-  blockTypeDropdown!: SlDropdown;
+  @query('#test-operations-dropdown')
+  testOperationsDropdown!: SlDropdown;
 
-  private _styleMenu!: GUI;
+  private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
 
   @state()
@@ -248,12 +257,25 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     return this;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+    document.body.addEventListener('keydown', this._keydown);
+    this._restoreMode();
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     matchMedia.removeEventListener('change', this._darkModeChange);
+    document.body.removeEventListener('keydown', this._keydown);
   }
+
+  private _keydown = (e: KeyboardEvent) => {
+    if (e.key === 'F1') {
+      this._switchEditorMode();
+    }
+  };
 
   private _toggleConnection() {
     if (this._connected) {
@@ -275,7 +297,15 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private _switchEditorMode() {
     const mode = this.editor.mode === 'page' ? 'edgeless' : 'page';
+    localStorage.setItem('playground:editorMode', mode);
     this.mode = mode;
+  }
+
+  private _restoreMode() {
+    const mode = localStorage.getItem('playground:editorMode');
+    if (mode && (mode === 'edgeless' || mode === 'page')) {
+      this.mode = mode;
+    }
   }
 
   private _addNote() {
@@ -286,7 +316,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},${EDITOR_WIDTH},480]`;
+    const xywh = `[0,${count * 60},${EDITOR_WIDTH},95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);
@@ -344,10 +374,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     input.click();
   }
 
-  private async _inspect() {
-    await createViewer(this.workspace.doc.toJSON());
-  }
-
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -356,8 +382,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _toggleStyleDebugMenu() {
+    init_css_debug_menu(this._styleMenu);
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
-    this._showStyleDebugMenu ? this._styleMenu.show() : this._styleMenu.hide();
+    this._showStyleDebugMenu
+      ? (this._styleMenu.hidden = false)
+      : (this._styleMenu.hidden = true);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -442,11 +471,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new GUI({ hideable: false });
-    this._styleMenu.width = 650;
-    const style = document.documentElement.style;
-    init_css_debug_menu(this._styleMenu, style);
-    this._styleMenu.hide();
+    this._styleMenu = new Pane({ title: 'Waiting' });
+    this._styleMenu.hidden = true;
+    this._styleMenu.element.style.width = '650';
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -486,6 +513,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           width: 100%;
           min-width: 390px;
           align-items: center;
+          justify-content: space-between;
         }
 
         .default-toolbar sl-button.dots-menu::part(base) {
@@ -514,144 +542,171 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <sl-dropdown placement="bottom" hoist>
-            <sl-button
-              class="dots-menu"
-              variant="text"
-              size="small"
-              slot="trigger"
-            >
-              <sl-icon
-                style="font-size: 14px"
-                name="three-dots-vertical"
-                label="Menu"
-              ></sl-icon>
-            </sl-button>
-            <sl-menu>
-              <sl-menu-item
-                @mouseenter=${() => this.blockTypeDropdown.show()}
-                @mouseleave=${() => this.blockTypeDropdown.hide()}
+          <div style="display: flex; gap: 12px">
+            <sl-dropdown placement="bottom" hoist>
+              <sl-button
+                class="dots-menu"
+                variant="text"
+                size="small"
+                slot="trigger"
               >
                 <sl-icon
-                  slot="prefix"
-                  name="terminal"
-                  label="Test operations"
+                  style="font-size: 14px"
+                  name="three-dots-vertical"
+                  label="Menu"
                 ></sl-icon>
-                <sl-dropdown
-                  id="block-type-dropdown"
-                  placement="right-start"
-                  .distance=${55}
-                  hoist
+              </sl-button>
+              <sl-menu>
+                <sl-menu-item
+                  @mouseenter=${() => this.testOperationsDropdown.show()}
+                  @mouseleave=${() => this.testOperationsDropdown.hide()}
                 >
-                  <span slot="trigger">Test operations</span>
-                  <sl-menu>
-                    <sl-menu-item @click=${this._toggleConnection}>
-                      ${this._connected ? 'Disconnect' : 'Connect'}
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._addNote}>
-                      Add Note</sl-menu-item
-                    >
-                    <sl-menu-item @click=${this._exportMarkDown}>
-                      Export Markdown
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportHtml}>
-                      Export HTML
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportPdf}>
-                      Export PDF
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportPng}>
-                      Export PNG
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._exportSnapshot}>
-                      Export Snapshot
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._importSnapshot}>
-                      Import Snapshot
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._shareUrl}>
-                      Share URL</sl-menu-item
-                    >
-                    <sl-menu-item @click=${this._toggleStyleDebugMenu}>
-                      Toggle CSS Debug Menu
-                    </sl-menu-item>
-                    <sl-menu-item @click=${this._inspect}>
-                      Inspect Doc</sl-menu-item
-                    >
-                  </sl-menu>
-                </sl-dropdown>
-              </sl-menu-item>
-              <sl-menu-item @click=${this._switchEditorMode}>
-                Switch to ${this.mode === 'page' ? 'Edgeless' : 'Page'} Mode
-                <sl-icon
-                  slot="prefix"
-                  name=${this.mode === 'page'
-                    ? 'bounding-box-circles'
-                    : 'filetype-doc'}
-                ></sl-icon>
-              </sl-menu-item>
-              <sl-menu-item @click=${this._toggleDarkMode}>
-                Toggle Dark Mode
-                <sl-icon
-                  slot="prefix"
-                  name=${this._dark ? 'moon' : 'brightness-high'}
-                ></sl-icon>
-              </sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item @click=${this._startCollaboration}>
-                Start Collaboration
-                <sl-icon slot="prefix" name="people"></sl-icon>
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
+                  <sl-icon
+                    slot="prefix"
+                    name="terminal"
+                    label="Test operations"
+                  ></sl-icon>
+                  <sl-dropdown
+                    id="test-operations-dropdown"
+                    placement="right-start"
+                    .distance=${41.5}
+                    hoist
+                  >
+                    <span slot="trigger">Test operations</span>
+                    <sl-menu>
+                      <sl-menu-item @click=${this._toggleConnection}>
+                        ${this._connected ? 'Disconnect' : 'Connect'}
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._addNote}>
+                        Add Note</sl-menu-item
+                      >
+                      <sl-menu-item @click=${this._exportMarkDown}>
+                        Export Markdown
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportHtml}>
+                        Export HTML
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportPdf}>
+                        Export PDF
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportPng}>
+                        Export PNG
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._exportSnapshot}>
+                        Export Snapshot
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._importSnapshot}>
+                        Import Snapshot
+                      </sl-menu-item>
+                      <sl-menu-item @click=${this._shareUrl}>
+                        Share URL</sl-menu-item
+                      >
+                      <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+                        Toggle CSS Debug Menu
+                      </sl-menu-item>
+                    </sl-menu>
+                  </sl-dropdown>
+                </sl-menu-item>
+                <sl-menu-item @click=${this._toggleDarkMode}>
+                  Toggle Dark Mode
+                  <sl-icon
+                    slot="prefix"
+                    name=${this._dark ? 'moon' : 'brightness-high'}
+                  ></sl-icon>
+                </sl-menu-item>
+                <sl-divider></sl-divider>
+                <a
+                  target="_blank"
+                  href="https://github.com/toeverything/blocksuite"
+                >
+                  <sl-menu-item>
+                    <sl-icon slot="prefix" name="github"></sl-icon>
+                    Github
+                  </sl-menu-item>
+                </a>
+              </sl-menu>
+            </sl-dropdown>
 
-          <!-- undo/redo group -->
-          <sl-button-group label="History" style="margin-right: 12px">
-            <!-- undo -->
-            <sl-tooltip content="Undo" placement="bottom" hoist>
-              <sl-button
-                pill
-                size="small"
-                content="Undo"
-                .disabled=${!this._canUndo}
-                @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
-                  this.page.undo();
-                }}
-              >
-                <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
-              </sl-button>
-            </sl-tooltip>
-            <!-- redo -->
-            <sl-tooltip content="Redo" placement="bottom" hoist>
-              <sl-button
-                pill
-                size="small"
-                content="Redo"
-                .disabled=${!this._canRedo}
-                @click=${() => {
-                  SelectionUtils.clearSelection(this.page);
-                  this.page.redo();
-                }}
-              >
-                <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
-              </sl-button>
-            </sl-tooltip>
-          </sl-button-group>
+            <!-- undo/redo group -->
+            <sl-button-group label="History">
+              <!-- undo -->
+              <sl-tooltip content="Undo" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Undo"
+                  .disabled=${!this._canUndo}
+                  @click=${() => {
+                    this.page.undo();
+                  }}
+                >
+                  <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+              <!-- redo -->
+              <sl-tooltip content="Redo" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Redo"
+                  .disabled=${!this._canRedo}
+                  @click=${() => {
+                    this.page.redo();
+                  }}
+                >
+                  <sl-icon name="arrow-clockwise" label="Redo"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+            </sl-button-group>
 
-          ${this._initws
-            ? html`<div class="ws-indicator">
+            <sl-tooltip content="Start collaboration" placement="bottom" hoist>
+              <sl-button
+                @click=${this._startCollaboration}
+                size="small"
+                .loading=${this._initws}
+                circle
+              >
                 <sl-icon name="people" label="Collaboration"></sl-icon>
-                <sl-spinner></sl-spinner>
-              </div>`
-            : nothing}
-          ${this._showTabMenu
-            ? getTabGroupTemplate({
-                workspace: this.workspace,
-                editor: this.editor,
-                requestUpdate: () => this.requestUpdate(),
-              })
-            : null}
+              </sl-button>
+            </sl-tooltip>
+          </div>
+
+          <div>
+            <sl-button-group label="Mode" style="margin-right: 12px">
+              <!-- switch to page -->
+              <sl-tooltip content="Page" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Page"
+                  .disabled=${this.mode !== 'edgeless'}
+                  @click=${this._switchEditorMode}
+                >
+                  <sl-icon name="filetype-doc" label="Page"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+              <!-- switch to edgeless -->
+              <sl-tooltip content="Edgeless" placement="bottom" hoist>
+                <sl-button
+                  pill
+                  size="small"
+                  content="Edgeless"
+                  .disabled=${this.mode !== 'page'}
+                  @click=${this._switchEditorMode}
+                >
+                  <sl-icon name="palette" label="Edgeless"></sl-icon>
+                </sl-button>
+              </sl-tooltip>
+            </sl-button-group>
+
+            ${this._showTabMenu
+              ? getTabGroupTemplate({
+                  workspace: this.workspace,
+                  editor: this.editor,
+                  requestUpdate: () => this.requestUpdate(),
+                })
+              : null}
+          </div>
         </div>
       </div>
     `;

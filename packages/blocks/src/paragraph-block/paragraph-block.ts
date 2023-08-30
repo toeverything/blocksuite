@@ -1,25 +1,24 @@
 import '../__internal__/rich-text/rich-text.js';
 
-import {
-  BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
-  BlockHubIcon20,
-} from '@blocksuite/global/config';
-import { DisposableGroup, matchFlavours } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { when } from 'lit/directives/when.js';
 
-import { isPageMode } from '../__internal__/index.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
+import { isPageMode, matchFlavours } from '../__internal__/index.js';
+import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
 } from '../__internal__/rich-text/virgo/types.js';
-import { registerService } from '../__internal__/service.js';
+import { BlockHubIcon20 } from '../icons/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
-import paragraphService from './paragraph-service.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {
   // Call event.preventDefault() to keep the mouse event from being sent as well.
@@ -84,10 +83,13 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   static override styles = css`
     .affine-paragraph-block-container {
       position: relative;
-      border-radius: 5px;
+      border-radius: 4px;
     }
-    .affine-paragraph-block-container.selected {
-      background-color: var(--affine-hover-color);
+    .affine-paragraph-rich-text-wrapper {
+      position: relative;
+    }
+    code {
+      font-size: calc(var(--affine-font-base) - 4px);
     }
     .h1 {
       font-size: var(--affine-font-h-1);
@@ -208,13 +210,13 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   private _placeholderDisposables = new DisposableGroup();
 
   @query('rich-text')
-  private _richTextElement?: HTMLElement;
+  private _richTextElement?: RichText;
 
   override connectedCallback() {
     super.connectedCallback();
     // Initial placeholder state
     this._updatePlaceholder();
-    registerService('affine:paragraph', paragraphService);
+    bindContainerHotkey(this);
   }
 
   override firstUpdated() {
@@ -254,7 +256,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     this._tipsPlaceholderTemplate = TipsPlaceholder(this.model, this.tipsPos);
   };
 
-  private _onFocusIn = (e: FocusEvent) => {
+  private _onFocusIn = () => {
     this._isFocus = true;
     this._updatePlaceholder();
 
@@ -273,7 +275,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     });
   };
 
-  private _onFocusOut = (e: FocusEvent) => {
+  private _onFocusOut = () => {
     this._isFocus = false;
     this._updatePlaceholder();
     // We should not observe text change when focus out
@@ -294,7 +296,6 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   override render() {
     const { type } = this.model;
-    const selected = this.selected?.is('block') ? 'selected' : '';
 
     // hide placeholder in database
     const tipsPlaceholderTemplate = this.isInDatabase()
@@ -309,18 +310,26 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     </div>`;
 
     return html`
-      <div class="affine-paragraph-block-container ${type} ${selected}">
-        ${tipsPlaceholderTemplate}
-        <rich-text
-          .model=${this.model}
-          .textSchema=${this.textSchema}
-          @focusin=${this._onFocusIn}
-          @focusout=${this._onFocusOut}
-          style=${styleMap({
-            fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
-          })}
-        ></rich-text>
+      <div class="affine-paragraph-block-container ${type}">
+        <div class="affine-paragraph-rich-text-wrapper">
+          ${tipsPlaceholderTemplate}
+          <rich-text
+            .yText=${this.model.text.yText}
+            .undoManager=${this.model.page.history}
+            .textSchema=${this.textSchema}
+            .readonly=${this.model.page.readonly}
+            @focusin=${this._onFocusIn}
+            @focusout=${this._onFocusOut}
+            style=${styleMap({
+              fontWeight: /^h[1-6]$/.test(type) ? '600' : undefined,
+            })}
+          ></rich-text>
+        </div>
         ${children}
+        ${when(
+          this.selected?.is('block'),
+          () => html`<affine-block-selection></affine-block-selection>`
+        )}
       </div>
     `;
   }

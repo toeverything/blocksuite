@@ -1,21 +1,26 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import type { IModelCoord, ShapeElement } from '@blocksuite/phasor';
+import { assertExists } from '@blocksuite/global/utils';
+import type {
+  FrameElement,
+  IModelCoord,
+  ShapeElement,
+} from '@blocksuite/phasor';
 import { Bound, TextElement } from '@blocksuite/phasor';
-import { assertExists } from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
+import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type {
   GENERAL_CANVAS_FONT_FAMILY,
-  SCIBBLED_CANVAS_FONT_FANILY,
+  SCRIBBLED_CANVAS_FONT_FAMILY,
 } from './consts.js';
 
 export type CANVAS_TEXT_FONT =
   | typeof GENERAL_CANVAS_FONT_FAMILY
-  | typeof SCIBBLED_CANVAS_FONT_FANILY;
+  | typeof SCRIBBLED_CANVAS_FONT_FAMILY;
 
 export function mountTextEditor(
   textElement: TextElement,
@@ -31,9 +36,10 @@ export function mountTextEditor(
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
   textEditor.vEditor?.focusByIndex(cursorIndex);
-  edgeless.selection.switchToDefaultMode({
-    selected: [textElement],
-    active: true,
+
+  edgeless.tools.switchToDefaultMode({
+    elements: [textElement.id],
+    editing: true,
   });
 }
 
@@ -47,9 +53,24 @@ export function mountShapeEditor(
   pageBlockContainer.appendChild(shapeEditor);
   shapeEditor.mount(shapeElement, edgeless);
   shapeEditor.vEditor?.focusEnd();
-  edgeless.selection.switchToDefaultMode({
-    selected: [shapeElement],
-    active: true,
+  edgeless.tools.switchToDefaultMode({
+    elements: [shapeElement.id],
+    editing: true,
+  });
+}
+
+export function mountFrameEditor(
+  frame: FrameElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const frameEditor = new EdgelessFrameTitleEditor();
+
+  edgeless.pageBlockContainer.appendChild(frameEditor);
+  frameEditor.mount(frame, edgeless);
+  frameEditor.vEditor?.focusEnd();
+  edgeless.tools.switchToDefaultMode({
+    elements: [frame.id],
+    editing: true,
   });
 }
 

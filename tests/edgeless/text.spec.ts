@@ -3,7 +3,9 @@ import { expect } from '@playwright/test';
 import {
   assertEdgelessTool,
   enterPlaygroundRoom,
+  getEdgelessSelectedRect,
   initEmptyEdgelessState,
+  pressArrowLeft,
   setEdgelessTool,
   SHORT_KEY,
   switchEditorMode,
@@ -17,6 +19,7 @@ import {
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
+// it's flaky
 test('add text element in default mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -26,6 +29,7 @@ test('add text element in default mode', async ({ page }) => {
 
   await page.mouse.dblclick(130, 140);
   await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
 
   await type(page, 'hello');
   await assertEdgelessCanvasText(page, 'hello');
@@ -36,17 +40,19 @@ test('add text element in default mode', async ({ page }) => {
   expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
   await page.mouse.dblclick(145, 155);
+  await waitNextFrame(page);
   await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');
   await assertEdgelessCanvasText(page, 'hhelloello');
 
-  await page.mouse.click(145, 155);
+  await pressArrowLeft(page, 5);
   await type(page, 'ddd\n');
   await assertEdgelessCanvasText(page, 'hddd\nhelloello');
 });
 
+// it's also a little flaky
 test('add text element in text mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
@@ -65,11 +71,14 @@ test('add text element in text mode', async ({ page }) => {
 
   expect(await page.locator('edgeless-text-editor').count()).toBe(0);
 
-  await page.mouse.dblclick(145, 155);
+  await page.mouse.click(145, 145);
+  await page.mouse.click(145, 145);
+
   await page.locator('edgeless-text-editor').waitFor({
     state: 'attached',
   });
   await type(page, 'hello');
+  await page.waitForTimeout(100);
   await assertEdgelessCanvasText(page, 'hhelloello');
 
   await page.mouse.click(145, 155);
@@ -117,25 +126,23 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await switchEditorMode(page);
   await setEdgelessTool(page, 'text');
 
-  await page.mouse.click(130, 160);
+  await page.mouse.click(130, 200);
   await waitNextFrame(page);
 
   await type(page, 'aaa\nbbbbbbbb\n\ncc');
   await assertEdgelessCanvasText(page, 'aaa\nbbbbbbbb\n\ncc');
   await assertEdgelessTool(page, 'default');
-  await page.mouse.click(120, 160);
+  await page.mouse.click(10, 100);
 
-  await page.mouse.click(145, 175);
-  await assertEdgelessSelectedRect(page, [130, 160, 106, 156]);
-
+  await page.mouse.click(140, 210);
+  await assertEdgelessSelectedRect(page, [130, 200, 106, 156]);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
   const generalTextFont = page.getByText('General');
   await generalTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 160, 106.7, 108]);
-
+  await assertEdgelessSelectedRect(page, [130, 200, 106.7, 108]);
   await fontButton.click();
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 160, 104, 156]);
+  await assertEdgelessSelectedRect(page, [130, 200, 104, 156]);
 });

@@ -8,6 +8,7 @@ export enum CLIPBOARD_MIMETYPE {
   TEXT = 'text/plain',
   BLOCKSUITE_PAGE = 'blocksuite/page',
   BLOCKSUITE_SURFACE = 'blocksuite/surface',
+  BLOCKSUITE_DATABASE = 'blocksuite/database',
   // IMAGE_BMP = 'image/bmp',
   // IMAGE_GIF = 'image/gif',
   // IMAGE_JPEG = 'image/jpeg',
@@ -60,15 +61,6 @@ export function isPureFileInClipboard(clipboardData: DataTransfer) {
       (types.includes('text/plain') || types.includes('text/html')) &&
       types.includes('Files'))
   );
-}
-
-// TODO: support more file types, now is just image
-export function getFileFromClipboard(clipboardData: DataTransfer) {
-  const files = clipboardData.files;
-  if (files && files[0] && files[0].type.indexOf('image') > -1) {
-    return files[0];
-  }
-  return;
 }
 
 export function performNativeCopy(items: ClipboardItem[]): boolean {

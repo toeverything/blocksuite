@@ -1,21 +1,20 @@
-import './image/placeholder/loading-card.js';
 import './image/placeholder/image-not-found.js';
+import './image/placeholder/loading-card.js';
 
-import { Slot } from '@blocksuite/global/utils';
-import { BlockElement, type FocusContext } from '@blocksuite/lit';
+import { PathFinder } from '@blocksuite/block-std';
+import { BlockElement } from '@blocksuite/lit';
+import { offset, shift } from '@floating-ui/dom';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { registerService } from '../__internal__/service.js';
-import { clamp } from '../__internal__/utils/common.js';
+import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { getViewportElement } from '../__internal__/utils/query.js';
+import { createLitPortal } from '../components/portal.js';
 import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
-import { ImageBlockService } from './image-service.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
@@ -68,9 +67,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
     .resizable-img {
       position: relative;
-      border: 1px solid var(--affine-white-90);
       border-radius: 8px;
-      overflow: hidden;
     }
 
     .resizable-img img {
@@ -100,29 +97,27 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   @state()
   private _source!: string;
+  private _blob!: Blob;
 
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
     'loading';
 
   @state()
-  private _optionPosition: { x: number; y: number } | null = null;
-
-  @state()
   _focused = false;
 
   private _retryCount = 0;
 
-  private hoverState = new Slot<boolean>();
-
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:image', ImageBlockService);
     this._imageState = 'loading';
     this._fetchImage();
     this._disposables.add(
       this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
     );
+
+    this._bindKeymap();
+    this._handleSelection();
 
     this._observeDrag();
     // Wait for DOM to be ready
@@ -139,8 +134,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
 
-    this.model.propsUpdated.on(() => this.requestUpdate());
-    this.model.childrenUpdated.on(() => this.requestUpdate());
     // exclude padding and border width
     const { width, height } = this.model;
 
@@ -173,22 +166,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         document.activeElement.blur();
       }
     });
-  }
-
-  override focusBlock(ctx: FocusContext) {
-    super.focusBlock(ctx);
-    if (ctx.multi) {
-      return true;
-    }
-    this._focused = true;
-    // show selection rect
-    return false;
-  }
-
-  override blurBlock(ctx: FocusContext) {
-    this._focused = false;
-    super.blurBlock(ctx);
-    return true;
   }
 
   private _onInputChange() {
@@ -228,6 +205,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
+          this._blob = blob;
           this._source = URL.createObjectURL(blob);
           this._imageState = 'ready';
         } else {
@@ -269,7 +247,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       })
     );
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragEnd', ctx => {
+      this.root.uiEventDispatcher.add('dragEnd', () => {
         if (dragging) {
           dragging = false;
           embedResizeManager.onEnd();
@@ -281,110 +259,153 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _observePosition() {
-    // At AFFiNE, avoid the option element to be covered by the header
-    // we need to reserve the space for the header
-    const HEADER_HEIGHT = 64;
-    // The height of the option element
-    // You need to change this value manually if you change the style of the option element
-    const OPTION_ELEMENT_WEIGHT = 50;
-    const OPTION_ELEMENT_HEIGHT = 136;
-    const HOVER_DELAY = 300;
-    const TOP_EDGE = 10;
-    const LEFT_EDGE = 12;
     const ANCHOR_EL: HTMLElement = this.resizeImg;
 
-    let isHover = false;
-    let isClickHold = false;
-    let timer: number;
-
-    const updateOptionsPosition = () => {
-      if (isClickHold) {
-        this._optionPosition = null;
-        return;
-      }
-      clearTimeout(timer);
-      if (!isHover) {
-        // delay hiding the option element
-        timer = window.setTimeout(
-          () => (this._optionPosition = null),
-          HOVER_DELAY
-        );
-        if (!this._optionPosition) return;
-      }
-      // Update option position when scrolling
-      const rect = ANCHOR_EL.getBoundingClientRect();
-      const showInside =
-        rect.width > 680 ||
-        rect.right + LEFT_EDGE + OPTION_ELEMENT_WEIGHT > window.innerWidth;
-      this._optionPosition = {
-        x: showInside
-          ? // when image size is too large, the option popup should show inside
-            rect.right - OPTION_ELEMENT_WEIGHT
-          : rect.right + LEFT_EDGE,
-        y:
-          rect.height < OPTION_ELEMENT_HEIGHT
-            ? // when image size is too small,
-              // the option popup should always show align with the top edge
-              rect.top
-            : clamp(
-                rect.top + TOP_EDGE,
-                Math.min(
-                  HEADER_HEIGHT + LEFT_EDGE,
-                  rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-                ),
-                rect.bottom - OPTION_ELEMENT_HEIGHT - TOP_EDGE
-              ),
-      };
-    };
-
-    this.hoverState.on(newHover => {
-      if (isHover === newHover) return;
-      isHover = newHover;
-      updateOptionsPosition();
+    let portal: HTMLElement | null = null;
+    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () => {
+      if (portal?.isConnected) return;
+      const abortController = new AbortController();
+      portal = createLitPortal({
+        template: ImageOptionsTemplate({
+          anchor: ANCHOR_EL,
+          model: this.model,
+          blob: this._blob,
+          abortController,
+        }),
+        computePosition: {
+          referenceElement: ANCHOR_EL,
+          placement: 'right-start',
+          middleware: [
+            offset({
+              mainAxis: 12,
+              crossAxis: 10,
+            }),
+            shift({
+              crossAxis: true,
+              padding: {
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
+                right: 12,
+              },
+            }),
+          ],
+          autoUpdate: true,
+        },
+        abortController,
+      });
     });
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () =>
-      this.hoverState.emit(true)
-    );
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseleave', () =>
-      this.hoverState.emit(false)
-    );
-
-    // When the resize handler is clicked, the image option should be hidden
-    this._disposables.addFromEvent(this, 'pointerdown', () => {
-      isClickHold = true;
-      updateOptionsPosition();
-    });
-    this._disposables.addFromEvent(window, 'pointerup', () => {
-      isClickHold = false;
-      updateOptionsPosition();
-    });
-
-    this._disposables.add(
-      this.model.propsUpdated.on(() => updateOptionsPosition())
-    );
-    const viewportElement = getViewportElement(this.model.page);
-    if (viewportElement) {
-      this._disposables.addFromEvent(viewportElement, 'scroll', () =>
-        updateOptionsPosition()
-      );
-    }
   }
 
-  private _imageOptionsTemplate() {
-    if (!this._optionPosition) return null;
-    return html`<affine-portal
-      .template=${ImageOptionsTemplate({
-        model: this.model,
-        position: this._optionPosition,
-        hoverState: this.hoverState,
-      })}
-    ></affine-portal>`;
+  private _handleSelection() {
+    const selection = this.root.selectionManager;
+    this._disposables.add(
+      selection.slots.changed.on(selList => {
+        const curr = selList.find(
+          sel => PathFinder.equals(sel.path, this.path) && sel.is('image')
+        );
+
+        this._focused = !!curr;
+      })
+    );
+
+    this.handleEvent('click', () => {
+      selection.update(selList => {
+        return selList
+          .filter(sel => {
+            return !['text', 'block', 'image'].includes(sel.type);
+          })
+          .concat(selection.getInstance('image', { path: this.path }));
+      });
+      return true;
+    });
+    this.handleEvent(
+      'click',
+      () => {
+        if (!this._focused) return;
+
+        selection.update(selList => {
+          return selList.filter(sel => {
+            const current =
+              sel.is('image') && PathFinder.equals(sel.path, this.path);
+            return !current;
+          });
+        });
+      },
+      {
+        global: true,
+      }
+    );
+  }
+
+  private _bindKeymap() {
+    const selection = this.root.selectionManager;
+    const addParagraph = () => {
+      const parent = this.page.getParent(this.model);
+      if (!parent) return;
+      const index = parent.children.indexOf(this.model);
+      const blockId = this.page.addBlock(
+        'affine:paragraph',
+        {},
+        parent,
+        index + 1
+      );
+      requestAnimationFrame(() => {
+        selection.update(selList => {
+          return selList
+            .filter(sel => !sel.is('image'))
+            .concat(
+              selection.getInstance('text', {
+                from: {
+                  path: this.parentPath.concat(blockId),
+                  index: 0,
+                  length: 0,
+                },
+                to: null,
+              })
+            );
+        });
+      });
+    };
+
+    this.bindHotKey({
+      Escape: () => {
+        selection.update(selList => {
+          return selList.map(sel => {
+            const current =
+              sel.is('image') && PathFinder.equals(sel.path, this.path);
+            if (current) {
+              return selection.getInstance('block', { path: this.path });
+            }
+            return sel;
+          });
+        });
+        return true;
+      },
+      Delete: () => {
+        if (!this._focused) return;
+        addParagraph();
+        this.page.deleteBlock(this.model);
+        return true;
+      },
+      Backspace: () => {
+        if (!this._focused) return;
+        addParagraph();
+        this.page.deleteBlock(this.model);
+        return true;
+      },
+      Enter: () => {
+        if (!this._focused) return;
+        addParagraph();
+        return true;
+      },
+    });
   }
 
   private _imageResizeBoardTemplate() {
     const isFocused = this._focused;
     if (!isFocused || this._imageState !== 'ready') return null;
-    return ImageSelectedRectsContainer();
+    const readonly = this.model.page.readonly;
+    return ImageSelectedRectsContainer(readonly);
   }
 
   override render() {
@@ -413,8 +434,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       <div style="position: relative;">
         <div class="affine-image-wrapper">
           <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
-            ${img} ${this._imageOptionsTemplate()}
-            ${this._imageResizeBoardTemplate()}
+            ${img} ${this._imageResizeBoardTemplate()}
           </div>
         </div>
         ${this.selected?.is('block')
@@ -432,8 +452,11 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             @input=${this._onInputChange}
             @blur=${this._onInputBlur}
             @click=${stopPropagation}
+            @keydown=${stopPropagation}
             @keyup=${stopPropagation}
+            @pointerdown=${stopPropagation}
             @pointerup=${stopPropagation}
+            @pointermove=${stopPropagation}
             @paste=${stopPropagation}
             @cut=${stopPropagation}
             @copy=${stopPropagation}

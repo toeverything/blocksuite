@@ -61,7 +61,7 @@ export class TagsDatasource extends BaseDataSource {
     },
     parent: {
       type: selectPureColumnConfig.type,
-      getData: () => ({ options: this.meta.properties.tags.options }),
+      getData: () => ({ options: this.meta.properties.tags?.options ?? [] }),
       getValue: tag => tag.parentId,
       setValue: (tag, value) => {
         this.changeTag({
@@ -76,7 +76,7 @@ export class TagsDatasource extends BaseDataSource {
     return Object.keys(this.propertiesMap);
   }
 
-  constructor(root: BlockSuiteRoot, config: TagsDatasourceConfig) {
+  constructor(root: BlockSuiteRoot, _config: TagsDatasourceConfig) {
     super();
     this.meta = root.page.workspace.meta;
     root.page.workspace.meta.pageMetasUpdated.pipe(this.slots.update);
@@ -106,7 +106,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(tag);
   }
 
-  public propertyAdd(insertPosition: InsertPosition): string {
+  public propertyAdd(_insertPosition: InsertPosition | number): string {
     throw new Error('not support');
   }
 
@@ -117,19 +117,19 @@ export class TagsDatasource extends BaseDataSource {
     this.propertiesMap[propertyId]?.changeData?.(data);
   }
 
-  public propertyChangeName(propertyId: string, name: string): void {
+  public propertyChangeName(_propertyId: string, _name: string): void {
     // not support
   }
 
-  public propertyChangeType(propertyId: string, type: string): void {
+  public propertyChangeType(_propertyId: string, _type: string): void {
     // not support
   }
 
-  public propertyDelete(id: string): void {
+  public propertyDelete(_id: string): void {
     // not support
   }
 
-  public propertyDuplicate(columnId: string): string {
+  public propertyDuplicate(_columnId: string): string {
     throw new Error('not support');
   }
 
@@ -145,7 +145,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(insertPosition: InsertPosition): string {
+  public rowAdd(_insertPosition: InsertPosition | number): string {
     const id = nanoid();
     this.changeTags([
       ...this.tags,
@@ -167,7 +167,7 @@ export class TagsDatasource extends BaseDataSource {
   };
 
   private get tags() {
-    return this.meta.properties.tags.options;
+    return this.meta.properties.tags?.options ?? [];
   }
 
   private changeTags = (tags: SelectTag[]) => {

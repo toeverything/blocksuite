@@ -1,3 +1,12 @@
+import { assertExists } from '@blocksuite/global/utils';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { ReferenceElement } from '@floating-ui/dom';
+import { css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { html } from 'lit/static-html.js';
+
+import { popMenu, positionToVRect } from '../../../../components/menu/menu.js';
 import {
   DatabaseDragIcon,
   DatabaseDuplicate,
@@ -5,37 +14,20 @@ import {
   DatabaseInsertRight,
   DatabaseMoveLeft,
   DatabaseMoveRight,
-  DatabaseMultiSelect,
-  DatabaseNumber,
-  DatabaseProgress,
-  DatabaseSelect,
-  DateTime,
   DeleteIcon,
-  LinkIcon,
   TextIcon,
-  TodoIcon,
-} from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { keyed } from 'lit/directives/keyed.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import { html } from 'lit/static-html.js';
-
-import { popMenu } from '../../../../components/menu/menu.js';
+} from '../../../../icons/index.js';
 import type { InsertPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
 import { getResultInRange } from '../../../utils/utils.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import { getTableContainer } from '../../table-view.js';
 import type {
   DataViewTableColumnManager,
   DataViewTableManager,
 } from '../../table-view-manager.js';
-import type { ColumnTypeIcon } from '../../types.js';
+import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 
 @customElement('affine-database-header-column')
@@ -59,7 +51,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private _columnsOffset = (header: Element, scale: number) => {
+  private _columnsOffset = (header: Element, _scale: number) => {
     const columns = header.querySelectorAll('affine-database-header-column');
     const left: ColumnOffset[] = [];
     const right: ColumnOffset[] = [];
@@ -210,6 +202,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         if (insertPosition) {
           this.tableViewManager.columnMove(this.column.id, insertPosition);
         }
+      },
+      onClear: () => {
         cancelScroll();
         html?.classList.toggle('affine-database-header-column-grabbing', false);
         dropPreview.remove();
@@ -227,7 +221,18 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
 
   private _clickColumn = () => {
-    popMenu(this, {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    this.popMenu();
+  };
+  private _contextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    this.popMenu(positionToVRect(e.x, e.y));
+  };
+
+  private popMenu(ele?: ReferenceElement) {
+    popMenu(ele ?? this, {
       options: {
         input: {
           initValue: this.column.name,
@@ -251,7 +256,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
                   return {
                     type: 'action',
                     name: config.name,
-                    icon: html`<uni-lit
+                    icon: html` <uni-lit
                       .uni="${this.tableViewManager.getIcon(config.type)}"
                     ></uni-lit>`,
                     select: () => {
@@ -333,7 +338,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move Right',
+            name: 'Move right',
             icon: DatabaseMoveRight,
             hide: () => this.column.isLast,
             select: () => {
@@ -368,9 +373,15 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         ],
       },
     });
-  };
+  }
 
   private _clickTypeIcon = (event: MouseEvent) => {
+    if (this.tableViewManager.readonly) {
+      return;
+    }
+    if (this.column.type === 'title') {
+      return;
+    }
     event.stopPropagation();
     popMenu(this, {
       options: {
@@ -384,7 +395,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             return {
               type: 'action',
               name: config.name,
-              icon: html`<uni-lit
+              icon: html` <uni-lit
                 .uni="${this.tableViewManager.getIcon(config.type)}"
               ></uni-lit>`,
               select: () => {
@@ -406,16 +417,14 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         style=${style}
         class="affine-database-column-content"
         @click="${this._clickColumn}"
+        @contextmenu="${this._contextMenu}"
       >
         <div class="affine-database-column-text ${column.type}">
           <div
             class="affine-database-column-type-icon"
             @click="${this._clickTypeIcon}"
           >
-            ${keyed(
-              column.type,
-              html`<uni-lit .uni="${column.icon}"></uni-lit>`
-            )}
+            <uni-lit .uni="${column.icon}"></uni-lit>
           </div>
           <div class="affine-database-column-text-content">
             <div class="affine-database-column-text-input">${column.name}</div>
@@ -449,6 +458,10 @@ const createDragPreview = (
   const div = document.createElement('div');
   div.append(content);
   // div.style.pointerEvents='none';
+  div.style.backgroundColor = 'var(--affine-background-primary-color)';
+  div.style.opacity = '0.95';
+  div.style.boxShadow =
+    '0px 0px 12px 0px rgba(66, 65, 73, 0.14), 0px 0px 0px 0.5px #e3e3e4 inset';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;
@@ -491,17 +504,6 @@ const createDropPreview = (container: Element, height: number) => {
       div.remove();
     },
   };
-};
-
-export const columnTypeIconMap: ColumnTypeIcon = {
-  select: DatabaseSelect,
-  number: DatabaseNumber,
-  checkbox: TodoIcon,
-  progress: DatabaseProgress,
-  'rich-text': TextIcon,
-  'multi-select': DatabaseMultiSelect,
-  link: LinkIcon,
-  date: DateTime,
 };
 
 declare global {

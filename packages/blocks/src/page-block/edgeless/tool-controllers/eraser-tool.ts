@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import { noop } from '@blocksuite/global/utils';
 import {
   Bound,
   getStroke,
@@ -9,7 +10,6 @@ import {
 import { linePolygonIntersects } from '@blocksuite/phasor';
 
 import type {
-  EdgelessTool,
   Erasable,
   IPoint,
   TopLevelBlockModel,
@@ -17,8 +17,8 @@ import type {
 import {
   type EraserTool,
   getBlockElementById,
-  noop,
 } from '../../../__internal__/utils/index.js';
+import { deleteElements } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './index.js';
 
@@ -81,7 +81,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._timer = requestAnimationFrame(this._loop);
   };
 
-  onContainerPointerDown(e: PointerEventState): void {
+  onContainerPointerDown(): void {
     noop();
   }
 
@@ -129,7 +129,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._prevPoint = currentPoint;
   }
 
-  override beforeModeSwitch(mode: EdgelessTool) {
+  override beforeModeSwitch() {
     this._eraseTargets.forEach(erasable => {
       if (isTopLevelBlock(erasable)) {
         const ele = getBlockElementById(erasable.id);
@@ -148,48 +148,41 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._eraseTargets.clear();
   }
 
-  override onContainerDragEnd(e: PointerEventState): void {
-    this._eraseTargets.forEach(erasable => {
-      if (isTopLevelBlock(erasable)) {
-        this._page.deleteBlock(erasable);
-      } else {
-        this._edgeless.connector.detachConnectors([erasable]);
-        this._surface.removeElement(erasable.id);
-      }
-    });
+  override onContainerDragEnd(): void {
+    deleteElements(this._edgeless, Array.from(this._eraseTargets));
     this._reset();
     this._page.captureSync();
   }
 
-  override onContainerClick(e: PointerEventState): void {
+  override onContainerClick(): void {
     noop();
   }
 
-  override onContainerDblClick(e: PointerEventState): void {
+  override onContainerDblClick(): void {
     noop();
   }
 
-  override onContainerTripleClick(e: PointerEventState): void {
+  override onContainerTripleClick(): void {
     noop();
   }
 
-  override onContainerMouseMove(e: PointerEventState): void {
+  override onContainerMouseMove(): void {
     noop();
   }
 
-  override onContainerMouseOut(e: PointerEventState): void {
+  override onContainerMouseOut(): void {
     noop();
   }
 
-  override onContainerContextMenu(e: PointerEventState): void {
+  override onContainerContextMenu(): void {
     noop();
   }
 
-  override onPressShiftKey(pressed: boolean): void {
+  override onPressShiftKey(_pressed: boolean): void {
     noop();
   }
 
-  override afterModeSwitch(newMode: EraserTool): void {
+  override afterModeSwitch(_newMode: EraserTool): void {
     noop();
   }
 }

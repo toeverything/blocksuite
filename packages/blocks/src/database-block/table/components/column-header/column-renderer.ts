@@ -42,6 +42,7 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
         return html` <div style="${style}">
           <affine-database-cell-container
             .column="${this.column}"
+            .view="${this.tableViewManager}"
             .rowId="${id}"
             .columnId="${this.column.id}"
             .rowIndex="${index}"

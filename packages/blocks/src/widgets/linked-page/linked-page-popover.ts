@@ -1,5 +1,6 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists, type BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -19,6 +20,9 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   options!: LinkedPageOptions;
+
+  @property({ attribute: false })
+  triggerKey!: string;
 
   @state()
   private _position: {
@@ -116,7 +120,7 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
       },
       onConfirm: () => {
         this.abortController.abort();
-        cleanSpecifiedTail(this.model, '@' + this._query);
+        cleanSpecifiedTail(this.model, this.triggerKey + this._query);
         this._flattenActionList[this._activatedItemIndex].action();
       },
       onEsc: () => {
@@ -161,7 +165,10 @@ export class LinkedPagePopover extends WithDisposable(LitElement) {
                   ?hover=${this._activatedItemIndex === curIdx}
                   @click=${() => {
                     this.abortController.abort();
-                    cleanSpecifiedTail(this.model, '@' + this._query);
+                    cleanSpecifiedTail(
+                      this.model,
+                      this.triggerKey + this._query
+                    );
                     action();
                   }}
                   @mousemove=${() => {

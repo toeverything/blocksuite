@@ -1,30 +1,24 @@
 // operations used in rich-text level
 
-import { ALLOW_DEFAULT, PREVENT_DEFAULT } from '@blocksuite/global/config';
-import type { BlockModelProps } from '@blocksuite/global/types';
-import { assertExists, matchFlavours } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text, Utils } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
-import { checkFirstLine, checkLastLine } from '../utils/check-line.js';
 import { supportsChildren } from '../utils/common.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
 } from '../utils/common-operations.js';
+import type { BlockModelProps } from '../utils/model.js';
+import { matchFlavours } from '../utils/model.js';
 import {
-  getDefaultPage,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
   getVirgoByModel,
 } from '../utils/query.js';
-import {
-  focusBlockByModel,
-  focusTitle,
-  getCurrentNativeRange,
-} from '../utils/selection.js';
+import { focusBlockByModel, focusTitle } from '../utils/selection.js';
 import type { ExtendedModel } from '../utils/types.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
@@ -105,20 +99,6 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   }
 
   asyncFocusRichText(page, id);
-}
-
-export function handleSoftEnter(
-  page: Page,
-  model: ExtendedModel,
-  index: number,
-  length: number
-) {
-  if (!model.text) {
-    console.error('Failed to handle soft enter! No text found!', model);
-    return;
-  }
-  page.captureSync();
-  model.text.replace(index, length, '\n');
 }
 
 export function handleBlockSplit(
@@ -381,18 +361,9 @@ export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
   }
 }
 
-// When deleting at line start of a code block,
-// select the code block itself
-function handleCodeBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:code'])) return false;
-
-  focusBlockByModel(model);
-  return true;
-}
-
 // When deleting at line end of a code block,
 // do nothing
-function handleCodeBlockForwardDelete(page: Page, model: ExtendedModel) {
+function handleCodeBlockForwardDelete(_page: Page, model: ExtendedModel) {
   if (!matchFlavours(model, ['affine:code'])) return false;
   return true;
 }
@@ -550,7 +521,7 @@ function handleEmbedDividerCodeSibling(
 function handleNoPreviousSibling(page: Page, model: ExtendedModel) {
   const text = model.text;
   const titleElement = document.querySelector(
-    '.affine-default-page-block-title'
+    '.affine-doc-page-block-title'
   ) as HTMLTextAreaElement | null;
   // Probably no title, e.g. in edgeless mode
   if (!titleElement) return false;
@@ -773,7 +744,6 @@ function handleUnknownBlockForwardDelete(model: ExtendedModel) {
 
 export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
   if (
-    handleCodeBlockBackspace(page, model) ||
     handleListBlockBackspace(page, model) ||
     handleParagraphBlockBackspace(page, model)
   ) {
@@ -794,77 +764,4 @@ export function handleLineEndForwardDelete(page: Page, model: ExtendedModel) {
     return;
   }
   handleUnknownBlockForwardDelete(model);
-}
-
-export function handleParagraphBlockLeftKey(page: Page, model: ExtendedModel) {
-  if (!matchFlavours(model, ['affine:paragraph'])) return;
-  const pageElement = getDefaultPage(page);
-  if (!pageElement) {
-    // Maybe in edgeless mode
-    return;
-  }
-  const titleVEditor = pageElement.titleVEditor;
-  const parent = page.getParent(model);
-  if (parent && matchFlavours(parent, ['affine:note'])) {
-    const paragraphIndex = parent.children.indexOf(model);
-    if (paragraphIndex === 0) {
-      const noteParent = page.getParent(parent);
-      if (noteParent && matchFlavours(noteParent, ['affine:page'])) {
-        const noteIndex = noteParent.children
-          // page block may contain other blocks like surface
-          .filter(block => matchFlavours(block, ['affine:note']))
-          .indexOf(parent);
-        if (noteIndex === 0) {
-          titleVEditor.focusEnd();
-          return;
-        }
-      }
-    }
-  }
-}
-
-export function handleKeyUp(event: KeyboardEvent, editableContainer: Element) {
-  const range = getCurrentNativeRange();
-  if (!range.collapsed) {
-    // If the range is not collapsed,
-    // we assume that the caret is at the start of the range.
-    range.collapse(true);
-  }
-  const isFirstLine = checkFirstLine(range, editableContainer);
-  if (isFirstLine) {
-    // If the caret is at the first line of the block,
-    // default behavior will move the caret to the start of the line,
-    // which is not expected. so we need to prevent default behavior.
-    return PREVENT_DEFAULT;
-  }
-  // Avoid triggering hotkey bindings
-  event.stopPropagation();
-  return ALLOW_DEFAULT;
-}
-
-export function handleKeyDown(
-  block: BaseBlockModel,
-  event: KeyboardEvent,
-  editableContainer: HTMLElement
-) {
-  const range = getCurrentNativeRange();
-  if (!range.collapsed) {
-    // If the range is not collapsed,
-    // we assume that the caret is at the end of the range.
-    range.collapse();
-  }
-  const isLastLine = checkLastLine(range, editableContainer);
-  if (isLastLine) {
-    // When the cursor is at the last line of the block,
-    // default ArrowDown behavior will move the cursor to the end of the line
-    // If the block is the last block of the page,
-    // we want the cursor to move to next block instead of the end of the line,
-    // thus we should prevent the default behavior.
-    // If the block is the last block of the page,
-    // let the cursor move to the end of line as default.
-    return getNextBlock(block) ? PREVENT_DEFAULT : ALLOW_DEFAULT;
-  }
-  // Avoid triggering hotkey bindings
-  event.stopPropagation();
-  return ALLOW_DEFAULT;
 }

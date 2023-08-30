@@ -12,10 +12,6 @@ export type InsertPosition =
       id: string;
       before: boolean;
     };
-export type BlockOperation = {
-  copy: () => void;
-  delete: () => void;
-};
 export type Cell<ValueType = unknown> = {
   columnId: Column['id'];
   value: ValueType;

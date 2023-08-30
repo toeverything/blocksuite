@@ -1,61 +1,59 @@
 import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
+import '../buttons/menu-button.js';
 
-import {
-  ConnectorLIcon,
-  ConnectorXIcon,
-  LineStyleIcon,
-} from '@blocksuite/global/config';
+import { countBy, maxBy } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
 import { StrokeStyle } from '@blocksuite/phasor';
 import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { countBy, maxBy } from '../../../../__internal__/utils/common.js';
-import { BrushSize } from '../../../../__internal__/utils/types.js';
-import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { EdgelessSelectionState } from '../../utils/selection-manager.js';
-import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
+import { LineWidth } from '../../../../__internal__/utils/types.js';
+import {
+  ConnectorLIcon,
+  ConnectorXIcon,
+  DashLineIcon,
+  GeneralStyleIcon,
+  LineStyleIcon,
+  RoughIcon,
+  ScribbledStyleIcon,
+  SmallArrowDownIcon,
+  StraightLineIcon,
+} from '../../../../icons/index.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
-import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import {
   type ColorEvent,
   ColorUnit,
-  type EdgelessColorPanel,
   GET_DEFAULT_LINE_COLOR,
 } from '../panel/color-panel.js';
-import {
-  LineStylesPanel,
-  type LineStylesPanelClickedButton,
-  lineStylesPanelStyles,
-} from '../panel/line-styles-panel.js';
-import { createButtonPopper } from '../utils.js';
+import type { LineWidthEvent } from '../panel/line-width-panel.js';
 
 function getMostCommonColor(elements: ConnectorElement[]): CssVariableName {
   const colors = countBy(elements, (ele: ConnectorElement) => ele.stroke);
-  const max = maxBy(Object.entries(colors), ([k, count]) => count);
+  const max = maxBy(Object.entries(colors), ([_k, count]) => count);
   return max ? (max[0] as CssVariableName) : GET_DEFAULT_LINE_COLOR();
 }
 
 function getMostCommonMode(elements: ConnectorElement[]): ConnectorMode | null {
   const modes = countBy(elements, (ele: ConnectorElement) => ele.mode);
-  const max = maxBy(Object.entries(modes), ([k, count]) => count);
+  const max = maxBy(Object.entries(modes), ([_k, count]) => count);
   return max ? (Number(max[0]) as ConnectorMode) : null;
 }
 
-function getMostCommonLineWidth(elements: ConnectorElement[]): BrushSize {
+function getMostCommonLineWidth(elements: ConnectorElement[]): LineWidth {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
     return ele.strokeWidth;
   });
-  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
-  return max ? (Number(max[0]) as BrushSize) : BrushSize.LINE_WIDTH_FOUR;
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
+  return max ? (Number(max[0]) as LineWidth) : LineWidth.LINE_WIDTH_FOUR;
 }
 
-function getMostCommonLineStyle(
+export function getMostCommonLineStyle(
   elements: ConnectorElement[]
 ): LineStyleButtonProps['mode'] | null {
   const sizes = countBy(elements, (ele: ConnectorElement) => {
@@ -71,15 +69,13 @@ function getMostCommonLineStyle(
       }
     }
   });
-  const max = maxBy(Object.entries(sizes), ([k, count]) => count);
+  const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
 }
 
 @customElement('edgeless-change-connector-button')
-export class EdgelessChangeConnectorButton extends LitElement {
+export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   static override styles = [
-    lineSizeButtonStyles,
-    lineStylesPanelStyles,
     css`
       :host {
         display: flex;
@@ -93,86 +89,20 @@ export class EdgelessChangeConnectorButton extends LitElement {
       menu-divider {
         height: 24px;
       }
-
-      .color-panel-container {
-        display: none;
-        padding: 4px;
-        justify-content: center;
-        align-items: center;
-        background: var(--affine-background-overlay-panel-color);
-        box-shadow: var(--affine-shadow-2);
-        border-radius: 8px;
-      }
-
-      .color-panel-container[data-show] {
-        display: block;
-      }
-
-      .connector-mode-button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 24px;
-        height: 24px;
-        box-sizing: border-box;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-
-      .connector-mode-button[active] {
-        background-color: var(--affine-hover-color);
-      }
-
-      .straight-line-button {
-        margin-left: 8px;
-      }
-
-      .line-style-panel {
-        display: none;
-      }
-      .line-style-panel[data-show] {
-        display: flex;
-      }
     `,
   ];
 
   @property({ attribute: false })
-  elements: ConnectorElement[] = [];
+  edgeless!: EdgelessPageBlockComponent;
 
-  @property({ type: Object })
-  selectionState!: EdgelessSelectionState;
+  @property({ attribute: false })
+  elements: ConnectorElement[] = [];
 
   @property({ attribute: false })
   page!: Page;
 
   @property({ attribute: false })
   surface!: SurfaceManager;
-
-  @property({ attribute: false })
-  slots!: EdgelessSelectionSlots;
-
-  @query('.connector-color-button')
-  private _colorButton!: EdgelessToolIconButton;
-  @query('.color-panel-container')
-  private _colorPanel!: EdgelessColorPanel;
-  private _colorPanelPopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  private _disposables: DisposableGroup = new DisposableGroup();
-
-  @query('.line-styles-button')
-  private _lineStylesButton!: EdgelessToolIconButton;
-  @query('.line-style-panel')
-  private _lineStylesPanel!: HTMLDivElement;
-  private _lineStylesPanelPopper: ReturnType<typeof createButtonPopper> | null =
-    null;
-
-  private _popperShow = false;
-
-  private _forceUpdateSelection() {
-    // FIXME: force update selection, because connector mode changed
-    this.slots.selectionUpdated.emit({ ...this.selectionState });
-  }
 
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();
@@ -183,7 +113,17 @@ export class EdgelessChangeConnectorButton extends LitElement {
         });
       }
     });
-    this._forceUpdateSelection();
+  }
+
+  private _setConnectorRough(rough: boolean) {
+    this.page.captureSync();
+    this.elements.forEach(element => {
+      if (element.rough !== rough) {
+        this.surface.updateElement<'connector'>(element.id, {
+          rough,
+        });
+      }
+    });
   }
 
   private _setConnectorColor(stroke: CssVariableName) {
@@ -199,134 +139,124 @@ export class EdgelessChangeConnectorButton extends LitElement {
     if (shouldUpdate) this.requestUpdate();
   }
 
-  private _setShapeStrokeWidth(strokeWidth: number) {
+  private _setConnectorStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'connector'>(ele.id, {
         strokeWidth,
       });
     });
-    this._forceUpdateSelection();
   }
 
-  private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
+  private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
       this.surface.updateElement<'connector'>(ele.id, {
         strokeStyle,
       });
     });
-    this._forceUpdateSelection();
-  }
-
-  private _setShapeStyles({ type, value }: LineStylesPanelClickedButton) {
-    if (type === 'size') {
-      const strokeWidth = value;
-      this._setShapeStrokeWidth(strokeWidth);
-    } else if (type === 'lineStyle') {
-      switch (value) {
-        case 'solid': {
-          this._setShapeStrokeStyle(StrokeStyle.Solid);
-          break;
-        }
-        case 'dash': {
-          this._setShapeStrokeStyle(StrokeStyle.Dashed);
-          break;
-        }
-        case 'none': {
-          this._setShapeStrokeStyle(StrokeStyle.None);
-          break;
-        }
-      }
-    }
-  }
-
-  override firstUpdated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
-
-    this._colorPanelPopper = createButtonPopper(
-      this._colorButton,
-      this._colorPanel
-    );
-    _disposables.add(this._colorPanelPopper);
-
-    this._lineStylesPanelPopper = createButtonPopper(
-      this._lineStylesButton,
-      this._lineStylesPanel,
-      ({ display }) => {
-        this._popperShow = display === 'show';
-      }
-    );
-    _disposables.add(this._lineStylesPanelPopper);
-
-    super.firstUpdated(changedProperties);
   }
 
   override render() {
     const selectedColor = getMostCommonColor(this.elements);
     const selectedMode = getMostCommonMode(this.elements);
     const selectedLineSize =
-      getMostCommonLineWidth(this.elements) ?? BrushSize.LINE_WIDTH_FOUR;
-    const selectedLineStyle = getMostCommonLineStyle(this.elements) ?? 'solid';
+      getMostCommonLineWidth(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
 
     return html`
-      <edgeless-tool-icon-button
-        class="straight-line-button"
-        .tooltip=${'Straight'}
-        .tipPosition=${'bottom'}
-        @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
-      >
-        <div
-          class="connector-mode-button"
-          ?active=${selectedMode === ConnectorMode.Straight}
-        >
-          ${ConnectorLIcon}
-        </div>
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .tooltip=${'Elbowed'}
-        .tipPosition=${'bottom'}
-        @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
-      >
-        <div
-          class="connector-mode-button"
-          ?active=${selectedMode === ConnectorMode.Orthogonal}
-        >
-          ${ConnectorXIcon}
-        </div>
-      </edgeless-tool-icon-button>
-      <menu-divider .vertical=${true}></menu-divider>
-      <edgeless-tool-icon-button
+      <edgeless-menu-button
         class="connector-color-button"
-        .tooltip=${'Color'}
-        .tipPosition=${'bottom'}
-        .active=${false}
-        @click=${() => this._colorPanelPopper?.toggle()}
-      >
-        ${ColorUnit(selectedColor)}
-      </edgeless-tool-icon-button>
-      <div class="color-panel-container">
-        <edgeless-color-panel
+        .iconInfo=${{
+          icon: html`${ColorUnit(selectedColor)}`,
+          tooltip: 'Color',
+        }}
+        .menuChildren=${html` <edgeless-color-panel
           .value=${selectedColor}
           @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
         >
-        </edgeless-color-panel>
-      </div>
-      <edgeless-tool-icon-button
+        </edgeless-color-panel>`}
+      ></edgeless-menu-button>
+
+      <menu-divider .vertical=${true}></menu-divider>
+
+      <edgeless-menu-button
         class="line-styles-button"
-        .tooltip=${this._popperShow ? '' : 'Border style'}
-        .tipPosition=${'bottom'}
-        .active=${false}
-        @click=${() => this._lineStylesPanelPopper?.toggle()}
+        .iconInfo=${{
+          icon: html`${LineStyleIcon}${SmallArrowDownIcon}`,
+          tooltip: 'Border style',
+        }}
+        .menuChildren=${html`
+          <edgeless-line-width-panel
+            .selectedSize=${selectedLineSize as LineWidth}
+            @select=${(e: LineWidthEvent) => {
+              this._setConnectorStrokeWidth(e.detail);
+            }}
+          ></edgeless-line-width-panel>
+          <edgeless-tool-icon-button
+            class=${`edgeless-component-line-style-button-${StrokeStyle.Solid}`}
+            .tooltip=${'Solid'}
+            @click=${() => this._setConnectorStrokeStyle(StrokeStyle.Solid)}
+          >
+            ${StraightLineIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button
+            class=${`edgeless-component-line-style-button-${StrokeStyle.Dashed}`}
+            .tooltip=${'Dash'}
+            @click=${() => this._setConnectorStrokeStyle(StrokeStyle.Dashed)}
+          >
+            ${DashLineIcon}
+          </edgeless-tool-icon-button>
+        `}
       >
-        ${LineStyleIcon}
-      </edgeless-tool-icon-button>
-      ${LineStylesPanel({
-        selectedLineSize,
-        selectedLineStyle,
-        lineStyle: ['solid', 'dash'],
-        onClick: event => {
-          this._setShapeStyles(event);
-        },
-      })}
+      </edgeless-menu-button>
+
+      <menu-divider .vertical=${true}></menu-divider>
+
+      <edgeless-menu-button
+        .iconInfo=${{
+          icon: html`${RoughIcon}${SmallArrowDownIcon}`,
+          tooltip: 'Style',
+        }}
+        .menuChildren=${html`
+          <edgeless-tool-icon-button
+            .tooltip=${'General'}
+            @click=${() => this._setConnectorRough(false)}
+          >
+            ${GeneralStyleIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button
+            .tooltip=${'Scribbled'}
+            @click=${() => this._setConnectorRough(true)}
+          >
+            ${ScribbledStyleIcon}
+          </edgeless-tool-icon-button>
+        `}
+      >
+      </edgeless-menu-button>
+
+      <menu-divider .vertical=${true}></menu-divider>
+
+      <edgeless-menu-button
+        .iconInfo=${{
+          icon: html`${selectedMode === ConnectorMode.Straight
+            ? ConnectorLIcon
+            : ConnectorXIcon}${SmallArrowDownIcon}`,
+          tooltip: 'Connector Shape',
+        }}
+        .menuChildren=${html`
+          <edgeless-tool-icon-button
+            .tooltip=${'Straight'}
+            @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
+          >
+            ${ConnectorLIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button
+            .tooltip=${'Elbowed'}
+            @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
+          >
+            ${ConnectorXIcon}
+          </edgeless-tool-icon-button>
+        `}
+      >
+      </edgeless-menu-button>
     `;
   }
 }

@@ -24,6 +24,4 @@ declare type BlockSuiteFlags = {
   enable_attachment_block: boolean;
 
   readonly: Record<string, boolean>;
-
-  enable_note_cut: boolean;
 };

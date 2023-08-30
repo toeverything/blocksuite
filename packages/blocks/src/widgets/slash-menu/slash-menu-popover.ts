@@ -1,3 +1,4 @@
+import { isFuzzyMatch } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
@@ -7,12 +8,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getRichTextByModel,
   isControlledKeyboardEvent,
-  isFuzzyMatch,
 } from '../../__internal__/utils/index.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../components/utils.js';
+import type { PageBlockComponent } from '../../page-block/types.js';
 import { styles } from './styles.js';
 import {
   collectGroupNames,
@@ -26,10 +27,16 @@ export class SlashMenu extends WithDisposable(LitElement) {
   static override styles = styles;
 
   @property({ attribute: false })
+  pageElement!: PageBlockComponent;
+
+  @property({ attribute: false })
   model!: BaseBlockModel;
 
   @property({ attribute: false })
   options!: SlashMenuOptions;
+
+  @property({ attribute: false })
+  triggerKey!: string;
 
   @query('.slash-menu')
   slashMenuElement?: HTMLElement;
@@ -180,7 +187,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
   }
 
   // Handle click outside
-  private _onClickAway = (e: Event) => {
+  private _onClickAway = () => {
     // if (e.target === this) return;
     if (!this._hide) return;
     // If the slash menu is hidden, click anywhere will close the slash menu
@@ -243,11 +250,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
     // Need to remove the search string
     // We must to do clean the slash string before we do the action
     // Otherwise, the action may change the model and cause the slash string to be changed
-    cleanSpecifiedTail(this.model, '/' + this._searchString);
+    cleanSpecifiedTail(this.model, this.triggerKey + this._searchString);
     this.abortController.abort();
 
     const { action } = this._filterItems[index];
-    action({ page: this.model.page, model: this.model });
+    action({ pageElement: this.pageElement, model: this.model });
   }
 
   private _handleClickCategory(groupName: string) {

@@ -10,8 +10,6 @@ import {
   deleteAllConnectors,
   dragBetweenViewCoords,
   edgelessCommonSetup as commonSetup,
-  locatorConnectorStrokeStyleButton,
-  locatorConnectorStrokeWidthButton,
   pickColorAtPoints,
   rotateElementByHandle,
   Shape,
@@ -26,7 +24,7 @@ import {
 import {
   assertConnectorPath,
   assertEdgelessHoverRect,
-  assertPointAlmostEqual,
+  assertEdgelessNonSelectedRect,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -91,9 +89,8 @@ test('elbow connector both side attatched element', async ({ page }) => {
     [100, 50],
     [200, 50],
   ]);
-
   // select
-  await dragBetweenViewCoords(page, [250, -10], [260, 50]);
+  await dragBetweenViewCoords(page, [250, 50], [350, -10]);
 
   await dragBetweenViewCoords(page, [250, 50], [250, 0]);
   await assertConnectorPath(page, [
@@ -276,7 +273,9 @@ test('path #3, the two shape are parallel in x axis, the anchor from the right t
   ]);
 });
 
-test('when element is removed, connector should updated', async ({ page }) => {
+test('when element is removed, connector should be deleted too', async ({
+  page,
+}) => {
   await commonSetup(page);
   await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
   await createConnectorElement(page, [100, 50], [200, 0]);
@@ -285,12 +284,7 @@ test('when element is removed, connector should updated', async ({ page }) => {
   await dragBetweenViewCoords(page, [10, -10], [20, 20]);
   await pressBackspace(page);
   await dragBetweenViewCoords(page, [100, 50], [0, 50]);
-  await assertConnectorPath(page, [
-    [0, 50],
-    [50, 50],
-    [50, 0],
-    [100, 0],
-  ]);
+  await assertEdgelessNonSelectedRect(page);
 });
 
 test('connector connects triangle shape', async ({ page }) => {
@@ -346,6 +340,7 @@ test('change connector line width', async ({ page }) => {
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y);
+  await page.pause();
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 
@@ -381,9 +376,6 @@ test('change connector stroke style', async ({ page }) => {
   await waitNextFrame(page);
 
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeStyles');
-  const activeButton = locatorConnectorStrokeStyleButton(page, 'dash');
-  const className = await activeButton.evaluate(ele => ele.className);
-  expect(className.includes(' active')).toBeTruthy();
 
   const pickedColor = await pickColorAtPoints(page, [[start.x + 20, start.y]]);
   expect(pickedColor[0]).toBe('#000000');

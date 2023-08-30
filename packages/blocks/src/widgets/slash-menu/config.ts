@@ -1,4 +1,26 @@
+import { assertExists } from '@blocksuite/global/utils';
+import { Text } from '@blocksuite/store';
+
+import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
+import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
+  createPage,
+  getCurrentNativeRange,
+  getNextBlock,
+  getPageBlock,
+  getPreviousBlock,
+  getVirgoByModel,
+  openFileOrFiles,
+  resetNativeSelection,
+  uploadImageFromLocal,
+} from '../../__internal__/utils/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+import { appendAttachmentBlock } from '../../attachment-block/utils.js';
+import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
+import { toast } from '../../components/toast.js';
+import {
+  ArrowDownBigIcon,
+  ArrowUpBigIcon,
   AttachmentIcon,
   BookmarkIcon,
   CopyIcon,
@@ -10,52 +32,33 @@ import {
   ImageIcon20,
   NewPageIcon,
   NowIcon,
-  paragraphConfig,
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
-} from '@blocksuite/global/config';
-import { assertExists, Text } from '@blocksuite/store';
-
-import { REFERENCE_NODE } from '../../__internal__/rich-text/reference-node.js';
-import { getServiceOrRegister } from '../../__internal__/service.js';
+} from '../../icons/index.js';
+import type { ImageProps } from '../../image-block/image-model.js';
+import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
+import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
+import { copyBlock } from '../../page-block/doc/utils.js';
 import {
-  createPage,
-  getCurrentNativeRange,
-  getPageBlock,
-  getVirgoByModel,
-  resetNativeSelection,
-  uploadFileFromLocal,
-  uploadImageFromLocal,
-} from '../../__internal__/utils/index.js';
-import { humanFileSize } from '../../__internal__/utils/math.js';
-import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import type {
-  AttachmentBlockModel,
-  AttachmentProps,
-} from '../../attachment-block/attachment-model.js';
-import {
-  MAX_ATTACHMENT_SIZE,
-  setAttachmentLoading,
-} from '../../attachment-block/utils.js';
-import { getBookmarkInitialProps } from '../../bookmark-block/utils.js';
-import { toast } from '../../components/toast.js';
-import { copyBlock } from '../../page-block/default/utils.js';
-import { formatConfig } from '../../page-block/utils/format-config.js';
-import {
+  getSelectedContentBlockElements,
   onModelTextUpdated,
-  updateBlockType,
 } from '../../page-block/utils/index.js';
+import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
+import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import type { LinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
   insertContent,
   insideDatabase,
-  insideDataView,
   type SlashItem,
+  withRemoveEmptyLine,
 } from './utils.js';
 
-export const menuGroups: { name: string; items: SlashItem[] }[] = [
+export const menuGroups: {
+  name: string;
+  items: SlashItem[];
+}[] = [
   {
     name: 'Text',
     items: [
@@ -74,8 +77,16 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             }
             return true;
           },
-          action: ({ model }) => {
-            const newModels = updateBlockType([model], flavour, type);
+          action: ({ pageElement }) => {
+            const selectedBlockElements = getSelectedContentBlockElements(
+              pageElement,
+              ['text', 'block']
+            );
+            const newModels = updateBlockElementType(
+              selectedBlockElements,
+              flavour,
+              type
+            );
             // Reset selection if the target is code block
             if (flavour === 'affine:code') {
               if (newModels.length !== 1) {
@@ -96,7 +107,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
   },
   {
     name: 'Style',
-    items: formatConfig
+    items: inlineFormatConfig
       .filter(i => !['Link', 'Code'].includes(i.name))
       .map(({ name, icon, id }) => ({
         name,
@@ -134,7 +145,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: ({ model }) => updateBlockType([model], flavour, type),
+        action: ({ pageElement }) => {
+          const selectedBlockElements = getSelectedContentBlockElements(
+            pageElement,
+            ['text', 'block']
+          );
+          updateBlockElementType(selectedBlockElements, flavour, type);
+        },
       })),
   },
 
@@ -146,10 +163,13 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
         icon: NewPageIcon,
         showWhen: model =>
           !!model.page.awarenessStore.getFlag('enable_linked_page'),
-        action: async ({ page, model }) => {
-          const newPage = await createPage(page.workspace);
+        action: async ({ pageElement, model }) => {
+          const newPage = await createPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
-            reference: { type: 'LinkedPage', pageId: newPage.id },
+            reference: {
+              type: 'LinkedPage',
+              pageId: newPage.id,
+            },
           });
         },
       },
@@ -174,7 +194,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           return true;
         },
         action: ({ model }) => {
-          insertContent(model, '@');
+          const triggerKey = '@';
+          insertContent(model, triggerKey);
           const pageBlock = getPageBlock(model);
           const widgetEle = pageBlock?.widgetElements.linkedPage;
           assertExists(widgetEle);
@@ -182,7 +203,7 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           const linkedPageWidget = widgetEle as LinkedPageWidget;
           // Wait for range to be updated
           setTimeout(() => {
-            linkedPageWidget.showLinkedPage(model);
+            linkedPageWidget.showLinkedPage(model, triggerKey);
           });
         },
       },
@@ -203,17 +224,25 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        async action({ page, model }) {
-          const parent = page.getParent(model);
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
-          parent.children.indexOf(model);
-          const props = (await uploadImageFromLocal(page.blobs)).map(
-            ({ sourceId }) => ({ flavour: 'affine:image', sourceId })
+          const props = (
+            await uploadImageFromLocal(pageElement.page.blobs)
+          ).map(
+            ({
+              sourceId,
+            }): ImageProps & {
+              flavour: 'affine:image';
+            } => ({
+              flavour: 'affine:image',
+              sourceId,
+            })
           );
-          page.addSiblingBlocks(model, props);
-        },
+          pageElement.page.addSiblingBlocks(model, props);
+        }),
       },
       {
         name: 'Bookmark',
@@ -224,8 +253,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return !insideDatabase(model);
         },
-        async action({ page, model }) {
-          const parent = page.getParent(model);
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             return;
           }
@@ -235,8 +264,8 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             flavour: 'affine:bookmark',
             url,
           } as const;
-          page.addSiblingBlocks(model, [props]);
-        },
+          pageElement.page.addSiblingBlocks(model, [props]);
+        }),
       },
       {
         name: 'File',
@@ -249,51 +278,14 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
             return false;
           return !insideDatabase(model);
         },
-        action: async ({ page, model }) => {
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const page = pageElement.page;
           const parent = page.getParent(model);
-          if (!parent) {
-            return;
-          }
-          let attachmentModel: AttachmentBlockModel | null = null;
-          const fileInfo = await uploadFileFromLocal(page.blobs, file => {
-            if (file.size > MAX_ATTACHMENT_SIZE) {
-              toast(
-                `You can only upload files less than ${humanFileSize(
-                  MAX_ATTACHMENT_SIZE,
-                  true,
-                  0
-                )}`
-              );
-              return false;
-            }
-
-            const loadingKey = page.generateId();
-            setAttachmentLoading(loadingKey, true);
-            const props: AttachmentProps & { flavour: 'affine:attachment' } = {
-              flavour: 'affine:attachment',
-              name: file.name,
-              size: file.size,
-              loadingKey,
-            };
-            const [newBlockId] = page.addSiblingBlocks(model, [props]);
-            assertExists(newBlockId);
-            attachmentModel = page.getBlockById(
-              newBlockId
-            ) as AttachmentBlockModel;
-
-            return true;
-          });
-          if (!fileInfo || !attachmentModel) return;
-          const { sourceId } = fileInfo;
-          // FIXME: I think it is a bug of TypeScript
-          const realAttachmentModel: AttachmentBlockModel = attachmentModel;
-          // await new Promise(resolve => setTimeout(resolve, 1000));
-          setAttachmentLoading(realAttachmentModel.loadingKey ?? '', false);
-          page.updateBlock(realAttachmentModel, {
-            sourceId,
-            loadingKey: null,
-          });
-        },
+          if (!parent) return;
+          const file = await openFileOrFiles();
+          if (!file) return;
+          await appendAttachmentBlock(file, model);
+        }),
       },
     ],
   },
@@ -365,25 +357,31 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: withRemoveEmptyLine(async ({ pageElement, model }) => {
+          const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = page.addBlock(
+          const id = pageElement.page.addBlock(
             'affine:database',
             {},
-            page.getParent(model),
+            pageElement.page.getParent(model),
             index + 1
           );
           const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(page, model, id, false);
-        },
+          service.initDatabaseBlock(
+            pageElement.page,
+            model,
+            id,
+            'table',
+            false
+          );
+        }),
       },
       {
         name: 'Kanban View',
         alias: ['database'],
-        disabled: true,
+        disabled: false,
         icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
           if (!model.page.awarenessStore.getFlag('enable_database')) {
@@ -398,48 +396,56 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
           }
           return true;
         },
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        action: ({ model }) => {},
-      },
-    ],
-  },
-  {
-    name: 'Data View',
-    items: [
-      {
-        name: 'Data View Table',
-        alias: ['table'],
-        icon: DatabaseKanbanViewIcon20,
-        showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_data_view')) {
-            return false;
-          }
-          if (!model.page.schema.flavourSchemaMap.has('affine:data-view')) {
-            return false;
-          }
-          if (insideDataView(model)) {
-            return false;
-          }
-          return true;
-        },
-        action: async ({ page, model }) => {
-          const parent = page.getParent(model);
+        action: withRemoveEmptyLine(async ({ model, pageElement }) => {
+          const parent = pageElement.page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          page.addBlock(
-            'affine:data-view',
+          const id = pageElement.page.addBlock(
+            'affine:database',
             {},
-            page.getParent(model),
+            pageElement.page.getParent(model),
             index + 1
           );
-        },
+          const service = await getServiceOrRegister('affine:database');
+          service.initDatabaseBlock(
+            pageElement.page,
+            model,
+            id,
+            'kanban',
+            false
+          );
+        }),
       },
     ],
   },
   {
     name: 'Actions',
     items: [
+      {
+        name: 'Move Up',
+        icon: ArrowUpBigIcon,
+        action: async ({ pageElement, model }) => {
+          const page = pageElement.page;
+          const previousBlock = getPreviousBlock(model);
+          if (!previousBlock) return;
+          const parent = page.getParent(previousBlock);
+          if (!parent) return;
+          page.moveBlocks([model], parent, previousBlock, true);
+        },
+      },
+      {
+        name: 'Move Down',
+        icon: ArrowDownBigIcon,
+        action: async ({ pageElement, model }) => {
+          const page = pageElement.page;
+          const nextBlock = getNextBlock(model);
+          if (!nextBlock) return;
+          const parent = page.getParent(nextBlock);
+          if (!parent) return;
+          page.moveBlocks([model], parent, nextBlock, false);
+        },
+      },
       {
         name: 'Copy',
         icon: CopyIcon,
@@ -462,37 +468,41 @@ export const menuGroups: { name: string; items: SlashItem[] }[] = [
       {
         name: 'Duplicate',
         icon: DuplicateIcon,
-        action: ({ page, model }) => {
+        action: ({ pageElement, model }) => {
           if (!model.text || !(model.text instanceof Text)) {
             throw new Error("Can't duplicate a block without text");
           }
-          const parent = page.getParent(model);
+          const parent = pageElement.page.getParent(model);
           if (!parent) {
             throw new Error('Failed to duplicate block! Parent not found');
           }
           const index = parent.children.indexOf(model);
 
           // TODO add clone model util
-          page.addBlock(
+          pageElement.page.addBlock(
             model.flavour,
             {
-              type: model.type,
-              text: page.Text.fromDelta(model.text.toDelta()),
+              type: (model as ParagraphBlockModel).type,
+              text: pageElement.page.Text.fromDelta(model.text.toDelta()),
               // @ts-expect-error
               checked: model.checked,
             },
-            page.getParent(model),
+            pageElement.page.getParent(model),
             index
           );
         },
       },
       {
         name: 'Delete',
+        alias: ['remove'],
         icon: DeleteIcon,
-        action: ({ page, model }) => {
-          page.deleteBlock(model);
+        action: ({ pageElement, model }) => {
+          pageElement.page.deleteBlock(model, { bringChildrenTo: 'parent' });
         },
       },
     ],
   },
-] satisfies { name: string; items: SlashItem[] }[];
+] satisfies {
+  name: string;
+  items: SlashItem[];
+}[];

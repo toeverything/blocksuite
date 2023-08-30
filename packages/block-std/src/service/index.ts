@@ -1,5 +1,5 @@
+import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { DisposableGroup } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
 import type { BlockStore } from '../store/index.js';
@@ -9,7 +9,7 @@ export interface BlockServiceOptions {
   store: BlockStore;
 }
 
-export class BlockService<Model extends BaseBlockModel = BaseBlockModel> {
+export class BlockService<_Model extends BaseBlockModel = BaseBlockModel> {
   readonly store: BlockStore;
   readonly flavour: string;
   readonly disposables = new DisposableGroup();

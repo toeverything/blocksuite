@@ -9,6 +9,10 @@ export const tString = typesystem.defineData<{ value: string }>({
   name: 'String',
   supers: [],
 });
+export const tRichText = typesystem.defineData<{ value: string }>({
+  name: 'RichText',
+  supers: [tString],
+});
 export const tBoolean = typesystem.defineData<{ value: boolean }>({
   name: 'Boolean',
   supers: [],
@@ -20,6 +24,10 @@ export const tDate = typesystem.defineData<{ value: number }>({
 export const tURL = typesystem.defineData({
   name: 'URL',
   supers: [tString],
+});
+export const tImage = typesystem.defineData({
+  name: 'Image',
+  supers: [],
 });
 export const tEmail = typesystem.defineData({
   name: 'Email',

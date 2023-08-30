@@ -1,14 +1,16 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { ArrowUpIcon, EdgelessPenIcon } from '@blocksuite/global/config';
+import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { assertExists } from '@blocksuite/store';
-import { computePosition, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
+import {
+  type EdgelessTool,
+  LineWidth,
+} from '../../../../../__internal__/index.js';
+import { ArrowUpIcon, EdgelessPenIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -24,18 +26,14 @@ function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
   assertExists(reference.shadowRoot);
   reference.shadowRoot.appendChild(brushMenu);
 
-  computePosition(reference, brushMenu, {
-    placement: 'top',
-    middleware: [
-      offset({
-        mainAxis: 10,
-      }),
-    ],
-  }).then(({ x, y }) => {
-    Object.assign(brushMenu.style, {
-      left: `${x}px`,
-      top: `${y}px`,
-    });
+  // The brush menu should be positioned at the top of the brush button.
+  // And it should be positioned at the top center of the toolbar all the time.
+  const x = 110;
+  const y = -40;
+
+  Object.assign(brushMenu.style, {
+    left: `${x}px`,
+    top: `${y}px`,
   });
 
   return {
@@ -55,14 +53,23 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
     .edgeless-brush-button {
       position: relative;
       height: 66px;
-      width: 36px;
+      width: 40px;
       overflow-y: hidden;
     }
     #edgeless-pen-icon {
       position: absolute;
       top: 10px;
-      left: 0;
+      left: 3px;
       transition: top 0.3s ease-in-out;
+    }
+    .active-mode {
+      height: 66px;
+      width: 40px;
+      top: 10px;
+      position: absolute;
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
+      background: var(--affine-hover-color);
     }
     #edgeless-pen-icon:hover {
       top: 2px;
@@ -72,7 +79,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       position: absolute;
-      right: 0px;
+      right: 2px;
       top: 12px;
       width: 14px;
       height: 14px;
@@ -156,6 +163,9 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type === 'brush') {
           this._setBrushColor(newTool.color);
+        } else {
+          this._brushMenu?.dispose();
+          this._brushMenu = null;
         }
       })
     );
@@ -163,6 +173,8 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
 
   override disconnectedCallback(): void {
     this._disposables.dispose();
+    this._brushMenu?.dispose();
+    this._brushMenu = null;
     super.disconnectedCallback();
   }
 
@@ -171,19 +183,19 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
 
     return html`
       <edgeless-toolbar-button
-        .tooltip=${getTooltipWithShortcut('Pen', 'P')}
+        .tooltip=${this._brushMenu ? '' : getTooltipWithShortcut('Pen', 'P')}
         .active=${type === 'brush'}
-        .activeMode=${'background'}
         @click=${() => {
           this.setEdgelessTool({
             type: 'brush',
-            lineWidth: 4,
+            lineWidth: LineWidth.LINE_WIDTH_FOUR,
             color: DEFAULT_BRUSH_COLOR,
           });
           this._toggleBrushMenu();
         }}
       >
         <div class="edgeless-brush-button">
+          <div class=${type === 'brush' ? 'active-mode' : ''}></div>
           ${EdgelessPenIcon}
           <div class="arrow-up-icon">${ArrowUpIcon}</div>
         </div>

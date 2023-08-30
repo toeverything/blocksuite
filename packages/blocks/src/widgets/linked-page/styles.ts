@@ -41,5 +41,5 @@ export const styles = css`
     background: var(--affine-border-color);
   }
 
-  ${scrollbarStyle}
+  ${scrollbarStyle('.linked-page-popover .group')}
 `;

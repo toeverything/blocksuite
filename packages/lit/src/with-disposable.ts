@@ -4,6 +4,7 @@ import type { LitElement } from 'lit';
 // See https://lit.dev/docs/composition/mixins/#mixins-in-typescript
 // This definition should be exported, see https://github.com/microsoft/TypeScript/issues/30355#issuecomment-839834550
 export declare class DisposableClass {
+  readonly disposables: DisposableGroup;
   protected _disposables: DisposableGroup;
 }
 
@@ -31,6 +32,10 @@ export function WithDisposable<T extends Constructor<LitElement>>(
 ) {
   class DerivedClass extends SuperClass {
     protected _disposables = new DisposableGroup();
+
+    get disposables() {
+      return this._disposables;
+    }
 
     override connectedCallback() {
       super.connectedCallback();

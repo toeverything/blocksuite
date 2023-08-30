@@ -1,12 +1,10 @@
 /// <reference types="vite/client" />
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/global/config';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { registerService } from '../__internal__/service.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
 import type { DividerBlockModel } from './divider-model.js';
-import { DividerBlockService } from './divider-service.js';
 
 @customElement('affine-divider')
 export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
@@ -30,7 +28,6 @@ export class DividerBlockComponent extends BlockElement<DividerBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    registerService('affine:divider', DividerBlockService);
   }
 
   override firstUpdated() {

@@ -13,7 +13,12 @@ export const checkboxPureColumnConfig = columnManager.register<boolean>(
     name: 'Checkbox',
     type: () => tBoolean.create(),
     defaultData: () => ({}),
-    cellToString: data => '',
+    cellToString: data => (data ? 'True' : 'False'),
+    cellFromString: data => {
+      return {
+        value: data === 'False' ? false : true,
+      };
+    },
     cellToJson: data => data ?? null,
   }
 );

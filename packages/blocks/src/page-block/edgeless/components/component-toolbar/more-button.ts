@@ -1,10 +1,10 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 
-import { MoreHorizontalIcon } from '@blocksuite/global/config';
+import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { PhasorElement } from '@blocksuite/phasor';
-import { css, html, LitElement } from 'lit';
+import { FrameElement, type PhasorElement } from '@blocksuite/phasor';
+import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -12,42 +12,82 @@ import {
   type ReorderingType,
   type TopLevelBlockModel,
 } from '../../../../__internal__/index.js';
+import {
+  BringForwardIcon,
+  BringToFrontIcon,
+  CopyAsPngIcon,
+  FrameIcon,
+  MoreCopyIcon,
+  MoreDeleteIcon,
+  MoreDuplicateIcon,
+  MoreHorizontalIcon,
+  MoreVerticalIcon,
+  SendBackwardIcon,
+  SendToBackIcon,
+} from '../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { duplicate } from '../../utils/clipboard-utils.js';
+import { deleteElements } from '../../utils/crud.js';
 import { isTopLevelBlock } from '../../utils/query.js';
-import type { Selectable } from '../../utils/selection-manager.js';
 import { createButtonPopper } from '../utils.js';
 
-type Action = {
-  name: string;
-  type: 'delete' | 'copy-as-png' | ReorderingType;
-  disabled?: boolean;
-};
+type Action =
+  | {
+      icon: TemplateResult<1>;
+      name: string;
+      type:
+        | 'delete'
+        | 'copy-as-png'
+        | 'create-frame'
+        | 'copy'
+        | 'duplicate'
+        | ReorderingType;
+      disabled?: boolean;
+    }
+  | {
+      type: 'divider';
+    };
 
 const ACTIONS: Action[] = [
-  // FIXME: should implement these function
-  // { name: 'Copy', type: 'copy', disabled: true },
-  // { name: 'Paste', type: 'paste', disabled: true },
-  // { name: 'Duplicate', type: 'duplicate', disabled: true },
-  { name: 'Bring to front', type: 'front' },
-  { name: 'Bring forward', type: 'forward' },
-  { name: 'Send backward', type: 'backward' },
-  { name: 'Send to back', type: 'back' },
-  { name: 'Copy as PNG', type: 'copy-as-png' },
-  { name: 'Delete', type: 'delete' },
+  { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
+  { type: 'divider' },
+  { icon: BringToFrontIcon, name: 'Bring to front', type: 'front' },
+  { icon: BringForwardIcon, name: 'Bring forward', type: 'forward' },
+  { icon: SendBackwardIcon, name: 'Send backward', type: 'backward' },
+  { icon: SendToBackIcon, name: 'Send to back', type: 'back' },
+  { type: 'divider' },
+  { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
+  { icon: CopyAsPngIcon, name: 'Copy as PNG', type: 'copy-as-png' },
+  { icon: MoreDuplicateIcon, name: 'Duplicate', type: 'duplicate' },
+  { type: 'divider' },
+  { icon: MoreDeleteIcon, name: 'Delete', type: 'delete' },
 ];
 
-function Actions(onClick: (action: Action) => void) {
+const FRAME_ACTIONS: Action[] = [
+  { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
+  { type: 'divider' },
+  { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
+  { icon: CopyAsPngIcon, name: 'Copy as PNG', type: 'copy-as-png' },
+  { icon: MoreDuplicateIcon, name: 'Duplicate', type: 'duplicate' },
+  { type: 'divider' },
+  { icon: MoreDeleteIcon, name: 'Delete', type: 'delete' },
+];
+
+function Actions(actions: Action[], onClick: (action: Action) => void) {
   return repeat(
-    ACTIONS,
+    actions,
     action => action.type,
-    action =>
-      html`<div
-        class="action-item ${action.type}"
-        @click=${() => onClick(action)}
-        ?data-disabled=${action.disabled}
-      >
-        ${action.name}
-      </div>`
+    action => {
+      return action.type === 'divider'
+        ? html`<menu-divider></menu-divider>`
+        : html`<div
+            class="action-item ${action.type}"
+            @click=${() => onClick(action)}
+            ?data-disabled=${action.disabled}
+          >
+            ${action.icon}${action.name}
+          </div>`;
+    }
   );
 }
 
@@ -58,13 +98,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       display: block;
       color: var(--affine-text-primary-color);
       fill: currentColor;
-      padding-right: 6px;
+      font-family: var(--affine-font-family);
     }
 
     .more-actions-container {
       display: none;
-      width: 158px;
-      padding: 8px 4px;
+      width: 164px;
+      padding: 8px;
       justify-content: center;
       align-items: center;
       background: var(--affine-background-overlay-panel-color);
@@ -79,14 +119,24 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     }
 
     .action-item {
-      width: 100%;
+      display: flex;
+      white-space: nowrap;
       height: 32px;
       box-sizing: border-box;
-      padding: 5px 12px;
-      border-radius: 5px;
+      font-size: 14px;
+      padding: 4px 8px;
+      border-radius: 4px;
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
+      align-items: center;
+      gap: 8px;
+    }
+
+    menu-divider {
+      width: 88%;
+      position: relative;
+      left: 8px;
     }
 
     .action-item:hover {
@@ -103,10 +153,13 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  elements: Selectable[] = [];
+  elements: string[] = [];
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  vertical = false;
 
   @state()
   private _popperShow = false;
@@ -121,6 +174,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return this.edgeless.page;
   }
 
+  get selection() {
+    return this.edgeless.selectionManager;
+  }
+
   get slots() {
     return this.edgeless.slots;
   }
@@ -129,43 +186,38 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     return this.edgeless.surface;
   }
 
-  private _splitElements(): {
-    notes: TopLevelBlockModel[];
-    shapes: PhasorElement[];
-  } {
-    const notes: TopLevelBlockModel[] = [];
-    const shapes: PhasorElement[] = [];
-    this.elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        notes.push(element);
-      } else {
-        shapes.push(element);
-      }
-    });
-    return {
-      notes: notes,
-      shapes,
+  private _splitElements() {
+    const { notes, shapes } = groupBy(this.selection.elements, element => {
+      return isTopLevelBlock(element) ? 'notes' : 'shapes';
+    }) as {
+      notes: TopLevelBlockModel[];
+      shapes: PhasorElement[];
     };
+
+    return { notes: notes ?? [], shapes: shapes ?? [] };
   }
 
   private _delete() {
     this.page.captureSync();
-    this.elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        const children = this.page.root?.children ?? [];
-        if (children.length > 1) {
-          this.page.deleteBlock(element);
-        }
-      } else {
-        this.edgeless.connector.detachConnectors([element]);
-        this.surface.removeElement(element.id);
-      }
+    deleteElements(this.edgeless, this.selection.elements);
+
+    this.selection.setSelection({
+      elements: [],
+      editing: false,
     });
-    this.slots.selectionUpdated.emit({ selected: [], active: false });
   }
 
-  private _runAction = ({ type }: Action) => {
+  private _runAction = async ({ type }: Action) => {
+    const selection = this.edgeless.selectionManager;
     switch (type) {
+      case 'copy': {
+        this.edgeless.clipboard.copy();
+        break;
+      }
+      case 'duplicate': {
+        await duplicate(this.edgeless, selection.elements);
+        break;
+      }
       case 'delete': {
         this._delete();
         break;
@@ -176,6 +228,10 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
           notes,
           shapes,
         });
+        break;
+      }
+      case 'create-frame': {
+        this.edgeless.frame.createFrameOnSelected();
         break;
       }
       case 'front':
@@ -216,14 +272,22 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const actions = Actions(this._runAction);
+    const selection = this.edgeless.selectionManager;
+
+    const actions = Actions(
+      selection.elements.some(ele => ele instanceof FrameElement)
+        ? FRAME_ACTIONS
+        : ACTIONS,
+      this._runAction
+    );
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._popperShow ? '' : 'More'}
         .active=${false}
+        .iconContainerPadding=${2}
         @click=${() => this._actionsMenuPopper?.toggle()}
       >
-        ${MoreHorizontalIcon}
+        ${this.vertical ? MoreVerticalIcon : MoreHorizontalIcon}
       </edgeless-tool-icon-button>
       <div class="more-actions-container">${actions}</div>
     `;

@@ -3,6 +3,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { startDrag } from '../../../utils/drag.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { progressPureColumnConfig } from './define.js';
@@ -11,21 +12,19 @@ const styles = css`
   affine-database-progress-cell-editing {
     display: block;
     width: 100%;
-    height: 100%;
     padding: 0 4px;
   }
 
   affine-database-progress-cell {
     display: block;
     width: 100%;
-    height: 100%;
     padding: 0 4px;
   }
 
   .affine-database-progress {
     display: flex;
     align-items: center;
-    height: 100%;
+    height: var(--data-view-cell-text-line-height);
     gap: 4px;
   }
 
@@ -37,7 +36,7 @@ const styles = css`
   .affine-database-progress-bg {
     overflow: hidden;
     width: 100%;
-    height: 13px;
+    height: 10px;
     border-radius: 22px;
   }
 
@@ -51,7 +50,7 @@ const styles = css`
     left: 0;
     transform: translate(0px, -1px);
     width: 6px;
-    height: 15px;
+    height: 12px;
     border-radius: 2px;
     opacity: 1;
     cursor: ew-resize;
@@ -76,17 +75,14 @@ const progressColors = {
   success: 'var(--affine-success-color)',
 };
 
-type DragConfig = {
-  stepWidth: number;
-  containerWidth: number;
-  boundLeft: number;
-};
-
 @customElement('affine-database-progress-cell')
 export class ProgressCell extends BaseCellRenderer<number> {
   static override styles = styles;
 
   _bgClick(e: MouseEvent) {
+    if (this.column.readonly) {
+      return;
+    }
     this.onChange(
       Math.round(
         (e.offsetX * 100) / (e.currentTarget as HTMLDivElement).offsetWidth
@@ -146,18 +142,10 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
   @query('.affine-database-progress-bg')
   private _progressBg!: HTMLElement;
 
-  private _dragConfig: DragConfig | null = null;
-
   override firstUpdated() {
     const disposables = this._disposables;
 
-    disposables.addFromEvent(
-      this._progressBg,
-      'pointerdown',
-      this._onPointerDown
-    );
-    disposables.addFromEvent(document, 'pointermove', this._onPointerMove);
-    disposables.addFromEvent(document, 'pointerup', this._onPointerUp);
+    disposables.addFromEvent(this._progressBg, 'pointerdown', this.startDrag);
     disposables.addFromEvent(window, 'keydown', evt => {
       if (evt.key === 'ArrowDown') {
         this._onChange(Math.max(0, this._value - 1));
@@ -170,40 +158,31 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     });
   }
 
-  private _onPointerDown = (event: PointerEvent) => {
-    event.stopPropagation();
-    const { left, width } = this._progressBg.getBoundingClientRect();
-    const visibleWidth = width - 6;
-    this._dragConfig = {
-      stepWidth: visibleWidth / 100,
-      boundLeft: left,
-      containerWidth: visibleWidth,
+  startDrag = (event: PointerEvent) => {
+    const bgRect = this._progressBg.getBoundingClientRect();
+    const min = bgRect.left;
+    const max = bgRect.right;
+    const setValue = (x: number) => {
+      this.tempValue = Math.round(
+        ((Math.min(max, Math.max(min, x)) - min) / (max - min)) * 100
+      );
     };
-    this._onPointerMove(event);
-  };
-
-  private _onPointerMove = (event: PointerEvent) => {
-    event.stopPropagation();
-    if (!this._dragConfig) return;
-    const x = event.clientX;
-    const { boundLeft, containerWidth, stepWidth } = this._dragConfig;
-
-    let steps: number;
-    if (x <= boundLeft) {
-      steps = 0;
-    } else if (x - boundLeft >= containerWidth) {
-      steps = 100;
-    } else {
-      steps = Math.floor((x - boundLeft) / stepWidth);
-    }
-
-    if (this._value !== steps) {
-      this._onChange(steps);
-    }
-  };
-
-  private _onPointerUp = () => {
-    this._dragConfig = null;
+    startDrag(event, {
+      onDrag: ({ x }) => {
+        setValue(x);
+        return;
+      },
+      onMove: ({ x }) => {
+        setValue(x);
+        return;
+      },
+      onDrop: () => {
+        //
+      },
+      onClear: () => {
+        //
+      },
+    });
   };
 
   protected override render() {

@@ -25,12 +25,12 @@
         box-sizing: border-box;
       }
 
-      .affine-default-page-block-title-container {
+      .affine-doc-page-block-title-container {
         margin-top: 78px;
       }
 
       @media print {
-        .affine-default-page-block-title-container {
+        .affine-doc-page-block-title-container {
           margin-top: 0px;
         }
       }
@@ -38,6 +38,7 @@
   </head>
 
   <body>
+    <script type="module" src="../polyfill/intl-segmenter.ts"></script>
     <script type="module" src="../apps/starter/main.ts"></script>
     <div id="app">
       <div id="inspector"></div>

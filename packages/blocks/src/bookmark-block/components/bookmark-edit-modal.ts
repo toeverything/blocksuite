@@ -1,5 +1,4 @@
 import '../../components/button.js';
-import '../../components/portal.js';
 import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
@@ -7,8 +6,8 @@ import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { CloseIcon } from '../../icons/index.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { CloseIcon } from '../images/icons.js';
 
 export const bookmarkModalStyles = html`
   <style>
@@ -227,7 +226,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           </div>
         </div>
       </div>`;
-    return html`<affine-portal .template=${modal}></affine-portal>`;
+    return html`<blocksuite-portal .template=${modal}></blocksuite-portal>`;
   }
 }
 

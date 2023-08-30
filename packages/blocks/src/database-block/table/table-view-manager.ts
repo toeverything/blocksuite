@@ -1,14 +1,18 @@
 import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
+import type { CellRenderer } from '../common/columns/manager.js';
+import type { RealDataViewDataTypeMap } from '../common/data-view.js';
 import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import type { TableViewData } from '../common/view-manager.js';
 import type { ViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
+import { headerRenderer } from './components/header-cell.js';
+
+type TableViewData = RealDataViewDataTypeMap['table'];
 
 export class DataViewTableManager extends BaseDataViewManager {
   public override get type(): string {
@@ -67,13 +71,16 @@ export class DataViewTableManager extends BaseDataViewManager {
     if (this.view.columns.length === this.columns.length) {
       return;
     }
-    this.viewSource.updateView(view => {
+    this.viewSource.updateView(_view => {
       return {
-        columns: this.columnManagerList.map((column, i) => ({
-          id: column.id,
-          width: column.width,
-          hide: column.hide,
-        })),
+        columns: this.columnsWithoutFilter.map(id => {
+          const column = this.columnGet(id);
+          return {
+            id: column.id,
+            hide: column.hide,
+            width: column.width,
+          };
+        }),
       };
     });
   }
@@ -109,13 +116,28 @@ export class DataViewTableManager extends BaseDataViewManager {
     this.updateView(view => {
       return {
         columns: view.columns.map(v =>
-          v.id === columnId ? { ...v, width: width } : v
+          v.id === columnId
+            ? {
+                ...v,
+                width: width,
+              }
+            : v
         ),
       };
     });
   }
 
   public get columns(): string[] {
+    return this.columnsWithoutFilter.filter(id => !this.columnGetHide(id));
+  }
+
+  public get detailColumns(): string[] {
+    return this.columnsWithoutFilter.filter(
+      id => this.columnGetType(id) !== 'title'
+    );
+  }
+
+  public get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
     this.view.columns.forEach(v => {
@@ -127,31 +149,89 @@ export class DataViewTableManager extends BaseDataViewManager {
     result.push(...needShow);
     return result;
   }
-
+  override get readonly(): boolean {
+    return this.viewSource.readonly;
+  }
   public isShow(rowId: string): boolean {
     if (this.filter.conditions.length) {
       const rowMap = Object.fromEntries(
         this.columnManagerList.map(column => [
           column.id,
-          column.getFilterValue(rowId),
+          column.getJsonValue(rowId),
         ])
       );
       return evalFilter(this.filter, rowMap);
     }
     return true;
   }
+
+  columnUpdateHide(columnId: string, hide: boolean): void {
+    this.updateView(view => {
+      return {
+        columns: view.columns.map(v =>
+          v.id === columnId
+            ? {
+                ...v,
+                hide,
+              }
+            : v
+        ),
+      };
+    });
+  }
+
+  columnGetHide(columnId: string): boolean {
+    return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
+  }
+
+  public deleteView(): void {
+    this.viewSource.delete();
+  }
+
+  public get isDeleted(): boolean {
+    return this.viewSource.isDeleted();
+  }
+
+  public get header() {
+    return (
+      this.view.header ?? {
+        titleColumn: this.columnsWithoutFilter.find(
+          id => this.columnGetType(id) === 'title'
+        ),
+        iconColumn: 'type',
+      }
+    );
+  }
+
+  public isInHeader(columnId: string) {
+    return Object.values(this.header).some(v => v === columnId);
+  }
+
+  public hasHeader(rowId: string): boolean {
+    return Object.values(this.header).some(id => this.cellGetValue(rowId, id));
+  }
 }
 
 export class DataViewTableColumnManager extends BaseDataViewColumnManager {
-  constructor(propertyId: string, override viewManager: DataViewTableManager) {
-    super(propertyId, viewManager);
+  constructor(
+    propertyId: string,
+    override dataViewManager: DataViewTableManager
+  ) {
+    super(propertyId, dataViewManager);
   }
 
   get width(): number {
-    return this.viewManager.columnGetWidth(this.id);
+    return this.dataViewManager.columnGetWidth(this.id);
   }
 
   updateWidth(width: number): void {
-    this.viewManager.columnUpdateWidth(this.id, width);
+    this.dataViewManager.columnUpdateWidth(this.id, width);
+  }
+
+  public override get renderer(): CellRenderer {
+    if (this.id === this.dataViewManager.header.titleColumn) {
+      return headerRenderer;
+    }
+    return super.renderer;
   }
 }

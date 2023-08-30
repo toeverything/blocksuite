@@ -1,3 +1,4 @@
+export * from './block.js';
 export * from './click.js';
 export * from './drag.js';
 export * from './edgeless.js';

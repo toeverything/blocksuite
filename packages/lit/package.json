@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/lit",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Lit renderer for blocksuite store",
   "main": "src/index.ts",
   "type": "module",
@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "lit": "^2.7.6"
+    "@blocksuite/virgo": "workspace:*",
+    "lit": "^2.8.0"
   },
   "devDependencies": {
     "@blocksuite/block-std": "workspace:*",

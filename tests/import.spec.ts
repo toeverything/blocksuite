@@ -334,35 +334,24 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
     <article id="8da888cd-8160-4fd6-929c-628fca9189d8" class="page sans">
       <header><h1 class="page-title">demo</h1></header>
       <div class="page-body">
-        <figure id="5b57744f-875a-4a73-b86b-a0a4c6e4de73">
-          <a
-            href="https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel"
-            class="bookmark source"
-            ><div class="bookmark-info">
+        <figure id="5d65f4af-8da7-4fe2-8d20-cb6ba4d902b3">
+          <a href="https://github.com/toeverything/AFFiNE" class="bookmark source">
+            <div class="bookmark-info">
               <div class="bookmark-text">
-                <div class="bookmark-title">
-                  Beyond Frank Lloyd Wright: A Broader View of Art in Chicago
-                </div>
-                <div class="bookmark-description">
-                  "We had been aware of the Walker exhibit but hadn't quite known how to
-                  connect," said Steve Weaver, executive director of the Chicago Public
-                  Art Group. On April 7 it is hosting a Terra-supported tour of
-                  neighborhood murals by Mr. Walker, as well as by artists including
-                  Mitchell Caton, Calvin Jones and Justine DeVan, with a stop at the
-                  Hyde Park exhibition.
-                </div>
+                <div class="bookmark-title">GitHub - toeverything/AFFiNE: There can be more than Notion and
+                  Miro. AFFiNE is a next-gen knowledge base that brings planning, sorting and creating all
+                  together. Privacy first, open-source, customizable and ready to use.</div>
+                <div class="bookmark-description">There can be more than Notion and Miro. AFFiNE is a
+                  next-gen knowledge base that brings planning, sorting and creating all together. Privacy
+                  first, open-source, customizable and ready to use. - Gi...</div>
               </div>
-              <div class="bookmark-href">
-                <img
-                  src="https://static01.nyt.com/favicon.ico"
-                  class="icon bookmark-icon"
-                />https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel
-              </div>
-            </div>
-            <img
-              src="https://static01.nyt.com/images/2018/03/15/arts/15ARTCHICAGO1/15ARTCHICAGO1-facebookJumbo.jpg"
-              class="bookmark-image"
-          /></a>
+              <div class="bookmark-href"><img src="https://github.com/fluidicon.png"
+                  class="icon bookmark-icon" />https://github.com/toeverything/AFFiNE</div>
+            </div><img
+              src="https://repository-images.githubusercontent.com/519859998/a99cfab6-8d58-4c05-9523-ea31e0cda7f8"
+              class="bookmark-image" />
+          </a>
+          <figcaption>cccxdsdddddd</figcaption>
         </figure>
       </div>
     </article>
@@ -379,7 +368,15 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
     {
       flavour: 'affine:bookmark',
       children: [],
-      url: 'https://www.nytimes.com/2018/03/08/arts/chicago-museums-art.html?rref=collection%2Fsectioncollection%2Ftravel',
+      url: 'https://github.com/toeverything/AFFiNE',
+      bookmarkTitle:
+        'GitHub - toeverything/AFFiNE: There can be more than Notion and\n                  Miro. AFFiNE is a next-gen knowledge base that brings planning, sorting and creating all\n                  together. Privacy first, open-source, customizable and ready to use.',
+      description:
+        'There can be more than Notion and Miro. AFFiNE is a\n                  next-gen knowledge base that brings planning, sorting and creating all together. Privacy\n                  first, open-source, customizable and ready to use. - Gi...',
+      icon: 'https://github.com/fluidicon.png',
+      image:
+        'https://repository-images.githubusercontent.com/519859998/a99cfab6-8d58-4c05-9523-ea31e0cda7f8',
+      caption: '',
     },
   ];
 
@@ -402,45 +399,64 @@ test(scoped`import notion markdown-format table`, async ({ page }) => {
 
   const expectedValue = [
     {
-      flavour: 'affine:paragraph',
-      type: 'h1',
-      text: [{ insert: 'demo', attributes: {} }],
+      checked: undefined,
       children: [],
+      flavour: 'affine:paragraph',
+      text: [{ attributes: {}, insert: 'demo' }],
+      type: 'h1',
     },
     {
-      flavour: 'affine:database',
-      databaseProps: {
-        id: '3',
-        title: 'Database',
-        rowIds: ['4', '5'],
-        cells: {
-          '4': { '1': { columnId: '1', value: 'table-content2' } },
-          '5': { '1': { columnId: '1', value: '' } },
-        },
-        columns: [
-          {
-            name: 'table-title2',
-            type: 'rich-text',
-            data: {},
-            id: '1',
-          },
-          { name: '', type: 'rich-text', data: {}, id: '2' },
-        ],
-      },
       children: [
         {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [{ insert: 'table-content1' }],
           children: [],
+          flavour: 'affine:paragraph',
+          text: [{ insert: 'table-content1' }],
+          type: 'text',
         },
         {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [{ insert: '' }],
           children: [],
+          flavour: 'affine:paragraph',
+          text: [{ insert: '' }],
+          type: 'text',
         },
       ],
+      databaseProps: {
+        cells: {
+          '4': {
+            '1': { columnId: '1', value: 'table-content1' },
+            '2': { columnId: '2', value: 'table-content2' },
+          },
+          '5': {
+            '1': { columnId: '1', value: '' },
+            '2': { columnId: '2', value: '' },
+          },
+        },
+        columns: [
+          { data: {}, id: '1', name: 'table-title1', type: 'rich-text' },
+          { data: {}, id: '2', name: 'table-title2', type: 'rich-text' },
+        ],
+        id: '3',
+        rowIds: ['4', '5'],
+        title: 'Database',
+        views: [
+          {
+            id: '0',
+            name: 'Table View',
+            mode: 'table',
+            header: {
+              iconColumn: 'type',
+              titleColumn: '1',
+            },
+            columns: [],
+            filter: {
+              type: 'group',
+              op: 'and',
+              conditions: [],
+            },
+          },
+        ],
+      },
+      flavour: 'affine:database',
     },
   ];
 
@@ -587,189 +603,128 @@ test(scoped`import notion html-format table`, async ({ page }) => {
 
   const expectedValue = [
     {
-      flavour: 'affine:page',
-      type: 'h1',
-      text: [
-        {
-          insert: 'demo',
-          'matchesReplaceMap[0]': {},
-        },
-      ],
       children: [],
+      flavour: 'affine:page',
+      text: [{ insert: 'demo', 'matchesReplaceMap[0]': {} }],
+      type: 'h1',
     },
     {
-      flavour: 'affine:database',
+      children: [
+        {
+          children: [],
+          flavour: 'affine:paragraph',
+          text: [{ insert: '@Untitled' }],
+          type: 'text',
+        },
+        {
+          children: [],
+          flavour: 'affine:paragraph',
+          text: [{ insert: 'Untitled' }],
+          type: 'text',
+        },
+        {
+          children: [],
+          flavour: 'affine:paragraph',
+          text: [{ insert: 'Untitled' }],
+          type: 'text',
+        },
+      ],
       databaseProps: {
-        id: '7',
-        title: 'Database',
-        rowIds: ['8', '9', '10'],
         cells: {
-          '8': {
-            '1': {
-              columnId: '1',
-              value: '',
-            },
-            '2': {
-              columnId: '2',
-              value: 'matchesReplaceMap[8]',
-            },
-            '3': {
-              columnId: '3',
-              value: ['matchesReplaceMap[12]'],
-            },
-            '4': {
-              columnId: '4',
-              value: 'on',
-            },
-            '5': {
-              columnId: '5',
-              value: '123',
-            },
-          },
-          '9': {
-            '1': {
-              columnId: '1',
-              value: 'aaa',
-            },
-            '2': {
-              columnId: '2',
-              value: 'matchesReplaceMap[10]',
-            },
-            '3': {
-              columnId: '3',
-              value: ['matchesReplaceMap[14]'],
-            },
-            '4': {
-              columnId: '4',
-              value: '',
-            },
-            '5': {
-              columnId: '5',
-              value: '',
-            },
-          },
           '10': {
-            '1': {
-              columnId: '1',
-              value: '',
-            },
-            '2': {
-              columnId: '2',
-              value: 'matchesReplaceMap[8]',
-            },
-            '3': {
-              columnId: '3',
+            '1': { columnId: '1', value: 'Untitled' },
+            '2': { columnId: '2', value: '' },
+            '3': { columnId: '3', value: 'matchesReplaceMap[8]' },
+            '4': {
+              columnId: '4',
               value: ['matchesReplaceMap[12]', 'matchesReplaceMap[14]'],
             },
-            '4': {
-              columnId: '4',
-              value: '',
-            },
-            '5': {
-              columnId: '5',
-              value: '',
-            },
+            '5': { columnId: '5', value: '' },
+            '6': { columnId: '6', value: '' },
+          },
+          '8': {
+            '1': { columnId: '1', value: '@Untitled' },
+            '2': { columnId: '2', value: '' },
+            '3': { columnId: '3', value: 'matchesReplaceMap[8]' },
+            '4': { columnId: '4', value: ['matchesReplaceMap[12]'] },
+            '5': { columnId: '5', value: 'on' },
+            '6': { columnId: '6', value: '123' },
+          },
+          '9': {
+            '1': { columnId: '1', value: 'Untitled' },
+            '2': { columnId: '2', value: 'aaa' },
+            '3': { columnId: '3', value: 'matchesReplaceMap[10]' },
+            '4': { columnId: '4', value: ['matchesReplaceMap[14]'] },
+            '5': { columnId: '5', value: '' },
+            '6': { columnId: '6', value: '' },
           },
         },
         columns: [
+          { data: {}, id: '1', name: 'Name', type: 'title' },
+          { data: {}, id: '2', name: 'Text', type: 'rich-text' },
           {
-            id: '1',
-            type: 'rich-text',
-            name: 'Text',
-            data: {},
-          },
-          {
-            id: '2',
-            type: 'select',
-            name: 'Select',
             data: {
               options: [
                 {
+                  color: 'matchesReplaceMap[9]',
                   id: 'matchesReplaceMap[8]',
                   value: 's',
-                  color: 'matchesReplaceMap[9]',
                 },
                 {
+                  color: 'matchesReplaceMap[11]',
                   id: 'matchesReplaceMap[10]',
                   value: 'a',
-                  color: 'matchesReplaceMap[11]',
                 },
               ],
             },
+            id: '3',
+            name: 'Select',
+            type: 'select',
           },
           {
-            id: '3',
-            type: 'multi-select',
-            name: 'Multi-select',
             data: {
               options: [
                 {
+                  color: 'matchesReplaceMap[13]',
                   id: 'matchesReplaceMap[12]',
                   value: 'aaa',
-                  color: 'matchesReplaceMap[13]',
                 },
                 {
+                  color: 'matchesReplaceMap[15]',
                   id: 'matchesReplaceMap[14]',
                   value: 'bbb',
-                  color: 'matchesReplaceMap[15]',
                 },
               ],
             },
-          },
-          {
             id: '4',
-            type: 'checkbox',
-            name: 'Checkbox',
-            data: {},
+            name: 'Multi-select',
+            type: 'multi-select',
           },
+          { data: {}, id: '5', name: 'Checkbox', type: 'checkbox' },
+          { data: { decimal: 0 }, id: '6', name: 'Number', type: 'number' },
+        ],
+        id: '7',
+        rowIds: ['8', '9', '10'],
+        title: 'Database',
+        views: [
           {
-            id: '5',
-            type: 'number',
-            name: 'Number',
-            data: {
-              decimal: 0,
+            id: '0',
+            name: 'Table View',
+            mode: 'table',
+            columns: [],
+            header: {
+              'matchesReplaceMap[16]': 'type',
+              titleColumn: '1',
             },
-          },
-          {
-            id: '6',
-            type: 'rich-text',
-            name: '',
-            data: {},
+            filter: {
+              type: 'group',
+              op: 'and',
+              'matchesReplaceMap[17]': [],
+            },
           },
         ],
       },
-      children: [
-        {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [
-            {
-              insert: '@Untitled',
-            },
-          ],
-          children: [],
-        },
-        {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [
-            {
-              insert: 'Untitled',
-            },
-          ],
-          children: [],
-        },
-        {
-          flavour: 'affine:paragraph',
-          type: 'text',
-          text: [
-            {
-              insert: 'Untitled',
-            },
-          ],
-          children: [],
-        },
-      ],
+      flavour: 'affine:database',
     },
   ];
 
@@ -1667,6 +1622,151 @@ test(scoped`import notion html-format todo list`, async ({ page }) => {
           children: [],
         },
       ],
+    },
+  ];
+
+  const blocks = await transformHtml(page, tempText);
+  expect(blocks).toEqual(expectedValue);
+});
+
+test(scoped`import notion html-format highlight`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+
+  const tempText = `
+  <html>
+    <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+      <title>demo</title>
+    </head>
+    <body>
+      <article id="041bd128-3d2c-47ff-a383-3cfdc54ed674" class="page sans">
+        <header>
+          <h1 class="page-title"></h1>
+          <p class="page-description"></p>
+        </header>
+          <p id="891ba981-e662-4b50-bfcb-f3494d58a296" class="">a<mark
+            class="highlight-default">b</mark>c<mark class="highlight-gray">d</mark>e<mark
+            class="highlight-brown">f</mark>g<mark class="highlight-orange">h</mark><mark
+            class="highlight-yellow">i</mark>c<mark class="highlight-green">j</mark>k<mark
+            class="highlight-blue">l</mark>m<mark class="highlight-purple">n</mark><mark
+            class="highlight-pink">o</mark>p<mark class="highlight-red">q</mark></p>
+          <p id="5af1c753-b9f0-42f7-96a7-1509b1e9f5e9" class="">a<mark
+            class="highlight-default_background">b</mark>c<mark class="highlight-gray_background">d</mark>e<mark
+            class="highlight-brown_background">f</mark>g<mark class="highlight-orange_background">h</mark><mark
+            class="highlight-yellow_background">i</mark>c<mark class="highlight-green_background">j</mark>k<mark
+            class="highlight-blue_background">l</mark>m<mark class="highlight-purple_background">n</mark><mark
+            class="highlight-pink_background">o</mark>p<mark class="highlight-red_background">q</mark></p>
+        </div>
+      </article>
+    </body>
+  </html>
+`;
+
+  const expectedValue = [
+    { flavour: 'affine:page', type: 'h1', text: [], children: [] },
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [
+        { insert: 'a', attributes: {} },
+        { insert: 'b', attributes: {} },
+        { insert: 'c', attributes: {} },
+        {
+          insert: 'd',
+          attributes: { background: 'var(--affine-text-highlight-grey)' },
+        },
+        { insert: 'e', attributes: {} },
+        {
+          insert: 'f',
+          attributes: { background: 'var(--affine-text-highlight-yellow)' },
+        },
+        { insert: 'g', attributes: {} },
+        {
+          insert: 'h',
+          attributes: { background: 'var(--affine-text-highlight-orange)' },
+        },
+        {
+          insert: 'i',
+          attributes: { background: 'var(--affine-text-highlight-yellow)' },
+        },
+        { insert: 'c', attributes: {} },
+        {
+          insert: 'j',
+          attributes: { background: 'var(--affine-text-highlight-green)' },
+        },
+        { insert: 'k', attributes: {} },
+        {
+          insert: 'l',
+          attributes: { background: 'var(--affine-text-highlight-blue)' },
+        },
+        { insert: 'm', attributes: {} },
+        {
+          insert: 'n',
+          attributes: { background: 'var(--affine-text-highlight-purple)' },
+        },
+        {
+          insert: 'o',
+          attributes: { background: 'var(--affine-text-highlight-pink)' },
+        },
+        { insert: 'p', attributes: {} },
+        {
+          insert: 'q',
+          attributes: { background: 'var(--affine-text-highlight-pink)' },
+        },
+      ],
+      children: [],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [
+        { insert: 'a', attributes: {} },
+        { insert: 'b', attributes: {} },
+        { insert: 'c', attributes: {} },
+        {
+          insert: 'd',
+          attributes: { background: 'var(--affine-text-highlight-grey)' },
+        },
+        { insert: 'e', attributes: {} },
+        {
+          insert: 'f',
+          attributes: { background: 'var(--affine-text-highlight-yellow)' },
+        },
+        { insert: 'g', attributes: {} },
+        {
+          insert: 'h',
+          attributes: { background: 'var(--affine-text-highlight-orange)' },
+        },
+        {
+          insert: 'i',
+          attributes: { background: 'var(--affine-text-highlight-yellow)' },
+        },
+        { insert: 'c', attributes: {} },
+        {
+          insert: 'j',
+          attributes: { background: 'var(--affine-text-highlight-green)' },
+        },
+        { insert: 'k', attributes: {} },
+        {
+          insert: 'l',
+          attributes: { background: 'var(--affine-text-highlight-blue)' },
+        },
+        { insert: 'm', attributes: {} },
+        {
+          insert: 'n',
+          attributes: { background: 'var(--affine-text-highlight-purple)' },
+        },
+        {
+          insert: 'o',
+          attributes: { background: 'var(--affine-text-highlight-pink)' },
+        },
+        { insert: 'p', attributes: {} },
+        {
+          insert: 'q',
+          attributes: { background: 'var(--affine-text-highlight-pink)' },
+        },
+      ],
+      children: [],
     },
   ];
 

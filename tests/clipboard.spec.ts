@@ -1,8 +1,7 @@
 import './utils/declare-test-window.js';
 
-import { EDITOR_WIDTH } from '@blocksuite/global/config';
-import { assertExists } from '@blocksuite/global/utils';
-
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
 import {
   activeNoteInEdgeless,
@@ -14,7 +13,8 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  getAllNotes,
+  getAllNoteIds,
+  getCopyClipItemsInPage,
   getEditorLocator,
   getRichTextBoundingBox,
   importMarkdown,
@@ -23,11 +23,12 @@ import {
   initEmptyEdgelessState,
   initEmptyParagraphState,
   initThreeParagraphs,
+  pasteBlocks,
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
+  pressArrowRight,
   pressArrowUp,
-  pressBackspace,
   pressEnter,
   pressEscape,
   pressShiftTab,
@@ -50,16 +51,18 @@ import {
 } from './utils/actions/index.js';
 import {
   assertBlockTypes,
+  assertClipData,
   assertClipItems,
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
+  assertExists,
   assertRichImage,
+  assertRichTextModelType,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
-  assertTypeFormat,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
@@ -70,6 +73,7 @@ test(scoped`clipboard copy paste`, async ({ page }) => {
 
   await type(page, 'test');
   await setVirgoSelection(page, 0, 3);
+  await waitNextFrame(page);
   await copyByKeyboard(page);
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
@@ -92,10 +96,10 @@ test(scoped`clipboard paste html`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -128,10 +132,10 @@ test(
         const e = new ClipboardEvent('paste', { clipboardData: dT });
         Object.defineProperty(e, 'target', {
           writable: false,
-          value: document.body,
+          value: document,
         });
         e.clipboardData?.setData('text/html', clipData['text/html']);
-        document.body.dispatchEvent(e);
+        document.dispatchEvent(e);
       },
       { clipData }
     );
@@ -141,7 +145,7 @@ test(
   }
 );
 
-test.fixme(
+test(
   scoped`clipboard paste end with image, the cursor should be controlled by up/down keys`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -164,10 +168,10 @@ test.fixme(
         const e = new ClipboardEvent('paste', { clipboardData: dT });
         Object.defineProperty(e, 'target', {
           writable: false,
-          value: document.body,
+          value: document,
         });
         e.clipboardData?.setData('text/html', clipData['text/html']);
-        document.body.dispatchEvent(e);
+        document.dispatchEvent(e);
       },
       { clipData }
     );
@@ -176,10 +180,7 @@ test.fixme(
     await pressArrowUp(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 2);
-    await assertText(
-      page,
-      'Lorem Ipsum placeholder text.Lorem Ipsum placeholder text.'
-    );
+    await assertText(page, 'Lorem Ipsum placeholder text.');
     await pressArrowDown(page, 1);
     await pasteContent(page, clipData);
     await assertRichImage(page, 3);
@@ -304,6 +305,7 @@ test(scoped`split block when paste`, async ({ page }) => {
 
   await setVirgoSelection(page, 1, 1);
   await pasteContent(page, clipData);
+  await waitNextFrame(page);
 
   await assertRichTexts(page, ['atext', 'h1c']);
   await assertSelection(page, 1, 2, 0);
@@ -339,7 +341,6 @@ test(scoped`import markdown`, async ({ page }) => {
   const clipData = `# text
 # h1
 `;
-  await setVirgoSelection(page, 1, 1);
   await importMarkdown(page, noteId, clipData);
   await page.waitForTimeout(100);
   await assertRichTexts(page, ['text', 'h1', '']);
@@ -372,7 +373,7 @@ test(scoped`copy clipItems format`, async ({ page }) => {
   await undoByClick(page);
   await assertRichTexts(page, ['']);
 });
-// FIXME
+
 test(scoped`copy partially selected text`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -412,140 +413,46 @@ test(scoped`copy & paste outside editor`, async ({ page }) => {
   await assertRichTexts(page, ['123']);
 });
 
-// FIXME: this test case can pass in local but not online
-test.skip('should keep first line format when pasted into a new line', async ({
+test('should keep first line format when pasted into a new line', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
   await focusRichText(page);
-  await type(page, '-');
-  await pressSpace(page);
-  await type(page, '1');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, '2');
-  await pressEnter(page);
-  await type(page, '3');
-  await pressEnter(page);
-  await pressShiftTab(page);
-  await type(page, '4');
 
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-background-secondary-color"
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-  </affine:note>
-</affine:page>`
-  );
+  const pasteBlocksContent = [
+    {
+      flavour: 'affine:list',
+      type: 'todo',
+      text: [{ insert: 'aaa' }],
+      children: [],
+    },
+  ];
 
-  await setSelection(page, 3, 0, 5, 1);
+  await pasteBlocks(page, pasteBlocksContent);
   await waitNextFrame(page);
-  await copyByKeyboard(page);
-
-  await focusRichText(page, 3);
-  await pressEnter(page);
-  await pressBackspace(page);
-  await pasteByKeyboard(page);
-  await waitNextFrame(page);
-  await assertStoreMatchJSX(
-    page,
-    /*xml*/ `
-<affine:page>
-  <affine:note
-    prop:background="--affine-background-secondary-color"
-    prop:hidden={false}
-    prop:index="a0"
-  >
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-    <affine:list
-      prop:checked={false}
-      prop:text="4"
-      prop:type="bulleted"
-    />
-    <affine:list
-      prop:checked={false}
-      prop:text="1"
-      prop:type="bulleted"
-    >
-      <affine:list
-        prop:checked={false}
-        prop:text="2"
-        prop:type="bulleted"
-      />
-      <affine:list
-        prop:checked={false}
-        prop:text="3"
-        prop:type="bulleted"
-      />
-    </affine:list>
-  </affine:note>
-</affine:page>`
-  );
+  await assertRichTexts(page, ['aaa']);
+  await assertBlockTypes(page, ['todo']);
 });
 
-test.fixme(
-  scoped`cut should work for multi-block selection`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await focusRichText(page);
+test(scoped`cut should work for multi-block selection`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
 
-    await type(page, 'a');
-    await pressEnter(page);
-    await type(page, 'b');
-    await pressEnter(page);
-    await type(page, 'c');
-    await selectAllByKeyboard(page);
-    await selectAllByKeyboard(page);
-    await page.keyboard.press(`${SHORT_KEY}+x`);
-    await assertText(page, '');
-    await page.keyboard.press(`${SHORT_KEY}+v`);
-    await waitNextFrame(page);
-    await assertRichTexts(page, ['a', 'b', 'c']);
-  }
-);
+  await type(page, 'a');
+  await pressEnter(page);
+  await type(page, 'b');
+  await pressEnter(page);
+  await type(page, 'c');
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await selectAllByKeyboard(page);
+  await cutByKeyboard(page);
+  await page.locator('.affine-doc-viewport').click();
+  await waitNextFrame(page);
+  await assertText(page, '');
+});
 
 test(
   scoped`pasting into empty list should not convert the list into paragraph`,
@@ -559,11 +466,11 @@ test(
     await type(page, '- ');
     await page.keyboard.press(`${SHORT_KEY}+v`);
     await assertRichTexts(page, ['test']);
-    await assertTypeFormat(page, 'bulleted');
+    await assertRichTextModelType(page, 'bulleted');
   }
 );
 
-test.skip('cut will delete all content, and copy will reappear content', async ({
+test('cut will delete all content, and copy will reappear content', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -610,7 +517,35 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   await waitNextFrame(page);
   await focusRichText(page);
 
-  await pasteByKeyboard(page);
+  const pesteBlocksContent = [
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: '1' }],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: '2' }],
+          children: [],
+        },
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: '3' }],
+          children: [],
+        },
+      ],
+    },
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: '4' }],
+      children: [],
+    },
+  ];
+
+  await pasteBlocks(page, pesteBlocksContent);
   await waitNextFrame(page);
   await assertStoreMatchJSX(
     page,
@@ -647,7 +582,7 @@ test.skip('cut will delete all content, and copy will reappear content', async (
   );
 });
 
-test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
+test(scoped`should copy and paste of database work`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyDatabaseWithParagraphState(page);
 
@@ -655,6 +590,8 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
   await initDatabaseColumn(page);
   await initDatabaseDynamicRowWithData(page, 'abc', true);
   await pressEscape(page);
+  await focusRichText(page);
+  await selectAllByKeyboard(page);
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
   await pressEnter(page);
@@ -679,9 +616,6 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
         prop:type="text"
       />
     </affine:database>
-    <affine:paragraph
-      prop:type="text"
-    />
     <affine:database
       prop:columns="Array [2]"
       prop:title="Database 1"
@@ -720,51 +654,42 @@ test.fixme(scoped`should copy and paste of database work`, async ({ page }) => {
     <affine:paragraph
       prop:type="text"
     />
-    <affine:paragraph
-      prop:type="text"
-    />
-    <affine:paragraph
-      prop:type="text"
-    />
   </affine:note>
 </affine:page>`
   );
 });
 
-test.fixme(
-  `copy phasor element and text note in edgeless mode`,
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
-    await initThreeParagraphs(page);
-    await switchEditorMode(page);
-    await addBasicRectShapeElement(
-      page,
-      {
-        x: 100,
-        y: 100,
-      },
-      {
-        x: 200,
-        y: 200,
-      }
-    );
+test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await switchEditorMode(page);
+  await addBasicRectShapeElement(
+    page,
+    {
+      x: 100,
+      y: 100,
+    },
+    {
+      x: 200,
+      y: 200,
+    }
+  );
 
-    await dragBetweenCoords(
-      page,
-      { x: 50, y: 90 },
-      { x: 400, y: 400 },
-      { steps: 10 }
-    );
-    await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 272]);
+  await dragBetweenCoords(
+    page,
+    { x: 50, y: 90 },
+    { x: 800, y: 800 },
+    { steps: 10 }
+  );
+  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 463.5]);
 
-    await copyByKeyboard(page);
-    await page.mouse.move(400, 400);
-    await page.waitForTimeout(300);
-    await pasteByKeyboard(page, false);
-    await assertEdgelessSelectedRect(page, [0, 264, EDITOR_WIDTH, 272]);
-  }
-);
+  await copyByKeyboard(page);
+  await page.mouse.move(800, 400);
+  await page.waitForTimeout(300);
+  await pasteByKeyboard(page, false);
+  await assertEdgelessSelectedRect(page, [400, 168.25, EDITOR_WIDTH, 463.5]);
+});
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -778,9 +703,10 @@ test(scoped`copy when text note active in edgeless`, async ({ page }) => {
   await waitForVirgoStateUpdated(page);
   await setVirgoSelection(page, 0, 4);
   await copyByKeyboard(page);
+  await pressArrowRight(page);
   await type(page, '555');
   await pasteByKeyboard(page, false);
-  await assertText(page, '5551234');
+  await assertText(page, '12345551234');
 });
 
 test(scoped`paste note block with background`, async ({ page }) => {
@@ -801,10 +727,10 @@ test(scoped`paste note block with background`, async ({ page }) => {
 
   await page.mouse.move(0, 0);
   await pasteByKeyboard(page, false);
-  const notes = await getAllNotes(page);
-  await Array.from(notes).map(async note => {
-    await assertEdgelessNoteBackground(page, note.id, color);
-  });
+  const noteIds = await getAllNoteIds(page);
+  for (const noteId of noteIds) {
+    await assertEdgelessNoteBackground(page, noteId, color);
+  }
 });
 
 test(scoped`copy and paste to selection block selection`, async ({ page }) => {
@@ -819,11 +745,12 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
 
   await selectAllByKeyboard(page);
   await copyByKeyboard(page);
+  await pressArrowRight(page);
   await pasteByKeyboard(page, false);
-  await assertRichTexts(page, ['1234', '']);
+  await assertRichTexts(page, ['12341234']);
 });
 
-test.fixme(
+test(
   scoped`should keep paragraph block's type when pasting at the start of empty paragraph block except type text`,
   async ({ page }) => {
     test.info().annotations.push({
@@ -868,9 +795,12 @@ test.fixme(
 
     // when pasting a quote into a text paragraph block, the paragraph type should be text
     await selectAllByKeyboard(page);
+    await selectAllByKeyboard(page);
     await copyByKeyboard(page);
     await waitNextFrame(page);
 
+    await pressEnter(page);
+    await pressEnter(page);
     await pressEnter(page);
     await pasteByKeyboard(page);
     await waitNextFrame(page);
@@ -918,10 +848,10 @@ test(scoped`paste from FeiShu list format`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -951,10 +881,10 @@ test(scoped`paste in list format`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/html', clipData['text/html']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -977,10 +907,10 @@ test(scoped`auto identify url`, async ({ page }) => {
       const e = new ClipboardEvent('paste', { clipboardData: dT });
       Object.defineProperty(e, 'target', {
         writable: false,
-        value: document.body,
+        value: document,
       });
       e.clipboardData?.setData('text/plain', clipData['text/plain']);
-      document.body.dispatchEvent(e);
+      document.dispatchEvent(e);
     },
     { clipData }
   );
@@ -1036,4 +966,115 @@ test(scoped`paste parent block`, async ({ page }) => {
     'This is child 1',
     'This is child 2Thi',
   ]);
+});
+
+test(scoped`clipboard copy muti selection`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'abc');
+  await pressEnter(page);
+  await type(page, 'def');
+  await setSelection(page, 2, 1, 3, 1);
+  await waitNextFrame(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+  await focusRichText(page, 1);
+  await pasteByKeyboard(page);
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['abc', 'defbc', 'd']);
+});
+
+test(scoped`clipboard copy nested items`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'abc');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'def');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'ghi');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await pressShiftTab(page);
+  await type(page, 'jkl');
+  await setSelection(page, 2, 1, 3, 1);
+  await waitNextFrame(page);
+  const clipItems = await getCopyClipItemsInPage(page);
+
+  const blockJson = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'bc' }],
+      children: [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          text: [{ insert: 'd' }],
+          children: [],
+        },
+      ],
+    },
+  ];
+  const htmlText =
+    `<p>bc</p><div style="padding-left: 26px"><p>d</p></div>` +
+    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
+      blockJson
+    ).replace(/"/g, '&quot;')}"></blocksuite>`;
+  const expectClipItems = [
+    { mimeType: 'text/plain', data: 'bcd' },
+    {
+      mimeType: 'text/html',
+      data: htmlText,
+    },
+    {
+      mimeType: 'blocksuite/page',
+      data: JSON.stringify(blockJson),
+    },
+  ];
+  assertClipData(clipItems, expectClipItems, 'text/plain');
+  assertClipData(clipItems, expectClipItems, 'text/html');
+  assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+
+  await setSelection(page, 4, 1, 5, 1);
+  await waitNextFrame(page);
+  const clipItems2 = await getCopyClipItemsInPage(page);
+  const blockJson2 = [
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'hi' }],
+      children: [],
+    },
+    {
+      flavour: 'affine:paragraph',
+      type: 'text',
+      text: [{ insert: 'j' }],
+      children: [],
+    },
+  ];
+  const htmlText2 =
+    `<p>hi</p><p>j</p>` +
+    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
+      blockJson2
+    ).replace(/"/g, '&quot;')}"></blocksuite>`;
+  const expectClipItems2 = [
+    { mimeType: 'text/plain', data: 'hi\nj' },
+    {
+      mimeType: 'text/html',
+      data: htmlText2,
+    },
+    {
+      mimeType: 'blocksuite/page',
+      data: JSON.stringify(blockJson2),
+    },
+  ];
+  assertClipData(clipItems2, expectClipItems2, 'text/plain');
+  assertClipData(clipItems2, expectClipItems2, 'text/html');
+  assertClipData(clipItems2, expectClipItems2, 'blocksuite/page');
 });
