@@ -348,6 +348,11 @@ export class DebugMenu extends ShadowlessElement {
       : (this._styleMenu.hidden = true);
   }
 
+  private _toggleReadonly() {
+    const page = this.page;
+    page.awarenessStore.setReadonly(page, !page.readonly);
+  }
+
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
@@ -634,11 +639,14 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._importSnapshot}>
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}>Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
+              <sl-menu-item @click=${this._inspect}>Inspect Doc</sl-menu-item>
+              <sl-menu-item @click=${this._toggleReadonly}>
+                Toggle Readonly
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 
