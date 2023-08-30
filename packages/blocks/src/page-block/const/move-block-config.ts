@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import {
@@ -73,17 +74,17 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           nextBlock.model,
           false
         );
-        const selectionManager = blockElement.root.selectionManager;
-        selectionManager.set([
-          selectionManager.getInstance('text', {
-            from: {
-              path: block.path,
-              index: textSelection.from.index,
-              length: textSelection.from.length,
-            },
-            to: null,
-          }),
-        ]);
+        // `moveBlocks` will trigger two updates for the blockElement (delete and insert), so
+        // we need to wait for two `updateComplete` to render range after dom updated
+        blockElement.updateComplete.then(() => {
+          blockElement.updateComplete.then(() => {
+            // `textSelection` will not change so we need wo sync it manually
+            const rangeManager = blockElement.root.rangeManager;
+            assertExists(rangeManager);
+            rangeManager.syncTextSelectionToRange(textSelection);
+          });
+        });
+
         return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
