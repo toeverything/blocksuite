@@ -63,7 +63,8 @@ export const moveBlockConfig: MoveBlockConfig[] = [
         const block = pathToBlock(blockElement, textSelection.from.path);
         if (!block) return;
         const nextBlock = getNextBlock(block, block => !!block.model.text);
-        if (!nextBlock) return;
+        // ensure nextBlock is not a child of current block
+        if (!nextBlock || nextBlock.path.includes(block.model.id)) return;
         const parent = blockElement.page.getParent(nextBlock.model);
         if (!parent) return;
         blockElement.page.moveBlocks(
@@ -72,6 +73,17 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           nextBlock.model,
           false
         );
+        const selectionManager = blockElement.root.selectionManager;
+        selectionManager.set([
+          selectionManager.getInstance('text', {
+            from: {
+              path: block.path,
+              index: textSelection.from.index,
+              length: textSelection.from.length,
+            },
+            to: null,
+          }),
+        ]);
         return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
