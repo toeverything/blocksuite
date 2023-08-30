@@ -10,7 +10,7 @@ import type { DataViewManager } from './data-view-manager.js';
 
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
-  Selection extends DataViewSelection = DataViewSelection
+  Selection extends DataViewSelection = DataViewSelection,
 > {
   view: T;
 
@@ -57,7 +57,7 @@ export type DataViewDataType = FallBack<
 export type DataViewTypes = DataViewDataType['mode'];
 
 export interface DataViewConfig<
-  Data extends DataViewDataType = DataViewDataType
+  Data extends DataViewDataType = DataViewDataType,
 > {
   type: DataViewTypes;
   defaultName: string;
@@ -66,7 +66,7 @@ export interface DataViewConfig<
 }
 
 export interface DataViewRendererConfig<
-  _Data extends DataViewDataType = DataViewDataType
+  _Data extends DataViewDataType = DataViewDataType,
 > {
   type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;

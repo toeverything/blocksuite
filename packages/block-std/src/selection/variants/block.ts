@@ -27,7 +27,10 @@ export class BlockSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    block: typeof BlockSelection;
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace BlockSuite {
+    interface Selection {
+      block: typeof BlockSelection;
+    }
   }
 }

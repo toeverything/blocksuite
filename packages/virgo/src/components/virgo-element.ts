@@ -9,7 +9,7 @@ import { getVEditorInsideRoot } from '../utils/query.js';
 
 @customElement('v-element')
 export class VirgoElement<
-  T extends BaseTextAttributes = BaseTextAttributes
+  T extends BaseTextAttributes = BaseTextAttributes,
 > extends LitElement {
   @property({ type: Object })
   delta: DeltaInsert<T> = {

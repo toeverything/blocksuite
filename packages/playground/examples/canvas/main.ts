@@ -18,9 +18,11 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
   const elements = surface.pickByPoint(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
   console.log(
-    `picked elements count: ${elements.length}, top element type: ${
-      topElement?.type
-    }, color ${(topElement as DebugElement)?.color}`
+    `picked elements count: ${
+      elements.length
+    }, top element type: ${topElement?.type}, color ${(
+      topElement as DebugElement
+    )?.color}`
   );
 }
 

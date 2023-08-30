@@ -11,7 +11,7 @@ export interface StackItem {
 
 export class Space<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  State extends Record<string, unknown> = Record<string, any>
+  State extends Record<string, unknown> = Record<string, any>,
 > {
   /** unprefixed id */
   readonly id: string;

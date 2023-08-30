@@ -176,7 +176,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       border-radius: 19px;
       cursor: pointer;
       pointer-events: auto;
-      transition: background 0.3s linear, box-shadow 0.2s linear;
+      transition:
+        background 0.3s linear,
+        box-shadow 0.2s linear;
     }
     .edgeless-auto-complete-arrow-wrapper:hover
       > .edgeless-auto-complete-arrow {

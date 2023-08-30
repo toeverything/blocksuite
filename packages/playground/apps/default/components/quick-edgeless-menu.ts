@@ -34,7 +34,6 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
-import { createViewer } from '../../starter/components/doc-inspector';
 import {
   generateRoomId,
   initCollaborationSocket,
@@ -375,10 +374,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     input.click();
   }
 
-  private async _inspect() {
-    await createViewer(this.workspace.doc.toJSON());
-  }
-
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -609,9 +604,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                       <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                         Toggle CSS Debug Menu
                       </sl-menu-item>
-                      <sl-menu-item @click=${this._inspect}>
-                        Inspect Doc</sl-menu-item
-                      >
                     </sl-menu>
                   </sl-dropdown>
                 </sl-menu-item>

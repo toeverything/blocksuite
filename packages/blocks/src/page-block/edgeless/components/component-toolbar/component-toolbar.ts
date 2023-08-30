@@ -6,6 +6,7 @@ import './change-note-button.js';
 import './change-text-button.js';
 import './add-frame-button.js';
 import './more-button.js';
+import './align-button.js';
 
 import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -203,6 +204,12 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ></edgeless-add-frame-button>`;
   }
 
+  private _getAlignButton() {
+    return html`<edgeless-align-button
+      .edgeless=${this.edgeless}
+    ></edgeless-align-button>`;
+  }
+
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless } = this;
@@ -226,6 +233,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         ].filter(b => !!b && b !== nothing);
 
     if (this.selection.state.elements.length > 1) {
+      buttons.unshift(
+        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+      );
+      buttons.unshift(this._getAlignButton());
       buttons.unshift(
         html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       );

@@ -3,14 +3,14 @@ import type { TemplateResult } from 'lit';
 import type { BaseTextAttributes } from './utils/index.js';
 
 export type DeltaInsert<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = {
   insert: string;
   attributes?: TextAttributes;
 };
 
 export type AttributeRenderer<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = (
   delta: DeltaInsert<TextAttributes>,
   selected: boolean
@@ -23,11 +23,11 @@ export interface VRange {
 
 export type VRangeUpdatedProp = [
   range: VRange | null,
-  type: 'native' | 'input' | 'other' | 'silent'
+  type: 'native' | 'input' | 'other' | 'silent',
 ];
 
 export type DeltaEntry<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > = [delta: DeltaInsert<TextAttributes>, range: VRange];
 
 // corresponding to [anchorNode/focusNode, anchorOffset/focusOffset]

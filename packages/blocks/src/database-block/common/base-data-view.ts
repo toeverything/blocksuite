@@ -11,7 +11,7 @@ import type { DataViewManager } from './data-view-manager.js';
 
 export abstract class BaseDataView<
     T extends DataViewManager = DataViewManager,
-    Selection extends DataViewSelection = DataViewSelection
+    Selection extends DataViewSelection = DataViewSelection,
   >
   extends WithDisposable(ShadowlessElement)
   implements DataViewProps<T, Selection>, DataViewExpose

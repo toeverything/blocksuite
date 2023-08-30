@@ -80,7 +80,8 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       flex-direction: column;
       user-select: none;
       min-width: 200px;
-      box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
+      box-shadow:
+        0px 0px 12px 0px rgba(66, 65, 73, 0.14),
         0px 0px 0px 0.5px #e3e3e4 inset;
       border-radius: 8px;
       background-color: var(--affine-background-primary-color);

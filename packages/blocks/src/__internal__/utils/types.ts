@@ -76,7 +76,7 @@ export type KanbanViewSelection = {
 export type DataViewSelection = TableViewSelection | KanbanViewSelection;
 export type GetDataViewSelection<
   K extends DataViewSelection['type'],
-  T = DataViewSelection
+  T = DataViewSelection,
 > = T extends {
   type: K;
 }

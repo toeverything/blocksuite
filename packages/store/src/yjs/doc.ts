@@ -40,7 +40,7 @@ export class BlockSuiteDoc extends Y.Doc {
       unknown
     > = BlockSuiteDocData[Key] extends Record<string, unknown>
       ? BlockSuiteDocData[Key]
-      : never
+      : never,
   >(key: Key, config: ProxyConfig = {}): Value {
     const map = super.getMap(key);
     return this.proxy.createYProxy(map, config);
@@ -50,7 +50,7 @@ export class BlockSuiteDoc extends Y.Doc {
     Key extends keyof BlockSuiteDocData & string,
     Value extends unknown[] = BlockSuiteDocData[Key] extends unknown[]
       ? BlockSuiteDocData[Key]
-      : never
+      : never,
   >(key: Key, config: ProxyConfig = {}): Value {
     const array = super.getArray(key);
     return this.proxy.createYProxy(array, config) as Value;

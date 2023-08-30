@@ -16,7 +16,7 @@ import type { WidgetElement } from './widget-element.js';
 export class BlockElement<
   Model extends BaseBlockModel = BaseBlockModel,
   Service extends BlockService = BlockService,
-  WidgetName extends string = string
+  WidgetName extends string = string,
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
@@ -186,7 +186,10 @@ export class BlockElement<
 }
 
 declare global {
-  interface BlockSuiteView {
-    block: BlockSuiteViewSpec<BlockElement>;
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace BlockSuite {
+    interface View {
+      block: BlockSuiteViewSpec<BlockElement>;
+    }
   }
 }
