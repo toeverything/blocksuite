@@ -16,10 +16,12 @@ type InnerCommand<Options = void> = (options?: Options) => CommandMap;
 
 type InlineCommand = (fn: Command) => CommandMap;
 
+type RunCommand = () => boolean;
+
 interface Chain {
-  run: () => boolean;
+  run: RunCommand;
   inline: InlineCommand;
-  [key: string]: InnerCommand | InlineCommand;
+  [key: string]: InnerCommand | InlineCommand | RunCommand;
 }
 
 export class CommandManager {
