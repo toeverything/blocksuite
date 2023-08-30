@@ -5,17 +5,21 @@ import { addNote, switchEditorMode } from './utils/actions/edgeless.js';
 import {
   pressBackspace,
   pressEnter,
+  redoByKeyboard,
   SHORT_KEY,
   type,
+  undoByKeyboard,
   withPressKey,
 } from './utils/actions/keyboard.js';
 import {
+  captureHistory,
   enterPlaygroundRoom,
   focusRichText,
   getSelectionRect,
   getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
+  initThreeLists,
   insertThreeLevelLists,
   waitNextFrame,
 } from './utils/actions/misc.js';
@@ -715,7 +719,9 @@ test('delete block by slash menu should keep children', async ({ page }) => {
   const slashMenu = page.locator(`.slash-menu`);
   const slashItems = slashMenu.locator('icon-button');
 
+  await captureHistory(page);
   await focusRichText(page, 1);
+  await waitNextFrame(page);
   await type(page, '/');
 
   await expect(slashMenu).toBeVisible();
@@ -743,4 +749,30 @@ test('delete block by slash menu should keep children', async ({ page }) => {
 </affine:note>`,
     noteId
   );
+
+  await undoByKeyboard(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+  await redoByKeyboard(page);
+  await assertRichTexts(page, ['123', '789']);
+});
+
+test('delete block by slash menu should not move children to top', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeLists(page);
+  const slashMenu = page.locator(`.slash-menu`);
+  const slashItems = slashMenu.locator('icon-button');
+
+  await focusRichText(page, 1);
+  await waitNextFrame(page);
+  await type(page, '/');
+
+  await expect(slashMenu).toBeVisible();
+  await type(page, 'remove');
+  await expect(slashItems).toHaveCount(1);
+  await pressEnter(page);
+
+  await assertRichTexts(page, ['123', '', '789']);
 });
