@@ -48,7 +48,7 @@ export class IconButton extends LitElement {
     }
 
     ::slotted(svg) {
-      color: var(--affine-icon-color);
+      color: var(--svg-icon-color);
     }
 
     :host(:hover) {
@@ -63,7 +63,6 @@ export class IconButton extends LitElement {
     :host(:disabled) {
       background: transparent;
       color: var(--affine-text-disable-color);
-      fill: var(--affine-text-disable-color);
       cursor: not-allowed;
     }
 
@@ -72,15 +71,8 @@ export class IconButton extends LitElement {
       background: var(--affine-hover-color);
     }
 
-    /* You can add a 'active' attribute to the button to revert the active style */
-    :host([active]) {
-      fill: var(--affine-primary-color);
-      color: var(--affine-primary-color);
-    }
-
     :host(:active[active]) {
       background: transparent;
-      fill: var(--affine-icon-color);
     }
   `;
 
@@ -95,6 +87,9 @@ export class IconButton extends LitElement {
 
   @property()
   text: string | null = null;
+
+  @property({ attribute: true, type: Boolean })
+  active?: boolean = false;
 
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
   @property({ attribute: true, type: Boolean })
@@ -153,6 +148,13 @@ export class IconButton extends LitElement {
   }
 
   override render() {
+    const iconColor = this.disabled
+      ? 'var(--affine-disabled-color)'
+      : this.active
+      ? 'var(--affine-primary-color)'
+      : 'var(--affine-icon-color)';
+    this.style.setProperty('--svg-icon-color', iconColor);
+
     return html`<slot></slot>${this.text
         ? // wrap a span around the text so we can ellipsis it automatically
           html`<span class="text">${this.text}</span>`
