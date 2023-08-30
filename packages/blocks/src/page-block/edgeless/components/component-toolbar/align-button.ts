@@ -18,8 +18,10 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '../../../../icons/edgeless.js';
+import type { EdgelessElement } from '../../../../index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
+import { isTopLevelBlock } from '../../utils/query.js';
 
 @customElement('edgeless-align-button')
 export class EdgelessAlignButton extends WithDisposable(LitElement) {
@@ -38,6 +40,18 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     );
   }
 
+  private _updateXYWH(ele: EdgelessElement, bound: Bound) {
+    if (isTopLevelBlock(ele)) {
+      this.edgeless.page.updateBlock(ele, {
+        xywh: bound.serialize(),
+      });
+    } else {
+      this.edgeless.surface.updateElement(ele.id, {
+        xywh: bound.serialize(),
+      });
+    }
+  }
+
   private _alignLeft() {
     const { elements } = this;
     const bounds = elements.map(getGridBound);
@@ -48,9 +62,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       const bound = Bound.deserialize(ele.xywh);
       const offset = bound.minX - gridBound.minX;
       bound.x = left + offset;
-      this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(ele, bound);
     });
   }
 
@@ -64,9 +76,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       const bound = Bound.deserialize(ele.xywh);
       const offset = bound.maxX - gridBound.maxX;
       bound.x = right - bound.w + offset;
-      this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(ele, bound);
     });
   }
 
@@ -80,9 +90,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     elements.forEach(ele => {
       const bound = Bound.deserialize(ele.xywh);
       bound.x = centerX - bound.w / 2;
-      this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(ele, bound);
     });
   }
 
@@ -104,9 +112,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       const bound = Bound.deserialize(elements[i].xywh);
       bound.x = next + bounds[i].w / 2 - bound.w / 2;
       next += gap + bounds[i].w;
-      this.edgeless.surface.updateElement(elements[i].id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(elements[i], bound);
     }
   }
 
@@ -120,9 +126,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       const bound = Bound.deserialize(ele.xywh);
       const offset = bound.minY - gridBound.minY;
       bound.y = top + offset;
-      this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(ele, bound);
     });
   }
 
@@ -136,9 +140,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       const bound = Bound.deserialize(ele.xywh);
       const offset = bound.maxY - gridBound.maxY;
       bound.y = bottom - bound.h + offset;
-      this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(ele, bound);
     });
   }
 
@@ -152,9 +154,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     elements.forEach(ele => {
       const bound = Bound.deserialize(ele.xywh);
       bound.y = centerY - bound.h / 2;
-      this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(ele, bound);
     });
   }
 
@@ -176,9 +176,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       const bound = Bound.deserialize(elements[i].xywh);
       bound.y = next + bounds[i].h / 2 - bound.h / 2;
       next += gap + bounds[i].h;
-      this.edgeless.surface.updateElement(elements[i].id, {
-        xywh: bound.serialize(),
-      });
+      this._updateXYWH(elements[i], bound);
     }
   }
 
