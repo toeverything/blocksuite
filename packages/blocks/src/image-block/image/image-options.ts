@@ -32,6 +32,7 @@ export function ImageOptionsTemplate({
     anchor.removeEventListener('mouseover', onHover);
     anchor.removeEventListener('mouseleave', onHoverLeave);
   });
+  const readonly = model.page.readonly;
 
   return html`
     <style>
@@ -67,6 +68,7 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip"
           size="32px"
+          ?disabled=${readonly}
           @click=${() => {
             abortController.abort();
             turnImageIntoCardView(model, blob);
@@ -78,6 +80,7 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip"
           size="32px"
+          ?disabled=${readonly}
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
@@ -106,6 +109,7 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip delete-image-button"
           size="32px"
+          ?disabled=${readonly}
           @click="${() => {
             abortController.abort();
             model.page.deleteBlock(model);

@@ -497,7 +497,7 @@ export const menuGroups: {
         alias: ['remove'],
         icon: DeleteIcon,
         action: ({ pageElement, model }) => {
-          pageElement.page.deleteBlock(model, { bringChildrenTo: 'parent' });
+          pageElement.page.deleteBlock(model);
         },
       },
     ],

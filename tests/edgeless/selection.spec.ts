@@ -1,5 +1,3 @@
-import { expect } from '@playwright/test';
-
 import * as actions from '../utils/actions/edgeless.js';
 import {
   createShapeElement,
@@ -16,8 +14,6 @@ import {
   enterPlaygroundRoom,
   getBoundingRect,
   initEmptyEdgelessState,
-  initThreeNotes,
-  initThreeOverlapFilledShapes,
   initThreeParagraphs,
   pasteByKeyboard,
   pressEnter,

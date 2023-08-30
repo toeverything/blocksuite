@@ -48,7 +48,8 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       position: absolute;
       background-color: var(--affine-background-primary-color);
       border-radius: 8px;
-      box-shadow: 0px 0px 12px 0px rgba(66, 65, 73, 0.14),
+      box-shadow:
+        0px 0px 12px 0px rgba(66, 65, 73, 0.14),
         0px 0px 0px 0.5px #e3e3e4 inset;
       padding: 8px;
       min-width: 250px;

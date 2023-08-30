@@ -6,7 +6,7 @@ export type ColumnType = string;
 export type ColumnTypeIcon = Record<ColumnType, TemplateResult>;
 
 export interface Column<
-  Data extends Record<string, unknown> = Record<string, unknown>
+  Data extends Record<string, unknown> = Record<string, unknown>,
 > {
   id: string;
   type: ColumnType;

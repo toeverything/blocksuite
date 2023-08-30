@@ -531,18 +531,19 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
             ? repeat(
                 this._hiddenNotes,
                 note => note.note.id,
-                (note, idx) => html`<edgeless-note-toc-card
-                  data-note-id=${note.note.id}
-                  .note=${note.note}
-                  .number=${idx + 1}
-                  .index=${note.index}
-                  .page=${this.page}
-                  .invisible=${true}
-                  style=${this.insertIndex !== undefined
-                    ? 'transform: translateY(20px)'
-                    : ''}
-                  @fitview=${this._fitToElement}
-                ></edgeless-note-toc-card>`
+                (note, idx) =>
+                  html`<edgeless-note-toc-card
+                    data-note-id=${note.note.id}
+                    .note=${note.note}
+                    .number=${idx + 1}
+                    .index=${note.index}
+                    .page=${this.page}
+                    .invisible=${true}
+                    style=${this.insertIndex !== undefined
+                      ? 'transform: translateY(20px)'
+                      : ''}
+                    @fitview=${this._fitToElement}
+                  ></edgeless-note-toc-card>`
               )
             : nothing}
         </div>

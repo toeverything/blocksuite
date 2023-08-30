@@ -22,7 +22,7 @@ export function noop(_?: unknown) {
  */
 export function throttle<
   Args extends unknown[],
-  T extends (...args: Args) => void
+  T extends (...args: Args) => void,
 >(
   fn: (...args: Args) => void,
   limit: number,
@@ -30,7 +30,7 @@ export function throttle<
 ): T;
 export function throttle<
   Args extends unknown[],
-  T extends (this: unknown, ...args: Args) => void
+  T extends (this: unknown, ...args: Args) => void,
 >(fn: T, limit: number, { leading = true, trailing = true } = {}): T {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let lastArgs: Args | null = null;

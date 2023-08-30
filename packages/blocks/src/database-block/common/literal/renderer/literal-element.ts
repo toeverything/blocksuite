@@ -8,7 +8,7 @@ import { createDatabasePopup } from '../../popup.js';
 
 export abstract class LiteralElement<
   T = unknown,
-  Type extends TType = TType
+  Type extends TType = TType,
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   type!: Type;

@@ -17,14 +17,18 @@ export const styles = css`
     min-height: 12px;
     pointer-events: auto;
     user-select: none;
-    transition: transform 0.25s ease, height 0.25s ease;
+    transition:
+      transform 0.25s ease,
+      height 0.25s ease;
   }
   .affine-drag-handle-grabber {
     width: 4px;
     height: 12px;
     border-radius: 1px;
     background: var(--affine-placeholder-color);
-    transition: height 0.25s ease, width 0.25s ease;
+    transition:
+      height 0.25s ease,
+      width 0.25s ease;
   }
   .affine-drag-handle-container:hover {
     cursor: grab;

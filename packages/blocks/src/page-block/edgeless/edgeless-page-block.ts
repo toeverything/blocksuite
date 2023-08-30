@@ -653,8 +653,9 @@ export class EdgelessPageBlockComponent
     _disposables.add(slots.reorderingNotesUpdated.on(this.reorderNotes));
     _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
     _disposables.add(
-      slots.zoomUpdated.on((action: ZoomAction) =>
-        this.components.zoomToolbar?.setZoomByAction(action)
+      slots.zoomUpdated.on(
+        (action: ZoomAction) =>
+          this.components.zoomToolbar?.setZoomByAction(action)
       )
     );
     _disposables.add(

@@ -50,23 +50,24 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
   return html`${inlineFormatConfig
       .filter(({ showWhen }) => showWhen(pageElement))
       .map(
-        ({ id, name, icon, action, activeWhen }) => html`<icon-button
-          size="32px"
-          class="has-tool-tip"
-          data-testid=${id}
-          ?active=${activeWhen(format)}
-          @click=${() => {
-            action({
-              blockElement: pageElement,
-              type,
-              format,
-            });
-            formatBar.requestUpdate();
-          }}
-        >
-          ${icon}
-          <tool-tip inert role="tooltip">${name}</tool-tip>
-        </icon-button>`
+        ({ id, name, icon, action, activeWhen }) =>
+          html`<icon-button
+            size="32px"
+            class="has-tool-tip"
+            data-testid=${id}
+            ?active=${activeWhen(format)}
+            @click=${() => {
+              action({
+                blockElement: pageElement,
+                type,
+                format,
+              });
+              formatBar.requestUpdate();
+            }}
+          >
+            ${icon}
+            <tool-tip inert role="tooltip">${name}</tool-tip>
+          </icon-button>`
       )}
     <div class="divider"></div>
     ${backgroundButton}
