@@ -339,7 +339,6 @@ function pasteToCells(
   const srcRowLength = srcColumns.length;
   const srcColumnLength = srcColumns[0].length;
 
-  data.captureSync();
   for (let i = 0; i < rowLength; i++) {
     for (let j = 0; j < columnLength; j++) {
       const rowIndex = rowStartIndex + i;
