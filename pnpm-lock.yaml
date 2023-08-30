@@ -19,6 +19,8 @@ overrides:
   object.hasown: npm:@nolyfill/object.hasown@latest
   object.values: npm:@nolyfill/object.values@latest
   string.prototype.matchall: npm:@nolyfill/string.prototype.matchall@latest
+  has: npm:@nolyfill/has@latest
+  is-generator-function: npm:@nolyfill/is-generator-function@latest
 
 importers:
 
@@ -1442,9 +1444,20 @@ packages:
       dequal: 2.0.3
     dev: true
 
-  /@nolyfill/has-tostringtag@1.0.20:
-    resolution: {integrity: sha512-AdpzunKoh4iUVB+UxUVCfqwgOBTTWfs4WNOYRp70GKbsvxbUnDghHPp4ZcaSjItD5lvJWgnd9I7VT7rraPqgeA==}
+  /@nolyfill/has@1.0.21:
+    resolution: {integrity: sha512-Sf8iFaegjGp29hQVQjIc+nDR0uWqGkHsFC3jsUigFwGjpafgMaBtL++DpTU9jYAKDJEvslR1szl8qJjNGlhgcw==}
     engines: {node: '>=12.4.0'}
+    dependencies:
+      '@nolyfill/shared': 1.0.21
+    dev: true
+
+  /@nolyfill/is-generator-function@1.0.21:
+    resolution: {integrity: sha512-rxHlkx7kHiu7/nNgn/SV5cbuncZv52RzRJ+weVQsjj5xpLxsH298NGRLcHW48yYwPOdGvd3BnbpZe1kCo9QWaw==}
+    engines: {node: '>=12.4.0'}
+    dev: true
+
+  /@nolyfill/shared@1.0.21:
+    resolution: {integrity: sha512-qDc/NoaFU23E0hhiDPeUrvWzTXIPE+RbvRQtRWSeHHNmCIgYI9HS1jKzNYNJxv4jvZ/1VmM3L6rNVxbj+LBMNA==}
     dev: true
 
   /@open-wc/dev-server-hmr@0.2.0:
@@ -3822,10 +3835,6 @@ packages:
     requiresBuild: true
     optional: true
 
-  /function-bind@1.1.1:
-    resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
-    dev: true
-
   /gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
@@ -4024,13 +4033,6 @@ packages:
       kind-of: 4.0.0
     dev: true
 
-  /has@1.0.3:
-    resolution: {integrity: sha512-f2dvO0VU6Oej7RkWJGrehjbzMAjFp5/VKPp5tTpWIV4JHHZK1/BxbFRtf/siA2SWTe09caDmVtYYzWEIbBS4zw==}
-    engines: {node: '>= 0.4.0'}
-    dependencies:
-      function-bind: 1.1.1
-    dev: true
-
   /hasha@5.2.2:
     resolution: {integrity: sha512-Hrp5vIK/xr5SkeN2onO32H0MgNZ0f17HRNH39WfL0SYUNOTZ5Lz1TJ8Pajo/87dYGEFlLMm7mIc/k/s6Bvz9HQ==}
     engines: {node: '>=8'}
@@ -4211,7 +4213,7 @@ packages:
   /is-core-module@2.12.1:
     resolution: {integrity: sha512-Q4ZuBAe2FUsKtyQJoQHlvP8OvBERxO3jEmy1I7hcRXcJBGGHFh/aJBswbXuS9sgrDH2QUO8ilkwNPHvHMd8clg==}
     dependencies:
-      has: 1.0.3
+      has: /@nolyfill/has@1.0.21
     dev: true
 
   /is-data-descriptor@0.1.4:
@@ -4271,13 +4273,6 @@ packages:
   /is-fullwidth-code-point@4.0.0:
     resolution: {integrity: sha512-O4L094N2/dZ7xqVdrXhh9r1KODPJpFms8B5sGdJLPy664AgvXsreZUyCQQNItZRDlYug4xStLjNp/sz3HvBowQ==}
     engines: {node: '>=12'}
-    dev: true
-
-  /is-generator-function@1.0.10:
-    resolution: {integrity: sha512-jsEjy9l3yiXEQ+PsXdmBwEPcOxaXWLspKdplFUVI9vq1iZgIekeC0L167qeu86czQaxed3q/Uzuw0swL0irL8A==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      has-tostringtag: /@nolyfill/has-tostringtag@1.0.20
     dev: true
 
   /is-glob@3.1.0:
@@ -4669,7 +4664,7 @@ packages:
       fresh: 0.5.2
       http-assert: 1.5.0
       http-errors: 1.8.1
-      is-generator-function: 1.0.10
+      is-generator-function: /@nolyfill/is-generator-function@1.0.21
       koa-compose: 4.1.0
       koa-convert: 2.0.0
       on-finished: 2.4.1
