@@ -96,7 +96,7 @@ const syncProviders = async (
   }
 
   const oldMeta = localStorage.getItem('meta');
-  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : null;
+  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : {};
 
   let run = true;
   const runWorkspaceMigration = () => {
