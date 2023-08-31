@@ -67,6 +67,11 @@ export function syncBlockProps(
       return;
     }
 
+    if (propSchema[key] instanceof NativeWrapper) {
+      yBlock.set(`prop:${key}`, value.yMap);
+      return;
+    }
+
     if (
       !isPrimitive(value) &&
       !Array.isArray(value) &&
@@ -76,11 +81,6 @@ export function syncBlockProps(
     }
 
     if (value === undefined) {
-      return;
-    }
-
-    if (value instanceof NativeWrapper) {
-      yBlock.set(`prop:${key}`, value);
       return;
     }
 
@@ -95,7 +95,9 @@ export function syncBlockProps(
   // set default value
   Object.entries(propSchema).forEach(([key, value]) => {
     if (!yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined) {
-      if (value instanceof Text) {
+      if (value instanceof NativeWrapper) {
+        yBlock.set(`prop:${key}`, value.yMap);
+      } else if (value instanceof Text) {
         yBlock.set(`prop:${key}`, value.yText);
       } else if (Array.isArray(value) || isPureObject(value)) {
         yBlock.set(`prop:${key}`, native2Y(value, true));
@@ -124,8 +126,8 @@ export function toBlockProps(
     if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
       const key = prefixedKey.replace('prop:', '');
       const realValue = yBlock.get(prefixedKey);
-      if (realValue instanceof NativeWrapper) {
-        props[key] = realValue;
+      if (NativeWrapper.is(realValue)) {
+        props[key] = new NativeWrapper(realValue);
       } else if (realValue instanceof Y.Map) {
         const value = proxy.createYProxy(realValue, config);
         props[key] = value;

@@ -16,7 +16,7 @@ const migration = {
   toV5: data => {
     let { elements } = data;
     if (isPureObject(elements)) {
-      const y = native2Y(elements, true) as Y.Map<unknown>;
+      const y = native2Y(elements as unknown, true) as Y.Map<unknown>;
       elements = new NativeWrapper(y);
       data.elements = elements;
     }
@@ -46,12 +46,12 @@ const migration = {
         const target = element.get('target');
         const sourceId = source.get('id');
         const targetId = target.get('id');
-        if (!source.get('position') && (!sourceId || !elements.get(sourceId))) {
-          elements.delete(key);
+        if (!source.get('position') && (!sourceId || !value.get(sourceId))) {
+          value.delete(key);
           return;
         }
-        if (!targetId && !elements.get(targetId)) {
-          elements.delete(key);
+        if (!targetId && !value.get(targetId)) {
+          value.delete(key);
           return;
         }
       }
