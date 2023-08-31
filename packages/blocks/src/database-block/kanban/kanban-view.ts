@@ -11,6 +11,7 @@ import Sortable from 'sortablejs';
 
 import type { KanbanViewSelection } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
+import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import { KanbanViewClipboard } from './clipboard.js';
@@ -157,6 +158,7 @@ export class DataViewKanban extends BaseDataView<
     }
 
     return html`
+      ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
       <div class="affine-data-view-kanban-groups">
         ${repeat(
           groups,

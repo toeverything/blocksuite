@@ -10,6 +10,13 @@ export const stringFilter = {
     }),
     label: 'Is',
     impl: (value, target) => {
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
       return value == target;
     },
   },
@@ -20,6 +27,13 @@ export const stringFilter = {
     }),
     label: 'Is not',
     impl: (value, target) => {
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
       return value != target;
     },
   },
@@ -30,11 +44,14 @@ export const stringFilter = {
     }),
     label: 'Contains',
     impl: (value, target) => {
-      return (
-        typeof value === 'string' &&
-        typeof target === 'string' &&
-        value.includes(target)
-      );
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return value.includes(target);
     },
   },
   doesNoContains: {
@@ -44,11 +61,14 @@ export const stringFilter = {
     }),
     label: 'Does no contains',
     impl: (value, target) => {
-      return (
-        typeof value === 'string' &&
-        typeof target === 'string' &&
-        !value.includes(target)
-      );
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return !value.includes(target);
     },
   },
   startsWith: {
@@ -58,11 +78,14 @@ export const stringFilter = {
     }),
     label: 'Starts with',
     impl: (value, target) => {
-      return (
-        typeof value === 'string' &&
-        typeof target === 'string' &&
-        value.startsWith(target)
-      );
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return value.startsWith(target);
     },
   },
   endsWith: {
@@ -72,11 +95,14 @@ export const stringFilter = {
     }),
     label: 'Ends with',
     impl: (value, target) => {
-      return (
-        typeof value === 'string' &&
-        typeof target === 'string' &&
-        value.endsWith(target)
-      );
+      if (
+        typeof value !== 'string' ||
+        typeof target !== 'string' ||
+        target === ''
+      ) {
+        return true;
+      }
+      return value.endsWith(target);
     },
   },
 } as Record<string, FilterDefineType>;

@@ -13,21 +13,31 @@ import {
 import { isTArray, tArray } from '../../logical/typesystem.js';
 import { literalMatcher } from './matcher.js';
 import { DateLiteral } from './renderer/date-literal.js';
-import { NumberLiteral, StringLiteral } from './renderer/literal-element.js';
+import {
+  BooleanLiteral,
+  NumberLiteral,
+  StringLiteral,
+} from './renderer/literal-element.js';
 import { MultiTagLiteral, TagLiteral } from './renderer/tag-literal.js';
 
 literalMatcher.register(tBoolean.create(), {
-  view: createUniComponentFromWebComponent(StringLiteral),
+  view: createUniComponentFromWebComponent(BooleanLiteral),
   popEdit: (position, { value, onChange }) => {
     popMenu(position, {
       options: {
         input: {
-          initValue: value?.toString() ?? '',
-          onComplete: text => {
-            onChange(text);
-          },
+          search: true,
         },
-        items: [],
+        items: [true, false].map(v => {
+          return {
+            type: 'action',
+            name: v.toString().toUpperCase(),
+            isSelected: v === value,
+            select: () => {
+              onChange(v);
+            },
+          };
+        }),
       },
     });
   },
@@ -40,7 +50,7 @@ literalMatcher.register(tString.create(), {
         input: {
           initValue: value?.toString() ?? '',
           onComplete: text => {
-            onChange(text);
+            onChange(text || undefined);
           },
         },
         items: [],
@@ -56,6 +66,10 @@ literalMatcher.register(tNumber.create(), {
         input: {
           initValue: value?.toString() ?? '',
           onComplete: text => {
+            if (!text) {
+              onChange(undefined);
+              return;
+            }
             const number = Number.parseFloat(text);
             if (!Number.isNaN(number)) {
               onChange(number);
@@ -93,7 +107,7 @@ literalMatcher.register(tArray(tTag.create()), {
               type: 'checkbox',
               name: tag.value,
               checked: list.includes(tag.id),
-              label: html`<div class="dv-round-4" style=${styles}>
+              label: html` <div class="dv-round-4" style=${styles}>
                 ${tag.value}
               </div>`,
               select: checked => {
@@ -134,7 +148,7 @@ literalMatcher.register(tTag.create(), {
             return {
               type: 'action',
               name: tag.value,
-              label: html`<div class="dv-round-4" style=${styles}>
+              label: html` <div class="dv-round-4" style=${styles}>
                 ${tag.value}
               </div>`,
               select: () => {

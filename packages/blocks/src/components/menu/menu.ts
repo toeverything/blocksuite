@@ -15,7 +15,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
-import { ArrowDownIcon } from '../../icons/index.js';
+import { ArrowDownIcon, DoneIcon } from '../../icons/index.js';
 import {
   checkboxChecked,
   checkboxUnchecked,
@@ -34,8 +34,10 @@ type NormalMenu = MenuCommon &
     | {
         type: 'action';
         name: string;
+        isSelected?: boolean;
         label?: TemplateResult;
         icon?: TemplateResult;
+        postfix?: TemplateResult;
         select: () => void;
         onHover?: (hover: boolean) => void;
         class?: string;
@@ -44,6 +46,7 @@ type NormalMenu = MenuCommon &
         type: 'checkbox';
         name: string;
         checked: boolean;
+        postfix?: TemplateResult;
         label?: TemplateResult;
         select: (checked: boolean) => boolean;
         class?: string;
@@ -151,7 +154,6 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-action .icon {
-      margin-right: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -167,6 +169,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       font-size: 14px;
       line-height: 22px;
       flex: 1;
+      gap: 8px;
     }
 
     .affine-menu-action.selected {
@@ -179,7 +182,15 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     }
 
     .affine-menu-action.selected.delete-item .icon > svg {
-      fill: var(--affine-error-color);
+      color: var(--affine-error-color);
+    }
+
+    .affine-menu-action.selected-item {
+      color: var(--affine-text-emphasis-color);
+    }
+
+    .affine-menu-action.selected-item svg {
+      color: var(--affine-text-emphasis-color);
     }
 
     .database-menu-component-action-button:hover {
@@ -314,33 +325,48 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     [K in Menu['type']]: (menu: GetMenuByType<K>) => Item[];
   } = {
     action: menu => {
+      const icon = menu.icon
+        ? html` <div class="icon">${menu.icon}</div>`
+        : nothing;
+      const postfixIcon =
+        menu.postfix ?? (menu.isSelected ? DoneIcon : undefined);
+      const postfix = postfixIcon
+        ? html` <div class="icon">${postfixIcon}</div>`
+        : nothing;
       return [
         {
-          label: html` ${menu.icon
-              ? html` <div class="icon">${menu.icon}</div>`
-              : nothing}
+          label: html`
+            ${icon}
             <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
-            </div>`,
+            </div>
+            ${postfix}
+          `,
           onHover: menu.onHover,
           select: () => {
             menu.select();
             this._complete();
           },
-          class: menu.class ?? '',
+          class: menu.class ?? (menu.isSelected ? 'selected-item' : ''),
         },
       ];
     },
     checkbox: menu => {
+      const postfix = menu.postfix
+        ? html` <div class="icon">${menu.postfix}</div>`
+        : nothing;
       const checked = this.getChecked(menu.name) ?? menu.checked;
       return [
         {
-          label: html` <div class="icon">
+          label: html`
+            <div class="icon">
               ${checked ? checkboxChecked() : checkboxUnchecked()}
             </div>
             <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
-            </div>`,
+            </div>
+            ${postfix}
+          `,
           select: () => {
             this.setChecked(menu.name, menu.select(checked));
           },

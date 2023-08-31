@@ -16,6 +16,12 @@ export const dataViewCommonStyle = (selector: string) => `
     color: var(--affine-icon-color);
     fill: var(--affine-icon-color);
   }
+  .dv-icon-20 svg{
+    width: 20px;
+    height: 20px;
+    color: var(--affine-icon-color);
+    fill: var(--affine-icon-color);
+  }
   .dv-border{
     border: 1px solid var(--affine-border-color);
   }
@@ -24,5 +30,8 @@ export const dataViewCommonStyle = (selector: string) => `
   }
   .dv-round-8{
     border-radius: 8px;
+  }
+  .dv-color-2{
+    color: var(--affine-text-secondary-color);
   }
 `;

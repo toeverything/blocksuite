@@ -16,11 +16,10 @@ export const multiTagFilter = {
     }),
     label: 'Contains all',
     impl: (value, target) => {
-      return (
-        Array.isArray(target) &&
-        Array.isArray(value) &&
-        target.every(v => value.includes(v))
-      );
+      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+        return true;
+      }
+      return target.every(v => value.includes(v));
     },
   },
   containsOneOf: {
@@ -32,11 +31,10 @@ export const multiTagFilter = {
     name: 'containsOneOf',
     label: 'Contains one of',
     impl: (value, target) => {
-      return (
-        Array.isArray(target) &&
-        Array.isArray(value) &&
-        target.some(v => value.includes(v))
-      );
+      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+        return true;
+      }
+      return target.some(v => value.includes(v));
     },
   },
   doesNotContainsOneOf: {
@@ -47,11 +45,10 @@ export const multiTagFilter = {
     }),
     label: 'Does not contains one of',
     impl: (value, target) => {
-      return (
-        Array.isArray(target) &&
-        Array.isArray(value) &&
-        target.every(v => !value.includes(v))
-      );
+      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+        return true;
+      }
+      return target.every(v => !value.includes(v));
     },
   },
   doesNotContainsAll: {
@@ -62,11 +59,10 @@ export const multiTagFilter = {
     }),
     label: 'Does not contains all',
     impl: (value, target) => {
-      return (
-        Array.isArray(target) &&
-        Array.isArray(value) &&
-        !target.every(v => value.includes(v))
-      );
+      if (!Array.isArray(target) || !Array.isArray(value) || !target.length) {
+        return true;
+      }
+      return !target.every(v => value.includes(v));
     },
   },
 } as Record<string, FilterDefineType>;

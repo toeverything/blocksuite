@@ -200,7 +200,7 @@ export interface DataViewColumnManager<
 
 export abstract class BaseDataViewManager implements DataViewManager {
   private searchString = '';
-  private _filterVisible = true;
+  private _filterVisible?: boolean;
 
   get rows(): string[] {
     return this.filteredRows(this.searchString);
@@ -467,7 +467,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
   }
 
   get filterVisible(): boolean {
-    return this._filterVisible;
+    return this._filterVisible ?? this.filter.conditions.length > 0;
   }
 }
 

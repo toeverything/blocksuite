@@ -7,8 +7,8 @@ import { LiteralElement } from './literal-element.js';
 @customElement('data-view-literal-date-view')
 export class DateLiteral extends LiteralElement<number> {
   override render() {
-    return html`${this.value
+    return this.value
       ? format(new Date(this.value), 'yyyy/MM/dd')
-      : 'Empty'}`;
+      : html`<span class="dv-color-2">Empty</span>`;
   }
 }

@@ -5,10 +5,10 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { eventToVRect } from '../../../../components/menu/index.js';
+import { FilterIcon } from '../../../../icons/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { popCreateFilter } from '../../../common/ref/ref.js';
 import type { DataViewManager } from '../../data-view-manager.js';
-import { viewOpIcons } from './view-options.js';
 
 const styles = css`
   .affine-database-filter-button {
@@ -66,7 +66,7 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
   }
 
   private addFilter(event: MouseEvent) {
-    if (!this._filter.conditions.length) {
+    if (!this._filter.conditions.length && !this.view.filterVisible) {
       this.showToolBar(true);
       popCreateFilter(eventToVRect(event), {
         vars: this.view.vars,
@@ -75,6 +75,7 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
             ...this._filter,
             conditions: [filter],
           };
+          this.view.filterSetVisible(true);
         },
         onClose: () => {
           this.showToolBar(false);
@@ -86,17 +87,11 @@ export class DataViewHeaderToolsFilter extends WithDisposable(
   }
 
   override render() {
-    const showFilter = this.closest(
-      'affine-database'
-    )?.root.page.awarenessStore.getFlag('enable_database_filter');
-    if (!showFilter) {
-      return;
-    }
     return html` <div
       @click="${this.addFilter}"
-      class="affine-database-filter-button"
+      class="affine-database-filter-button dv-icon-20"
     >
-      ${viewOpIcons.filter} Filter
+      ${FilterIcon} Filter
     </div>`;
   }
 }

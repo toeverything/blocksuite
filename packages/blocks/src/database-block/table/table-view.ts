@@ -12,6 +12,7 @@ import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { PlusIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
@@ -249,6 +250,7 @@ export class DatabaseTable extends BaseDataView<
       this._addRow(this.view, position);
     };
     return html`
+      ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
       <div class="affine-database-table">
         <div class="affine-database-block-table">
           <div class="affine-database-table-container">

@@ -22,9 +22,13 @@ import { html } from 'lit/static-html.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelectionState } from '../__internal__/index.js';
-import { renderUniLit } from '../components/uni-component/uni-component.js';
+import {
+  defineUniComponent,
+  renderUniLit,
+} from '../components/uni-component/uni-component.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
+import type { DataViewProps } from './common/data-view.js';
 import {
   type DataViewExpose,
   viewRendererManager,
@@ -96,15 +100,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         PathFinder.equals(selection.path, this.path)
       );
       return !!selection;
-    });
-    requestAnimationFrame(() => {
-      this.requestUpdate();
-    });
-  }
-
-  override firstUpdated() {
-    requestAnimationFrame(() => {
-      this.requestUpdate();
     });
   }
 
@@ -267,12 +262,12 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       .view="${view}"
     ></data-view-header-tools>`;
   };
-
   private renderView(viewData?: ViewData) {
     if (!viewData) {
       return;
     }
-    const props = {
+    const props: DataViewProps = {
+      header: this.headerComponent,
       titleText: this.model.title,
       selectionUpdated: viewData.selectionUpdated,
       setSelection: viewData.setSelection,
@@ -292,17 +287,36 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     );
   }
 
-  renderFilterBar(viewData?: ViewData) {
-    if (!viewData || viewData.view.filter.conditions.length === 0) {
+  renderFilterBar(view?: DataViewManager) {
+    if (!view || !view.filterVisible) {
       return;
     }
     return html`<filter-bar
-      .vars=${viewData.view.vars}
-      .data=${viewData.view.filter}
-      .setData=${viewData.view.updateFilter.bind(viewData.view)}
+      .vars=${view.vars}
+      .data=${view.filter}
+      .setData=${view.updateFilter.bind(view)}
     ></filter-bar>`;
   }
 
+  headerComponent = defineUniComponent(
+    ({ view }: { view: DataViewManager }) => {
+      return html`
+        <div style="margin-bottom: 16px;display:flex;flex-direction: column">
+          <div
+            style="display:flex;align-items:center;gap:12px;padding: 0 6px;margin-bottom: 8px;"
+          >
+            ${this.renderTitle()} ${this.renderReference()}
+          </div>
+          <div
+            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
+          >
+            ${this.renderViews()} ${this.renderTools(view)}
+          </div>
+          ${this.renderFilterBar(view)}
+        </div>
+      `;
+    }
+  );
   override render() {
     const viewData = this.model.views
       .map(view => this.getView(view.id))
@@ -310,6 +324,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     if (!viewData && this.model.views.length !== 0) {
       const viewId = this.model.views[0].id;
       this.currentView = viewId;
+      requestAnimationFrame(() => {
+        this.requestUpdate();
+      });
       return;
     }
     const containerClass = classMap({
@@ -318,22 +335,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       'database-block-selected': this.selected?.type === 'block',
     });
     return html`
-      <div class="${containerClass}">
-        <div
-          style="margin-bottom: 16px;display:flex;flex-direction: column;gap: 8px"
-        >
-          <div style="display:flex;align-items:center;gap:12px;padding: 0 6px;">
-            ${this.renderTitle()} ${this.renderReference()}
-          </div>
-          <div
-            style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
-          >
-            ${this.renderViews()} ${this.renderTools(viewData?.view)}
-          </div>
-          ${this.renderFilterBar(viewData)}
-        </div>
-        ${this.renderView(viewData)}
-      </div>
+      <div class="${containerClass}">${this.renderView(viewData)}</div>
     `;
   }
 }

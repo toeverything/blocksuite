@@ -10,11 +10,10 @@ export const numberFilter = {
     }),
     label: '>',
     impl: (value, target) => {
-      return (
-        typeof value === 'number' &&
-        typeof target === 'number' &&
-        value > target
-      );
+      if (typeof value !== 'number' || typeof target !== 'number') {
+        return true;
+      }
+      return value > target;
     },
   },
   greatThanOrEqual: {
@@ -24,11 +23,10 @@ export const numberFilter = {
     }),
     label: '>=',
     impl: (value, target) => {
-      return (
-        typeof value === 'number' &&
-        typeof target === 'number' &&
-        value >= target
-      );
+      if (typeof value !== 'number' || typeof target !== 'number') {
+        return true;
+      }
+      return value >= target;
     },
   },
   lessThan: {
@@ -38,11 +36,10 @@ export const numberFilter = {
     }),
     label: '<',
     impl: (value, target) => {
-      return (
-        typeof value === 'number' &&
-        typeof target === 'number' &&
-        value < target
-      );
+      if (typeof value !== 'number' || typeof target !== 'number') {
+        return true;
+      }
+      return value < target;
     },
   },
   lessThanOrEqual: {
@@ -52,11 +49,10 @@ export const numberFilter = {
     }),
     label: '<=',
     impl: (value, target) => {
-      return (
-        typeof value === 'number' &&
-        typeof target === 'number' &&
-        value <= target
-      );
+      if (typeof value !== 'number' || typeof target !== 'number') {
+        return true;
+      }
+      return value <= target;
     },
   },
   equal: {
@@ -66,7 +62,10 @@ export const numberFilter = {
     }),
     label: '==',
     impl: (value, target) => {
-      return typeof value === 'number' && value == target;
+      if (typeof value !== 'number' || typeof target !== 'number') {
+        return true;
+      }
+      return value == target;
     },
   },
   notEqual: {
@@ -76,7 +75,10 @@ export const numberFilter = {
     }),
     label: '!=',
     impl: (value, target) => {
-      return typeof value === 'number' && value != target;
+      if (typeof value !== 'number' || typeof target !== 'number') {
+        return true;
+      }
+      return value != target;
     },
   },
 } as Record<string, FilterDefineType>;

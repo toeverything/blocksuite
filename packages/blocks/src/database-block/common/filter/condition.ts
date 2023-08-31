@@ -119,16 +119,20 @@ export class FilterConditionView extends WithDisposable(ShadowlessElement) {
     const list = this._filterList();
     popFilterableSimpleMenu(
       target,
-      list.map(v => ({
-        type: 'action',
-        name: v.label,
-        select: () => {
-          this.setData({
-            ...this.data,
-            function: v.name,
-          });
-        },
-      }))
+      list.map(v => {
+        const selected = v.name === this.data.function;
+        return {
+          type: 'action',
+          name: v.label,
+          isSelected: selected,
+          select: () => {
+            this.setData({
+              ...this.data,
+              function: v.name,
+            });
+          },
+        };
+      })
     );
   }
 

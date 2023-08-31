@@ -16,7 +16,10 @@ export const tagFilter = {
     }),
     label: 'Is one of',
     impl: (value, target) => {
-      return Array.isArray(target) && target.includes(value);
+      if (!Array.isArray(target) || !target.length) {
+        return true;
+      }
+      return target.includes(value);
     },
   },
   isNotOneOf: {
@@ -27,7 +30,10 @@ export const tagFilter = {
     }),
     label: 'Is not one of',
     impl: (value, target) => {
-      return Array.isArray(target) && !target.includes(value);
+      if (!Array.isArray(target) || !target.length) {
+        return true;
+      }
+      return !target.includes(value);
     },
   },
 } as Record<string, FilterDefineType>;

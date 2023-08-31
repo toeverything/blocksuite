@@ -13,6 +13,7 @@ import { popFilterModal } from './filter-modal.js';
 export class FilterBar extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     filter-bar {
+      margin-top: 8px;
       display: flex;
       gap: 8px;
     }
@@ -84,9 +85,28 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
     });
   };
 
+  renderAddFilter() {
+    const count = this.data.conditions.length;
+    if (count <= 2) {
+      return html`<div
+        class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
+        @click="${this.addFilter}"
+      >
+        ${AddCursorIcon} Add filter
+      </div>`;
+    }
+    return html`<div
+      class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
+      @click="${this.addFilter}"
+    >
+      ${count - 2} More
+    </div>`;
+  }
+
   override render() {
+    const conditions = this.data.conditions;
     return html`
-      ${repeat(this.data.conditions, (condition, i) => {
+      ${repeat(conditions.slice(0, 2), (condition, i) => {
         const deleteFilter = () => {
           this.deleteFilter(i);
         };
@@ -122,12 +142,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
           </div>
         </div>`;
       })}
-      <div
-        class="filter-bar-add-filter dv-icon-16 dv-round-4 dv-hover"
-        @click="${this.addFilter}"
-      >
-        ${AddCursorIcon} Add filter
-      </div>
+      ${this.renderAddFilter()}
     `;
   }
 

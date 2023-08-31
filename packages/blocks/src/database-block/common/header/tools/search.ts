@@ -178,7 +178,7 @@ export class DataViewHeaderToolsSearch extends WithDisposable(
     });
     return html`
       <label class="${searchToolClassMap}" @click="${this._clickSearch}">
-        <div class="affine-database-search-input-icon">
+        <div class="affine-database-search-input-icon dv-icon-20">
           ${DatabaseSearchIcon}
         </div>
         <input
