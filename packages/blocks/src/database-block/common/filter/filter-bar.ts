@@ -86,6 +86,9 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
       vars: this.vars,
       value: value,
       onChange: filter => this._setFilter(i, filter),
+      onDelete: () => {
+        this.deleteFilter(i);
+      },
     });
   };
   renderMoreFilter = (): TemplateResult => {

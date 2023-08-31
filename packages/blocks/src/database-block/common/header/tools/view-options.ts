@@ -94,6 +94,12 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
                 value: this.view.filter,
                 onChange: this.view.updateFilter.bind(this.view),
                 isRoot: true,
+                onDelete: () => {
+                  this.view.updateFilter({
+                    ...this.view.filter,
+                    conditions: [],
+                  });
+                },
               });
             },
           },
