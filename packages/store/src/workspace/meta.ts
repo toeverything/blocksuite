@@ -186,6 +186,18 @@ export class WorkspaceMeta {
     }
   }
 
+  updateVersion(workspace: Workspace) {
+    this._proxy.workspaceVersion = WORKSPACE_VERSION;
+
+    this._proxy.pageVersion = PAGE_VERSION;
+
+    const _versions: Record<string, number> = {};
+    workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+      _versions[flavour] = schema.version;
+    });
+    this._proxy.blockVersions = _versions;
+  }
+
   /**
    * @internal Only for page initialization
    */
