@@ -937,9 +937,10 @@ export class Page extends Space<FlatBlockMap> {
     // Initialization from empty yDoc, indicating that the document is new.
     if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
+    } else {
+      // Initialization from existing yDoc, indicating that the document is loaded from storage.
+      this.validateVersion();
     }
-    // Initialization from existing yDoc, indicating that the document is loaded from storage.
-    this.validateVersion();
   }
 
   override async waitForLoaded() {
