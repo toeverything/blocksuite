@@ -13,7 +13,7 @@ import type { FilterGroup, Variable } from '../ast.js';
 export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     advanced-filter-modal {
-      background-color: var(--affine-background-primary-color);
+      background-color: var(--affine-background-overlay-panel-color);
       position: absolute;
       border-radius: 8px;
       box-shadow: var(--affine-shadow-2);

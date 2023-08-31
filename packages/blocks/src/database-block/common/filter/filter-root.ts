@@ -22,6 +22,7 @@ import {
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import { popAddNewFilter } from './condition.js';
 import type { FilterGroupView } from './filter-group.js';
+import { getDepth } from './filter-group.js';
 
 @customElement('filter-root-view')
 export class FilterRootView extends WithDisposable(ShadowlessElement) {
@@ -186,13 +187,15 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   };
 
   private _clickConditionOps(target: ReferenceElement, i: number) {
+    const filter = this.data.conditions[i];
     popFilterableSimpleMenu(target, [
       {
         type: 'action',
-        name: 'Wrap with group',
+        name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         icon: ConvertIcon,
+        hide: () => getDepth(filter) > 3,
         select: () => {
-          //
+          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
         },
       },
       {
@@ -200,7 +203,9 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         name: 'Duplicate',
         icon: DuplicateIcon,
         select: () => {
-          //
+          const conditions = [...this.data.conditions];
+          conditions.splice(i + 1, 0, structuredClone(conditions[i]));
+          this.setData({ ...this.data, conditions: conditions });
         },
       },
       {

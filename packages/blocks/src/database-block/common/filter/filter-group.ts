@@ -87,6 +87,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-hover-color);
       color: var(--affine-text-primary-color);
     }
+
     .filter-group-button:hover svg {
       fill: var(--affine-text-primary-color);
       color: var(--affine-text-primary-color);
@@ -118,6 +119,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       width: 18px;
       height: 18px;
     }
+
     .filter-group-item-ops:hover svg {
       fill: var(--affine-text-primary-color);
       color: var(--affine-text-primary-color);
@@ -126,13 +128,16 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
     .delete-style {
       background-color: var(--affine-background-error-color);
     }
+
     .filter-group-border {
       border: 1px dashed var(--affine-border-color);
     }
+
     .filter-group-bg-1 {
       background-color: var(--affine-background-secondary-color);
       border: 1px solid var(--affine-border-color);
     }
+
     .filter-group-bg-2 {
       background-color: var(--affine-background-tertiary-color);
       border: 1px solid var(--affine-border-color);
@@ -206,13 +211,15 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   deleteIndex?: number;
 
   private _clickConditionOps(target: ReferenceElement, i: number) {
+    const filter = this.data.conditions[i];
     popFilterableSimpleMenu(target, [
       {
         type: 'action',
-        name: 'Wrap with group',
+        name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         icon: ConvertIcon,
+        hide: () => this.depth + getDepth(filter) > 3,
         select: () => {
-          //
+          this.setData({ type: 'group', op: 'and', conditions: [this.data] });
         },
       },
       {
@@ -220,7 +227,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         name: 'Duplicate',
         icon: DuplicateIcon,
         select: () => {
-          //
+          const conditions = [...this.data.conditions];
+          conditions.splice(i + 1, 0, structuredClone(conditions[i]));
+          this.setData({ ...this.data, conditions: conditions });
         },
       },
       {
@@ -248,9 +257,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       },
     ]);
   }
+
   private get isMaxDepth() {
     return this.depth === 3;
   }
+
   override render() {
     const data = this.data;
     return html`
@@ -283,7 +294,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           const groupClassList = classMap({
             [`filter-group-bg-${this.depth}`]: filter.type !== 'filter',
           });
-          return html` <div class="${classList}" @contextmenu=${clickOps}>
+          return html` <div class="${classList}" @contextmenu="${clickOps}">
             ${op}
             <div
               style="flex:1;display:flex;align-items:start;justify-content: space-between;gap: 8px;"
@@ -325,3 +336,9 @@ declare global {
     'filter-group-view': FilterGroupView;
   }
 }
+export const getDepth = (filter: Filter): number => {
+  if (filter.type === 'filter') {
+    return 1;
+  }
+  return Math.max(...filter.conditions.map(getDepth)) + 1;
+};

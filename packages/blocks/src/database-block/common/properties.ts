@@ -46,11 +46,9 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   static override styles = css`
     data-view-properties-setting {
       position: absolute;
-      background-color: var(--affine-background-primary-color);
+      background-color: var(--affine-background-overlay-panel-color);
       border-radius: 8px;
-      box-shadow:
-        0px 0px 12px 0px rgba(66, 65, 73, 0.14),
-        0px 0px 0px 0.5px #e3e3e4 inset;
+      box-shadow: var(--affine-shadow-2);
       padding: 8px;
       min-width: 250px;
     }

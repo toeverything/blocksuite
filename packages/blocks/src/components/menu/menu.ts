@@ -99,7 +99,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       min-width: 200px;
       box-shadow: var(--affine-shadow-2);
       border-radius: 8px;
-      background-color: var(--affine-background-primary-color);
+      background-color: var(--affine-background-overlay-panel-color);
       padding: 8px;
       position: absolute;
       z-index: 999;
