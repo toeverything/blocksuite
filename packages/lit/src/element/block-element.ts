@@ -186,7 +186,6 @@ export class BlockElement<
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
     interface View {
       block: BlockSuiteViewSpec<BlockElement>;

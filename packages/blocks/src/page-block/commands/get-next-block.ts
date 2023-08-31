@@ -25,7 +25,6 @@ export const getNextBlockCommand: Command<{
 };
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
     interface CommandData {
       nextBlock?: BlockElement;

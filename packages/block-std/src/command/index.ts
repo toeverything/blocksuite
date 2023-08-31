@@ -88,7 +88,6 @@ export class CommandManager {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
     interface CommandData {}
     interface Commands {}
