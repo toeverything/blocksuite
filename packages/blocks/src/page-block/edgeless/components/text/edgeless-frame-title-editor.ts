@@ -37,6 +37,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       assertExists(this._vInput);
       assertExists(this._frame);
       this._vInput.mount(this._virgoContainer);
+      this._vInput.vEditor.selectAll();
       this._edgeless?.surface.updateElementLocalRecord(this._frame.id, {
         titleHide: true,
       });
@@ -45,11 +46,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       this.disposables.addFromEvent(this._virgoContainer, 'blur', () => {
         this._unmount();
       });
-      this.disposables.add(
-        dispatcher.add('click', () => {
-          return true;
-        })
-      );
+
       this.disposables.add(
         dispatcher.add('doubleClick', () => {
           return true;
@@ -96,23 +93,20 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const viewport = this._edgeless?.surface.viewport;
     let virgoStyle = styleMap({});
     if (viewport && this._frame && this._edgeless) {
-      const padding = this._frame.padding;
-      const zoom = viewport.zoom;
       const bound = this._frame.gridBound;
-      const radius = this._frame.radius;
       const [x, y] = viewport.toViewCoord(bound.x, bound.y);
       virgoStyle = styleMap({
         position: 'absolute',
         left: x + 'px',
         top: y + 'px',
         minWidth: '8px',
-        borderRadius: radius + 'px',
+        borderRadius: '4px',
         fontSize: '16px',
         fontFamily: 'sans-serif',
         color: 'white',
         background: this._frame.color,
         outline: 'none',
-        padding: `${padding[1] * zoom}px ${padding[0] * zoom}px`,
+        padding: `4px 8px`,
         lineHeight: 'initial',
         zIndex: '1',
       });

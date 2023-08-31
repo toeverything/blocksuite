@@ -3,11 +3,8 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 import {
   Bound,
   ConnectorElement,
-  deserializeXYWH,
   FrameElement,
-  getCommonBound,
   type HitTestOptions,
-  isPointIn,
   type PhasorElement,
   type PhasorElementType,
   ShapeElement,
@@ -23,8 +20,8 @@ import {
 } from '../../../__internal__/index.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
+import { edgelessElementsBound } from '../utils/bound-utils.js';
 import {
-  getXYWH,
   isPhasorElement,
   isTopLevelBlock,
   pickBlocksByBound,
@@ -209,22 +206,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const selected = this.selection.elements;
     if (!selected.length) return false;
 
-    const commonBound = getCommonBound(
-      selected.map(element => {
-        if (isTopLevelBlock(element)) {
-          const [x, y, w, h] = deserializeXYWH(getXYWH(element));
-          return {
-            x,
-            y,
-            w,
-            h,
-          };
-        }
-        return element;
-      })
-    );
+    const commonBound = edgelessElementsBound(selected);
+
     const [modelX, modelY] = this._surface.toModelCoord(viewX, viewY);
-    if (commonBound && isPointIn(commonBound, modelX, modelY)) {
+    if (commonBound && commonBound.isPointInBound([modelX, modelY])) {
       return true;
     }
     return false;

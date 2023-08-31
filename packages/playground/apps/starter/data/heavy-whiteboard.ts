@@ -8,7 +8,13 @@ import {
   type ShapeType,
   StrokeStyle,
 } from '@blocksuite/phasor';
-import { nanoid, Text, type Workspace } from '@blocksuite/store';
+import {
+  nanoid,
+  native2Y,
+  NativeWrapper,
+  Text,
+  type Workspace,
+} from '@blocksuite/store';
 
 import { getOptions } from '../utils';
 import { type InitFn } from './utils';
@@ -66,7 +72,7 @@ export const heavyWhiteboard: InitFn = async (
 
   page.addBlock(
     'affine:surface',
-    { elements: surfaceBlockElements },
+    { elements: new NativeWrapper(native2Y(surfaceBlockElements, true)) },
     pageBlockId
   );
 

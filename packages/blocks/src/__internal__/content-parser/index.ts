@@ -200,6 +200,8 @@ export class ContentParser {
     ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -212,7 +214,7 @@ export class ContentParser {
           return false;
         }
       },
-      onclone: function (documentClone: Document, element: HTMLElement) {
+      onclone: async function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
         const layer = documentClone.querySelector('.affine-edgeless-layer');
@@ -228,6 +230,8 @@ export class ContentParser {
             element.style.setProperty('box-shadow', 'none');
           }
         });
+
+        await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
@@ -274,6 +278,8 @@ export class ContentParser {
     );
     if (!pageContainer) return;
 
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -296,6 +302,9 @@ export class ContentParser {
           return false;
         }
       },
+      onclone: async function (_documentClone: Document, element: HTMLElement) {
+        await replaceRichTextWithSvgElementFunc(element);
+      },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
@@ -307,6 +316,45 @@ export class ContentParser {
     );
     this._checkCanContinueToCanvas(pathname, pageMode);
     return data;
+  }
+
+  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+    const richList = Array.from(element.querySelectorAll('.affine-rich-text'));
+    await Promise.all(
+      richList.map(async rich => {
+        const svgEle = await this._elementToSvgElement(
+          rich.cloneNode(true) as HTMLElement,
+          rich.clientWidth,
+          rich.clientHeight + 1
+        );
+        rich.parentElement?.appendChild(svgEle);
+        rich.parentElement?.removeChild(rich);
+      })
+    );
+  }
+
+  private async _elementToSvgElement(
+    node: HTMLElement,
+    width: number,
+    height: number
+  ) {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(xmlns, 'svg');
+    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('x', '0');
+    foreignObject.setAttribute('y', '0');
+    foreignObject.setAttribute('externalResourcesRequired', 'true');
+
+    svg.appendChild(foreignObject);
+    foreignObject.appendChild(node);
+    return svg;
   }
 
   private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
@@ -341,7 +389,7 @@ export class ContentParser {
 
     FileExporter.exportPng(
       (this._page.root as PageBlockModel).title.toString(),
-      canvasImage.toDataURL('PNG')
+      canvasImage.toDataURL('image/png')
     );
   }
 

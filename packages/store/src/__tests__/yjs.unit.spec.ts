@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
-import { NativeWrapper } from '../yjs/native-wrapper';
+import { NativeWrapper } from '../yjs/native-wrapper.js';
 
 const proxyManager = new ProxyManager();
 
@@ -134,11 +134,9 @@ describe('blocksuite yjs', () => {
         deep: true,
       });
 
-      expect(proxy.inner.native).toEqual({
-        value: ['hello', 'world'],
-      });
+      expect(proxy.inner.native.getValue()).toEqual(['hello', 'world']);
 
-      proxy.inner.native.value = ['hello', 'world', 'foo'];
+      proxy.inner.native.setValue(['hello', 'world', 'foo']);
       expect(native.getValue()).toEqual(['hello', 'world', 'foo']);
     });
   });

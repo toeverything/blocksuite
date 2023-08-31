@@ -12,6 +12,7 @@ import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
+import { DocPageService } from '../page-block/doc/doc-page-service.js';
 import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
 import {
   type DocPageBlockWidgetName,
@@ -26,6 +27,7 @@ import { AFFINE_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/remote-selection/
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
+  service: DocPageService,
   view: {
     component: literal`affine-doc-page`,
     widgets: {

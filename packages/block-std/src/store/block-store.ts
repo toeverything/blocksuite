@@ -1,13 +1,10 @@
 import type { Page, Workspace } from '@blocksuite/store';
 
+import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
 import { SelectionManager } from '../selection/index.js';
 import { SpecStore } from './spec-store.js';
 import { ViewStore } from './view-store.js';
-
-export interface BlockStoreConfig<BlockViewType = unknown> {
-  getBlockViewByNode: (node: Node) => BlockViewType | null;
-}
 
 export interface BlockStoreOptions {
   root: HTMLElement;
@@ -20,6 +17,7 @@ export class BlockStore<ComponentType = unknown, NodeView = unknown> {
   readonly workspace: Workspace;
   readonly uiEventDispatcher: UIEventDispatcher;
   readonly selectionManager: SelectionManager;
+  readonly commandManager: CommandManager;
   readonly root: HTMLElement;
   readonly specStore: SpecStore<ComponentType>;
   readonly viewStore: ViewStore<NodeView>;
@@ -30,6 +28,7 @@ export class BlockStore<ComponentType = unknown, NodeView = unknown> {
     this.page = options.page;
     this.uiEventDispatcher = new UIEventDispatcher(this);
     this.selectionManager = new SelectionManager(this);
+    this.commandManager = new CommandManager(this);
     this.specStore = new SpecStore<ComponentType>(this);
     this.viewStore = new ViewStore<NodeView>(this);
   }

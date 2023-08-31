@@ -56,7 +56,7 @@ export const formatBarStyle = css`
   .affine-format-bar-widget {
     box-sizing: border-box;
     position: absolute;
-    display: flex;
+    display: none;
     align-items: center;
     padding: 4px 8px;
     gap: 4px;
