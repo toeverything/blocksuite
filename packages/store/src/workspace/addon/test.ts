@@ -3,7 +3,7 @@ import * as Y from 'yjs';
 
 import type { JSXElement } from '../../utils/jsx.js';
 import { serializeYDoc, yDocToJSXNode } from '../../utils/jsx.js';
-import { Text } from '../../yjs/index.js';
+import { native2Y, NativeWrapper, Text } from '../../yjs/index.js';
 import type { Page } from '../page.js';
 import { addOnFactory } from './shared.js';
 
@@ -44,7 +44,10 @@ export const test = addOnFactory<keyof TestAddon>(
             props['sys:flavour'] === 'affine:surface' &&
             props['prop:elements']
           ) {
-            Object.values(props['prop:elements']).forEach(element => {
+            const obj = (
+              props['prop:elements'] as { value: Record<string, unknown> }
+            ).value;
+            Object.values(obj).forEach(element => {
               const _element = element as Record<string, unknown>;
               if (_element['type'] === 'text') {
                 const yText = new Y.Text();
@@ -62,6 +65,8 @@ export const test = addOnFactory<keyof TestAddon>(
                 _element['text'] = yText;
               }
             });
+
+            props['prop:elements'] = new NativeWrapper(native2Y(obj, true));
           }
 
           // setup embed source
