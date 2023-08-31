@@ -116,6 +116,7 @@ const syncProviders = async (
       if (isValidateError) {
         page.spaceDoc.once('update', () => {
           workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+          workspace.meta.writeVersion(workspace);
           page.trySyncFromExistingDoc();
         });
         return;
