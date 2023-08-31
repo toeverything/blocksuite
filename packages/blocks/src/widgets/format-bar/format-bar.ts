@@ -272,6 +272,7 @@ export class AffineFormatBarWidget extends WidgetElement {
                   }),
                 ],
               }).then(({ x, y }) => {
+                formatQuickBarElement.style.display = 'flex';
                 formatQuickBarElement.style.top = `${y}px`;
                 formatQuickBarElement.style.left = `${x}px`;
               });
