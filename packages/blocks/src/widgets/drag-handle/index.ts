@@ -191,7 +191,7 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
     const padding =
       ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
-    this._dragHandleContainer.style.padding = `${padding}px 0`;
+    this._dragHandleContainer.style.paddingTop = `${padding}px`;
 
     this._dragHandleContainer.style.width = `${
       DRAG_HANDLE_WIDTH * this._scale
@@ -918,8 +918,11 @@ export class DragHandleWidget extends WidgetElement {
         // topBeforeExpanding is the top of the drag handle container without expanding
         const topBeforeExpanding = this._getTopWithBlockElement(blockElement);
 
+        const containerHeight = getDragHandleContainerHeight(
+          blockElement.model
+        );
         const paddingTop =
-          parseInt(this._dragHandleContainer.style.paddingTop) ?? 0;
+          ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
         const translateY = finalTop - topBeforeExpanding - paddingTop;
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
