@@ -57,12 +57,12 @@ describe('block migration', () => {
     const doc = await loadBinary('page-surface-v3-v4');
 
     // @ts-ignore
-    const surfaceElements = doc
+    let surfaceElements = doc
       .getMap('blocks')
       .get('zUHGq4EHQJ')
       .get('prop:elements') as Y.Map<unknown>;
-    const text = surfaceElements.get('Cj2MNGM9UK') as Y.Map<unknown>;
-    const shape = surfaceElements.get('Rl2IT9rGoP') as Y.Map<unknown>;
+    let text = surfaceElements.get('Cj2MNGM9UK') as Y.Map<unknown>;
+    let shape = surfaceElements.get('Rl2IT9rGoP') as Y.Map<unknown>;
 
     assert.equal(text.get('isBold'), true);
     assert.equal(text.get('isItalic'), true);
@@ -83,6 +83,15 @@ describe('block migration', () => {
       },
       doc
     );
+
+    // @ts-ignore
+    surfaceElements = doc
+      .getMap('blocks')
+      .get('zUHGq4EHQJ')
+      .get('prop:elements')
+      .getValue() as Y.Map<unknown>;
+    text = surfaceElements.get('Cj2MNGM9UK') as Y.Map<unknown>;
+    shape = surfaceElements.get('Rl2IT9rGoP') as Y.Map<unknown>;
 
     assert.isUndefined(text.get('isBold'));
     assert.isUndefined(text.get('isItalic'));

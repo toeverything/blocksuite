@@ -151,10 +151,7 @@ export class ProxyManager {
       return this._proxies.get(yAbstract) as Data;
     }
     if (yAbstract instanceof NativeWrapper) {
-      const data = this._createYMapProxy(yAbstract, {
-        ...config,
-        deep: false,
-      }) as Data;
+      const data = yAbstract as Data;
       this._proxies.set(yAbstract, data);
       return data;
     }

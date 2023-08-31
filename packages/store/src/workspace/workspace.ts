@@ -50,7 +50,7 @@ export class Workspace extends WorkspaceAddonType {
     let flag = false;
     if (this.doc.store.clients.size === 1) {
       const items = Array.from(this.doc.store.clients.values())[0];
-      // workspaceVersion and pageVersion were set when we init the workspace
+      // workspaceVersion and pageVersion were set when the workspace is initialized
       if (items.length <= 2) {
         flag = true;
       }
