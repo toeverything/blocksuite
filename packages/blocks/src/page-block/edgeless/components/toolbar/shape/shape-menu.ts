@@ -9,8 +9,8 @@ import { customElement, property } from 'lit/decorators.js';
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import {
-  GeneralShapeStyleIcon,
-  ScribbledShapeStyleIcon,
+  GeneralStyleIcon,
+  ScribbledStyleIcon,
 } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_SHAPE_FILL_COLOR } from '../../component-toolbar/change-shape-button.js';
@@ -139,7 +139,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                   this._setShapeStyle(ShapeStyle.General);
                 }}
               >
-                ${GeneralShapeStyleIcon}
+                ${GeneralStyleIcon}
               </edgeless-tool-icon-button>
               <edgeless-tool-icon-button
                 .tooltip=${'Scribbled'}
@@ -150,7 +150,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                   this._setShapeStyle(ShapeStyle.Scribbled);
                 }}
               >
-                ${ScribbledShapeStyleIcon}
+                ${ScribbledStyleIcon}
               </edgeless-tool-icon-button>
             </div>
             <menu-divider .vertical=${true}></menu-divider>
