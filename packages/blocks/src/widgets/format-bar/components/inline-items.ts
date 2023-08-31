@@ -38,10 +38,13 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
   }
 
   if (textSelection) {
-    format = getCombinedFormatInTextSelection(pageElement, textSelection);
+    format = getCombinedFormatInTextSelection(pageElement.root, textSelection);
     type = 'text';
   } else {
-    format = getCombinedFormatInBlockSelections(pageElement, blockSelections);
+    format = getCombinedFormatInBlockSelections(
+      pageElement.root,
+      blockSelections
+    );
     type = 'block';
   }
 
