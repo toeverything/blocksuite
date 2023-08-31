@@ -142,6 +142,13 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       background-color: var(--affine-background-tertiary-color);
       border: 1px solid var(--affine-border-color);
     }
+    .hover-style {
+      background-color: var(--affine-hover-color);
+    }
+
+    .delete-style {
+      background-color: var(--affine-background-error-color);
+    }
   `;
   @property({ attribute: false })
   depth = 1;
@@ -208,7 +215,10 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
   };
 
   @state()
-  deleteIndex?: number;
+  containerClass?: {
+    index: number;
+    class: string;
+  };
 
   private _clickConditionOps(target: ReferenceElement, i: number) {
     const filter = this.data.conditions[i];
@@ -217,6 +227,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         icon: ConvertIcon,
+        onHover: hover => {
+          this.containerClass = hover
+            ? { index: i, class: 'hover-style' }
+            : undefined;
+        },
         hide: () => this.depth + getDepth(filter) > 3,
         select: () => {
           this.setData({ type: 'group', op: 'and', conditions: [this.data] });
@@ -226,6 +241,11 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
         type: 'action',
         name: 'Duplicate',
         icon: DuplicateIcon,
+        onHover: hover => {
+          this.containerClass = hover
+            ? { index: i, class: 'hover-style' }
+            : undefined;
+        },
         select: () => {
           const conditions = [...this.data.conditions];
           conditions.splice(i + 1, 0, structuredClone(conditions[i]));
@@ -242,7 +262,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             icon: DeleteIcon,
             class: 'delete-item',
             onHover: hover => {
-              this.deleteIndex = hover ? i : undefined;
+              this.containerClass = hover
+                ? { index: i, class: 'delete-style' }
+                : undefined;
             },
             select: () => {
               const conditions = [...this.data.conditions];
@@ -289,7 +311,8 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
             'filter-root-item': true,
             'filter-exactly-hover-container': true,
             'dv-pd-4 dv-round-4': true,
-            'delete-style': this.deleteIndex === i,
+            [this.containerClass?.class ?? '']:
+              this.containerClass?.index === i,
           });
           const groupClassList = classMap({
             [`filter-group-bg-${this.depth}`]: filter.type !== 'filter',
@@ -309,9 +332,9 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
                   `
                 : html`
                     <filter-group-view
-                      class=${groupClassList}
+                      class="${groupClassList}"
                       style="width: 100%;"
-                      .depth=${this.depth + 1}
+                      .depth="${this.depth + 1}"
                       .setData="${(v: Filter) => this._setFilter(i, v)}"
                       .vars="${this.vars}"
                       .data="${filter}"

@@ -140,10 +140,6 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       color: var(--affine-text-primary-color);
     }
 
-    .delete-style {
-      background-color: var(--affine-background-error-color);
-    }
-
     .filter-root-grabber {
       cursor: grab;
       width: 4px;
@@ -168,7 +164,10 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   setData!: (filter: FilterGroup) => void;
   @state()
-  deleteIndex?: number;
+  containerClass?: {
+    index: number;
+    class: string;
+  };
   private _setFilter = (index: number, filter: Filter) => {
     this.setData({
       ...this.data,
@@ -193,6 +192,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         type: 'action',
         name: filter.type === 'filter' ? 'Turn into group' : 'Wrap in group',
         icon: ConvertIcon,
+        onHover: hover => {
+          this.containerClass = hover
+            ? { index: i, class: 'hover-style' }
+            : undefined;
+        },
         hide: () => getDepth(filter) > 3,
         select: () => {
           this.setData({ type: 'group', op: 'and', conditions: [this.data] });
@@ -202,6 +206,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         type: 'action',
         name: 'Duplicate',
         icon: DuplicateIcon,
+        onHover: hover => {
+          this.containerClass = hover
+            ? { index: i, class: 'hover-style' }
+            : undefined;
+        },
         select: () => {
           const conditions = [...this.data.conditions];
           conditions.splice(i + 1, 0, structuredClone(conditions[i]));
@@ -218,7 +227,9 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
             icon: DeleteIcon,
             class: 'delete-item',
             onHover: hover => {
-              this.deleteIndex = hover ? i : undefined;
+              this.containerClass = hover
+                ? { index: i, class: 'delete-style' }
+                : undefined;
             },
             select: () => {
               const conditions = [...this.data.conditions];
@@ -292,7 +303,8 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
             'filter-root-item': true,
             'filter-exactly-hover-container': true,
             'dv-pd-4 dv-round-4': true,
-            'delete-style': this.deleteIndex === i,
+            [this.containerClass?.class ?? '']:
+              this.containerClass?.index === i,
           });
           return html` ${data.conditions[i - 1]?.type === 'group' ||
             filter.type === 'group'
