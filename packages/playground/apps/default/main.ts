@@ -95,21 +95,34 @@ const syncProviders = async (
     }
   }
 
-  const oldVersions = { ...workspace.meta.blockVersions };
+  const oldMeta = localStorage.getItem('meta');
+  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : null;
 
   let run = true;
   const runWorkspaceMigration = () => {
     if (run) {
       workspace.schema.upgradeWorkspace(workspace.doc);
+      const meta = workspace.doc.toJSON().meta;
+      localStorage.setItem('meta', JSON.stringify(meta));
       run = false;
     }
   };
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded(() => {
+    await page.waitForLoaded().catch(e => {
+      const isValidateError =
+        e instanceof Error && e.message.includes('outdated');
+      if (isValidateError) {
+        page.spaceDoc.once('update', () => {
+          workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+        });
+        return;
+      }
+      throw e;
+    });
+    page.spaceDoc.once('update', () => {
       runWorkspaceMigration();
-      workspace.schema.upgradePage(oldVersions, page.spaceDoc);
     });
   });
 };

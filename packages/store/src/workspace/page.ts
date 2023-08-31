@@ -673,6 +673,8 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     this._synced = true;
+
+    this.validateVersion();
   }
 
   dispose() {
@@ -929,20 +931,20 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.yUpdated.emit();
   };
 
+  validateVersion() {
+    this.workspace.meta.validateVersion(this.workspace);
+  }
+
   private _handleVersion() {
     // Initialization from empty yDoc, indicating that the document is new.
     if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.
-    else {
-      this.workspace.meta.validateVersion(this.workspace);
-    }
   }
 
-  override async waitForLoaded(onLoaded?: () => void) {
+  override async waitForLoaded() {
     await super.waitForLoaded();
-    onLoaded?.();
     if (!this._synced) {
       this.trySyncFromExistingDoc();
     }

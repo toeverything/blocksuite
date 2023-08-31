@@ -24,6 +24,7 @@ import {
   type SurfaceManager,
   Vec,
 } from '@blocksuite/phasor';
+import { Workspace } from '@blocksuite/store';
 
 import {
   type Connectable,
@@ -1151,7 +1152,11 @@ export class EdgelessConnectorManager {
     connector: IConnector,
     type: 'source' | 'target'
   ): PointLocation {
-    const connection = connector[type];
+    let connection = connector[type];
+    if (connection instanceof Workspace.Y.Map) {
+      connection = connection.toJSON();
+      (connector as ConnectorElement).yMap.set(type, connection);
+    }
     const anotherType = type === 'source' ? 'target' : 'source';
 
     if (connection.id) {
