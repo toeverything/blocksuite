@@ -107,11 +107,15 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   _focused = false;
 
   private _retryCount = 0;
+  private _lastSourceId: string;
 
   override connectedCallback() {
     super.connectedCallback();
-    this._imageState = 'loading';
     this._fetchImage();
+    this._disposables.add(
+      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
+    );
+    this._disposables.add(this.model.propsUpdated.on(this._fetchImage));
 
     this._bindKeymap();
     this._handleSelection();
@@ -194,16 +198,22 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   };
 
   private _fetchImage = () => {
-    if (this._imageState === 'ready') {
+    if (
+      this._imageState === 'ready' &&
+      this._lastSourceId === this.model.sourceId
+    ) {
       return;
     }
+
     const storage = this.model.page.blobs;
+    this._imageState = 'loading';
     storage
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
           this._blob = blob;
           this._source = URL.createObjectURL(blob);
+          this._lastSourceId = this.model.sourceId;
           this._imageState = 'ready';
         } else {
           this._fetchError(new Error('Cannot find blob'));

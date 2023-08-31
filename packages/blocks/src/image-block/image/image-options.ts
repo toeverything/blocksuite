@@ -1,5 +1,7 @@
 import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import { html, nothing } from 'lit';
+import { repeat } from 'lit/directives/repeat.js';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
@@ -12,6 +14,7 @@ import {
   DownloadIcon,
 } from '../../icons/index.js';
 import type { ImageBlockModel } from '../image-model.js';
+import { createAddonPortal } from './image-addon.js';
 import { copyImage, downloadImage, focusCaption } from './utils.js';
 
 export function ImageOptionsTemplate({
@@ -35,6 +38,7 @@ export function ImageOptionsTemplate({
   const supportAttachment =
     model.page.schema.flavourSchemaMap.has('affine:attachment');
   const readonly = model.page.readonly;
+  const addons = model.page.workspace.addons.getAddonByType('image-addon');
 
   return html`
     <style>
@@ -125,6 +129,43 @@ export function ImageOptionsTemplate({
           ${DeleteIcon}
           <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
         </icon-button>
+        ${repeat(
+          addons,
+          addon => addon.name,
+          addon => html`
+            <icon-button
+              class="has-tool-tip"
+              size="32px"
+              ?disabled=${readonly}
+              @click="${async () => {
+                abortController.abort();
+
+                const blobManager = model.page.blobs;
+                const imageBlob = await model.page.blobs.get(model.sourceId);
+                if (!imageBlob) return;
+
+                createAddonPortal(addon, imageBlob, blob => {
+                  if (blob === imageBlob) return;
+
+                  console.log(blob);
+
+                  blobManager.set(blob).then(sourceId => {
+                    console.log(sourceId);
+
+                    model.page.updateBlock(model, {
+                      sourceId,
+                    });
+                  });
+                });
+              }}"
+            >
+              ${unsafeHTML(addon.icon)}
+              <tool-tip inert tip-position="right" role="tooltip"
+                >${addon.title}</tool-tip
+              >
+            </icon-button>
+          `
+        )}
       </div>
     </div>
   `;

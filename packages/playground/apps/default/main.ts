@@ -10,7 +10,9 @@ import std from '@blocksuite/blocks/std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProviderCreator, Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
+import type { AddonRegistion } from '@blocksuite/store/addons/index.js';
 
+import ledits from '../../addons/ledits/package.json';
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 import { initCollaborationSocket } from './providers/websocket-channel.js';
@@ -28,6 +30,16 @@ import { getProviderCreators } from './utils/providers.js';
 const options = createWorkspaceOptions();
 initDebugConfig();
 
+function registerAddons(workspace: Workspace) {
+  workspace.registerAddon({
+    name: 'ledits',
+    ...ledits.blocksuitesAddon.entry,
+    load: () => {
+      return import('../../addons/ledits/main.js');
+    },
+  } as AddonRegistion);
+}
+
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {
   workspace.slots.pageAdded.once(pageId => {
@@ -41,6 +53,8 @@ function subscribePage(workspace: Workspace) {
     if (!app) {
       return;
     }
+
+    registerAddons(workspace);
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
