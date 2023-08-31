@@ -21,7 +21,7 @@ export const dateFilter = {
       args: [tDate.create(), tDate.create()],
       rt: tBoolean.create(),
     }),
-    label: 'Before',
+    label: 'After',
     impl: (value, target) => {
       if (typeof value !== 'number' || typeof target !== 'number') {
         return true;

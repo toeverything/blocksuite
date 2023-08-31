@@ -92,7 +92,7 @@ export class DataViewHeaderToolsViewOptions extends WithDisposable(
               popFilterModal(eventToVRect(e), {
                 vars: this.view.vars,
                 value: this.view.filter,
-                onChange: this.view.updateFilter,
+                onChange: this.view.updateFilter.bind(this.view),
                 isRoot: true,
               });
             },
