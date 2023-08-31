@@ -50,6 +50,14 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     return false;
   }
 
+  override onCopy(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
+  override onPaste(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
   override render() {
     const checked = this.value ?? false;
     const icon = checked ? checkboxChecked() : checkboxUnchecked();

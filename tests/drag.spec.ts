@@ -369,12 +369,17 @@ test('should sync selected-blocks to session-manager when clicking drag handle',
   await assertRichTexts(page, ['123', '456', '789']);
 
   await focusRichText(page, 1);
+  const rect = await getBoundingClientRect(page, '[data-block-id="1"]');
+  if (!rect) {
+    throw new Error();
+  }
+  await page.mouse.move(rect.x + 10, rect.y + 10, { steps: 2 });
 
   const handle = page.locator('.affine-drag-handle-container');
   await handle.click();
 
   await page.keyboard.press('Backspace');
-  await assertRichTexts(page, ['123', '', '789']);
+  await assertRichTexts(page, ['', '456', '789']);
 });
 
 test('should be able to drag & drop multiple blocks', async ({ page }) => {

@@ -16,6 +16,7 @@ import { PlusIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
+import { TableViewClipboard } from './clipboard.js';
 import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { DataBaseRowContainer } from './components/row-container.js';
 import type { DatabaseSelectionView } from './components/selection.js';
@@ -173,6 +174,15 @@ export class DatabaseTable extends BaseDataView<
         this.requestUpdate();
       })
     );
+
+    // init clipboard
+    const clipboard = new TableViewClipboard({
+      view: this,
+      data: this.view,
+      disposables: this._disposables,
+    });
+    clipboard.init();
+
     if (this.readonly) return;
     requestAnimationFrame(() => {
       const tableContent = this._tableContainer.parentElement;

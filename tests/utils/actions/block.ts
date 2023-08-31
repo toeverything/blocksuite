@@ -14,14 +14,11 @@ export async function updateBlockType(
 ) {
   await page.evaluate(
     ([flavour, type]) => {
-      //@ts-ignore
-      const pageElement = window.root.querySelector(
-        '[data-block-id]'
-      ) as PageBlockComponent;
       const selectedBlockElements =
         //@ts-ignore
         window.testUtils.pageBlock.getSelectedContentBlockElements(
-          pageElement,
+          //@ts-ignore
+          window.root,
           ['text', 'block']
         );
       //@ts-ignore

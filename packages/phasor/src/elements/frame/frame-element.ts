@@ -104,6 +104,7 @@ export class FrameElement extends SurfaceElement<IFrame, IFrameLocalRecord> {
 
   private _renderTitle(ctx: CanvasRenderingContext2D) {
     let text = this.title.toJSON();
+    if (text === '') return;
     const zoom = this.surface.viewport.zoom;
     const fontSize = 16 / zoom;
     const fontFamily = 'sans-serif';

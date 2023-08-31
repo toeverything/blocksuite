@@ -112,9 +112,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     super.connectedCallback();
     this._imageState = 'loading';
     this._fetchImage();
-    this._disposables.add(
-      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
-    );
 
     this._bindKeymap();
     this._handleSelection();
@@ -122,6 +119,16 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._observeDrag();
     // Wait for DOM to be ready
     setTimeout(() => this._observePosition());
+
+    this._disposables.add(
+      this.model.deleted.on(async () => {
+        const storage = this.model.page.blobs;
+        const list = await storage.list();
+        if (list.includes(this.model.sourceId)) {
+          await storage.delete(this.model.sourceId);
+        }
+      })
+    );
   }
 
   override disconnectedCallback() {

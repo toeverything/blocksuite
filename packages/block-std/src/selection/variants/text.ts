@@ -83,7 +83,6 @@ export class TextSelection extends BaseSelection {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
     interface Selection {
       text: typeof TextSelection;

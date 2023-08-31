@@ -102,10 +102,36 @@ export class DragHandleWidget extends WidgetElement {
     return this.root.viewStore.viewFromPath('block', path);
   }
 
+  private get _viewportOffset() {
+    if (!isPageMode(this.page)) {
+      const pageBlock = this.pageElement as EdgelessPageBlockComponent;
+      return {
+        left: -pageBlock.surface.viewport.left,
+        top: -pageBlock.surface.viewport.top,
+      };
+    } else {
+      const pageBlock = this.pageElement as DocPageBlockComponent;
+      return {
+        left: pageBlock.viewport.scrollLeft - pageBlock.viewport.left,
+        top: pageBlock.viewport.scrollTop - pageBlock.viewport.top,
+      };
+    }
+  }
+
+  // Need to consider block padding and scale
+  private _getTopWithBlockElement(blockElement: BlockElement) {
+    const computedStyle = getComputedStyle(blockElement);
+    const { top } = blockElement.getBoundingClientRect();
+    const paddingTop = parseInt(computedStyle.paddingTop) * this._scale;
+    return top + paddingTop + this._viewportOffset.top;
+  }
+
   private _hide(force = false) {
     if (!this._dragHandleContainer) return;
 
-    this._dragHandleContainer.style.display = 'none';
+    if (this._dragHandleContainer.style.display !== 'none')
+      this._dragHandleContainer.style.display = 'none';
+
     if (force) this._reset();
   }
 
@@ -147,18 +173,16 @@ export class DragHandleWidget extends WidgetElement {
   // Single block: drag handle should show on the vertical middle of the first line of element
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
   private _show(blockElement: BlockElement) {
-    let { left, top } = blockElement.getBoundingClientRect();
+    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
+
+    let { left } = blockElement.getBoundingClientRect();
 
     // Some blocks have padding, should consider padding when calculating position
     const computedStyle = getComputedStyle(blockElement);
-    const paddingTop = parseInt(computedStyle.paddingTop) * this._scale;
     const paddingLeft = parseInt(computedStyle.paddingLeft) * this._scale;
     left += paddingLeft;
-    top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
-
-    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
 
     this._dragHandleContainer.style.display = 'flex';
     this._dragHandleContainer.style.transform = ``;
@@ -167,15 +191,18 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
     const padding =
       ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
-    this._dragHandleContainer.style.padding = `${padding}px 0`;
+    this._dragHandleContainer.style.paddingTop = `${padding}px`;
 
     this._dragHandleContainer.style.width = `${
       DRAG_HANDLE_WIDTH * this._scale
     }px`;
 
     const posLeft =
-      left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
-    const posTop = top;
+      left -
+      (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale +
+      this._viewportOffset.left;
+
+    const posTop = this._getTopWithBlockElement(blockElement);
 
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
@@ -253,6 +280,11 @@ export class DragHandleWidget extends WidgetElement {
     top -= DRAG_HOVER_RECT_PADDING * this._scale;
     right += DRAG_HOVER_RECT_PADDING * this._scale;
     bottom += DRAG_HOVER_RECT_PADDING * this._scale;
+
+    left += this._viewportOffset.left;
+    right += this._viewportOffset.left;
+    top += this._viewportOffset.top;
+    bottom += this._viewportOffset.top;
 
     return new Rect(left, top, right, bottom);
   }
@@ -880,13 +912,18 @@ export class DragHandleWidget extends WidgetElement {
         if (!draggingAreaRect) return;
 
         const height = draggingAreaRect.height - 16;
-        const top = draggingAreaRect.top + 8;
+        // finalTop is the top of the drag handle container after expanding
+        const finalTop = draggingAreaRect.top + 8;
 
-        const lastTop = this._dragHandleContainer.getBoundingClientRect().top;
+        // topBeforeExpanding is the top of the drag handle container without expanding
+        const topBeforeExpanding = this._getTopWithBlockElement(blockElement);
 
+        const containerHeight = getDragHandleContainerHeight(
+          blockElement.model
+        );
         const paddingTop =
-          parseInt(this._dragHandleContainer.style.paddingTop) ?? 0;
-        const translateY = top - lastTop - paddingTop;
+          ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
+        const translateY = finalTop - topBeforeExpanding - paddingTop;
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
         this._dragHandleContainer.style.height = `${height}px`;
@@ -965,6 +1002,10 @@ export class DragHandleWidget extends WidgetElement {
     this.handleEvent('wheel', this._wheelHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
+    this.handleEvent('selectionChange', () => {
+      if (this.root.selectionManager.find('block')) return;
+      this._hide();
+    });
 
     if (isEdgelessPage(this._pageBlockElement)) {
       const edgelessPage = this._pageBlockElement;
@@ -978,6 +1019,11 @@ export class DragHandleWidget extends WidgetElement {
           this._hide();
           this._scale = edgelessPage.surface.viewport.zoom;
         })
+      );
+    } else {
+      const docPage = this._pageBlockElement;
+      this._disposables.add(
+        docPage.slots.viewportUpdated.on(() => this._hide())
       );
     }
   }

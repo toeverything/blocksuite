@@ -297,6 +297,13 @@ export class VEditor<
     });
   }
 
+  selectAll(): void {
+    this.rangeService.setVRange({
+      index: 0,
+      length: this.yText.length,
+    });
+  }
+
   focusByIndex(index: number): void {
     this.rangeService.setVRange({
       index: index,

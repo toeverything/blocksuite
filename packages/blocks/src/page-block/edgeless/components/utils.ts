@@ -122,8 +122,10 @@ export function createButtonPopper(
 }
 
 export function getTooltipWithShortcut(tip: string, shortcut: string) {
-  return html`<span>${tip}</span
-    ><span style="margin-left: 10px;">(${shortcut})</span>`;
+  return html`<div class="tooltip-with-shortcut">
+    <span class="tooltip__label">${tip}</span>
+    <span class="tooltip__shortcut">${shortcut}</span>
+  </div>`;
 }
 
 export function readImageSize(file: File) {

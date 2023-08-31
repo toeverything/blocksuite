@@ -20,7 +20,7 @@ export function formatByTextSelection(
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
   value: string | true | null
 ) {
-  const selectedModels = getSelectedContentModels(blockElement, ['text']);
+  const selectedModels = getSelectedContentModels(blockElement.root, ['text']);
 
   if (selectedModels.length === 0) {
     throw new Error('No selected models');
@@ -117,7 +117,7 @@ export function toggleLink(
     return;
   }
 
-  const selectedModel = getSelectedContentModels(blockElement, ['text']);
+  const selectedModel = getSelectedContentModels(blockElement.root, ['text']);
   if (selectedModel.length === 0) {
     return;
   }

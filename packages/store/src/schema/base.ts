@@ -17,12 +17,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Native: <T>(input?: T) => NativeWrapper<T>;
+  Native: <T>(input: T) => NativeWrapper<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Native: <T>(input: T = {} as T) => new NativeWrapper(input),
+  Native: <T>(input: T) => new NativeWrapper(input),
 });
 
 export const BlockSchema = z.object({

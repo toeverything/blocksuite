@@ -76,7 +76,7 @@ const INLINE_UNSUPPORTED_MODELS: Flavour[] = [
 export function noneInlineUnsupportedBlockSelected(
   pageElement: PageBlockComponent
 ) {
-  const selectedModels = getSelectedContentModels(pageElement, [
+  const selectedModels = getSelectedContentModels(pageElement.root, [
     'text',
     'block',
   ]);
@@ -180,7 +180,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     // Only can show link button when selection is in one line paragraph
     showWhen: (pageElement: PageBlockComponent) => {
       const textSelection = pageElement.selection.find('text');
-      const selectedModels = getSelectedContentModels(pageElement, [
+      const selectedModels = getSelectedContentModels(pageElement.root, [
         'text',
         'block',
       ]);
@@ -190,7 +190,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
         noneInlineUnsupportedBlockSelected(pageElement) &&
         // can't create link when selection includes reference node
         // XXX get loose format at here is not a good practice
-        !getCombinedFormatInTextSelection(pageElement, textSelection, true)
+        !getCombinedFormatInTextSelection(pageElement.root, textSelection, true)
           .reference
       );
     },

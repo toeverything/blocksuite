@@ -123,7 +123,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const { state, elements } = this.selection;
     if (state.editing) {
-      deleteModelsByTextSelection(this._edgeless);
+      deleteModelsByTextSelection(this._edgeless.root);
       return;
     }
 
@@ -209,11 +209,13 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByTextSelection(this._edgeless);
+    deleteModelsByTextSelection(this._edgeless.root);
 
     const textSelection = this.textSelection;
     assertExists(textSelection);
-    const selectedModels = getSelectedContentModels(this._edgeless, ['text']);
+    const selectedModels = getSelectedContentModels(this._edgeless.root, [
+      'text',
+    ]);
 
     const focusedBlockModel = selectedModels[0];
     assertExists(focusedBlockModel);

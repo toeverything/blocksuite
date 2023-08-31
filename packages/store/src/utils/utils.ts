@@ -15,7 +15,7 @@ import type {
 import type { Page } from '../workspace/page.js';
 import type { ProxyConfig } from '../yjs/config.js';
 import type { ProxyManager } from '../yjs/index.js';
-import { isPureObject } from '../yjs/index.js';
+import { isPureObject, NativeWrapper } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
 import { native2Y } from '../yjs/utils.js';
 
@@ -52,7 +52,6 @@ export function syncBlockProps(
   ignoredKeys: Set<string>
 ) {
   const propSchema = schema.model.props?.(internalPrimitives) ?? {};
-  const flavour = schema.model.flavour;
 
   Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key) || ignoredKeys.has(key)) return;
@@ -76,26 +75,21 @@ export function syncBlockProps(
       throw new Error('Only top level primitives are supported for now');
     }
 
-    // FIXME(mirone)
-    // see https://github.com/toeverything/blocksuite/issues/3467
-    if (flavour === 'affine:surface' && key === 'elements') {
-      const yMap = new Y.Map();
-
-      Object.entries(value).forEach(([key, surfaceElement]) => {
-        yMap.set(key, native2Y(surfaceElement, false));
-      });
-
-      yBlock.set(`prop:${key}`, yMap);
+    if (value === undefined) {
       return;
     }
 
-    if (value !== undefined) {
-      if (Array.isArray(value) || isPureObject(value)) {
-        yBlock.set(`prop:${key}`, native2Y(value, true));
-      } else {
-        yBlock.set(`prop:${key}`, value);
-      }
+    if (value instanceof NativeWrapper) {
+      yBlock.set(`prop:${key}`, value);
+      return;
     }
+
+    if (Array.isArray(value) || isPureObject(value)) {
+      yBlock.set(`prop:${key}`, native2Y(value, true));
+      return;
+    }
+
+    yBlock.set(`prop:${key}`, value);
   });
 
   // set default value
@@ -130,7 +124,9 @@ export function toBlockProps(
     if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
       const key = prefixedKey.replace('prop:', '');
       const realValue = yBlock.get(prefixedKey);
-      if (realValue instanceof Y.Map) {
+      if (realValue instanceof NativeWrapper) {
+        props[key] = realValue;
+      } else if (realValue instanceof Y.Map) {
         const value = proxy.createYProxy(realValue, config);
         props[key] = value;
       } else if (realValue instanceof Y.Array) {

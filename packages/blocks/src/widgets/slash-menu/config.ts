@@ -79,7 +79,7 @@ export const menuGroups: {
           },
           action: ({ pageElement }) => {
             const selectedBlockElements = getSelectedContentBlockElements(
-              pageElement,
+              pageElement.root,
               ['text', 'block']
             );
             const newModels = updateBlockElementType(
@@ -147,7 +147,7 @@ export const menuGroups: {
         },
         action: ({ pageElement }) => {
           const selectedBlockElements = getSelectedContentBlockElements(
-            pageElement,
+            pageElement.root,
             ['text', 'block']
           );
           updateBlockElementType(selectedBlockElements, flavour, type);
@@ -497,7 +497,7 @@ export const menuGroups: {
         alias: ['remove'],
         icon: DeleteIcon,
         action: ({ pageElement, model }) => {
-          pageElement.page.deleteBlock(model, { bringChildrenTo: 'parent' });
+          pageElement.page.deleteBlock(model);
         },
       },
     ],
