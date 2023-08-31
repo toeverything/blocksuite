@@ -35,18 +35,13 @@ export class AffineFormatBarWidget extends WidgetElement {
   @query('.custom-items')
   customItemsContainer!: HTMLElement;
 
+  @query(`.${AFFINE_FORMAT_BAR_WIDGET_TAG}`)
+  private _formatBarElement?: HTMLElement;
+
   private _customElements: HTMLDivElement[] = [];
 
   private get _selectionManager() {
     return this.root.selectionManager;
-  }
-
-  private get _formatBarElement() {
-    const shadowRoot = this.shadowRoot;
-    assertExists(shadowRoot);
-    return shadowRoot.querySelector(
-      `.${AFFINE_FORMAT_BAR_WIDGET_TAG}`
-    ) as HTMLElement | null;
   }
 
   private _dragging = false;
@@ -227,6 +222,7 @@ export class AffineFormatBarWidget extends WidgetElement {
                   }),
                 ],
               }).then(({ x, y }) => {
+                formatQuickBarElement.style.display = 'flex';
                 formatQuickBarElement.style.top = `${y}px`;
                 formatQuickBarElement.style.left = `${x}px`;
               });
@@ -276,6 +272,7 @@ export class AffineFormatBarWidget extends WidgetElement {
                   }),
                 ],
               }).then(({ x, y }) => {
+                formatQuickBarElement.style.display = 'flex';
                 formatQuickBarElement.style.top = `${y}px`;
                 formatQuickBarElement.style.left = `${x}px`;
               });

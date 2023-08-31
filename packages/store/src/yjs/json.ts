@@ -78,6 +78,5 @@ export function docFromJSON(value: object): Y.Doc {
       map.set(k, fromJSON(v));
     });
   });
-  console.log(doc.toJSON());
   return doc;
 }

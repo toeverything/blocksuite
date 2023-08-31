@@ -112,9 +112,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     super.connectedCallback();
     this._imageState = 'loading';
     this._fetchImage();
-    this._disposables.add(
-      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
-    );
 
     this._bindKeymap();
     this._handleSelection();
