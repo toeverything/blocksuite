@@ -28,6 +28,9 @@ import {
 } from './utils.js';
 
 export const bindHotKey = (blockElement: BlockElement) => {
+  const root = blockElement.root;
+  const selectionManager = blockElement.root.selectionManager;
+
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
   let composition = false;
@@ -336,11 +339,9 @@ export const bindHotKey = (blockElement: BlockElement) => {
     config.hotkey.forEach(key => {
       blockElement.bindHotKey({
         [key]: ctx => {
-          const selectionManager = blockElement.root.selectionManager;
-
           ctx.get('defaultState').event.preventDefault();
 
-          const selected = getSelectedContentBlockElements(blockElement, [
+          const selected = getSelectedContentBlockElements(root, [
             'text',
             'block',
           ]);
