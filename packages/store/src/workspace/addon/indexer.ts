@@ -5,9 +5,9 @@ import {
   SearchIndexer,
 } from '../../indexer/index.js';
 import type { WorkspaceOptions } from '../workspace.js';
-import type { Workspace } from '../workspace.js';
+import { addOnFactory } from './shared.js';
 
-export type Indexer = {
+type Indexer = {
   search: SearchIndexer;
   backlink: BacklinkIndexer;
 };
@@ -17,26 +17,22 @@ export interface IndexerAddon {
   search: (query: QueryContent) => Map<string, string>;
 }
 
-type WorkspaceConstructor = {
-  new (storeOptions: WorkspaceOptions): Omit<Workspace, keyof IndexerAddon>;
-};
+export const indexer = addOnFactory<keyof IndexerAddon>(
+  originalClass =>
+    class extends originalClass {
+      indexer: Indexer;
 
-export function indexer(originalClass: WorkspaceConstructor): typeof Workspace {
-  // @ts-ignore
-  return class extends originalClass {
-    indexer: Indexer;
+      search(query: QueryContent) {
+        return this.indexer.search.search(query);
+      }
 
-    search(query: QueryContent) {
-      return this.indexer.search.search(query);
+      constructor(storeOptions: WorkspaceOptions) {
+        super(storeOptions);
+        const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
+        this.indexer = {
+          search: new SearchIndexer(this.doc),
+          backlink: new BacklinkIndexer(blockIndexer),
+        };
+      }
     }
-
-    constructor(storeOptions: WorkspaceOptions) {
-      super(storeOptions);
-      const blockIndexer = new BlockIndexer(this.doc, { slots: this.slots });
-      this.indexer = {
-        search: new SearchIndexer(this.doc),
-        backlink: new BacklinkIndexer(blockIndexer),
-      };
-    }
-  };
-}
+);
