@@ -14,10 +14,7 @@ export type DeltaOperation = {
 } & OptionalAttributes;
 
 export class Text {
-  private _yText: Y.Text;
-
-  // TODO toggle transact by options
-  private _shouldTransact = true;
+  private readonly _yText: Y.Text;
 
   constructor(input?: Y.Text | string) {
     if (typeof input === 'string') {
@@ -44,19 +41,15 @@ export class Text {
   }
 
   private _transact(callback: () => void) {
-    if (this._shouldTransact) {
-      const doc = this._yText.doc;
-      if (!doc) {
-        throw new Error(
-          'Failed to transact text! yText is not attached to a doc'
-        );
-      }
-      doc.transact(() => {
-        callback();
-      }, doc.clientID);
-    } else {
-      callback();
+    const doc = this._yText.doc;
+    if (!doc) {
+      throw new Error(
+        'Failed to transact text! yText is not attached to a doc'
+      );
     }
+    doc.transact(() => {
+      callback();
+    }, doc.clientID);
   }
 
   clone() {

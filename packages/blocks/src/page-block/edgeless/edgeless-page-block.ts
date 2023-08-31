@@ -369,14 +369,12 @@ export class EdgelessPageBlockComponent
 
   // just init surface, attach to dom later
   private _initSurface() {
-    const { page } = this;
     const surfaceBlock = this.model.children.find(
       child => child.flavour === 'affine:surface'
     ) as SurfaceBlockModel | undefined;
     assertExists(surfaceBlock);
-    const yContainer = surfaceBlock.originProp('elements') as InstanceType<
-      typeof page.YMap
-    >;
+    const yContainer = surfaceBlock.elements.getValue();
+    assertExists(yContainer);
     this.surface = new SurfaceManager(
       yContainer,
       this.computeValue.bind(this),
