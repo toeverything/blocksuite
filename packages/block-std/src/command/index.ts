@@ -41,13 +41,14 @@ export class CommandManager {
     };
   };
 
-  register = <N extends BlockSuite.CommandName>(
+  register<N extends BlockSuite.CommandName>(
     name: N,
     command: BlockSuite.Commands[N]
-  ) => {
+  ): CommandManager;
+  register(name: string, command: Command) {
     this._commands.set(name, command);
     return this;
-  };
+  }
 
   chain = () => {
     const ctx = this._getCommandCtx();
