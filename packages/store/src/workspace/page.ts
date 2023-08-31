@@ -673,8 +673,6 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     this._synced = true;
-
-    this.validateVersion();
   }
 
   dispose() {
@@ -941,6 +939,7 @@ export class Page extends Space<FlatBlockMap> {
       this.workspace.meta.writeVersion(this.workspace);
     }
     // Initialization from existing yDoc, indicating that the document is loaded from storage.
+    this.validateVersion();
   }
 
   override async waitForLoaded() {
