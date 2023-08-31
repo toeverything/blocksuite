@@ -3,8 +3,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  GeneralShapeStyleIcon,
-  ScribbledShapeStyleIcon,
+  GeneralStyleIcon,
+  ScribbledStyleIcon,
 } from '../../../../icons/index.js';
 
 @customElement('edgeless-shape-style-panel')
@@ -52,7 +52,7 @@ export class EdgelessShapeStylePanel extends LitElement {
             this._onSelect(ShapeStyle.General);
           }}
         >
-          ${GeneralShapeStyleIcon}
+          ${GeneralStyleIcon}
         </edgeless-tool-icon-button>
         <edgeless-tool-icon-button
           class="scribbled-shape-button"
@@ -65,7 +65,7 @@ export class EdgelessShapeStylePanel extends LitElement {
             this._onSelect(ShapeStyle.Scribbled);
           }}
         >
-          ${ScribbledShapeStyleIcon}
+          ${ScribbledStyleIcon}
         </edgeless-tool-icon-button>
       </div>
     `;
