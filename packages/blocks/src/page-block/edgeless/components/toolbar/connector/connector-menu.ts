@@ -43,6 +43,7 @@ function ConnectorModeButtonGroup(
         .activeMode=${'background'}
         .iconContainerPadding=${2}
         .tooltip=${straightLineTooltip}
+        .tipPosition=${'top-end'}
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
         ${ConnectorLWithArrowIcon}

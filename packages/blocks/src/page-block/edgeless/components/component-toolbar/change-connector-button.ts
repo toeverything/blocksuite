@@ -10,16 +10,16 @@ import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
 import {
-  ConnectorLIcon,
-  ConnectorXIcon,
+  ConnectorLWithArrowIcon,
+  ConnectorXWithArrowIcon,
   DashLineIcon,
   GeneralStyleIcon,
   LineStyleIcon,
-  RoughIcon,
   ScribbledStyleIcon,
   SmallArrowDownIcon,
   StraightLineIcon,
@@ -71,6 +71,22 @@ export function getMostCommonLineStyle(
   });
   const max = maxBy(Object.entries(sizes), ([_k, count]) => count);
   return max ? (max[0] as LineStyleButtonProps['mode']) : null;
+}
+
+function getMostCommonRough(elements: ConnectorElement[]): boolean {
+  const { trueCount, falseCount } = elements.reduce(
+    (counts, ele) => {
+      if (ele.rough) {
+        counts.trueCount++;
+      } else {
+        counts.falseCount++;
+      }
+      return counts;
+    },
+    { trueCount: 0, falseCount: 0 }
+  );
+
+  return trueCount > falseCount;
 }
 
 @customElement('edgeless-change-connector-button')
@@ -160,9 +176,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     const selectedMode = getMostCommonMode(this.elements);
     const selectedLineSize =
       getMostCommonLineWidth(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
+    const selectedRough = getMostCommonRough(this.elements);
+    const selectedLineStyle = getMostCommonLineStyle(this.elements);
 
     return html`
       <edgeless-menu-button
+        .padding=${4}
         class="connector-color-button"
         .iconInfo=${{
           icon: html`${ColorUnit(selectedColor)}`,
@@ -175,10 +194,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
         </edgeless-color-panel>`}
       ></edgeless-menu-button>
 
-      <menu-divider .vertical=${true}></menu-divider>
+      <menu-divider .vertical=${true} .dividerMargin=${12}></menu-divider>
 
       <edgeless-menu-button
         class="line-styles-button"
+        .padding=${8}
+        .gap=${8}
         .iconInfo=${{
           icon: html`${LineStyleIcon}${SmallArrowDownIcon}`,
           tooltip: 'Border style',
@@ -190,9 +211,17 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               this._setConnectorStrokeWidth(e.detail);
             }}
           ></edgeless-line-width-panel>
+          <menu-divider
+            .vertical=${true}
+            .dividerMargin=${2}
+            style=${styleMap({ height: '24px' })}
+          ></menu-divider>
           <edgeless-tool-icon-button
             class=${`edgeless-component-line-style-button-${StrokeStyle.Solid}`}
             .tooltip=${'Solid'}
+            .active=${selectedLineStyle === StrokeStyle.Solid}
+            .activeMode=${'background'}
+            .iconContainerPadding=${2}
             @click=${() => this._setConnectorStrokeStyle(StrokeStyle.Solid)}
           >
             ${StraightLineIcon}
@@ -200,6 +229,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
           <edgeless-tool-icon-button
             class=${`edgeless-component-line-style-button-${StrokeStyle.Dashed}`}
             .tooltip=${'Dash'}
+            .active=${selectedLineStyle === StrokeStyle.Dashed}
+            .activeMode=${'background'}
+            .iconContainerPadding=${2}
             @click=${() => this._setConnectorStrokeStyle(StrokeStyle.Dashed)}
           >
             ${DashLineIcon}
@@ -208,22 +240,32 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       >
       </edgeless-menu-button>
 
-      <menu-divider .vertical=${true}></menu-divider>
+      <menu-divider .vertical=${true} .dividerMargin=${12}></menu-divider>
 
       <edgeless-menu-button
+        .padding=${8}
+        .gap=${8}
         .iconInfo=${{
-          icon: html`${RoughIcon}${SmallArrowDownIcon}`,
+          icon: html`${selectedRough
+            ? ScribbledStyleIcon
+            : GeneralStyleIcon}${SmallArrowDownIcon}`,
           tooltip: 'Style',
         }}
         .menuChildren=${html`
           <edgeless-tool-icon-button
             .tooltip=${'General'}
+            .iconContainerPadding=${2}
+            .active=${!selectedRough}
+            .activeMode=${'background'}
             @click=${() => this._setConnectorRough(false)}
           >
             ${GeneralStyleIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button
             .tooltip=${'Scribbled'}
+            .active=${selectedRough}
+            .activeMode=${'background'}
+            .iconContainerPadding=${2}
             @click=${() => this._setConnectorRough(true)}
           >
             ${ScribbledStyleIcon}
@@ -232,27 +274,35 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       >
       </edgeless-menu-button>
 
-      <menu-divider .vertical=${true}></menu-divider>
+      <menu-divider .vertical=${true} .dividerMargin=${12}></menu-divider>
 
       <edgeless-menu-button
+        .padding=${8}
+        .gap=${8}
         .iconInfo=${{
           icon: html`${selectedMode === ConnectorMode.Straight
-            ? ConnectorLIcon
-            : ConnectorXIcon}${SmallArrowDownIcon}`,
+            ? ConnectorLWithArrowIcon
+            : ConnectorXWithArrowIcon}${SmallArrowDownIcon}`,
           tooltip: 'Connector Shape',
         }}
         .menuChildren=${html`
           <edgeless-tool-icon-button
             .tooltip=${'Straight'}
+            .iconContainerPadding=${2}
+            .active=${selectedMode === ConnectorMode.Straight}
+            .activeMode=${'background'}
             @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
           >
-            ${ConnectorLIcon}
+            ${ConnectorLWithArrowIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button
             .tooltip=${'Elbowed'}
+            .iconContainerPadding=${2}
+            .active=${selectedMode === ConnectorMode.Orthogonal}
+            .activeMode=${'background'}
             @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
           >
-            ${ConnectorXIcon}
+            ${ConnectorXWithArrowIcon}
           </edgeless-tool-icon-button>
         `}
       >

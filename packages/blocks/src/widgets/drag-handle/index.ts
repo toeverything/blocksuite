@@ -118,6 +118,14 @@ export class DragHandleWidget extends WidgetElement {
     }
   }
 
+  // Need to consider block padding and scale
+  private _getTopWithBlockElement(blockElement: BlockElement) {
+    const computedStyle = getComputedStyle(blockElement);
+    const { top } = blockElement.getBoundingClientRect();
+    const paddingTop = parseInt(computedStyle.paddingTop) * this._scale;
+    return top + paddingTop + this._viewportOffset.top;
+  }
+
   private _hide(force = false) {
     if (!this._dragHandleContainer) return;
 
@@ -165,18 +173,16 @@ export class DragHandleWidget extends WidgetElement {
   // Single block: drag handle should show on the vertical middle of the first line of element
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
   private _show(blockElement: BlockElement) {
-    let { left, top } = blockElement.getBoundingClientRect();
+    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
+
+    let { left } = blockElement.getBoundingClientRect();
 
     // Some blocks have padding, should consider padding when calculating position
     const computedStyle = getComputedStyle(blockElement);
-    const paddingTop = parseInt(computedStyle.paddingTop) * this._scale;
     const paddingLeft = parseInt(computedStyle.paddingLeft) * this._scale;
     left += paddingLeft;
-    top += paddingTop;
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
-
-    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
 
     this._dragHandleContainer.style.display = 'flex';
     this._dragHandleContainer.style.transform = ``;
@@ -185,18 +191,18 @@ export class DragHandleWidget extends WidgetElement {
     }px`;
     const padding =
       ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
-    this._dragHandleContainer.style.padding = `${padding}px 0`;
+    this._dragHandleContainer.style.paddingTop = `${padding}px`;
 
     this._dragHandleContainer.style.width = `${
       DRAG_HANDLE_WIDTH * this._scale
     }px`;
 
-    let posLeft =
-      left - (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale;
-    let posTop = top;
+    const posLeft =
+      left -
+      (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale +
+      this._viewportOffset.left;
 
-    posLeft += this._viewportOffset.left;
-    posTop += this._viewportOffset.top;
+    const posTop = this._getTopWithBlockElement(blockElement);
 
     this._dragHandleContainer.style.left = `${posLeft}px`;
     this._dragHandleContainer.style.top = `${posTop}px`;
@@ -906,14 +912,18 @@ export class DragHandleWidget extends WidgetElement {
         if (!draggingAreaRect) return;
 
         const height = draggingAreaRect.height - 16;
-        const top = draggingAreaRect.top + 8;
+        // finalTop is the top of the drag handle container after expanding
+        const finalTop = draggingAreaRect.top + 8;
 
-        const lastTop = this._dragHandleContainer.getBoundingClientRect().top;
+        // topBeforeExpanding is the top of the drag handle container without expanding
+        const topBeforeExpanding = this._getTopWithBlockElement(blockElement);
 
+        const containerHeight = getDragHandleContainerHeight(
+          blockElement.model
+        );
         const paddingTop =
-          parseInt(this._dragHandleContainer.style.paddingTop) ?? 0;
-        const translateY =
-          top - lastTop - paddingTop - this._viewportOffset.top;
+          ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
+        const translateY = finalTop - topBeforeExpanding - paddingTop;
 
         this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
         this._dragHandleContainer.style.height = `${height}px`;

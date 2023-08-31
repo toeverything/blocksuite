@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { merge } from 'merge';
 import { Awareness } from 'y-protocols/awareness.js';
 
@@ -11,7 +10,6 @@ import {
   nanoid,
   uuidv4,
 } from '../utils/id-generator.js';
-import { serializeYDoc, yDocToJSXNode } from '../utils/jsx.js';
 import { AwarenessStore, type RawAwarenessState } from '../yjs/awareness.js';
 import { BlockSuiteDoc } from '../yjs/index.js';
 import type { Space } from './space.js';
@@ -94,7 +92,6 @@ export class Store {
   readonly awarenessStore: AwarenessStore;
   readonly idGenerator: IdGenerator;
 
-  // TODO: The user cursor should be spread by the spaceId in awareness
   constructor(
     {
       id,
@@ -156,32 +153,5 @@ export class Store {
 
   removeSpace(space: Space) {
     this.spaces.delete(space.prefixedId);
-  }
-
-  /**
-   * @internal Only for testing, 'page0' should be replaced by props 'spaceId'
-   */
-  exportJSX(pageId: string, blockId?: string) {
-    const prefixedPageId = pageId.startsWith('space:')
-      ? pageId
-      : `space:${pageId}`;
-    const doc = this.doc.spaces.get(prefixedPageId);
-    assertExists(doc);
-    const pageJson = serializeYDoc(doc);
-    if (!pageJson) {
-      throw new Error(`Page ${pageId} doesn't exist`);
-    }
-    const blockJson = pageJson.blocks as Record<string, unknown>;
-    if (!blockId) {
-      const pageBlockId = Object.keys(blockJson).at(0);
-      if (!pageBlockId) {
-        return null;
-      }
-      blockId = pageBlockId;
-    }
-    if (!blockJson[blockId]) {
-      return null;
-    }
-    return yDocToJSXNode(blockJson, blockId);
   }
 }
