@@ -75,7 +75,6 @@ export const moreMenuStyles = css`
 
   .affine-attachment-options-more icon-button:hover.danger {
     background: var(--affine-background-error-color);
-    fill: var(--affine-error-color);
     color: var(--affine-error-color);
   }
 `;
@@ -114,6 +113,7 @@ export const styles = css`
 
   .affine-attachment-options .divider {
     width: 1px;
+    margin: 0 1.5px;
     height: 24px;
     background-color: var(--affine-border-color);
   }

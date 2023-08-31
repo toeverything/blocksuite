@@ -97,3 +97,4 @@ Example:
 - Michael Salim @Vija02 2023/08/22
 - BangKk @bangkk5 2023/08/24
 - Niko Yang @Niko030303 2023/08/31
+- CatsJuice @catsjuice 2023/08/31

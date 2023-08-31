@@ -621,7 +621,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Bring to front',
+          hasText: 'Bring to Front',
         });
       await actionButton.click();
       break;
@@ -633,7 +633,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Bring forward',
+          hasText: 'Bring Forward',
         });
       await actionButton.click();
       break;
@@ -645,7 +645,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Send backward',
+          hasText: 'Send Backward',
         });
       await actionButton.click();
       break;
@@ -657,7 +657,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Send to back',
+          hasText: 'Send to Back',
         });
       await actionButton.click();
       break;

@@ -218,6 +218,8 @@ export function createLitPortal({
   });
 
   if (computePositionOptions) {
+    const display = portalRoot.style.display;
+    portalRoot.style.display = 'none';
     portalRoot.style.position = 'fixed';
     portalRoot.style.left = '0';
     portalRoot.style.top = '0';
@@ -238,6 +240,7 @@ export function createLitPortal({
           // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
           portalRoot.style.left = `${x}px`;
           portalRoot.style.top = `${y}px`;
+          portalRoot.style.display = display;
           positionSlot.emit(positionReturn);
         }
       );

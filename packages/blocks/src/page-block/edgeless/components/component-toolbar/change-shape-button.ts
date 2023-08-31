@@ -24,9 +24,9 @@ import {
 } from '../../../../__internal__/utils/types.js';
 import {
   ChangeShapeIcon,
-  GeneralShapeStyleIcon,
+  GeneralStyleIcon,
   LineStyleIcon,
-  ScribbledShapeStyleIcon,
+  ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -501,8 +501,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         >
           <div class="shape-style-button">
             ${selectedShapeStyle === ShapeStyle.General
-              ? GeneralShapeStyleIcon
-              : ScribbledShapeStyleIcon}
+              ? GeneralStyleIcon
+              : ScribbledStyleIcon}
             ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>
