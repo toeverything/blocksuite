@@ -115,9 +115,8 @@ const syncProviders = async (
         e instanceof Error && e.message.includes('outdated');
       if (isValidateError) {
         page.spaceDoc.once('update', () => {
-          requestAnimationFrame(() => {
-            workspace.schema.upgradePage(oldVersions, page.spaceDoc);
-          });
+          workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+          page.trySyncFromExistingDoc();
         });
         return;
       }
