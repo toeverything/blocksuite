@@ -34,4 +34,12 @@ export const dataViewCommonStyle = (selector: string) => `
   .dv-color-2{
     color: var(--affine-text-secondary-color);
   }
+  .dv-shadow-2{
+    box-shadow: var(--affine-shadow-2)
+  }
+  .dv-divider-h{
+    height: 1px;
+    background-color: var(--affine-divider-color);
+    margin: 8px 0;
+  }
 `;

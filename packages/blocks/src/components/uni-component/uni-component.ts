@@ -129,6 +129,26 @@ class UniAnyRender<
   }
 }
 
+@customElement('any-render')
+export class AnyRender<T> extends ShadowlessElement {
+  @property({ attribute: false })
+  props!: T;
+  @property({ attribute: false })
+  renderTemplate!: (props: T) => TemplateResult;
+
+  override render() {
+    return this.renderTemplate(this.props);
+  }
+}
+
+export const defineComponent = <T>(
+  renderTemplate: (props: T) => TemplateResult
+) => {
+  const ins = new AnyRender<T>();
+  ins.renderTemplate = renderTemplate;
+  return ins;
+};
+
 export const defineUniComponent = <T, Expose extends NonNullable<unknown>>(
   renderTemplate: (props: T, expose: Expose) => TemplateResult
 ): UniComponent<T, Expose> => {
