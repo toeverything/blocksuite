@@ -89,7 +89,7 @@ describe('block migration', () => {
       .getMap('blocks')
       .get('zUHGq4EHQJ')
       .get('prop:elements')
-      .getValue() as Y.Map<unknown>;
+      .get('value') as Y.Map<unknown>;
     text = surfaceElements.get('Cj2MNGM9UK') as Y.Map<unknown>;
     shape = surfaceElements.get('Rl2IT9rGoP') as Y.Map<unknown>;
 
