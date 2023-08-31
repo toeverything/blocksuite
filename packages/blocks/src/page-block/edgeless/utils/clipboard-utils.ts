@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import {
   Bound,
+  ConnectorElement,
   FrameElement,
   type PhasorElementType,
 } from '@blocksuite/phasor';
@@ -59,13 +60,19 @@ export async function duplicate(
         );
         return id;
       } else {
-        return surface.addElement(
+        const id = surface.addElement(
           element.type as keyof PhasorElementType,
           {
             ...element.serialize(),
             xywh: bound.serialize(),
           } as unknown as Record<string, unknown>
         );
+        const newElement = surface.pickById(id);
+        assertExists(newElement);
+        if (newElement instanceof ConnectorElement) {
+          edgeless.connector.updateXYWH(newElement, bound);
+        }
+        return id;
       }
     })
   );

@@ -36,7 +36,6 @@ import { Pane } from 'tweakpane';
 
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import type { CustomNavigationPanel } from './custom-navigation-panel';
-import { createViewer } from './doc-inspector';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -330,10 +329,6 @@ export class DebugMenu extends ShadowlessElement {
     input.click();
   }
 
-  private async _inspect() {
-    await createViewer(this.workspace.doc.toJSON());
-  }
-
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -346,6 +341,11 @@ export class DebugMenu extends ShadowlessElement {
     this._showStyleDebugMenu
       ? (this._styleMenu.hidden = false)
       : (this._styleMenu.hidden = true);
+  }
+
+  private _toggleReadonly() {
+    const page = this.page;
+    page.awarenessStore.setReadonly(page, !page.readonly);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -634,11 +634,13 @@ export class DebugMenu extends ShadowlessElement {
               <sl-menu-item @click=${this._importSnapshot}>
                 Import Snapshot
               </sl-menu-item>
-              <sl-menu-item @click=${this._shareUrl}> Share URL</sl-menu-item>
+              <sl-menu-item @click=${this._shareUrl}>Share URL</sl-menu-item>
               <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                 Toggle CSS Debug Menu
               </sl-menu-item>
-              <sl-menu-item @click=${this._inspect}> Inspect Doc</sl-menu-item>
+              <sl-menu-item @click=${this._toggleReadonly}>
+                Toggle Readonly
+              </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
 

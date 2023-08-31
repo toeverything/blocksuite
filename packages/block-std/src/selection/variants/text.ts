@@ -83,7 +83,9 @@ export class TextSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    text: typeof TextSelection;
+  namespace BlockSuite {
+    interface Selection {
+      text: typeof TextSelection;
+    }
   }
 }

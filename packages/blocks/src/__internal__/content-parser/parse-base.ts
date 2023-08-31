@@ -138,9 +138,10 @@ export abstract class BaseParser {
   ): Promise<SerializedBlock[] | null> => {
     let result;
     // custom parser
-    result = await this._contextedContentParser.getParserHtmlText2Block(
-      'CustomNodeParser'
-    )?.(node);
+    result =
+      await this._contextedContentParser.getParserHtmlText2Block(
+        'CustomNodeParser'
+      )?.(node);
     if (result && result.length > 0) {
       return result;
     }
@@ -173,9 +174,10 @@ export abstract class BaseParser {
           });
           break;
         case 'BLOCKQUOTE':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'BlockQuoteParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'BlockQuoteParser'
+            )?.(node);
           break;
         case 'P':
           if (
@@ -185,9 +187,10 @@ export abstract class BaseParser {
               node.firstChild.textContent?.startsWith('[ ] ') ||
               node.firstChild.textContent?.startsWith('[x] '))
           ) {
-            result = await this._contextedContentParser.getParserHtmlText2Block(
-              'ListItemParser'
-            )?.(node);
+            result =
+              await this._contextedContentParser.getParserHtmlText2Block(
+                'ListItemParser'
+              )?.(node);
           } else if (node.firstChild instanceof HTMLImageElement) {
             result = await this._contextedContentParser.getParserHtmlText2Block(
               'EmbedItemParser'
@@ -210,9 +213,10 @@ export abstract class BaseParser {
           }
           break;
         case 'LI':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'ListItemParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'ListItemParser'
+            )?.(node);
           break;
         case 'HR':
           result = await this._contextedContentParser.getParserHtmlText2Block(
@@ -223,27 +227,31 @@ export abstract class BaseParser {
           });
           break;
         case 'PRE':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'CodeBlockParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'CodeBlockParser'
+            )?.(node);
           break;
         case 'FIGURE':
         case 'IMG':
           {
-            result = await this._contextedContentParser.getParserHtmlText2Block(
-              'EmbedItemParser'
-            )?.(node);
+            result =
+              await this._contextedContentParser.getParserHtmlText2Block(
+                'EmbedItemParser'
+              )?.(node);
           }
           break;
         case 'HEADER':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'HeaderParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'HeaderParser'
+            )?.(node);
           break;
         case 'TABLE':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'TableParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'TableParser'
+            )?.(node);
           break;
         default:
           break;
@@ -570,9 +578,8 @@ export abstract class BaseParser {
         children: [],
       }));
     if (this._customTableTitleColumnHandler) {
-      const customTitleColumn = await this._customTableTitleColumnHandler(
-        element
-      );
+      const customTitleColumn =
+        await this._customTableTitleColumnHandler(element);
       children = customTitleColumn ?? children;
     }
     const columns: Column[] = getTableColumns(columnMeta, rows, idCounter);

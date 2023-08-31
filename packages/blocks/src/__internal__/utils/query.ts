@@ -467,14 +467,6 @@ function isSurface({ tagName }: Element) {
 }
 
 /**
- * Returns `true` if element is embed.
- * @deprecated Use {@link isImage} instead.
- */
-function isEmbed({ tagName }: Element) {
-  return tagName === 'AFFINE-IMAGE';
-}
-
-/**
  * Returns `true` if element is database.
  */
 function isDatabase({ tagName }: Element) {
@@ -781,7 +773,7 @@ function findBlockElement(elements: Element[], parent?: Element) {
     // if parent does not contain element, it's ignored
     if (parent && !contains(parent, element)) continue;
     if (hasBlockId(element) && isBlock(element)) return element;
-    if (isEmbed(element)) {
+    if (isImage(element)) {
       const element = elements[i];
       if (i < len && hasBlockId(element) && isBlock(element)) {
         return elements[i];

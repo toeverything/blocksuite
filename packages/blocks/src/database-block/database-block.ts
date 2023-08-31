@@ -33,9 +33,7 @@ import type { DataViewManager } from './common/data-view-manager.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { ViewSource } from './common/view-source.js';
 import type { DatabaseBlockModel } from './database-model.js';
-import { KanbanViewClipboard } from './kanban/clipboard.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
-import { TableViewClipboard } from './table/clipboard.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
 
 type ViewData = {
@@ -235,18 +233,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           };
         },
       };
-
-      // init clipboard
-      const clipboard = new {
-        table: TableViewClipboard,
-        kanban: KanbanViewClipboard,
-      }[this.getViewDataById(id)?.mode ?? 'table'](this.root, {
-        path: this.path,
-        model: this.model,
-        view: this._view,
-        data: view,
-      });
-      clipboard.init();
     }
     return this.viewMap[id];
   }
@@ -322,7 +308,8 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       .map(view => this.getView(view.id))
       .find(v => v.view.id === this.currentView);
     if (!viewData && this.model.views.length !== 0) {
-      this.currentView = this.model.views[0].id;
+      const viewId = this.model.views[0].id;
+      this.currentView = viewId;
       return;
     }
     const containerClass = classMap({

@@ -23,15 +23,15 @@ export abstract class BaseSelection {
     return PathFinder.id(this.path);
   }
 
-  is<T extends BlockSuiteSelectionType>(
+  is<T extends BlockSuite.SelectionType>(
     type: T
-  ): this is BlockSuiteSelectionInstance[T] {
+  ): this is BlockSuite.SelectionInstance[T] {
     return this.type === type;
   }
 
-  get type(): BlockSuiteSelectionType {
+  get type(): BlockSuite.SelectionType {
     return (this.constructor as SelectionConstructor)
-      .type as BlockSuiteSelectionType;
+      .type as BlockSuite.SelectionType;
   }
 
   get group(): string {

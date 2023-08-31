@@ -10,7 +10,7 @@ import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export function getSelectedContentModels(
   blockElement: BlockElement,
-  types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text'>[]
 ): BaseBlockModel[] {
   const selectedElements = getSelectedContentBlockElements(blockElement, types);
   const selectedModels = selectedElements.map(element => element.model);
@@ -22,7 +22,7 @@ export function getSelectedContentModels(
  */
 export function getSelectedContentBlockElements(
   blockElement: BlockElement,
-  types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text'>[]
 ): BlockElement[] {
   const { rangeManager } = blockElement.root;
   const selectionManager = blockElement.root.selectionManager;

@@ -87,17 +87,18 @@ const ParagraphPanel = ({
       .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
       .map(
-        ({ flavour, type, name, icon }) => html`<icon-button
-          width="100%"
-          height="32px"
-          style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
-          text="${name}"
-          data-testid="${flavour}/${type}"
-          @click="${() =>
-            updateParagraphType(selectedBlockElements, flavour, type)}"
-        >
-          ${icon}
-        </icon-button>`
+        ({ flavour, type, name, icon }) =>
+          html`<icon-button
+            width="100%"
+            height="32px"
+            style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
+            text="${name}"
+            data-testid="${flavour}/${type}"
+            @click="${() =>
+              updateParagraphType(selectedBlockElements, flavour, type)}"
+          >
+            ${icon}
+          </icon-button>`
       )}
   </div>`;
 };

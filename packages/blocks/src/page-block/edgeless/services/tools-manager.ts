@@ -41,6 +41,7 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (!target || !(target instanceof HTMLElement)) {
     return false;
   }
+
   if (target.tagName === 'INPUT') {
     return true;
   }
@@ -50,6 +51,14 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (target.tagName === 'AFFINE-DRAG-HANDLE') {
     return true;
   }
+  if (
+    target.tagName === 'EDGELESS-TOOLBAR' ||
+    target.tagName === 'EDGELESS-ZOOM-TOOLBAR' ||
+    target.tagName === 'ZOOM-BAR-TOGGLE-BUTTON'
+  ) {
+    return true;
+  }
+
   return false;
 }
 

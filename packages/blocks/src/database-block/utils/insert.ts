@@ -3,7 +3,7 @@ import type { InsertPosition } from '../types.js';
 export function insertPositionToIndex<
   T extends {
     id: string;
-  }
+  },
 >(position: InsertPosition, arr: T[]): number;
 export function insertPositionToIndex<T>(
   position: InsertPosition,

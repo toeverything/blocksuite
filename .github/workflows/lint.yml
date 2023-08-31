@@ -51,13 +51,11 @@ jobs:
         # ESLint will save the cache files on cwd by default,
         # so the lint command uses node_modules for caching.
         # Refs: https://eslint.org/docs/latest/user-guide/command-line-interface#--cache-location
+        # By using eslint-plugin-prettier, eslint will lint the prettier rules as well.
         run: pnpm lint
 
       - name: Run lit-lint
         run: pnpm lit-lint
-
-      - name: Run prettier
-        run: npx prettier --cache --check packages tests
 
       - name: Run circular imports detect
         run: pnpm circular

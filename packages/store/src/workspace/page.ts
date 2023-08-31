@@ -209,7 +209,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   getBlockByFlavour(blockFlavour: string) {
-    return [...this._blockMap.values()].filter(
+    return Array.from(this._blockMap.values()).filter(
       ({ flavour }) => flavour === blockFlavour
     );
   }
@@ -614,12 +614,7 @@ export class Page extends Space<FlatBlockMap> {
     if (index > -1) {
       parent?.children.splice(parent.children.indexOf(model), 1);
     }
-    if (bringChildrenTo === 'parent' && parent) {
-      model.children.forEach(child => {
-        this.schema.validate(child.flavour, parent.flavour);
-      });
-      parent.children.unshift(...model.children);
-    } else if (bringChildrenTo instanceof BaseBlockModel) {
+    if (bringChildrenTo instanceof BaseBlockModel) {
       model.children.forEach(child => {
         this.schema.validate(child.flavour, bringChildrenTo.flavour);
       });
@@ -636,7 +631,6 @@ export class Page extends Space<FlatBlockMap> {
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
-      const children = model.children.map(model => model.id);
       model.dispose();
 
       if (parent) {
@@ -646,11 +640,9 @@ export class Page extends Space<FlatBlockMap> {
         if (index > -1) {
           yChildren.delete(index, 1);
         }
-        if (options.bringChildrenTo === 'parent') {
-          yChildren.unshift(children);
-        } else if (options.bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlock(options.bringChildrenTo, {
-            children: options.bringChildrenTo.children,
+        if (bringChildrenTo instanceof BaseBlockModel) {
+          this.updateBlock(bringChildrenTo, {
+            children: bringChildrenTo.children,
           });
         }
 

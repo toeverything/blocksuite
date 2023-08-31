@@ -13,6 +13,7 @@ import type { KanbanViewSelection } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
+import { KanbanViewClipboard } from './clipboard.js';
 import { KanbanGroup } from './group.js';
 import { KanbanHotkeys } from './hotkeys.js';
 import type {
@@ -74,6 +75,14 @@ export class DataViewKanban extends BaseDataView<
     );
     this._disposables.add(this.selection.run());
     this._disposables.add(this.hotkeys.run());
+
+    // init clipboard
+    const clipboard = new KanbanViewClipboard({
+      view: this,
+      data: this.view,
+      disposables: this._disposables,
+    });
+    clipboard.init();
   }
 
   override firstUpdated() {

@@ -27,13 +27,13 @@ import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
 import { intersectVRange } from './utils/v-range.js';
 
 export type VirgoRootElement<
-  T extends BaseTextAttributes = BaseTextAttributes
+  T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
   virgoEditor: VEditor<T>;
 };
 
 export class VEditor<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   static nativePointToTextPoint = nativePointToTextPoint;
   static textPointToDomPoint = textPointToDomPoint;

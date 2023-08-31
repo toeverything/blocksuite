@@ -1,7 +1,7 @@
 {
   "name": "@blocksuite/playground",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -18,11 +18,11 @@
     "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "@lit-labs/react": "^1.2.1",
-    "@rich-data/json-plugin": "3.0.0-20230826094703-d698646",
-    "@rich-data/viewer": "3.0.0-20230826094703-d698646",
     "@shoelace-style/shoelace": "2.0.0",
     "@toeverything/y-indexeddb": "0.9.0-canary.0",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
     "async-call-rpc": "^6.3.1",
     "browser-fs-access": "^0.32.1",
     "intl-segmenter-polyfill-rs": "^0.1.6",

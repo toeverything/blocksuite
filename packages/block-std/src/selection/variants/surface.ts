@@ -49,7 +49,9 @@ export class SurfaceSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    surface: typeof SurfaceSelection;
+  namespace BlockSuite {
+    interface Selection {
+      surface: typeof SurfaceSelection;
+    }
   }
 }

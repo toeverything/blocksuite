@@ -171,70 +171,85 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     const blockSelector = `[${this.blockIdAttr}]`;
     const widgetSelector = `[${this.widgetIdAttr}]`;
 
-    const fromDOM = <T extends Element & { path: string[] }>(
-      node: Node,
-      target: string,
-      notInside: string
-    ) => {
-      const selector = `[${target}]`;
-      const notInSelector = `[${notInside}]`;
-      const element =
-        node && node instanceof HTMLElement ? node : node.parentElement;
-      if (!element) return null;
-
-      const view = element.closest<T>(selector);
-      if (!view) {
-        return null;
-      }
-      const not = element.closest(notInSelector);
-      if (view.contains(not)) {
-        return null;
-      }
-
-      const id = view.getAttribute(target);
-      assertExists(id);
-
-      return {
-        id,
-        path: view.path,
-        view,
-      };
-    };
-
-    this.blockStore.viewStore.register('block', {
+    this.blockStore.viewStore.register<'block'>({
+      type: 'block',
       fromDOM: node => {
-        return fromDOM<BlockElement>(node, this.blockIdAttr, this.widgetIdAttr);
+        return fromDOM<BlockElement>(
+          node,
+          this.blockIdAttr,
+          this.widgetIdAttr,
+          'block'
+        );
       },
-      toDOM: ({ view }) => {
-        return view;
-      },
-      getChildren: view => {
-        return Array.from(
-          view.querySelectorAll<BlockElement>(
-            `${blockSelector},${widgetSelector}`
-          )
-        ).filter(x => {
-          return x.parentElement?.closest(blockSelector) === view;
-        });
-      },
+      toDOM: ({ view }) => view,
+      getChildren: view =>
+        getChildren(view, blockSelector, widgetSelector, 'block'),
     });
 
-    this.blockStore.viewStore.register('widget', {
+    this.blockStore.viewStore.register<'widget'>({
+      type: 'widget',
       fromDOM: node => {
         return fromDOM<WidgetElement>(
           node,
           this.widgetIdAttr,
-          this.blockIdAttr
+          this.blockIdAttr,
+          'widget'
         );
       },
-      toDOM: ({ view }) => {
-        return view;
-      },
-      getChildren: () => {
-        return [];
-      },
+      toDOM: ({ view }) => view,
+      getChildren: view =>
+        getChildren(view, blockSelector, widgetSelector, 'widget'),
     });
   };
+}
+
+function fromDOM<T extends Element & { path: string[] }>(
+  node: Node,
+  target: string,
+  notInside: string,
+  type: BlockSuite.ViewType
+) {
+  const selector = `[${target}]`;
+  const notInSelector = `[${notInside}]`;
+  const element =
+    node && node instanceof HTMLElement ? node : node.parentElement;
+  if (!element) return null;
+
+  const view = element.closest<T>(selector);
+  if (!view) {
+    return null;
+  }
+  const not = element.closest(notInSelector);
+  if (view.contains(not)) {
+    return null;
+  }
+
+  const id = view.getAttribute(target);
+  assertExists(id);
+
+  return {
+    id,
+    path: view.path,
+    view,
+    type,
+  };
+}
+
+function getChildren(
+  view: Element,
+  blockSelector: string,
+  widgetSelector: string,
+  type: BlockSuite.ViewType
+) {
+  const selector = `${blockSelector},${widgetSelector}`;
+  return Array.from(
+    view.querySelectorAll<BlockElement | WidgetElement>(selector)
+  ).filter(
+    x =>
+      x.parentElement?.closest(
+        type === 'block' ? blockSelector : widgetSelector
+      ) === view
+  );
 }
 
 declare global {

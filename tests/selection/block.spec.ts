@@ -30,7 +30,6 @@ import {
   resetHistory,
   selectAllByKeyboard,
   shamefullyBlurActiveElement,
-  SHORT_KEY,
   type,
   undoByClick,
   undoByKeyboard,

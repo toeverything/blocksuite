@@ -625,7 +625,7 @@ function getNextPoint(
   offsetW = 10,
   offsetH = 10
 ) {
-  const result: IVec = [...point];
+  const result: IVec = Array.from(point);
   if (almostEqual(bound.x, result[0])) result[0] -= offsetX;
   else if (almostEqual(bound.y, result[1])) result[1] -= offsetY;
   else if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
@@ -1006,7 +1006,7 @@ export class EdgelessConnectorManager {
     Bound | null,
     Bound | null,
     Bound | null,
-    Bound | null
+    Bound | null,
   ] {
     const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 

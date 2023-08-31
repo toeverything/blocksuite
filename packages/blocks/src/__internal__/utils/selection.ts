@@ -269,14 +269,14 @@ export function handleNativeRangeAtPoint(x: number, y: number) {
  * Get the closest element in the horizontal position
  */
 export function getHorizontalClosestElement<
-  K extends keyof HTMLElementTagNameMap
+  K extends keyof HTMLElementTagNameMap,
 >(
   clientY: number,
   selectors: K,
   container?: Element
 ): HTMLElementTagNameMap[K] | null;
 export function getHorizontalClosestElement<
-  K extends keyof SVGElementTagNameMap
+  K extends keyof SVGElementTagNameMap,
 >(
   clientY: number,
   selectors: K,

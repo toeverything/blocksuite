@@ -186,9 +186,9 @@ export class AffineFormatBarWidget extends WidgetElement {
         this._customElements.length === 0 &&
         AffineFormatBarWidget.customElements.size !== 0
       ) {
-        this._customElements = [...AffineFormatBarWidget.customElements].map(
-          element => element(this)
-        );
+        this._customElements = Array.from(
+          AffineFormatBarWidget.customElements
+        ).map(element => element(this));
         this.customItemsContainer.append(...this._customElements);
         this._disposables.add(() => {
           this._customElements.forEach(element => {

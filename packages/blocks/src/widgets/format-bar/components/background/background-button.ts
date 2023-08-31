@@ -46,24 +46,25 @@ const updateBackground = (
 const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
   return html`<div class="background-highlight-panel">
     ${backgroundConfig.map(
-      ({ name, color }) => html`<icon-button
-        width="100%"
-        height="32px"
-        style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
-        text="${name}"
-        data-testid="${color ?? 'unset'}"
-        @click="${() => {
-          updateBackground(formatBar.pageElement, color);
-          formatBar.requestUpdate();
-        }}"
-      >
-        <span
-          style="color: ${color ??
-          'rgba(0,0,0,0)'}; display: flex; align-items: center;"
+      ({ name, color }) =>
+        html`<icon-button
+          width="100%"
+          height="32px"
+          style="padding-left: 4px; justify-content: flex-start; gap: 8px;"
+          text="${name}"
+          data-testid="${color ?? 'unset'}"
+          @click="${() => {
+            updateBackground(formatBar.pageElement, color);
+            formatBar.requestUpdate();
+          }}"
         >
-          ${TextBackgroundDuotoneIcon}
-        </span>
-      </icon-button>`
+          <span
+            style="color: ${color ??
+            'rgba(0,0,0,0)'}; display: flex; align-items: center;"
+          >
+            ${TextBackgroundDuotoneIcon}
+          </span>
+        </icon-button>`
     )}
   </div>`;
 };

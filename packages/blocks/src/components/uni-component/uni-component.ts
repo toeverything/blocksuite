@@ -7,7 +7,7 @@ import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 export type UniComponentReturn<
   Props = NonNullable<unknown>,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > = {
   update: (props: Props) => void;
   unmount: () => void;
@@ -15,7 +15,7 @@ export type UniComponentReturn<
 };
 export type UniComponent<
   Props = NonNullable<unknown>,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > = (ele: HTMLElement, props: Props) => UniComponentReturn<Props, Expose>;
 export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
   uni: UniComponent<Props, Expose> | undefined,
@@ -37,7 +37,7 @@ export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
 @customElement('uni-lit')
 export class UniLit<
   Props,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > extends ShadowlessElement {
   @property({ attribute: false })
   uni?: UniComponent<Props, Expose>;
@@ -92,7 +92,7 @@ export class UniLit<
 
 export const createUniComponentFromWebComponent = <
   T,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 >(
   component: typeof LitElement
 ): UniComponent<T, Expose> => {

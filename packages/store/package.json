@@ -1,6 +1,6 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "BlockSuite data store built for general purpose state management.",
   "main": "src/index.ts",
   "type": "module",
@@ -22,7 +22,6 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.1",
-    "ky": "^0.33.3",
     "lib0": "^0.2.83",
     "merge": "^2.1.1",
     "minimatch": "^9.0.3",

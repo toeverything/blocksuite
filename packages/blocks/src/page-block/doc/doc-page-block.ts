@@ -139,6 +139,7 @@ export class DocPageBlockComponent
     tagClicked: new Slot<{
       tagId: string;
     }>(),
+    viewportUpdated: new Slot<PageViewport>(),
   };
 
   @query('.affine-doc-page-block-title')
@@ -319,6 +320,21 @@ export class DocPageBlockComponent
     );
   }
 
+  private _initViewportResizeEffect() {
+    // when observe viewportElement resize, emit viewport update event
+    const resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        for (const { target } of entries) {
+          if (target === this.viewportElement) {
+            this.slots.viewportUpdated.emit(this.viewport);
+            break;
+          }
+        }
+      }
+    );
+    resizeObserver.observe(this.viewportElement);
+  }
+
   private _initReadonlyListener() {
     const page = this.page;
 
@@ -336,6 +352,7 @@ export class DocPageBlockComponent
   override firstUpdated() {
     this._initSlotEffects();
     this._initReadonlyListener();
+    this._initViewportResizeEffect();
   }
 
   override connectedCallback() {
