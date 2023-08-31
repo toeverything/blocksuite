@@ -1,3 +1,4 @@
+export * from './command/index.js';
 export * from './event/index.js';
 export * from './selection/index.js';
 export * from './service/index.js';

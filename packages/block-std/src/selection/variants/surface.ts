@@ -49,7 +49,6 @@ export class SurfaceSelection extends BaseSelection {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace BlockSuite {
     interface Selection {
       surface: typeof SurfaceSelection;
