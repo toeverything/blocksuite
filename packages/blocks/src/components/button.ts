@@ -40,17 +40,6 @@ export class IconButton extends LitElement {
       pointer-events: auto;
     }
 
-    :host > .text {
-      flex: 1;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-    }
-
-    ::slotted(svg) {
-      color: var(--svg-icon-color);
-    }
-
     :host(:hover) {
       background: var(--affine-hover-color);
     }
@@ -73,6 +62,17 @@ export class IconButton extends LitElement {
 
     :host(:active[active]) {
       background: transparent;
+    }
+
+    :host > .text {
+      flex: 1;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    ::slotted(svg) {
+      color: var(--svg-icon-color);
     }
   `;
 
@@ -97,6 +97,7 @@ export class IconButton extends LitElement {
 
   constructor() {
     super();
+    // Allow activate button by pressing Enter key
     this.addEventListener('keypress', event => {
       if (this.disabled) {
         return;
@@ -148,12 +149,15 @@ export class IconButton extends LitElement {
   }
 
   override render() {
-    const iconColor = this.disabled
-      ? 'var(--affine-disabled-color)'
-      : this.active
-      ? 'var(--affine-primary-color)'
-      : 'var(--affine-icon-color)';
-    this.style.setProperty('--svg-icon-color', iconColor);
+    if (this.disabled) {
+      const disabledColor = 'var(--affine-disabled-color)';
+      this.style.setProperty('--svg-icon-color', disabledColor);
+    } else {
+      const iconColor = this.active
+        ? 'var(--affine-primary-color)'
+        : 'var(--affine-icon-color)';
+      this.style.setProperty('--svg-icon-color', iconColor);
+    }
 
     return html`<slot></slot>${this.text
         ? // wrap a span around the text so we can ellipsis it automatically
