@@ -1,22 +1,12 @@
-export function getArrowPoints(
-  [startX, startY]: number[],
-  [endX, endY]: number[],
-  arrowSize = 10
-) {
-  const dx = endX - startX;
-  const dy = endY - startY;
-  const angle = Math.atan2(dy, dx);
-  const oneSide = [
-    endX - arrowSize * Math.cos(angle - Math.PI / 10),
-    endY - arrowSize * Math.sin(angle - Math.PI / 10),
-  ];
-  const anotherSide = [
-    endX - arrowSize * Math.cos(angle + Math.PI / 10),
-    endY - arrowSize * Math.sin(angle + Math.PI / 10),
-  ];
+import type { PointLocation } from '../../utils/point-location.js';
+import { Vec } from '../../utils/vec.js';
+
+export function getArrowPoints(point: PointLocation, size = 10) {
+  const unit = Vec.mul(point.tangent, -1);
   return {
-    sides: [oneSide, anotherSide],
-    start: [startX, startY],
-    end: [endX, endY],
+    sides: [
+      Vec.add(Vec.mul(Vec.rot(unit, Math.PI / 10), size), point),
+      Vec.add(Vec.mul(Vec.rot(unit, -Math.PI / 10), size), point),
+    ],
   };
 }
