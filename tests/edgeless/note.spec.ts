@@ -264,7 +264,9 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   await page.mouse.move(x, y);
   await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await page.mouse.dblclick(x, y);
+  await waitNextFrame(page);
   await page.mouse.move(x, y);
+
   await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 
   await page.mouse.move(0, 0);
