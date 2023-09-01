@@ -9,19 +9,20 @@ import {
 } from '@blocksuite/store';
 
 type SurfaceBlockProps = {
-  elements: NativeWrapper<Y.Map<unknown>>;
+  elements: NativeWrapper<Y.Map<Y.Map<unknown>>>;
 };
 
 const migration = {
   toV5: data => {
-    let { elements } = data;
+    const { elements } = data;
     if (isPureObject(elements)) {
-      const map = new Workspace.Y.Map();
+      const map: Record<string, Y.Map<unknown>> = {};
+      const yMap = native2Y(map, false);
+      const wrapper = new NativeWrapper(yMap);
+      data.elements = wrapper;
       for (const [key, value] of Object.entries(elements)) {
-        map.set(key, native2Y(value, false));
+        wrapper.yMap.set(key, native2Y(value, false));
       }
-      elements = new NativeWrapper(map);
-      data.elements = elements;
     }
   },
   toV4: data => {
