@@ -47,7 +47,7 @@ export const test = addOnFactory<keyof TestAddon>(
             const obj = (
               props['prop:elements'] as { value: Record<string, unknown> }
             ).value;
-            const wrapper: Record<string, unknown> = {};
+            const wrapper = new Y.Map();
             Object.entries(obj).forEach(([key, element]) => {
               const _element = element as Record<string, unknown>;
               if (_element['type'] === 'text') {
@@ -65,12 +65,10 @@ export const test = addOnFactory<keyof TestAddon>(
                 yText.applyDelta(_element['text']);
                 _element['text'] = yText;
               }
-              wrapper[key] = native2Y(_element, false);
+              wrapper.set(key, native2Y(_element, false));
             });
 
-            props['prop:elements'] = new NativeWrapper(
-              native2Y(wrapper, false)
-            );
+            props['prop:elements'] = new NativeWrapper(wrapper);
           }
 
           // setup embed source
