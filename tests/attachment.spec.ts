@@ -36,11 +36,6 @@ function getAttachment(page: Page) {
       window.showOpenFilePicker = undefined;
     });
 
-    page.evaluate(async () => {
-      // Force fallback to input[type=file] in tests
-      // See https://github.com/microsoft/playwright/issues/8850
-      window.showOpenFilePicker = undefined;
-    });
     const slashMenu = page.locator(`.slash-menu`);
     await waitNextFrame(page);
     await type(page, '/');
