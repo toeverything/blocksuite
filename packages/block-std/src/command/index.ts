@@ -1,43 +1,57 @@
 import type { BlockStore } from '../store/index.js';
 
-export interface CommandCtx {
+export interface InitCommandCtx {
   blockStore: BlockStore;
-  data: Partial<BlockSuite.CommandData>;
 }
 
-export type Command<Options = void> = (
-  ctx: CommandCtx,
-  options?: Options
-) => boolean;
-
-type ToInnerCommand<T> = T extends Command<infer Options>
-  ? InnerCommand<Options>
+export type CommandKeyToData<K extends BlockSuite.CommandDataName> = Pick<
+  BlockSuite.CommandData,
+  K
+>;
+export type Command<
+  In extends BlockSuite.CommandDataName = never,
+  Out extends BlockSuite.CommandDataName = never,
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  InData extends object = {},
+> = (
+  ctx: CommandKeyToData<In> & InitCommandCtx & InData,
+  next: (ctx: CommandKeyToData<Out>) => Promise<void>
+) => Promise<void>;
+type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
+  ? void
+  : Omit<A, keyof B>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type InDataOfCommand<C> = C extends Command<infer K, any, infer R>
+  ? CommandKeyToData<K> & R
   : never;
-
-type InnerCommands = {
-  [Key in BlockSuite.CommandName]: ToInnerCommand<BlockSuite.Commands[Key]>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type OutDataOfCommand<C> = C extends Command<any, infer K, any>
+  ? CommandKeyToData<K>
+  : never;
+// eslint-disable-next-line @typescript-eslint/ban-types
+type CommonMethods<In extends object = {}> = {
+  run(): Promise<void>;
+  with<T extends Partial<BlockSuite.CommandData>>(value: T): Chain<In & T>;
+  inline: <InlineOut extends BlockSuite.CommandDataName = never>(
+    command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
+  ) => Chain<In & CommandKeyToData<InlineOut>>;
 };
-
-type InnerCommand<Options = void> = (options?: Options) => Chain;
-
-type InlineCommand = (fn: Command) => Chain;
-
-type RunCommand = () => boolean;
-
-interface Chain extends InnerCommands {
-  run: RunCommand;
-  inline: InlineCommand;
-}
+const cmdSymbol = Symbol('cmds');
+// eslint-disable-next-line @typescript-eslint/ban-types
+type Chain<In extends object = {}> = CommonMethods<In> & {
+  [K in keyof BlockSuite.Commands]: (
+    data: Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
+  ) => Chain<In & OutDataOfCommand<BlockSuite.Commands[K]>>;
+};
 
 export class CommandManager {
   private _commands = new Map<string, Command>();
 
   constructor(public blockStore: BlockStore) {}
 
-  private _getCommandCtx = () => {
+  private _getCommandCtx = (): InitCommandCtx => {
     return {
       blockStore: this.blockStore,
-      data: {},
     };
   };
 
@@ -50,48 +64,59 @@ export class CommandManager {
     return this;
   }
 
-  pipe = () => {
-    const ctx = this._getCommandCtx();
-    const queue: Array<() => boolean> = [];
-    // @ts-ignore
-    const mapping: Chain = {
+  createChain = (methods: Record<string, unknown>, cmds: Command[]): Chain => {
+    return {
+      [cmdSymbol]: cmds,
       run: () => {
-        for (const command of queue) {
-          const result = command();
-          if (!result) {
-            return false;
+        const ctx = this._getCommandCtx();
+        const runCmds = async (
+          ctx: BlockSuite.CommandData,
+          [cmd, ...rest]: Command[]
+        ) => {
+          if (cmd) {
+            await cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
-        }
-        return true;
+        };
+        return runCmds(ctx, cmds);
       },
-      inline: (fn: Command) => {
-        queue.push(() => {
-          return fn(ctx);
-        });
-        return mapping;
+      with: value => {
+        return this.createChain(methods, [...cmds, (_, next) => next(value)]);
       },
-    };
-
-    for (const [commandName, command] of this._commands.entries()) {
-      const innerCommand: InnerCommand = options => {
-        queue.push(() => {
-          return command(ctx, options);
-        });
-        return mapping;
+      inline: command => {
+        return this.createChain(methods, [...cmds, command]);
+      },
+      ...methods,
+    } as Chain;
+  };
+  pipe = (): Chain<InitCommandCtx> => {
+    const methods = {
+      [cmdSymbol]: [],
+    } as { [cmdSymbol]: Command[] } & Record<
+      string,
+      (data: Record<string, unknown>) => Chain
+    >;
+    const createChain = this.createChain;
+    for (const [name, command] of this._commands.entries()) {
+      methods[name] = function (data: Record<string, unknown>) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [
+          ...cmds,
+          (ctx, next) => command({ ...ctx, ...data }, next),
+        ]);
       };
-      // @ts-expect-error force inject command
-      mapping[commandName] = innerCommand;
     }
 
-    return mapping;
+    return createChain(methods, []);
   };
 }
 
 declare global {
   namespace BlockSuite {
-    interface CommandData {}
+    interface CommandData extends InitCommandCtx {}
+
     interface Commands {}
 
     type CommandName = keyof Commands;
+    type CommandDataName = keyof CommandData;
   }
 }
