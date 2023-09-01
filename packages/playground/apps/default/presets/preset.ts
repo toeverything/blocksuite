@@ -76,7 +76,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
         roughness: DEFAULT_ROUGHNESS,
       },
     },
-    true
+    false
   );
 
   const elements = new NativeWrapper(yMap);

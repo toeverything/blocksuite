@@ -84,7 +84,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
         title: new Y.Text('Frame 1'),
       },
     },
-    true
+    false
   );
   page.addBlock(
     'affine:surface',

@@ -72,7 +72,7 @@ export const heavyWhiteboard: InitFn = async (
 
   page.addBlock(
     'affine:surface',
-    { elements: new NativeWrapper(native2Y(surfaceBlockElements, true)) },
+    { elements: new NativeWrapper(native2Y(surfaceBlockElements, false)) },
     pageBlockId
   );
 

@@ -16,7 +16,7 @@ const migration = {
   toV5: data => {
     let { elements } = data;
     if (isPureObject(elements)) {
-      const y = native2Y(elements as unknown, true) as Y.Map<unknown>;
+      const y = native2Y(elements as unknown, false) as Y.Map<unknown>;
       elements = new NativeWrapper(y);
       data.elements = elements;
     }

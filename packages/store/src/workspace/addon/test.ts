@@ -66,7 +66,7 @@ export const test = addOnFactory<keyof TestAddon>(
               }
             });
 
-            props['prop:elements'] = new NativeWrapper(native2Y(obj, true));
+            props['prop:elements'] = new NativeWrapper(native2Y(obj, false));
           }
 
           // setup embed source
