@@ -168,11 +168,22 @@ export class NotionHtmlParser extends BaseParser {
   private _notionHtmlEmbedItemParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
+    const bookmarkList = this._bookMarkParser(element);
+    if (bookmarkList) {
+      return bookmarkList;
+    }
+
+    const fileList = this._fileParser(element);
+    if (fileList) {
+      return fileList;
+    }
+
     const texts = [];
     let imgElement = null;
     let caption = '';
     if (element.tagName === 'FIGURE') {
       if (
+        !element.classList.contains('image') &&
         element.children.length === 1 &&
         element.children[0].tagName === 'A'
       ) {
@@ -195,39 +206,6 @@ export class NotionHtmlParser extends BaseParser {
       texts.push(...(captionText || []));
       if (captionText && captionText.length > 0) {
         caption = captionText[0].insert || '';
-      }
-      const bookmarkUrlElement = element.querySelector('.bookmark.source');
-      if (bookmarkUrlElement) {
-        const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
-        const bookmarkTitle =
-          bookmarkUrlElement?.querySelector('.bookmark-title')?.textContent ??
-          'Bookmark';
-        const bookmarDescription =
-          bookmarkUrlElement?.querySelector('.bookmark-description')
-            ?.textContent ?? bookmarkUrl;
-        const bookmarIcon =
-          bookmarkUrlElement
-            ?.querySelector('.bookmark-icon')
-            ?.getAttribute('src') ?? '';
-        const bookmarImage =
-          bookmarkUrlElement
-            ?.querySelector('.bookmark-image')
-            ?.getAttribute('src') ?? '';
-        const bookmarCaption =
-          bookmarkUrlElement?.querySelector('figcaption')?.textContent ?? '';
-
-        return [
-          {
-            flavour: 'affine:bookmark',
-            children: [],
-            url: bookmarkUrl,
-            bookmarkTitle: bookmarkTitle,
-            description: bookmarDescription,
-            icon: bookmarIcon,
-            image: bookmarImage,
-            caption: bookmarCaption,
-          },
-        ];
       }
     } else if (element instanceof HTMLImageElement) {
       imgElement = element;
@@ -287,6 +265,61 @@ export class NotionHtmlParser extends BaseParser {
     ];
   };
 
+  private _bookMarkParser = (element: Element): SerializedBlock[] | null => {
+    if (element.tagName !== 'FIGURE') {
+      return null;
+    }
+    const bookmarkUrlElement = element.querySelector('.bookmark.source');
+    if (!bookmarkUrlElement) {
+      return null;
+    }
+    const bookmarkUrl = bookmarkUrlElement?.getAttribute('href') ?? '';
+    const bookmarkTitle =
+      bookmarkUrlElement?.querySelector('.bookmark-title')?.textContent ??
+      'Bookmark';
+    const bookmarkDescription =
+      bookmarkUrlElement?.querySelector('.bookmark-description')?.textContent ??
+      bookmarkUrl;
+    const bookmarkIcon =
+      bookmarkUrlElement
+        ?.querySelector('.bookmark-icon')
+        ?.getAttribute('src') ?? '';
+    const bookmarkImage =
+      bookmarkUrlElement
+        ?.querySelector('.bookmark-image')
+        ?.getAttribute('src') ?? '';
+    const bookmarkCaption =
+      bookmarkUrlElement?.querySelector('figcaption')?.textContent ?? '';
+
+    return [
+      {
+        flavour: 'affine:bookmark',
+        children: [],
+        url: bookmarkUrl,
+        bookmarkTitle: bookmarkTitle,
+        description: bookmarkDescription,
+        icon: bookmarkIcon,
+        image: bookmarkImage,
+        caption: bookmarkCaption,
+      },
+    ];
+  };
+
+  private _fileParser = async (
+    element: Element
+  ): Promise<SerializedBlock[] | null> => {
+    if (element.tagName !== 'FIGURE' || element.classList.length > 0) {
+      return null;
+    }
+    if (
+      element.children.length === 0 ||
+      element.children[0].tagName !== 'DIV' ||
+      !element.children[0].classList.contains('source')
+    ) {
+      return null;
+    }
+  };
+
   private _notionHtmlTableParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
@@ -317,7 +350,6 @@ const getCaptionText = async (
       return captionResult[0].text;
     }
   }
-
   return null;
 };
 
