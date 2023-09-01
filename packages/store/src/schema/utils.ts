@@ -24,7 +24,6 @@ export function toBlockMigrationData(
       if (value instanceof NativeWrapper) {
         const _y = value.yMap;
         yBlock.set(`prop:${p}`, _y);
-        console.log(_y);
         return Reflect.set(target, p, value, receiver);
       }
 
