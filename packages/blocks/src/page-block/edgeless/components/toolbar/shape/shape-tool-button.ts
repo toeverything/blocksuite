@@ -1,7 +1,6 @@
 import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
@@ -21,35 +20,8 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../../component-toolbar/change-shape-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
-
-interface ShapeMenuPopper {
-  element: EdgelessShapeMenu;
-  dispose: () => void;
-}
-
-function createShapeMenuPopper(reference: HTMLElement): ShapeMenuPopper {
-  const shapeMenu = document.createElement('edgeless-shape-menu');
-  assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(shapeMenu);
-
-  // The brush menu should be positioned at the top of the brush button.
-  // And it should be positioned at the top center of the toolbar all the time.
-  const x = 110;
-  const y = -40;
-
-  Object.assign(shapeMenu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
-  });
-
-  return {
-    element: shapeMenu,
-    dispose: () => {
-      shapeMenu.remove();
-    },
-  };
-}
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
@@ -93,14 +65,17 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
 
   private _shapeToolLocalState: ShapeToolState | null = null;
 
-  private _shapeMenu: ShapeMenuPopper | null = null;
+  private _shapeMenu: MenuPopper<EdgelessShapeMenu> | null = null;
 
   private _toggleShapeMenu() {
     if (this._shapeMenu) {
       this._shapeMenu.dispose();
       this._shapeMenu = null;
     } else {
-      this._shapeMenu = createShapeMenuPopper(this);
+      this._shapeMenu = createPopper('edgeless-shape-menu', this, {
+        x: 110,
+        y: -40,
+      });
       this._shapeMenu.element.edgelessTool = this.edgelessTool;
       this._shapeMenu.element.edgeless = this.edgeless;
     }

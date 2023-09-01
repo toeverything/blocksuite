@@ -150,10 +150,10 @@ export class ProxyManager {
     if (this._proxies.has(yAbstract)) {
       return this._proxies.get(yAbstract) as Data;
     }
-    if (yAbstract instanceof NativeWrapper) {
-      const data = yAbstract as Data;
+    if (NativeWrapper.is(yAbstract)) {
+      const data = new NativeWrapper(yAbstract);
       this._proxies.set(yAbstract, data);
-      return data;
+      return data as Data;
     }
     if (yAbstract instanceof YArray) {
       const data = this._createYArrayProxy(yAbstract, config) as Data;

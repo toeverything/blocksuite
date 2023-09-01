@@ -231,6 +231,7 @@ test('edgeless toolbar shape menu shows up and close normally', async ({
   await expect(shapeMenu).toBeVisible();
 
   await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.waitForTimeout(500);
   await expect(shapeMenu).toBeHidden();
 });
 

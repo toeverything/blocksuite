@@ -1,7 +1,6 @@
 import '../../buttons/tool-icon-button.js';
 import './frame-menu.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -10,33 +9,8 @@ import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import { ArrowUpIcon, LargeFrameIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessFrameMenu } from './frame-menu.js';
-
-interface FrameMenuPopper {
-  element: EdgelessFrameMenu;
-  dispose: () => void;
-}
-
-function createFrameMenuPopper(reference: HTMLElement): FrameMenuPopper {
-  const frameMenu = document.createElement('edgeless-frame-menu');
-  assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(frameMenu);
-
-  const x = 90;
-  const y = -40;
-
-  Object.assign(frameMenu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
-  });
-
-  return {
-    element: frameMenu,
-    dispose: () => {
-      frameMenu.remove();
-    },
-  };
-}
 
 @customElement('edgeless-frame-tool-button')
 export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
@@ -75,14 +49,17 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  private _frameMenu: FrameMenuPopper | null = null;
+  private _frameMenu: MenuPopper<EdgelessFrameMenu> | null = null;
 
   private _toggleFrameMenu() {
     if (this._frameMenu) {
       this._frameMenu.dispose();
       this._frameMenu = null;
     } else {
-      this._frameMenu = createFrameMenuPopper(this);
+      this._frameMenu = createPopper('edgeless-frame-menu', this, {
+        x: 90,
+        y: -40,
+      });
       this._frameMenu.element.edgelessTool = this.edgelessTool;
       this._frameMenu.element.edgeless = this.edgeless;
     }

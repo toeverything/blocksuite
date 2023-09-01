@@ -118,7 +118,7 @@ export class Schema {
     const blocks = pageData.getMap('blocks');
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
-      const currentVersion = oldVersions[flavour];
+      const currentVersion = oldVersions[flavour] ?? 0;
       assertExists(
         currentVersion,
         `previous version for flavour ${flavour} not found`

@@ -24,17 +24,6 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
       z-index: -1;
     }
 
-    .container {
-      display: flex;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border: 1px solid var(--affine-border-color);
-      border-radius: 8px 8px 0 0;
-      position: relative;
-      cursor: default;
-    }
-
     .menu-content {
       display: flex;
       align-items: center;
@@ -80,22 +69,20 @@ export class EdgelessBrushMenu extends WithDisposable(LitElement) {
     const { color, lineWidth } = this.edgelessTool;
 
     return html`
-      <div class="container">
-        <edgeless-slide-menu>
-          <div class="menu-content">
-            <edgeless-line-width-panel
-              .selectedSize=${lineWidth}
-              @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
-            >
-            </edgeless-line-width-panel>
-            <menu-divider .vertical=${true}></menu-divider>
-            <edgeless-one-row-color-panel
-              .value=${color}
-              @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
-            ></edgeless-one-row-color-panel>
-          </div>
-        </edgeless-slide-menu>
-      </div>
+      <edgeless-slide-menu>
+        <div class="menu-content">
+          <edgeless-line-width-panel
+            .selectedSize=${lineWidth}
+            @select=${(e: LineWidthEvent) => this._setLineWidth(e.detail)}
+          >
+          </edgeless-line-width-panel>
+          <menu-divider .vertical=${true}></menu-divider>
+          <edgeless-one-row-color-panel
+            .value=${color}
+            @select=${(e: ColorEvent) => this._setBrushColor(e.detail)}
+          ></edgeless-one-row-color-panel>
+        </div>
+      </edgeless-slide-menu>
     `;
   }
 }

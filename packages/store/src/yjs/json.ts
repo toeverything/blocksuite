@@ -1,15 +1,13 @@
 import * as Y from 'yjs';
 
+import { NATIVE_UNIQ_IDENTIFIER, TEXT_UNIQ_IDENTIFIER } from '../consts.js';
 import { NativeWrapper } from './native-wrapper.js';
-
-const TEXT_UNIQ_IDENTIFIER = '$blocksuite:internal:text$';
-const NATIVE_UNIQ_IDENTIFIER = '$blocksuite:internal:native$';
 
 export function toJSON(value: unknown): unknown {
   if (value instanceof Y.Doc) {
     throw new Error('Y.Doc is not supported');
   }
-  if (value instanceof NativeWrapper) {
+  if (NativeWrapper.is(value)) {
     return {
       [NATIVE_UNIQ_IDENTIFIER]: true,
       value: value.getValue(),
