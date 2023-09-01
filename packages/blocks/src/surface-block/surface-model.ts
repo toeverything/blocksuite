@@ -28,10 +28,14 @@ const migration = {
         const map = new Workspace.Y.Map();
         yMap.set(key, map);
         Object.entries(value).forEach(([_key, _value]) => {
-          map.set(
-            _key,
-            _value instanceof Workspace.Y.Text ? _value.clone() : _value
-          );
+          if (_value instanceof Workspace.Y.Text) {
+            const yText = new Workspace.Y.Text();
+            yText.applyDelta(_value.toDelta());
+            map.set(_key, yText);
+
+            return;
+          }
+          map.set(_key, _value);
         });
       });
     }
