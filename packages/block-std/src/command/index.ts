@@ -80,7 +80,10 @@ export class CommandManager {
         return runCmds(ctx, cmds);
       },
       with: value => {
-        return this.createChain(methods, [...cmds, (_, next) => next(value)]);
+        return this.createChain(methods, [
+          ...cmds,
+          (_, next) => next(value),
+        ]) as never;
       },
       inline: command => {
         return this.createChain(methods, [...cmds, command]);
