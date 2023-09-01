@@ -2,6 +2,7 @@ import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   defineBlockSchema,
   isPureObject,
+  native2Y,
   NativeWrapper,
   type SchemaToModel,
   Workspace,
@@ -15,7 +16,6 @@ const migration = {
   toV5: data => {
     const { elements } = data;
     if (isPureObject(elements)) {
-      console.log(elements);
       const wrapper = new NativeWrapper<Y.Map<Y.Map<unknown>>>(
         new Workspace.Y.Map()
       );
@@ -25,20 +25,8 @@ const migration = {
         return;
       }
       Object.entries(elements).forEach(([key, value]) => {
-        const map = new Workspace.Y.Map();
+        const map = native2Y(value, false);
         yMap.set(key, map);
-        Object.entries(value).forEach(([_key, _value]) => {
-          // if (_value instanceof Workspace.Y.Text) {
-          //   const yText = new Workspace.Y.Text();
-          //   console.log(_value);
-          //   console.log(_value.toDelta());
-          //   yText.applyDelta(_value.toDelta());
-          //   map.set(_key, yText);
-          //
-          //   return;
-          // }
-          map.set(_key, _value);
-        });
       });
     }
   },
