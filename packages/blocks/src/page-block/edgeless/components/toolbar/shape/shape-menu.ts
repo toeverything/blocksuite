@@ -30,16 +30,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       position: absolute;
       z-index: -1;
     }
-    .shape-menu-container {
-      display: flex;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px 8px 0 0;
-      border: 1px solid var(--affine-border-color);
-      position: relative;
-      cursor: default;
-    }
     .menu-content {
       display: flex;
       align-items: center;

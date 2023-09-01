@@ -156,6 +156,9 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   const end = { x: 200, y: 200 };
   await addBasicBrushElement(page, start, end);
 
+  // wait for menu hide animation
+  await page.waitForTimeout(500);
+
   // change to line width 12
   await page.mouse.click(110, 110);
   await updateExistedBrushElementSize(page, 6);
