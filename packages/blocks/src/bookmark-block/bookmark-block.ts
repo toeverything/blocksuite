@@ -16,6 +16,7 @@ import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
+import { allowEmbed, formatEmbedUrl } from './format-url/index.js';
 import { DefaultBanner } from './images/banners.js';
 import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
@@ -30,7 +31,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       position: relative;
     }
     .affine-bookmark-link {
-      height: 112px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       box-shadow: var(--affine-shadow-1);
       background: var(--affine-card-background-blue);
       border: 3px solid var(--affine-background-secondary-color);
@@ -45,6 +48,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       position: relative;
     }
     .affine-bookmark-banner {
+      position: absolute;
+      right: 24px;
+      bottom: 0;
       width: 140px;
       height: 93px;
       margin-left: 20px;
@@ -63,6 +69,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       object-fit: cover;
     }
     .affine-bookmark-content-wrapper {
+      width: 100%;
       flex-grow: 1;
       overflow: hidden;
     }
@@ -279,8 +286,59 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       this._optionsAbortController?.abort();
     };
 
-  override render() {
+  private _linkCard() {
     const { url, bookmarkTitle, description, icon, image } = this.model;
+
+    return html`<div
+      class="affine-bookmark-link"
+      @click=${this._onCardClick}
+      @dblclick=${this._onCardDbClick}
+    >
+      ${allowEmbed(url)
+        ? html`<iframe
+            height="500"
+            style="width: 100%"
+            scrolling="no"
+            src=${formatEmbedUrl(url)}
+            frameborder="no"
+            loading="lazy"
+            allowTransparency="true"
+            allowfullscreen="true"
+          ></iframe>`
+        : nothing}
+      <div class="affine-bookmark-content-wrapper">
+        <div class="affine-bookmark-title">
+          <div class="affine-bookmark-icon">
+            ${icon && !this._isIconError
+              ? html`<img
+                  src="${icon}"
+                  alt="icon"
+                  @error="${this._onIconError}"
+                />`
+              : WebIcon16}
+          </div>
+          <div class="affine-bookmark-title-content">
+            ${bookmarkTitle || 'Bookmark'}
+          </div>
+        </div>
+
+        <div class="affine-bookmark-description">${description || url}</div>
+        <div class="affine-bookmark-url">${url}</div>
+      </div>
+      <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
+        ${image && !this._isImageError
+          ? html`<img
+              src="${image}"
+              alt="image"
+              @error="${this._onImageError}"
+            />`
+          : DefaultBanner}
+      </div>
+    </div>`;
+  }
+
+  override render() {
+    const { url } = this.model;
     const mode = queryCurrentMode();
 
     const createModal = this._showCreateModal
@@ -324,41 +382,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         </div>`
       : nothing;
 
-    const linkCard = html`<div
-      class="affine-bookmark-link"
-      @click=${this._onCardClick}
-      @dblclick=${this._onCardDbClick}
-    >
-      <div class="affine-bookmark-content-wrapper">
-        <div class="affine-bookmark-title">
-          <div class="affine-bookmark-icon">
-            ${icon && !this._isIconError
-              ? html`<img
-                  src="${icon}"
-                  alt="icon"
-                  @error="${this._onIconError}"
-                />`
-              : WebIcon16}
-          </div>
-          <div class="affine-bookmark-title-content">
-            ${bookmarkTitle || 'Bookmark'}
-          </div>
-        </div>
-
-        <div class="affine-bookmark-description">${description || url}</div>
-        <div class="affine-bookmark-url">${url}</div>
-      </div>
-      <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-        ${image && !this._isImageError
-          ? html`<img
-              src="${image}"
-              alt="image"
-              @error="${this._onImageError}"
-            />`
-          : DefaultBanner}
-      </div>
-    </div>`;
-
     if (!url) {
       return createModal;
     }
@@ -369,7 +392,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         class="affine-bookmark-block-container"
         @mouseover="${this._onHover}"
       >
-        ${this._isLoading ? loading : linkCard}
+        ${this._isLoading ? loading : this._linkCard()}
         <input
           .disabled=${this.model.page.readonly}
           placeholder="Write a caption"
