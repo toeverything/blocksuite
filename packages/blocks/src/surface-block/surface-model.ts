@@ -16,16 +16,14 @@ const migration = {
   toV5: data => {
     const { elements } = data;
     if (isPureObject(elements)) {
-      const map: Record<string, Y.Map<unknown>> = {};
-      const yMap = native2Y(map, false);
       console.log(elements);
-      console.log(Object.entries(elements));
-      const wrapper = new NativeWrapper(yMap);
-      const target = wrapper.getValue();
+      const map: Record<string, Y.Map<unknown>> = {};
       for (const [key, value] of Object.entries(elements)) {
-        target?.set(key, native2Y(value, false));
+        map[key] = native2Y(value, false);
       }
+      const wrapper = new NativeWrapper(native2Y(map, false));
       data.elements = wrapper;
+      console.log(wrapper.getValue());
     }
   },
   toV4: data => {
