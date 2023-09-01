@@ -6,6 +6,7 @@ import {
   type PhasorElementType,
 } from '@blocksuite/phasor';
 
+import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import type { EdgelessElement } from '../../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
@@ -54,10 +55,8 @@ export async function duplicate(
         const note = page.getBlockById(id);
 
         assertExists(note);
-        await noteService.json2Block(
-          note,
-          noteService.block2Json(element).children
-        );
+        const serializedBlock = (await getBlockClipboardInfo(element)).json;
+        await noteService.json2Block(note, serializedBlock.children);
         return id;
       } else {
         const id = surface.addElement(
