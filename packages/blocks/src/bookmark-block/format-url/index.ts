@@ -3,7 +3,7 @@ import { isYoutubeUrl, parseYoutubeId } from './youtube.js';
 
 export const allowEmbed = (url: string) => isYoutubeUrl(url) || isFigmaUrl(url);
 
-export const formatEmbedUrl = (url: string): undefined | string => {
+export const formatEmbedUrl = (url: string): string => {
   if (isYoutubeUrl(url)) {
     const youtubeId = parseYoutubeId(url);
     return youtubeId ? `https://www.youtube.com/embed/${youtubeId}` : url;

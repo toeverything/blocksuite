@@ -151,6 +151,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       color: var(--affine-placeholder-color);
       border-radius: 12px;
     }
+
+    .embed-frame {
+      width: 100%;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
   `;
 
   slots = {
@@ -296,14 +302,14 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     >
       ${allowEmbed(url)
         ? html`<iframe
-            height="500"
-            style="width: 100%"
+            class="embed-frame"
+            height="480"
             scrolling="no"
             src=${formatEmbedUrl(url)}
             frameborder="no"
             loading="lazy"
-            allowTransparency="true"
-            allowfullscreen="true"
+            allowTransparency
+            allowfullscreen
           ></iframe>`
         : nothing}
       <div class="affine-bookmark-content-wrapper">
