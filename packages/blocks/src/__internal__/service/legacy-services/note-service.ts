@@ -34,12 +34,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       background: block.background,
       children:
         children ??
-        block.children.map((child, index, array) => {
-          if (index === array.length - 1) {
-            // @ts-ignore
-            return getService(child.flavour).block2Json(child, 0, end);
-          }
-          // @ts-ignore
+        block.children.map(child => {
           return getService(child.flavour).block2Json(child);
         }),
     };
