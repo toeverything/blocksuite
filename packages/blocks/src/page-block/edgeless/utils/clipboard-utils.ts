@@ -3,6 +3,7 @@ import {
   Bound,
   ConnectorElement,
   FrameElement,
+  inflateBound,
   type PhasorElementType,
 } from '@blocksuite/phasor';
 
@@ -76,10 +77,43 @@ export async function duplicate(
       }
     })
   );
+  handleZoom(newElements, edgeless);
+
   if (select) {
     edgeless.selectionManager.setSelection({
       elements: newElements,
       editing: false,
     });
   }
+}
+
+function handleZoom(
+  newElementIds: string[],
+  edgeless: EdgelessPageBlockComponent
+) {
+  const { surface } = edgeless;
+  const { viewport } = surface;
+  const newElements = Array.from(newElementIds, id => surface.pickById(id));
+  let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
+  totalBound = inflateBound(totalBound, 30);
+  let zoom = viewport.zoom;
+  const originViewBound = getBoundByZoom(
+    Bound.from(viewport.viewportBounds),
+    1 / zoom
+  );
+  let currentViewBound = Bound.from(viewport.viewportBounds);
+  while (!currentViewBound.contains(totalBound)) {
+    zoom -= 0.01;
+    currentViewBound = getBoundByZoom(Bound.from(originViewBound), zoom);
+    if (zoom === 0.1) break;
+  }
+  viewport.smoothZoom(zoom);
+}
+
+function getBoundByZoom(originBound: Bound, zoom: number) {
+  let { w, h } = originBound;
+  const [centerX, centerY] = originBound.center;
+  w = w / zoom;
+  h = h / zoom;
+  return new Bound(centerX - w / 2, centerY - h / 2, w, h);
 }
