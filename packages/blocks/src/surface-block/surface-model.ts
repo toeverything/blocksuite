@@ -21,9 +21,22 @@ const migration = {
         new Workspace.Y.Map()
       );
       data.elements = wrapper;
-      for (const [key, value] of Object.entries(elements)) {
-        wrapper.getValue()?.set(key, native2Y(value, false));
+      const yMap = wrapper.getValue();
+      if (!yMap) {
+        return;
       }
+      Object.entries(elements).forEach(([key, value]) => {
+        console.log(value);
+        console.log(wrapper);
+        try {
+          const map = native2Y(value, false);
+          yMap.set(key, map);
+          console.log(map);
+          console.log(map.toJSON());
+        } catch (e) {
+          console.error(e);
+        }
+      });
       console.log(wrapper.getValue());
     }
   },
