@@ -383,7 +383,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
       blockElement.bindHotKey({
         [key]: context => {
           context.get('defaultState').event.preventDefault();
-          config.action(blockElement);
+          return config.action(blockElement);
         },
       });
     });
