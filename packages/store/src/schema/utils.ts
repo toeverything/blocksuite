@@ -22,10 +22,9 @@ export function toBlockMigrationData(
       }
 
       if (value instanceof NativeWrapper) {
-        yBlock.delete(`prop:${p}`);
         const _y = value.yMap;
-        console.log(_y.toJSON());
         yBlock.set(`prop:${p}`, _y);
+        console.log(_y);
         return Reflect.set(target, p, value, receiver);
       }
 

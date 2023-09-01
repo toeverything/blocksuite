@@ -17,12 +17,13 @@ const migration = {
     const { elements } = data;
     if (isPureObject(elements)) {
       console.log(elements);
-      const map: Record<string, Y.Map<unknown>> = {};
-      for (const [key, value] of Object.entries(elements)) {
-        map[key] = native2Y(value, false);
-      }
-      const wrapper = new NativeWrapper(native2Y(map, false));
+      const wrapper = new NativeWrapper<Y.Map<Y.Map<unknown>>>(
+        new Workspace.Y.Map()
+      );
       data.elements = wrapper;
+      for (const [key, value] of Object.entries(elements)) {
+        wrapper.getValue()?.set(key, native2Y(value, false));
+      }
       console.log(wrapper.getValue());
     }
   },
