@@ -6,6 +6,7 @@ import {
   type Connection,
   ConnectorElement,
   deserializeXYWH,
+  FrameElement,
   getCommonBound,
   type PhasorElement,
   type PhasorElementType,
@@ -15,7 +16,6 @@ import { type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
-import { getCopyElements } from '../../page-block/edgeless/utils/clipboard-utils.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
   isPhasorElementWithText,
@@ -23,7 +23,11 @@ import {
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { ContentParser } from '../content-parser/index.js';
-import { type SerializedBlock, type TopLevelBlockModel } from '../index.js';
+import {
+  type EdgelessElement,
+  type SerializedBlock,
+  type TopLevelBlockModel,
+} from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import type { Clipboard } from './type.js';
@@ -41,6 +45,23 @@ import {
   performNativeCopy,
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
+
+export function getCopyElements(
+  edgeless: EdgelessPageBlockComponent,
+  elements: EdgelessElement[]
+) {
+  const set = new Set<EdgelessElement>();
+
+  elements.forEach(element => {
+    if (element instanceof FrameElement) {
+      set.add(element);
+      edgeless.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+    } else {
+      set.add(element);
+    }
+  });
+  return Array.from(set);
+}
 
 function prepareConnectorClipboardData(
   connector: ConnectorElement,

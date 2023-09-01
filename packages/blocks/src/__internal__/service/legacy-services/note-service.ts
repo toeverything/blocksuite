@@ -4,7 +4,6 @@ import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import type { SerializedBlock } from '../../utils/index.js';
 import { addSerializedBlocks } from '../json2block.js';
 import { BaseService } from '../service.js';
-import { getService } from '../singleton.js';
 
 export class NoteBlockService extends BaseService<NoteBlockModel> {
   override async json2Block(
@@ -21,7 +20,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
 
   override block2Json(
     block: NoteBlockModel,
-    children?: SerializedBlock[],
+    children: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -32,16 +31,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       text: delta,
       xywh: block.xywh,
       background: block.background,
-      children:
-        children ??
-        block.children.map((child, index, array) => {
-          if (index === array.length - 1) {
-            // @ts-ignore
-            return getService(child.flavour).block2Json(child, 0, end);
-          }
-          // @ts-ignore
-          return getService(child.flavour).block2Json(child);
-        }),
+      children,
     };
   }
 }
