@@ -2,7 +2,6 @@ import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   defineBlockSchema,
   isPureObject,
-  native2Y,
   NativeWrapper,
   type SchemaToModel,
   Workspace,
@@ -23,8 +22,14 @@ const migration = {
         return;
       }
       Object.entries(elements).forEach(([key, value]) => {
-        const map = native2Y(value, false);
+        const map = new Workspace.Y.Map();
         yMap.set(key, map);
+        Object.entries(value).forEach(([_key, _value]) => {
+          map.set(
+            _key,
+            _value instanceof Workspace.Y.Text ? _value.clone() : _value
+          );
+        });
       });
     }
   },
