@@ -6,28 +6,14 @@ import {
   type PhasorElementType,
 } from '@blocksuite/phasor';
 
-import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
+import {
+  getBlockClipboardInfo,
+  getCopyElements,
+} from '../../../__internal__/clipboard/index.js';
 import type { EdgelessElement } from '../../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
 import { isTopLevelBlock } from './query.js';
-
-export function getCopyElements(
-  edgeless: EdgelessPageBlockComponent,
-  elements: EdgelessElement[]
-) {
-  const set = new Set<EdgelessElement>();
-
-  elements.forEach(element => {
-    if (element instanceof FrameElement) {
-      set.add(element);
-      edgeless.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
-    } else {
-      set.add(element);
-    }
-  });
-  return Array.from(set);
-}
 
 const offset = 10;
 export async function duplicate(
