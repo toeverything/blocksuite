@@ -30,6 +30,7 @@ const migration = {
         Object.entries(value).forEach(([_key, _value]) => {
           if (_value instanceof Workspace.Y.Text) {
             const yText = new Workspace.Y.Text();
+            console.log(_value);
             console.log(_value.toDelta());
             yText.applyDelta(_value.toDelta());
             map.set(_key, yText);
