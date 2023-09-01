@@ -11,49 +11,21 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isPageComponent } from '../../page-block/utils/guard.js';
+import {
+  cursorStyle,
+  filterCoveringRects,
+  multiPlayersColor,
+  selectionStyle,
+} from './utils.js';
 
 export const AFFINE_REMOTE_SELECTION_WIDGET_TAG =
   'affine-remote-selection-widget';
 
-interface SelectionRect {
+export interface SelectionRect {
   width: number;
   height: number;
   top: number;
   left: number;
-}
-
-function addAlpha(hexColor: string, opacity: number): string {
-  const normalized = Math.round(Math.min(Math.max(opacity, 0), 1) * 255);
-  return hexColor + normalized.toString(16).toUpperCase();
-}
-
-function randomColor(): string {
-  const hex = Math.floor(Math.random() * 16777215).toString(16);
-  return `#${hex}`;
-}
-
-function selectionStyle(rect: SelectionRect, color: string) {
-  return styleMap({
-    position: 'absolute',
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    backgroundColor: color,
-    pointerEvent: 'none',
-  });
-}
-
-function cursorStyle(rect: SelectionRect, color: string) {
-  return styleMap({
-    position: 'absolute',
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    backgroundColor: color,
-    pointerEvent: 'none',
-  });
 }
 
 @customElement(AFFINE_REMOTE_SELECTION_WIDGET_TAG)
@@ -134,11 +106,10 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
       if (range) {
         const nativeRects = Array.from(range.getClientRects());
-
-        return nativeRects
+        const rectsWithoutFiltered = nativeRects
           .map(rect => ({
-            width: rect.width,
-            height: rect.height,
+            width: rect.right - rect.left,
+            height: rect.bottom - rect.top,
             top:
               rect.top -
               (containerRect?.top ?? 0) +
@@ -148,10 +119,9 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
               (containerRect?.left ?? 0) +
               (container?.scrollLeft ?? 0),
           }))
-          .filter(
-            rect =>
-              (rect.width > 1 && rect.height > 0) || textSelection.to === null
-          );
+          .filter(rect => rect.width > 0 && rect.height > 0);
+
+        return filterCoveringRects(rectsWithoutFiltered);
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
@@ -257,7 +227,9 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
           this._colorMap.set(selection.id, selection.user.color);
         }
         if (!this._colorMap.has(selection.id)) {
-          this._colorMap.set(selection.id, randomColor());
+          const color = multiPlayersColor.pick();
+          assertExists(color);
+          this._colorMap.set(selection.id, color);
         }
         const color = this._colorMap.get(selection.id) as string;
         const cursorRect = selection.textSelection
@@ -265,11 +237,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
           : null;
 
         return selection.rects
-          .map(
-            r => html`
-              <div style="${selectionStyle(r, addAlpha(color, 0.5))}"></div>
-            `
-          )
+          .map(r => html`<div style="${selectionStyle(r, color)}"></div>`)
           .concat([
             html`
               <div

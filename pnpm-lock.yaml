@@ -203,8 +203,8 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.13
-        version: 0.7.13
+        specifier: ^0.7.14
+        version: 0.7.14
       '@types/autosize':
         specifier: ^4.0.1
         version: 4.0.1
@@ -262,8 +262,8 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.13
-        version: 0.7.13
+        specifier: ^0.7.14
+        version: 0.7.14
 
   packages/global:
     dependencies:
@@ -1546,8 +1546,8 @@ packages:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
 
-  /@toeverything/theme@0.7.13:
-    resolution: {integrity: sha512-2J3Bu/zm37n3Vlo3/CvJD9gfJL+PETX2rl14y5ceBZ7a+q1kafya82mQiM0OhIrrgvlmork3lrerlpY4LSh74g==}
+  /@toeverything/theme@0.7.14:
+    resolution: {integrity: sha512-ke4G4qSwO5mxIVrv/X3gDbElwWWxrmCg99W4p9Gm65e3mTxCkZrGId43XPhdB4P9zKG2vJgdM1/w6cpWsHB3dw==}
     dev: true
 
   /@toeverything/y-indexeddb@0.9.0-canary.0(yjs@13.6.7):
