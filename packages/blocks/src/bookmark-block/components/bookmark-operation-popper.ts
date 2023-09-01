@@ -15,7 +15,11 @@ import {
 } from '../../icons/index.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { cloneBookmarkProperties, reloadBookmarkBlock } from '../utils.js';
+import {
+  cloneBookmarkProperties,
+  reloadBookmarkBlock,
+  tryGetBookmarkAPI,
+} from '../utils.js';
 
 export type MenuActionCallback = (type: Operation['type']) => void;
 
@@ -28,6 +32,7 @@ type Operation = {
     callback?: MenuActionCallback,
     element?: HTMLElement
   ) => void;
+  showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
   divider?: boolean;
 };
 const operations: Operation[] = [
@@ -62,6 +67,7 @@ const operations: Operation[] = [
     type: 'reload',
     icon: RefreshIcon,
     label: 'Reload',
+    showWhen: () => !!tryGetBookmarkAPI(),
     action: (model, callback) => {
       reloadBookmarkBlock(
         model,
@@ -123,7 +129,7 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
 
   override render() {
     const menuItems = repeat(
-      operations,
+      operations.filter(({ showWhen = () => true }) => showWhen(this.model)),
       ({ type }) => type,
       ({ type, icon, label, action, divider }) => {
         return html`<icon-button
