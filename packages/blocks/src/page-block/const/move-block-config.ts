@@ -74,15 +74,11 @@ export const moveBlockConfig: MoveBlockConfig[] = [
           nextBlock.model,
           false
         );
-        // `moveBlocks` will trigger two updates for the blockElement (delete and insert), so
-        // we need to wait for two `updateComplete` to render range after dom updated
         blockElement.updateComplete.then(() => {
-          blockElement.updateComplete.then(() => {
-            // `textSelection` will not change so we need wo sync it manually
-            const rangeManager = blockElement.root.rangeManager;
-            assertExists(rangeManager);
-            rangeManager.syncTextSelectionToRange(textSelection);
-          });
+          // `textSelection` will not change so we need wo sync it manually
+          const rangeManager = blockElement.root.rangeManager;
+          assertExists(rangeManager);
+          rangeManager.syncTextSelectionToRange(textSelection);
         });
 
         return true;
