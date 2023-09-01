@@ -21,7 +21,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
 
   override block2Json(
     block: NoteBlockModel,
-    children?: SerializedBlock[],
+    children: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -32,11 +32,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       text: delta,
       xywh: block.xywh,
       background: block.background,
-      children:
-        children ??
-        block.children.map(child => {
-          return getService(child.flavour).block2Json(child);
-        }),
+      children,
     };
   }
 }

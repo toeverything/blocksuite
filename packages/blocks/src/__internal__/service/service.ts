@@ -56,7 +56,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
 
   block2Json(
     block: BlockModel,
-    children?: SerializedBlock[],
+    children: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -65,11 +65,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       flavour: block.flavour,
       type: (block as BlockModel & { type: string }).type as string,
       text: delta,
-      children:
-        children ??
-        block.children.map(child => {
-          return getService(child.flavour).block2Json(child);
-        }),
+      children,
     };
   }
 
