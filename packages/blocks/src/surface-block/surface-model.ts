@@ -2,7 +2,6 @@ import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   defineBlockSchema,
   isPureObject,
-  native2Y,
   NativeWrapper,
   type SchemaToModel,
   Workspace,
