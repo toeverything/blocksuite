@@ -9,16 +9,14 @@ import {
 } from '@blocksuite/store';
 
 type SurfaceBlockProps = {
-  elements: NativeWrapper<Y.Map<Y.Map<unknown>>>;
+  elements: NativeWrapper<Y.Map<unknown>>;
 };
 
 const migration = {
   toV5: data => {
     const { elements } = data;
     if (isPureObject(elements)) {
-      const wrapper = new NativeWrapper<Y.Map<Y.Map<unknown>>>(
-        new Workspace.Y.Map()
-      );
+      const wrapper = new NativeWrapper<Y.Map<unknown>>(new Workspace.Y.Map());
       data.elements = wrapper;
       const yMap = wrapper.getValue();
       if (!yMap) {
