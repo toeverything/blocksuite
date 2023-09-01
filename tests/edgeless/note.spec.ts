@@ -548,6 +548,37 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await expect(toolbar).toBeHidden();
 });
 
+test('duplicate note should work correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  const toolbar = locatorComponentToolbar(page);
+
+  await triggerComponentToolbarAction(page, 'duplicate');
+  await expect(toolbar).toBeHidden();
+
+  const noteLocator = await page.locator('edgeless-child-note');
+  await expect(noteLocator).toHaveCount(2);
+  const [firstNote, secondNote] = await noteLocator.all();
+
+  // content should be same
+  await expect(
+    (await firstNote.allTextContents()) === (await secondNote.allTextContents())
+  ).toBeTruthy();
+
+  // size should be same
+  const firstNoteBox = await firstNote.boundingBox();
+  const secondNoteBox = await secondNote.boundingBox();
+  await expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
+  await expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
+});
+
 test('double click toolbar zoom button, should not add text', async ({
   page,
 }) => {
