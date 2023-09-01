@@ -50,6 +50,7 @@ const operations: Operation[] = [
     type: 'duplicate',
     icon: DuplicateIcon,
     label: 'Duplicate',
+    showWhen: model => !model.page.readonly,
     action: (model, callback) => {
       const { page } = model;
 
@@ -67,7 +68,7 @@ const operations: Operation[] = [
     type: 'reload',
     icon: RefreshIcon,
     label: 'Reload',
-    showWhen: () => !!tryGetBookmarkAPI(),
+    showWhen: model => !!tryGetBookmarkAPI() && !model.page.readonly,
     action: (model, callback) => {
       reloadBookmarkBlock(
         model,
@@ -81,6 +82,7 @@ const operations: Operation[] = [
     type: 'delete',
     icon: DeleteIcon,
     label: 'Delete',
+    showWhen: model => !model.page.readonly,
     action: (model, callback) => {
       model.page.deleteBlock(model);
       callback?.('delete');
