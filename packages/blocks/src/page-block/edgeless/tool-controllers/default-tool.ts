@@ -12,6 +12,7 @@ import {
   TextElement,
 } from '@blocksuite/phasor';
 
+import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
@@ -340,10 +341,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       const note = this._page.getBlockById(id);
 
       assertExists(note);
-      await noteService.json2Block(
-        note,
-        noteService.block2Json(selected).children
-      );
+      const serializedBlock = (await getBlockClipboardInfo(selected)).json;
+      await noteService.json2Block(note, serializedBlock.children);
       return this._page.getBlockById(id);
     } else {
       const id = surface.addElement(

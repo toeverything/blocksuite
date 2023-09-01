@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeEmbed,
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -9,6 +10,7 @@ import {
   focusTitle,
   getSelectionRect,
   initEmptyParagraphState,
+  initImageState,
   initThreeParagraphs,
   pasteByKeyboard,
   pressArrowDown,
@@ -29,6 +31,7 @@ import {
   assertAlmostEqual,
   assertExists,
   assertLocatorVisible,
+  assertRichImage,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -1422,3 +1425,17 @@ test.fixme(
     await assertRichTexts(page, ['1203', '456', '7809']);
   }
 );
+
+test('selecting image should not show format bar', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4535',
+  });
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+  await activeEmbed(page);
+  await waitNextFrame(page);
+  const { formatBar } = getFormatBar(page);
+  await expect(formatBar).not.toBeVisible();
+});
