@@ -148,7 +148,7 @@ export class AffineFormatBarWidget extends WidgetElement {
             this._displayType = 'text';
             assertExists(pageElement.root.rangeManager);
             this._selectedBlockElements = getSelectedContentBlockElements(
-              pageElement,
+              this.root,
               ['text']
             );
           } else {

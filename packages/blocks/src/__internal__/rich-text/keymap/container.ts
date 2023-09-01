@@ -26,6 +26,7 @@ import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selectionManager;
   const model = blockElement.model;
+  const root = blockElement.root;
 
   const _selectBlock = () => {
     selection.update(selList => {
@@ -292,12 +293,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const page = blockElement.closest<PageBlockComponent>(
-        'affine-doc-page,affine-edgeless-page'
-      );
-      if (!page) return;
-
-      const textModels = getSelectedContentModels(page, ['text']);
+      const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
@@ -308,7 +304,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(page, ['text', 'block']);
+      const models = getSelectedContentModels(root, ['text', 'block']);
       handleMultiBlockIndent(blockElement.page, models);
       return true;
     },
@@ -326,7 +322,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = getSelectedContentModels(page, ['text']);
+      const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
@@ -337,7 +333,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(page, ['text', 'block']);
+      const models = getSelectedContentModels(root, ['text', 'block']);
       handleMultiBlockUnindent(blockElement.page, models);
       return true;
     },
@@ -373,10 +369,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         _preventDefault(ctx);
 
-        const format = getCombinedFormatInTextSelection(
-          blockElement,
-          textSelection
-        );
+        const format = getCombinedFormatInTextSelection(root, textSelection);
         config.action({ blockElement, type: 'text', format });
         return true;
       },

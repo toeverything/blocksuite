@@ -2,7 +2,7 @@ import { toBlockProps } from '../utils/utils.js';
 import type { BlockProps, YBlock } from '../workspace/page.js';
 import type { ProxyConfig } from '../yjs/config.js';
 import type { ProxyManager } from '../yjs/index.js';
-import { isPureObject, native2Y } from '../yjs/index.js';
+import { isPureObject, native2Y, NativeWrapper } from '../yjs/index.js';
 
 export function toBlockMigrationData(
   yBlock: YBlock,
@@ -19,6 +19,12 @@ export function toBlockMigrationData(
     set: (target, p, value, receiver) => {
       if (typeof p !== 'string') {
         throw new Error('key cannot be a symbol');
+      }
+
+      if (value instanceof NativeWrapper) {
+        const _y = value.yMap;
+        yBlock.set(`prop:${p}`, _y);
+        return Reflect.set(target, p, value, receiver);
       }
 
       if (isPureObject(value) || Array.isArray(value)) {
