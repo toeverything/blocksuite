@@ -560,10 +560,9 @@ test('duplicate note should work correctly', async ({ page }) => {
 
   await selectNoteInEdgeless(page, ids.noteId);
 
-  const toolbar = locatorComponentToolbar(page);
-
   await triggerComponentToolbarAction(page, 'duplicate');
-  await expect(toolbar).toBeHidden();
+  const moreActionsContainer = await page.locator('.more-actions-container');
+  await expect(moreActionsContainer).toBeHidden();
 
   const noteLocator = await page.locator('edgeless-child-note');
   await expect(noteLocator).toHaveCount(2);
@@ -571,7 +570,7 @@ test('duplicate note should work correctly', async ({ page }) => {
 
   // content should be same
   await expect(
-    (await firstNote.allTextContents()) === (await secondNote.allTextContents())
+    (await firstNote.innerText()) === (await secondNote.innerText())
   ).toBeTruthy();
 
   // size should be same
