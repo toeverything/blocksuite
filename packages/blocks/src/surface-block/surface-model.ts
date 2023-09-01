@@ -21,6 +21,7 @@ const migration = {
       const wrapper = new NativeWrapper(yMap);
       data.elements = wrapper;
       for (const [key, value] of Object.entries(elements)) {
+        console.log(key, value);
         wrapper.yMap.set(key, native2Y(value, false));
       }
     }
