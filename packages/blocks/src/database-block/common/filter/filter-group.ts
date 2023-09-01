@@ -69,8 +69,8 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 15px;
-      line-height: 24px;
+      font-size: 14px;
+      line-height: 22px;
       border-radius: 4px;
       cursor: pointer;
       color: var(--affine-text-secondary-color);
@@ -347,7 +347,7 @@ export class FilterGroupView extends WithDisposable(ShadowlessElement) {
           </div>`;
         })}
       </div>
-      <div class="filter-group-button add-new" @click="${this._addNew}">
+      <div class="filter-group-button" @click="${this._addNew}">
         ${PlusIcon} Add ${this.isMaxDepth ? nothing : ArrowDownSmallIcon}
       </div>
     `;

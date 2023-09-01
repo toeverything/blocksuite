@@ -36,9 +36,9 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
 
     .filter-root-title {
       padding: 12px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
-      line-height: 24px;
+      line-height: 22px;
       color: var(--affine-text-primary-color);
     }
 
@@ -75,8 +75,8 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 15px;
-      line-height: 24px;
+      font-size: 14px;
+      line-height: 22px;
       border-radius: 4px;
       cursor: pointer;
       color: var(--affine-text-secondary-color);

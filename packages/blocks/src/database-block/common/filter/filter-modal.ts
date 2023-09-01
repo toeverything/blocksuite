@@ -33,8 +33,8 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 15px;
-      line-height: 24px;
+      font-size: 14px;
+      line-height: 22px;
       border-radius: 4px;
       cursor: pointer;
       color: var(--affine-text-secondary-color);
