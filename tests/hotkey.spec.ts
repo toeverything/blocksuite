@@ -1128,7 +1128,7 @@ test('should drag multiple block and input text works', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 });
 
-test.describe('keyboard operation to move Block up or down', () => {
+test.describe('keyboard operation to move block up or down', () => {
   test('common paragraph', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -1147,6 +1147,7 @@ test.describe('keyboard operation to move Block up or down', () => {
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
     await assertRichTexts(page, ['hello', 'world', 'bar', 'foo']);
   });
+
   test('with indent', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
@@ -1167,6 +1168,7 @@ test.describe('keyboard operation to move Block up or down', () => {
     await assertBlockChildrenIds(page, '1', ['4', '2']);
     await assertBlockChildrenIds(page, '2', ['3']);
   });
+
   test('keep cursor', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);

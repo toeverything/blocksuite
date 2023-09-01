@@ -24,10 +24,13 @@ export const moveBlockConfig: MoveBlockConfig[] = [
         const currentModel = pathToBlock(blockElement, textSelection.from.path)
           ?.model;
         if (!currentModel) return;
+
         const previousSiblingModel = page.getPreviousSibling(currentModel);
         if (!previousSiblingModel) return;
+
         const parentModel = blockElement.page.getParent(previousSiblingModel);
         if (!parentModel) return;
+
         blockElement.page.moveBlocks(
           [currentModel],
           parentModel,
@@ -46,10 +49,13 @@ export const moveBlockConfig: MoveBlockConfig[] = [
         const currentModel = pathToBlock(blockElement, blockSelection.path)
           ?.model;
         if (!currentModel) return;
+
         const previousSiblingModel = page.getPreviousSibling(currentModel);
         if (!previousSiblingModel) return;
+
         const parentModel = page.getParent(previousSiblingModel);
         if (!parentModel) return;
+
         page.moveBlocks(
           [currentModel],
           parentModel,
@@ -71,10 +77,13 @@ export const moveBlockConfig: MoveBlockConfig[] = [
         const currentModel = pathToBlock(blockElement, textSelection.from.path)
           ?.model;
         if (!currentModel) return;
+
         const nextSiblingModel = page.getNextSibling(currentModel);
         if (!nextSiblingModel) return;
+
         const parentModel = page.getParent(nextSiblingModel);
         if (!parentModel) return;
+
         page.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
         blockElement.updateComplete.then(() => {
           // `textSelection` will not change so we need wo sync it manually
@@ -89,10 +98,13 @@ export const moveBlockConfig: MoveBlockConfig[] = [
         const currentModel = pathToBlock(blockElement, blockSelection.path)
           ?.model;
         if (!currentModel) return;
+
         const nextSiblingModel = page.getNextSibling(currentModel);
         if (!nextSiblingModel) return;
+
         const parentModel = page.getParent(nextSiblingModel);
         if (!parentModel) return;
+
         page.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
         return true;
       }

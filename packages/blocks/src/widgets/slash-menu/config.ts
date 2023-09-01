@@ -427,8 +427,10 @@ export const menuGroups: {
           const page = pageElement.page;
           const previousSiblingModel = page.getPreviousSibling(model);
           if (!previousSiblingModel) return;
+
           const parentModel = page.getParent(previousSiblingModel);
           if (!parentModel) return;
+
           page.moveBlocks([model], parentModel, previousSiblingModel, true);
         },
       },
@@ -439,8 +441,10 @@ export const menuGroups: {
           const page = pageElement.page;
           const nextSiblingModel = page.getNextSibling(model);
           if (!nextSiblingModel) return;
+
           const parentModel = page.getParent(nextSiblingModel);
           if (!parentModel) return;
+
           page.moveBlocks([model], parentModel, nextSiblingModel, false);
         },
       },
