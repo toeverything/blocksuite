@@ -176,118 +176,118 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   private _floatDisposables: DisposableGroup | null = null;
   override updated() {
-    if (this._shouldDisplay()) {
-      if (
-        this._customElements.length === 0 &&
-        AffineFormatBarWidget.customElements.size !== 0
-      ) {
-        this._customElements = Array.from(
-          AffineFormatBarWidget.customElements
-        ).map(element => element(this));
-        this.customItemsContainer.append(...this._customElements);
-        this._disposables.add(() => {
-          this._customElements.forEach(element => {
-            element.remove();
-          });
-          this._customElements = [];
-          this.customItemsContainer.replaceChildren();
-        });
-      }
-
-      this._floatDisposables = new DisposableGroup();
-
-      const formatQuickBarElement = this._formatBarElement;
-      assertExists(formatQuickBarElement, 'format quick bar should exist');
-      if (this._displayType === 'text') {
-        assertExists(this._rangeManager, 'range controller should exist');
-        const range = this._rangeManager.value;
-        assertExists(range);
-        const visualElement = {
-          getBoundingClientRect: () => range.getBoundingClientRect(),
-          getClientRects: () => range.getClientRects(),
-        };
-
-        this._floatDisposables.add(
-          autoUpdate(
-            visualElement,
-            formatQuickBarElement,
-            () => {
-              computePosition(visualElement, formatQuickBarElement, {
-                placement: this._placement,
-                middleware: [
-                  offset(10),
-                  inline(),
-                  shift({
-                    padding: 6,
-                  }),
-                ],
-              }).then(({ x, y }) => {
-                formatQuickBarElement.style.display = 'flex';
-                formatQuickBarElement.style.top = `${y}px`;
-                formatQuickBarElement.style.left = `${x}px`;
-              });
-            },
-            {
-              // follow edgeless viewport update
-              animationFrame: true,
-            }
-          )
-        );
-      } else if (this._displayType === 'block') {
-        const firstBlockElement = this._selectedBlockElements[0];
-        let rect = firstBlockElement.getBoundingClientRect();
-        this._selectedBlockElements.forEach(el => {
-          const elRect = el.getBoundingClientRect();
-          if (elRect.top < rect.top) {
-            rect = new DOMRect(rect.left, elRect.top, rect.width, rect.bottom);
-          }
-          if (elRect.bottom > rect.bottom) {
-            rect = new DOMRect(rect.left, rect.top, rect.width, elRect.bottom);
-          }
-          if (elRect.left < rect.left) {
-            rect = new DOMRect(elRect.left, rect.top, rect.right, rect.bottom);
-          }
-          if (elRect.right > rect.right) {
-            rect = new DOMRect(rect.left, rect.top, elRect.right, rect.bottom);
-          }
-        });
-        const visualElement = {
-          getBoundingClientRect: () => rect,
-          getClientRects: () =>
-            this._selectedBlockElements.map(el => el.getBoundingClientRect()),
-        };
-
-        this._floatDisposables.add(
-          autoUpdate(
-            visualElement,
-            formatQuickBarElement,
-            () => {
-              computePosition(visualElement, formatQuickBarElement, {
-                placement: this._placement,
-                middleware: [
-                  offset(10),
-                  inline(),
-                  shift({
-                    padding: 6,
-                  }),
-                ],
-              }).then(({ x, y }) => {
-                formatQuickBarElement.style.display = 'flex';
-                formatQuickBarElement.style.top = `${y}px`;
-                formatQuickBarElement.style.left = `${x}px`;
-              });
-            },
-            {
-              // follow edgeless viewport update
-              animationFrame: true,
-            }
-          )
-        );
-      }
-    } else {
+    if (!this._shouldDisplay()) {
       if (this._floatDisposables) {
         this._floatDisposables.dispose();
       }
+      return;
+    }
+    if (
+      this._customElements.length === 0 &&
+      AffineFormatBarWidget.customElements.size !== 0
+    ) {
+      this._customElements = Array.from(
+        AffineFormatBarWidget.customElements
+      ).map(element => element(this));
+      this.customItemsContainer.append(...this._customElements);
+      this._disposables.add(() => {
+        this._customElements.forEach(element => {
+          element.remove();
+        });
+        this._customElements = [];
+        this.customItemsContainer.replaceChildren();
+      });
+    }
+
+    this._floatDisposables = new DisposableGroup();
+
+    const formatQuickBarElement = this._formatBarElement;
+    assertExists(formatQuickBarElement, 'format quick bar should exist');
+    if (this._displayType === 'text') {
+      assertExists(this._rangeManager, 'range controller should exist');
+      const range = this._rangeManager.value;
+      assertExists(range);
+      const visualElement = {
+        getBoundingClientRect: () => range.getBoundingClientRect(),
+        getClientRects: () => range.getClientRects(),
+      };
+
+      this._floatDisposables.add(
+        autoUpdate(
+          visualElement,
+          formatQuickBarElement,
+          () => {
+            computePosition(visualElement, formatQuickBarElement, {
+              placement: this._placement,
+              middleware: [
+                offset(10),
+                inline(),
+                shift({
+                  padding: 6,
+                }),
+              ],
+            }).then(({ x, y }) => {
+              formatQuickBarElement.style.display = 'flex';
+              formatQuickBarElement.style.top = `${y}px`;
+              formatQuickBarElement.style.left = `${x}px`;
+            });
+          },
+          {
+            // follow edgeless viewport update
+            animationFrame: true,
+          }
+        )
+      );
+    } else if (this._displayType === 'block') {
+      const firstBlockElement = this._selectedBlockElements[0];
+      let rect = firstBlockElement.getBoundingClientRect();
+      this._selectedBlockElements.forEach(el => {
+        const elRect = el.getBoundingClientRect();
+        if (elRect.top < rect.top) {
+          rect = new DOMRect(rect.left, elRect.top, rect.width, rect.bottom);
+        }
+        if (elRect.bottom > rect.bottom) {
+          rect = new DOMRect(rect.left, rect.top, rect.width, elRect.bottom);
+        }
+        if (elRect.left < rect.left) {
+          rect = new DOMRect(elRect.left, rect.top, rect.right, rect.bottom);
+        }
+        if (elRect.right > rect.right) {
+          rect = new DOMRect(rect.left, rect.top, elRect.right, rect.bottom);
+        }
+      });
+      const visualElement = {
+        getBoundingClientRect: () => rect,
+        getClientRects: () =>
+          this._selectedBlockElements.map(el => el.getBoundingClientRect()),
+      };
+
+      this._floatDisposables.add(
+        autoUpdate(
+          visualElement,
+          formatQuickBarElement,
+          () => {
+            computePosition(visualElement, formatQuickBarElement, {
+              placement: this._placement,
+              middleware: [
+                offset(10),
+                inline(),
+                shift({
+                  padding: 6,
+                }),
+              ],
+            }).then(({ x, y }) => {
+              formatQuickBarElement.style.display = 'flex';
+              formatQuickBarElement.style.top = `${y}px`;
+              formatQuickBarElement.style.left = `${x}px`;
+            });
+          },
+          {
+            // follow edgeless viewport update
+            animationFrame: true,
+          }
+        )
+      );
     }
   }
 
