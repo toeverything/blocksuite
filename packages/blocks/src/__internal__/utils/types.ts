@@ -5,14 +5,14 @@ import type { DataViewDataType } from '../../database-block/common/data-view.js'
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import { type ShapeStyle } from '../../surface-block/consts.js';
 import {
   type BrushElement,
   type ConnectorElement,
   type ConnectorMode,
   type PhasorElement,
-  type ShapeStyle,
   type ShapeType,
-} from '../../surface-block/index.js';
+} from '../../surface-block/elements/index.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
