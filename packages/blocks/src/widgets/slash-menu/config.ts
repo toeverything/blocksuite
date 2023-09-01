@@ -6,9 +6,7 @@ import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,
-  getNextBlock,
   getPageBlock,
-  getPreviousBlock,
   getVirgoByModel,
   openFileOrFiles,
   resetNativeSelection,
