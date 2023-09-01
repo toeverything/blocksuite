@@ -2,12 +2,12 @@ import './frame-order-menu.js';
 import '../../buttons/tool-icon-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import type { FrameElement } from '@blocksuite/phasor';
 import { computePosition, offset } from '@floating-ui/dom';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { FrameOrderAdjustmentIcon } from '../../../../../icons/index.js';
+import type { FrameElement } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 

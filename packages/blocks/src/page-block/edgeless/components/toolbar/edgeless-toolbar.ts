@@ -9,7 +9,6 @@ import './frame/frame-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound, clamp, compare, FrameElement } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
@@ -29,6 +28,12 @@ import {
   PresentationFullScreenIcon,
   SelectIcon,
 } from '../../../../icons/index.js';
+import {
+  Bound,
+  clamp,
+  compare,
+  FrameElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../utils.js';
 

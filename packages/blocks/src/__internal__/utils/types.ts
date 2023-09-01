@@ -1,4 +1,10 @@
 import { type Slot } from '@blocksuite/global/utils';
+import { type BaseBlockModel, type Page } from '@blocksuite/store';
+
+import type { DataViewDataType } from '../../database-block/common/data-view.js';
+import type { Cell } from '../../database-block/index.js';
+import type { Column } from '../../database-block/table/types.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import {
   type BrushElement,
   type ConnectorElement,
@@ -6,13 +12,7 @@ import {
   type PhasorElement,
   type ShapeStyle,
   type ShapeType,
-} from '@blocksuite/phasor';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
-
-import type { DataViewDataType } from '../../database-block/common/data-view.js';
-import type { Cell } from '../../database-block/index.js';
-import type { Column } from '../../database-block/table/types.js';
-import type { NoteBlockModel } from '../../note-block/index.js';
+} from '../../surface-block/index.js';
 import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';

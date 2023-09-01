@@ -2,7 +2,6 @@ import '../../buttons/tool-icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { ShapeStyle, type ShapeType } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -12,6 +11,10 @@ import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
 } from '../../../../../icons/index.js';
+import {
+  ShapeStyle,
+  type ShapeType,
+} from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_SHAPE_FILL_COLOR } from '../../component-toolbar/change-shape-button.js';
 import type { ColorEvent } from '../../panel/color-panel.js';

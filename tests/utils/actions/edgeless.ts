@@ -4,13 +4,12 @@ import '../declare-test-window.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type {
-  CssVariableName,
-  IPoint,
-  NoteBlockModel,
+import {
+  type CssVariableName,
+  type IPoint,
+  type NoteBlockModel,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists, sleep } from '../../../packages/global/src/utils.js';
-import { Vec } from '../../../packages/phasor/src/utils/vec.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
@@ -26,6 +25,21 @@ import {
   initEmptyEdgelessState,
   waitNextFrame,
 } from './misc.js';
+
+const rotWith = (A: number[], C: number[], r = 0): number[] => {
+  if (r === 0) return A;
+
+  const s = Math.sin(r);
+  const c = Math.cos(r);
+
+  const px = A[0] - C[0];
+  const py = A[1] - C[1];
+
+  const nx = px * c - py * s;
+  const ny = px * s + py * c;
+
+  return [nx + C[0], ny + C[1]];
+};
 
 const AWAIT_TIMEOUT = 500;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
@@ -365,7 +379,7 @@ export async function rotateElementByHandle(
   const x = box.x + box.width / 2;
   const y = box.y + box.height / 2;
 
-  const t = Vec.rotWith([x, y], [cx, cy], (deg * Math.PI) / 180);
+  const t = rotWith([x, y], [cx, cy], (deg * Math.PI) / 180);
 
   await dragBetweenCoords(
     page,

@@ -1,6 +1,5 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound } from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -16,6 +15,7 @@ import {
   HiddenCardIcon,
 } from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import { Bound } from '../../../../surface-block/index.js';
 import {
   type DragEvent,
   type FitViewEvent,

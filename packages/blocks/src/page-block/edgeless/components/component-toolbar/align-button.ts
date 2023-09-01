@@ -2,7 +2,6 @@ import '../buttons/menu-button.js';
 import '../../../../components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound, ConnectorElement } from '@blocksuite/phasor';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -19,6 +18,7 @@ import {
   SmallArrowDownIcon,
 } from '../../../../icons/edgeless.js';
 import type { EdgelessElement } from '../../../../index.js';
+import { Bound, ConnectorElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
 import { isTopLevelBlock } from '../../utils/query.js';

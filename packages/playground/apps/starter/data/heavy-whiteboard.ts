@@ -7,7 +7,7 @@ import {
   serializeXYWH,
   type ShapeType,
   StrokeStyle,
-} from '@blocksuite/phasor';
+} from '@blocksuite/blocks';
 import {
   nanoid,
   native2Y,

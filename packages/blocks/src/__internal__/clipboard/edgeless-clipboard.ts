@@ -1,17 +1,4 @@
 import { assertExists, groupBy } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/phasor';
-import {
-  Bound,
-  compare,
-  type Connection,
-  ConnectorElement,
-  deserializeXYWH,
-  FrameElement,
-  getCommonBound,
-  type PhasorElement,
-  type PhasorElementType,
-  serializeXYWH,
-} from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -22,6 +9,19 @@ import {
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
+import {
+  Bound,
+  compare,
+  type Connection,
+  ConnectorElement,
+  deserializeXYWH,
+  getCommonBound,
+  type IBound,
+  type PhasorElement,
+  type PhasorElementType,
+  serializeXYWH,
+  FrameElement
+} from '../../surface-block/index.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
   type EdgelessElement,

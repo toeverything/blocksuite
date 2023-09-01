@@ -7,7 +7,6 @@ import {
   type UIEventState,
 } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
 
 import {
   type EdgelessTool,
@@ -19,6 +18,10 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import {
+  normalizeWheelDeltaY,
+  type PhasorElement,
+} from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';

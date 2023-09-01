@@ -1,16 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
+
+import type { EdgelessElement } from '../../../index.js';
 import {
   Bound,
   ConnectorElement,
   FrameElement,
   type PhasorElementType,
-} from '@blocksuite/phasor';
-
+} from '../../../surface-block/index.js';
 import {
   getBlockClipboardInfo,
   getCopyElements,
 } from '../../../__internal__/clipboard/index.js';
-import type { EdgelessElement } from '../../../index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
 import { isTopLevelBlock } from './query.js';

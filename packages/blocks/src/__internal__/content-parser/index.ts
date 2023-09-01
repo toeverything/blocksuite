@@ -1,5 +1,4 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import { marked } from 'marked';
@@ -11,6 +10,7 @@ import { toast } from '../../components/toast.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
+import type { IBound, PhasorElement } from '../../surface-block/index.js';
 import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,

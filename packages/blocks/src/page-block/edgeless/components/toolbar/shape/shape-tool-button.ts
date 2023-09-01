@@ -2,7 +2,6 @@ import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -14,6 +13,7 @@ import {
   ArrowUpIcon,
   EdgelessGeneralShapeIcon,
 } from '../../../../../icons/index.js';
+import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,

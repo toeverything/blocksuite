@@ -13,25 +13,6 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import {
-  Bound,
-  clamp,
-  compare,
-  ConnectorElement,
-  deserializeXYWH,
-  FrameElement,
-  generateKeyBetween,
-  generateNKeysBetween,
-  getCommonBound,
-  type IBound,
-  intersects,
-  type IVec,
-  type PhasorElement,
-  serializeXYWH,
-  SurfaceManager,
-  ZOOM_MAX,
-  ZOOM_MIN,
-} from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -72,6 +53,25 @@ import type {
   PageBlockModel,
   SurfaceBlockModel,
 } from '../../index.js';
+import {
+  Bound,
+  clamp,
+  compare,
+  ConnectorElement,
+  deserializeXYWH,
+  FrameElement,
+  generateKeyBetween,
+  generateNKeysBetween,
+  getCommonBound,
+  type IBound,
+  intersects,
+  type IVec,
+  type PhasorElement,
+  serializeXYWH,
+  SurfaceManager,
+  ZOOM_MAX,
+  ZOOM_MIN,
+} from '../../surface-block/index.js';
 import { FontLoader } from '../font-loader/index.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteSlicer } from './components/note-slicer/index.js';
