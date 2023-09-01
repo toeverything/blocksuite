@@ -64,7 +64,10 @@ export class CommandManager {
     return this;
   }
 
-  createChain = (methods: Record<string, unknown>, cmds: Command[]): Chain => {
+  createChain = (
+    methods: Record<BlockSuite.CommandName, unknown>,
+    cmds: Command[]
+  ): Chain => {
     return {
       [cmdSymbol]: cmds,
       run: () => {
@@ -86,21 +89,22 @@ export class CommandManager {
         ]) as never;
       },
       inline: command => {
-        return this.createChain(methods, [...cmds, command]);
+        return this.createChain(methods, [...cmds, command]) as never;
       },
       ...methods,
     } as Chain;
   };
   pipe = (): Chain<InitCommandCtx> => {
-    const methods = {
-      [cmdSymbol]: [],
-    } as { [cmdSymbol]: Command[] } & Record<
+    const methods = {} as Record<
       string,
       (data: Record<string, unknown>) => Chain
     >;
     const createChain = this.createChain;
     for (const [name, command] of this._commands.entries()) {
-      methods[name] = function (data: Record<string, unknown>) {
+      methods[name] = function (
+        this: { [cmdSymbol]: Command[] },
+        data: Record<string, unknown>
+      ) {
         const cmds = this[cmdSymbol];
         return createChain(methods, [
           ...cmds,
