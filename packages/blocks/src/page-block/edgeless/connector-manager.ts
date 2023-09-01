@@ -1063,8 +1063,8 @@ export class EdgelessConnectorManager {
         startPoint.out = [Vec.mul(Vec.sub(endPoint, startPoint), 2 / 3)[0], 0];
         endPoint.in = [Vec.mul(Vec.sub(startPoint, endPoint), 2 / 3)[0], 0];
       } else {
-        startPoint.out = [0, Vec.mul(Vec.sub(endPoint, startPoint), 1 / 3)[1]];
-        endPoint.in = [0, Vec.mul(Vec.sub(startPoint, endPoint), 1 / 3)[1]];
+        startPoint.out = [0, Vec.mul(Vec.sub(endPoint, startPoint), 2 / 3)[1]];
+        endPoint.in = [0, Vec.mul(Vec.sub(startPoint, endPoint), 2 / 3)[1]];
       }
       return [startPoint, endPoint];
     }
