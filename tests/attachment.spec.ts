@@ -206,3 +206,31 @@ test('should turn attachment to image works', async ({ page }) => {
     noteId
   );
 });
+
+test('should attachment can be deleted works', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  const { attachment, insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await insertAttachment();
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await attachment.click();
+  await pressBackspace(page);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+});
