@@ -64,11 +64,14 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   private _shouldDisplay() {
     const readonly = this.page.awarenessStore.isReadonly(this.page);
+    const includeTextBlock = this._selectedBlockElements.some(
+      el => 'text' in el.model
+    );
 
     return (
       !readonly &&
       this._displayType !== 'none' &&
-      this._selectedBlockElements.length > 0 &&
+      includeTextBlock &&
       !this._dragging
     );
   }
