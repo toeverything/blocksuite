@@ -10,6 +10,7 @@ import { html } from 'lit/static-html.js';
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
 import {
   DatabaseSearchClose,
+  DeleteIcon,
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../icons/index.js';
@@ -234,6 +235,8 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
           {
             type: 'action',
             name: 'Delete',
+            icon: DeleteIcon,
+            class: 'delete-item',
             select: () => {
               this.deleteTag(id);
             },
@@ -248,12 +251,12 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
                   borderRadius: '50%',
                   width: '20px',
                   height: '20px',
-                  marginRight: '8px',
                 });
                 return {
                   type: 'action',
                   name: item.name,
                   icon: html` <div style=${styles}></div>`,
+                  isSelected: option.color === item.color,
                   select: () => {
                     this.changeTag({
                       ...option,
