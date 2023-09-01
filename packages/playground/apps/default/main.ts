@@ -124,7 +124,6 @@ const syncProviders = async (
       throw e;
     });
     page.spaceDoc.once('update', () => {
-      workspace.schema.upgradePage({}, page.spaceDoc);
       runWorkspaceMigration();
     });
   });
