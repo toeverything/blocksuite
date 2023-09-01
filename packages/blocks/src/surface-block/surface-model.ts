@@ -2,7 +2,6 @@ import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   defineBlockSchema,
   isPureObject,
-  native2Y,
   NativeWrapper,
   type SchemaToModel,
   Workspace,
@@ -14,11 +13,22 @@ type SurfaceBlockProps = {
 
 const migration = {
   toV5: data => {
-    let { elements } = data;
+    const { elements } = data;
     if (isPureObject(elements)) {
-      const y = native2Y(elements as unknown, true) as Y.Map<unknown>;
-      elements = new NativeWrapper(y);
-      data.elements = elements;
+      const yMap = new Workspace.Y.Map();
+
+      Object.entries(elements).forEach(([key, value]) => {
+        const map = new Workspace.Y.Map();
+        Object.entries(value).forEach(([_key, _value]) => {
+          map.set(
+            _key,
+            _value instanceof Workspace.Y.Text ? _value.clone() : _value
+          );
+        });
+        yMap.set(key, map);
+      });
+      const wrapper = new NativeWrapper<Y.Map<unknown>>(yMap);
+      data.elements = wrapper;
     }
   },
   toV4: data => {
@@ -44,13 +54,13 @@ const migration = {
       if (type === 'connector') {
         const source = element.get('source');
         const target = element.get('target');
-        const sourceId = source.get('id');
-        const targetId = target.get('id');
-        if (!source.get('position') && (!sourceId || !value.get(sourceId))) {
+        const sourceId = source['id'];
+        const targetId = target['id'];
+        if (!source['position'] && (!sourceId || !value.get(sourceId))) {
           value.delete(key);
           return;
         }
-        if (!targetId && !value.get(targetId)) {
+        if (!target['position'] && (!targetId || !value.get(targetId))) {
           value.delete(key);
           return;
         }

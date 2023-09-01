@@ -1,5 +1,5 @@
 import { createDelayHoverSignal } from '@blocksuite/global/utils';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
@@ -32,6 +32,8 @@ export function ImageOptionsTemplate({
     anchor.removeEventListener('mouseover', onHover);
     anchor.removeEventListener('mouseleave', onHoverLeave);
   });
+  const supportAttachment =
+    model.page.schema.flavourSchemaMap.has('affine:attachment');
   const readonly = model.page.readonly;
 
   return html`
@@ -65,18 +67,20 @@ export function ImageOptionsTemplate({
       @mouseout=${onHoverLeave}
     >
       <div class="embed-editing-state">
-        <icon-button
-          class="has-tool-tip"
-          size="32px"
-          ?disabled=${readonly}
-          @click=${() => {
-            abortController.abort();
-            turnImageIntoCardView(model, blob);
-          }}
-        >
-          ${BookmarkIcon}
-          <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
-        </icon-button>
+        ${supportAttachment
+          ? html`<icon-button
+              class="has-tool-tip"
+              size="32px"
+              ?disabled=${readonly}
+              @click=${() => {
+                abortController.abort();
+                turnImageIntoCardView(model, blob);
+              }}
+            >
+              ${BookmarkIcon}
+              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+            </icon-button>`
+          : nothing}
         <icon-button
           class="has-tool-tip"
           size="32px"

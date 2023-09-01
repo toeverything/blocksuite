@@ -66,6 +66,7 @@ describe('block migration', () => {
 
     assert.equal(text.get('isBold'), true);
     assert.equal(text.get('isItalic'), true);
+    assert.equal(text.get('text').toJSON(), 'aaa');
     assert.isUndefined(text.get('bold'));
     assert.isUndefined(text.get('italic'));
 
@@ -97,6 +98,7 @@ describe('block migration', () => {
     assert.isUndefined(text.get('isItalic'));
     assert.equal(text.get('bold'), true);
     assert.equal(text.get('italic'), true);
+    assert.equal(text.get('text').toJSON(), 'aaa');
 
     assert.isUndefined(shape.get('isBold'));
     assert.isUndefined(shape.get('isItalic'));

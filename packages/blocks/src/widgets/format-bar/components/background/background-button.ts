@@ -8,7 +8,7 @@ import {
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
 } from '../../../../icons/index.js';
-import { noneInlineUnsupportedBlockSelected } from '../../../../page-block/const/inline-format-config.js';
+import { includeInlineSupportedBlockSelected } from '../../../../page-block/const/inline-format-config.js';
 import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { formatByTextSelection } from '../../../../page-block/utils/operations/element/inline-level.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
@@ -75,7 +75,7 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
     throw new Error('Background highlight button host is not a page component');
   }
 
-  if (!noneInlineUnsupportedBlockSelected(pageElement)) {
+  if (!includeInlineSupportedBlockSelected(pageElement)) {
     return nothing;
   }
 

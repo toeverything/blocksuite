@@ -57,6 +57,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
         },
+        c: () => {
+          this._setEdgelessTool(pageElement, {
+            type: 'connector',
+            mode: ConnectorMode.Curve,
+            color: GET_DEFAULT_LINE_COLOR(),
+            strokeWidth: LineWidth.LINE_WIDTH_TWO,
+          });
+        },
         h: () => {
           this._setEdgelessTool(pageElement, {
             type: 'pan',

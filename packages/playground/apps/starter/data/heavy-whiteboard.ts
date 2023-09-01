@@ -51,28 +51,31 @@ export const heavyWhiteboard: InitFn = async (
     const x = Math.random() * count * 2;
     const y = Math.random() * count * 2;
     const id = nanoid();
-    surfaceBlockElements[id] = {
-      id,
-      index: 'a0',
-      type: 'shape',
-      xywh: `[${x},${y},100,100]`,
-      seed: Math.floor(Math.random() * 2 ** 31),
+    surfaceBlockElements[id] = native2Y(
+      {
+        id,
+        index: 'a0',
+        type: 'shape',
+        xywh: `[${x},${y},100,100]`,
+        seed: Math.floor(Math.random() * 2 ** 31),
 
-      shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4] as ShapeType,
+        shapeType: SHAPE_TYPES[Math.floor(Math.random() * 40) % 4] as ShapeType,
 
-      radius: 0,
-      filled: false,
-      fillColor: DEFAULT_SHAPE_FILL_COLOR,
-      strokeWidth: 4,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      strokeStyle: StrokeStyle.Solid,
-      roughness: DEFAULT_ROUGHNESS,
-    };
+        radius: 0,
+        filled: false,
+        fillColor: DEFAULT_SHAPE_FILL_COLOR,
+        strokeWidth: 4,
+        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+        strokeStyle: StrokeStyle.Solid,
+        roughness: DEFAULT_ROUGHNESS,
+      },
+      false
+    );
   }
 
   page.addBlock(
     'affine:surface',
-    { elements: new NativeWrapper(native2Y(surfaceBlockElements, true)) },
+    { elements: new NativeWrapper(native2Y(surfaceBlockElements, false)) },
     pageBlockId
   );
 

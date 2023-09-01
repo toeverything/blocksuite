@@ -143,6 +143,12 @@ export class BlockElement<
     return this.root.renderModel(model);
   };
 
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 

@@ -111,3 +111,61 @@ export const createUniComponentFromWebComponent = <
     };
   };
 };
+
+@customElement('uni-any-render')
+class UniAnyRender<
+  T,
+  Expose extends NonNullable<unknown>,
+> extends ShadowlessElement {
+  @property({ attribute: false })
+  props!: T;
+  @property({ attribute: false })
+  expose!: Expose;
+  @property({ attribute: false })
+  renderTemplate!: (props: T, expose: Expose) => TemplateResult;
+
+  override render() {
+    return this.renderTemplate(this.props, this.expose);
+  }
+}
+
+@customElement('any-render')
+export class AnyRender<T> extends ShadowlessElement {
+  @property({ attribute: false })
+  props!: T;
+  @property({ attribute: false })
+  renderTemplate!: (props: T) => TemplateResult;
+
+  override render() {
+    return this.renderTemplate(this.props);
+  }
+}
+
+export const defineComponent = <T>(
+  renderTemplate: (props: T) => TemplateResult
+) => {
+  const ins = new AnyRender<T>();
+  ins.renderTemplate = renderTemplate;
+  return ins;
+};
+
+export const defineUniComponent = <T, Expose extends NonNullable<unknown>>(
+  renderTemplate: (props: T, expose: Expose) => TemplateResult
+): UniComponent<T, Expose> => {
+  return (ele, props) => {
+    const ins = new UniAnyRender<T, Expose>();
+    ins.props = props;
+    ins.expose = {} as Expose;
+    ins.renderTemplate = renderTemplate;
+    ele.appendChild(ins);
+    return {
+      update: props => {
+        ins.props = props;
+      },
+      unmount: () => {
+        ins.remove();
+      },
+      expose: ins.expose,
+    };
+  };
+};

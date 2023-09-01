@@ -4,12 +4,7 @@ import {
   serializeXYWH,
   StrokeStyle,
 } from '@blocksuite/phasor';
-import {
-  native2Y,
-  NativeWrapper,
-  Text,
-  type Workspace,
-} from '@blocksuite/store';
+import { native2Y, NativeWrapper, Text, Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
@@ -40,44 +35,48 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
   });
-  const yMap = native2Y(
+  const item0 = native2Y(
     {
-      0: {
-        id: '0',
-        index: 'a0',
-        type: 'shape',
-        xywh: '[0,0,100,100]',
-        seed: Math.floor(Math.random() * 2 ** 31),
-        shapeType: 'rect',
+      id: '0',
+      index: 'a0',
+      type: 'shape',
+      xywh: '[0,0,100,100]',
+      seed: Math.floor(Math.random() * 2 ** 31),
+      shapeType: 'rect',
 
-        radius: 0,
-        filled: true,
-        fillColor: '--affine-palette-shape-navy',
-        strokeWidth: 4,
-        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-        strokeStyle: StrokeStyle.Solid,
-        roughness: DEFAULT_ROUGHNESS,
-      },
-      1: {
-        id: '1',
-        index: 'a1',
-        type: 'shape',
-        xywh: '[200,0,100,100]',
-        seed: Math.floor(Math.random() * 2 ** 31),
-
-        shapeType: 'rect',
-
-        radius: 0,
-        filled: true,
-        fillColor: '--affine-palette-shape-navy',
-        strokeWidth: 4,
-        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-        strokeStyle: StrokeStyle.Solid,
-        roughness: DEFAULT_ROUGHNESS,
-      },
+      radius: 0,
+      filled: true,
+      fillColor: '--affine-palette-shape-navy',
+      strokeWidth: 4,
+      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      strokeStyle: StrokeStyle.Solid,
+      roughness: DEFAULT_ROUGHNESS,
     },
-    true
+    false
   );
+  const item1 = native2Y(
+    {
+      id: '1',
+      index: 'a1',
+      type: 'shape',
+      xywh: '[200,0,100,100]',
+      seed: Math.floor(Math.random() * 2 ** 31),
+
+      shapeType: 'rect',
+
+      radius: 0,
+      filled: true,
+      fillColor: '--affine-palette-shape-navy',
+      strokeWidth: 4,
+      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+      strokeStyle: StrokeStyle.Solid,
+      roughness: DEFAULT_ROUGHNESS,
+    },
+    false
+  );
+  const yMap = new Workspace.Y.Map();
+  yMap.set('0', item0);
+  yMap.set('1', item1);
 
   const elements = new NativeWrapper(yMap);
 

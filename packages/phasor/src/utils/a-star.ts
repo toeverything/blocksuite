@@ -233,7 +233,7 @@ export class AStarRunner {
     while (current) {
       result.unshift(current);
       const froms = this._cameFrom.get(current);
-      assertExists(froms);
+      if (!froms) return result;
       const index = nextIndexs.shift();
       assertExists(index);
       nextIndexs.push(froms.indexs[index]);

@@ -27,10 +27,6 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     .frame-menu-container {
       display: flex;
       align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px 8px 0 0;
-      border: 1px solid var(--affine-border-color);
       position: relative;
       cursor: default;
     }

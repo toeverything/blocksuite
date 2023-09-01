@@ -1,8 +1,9 @@
-import type { TemplateResult } from 'lit';
+import { type ReferenceElement } from '@floating-ui/dom';
 
+import type { UniComponent } from '../../../components/uni-component/uni-component.js';
+import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import { Matcher } from '../../logical/matcher.js';
 import type { TType } from '../../logical/typesystem.js';
-import type { LiteralElement } from './renderer/literal-element.js';
 
 export const renderLiteral = (
   type: TType,
@@ -13,11 +14,11 @@ export const renderLiteral = (
   if (!data) {
     return;
   }
-  return data.render(type, value, onChange);
+  return renderUniLit(data.view, { value, onChange, type });
 };
 
 export const popLiteralEdit = (
-  target: HTMLElement,
+  target: ReferenceElement,
   type: TType,
   value: unknown,
   onChange: (value: unknown) => void
@@ -26,19 +27,16 @@ export const popLiteralEdit = (
   if (!data) {
     return;
   }
-  const ele = data.component.create(type, value, onChange);
-  ele._popEdit(target);
+  data.popEdit(target, { value, onChange, type });
 };
 
-export type LiteralRenderer = (
-  type: TType,
-  value: unknown,
-  onChange: (value: unknown) => void
-) => TemplateResult;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnyLiteralComponent = typeof LiteralElement<any>;
-export type LiteralData = {
-  render: LiteralRenderer;
-  component: AnyLiteralComponent;
+export type LiteralViewProps<Value = unknown, Type extends TType = TType> = {
+  type: Type;
+  value?: Value;
+  onChange: (value?: Value) => void;
+};
+export type LiteralData<Value = unknown> = {
+  view: UniComponent<LiteralViewProps<Value>>;
+  popEdit: (position: ReferenceElement, props: LiteralViewProps<Value>) => void;
 };
 export const literalMatcher = new Matcher<LiteralData>();

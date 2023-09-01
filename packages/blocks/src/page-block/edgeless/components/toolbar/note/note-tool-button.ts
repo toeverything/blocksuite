@@ -1,7 +1,6 @@
 import '../../buttons/tool-icon-button.js';
 import './note-menu.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -11,6 +10,7 @@ import type { CssVariableName } from '../../../../../__internal__/theme/css-vari
 import { ArrowUpIcon, NoteIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessNoteMenu } from './note-menu.js';
 
 export const NOTE_COLORS: CssVariableName[] = [
@@ -23,32 +23,6 @@ export const NOTE_COLORS: CssVariableName[] = [
 ];
 
 export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
-
-interface NoteMenuPopper {
-  element: EdgelessNoteMenu;
-  dispose: () => void;
-}
-
-function createNoteMenuPopper(reference: HTMLElement): NoteMenuPopper {
-  const noteMenu = document.createElement('edgeless-note-menu');
-  assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(noteMenu);
-
-  const x = 110;
-  const y = -40;
-
-  Object.assign(noteMenu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
-  });
-
-  return {
-    element: noteMenu,
-    dispose: () => {
-      noteMenu.remove();
-    },
-  };
-}
 
 @customElement('edgeless-note-tool-button')
 export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
@@ -76,14 +50,17 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  private _noteMenu: NoteMenuPopper | null = null;
+  private _noteMenu: MenuPopper<EdgelessNoteMenu> | null = null;
 
   private _toggleNoteMenu() {
     if (this._noteMenu) {
       this._noteMenu.dispose();
       this._noteMenu = null;
     } else {
-      this._noteMenu = createNoteMenuPopper(this);
+      this._noteMenu = createPopper('edgeless-note-menu', this, {
+        x: 110,
+        y: -40,
+      });
       this._noteMenu.element.edgelessTool = this.edgelessTool;
       this._noteMenu.element.edgeless = this.edgeless;
     }
