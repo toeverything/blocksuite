@@ -47,11 +47,15 @@ export const RenameModal = ({
   };
   const onKeydown = (e: KeyboardEvent) => {
     e.stopPropagation();
-    if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
-      onConfirm();
+
+    if (e.key === 'Escape' && !e.isComposing) {
+      abortController.abort();
+      return;
     }
-    return;
+    if (e.key === 'Enter' && !e.isComposing) {
+      onConfirm();
+      return;
+    }
   };
 
   return html`
