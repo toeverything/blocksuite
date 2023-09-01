@@ -172,13 +172,13 @@ export class WorkspaceMeta {
     if (!workspaceVersion) {
       this._proxy.workspaceVersion = WORKSPACE_VERSION;
     } else {
-      console.error(`Workspace version already set.`);
+      console.error('Workspace version is already set');
     }
 
     if (!pageVersion) {
       this._proxy.pageVersion = PAGE_VERSION;
     } else {
-      console.error(`Page version already set.`);
+      console.error('Page version is already set');
     }
 
     if (!blockVersions) {
@@ -188,8 +188,20 @@ export class WorkspaceMeta {
       });
       this._proxy.blockVersions = _versions;
     } else {
-      console.error(`Block versions already set.`);
+      console.error('Block versions is already set');
     }
+  }
+
+  updateVersion(workspace: Workspace) {
+    this._proxy.workspaceVersion = WORKSPACE_VERSION;
+
+    this._proxy.pageVersion = PAGE_VERSION;
+
+    const _versions: Record<string, number> = {};
+    workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+      _versions[flavour] = schema.version;
+    });
+    this._proxy.blockVersions = _versions;
   }
 
   /**
