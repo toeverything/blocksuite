@@ -321,7 +321,11 @@ export class NotionHtmlParser extends BaseParser {
     }
 
     const linkElement = element.querySelector('A');
-    const fileUrl = linkElement?.getAttribute('href') ?? '';
+    if (!linkElement) {
+      return null;
+    }
+
+    const fileUrl = linkElement.getAttribute('href') ?? '';
     if (!fileUrl || fileUrl === 'https://www.notion.soundefined') {
       return [];
     }
@@ -331,7 +335,7 @@ export class NotionHtmlParser extends BaseParser {
     if (!fileBlob || fileBlob.size === 0) {
       const texts = [
         {
-          insert: linkElement?.textContent || fileUrl,
+          insert: linkElement.textContent || fileUrl,
           attributes: {
             link: fileUrl,
           },
@@ -349,12 +353,16 @@ export class NotionHtmlParser extends BaseParser {
       const storage = this._page.blobs;
       assertExists(storage);
       const id = await storage.set(fileBlob);
+      const suffix = fileUrl.split('.').pop();
+      const name = linkElement.textContent
+        ? linkElement.textContent + '.' + suffix
+        : fileUrl;
       return [
         {
           flavour: 'affine:attachment',
-          name: linkElement?.textContent || fileUrl,
+          name: name,
           size: fileBlob.size,
-          type: fileBlob.type,
+          type: fileBlob.type ?? suffix,
           caption: caption,
           sourceId: id,
           children: [],
