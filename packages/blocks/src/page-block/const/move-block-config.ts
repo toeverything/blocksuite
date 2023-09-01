@@ -3,8 +3,6 @@ import type { BlockElement } from '@blocksuite/lit';
 
 import {
   getBlockSelectionBySide,
-  getNextBlock,
-  getPrevBlock,
   getTextSelection,
   pathToBlock,
 } from '../../note-block/utils.js';
@@ -20,35 +18,43 @@ export const moveBlockConfig: MoveBlockConfig[] = [
     name: 'Move Up',
     hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp'],
     action: blockElement => {
+      const page = blockElement.page;
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
-        const block = pathToBlock(blockElement, textSelection.from.path);
-        if (!block) return;
-        const prevBlock = getPrevBlock(block, block => !!block.model.text);
-        if (!prevBlock) return;
-        const parent = blockElement.page.getParent(prevBlock.model);
-        if (!parent) return;
+        const currentModel = pathToBlock(blockElement, textSelection.from.path)
+          ?.model;
+        if (!currentModel) return;
+        const previousSiblingModel = page.getPreviousSibling(currentModel);
+        if (!previousSiblingModel) return;
+        const parentModel = blockElement.page.getParent(previousSiblingModel);
+        if (!parentModel) return;
         blockElement.page.moveBlocks(
-          [block.model],
-          parent,
-          prevBlock.model,
+          [currentModel],
+          parentModel,
+          previousSiblingModel,
           true
         );
+        blockElement.updateComplete.then(() => {
+          const rangeManager = blockElement.root.rangeManager;
+          assertExists(rangeManager);
+          rangeManager.syncTextSelectionToRange(textSelection);
+        });
         return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (blockSelection) {
-        const block = pathToBlock(blockElement, blockSelection.path);
-        if (!block) return;
-        const prevBlock = getPrevBlock(block);
-        if (!prevBlock) return;
-        const parent = blockElement.page.getParent(prevBlock.model);
-        if (!parent || parent.flavour === 'affine:page') return;
-        blockElement.page.moveBlocks(
-          [block.model],
-          parent,
-          prevBlock.model,
-          true
+        const currentModel = pathToBlock(blockElement, blockSelection.path)
+          ?.model;
+        if (!currentModel) return;
+        const previousSiblingModel = page.getPreviousSibling(currentModel);
+        if (!previousSiblingModel) return;
+        const parentModel = page.getParent(previousSiblingModel);
+        if (!parentModel) return;
+        page.moveBlocks(
+          [currentModel],
+          parentModel,
+          previousSiblingModel,
+          false
         );
         return true;
       }
@@ -59,44 +65,35 @@ export const moveBlockConfig: MoveBlockConfig[] = [
     name: 'Move Down',
     hotkey: ['Mod-Alt-ArrowDown', 'Mod-Shift-ArrowDown'],
     action: blockElement => {
+      const page = blockElement.page;
       const textSelection = getTextSelection(blockElement);
       if (textSelection) {
-        const block = pathToBlock(blockElement, textSelection.from.path);
-        if (!block) return;
-        const nextBlock = getNextBlock(block, block => !!block.model.text);
-        // ensure nextBlock is not a child of current block
-        if (!nextBlock || nextBlock.path.includes(block.model.id)) return;
-        const parent = blockElement.page.getParent(nextBlock.model);
-        if (!parent) return;
-        blockElement.page.moveBlocks(
-          [block.model],
-          parent,
-          nextBlock.model,
-          false
-        );
+        const currentModel = pathToBlock(blockElement, textSelection.from.path)
+          ?.model;
+        if (!currentModel) return;
+        const nextSiblingModel = page.getNextSibling(currentModel);
+        if (!nextSiblingModel) return;
+        const parentModel = page.getParent(nextSiblingModel);
+        if (!parentModel) return;
+        page.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
         blockElement.updateComplete.then(() => {
           // `textSelection` will not change so we need wo sync it manually
           const rangeManager = blockElement.root.rangeManager;
           assertExists(rangeManager);
           rangeManager.syncTextSelectionToRange(textSelection);
         });
-
         return true;
       }
       const blockSelection = getBlockSelectionBySide(blockElement, true);
       if (blockSelection) {
-        const block = pathToBlock(blockElement, blockSelection.path);
-        if (!block) return;
-        const nextBlock = getNextBlock(block);
-        if (!nextBlock) return;
-        const parent = blockElement.page.getParent(nextBlock.model);
-        if (!parent) return;
-        blockElement.page.moveBlocks(
-          [block.model],
-          parent,
-          nextBlock.model,
-          false
-        );
+        const currentModel = pathToBlock(blockElement, blockSelection.path)
+          ?.model;
+        if (!currentModel) return;
+        const nextSiblingModel = page.getNextSibling(currentModel);
+        if (!nextSiblingModel) return;
+        const parentModel = page.getParent(nextSiblingModel);
+        if (!parentModel) return;
+        page.moveBlocks([currentModel], parentModel, nextSiblingModel, false);
         return true;
       }
       return;

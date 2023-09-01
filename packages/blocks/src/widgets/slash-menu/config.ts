@@ -427,11 +427,11 @@ export const menuGroups: {
         icon: ArrowUpBigIcon,
         action: async ({ pageElement, model }) => {
           const page = pageElement.page;
-          const previousBlock = getPreviousBlock(model);
-          if (!previousBlock) return;
-          const parent = page.getParent(previousBlock);
-          if (!parent) return;
-          page.moveBlocks([model], parent, previousBlock, true);
+          const previousSiblingModel = page.getPreviousSibling(model);
+          if (!previousSiblingModel) return;
+          const parentModel = page.getParent(previousSiblingModel);
+          if (!parentModel) return;
+          page.moveBlocks([model], parentModel, previousSiblingModel, true);
         },
       },
       {
@@ -439,11 +439,11 @@ export const menuGroups: {
         icon: ArrowDownBigIcon,
         action: async ({ pageElement, model }) => {
           const page = pageElement.page;
-          const nextBlock = getNextBlock(model);
-          if (!nextBlock) return;
-          const parent = page.getParent(nextBlock);
-          if (!parent) return;
-          page.moveBlocks([model], parent, nextBlock, false);
+          const nextSiblingModel = page.getNextSibling(model);
+          if (!nextSiblingModel) return;
+          const parentModel = page.getParent(nextSiblingModel);
+          if (!parentModel) return;
+          page.moveBlocks([model], parentModel, nextSiblingModel, false);
         },
       },
       {

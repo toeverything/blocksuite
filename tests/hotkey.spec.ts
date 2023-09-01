@@ -16,8 +16,10 @@ import {
   pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
+  pressBackspace,
   pressEnter,
   pressForwardDelete,
+  pressTab,
   readClipboardText,
   redoByClick,
   redoByKeyboard,
@@ -32,6 +34,7 @@ import {
   waitNextFrame,
 } from './utils/actions/index.js';
 import {
+  assertBlockChildrenIds,
   assertRichTextModelType,
   assertRichTexts,
   assertSelection,
@@ -1125,21 +1128,61 @@ test('should drag multiple block and input text works', async ({ page }) => {
   await assertRichTexts(page, ['123', '456', '789']);
 });
 
-test('keyboard operation to move Block up or down', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'hello');
-  await pressEnter(page);
-  await type(page, 'world');
-  await pressEnter(page);
-  await type(page, 'foo');
-  await pressEnter(page);
-  await type(page, 'bar');
-  await assertRichTexts(page, ['hello', 'world', 'foo', 'bar']);
-  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
-  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
-  await assertRichTexts(page, ['hello', 'bar', 'world', 'foo']);
-  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
-  await assertRichTexts(page, ['hello', 'world', 'bar', 'foo']);
+test.describe('keyboard operation to move Block up or down', () => {
+  test('common paragraph', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, 'hello');
+    await pressEnter(page);
+    await type(page, 'world');
+    await pressEnter(page);
+    await type(page, 'foo');
+    await pressEnter(page);
+    await type(page, 'bar');
+    await assertRichTexts(page, ['hello', 'world', 'foo', 'bar']);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
+    await assertRichTexts(page, ['hello', 'bar', 'world', 'foo']);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
+    await assertRichTexts(page, ['hello', 'world', 'bar', 'foo']);
+  });
+  test('with indent', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, 'hello');
+    await pressEnter(page);
+    await pressTab(page);
+    await type(page, 'world');
+    await pressEnter(page);
+    await pressBackspace(page);
+    await type(page, 'foo');
+    await assertRichTexts(page, ['hello', 'world', 'foo']);
+    await assertBlockChildrenIds(page, '2', ['3']);
+    await pressArrowUp(page);
+    await pressArrowUp(page);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
+    await assertRichTexts(page, ['foo', 'hello', 'world']);
+    await assertBlockChildrenIds(page, '1', ['4', '2']);
+    await assertBlockChildrenIds(page, '2', ['3']);
+  });
+  test('keep cursor', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await focusRichText(page);
+    await type(page, 'hello');
+    await pressEnter(page);
+    await type(page, 'world');
+    await pressEnter(page);
+    await type(page, 'foo');
+    await assertRichTexts(page, ['hello', 'world', 'foo']);
+    await assertSelection(page, 2, 3);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowUp`);
+    await assertSelection(page, 0, 3);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
+    await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
+    await assertSelection(page, 2, 3);
+  });
 });
