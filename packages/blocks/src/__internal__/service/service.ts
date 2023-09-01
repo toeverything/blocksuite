@@ -6,7 +6,6 @@ import type { TemplateResultType } from 'lit/directive-helpers.js';
 
 import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
-import { getService } from './singleton.js';
 
 // Breaking change introduced in lit@2.8.0
 // https://github.com/lit/lit/pull/3993
