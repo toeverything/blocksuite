@@ -4,6 +4,7 @@ import { moveToImage } from 'utils/actions/drag.js';
 import {
   pressBackspace,
   pressEnter,
+  pressEscape,
   SHORT_KEY,
   type,
 } from './utils/actions/keyboard.js';
@@ -15,6 +16,7 @@ import {
 } from './utils/actions/misc.js';
 import {
   assertImageOption,
+  assertKeyboardWorkInInput,
   assertRichImage,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
@@ -29,6 +31,14 @@ function getAttachment(page: Page) {
   const attachment = page.locator('affine-attachment');
   const loading = attachment.locator('.affine-attachment-loading');
   const options = page.locator('.affine-attachment-options');
+  const turnToEmbedBtn = options
+    .locator('icon-button')
+    .filter({ hasText: 'Turn into Embed view' });
+  const renameBtn = options
+    .locator('icon-button')
+    .filter({ hasText: 'Rename' });
+  const renameInput = page.locator('.affine-attachment-rename-container input');
+
   const insertAttachment = async () => {
     page.evaluate(async () => {
       // Force fallback to input[type=file] in tests
@@ -53,8 +63,14 @@ function getAttachment(page: Page) {
     attachment.locator('.affine-attachment-name').innerText();
 
   return {
+    // locators
     attachment,
     options,
+    turnToEmbedBtn,
+    renameBtn,
+    renameInput,
+
+    // actions
     insertAttachment,
     /**
      * Wait for the attachment upload to finish
@@ -64,19 +80,14 @@ function getAttachment(page: Page) {
     getSize: () => attachment.locator('.affine-attachment-desc').innerText(),
 
     turnToEmbed: async () => {
-      const btn = options
-        .locator('icon-button')
-        .filter({ hasText: 'Turn into Embed view' });
-
-      await expect(btn).toBeVisible();
-      await btn.click();
+      await expect(turnToEmbedBtn).toBeVisible();
+      await turnToEmbedBtn.click();
       await assertRichImage(page, 1);
     },
     rename: async (newName: string) => {
       await attachment.hover();
       await expect(options).toBeVisible();
-      const btn = options.locator('icon-button').filter({ hasText: 'Rename' });
-      await btn.click();
+      await renameBtn.click();
       await page.keyboard.press(`${SHORT_KEY}+a`, { delay: 50 });
       await pressBackspace(page);
       await type(page, newName);
@@ -84,6 +95,7 @@ function getAttachment(page: Page) {
       expect(await getName()).toContain(newName);
     },
 
+    // external
     turnImageToCard: async () => {
       await moveToImage(page);
       await assertImageOption(page);
@@ -139,8 +151,15 @@ test('should rename attachment works', async ({ page }) => {
   });
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
-  const { insertAttachment, waitLoading, getName, rename } =
-    getAttachment(page);
+  const {
+    attachment,
+    renameBtn,
+    renameInput,
+    insertAttachment,
+    waitLoading,
+    getName,
+    rename,
+  } = getAttachment(page);
 
   await focusRichText(page);
   await insertAttachment();
@@ -148,6 +167,14 @@ test('should rename attachment works', async ({ page }) => {
   await waitLoading();
 
   expect(await getName()).toBe(FILE_NAME);
+
+  await attachment.hover();
+  await expect(renameBtn).toBeVisible();
+  await renameBtn.click();
+  await assertKeyboardWorkInInput(page, renameInput);
+  await pressEscape(page);
+  await expect(renameInput).not.toBeVisible();
+
   await rename('new-name');
   expect(await getName()).toBe('new-name.png');
   await rename('');
