@@ -35,7 +35,7 @@ class SideLayoutModal extends ShadowlessElement {
       top: 0;
       bottom: 0;
       width: 500px;
-      background-color: var(--affine-background-primary-color);
+      background-color: var(--affine-background-overlay-panel-color);
       border-left: 0.5px solid var(--affine-border-color);
       box-shadow: -5px 0px 10px 0px rgba(0, 0, 0, 0.05);
     }

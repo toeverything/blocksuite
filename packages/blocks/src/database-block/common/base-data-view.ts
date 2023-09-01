@@ -5,6 +5,7 @@ import type { Page, Text } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { InsertPosition } from '../types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
@@ -16,6 +17,8 @@ export abstract class BaseDataView<
   extends WithDisposable(ShadowlessElement)
   implements DataViewProps<T, Selection>, DataViewExpose
 {
+  @property({ attribute: false })
+  header!: UniComponent<{ viewMethods: DataViewExpose; view: T }>;
   @property({ attribute: false })
   view!: T;
 

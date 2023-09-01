@@ -12,6 +12,8 @@ export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
   Selection extends DataViewSelection = DataViewSelection,
 > {
+  header: UniComponent<{ viewMethods: DataViewExpose; view: T }>;
+
   view: T;
 
   titleText: Text;
@@ -31,7 +33,9 @@ export interface DataViewProps<
 
 export interface DataViewExpose {
   addRow?(position: InsertPosition | number): void;
+
   getSelection?(): DataViewSelection | undefined;
+
   focusFirstCell(): void;
 }
 
