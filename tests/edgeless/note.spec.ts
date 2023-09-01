@@ -264,7 +264,9 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   await page.mouse.move(x, y);
   await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await page.mouse.dblclick(x, y);
+  await waitNextFrame(page);
   await page.mouse.move(x, y);
+
   await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 
   await page.mouse.move(0, 0);
@@ -546,6 +548,36 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await page.mouse.click(0, 0);
   await activeNoteInEdgeless(page, ids.noteId);
   await expect(toolbar).toBeHidden();
+});
+
+test('duplicate note should work correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  await triggerComponentToolbarAction(page, 'duplicate');
+  const moreActionsContainer = await page.locator('.more-actions-container');
+  await expect(moreActionsContainer).toBeHidden();
+
+  const noteLocator = await page.locator('edgeless-child-note');
+  await expect(noteLocator).toHaveCount(2);
+  const [firstNote, secondNote] = await noteLocator.all();
+
+  // content should be same
+  await expect(
+    (await firstNote.innerText()) === (await secondNote.innerText())
+  ).toBeTruthy();
+
+  // size should be same
+  const firstNoteBox = await firstNote.boundingBox();
+  const secondNoteBox = await secondNote.boundingBox();
+  await expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
+  await expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
 });
 
 test('double click toolbar zoom button, should not add text', async ({

@@ -607,7 +607,8 @@ type Action =
   | 'changeConnectorStrokeColor'
   | 'changeConnectorStrokeStyles'
   | 'addFrame'
-  | 'createFrameOnMoreOption';
+  | 'createFrameOnMoreOption'
+  | 'duplicate';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -682,6 +683,18 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Frame Section',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'duplicate': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Duplicate',
         });
       await actionButton.click();
       break;
