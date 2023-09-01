@@ -12,6 +12,7 @@ import {
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
 import {
+  ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '../../../../../icons/index.js';
@@ -31,6 +32,7 @@ function ConnectorModeButtonGroup(
   const { mode } = edgelessTool;
   const straightLineTooltip = getTooltipWithShortcut('Straight', 'L');
   const orthogonalTooltip = getTooltipWithShortcut('Elbowed', 'X');
+  const curveTooltip = getTooltipWithShortcut('Curve', 'C');
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
@@ -47,6 +49,15 @@ function ConnectorModeButtonGroup(
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
         ${ConnectorLWithArrowIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Curve}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${curveTooltip}
+        @click=${() => setConnectorMode(ConnectorMode.Curve)}
+      >
+        ${ConnectorCWithArrowIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Orthogonal}

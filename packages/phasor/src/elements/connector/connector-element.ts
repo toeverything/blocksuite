@@ -2,6 +2,11 @@ import { DEFAULT_ROUGHNESS, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import { Bound } from '../../utils/bound.js';
 import {
+  type BezierCurveParameters,
+  getBezierNearestPoint,
+  getBezierTangent,
+} from '../../utils/curve.js';
+import {
   linePolylineIntersects,
   polyLineNearestPoint,
 } from '../../utils/math-utils.js';
@@ -9,11 +14,11 @@ import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
 import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
-import type { IConnector } from './types.js';
+import { ConnectorMode, type IConnector } from './types.js';
 import { getArrowPoints } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
-  private _path: IVec[] = [];
+  private _path: PointLocation[] = [];
   private _xywh: SerializedXYWH = `[0, 0, 0, 0]`;
   protected override _connectable = false;
 
@@ -22,7 +27,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this._path;
   }
 
-  set path(p: IVec[]) {
+  set path(p: PointLocation[]) {
     this._path = p;
   }
 
@@ -77,7 +82,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
 
   get absolutePath() {
     const { x, y } = this;
-    return this.path.map(p => [p[0] + x, p[1] + y]);
+    return this.path.map(p => p.clone().setVec([p[0] + x, p[1] + y]));
   }
 
   override hitTest(
@@ -85,7 +90,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     y: number,
     options?: HitTestOptions | undefined
   ): boolean {
-    const point = polyLineNearestPoint(this.absolutePath, [x, y]);
+    const point =
+      this.mode === ConnectorMode.Curve
+        ? getBezierNearestPoint(this.bezierParameters, [x, y])
+        : polyLineNearestPoint(this.absolutePath, [x, y]);
     return (
       Vec.dist(point, [x, y]) < (options?.expand ? this.strokeWidth / 2 : 0) + 8
     );
@@ -103,22 +111,17 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return linePolylineIntersects(start, end, this.absolutePath);
   }
 
+  get bezierParameters(): BezierCurveParameters {
+    const { absolutePath: p } = this;
+    return [p[0], p[0].absOut, p[1].absIn, p[1]];
+  }
+
   override render(
     ctx: CanvasRenderingContext2D,
     matrix: DOMMatrix,
     rc: RoughCanvas
   ) {
-    const { absolutePath: points } = this;
-    const [x, y] = this.deserializeXYWH();
-
-    ctx.setTransform(matrix.translateSelf(-x, -y));
-
-    this._renderPoints(
-      ctx,
-      rc,
-      points,
-      this.strokeStyle === StrokeStyle.Dashed
-    );
+    const { absolutePath: points, mode } = this;
 
     // points might not be build yet in some senarios
     // eg. undo/redo, copy/paste
@@ -127,17 +130,42 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       return;
     }
 
+    const [x, y] = this.deserializeXYWH();
+
+    ctx.setTransform(matrix.translateSelf(-x, -y));
+
+    this._renderPoints(
+      ctx,
+      rc,
+      points,
+      this.strokeStyle === StrokeStyle.Dashed,
+      mode === ConnectorMode.Curve
+    );
+
     const last = points[points.length - 1];
     const secondToLast = points[points.length - 2];
-    const { sides, end } = getArrowPoints(secondToLast, last, 15);
-    this._renderPoints(ctx, rc, [sides[0], end, sides[1]], false);
+    const clone = last.clone();
+    if (mode !== ConnectorMode.Curve) {
+      clone.tangent = Vec.tangent(last, secondToLast);
+    } else {
+      clone.tangent = getBezierTangent(this.bezierParameters, 1) ?? [];
+    }
+    const { sides } = getArrowPoints(clone, 15);
+    this._renderPoints(
+      ctx,
+      rc,
+      [PointLocation.fromVec(sides[0]), last, PointLocation.fromVec(sides[1])],
+      false,
+      false
+    );
   }
 
   private _renderPoints(
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
-    points: IVec[],
-    dash: boolean
+    points: PointLocation[],
+    dash: boolean,
+    curve: boolean
   ) {
     const { seed, stroke, strokeWidth, roughness, rough } = this;
     const realStrokeColor = this.computedValue(stroke);
@@ -149,20 +177,46 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
         stroke: realStrokeColor,
         strokeWidth,
       };
-      rc.linearPath(points as [number, number][], options);
+      if (curve) {
+        const b = this.bezierParameters;
+        rc.path(
+          `M${b[0][0]},${b[0][1]} C${b[1][0]},${b[1][1]} ${b[2][0]},${b[2][1]}  ${b[3][0]},${b[3][1]} `,
+          options
+        );
+      } else {
+        rc.linearPath(points as unknown as [number, number][], options);
+      }
     } else {
       ctx.save();
       ctx.strokeStyle = realStrokeColor;
       ctx.lineWidth = this.strokeWidth;
       dash && ctx.setLineDash([12, 12]);
       ctx.beginPath();
-      points.forEach((point, index) => {
-        if (index === 0) {
-          ctx.moveTo(point[0], point[1]);
-        } else {
-          ctx.lineTo(point[0], point[1]);
-        }
-      });
+      if (curve) {
+        points.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point[0], point[1]);
+          } else {
+            const last = points[index - 1];
+            ctx.bezierCurveTo(
+              last.absOut[0],
+              last.absOut[1],
+              point.absIn[0],
+              point.absIn[1],
+              point[0],
+              point[1]
+            );
+          }
+        });
+      } else {
+        points.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point[0], point[1]);
+          } else {
+            ctx.lineTo(point[0], point[1]);
+          }
+        });
+      }
       ctx.stroke();
       ctx.closePath();
       ctx.restore();

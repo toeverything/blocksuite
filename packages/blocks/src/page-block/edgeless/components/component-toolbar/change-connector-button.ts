@@ -15,6 +15,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
 import {
+  ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
   DashLineIcon,
@@ -282,7 +283,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
         .iconInfo=${{
           icon: html`${selectedMode === ConnectorMode.Straight
             ? ConnectorLWithArrowIcon
-            : ConnectorXWithArrowIcon}${SmallArrowDownIcon}`,
+            : selectedMode === ConnectorMode.Orthogonal
+            ? ConnectorXWithArrowIcon
+            : ConnectorCWithArrowIcon}${SmallArrowDownIcon}`,
           tooltip: 'Connector Shape',
         }}
         .menuChildren=${html`
@@ -294,6 +297,15 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
             @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
           >
             ${ConnectorLWithArrowIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button
+            .tooltip=${'Curve'}
+            .iconContainerPadding=${2}
+            .active=${selectedMode === ConnectorMode.Curve}
+            .activeMode=${'background'}
+            @click=${() => this._setConnectorMode(ConnectorMode.Curve)}
+          >
+            ${ConnectorCWithArrowIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button
             .tooltip=${'Elbowed'}
