@@ -173,7 +173,7 @@ export class NotionHtmlParser extends BaseParser {
       return bookmarkList;
     }
 
-    const fileList = this._fileParser(element);
+    const fileList = await this._attachmentParser(element);
     if (fileList) {
       return fileList;
     }
@@ -305,18 +305,61 @@ export class NotionHtmlParser extends BaseParser {
     ];
   };
 
-  private _fileParser = async (
+  private _attachmentParser = async (
     element: Element
   ): Promise<SerializedBlock[] | null> => {
     if (element.tagName !== 'FIGURE' || element.classList.length > 0) {
       return null;
     }
+
     if (
       element.children.length === 0 ||
       element.children[0].tagName !== 'DIV' ||
       !element.children[0].classList.contains('source')
     ) {
       return null;
+    }
+
+    const linkElement = element.querySelector('A');
+    const fileUrl = linkElement?.getAttribute('href') ?? '';
+    if (!fileUrl || fileUrl === 'https://www.notion.soundefined') {
+      return [];
+    }
+
+    const caption = element?.querySelector('figcaption')?.textContent ?? '';
+    const fileBlob = await this._fetchFileHandler(fileUrl);
+    if (!fileBlob || fileBlob.size === 0) {
+      const texts = [
+        {
+          insert: linkElement?.textContent || fileUrl,
+          attributes: {
+            link: fileUrl,
+          },
+        },
+      ];
+      return [
+        {
+          flavour: 'affine:paragraph',
+          type: 'text',
+          children: [],
+          text: texts,
+        },
+      ];
+    } else {
+      const storage = this._page.blobs;
+      assertExists(storage);
+      const id = await storage.set(fileBlob);
+      return [
+        {
+          flavour: 'affine:attachment',
+          name: linkElement?.textContent || fileUrl,
+          size: fileBlob.size,
+          type: fileBlob.type,
+          caption: caption,
+          sourceId: id,
+          children: [],
+        },
+      ];
     }
   };
 

@@ -247,6 +247,8 @@ export type SerializedBlock = {
   children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
+  name?: string;
+  size?: number;
   width?: number;
   height?: number;
   language?: string;
