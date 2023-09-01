@@ -409,10 +409,10 @@ function hasBlockId(element: Element): element is BlockComponentElement {
 }
 
 /**
- * Returns `true` if element is default page.
+ * Returns `true` if element is doc page.
  */
-export function isDefaultPage({ tagName }: Element) {
-  return tagName === 'AFFINE-DEFAULT-PAGE';
+export function isDocPage({ tagName }: Element) {
+  return tagName === 'AFFINE-DOC-PAGE';
 }
 
 /**
@@ -431,7 +431,7 @@ export function isEdgelessPage(
  */
 function isPageOrNoteOrSurface(element: Element) {
   return (
-    isDefaultPage(element) ||
+    isDocPage(element) ||
     isEdgelessPage(element) ||
     isNote(element) ||
     isSurface(element)
