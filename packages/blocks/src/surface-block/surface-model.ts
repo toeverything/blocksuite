@@ -16,8 +16,11 @@ const migration = {
   toV5: data => {
     let { elements } = data;
     if (isPureObject(elements)) {
-      const y = native2Y(elements as unknown, false) as Y.Map<unknown>;
-      elements = new NativeWrapper(y);
+      const map = new Workspace.Y.Map();
+      for (const [key, value] of Object.entries(elements)) {
+        map.set(key, native2Y(value, false));
+      }
+      elements = new NativeWrapper(map);
       data.elements = elements;
     }
   },
@@ -50,7 +53,7 @@ const migration = {
           value.delete(key);
           return;
         }
-        if (!targetId && !value.get(targetId)) {
+        if (!target.get('position') && !targetId && !value.get(targetId)) {
           value.delete(key);
           return;
         }

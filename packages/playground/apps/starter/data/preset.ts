@@ -42,47 +42,56 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   });
   const yMap = native2Y(
     {
-      0: {
-        id: '0',
-        index: 'a0',
-        type: 'shape',
-        xywh: '[0,0,100,100]',
-        seed: Math.floor(Math.random() * 2 ** 31),
-        shapeType: 'rect',
+      0: native2Y(
+        {
+          id: '0',
+          index: 'a0',
+          type: 'shape',
+          xywh: '[0,0,100,100]',
+          seed: Math.floor(Math.random() * 2 ** 31),
+          shapeType: 'rect',
 
-        radius: 0,
-        filled: true,
-        fillColor: '--affine-palette-shape-navy',
-        strokeWidth: 4,
-        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-        strokeStyle: StrokeStyle.Solid,
-        roughness: DEFAULT_ROUGHNESS,
-      },
-      1: {
-        id: '1',
-        index: 'a1',
-        type: 'shape',
-        xywh: '[200,0,100,100]',
-        seed: Math.floor(Math.random() * 2 ** 31),
+          radius: 0,
+          filled: true,
+          fillColor: '--affine-palette-shape-navy',
+          strokeWidth: 4,
+          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+          strokeStyle: StrokeStyle.Solid,
+          roughness: DEFAULT_ROUGHNESS,
+        },
+        false
+      ),
+      1: native2Y(
+        {
+          id: '1',
+          index: 'a1',
+          type: 'shape',
+          xywh: '[200,0,100,100]',
+          seed: Math.floor(Math.random() * 2 ** 31),
 
-        shapeType: 'rect',
+          shapeType: 'rect',
 
-        radius: 0,
-        filled: true,
-        fillColor: '--affine-palette-shape-navy',
-        strokeWidth: 4,
-        strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-        strokeStyle: StrokeStyle.Solid,
-        roughness: DEFAULT_ROUGHNESS,
-      },
-      2: {
-        id: '2',
-        index: 'a2',
-        type: 'frame',
-        xywh: '[1000,0,800,640]',
-        batch: 'a0',
-        title: new Y.Text('Frame 1'),
-      },
+          radius: 0,
+          filled: true,
+          fillColor: '--affine-palette-shape-navy',
+          strokeWidth: 4,
+          strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
+          strokeStyle: StrokeStyle.Solid,
+          roughness: DEFAULT_ROUGHNESS,
+        },
+        false
+      ),
+      2: native2Y(
+        {
+          id: '2',
+          index: 'a2',
+          type: 'frame',
+          xywh: '[1000,0,800,640]',
+          batch: 'a0',
+          title: new Y.Text('Frame 1'),
+        },
+        false
+      ),
     },
     false
   );
