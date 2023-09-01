@@ -2,7 +2,6 @@ import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   defineBlockSchema,
   isPureObject,
-  native2Y,
   NativeWrapper,
   type SchemaToModel,
   Workspace,
@@ -26,18 +25,15 @@ const migration = {
         return;
       }
       Object.entries(elements).forEach(([key, value]) => {
-        console.log(value);
-        console.log(wrapper);
-        try {
-          const map = native2Y(value, false);
-          yMap.set(key, map);
-          console.log(map);
-          console.log(map.toJSON());
-        } catch (e) {
-          console.error(e);
-        }
+        const map = new Workspace.Y.Map();
+        yMap.set(key, map);
+        Object.entries(value).forEach(([_key, _value]) => {
+          map.set(
+            _key,
+            _value instanceof Workspace.Y.Text ? _value.clone() : _value
+          );
+        });
       });
-      console.log(wrapper.getValue());
     }
   },
   toV4: data => {
@@ -63,13 +59,13 @@ const migration = {
       if (type === 'connector') {
         const source = element.get('source');
         const target = element.get('target');
-        const sourceId = source.get('id');
-        const targetId = target.get('id');
-        if (!source.get('position') && (!sourceId || !value.get(sourceId))) {
+        const sourceId = source['id'];
+        const targetId = target['id'];
+        if (!source['position'] && (!sourceId || !value.get(sourceId))) {
           value.delete(key);
           return;
         }
-        if (!target.get('position') && !targetId && !value.get(targetId)) {
+        if (!target['position'] && !targetId && !value.get(targetId)) {
           value.delete(key);
           return;
         }
