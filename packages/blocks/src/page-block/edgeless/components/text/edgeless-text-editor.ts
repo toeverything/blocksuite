@@ -43,27 +43,25 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       );
       const lineHeight = vLines[0].offsetHeight;
 
-      const rect = getSelectedRect([element]);
+      const bcr = this._virgoContainer.getBoundingClientRect();
 
-      const [oldLeftTopX, oldLeftTopY] = calculateRotatedPointPosition(
-        rect.width,
-        rect.height,
-        element.rotate,
-        0,
-        0
-      );
       const [leftTopX, leftTopY] = calculateRotatedPointPosition(
-        width,
-        vLines.length * lineHeight,
+        bcr.left + bcr.width / 2,
+        bcr.top + bcr.height / 2,
         -element.rotate,
-        oldLeftTopX,
-        oldLeftTopY
+        this._virgoContainer.offsetLeft,
+        this._virgoContainer.offsetTop
+      );
+
+      const [modelLeftTopX, modelLeftTopY] = edgeless.surface.toModelCoord(
+        leftTopX,
+        leftTopY
       );
 
       edgeless.surface.updateElement(element.id, {
         xywh: new Bound(
-          element.x + leftTopX,
-          element.y + leftTopY,
+          modelLeftTopX,
+          modelLeftTopY,
           width,
           vLines.length * lineHeight
         ).serialize(),
@@ -148,17 +146,14 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       const rotate = this._element.rotate;
 
       const [leftTopX, leftTopY] = calculateRotatedPointPosition(
-        rect.width,
-        rect.height,
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
         rotate,
-        0,
-        0
+        rect.left,
+        rect.top
       );
 
-      const [x, y] = this._edgeless.surface.toViewCoord(
-        rect.left + leftTopX,
-        rect.top + leftTopY
-      );
+      const [x, y] = this._edgeless.surface.toViewCoord(leftTopX, leftTopY);
 
       virgoStyle = styleMap({
         position: 'absolute',
@@ -177,7 +172,6 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         zIndex: '10',
         textAlign: this._element.textAlign,
         marginRight: '-100%',
-        backgroundColor: '#b2b2b250',
       });
     }
 
