@@ -2,10 +2,14 @@ import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-export const getNextBlockCommand: Command<{
-  path: string[];
-}> = (ctx, options) => {
-  const path = options?.path;
+export const getNextBlockCommand: Command<
+  never,
+  'nextBlock',
+  {
+    path: string[];
+  }
+> = async (ctx, next) => {
+  const path = ctx.path;
   assertExists(path);
   const viewStore = ctx.blockStore.viewStore;
   const nextView = viewStore.findNext(path, nodeView => {
@@ -16,11 +20,7 @@ export const getNextBlockCommand: Command<{
   });
 
   if (nextView) {
-    const el = nextView.view;
-    ctx.data.nextBlock = el as BlockElement;
-    return true;
-  } else {
-    return false;
+    await next({ nextBlock: nextView.view as BlockElement });
   }
 };
 
