@@ -30,7 +30,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
@@ -198,10 +198,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       z-index: 1001 !important;
     }
 
-    .ws-indicator {
+    .top-container {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
       font-size: 16px;
     }
   `;
@@ -449,7 +449,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     const id = params.get('room') || (await generateRoomId());
     const success = await this._initWebsocketProvider(id);
 
-    if (success) history.replaceState({}, '', `?room=${id}`);
+    if (success) {
+      history.replaceState({}, '', `?room=${id}`);
+      this.requestUpdate();
+    }
   };
 
   private async _initWebsocketProvider(room: string): Promise<boolean> {
@@ -542,7 +545,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <div style="display: flex; gap: 12px">
+          <div class="top-container">
             <sl-dropdown placement="bottom" hoist>
               <sl-button
                 class="dots-menu"
@@ -669,6 +672,36 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 <sl-icon name="people" label="Collaboration"></sl-icon>
               </sl-button>
             </sl-tooltip>
+
+            ${new URLSearchParams(location.search).get('room')
+              ? html`<sl-tooltip
+                  content="Your name in Collaboration (default: Unknown)"
+                  placement="bottom"
+                  hoist
+                  ><sl-input
+                    placeholder="Unknown"
+                    clearable
+                    size="small"
+                    @blur=${(e: Event) => {
+                      if ((e.target as HTMLInputElement).value.length > 0) {
+                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                          'user',
+                          {
+                            name: (e.target as HTMLInputElement).value ?? '',
+                          }
+                        );
+                      } else {
+                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                          'user',
+                          {
+                            name: 'Unknown',
+                          }
+                        );
+                      }
+                    }}
+                  ></sl-input
+                ></sl-tooltip>`
+              : nothing}
           </div>
 
           <div>
