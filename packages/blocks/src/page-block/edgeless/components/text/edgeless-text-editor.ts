@@ -1,4 +1,7 @@
-import { assertExists } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  calculateRotatedPointPosition,
+} from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -39,10 +42,28 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         this._virgoContainer.querySelectorAll('v-line')
       );
       const lineHeight = vLines[0].offsetHeight;
+
+      const rect = getSelectedRect([element]);
+
+      const [oldLeftTopX, oldLeftTopY] = calculateRotatedPointPosition(
+        rect.width,
+        rect.height,
+        element.rotate,
+        0,
+        0
+      );
+      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
+        width,
+        vLines.length * lineHeight,
+        -element.rotate,
+        oldLeftTopX,
+        oldLeftTopY
+      );
+
       edgeless.surface.updateElement(element.id, {
         xywh: new Bound(
-          element.x,
-          element.y,
+          element.x + leftTopX,
+          element.y + leftTopY,
           width,
           vLines.length * lineHeight
         ).serialize(),
@@ -124,10 +145,20 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     if (viewport && this._element && this._edgeless) {
       const zoom = viewport.zoom;
       const rect = getSelectedRect([this._element]);
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const [x, y] = this._edgeless.surface.toViewCoord(cx, cy);
       const rotate = this._element.rotate;
+
+      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
+        rect.width,
+        rect.height,
+        rotate,
+        0,
+        0
+      );
+
+      const [x, y] = this._edgeless.surface.toViewCoord(
+        rect.left + leftTopX,
+        rect.top + leftTopY
+      );
 
       virgoStyle = styleMap({
         position: 'absolute',
@@ -138,8 +169,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
         outline: 'none',
-        transform: `translate(-50%, -50%) scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
-        transformOrigin: 'conter',
+        transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
+        transformOrigin: 'top left',
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,

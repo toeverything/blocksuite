@@ -26,3 +26,28 @@ export const clamp = (value: number, min: number, max: number): number => {
   }
   return value;
 };
+
+// Radian and angle conversion functions
+export function toRadians(angle: number) {
+  return angle * (Math.PI / 180);
+}
+
+// Rotate a point in a rectangle.
+export function calculateRotatedPointPosition(
+  w: number,
+  h: number,
+  R: number,
+  absoluteX: number,
+  absoluteY: number
+) {
+  const x = absoluteX - w / 2;
+  const y = absoluteY - h / 2;
+
+  const originalX = x * Math.cos(toRadians(R)) - y * Math.sin(toRadians(R));
+  const originalY = x * Math.sin(toRadians(R)) + y * Math.cos(toRadians(R));
+
+  const originalAbsoluteX = w / 2 + originalX;
+  const originalAbsoluteY = h / 2 + originalY;
+
+  return [originalAbsoluteX, originalAbsoluteY];
+}
