@@ -2,7 +2,6 @@ import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { almostEqual } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { deserializeXYWH } from '@blocksuite/phasor';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import {
@@ -15,6 +14,7 @@ import {
   caretFromPoint,
 } from '../page-block/text-selection/utils.js';
 import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
+import { deserializeXYWH } from '../surface-block/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 
 const getSelection = (blockComponent: BlockElement) =>

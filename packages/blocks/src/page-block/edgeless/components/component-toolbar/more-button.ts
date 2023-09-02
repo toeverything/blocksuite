@@ -3,7 +3,6 @@ import '../toolbar/shape/shape-menu.js';
 
 import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { FrameElement, type PhasorElement } from '@blocksuite/phasor';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -25,6 +24,10 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../../icons/index.js';
+import {
+  FrameElement,
+  type PhasorElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';

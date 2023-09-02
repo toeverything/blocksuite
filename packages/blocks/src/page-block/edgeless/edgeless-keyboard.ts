@@ -1,15 +1,14 @@
 import {
-  Bound,
-  ConnectorElement,
-  ConnectorMode,
-  ShapeStyle,
-} from '@blocksuite/phasor';
-
-import {
   type EdgelessTool,
   LineWidth,
   type ShapeToolState,
 } from '../../__internal__/utils/types.js';
+import {
+  Bound,
+  ConnectorElement,
+  ConnectorMode,
+  ShapeStyle,
+} from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,

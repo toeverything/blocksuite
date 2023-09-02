@@ -56,12 +56,6 @@ export default defineConfig({
       '@blocksuite/store': path.resolve(
         fileURLToPath(new URL('../store/src', import.meta.url))
       ),
-      '@blocksuite/phasor': path.resolve(
-        fileURLToPath(new URL('../phasor/src', import.meta.url))
-      ),
-      '@blocksuite/phasor/*': path.resolve(
-        fileURLToPath(new URL('../phasor/src/*', import.meta.url))
-      ),
       '@blocksuite/virgo': path.resolve(
         fileURLToPath(new URL('../virgo/src', import.meta.url))
       ),

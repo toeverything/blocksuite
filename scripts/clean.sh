@@ -8,7 +8,6 @@ packages=(
   "editor"
   "global"
   "lit"
-  "phasor"
   "playground"
   "store"
   "virgo"

@@ -1,4 +1,9 @@
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
+
+import {
+  type Connectable,
+  type TopLevelBlockModel,
+} from '../../__internal__/utils/types.js';
 import {
   almostEqual,
   AStarRunner,
@@ -23,12 +28,7 @@ import {
   sign,
   type SurfaceManager,
   Vec,
-} from '@blocksuite/phasor';
-
-import {
-  type Connectable,
-  type TopLevelBlockModel,
-} from '../../__internal__/utils/types.js';
+} from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import type { Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';

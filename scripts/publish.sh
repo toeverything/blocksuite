@@ -7,7 +7,6 @@ packages=(
   # "docs" # NOT PUBLISHED
   "editor"
   "global"
-  "phasor"
   # "playground" # NOT PUBLISHED
   "store"
   "virgo"
