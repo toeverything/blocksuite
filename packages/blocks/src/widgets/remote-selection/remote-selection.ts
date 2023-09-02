@@ -154,41 +154,74 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     return [];
   }
 
-  private _getCursorRect(textSelection: TextSelection): SelectionRect | null {
+  private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
     if (!isPageComponent(this.pageElement)) {
       throw new Error('remote selection widget must be used in page component');
     }
 
-    const rangeManager = this.root.rangeManager;
-    assertExists(rangeManager);
-    const range = rangeManager.pointToRange({
-      path: textSelection.to ? textSelection.to.path : textSelection.from.path,
-      index: textSelection.to
-        ? textSelection.to.index + textSelection.to.length
-        : textSelection.from.index + textSelection.from.length,
-      length: 0,
-    });
-
-    if (!range) {
-      return null;
-    }
-
+    const textSelection = selections.find(
+      selection => selection instanceof TextSelection
+    ) as TextSelection | undefined;
+    const blockSelections = selections.filter(
+      selection => selection instanceof BlockSelection
+    );
     const container = this._container;
     const containerRect = this._containerRect;
-    const rangeRects = Array.from(range.getClientRects());
-    if (rangeRects.length === 1) {
-      const rect = rangeRects[0];
-      return {
-        width: 2,
-        height: rect.height + 4,
-        top:
-          rect.top -
-          2 -
-          (containerRect?.top ?? 0) +
-          (container?.scrollTop ?? 0),
-        left:
-          rect.left - (containerRect?.left ?? 0) + (container?.scrollLeft ?? 0),
-      };
+
+    if (textSelection) {
+      const rangeManager = this.root.rangeManager;
+      assertExists(rangeManager);
+      const range = rangeManager.pointToRange({
+        path: textSelection.to
+          ? textSelection.to.path
+          : textSelection.from.path,
+        index: textSelection.to
+          ? textSelection.to.index + textSelection.to.length
+          : textSelection.from.index + textSelection.from.length,
+        length: 0,
+      });
+
+      if (!range) {
+        return null;
+      }
+
+      const container = this._container;
+      const containerRect = this._containerRect;
+      const rangeRects = Array.from(range.getClientRects());
+      if (rangeRects.length === 1) {
+        const rect = rangeRects[0];
+        return {
+          width: 2,
+          height: rect.height,
+          top:
+            rect.top - (containerRect?.top ?? 0) + (container?.scrollTop ?? 0),
+          left:
+            rect.left -
+            (containerRect?.left ?? 0) +
+            (container?.scrollLeft ?? 0),
+        };
+      }
+    } else if (blockSelections.length > 0) {
+      const lastBlockSelection = blockSelections[blockSelections.length - 1];
+
+      const blockElement = this.root.viewStore.viewFromPath(
+        'block',
+        lastBlockSelection.path
+      );
+      if (blockElement) {
+        const rect = blockElement.getBoundingClientRect();
+        return {
+          width: 2,
+          height: rect.height,
+          top:
+            rect.top - (containerRect?.top ?? 0) + (container?.scrollTop ?? 0),
+          left:
+            rect.left +
+            rect.width -
+            (containerRect?.left ?? 0) +
+            (container?.scrollLeft ?? 0),
+        };
+      }
     }
 
     return null;
@@ -203,7 +236,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     const remoteUsers = new Set<number>();
     const selections: Array<{
       id: number;
-      textSelection?: TextSelection;
+      selections: BaseSelection[];
       rects: SelectionRect[];
       user?: UserInfo;
     }> = this._remoteSelections.flatMap(({ selections, id, user }) => {
@@ -215,9 +248,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
       return {
         id,
-        textSelection: selections.find(
-          selection => selection instanceof TextSelection
-        ) as TextSelection | undefined,
+        selections,
         rects: this._getSelectionRect(selections),
         user,
       };
@@ -231,9 +262,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
           this._colorMap.set(selection.id, color);
         }
         const color = this._colorMap.get(selection.id) as string;
-        const cursorRect = selection.textSelection
-          ? this._getCursorRect(selection.textSelection)
-          : null;
+        const cursorRect = this._getCursorRect(selection.selections);
 
         return selection.rects
           .map(r => html`<div style="${selectionStyle(r, color)}"></div>`)
@@ -255,7 +284,9 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
                   <div
                     style="${styleMap({
                       position: 'absolute',
-                      bottom: `${cursorRect?.height}px`,
+                      bottom: `${
+                        cursorRect?.height ? cursorRect.height - 4 : 0
+                      }px`,
                       padding: '0 3px 0 3px',
                       backgroundColor: color,
                       color: 'white',
