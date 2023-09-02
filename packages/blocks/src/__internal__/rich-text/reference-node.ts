@@ -21,7 +21,6 @@ export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;
   tagClicked: Slot<{ tagId: string }>;
 };
-
 @customElement('affine-reference')
 export class AffineReference extends WithDisposable(ShadowlessElement) {
   static override styles = css`

@@ -1,7 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { almostEqual, assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { deserializeXYWH, serializeXYWH } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -18,6 +17,10 @@ import type {
   EdgelessPageBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+} from '../../../../surface-block/index.js';
 import {
   DefaultModeDragType,
   type DefaultToolController,

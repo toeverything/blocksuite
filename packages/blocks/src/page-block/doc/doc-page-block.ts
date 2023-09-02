@@ -14,7 +14,7 @@ import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '../../__internal__/consts.js';
-import type { BlockHost, EditingState } from '../../__internal__/index.js';
+import type { EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
@@ -34,10 +34,11 @@ export interface PageViewport {
 }
 
 @customElement('affine-doc-page')
-export class DocPageBlockComponent
-  extends BlockElement<PageBlockModel, BlockService, DocPageBlockWidgetName>
-  implements BlockHost
-{
+export class DocPageBlockComponent extends BlockElement<
+  PageBlockModel,
+  BlockService,
+  DocPageBlockWidgetName
+> {
   static override styles = css`
     .affine-doc-viewport {
       position: relative;

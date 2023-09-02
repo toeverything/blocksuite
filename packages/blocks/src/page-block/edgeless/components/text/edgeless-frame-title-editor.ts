@@ -1,11 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { type FrameElement } from '@blocksuite/phasor';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
+import { type FrameElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-frame-title-editor')

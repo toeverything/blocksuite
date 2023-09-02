@@ -1,9 +1,13 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import { Bound, ShapeStyle, StrokeStyle } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { hasClassNameInList } from '../../../__internal__/index.js';
+import {
+  Bound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../../surface-block/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

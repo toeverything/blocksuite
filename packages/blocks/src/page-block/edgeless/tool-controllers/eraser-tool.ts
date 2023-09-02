@@ -1,13 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
-import {
-  Bound,
-  getStroke,
-  getSvgPathFromStroke,
-  type IVec,
-  Overlay,
-} from '@blocksuite/phasor';
-import { linePolygonIntersects } from '@blocksuite/phasor';
 
 import type {
   Erasable,
@@ -18,6 +10,14 @@ import {
   type EraserTool,
   getBlockElementById,
 } from '../../../__internal__/utils/index.js';
+import {
+  Bound,
+  getStroke,
+  getSvgPathFromStroke,
+  type IVec,
+  linePolygonIntersects,
+  Overlay,
+} from '../../../surface-block/index.js';
 import { deleteElements } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './index.js';

@@ -1,8 +1,11 @@
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
-import type { Options, RoughCanvas } from '@blocksuite/phasor';
-import { ShapeStyle } from '@blocksuite/phasor';
-import { Overlay } from '@blocksuite/phasor';
 
+import {
+  type Options,
+  Overlay,
+  type RoughCanvas,
+  ShapeStyle,
+} from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,

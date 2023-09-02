@@ -24,8 +24,6 @@
       "@blocksuite/global/*": ["../global/src/*"],
       "@blocksuite/store": ["../store/src"],
       "@blocksuite/store/*": ["../store/src/*"],
-      "@blocksuite/phasor": ["../phasor/src"],
-      "@blocksuite/phasor/*": ["../phasor/src/*"],
       "@blocksuite/virgo": ["../virgo/src"],
       "@blocksuite/virgo/*": ["../virgo/src/*"]
     }

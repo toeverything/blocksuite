@@ -10,13 +10,6 @@ import './align-button.js';
 
 import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type {
-  BrushElement,
-  ConnectorElement,
-  FrameElement,
-  ShapeElement,
-  TextElement,
-} from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
@@ -24,6 +17,13 @@ import { join } from 'lit/directives/join.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import { RenameIcon } from '../../../../icons/edgeless.js';
+import type {
+  BrushElement,
+  ConnectorElement,
+  FrameElement,
+  ShapeElement,
+  TextElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { mountFrameEditor } from '../../utils/text.js';

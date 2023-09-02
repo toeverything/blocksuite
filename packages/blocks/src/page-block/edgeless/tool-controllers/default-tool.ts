@@ -1,5 +1,13 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
+
+import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
+import {
+  type DefaultTool,
+  handleNativeRangeAtPoint,
+  resetNativeSelection,
+  type TopLevelBlockModel,
+} from '../../../__internal__/index.js';
 import {
   Bound,
   ConnectorElement,
@@ -10,15 +18,7 @@ import {
   ShapeElement,
   type SurfaceManager,
   TextElement,
-} from '@blocksuite/phasor';
-
-import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
-import {
-  type DefaultTool,
-  handleNativeRangeAtPoint,
-  resetNativeSelection,
-  type TopLevelBlockModel,
-} from '../../../__internal__/index.js';
+} from '../../../surface-block/index.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';

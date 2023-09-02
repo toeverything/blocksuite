@@ -4,9 +4,6 @@ import '../buttons/menu-button.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
-import { StrokeStyle } from '@blocksuite/phasor';
-import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -25,6 +22,12 @@ import {
   SmallArrowDownIcon,
   StraightLineIcon,
 } from '../../../../icons/index.js';
+import {
+  type ConnectorElement,
+  ConnectorMode,
+  StrokeStyle,
+  type SurfaceManager,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import {

@@ -50,9 +50,7 @@ export class WorkspaceMeta {
   constructor(doc: BlockSuiteDoc) {
     this.doc = doc;
     this._yMap = doc.getMap(this.id);
-    this._proxy = doc.getMapProxy<string, WorkspaceMetaState>(this.id, {
-      deep: true,
-    });
+    this._proxy = doc.getMapProxy<string, WorkspaceMetaState>(this.id);
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
   }
 
