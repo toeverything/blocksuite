@@ -24,7 +24,7 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
-import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
+import type { EdgelessTool } from '../../__internal__/index.js';
 import {
   asyncFocusRichText,
   bringForward,
@@ -145,7 +145,7 @@ export class EdgelessPageBlockComponent
     EdgelessPageService,
     EdgelessPageBlockWidgetName
   >
-  implements EdgelessContainer, BlockHost
+  implements EdgelessContainer
 {
   static override styles = css`
     .affine-edgeless-page-block-container {
