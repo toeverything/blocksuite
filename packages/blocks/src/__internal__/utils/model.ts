@@ -1,4 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type {
   AttachmentBlockModel,
@@ -76,4 +77,19 @@ export function matchFlavours<const Key extends readonly string[]>(
   expected: Key
 ): model is Flavours<Writeable<Key>> {
   return expected.includes(model.flavour);
+}
+
+export function isInsideBlockByFlavour(
+  page: Page,
+  block: BaseBlockModel | string,
+  flavour: string
+): boolean {
+  const parent = page.getParent(block);
+  if (parent === null) {
+    return false;
+  }
+  if (flavour === parent.flavour) {
+    return true;
+  }
+  return isInsideBlockByFlavour(page, parent, flavour);
 }

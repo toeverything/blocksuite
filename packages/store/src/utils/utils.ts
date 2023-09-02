@@ -3,7 +3,7 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import type { BaseBlockModel, BlockSchema } from '../schema/base.js';
+import type { BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { Workspace } from '../workspace/index.js';
 import type {
@@ -12,8 +12,6 @@ import type {
   YBlock,
   YBlocks,
 } from '../workspace/page.js';
-import type { Page } from '../workspace/page.js';
-import type { ProxyConfig } from '../yjs/config.js';
 import type { ProxyManager } from '../yjs/index.js';
 import { isPureObject, NativeWrapper } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
@@ -112,15 +110,8 @@ export function toBlockProps(
   yBlock: YBlock,
   proxy: ProxyManager
 ): Partial<BlockProps> {
-  const config: ProxyConfig = { deep: true };
   const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
   const props: Partial<BlockProps> = {};
-
-  Object.keys(prefixedProps).forEach(key => {
-    if (prefixedProps[key] && key.startsWith('sys:')) {
-      props[key.replace('sys:', '')] = prefixedProps[key];
-    }
-  });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
     if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
@@ -129,10 +120,10 @@ export function toBlockProps(
       if (NativeWrapper.is(realValue)) {
         props[key] = new NativeWrapper(realValue);
       } else if (realValue instanceof Y.Map) {
-        const value = proxy.createYProxy(realValue, config);
+        const value = proxy.createYProxy(realValue);
         props[key] = value;
       } else if (realValue instanceof Y.Array) {
-        const value = proxy.createYProxy(realValue, config);
+        const value = proxy.createYProxy(realValue);
         props[key] = value;
       } else {
         props[key] = prefixedProps[prefixedKey];
@@ -149,19 +140,4 @@ export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
 
 export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
   Y.applyUpdateV2(workspace.doc, fromBase64(update));
-}
-
-export function isInsideBlockByFlavour(
-  page: Page,
-  block: BaseBlockModel | string,
-  flavour: string
-): boolean {
-  const parent = page.getParent(block);
-  if (parent === null) {
-    return false;
-  }
-  if (flavour === parent.flavour) {
-    return true;
-  }
-  return isInsideBlockByFlavour(page, parent, flavour);
 }
