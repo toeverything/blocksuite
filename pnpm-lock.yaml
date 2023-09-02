@@ -28,100 +28,100 @@ importers:
     devDependencies:
       '@commitlint/cli':
         specifier: ^17.7.1
-        version: 17.7.1
+        version: registry.npmmirror.com/@commitlint/cli@17.7.1
       '@commitlint/config-conventional':
         specifier: ^17.7.0
-        version: 17.7.0
+        version: registry.npmmirror.com/@commitlint/config-conventional@17.7.0
       '@open-wc/dev-server-hmr':
         specifier: ^0.2.0
-        version: 0.2.0
+        version: registry.npmmirror.com/@open-wc/dev-server-hmr@0.2.0
       '@playwright/test':
         specifier: ^1.37.1
-        version: 1.37.1
+        version: registry.npmmirror.com/@playwright/test@1.37.1
       '@types/node':
         specifier: ^18.17.13
-        version: 18.17.13
+        version: registry.npmmirror.com/@types/node@18.17.13
       '@typescript-eslint/eslint-plugin':
         specifier: ^6.5.0
-        version: 6.5.0
+        version: registry.npmmirror.com/@typescript-eslint/eslint-plugin@6.5.0(@typescript-eslint/parser@6.5.0)(eslint@8.48.0)(typescript@5.2.2)
       '@typescript-eslint/parser':
         specifier: ^6.5.0
-        version: 6.5.0
+        version: registry.npmmirror.com/@typescript-eslint/parser@6.5.0(eslint@8.48.0)(typescript@5.2.2)
       '@vitest/coverage-istanbul':
         specifier: ^0.28.5
-        version: 0.28.5
+        version: registry.npmmirror.com/@vitest/coverage-istanbul@0.28.5(@vitest/ui@0.28.5)(happy-dom@10.11.2)
       '@vitest/ui':
         specifier: ^0.28.5
-        version: 0.28.5
+        version: registry.npmmirror.com/@vitest/ui@0.28.5
       es-module-lexer:
         specifier: ^1.3.0
-        version: 1.3.0
+        version: registry.npmmirror.com/es-module-lexer@1.3.0
       eslint:
         specifier: ^8.48.0
-        version: 8.48.0
+        version: registry.npmmirror.com/eslint@8.48.0
       eslint-config-prettier:
         specifier: ^9.0.0
-        version: 9.0.0
+        version: registry.npmmirror.com/eslint-config-prettier@9.0.0(eslint@8.48.0)
       eslint-plugin-lit:
         specifier: ^1.9.1
-        version: 1.9.1
+        version: registry.npmmirror.com/eslint-plugin-lit@1.9.1(eslint@8.48.0)
       eslint-plugin-prettier:
         specifier: ^5.0.0
-        version: 5.0.0
+        version: registry.npmmirror.com/eslint-plugin-prettier@5.0.0(eslint-config-prettier@9.0.0)(eslint@8.48.0)(prettier@3.0.3)
       eslint-plugin-simple-import-sort:
         specifier: ^10.0.0
-        version: 10.0.0
+        version: registry.npmmirror.com/eslint-plugin-simple-import-sort@10.0.0(eslint@8.48.0)
       eslint-plugin-wc:
         specifier: ^1.5.0
-        version: 1.5.0
+        version: registry.npmmirror.com/eslint-plugin-wc@1.5.0(eslint@8.48.0)
       happy-dom:
         specifier: ^10.11.2
-        version: 10.11.2
+        version: registry.npmmirror.com/happy-dom@10.11.2
       husky:
         specifier: ^8.0.3
-        version: 8.0.3
+        version: registry.npmmirror.com/husky@8.0.3
       lint-staged:
         specifier: ^14.0.1
-        version: 14.0.1
+        version: registry.npmmirror.com/lint-staged@14.0.1
       lit-analyzer:
         specifier: 2.0.0-pre.3
-        version: 2.0.0-pre.3
+        version: registry.npmmirror.com/lit-analyzer@2.0.0-pre.3
       madge:
         specifier: ^6.1.0
-        version: 6.1.0
+        version: registry.npmmirror.com/madge@6.1.0(typescript@5.2.2)
       micromatch:
         specifier: ^4.0.5
-        version: 4.0.5
+        version: registry.npmmirror.com/micromatch@4.0.5
       nyc:
         specifier: ^15.1.0
-        version: 15.1.0
+        version: registry.npmmirror.com/nyc@15.1.0
       prettier:
         specifier: ^3.0.3
-        version: 3.0.3
+        version: registry.npmmirror.com/prettier@3.0.3
       pretty-format:
         specifier: ^29.6.3
-        version: 29.6.3
+        version: registry.npmmirror.com/pretty-format@29.6.3
       ts-lit-plugin:
         specifier: ^1.2.1
-        version: 1.2.1
+        version: registry.npmmirror.com/ts-lit-plugin@1.2.1
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1
+        version: registry.npmmirror.com/ts-node@10.9.1(@types/node@18.17.13)(typescript@5.2.2)
       typescript:
-        specifier: ^5.2.2
-        version: 5.2.2
+        specifier: ^5
+        version: registry.npmmirror.com/typescript@5.2.2
       vite:
         specifier: ^4.4.9
-        version: 4.4.9
+        version: registry.npmmirror.com/vite@4.4.9(@types/node@18.17.13)
       vite-plugin-istanbul:
         specifier: ^4.1.0
-        version: 4.1.0
+        version: registry.npmmirror.com/vite-plugin-istanbul@4.1.0(vite@4.4.9)
       vite-plugin-web-components-hmr:
         specifier: ^0.1.3
-        version: 0.1.3
+        version: registry.npmmirror.com/vite-plugin-web-components-hmr@0.1.3(vite@4.4.9)
       vitest:
         specifier: ^0.28.5
-        version: 0.28.5
+        version: registry.npmmirror.com/vitest@0.28.5(@vitest/ui@0.28.5)(happy-dom@10.11.2)
 
   packages/block-std:
     dependencies:
