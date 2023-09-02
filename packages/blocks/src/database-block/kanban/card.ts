@@ -39,6 +39,10 @@ const styles = css`
     gap: 8px;
   }
 
+  affine-data-view-kanban-card .card-header-title uni-lit {
+    width: 100%;
+  }
+
   .card-header.has-divider {
     border-bottom: 0.5px solid var(--affine-border-color);
   }

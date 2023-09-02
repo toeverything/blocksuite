@@ -297,6 +297,9 @@ export const bindHotKey = (blockElement: BlockElement) => {
       ctx.get('defaultState').event.preventDefault();
       const view = blockElement.root.viewStore;
       const selection = blockElement.root.selectionManager;
+      if (!selection.find('block')) {
+        return;
+      }
       const blocks: BlockSelection[] = [];
       view.walkThrough(nodeView => {
         if (nodeView.type === 'block') {
