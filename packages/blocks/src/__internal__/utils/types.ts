@@ -13,13 +13,9 @@ import {
   type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
-import type { Clipboard } from '../clipboard/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
-import type {
-  BlockServiceInstanceByKey,
-  ServiceFlavour,
-} from '../service/legacy-services/index.js';
+import type { ServiceFlavour } from '../service/legacy-services/index.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -86,23 +82,7 @@ export type DataViewSelectionState = DataViewSelection | undefined;
 
 /** Common context interface definition for block models. */
 
-/**
- * Functions that a block host provides
- */
-export interface BlockHostContext {
-  getService: <Key extends ServiceFlavour>(
-    flavour: Key
-  ) => BlockServiceInstanceByKey<Key>;
-}
-
 export type CommonSlots = RefNodeSlots;
-
-export interface BlockHost extends BlockHostContext {
-  page: Page;
-  flavour: string;
-  clipboard: Clipboard;
-  readonly slots: CommonSlots;
-}
 
 type EditorMode = 'page' | 'edgeless';
 type EditorSlots = {
@@ -114,15 +94,6 @@ export type AbstractEditor = {
   mode: EditorMode;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;
-
-/**
- * type of `window.getSelection().type`
- *
- * The attribute must return "None" if this is empty, "Caret" if this's range is collapsed, and "Range" otherwise.
- *
- * More details see https://w3c.github.io/selection-api/#dom-selection-type
- */
-export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BaseBlockModel & Record<string, any>;

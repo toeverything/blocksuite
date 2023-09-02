@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockElement } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { Workspace } from '@blocksuite/store';
@@ -7,7 +8,6 @@ import type { VRange } from '@blocksuite/virgo';
 import type { ListType } from '../../list-block/index.js';
 import { matchFlavours } from './model.js';
 import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
-import type { ExtendedModel } from './types.js';
 
 export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const richText = await asyncGetRichTextByModel(model);
@@ -38,33 +38,28 @@ export function asyncFocusRichText(
   return asyncSetVRange(model, vRange);
 }
 
-export function isInSamePath(
-  page: Page,
-  children: BaseBlockModel,
-  father: BaseBlockModel
-): boolean {
-  if (children === father) {
-    return true;
-  }
-  let parent: BaseBlockModel | null;
-  for (;;) {
-    parent = page.getParent(children);
-    if (parent === null) {
-      return false;
-    } else if (parent.id === father.id) {
-      return true;
-    }
-    children = parent;
-  }
+function addSpace(element: BlockElement, index: number) {
+  element.model.text?.insert(' ', index);
+  const currentText = element.selection.find('text');
+  element.selection.setGroup('note', [
+    element.selection.getInstance('text', {
+      from: {
+        path: element.path,
+        index: (currentText?.from.index ?? 0) + 1,
+        length: 0,
+      },
+      to: null,
+    }),
+  ]);
 }
 
 export function convertToList(
-  page: Page,
-  model: ExtendedModel,
+  element: BlockElement,
   listType: ListType,
   prefix: string,
   otherProperties?: Record<string, unknown>
 ): boolean {
+  const { page, model } = element;
   if (matchFlavours(model, ['affine:list'])) {
     return false;
   }
@@ -73,7 +68,7 @@ export function convertToList(
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
-    model.text?.insert(' ', prefix.length);
+    addSpace(element, prefix.length);
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
@@ -92,11 +87,11 @@ export function convertToList(
 }
 
 export function convertToParagraph(
-  page: Page,
-  model: ExtendedModel,
+  element: BlockElement,
   type: 'text' | 'quote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
   prefix: string
 ): boolean {
+  const { page, model } = element;
   if (matchFlavours(model, ['affine:paragraph']) && model['type'] === type) {
     return false;
   }
@@ -105,7 +100,7 @@ export function convertToParagraph(
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
-    model.text?.insert(' ', prefix.length);
+    addSpace(element, prefix.length);
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
@@ -122,7 +117,7 @@ export function convertToParagraph(
     matchFlavours(model, ['affine:paragraph']) &&
     model['type'] !== type
   ) {
-    model.text?.insert(' ', prefix.length);
+    addSpace(element, prefix.length);
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
@@ -139,11 +134,14 @@ export function convertToParagraph(
 }
 
 export function convertToDivider(
-  page: Page,
-  model: ExtendedModel,
+  element: BlockElement,
   prefix: string
 ): boolean {
-  if (matchFlavours(model, ['affine:divider']) || model.type === 'quote') {
+  const { page, model } = element;
+  if (
+    matchFlavours(model, ['affine:divider']) ||
+    (matchFlavours(model, ['affine:paragraph']) && model.type === 'quote')
+  ) {
     return false;
   }
   if (!matchFlavours(model, ['affine:divider'])) {
@@ -151,14 +149,13 @@ export function convertToDivider(
     if (!parent) return false;
 
     const index = parent.children.indexOf(model);
-    model.text?.insert(' ', prefix.length);
+    addSpace(element, prefix.length);
     page.captureSync();
 
     model.text?.delete(0, prefix.length + 1);
     const blockProps = {
       children: model.children,
     };
-    // space.deleteBlock(model);
     page.addBlock('affine:divider', blockProps, parent, index);
 
     const nextBlock = parent.children[index + 1];

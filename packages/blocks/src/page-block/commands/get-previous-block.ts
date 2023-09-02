@@ -2,10 +2,14 @@ import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-export const getPreviousBlockCommand: Command<{
-  path: string[];
-}> = (ctx, options) => {
-  const path = options?.path;
+export const getPreviousBlockCommand: Command<
+  never,
+  'previousBlock',
+  {
+    path: string[];
+  }
+> = async (ctx, next) => {
+  const path = ctx.path;
   assertExists(path);
   const viewStore = ctx.blockStore.viewStore;
   const previousView = viewStore.findPrev(path, nodeView => {
@@ -16,11 +20,7 @@ export const getPreviousBlockCommand: Command<{
   });
 
   if (previousView) {
-    const el = previousView.view;
-    ctx.data.previousBlock = el as BlockElement;
-    return true;
-  } else {
-    return false;
+    await next({ previousBlock: previousView.view as BlockElement });
   }
 };
 
