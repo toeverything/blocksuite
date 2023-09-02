@@ -76,9 +76,12 @@ function handleZoom(
   newElementIds: string[],
   edgeless: EdgelessPageBlockComponent
 ) {
-  const { surface } = edgeless;
+  const { surface, page } = edgeless;
   const { viewport } = surface;
-  const newElements = Array.from(newElementIds, id => surface.pickById(id));
+  const newElements = Array.from(
+    newElementIds,
+    id => surface.pickById(id) ?? page.getBlockById(id)
+  );
   let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
   totalBound = inflateBound(totalBound, 30);
   let zoom = viewport.zoom;
