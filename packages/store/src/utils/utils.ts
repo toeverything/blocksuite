@@ -3,21 +3,13 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
-import type { BaseBlockModel, BlockSchema } from '../schema/base.js';
+import type { BlockSchema } from '../schema/base.js';
 import { internalPrimitives } from '../schema/base.js';
 import type { Workspace } from '../workspace/index.js';
-import type {
-  BlockProps,
-  PrefixedBlockProps,
-  YBlock,
-  YBlocks,
-} from '../workspace/page.js';
-import type { Page } from '../workspace/page.js';
-import type { ProxyConfig } from '../yjs/config.js';
+import type { BlockProps, YBlock, YBlocks } from '../workspace/page.js';
 import type { ProxyManager } from '../yjs/index.js';
-import { isPureObject, NativeWrapper } from '../yjs/index.js';
-import { Text } from '../yjs/text-adapter.js';
-import { native2Y } from '../yjs/utils.js';
+import { canToProxy, canToY } from '../yjs/index.js';
+import { native2Y, NativeWrapper, Text } from '../yjs/index.js';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -58,16 +50,16 @@ export function syncBlockProps(
 
     const isText = propSchema[key] instanceof Text;
     if (isText) {
-      if (value instanceof Text) {
-        yBlock.set(`prop:${key}`, value.yText);
-      } else {
-        // When copying the database, the value of title is a string
-        yBlock.set(`prop:${key}`, new Y.Text(value));
-      }
+      const text =
+        value instanceof Text ? value.yText : new Y.Text(value as string);
+      yBlock.set(`prop:${key}`, text);
       return;
     }
 
     if (propSchema[key] instanceof NativeWrapper) {
+      if (!(value instanceof NativeWrapper)) {
+        throw new Error('Invalid NativeWrapper value');
+      }
       yBlock.set(`prop:${key}`, value.yMap);
       return;
     }
@@ -84,7 +76,7 @@ export function syncBlockProps(
       return;
     }
 
-    if (Array.isArray(value) || isPureObject(value)) {
+    if (canToY(value)) {
       yBlock.set(`prop:${key}`, native2Y(value, true));
       return;
     }
@@ -97,13 +89,20 @@ export function syncBlockProps(
     if (!yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined) {
       if (value instanceof NativeWrapper) {
         yBlock.set(`prop:${key}`, value.yMap);
-      } else if (value instanceof Text) {
-        yBlock.set(`prop:${key}`, value.yText);
-      } else if (Array.isArray(value) || isPureObject(value)) {
-        yBlock.set(`prop:${key}`, native2Y(value, true));
-      } else {
-        yBlock.set(`prop:${key}`, value);
+        return;
       }
+
+      if (value instanceof Text) {
+        yBlock.set(`prop:${key}`, value.yText);
+        return;
+      }
+
+      if (canToY(value)) {
+        yBlock.set(`prop:${key}`, native2Y(value, true));
+        return;
+      }
+
+      yBlock.set(`prop:${key}`, value);
     }
   });
 }
@@ -112,31 +111,25 @@ export function toBlockProps(
   yBlock: YBlock,
   proxy: ProxyManager
 ): Partial<BlockProps> {
-  const config: ProxyConfig = { deep: true };
-  const prefixedProps = yBlock.toJSON() as PrefixedBlockProps;
+  const prefixedProps = yBlock.toJSON();
   const props: Partial<BlockProps> = {};
-
-  Object.keys(prefixedProps).forEach(key => {
-    if (prefixedProps[key] && key.startsWith('sys:')) {
-      props[key.replace('sys:', '')] = prefixedProps[key];
-    }
-  });
 
   Object.keys(prefixedProps).forEach(prefixedKey => {
     if (prefixedProps[prefixedKey] && prefixedKey.startsWith('prop:')) {
       const key = prefixedKey.replace('prop:', '');
       const realValue = yBlock.get(prefixedKey);
+
       if (NativeWrapper.is(realValue)) {
         props[key] = new NativeWrapper(realValue);
-      } else if (realValue instanceof Y.Map) {
-        const value = proxy.createYProxy(realValue, config);
-        props[key] = value;
-      } else if (realValue instanceof Y.Array) {
-        const value = proxy.createYProxy(realValue, config);
-        props[key] = value;
-      } else {
-        props[key] = prefixedProps[prefixedKey];
+        return;
       }
+
+      if (canToProxy(realValue)) {
+        props[key] = proxy.createYProxy(realValue);
+        return;
+      }
+
+      props[key] = prefixedProps[prefixedKey];
     }
   });
 
@@ -149,19 +142,4 @@ export function encodeWorkspaceAsYjsUpdateV2(workspace: Workspace): string {
 
 export function applyYjsUpdateV2(workspace: Workspace, update: string): void {
   Y.applyUpdateV2(workspace.doc, fromBase64(update));
-}
-
-export function isInsideBlockByFlavour(
-  page: Page,
-  block: BaseBlockModel | string,
-  flavour: string
-): boolean {
-  const parent = page.getParent(block);
-  if (parent === null) {
-    return false;
-  }
-  if (flavour === parent.flavour) {
-    return true;
-  }
-  return isInsideBlockByFlavour(page, parent, flavour);
 }

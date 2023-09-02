@@ -13,6 +13,7 @@ import {
 } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { canToProxy } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
 import type { PageMeta } from './meta.js';
 import { Space } from './space.js';
@@ -22,18 +23,13 @@ export type YBlock = Y.Map<unknown>;
 export type YBlocks = Y.Map<YBlock>;
 
 /** JSON-serializable properties of a block */
-export type BlockProps = {
+export type BlockSysProps = {
   id: string;
   flavour: string;
-  text?: Text;
   children?: BaseBlockModel[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [index: string]: any;
 };
-
-export type PrefixedBlockProps = Record<string, unknown> & {
-  'sys:id': string;
-  'sys:flavour': string;
+export type BlockProps = BlockSysProps & {
+  [index: string]: unknown;
 };
 
 function createChildMap(yChildIds: Y.Array<string>) {
@@ -150,14 +146,6 @@ export class Page extends Space<FlatBlockMap> {
     return this._history.canRedo();
   }
 
-  get YText() {
-    return Y.Text;
-  }
-
-  get YMap() {
-    return Y.Map;
-  }
-
   get Text() {
     return Text;
   }
@@ -212,10 +200,6 @@ export class Page extends Space<FlatBlockMap> {
     return Array.from(this._blockMap.values()).filter(
       ({ flavour }) => flavour === blockFlavour
     );
-  }
-
-  hasFlavour(flavour: string) {
-    return this.getBlockByFlavour(flavour).length > 0;
   }
 
   getParent(target: BaseBlockModel | string): BaseBlockModel | null {
@@ -723,20 +707,21 @@ export class Page extends Space<FlatBlockMap> {
   };
 
   private _createBlockModel(
+    id: string,
+    flavour: string,
     props: Omit<BlockProps, 'children'>,
     block: YBlock
   ) {
-    const schema = this.schema.flavourSchemaMap.get(props.flavour);
-    if (!schema) {
-      throw new Error(`Block flavour ${props.flavour} is not registered`);
-    } else if (!props.id) {
-      throw new Error('Block id is not defined');
-    }
+    const schema = this.schema.flavourSchemaMap.get(flavour);
+    assertExists(schema, `Block flavour ${flavour} is not registered`);
+    assertExists(id, 'Block id is not defined');
+
     const blockModel = schema.model.toModel
       ? schema.model.toModel()
       : new BaseBlockModel();
 
-    blockModel.id = props.id;
+    blockModel.id = id;
+    blockModel.flavour = flavour;
     const modelProps = schema.model.props?.(internalPrimitives) ?? {};
     Object.entries(modelProps).forEach(([key, value]) => {
       // @ts-ignore
@@ -747,7 +732,6 @@ export class Page extends Space<FlatBlockMap> {
     });
     blockModel.page = this;
     blockModel.yBlock = block;
-    blockModel.flavour = schema.model.flavour;
     blockModel.role = schema.model.role;
 
     blockModel.created.emit();
@@ -758,8 +742,9 @@ export class Page extends Space<FlatBlockMap> {
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
 
+    const flavour = yBlock.get('sys:flavour') as string;
     const props = toBlockProps(yBlock, this.doc.proxy);
-    const model = this._createBlockModel({ ...props, id }, yBlock);
+    const model = this._createBlockModel(id, flavour, { ...props }, yBlock);
     this._blockMap.set(id, model);
 
     const yChildren = yBlock.get('sys:children');
@@ -801,9 +786,9 @@ export class Page extends Space<FlatBlockMap> {
     const model = this._blockMap.get(id);
     if (model === this._root) {
       this.slots.rootDeleted.emit(id);
-    } else {
-      // TODO dispatch model delete event
     }
+
+    this.slots.blockUpdated.emit({ type: 'delete', id });
     this._blockMap.delete(id);
   }
 
@@ -840,10 +825,8 @@ export class Page extends Space<FlatBlockMap> {
       const value = event.target.get(key);
       yProps[key] = { old: event.changes.keys.get(key)?.oldValue, new: value };
       hasPropsUpdate = true;
-      if (value instanceof Y.Map || value instanceof Y.Array) {
-        props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value, {
-          deep: true,
-        });
+      if (canToProxy(value)) {
+        props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value);
       } else {
         props[key.replace('prop:', '')] = value;
       }

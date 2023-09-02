@@ -2,7 +2,6 @@ import { debug } from '@blocksuite/global/debug';
 import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
 
-import type { ProxyConfig } from './config.js';
 import { ProxyManager } from './proxy.js';
 
 export type BlockSuiteDocAllowedValue =
@@ -41,9 +40,9 @@ export class BlockSuiteDoc extends Y.Doc {
     > = BlockSuiteDocData[Key] extends Record<string, unknown>
       ? BlockSuiteDocData[Key]
       : never,
-  >(key: Key, config: ProxyConfig = {}): Value {
+  >(key: Key): Value {
     const map = super.getMap(key);
-    return this.proxy.createYProxy(map, config);
+    return this.proxy.createYProxy(map);
   }
 
   getArrayProxy<
@@ -51,9 +50,9 @@ export class BlockSuiteDoc extends Y.Doc {
     Value extends unknown[] = BlockSuiteDocData[Key] extends unknown[]
       ? BlockSuiteDocData[Key]
       : never,
-  >(key: Key, config: ProxyConfig = {}): Value {
+  >(key: Key): Value {
     const array = super.getArray(key);
-    return this.proxy.createYProxy(array, config) as Value;
+    return this.proxy.createYProxy(array) as Value;
   }
 
   @debug('transact')

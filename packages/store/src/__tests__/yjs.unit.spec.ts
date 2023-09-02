@@ -41,12 +41,12 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = proxyManager.createYProxy(arr, {
-        readonly: true,
-      }) as unknown[];
+      const proxy = proxyManager.createYProxy(arr) as unknown[];
+      proxyManager.readonly = true;
       expect(arr.get(0)).toBe(0);
 
       expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
+      proxyManager.readonly = false;
     });
   });
 
@@ -63,9 +63,7 @@ describe('blocksuite yjs', () => {
       map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proxy = proxyManager.createYProxy<Record<string, any>>(map, {
-        deep: true,
-      });
+      const proxy = proxyManager.createYProxy<Record<string, any>>(map);
 
       expect(proxy.num).toBe(0);
       expect(proxy.obj.foo).toBe(1);
@@ -105,12 +103,7 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(
-        map,
-        {
-          deep: true,
-        }
-      );
+      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(map);
       proxy.inner = { ...proxy.inner };
       expect(proxy.inner.text).toBeInstanceOf(Y.Text);
       expect(proxy.inner.text.toJSON()).toBe('hello');
@@ -125,10 +118,11 @@ describe('blocksuite yjs', () => {
       inner.set('native', native.yMap);
 
       const proxy = proxyManager.createYProxy<{
-        inner: { native: NativeWrapper };
-      }>(map, {
-        deep: true,
-      });
+        inner: {
+          native: NativeWrapper<string[]>;
+          native2: NativeWrapper<number>;
+        };
+      }>(map);
 
       expect(proxy.inner.native.getValue()).toEqual(['hello', 'world']);
 
@@ -139,6 +133,12 @@ describe('blocksuite yjs', () => {
         'world',
         'foo',
       ]);
+
+      const native2 = new NativeWrapper(0);
+      proxy.inner.native2 = native2;
+      expect(map.get('inner').get('native2').get('value')).toBe(0);
+      native2.setValue(1);
+      expect(map.get('inner').get('native2').get('value')).toBe(1);
     });
   });
 });
