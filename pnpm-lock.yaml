@@ -108,7 +108,7 @@ importers:
         specifier: ^10.9.1
         version: 10.9.1(@types/node@18.17.13)(typescript@5.2.2)
       typescript:
-        specifier: ^5.2.2
+        specifier: ^5
         version: 5.2.2
       vite:
         specifier: ^4.4.9
