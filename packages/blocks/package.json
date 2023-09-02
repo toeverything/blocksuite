@@ -19,7 +19,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.13",
+    "@toeverything/theme": "^0.7.15",
     "nanoid": "^4",
     "yjs": "^13"
   },
@@ -79,7 +79,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.13",
+    "@toeverything/theme": "^0.7.15",
     "@types/autosize": "^4.0.1",
     "@types/marked": "^4.3.1",
     "@types/sortablejs": "^1.15.1",

@@ -206,7 +206,7 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.13
+        specifier: ^0.7.15
         version: 0.7.15
       '@types/autosize':
         specifier: ^4.0.1
@@ -265,7 +265,7 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.13
+        specifier: ^0.7.15
         version: 0.7.15
 
   packages/global:
@@ -2926,7 +2926,7 @@ packages:
       '@types/node': '*'
       cosmiconfig: '>=7'
       ts-node: '>=10'
-      typescript: '>=4'
+      typescript: ^5
     dependencies:
       '@types/node': 20.4.7
       cosmiconfig: 8.2.0
@@ -5040,7 +5040,7 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
     peerDependencies:
-      typescript: ^3.9.5 || ^4.9.5 || ^5
+      typescript: ^5
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -6723,7 +6723,7 @@ packages:
     resolution: {integrity: sha512-Cbu4nIqnEdd+THNEsBdkolnOXhg0I8XteoHaEKgvsxpsbWda4IsUut2c187HxywQCvveojow0Dgw/amxtSKVkQ==}
     engines: {node: '>=16.13.0'}
     peerDependencies:
-      typescript: '>=4.2.0'
+      typescript: ^5
     dependencies:
       typescript: 5.2.2
     dev: true
@@ -6748,7 +6748,7 @@ packages:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
       '@types/node': '*'
-      typescript: '>=2.7'
+      typescript: ^5
     peerDependenciesMeta:
       '@swc/core':
         optional: true
@@ -6779,7 +6779,7 @@ packages:
       '@swc/core': '>=1.2.50'
       '@swc/wasm': '>=1.2.50'
       '@types/node': '*'
-      typescript: '>=2.7'
+      typescript: ^5
     peerDependenciesMeta:
       '@swc/core':
         optional: true
@@ -6836,7 +6836,7 @@ packages:
     resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
     engines: {node: '>= 6'}
     peerDependencies:
-      typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
+      typescript: ^5
     dependencies:
       tslib: 1.14.1
       typescript: 5.2.2
