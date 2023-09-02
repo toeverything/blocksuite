@@ -8,7 +8,6 @@ import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
-import { bindKeymap } from './keymap.js';
 import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
