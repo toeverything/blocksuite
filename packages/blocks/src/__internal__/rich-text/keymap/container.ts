@@ -209,13 +209,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       assertExists(vRange);
 
       if (
-        !tryConvertBlock(
-          model.page,
-          model,
-          vEditor,
-          _getPrefixText(vEditor),
-          vRange
-        )
+        !tryConvertBlock(blockElement, vEditor, _getPrefixText(vEditor), vRange)
       ) {
         _preventDefault(ctx);
         return true;
@@ -262,7 +256,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const prefixText = _getPrefixText(vEditor);
 
-      if (!tryConvertBlock(model.page, model, vEditor, prefixText, vRange)) {
+      if (!tryConvertBlock(blockElement, vEditor, prefixText, vRange)) {
         _preventDefault(ctx);
       }
 
