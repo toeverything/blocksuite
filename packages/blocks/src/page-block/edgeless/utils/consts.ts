@@ -1,4 +1,4 @@
-import { DEFAULT_ROUGHNESS } from '@blocksuite/phasor';
+import { DEFAULT_ROUGHNESS } from '../../../surface-block/index.js';
 
 export const NOTE_MIN_WIDTH = 200;
 export const NOTE_MIN_HEIGHT = 20;

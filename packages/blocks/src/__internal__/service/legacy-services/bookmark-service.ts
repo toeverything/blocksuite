@@ -45,12 +45,15 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     return block.url;
   }
 
-  override block2Json(block: BookmarkBlockModel): SerializedBlock {
+  override block2Json(
+    block: BookmarkBlockModel,
+    children: SerializedBlock[]
+  ): SerializedBlock {
     const clonedProps = cloneBookmarkProperties(block);
 
     return {
       flavour: block.flavour,
-      children: [],
+      children,
       ...clonedProps,
     };
   }

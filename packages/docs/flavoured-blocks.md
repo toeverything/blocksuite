@@ -12,6 +12,10 @@ In general, the terms "block flavour" and "block type" can be used interchangeab
 
 In BlockSuite, the basic APIs for managing blocks include `addBlock`, `updateBlock`, and `deleteBlock`. These operations allow users to create, modify, and remove blocks within a `page`, providing an easy way to manage and organize the structured content.
 
+::: tip
+Block operations APIs are only available after the page is loaded. Remember to add `await page.waitForLoaded();` before calling these APIs.
+:::
+
 The `page.addBlock` method takes one required `flavour` argument. This argument marks the type of block to be added. Optionally, you can use the `props` argument that contains the properties for the new block, the `parent` and `parentIndex` arguments to specify the parent block and the index at which the new block should be inserted, respectively.
 
 Example usage:

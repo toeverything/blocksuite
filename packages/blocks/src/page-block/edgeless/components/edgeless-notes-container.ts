@@ -1,5 +1,4 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -15,6 +14,7 @@ import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
 } from '../../../note-block/note-model.js';
+import { deserializeXYWH } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-note-mask')

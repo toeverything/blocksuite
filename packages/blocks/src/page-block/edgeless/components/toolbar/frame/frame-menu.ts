@@ -1,12 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
 
 import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { Bound } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
 export const FrameConfig = [

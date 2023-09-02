@@ -26,7 +26,7 @@ import {
   generateElementId,
   generateKeyBetween,
   normalizeWheelDeltaY,
-} from './utils/std.js';
+} from './utils/index.js';
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;

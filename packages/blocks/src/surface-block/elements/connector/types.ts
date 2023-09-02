@@ -5,6 +5,7 @@ import type { ISurfaceElement } from '../surface-element.js';
 export enum ConnectorMode {
   Straight,
   Orthogonal,
+  Curve,
 }
 
 // at least one of id and position is not null

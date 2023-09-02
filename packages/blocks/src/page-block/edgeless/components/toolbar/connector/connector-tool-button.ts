@@ -2,7 +2,6 @@ import '../../buttons/toolbar-button.js';
 import './connector-menu.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -11,6 +10,7 @@ import {
   LineWidth,
 } from '../../../../../__internal__/index.js';
 import { EdgelessConnectorIcon } from '../../../../../icons/index.js';
+import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   Bound,
-  contains,
   getCommonBound,
   inflateBound,
   transformPointsToNewBound,
@@ -62,20 +61,6 @@ describe('bound utils', () => {
       h: 1,
     };
     expect(getCommonBound([b1])).toMatchObject(b1);
-  });
-
-  it('contains', () => {
-    const a0 = new Bound(0, 0, 10, 10);
-    const b0 = new Bound(0, 0, 5, 5);
-    expect(contains(a0, b0)).toBeTruthy();
-
-    const a1 = new Bound(0, 0, 10, 10);
-    const b1 = new Bound(0, 0, 10, 10);
-    expect(contains(a1, b1)).toBeTruthy();
-
-    const a2 = new Bound(0, 0, 10, 10);
-    const b2 = new Bound(5, 5, 12, 10);
-    expect(contains(a2, b2)).toBeFalsy();
   });
 
   it('inflateBound', () => {

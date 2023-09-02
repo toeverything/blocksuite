@@ -20,11 +20,11 @@
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@toeverything/theme": "^0.7.15",
+    "nanoid": "^4",
     "yjs": "^13"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/phasor": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.1",
     "@types/webfontloader": "^1.6.35",
@@ -40,6 +40,7 @@
     "sortablejs": "^1.15.0",
     "turndown": "^7.1.2",
     "webfontloader": "^1.6.28",
+    "fractional-indexing": "^3.2.0",
     "zod": "^3.22.2"
   },
   "exports": {

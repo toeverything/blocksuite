@@ -31,6 +31,10 @@ const page = workspace.createPage({ id: 'page0' });
 
 The `page` instance provides a set of core APIs for performing block operations, e.g., `page.addBlock`, `page.updateBlock`, and `page.deleteBlock`. These APIs will be further introduced in the following sections of the document.
 
+::: tip
+Block operations APIs are only available after the page is loaded. Remember to add `await page.waitForLoaded();` before calling these APIs.
+:::
+
 ::: info
 🚧 A page within a workspace can also be loaded asynchronously.
 :::

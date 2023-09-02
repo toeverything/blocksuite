@@ -1,24 +1,3 @@
-import {
-  Bound,
-  clamp,
-  type PhasorElementWithText,
-  ShapeElement,
-  TextElement,
-} from '@blocksuite/phasor';
-import {
-  type PhasorElement,
-  type SurfaceManager,
-  type SurfaceViewport,
-} from '@blocksuite/phasor';
-import {
-  contains,
-  deserializeXYWH,
-  getQuadBoundsWithRotation,
-  intersects,
-  isPointIn as isPointInFromPhasor,
-  serializeXYWH,
-} from '@blocksuite/phasor';
-import { GRID_GAP_MAX, GRID_GAP_MIN } from '@blocksuite/phasor';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
@@ -27,6 +6,22 @@ import {
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import {
+  Bound,
+  clamp,
+  deserializeXYWH,
+  getQuadBoundsWithRotation,
+  GRID_GAP_MAX,
+  GRID_GAP_MIN,
+  isPointIn as isPointInFromPhasor,
+  type PhasorElement,
+  type PhasorElementWithText,
+  serializeXYWH,
+  ShapeElement,
+  type SurfaceManager,
+  type SurfaceViewport,
+  TextElement,
+} from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from '../services/tools-manager.js';
 
@@ -71,14 +66,10 @@ export function pickTopBlock(
   return null;
 }
 
-export function pickBlocksByBound(
-  blocks: TopLevelBlockModel[],
-  bound: Omit<Bound, 'serialize'>
-) {
+export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
   return blocks.filter(block => {
-    const [x, y, w, h] = deserializeXYWH(block.xywh);
-    const blockBound = { x, y, w, h };
-    return contains(bound, blockBound) || intersects(bound, blockBound);
+    const blockBound = Bound.deserialize(block.xywh);
+    return bound.contains(blockBound) || bound.isIntersectWithBound(blockBound);
   });
 }
 

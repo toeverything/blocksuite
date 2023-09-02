@@ -15,7 +15,6 @@
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
-    "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@shoelace-style/shoelace": "2.0.0",

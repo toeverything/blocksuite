@@ -1,7 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { SHAPE_TEXT_PADDING, ShapeElement } from '@blocksuite/phasor';
-import { Bound } from '@blocksuite/phasor';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -9,6 +7,11 @@ import * as Y from 'yjs';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
+import {
+  Bound,
+  SHAPE_TEXT_PADDING,
+  ShapeElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 import { GET_DEFAULT_LINE_COLOR } from '../panel/color-panel.js';

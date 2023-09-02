@@ -1,11 +1,11 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
+
+import type { IPoint } from '../../../../__internal__/utils/types.js';
 import {
   Bound,
   getQuadBoundsWithRotation,
   rotatePoints,
-} from '@blocksuite/phasor';
-
-import type { IPoint } from '../../../../__internal__/utils/types.js';
+} from '../../../../surface-block/index.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 

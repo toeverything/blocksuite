@@ -1,16 +1,12 @@
 import {
+  Bound,
   ConnectorMode,
   type Controller,
   type DebugElement,
   type ShapeType,
   StrokeStyle,
-} from '@blocksuite/phasor';
-import {
-  Bound,
   SurfaceManager,
-  // Uncomment to batch load mock data
-  // initMockData,
-} from '@blocksuite/phasor';
+} from '@blocksuite/blocks';
 import * as Y from 'yjs';
 
 function testClick(surface: SurfaceManager, e: MouseEvent) {

@@ -1,5 +1,11 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { css, html, LitElement, nothing } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import * as Y from 'yjs';
+
+import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
 import {
   Bound,
   type Connection,
@@ -14,13 +20,7 @@ import {
   ShapeMethodsMap,
   toDegree,
   Vec,
-} from '@blocksuite/phasor';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
-import * as Y from 'yjs';
-
-import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';

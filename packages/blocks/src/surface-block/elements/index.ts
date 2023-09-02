@@ -3,7 +3,7 @@ import { BrushElementDefaultProps } from './brush/constants.js';
 import type { IBrush } from './brush/types.js';
 import { ConnectorElement } from './connector/connector-element.js';
 import { ConnectorElementDefaultProps } from './connector/constants.js';
-import type { IConnector } from './connector/types.js';
+import { type IConnector } from './connector/types.js';
 import {
   DebugElement,
   DebugElementDefaultProps,
@@ -24,6 +24,7 @@ import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
 
 // eslint-disable-next-line simple-import-sort/exports
+export { ConnectorMode } from './connector/types.js';
 export { BrushElement } from './brush/brush-element.js';
 export { ConnectorElement } from './connector/connector-element.js';
 export { DebugElement } from './debug/debug-element.js';

@@ -7,6 +7,7 @@ import { type IVec, Vec } from './vec.js';
 
 export const EPSILON = 1e-12;
 export const MACHINE_EPSILON = 1.12e-16;
+export const CURVETIME_EPSILON = 1e-8;
 
 interface TLBounds {
   minX: number;
@@ -52,6 +53,10 @@ export function intersects(a: IBound, b: IBound): boolean {
 
 export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
+}
+
+export function isZero(x: number) {
+  return x >= -EPSILON && x <= EPSILON;
 }
 
 export function pointAlmostEqual(a: IVec, b: IVec, _epsilon = 0.0001) {
