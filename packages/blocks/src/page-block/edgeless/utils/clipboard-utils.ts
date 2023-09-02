@@ -9,6 +9,7 @@ import {
   Bound,
   ConnectorElement,
   FrameElement,
+  inflateBound,
   type PhasorElementType,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
