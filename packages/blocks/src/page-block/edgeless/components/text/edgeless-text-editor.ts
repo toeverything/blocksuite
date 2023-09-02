@@ -10,6 +10,7 @@ import { Bound, type TextElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
+import { calculateRotatedPointPosition } from './utils.js';
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
@@ -34,17 +35,33 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const edgeless = this._edgeless;
     const element = this._element;
     if (edgeless && element) {
-      const rect = this._virgoContainer.getBoundingClientRect();
+      const width = this._virgoContainer.offsetWidth;
       const vLines = Array.from(
         this._virgoContainer.querySelectorAll('v-line')
       );
-      const lineHeight = vLines[0].getBoundingClientRect().height;
+      const lineHeight = vLines[0].offsetHeight;
+
+      const bcr = this._virgoContainer.getBoundingClientRect();
+
+      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
+        bcr.left + bcr.width / 2,
+        bcr.top + bcr.height / 2,
+        -element.rotate,
+        this._virgoContainer.offsetLeft,
+        this._virgoContainer.offsetTop
+      );
+
+      const [modelLeftTopX, modelLeftTopY] = edgeless.surface.toModelCoord(
+        leftTopX,
+        leftTopY
+      );
+
       edgeless.surface.updateElement(element.id, {
         xywh: new Bound(
-          element.x,
-          element.y,
-          rect.width / edgeless.surface.viewport.zoom,
-          (vLines.length / edgeless.surface.viewport.zoom) * lineHeight
+          modelLeftTopX,
+          modelLeftTopY,
+          width,
+          vLines.length * lineHeight
         ).serialize(),
       });
     }
@@ -124,7 +141,17 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     if (viewport && this._element && this._edgeless) {
       const zoom = viewport.zoom;
       const rect = getSelectedRect([this._element]);
-      const [x, y] = this._edgeless.surface.toViewCoord(rect.left, rect.top);
+      const rotate = this._element.rotate;
+
+      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+        rotate,
+        rect.left,
+        rect.top
+      );
+
+      const [x, y] = this._edgeless.surface.toViewCoord(leftTopX, leftTopY);
 
       virgoStyle = styleMap({
         position: 'absolute',
@@ -135,7 +162,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
         outline: 'none',
-        transform: `scale(${zoom}, ${zoom})`,
+        transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
         transformOrigin: 'top left',
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
