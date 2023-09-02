@@ -135,9 +135,8 @@ export class UIEventDispatcher {
     };
   }
 
-  bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
-    return this.add('keyDown', bindKeymap(keymap), options);
-  }
+  bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
+    this._keyboardControl.bindHotkey(...args);
 
   private get _currentSelections() {
     return this.blockStore.selectionManager.value;
