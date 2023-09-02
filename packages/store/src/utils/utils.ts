@@ -8,7 +8,8 @@ import { internalPrimitives } from '../schema/base.js';
 import type { Workspace } from '../workspace/index.js';
 import type { BlockProps, YBlock, YBlocks } from '../workspace/page.js';
 import type { ProxyManager } from '../yjs/index.js';
-import { isPureObject, native2Y, NativeWrapper, Text } from '../yjs/index.js';
+import { canToProxy, canToY } from '../yjs/index.js';
+import { native2Y, NativeWrapper, Text } from '../yjs/index.js';
 
 const SYS_KEYS = new Set(['id', 'flavour', 'children']);
 
@@ -75,7 +76,7 @@ export function syncBlockProps(
       return;
     }
 
-    if (Array.isArray(value) || isPureObject(value)) {
+    if (canToY(value)) {
       yBlock.set(`prop:${key}`, native2Y(value, true));
       return;
     }
@@ -96,7 +97,7 @@ export function syncBlockProps(
         return;
       }
 
-      if (Array.isArray(value) || isPureObject(value)) {
+      if (canToY(value)) {
         yBlock.set(`prop:${key}`, native2Y(value, true));
         return;
       }
@@ -123,7 +124,7 @@ export function toBlockProps(
         return;
       }
 
-      if (realValue instanceof Y.Map || realValue instanceof Y.Array) {
+      if (canToProxy(realValue)) {
         props[key] = proxy.createYProxy(realValue);
         return;
       }

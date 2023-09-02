@@ -13,6 +13,7 @@ import {
 } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
+import { canToProxy } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
 import type { PageMeta } from './meta.js';
 import { Space } from './space.js';
@@ -824,7 +825,7 @@ export class Page extends Space<FlatBlockMap> {
       const value = event.target.get(key);
       yProps[key] = { old: event.changes.keys.get(key)?.oldValue, new: value };
       hasPropsUpdate = true;
-      if (value instanceof Y.Map || value instanceof Y.Array) {
+      if (canToProxy(value)) {
         props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value);
       } else {
         props[key.replace('prop:', '')] = value;

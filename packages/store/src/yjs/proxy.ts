@@ -4,7 +4,7 @@ import { Array as YArray, Map as YMap } from 'yjs';
 
 import { NativeWrapper } from './native-wrapper.js';
 import type { UnRecord } from './utils.js';
-import { isPureObject, native2Y } from './utils.js';
+import { canToProxy, canToY, native2Y } from './utils.js';
 
 type ProxyTransaction = Transaction & { isLocalProxy?: boolean };
 
@@ -20,14 +20,11 @@ export class ProxyManager {
     target: unknown[] | UnRecord,
     yAbstract: YArray<unknown> | YMap<unknown>
   ): void {
-    if (!(yAbstract instanceof YArray || yAbstract instanceof YMap)) {
+    if (!canToProxy(yAbstract)) {
       return;
     }
     yAbstract.forEach((value, key) => {
-      const result =
-        value instanceof YMap || value instanceof YArray
-          ? this.createYProxy(value)
-          : value;
+      const result = canToProxy(value) ? this.createYProxy(value) : value;
 
       (target as Record<string, unknown>)[key] = result;
     });
@@ -56,7 +53,7 @@ export class ProxyManager {
               return !this._proxies.has(value);
             })
             .map(value => {
-              if (value instanceof YMap || value instanceof YArray) {
+              if (canToProxy(value)) {
                 return this.createYProxy(value);
               }
               return value;
@@ -87,7 +84,7 @@ export class ProxyManager {
           delete object[key];
         } else if (type.action === 'add' || type.action === 'update') {
           const current = yMap.get(key);
-          if (current instanceof YMap || current instanceof YArray) {
+          if (canToProxy(current)) {
             if (this._proxies.has(current)) {
               object[key] = this._proxies.get(current);
             } else {
@@ -145,7 +142,7 @@ export class ProxyManager {
       return value;
     }
 
-    if (isPureObject(value) || Array.isArray(value)) {
+    if (canToY(value)) {
       const y = native2Y(value as Record<string, unknown> | unknown[], true);
       onCreate(y);
       return this.createYProxy(y);
