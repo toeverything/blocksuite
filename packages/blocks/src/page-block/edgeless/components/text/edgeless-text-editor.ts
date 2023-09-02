@@ -1,7 +1,4 @@
-import {
-  assertExists,
-  calculateRotatedPointPosition,
-} from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -13,6 +10,7 @@ import { Bound, type TextElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
+import { calculateRotatedPointPosition } from './utils.js';
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {

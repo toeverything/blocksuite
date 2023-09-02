@@ -1,7 +1,4 @@
-import {
-  assertExists,
-  calculateRotatedPointPosition,
-} from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -18,6 +15,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 import { GET_DEFAULT_LINE_COLOR } from '../panel/color-panel.js';
+import { calculateRotatedPointPosition } from './utils.js';
 
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
