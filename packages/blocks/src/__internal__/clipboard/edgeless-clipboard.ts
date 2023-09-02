@@ -15,12 +15,12 @@ import {
   type Connection,
   ConnectorElement,
   deserializeXYWH,
+  FrameElement,
   getCommonBound,
   type IBound,
   type PhasorElement,
   type PhasorElementType,
   serializeXYWH,
-  FrameElement
 } from '../../surface-block/index.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
