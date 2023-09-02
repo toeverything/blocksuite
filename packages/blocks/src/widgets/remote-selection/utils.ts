@@ -52,6 +52,7 @@ export function selectionStyle(
     backgroundColor: color,
     pointerEvent: 'none',
     opacity: '20%',
+    borderRadius: '3px',
   });
 }
 
@@ -62,7 +63,7 @@ export function cursorStyle(
   return styleMap({
     position: 'absolute',
     width: `${rect.width}px`,
-    height: `${rect.height + 4}px`,
+    height: `${rect.height}px`,
     top: `${rect.top}px`,
     left: `${rect.left}px`,
     backgroundColor: color,
