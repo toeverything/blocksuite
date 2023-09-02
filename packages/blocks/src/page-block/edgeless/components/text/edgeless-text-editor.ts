@@ -34,17 +34,17 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const edgeless = this._edgeless;
     const element = this._element;
     if (edgeless && element) {
-      const rect = this._virgoContainer.getBoundingClientRect();
+      const width = this._virgoContainer.offsetWidth;
       const vLines = Array.from(
         this._virgoContainer.querySelectorAll('v-line')
       );
-      const lineHeight = vLines[0].getBoundingClientRect().height;
+      const lineHeight = vLines[0].offsetHeight;
       edgeless.surface.updateElement(element.id, {
         xywh: new Bound(
           element.x,
           element.y,
-          rect.width / edgeless.surface.viewport.zoom,
-          (vLines.length / edgeless.surface.viewport.zoom) * lineHeight
+          width,
+          vLines.length * lineHeight
         ).serialize(),
       });
     }
@@ -124,7 +124,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     if (viewport && this._element && this._edgeless) {
       const zoom = viewport.zoom;
       const rect = getSelectedRect([this._element]);
-      const [x, y] = this._edgeless.surface.toViewCoord(rect.left, rect.top);
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const [x, y] = this._edgeless.surface.toViewCoord(cx, cy);
+      const rotate = this._element.rotate;
 
       virgoStyle = styleMap({
         position: 'absolute',
@@ -135,14 +138,15 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
         outline: 'none',
-        transform: `scale(${zoom}, ${zoom})`,
-        transformOrigin: 'top left',
+        transform: `translate(-50%, -50%) scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
+        transformOrigin: 'conter',
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,
         zIndex: '10',
         textAlign: this._element.textAlign,
         marginRight: '-100%',
+        backgroundColor: '#b2b2b250',
       });
     }
 
