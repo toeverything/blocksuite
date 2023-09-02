@@ -28,14 +28,7 @@ export type BlockSysProps = {
   children?: BaseBlockModel[];
 };
 export type BlockProps = BlockSysProps & {
-  text?: Text;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [index: string]: any;
-};
-
-export type PrefixedBlockProps = Record<string, unknown> & {
-  'sys:id': string;
-  'sys:flavour': string;
+  [index: string]: unknown;
 };
 
 function createChildMap(yChildIds: Y.Array<string>) {
@@ -152,14 +145,6 @@ export class Page extends Space<FlatBlockMap> {
     return this._history.canRedo();
   }
 
-  get YText() {
-    return Y.Text;
-  }
-
-  get YMap() {
-    return Y.Map;
-  }
-
   get Text() {
     return Text;
   }
@@ -214,10 +199,6 @@ export class Page extends Space<FlatBlockMap> {
     return Array.from(this._blockMap.values()).filter(
       ({ flavour }) => flavour === blockFlavour
     );
-  }
-
-  hasFlavour(flavour: string) {
-    return this.getBlockByFlavour(flavour).length > 0;
   }
 
   getParent(target: BaseBlockModel | string): BaseBlockModel | null {
@@ -804,9 +785,9 @@ export class Page extends Space<FlatBlockMap> {
     const model = this._blockMap.get(id);
     if (model === this._root) {
       this.slots.rootDeleted.emit(id);
-    } else {
-      // TODO dispatch model delete event
     }
+
+    this.slots.blockUpdated.emit({ type: 'delete', id });
     this._blockMap.delete(id);
   }
 
