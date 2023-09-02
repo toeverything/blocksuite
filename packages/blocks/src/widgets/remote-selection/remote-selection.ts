@@ -3,7 +3,7 @@ import {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { type UserInfo } from '@blocksuite/store';
 import { html, nothing } from 'lit';
@@ -59,20 +59,22 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this._selectionManager.slots.remoteChanged.on(remoteSelections => {
-        const status = this.page.awarenessStore.getStates();
-        this._remoteSelections = Object.entries(remoteSelections).map(
-          ([id, selections]) => {
-            return {
-              id: parseInt(id),
-              selections,
-              user: status.get(parseInt(id))?.user,
-            };
-          }
-        );
+      this._selectionManager.slots.remoteChanged.on(
+        throttle((remoteSelections: Record<string, BaseSelection[]>) => {
+          const status = this.page.awarenessStore.getStates();
+          this._remoteSelections = Object.entries(remoteSelections).map(
+            ([id, selections]) => {
+              return {
+                id: parseInt(id),
+                selections,
+                user: status.get(parseInt(id))?.user,
+              };
+            }
+          );
 
-        this.requestUpdate();
-      })
+          this.requestUpdate();
+        }, 100)
+      )
     );
     this.handleEvent('wheel', () => {
       this.requestUpdate();
@@ -223,9 +225,6 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
     return html`<div>
       ${selections.flatMap(selection => {
-        if (selection.user) {
-          this._colorMap.set(selection.id, selection.user.color);
-        }
         if (!this._colorMap.has(selection.id)) {
           const color = multiPlayersColor.pick();
           assertExists(color);
@@ -257,13 +256,18 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
                     style="${styleMap({
                       position: 'absolute',
                       bottom: `${cursorRect?.height}px`,
-                      padding: '2px',
-                      'background-color': color,
+                      padding: '0 3px 0 3px',
+                      backgroundColor: color,
                       color: 'white',
                       whiteSpace: 'nowrap',
+                      border: '1px solid var(--affine-pure-black-20)',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '400',
+                      fontHeight: '20px',
                     })}"
                   >
-                    ${selection.user?.name}
+                    ${selection.user?.name ?? 'Unknown'}
                   </div>
                 </div>
               </div>

@@ -62,7 +62,7 @@ export function cursorStyle(
   return styleMap({
     position: 'absolute',
     width: `${rect.width}px`,
-    height: `${rect.height}px`,
+    height: `${rect.height + 4}px`,
     top: `${rect.top}px`,
     left: `${rect.left}px`,
     backgroundColor: color,

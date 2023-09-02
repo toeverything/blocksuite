@@ -6,9 +6,7 @@ import type { Space } from '../workspace/space.js';
 import type { Store } from '../workspace/store.js';
 
 export interface UserInfo {
-  id: number;
   name: string;
-  color: string;
 }
 
 // Raw JSON state in awareness CRDT
