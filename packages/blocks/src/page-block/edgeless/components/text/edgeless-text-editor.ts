@@ -6,11 +6,15 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
-import { Bound, type TextElement } from '../../../../surface-block/index.js';
+import {
+  Bound,
+  type TextElement,
+  toRadian,
+  Vec,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
 import { getSelectedRect } from '../../utils/query.js';
-import { calculateRotatedPointPosition } from './utils.js';
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
@@ -43,12 +47,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
       const bcr = this._virgoContainer.getBoundingClientRect();
 
-      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
-        bcr.left + bcr.width / 2,
-        bcr.top + bcr.height / 2,
-        -element.rotate,
-        this._virgoContainer.offsetLeft,
-        this._virgoContainer.offsetTop
+      const [leftTopX, leftTopY] = Vec.rotWith(
+        [this._virgoContainer.offsetLeft, this._virgoContainer.offsetTop],
+        [bcr.left + bcr.width / 2, bcr.top + bcr.height / 2],
+        toRadian(-element.rotate)
       );
 
       const [modelLeftTopX, modelLeftTopY] = edgeless.surface.toModelCoord(
@@ -143,12 +145,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       const rect = getSelectedRect([this._element]);
       const rotate = this._element.rotate;
 
-      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
-        rect.left + rect.width / 2,
-        rect.top + rect.height / 2,
-        rotate,
-        rect.left,
-        rect.top
+      const [leftTopX, leftTopY] = Vec.rotWith(
+        [rect.left, rect.top],
+        [rect.left + rect.width / 2, rect.top + rect.height / 2],
+        toRadian(rotate)
       );
 
       const [x, y] = this._edgeless.surface.toViewCoord(leftTopX, leftTopY);
