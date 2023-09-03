@@ -78,6 +78,7 @@ export class DragHandleWidget extends WidgetElement {
   private _hoveredBlockId = '';
   private _hoveredBlockPath: string[] | null = null;
   private _lastHoveredBlockPath: string[] | null = null;
+  private _lastShowedBlockPath: string[] | null = null;
   private _hoverDragHandle = false;
   private _dragHandlePointerDown = false;
   private _dropBlockId = '';
@@ -142,6 +143,7 @@ export class DragHandleWidget extends WidgetElement {
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
     this._lastHoveredBlockPath = null;
+    this._lastShowedBlockPath = null;
     this._hoverDragHandle = false;
     this._dragHandlePointerDown = false;
     this._draggingElements = [];
@@ -172,7 +174,7 @@ export class DragHandleWidget extends WidgetElement {
 
   // Single block: drag handle should show on the vertical middle of the first line of element
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
-  private _show(blockElement: BlockElement, disableTransition = true) {
+  private _show(blockElement: BlockElement) {
     const container = this._dragHandleContainer;
     const grabber = this._dragHandleGrabber;
     if (!container || !grabber) return;
@@ -204,7 +206,8 @@ export class DragHandleWidget extends WidgetElement {
       paddingTop -
       DRAG_HANDLE_GRABBER_HEIGHT * this._scale;
 
-    const applyStyle = () => {
+    const applyStyle = (transition?: boolean) => {
+      container.style.transition = transition ? 'padding 0.25s ease' : 'none';
       container.style.paddingTop = `${paddingTop}px`;
       container.style.paddingBottom = `${paddingBottom}px`;
       container.style.width = `${DRAG_HANDLE_WIDTH * this._scale}px`;
@@ -214,17 +217,17 @@ export class DragHandleWidget extends WidgetElement {
       container.style.height = `${draggingAreaRect.height}px`;
     };
 
-    if (disableTransition) {
-      if (blockElement.path.join('|') !== this._lastHoveredBlockPath?.join('|'))
-        container.style.transition = 'none';
-      applyStyle();
-    } else {
-      requestAnimationFrame(() => {
-        container.style.transition = 'padding 0.25s ease';
-        applyStyle();
-      });
-    }
+    // new block element is selected
+    if (this._selectedBlocks.some(blk => blk.blockId === blockElement.model.id))
+      applyStyle(true);
+    else if (
+      blockElement.path.join('|') !== this._lastShowedBlockPath?.join('|')
+    )
+      applyStyle(false);
+    else applyStyle(true);
+
     this._resetDragHandleGrabber();
+    this._lastShowedBlockPath = blockElement.path;
   }
 
   private _showDragHandleOnHoverBlock(blockPath: string[]) {
@@ -991,7 +994,7 @@ export class DragHandleWidget extends WidgetElement {
         if (!blockElement) return;
 
         if (this._dragging) return;
-        this._show(blockElement, false);
+        this._show(blockElement);
       }
     );
   }
