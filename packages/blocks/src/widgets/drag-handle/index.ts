@@ -47,6 +47,7 @@ import {
   getNoteId,
   includeTextSelection,
   insideDatabaseTable,
+  isBlockPathEqual,
 } from './utils.js';
 
 @customElement('affine-drag-handle-widget')
@@ -78,7 +79,7 @@ export class DragHandleWidget extends WidgetElement {
   private _hoveredBlockId = '';
   private _hoveredBlockPath: string[] | null = null;
   private _lastHoveredBlockPath: string[] | null = null;
-  private _lastShowedBlockPath: string[] | null = null;
+  private _lastShowedBlock: { path: string[]; el: BlockElement } | null = null;
   private _hoverDragHandle = false;
   private _dragHandlePointerDown = false;
   private _dropBlockId = '';
@@ -143,7 +144,7 @@ export class DragHandleWidget extends WidgetElement {
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
     this._lastHoveredBlockPath = null;
-    this._lastShowedBlockPath = null;
+    this._lastShowedBlock = null;
     this._hoverDragHandle = false;
     this._dragHandlePointerDown = false;
     this._draggingElements = [];
@@ -217,17 +218,27 @@ export class DragHandleWidget extends WidgetElement {
       container.style.height = `${draggingAreaRect.height}px`;
     };
 
-    // new block element is selected
-    if (this._selectedBlocks.some(blk => blk.blockId === blockElement.model.id))
-      applyStyle(true);
-    else if (
-      blockElement.path.join('|') !== this._lastShowedBlockPath?.join('|')
-    )
-      applyStyle(false);
-    else applyStyle(true);
+    if (this._selectedBlocks.length) {
+      if (this._isBlockSelected(blockElement))
+        applyStyle(this._isBlockSelected(this._lastShowedBlock?.el));
+      else if (isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path))
+        applyStyle(false);
+      else applyStyle(true);
+    } else applyStyle(false);
 
     this._resetDragHandleGrabber();
-    this._lastShowedBlockPath = blockElement.path;
+    this._lastShowedBlock = {
+      path: blockElement.path,
+      el: blockElement,
+    };
+  }
+
+  /** Check if given blockElement is selected */
+  private _isBlockSelected(block?: BlockElement) {
+    if (!block) return false;
+    return this._selectedBlocks.some(
+      selection => selection.blockId === block.model.id
+    );
   }
 
   private _showDragHandleOnHoverBlock(blockPath: string[]) {

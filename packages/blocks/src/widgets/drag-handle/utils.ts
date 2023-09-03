@@ -81,3 +81,18 @@ export const includeTextSelection = (selections: BaseSelection[]) => {
 export const getBlockIdFromPath = (path: string[]) => {
   return path[path.length - 1];
 };
+
+/**
+ * Check if the path of two blocks are equal
+ */
+export const isBlockPathEqual = (
+  path1: string[] | null | undefined,
+  path2: string[] | null | undefined
+) => {
+  if (!path1 || !path2) {
+    return false;
+  }
+  return path1.join('|') === path2.join('|');
+};
+
+// export const
