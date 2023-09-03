@@ -218,19 +218,26 @@ export class DragHandleWidget extends WidgetElement {
       container.style.height = `${draggingAreaRect.height}px`;
     };
 
-    if (this._selectedBlocks.length) {
+    if (isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path)) {
+      applyStyle(true);
+    } else if (this._selectedBlocks.length) {
       if (this._isBlockSelected(blockElement))
-        applyStyle(this._isBlockSelected(this._lastShowedBlock?.el));
-      else if (isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path))
-        applyStyle(false);
-      else applyStyle(true);
-    } else applyStyle(false);
+        applyStyle(
+          this._hoverDragHandle &&
+            this._isBlockSelected(this._lastShowedBlock?.el)
+        );
+      else applyStyle(false);
+    } else {
+      applyStyle(false);
+    }
 
     this._resetDragHandleGrabber();
-    this._lastShowedBlock = {
-      path: blockElement.path,
-      el: blockElement,
-    };
+    if (!isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path)) {
+      this._lastShowedBlock = {
+        path: blockElement.path,
+        el: blockElement,
+      };
+    }
   }
 
   /** Check if given blockElement is selected */
@@ -995,7 +1002,6 @@ export class DragHandleWidget extends WidgetElement {
       'pointerleave',
       () => {
         if (this._dragHandlePointerDown) this._removeHoverRect();
-        this._hoverDragHandle = false;
 
         if (!this._hoveredBlockPath) return;
 
@@ -1006,6 +1012,7 @@ export class DragHandleWidget extends WidgetElement {
 
         if (this._dragging) return;
         this._show(blockElement);
+        this._hoverDragHandle = false;
       }
     );
   }
