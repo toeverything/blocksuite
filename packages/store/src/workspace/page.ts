@@ -7,13 +7,13 @@ import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
-  initInternalProps,
+  initSysProps,
+  schemaToModel,
   syncBlockProps,
-  toBlockProps,
+  valueToProps,
 } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
 import type { BlockSuiteDoc } from '../yjs/index.js';
-import { canToProxy } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
 import type { PageMeta } from './meta.js';
 import { Space } from './space.js';
@@ -56,9 +56,6 @@ export class Page extends Space<FlatBlockMap> {
   private _blockMap = new Map<string, BaseBlockModel>();
   private _synced = false;
   private _shouldTransact = true;
-
-  // TODO use schema
-  private _ignoredKeys = new Set<string>(Object.keys(new BaseBlockModel()));
 
   readonly slots = {
     historyUpdated: new Slot(),
@@ -339,9 +336,12 @@ export class Page extends Space<FlatBlockMap> {
       blockProps.children?.map(child => child.flavour)
     );
 
-    const clonedProps: Partial<BlockProps> = { flavour, ...blockProps };
     const id = blockProps.id ?? this._idGenerator();
-    clonedProps.id = id;
+    const clonedProps: BlockSysProps & Partial<BlockProps> = {
+      id,
+      flavour,
+      ...blockProps,
+    };
 
     this.transact(() => {
       const yBlock = new Y.Map() as YBlock;
@@ -352,8 +352,8 @@ export class Page extends Space<FlatBlockMap> {
       const schema = this.getSchemaByFlavour(flavour);
       assertExists(schema);
 
-      initInternalProps(yBlock, clonedProps);
-      syncBlockProps(schema, yBlock, clonedProps, this._ignoredKeys);
+      initSysProps(yBlock, clonedProps);
+      syncBlockProps(schema, yBlock, clonedProps);
 
       const parentId =
         parentModel?.id ??
@@ -496,9 +496,9 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     // Emit event to indicate that the children of these blocks have been updated
-    Array.from(childBlocksPerParent.keys()).forEach(parent =>
-      parent.childrenUpdated.emit()
-    );
+    childBlocksPerParent.forEach((_, parent) => {
+      parent.childrenUpdated.emit();
+    });
 
     newParent.childrenUpdated.emit();
   }
@@ -535,7 +535,7 @@ export class Page extends Space<FlatBlockMap> {
 
       const schema = this.schema.flavourSchemaMap.get(model.flavour);
       assertExists(schema);
-      syncBlockProps(schema, yBlock, props, this._ignoredKeys);
+      syncBlockProps(schema, yBlock, props);
     });
 
     model.propsUpdated.emit();
@@ -563,7 +563,7 @@ export class Page extends Space<FlatBlockMap> {
     if (props.length > 1) {
       const blocks: Array<{
         flavour: string;
-        blockProps: Partial<BlockProps & Omit<BlockProps, 'id' | 'flavour'>>;
+        blockProps: Partial<BlockProps>;
       }> = [];
       props.forEach(prop => {
         const { flavour, ...blockProps } = prop;
@@ -706,45 +706,19 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.historyUpdated.emit();
   };
 
-  private _createBlockModel(
-    id: string,
-    flavour: string,
-    props: Omit<BlockProps, 'children'>,
-    block: YBlock
-  ) {
+  private _createBlockModel(id: string, flavour: string, block: YBlock) {
     const schema = this.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Block flavour ${flavour} is not registered`);
     assertExists(id, 'Block id is not defined');
 
-    const blockModel = schema.model.toModel
-      ? schema.model.toModel()
-      : new BaseBlockModel();
-
-    blockModel.id = id;
-    blockModel.flavour = flavour;
-    const modelProps = schema.model.props?.(internalPrimitives) ?? {};
-    Object.entries(modelProps).forEach(([key, value]) => {
-      // @ts-ignore
-      blockModel[key] =
-        value instanceof Text
-          ? new Text(block.get(`prop:${key}`) as Y.Text)
-          : props[key] ?? value;
-    });
-    blockModel.page = this;
-    blockModel.yBlock = block;
-    blockModel.role = schema.model.role;
-
-    blockModel.created.emit();
-
-    return blockModel;
+    return schemaToModel(id, schema, block, this);
   }
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
 
     const flavour = yBlock.get('sys:flavour') as string;
-    const props = toBlockProps(yBlock, this.doc.proxy);
-    const model = this._createBlockModel(id, flavour, { ...props }, yBlock);
+    const model = this._createBlockModel(id, flavour, yBlock);
     this._blockMap.set(id, model);
 
     const yChildren = yBlock.get('sys:children');
@@ -801,11 +775,9 @@ export class Page extends Space<FlatBlockMap> {
     const yProps: { [key: string]: { old: unknown; new: unknown } } = {};
     let hasPropsUpdate = false;
     let hasChildrenUpdate = false;
-    for (const key of event.keysChanged) {
-      // TODO use schema
-      if (key === 'prop:text') continue;
+    event.keysChanged.forEach(prefixedKey => {
       // Update children
-      if (key === 'sys:children') {
+      if (prefixedKey === 'sys:children') {
         hasChildrenUpdate = true;
         const yChildren = event.target.get('sys:children');
         if (!(yChildren instanceof Y.Array)) {
@@ -814,23 +786,23 @@ export class Page extends Space<FlatBlockMap> {
             event,
             yChildren
           );
-          continue;
+          return;
         }
         model.childMap = createChildMap(yChildren);
         model.children = yChildren.map(
           id => this._blockMap.get(id) as BaseBlockModel
         );
-        continue;
+        return;
       }
-      const value = event.target.get(key);
-      yProps[key] = { old: event.changes.keys.get(key)?.oldValue, new: value };
+
+      const key = prefixedKey.replace('prop:', '');
+      const value = event.target.get(prefixedKey);
+      const newVal = valueToProps(value, this.doc.proxy);
+      const oldVal = event.changes.keys.get(prefixedKey)?.oldValue;
+      yProps[prefixedKey] = { old: oldVal, new: newVal };
       hasPropsUpdate = true;
-      if (canToProxy(value)) {
-        props[key.replace('prop:', '')] = this.doc.proxy.createYProxy(value);
-      } else {
-        props[key.replace('prop:', '')] = value;
-      }
-    }
+      props[key] = newVal;
+    });
 
     if (hasPropsUpdate) {
       Object.assign(model, props);
