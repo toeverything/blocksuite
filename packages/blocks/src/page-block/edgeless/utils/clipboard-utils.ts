@@ -9,6 +9,7 @@ import {
   Bound,
   ConnectorElement,
   FrameElement,
+  inflateBound,
   type PhasorElementType,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -61,10 +62,29 @@ export async function duplicate(
       }
     })
   );
+  handleZoom(newElements, edgeless);
+
   if (select) {
     edgeless.selectionManager.setSelection({
       elements: newElements,
       editing: false,
     });
   }
+}
+
+function handleZoom(
+  newElementIds: string[],
+  edgeless: EdgelessPageBlockComponent
+) {
+  const { surface, page } = edgeless;
+  const { viewport } = surface;
+  const newElements = Array.from(
+    newElementIds,
+    id => surface.pickById(id) ?? page.getBlockById(id)
+  );
+  let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
+  totalBound = inflateBound(totalBound, 30);
+  let currentViewBound = Bound.from(viewport.viewportBounds);
+  currentViewBound = currentViewBound.unite(totalBound);
+  viewport.setViewportByBound(currentViewBound, [0, 0, 0, 0], true);
 }

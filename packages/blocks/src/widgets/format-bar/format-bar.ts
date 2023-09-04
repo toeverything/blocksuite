@@ -313,16 +313,15 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     const selectedBlockElements = this._selectedBlockElements;
-    const page = this.page;
+    const root = this.root;
 
     //TODO: format bar in database
 
     const paragraphButton = ParagraphButton({
       formatBar: this,
       selectedBlockElements,
-      page,
     });
-    const actionItems = ActionItems(pageElement);
+    const actionItems = ActionItems(root);
     const inlineItems = InlineItems(this);
 
     return html`<div

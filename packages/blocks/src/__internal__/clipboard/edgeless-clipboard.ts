@@ -171,7 +171,7 @@ export class EdgelessClipboard implements Clipboard {
       if (isPhasorElementWithText(elements[0])) {
         copyOnPhasorElementWithText(this._edgeless);
       } else {
-        await copyBlocksInPage(this._edgeless);
+        await copyBlocksInPage(this._edgeless.root);
       }
       return;
     }
