@@ -93,9 +93,9 @@ export class EdgelessSelectionManager {
       this._selection.slots.changed.on(selections => {
         const { cursor, surface } = selections.reduce(
           (p, s) => {
-            if (s.type === 'surface') {
+            if (s.is('surface')) {
               p.surface = s as SurfaceSelection;
-            } else if (s.type === 'cursor') {
+            } else if (s.is('cursor')) {
               p.cursor = s as CursorSelection;
             }
 
@@ -104,12 +104,16 @@ export class EdgelessSelectionManager {
           {} as { surface?: SurfaceSelection; cursor?: CursorSelection }
         );
 
-        if (cursor && (!this.cursor || !cursor.equals(this.cursor))) {
+        if (cursor && !this.cursor?.equals(cursor)) {
           this._setCursor(cursor);
           this.slots.cursorUpdated.emit(cursor);
         }
 
-        if (this.state.isEmpty() && (!surface || surface.isEmpty())) return;
+        if (
+          (!surface && this.state.isEmpty()) ||
+          (surface && this.state.equals(surface))
+        )
+          return;
 
         this._setState(
           surface ??

@@ -641,7 +641,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   };
 
-  private _updateOnElementChange = (element: string | { id: string }) => {
+  private _updateOnElementChange = (
+    element: string | { id: string },
+    fromRemote: boolean = false
+  ) => {
+    if (fromRemote && this._resizeManager.dragging) return;
+
     const id = typeof element === 'string' ? element : element.id;
 
     if (this.selection.has(id)) this._updateSelectedRect();
@@ -651,7 +656,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { _disposables, page, slots, selection, surface, edgeless } = this;
 
     _disposables.add(
-      // vewport zooming / scrolling
+      // viewport zooming / scrolling
       slots.viewportUpdated.on(this._updateOnViewportChange)
     );
 
@@ -668,7 +673,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
-    _disposables.add(page.slots.yBlockUpdated.on(this._updateOnElementChange));
+    _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
+    _disposables.add(
+      page.slots.yBlockUpdated.on(data => {
+        this._updateOnElementChange(data, true);
+      })
+    );
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
