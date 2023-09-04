@@ -5,7 +5,7 @@ import {
   getBlockSelectionBySide,
   getTextSelection,
   pathToBlock,
-} from '../../note-block/utils.js';
+} from '../note-block/utils.js';
 
 interface MoveBlockConfig {
   name: string;

@@ -14,8 +14,8 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
-} from '../../icons/index.js';
-import type { BlockSchemas } from '../../models.js';
+} from '../icons/index.js';
+import type { BlockSchemas } from '../models.js';
 
 interface BlockConfig {
   flavour: keyof BlockSchemas;
