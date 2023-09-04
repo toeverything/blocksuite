@@ -150,7 +150,7 @@ export class IconButton extends LitElement {
 
   override render() {
     if (this.disabled) {
-      const disabledColor = 'var(--affine-disabled-color)';
+      const disabledColor = 'var(--affine-text-disable-color)';
       this.style.setProperty('--svg-icon-color', disabledColor);
     } else {
       const iconColor = this.active
