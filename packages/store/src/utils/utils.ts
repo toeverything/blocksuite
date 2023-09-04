@@ -1,4 +1,3 @@
-import { isPrimitive } from '@blocksuite/global/utils';
 import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
@@ -48,40 +47,23 @@ export function syncBlockProps(
 ) {
   const propSchema = schema.model.props?.(internalPrimitives) ?? {};
 
-  Object.entries(propSchema).forEach(([key, defaultValue]) => {
-    const value = props[key];
-    if (defaultValue instanceof Text) {
-      const text =
-        value instanceof Text
-          ? value.yText
-          : typeof value === 'string'
-          ? new Y.Text(value)
-          : defaultValue.yText;
-      yBlock.set(`prop:${key}`, text);
+  Object.entries(props).forEach(([key, value]) => {
+    if (value === undefined) {
       return;
     }
 
-    if (defaultValue instanceof NativeWrapper) {
-      const nativeWrapper =
-        value instanceof NativeWrapper ? value : defaultValue;
-      yBlock.set(`prop:${key}`, nativeWrapper.yMap);
+    yBlock.set(`prop:${key}`, propsToValue(value));
+  });
+
+  // set default value
+  Object.entries(propSchema).forEach(([key, value]) => {
+    const notExists =
+      !yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined;
+    if (!notExists) {
       return;
     }
 
-    if (canToY(value)) {
-      yBlock.set(`prop:${key}`, native2Y(value, true));
-      return;
-    }
-
-    if (
-      !isPrimitive(value) &&
-      !Array.isArray(value) &&
-      typeof value !== 'object'
-    ) {
-      throw new Error('Only top level primitives are supported for now');
-    }
-
-    yBlock.set(`prop:${key}`, value ?? defaultValue);
+    yBlock.set(`prop:${key}`, propsToValue(value));
   });
 }
 
@@ -96,6 +78,22 @@ export function valueToProps(value: unknown, proxy: ProxyManager): unknown {
 
   if (canToProxy(value)) {
     return proxy.createYProxy(value);
+  }
+
+  return value;
+}
+
+export function propsToValue(value: unknown): unknown {
+  if (value instanceof NativeWrapper) {
+    return value.yMap;
+  }
+
+  if (value instanceof Text) {
+    return value.yText;
+  }
+
+  if (canToY(value)) {
+    return native2Y(value, true);
   }
 
   return value;

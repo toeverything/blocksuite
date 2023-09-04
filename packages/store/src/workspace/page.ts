@@ -767,7 +767,8 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   private _handleYBlockUpdate(event: Y.YMapEvent<unknown>) {
-    const id = event.target.get('sys:id') as string;
+    const yMap = event.target;
+    const id = yMap.get('sys:id') as string;
     const model = this.getBlockById(id);
     if (!model) return;
 
@@ -796,7 +797,7 @@ export class Page extends Space<FlatBlockMap> {
       }
 
       const key = prefixedKey.replace('prop:', '');
-      const value = event.target.get(prefixedKey);
+      const value = yMap.get(prefixedKey);
       const newVal = valueToProps(value, this.doc.proxy);
       const oldVal = event.changes.keys.get(prefixedKey)?.oldValue;
       yProps[prefixedKey] = { old: oldVal, new: newVal };
