@@ -118,6 +118,9 @@ const withTempConvertData = () => {
  * Turn the attachment block into an image block.
  */
 export async function turnIntoEmbedView(model: AttachmentBlockModel) {
+  if (!model.page.schema.flavourSchemaMap.has('affine:image'))
+    throw new Error('The image flavour is not supported!');
+
   const sourceId = model.sourceId;
   assertExists(sourceId);
   const { saveAttachmentData, getImageData } = withTempConvertData();
@@ -135,6 +138,9 @@ export async function turnIntoEmbedView(model: AttachmentBlockModel) {
  * Turn the image block into a attachment block.
  */
 export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
+  if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
+    throw new Error('The attachment flavour is not supported!');
+
   const sourceId = model.sourceId;
   assertExists(sourceId);
   const { saveImageData, getAttachmentData } = withTempConvertData();

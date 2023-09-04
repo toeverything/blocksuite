@@ -1,7 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { SHAPE_TEXT_PADDING, ShapeElement } from '@blocksuite/phasor';
-import { Bound } from '@blocksuite/phasor';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -9,6 +7,13 @@ import * as Y from 'yjs';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
+import {
+  Bound,
+  SHAPE_TEXT_PADDING,
+  ShapeElement,
+  toRadian,
+  Vec,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 import { GET_DEFAULT_LINE_COLOR } from '../panel/color-panel.js';
@@ -38,14 +43,25 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const edgeless = this._edgeless;
     const element = this._element;
     if (edgeless && element) {
-      const containerHeight =
-        this._virgoContainer.getBoundingClientRect().height /
-        edgeless.surface.viewport.zoom;
+      const bcr = this._virgoContainer.getBoundingClientRect();
+      const containerHeight = this._virgoContainer.offsetHeight;
+
       if (containerHeight > element.h) {
+        const [leftTopX, leftTopY] = Vec.rotWith(
+          [this._virgoContainer.offsetLeft, this._virgoContainer.offsetTop],
+          [bcr.left + bcr.width / 2, bcr.top + bcr.height / 2],
+          toRadian(-element.rotate)
+        );
+
+        const [modelLeftTopX, modelLeftTopY] = edgeless.surface.toModelCoord(
+          leftTopX,
+          leftTopY
+        );
+
         edgeless.surface.updateElement<'shape'>(element.id, {
           xywh: new Bound(
-            element.x,
-            element.y,
+            modelLeftTopX,
+            modelLeftTopY,
             element.w,
             containerHeight
           ).serialize(),
@@ -153,7 +169,15 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     if (viewport && this._element && this._edgeless) {
       const zoom = viewport.zoom;
       const rect = getSelectedRect([this._element]);
-      const [x, y] = this._edgeless.surface.toViewCoord(rect.left, rect.top);
+      const rotate = this._element.rotate;
+
+      const [leftTopX, leftTopY] = Vec.rotWith(
+        [rect.left, rect.top],
+        [rect.left + rect.width / 2, rect.top + rect.height / 2],
+        toRadian(rotate)
+      );
+
+      const [x, y] = this._edgeless.surface.toViewCoord(leftTopX, leftTopY);
 
       virgoStyle = styleMap({
         position: 'absolute',
@@ -165,7 +189,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
         fontFamily: this._element.fontFamily,
         lineHeight: 'initial',
         outline: 'none',
-        transform: `scale(${zoom}, ${zoom})`,
+        transform: `scale(${zoom}, ${zoom}) rotate(${rotate}deg)`,
         transformOrigin: 'top left',
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`

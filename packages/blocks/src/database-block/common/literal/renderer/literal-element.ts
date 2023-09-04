@@ -1,84 +1,65 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { TemplateResult } from 'lit';
-import { html } from 'lit';
-import { property } from 'lit/decorators.js';
+import { css, html } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
 
 import type { TType } from '../../../logical/typesystem.js';
-import { createDatabasePopup } from '../../popup.js';
+import type { LiteralViewProps } from '../matcher.js';
 
-export abstract class LiteralElement<
-  T = unknown,
-  Type extends TType = TType,
-> extends WithDisposable(ShadowlessElement) {
+export abstract class LiteralElement<T = unknown, Type extends TType = TType>
+  extends WithDisposable(ShadowlessElement)
+  implements LiteralViewProps<T, Type>
+{
   @property({ attribute: false })
   type!: Type;
 
   @property({ attribute: false })
-  value!: T;
+  value?: T;
 
   @property({ attribute: false })
-  onChange!: (value: T) => void;
+  onChange!: (value?: T) => void;
+}
 
-  @property({ attribute: false })
-  mode: 'show' | 'edit' = 'show';
-
-  showValue(): string {
-    return this.value?.toString() ?? '[]';
+@customElement('data-view-literal-boolean-view')
+export class BooleanLiteral extends LiteralElement<boolean> {
+  override render() {
+    return this.value ? 'True' : 'False';
   }
+}
 
-  doneValue(): T {
-    return this.value;
-  }
-
-  done() {
-    this.onChange(this.doneValue());
-  }
-
-  show(): TemplateResult {
-    return html` <span @click="${this.popEdit}">${this.showValue()}</span> `;
-  }
-
-  edit(): TemplateResult {
-    return html``;
-  }
-
-  static create<T>(type: TType, value: T, onChange: (value: T) => void) {
-    // @ts-expect-error
-    const ele = new this() as LiteralElement<T>;
-    ele.type = type;
-    ele.value = value;
-    ele.onChange = v => {
-      onChange(v);
-      ele.value = v;
-      ele.remove();
-    };
-    return ele;
-  }
-
-  _popEdit(target: HTMLElement = this) {
-    const ele = (this.constructor as typeof LiteralElement).create(
-      this.type,
-      this.value,
-      this.onChange
-    );
-    ele.mode = 'edit';
-    ele.style.position = 'absolute';
-    ele.style.zIndex = '999';
-    createDatabasePopup(target, ele, {
-      onClose: () => {
-        ele.done();
-      },
-    });
-  }
-
-  popEdit() {
-    this._popEdit();
-  }
+@customElement('data-view-literal-number-view')
+export class NumberLiteral extends LiteralElement<number> {
+  static override styles = css`
+    data-view-literal-number-view {
+      display: block;
+      max-width: 100px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+  `;
 
   override render() {
-    if (this.mode === 'show') {
-      return this.show();
+    return (
+      this.value?.toString() ?? html`<span class="dv-color-2">Empty</span>`
+    );
+  }
+}
+
+@customElement('data-view-literal-string-view')
+export class StringLiteral extends LiteralElement<string> {
+  static override styles = css`
+    data-view-literal-string-view {
+      display: block;
+      max-width: 100px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
     }
-    return this.edit();
+  `;
+
+  override render() {
+    return (
+      this.value?.toString() ?? html`<span class="dv-color-2">Empty</span>`
+    );
   }
 }

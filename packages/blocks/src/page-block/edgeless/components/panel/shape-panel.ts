@@ -1,11 +1,11 @@
 import '../buttons/tool-icon-button.js';
 
 import { Slot } from '@blocksuite/global/utils';
-import { ShapeStyle } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { ShapeTool } from '../../../../__internal__/index.js';
+import { ShapeStyle } from '../../../../surface-block/index.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 
 @customElement('edgeless-shape-panel')

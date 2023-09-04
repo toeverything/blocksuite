@@ -16,8 +16,10 @@ import { viewManager, viewRendererManager } from '../data-view.js';
 export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     data-view-header-views {
+      height: 32px;
       display: flex;
       user-select: none;
+      gap: 4px;
     }
     data-view-header-views::-webkit-scrollbar-thumb {
       width: 1px;
@@ -52,7 +54,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
 
     .database-view-button.active {
       color: var(--affine-text-primary-color);
-      background-color: var(--affine-hover-color);
+      background-color: var(--affine-hover-color-filled);
     }
   `;
   @property({ attribute: false })
@@ -93,6 +95,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
           .uni=${viewRendererManager.getView(v.mode).icon}
         ></uni-lit>`,
         name: v.name,
+        isSelected: this.currentView === v.id,
         select: () => {
           this.setViewId(v.id);
         },
@@ -173,14 +176,14 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         return;
       }
       return html`<div
-        class="database-view-button"
+        class="database-view-button dv-icon-16 dv-hover"
         @click="${this._addViewMenu}"
       >
-        ${AddCursorIcon}
+        ${AddCursorIcon} <span style="margin-left: 6px;">Add view</span>
       </div>`;
     }
     return html`
-      <div class="database-view-button" @click="${this._showMore}">
+      <div class="database-view-button dv-hover" @click="${this._showMore}">
         ${this.model.views.length - 3} More
       </div>
     `;
@@ -198,6 +201,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         view => {
           const classList = classMap({
             'database-view-button': true,
+            'dv-hover': true,
             active: this.currentView === view.id,
           });
           return html` <div

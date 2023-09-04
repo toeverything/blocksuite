@@ -60,7 +60,7 @@ const migration = {
           value.delete(key);
           return;
         }
-        if (!target['position'] && !targetId && !value.get(targetId)) {
+        if (!target['position'] && (!targetId || !value.get(targetId))) {
           value.delete(key);
           return;
         }

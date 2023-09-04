@@ -1,5 +1,7 @@
-import type { ShapeElement, TextElement } from '@blocksuite/phasor';
-
+import type {
+  ShapeElement,
+  TextElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessShapeTextEditor } from './edgeless-shape-text-editor.js';
 import type { EdgelessTextEditor } from './edgeless-text-editor.js';
 

@@ -1,5 +1,6 @@
-import { type IVec } from '@blocksuite/phasor';
 import { html, nothing } from 'lit';
+
+import { type IVec } from '../../../../surface-block/index.js';
 
 export enum HandleDirection {
   Left = 'left',

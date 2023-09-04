@@ -129,6 +129,7 @@ async function initEmptyEditor({
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
+        debugMenu.contentParser = editor.createContentParser();
         document.body.appendChild(debugMenu);
         window.debugMenu = debugMenu;
         window.editor = editor;

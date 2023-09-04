@@ -1,6 +1,5 @@
 import { clamp } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -9,6 +8,11 @@ import {
   stopPropagation,
 } from '../../../../__internal__/index.js';
 import { MinusIcon, PlusIcon, ViewBarIcon } from '../../../../icons/index.js';
+import {
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 export type ZoomAction = 'fit' | 'out' | 'reset' | 'in';

@@ -1,7 +1,6 @@
 import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 
-import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -12,9 +11,11 @@ import {
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
 import {
+  ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '../../../../../icons/index.js';
+import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
@@ -31,6 +32,7 @@ function ConnectorModeButtonGroup(
   const { mode } = edgelessTool;
   const straightLineTooltip = getTooltipWithShortcut('Straight', 'L');
   const orthogonalTooltip = getTooltipWithShortcut('Elbowed', 'X');
+  const curveTooltip = getTooltipWithShortcut('Curve', 'C');
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
@@ -47,6 +49,15 @@ function ConnectorModeButtonGroup(
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
         ${ConnectorLWithArrowIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Curve}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${curveTooltip}
+        @click=${() => setConnectorMode(ConnectorMode.Curve)}
+      >
+        ${ConnectorCWithArrowIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Orthogonal}

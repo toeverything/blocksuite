@@ -13,19 +13,23 @@ export const RenameModal = ({
   model: AttachmentBlockModel;
   abortController: AbortController;
 }) => {
-  const containerRef = createRef<HTMLDivElement>();
+  const inputRef = createRef<HTMLInputElement>();
+  // Fix auto focus
+  setTimeout(() => inputRef.value?.focus());
   const originalName = model.name;
   const nameWithoutExtension = originalName.slice(
     0,
     originalName.lastIndexOf('.')
   );
   const originalExtension = originalName.slice(originalName.lastIndexOf('.'));
-  const fixedExtension =
-    originalExtension.length <= 7 && // including the dot
+  const includeExtension =
+    originalExtension.includes('.') &&
+    originalExtension.length <= 7 &&
+    // including the dot
     originalName.length > originalExtension.length;
 
-  let fileName = fixedExtension ? nameWithoutExtension : originalName;
-  const extension = fixedExtension ? originalExtension : '';
+  let fileName = includeExtension ? nameWithoutExtension : originalName;
+  const extension = includeExtension ? originalExtension : '';
 
   const onConfirm = () => {
     const newFileName = fileName + extension;
@@ -43,11 +47,15 @@ export const RenameModal = ({
   };
   const onKeydown = (e: KeyboardEvent) => {
     e.stopPropagation();
-    if (e.key === 'Enter' && !e.isComposing) {
-      e.preventDefault();
-      onConfirm();
+
+    if (e.key === 'Escape' && !e.isComposing) {
+      abortController.abort();
+      return;
     }
-    return;
+    if (e.key === 'Enter' && !e.isComposing) {
+      onConfirm();
+      return;
+    }
   };
 
   return html`
@@ -58,10 +66,10 @@ export const RenameModal = ({
       class="affine-attachment-rename-overlay-mask"
       @click="${() => abortController.abort()}"
     ></div>
-    <div ${ref(containerRef)} class="affine-attachment-rename-container">
+    <div class="affine-attachment-rename-container">
       <div class="affine-attachment-rename-input-wrapper">
         <input
-          autofocus
+          ${ref(inputRef)}
           type="text"
           .value=${fileName}
           @input=${onInput}

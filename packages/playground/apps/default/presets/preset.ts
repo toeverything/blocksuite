@@ -1,9 +1,9 @@
-import { DEFAULT_SHAPE_STROKE_COLOR } from '@blocksuite/blocks';
 import {
   DEFAULT_ROUGHNESS,
+  DEFAULT_SHAPE_STROKE_COLOR,
   serializeXYWH,
   StrokeStyle,
-} from '@blocksuite/phasor';
+} from '@blocksuite/blocks';
 import { native2Y, NativeWrapper, Text, Workspace } from '@blocksuite/store';
 
 import { type InitFn } from './utils';

@@ -3,7 +3,7 @@ import {
   BlockSelection,
   TextSelection,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { type UserInfo } from '@blocksuite/store';
 import { html, nothing } from 'lit';
@@ -11,49 +11,21 @@ import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isPageComponent } from '../../page-block/utils/guard.js';
+import {
+  cursorStyle,
+  filterCoveringRects,
+  multiPlayersColor,
+  selectionStyle,
+} from './utils.js';
 
 export const AFFINE_REMOTE_SELECTION_WIDGET_TAG =
   'affine-remote-selection-widget';
 
-interface SelectionRect {
+export interface SelectionRect {
   width: number;
   height: number;
   top: number;
   left: number;
-}
-
-function addAlpha(hexColor: string, opacity: number): string {
-  const normalized = Math.round(Math.min(Math.max(opacity, 0), 1) * 255);
-  return hexColor + normalized.toString(16).toUpperCase();
-}
-
-function randomColor(): string {
-  const hex = Math.floor(Math.random() * 16777215).toString(16);
-  return `#${hex}`;
-}
-
-function selectionStyle(rect: SelectionRect, color: string) {
-  return styleMap({
-    position: 'absolute',
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    backgroundColor: color,
-    pointerEvent: 'none',
-  });
-}
-
-function cursorStyle(rect: SelectionRect, color: string) {
-  return styleMap({
-    position: 'absolute',
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
-    top: `${rect.top}px`,
-    left: `${rect.left}px`,
-    backgroundColor: color,
-    pointerEvent: 'none',
-  });
 }
 
 @customElement(AFFINE_REMOTE_SELECTION_WIDGET_TAG)
@@ -87,20 +59,22 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this._selectionManager.slots.remoteChanged.on(remoteSelections => {
-        const status = this.page.awarenessStore.getStates();
-        this._remoteSelections = Object.entries(remoteSelections).map(
-          ([id, selections]) => {
-            return {
-              id: parseInt(id),
-              selections,
-              user: status.get(parseInt(id))?.user,
-            };
-          }
-        );
+      this._selectionManager.slots.remoteChanged.on(
+        throttle((remoteSelections: Record<string, BaseSelection[]>) => {
+          const status = this.page.awarenessStore.getStates();
+          this._remoteSelections = Object.entries(remoteSelections).map(
+            ([id, selections]) => {
+              return {
+                id: parseInt(id),
+                selections,
+                user: status.get(parseInt(id))?.user,
+              };
+            }
+          );
 
-        this.requestUpdate();
-      })
+          this.requestUpdate();
+        }, 100)
+      )
     );
     this.handleEvent('wheel', () => {
       this.requestUpdate();
@@ -134,11 +108,10 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
       if (range) {
         const nativeRects = Array.from(range.getClientRects());
-
-        return nativeRects
+        const rectsWithoutFiltered = nativeRects
           .map(rect => ({
-            width: rect.width,
-            height: rect.height,
+            width: rect.right - rect.left,
+            height: rect.bottom - rect.top,
             top:
               rect.top -
               (containerRect?.top ?? 0) +
@@ -148,10 +121,9 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
               (containerRect?.left ?? 0) +
               (container?.scrollLeft ?? 0),
           }))
-          .filter(
-            rect =>
-              (rect.width > 1 && rect.height > 0) || textSelection.to === null
-          );
+          .filter(rect => rect.width > 0 && rect.height > 0);
+
+        return filterCoveringRects(rectsWithoutFiltered);
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
@@ -182,41 +154,74 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     return [];
   }
 
-  private _getCursorRect(textSelection: TextSelection): SelectionRect | null {
+  private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
     if (!isPageComponent(this.pageElement)) {
       throw new Error('remote selection widget must be used in page component');
     }
 
-    const rangeManager = this.root.rangeManager;
-    assertExists(rangeManager);
-    const range = rangeManager.pointToRange({
-      path: textSelection.to ? textSelection.to.path : textSelection.from.path,
-      index: textSelection.to
-        ? textSelection.to.index + textSelection.to.length
-        : textSelection.from.index + textSelection.from.length,
-      length: 0,
-    });
-
-    if (!range) {
-      return null;
-    }
-
+    const textSelection = selections.find(
+      selection => selection instanceof TextSelection
+    ) as TextSelection | undefined;
+    const blockSelections = selections.filter(
+      selection => selection instanceof BlockSelection
+    );
     const container = this._container;
     const containerRect = this._containerRect;
-    const rangeRects = Array.from(range.getClientRects());
-    if (rangeRects.length === 1) {
-      const rect = rangeRects[0];
-      return {
-        width: 2,
-        height: rect.height + 4,
-        top:
-          rect.top -
-          2 -
-          (containerRect?.top ?? 0) +
-          (container?.scrollTop ?? 0),
-        left:
-          rect.left - (containerRect?.left ?? 0) + (container?.scrollLeft ?? 0),
-      };
+
+    if (textSelection) {
+      const rangeManager = this.root.rangeManager;
+      assertExists(rangeManager);
+      const range = rangeManager.pointToRange({
+        path: textSelection.to
+          ? textSelection.to.path
+          : textSelection.from.path,
+        index: textSelection.to
+          ? textSelection.to.index + textSelection.to.length
+          : textSelection.from.index + textSelection.from.length,
+        length: 0,
+      });
+
+      if (!range) {
+        return null;
+      }
+
+      const container = this._container;
+      const containerRect = this._containerRect;
+      const rangeRects = Array.from(range.getClientRects());
+      if (rangeRects.length === 1) {
+        const rect = rangeRects[0];
+        return {
+          width: 2,
+          height: rect.height,
+          top:
+            rect.top - (containerRect?.top ?? 0) + (container?.scrollTop ?? 0),
+          left:
+            rect.left -
+            (containerRect?.left ?? 0) +
+            (container?.scrollLeft ?? 0),
+        };
+      }
+    } else if (blockSelections.length > 0) {
+      const lastBlockSelection = blockSelections[blockSelections.length - 1];
+
+      const blockElement = this.root.viewStore.viewFromPath(
+        'block',
+        lastBlockSelection.path
+      );
+      if (blockElement) {
+        const rect = blockElement.getBoundingClientRect();
+        return {
+          width: 2,
+          height: rect.height,
+          top:
+            rect.top - (containerRect?.top ?? 0) + (container?.scrollTop ?? 0),
+          left:
+            rect.left +
+            rect.width -
+            (containerRect?.left ?? 0) +
+            (container?.scrollLeft ?? 0),
+        };
+      }
     }
 
     return null;
@@ -231,7 +236,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     const remoteUsers = new Set<number>();
     const selections: Array<{
       id: number;
-      textSelection?: TextSelection;
+      selections: BaseSelection[];
       rects: SelectionRect[];
       user?: UserInfo;
     }> = this._remoteSelections.flatMap(({ selections, id, user }) => {
@@ -243,9 +248,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
       return {
         id,
-        textSelection: selections.find(
-          selection => selection instanceof TextSelection
-        ) as TextSelection | undefined,
+        selections,
         rects: this._getSelectionRect(selections),
         user,
       };
@@ -253,23 +256,16 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
     return html`<div>
       ${selections.flatMap(selection => {
-        if (selection.user) {
-          this._colorMap.set(selection.id, selection.user.color);
-        }
         if (!this._colorMap.has(selection.id)) {
-          this._colorMap.set(selection.id, randomColor());
+          const color = multiPlayersColor.pick();
+          assertExists(color);
+          this._colorMap.set(selection.id, color);
         }
         const color = this._colorMap.get(selection.id) as string;
-        const cursorRect = selection.textSelection
-          ? this._getCursorRect(selection.textSelection)
-          : null;
+        const cursorRect = this._getCursorRect(selection.selections);
 
         return selection.rects
-          .map(
-            r => html`
-              <div style="${selectionStyle(r, addAlpha(color, 0.5))}"></div>
-            `
-          )
+          .map(r => html`<div style="${selectionStyle(r, color)}"></div>`)
           .concat([
             html`
               <div
@@ -288,14 +284,21 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
                   <div
                     style="${styleMap({
                       position: 'absolute',
-                      bottom: `${cursorRect?.height}px`,
-                      padding: '2px',
-                      'background-color': color,
+                      bottom: `${
+                        cursorRect?.height ? cursorRect.height - 4 : 0
+                      }px`,
+                      padding: '0 3px 0 3px',
+                      backgroundColor: color,
                       color: 'white',
                       whiteSpace: 'nowrap',
+                      border: '1px solid var(--affine-pure-black-20)',
+                      borderRadius: '4px',
+                      fontSize: '12px',
+                      fontWeight: '400',
+                      fontHeight: '20px',
                     })}"
                   >
-                    ${selection.user?.name}
+                    ${selection.user?.name ?? 'Unknown'}
                   </div>
                 </div>
               </div>

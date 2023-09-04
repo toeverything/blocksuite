@@ -1,14 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
+import * as Y from 'yjs';
+
+import type { EdgelessElement } from '../../__internal__/utils/types.js';
+import type { NoteBlockModel } from '../../models.js';
 import {
   Bound,
   FrameElement,
   Overlay,
   type RoughCanvas,
-} from '@blocksuite/phasor';
-import * as Y from 'yjs';
-
-import type { EdgelessElement } from '../../__internal__/utils/types.js';
-import type { NoteBlockModel } from '../../models.js';
+} from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { type Selectable } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';

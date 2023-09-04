@@ -55,7 +55,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
 
   block2Json(
     block: BlockModel,
-    children?: SerializedBlock[],
+    children: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -64,16 +64,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       flavour: block.flavour,
       type: (block as BlockModel & { type: string }).type as string,
       text: delta,
-      children:
-        children ??
-        block.children.map((child, index, array) => {
-          if (index === array.length - 1) {
-            // @ts-ignore
-            return getService(child.flavour).block2Json(child, 0, end);
-          }
-          // @ts-ignore
-          return getService(child.flavour).block2Json(child);
-        }),
+      children,
     };
   }
 

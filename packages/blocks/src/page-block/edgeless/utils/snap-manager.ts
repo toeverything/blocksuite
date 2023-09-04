@@ -1,13 +1,12 @@
+import { Point } from '../../../__internal__/utils/rect.js';
+import type { Alignable } from '../../../__internal__/utils/types.js';
+import { type NoteBlockModel } from '../../../note-block/note-model.js';
 import {
   Bound,
   deserializeXYWH,
   getBoundsWithRotation,
   Overlay,
-} from '@blocksuite/phasor';
-
-import { Point } from '../../../__internal__/utils/rect.js';
-import type { Alignable } from '../../../__internal__/utils/types.js';
-import { type NoteBlockModel } from '../../../note-block/note-model.js';
+} from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { isTopLevelBlock } from '../utils/query.js';
 

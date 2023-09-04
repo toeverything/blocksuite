@@ -19,7 +19,6 @@ import {
   getVirgoSelectionText,
   initEmptyEdgelessState,
   initEmptyParagraphState,
-  initThreeLists,
   insertThreeLevelLists,
   waitNextFrame,
 } from './utils/actions/misc.js';

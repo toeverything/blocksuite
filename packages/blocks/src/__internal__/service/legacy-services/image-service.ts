@@ -36,7 +36,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
 
   override block2Json(
     block: ImageBlockModel,
-    _children?: SerializedBlock[],
+    children: SerializedBlock[],
     _begin?: number,
     _end?: number
   ): SerializedBlock {
@@ -46,7 +46,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
       height: block.height,
       caption: block.caption,
       flavour: block.flavour,
-      children: [],
+      children,
     };
   }
 }

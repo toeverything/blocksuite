@@ -2,8 +2,8 @@ import { html, nothing } from 'lit';
 
 import type { AffineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import {
+  includeInlineSupportedBlockSelected,
   inlineFormatConfig,
-  noneInlineUnsupportedBlockSelected,
 } from '../../../page-block/const/inline-format-config.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import {
@@ -19,7 +19,7 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
     throw new Error('the pageElement of formatBar is not a PageComponent');
   }
 
-  if (!noneInlineUnsupportedBlockSelected(pageElement)) {
+  if (!includeInlineSupportedBlockSelected(pageElement)) {
     return nothing;
   }
 

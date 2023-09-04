@@ -3,14 +3,6 @@ import '../panel/font-size-panel.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  Bound,
-  normalizeShapeBound,
-  normalizeTextBound,
-  type ShapeElement,
-  type SurfaceManager,
-  type TextElement,
-} from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -24,6 +16,14 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../../icons/index.js';
+import {
+  Bound,
+  normalizeShapeBound,
+  normalizeTextBound,
+  type ShapeElement,
+  type SurfaceManager,
+  type TextElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';

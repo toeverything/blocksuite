@@ -131,6 +131,10 @@ function selectedModels2selectBlocksInfo(
       endPos,
       children: [] as SelectedBlock[],
     };
+    if (model.flavour === 'affine:database') {
+      const databaseBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
+      block.children = databaseBlock.children;
+    }
     blocksMap.set(model.id, block);
 
     const parentBlockChildren =

@@ -13,25 +13,6 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import {
-  Bound,
-  clamp,
-  compare,
-  ConnectorElement,
-  deserializeXYWH,
-  FrameElement,
-  generateKeyBetween,
-  generateNKeysBetween,
-  getCommonBound,
-  type IBound,
-  intersects,
-  type IVec,
-  type PhasorElement,
-  serializeXYWH,
-  SurfaceManager,
-  ZOOM_MAX,
-  ZOOM_MIN,
-} from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -43,7 +24,7 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
-import type { BlockHost, EdgelessTool } from '../../__internal__/index.js';
+import type { EdgelessTool } from '../../__internal__/index.js';
 import {
   asyncFocusRichText,
   bringForward,
@@ -72,6 +53,25 @@ import type {
   PageBlockModel,
   SurfaceBlockModel,
 } from '../../index.js';
+import {
+  Bound,
+  clamp,
+  compare,
+  ConnectorElement,
+  deserializeXYWH,
+  FrameElement,
+  generateKeyBetween,
+  generateNKeysBetween,
+  getCommonBound,
+  type IBound,
+  intersects,
+  type IVec,
+  type PhasorElement,
+  serializeXYWH,
+  SurfaceManager,
+  ZOOM_MAX,
+  ZOOM_MIN,
+} from '../../surface-block/index.js';
 import { FontLoader } from '../font-loader/index.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteSlicer } from './components/note-slicer/index.js';
@@ -145,7 +145,7 @@ export class EdgelessPageBlockComponent
     EdgelessPageService,
     EdgelessPageBlockWidgetName
   >
-  implements EdgelessContainer, BlockHost
+  implements EdgelessContainer
 {
   static override styles = css`
     .affine-edgeless-page-block-container {

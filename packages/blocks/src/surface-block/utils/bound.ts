@@ -283,14 +283,14 @@ export function getCommonBound(bounds: IBound[]): Bound | null {
   return new Bound(result.x, result.y, result.w, result.h);
 }
 
-/**
- * Get whether A contains B
- */
-export function contains(a: IBound, b: IBound): boolean {
-  return (
-    a.x <= b.x && a.x + a.w >= b.x + b.w && a.y <= b.y && a.y + a.h >= b.y + b.h
-  );
-}
+// /**
+//  * Get whether A contains B
+//  */
+// export function contains(a: IBound, b: IBound): boolean {
+//   return (
+//     a.x <= b.x && a.x + a.w >= b.x + b.w && a.y <= b.y && a.y + a.h >= b.y + b.h
+//   );
+// }
 
 export function getBoundFromPoints(points: number[][]) {
   const { minX, minY, width, height } = getBoundsFromPoints(points);

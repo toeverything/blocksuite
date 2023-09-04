@@ -4,9 +4,6 @@ import '../buttons/menu-button.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { ConnectorElement, SurfaceManager } from '@blocksuite/phasor';
-import { StrokeStyle } from '@blocksuite/phasor';
-import { ConnectorMode } from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -15,6 +12,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
 import {
+  ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
   DashLineIcon,
@@ -24,6 +22,12 @@ import {
   SmallArrowDownIcon,
   StraightLineIcon,
 } from '../../../../icons/index.js';
+import {
+  type ConnectorElement,
+  ConnectorMode,
+  StrokeStyle,
+  type SurfaceManager,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import {
@@ -282,7 +286,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
         .iconInfo=${{
           icon: html`${selectedMode === ConnectorMode.Straight
             ? ConnectorLWithArrowIcon
-            : ConnectorXWithArrowIcon}${SmallArrowDownIcon}`,
+            : selectedMode === ConnectorMode.Orthogonal
+            ? ConnectorXWithArrowIcon
+            : ConnectorCWithArrowIcon}${SmallArrowDownIcon}`,
           tooltip: 'Connector Shape',
         }}
         .menuChildren=${html`
@@ -294,6 +300,15 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
             @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
           >
             ${ConnectorLWithArrowIcon}
+          </edgeless-tool-icon-button>
+          <edgeless-tool-icon-button
+            .tooltip=${'Curve'}
+            .iconContainerPadding=${2}
+            .active=${selectedMode === ConnectorMode.Curve}
+            .activeMode=${'background'}
+            @click=${() => this._setConnectorMode(ConnectorMode.Curve)}
+          >
+            ${ConnectorCWithArrowIcon}
           </edgeless-tool-icon-button>
           <edgeless-tool-icon-button
             .tooltip=${'Elbowed'}
