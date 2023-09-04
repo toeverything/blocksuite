@@ -15,6 +15,8 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
+import { inlineFormatConfig } from '../../common/inline-format-config.js';
+import { paragraphConfig } from '../../common/paragraph-config.js';
 import { toast } from '../../components/toast.js';
 import {
   ArrowDownBigIcon,
@@ -35,8 +37,6 @@ import {
   YesterdayIcon,
 } from '../../icons/index.js';
 import type { ImageProps } from '../../image-block/image-model.js';
-import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
-import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   getSelectedContentBlockElements,

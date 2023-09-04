@@ -4,10 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import { getBlockElementByModel } from '../__internal__/utils/query.js';
-import { actionConfig } from '../page-block/const/action-config.js';
-import { moveBlockConfig } from '../page-block/const/move-block-config.js';
-import { paragraphConfig } from '../page-block/const/paragraph-config.js';
-import type { PageBlockComponent } from '../page-block/types.js';
+import { actionConfig } from '../common/actions/action-config.js';
+import { moveBlockConfig } from '../common/move-block-config.js';
+import { paragraphConfig } from '../common/paragraph-config.js';
 import {
   getSelectedContentBlockElements,
   onModelElementUpdated,
@@ -321,15 +320,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
     if (!config.hotkey) return;
     blockElement.bindHotKey({
       [config.hotkey]: ctx => {
-        const pageElement = blockElement.closest<PageBlockComponent>(
-          'affine-doc-page,affine-edgeless-page'
-        );
-        if (!pageElement) return;
-
-        if (!config.showWhen(pageElement)) return;
+        if (!config.showWhen(root)) return;
 
         ctx.get('defaultState').event.preventDefault();
-        config.action(pageElement);
+        config.action(root);
       },
     });
   });

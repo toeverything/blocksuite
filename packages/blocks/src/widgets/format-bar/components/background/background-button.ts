@@ -1,15 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html, nothing } from 'lit';
 
+import { includeInlineSupportedBlockSelected } from '../../../../common/inline-format-config.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
 } from '../../../../icons/index.js';
-import { includeInlineSupportedBlockSelected } from '../../../../page-block/const/inline-format-config.js';
-import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { formatByTextSelection } from '../../../../page-block/utils/operations/element/inline-level.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig } from './const.js';
@@ -17,20 +16,17 @@ import { backgroundConfig } from './const.js';
 let lastUsedColor: string | null = null;
 
 const updateBackground = (
-  blockElement: BlockElement,
+  root: BlockSuiteRoot,
   color: string | null = null
 ) => {
   lastUsedColor = color;
 
-  const textSelection = blockElement.selection.find('text');
+  const textSelection = root.selectionManager.find('text');
 
   if (!textSelection) {
-    const blockSelections = blockElement.selection.filter('block');
+    const blockSelections = root.selectionManager.filter('block');
     for (const blockSelection of blockSelections) {
-      const el = blockElement.root.viewStore.viewFromPath(
-        'block',
-        blockSelection.path
-      );
+      const el = root.viewStore.viewFromPath('block', blockSelection.path);
       if (el && el.model.text) {
         el.model.text.format(0, el.model.text.length, {
           background: color,
@@ -40,7 +36,7 @@ const updateBackground = (
     return;
   }
 
-  formatByTextSelection(blockElement, textSelection, 'background', color);
+  formatByTextSelection(root, textSelection, 'background', color);
 };
 
 const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
@@ -54,7 +50,7 @@ const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
           text="${name}"
           data-testid="${color ?? 'unset'}"
           @click="${() => {
-            updateBackground(formatBar.pageElement, color);
+            updateBackground(formatBar.root, color);
             formatBar.requestUpdate();
           }}"
         >
@@ -70,12 +66,9 @@ const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
 };
 
 export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
-  const pageElement = formatBar.pageElement;
-  if (!isPageComponent(pageElement)) {
-    throw new Error('Background highlight button host is not a page component');
-  }
+  const root = formatBar.pageElement.root;
 
-  if (!includeInlineSupportedBlockSelected(pageElement)) {
+  if (!includeInlineSupportedBlockSelected(root)) {
     return nothing;
   }
 
@@ -123,7 +116,7 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
       data-last-used="${lastUsedColor ?? 'unset'}"
       width="52px"
       height="32px"
-      @click="${() => updateBackground(pageElement, lastUsedColor)}"
+      @click="${() => updateBackground(root, lastUsedColor)}"
     >
       ${HighLightDuotoneIcon} ${ArrowDownIcon}</icon-button
     >
