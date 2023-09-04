@@ -1,13 +1,13 @@
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html } from 'lit';
 
-import { actionConfig } from '../../../page-block/const/action-config.js';
-import type { PageBlockComponent } from '../../../page-block/types.js';
+import { actionConfig } from '../../../common/actions/action-config.js';
 
-export const ActionItems = (pageElement: PageBlockComponent) =>
+export const ActionItems = (root: BlockSuiteRoot) =>
   actionConfig
-    .filter(({ showWhen }) => showWhen(pageElement))
+    .filter(({ showWhen }) => showWhen(root))
     .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
-      const enabled = enabledWhen(pageElement);
+      const enabled = enabledWhen(root);
       const toolTip = enabled
         ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
         : html`<tool-tip tip-position="top" inert role="tooltip"
@@ -18,7 +18,7 @@ export const ActionItems = (pageElement: PageBlockComponent) =>
         class="has-tool-tip"
         data-testid=${id}
         ?disabled=${!enabled}
-        @click=${() => enabled && action(pageElement)}
+        @click=${() => enabled && action(root)}
       >
         ${icon}${toolTip}
       </icon-button>`;

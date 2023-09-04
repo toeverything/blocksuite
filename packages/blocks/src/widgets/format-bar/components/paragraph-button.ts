@@ -6,9 +6,9 @@ import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
+import { paragraphConfig } from '../../../common/paragraph-config.js';
 import { ArrowDownIcon } from '../../../icons/index.js';
 import type { Flavour, ParagraphBlockModel } from '../../../models.js';
-import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
 import { onModelElementUpdated } from '../../../page-block/utils/callback.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
@@ -21,7 +21,6 @@ interface ParagraphPanelProps {
 
 interface ParagraphButtonProps {
   formatBar: AffineFormatBarWidget;
-  page: Page;
   selectedBlockElements: BlockElement[];
 }
 
@@ -105,7 +104,6 @@ const ParagraphPanel = ({
 
 export const ParagraphButton = ({
   formatBar,
-  page,
   selectedBlockElements,
 }: ParagraphButtonProps) => {
   const paragraphIcon =
@@ -125,7 +123,7 @@ export const ParagraphButton = ({
 
   const paragraphPanel = ParagraphPanel({
     selectedBlockElements,
-    page,
+    page: formatBar.root.page,
   });
 
   const onHover = () => {

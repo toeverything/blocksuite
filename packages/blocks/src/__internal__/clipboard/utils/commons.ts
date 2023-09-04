@@ -1,9 +1,9 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
-import type { PageBlockComponent } from '../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
 import type { SelectedBlock } from '../../content-parser/types.js';
@@ -191,12 +191,9 @@ async function createPageClipboardItems(
   return [textClipboardItem, htmlClipboardItem, pageClipboardItem];
 }
 
-export async function copyBlocksInPage(pageElement: PageBlockComponent) {
-  const selectedModels = getSelectedContentModels(pageElement.root, [
-    'text',
-    'block',
-  ]);
-  const textSelection = pageElement.selection.find('text');
+export async function copyBlocksInPage(root: BlockSuiteRoot) {
+  const selectedModels = getSelectedContentModels(root, ['text', 'block']);
+  const textSelection = root.selectionManager.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,
     textSelection

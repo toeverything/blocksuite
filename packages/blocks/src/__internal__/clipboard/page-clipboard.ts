@@ -94,7 +94,7 @@ export class PageClipboard implements Clipboard {
   };
 
   private async _copyBlocksInPage() {
-    return await copyBlocksInPage(this._ele);
+    return await copyBlocksInPage(this._ele.root);
   }
 
   private _onCut = async (ctx: UIEventStateContext) => {

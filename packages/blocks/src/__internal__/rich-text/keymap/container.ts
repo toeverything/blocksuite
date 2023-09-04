@@ -4,9 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { VEditor, VirgoRootElement } from '@blocksuite/virgo';
 
+import { bracketPairs } from '../../../common/bracket-pairs.js';
+import { inlineFormatConfig } from '../../../common/inline-format-config.js';
 import { getNextBlock } from '../../../note-block/utils.js';
-import { bracketPairs } from '../../../page-block/const/bracket-pairs.js';
-import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   getCombinedFormatInTextSelection,
@@ -364,7 +364,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         _preventDefault(ctx);
 
         const format = getCombinedFormatInTextSelection(root, textSelection);
-        config.action({ blockElement, type: 'text', format });
+        config.action({ root, type: 'text', format });
         return true;
       },
     });
