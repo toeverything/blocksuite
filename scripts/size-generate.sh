@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -fr ./temp &&
+rm -fr ./temp/size &&
   pnpm run build:editor &&
   pnpm run size:data &&
   pnpm -C ./packages/playground run build:size &&
