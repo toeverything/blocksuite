@@ -1,4 +1,5 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
+import { array } from 'zod';
 
 import type { ParagraphBlockModel } from '../../../paragraph-block/paragraph-model.js';
 import type { SerializedBlock } from '../../index.js';
@@ -43,6 +44,54 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
         break;
       default:
         resultText = text;
+    }
+    return resultText;
+  }
+
+  override async block2markdown(
+    model: ParagraphBlockModel,
+    { childText = '', begin, end }: BlockTransformContext = {}
+  ) {
+    const text = await super.block2markdown(model, {
+      childText: '',
+      begin,
+      end,
+    });
+    let resultText = '';
+    switch (model.type) {
+      case 'h1':
+        resultText = `${'#'.repeat(1)} ${text}`;
+        break;
+      case 'h2':
+        resultText = `${'#'.repeat(2)} ${text}`;
+        break;
+      case 'h3':
+        resultText = `${'#'.repeat(3)} ${text}`;
+        break;
+      case 'h4':
+        resultText = `${'#'.repeat(4)} ${text}`;
+        break;
+      case 'h5':
+        resultText = `${'#'.repeat(5)} ${text}`;
+        break;
+      case 'h6':
+        resultText = `${'#'.repeat(6)} ${text}`;
+        break;
+      case 'quote':
+        resultText = text
+          .split('\n')
+          .reduce((preValue, curValue, index, array) => {
+            preValue += `${index !== 0 ? '\n' : ''}> ${curValue}${
+              index !== array.length - 1 && array.length !== 1 ? '\n>' : ''
+            }`;
+            return preValue;
+          }, '');
+        break;
+      default:
+        resultText = text;
+    }
+    if (childText) {
+      resultText = `${resultText}\r\n\r\n${childText}`;
     }
     return resultText;
   }

@@ -123,7 +123,7 @@ export class ContentParser {
     if (!root) return;
 
     const blobMap = new Map<string, string>();
-    const htmlContent = await this.block2Html(
+    const markdownContent = await this.block2markdown(
       [this.getSelectedBlock(root)],
       blobMap
     );
@@ -131,7 +131,7 @@ export class ContentParser {
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       root.id,
-      htmlContent,
+      markdownContent,
       blobMap,
       this._page.blobs
     );
@@ -434,6 +434,22 @@ export class ContentParser {
     return htmlText;
   }
 
+  public async block2markdown(
+    blocks: SelectedBlock[],
+    blobMap: Map<string, string>
+  ): Promise<string> {
+    let markdownText = '';
+    for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
+      markdownText =
+        markdownText +
+        (await this._getMarkdownInfoBySelectionInfo(
+          blocks[currentIndex],
+          blobMap
+        ));
+    }
+    return markdownText;
+  }
+
   public async block2Text(blocks: SelectedBlock[]): Promise<string> {
     return (
       await Promise.all(
@@ -664,6 +680,38 @@ export class ContentParser {
       begin: selectedBlock.startPos,
       end: selectedBlock.endPos,
     });
+  }
+
+  private async _getMarkdownInfoBySelectionInfo(
+    block: SelectedBlock,
+    blobMap: Map<string, string>
+  ): Promise<string> {
+    const model = block.model;
+    const children: string[] = [];
+    for (
+      let currentIndex = 0;
+      currentIndex < block.children.length;
+      currentIndex++
+    ) {
+      const childText = await this._getMarkdownInfoBySelectionInfo(
+        block.children[currentIndex],
+        blobMap
+      );
+      childText && children.push(childText);
+    }
+    const { getServiceOrRegister } = await import('../service/index.js');
+    const service = await getServiceOrRegister(model.flavour);
+
+    const text = await service.block2markdown(
+      model,
+      {
+        childText: children.join('\r\n\r\n'),
+        begin: block.startPos,
+        end: block.endPos,
+      },
+      blobMap
+    );
+    return text;
   }
 
   private async _convertHtml2Blocks(

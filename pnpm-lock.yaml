@@ -186,9 +186,6 @@ importers:
       sortablejs:
         specifier: ^1.15.0
         version: 1.15.0
-      turndown:
-        specifier: ^7.1.2
-        version: 7.1.2
       webfontloader:
         specifier: ^1.6.28
         version: 1.6.28
@@ -3334,10 +3331,6 @@ packages:
     dependencies:
       esutils: 2.0.3
     dev: true
-
-  /domino@2.1.6:
-    resolution: {integrity: sha512-3VdM/SXBZX2omc9JF9nOPCtDaYQ67BGp5CoLpIQlO2KCAPETs8TcDHacF26jXadGbvUteZzRTeos2fhID5+ucQ==}
-    dev: false
 
   /dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
@@ -6848,12 +6841,6 @@ packages:
       tslib: 1.14.1
       typescript: 5.2.2
     dev: true
-
-  /turndown@7.1.2:
-    resolution: {integrity: sha512-ntI9R7fcUKjqBP6QU8rBK2Ehyt8LAzt3UBT9JR9tgo6GtuKvyUzpayWmeMKJw1DPdXzktvtIT8m2mVXz+bL/Qg==}
-    dependencies:
-      domino: 2.1.6
-    dev: false
 
   /tweakpane@3.1.10:
     resolution: {integrity: sha512-rqwnl/pUa7+inhI2E9ayGTqqP0EPOOn/wVvSWjZsRbZUItzNShny7pzwL3hVlaN4m9t/aZhsP0aFQ9U5VVR2VQ==}

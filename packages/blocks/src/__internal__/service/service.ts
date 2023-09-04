@@ -53,6 +53,18 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     return `${text}${childText}`;
   }
 
+  async block2markdown(
+    block: BlockModel,
+    { childText = '', begin, end }: BlockTransformContext = {},
+    _blobMap?: Map<string, string>
+  ): Promise<string> {
+    const delta = block.text?.sliceToDelta(begin || 0, end) || [];
+    const text = delta.reduce((markdown: string, item: DeltaOperation) => {
+      return markdown + BaseService.deltaLeaf2markdown(block, item);
+    }, '');
+    return `${text}${childText}`;
+  }
+
   block2Json(
     block: BlockModel,
     children: SerializedBlock[],
@@ -114,7 +126,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     if (attributes.underline) {
       text = `<u>${text}</u>`;
     }
-    if (attributes.strikethrough) {
+    if (attributes.strike || attributes.strikethrough) {
       text = `<s>${text}</s>`;
     }
     if (attributes.link) {
@@ -131,6 +143,56 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
       const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
       text = `<a href="${referenceLink}">${referenceTitle}</a>`;
+    }
+    return text;
+  }
+
+  private static deltaLeaf2markdown(
+    block: BaseBlockModel,
+    deltaLeaf: DeltaOperation
+  ) {
+    let text = deltaLeaf.insert ?? '';
+    // replace unsafe characters
+    text = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    const attributes = deltaLeaf.attributes;
+    if (!attributes) {
+      return text;
+    }
+    if (attributes.code) {
+      text = '`' + text + '`';
+    }
+    if (attributes.bold) {
+      text = `**${text}**`;
+    }
+    if (attributes.italic) {
+      text = `_${text}_`;
+    }
+    if (attributes.underline) {
+      text = `<u>${text}</u>`;
+    }
+    if (attributes.strike || attributes.strikethrough) {
+      text = `~~${text}~~`;
+    }
+    if (attributes.link) {
+      text = `[${text}](${attributes.link})`;
+    }
+    if (attributes.reference) {
+      const refPageId = attributes.reference.pageId;
+      const workspace = block.page.workspace;
+      const pageMeta = workspace.meta.pageMetas.find(
+        page => page.id === refPageId
+      );
+      const host = window.location.origin;
+      // maybe should use public link at here?
+      const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
+      const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
+      text = `[${referenceTitle}](${referenceLink})`;
     }
     return text;
   }
