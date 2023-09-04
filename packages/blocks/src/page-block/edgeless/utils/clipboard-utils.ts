@@ -84,24 +84,12 @@ function handleZoom(
   );
   let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
   totalBound = inflateBound(totalBound, 30);
-  let zoom = viewport.zoom;
-  const originViewBound = getBoundByZoom(
-    Bound.from(viewport.viewportBounds),
-    1 / zoom
-  );
   let currentViewBound = Bound.from(viewport.viewportBounds);
   while (!currentViewBound.contains(totalBound)) {
-    zoom -= 0.01;
-    currentViewBound = getBoundByZoom(Bound.from(originViewBound), zoom);
-    if (zoom === 0.1) break;
+    const offset = 0.1;
+    const ratio = viewport.viewportBounds.h / viewport.viewportBounds.w;
+    const expandHeight = ratio * offset;
+    currentViewBound = currentViewBound.expand(offset, expandHeight);
   }
-  viewport.smoothZoom(zoom);
-}
-
-function getBoundByZoom(originBound: Bound, zoom: number) {
-  let { w, h } = originBound;
-  const [centerX, centerY] = originBound.center;
-  w = w / zoom;
-  h = h / zoom;
-  return new Bound(centerX - w / 2, centerY - h / 2, w, h);
+  viewport.setViewportByBound(currentViewBound, [0, 0, 0, 0], true);
 }
