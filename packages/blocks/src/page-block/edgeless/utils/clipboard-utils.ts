@@ -90,6 +90,11 @@ function handleZoom(
     const ratio = viewport.viewportBounds.h / viewport.viewportBounds.w;
     const expandHeight = ratio * offset;
     currentViewBound = currentViewBound.expand(offset, expandHeight);
+    const zoom = Math.min(
+      viewport.width / currentViewBound.w,
+      viewport.height / currentViewBound.h
+    );
+    if (zoom <= 0.1) break;
   }
   viewport.setViewportByBound(currentViewBound, [0, 0, 0, 0], true);
 }
