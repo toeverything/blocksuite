@@ -14,8 +14,8 @@ function randomColor(): string {
   return `hsl(${h}, 75%, 65%)`;
 }
 
-@customElement('edgeless-remote-selection')
-export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
+@customElement('edgeless-remote-cursor')
+export class EdgelessRemoteCursor extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       pointer-events: none;
@@ -67,73 +67,14 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
     return this.edgeless.page;
   }
 
-  private _updateRemoteRects = () => {
-    const { zoom, selection, surface, remoteColorMap } = this;
-    const remoteSelection = selection.remoteSelection;
-    const remoteRects: EdgelessRemoteSelection['_remoteRects'] = {};
-
-    Object.entries(remoteSelection).forEach(([clientId, selection]) => {
-      if (selection.elements.length === 0) return;
-
-      const elements = selection.elements
-        .map(id => this.edgeless.getElementModel(id))
-        .filter(element => element) as Selectable[];
-      const rect = getSelectedRect(elements);
-
-      if (rect.width === 0 || rect.height === 0) return;
-
-      const [left, top] = surface.toViewCoord(rect.left, rect.top);
-      const [width, height] = [rect.width * zoom, rect.height * zoom];
-
-      if (!remoteColorMap.has(clientId))
-        remoteColorMap.set(clientId, randomColor());
-
-      let rotate = 0;
-      if (elements.length === 1) {
-        const element = elements[0];
-        if (!isTopLevelBlock(element)) {
-          rotate = element.rotate ?? 0;
-        }
-      }
-
-      remoteRects[clientId] = {
-        width,
-        height,
-        borderStyle: 'solid',
-        left,
-        top,
-        rotate,
-      };
-    });
-
-    this._remoteRects = remoteRects;
-  };
-
-  private _updateOnElementChange = (element: string | { id: string }) => {
-    const id = typeof element === 'string' ? element : element.id;
-
-    if (this.selection.hasRemote(id)) this._updateRemoteRects();
-  };
+  private _updateRemoteCursor = () => {};
 
   override connectedCallback() {
     super.connectedCallback();
 
-    const { _disposables, surface, page } = this;
+    const { edgeless } = this;
 
-    Object.values(
-      pick(surface.slots, ['elementAdded', 'elementRemoved', 'elementUpdated'])
-    ).forEach(slot => {
-      _disposables.add(slot.on(this._updateOnElementChange));
-    });
-
-    _disposables.add(
-      this.selection.slots.remoteUpdated.on(this._updateRemoteRects)
-    );
-    _disposables.add(page.slots.yBlockUpdated.on(this._updateOnElementChange));
-    _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(this._updateRemoteRects)
-    );
-    this._updateRemoteRects();
+    this.selection.slots;
   }
 
   override render() {
@@ -163,6 +104,6 @@ export class EdgelessRemoteSelection extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-remote-selection': EdgelessRemoteSelection;
+    'edgeless-remote-cursor': EdgelessRemoteCursor;
   }
 }

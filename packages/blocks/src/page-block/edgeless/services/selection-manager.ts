@@ -1,3 +1,4 @@
+import type { CursorSelection } from '@blocksuite/block-std';
 import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
@@ -17,24 +18,35 @@ export interface EdgelessSelectionState {
   editing: boolean;
 }
 
+export interface CursorSelectionState {
+  x: number;
+  y: number;
+}
+
 export class EdgelessSelectionManager {
   container!: EdgelessPageBlockComponent;
   disposable: DisposableGroup = new DisposableGroup();
 
   slots = {
     updated: new Slot<SurfaceSelection>(),
-    blocksUpdated: new Slot<BlockComponentElement[]>(),
     remoteUpdated: new Slot(),
+
+    cursorUpdated: new Slot<CursorSelection>(),
+    remoteCursorUpdated: new Slot(),
+
+    blocksUpdated: new Slot<BlockComponentElement[]>(),
   };
 
   lastState: SurfaceSelection | null = null;
-
   state: SurfaceSelection = SurfaceSelection.fromJSON({
     blockId: '',
     editing: false,
     elements: [],
   });
 
+  cursor: CursorSelection | null = null;
+
+  remoteCursor: Record<string, CursorSelection> = {};
   remoteSelection: Record<string, SurfaceSelection> = {};
 
   selectedBlocks: BlockComponentElement[] = [];
@@ -72,17 +84,35 @@ export class EdgelessSelectionManager {
     this._selectedElements = new Set(selection.elements);
   }
 
+  private _setCursor(cursor: CursorSelection) {
+    this.cursor = cursor;
+  }
+
   mount() {
     this.disposable.add(
       this._selection.slots.changed.on(selections => {
-        const selection = selections.find(
-          s => s.type === 'surface'
-        ) as SurfaceSelection;
+        const { cursor, surface } = selections.reduce(
+          (p, s) => {
+            if (s.type === 'surface') {
+              p.surface = s as SurfaceSelection;
+            } else if (s.type === 'cursor') {
+              p.cursor = s as CursorSelection;
+            }
 
-        if (this.state.isEmpty() && (!selection || selection.isEmpty())) return;
+            return p;
+          },
+          {} as { surface?: SurfaceSelection; cursor?: CursorSelection }
+        );
+
+        if (cursor && (!this.cursor || !cursor.equals(this.cursor))) {
+          this._setCursor(cursor);
+          this.slots.cursorUpdated.emit(cursor);
+        }
+
+        if (this.state.isEmpty() && (!surface || surface.isEmpty())) return;
 
         this._setState(
-          selection ??
+          surface ??
             SurfaceSelection.fromJSON({
               elements: [],
               editing: false,
@@ -94,7 +124,8 @@ export class EdgelessSelectionManager {
 
     this.disposable.add(
       this._selection.slots.remoteChanged.on(states => {
-        const result: Record<string, SurfaceSelection> = {};
+        const remoteSelection: Record<string, SurfaceSelection> = {};
+        const remoteCursors: Record<string, CursorSelection> = {};
         const remoteSelectedElements = new Set<string>();
 
         Object.keys(states).forEach(id => {
@@ -102,15 +133,21 @@ export class EdgelessSelectionManager {
 
           selections.forEach(selection => {
             if (selection.is('surface')) {
-              result[id] = selection;
+              remoteSelection[id] = selection;
               selection.elements.forEach(id => remoteSelectedElements.add(id));
+            }
+
+            if (selection.is('cursor')) {
+              remoteCursors[id] = selection;
             }
           });
         });
 
-        this.remoteSelection = result;
+        this.remoteCursor = remoteCursors;
+        this.remoteSelection = remoteSelection;
         this._remoteSelectedElements = remoteSelectedElements;
         this.slots.remoteUpdated.emit();
+        this.slots.remoteCursorUpdated.emit();
       })
     );
   }
@@ -135,7 +172,16 @@ export class EdgelessSelectionManager {
       selection.editing
     );
 
-    this._selection.setGroup('edgeless', [instance]);
+    this._selection.setGroup(
+      'edgeless',
+      this.cursor ? [instance, this.cursor] : [instance]
+    );
+  }
+
+  setCursor(cursor: CursorSelection | CursorSelectionState) {
+    const instance = this._selection.getInstance('cursor', cursor.x, cursor.y);
+
+    this._selection.setGroup('edgeless', [this.state, instance]);
   }
 
   setSelectedBlocks(blocks: BlockComponentElement[]) {

@@ -13,6 +13,7 @@ export type DocPageBlockWidgetName =
   | typeof AFFINE_DATABASE_CONVERT_WIDGET_TAG
   | typeof AFFINE_REMOTE_SELECTION_WIDGET_TAG;
 export type EdgelessPageBlockWidgetName =
+  | 'remoteSelection'
   | 'slashMenu'
   | 'linkedPage'
   | 'dragHandle'
