@@ -3,6 +3,7 @@ import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
+  name: string;
   caption?: string;
   sourceId: string;
   width?: number;
@@ -10,6 +11,7 @@ export type ImageBlockProps = {
 };
 
 const defaultImageProps: ImageBlockProps = {
+  name: '',
   caption: '',
   sourceId: '',
   width: 0,
@@ -18,7 +20,7 @@ const defaultImageProps: ImageBlockProps = {
 
 export const ImageBlockSchema = defineBlockSchema({
   flavour: 'affine:image',
-  props: () => defaultImageProps,
+  props: (): ImageBlockProps => defaultImageProps,
   metadata: {
     version: 1,
     role: 'content',

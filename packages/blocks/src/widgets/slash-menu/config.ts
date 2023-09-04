@@ -231,11 +231,13 @@ export const menuGroups: {
             await uploadImageFromLocal(pageElement.page.blobs)
           ).map(
             ({
+              file,
               sourceId,
             }): ImageBlockProps & {
               flavour: 'affine:image';
             } => ({
               flavour: 'affine:image',
+              name: file.name,
               sourceId,
             })
           );
