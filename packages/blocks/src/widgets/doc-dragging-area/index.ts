@@ -1,4 +1,3 @@
-
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
@@ -338,4 +337,3 @@ export class DocDraggingAreaWidget extends WidgetElement {
     `;
   }
 }
-
