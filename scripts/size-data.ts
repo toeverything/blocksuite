@@ -62,7 +62,7 @@ const results = Object.fromEntries(
 
 await mkdir(sizeDir, { recursive: true });
 await writeFile(
-  path.resolve(sizeDir, '_usages.json'),
+  path.resolve(sizeDir, '_packages.json'),
   JSON.stringify(results),
   'utf-8'
 );

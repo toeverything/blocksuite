@@ -31,7 +31,7 @@ const config = mergeConfig(
           await writeFile(
             resolve(sizeDir, `playground.json`),
             JSON.stringify({
-              file: 'playground (no dynamic import)',
+              file: 'examples/basic',
               size: file.length,
               gzip: gzipped.length,
               brotli: brotli.length,

@@ -15,7 +15,7 @@ interface BundleResult extends SizeResult {
   file: string;
 }
 
-type UsageResult = Record<string, SizeResult & { name: string }>;
+type PackageResult = Record<string, SizeResult & { name: string }>;
 
 const currDir = path.resolve('temp/size');
 const prevDir = path.resolve('temp/size-prev');
@@ -25,13 +25,13 @@ const sizeHeaders = ['Size', 'Gzip', 'Brotli'];
 run();
 
 async function run() {
-  await renderFiles();
-  await renderUsages();
+  await renderBundles();
+  await renderPackages();
 
   process.stdout.write(output);
 }
 
-async function renderFiles() {
+async function renderBundles() {
   const filterFiles = (files: string[]) =>
     files.filter(file => !file.startsWith('_'));
 
@@ -60,18 +60,18 @@ async function renderFiles() {
   }
 
   output += '### Bundles\n\n';
-  output += markdownTable([['File', ...sizeHeaders], ...rows]);
+  output += markdownTable([['Entry', ...sizeHeaders], ...rows]);
   output += '\n\n';
 }
 
-async function renderUsages() {
-  const curr = (await importJSON<UsageResult>(
-    path.resolve(currDir, '_usages.json')
+async function renderPackages() {
+  const curr = (await importJSON<PackageResult>(
+    path.resolve(currDir, '_packages.json')
   ))!;
-  const prev = await importJSON<UsageResult>(
-    path.resolve(prevDir, '_usages.json')
+  const prev = await importJSON<PackageResult>(
+    path.resolve(prevDir, '_packages.json')
   );
-  output += '\n### Usages\n\n';
+  output += '\n### Packages\n\n';
 
   const data = Object.values(curr)
     .map(usage => {
