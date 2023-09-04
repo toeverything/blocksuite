@@ -42,6 +42,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       position: absolute;
       top: 0;
       left: 0;
+      transform-origin: left center;
     }
 
     .affine-note-slicer-container {
@@ -92,6 +93,13 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     );
     this._disposables.add(
       this.edgelessPage.page.slots.blockUpdated.on(() => {
+        if (this._lastPointerState) {
+          this._updateVisibility(this._lastPointerState);
+        }
+      })
+    );
+    this._disposables.add(
+      this.edgelessPage.selectionManager.slots.updated.on(() => {
         if (this._lastPointerState) {
           this._updateVisibility(this._lastPointerState);
         }
@@ -204,13 +212,11 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const shouldTransition = note === this._noteModel;
     const noteContainer = noteElement.parentElement;
     const noteContainerRect = noteContainer.getBoundingClientRect();
-    const [baseX, baseY] = deserializeXYWH(note.xywh);
-    const transformX = baseX * this._zoom;
+    const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
+    const transformX = baseX;
     const transformY =
-      baseY * this._zoom -
-      noteContainerRect.top +
-      gapRect.top +
-      gapRect.height / 2;
+      baseY +
+      (gapRect.y - noteContainerRect.top + gapRect.height / 2) / this._zoom;
     const sliceVerticalPos =
       baseY + upperBlockElement.offsetHeight + upperBlockElement.offsetTop;
 
@@ -232,7 +238,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._lastPosition = {
       transformX,
       transformY,
-      width: noteElement.offsetWidth * this._zoom,
+      width: noteWidth - EDGELESS_BLOCK_CHILD_PADDING * 2,
       gapRect,
       sliceVerticalPos,
     };
@@ -245,7 +251,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
         this.style.removeProperty('transition');
       }
 
-      this.style.transform = `translate3d(calc(var(--affine-edgeless-x) + ${transformX}px), calc(var(--affine-edgeless-y) + ${transformY}px), 0) translate3d(0, -50%, 0)`;
+      this.style.transform = `translate3d(${transformX}px, ${transformY}px, 0) translate3d(0, -50%, 0)`;
+      this.style.zIndex = noteContainer.style.zIndex;
     });
   }
 
@@ -261,18 +268,17 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     this._lastPointerState = null;
   }
 
+  private _onPopup() {
+    this.style.zIndex = (Number(this.style.zIndex) + 1).toString();
+  }
+
   private _showIndicator() {
     if (this._lastPosition) {
-      this._indicatorLine?.show();
+      this._indicatorLine.show();
     }
   }
 
-  private _popupButton() {
-    this.style.zIndex = '1';
-    this._slicerButton.show();
-  }
-
-  private _clipNote() {
+  private _sliceNote() {
     if (!this._blockModel || !this._noteModel || !this._lastPosition) return;
 
     const page = this.edgelessPage.page;
@@ -310,16 +316,16 @@ export class NoteSlicer extends WithDisposable(LitElement) {
 
   override render() {
     return html`<div class="affine-note-slicer-container">
-      <note-slicer-button
-        .edgelessPage=${this.edgelessPage}
-        @showindicator=${this._showIndicator}
-        @popupbutton=${this._popupButton}
-        @clip=${this._clipNote}
-      ></note-slicer-button>
       <note-slicer-indicator
-        .offset=${EDGELESS_BLOCK_CHILD_PADDING * this._zoom - 20}
+        .offset=${EDGELESS_BLOCK_CHILD_PADDING}
         .width=${this._lastPosition?.width ?? 0}
       ></note-slicer-indicator>
+      <note-slicer-button
+        .zoom=${this._zoom}
+        @showindicator=${this._showIndicator}
+        @slice=${this._sliceNote}
+        @popup=${this._onPopup}
+      ></note-slicer-button>
     </div> `;
   }
 }

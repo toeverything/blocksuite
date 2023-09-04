@@ -13,6 +13,7 @@ import { assertExists, sleep } from '../../../packages/global/src/utils.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
+  pressEnter,
   selectAllByKeyboard,
   SHIFT_KEY,
   SHORT_KEY,
@@ -328,7 +329,40 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
   await waitNextFrame(page);
-  await type(page, text);
+
+  const paragraphs = text.split('\n');
+  let i = 0;
+  for (const paragraph of paragraphs) {
+    ++i;
+    await type(page, paragraph);
+
+    if (i < paragraphs.length) {
+      await pressEnter(page);
+    }
+  }
+
+  const { id } = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+
+    return {
+      id: container.selectionManager.state.elements[0],
+    };
+  });
+
+  return id;
+}
+
+export async function exitEditing(page: Page) {
+  await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+
+    container.selectionManager.setSelection({
+      elements: [],
+      editing: false,
+    });
+  });
 }
 
 export async function resizeElementByHandle(
