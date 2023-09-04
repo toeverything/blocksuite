@@ -85,16 +85,6 @@ function handleZoom(
   let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
   totalBound = inflateBound(totalBound, 30);
   let currentViewBound = Bound.from(viewport.viewportBounds);
-  while (!currentViewBound.contains(totalBound)) {
-    const offset = 0.1;
-    const ratio = viewport.viewportBounds.h / viewport.viewportBounds.w;
-    const expandHeight = ratio * offset;
-    currentViewBound = currentViewBound.expand(offset, expandHeight);
-    const zoom = Math.min(
-      viewport.width / currentViewBound.w,
-      viewport.height / currentViewBound.h
-    );
-    if (zoom <= 0.1) break;
-  }
+  currentViewBound = currentViewBound.unite(totalBound);
   viewport.setViewportByBound(currentViewBound, [0, 0, 0, 0], true);
 }
