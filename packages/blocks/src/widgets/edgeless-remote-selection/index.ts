@@ -56,19 +56,24 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
     }
 
     .remote-username {
-      padding: 0px 4px;
-      border-radius: 4px;
+      margin-left: 22px;
+      margin-top: -2px;
+
+      color: white;
+
+      max-width: 160px;
+      padding: 0px 3px;
       border: 1px solid var(--affine-pure-black-20);
+
       box-shadow: 0px 1px 6px 0px rgba(0, 0, 0, 0.16);
+      border-radius: 4px;
+
       font-size: 12px;
       line-height: 18px;
-      color: white;
-      max-width: 160px;
+
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-left: 22px;
-      margin-top: -2px;
     }
   `;
 

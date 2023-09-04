@@ -280,15 +280,18 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
                       bottom: `${
                         cursorRect?.height ? cursorRect.height - 4 : 0
                       }px`,
-                      padding: '0 3px 0 3px',
                       backgroundColor: color,
                       color: 'white',
-                      whiteSpace: 'nowrap',
+                      maxWidth: '160px',
+                      padding: '0 3px',
                       border: '1px solid var(--affine-pure-black-20)',
+                      boxShadow: '0px 1px 6px 0px rgba(0, 0, 0, 0.16)',
                       borderRadius: '4px',
                       fontSize: '12px',
-                      fontWeight: '400',
-                      fontHeight: '20px',
+                      lineHeight: '18px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     })}"
                   >
                     ${selection.user?.name ?? 'Unknown'}
