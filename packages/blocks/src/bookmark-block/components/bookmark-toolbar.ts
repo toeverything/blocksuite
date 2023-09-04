@@ -26,6 +26,7 @@ export type ConfigItem = {
   type: 'link' | 'edit' | 'caption';
   icon: TemplateResult;
   tooltip: string;
+  disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
   action: (
     model: BaseBlockModel<BookmarkBlockModel>,
     callback?: ToolbarActionCallback,
@@ -40,6 +41,7 @@ const config: ConfigItem[] = [
     type: 'link',
     icon: LinkIcon,
     tooltip: 'Turn into Link view',
+    disableWhen: model => model.page.readonly,
     action: (model, callback) => {
       const { page } = model;
 
@@ -69,6 +71,7 @@ const config: ConfigItem[] = [
     type: 'edit',
     icon: EditIcon,
     tooltip: 'Edit',
+    disableWhen: model => model.page.readonly,
     action: (_model, callback) => {
       callback?.('edit');
     },
@@ -77,6 +80,7 @@ const config: ConfigItem[] = [
     type: 'caption',
     icon: CaptionIcon,
     tooltip: 'Add Caption',
+    disableWhen: model => model.page.readonly,
     action: (_model, callback) => {
       callback?.('caption');
     },
@@ -167,10 +171,11 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     const buttons = repeat(
       config,
       ({ type }) => type,
-      ({ type, icon, tooltip, action, divider }) => {
+      ({ type, icon, tooltip, action, divider, disableWhen = () => false }) => {
         return html`<icon-button
             size="24px"
             class="bookmark-toolbar-button has-tool-tip ${type}"
+            ?disabled=${disableWhen(this.model)}
             @click=${() => {
               action(this.model, this.onSelected, this);
             }}

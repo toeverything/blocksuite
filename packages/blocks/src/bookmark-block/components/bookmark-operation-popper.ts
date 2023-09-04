@@ -28,6 +28,8 @@ type Operation = {
     callback?: MenuActionCallback,
     element?: HTMLElement
   ) => void;
+  showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
+  disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
   divider?: boolean;
 };
 const operations: Operation[] = [
@@ -45,6 +47,7 @@ const operations: Operation[] = [
     type: 'duplicate',
     icon: DuplicateIcon,
     label: 'Duplicate',
+    disableWhen: model => model.page.readonly,
     action: (model, callback) => {
       const { page } = model;
 
@@ -62,6 +65,7 @@ const operations: Operation[] = [
     type: 'reload',
     icon: RefreshIcon,
     label: 'Reload',
+    disableWhen: model => model.page.readonly,
     action: (model, callback) => {
       reloadBookmarkBlock(
         model,
@@ -75,6 +79,7 @@ const operations: Operation[] = [
     type: 'delete',
     icon: DeleteIcon,
     label: 'Delete',
+    disableWhen: model => model.page.readonly,
     action: (model, callback) => {
       model.page.deleteBlock(model);
       callback?.('delete');
@@ -95,15 +100,15 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      fill: var(--affine-icon-color);
-      color: var(--affine-text-primary-color);
     }
     .menu-item:hover {
       background: var(--affine-hover-color);
     }
     .menu-item:hover.delete {
       background: var(--affine-background-error-color);
-      fill: var(--affine-error-color);
+      color: var(--affine-error-color);
+    }
+    .menu-item:hover.delete > svg {
       color: var(--affine-error-color);
     }
     .menu-item svg {
@@ -123,18 +128,20 @@ export class BookmarkOperationMenu extends WithDisposable(LitElement) {
 
   override render() {
     const menuItems = repeat(
-      operations,
+      operations.filter(({ showWhen = () => true }) => showWhen(this.model)),
       ({ type }) => type,
-      ({ type, icon, label, action, divider }) => {
+      ({ type, icon, label, action, divider, disableWhen = () => false }) => {
         return html`<icon-button
             width="126px"
             height="32px"
             class="menu-item ${type}"
+            text=${label}
+            ?disabled=${disableWhen(this.model)}
             @click=${() => {
               action(this.model, this.onSelected, this);
             }}
           >
-            ${icon} ${label}
+            ${icon}
           </icon-button>
           ${divider ? html`<div class="divider"></div>` : nothing} `;
       }
