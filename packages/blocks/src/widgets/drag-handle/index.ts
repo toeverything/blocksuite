@@ -47,6 +47,7 @@ import {
   getNoteId,
   includeTextSelection,
   insideDatabaseTable,
+  isBlockPathEqual,
 } from './utils.js';
 
 @customElement('affine-drag-handle-widget')
@@ -78,6 +79,7 @@ export class DragHandleWidget extends WidgetElement {
   private _hoveredBlockId = '';
   private _hoveredBlockPath: string[] | null = null;
   private _lastHoveredBlockPath: string[] | null = null;
+  private _lastShowedBlock: { path: string[]; el: BlockElement } | null = null;
   private _hoverDragHandle = false;
   private _dragHandlePointerDown = false;
   private _dropBlockId = '';
@@ -142,6 +144,7 @@ export class DragHandleWidget extends WidgetElement {
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
     this._lastHoveredBlockPath = null;
+    this._lastShowedBlock = null;
     this._hoverDragHandle = false;
     this._dragHandlePointerDown = false;
     this._draggingElements = [];
@@ -159,9 +162,9 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _resetDragHandleGrabber() {
-    this._dragHandleGrabber.style.height = `${
-      DRAG_HANDLE_GRABBER_HEIGHT * this._scale
-    }px`;
+    // this._dragHandleGrabber.style.height = `${
+    //   DRAG_HANDLE_GRABBER_HEIGHT * this._scale
+    // }px`;
     this._dragHandleGrabber.style.width = `${
       DRAG_HANDLE_GRABBER_WIDTH * this._scale
     }px`;
@@ -173,9 +176,13 @@ export class DragHandleWidget extends WidgetElement {
   // Single block: drag handle should show on the vertical middle of the first line of element
   // Multiple blocks: drag handle should show on the vertical middle of all blocks
   private _show(blockElement: BlockElement) {
-    if (!this._dragHandleContainer || !this._dragHandleGrabber) return;
+    const container = this._dragHandleContainer;
+    const grabber = this._dragHandleGrabber;
+    if (!container || !grabber) return;
 
     let { left } = blockElement.getBoundingClientRect();
+    const draggingAreaRect = this._getDraggingAreaRect(blockElement);
+    if (!draggingAreaRect) return;
 
     // Some blocks have padding, should consider padding when calculating position
     const computedStyle = getComputedStyle(blockElement);
@@ -184,30 +191,61 @@ export class DragHandleWidget extends WidgetElement {
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
 
-    this._dragHandleContainer.style.display = 'flex';
-    this._dragHandleContainer.style.transform = ``;
-    this._dragHandleContainer.style.height = `${
-      containerHeight * this._scale
-    }px`;
-    const padding =
-      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
-    this._dragHandleContainer.style.paddingTop = `${padding}px`;
-
-    this._dragHandleContainer.style.width = `${
-      DRAG_HANDLE_WIDTH * this._scale
-    }px`;
-
     const posLeft =
       left -
       (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this._scale +
       this._viewportOffset.left;
-
     const posTop = this._getTopWithBlockElement(blockElement);
 
-    this._dragHandleContainer.style.left = `${posLeft}px`;
-    this._dragHandleContainer.style.top = `${posTop}px`;
+    const rowPaddingY =
+      ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
+
+    // use padding to control grabber's height
+    const paddingTop = rowPaddingY + posTop - draggingAreaRect.top;
+    const paddingBottom =
+      draggingAreaRect.height -
+      paddingTop -
+      DRAG_HANDLE_GRABBER_HEIGHT * this._scale;
+
+    const applyStyle = (transition?: boolean) => {
+      container.style.transition = transition ? 'padding 0.25s ease' : 'none';
+      container.style.paddingTop = `${paddingTop}px`;
+      container.style.paddingBottom = `${paddingBottom}px`;
+      container.style.width = `${DRAG_HANDLE_WIDTH * this._scale}px`;
+      container.style.left = `${posLeft}px`;
+      container.style.top = `${draggingAreaRect.top}px`;
+      container.style.display = 'flex';
+      container.style.height = `${draggingAreaRect.height}px`;
+    };
+
+    if (isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path)) {
+      applyStyle(true);
+    } else if (this._selectedBlocks.length) {
+      if (this._isBlockSelected(blockElement))
+        applyStyle(
+          this._hoverDragHandle &&
+            this._isBlockSelected(this._lastShowedBlock?.el)
+        );
+      else applyStyle(false);
+    } else {
+      applyStyle(false);
+    }
 
     this._resetDragHandleGrabber();
+    if (!isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path)) {
+      this._lastShowedBlock = {
+        path: blockElement.path,
+        el: blockElement,
+      };
+    }
+  }
+
+  /** Check if given blockElement is selected */
+  private _isBlockSelected(block?: BlockElement) {
+    if (!block) return false;
+    return this._selectedBlocks.some(
+      selection => selection.blockId === block.model.id
+    );
   }
 
   private _showDragHandleOnHoverBlock(blockPath: string[]) {
@@ -911,24 +949,11 @@ export class DragHandleWidget extends WidgetElement {
         const draggingAreaRect = this._getDraggingAreaRect(blockElement);
         if (!draggingAreaRect) return;
 
-        const height = draggingAreaRect.height - 16;
-        // finalTop is the top of the drag handle container after expanding
-        const finalTop = draggingAreaRect.top + 8;
+        const padding = 8 * this._scale;
+        this._dragHandleContainer.style.paddingTop = `${padding}px`;
+        this._dragHandleContainer.style.paddingBottom = `${padding}px`;
+        this._dragHandleContainer.style.transition = `padding 0.25s ease`;
 
-        // topBeforeExpanding is the top of the drag handle container without expanding
-        const topBeforeExpanding = this._getTopWithBlockElement(blockElement);
-
-        const containerHeight = getDragHandleContainerHeight(
-          blockElement.model
-        );
-        const paddingTop =
-          ((containerHeight - DRAG_HANDLE_GRABBER_HEIGHT) / 2) * this._scale;
-        const translateY = finalTop - topBeforeExpanding - paddingTop;
-
-        this._dragHandleContainer.style.transform = `translateY(${translateY}px)`;
-        this._dragHandleContainer.style.height = `${height}px`;
-
-        this._dragHandleGrabber.style.height = `100%`;
         this._dragHandleGrabber.style.width = `${
           HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
         }px`;
@@ -977,7 +1002,6 @@ export class DragHandleWidget extends WidgetElement {
       'pointerleave',
       () => {
         if (this._dragHandlePointerDown) this._removeHoverRect();
-        this._hoverDragHandle = false;
 
         if (!this._hoveredBlockPath) return;
 
@@ -988,6 +1012,7 @@ export class DragHandleWidget extends WidgetElement {
 
         if (this._dragging) return;
         this._show(blockElement);
+        this._hoverDragHandle = false;
       }
     );
   }
