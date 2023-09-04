@@ -2,7 +2,7 @@ import { css } from 'lit';
 
 import { tooltipStyle } from '../tooltip/tooltip.js';
 
-export const editLinkStyle = css`
+const editLinkStyle = css`
   .affine-link-edit-popover {
     box-sizing: border-box;
     width: 404px;
@@ -80,6 +80,10 @@ export const editLinkStyle = css`
 `;
 
 export const linkPopoverStyle = css`
+  :host {
+    box-sizing: border-box;
+  }
+
   .popover-container {
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-base);

@@ -77,6 +77,9 @@ export const moreMenuStyles = css`
     background: var(--affine-background-error-color);
     color: var(--affine-error-color);
   }
+  .affine-attachment-options-more icon-button:hover.danger > svg {
+    color: var(--affine-error-color);
+  }
 `;
 
 export const styles = css`

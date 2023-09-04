@@ -49,6 +49,10 @@ export function CodeOptionTemplate({
         background: var(--affine-background-error-color);
         color: var(--affine-error-color);
       }
+      .delete-code-button:hover > svg {
+        color: var(--affine-error-color);
+      }
+
       ${tooltipStyle}
     </style>
 
