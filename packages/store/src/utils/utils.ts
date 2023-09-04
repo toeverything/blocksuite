@@ -50,9 +50,7 @@ export function syncBlockProps(
 
   Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key)) return;
-    if (value === undefined) {
-      return;
-    }
+    if (value === undefined) return;
 
     yBlock.set(`prop:${key}`, propsToValue(value));
   });
