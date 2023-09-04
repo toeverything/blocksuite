@@ -5,8 +5,8 @@
     "noEmit": true,
     "composite": false,
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "node16",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2022"]
   },
   "include": ["**/*.ts"]
