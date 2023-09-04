@@ -230,8 +230,8 @@ export class KanbanSelection {
 
     return {
       cell: nextCell,
-      cardId: nextCard.getAttribute('data-card-id') as string,
-      groupKey: nextGroup.getAttribute('data-key') as string,
+      cardId: nextCard.cardId,
+      groupKey: nextGroup.group.key,
     };
   }
 
@@ -255,7 +255,7 @@ export class KanbanSelection {
     const nextCellIndex = nextPosition === 'up' ? nextCells.length - 1 : 0;
     return {
       cell: nextCells[nextCellIndex],
-      cardId: nextCard.getAttribute('data-card-id') as string,
+      cardId: nextCard.cardId,
     };
   }
 
