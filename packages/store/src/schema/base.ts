@@ -48,7 +48,6 @@ export const BlockSchema = z.object({
 
 export type BlockSchemaType = z.infer<typeof BlockSchema>;
 
-export type PropsSetter<Props> = (props: Props) => Partial<Props>;
 export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
@@ -181,11 +180,6 @@ export class BaseBlockModel<
 
   childMap = new Map<string, number>();
   children: BaseBlockModel[] = [];
-
-  // TODO: infer return type
-  originProp(prop: string & keyof Props) {
-    return this.yBlock.get(`prop:${prop}`);
-  }
 
   isEmpty() {
     return this.children.length === 0;

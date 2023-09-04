@@ -203,6 +203,10 @@ export async function addSerializedBlocks(
           flavour,
           {
             ...blockProps,
+            title:
+              typeof databaseProps?.title === 'string'
+                ? new Text(databaseProps.title)
+                : databaseProps?.title,
             views: databaseProps?.views,
           },
           parent,
