@@ -6,8 +6,8 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { matchFlavours } from '../../__internal__/index.js';
-import { contains } from '../../index.js';
+import { matchFlavours } from '../../__internal__/utils/model.js';
+import { contains } from '../../__internal__/utils/query.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 
