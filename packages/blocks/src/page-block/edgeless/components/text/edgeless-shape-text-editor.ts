@@ -11,11 +11,12 @@ import {
   Bound,
   SHAPE_TEXT_PADDING,
   ShapeElement,
+  toRadian,
+  Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 import { GET_DEFAULT_LINE_COLOR } from '../panel/color-panel.js';
-import { calculateRotatedPointPosition } from './utils.js';
 
 @customElement('edgeless-shape-text-editor')
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
@@ -46,12 +47,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       const containerHeight = this._virgoContainer.offsetHeight;
 
       if (containerHeight > element.h) {
-        const [leftTopX, leftTopY] = calculateRotatedPointPosition(
-          bcr.left + bcr.width / 2,
-          bcr.top + bcr.height / 2,
-          -element.rotate,
-          this._virgoContainer.offsetLeft,
-          this._virgoContainer.offsetTop
+        const [leftTopX, leftTopY] = Vec.rotWith(
+          [this._virgoContainer.offsetLeft, this._virgoContainer.offsetTop],
+          [bcr.left + bcr.width / 2, bcr.top + bcr.height / 2],
+          toRadian(-element.rotate)
         );
 
         const [modelLeftTopX, modelLeftTopY] = edgeless.surface.toModelCoord(
@@ -172,12 +171,10 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       const rect = getSelectedRect([this._element]);
       const rotate = this._element.rotate;
 
-      const [leftTopX, leftTopY] = calculateRotatedPointPosition(
-        rect.left + rect.width / 2,
-        rect.top + rect.height / 2,
-        rotate,
-        rect.left,
-        rect.top
+      const [leftTopX, leftTopY] = Vec.rotWith(
+        [rect.left, rect.top],
+        [rect.left + rect.width / 2, rect.top + rect.height / 2],
+        toRadian(rotate)
       );
 
       const [x, y] = this._edgeless.surface.toViewCoord(leftTopX, leftTopY);
