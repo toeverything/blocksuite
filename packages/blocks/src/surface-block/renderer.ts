@@ -241,8 +241,9 @@ export class Renderer implements SurfaceViewport {
     smooth = false
   ) {
     const [pt, pr, pb, pl] = padding;
-    const zoom = Math.min(
+    const zoom = clamp(
       (this.width - (pr + pl)) / bound.w,
+      ZOOM_MIN,
       (this.height - (pt + pb)) / bound.h
     );
     const center = [
