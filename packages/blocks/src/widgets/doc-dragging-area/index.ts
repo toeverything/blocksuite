@@ -6,6 +6,8 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { matchFlavours } from '../../__internal__/utils/model.js';
+import { contains } from '../../__internal__/utils/query.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 
@@ -14,6 +16,11 @@ type Rect = {
   top: number;
   width: number;
   height: number;
+};
+
+type BlockWithRect = {
+  block: BlockElement;
+  rect: Rect;
 };
 
 function rectIntersects(a: Rect, b: Rect) {
@@ -32,6 +39,78 @@ function rectIncludes(a: Rect, b: Rect) {
     a.top <= b.top &&
     a.top + a.height >= b.top + b.height
   );
+}
+
+function filterBlocksExcludeSubtrees(
+  blockWithRects: BlockWithRect[],
+  userRect: Rect
+) {
+  const len = blockWithRects.length;
+  const blockPaths: string[][] = [];
+
+  // empty
+  if (len === 0) return blockPaths;
+
+  let prevIndex = -1;
+
+  for (let i = 0; i < len; i++) {
+    const { rect, block } = blockWithRects[i];
+    if (rectIntersects(rect, userRect)) {
+      if (prevIndex === -1) {
+        prevIndex = i;
+        if (rectIncludes(userRect, rect)) {
+          const prevBlock = blockWithRects[prevIndex].block;
+          // inside database block
+          if (matchFlavours(prevBlock.model, ['affine:database'])) {
+            continue;
+          }
+        }
+      } else {
+        let prevBlock = blockWithRects[prevIndex].block;
+        // prev block before and contains block
+        if (contains(prevBlock, block)) {
+          if (matchFlavours(prevBlock.model, ['affine:database'])) {
+            continue;
+          } else {
+            // not continuous block
+            if (blockPaths.length > 1) {
+              continue;
+            }
+            prevIndex = i;
+            blockPaths.shift();
+          }
+        } else {
+          // backward search parent block and remove its subtree
+          // only keep blocks of same level
+          const { previousElementSibling } = block;
+          // previousElementSibling is not prev block and previousElementSibling contains prev block
+          if (
+            previousElementSibling &&
+            previousElementSibling !== prevBlock &&
+            contains(previousElementSibling, prevBlock)
+          ) {
+            let n = i;
+            let m = blockPaths.length;
+            while (n--) {
+              prevBlock = blockWithRects[n].block;
+              if (prevBlock === previousElementSibling) {
+                blockPaths.push(prevBlock.path);
+                break;
+              } else if (m > 0) {
+                blockPaths.pop();
+                m--;
+              }
+            }
+          }
+          prevIndex = i;
+        }
+      }
+
+      blockPaths.push(block.path);
+    }
+  }
+
+  return blockPaths;
 }
 
 function isBlankArea(e: PointerEventState) {
@@ -58,7 +137,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
     left: 0,
   };
 
-  private get _allBlocksRect() {
+  private get _allBlocksWithRect(): BlockWithRect[] {
     const viewportElement = this._viewportElement;
 
     const getAllNodeFromTree = (): BlockElement[] => {
@@ -85,8 +164,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
-        id: element.model.id,
-        path: element.path,
+        block: element,
         rect: {
           left: bounding.left + viewportElement.scrollLeft - rootRect.left,
           top: bounding.top + viewportElement.scrollTop - rootRect.top,
@@ -106,16 +184,14 @@ export class DocDraggingAreaWidget extends WidgetElement {
   }
 
   private _selectBlocksByRect(userRect: Rect) {
-    const selections = this._allBlocksRect
-      .filter(
-        ({ rect }) =>
-          rectIntersects(rect, userRect) && !rectIncludes(rect, userRect)
-      )
-      .map(rectWithId => {
-        return this.root.selectionManager.getInstance('block', {
-          path: rectWithId.path,
-        });
+    const selections = filterBlocksExcludeSubtrees(
+      this._allBlocksWithRect,
+      userRect
+    ).map(blockPath => {
+      return this.root.selectionManager.getInstance('block', {
+        path: blockPath,
       });
+    });
 
     this.root.selectionManager.setGroup('note', selections);
   }
