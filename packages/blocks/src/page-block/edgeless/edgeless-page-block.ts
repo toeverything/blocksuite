@@ -8,6 +8,7 @@ import type { SurfaceSelection } from '@blocksuite/block-std';
 import {
   almostEqual,
   assertExists,
+  debounce,
   noop,
   Slot,
   throttle,
@@ -1197,6 +1198,25 @@ export class EdgelessPageBlockComponent
     );
   }
 
+  private _initRemoteCursor() {
+    const setRemoteCursor = debounce(
+      (pos: { x: number; y: number }) => {
+        const cursorPosition = this.surface.toModelCoord(pos.x, pos.y);
+        this.selectionManager.setCursor({
+          x: cursorPosition[0],
+          y: cursorPosition[1],
+        });
+      },
+      1000 / 60,
+      { trailing: true }
+    );
+
+    this.handleEvent('pointerMove', e => {
+      const pointerEvent = e.get('pointerState');
+      setRemoteCursor(pointerEvent);
+    });
+  }
+
   override firstUpdated() {
     this._initSlotEffects();
     this._initResizeEffect();
@@ -1204,6 +1224,7 @@ export class EdgelessPageBlockComponent
     this._initNoteHeightUpdate();
     this._initFontloader();
     this._initReadonlyListener();
+    this._initRemoteCursor();
     this.clipboard.init(this.page);
 
     requestAnimationFrame(() => {

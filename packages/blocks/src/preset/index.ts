@@ -59,6 +59,7 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
       [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_REMOTE_SELECTION_WIDGET_TAG
       )}`,
+      remoteSelection: literal`affine-edgelss-remote-selection-widget`,
     },
   },
 };

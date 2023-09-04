@@ -2295,3 +2295,61 @@ export const AlignDistributeVerticallyIcon = html`
     />
   </svg>
 `;
+
+export const RemoteCursor = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 26 28"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g filter="url(#filter0_d_13854_6171)">
+      <path
+        d="M4.0303 5.3021C3.7524 3.69583 5.44009 2.4703 6.88148 3.23168L20.3992 10.3721C21.9413 11.1867 21.7347 13.4578 20.0708 13.9806L14.5448 15.7171C14.1371 15.8452 13.7823 16.1029 13.5343 16.4511L10.1705 21.1742C9.1586 22.5951 6.93463 22.0889 6.63725 20.3701L4.0303 5.3021Z"
+        fill="currentColor"
+      />
+      <path
+        d="M4.52298 5.21686C4.31586 4.01972 5.57368 3.10633 6.64795 3.67379L20.1656 10.8142C21.315 11.4213 21.161 13.1139 19.9209 13.5036L14.3949 15.2401C13.8833 15.4009 13.4382 15.7242 13.1271 16.161L9.76325 20.8842C9.00907 21.9431 7.35156 21.5659 7.12993 20.2848L4.52298 5.21686Z"
+        stroke="black"
+        stroke-opacity="0.2"
+      />
+    </g>
+    <defs>
+      <filter
+        id="filter0_d_13854_6171"
+        x="-3"
+        y="-2"
+        width="32"
+        height="32"
+        filterUnits="userSpaceOnUse"
+        color-interpolation-filters="sRGB"
+      >
+        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dy="2" />
+        <feGaussianBlur stdDeviation="2" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.28 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_13854_6171"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_13854_6171"
+          result="shape"
+        />
+      </filter>
+    </defs>
+  </svg>
+`;
