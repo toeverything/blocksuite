@@ -38,9 +38,9 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
       left: 0;
       border-radius: 4px;
       box-sizing: border-box;
-      border-width: calc(3px / var(--affine-zoom));
+      border-width: 3px;
       z-index: 1;
-      transform-origin: top left;
+      transform-origin: center center;
     }
 
     .remote-cursor {
@@ -207,11 +207,11 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
           class="remote-rect"
           style=${styleMap({
             pointerEvents: 'none',
-            width: `${rect.width}px`,
-            height: `${rect.height}px`,
+            width: `calc(var(--affine-zoom) * ${rect.width}px)`,
+            height: `calc(var(--affine-zoom) * ${rect.height}px)`,
             borderStyle: rect.borderStyle,
             borderColor: remoteColorManager.get(id),
-            transform: `translate(calc(var(--affine-zoom) * ${rect.left}px), calc(var(--affine-zoom) * ${rect.top}px)) rotate(${rect.rotate}deg) scale(var(--affine-zoom))`,
+            transform: `translate(calc(var(--affine-zoom) * ${rect.left}px), calc(var(--affine-zoom) * ${rect.top}px)) rotate(${rect.rotate}deg)`,
           })}
         ></div>`
     );
