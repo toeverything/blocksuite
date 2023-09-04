@@ -5,6 +5,7 @@ import type { BlockStore } from '../store/index.js';
 import type { BaseSelection } from './base.js';
 import {
   BlockSelection,
+  CursorSelection,
   SurfaceSelection,
   TextSelection,
 } from './variants/index.js';
@@ -42,7 +43,12 @@ export class SelectionManager {
   }
 
   private _setupDefaultSelections() {
-    this.register([TextSelection, BlockSelection, SurfaceSelection]);
+    this.register([
+      TextSelection,
+      BlockSelection,
+      SurfaceSelection,
+      CursorSelection,
+    ]);
   }
 
   private _jsonToSelection = (json: Record<string, unknown>) => {

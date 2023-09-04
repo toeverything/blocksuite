@@ -2,7 +2,7 @@ import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
-import { noop, pick } from '@blocksuite/global/utils';
+import { pick } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -46,9 +46,6 @@ import {
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
-import { EdgelessRemoteSelection } from './edgeless-remote-selection.js';
-
-noop(EdgelessRemoteSelection);
 
 export type SelectedRect = {
   left: number;
@@ -319,10 +316,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     x: 0,
     y: 0,
   };
-
-  // TODO:
-  // should be manager in global awareness state
-  private _remoteColorMap: Map<string, string> = new Map();
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
@@ -648,7 +641,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   };
 
-  private _updateOnElementChange = (element: string | { id: string }) => {
+  private _updateOnElementChange = (
+    element: string | { id: string },
+    fromRemote: boolean = false
+  ) => {
+    if (fromRemote && this._resizeManager.dragging) return;
+
     const id = typeof element === 'string' ? element : element.id;
 
     if (this.selection.has(id)) this._updateSelectedRect();
@@ -658,7 +656,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { _disposables, page, slots, selection, surface, edgeless } = this;
 
     _disposables.add(
-      // vewport zooming / scrolling
+      // viewport zooming / scrolling
       slots.viewportUpdated.on(this._updateOnViewportChange)
     );
 
@@ -676,6 +674,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
+    _disposables.add(
+      page.slots.yBlockUpdated.on(data => {
+        this._updateOnElementChange(data, true);
+      })
+    );
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
@@ -697,14 +700,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { selection, _remoteColorMap } = this;
+    const { selection } = this;
     const elements = selection.elements;
 
-    if (!this._shouldRenderSelection(elements))
-      return html`<edgeless-remote-selection
-        .edgeless=${this.edgeless}
-        .remoteColorMap=${_remoteColorMap}
-      ></edgeless-remote-selection>`;
+    if (!this._shouldRenderSelection(elements)) return nothing;
 
     const {
       edgeless,
@@ -752,10 +751,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     return html`
-      <edgeless-remote-selection
-        .edgeless=${edgeless}
-        .remoteColorMap=${_remoteColorMap}
-      ></edgeless-remote-selection>
       ${page.readonly
         ? nothing
         : html`<edgeless-auto-complete
