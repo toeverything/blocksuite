@@ -15,7 +15,11 @@ import {
 } from '../../icons/index.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
-import { cloneBookmarkProperties, reloadBookmarkBlock } from '../utils.js';
+import {
+  cloneBookmarkProperties,
+  reloadBookmarkBlock,
+  tryGetBookmarkAPI,
+} from '../utils.js';
 
 export type MenuActionCallback = (type: Operation['type']) => void;
 
@@ -65,7 +69,7 @@ const operations: Operation[] = [
     type: 'reload',
     icon: RefreshIcon,
     label: 'Reload',
-    disableWhen: model => model.page.readonly,
+    disableWhen: model => model.page.readonly || !tryGetBookmarkAPI(),
     action: (model, callback) => {
       reloadBookmarkBlock(
         model,
