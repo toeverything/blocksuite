@@ -46,7 +46,7 @@ export function syncBlockProps(
   yBlock: YBlock,
   props: Partial<BlockProps>
 ) {
-  const propSchema = schema.model.props?.(internalPrimitives) ?? {};
+  const defaultProps = schema.model.props?.(internalPrimitives) ?? {};
 
   Object.entries(props).forEach(([key, value]) => {
     if (SYS_KEYS.has(key)) return;
@@ -56,7 +56,7 @@ export function syncBlockProps(
   });
 
   // set default value
-  Object.entries(propSchema).forEach(([key, value]) => {
+  Object.entries(defaultProps).forEach(([key, value]) => {
     const notExists =
       !yBlock.has(`prop:${key}`) || yBlock.get(`prop:${key}`) === undefined;
     if (!notExists) {
