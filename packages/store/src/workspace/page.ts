@@ -496,9 +496,9 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     // Emit event to indicate that the children of these blocks have been updated
-    childBlocksPerParent.forEach((_, parent) => {
-      parent.childrenUpdated.emit();
-    });
+    Array.from(childBlocksPerParent.keys()).forEach(parent =>
+      parent.childrenUpdated.emit()
+    );
 
     newParent.childrenUpdated.emit();
   }
@@ -711,7 +711,10 @@ export class Page extends Space<FlatBlockMap> {
     assertExists(schema, `Block flavour ${flavour} is not registered`);
     assertExists(id, 'Block id is not defined');
 
-    return schemaToModel(id, schema, block, this);
+    const model = schemaToModel(id, schema, block, this);
+    model.created.emit();
+
+    return model;
   }
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
