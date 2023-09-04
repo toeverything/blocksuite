@@ -16,7 +16,7 @@ import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
 import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
-import { allowEmbed, formatEmbedUrl } from './format-url/index.js';
+import { allowEmbed, formatEmbedUrl } from './embed/index.js';
 import { DefaultBanner } from './images/banners.js';
 import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
