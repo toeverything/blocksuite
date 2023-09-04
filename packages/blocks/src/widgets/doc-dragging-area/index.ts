@@ -1,3 +1,4 @@
+
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
@@ -46,14 +47,47 @@ function filterBlockInfos(blockInfos: BlockInfo[], userRect: Rect) {
   return results;
 }
 
+function filterBlockInfosByParent(
+  parentInfos: BlockInfo,
+  userRect: Rect,
+  filteredBlockInfos: BlockInfo[]
+) {
+  const targetBlock = parentInfos.element;
+  let results = [parentInfos];
+  if (targetBlock.childElementCount > 0) {
+    const childBlockInfos = targetBlock.childBlockElements
+      .map(el =>
+        filteredBlockInfos.find(
+          blockInfo => blockInfo.element.model.id === el.model.id
+        )
+      )
+      .filter(block => block) as BlockInfo[];
+    const firstIndex = childBlockInfos.findIndex(
+      bl => rectIntersects(bl.rect, userRect) && bl.rect.top < userRect.top
+    );
+    const lastIndex = childBlockInfos.findIndex(
+      bl =>
+        rectIntersects(bl.rect, userRect) &&
+        bl.rect.top + bl.rect.height > userRect.top + userRect.height
+    );
+
+    if (firstIndex !== -1 && lastIndex !== -1) {
+      results = childBlockInfos.slice(firstIndex, lastIndex + 1);
+    }
+  }
+
+  return results;
+}
+
 function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
   const filteredBlockInfos = filterBlockInfos(blockInfos, userRect);
   const len = filteredBlockInfos.length;
   const blockPaths: string[][] = [];
-  const blocks: BlockInfo[] = [];
+  let singleTargetParentBlock: BlockInfo | null = null;
+  let blocks: BlockInfo[] = [];
   if (len === 0) return blockPaths;
 
-  // To get the lowest target block
+  // To get the single target parent block info
   for (const block of filteredBlockInfos) {
     const rect = block.rect;
 
@@ -61,14 +95,19 @@ function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
       rectIntersects(userRect, rect) &&
       rectIncludesTopAndBottom(rect, userRect)
     ) {
-      if (blocks.length) blocks.shift();
-      blocks.push(block);
+      singleTargetParentBlock = block;
     }
   }
 
-  // If there is no block contains the top and bottom of the userRect
-  // Then get all the blocks that intersect with the userRect
-  if (blocks.length === 0) {
+  if (singleTargetParentBlock) {
+    blocks = filterBlockInfosByParent(
+      singleTargetParentBlock,
+      userRect,
+      filteredBlockInfos
+    );
+  } else {
+    // If there is no block contains the top and bottom of the userRect
+    // Then get all the blocks that intersect with the userRect
     for (const block of filteredBlockInfos) {
       if (rectIntersects(userRect, block.rect)) {
         blocks.push(block);
@@ -299,3 +338,4 @@ export class DocDraggingAreaWidget extends WidgetElement {
     `;
   }
 }
+
