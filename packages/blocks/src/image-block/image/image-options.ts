@@ -54,9 +54,12 @@ export function ImageOptionsTemplate({
       }
       .has-tool-tip.delete-image-button:hover {
         background: var(--affine-background-error-color);
-        fill: var(--affine-error-color);
         color: var(--affine-error-color);
       }
+      .has-tool-tip.delete-image-button:hover > svg {
+        color: var(--affine-error-color);
+      }
+
       ${tooltipStyle}
     </style>
 
