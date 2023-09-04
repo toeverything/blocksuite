@@ -2,6 +2,7 @@ import { fromBase64, toBase64 } from 'lib0/buffer.js';
 import * as Y from 'yjs';
 import type { z } from 'zod';
 
+import { SYS_KEYS } from '../consts.js';
 import type { BlockSchema, BlockSchemaType } from '../schema/base.js';
 import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
 import type { Workspace } from '../workspace/index.js';
@@ -48,6 +49,7 @@ export function syncBlockProps(
   const propSchema = schema.model.props?.(internalPrimitives) ?? {};
 
   Object.entries(props).forEach(([key, value]) => {
+    if (SYS_KEYS.has(key)) return;
     if (value === undefined) {
       return;
     }
