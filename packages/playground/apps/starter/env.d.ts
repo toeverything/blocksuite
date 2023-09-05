@@ -7,6 +7,7 @@ import type {
   Page,
   Workspace,
 } from '@blocksuite/store';
+import type { Job } from '@blocksuite/store';
 import type { z } from 'zod';
 
 declare global {
@@ -16,6 +17,7 @@ declare global {
     workspace: Workspace;
     blockSchemas: z.infer<typeof BlockSchema>[];
     ContentParser: typeof ContentParser;
+    job: Job;
     Y: typeof Workspace.Y;
     std: typeof std;
     testUtils: TestUtils;

@@ -15,6 +15,7 @@ export type {
 } from './persistence/blob/types.js';
 export * from './providers/type.js';
 export * from './schema/index.js';
+export { Job } from './transformer/index.js';
 export {
   createAutoIncrementIdGenerator,
   createAutoIncrementIdGeneratorByClientId,
