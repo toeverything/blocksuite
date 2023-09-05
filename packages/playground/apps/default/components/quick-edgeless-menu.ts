@@ -34,10 +34,13 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
-import {
+/*import {
   generateRoomId,
   initCollaborationSocket,
-} from '../providers/websocket-channel';
+} from '../providers/http-requests';
+*/
+import {   generateRoomId,
+  initCollaborationRequest } from '../providers/http-requests';
 import { notify } from '../utils/notify';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
@@ -457,7 +460,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   private async _initWebsocketProvider(room: string): Promise<boolean> {
     this._initws = true;
-    const result = await initCollaborationSocket(this.workspace, room);
+    const result = await initCollaborationRequest(this.workspace, room);
     this._initws = false;
     return result;
   }
