@@ -151,7 +151,13 @@ export class DataViewKanban extends BaseDataView<
     </div>`;
   };
   onWheel = (event: WheelEvent) => {
-    event.stopPropagation();
+    const ele = event.currentTarget;
+    if (ele instanceof HTMLElement) {
+      if (ele.scrollWidth === ele.clientWidth) {
+        return;
+      }
+      event.stopPropagation();
+    }
   };
   override render() {
     this.groupHelper = this.view.groupHelper;
