@@ -32,21 +32,15 @@ const presets: Preset[] = [
     entry: 'dist/index.js',
   },
   {
-    name: 'editor',
+    name: 'store',
     imports: '*',
-    pkg: path.resolve(pkgDir, 'editor'),
+    pkg: path.resolve(pkgDir, 'store'),
     entry: 'dist/index.js',
   },
   {
-    name: 'lit',
+    name: 'virgo',
     imports: '*',
-    pkg: path.resolve(pkgDir, 'lit'),
-    entry: 'dist/index.js',
-  },
-  {
-    name: 'lit',
-    imports: '*',
-    pkg: path.resolve(pkgDir, 'lit'),
+    pkg: path.resolve(pkgDir, 'virgo'),
     entry: 'dist/index.js',
   },
 ];
