@@ -18,7 +18,7 @@ hero:
       link: https://blocksuite-toeverything.vercel.app/starter/?init
 
 features:
-  - title: 🎨 Multimodal Editing
+  - title: 🎨 Isomorphic Editors
     details: Build diverse editors with standardized <b><i>blocks</i></b>. One model, multiple views.
   - title: 🧬 Intrinsically Collaborative
     details: Conflict resolution and time travel built into the core. Collaboration ready from day one.
