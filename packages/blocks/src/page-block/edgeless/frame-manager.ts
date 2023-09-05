@@ -41,7 +41,7 @@ export class EdgelessFrameManager {
   }
 
   selectFrame(eles: Selectable[]) {
-    const frames = this._edgeless.frame.frames;
+    const frames = this._edgeless.surface.frame.frames;
     if (!eles.some(ele => ele instanceof FrameElement) && frames.length !== 0) {
       const bound = edgelessElementsBound(eles);
       for (let i = frames.length - 1; i >= 0; i--) {
