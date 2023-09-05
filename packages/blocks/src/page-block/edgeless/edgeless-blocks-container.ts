@@ -2,6 +2,7 @@ import './components/edgeless-notes-container.js';
 import './components/rects/edgeless-selected-rect.js';
 import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
+import './components/note-slicer/index.js';
 
 import { throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -183,7 +184,7 @@ export class EdgelessBlocksContainer extends WithDisposable(LitElement) {
           ${readonly
             ? nothing
             : html`<affine-note-slicer
-                .edgelessPage=${this}
+                .edgelessPage=${edgeless}
               ></affine-note-slicer>`}
           <edgeless-notes-container
             .edgeless=${edgeless}
