@@ -11,7 +11,7 @@ import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProvider, Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import { CustomNavigationPanel } from './components/custom-navigation-panel';
 import { DebugMenu } from './components/debug-menu.js';
@@ -99,6 +99,7 @@ async function main() {
   }
   const workspace = new Workspace(options);
   window.workspace = workspace;
+  window.job = new Job({ workspace });
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
   window.std = std;
