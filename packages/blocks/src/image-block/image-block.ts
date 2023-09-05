@@ -107,14 +107,11 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   _focused = false;
 
   private _retryCount = 0;
-  private _lastSourceId: string;
+  private _lastSourceId: string = '';
 
   override connectedCallback() {
     super.connectedCallback();
     this._fetchImage();
-    this._disposables.add(
-      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
-    );
     this._disposables.add(this.model.propsUpdated.on(this._fetchImage));
 
     this._bindKeymap();
@@ -200,6 +197,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   private _fetchImage = () => {
     if (
       this._imageState === 'ready' &&
+      this._lastSourceId &&
       this._lastSourceId === this.model.sourceId
     ) {
       return;
