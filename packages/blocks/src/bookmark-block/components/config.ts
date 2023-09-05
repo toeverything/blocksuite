@@ -12,7 +12,7 @@ import {
   DeleteIcon,
   DuplicateIcon,
   EditIcon,
-  EmbedIcon,
+  EmbedWebIcon,
   LinkIcon,
   RefreshIcon,
 } from '../../icons/index.js';
@@ -89,7 +89,7 @@ export const config: ConfigItem[] = [
   },
   {
     type: 'embed',
-    icon: EmbedIcon,
+    icon: EmbedWebIcon,
     tooltip: 'Turn into Embed view',
     showWhen: model => model.type !== 'embed' && allowEmbed(model.url),
     disableWhen: model => model.page.readonly,
