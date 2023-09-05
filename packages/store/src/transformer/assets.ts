@@ -3,7 +3,6 @@ import { Buffer } from 'buffer';
 
 import { sha } from '../persistence/blob/utils.js';
 import type { Workspace } from '../workspace/index.js';
-import type { BlockSnapshot } from './base.js';
 
 type AssetsManagerConfig = {
   workspace: Workspace;
@@ -48,15 +47,15 @@ export class AssetsManager {
     await this._blobs.set(blob, blobId);
   }
 
-  async readFromSnapshot(snapshotId: string) {
+  async readFromSnapshot<T = unknown>(snapshotId: string) {
     const snapshot = this._assetsMap.get(snapshotId);
     assertExists(snapshot);
     const buffer = await blobToBuffer(snapshot);
     const json = new TextDecoder().decode(buffer);
-    return JSON.parse(json) as BlockSnapshot;
+    return JSON.parse(json) as T;
   }
 
-  async writeSnapshot(snapshot: BlockSnapshot) {
+  async writeSnapshot<T = unknown>(snapshot: T) {
     const json = JSON.stringify(snapshot);
     const bytes = new TextEncoder().encode(json);
     const blob = new Blob([bytes], {

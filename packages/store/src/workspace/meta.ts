@@ -13,17 +13,17 @@ export interface PageMeta {
   createDate: number;
 }
 
-type Tag = {
+export type Tag = {
   id: string;
   value: string;
   color: string;
 };
-type PagesPropertiesMeta = {
+export type PagesPropertiesMeta = {
   tags?: {
     options: Tag[];
   };
 };
-type WorkspaceMetaState = {
+export type WorkspaceMetaState = {
   pages?: unknown[];
   properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
