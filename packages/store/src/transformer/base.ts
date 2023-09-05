@@ -1,24 +1,9 @@
-import { z } from 'zod';
-
 import type { BaseBlockModel } from '../schema/index.js';
 import type { AssetsManager } from './assets.js';
 import { fromJSON, toJSON } from './json.js';
-
-export type BlockSnapshot = {
-  id: string;
-  flavour: string;
-  props: Record<string, unknown>;
-  children: BlockSnapshot[];
-};
+import type { BlockSnapshot } from './type.js';
 
 type BlockSnapshotLeaf = Omit<BlockSnapshot, 'children'>;
-
-export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
-  id: z.string(),
-  flavour: z.string(),
-  props: z.record(z.unknown()),
-  children: z.lazy(() => BlockSnapshotSchema.array()),
-});
 
 type FromSnapshotPayload = {
   json: BlockSnapshotLeaf;
