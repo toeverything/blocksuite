@@ -72,6 +72,50 @@ export class ListBlockService extends BaseService<ListBlockModel> {
     return text;
   }
 
+  override async block2markdown(
+    block: ListBlockModel,
+    { childText = '', begin, end }: BlockTransformContext = {}
+  ) {
+    let text = await super.block2markdown(block, {
+      childText,
+      begin,
+      end,
+    });
+    const previousSiblingBlock = block.page.getPreviousSibling(block);
+    switch (block.type) {
+      case 'bulleted':
+      case 'toggle':
+        text = `* ${text}`;
+        break;
+      case 'numbered':
+        text = `1. ${text}`;
+        break;
+      case 'todo':
+        text = `* [${block.checked ? 'x' : ' '}] ${text}`;
+        break;
+      default:
+        break;
+    }
+    if (
+      previousSiblingBlock?.flavour !== block.flavour ||
+      (previousSiblingBlock as ListBlockModel).type !== block.type
+    ) {
+      switch (block.type) {
+        case 'bulleted':
+        case 'toggle':
+        case 'todo':
+          text = `* ${text}`;
+          break;
+        case 'numbered':
+          text = `1. ${text}`;
+          break;
+        default:
+          break;
+      }
+    }
+    return text;
+  }
+
   override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[],

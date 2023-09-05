@@ -62,7 +62,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     const text = delta.reduce((markdown: string, item: DeltaOperation) => {
       return markdown + BaseService.deltaLeaf2markdown(block, item);
     }, '');
-    return `${text}${childText}`;
+    return `${text}\r\n\r\n${childText}`;
   }
 
   block2Json(
