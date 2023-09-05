@@ -43,6 +43,7 @@ import {
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
+
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   static override styles = css`

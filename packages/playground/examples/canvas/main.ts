@@ -170,9 +170,7 @@ function addDebugElements(surface: SurfaceBlockComponent) {
 }
 
 function main() {
-  // const doc = new Y.Doc();
   const container = document.querySelector('#container') as HTMLDivElement;
-  // const yContainer = doc.getMap('container');
   const surface = new SurfaceBlockComponent();
   surface.attach(container);
 
