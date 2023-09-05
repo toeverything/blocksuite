@@ -2,7 +2,7 @@ import type {
   Connectable,
   EdgelessElement,
 } from '../../../__internal__/index.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isTopLevelBlock } from './query.js';
 
 export function deleteElements(

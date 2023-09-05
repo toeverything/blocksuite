@@ -9,7 +9,6 @@ import {
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
-import type { SurfaceBlockComponent } from '../../surface-block/index.js';
 import {
   Bound,
   compare,
@@ -23,6 +22,7 @@ import {
   type PhasorElementType,
   serializeXYWH,
 } from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
   type EdgelessElement,

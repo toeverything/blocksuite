@@ -6,7 +6,6 @@ import {
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/index.js';
 import {
   Bound,
   clamp,
@@ -22,6 +21,7 @@ import {
   type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from '../services/tools-manager.js';
 

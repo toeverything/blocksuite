@@ -41,6 +41,8 @@ export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export * from './preset/index.js';
 export * from './surface-block/index.js';
+export * from './surface-block/surface-block.js';
+export * from './surface-block/surface-model.js';
 export * from './test-utils/test-utils.js';
 export * from './widgets/index.js';
 const env: Record<string, unknown> =

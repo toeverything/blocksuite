@@ -16,8 +16,7 @@ import {
 } from '../../__internal__/consts.js';
 import { getRectByBlockElement } from '../../__internal__/utils/query.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
-import { Bound } from '../../index.js';
-import { almostEqual } from '../../surface-block/utils/math-utils.js';
+import { almostEqual, Bound } from '../../surface-block/index.js';
 import { EdgelessNotesStatus } from './components/notes-status.js';
 import { updateNotesPosition } from './components/utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';

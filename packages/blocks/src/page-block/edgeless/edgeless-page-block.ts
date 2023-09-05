@@ -43,8 +43,6 @@ import type {
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
-  SurfaceBlockComponent,
-  SurfaceBlockModel,
 } from '../../index.js';
 import {
   Bound,
@@ -61,6 +59,8 @@ import {
   ZOOM_MAX,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
+import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { FontLoader } from '../font-loader/index.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { NoteSlicer } from './components/note-slicer/index.js';
@@ -1028,7 +1028,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     super.disconnectedCallback();
     this.clipboard.dispose();
     if (this._resizeObserver) {
-      console.log('disconnect');
       this._resizeObserver.disconnect();
       this._resizeObserver = null;
     }

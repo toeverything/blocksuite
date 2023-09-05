@@ -6,8 +6,8 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
-import type { EdgelessPageBlockComponent } from '../index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
+import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import { getEdgelessElement } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
@@ -154,7 +154,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     super.connectedCallback();
     const { edgeless } = this;
     this._renderer = new Renderer();
-    console.log(this.model);
     if (this.model)
       this._yContainer = this.model.elements.getValue() as Y.Map<
         Y.Map<unknown>

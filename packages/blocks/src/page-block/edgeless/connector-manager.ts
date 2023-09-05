@@ -4,7 +4,6 @@ import {
   type Connectable,
   type TopLevelBlockModel,
 } from '../../__internal__/utils/types.js';
-import type { SurfaceBlockComponent } from '../../surface-block/index.js';
 import {
   almostEqual,
   AStarRunner,
@@ -29,6 +28,7 @@ import {
   sign,
   Vec,
 } from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import type { Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';

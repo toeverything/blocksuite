@@ -8,7 +8,6 @@ import {
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/index.js';
 import {
   Bound,
   ConnectorElement,
@@ -19,6 +18,7 @@ import {
   ShapeElement,
   TextElement,
 } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';

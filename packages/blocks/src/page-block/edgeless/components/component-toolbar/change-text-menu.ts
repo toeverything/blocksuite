@@ -16,7 +16,6 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../../icons/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/index.js';
 import {
   Bound,
   normalizeShapeBound,
@@ -24,6 +23,7 @@ import {
   type ShapeElement,
   type TextElement,
 } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';

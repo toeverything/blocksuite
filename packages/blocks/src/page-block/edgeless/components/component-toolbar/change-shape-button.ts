@@ -23,12 +23,12 @@ import {
   ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
   ShapeStyle,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   GENERAL_CANVAS_FONT_FAMILY,

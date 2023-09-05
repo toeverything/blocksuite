@@ -11,10 +11,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
-import type {
-  BrushElement,
-  SurfaceBlockComponent,
-} from '../../../../surface-block/index.js';
+import type { BrushElement } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   type ColorEvent,

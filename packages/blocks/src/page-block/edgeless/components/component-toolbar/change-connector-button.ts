@@ -22,12 +22,12 @@ import {
   SmallArrowDownIcon,
   StraightLineIcon,
 } from '../../../../icons/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,
   ConnectorMode,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import {
