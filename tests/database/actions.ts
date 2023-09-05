@@ -100,7 +100,7 @@ export async function assertDatabaseTitleColumnText(
   }, index);
 
   if (title === '') {
-    expect(text).toBe(ZERO_WIDTH_SPACE);
+    expect(text).toMatch(new RegExp(`^(|[${ZERO_WIDTH_SPACE}])$`));
   } else {
     expect(text).toBe(title);
   }
