@@ -3,7 +3,7 @@ import {
   type UIEventHandler,
   type UIEventStateContext,
 } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -93,10 +93,27 @@ export class DragHandleWidget extends WidgetElement {
   private _dragPreview: DragPreview | null = null;
 
   private _rafID = 0;
+  private _anchorModelDisposables: DisposableGroup | null = null;
 
   protected get _selectedBlocks() {
     return this.root.selectionManager.value.filter(
       selection => selection.type !== 'surface'
+    );
+  }
+
+  private _handleAnchorModelDisposables(blockElement: BlockElement) {
+    if (this._anchorModelDisposables) {
+      this._anchorModelDisposables.dispose();
+      this._anchorModelDisposables = null;
+    }
+
+    this._anchorModelDisposables = new DisposableGroup();
+    this._anchorModelDisposables.add(
+      blockElement.model.propsUpdated.on(() => this._hide())
+    );
+
+    this._anchorModelDisposables.add(
+      blockElement.model.deleted.on(() => this._hide())
     );
   }
 
@@ -131,6 +148,7 @@ export class DragHandleWidget extends WidgetElement {
   private _hide(force = false) {
     if (!this._dragHandleContainer) return;
 
+    this._hoverDragHandle = false;
     if (this._dragHandleContainer.style.display !== 'none')
       this._dragHandleContainer.style.display = 'none';
 
@@ -162,9 +180,6 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _resetDragHandleGrabber() {
-    // this._dragHandleGrabber.style.height = `${
-    //   DRAG_HANDLE_GRABBER_HEIGHT * this._scale
-    // }px`;
     this._dragHandleGrabber.style.width = `${
       DRAG_HANDLE_GRABBER_WIDTH * this._scale
     }px`;
@@ -232,6 +247,7 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     this._resetDragHandleGrabber();
+    this._handleAnchorModelDisposables(blockElement);
     if (!isBlockPathEqual(blockElement.path, this._lastShowedBlock?.path)) {
       this._lastShowedBlock = {
         path: blockElement.path,
@@ -1027,10 +1043,6 @@ export class DragHandleWidget extends WidgetElement {
     this.handleEvent('wheel', this._wheelHandler);
     this.handleEvent('pointerOut', this._pointerOutHandler);
     this.handleEvent('beforeInput', () => this._hide());
-    this.handleEvent('selectionChange', () => {
-      if (this.root.selectionManager.find('block')) return;
-      this._hide();
-    });
 
     if (isEdgelessPage(this._pageBlockElement)) {
       const edgelessPage = this._pageBlockElement;
@@ -1056,6 +1068,8 @@ export class DragHandleWidget extends WidgetElement {
   override disconnectedCallback() {
     this._hide(true);
     this._removeDragPreview();
+    this._disposables.dispose();
+    this._anchorModelDisposables?.dispose();
     super.disconnectedCallback();
   }
 
