@@ -28,9 +28,6 @@ export default defineConfig({
       }),
     wasm(),
   ],
-  define: {
-    'process.env': {},
-  },
   build: {
     target: 'ES2022',
     sourcemap: true,
