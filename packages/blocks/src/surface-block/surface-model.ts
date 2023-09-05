@@ -7,7 +7,9 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
-type SurfaceBlockProps = {
+import { SurfaceBlockTransformer } from './surface-transformer.js';
+
+export type SurfaceBlockProps = {
   elements: NativeWrapper<Y.Map<unknown>>;
 };
 
@@ -27,7 +29,7 @@ const migration = {
         });
         yMap.set(key, map);
       });
-      const wrapper = new NativeWrapper<Y.Map<unknown>>(yMap);
+      const wrapper = new NativeWrapper(yMap);
       data.elements = wrapper;
     }
   },
@@ -88,6 +90,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
       migration.toV4(data);
     }
   },
+  transformer: () => new SurfaceBlockTransformer(),
 });
 
 export type SurfaceBlockModel = SchemaToModel<typeof SurfaceBlockSchema>;

@@ -2,6 +2,7 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+import type { BaseBlockTransformer } from '../transformer/base.js';
 import type { Page } from '../workspace/index.js';
 import type { YBlock } from '../workspace/page.js';
 import { NativeWrapper } from '../yjs/native-wrapper.js';
@@ -39,6 +40,11 @@ export const BlockSchema = z.object({
       .optional(),
     toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
   }),
+  transformer: z
+    .function()
+    .args()
+    .returns(z.custom<BaseBlockTransformer>())
+    .optional(),
   onUpgrade: z
     .function()
     .args(z.any(), z.number(), z.number())
@@ -79,6 +85,7 @@ export function defineBlockSchema<
     children?: string[];
   }>,
   Model extends BaseBlockModel<Props>,
+  Transformer extends BaseBlockTransformer<Props>,
 >(options: {
   flavour: Flavour;
   metadata: Metadata;
@@ -89,6 +96,7 @@ export function defineBlockSchema<
     latestVersion: number
   ) => void;
   toModel?: () => Model;
+  transformer?: () => Transformer;
 }): {
   version: number;
   model: {
@@ -101,14 +109,16 @@ export function defineBlockSchema<
     previousVersion: number,
     latestVersion: number
   ) => void;
+  transformer?: () => Transformer;
 };
 
 export function defineBlockSchema({
   flavour,
   props,
   metadata,
-  toModel,
   onUpgrade,
+  toModel,
+  transformer,
 }: {
   flavour: string;
   metadata: {
@@ -118,12 +128,13 @@ export function defineBlockSchema({
     children?: string[];
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
-  toModel?: () => BaseBlockModel;
   onUpgrade?: (
     data: Record<string, unknown>,
     previousVersion: number,
     latestVersion: number
   ) => void;
+  toModel?: () => BaseBlockModel;
+  transformer?: () => BaseBlockTransformer;
 }): BlockSchemaType {
   const schema = {
     version: metadata.version,
@@ -136,6 +147,7 @@ export function defineBlockSchema({
       toModel,
     },
     onUpgrade,
+    transformer,
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
   return schema;
@@ -169,6 +181,7 @@ export class BaseBlockModel<
   page!: Page;
   id!: string;
   yBlock!: YBlock;
+  keys!: string[];
 
   // text is optional
   text?: Text;

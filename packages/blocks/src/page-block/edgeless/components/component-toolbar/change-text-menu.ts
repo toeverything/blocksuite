@@ -21,9 +21,9 @@ import {
   normalizeShapeBound,
   normalizeTextBound,
   type ShapeElement,
-  type SurfaceManager,
   type TextElement,
 } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
@@ -142,7 +142,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   elementType!: EdgelessCanvasTextElementType;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

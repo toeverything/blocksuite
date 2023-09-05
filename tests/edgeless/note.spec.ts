@@ -313,15 +313,15 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
-  await expect(page.locator('affine-drag-handle-container')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await waitNextFrame(page);
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
-  await page.mouse.dblclick(305, 305);
-  await dragHandleFromBlockToBlockBottomById(page, '7', '4');
+  // await page.mouse.dblclick(305, 305);
+  await dragHandleFromBlockToBlockBottomById(page, '3', '4');
   await waitNextFrame(page);
-  await expect(page.locator('affine-drag-handle-container')).toBeHidden();
-  await assertRichTexts(page, ['456', '000', '789', '123']);
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
+  await assertRichTexts(page, ['456', '123', '789', '000']);
 
   await expect(page.locator('selected > *')).toHaveCount(0);
 });

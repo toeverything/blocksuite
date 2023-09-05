@@ -51,10 +51,10 @@ export const blob = addOnFactory<keyof BlobAddon>(
               );
             });
           },
-          set: async value => {
-            const key = await sha(await value.arrayBuffer());
-            await Promise.all(this._storages.map(s => s.crud.set(key, value)));
-            return key;
+          set: async (value, key) => {
+            const _key = key || (await sha(await value.arrayBuffer()));
+            await Promise.all(this._storages.map(s => s.crud.set(_key, value)));
+            return _key;
           },
           delete: async key => {
             await Promise.all(this._storages.map(s => s.crud.delete(key)));
