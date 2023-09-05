@@ -2,11 +2,9 @@ import './components/toolbar/edgeless-toolbar.js';
 import '../../surface-block/surface-block.js';
 
 import type { SurfaceSelection } from '@blocksuite/block-std';
-import type { EditorContainer } from '@blocksuite/editor';
 import {
   assertExists,
   debounce,
-  noop,
   Slot,
   throttle,
 } from '@blocksuite/global/utils';
@@ -63,7 +61,6 @@ import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { FontLoader } from '../font-loader/index.js';
 import { Gesture } from '../text-selection/gesture.js';
-import { NoteSlicer } from './components/note-slicer/index.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
@@ -89,7 +86,7 @@ import {
 import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode } from './utils/query.js';
 
-noop(NoteSlicer);
+type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot<{ zoom: number; center: IVec }>;
@@ -227,9 +224,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.service?.uiEventDispatcher;
   }
 
-  private _editorContainer: EditorContainer | null = null;
+  private _editorContainer: EdtitorContainer | null = null;
 
-  get editorContainer(): EditorContainer {
+  get editorContainer(): EdtitorContainer {
     if (this._editorContainer) return this._editorContainer;
     this._editorContainer = this.closest('editor-container');
     assertExists(this._editorContainer);

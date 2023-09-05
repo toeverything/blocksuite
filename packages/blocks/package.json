@@ -24,7 +24,6 @@
     "yjs": "^13"
   },
   "dependencies": {
-    "@blocksuite/editor": "workspace:",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.1",
