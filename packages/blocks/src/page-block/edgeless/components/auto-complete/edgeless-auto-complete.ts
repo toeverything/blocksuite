@@ -488,7 +488,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
             this._timer = setTimeout(() => this._showNextShape(type), 300);
           }}
           @mouseleave=${() => {
-            this._removeOverlay()
+            this._removeOverlay();
           }}
           @pointerdown=${(e: PointerEvent) => {
             this._onPointerDown(e, type);
