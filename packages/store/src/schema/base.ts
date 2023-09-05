@@ -81,7 +81,7 @@ export function defineBlockSchema<
     children?: string[];
   }>,
   Model extends BaseBlockModel<Props>,
-  Transformer extends BaseBlockTransformer<Model>,
+  Transformer extends BaseBlockTransformer<Props>,
 >(options: {
   flavour: Flavour;
   metadata: Metadata;
@@ -92,7 +92,7 @@ export function defineBlockSchema<
     latestVersion: number
   ) => void;
   toModel?: () => Model;
-  transformer?: Transformer;
+  transformer?: () => Transformer;
 }): {
   version: number;
   model: {
@@ -130,7 +130,7 @@ export function defineBlockSchema({
     latestVersion: number
   ) => void;
   toModel?: () => BaseBlockModel;
-  transformer?: BaseBlockTransformer;
+  transformer?: () => BaseBlockTransformer;
 }): BlockSchemaType {
   const schema = {
     version: metadata.version,
@@ -143,7 +143,7 @@ export function defineBlockSchema({
       toModel,
     },
     onUpgrade,
-    transformer: transformer ?? new BaseBlockTransformer(),
+    transformer: transformer?.() ?? new BaseBlockTransformer(),
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
   return schema;

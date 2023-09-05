@@ -119,11 +119,12 @@ export class Job {
       parent,
       index
     );
-    await Promise.all(
-      children.map((child, index) => {
-        return this._snapshotToBlock(child, page, id, index);
-      })
-    );
+
+    // Transform children one by one to make sure the order is correct
+    await children.reduce(async (acc, child, index): Promise<void> => {
+      await acc;
+      await this._snapshotToBlock(child, page, id, index);
+    }, Promise.resolve());
 
     const model = page.getBlockById(id);
     assertExists(model);
@@ -156,10 +157,11 @@ export class Job {
     PageSnapshotSchema.parse(snapshot);
 
     // TODO: validate versions and run migration
-    const { meta } = snapshot;
+    const { meta, block } = snapshot;
     const page = this._workspace.createPage({ id: meta.page.id });
     await page.waitForLoaded();
     this._importPageMeta(page, meta);
+    await this.snapshotToBlock(block, page);
 
     return page;
   }
