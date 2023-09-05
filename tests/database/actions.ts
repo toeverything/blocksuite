@@ -97,7 +97,11 @@ export async function assertDatabaseTitleColumnText(
     return titleSpan.innerText;
   }, index);
 
-  expect(text).toBe(title);
+  if (title === '') {
+    expect(text).toBe('\u200B');
+  } else {
+    expect(text).toBe(title);
+  }
 }
 
 export function getDatabaseBodyCell(
