@@ -55,7 +55,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertSelection(page, 0, 5, 0);
 
   await switchEditorMode(page);
-  const locator = page.locator('affine-edgeless-blocks-container');
+  const locator = page.locator('affine-edgeless-block-container');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
   await waitNextFrame(page);

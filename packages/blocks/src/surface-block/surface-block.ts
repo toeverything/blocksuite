@@ -60,7 +60,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       pointer-events: none;
     }
 
-    affine-edgeless-blocks-container {
+    affine-edgeless-block-container {
       position: relative;
       box-sizing: border-box;
       overflow: hidden;
@@ -217,8 +217,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <affine-edgeless-blocks-container .edgeless=${this.edgeless}>
-      </affine-edgeless-blocks-container>
+      <affine-edgeless-block-container .edgeless=${this.edgeless}>
+      </affine-edgeless-block-container>
     `;
   }
 

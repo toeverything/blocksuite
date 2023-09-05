@@ -24,13 +24,13 @@ import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid } from './utils/query.js';
 
-@customElement('affine-edgeless-blocks-container')
-export class EdgelessBlocksContainer extends WithDisposable(LitElement) {
+@customElement('affine-edgeless-block-container')
+export class EdgelessBlockContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @state()
-  private _rectsOfSelectedBlocks: DOMRect[] = [];
+  private _selectedBlockRects: DOMRect[] = [];
 
   private get _selection() {
     return this.edgeless.selectionManager;
@@ -120,9 +120,7 @@ export class EdgelessBlocksContainer extends WithDisposable(LitElement) {
         _selection.selectedBlocks = selectedBlocks;
         // TODO: remove `requestAnimationFrame`
         requestAnimationFrame(() => {
-          this._rectsOfSelectedBlocks = selectedBlocks.map(
-            getRectByBlockElement
-          );
+          this._selectedBlockRects = selectedBlocks.map(getRectByBlockElement);
         });
       })
     );
@@ -165,7 +163,7 @@ export class EdgelessBlocksContainer extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { edgeless, _rectsOfSelectedBlocks } = this;
+    const { edgeless, _selectedBlockRects } = this;
     const { sortedNotes, surface, renderModel } = edgeless;
     if (!surface) return nothing;
     const { viewport } = surface;
@@ -196,7 +194,7 @@ export class EdgelessBlocksContainer extends WithDisposable(LitElement) {
       <affine-selected-blocks
         .mouseRoot=${edgeless.mouseRoot}
         .state=${{
-          rects: _rectsOfSelectedBlocks,
+          rects: _selectedBlockRects,
           grab: false,
         }}
         .offset=${{
@@ -220,6 +218,6 @@ export class EdgelessBlocksContainer extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-edgeless-blocks-container': EdgelessBlocksContainer;
+    'affine-edgeless-block-container': EdgelessBlockContainer;
   }
 }
