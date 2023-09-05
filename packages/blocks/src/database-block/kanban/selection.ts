@@ -4,7 +4,7 @@ import type {
   KanbanFocusData,
   KanbanViewSelection,
 } from '../../__internal__/index.js';
-import type { KanbanCard } from './card.js';
+import { KanbanCard } from './card.js';
 import { KanbanCell } from './cell.js';
 import type { KanbanGroup } from './group.js';
 import type { DataViewKanban } from './kanban-view.js';
@@ -171,6 +171,11 @@ export class KanbanSelection {
     );
   }
 
+  getFocusCardIndex(selection: KanbanViewSelection) {
+    const cards = this.getGroupCardsBySelection();
+    return cards.findIndex(card => card.cardId === selection.cardId);
+  }
+
   getNextGroupFocusCell(
     groups: KanbanGroup[],
     selection: KanbanViewSelection,
@@ -181,7 +186,7 @@ export class KanbanSelection {
     groupKey: string;
   } {
     const groupIndex = groups.findIndex(
-      group => group.getAttribute('data-key') === selection.groupKey
+      group => group.group.key === selection.groupKey
     );
 
     const nextGroupIndex = getNextGroupIndex(groupIndex);
@@ -235,6 +240,52 @@ export class KanbanSelection {
     };
   }
 
+  getNextGroupFocusCard(
+    groups: KanbanGroup[],
+    selection: KanbanViewSelection,
+    getNextGroupIndex: (groupIndex: number) => number
+  ): {
+    card: KanbanCard;
+    cardId: string;
+    groupKey: string;
+  } {
+    const groupIndex = groups.findIndex(
+      group => group.group.key === selection.groupKey
+    );
+
+    const nextGroupIndex = getNextGroupIndex(groupIndex);
+
+    const nextGroup = groups[nextGroupIndex];
+    const card = this.getSelectCard(selection);
+    assertExists(card);
+    const rect = card.getBoundingClientRect();
+    const nextCards = Array.from(
+      nextGroup.querySelectorAll('affine-data-view-kanban-card')
+    );
+    const cardPos = nextCards
+      .map((card, index) => {
+        const targetRect = card.getBoundingClientRect();
+        return {
+          offsetY: getYOffset(rect, targetRect),
+          index,
+        };
+      })
+      .reduce((prev, curr) => {
+        if (prev.offsetY < curr.offsetY) {
+          return prev;
+        }
+        return curr;
+      });
+
+    const nextCard = nextCards[cardPos.index];
+
+    return {
+      card: nextCard,
+      cardId: nextCard.cardId,
+      groupKey: nextGroup.group.key,
+    };
+  }
+
   getNextCardFocusCell(
     nextPosition: 'up' | 'down',
     cards: KanbanCard[],
@@ -244,9 +295,7 @@ export class KanbanSelection {
     cell: KanbanCell;
     cardId: string;
   } {
-    const cardIndex = cards.findIndex(
-      card => card.getAttribute('data-card-id') === selection.cardId
-    );
+    const cardIndex = cards.findIndex(card => card.cardId === selection.cardId);
     const nextCardIndex = getNextCardIndex(cardIndex);
     const nextCard = cards[nextCardIndex];
     const nextCells = Array.from(
@@ -349,12 +398,64 @@ export class KanbanSelection {
     );
   }
 
+  getNextFocusCard(
+    selection: KanbanViewSelection,
+    index: number,
+    nextPosition: 'up' | 'down' | 'left' | 'right'
+  ): { card: KanbanCard; cardId: string; groupKey?: string } {
+    const kanbanCards = this.getGroupCardsBySelection();
+
+    if (nextPosition === 'up') {
+      const nextIndex = index - 1;
+      const nextCardIndex = nextIndex < 0 ? kanbanCards.length - 1 : nextIndex;
+      const card = kanbanCards[nextCardIndex];
+
+      return {
+        card,
+        cardId: card.cardId,
+      };
+    }
+
+    if (nextPosition === 'down') {
+      const nextIndex = index + 1;
+      const nextCardIndex = nextIndex > kanbanCards.length - 1 ? 0 : nextIndex;
+      const card = kanbanCards[nextCardIndex];
+
+      return {
+        card,
+        cardId: card.cardId,
+      };
+    }
+
+    const groups = Array.from(
+      this.viewEle.querySelectorAll('affine-data-view-kanban-group')
+    );
+
+    if (nextPosition === 'right') {
+      return this.getNextGroupFocusCard(groups, selection, groupIndex =>
+        groupIndex === groups.length - 1 ? 0 : groupIndex + 1
+      );
+    }
+
+    if (nextPosition === 'left') {
+      return this.getNextGroupFocusCard(groups, selection, groupIndex =>
+        groupIndex === 0 ? groups.length - 1 : groupIndex - 1
+      );
+    }
+
+    throw new Error(
+      'Unknown arrow keys, only support: up, down, left, and right keys.'
+    );
+  }
+
   public focusNext(position: 'up' | 'down' | 'left' | 'right') {
     const selection = this.selection;
     if (!selection || selection.focus?.isEditing) {
       return;
     }
+
     if (selection.focus) {
+      // cell focus
       const index = this.getFocusCellIndex(selection);
       const { cell, cardId, groupKey } = this.getNextFocusCell(
         selection,
@@ -370,6 +471,22 @@ export class KanbanSelection {
             ...selection.focus,
             columnId: cell.column.id,
           },
+        };
+      }
+    } else {
+      // card focus
+      const index = this.getFocusCardIndex(selection);
+      const { card, cardId, groupKey } = this.getNextFocusCard(
+        selection,
+        index,
+        position
+      );
+      if (card instanceof KanbanCard) {
+        this.selection = {
+          ...selection,
+          focus: undefined,
+          cardId: cardId ?? selection.cardId,
+          groupKey: groupKey ?? selection.groupKey,
         };
       }
     }

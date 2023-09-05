@@ -322,7 +322,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       .map(view => this.getView(view.id))
       .find(v => v.view.id === this.currentView);
     if (!viewData && this.model.views.length !== 0) {
-      const viewId = this.model.views[0].id;
+      const viewId = this.model.views[1].id;
       this.currentView = viewId;
       requestAnimationFrame(() => {
         this.requestUpdate();
