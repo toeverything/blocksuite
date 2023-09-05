@@ -97,7 +97,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
   override render() {
     const buttons = repeat(
-      config,
+      config.filter(({ showWhen = () => true }) => showWhen(this.model)),
       ({ type }) => type,
       ({ type, icon, tooltip, action, divider, disableWhen = () => false }) => {
         return html`<icon-button

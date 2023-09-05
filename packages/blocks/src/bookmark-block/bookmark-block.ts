@@ -294,6 +294,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       this._optionsAbortController?.abort();
     };
 
+  private _isEmbed() {
+    return this.model.type === 'embed' && allowEmbed(this.model.url);
+  }
+
   private _linkCard() {
     const { url, bookmarkTitle, description, icon, image } = this.model;
 
@@ -302,7 +306,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       @click=${this._onCardClick}
       @dblclick=${this._onCardDbClick}
     >
-      ${allowEmbed(url)
+      ${this._isEmbed()
         ? html`<iframe
             class="embed-frame"
             height="480"
@@ -333,15 +337,18 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         <div class="affine-bookmark-description">${description || url}</div>
         <div class="affine-bookmark-url">${url}</div>
       </div>
-      <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-        ${image && !this._isImageError
-          ? html`<img
-              src="${image}"
-              alt="image"
-              @error="${this._onImageError}"
-            />`
-          : DefaultBanner}
-      </div>
+
+      ${this._isEmbed()
+        ? nothing
+        : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
+            ${image && !this._isImageError
+              ? html`<img
+                  src="${image}"
+                  alt="image"
+                  @error="${this._onImageError}"
+                />`
+              : DefaultBanner}
+          </div>`}
     </div>`;
   }
 
