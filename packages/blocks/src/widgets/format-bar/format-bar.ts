@@ -327,6 +327,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET_TAG}
       @pointerdown=${stopPropagation}
+      @pointermove=${stopPropagation}
     >
       <div class="custom-items"></div>
       ${this._customElements.length > 0

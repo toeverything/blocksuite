@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
 
-import { getIndexCoordinate } from './misc.js';
+import { getIndexCoordinate, waitNextFrame } from './misc.js';
 
 export async function dragBetweenCoords(
   page: Page,
@@ -125,6 +125,7 @@ export async function dragHandleFromBlockToBlockBottomById(
     sourceBlock.x + sourceBlock.width / 2,
     sourceBlock.y + sourceBlock.height / 2
   );
+  await waitNextFrame(page);
   const handle = await page
     .locator('.affine-drag-handle-container')
     .boundingBox();
