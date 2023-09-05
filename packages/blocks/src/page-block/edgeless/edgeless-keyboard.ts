@@ -108,7 +108,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this.pageElement.selectionManager.elements.length !== 0 &&
             !this.pageElement.selectionManager.editing
           ) {
-            this.pageElement.frame.createFrameOnSelected();
+            pageElement.surface.frame.createFrameOnSelected();
           } else if (!this.pageElement.selectionManager.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
@@ -235,7 +235,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(edgeless, edgeless.selectionManager.elements);
+    deleteElements(edgeless.surface, edgeless.selectionManager.elements);
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
@@ -267,7 +267,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _move(key: string) {
     const edgeless = this.pageElement;
     if (edgeless.selectionManager.editing) return;
-
+    const { surface } = edgeless;
     const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
@@ -289,9 +289,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
       if (isPhasorElement(element)) {
         if (element instanceof ConnectorElement) {
-          this.pageElement.connector.updateXYWH(element, bound);
+          surface.connector.updateXYWH(element, bound);
         }
-        this.pageElement.surface.setElementBound(element.id, bound);
+        surface.setElementBound(element.id, bound);
       } else {
         this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
       }

@@ -53,8 +53,7 @@ export class EdgelessSnapManager extends Overlay {
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
     const { page, surface } = this.container;
-    const connectors =
-      this.container.connector.getConnecttedConnectors(alignables);
+    const connectors = surface.connector.getConnecttedConnectors(alignables);
 
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);

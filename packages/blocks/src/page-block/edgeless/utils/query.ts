@@ -18,10 +18,10 @@ import {
   type PhasorElementWithText,
   serializeXYWH,
   ShapeElement,
-  type SurfaceManager,
   type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from '../services/tools-manager.js';
 
@@ -106,7 +106,7 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
 }
 
 export function pickBy(
-  surface: SurfaceManager,
+  surface: SurfaceBlockComponent,
   page: Page,
   x: number,
   y: number,
@@ -127,7 +127,7 @@ export function pickBy(
 }
 
 export function pickSurfaceElementById(
-  surface: SurfaceManager,
+  surface: SurfaceBlockComponent,
   page: Page,
   id: string
 ) {

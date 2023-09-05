@@ -16,9 +16,9 @@ import {
   type PhasorElement,
   type PhasorElementType,
   ShapeElement,
-  type SurfaceManager,
   TextElement,
 } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -180,7 +180,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.y += delta.y;
 
     if (selected instanceof ConnectorElement) {
-      this._edgeless.connector.updateXYWH(selected, bound);
+      this._surface.connector.updateXYWH(selected, bound);
     }
 
     surface.setElementBound(selected.id, bound);
@@ -330,7 +330,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
   }
 
-  private async _cloneSelected(selected: Selectable, surface: SurfaceManager) {
+  private async _cloneSelected(
+    selected: Selectable,
+    surface: SurfaceBlockComponent
+  ) {
     if (isTopLevelBlock(selected)) {
       const noteService = this._edgeless.getService('affine:note');
       const id = this._page.addBlock(
@@ -358,7 +361,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       if (ele instanceof FrameElement) {
         this._frames.add(ele);
       } else {
-        const frame = this._edgeless.frame.selectFrame([ele]);
+        const frame = this._edgeless.surface.frame.selectFrame([ele]);
         if (frame) {
           this._frames.add(frame);
         }
@@ -374,7 +377,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const toBeMoved = new Set(elements);
     elements.forEach(element => {
       if (element instanceof FrameElement) {
-        this._edgeless.frame
+        this._surface.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
       }
@@ -397,7 +400,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._dragStartPos = { x, y };
     this._dragLastPos = { x, y };
 
-    this._alignBound = this._edgeless.snap.setupAlignables(this._toBeMoved);
+    this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
 
     this._selectedBounds = this._toBeMoved.map(element =>
       Bound.deserialize(element.xywh)
@@ -405,7 +408,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    const zoom = this._edgeless.surface.viewport.zoom;
+    const { surface } = this._edgeless;
+    const zoom = surface.viewport.zoom;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
         const startX = this._dragStartPos.x;
@@ -413,14 +417,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         const viewX = Math.min(startX, e.x);
         const viewY = Math.min(startY, e.y);
 
-        const [x, y] = this._surface.toModelCoord(viewX, viewY);
+        const [x, y] = surface.toModelCoord(viewX, viewY);
         const w = Math.abs(startX - e.x);
         const h = Math.abs(startY - e.y);
-        const { zoom } = this._surface.viewport;
+        const { zoom } = surface.viewport;
         const bound = new Bound(x, y, w / zoom, h / zoom);
 
         const blocks = pickBlocksByBound(this._blocks, bound);
-        const elements = this._surface.pickByBound(bound);
+        const elements = surface.pickByBound(bound);
         this._setSelectionState(
           [
             ...blocks.map(block => block.id),
@@ -448,7 +452,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         curBound.x += dx;
         curBound.y += dy;
 
-        const alignRst = this._edgeless.snap.align(curBound);
+        const alignRst = surface.snap.align(curBound);
         const delta = {
           x: dx + alignRst.dx,
           y: dy + alignRst.dy,
@@ -470,10 +474,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
             );
           }
         });
-        const frame = this._edgeless.frame.selectFrame(this._toBeMoved);
+        const frame = surface.frame.selectFrame(this._toBeMoved);
         frame
-          ? this._edgeless.frame.setHighlight(frame)
-          : this._edgeless.frame.clearHighlight();
+          ? surface.frame.setHighlight(frame)
+          : surface.frame.clearHighlight();
 
         this._forceUpdateSelection(this.dragType, true, {
           x: delta.x - this._lastMoveDelta.x,
@@ -502,16 +506,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     if (this.isActive) {
       return;
     }
-
+    const { surface } = this._edgeless;
     this._dragStartPos = { x: 0, y: 0 };
     this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
     this._lastMoveDelta = { x: 0, y: 0 };
-    this._edgeless.snap.cleanupAlignables();
-    this._edgeless.frame.clearHighlight();
+    surface.snap.cleanupAlignables();
+    surface.frame.clearHighlight();
     this._addFrames();
     this._frames.forEach(frame => {
-      this._edgeless.frame.calculateFrameColor(frame);
+      surface.frame.calculateFrameColor(frame);
     });
     this._frames.clear();
     this._toBeMoved = [];

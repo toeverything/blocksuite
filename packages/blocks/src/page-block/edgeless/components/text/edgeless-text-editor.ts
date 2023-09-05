@@ -126,7 +126,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     });
 
     if (this._element?.text.length === 0) {
-      deleteElements(this._edgeless, [this._element]);
+      deleteElements(this._edgeless.surface, [this._element]);
     }
 
     this.remove();

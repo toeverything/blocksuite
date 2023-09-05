@@ -39,7 +39,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     if (Vec.dist(this._startPoint, currentPoint) < 8 && !this._frameElement)
       return;
     if (!this._frameElement) {
-      const frames = edgeless.frame.frames;
+      const frames = surface.frame.frames;
 
       const id = edgeless.surface.addElement('frame', {
         title: new Y.Text(`Frame ${frames.length + 1}`),

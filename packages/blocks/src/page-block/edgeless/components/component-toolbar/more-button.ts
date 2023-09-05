@@ -202,7 +202,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _delete() {
     this.page.captureSync();
-    deleteElements(this.edgeless, this.selection.elements);
+    deleteElements(this.surface, this.selection.elements);
 
     this.selection.setSelection({
       elements: [],
@@ -234,7 +234,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'create-frame': {
-        this.edgeless.frame.createFrameOnSelected();
+        this.edgeless.surface.frame.createFrameOnSelected();
         break;
       }
       case 'front':
