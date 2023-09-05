@@ -7,7 +7,6 @@ import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import type { Page } from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
 
 export const BlockSchemas = [

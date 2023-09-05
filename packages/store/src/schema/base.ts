@@ -2,7 +2,7 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
-import { BaseBlockTransformer } from '../transformer/base.js';
+import type { BaseBlockTransformer } from '../transformer/base.js';
 import type { Page } from '../workspace/index.js';
 import type { YBlock } from '../workspace/page.js';
 import { NativeWrapper } from '../yjs/native-wrapper.js';
@@ -40,7 +40,11 @@ export const BlockSchema = z.object({
       .optional(),
     toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
   }),
-  transformer: z.custom<BaseBlockTransformer>(),
+  transformer: z
+    .function()
+    .args()
+    .returns(z.custom<BaseBlockTransformer>())
+    .optional(),
   onUpgrade: z
     .function()
     .args(z.any(), z.number(), z.number())
@@ -105,7 +109,7 @@ export function defineBlockSchema<
     previousVersion: number,
     latestVersion: number
   ) => void;
-  transformer: Transformer;
+  transformer?: () => Transformer;
 };
 
 export function defineBlockSchema({
@@ -143,7 +147,7 @@ export function defineBlockSchema({
       toModel,
     },
     onUpgrade,
-    transformer: transformer?.() ?? new BaseBlockTransformer(),
+    transformer,
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
   return schema;

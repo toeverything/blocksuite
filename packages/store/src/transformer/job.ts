@@ -1,9 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BaseBlockModel } from '../schema/index.js';
+import type { BaseBlockModel, BlockSchemaType } from '../schema/index.js';
 import type { Workspace } from '../workspace/index.js';
 import type { Page } from '../workspace/index.js';
 import { AssetsManager } from './assets.js';
+import { BaseBlockTransformer } from './base.js';
 import type { BlockSnapshot, PageSnapshot } from './type.js';
 import { BlockSnapshotSchema, PageSnapshotSchema } from './type.js';
 
@@ -23,6 +24,10 @@ export class Job {
     const schema = this._workspace.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Flavour schema not found for ${flavour}`);
     return schema;
+  }
+
+  private _getTransformer(schema: BlockSchemaType) {
+    return schema.transformer?.() ?? new BaseBlockTransformer();
   }
 
   private _exportPageMeta(page: Page): PageSnapshot['meta'] {
@@ -74,7 +79,8 @@ export class Job {
     model: BaseBlockModel
   ): Promise<BlockSnapshot> {
     const schema = this._getSchema(model.flavour);
-    const snapshot = await schema.transformer.toSnapshot({
+    const transformer = this._getTransformer(schema);
+    const snapshot = await transformer.toSnapshot({
       model,
       assets: this._assetsManager,
     });
@@ -109,7 +115,8 @@ export class Job {
       flavour,
       props,
     };
-    const modelData = await schema.transformer.fromSnapshot({
+    const transformer = this._getTransformer(schema);
+    const modelData = await transformer.fromSnapshot({
       json: snapshotLeaf,
       assets: this._assetsManager,
     });
