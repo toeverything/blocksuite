@@ -21,7 +21,6 @@ import {
   WithDisposable,
 } from '@blocksuite/lit';
 import { type Page } from '@blocksuite/store';
-import { baseTheme } from '@toeverything/theme';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -284,7 +283,7 @@ export class EditorContainer
           height: 100%;
           position: relative;
           overflow: hidden;
-          font-family: ${baseTheme.fontSansFamily};
+          font-family: var(--affine-font-family);
           background: var(--affine-background-primary-color);
         }
         @media print {

@@ -2,8 +2,7 @@ import '../page-block/edgeless/edgeless-blocks-container.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { baseTheme } from '@toeverything/theme';
-import { css, html, nothing, unsafeCSS } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import * as Y from 'yjs';
 
@@ -67,7 +66,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       box-sizing: border-box;
       overflow: hidden;
       height: 100%;
-      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
