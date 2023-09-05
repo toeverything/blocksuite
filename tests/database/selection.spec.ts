@@ -1,5 +1,12 @@
+import { expect } from '@playwright/test';
+
 import { dragBetweenCoords } from '../utils/actions/drag.js';
-import { pressEnter, pressEscape, type } from '../utils/actions/keyboard.js';
+import {
+  pressBackspace,
+  pressEnter,
+  pressEscape,
+  type,
+} from '../utils/actions/keyboard.js';
 import {
   enterPlaygroundRoom,
   getBoundingBox,
@@ -11,6 +18,7 @@ import {
 import { test } from '../utils/playwright.js';
 import {
   assertCellsSelection,
+  assertDatabaseTitleColumnText,
   assertRowsSelection,
   getDatabaseBodyCell,
   initDatabaseColumn,
@@ -124,7 +132,6 @@ test.describe('row-level selection', () => {
 
     const endBox = await getBoundingBox(selectColumn);
     const endX = endBox.x + endBox.width / 2;
-    const endY = endBox.y + endBox.height / 2;
 
     await dragBetweenCoords(
       page,
@@ -192,5 +199,57 @@ test.describe('cell-level selection', () => {
       start: [0, 0],
       end: [1, 1],
     });
+  });
+
+  test("should support backspace key to delete cell's content", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseRowWithData(page, 'row1');
+    await initDatabaseDynamicRowWithData(page, 'abc', false);
+    await pressEscape(page);
+    await initDatabaseRowWithData(page, 'row2');
+    await initDatabaseDynamicRowWithData(page, '123', false);
+    await pressEscape(page);
+
+    const startCell = getDatabaseBodyCell(page, {
+      rowIndex: 0,
+      columnIndex: 0,
+    });
+    const endCell = getDatabaseBodyCell(page, {
+      rowIndex: 1,
+      columnIndex: 1,
+    });
+
+    const startBox = await getBoundingBox(startCell);
+    const endBox = await getBoundingBox(endCell);
+
+    const startX = startBox.x + startBox.width / 2;
+    const startY = startBox.y + startBox.height / 2;
+    const endX = endBox.x + endBox.width / 2;
+    const endY = endBox.y + endBox.height / 2;
+
+    await dragBetweenCoords(
+      page,
+      { x: startX, y: startY },
+      { x: endX, y: endY }
+    );
+
+    await pressBackspace(page);
+    await assertDatabaseTitleColumnText(page, '', 0);
+    await assertDatabaseTitleColumnText(page, '', 1);
+    const selectCell1 = getDatabaseBodyCell(page, {
+      rowIndex: 0,
+      columnIndex: 1,
+    });
+    expect(await selectCell1.innerText()).toBe('');
+    const selectCell2 = getDatabaseBodyCell(page, {
+      rowIndex: 1,
+      columnIndex: 1,
+    });
+    expect(await selectCell2.innerText()).toBe('');
   });
 });
