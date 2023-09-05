@@ -13,7 +13,9 @@ import { Workspace } from '@blocksuite/store';
 
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
-import { initCollaborationSocket } from './providers/websocket-channel.js';
+//ENABLE WEB2.0 HACKER MODE
+//import { initCollaborationSocket } from './providers/websocket-channel.js'; 
+import { initCollaborationRequest } from './providers/http-requests.js';
 import {
   createEditor,
   createWorkspaceOptions,
@@ -80,7 +82,7 @@ const syncProviders = async (
   providerCreators: DocProviderCreator[]
 ) => {
   if (params.get('room')) {
-    await initCollaborationSocket(workspace, params.get('room') as string);
+    await initCollaborationRequest(workspace, params.get('room') as string);
   }
 
   providerCreators.forEach(fn => workspace.registerProvider(fn));
