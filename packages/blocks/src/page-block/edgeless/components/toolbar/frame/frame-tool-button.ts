@@ -28,11 +28,6 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       height: 32px;
     }
 
-    edgeless-tool-icon-button svg {
-      fill: var(--affine-icon-color);
-      stroke: none;
-    }
-
     edgeless-tool-icon-button svg + svg {
       position: absolute;
       top: 2px;
@@ -103,7 +98,6 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
         .active=${type === 'frame'}
-        .activeMode=${'background'}
         .iconContainerPadding=${0}
         @click=${() => {
           this.setEdgelessTool({

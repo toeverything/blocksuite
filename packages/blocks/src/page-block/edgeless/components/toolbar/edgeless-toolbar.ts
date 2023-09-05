@@ -76,10 +76,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
       gap: 10px;
     }
-    .edgeless-toolbar-left-part svg {
-      fill: var(--affine-icon-color);
-      stroke: none;
-    }
     .short-divider {
       width: 1px;
       height: 24px;
@@ -453,7 +449,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
-          .activeMode=${'background'}
           .iconContainerPadding=${4}
           @click=${() => this.setEdgelessTool({ type: 'default' })}
         >
@@ -462,7 +457,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
-          .activeMode=${'background'}
           .iconContainerPadding=${4}
           @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
         >
