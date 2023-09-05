@@ -408,6 +408,9 @@ importers:
       idb-keyval:
         specifier: ^6.2.1
         version: 6.2.1
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
       lib0:
         specifier: ^0.2.83
         version: 0.2.83
@@ -420,9 +423,6 @@ importers:
       nanoid:
         specifier: ^4.0.2
         version: 4.0.2
-      unionfs:
-        specifier: ^4.5.1
-        version: 4.5.1
       y-protocols:
         specifier: ^1.0.5
         version: 1.0.5
@@ -3899,10 +3899,6 @@ packages:
       universalify: 2.0.0
     dev: true
 
-  /fs-monkey@1.0.4:
-    resolution: {integrity: sha512-INM/fWAxMICjttnD0DX1rBvinKskj5G1w+oy/pnm9u/tSlnBrzFonJMcalKJ30P8RRsPzKcCG7Q8l0jx5Fh9YQ==}
-    dev: false
-
   /fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
     dev: true
@@ -6929,12 +6925,6 @@ packages:
       is-extendable: 0.1.1
       set-value: 2.0.1
     dev: true
-
-  /unionfs@4.5.1:
-    resolution: {integrity: sha512-hn8pzkh0/80mpsIT/YBJKa4+BF/9pNh0IgysBi0CjL95Uok8Hus69TNfgeJckoUNwfTpBq26+F7edO1oBINaIw==}
-    dependencies:
-      fs-monkey: 1.0.4
-    dev: false
 
   /uniq@1.0.1:
     resolution: {integrity: sha512-Gw+zz50YNKPDKXs+9d+aKAjVwpjNwqzvNpLigIruT4HA9lMZNdMqs9x07kKHB/L9WRzqp4+DlTU5s4wG2esdoA==}

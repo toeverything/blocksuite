@@ -9,7 +9,7 @@ import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProviderCreator, Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
@@ -164,6 +164,7 @@ async function main() {
   const workspace = new Workspace(options);
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
+  window.job = new Job({ workspace });
   window.Y = Workspace.Y;
   window.std = std;
   window.ContentParser = ContentParser;
