@@ -3,6 +3,8 @@ import { expect, type Locator, type Page } from '@playwright/test';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ColumnType } from '../../packages/blocks/src/index.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ZERO_WIDTH_SPACE } from '../../packages/virgo/src/consts.js';
 import {
   pressEnter,
   pressEscape,
@@ -98,7 +100,7 @@ export async function assertDatabaseTitleColumnText(
   }, index);
 
   if (title === '') {
-    expect(text).toBe('\u200B');
+    expect(text).toBe(ZERO_WIDTH_SPACE);
   } else {
     expect(text).toBe(title);
   }
