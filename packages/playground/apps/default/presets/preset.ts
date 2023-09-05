@@ -1,10 +1,6 @@
-import {
-  DEFAULT_ROUGHNESS,
-  DEFAULT_SHAPE_STROKE_COLOR,
-  serializeXYWH,
-  StrokeStyle,
-} from '@blocksuite/blocks';
-import { native2Y, NativeWrapper, Text, Workspace } from '@blocksuite/store';
+import { serializeXYWH } from '@blocksuite/blocks';
+import type { Workspace } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
@@ -35,58 +31,6 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
   });
-  const item0 = native2Y(
-    {
-      id: '0',
-      index: 'a0',
-      type: 'shape',
-      xywh: '[0,0,100,100]',
-      seed: Math.floor(Math.random() * 2 ** 31),
-      shapeType: 'rect',
-
-      radius: 0,
-      filled: true,
-      fillColor: '--affine-palette-shape-navy',
-      strokeWidth: 4,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      strokeStyle: StrokeStyle.Solid,
-      roughness: DEFAULT_ROUGHNESS,
-    },
-    false
-  );
-  const item1 = native2Y(
-    {
-      id: '1',
-      index: 'a1',
-      type: 'shape',
-      xywh: '[200,0,100,100]',
-      seed: Math.floor(Math.random() * 2 ** 31),
-
-      shapeType: 'rect',
-
-      radius: 0,
-      filled: true,
-      fillColor: '--affine-palette-shape-navy',
-      strokeWidth: 4,
-      strokeColor: DEFAULT_SHAPE_STROKE_COLOR,
-      strokeStyle: StrokeStyle.Solid,
-      roughness: DEFAULT_ROUGHNESS,
-    },
-    false
-  );
-  const yMap = new Workspace.Y.Map();
-  yMap.set('0', item0);
-  yMap.set('1', item1);
-
-  const elements = new NativeWrapper(yMap);
-
-  page.addBlock(
-    'affine:surface',
-    {
-      elements,
-    },
-    pageBlockId
-  );
 
   // Add note block inside page block
   const noteId = page.addBlock(
