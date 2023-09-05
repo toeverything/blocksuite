@@ -14,8 +14,10 @@ import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { createLitPortal } from '../components/portal.js';
 import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
-import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
-import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
+import type {
+  MenuActionCallback,
+  ToolbarActionCallback,
+} from './components/config.js';
 import { allowEmbed, formatEmbedUrl } from './embed/index.js';
 import { DefaultBanner } from './images/banners.js';
 import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
