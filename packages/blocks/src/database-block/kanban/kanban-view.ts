@@ -3,6 +3,7 @@ import './header.js';
 import './drag.js';
 import '../common/group-by/define.js';
 
+import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -149,7 +150,9 @@ export class DataViewKanban extends BaseDataView<
       <div class="add-group-icon">${AddCursorIcon}</div>
     </div>`;
   };
-
+  onWheel = (event: WheelEvent) => {
+    event.stopPropagation();
+  };
   override render() {
     this.groupHelper = this.view.groupHelper;
     const groups = this.groupHelper?.groups;
@@ -159,7 +162,7 @@ export class DataViewKanban extends BaseDataView<
 
     return html`
       ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
-      <div class="affine-data-view-kanban-groups">
+      <div class="affine-data-view-kanban-groups" @wheel="${this.onWheel}">
         ${repeat(
           groups,
           group => group.key,

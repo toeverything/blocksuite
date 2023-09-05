@@ -5,6 +5,7 @@ import './components/cell-container.js';
 import './components/selection.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -440,15 +441,18 @@ export class DatabaseTable extends BaseDataView<
       </div>
     `;
   }
-
+  onWheel = (event: WheelEvent) => {
+    event.stopPropagation();
+  };
   override render() {
     const addRow = (position: InsertPosition) => {
       this._addRow(this.view, position);
     };
+
     return html`
       ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
       <div class="affine-database-table">
-        <div class="affine-database-block-table">
+        <div class="affine-database-block-table" @wheel="${this.onWheel}">
           <div class="affine-database-table-container">
             <affine-database-column-header
               .tableViewManager="${this.view}"
