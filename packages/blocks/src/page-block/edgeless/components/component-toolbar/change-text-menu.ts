@@ -102,7 +102,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       height: 20px;
       line-height: 20px;
       font-size: 16px;
-      font-family: 'Avenir Next';
       font-size: 16px;
       font-style: normal;
       font-weight: 400;

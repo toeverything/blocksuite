@@ -1,4 +1,4 @@
-import { lightCssVariables } from '@toeverything/theme';
+import { baseTheme, lightCssVariables } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
 import { EDITOR_WIDTH } from '../../consts.js';
@@ -43,7 +43,7 @@ export const globalCSS = css`
     ${unsafeCSS(cssVariables)}
   }
   body {
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     color: var(--affine-text-primary-color);
   }
 

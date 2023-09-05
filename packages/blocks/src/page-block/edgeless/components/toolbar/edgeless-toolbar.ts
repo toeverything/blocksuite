@@ -9,7 +9,15 @@ import './frame/frame-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  unsafeCSS,
+} from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
@@ -49,7 +57,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
       transform: translateX(-50%);
       user-select: none;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
     .edgeless-toolbar-container {
       display: flex;

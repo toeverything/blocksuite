@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 /**
  * @example
@@ -14,7 +15,7 @@ export const tooltipStyle = css`
   tool-tip {
     --affine-tooltip-offset: 8px;
     --affine-tooltip-round: 4px;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     position: absolute;
     inline-size: max-content;
     text-align: center;

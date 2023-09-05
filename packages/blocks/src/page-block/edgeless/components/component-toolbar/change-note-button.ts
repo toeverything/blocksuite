@@ -73,7 +73,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       border-radius: 4px;
       color: var(--affine-white);
       font-size: 12px;
-      font-family: Avenir Next;
       font-weight: 600;
       line-height: 16px;
     }
@@ -126,7 +125,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     .note-status-button > span {
       font-size: 12px;
-      font-family: Avenir Next;
       font-style: normal;
       font-weight: 600;
       line-height: 16px;

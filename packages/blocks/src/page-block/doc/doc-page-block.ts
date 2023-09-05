@@ -5,7 +5,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
-import { css, html } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -51,7 +52,7 @@ export class DocPageBlockComponent extends BlockElement<
       display: flex;
       flex-direction: column;
       width: 100%;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);

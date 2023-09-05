@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 import { tooltipStyle } from '../tooltip/tooltip.js';
 
@@ -85,7 +86,7 @@ export const linkPopoverStyle = css`
   }
 
   .popover-container {
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     font-style: normal;
     line-height: 24px;
@@ -133,7 +134,7 @@ export const linkPopoverStyle = css`
   }
 
   label {
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     padding: 6px 0 6px 12px;
@@ -141,7 +142,7 @@ export const linkPopoverStyle = css`
   }
 
   input {
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     box-sizing: border-box;
     padding: 6px 12px 6px 0;
