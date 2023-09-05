@@ -347,22 +347,6 @@ export class KanbanSelection {
     }
   }
 
-  public focusUp() {
-    this.focusNext('up');
-  }
-
-  public focusDown() {
-    this.focusNext('down');
-  }
-
-  public focusLeft() {
-    this.focusNext('left');
-  }
-
-  public focusRight() {
-    this.focusNext('right');
-  }
-
   public deleteCard() {
     const selection = this.selection;
     if (!selection || !!selection.focus) {
