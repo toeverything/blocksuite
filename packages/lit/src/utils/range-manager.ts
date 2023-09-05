@@ -75,11 +75,7 @@ export class RangeManager {
     }
 
     const startRange = this.pointToRange(from);
-    this._setUpRangePoint(from);
     const endRange = to ? this.pointToRange(to) : null;
-    if (to) {
-      this._setUpRangePoint(to);
-    }
 
     if (!startRange) {
       this.clearRange(false);
@@ -233,16 +229,6 @@ export class RangeManager {
         length,
       },
     ];
-  }
-
-  private _setUpRangePoint(point: TextRangePoint) {
-    const result = this._calculateVirgo(point);
-    if (!result) {
-      return;
-    }
-    const [virgoEditor, vRange] = result;
-
-    virgoEditor.setVRange(vRange, false);
   }
 
   private _nodeToPoint(node: Node) {

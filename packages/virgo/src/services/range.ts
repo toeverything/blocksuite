@@ -11,40 +11,40 @@ import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
-  private readonly _editor: VEditor<TextAttributes>;
-
   private _prevVRange: VRange | null = null;
   private _vRange: VRange | null = null;
   private _lastScrollLeft = 0;
 
-  constructor(editor: VEditor<TextAttributes>) {
-    this._editor = editor;
+  constructor(public readonly editor: VEditor<TextAttributes>) {}
+
+  get vRangeProvider() {
+    return this.editor.vRangeProvider;
   }
 
-  onVRangeUpdated = ([newVRange, origin]: VRangeUpdatedProp) => {
+  onVRangeUpdated = ([newVRange, sync]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
 
     if (
-      this._editor.mounted &&
+      this.editor.mounted &&
       newVRange &&
       !isMaybeVRangeEqual(this._prevVRange, newVRange)
     ) {
       // no need to sync and native selection behavior about shift+arrow will
       // be broken if we sync
-      this._editor.requestUpdate(false);
+      this.editor.requestUpdate(false);
     }
     this._prevVRange = newVRange;
 
-    if (origin !== 'other') {
+    if (!sync) {
       return;
     }
 
     if (this._vRange === null) {
-      const selectionRoot = findDocumentOrShadowRoot(this._editor);
+      const selectionRoot = findDocumentOrShadowRoot(this.editor);
       const selection = selectionRoot.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
-        if (range.intersectsNode(this._editor.rootElement)) {
+        if (range.intersectsNode(this.editor.rootElement)) {
           selection.removeAllRanges();
         }
       }
@@ -65,6 +65,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   getVRange = (): VRange | null => {
+    if (this.vRangeProvider) {
+      return this.vRangeProvider.getVRange();
+    }
+
     return this._vRange;
   };
 
@@ -76,20 +80,26 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     if (
       vRange &&
       (vRange.index < 0 ||
-        vRange.index + vRange.length > this._editor.yText.length)
+        vRange.index + vRange.length > this.editor.yText.length)
     ) {
       throw new Error('invalid vRange');
     }
 
-    this._editor.slots.vRangeUpdated.emit([vRange, sync ? 'other' : 'silent']);
+    if (this.vRangeProvider) {
+      this.vRangeProvider.setVRange(vRange);
+      return;
+    }
+
+    this.editor.slots.vRangeUpdated.emit([vRange, sync]);
   };
 
   /**
    * sync the dom selection from vRange for **this Editor**
    */
   syncVRange = (): void => {
-    if (this._vRange && this._editor.mounted) {
-      this._applyVRange(this._vRange);
+    const vRange = this.getVRange();
+    if (vRange && this.editor.mounted) {
+      this._applyVRange(vRange);
     }
   };
 
@@ -97,7 +107,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    * calculate the dom selection from vRange for **this Editor**
    */
   toDomRange = (vRange: VRange): Range | null => {
-    const rootElement = this._editor.rootElement;
+    const rootElement = this.editor.rootElement;
     return virgoRangeToDomRange(rootElement, vRange);
   };
 
@@ -128,7 +138,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
    *    the second is {index: 0, length: 6}, the third is {index: 0, length: 4}
    */
   toVRange = (range: Range): VRange | null => {
-    const { rootElement, yText } = this._editor;
+    const { rootElement, yText } = this.editor;
 
     return domRangeToVirgoRange(range, rootElement, yText);
   };
@@ -138,7 +148,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _applyVRange = (vRange: VRange): void => {
-    const selectionRoot = findDocumentOrShadowRoot(this._editor);
+    const selectionRoot = findDocumentOrShadowRoot(this.editor);
     const selection = selectionRoot.getSelection();
     if (!selection) {
       return;
@@ -155,11 +165,11 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     this._scrollLineIntoViewIfNeeded(newRange);
     this._scrollCursorIntoViewIfNeeded(newRange);
 
-    this._editor.slots.rangeUpdated.emit(newRange);
+    this.editor.slots.rangeUpdated.emit(newRange);
   };
 
   private _scrollLineIntoViewIfNeeded = (range: Range) => {
-    if (this._editor.shouldLineScrollIntoView) {
+    if (this.editor.shouldLineScrollIntoView) {
       let lineElement: HTMLElement | null = range.endContainer.parentElement;
       while (!(lineElement instanceof VirgoLine)) {
         lineElement = lineElement?.parentElement ?? null;
@@ -171,8 +181,8 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   private _scrollCursorIntoViewIfNeeded = (range: Range) => {
-    if (this._editor.shouldCursorScrollIntoView) {
-      const root = this._editor.rootElement;
+    if (this.editor.shouldCursorScrollIntoView) {
+      const root = this.editor.rootElement;
 
       const rootRect = root.getBoundingClientRect();
       const rangeRect = range.getBoundingClientRect();

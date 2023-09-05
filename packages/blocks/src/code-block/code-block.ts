@@ -3,10 +3,10 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import type { VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
-import { css, html, nothing, render } from 'lit';
+import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -582,7 +582,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     );
   }
 
-  override render() {
+  override render(): TemplateResult<1> {
     return html`<div class="affine-code-block-container">
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
@@ -592,6 +592,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .undoManager=${this.model.page.history}
           .textSchema=${this.textSchema}
           .readonly=${this.model.page.readonly}
+          .vRangeProvider=${getVRangeProvider(this)}
         >
         </rich-text>
       </div>

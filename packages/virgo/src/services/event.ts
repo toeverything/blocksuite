@@ -20,14 +20,21 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   constructor(public readonly editor: VEditor<TextAttributes>) {}
 
+  get vRangeProvider() {
+    return this.editor.vRangeProvider;
+  }
+
   mount = () => {
     const rootElement = this.editor.rootElement;
 
-    this.editor.disposables.addFromEvent(
-      document,
-      'selectionchange',
-      this._onSelectionChange
-    );
+    if (!this.vRangeProvider) {
+      this.editor.disposables.addFromEvent(
+        document,
+        'selectionchange',
+        this._onSelectionChange
+      );
+    }
+
     this.editor.disposables.addFromEvent(
       rootElement,
       'beforeinput',
@@ -64,7 +71,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (!selection) return;
     if (selection.rangeCount === 0) {
       if (previousVRange !== null) {
-        this.editor.slots.vRangeUpdated.emit([null, 'native']);
+        this.editor.setVRange(null, false);
       }
 
       return;
@@ -99,7 +106,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         return;
       } else {
         if (previousVRange !== null) {
-          this.editor.slots.vRangeUpdated.emit([null, 'native']);
+          this.editor.setVRange(null, false);
         }
         return;
       }
@@ -110,7 +117,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     const vRange = this.editor.toVRange(selection.getRangeAt(0));
     if (!isMaybeVRangeEqual(previousVRange, vRange)) {
-      this.editor.slots.vRangeUpdated.emit([vRange, 'native']);
+      this.editor.setVRange(vRange, false);
     }
 
     // avoid infinite syncVRange
@@ -212,13 +219,13 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       if (newData && newData.length > 0) {
         this.editor.insertText(newVRange, newData, ctx.attributes);
 
-        this.editor.slots.vRangeUpdated.emit([
+        this.editor.setVRange(
           {
             index: newVRange.index + newData.length,
             length: 0,
           },
-          'input',
-        ]);
+          false
+        );
       }
     }
   };

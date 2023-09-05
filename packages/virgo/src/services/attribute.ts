@@ -10,8 +10,6 @@ import {
 import type { VEditor } from '../virgo.js';
 
 export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
-  private readonly _editor: VEditor<TextAttributes>;
-
   private _marks: TextAttributes | null = null;
 
   private _attributeRenderer: AttributeRenderer<TextAttributes> =
@@ -20,9 +18,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
   private _attributeSchema: z.ZodSchema<TextAttributes, ZodTypeDef, unknown> =
     baseTextAttributes as z.ZodSchema<TextAttributes, ZodTypeDef, unknown>;
 
-  constructor(editor: VEditor<TextAttributes>) {
-    this._editor = editor;
-  }
+  constructor(public readonly editor: VEditor<TextAttributes>) {}
 
   get marks() {
     return this._marks;
@@ -51,7 +47,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
   };
 
   getFormat = (vRange: VRange, loose = false): TextAttributes => {
-    const deltas = this._editor.deltaService
+    const deltas = this.editor.deltaService
       .getDeltasByVRange(vRange)
       .filter(
         ([_, position]) =>

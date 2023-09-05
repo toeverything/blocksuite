@@ -2,8 +2,8 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
-import { html, nothing } from 'lit';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
@@ -71,7 +71,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     bindContainerHotkey(this);
   }
 
-  override render() {
+  override render(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
@@ -100,6 +100,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
+            .vRangeProvider=${getVRangeProvider(this)}
           ></rich-text>
         </div>
         ${this.showChildren ? children : nothing}
