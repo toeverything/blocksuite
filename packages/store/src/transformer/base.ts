@@ -58,12 +58,14 @@ export class BaseBlockTransformer<
   async fromSnapshot({
     json,
   }: FromSnapshotPayload): Promise<ModelToSnapshotReturn<Model>> {
-    const { flavour, id, props } = json;
+    const { flavour, id, props: _props } = json;
+
+    const props = this._propsFromSnapshot(_props);
 
     return {
       id,
       flavour,
-      props: this._propsFromSnapshot(props),
+      props,
     } as ModelToSnapshotReturn<Model>;
   }
 
@@ -71,10 +73,13 @@ export class BaseBlockTransformer<
     model,
   }: ToSnapshotPayload<Model>): Promise<BlockSnapshotLeaf> {
     const { id, flavour } = model;
+
+    const props = this._propsToSnapshot(model);
+
     return {
       id,
       flavour,
-      props: this._propsToSnapshot(model),
+      props,
     };
   }
 }

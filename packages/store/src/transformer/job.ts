@@ -88,9 +88,11 @@ export class Job {
 
   snapshotToBlock(
     snapshot: BlockSnapshot,
-    page: Page
+    page: Page,
+    parent: string,
+    index?: number
   ): Promise<BaseBlockModel> {
     BlockSnapshotSchema.parse(snapshot);
-    return this._snapshotToBlock(snapshot, page);
+    return this._snapshotToBlock(snapshot, page, parent, index);
   }
 }
