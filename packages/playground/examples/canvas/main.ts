@@ -5,11 +5,10 @@ import {
   type DebugElement,
   type ShapeType,
   StrokeStyle,
-  SurfaceManager,
+  SurfaceBlockComponent,
 } from '@blocksuite/blocks';
-import * as Y from 'yjs';
 
-function testClick(surface: SurfaceManager, e: MouseEvent) {
+function testClick(surface: SurfaceBlockComponent, e: MouseEvent) {
   const [modelX, modelY] = surface.toModelCoord(e.offsetX, e.offsetY);
   const elements = surface.pickByPoint(modelX, modelY);
   const topElement = surface.pickTop(modelX, modelY);
@@ -22,7 +21,7 @@ function testClick(surface: SurfaceManager, e: MouseEvent) {
   );
 }
 
-function addBrushElements(surface: SurfaceManager) {
+function addBrushElements(surface: SurfaceBlockComponent) {
   surface.addElement('brush', {
     points: [
       [0, 14.35],
@@ -65,7 +64,7 @@ function addBrushElements(surface: SurfaceManager) {
   });
 }
 
-function addShapeElements(surface: SurfaceManager) {
+function addShapeElements(surface: SurfaceBlockComponent) {
   function addShape(shapeType: ShapeType, bound: Bound, radius = 0) {
     surface.addElement('shape', {
       shapeType,
@@ -86,7 +85,7 @@ function addShapeElements(surface: SurfaceManager) {
   addShape('rect', new Bound(310, 110, 100, 100), 0.1);
 }
 
-function addConnectorElements(surface: SurfaceManager) {
+function addConnectorElements(surface: SurfaceBlockComponent) {
   function addConnector(controllers: Controller[]) {
     surface.addElement('connector', {
       controllers,
@@ -155,7 +154,7 @@ function addConnectorElements(surface: SurfaceManager) {
   ]);
 }
 
-function addDebugElements(surface: SurfaceManager) {
+function addDebugElements(surface: SurfaceBlockComponent) {
   surface.addElement('debug', {
     xywh: new Bound(0, 0, 100, 100).serialize(),
     color: 'red',
@@ -171,10 +170,10 @@ function addDebugElements(surface: SurfaceManager) {
 }
 
 function main() {
-  const doc = new Y.Doc();
+  // const doc = new Y.Doc();
   const container = document.querySelector('#container') as HTMLDivElement;
-  const yContainer = doc.getMap('container');
-  const surface = new SurfaceManager(yContainer);
+  // const yContainer = doc.getMap('container');
+  const surface = new SurfaceBlockComponent();
   surface.attach(container);
 
   addDebugElements(surface);

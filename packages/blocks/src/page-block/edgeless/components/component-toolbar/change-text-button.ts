@@ -7,7 +7,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type {
-  SurfaceManager,
+  SurfaceBlockComponent,
   TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -31,7 +31,7 @@ export class EdgelessChangeTextButton extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

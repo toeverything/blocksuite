@@ -16,12 +16,12 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../../icons/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/index.js';
 import {
   Bound,
   normalizeShapeBound,
   normalizeTextBound,
   type ShapeElement,
-  type SurfaceManager,
   type TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
@@ -142,7 +142,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   elementType!: EdgelessCanvasTextElementType;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

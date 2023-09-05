@@ -2,7 +2,7 @@ import type * as Y from 'yjs';
 
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
-import type { SurfaceManager } from '../surface.js';
+import type { SurfaceBlockComponent } from '../surface-block.js';
 import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
 import { type PointLocation } from '../utils/point-location.js';
@@ -54,7 +54,7 @@ export abstract class SurfaceElement<
 
   yMap: Y.Map<unknown>;
 
-  protected surface: SurfaceManager;
+  protected surface: SurfaceBlockComponent;
   protected renderer: Renderer | null = null;
   protected _connectable = true;
 
@@ -62,7 +62,7 @@ export abstract class SurfaceElement<
 
   constructor(
     yMap: Y.Map<unknown>,
-    surface: SurfaceManager,
+    surface: SurfaceBlockComponent,
     data: Partial<T> = {}
   ) {
     if (!yMap.doc) {

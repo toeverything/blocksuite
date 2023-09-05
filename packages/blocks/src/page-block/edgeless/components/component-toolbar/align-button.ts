@@ -46,7 +46,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         xywh: bound.serialize(),
       });
     } else if (ele instanceof ConnectorElement) {
-      this.edgeless.connector.updateXYWH(ele, bound);
+      this.edgeless.surface.connector.updateXYWH(ele, bound);
     } else {
       this.edgeless.surface.updateElement(ele.id, {
         xywh: bound.serialize(),

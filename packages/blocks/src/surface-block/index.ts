@@ -23,7 +23,7 @@ export type { SurfaceViewport } from './renderer.js';
 export { Overlay, Renderer } from './renderer.js';
 export { RoughCanvas } from './rough/canvas.js';
 export type { Options } from './rough/core.js';
-export * from './surface.js';
+export * from './surface-block.js';
 export * from './surface-block.js';
 export * from './surface-model.js';
 export { AStarRunner } from './utils/a-star.js';

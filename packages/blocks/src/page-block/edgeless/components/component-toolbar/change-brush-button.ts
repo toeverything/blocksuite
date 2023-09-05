@@ -13,7 +13,7 @@ import type { CssVariableName } from '../../../../__internal__/theme/css-variabl
 import { LineWidth } from '../../../../__internal__/utils/types.js';
 import type {
   BrushElement,
-  SurfaceManager,
+  SurfaceBlockComponent,
 } from '../../../../surface-block/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
@@ -97,7 +97,7 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

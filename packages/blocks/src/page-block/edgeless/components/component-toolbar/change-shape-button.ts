@@ -23,11 +23,11 @@ import {
   ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
   ShapeStyle,
   StrokeStyle,
-  type SurfaceManager,
 } from '../../../../surface-block/index.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
@@ -270,7 +270,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

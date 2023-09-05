@@ -6,6 +6,7 @@ import {
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/index.js';
 import {
   Bound,
   clamp,
@@ -18,7 +19,6 @@ import {
   type PhasorElementWithText,
   serializeXYWH,
   ShapeElement,
-  type SurfaceManager,
   type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
@@ -106,7 +106,7 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
 }
 
 export function pickBy(
-  surface: SurfaceManager,
+  surface: SurfaceBlockComponent,
   page: Page,
   x: number,
   y: number,
@@ -127,7 +127,7 @@ export function pickBy(
 }
 
 export function pickSurfaceElementById(
-  surface: SurfaceManager,
+  surface: SurfaceBlockComponent,
   page: Page,
   id: string
 ) {
