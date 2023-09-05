@@ -354,8 +354,9 @@ export class NotionHtmlParser extends BaseParser {
       assertExists(storage);
       const id = await storage.set(fileBlob);
       const suffix = fileUrl.split('.').pop();
-      const name = linkElement.textContent
-        ? linkElement.textContent + '.' + suffix
+      const textContent = linkElement.textContent;
+      const name = textContent
+        ? textContent + (textContent.endsWith('.' + suffix) ? '' : '.' + suffix)
         : fileUrl;
       return [
         {
