@@ -138,9 +138,6 @@ importers:
 
   packages/blocks:
     dependencies:
-      '@blocksuite/editor':
-        specifier: 'workspace:'
-        version: link:../editor
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
