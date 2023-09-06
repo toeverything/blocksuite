@@ -41,6 +41,7 @@ export class BaseBlockTransformer<Props extends object = object> {
       })
     );
   }
+
   async fromSnapshot({
     json,
   }: FromSnapshotPayload): Promise<SnapshotReturn<Props>> {

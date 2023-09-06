@@ -6,7 +6,7 @@ import {
   edgelessPreset,
   FileDropManager,
   getServiceOrRegister,
-  type ImageProps,
+  type ImageBlockProps,
   type PageBlockModel,
   pagePreset,
   readImageSize,
@@ -176,7 +176,7 @@ export class EditorContainer
       matcher: file => file.type.startsWith('image'),
       handler: async (
         file: File
-      ): Promise<ImageProps & { flavour: 'affine:image' }> => {
+      ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
         const sourceId = await storage.set(file);
         const size = this.mode === 'edgeless' ? await readImageSize(file) : {};

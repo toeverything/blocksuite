@@ -24,7 +24,7 @@ export type PageSnapshot = {
       createDate: number;
       tags: string[];
     };
-    versions: {
+    versions?: {
       block: Record<string, number>;
       page: number;
     };
@@ -41,10 +41,12 @@ export const PageSnapshotSchema: z.ZodType<PageSnapshot> = z.object({
       createDate: z.number(),
       tags: z.array(z.string()),
     }),
-    versions: z.object({
-      block: z.record(z.number()),
-      page: z.number(),
-    }),
+    versions: z
+      .object({
+        block: z.record(z.number()),
+        page: z.number(),
+      })
+      .optional(),
     properties: z.record(z.any()),
   }),
   block: BlockSnapshotSchema,

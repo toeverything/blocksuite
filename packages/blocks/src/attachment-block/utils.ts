@@ -6,7 +6,7 @@ import { humanFileSize } from '../__internal__/utils/math.js';
 import { toast } from '../components/toast.js';
 import type {
   ImageBlockModel,
-  ImageProps,
+  ImageBlockProps,
 } from '../image-block/image-model.js';
 import { transformModel } from '../page-block/utils/operations/model.js';
 import type {
@@ -125,7 +125,7 @@ export async function turnIntoEmbedView(model: AttachmentBlockModel) {
   assertExists(sourceId);
   const { saveAttachmentData, getImageData } = withTempConvertData();
   const imageConvertData = getImageData(model.id);
-  const imageProp: ImageProps = {
+  const imageProp: ImageBlockProps = {
     sourceId,
     caption: model.caption,
     ...imageConvertData,

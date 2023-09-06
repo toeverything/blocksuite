@@ -4,11 +4,7 @@ import type {
   ToSnapshotPayload,
   Y,
 } from '@blocksuite/store';
-import {
-  BaseBlockTransformer,
-  NativeWrapper,
-  Workspace,
-} from '@blocksuite/store';
+import { BaseBlockTransformer, Workspace } from '@blocksuite/store';
 
 import type { SurfaceBlockProps } from './surface-model.js';
 
@@ -85,7 +81,7 @@ export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockPr
       yMap.set(key, element);
     });
 
-    const elements = new NativeWrapper(yMap);
+    const elements = this._internal.Native(yMap);
 
     snapshotRet.props = {
       elements,

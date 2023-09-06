@@ -17,7 +17,7 @@ export class Job {
   private readonly _assetsManager: AssetsManager;
   constructor({ workspace }: JobConfig) {
     this._workspace = workspace;
-    this._assetsManager = new AssetsManager({ workspace });
+    this._assetsManager = new AssetsManager({ blobs: workspace.blobs });
   }
 
   private _getSchema(flavour: string) {
@@ -30,28 +30,37 @@ export class Job {
     return schema.transformer?.() ?? new BaseBlockTransformer();
   }
 
-  private _exportPageMeta(page: Page): PageSnapshot['meta'] {
+  private _exportPageMeta(
+    page: Page,
+    withVersion: boolean
+  ): PageSnapshot['meta'] {
     const root = page.root;
     const { meta } = this._workspace;
     const { blockVersions, pageVersion, properties } = meta;
     const pageMeta = this._workspace.meta.getPageMeta(page.id);
     assertExists(root);
-    assertExists(blockVersions);
-    assertExists(pageVersion);
     assertExists(pageMeta);
-    return {
+    const output: PageSnapshot['meta'] = {
       page: {
         id: pageMeta.id,
         title: pageMeta.title,
         createDate: pageMeta.createDate,
         tags: [...pageMeta.tags],
       },
-      versions: {
-        block: { ...blockVersions },
-        page: pageVersion,
-      },
       properties: JSON.parse(JSON.stringify(properties)),
     };
+
+    if (withVersion) {
+      assertExists(blockVersions);
+      assertExists(pageVersion);
+
+      output.versions = {
+        block: { ...blockVersions },
+        page: pageVersion,
+      };
+    }
+
+    return output;
   }
 
   private _importPageMeta(page: Page, meta: PageSnapshot['meta']) {
@@ -151,7 +160,7 @@ export class Job {
 
   async pageToSnapshot(page: Page): Promise<PageSnapshot> {
     const root = page.root;
-    const meta = this._exportPageMeta(page);
+    const meta = this._exportPageMeta(page, true);
     assertExists(root);
     const block = await this.blockToSnapshot(root);
     const pageSnapshot: PageSnapshot = { meta, block };
