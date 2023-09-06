@@ -999,11 +999,17 @@ export const EdgelessPenIcon = html`<svg
       y="-1"
       width="11"
       height="11"
-      fill="none"
+      fill="currentColor"
       class="brush-head-rect"
     />
   </g>
-  <rect y="48" width="22" height="2" fill="none" class="brush-midline-rect" />
+  <rect
+    y="48"
+    width="22"
+    height="2"
+    fill="currentColor"
+    class="brush-midline-rect"
+  />
   <rect
     x="0.5"
     y="48.5"
@@ -1011,6 +1017,7 @@ export const EdgelessPenIcon = html`<svg
     height="1"
     stroke="none"
     stroke-opacity="0.1"
+    fill="currentColor"
     class="brush-midline-stroke"
   />
   <defs>
@@ -1305,7 +1312,7 @@ export const EdgelessGeneralShapeIcon = html`<svg
   width="58"
   height="48"
   viewBox="0 0 58 48"
-  fill="none"
+  fill="currentColor"
   xmlns="http://www.w3.org/2000/svg"
   class="shape-icon-shape-group"
 >
