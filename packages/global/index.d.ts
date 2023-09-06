@@ -23,5 +23,6 @@ declare type BlockSuiteFlags = {
   enable_note_index: boolean;
   enable_attachment_block: boolean;
 
+  enable_bultin_extension: boolean;
   readonly: Record<string, boolean>;
 };

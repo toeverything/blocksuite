@@ -274,9 +274,10 @@ export class EditorContainer
     }
   }
 
-  private _loadBuiltinExts(blocksuiteRoot: Element) {
+  private _loadBuiltinExts(blocksuiteRoot: BlockSuiteRoot) {
+    if (!this.page.awarenessStore.getFlag('enable_bultin_extension')) return;
     if (this._extsLoaded) return;
-    extensions.forEach(extEntry => extEntry(blocksuiteRoot as BlockSuiteRoot));
+    extensions.forEach(extEntry => extEntry(blocksuiteRoot));
     this._extsLoaded = true;
   }
 
