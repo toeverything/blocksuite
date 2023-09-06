@@ -3,16 +3,14 @@ import './shape-menu.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type {
   EdgelessTool,
   ShapeToolState,
 } from '../../../../../__internal__/index.js';
-import {
-  ArrowUpIcon,
-  EdgelessGeneralShapeIcon,
-} from '../../../../../icons/index.js';
+import { EdgelessGeneralShapeIcon } from '../../../../../icons/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
@@ -60,8 +58,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   shapeStyle?: ShapeStyle = ShapeStyle.Scribbled;
 
-  @query('.shape-icon-shape-group')
-  private _shapeIconShapeGroup!: HTMLElement;
+  @state()
+  private _shapeIconColor: string = DEFAULT_SHAPE_STROKE_COLOR;
 
   private _shapeToolLocalState: ShapeToolState | null = null;
 
@@ -94,10 +92,6 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     }
   }
 
-  private _setShapeIconColor(color: string) {
-    this._shapeIconShapeGroup.style.fill = `var(${color})`;
-  }
-
   private _tryLoadShapeLocalState() {
     const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessShape';
     const shapeData = sessionStorage.getItem(key);
@@ -114,9 +108,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     this._shapeToolLocalState = this._tryLoadShapeLocalState();
 
     this.updateComplete.then(() => {
-      const color =
+      this._shapeIconColor =
         this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR;
-      this._setShapeIconColor(color);
     });
 
     this._disposables.add(
@@ -142,8 +135,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
 
         this._shapeToolLocalState = shapeToolState;
         // Update shape icon color
-        const color = newTool.strokeColor;
-        this._setShapeIconColor(color);
+        this._shapeIconColor = newTool.strokeColor;
       })
     );
   }
@@ -179,8 +171,11 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._toggleShapeMenu();
         }}
       >
-        <div class="shape-button-group">
-          ${EdgelessGeneralShapeIcon} ${ArrowUpIcon}
+        <div
+          class="shape-button-group"
+          style=${styleMap({ color: `var(${this._shapeIconColor})` })}
+        >
+          ${EdgelessGeneralShapeIcon}
         </div>
       </edgeless-toolbar-button>
     `;
