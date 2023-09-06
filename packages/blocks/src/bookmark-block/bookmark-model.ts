@@ -9,12 +9,17 @@ type MetaData = {
   [x: string]: string | string[] | undefined | boolean;
 };
 export type BookmarkProps = {
+  /**
+   * The embed mode will embed the url into the block
+   */
+  type: 'card' | 'embed';
   url: string;
   caption?: string;
   crawled?: boolean;
 } & MetaData;
 
 export const defaultBookmarkProps: BookmarkProps = {
+  type: 'card',
   url: '',
   bookmarkTitle: '',
   description: '',

@@ -1,14 +1,17 @@
-import { html, LitElement, type PropertyValues } from 'lit';
+import { html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { createEvent } from '../../__internal__/utils/index.js';
 import { isValidUrl, normalizeUrl } from '../../__internal__/utils/url.js';
+import { allowEmbed } from '../../bookmark-block/embed.js';
 import {
   BookmarkIcon,
   ConfirmIcon,
   EditIcon,
+  EmbedWebIcon,
   UnlinkIcon,
 } from '../../icons/index.js';
+import type { BookmarkProps } from '../../index.js';
 import { toast } from '../toast.js';
 import { linkPopoverStyle } from './styles.js';
 
@@ -122,7 +125,15 @@ export class LinkPopover extends LitElement {
   private _onLinkToCard() {
     this.dispatchEvent(
       new CustomEvent<LinkDetail>('updateLink', {
-        detail: { type: 'toBookmark' },
+        detail: { type: 'toBookmark', bookmarkType: 'card' },
+      })
+    );
+  }
+
+  private _onLinkToEmbed() {
+    this.dispatchEvent(
+      new CustomEvent<LinkDetail>('updateLink', {
+        detail: { type: 'toBookmark', bookmarkType: 'embed' },
       })
     );
   }
@@ -191,8 +202,18 @@ export class LinkPopover extends LitElement {
               ${BookmarkIcon}
               <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
             </icon-button>
+            ${allowEmbed(this.previewLink)
+              ? html`<icon-button
+                  class="has-tool-tip"
+                  data-testid="unlink"
+                  @click=${this._onLinkToEmbed}
+                >
+                  ${EmbedWebIcon}
+                  <tool-tip inert role="tooltip">Turn into Embed view</tool-tip>
+                </icon-button>`
+              : nothing}
             <span class="affine-link-popover-dividing-line"></span>`
-        : ''}
+        : nothing}
       <icon-button
         class="has-tool-tip"
         data-testid="unlink"
@@ -295,7 +316,7 @@ declare global {
 }
 
 export type LinkDetail =
-  | { type: 'toBookmark' }
+  | { type: 'toBookmark'; bookmarkType: BookmarkProps['type'] }
   | { type: 'cancel' }
   | { type: 'confirm'; link: string; text?: string }
   | { type: 'remove' };

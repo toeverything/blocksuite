@@ -15,7 +15,7 @@ export type Command<
   InData extends object = {},
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
-  next: (ctx: CommandKeyToData<Out>) => Promise<void>
+  next: (ctx?: CommandKeyToData<Out>) => Promise<void>
 ) => Promise<void>;
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
@@ -34,6 +34,12 @@ type CommonMethods<In extends object = {}> = {
   with<T extends Partial<BlockSuite.CommandData>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
+  ) => Chain<In & CommandKeyToData<InlineOut>>;
+  try: <InlineOut extends BlockSuite.CommandDataName = never>(
+    commands: Command<
+      Extract<keyof In, BlockSuite.CommandDataName>,
+      InlineOut
+    >[]
   ) => Chain<In & CommandKeyToData<InlineOut>>;
 };
 const cmdSymbol = Symbol('cmds');
@@ -90,6 +96,21 @@ export class CommandManager {
       },
       inline: command => {
         return this.createChain(methods, [...cmds, command]) as never;
+      },
+      try: (commands: Command[]) => {
+        return this.createChain(methods, [
+          ...cmds,
+          async (ctx, next) => {
+            let success = false;
+            for (const cmd of commands) {
+              await cmd(ctx, async data => {
+                success = true;
+                await next(data);
+              });
+              if (success) break;
+            }
+          },
+        ]) as never;
       },
       ...methods,
     } as Chain;
