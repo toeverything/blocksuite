@@ -35,7 +35,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot,
   }: BlockSnapshotPayload): Promise<Markdown> {
     let buffer = '';
-    const tranverseSnapshot = (snapshot: BlockSnapshot) => {
+    const traverseSnapshot = (snapshot: BlockSnapshot) => {
       if (markdownConvertableFlavours.includes(snapshot.flavour)) {
         const text =
           (snapshot.props.text as { delta: DeltaInsert[] }) ?? undefined;
@@ -118,11 +118,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       } else {
         for (const child of snapshot.children) {
-          tranverseSnapshot(child);
+          traverseSnapshot(child);
         }
       }
     };
-    tranverseSnapshot(snapshot);
+    traverseSnapshot(snapshot);
     return buffer;
   }
   async convertAdapterTargetToPageSnapshot(
