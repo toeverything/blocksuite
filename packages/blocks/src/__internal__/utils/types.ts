@@ -64,8 +64,8 @@ export type KanbanFocusData = {
 export type KanbanViewSelection = {
   viewId: string;
   type: 'kanban';
-  groupKey: string;
-  cardId: string;
+  groupKeys: string[];
+  cardIds: string[];
   focus?: KanbanFocusData;
 };
 

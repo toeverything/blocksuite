@@ -75,7 +75,9 @@ export class DataViewKanban extends BaseDataView<
         this.requestUpdate();
       })
     );
-    this._disposables.add(this.selection.run());
+    this.selection
+      .run()
+      .forEach(disposable => this._disposables.add(disposable));
     this._disposables.add(this.hotkeys.run());
 
     // init clipboard

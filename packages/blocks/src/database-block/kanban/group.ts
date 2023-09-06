@@ -156,8 +156,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
         kanban.selection.selection = {
-          groupKey: this.group.key,
-          cardId: id,
+          groupKeys: [this.group.key],
+          cardIds: [id],
           focus: {
             columnId: this.view.header.titleColumn || this.view.columns[0],
             isEditing: true,
@@ -172,8 +172,8 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
         kanban.selection.selection = {
-          groupKey: this.group.key,
-          cardId: id,
+          groupKeys: [this.group.key],
+          cardIds: [id],
           focus: {
             columnId: this.view.header.titleColumn || this.view.columns[0],
             isEditing: true,

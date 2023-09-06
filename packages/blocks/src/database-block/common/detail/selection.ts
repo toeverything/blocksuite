@@ -91,10 +91,10 @@ export class DetailSelection {
   getSelectCard(selection: KanbanViewSelection) {
     return this.viewEle
       .querySelector(
-        `affine-data-view-kanban-group[data-key="${selection.groupKey}"]`
+        `affine-data-view-kanban-group[data-key="${selection.groupKeys}"]`
       )
       ?.querySelector(
-        `affine-data-view-kanban-card[data-card-id="${selection.cardId}"]`
+        `affine-data-view-kanban-card[data-card-id="${selection.cardIds}"]`
       ) as KanbanCard | undefined;
   }
 

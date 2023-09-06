@@ -84,6 +84,11 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
+      const selectionElement = this.closest('affine-data-view-kanban')
+        ?.selection;
+      if (!selectionElement) return;
+      if (e.shiftKey) return;
+
       if (!this.editing) {
         this.selectCurrentCell(!this.column.readonly);
       }
@@ -91,13 +96,12 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   }
 
   selectCurrentCell = (editing: boolean) => {
-    const selection = this.closest('affine-data-view-kanban')?.selection;
-    if (!selection) {
-      return;
-    }
-    selection.selection = {
-      groupKey: this.groupKey,
-      cardId: this.cardId,
+    const selectionElement = this.closest('affine-data-view-kanban')?.selection;
+    if (!selectionElement) return;
+
+    selectionElement.selection = {
+      groupKeys: [this.groupKey],
+      cardIds: [this.cardId],
       focus: {
         columnId: this.column.id,
         isEditing: editing,

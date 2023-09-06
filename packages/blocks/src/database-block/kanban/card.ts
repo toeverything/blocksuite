@@ -146,6 +146,9 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     this._disposables.addFromEvent(this, 'click', () => {
       const selection = this.getSelection();
       const preSelection = selection?.selection;
+
+      if (preSelection?.cardIds && preSelection.cardIds.length > 1) return;
+
       if (selection) {
         selection.selection = undefined;
       }
@@ -271,8 +274,8 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     const ele = e.currentTarget as HTMLElement;
     if (selection) {
       selection.selection = {
-        groupKey: this.groupKey,
-        cardId: this.cardId,
+        groupKeys: [this.groupKey],
+        cardIds: [this.cardId],
       };
       popCardMenu(ele, this.cardId, selection);
     }
@@ -283,8 +286,8 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     const selection = this.getSelection();
     if (selection) {
       selection.selection = {
-        groupKey: this.groupKey,
-        cardId: this.cardId,
+        groupKeys: [this.groupKey],
+        cardIds: [this.cardId],
       };
       popCardMenu(positionToVRect(e.x, e.y), this.cardId, selection);
     }

@@ -48,7 +48,7 @@ export const popCardMenu = (
         },
         items:
           selection.view.groupHelper?.groups
-            .filter(v => v.key !== selection.selection?.groupKey)
+            .filter(v => v.key !== selection.selection?.groupKeys)
             .map(group => {
               return {
                 type: 'action',
