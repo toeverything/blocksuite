@@ -440,11 +440,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-shape-tool-button>
-        <edgeless-connector-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-connector-tool-button>
       </div>
     `;
   }
@@ -462,6 +457,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
+
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
@@ -470,6 +466,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
+
+        <edgeless-connector-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-connector-tool-button>
 
         ${page.readonly
           ? nothing
