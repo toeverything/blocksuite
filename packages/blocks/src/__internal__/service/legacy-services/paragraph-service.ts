@@ -1,5 +1,4 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
-import { array } from 'zod';
 
 import type { ParagraphBlockModel } from '../../../paragraph-block/paragraph-model.js';
 import type { SerializedBlock } from '../../index.js';

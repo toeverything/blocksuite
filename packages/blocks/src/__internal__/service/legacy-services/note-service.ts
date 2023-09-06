@@ -1,10 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type {
-  BlockTransformContext,
-  SerializedBlock,
-} from '../../utils/index.js';
+import type { SerializedBlock } from '../../utils/index.js';
 import { addSerializedBlocks } from '../json2block.js';
 import { BaseService } from '../service.js';
 
