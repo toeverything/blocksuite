@@ -3,7 +3,7 @@ import './shape-menu.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type {
