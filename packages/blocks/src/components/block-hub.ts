@@ -2,7 +2,8 @@ import { IS_FIREFOX } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, unsafeCSS } from 'lit';
 import {
   customElement,
   property,
@@ -35,7 +36,7 @@ import {
   CrossIcon,
   DatabaseTableViewIcon,
   DividerIcon,
-  EmbedIcon,
+  EmbedWebIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -309,7 +310,7 @@ const styles = css`
 
   .block-hub-menu-container {
     display: flex;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     flex-flow: column;
     justify-content: center;
     align-items: center;
@@ -570,7 +571,7 @@ function BlockHubMenu(
         type="file"
         selected=${visibleCardType === 'file' ? 'true' : 'false'}
       >
-        ${blockHubFileCards} ${EmbedIcon}
+        ${blockHubFileCards} ${EmbedWebIcon}
       </div>
       ${enableDatabase
         ? html`

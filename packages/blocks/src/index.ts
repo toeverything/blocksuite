@@ -30,7 +30,6 @@ export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
 export * from './components/index.js';
-export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
 export * from './image-block/index.js';

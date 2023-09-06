@@ -6,6 +6,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { showLinkPopover } from '../../../components/link-popover/index.js';
+import type { BookmarkProps } from '../../../index.js';
 import { getModelByElement } from '../../utils/index.js';
 import { affineTextStyles } from '../virgo/affine-text.js';
 import type { AffineTextAttributes } from '../virgo/types.js';
@@ -100,7 +101,7 @@ export class AffineLink extends ShadowlessElement {
       return;
     }
     if (linkState.type === 'toBookmark') {
-      this._onConvertToBookmark();
+      this._onConvertToBookmark(linkState.bookmarkType);
       return;
     }
   }
@@ -172,7 +173,7 @@ export class AffineLink extends ShadowlessElement {
       );
     }
   }
-  private _onConvertToBookmark() {
+  private _onConvertToBookmark(type: BookmarkProps['type']) {
     const model = getModelByElement(this);
     const { page } = model;
 
@@ -197,12 +198,13 @@ export class AffineLink extends ShadowlessElement {
     assertExists(parent);
     const index = parent.children.indexOf(model);
 
-    page.addBlock(
-      'affine:bookmark',
-      { url: this.link, title: this.delta.insert },
-      parent,
-      index + 1
-    );
+    const props = {
+      type,
+      url: this.link,
+      title: this.delta.insert,
+    } as BookmarkProps;
+
+    page.addBlock('affine:bookmark', props, parent, index + 1);
     vEditor.deleteText({
       index: domPoint.index,
       length: textNode.length,

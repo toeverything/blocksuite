@@ -10,7 +10,8 @@ import './align-button.js';
 
 import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
@@ -58,6 +59,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
       padding: 0 8px;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     component-toolbar-menu-divider {

@@ -15,7 +15,7 @@ export type Command<
   InData extends object = {},
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
-  next: (ctx: CommandKeyToData<Out>) => Promise<void>
+  next: (ctx?: CommandKeyToData<Out>) => Promise<void>
 ) => Promise<void>;
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
@@ -35,6 +35,7 @@ type CommonMethods<In extends object = {}> = {
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
   ) => Chain<In & CommandKeyToData<InlineOut>>;
+  try: (fn: (chain: Chain<In>) => Chain<In>[]) => Chain<In>;
 };
 const cmdSymbol = Symbol('cmds');
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -90,6 +91,27 @@ export class CommandManager {
       },
       inline: command => {
         return this.createChain(methods, [...cmds, command]) as never;
+      },
+      try: fn => {
+        let success = false;
+        const chains = fn(this.createChain(methods, cmds)).map(chain =>
+          chain.inline(async (_, next) => {
+            success = true;
+            await next();
+          })
+        );
+        return this.createChain(methods, [
+          ...cmds,
+          async (_, next) => {
+            for (const chain of chains) {
+              chain.run();
+              if (success) {
+                await next();
+                break;
+              }
+            }
+          },
+        ]) as never;
       },
       ...methods,
     } as Chain;
