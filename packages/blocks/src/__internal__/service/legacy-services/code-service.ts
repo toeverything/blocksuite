@@ -75,43 +75,8 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     }
   }
 
-  override async block2markdown(
-    block: CodeBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
-  ): Promise<string> {
-    // const richTextElement = document.querySelector(
-    //   `[${BLOCK_ID_ATTR}="${block.id}"] rich-text`
-    // );
-    // if (!richTextElement) {
-    //   return await super.block2markdown(block, {
-    //     childText,
-    //     begin,
-    //     end,
-    //   });
-    // }
-    // assertExists(
-    //   this.highlightOptionsGetter,
-    //   'highlightOptionsGetter is not set'
-    // );
-    // const { lang, highlighter } = this.highlightOptionsGetter();
-    // const preElement = document.createElement('pre');
-    // const codeElement = document.createElement('code');
-    // preElement.setAttribute('code-lang', block.language);
-    // codeElement.innerHTML = Array.from(
-    //   richTextElement.querySelectorAll('v-line')
-    // )
-    //   .map(line => line.textContent + '\n')
-    //   .join('');
-    // preElement.append(codeElement);
-    // if (highlighter) {
-    //   const codeHtml = highlighter.codeToHtml(codeElement.innerHTML, {
-    //     lang,
-    //     theme: queryCurrentMode() === 'dark' ? DARK_THEME : LIGHT_THEME,
-    //   });
-    //   return codeHtml ?? preElement.outerHTML;
-    // } else {
-    //   return preElement.outerHTML;
-    // }
+  override async block2markdown(block: CodeBlockModel): Promise<string> {
+    return '```' + block.language + '\r\n' + block.text.toString() + '\r\n```';
   }
 
   override block2Json(
