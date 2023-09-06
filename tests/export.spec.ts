@@ -92,6 +92,6 @@ test('export html contain <blockquote>', async ({ page }) => {
 
   const htmlText = await export2Html(page);
   expect(htmlText).toContain(
-    '<header><h1 class="page-title"></h1></header><div><blockquote class="quote">page quote is here</blockquote></div>'
+    '<header><h1 class="page-title">Untitled</h1></header><div><blockquote class="quote">page quote is here</blockquote></div>'
   );
 });
