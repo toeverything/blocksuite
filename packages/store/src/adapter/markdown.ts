@@ -126,12 +126,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return buffer;
   }
   async convertAdapterTargetToPageSnapshot(
-    file: Markdown
+    _file: Markdown
   ): Promise<PageSnapshotReturn> {
     throw new Error('Method not implemented.');
   }
   async convertAdapterTargetToBlockSnapshot(
-    file: Markdown
+    _file: Markdown
   ): Promise<BlockSnapshotReturn> {
     throw new Error('Method not implemented.');
   }
