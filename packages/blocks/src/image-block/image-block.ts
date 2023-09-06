@@ -8,8 +8,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { type DocPageBlockComponent } from '../page-block/index.js';
-import type { AffineImageToolbarWidget } from '../widgets/image-toolbar/index.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
@@ -95,7 +93,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   @state()
   private _source!: string;
-  private _blob!: Blob;
+
+  blob!: Blob;
 
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
@@ -116,8 +115,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._handleSelection();
 
     this._observeDrag();
-    // Wait for DOM to be ready
-    setTimeout(() => this._observePosition());
   }
 
   override disconnectedCallback() {
@@ -207,7 +204,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
-          this._blob = blob;
+          this.blob = blob;
           this._source = URL.createObjectURL(blob);
           this._lastSourceId = this.model.sourceId;
           this._imageState = 'ready';
@@ -259,28 +256,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         return false;
       })
     );
-  }
-
-  private _observePosition() {
-    const ANCHOR_EL: HTMLElement = this.resizeImg;
-
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () => {
-      if (!this.page.root) return;
-
-      const docPageElement = this.root.viewStore.fromPath([this.page.root.id])
-        ?.view;
-
-      if (!docPageElement) return;
-
-      (
-        (docPageElement as DocPageBlockComponent).widgetElements
-          ?.imageToolbar as AffineImageToolbarWidget
-      ).show({
-        anchor: this.resizeImg,
-        model: this.model,
-        blob: this._blob,
-      });
-    });
   }
 
   private _handleSelection() {

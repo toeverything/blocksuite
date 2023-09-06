@@ -19,6 +19,10 @@ export class AddonManager {
   addons: ImageAddonRegistion[] = [];
 
   register(registion: ImageAddonRegistion) {
+    if (this.addons.find(addon => addon.name === registion.name)) {
+      return;
+    }
+
     this.addons.push(registion);
   }
 }

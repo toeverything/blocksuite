@@ -23,6 +23,7 @@ import {
   downloadImage,
   focusCaption,
 } from '../../image-block/image/utils.js';
+import type { ImageBlockComponent } from '../../image-block/index.js';
 import { type ImageBlockModel } from '../../image-block/index.js';
 import { AddonManager, type ImageAddonRegistion } from './addon-manager.js';
 
@@ -59,6 +60,8 @@ export class AffineImageToolbarWidget extends WidgetElement {
     tooltipStyle,
   ];
 
+  static imageAddonManager = new AddonManager();
+
   private _hovered = false;
   private _hideTimer: ReturnType<typeof setTimeout> | null = null;
   private _hiddenCleanup: (() => void)[] = [];
@@ -70,11 +73,11 @@ export class AffineImageToolbarWidget extends WidgetElement {
   }
 
   get addonManager(): AddonManager {
-    if (!this.root.ctx.imageAddonManager) {
-      this.root.ctx.imageAddonManager = new AddonManager();
+    if (!AffineImageToolbarWidget.imageAddonManager) {
+      AffineImageToolbarWidget.imageAddonManager = new AddonManager();
     }
 
-    return this.root.ctx.imageAddonManager as AddonManager;
+    return AffineImageToolbarWidget.imageAddonManager as AddonManager;
   }
 
   private _onHover = () => {
@@ -167,6 +170,25 @@ export class AffineImageToolbarWidget extends WidgetElement {
 
   registerEntry(addon: ImageAddonRegistion) {
     this.addonManager.register(addon);
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+
+    this.pageElement.handleEvent('pointerMove', ctx => {
+      const e = ctx.get('pointerState');
+      const target = e.raw.target as HTMLElement;
+
+      if (target.tagName !== 'IMG') return;
+
+      const image = target.closest('affine-image') as ImageBlockComponent;
+
+      this.show({
+        anchor: image.resizeImg,
+        model: image.model,
+        blob: image.blob,
+      });
+    });
   }
 
   override render() {
