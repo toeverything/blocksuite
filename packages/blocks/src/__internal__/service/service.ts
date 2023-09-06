@@ -55,14 +55,14 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
 
   async block2markdown(
     block: BlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {},
+    { begin, end }: BlockTransformContext = {},
     _blobMap?: Map<string, string>
   ): Promise<string> {
     const delta = block.text?.sliceToDelta(begin || 0, end) || [];
     const text = delta.reduce((markdown: string, item: DeltaOperation) => {
       return markdown + BaseService.deltaLeaf2markdown(block, item);
     }, '');
-    return text + (childText ? `\r\n\r\n${childText}` : '');
+    return text;
   }
 
   block2Json(

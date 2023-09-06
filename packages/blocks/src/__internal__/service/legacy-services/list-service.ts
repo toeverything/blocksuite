@@ -74,14 +74,12 @@ export class ListBlockService extends BaseService<ListBlockModel> {
 
   override async block2markdown(
     block: ListBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    { begin, end }: BlockTransformContext = {}
   ) {
     let text = await super.block2markdown(block, {
-      childText,
       begin,
       end,
     });
-    const previousSiblingBlock = block.page.getPreviousSibling(block);
     switch (block.type) {
       case 'bulleted':
       case 'toggle':
@@ -95,23 +93,6 @@ export class ListBlockService extends BaseService<ListBlockModel> {
         break;
       default:
         break;
-    }
-    if (
-      previousSiblingBlock?.flavour !== block.flavour ||
-      (previousSiblingBlock as ListBlockModel).type !== block.type
-    ) {
-      switch (block.type) {
-        case 'bulleted':
-        case 'toggle':
-        case 'todo':
-          text = `* ${text}`;
-          break;
-        case 'numbered':
-          text = `1. ${text}`;
-          break;
-        default:
-          break;
-      }
     }
     return text;
   }

@@ -50,10 +50,9 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
 
   override async block2markdown(
     model: ParagraphBlockModel,
-    { childText = '', begin, end }: BlockTransformContext = {}
+    { begin, end }: BlockTransformContext = {}
   ) {
     const text = await super.block2markdown(model, {
-      childText: '',
       begin,
       end,
     });
@@ -85,16 +84,13 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
               return preValue;
             }
             preValue += `${index !== 0 ? '\n' : ''}> ${curValue}${
-              index < array.length - 2 ? '\n>' : ''
+              index < array.length - 1 ? '\n>' : ''
             }`;
             return preValue;
           }, '');
         break;
       default:
         resultText = text;
-    }
-    if (childText) {
-      resultText = `${resultText}\r\n\r\n${childText}`;
     }
     return resultText;
   }

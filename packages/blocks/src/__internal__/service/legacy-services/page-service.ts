@@ -60,14 +60,8 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     return `${text}${childText}`;
   }
 
-  override async block2markdown(
-    block: PageBlockModel,
-    { childText = '' }: BlockTransformContext = {}
-  ) {
-    return (
-      `# ${block.title.toString() || DEFAULT_PAGE_NAME}` +
-      (childText ? `\r\n\r\n${childText}` : '')
-    );
+  override async block2markdown(block: PageBlockModel) {
+    return `# ${block.title.toString() || DEFAULT_PAGE_NAME}`;
   }
 
   // todo we don't support link and database in page block title

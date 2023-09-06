@@ -21,14 +21,6 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
     );
   }
 
-  override async block2markdown(
-    _block: NoteBlockModel,
-    { childText = '' }: BlockTransformContext = {},
-    _blobMap?: Map<string, string>
-  ): Promise<string> {
-    return childText;
-  }
-
   override block2Json(
     block: NoteBlockModel,
     children: SerializedBlock[],

@@ -436,16 +436,39 @@ export class ContentParser {
 
   public async block2markdown(
     blocks: SelectedBlock[],
-    blobMap: Map<string, string>
+    blobMap: Map<string, string>,
+    level: number = 1
   ): Promise<string> {
+    const { getServiceOrRegister } = await import('../service/index.js');
     let markdownText = '';
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
-      markdownText =
-        markdownText +
-        (await this._getMarkdownInfoBySelectionInfo(
-          blocks[currentIndex],
-          blobMap
-        ));
+      const block = blocks[currentIndex];
+      const model = block.model;
+      const service = await getServiceOrRegister(model.flavour);
+      const text = await service.block2markdown(
+        model,
+        {
+          begin: block.startPos,
+          end: block.endPos,
+        },
+        blobMap
+      );
+      if (text) {
+        markdownText +=
+          (currentIndex !== 0 ? '\r\n\r\n' : '') +
+          ' '.repeat(4 * (level - 1)) +
+          text;
+      }
+      const childText = await this.block2markdown(
+        block.children,
+        blobMap,
+        ['affine:page', 'affine:note'].includes(model.flavour)
+          ? level
+          : level + 1
+      );
+      if (childText) {
+        markdownText += '\r\n\r\n' + childText;
+      }
     }
     return markdownText;
   }
@@ -680,38 +703,6 @@ export class ContentParser {
       begin: selectedBlock.startPos,
       end: selectedBlock.endPos,
     });
-  }
-
-  private async _getMarkdownInfoBySelectionInfo(
-    block: SelectedBlock,
-    blobMap: Map<string, string>
-  ): Promise<string> {
-    const model = block.model;
-    const children: string[] = [];
-    for (
-      let currentIndex = 0;
-      currentIndex < block.children.length;
-      currentIndex++
-    ) {
-      const childText = await this._getMarkdownInfoBySelectionInfo(
-        block.children[currentIndex],
-        blobMap
-      );
-      childText && children.push(childText);
-    }
-    const { getServiceOrRegister } = await import('../service/index.js');
-    const service = await getServiceOrRegister(model.flavour);
-
-    const text = await service.block2markdown(
-      model,
-      {
-        childText: children.join('\r\n\r\n'),
-        begin: block.startPos,
-        end: block.endPos,
-      },
-      blobMap
-    );
-    return text;
   }
 
   private async _convertHtml2Blocks(
