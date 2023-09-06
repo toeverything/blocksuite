@@ -37,6 +37,8 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     }
 
     .database-view-button .name {
+      display: flex;
+      align-items: center;
       height: 22px;
       max-width: 100px;
       overflow: hidden;

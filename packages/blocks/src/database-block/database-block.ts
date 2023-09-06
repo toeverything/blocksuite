@@ -249,6 +249,8 @@ class DatabaseBlockViewSource implements ViewSource {
       }
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
+      const slot = new Slot();
+      this.updateSlot.pipe(slot);
       result = {
         get view() {
           const view = getView();
@@ -271,7 +273,7 @@ class DatabaseBlockViewSource implements ViewSource {
         get readonly() {
           return self.model.page.readonly;
         },
-        updateSlot: new Slot(),
+        updateSlot: slot,
         isDeleted() {
           return !self.model.views.find(v => v.id === id);
         },

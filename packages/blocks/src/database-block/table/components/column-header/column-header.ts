@@ -128,7 +128,6 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
-    console.log('render');
     return html`
       <div class="affine-database-column-header database-row">
         ${repeat(

@@ -118,13 +118,11 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
     const views = this.model.views;
     const current = views.find(v => v.id === this.currentView) ?? views[0];
     const databaseTag = literal`affine-database-${unsafeStatic(current.mode)}`;
-    const view = this.root.page.awarenessStore.getFlag('enable_database_filter')
-      ? html` <database-view-header
-          .currentView="${current.id}"
-          .setViewId="${this._setViewId}"
-          .model="${this.model}"
-        ></database-view-header>`
-      : '';
+    const view = html` <database-view-header
+      .currentView="${current.id}"
+      .setViewId="${this._setViewId}"
+      .model="${this.model}"
+    ></database-view-header>`;
     if (!current.dataSource) {
       return html`
         <div class="toolbar-hover-container">
