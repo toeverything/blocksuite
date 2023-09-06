@@ -321,8 +321,10 @@ export class DocDraggingAreaWidget extends WidgetElement {
         global: true,
       }
     );
+  }
 
-    this.handleEvent('wheel', () => {
+  override firstUpdated() {
+    this._disposables.addFromEvent(this._viewportElement, 'scroll', () => {
       if (!this._dragging || !this._lastPointerState) {
         return;
       }
@@ -332,9 +334,13 @@ export class DocDraggingAreaWidget extends WidgetElement {
       this._rafID = requestAnimationFrame(() => {
         this._updateDraggingArea(state, false);
       });
-
-      return true;
     });
+  }
+
+  override disconnectedCallback() {
+    this._clearRaf();
+    this._disposables.dispose();
+    super.disconnectedCallback();
   }
 
   override render() {
