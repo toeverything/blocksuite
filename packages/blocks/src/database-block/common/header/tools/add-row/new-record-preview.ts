@@ -3,10 +3,10 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { Point, Rect } from '../../../../__internal__/utils/rect.js';
-import type { DragIndicator } from '../../../../components/drag-indicator.js';
-import { PlusIcon } from '../../../../icons/index.js';
-import type { InsertPosition } from '../../../types.js';
+import { Point, Rect } from '../../../../../__internal__/utils/rect.js';
+import type { DragIndicator } from '../../../../../components/drag-indicator.js';
+import { PlusIcon } from '../../../../../icons/index.js';
+import type { InsertPosition } from '../../../../types.js';
 
 @customElement('affine-database-new-record-preview')
 class NewRecordPreview extends ShadowlessElement {

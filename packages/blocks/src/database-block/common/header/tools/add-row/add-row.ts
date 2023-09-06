@@ -1,12 +1,10 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 
-import { PlusIcon } from '../../../../icons/index.js';
-import type { DataViewTableManager } from '../../../table/table-view-manager.js';
-import type { InsertPosition } from '../../../types.js';
-import type { DataViewExpose } from '../../data-view.js';
+import { PlusIcon } from '../../../../../icons/index.js';
+import type { InsertPosition } from '../../../../types.js';
+import { BaseTool } from '../base-tool.js';
 import { initAddNewRecordHandlers } from './new-record-preview.js';
 
 const styles = css`
@@ -40,15 +38,8 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-add-row')
-export class DataViewHeaderToolsAddRow extends WithDisposable(
-  ShadowlessElement
-) {
+export class DataViewHeaderToolsAddRow extends BaseTool {
   static override styles = styles;
-
-  @property({ attribute: false })
-  viewMethod!: DataViewExpose;
-  @property({ attribute: false })
-  view!: DataViewTableManager;
 
   @query('.new-record')
   private _newRecord!: HTMLDivElement;

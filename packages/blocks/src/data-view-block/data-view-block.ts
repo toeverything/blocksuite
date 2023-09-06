@@ -15,7 +15,7 @@ import {
   getDatasourceTitle,
 } from '../__internal__/datasource/datasource-manager.js';
 import type { DataViewManager } from '../database-block/common/data-view-manager.js';
-import type { ViewSource } from '../database-block/common/view-source.js';
+import type { SingleViewSource } from '../database-block/common/view-source.js';
 import { DatabaseBlockSchema } from '../database-block/index.js';
 import { DataViewTableManager } from '../database-block/table/table-view-manager.js';
 import type { DataViewBlockModel } from './data-view-model.js';
@@ -45,7 +45,7 @@ export class DataViewBlockComponent extends BlockElement<DataViewBlockModel> {
     return this.model.views.find(v => v.id === id);
   };
 
-  private viewSource(id: string): ViewSource {
+  private viewSource(id: string): SingleViewSource {
     const getViewDataById = this.getViewDataById;
     const getReadonly = () => this.model.page.readonly;
 
