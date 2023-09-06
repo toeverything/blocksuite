@@ -1,15 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Buffer } from 'buffer';
 
 import type { BlobManager } from '../persistence/blob/types.js';
-import { sha } from '../persistence/blob/utils.js';
 
 type AssetsManagerConfig = {
   blobs: BlobManager;
-};
-
-const blobToBuffer = async (blob: Blob) => {
-  return Buffer.from(await blob.arrayBuffer());
 };
 
 export class AssetsManager {
@@ -18,6 +12,10 @@ export class AssetsManager {
 
   constructor(options: AssetsManagerConfig) {
     this._blobs = options.blobs;
+  }
+
+  getAssets() {
+    return this._assetsMap;
   }
 
   cleanup() {
@@ -37,30 +35,9 @@ export class AssetsManager {
 
     const exists = (await this._blobs.get(blobId)) !== null;
     if (exists) {
-      throw new Error(`Blob ${blobId} already exists in blob manager`);
+      return;
     }
 
     await this._blobs.set(blob, blobId);
-  }
-
-  async readFromSnapshot<T = unknown>(snapshotId: string) {
-    const snapshot = this._assetsMap.get(snapshotId);
-    assertExists(snapshot);
-    const buffer = await blobToBuffer(snapshot);
-    const json = new TextDecoder().decode(buffer);
-    return JSON.parse(json) as T;
-  }
-
-  async writeSnapshot<T = unknown>(snapshot: T) {
-    const json = JSON.stringify(snapshot);
-    const bytes = new TextEncoder().encode(json);
-    const blob = new Blob([bytes], {
-      type: 'application/json;charset=utf-8',
-    });
-
-    const key = await sha(await blob.arrayBuffer());
-    this._assetsMap.set(key, blob);
-
-    return key;
   }
 }
