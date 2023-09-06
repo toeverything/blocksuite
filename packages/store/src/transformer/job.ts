@@ -17,7 +17,7 @@ export class Job {
   private readonly _assetsManager: AssetsManager;
   constructor({ workspace }: JobConfig) {
     this._workspace = workspace;
-    this._assetsManager = new AssetsManager({ workspace });
+    this._assetsManager = new AssetsManager({ blobs: workspace.blobs });
   }
 
   private _getSchema(flavour: string) {
