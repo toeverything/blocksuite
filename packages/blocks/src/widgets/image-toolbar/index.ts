@@ -7,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../__internal__/consts.js';
+import { on } from '../../__internal__/utils/common.js';
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
@@ -22,7 +23,7 @@ import {
   downloadImage,
   focusCaption,
 } from '../../image-block/image/utils.js';
-import { type ImageBlockModel, on } from '../../index.js';
+import { type ImageBlockModel } from '../../image-block/index.js';
 import { AddonManager, type ImageAddonRegistion } from './addon-manager.js';
 
 @customElement('affine-image-toolbar-widget')

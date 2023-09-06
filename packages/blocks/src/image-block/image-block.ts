@@ -8,7 +8,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { type DocPageBlockComponent } from '../index.js';
+import { type DocPageBlockComponent } from '../page-block/index.js';
 import type { AffineImageToolbarWidget } from '../widgets/image-toolbar/index.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
