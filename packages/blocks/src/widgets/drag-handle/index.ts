@@ -1,4 +1,5 @@
 import {
+  PathFinder,
   type PointerEventState,
   type UIEventHandler,
   type UIEventStateContext,
@@ -17,6 +18,7 @@ import {
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getClosestBlockElementByPoint,
+  getHoveringNote,
   getModelByBlockElement,
   isEdgelessPage,
   isPageMode,
@@ -33,7 +35,9 @@ import {
   DRAG_HANDLE_GRABBER_WIDTH,
   DRAG_HANDLE_OFFSET_LEFT,
   DRAG_HOVER_RECT_PADDING,
+  type DropIndicator,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
+  type IndicatorRect,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
@@ -42,7 +46,6 @@ import {
   captureEventTarget,
   containBlock,
   containChildBlock,
-  getBlockIdFromPath,
   getDragHandleContainerHeight,
   getNoteId,
   includeTextSelection,
@@ -61,12 +64,7 @@ export class DragHandleWidget extends WidgetElement {
   private _dragHandleGrabber!: HTMLDivElement;
 
   @state()
-  private _indicatorRect: {
-    width: number;
-    height: number;
-    left: number;
-    top: number;
-  } | null = null;
+  private _indicatorRect: IndicatorRect | null = null;
 
   @state()
   private _dragHoverRect: {
@@ -96,9 +94,9 @@ export class DragHandleWidget extends WidgetElement {
   private _anchorModelDisposables: DisposableGroup | null = null;
 
   protected get _selectedBlocks() {
-    return this.root.selectionManager.value.filter(
-      selection => selection.type !== 'surface'
-    );
+    return this.root.selectionManager.find('text')
+      ? this.root.selectionManager.filter('text')
+      : this.root.selectionManager.filter('block');
   }
 
   private _handleAnchorModelDisposables(blockElement: BlockElement) {
@@ -295,8 +293,8 @@ export class DragHandleWidget extends WidgetElement {
 
         if (
           containBlock(
-            blockElements.map(block => getBlockIdFromPath(block.path)),
-            getBlockIdFromPath(this._hoveredBlockPath)
+            blockElements.map(block => PathFinder.id(block.path)),
+            PathFinder.id(this._hoveredBlockPath)
           )
         ) {
           blockElements.forEach(blockElement => {
@@ -313,7 +311,7 @@ export class DragHandleWidget extends WidgetElement {
     } else if (
       containBlock(
         selections.map(selection => selection.blockId),
-        getBlockIdFromPath(this._hoveredBlockPath)
+        PathFinder.id(this._hoveredBlockPath)
       )
     ) {
       this._selectedBlocks.forEach(block => {
@@ -383,16 +381,11 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _getClosestBlockElementByPoint(point: Point) {
-    const noteSelector = 'affine-note';
-    const closeNoteBlock = findClosestBlockElement(
-      this._pageBlockElement,
-      point,
-      noteSelector
-    );
-    if (!closeNoteBlock) return null;
-    const noteRect = Rect.fromDOM(closeNoteBlock);
+    const closestNoteBlock = this._getClosestNoteBlock(point);
+    if (!closestNoteBlock) return null;
+    const noteRect = Rect.fromDOM(closestNoteBlock);
     const blockElement = getClosestBlockElementByPoint(point, {
-      container: closeNoteBlock,
+      container: closestNoteBlock,
       rect: noteRect,
     });
     const blockSelector =
@@ -401,7 +394,7 @@ export class DragHandleWidget extends WidgetElement {
       blockElement
         ? blockElement
         : findClosestBlockElement(
-            closeNoteBlock as BlockElement,
+            closestNoteBlock as BlockElement,
             point.clone(),
             blockSelector
           )
@@ -415,9 +408,7 @@ export class DragHandleWidget extends WidgetElement {
   ) {
     let offsetY = 0;
     for (let i = 0; i < blockElements.length; i++) {
-      if (
-        blockElements[i].path.join('|') === hoverBlockElement.path.join('|')
-      ) {
+      if (PathFinder.equals(blockElements[i].path, hoverBlockElement.path)) {
         break;
       }
       offsetY += blockElements[i].getBoundingClientRect().height;
@@ -487,8 +478,9 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   private _getClosestNoteBlock = (point: Point) => {
-    const noteSelector = 'affine-note';
-    return findClosestBlockElement(this._pageBlockElement, point, noteSelector);
+    return isPageMode(this.page)
+      ? findClosestBlockElement(this._pageBlockElement, point, 'affine-note')
+      : getHoveringNote(point)?.querySelector('affine-note');
   };
 
   private _getContainerOffsetPoint = (state: PointerEventState) => {
@@ -516,17 +508,17 @@ export class DragHandleWidget extends WidgetElement {
   /**
    * When dragging, should update indicator position and target drop block id
    */
-  private _updateIndicator = (ctx: UIEventStateContext) => {
-    const state = ctx.get('pointerState');
+  private _getDropIndicator = (
+    state: PointerEventState
+  ): DropIndicator | null => {
+    let dropIndicator = null;
     const point = this._getContainerOffsetPoint(state);
     const closestBlockElement = this._getClosestBlockElementByPoint(point);
     if (!closestBlockElement) {
-      this._dropBlockId = '';
-      this._indicatorRect = null;
-      return;
+      return dropIndicator;
     }
 
-    const blockId = closestBlockElement.getAttribute(this.root.blockIdAttr);
+    const blockId = closestBlockElement.model.id;
     const blockPath = closestBlockElement.path;
     assertExists(blockId);
     assertExists(blockPath);
@@ -541,23 +533,20 @@ export class DragHandleWidget extends WidgetElement {
       ) ||
       containChildBlock(this._selectedBlocks, blockPath)
     ) {
-      this._dropBlockId = '';
-      return;
+      return dropIndicator;
     }
 
     this._dropBlockId = blockId;
 
     let rect = null;
     let targetElement = null;
-    const model = getModelByBlockElement(closestBlockElement);
+    const model = closestBlockElement.model;
 
     // Handle special case at this iteration
     // TODO: should consider drop in database next iteration
     const isDatabase = matchFlavours(model, ['affine:database'] as const);
     if (isDatabase) {
-      this._indicatorRect = rect;
-      this._dropBlockId = '';
-      return;
+      return dropIndicator;
     }
 
     const result = calcDropTarget(
@@ -579,7 +568,19 @@ export class DragHandleWidget extends WidgetElement {
       if (targetBlockId) this._dropBlockId = targetBlockId;
     }
 
-    this._indicatorRect = rect;
+    dropIndicator = {
+      rect,
+      dropBlockId: this._dropBlockId,
+      dropBefore: this._dropBefore,
+    };
+
+    return dropIndicator;
+  };
+
+  private _updateIndicator = (indicator: DropIndicator | null) => {
+    this._dropBlockId = indicator?.dropBlockId ?? '';
+    this._dropBefore = indicator?.dropBefore ?? false;
+    this._indicatorRect = indicator?.rect ?? null;
   };
 
   /**
@@ -811,7 +812,8 @@ export class DragHandleWidget extends WidgetElement {
         this._dropBlockId = '';
         this._indicatorRect = null;
       } else {
-        this._updateIndicator(ctx);
+        const dropIndicator = this._getDropIndicator(state);
+        this._updateIndicator(dropIndicator);
       }
 
       const previewPos = new Point(state.point.x, state.point.y);
