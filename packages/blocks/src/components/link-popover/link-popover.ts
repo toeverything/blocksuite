@@ -3,7 +3,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { createEvent } from '../../__internal__/utils/index.js';
 import { isValidUrl, normalizeUrl } from '../../__internal__/utils/url.js';
-import { allowEmbed } from '../../bookmark-block/embed/index.js';
+import { allowEmbed } from '../../bookmark-block/embed.js';
 import {
   BookmarkIcon,
   ConfirmIcon,

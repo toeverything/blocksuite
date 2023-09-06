@@ -18,7 +18,7 @@ import {
 } from '../../icons/index.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel, BookmarkProps } from '../bookmark-model.js';
-import { allowEmbed } from '../embed/index.js';
+import { allowEmbed } from '../embed.js';
 import {
   cloneBookmarkProperties,
   reloadBookmarkBlock,
