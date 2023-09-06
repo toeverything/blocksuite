@@ -38,23 +38,7 @@ export async function json2block(
 
   assertExists(parent);
   if (pastedBlocks.length === 1) {
-    // TODO: optimize textLength
-    const textLength =
-      firstBlock?.text?.reduce((sum, data) => {
-        return sum + (data.insert?.length || 0);
-      }, 0) ?? 0;
-
-    const shouldSplitBlock =
-      focusedBlockModel.text?.length !==
-      textRangePoint.index + textRangePoint.length;
-
-    shouldSplitBlock &&
-      (await handleBlockSplit(
-        page,
-        focusedBlockModel,
-        textRangePoint.index,
-        0
-      ));
+    let lastAddedBlockId;
 
     if (shouldMergeFirstBlock) {
       focusedBlockModel.text?.insertList(
@@ -62,32 +46,47 @@ export async function json2block(
         textRangePoint.index || 0
       );
 
-      await addSerializedBlocks(
+      const ids = await addSerializedBlocks(
         page,
         firstBlock.children || [],
         focusedBlockModel,
         0
       );
 
-      await setRange(focusedBlockModel, {
-        index: (textRangePoint.index ?? 0) + textLength,
-        length: 0,
-      });
+      if (firstBlock.children.length === 0) {
+        // TODO: optimize textLength
+        const textLength =
+          firstBlock?.text?.reduce((sum, data) => {
+            return sum + (data.insert?.length || 0);
+          }, 0) ?? 0;
+        await setRange(focusedBlockModel, {
+          index: (textRangePoint.index ?? 0) + textLength,
+          length: 0,
+        });
+      } else {
+        lastAddedBlockId = ids[ids.length - 1];
+      }
     } else {
-      const [id] = await addSerializedBlocks(
+      [lastAddedBlockId] = await addSerializedBlocks(
         page,
         pastedBlocks,
         parent,
         parent.children.indexOf(focusedBlockModel) + 1
       );
+    }
 
-      const model = page.getBlockById(id);
+    if (lastAddedBlockId) {
+      const lastModel = page.getBlockById(lastAddedBlockId);
 
-      assertExists(model);
-      if (model.text) {
-        await setRange(model, {
-          index: textLength,
-          length: 0,
+      assertExists(lastModel);
+      if (lastModel.text) {
+        const rangeIndex = lastModel.text.length;
+        // Wait for the block's rich text mounted
+        requestAnimationFrame(() => {
+          setRange(lastModel, {
+            index: rangeIndex,
+            length: 0,
+          });
         });
       }
     }
@@ -235,7 +234,8 @@ export async function addSerializedBlocks(
     }
 
     if (model && json.children.length) {
-      await addSerializedBlocks(page, json.children, model, 0);
+      const ids = await addSerializedBlocks(page, json.children, model, 0);
+      addedBlockIds.push(...ids);
       pendingModels.push({ model, json });
     }
   }

@@ -131,7 +131,10 @@ function selectedModels2selectBlocksInfo(
       endPos,
       children: [] as SelectedBlock[],
     };
-    if (model.flavour === 'affine:database') {
+    if (
+      model.flavour === 'affine:database' ||
+      (model.flavour === 'affine:list' && !textSelection)
+    ) {
       const databaseBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
       block.children = databaseBlock.children;
     }

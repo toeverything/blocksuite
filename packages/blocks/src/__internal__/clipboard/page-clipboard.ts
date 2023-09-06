@@ -66,7 +66,7 @@ export class PageClipboard implements Clipboard {
     } else {
       blocks = await clipboardData2Blocks(this._page, e.clipboardData);
     }
-
+    console.log(blocks);
     if (!blocks.length) {
       return;
     }
