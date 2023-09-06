@@ -27,6 +27,7 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
+  pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressEnter,
@@ -433,6 +434,40 @@ test('should keep first line format when pasted into a new line', async ({
   await waitNextFrame(page);
   await assertRichTexts(page, ['aaa']);
   await assertBlockTypes(page, ['todo']);
+});
+
+test('paste single list block inline should create a new line', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, '123');
+  await pressArrowLeft(page);
+
+  const pasteBlocksContent = [
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: 'aaa' }],
+      children: [],
+    },
+  ];
+
+  await pasteBlocks(page, pasteBlocksContent);
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['12aaa3']);
+  await assertBlockTypes(page, ['bulleted']);
+
+  await pressArrowRight(page);
+
+  await pasteBlocks(page, pasteBlocksContent);
+  await waitNextFrame(page);
+  await assertRichTexts(page, ['12aaa3aaa']);
+  await assertBlockTypes(page, ['bulleted']);
 });
 
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
