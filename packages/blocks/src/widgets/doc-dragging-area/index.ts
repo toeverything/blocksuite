@@ -330,7 +330,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
       this._clearRaf();
       const state = this._lastPointerState;
       this._rafID = requestAnimationFrame(() => {
-        this._updateDraggingArea(state, true);
+        this._updateDraggingArea(state, false);
       });
 
       return true;
