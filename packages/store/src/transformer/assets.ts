@@ -14,7 +14,6 @@ const blobToBuffer = async (blob: Blob) => {
 
 export class AssetsManager {
   private readonly _assetsMap = new Map<string, Blob>();
-
   private readonly _blobs: BlobManager;
 
   constructor(options: AssetsManagerConfig) {
