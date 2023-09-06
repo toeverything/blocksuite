@@ -35,7 +35,6 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
         'starter/': resolve(__dirname, 'starter/index.html'),
-        'examples/addon': resolve(__dirname, 'examples/addon/index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
         'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
         'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),

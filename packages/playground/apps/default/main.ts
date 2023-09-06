@@ -41,7 +41,6 @@ function subscribePage(workspace: Workspace) {
     if (!app) {
       return;
     }
-
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
