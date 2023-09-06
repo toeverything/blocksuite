@@ -1,4 +1,5 @@
-import { css, html } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { createIcon } from '../../../../components/icon/uni-icon.js';
@@ -25,7 +26,7 @@ export class TextCell extends BaseCellRenderer<string> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);
@@ -58,7 +59,7 @@ export class TextCellEditing extends BaseCellRenderer<string> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: var(--affine-font-base);
       line-height: var(--affine-line-height);
       color: var(--affine-text-primary-color);

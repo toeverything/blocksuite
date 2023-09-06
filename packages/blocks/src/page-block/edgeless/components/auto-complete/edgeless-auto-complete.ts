@@ -23,6 +23,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
+import { mountShapeEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 enum Direction {
@@ -149,6 +150,8 @@ function getPosition(type: Direction) {
   return { startPosition, endPosition };
 }
 
+const autoCompleteOverlay = new AutoCompleteOverlay();
+
 @customElement('edgeless-auto-complete')
 export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   static override styles = css`
@@ -210,8 +213,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   @state()
   private _isMoving = false;
-
-  private _overlay = new AutoCompleteOverlay();
   private _timer: ReturnType<typeof setTimeout> | null = null;
 
   private get _selected() {
@@ -222,11 +223,15 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return this._selected[0] as ShapeElement;
   }
 
+  private get _surface() {
+    return this.edgeless.surface;
+  }
+
   override firstUpdated() {
     this._disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() => {
-        this._overlay.linePoints = [];
-        this._overlay.shapePoints = [];
+        autoCompleteOverlay.linePoints = [];
+        autoCompleteOverlay.shapePoints = [];
       })
     );
   }
@@ -263,7 +268,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
       if (this._isMoving) {
         assertExists(connector);
-        this.edgeless.connector.updateConnection(connector, point, 'target');
+        this._surface.connector.updateConnection(connector, point, 'target');
       }
     });
 
@@ -274,7 +279,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         this._generateShapeOnDrag(type, connector);
       }
       this._isMoving = false;
-      this.edgeless.connector.clear();
+      this._surface.connector.clear();
       this._disposables.dispose();
       this._disposables = new DisposableGroup();
     });
@@ -317,10 +322,13 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       }
     );
 
+    mountShapeEditor(surface.pickById(id) as ShapeElement, this.edgeless);
+
     this.edgeless.selectionManager.setSelection({
       elements: [id],
-      editing: false,
+      editing: true,
     });
+    this._removeOverlay();
   }
 
   private _generateShapeOnDrag(_type: Direction, connector: ConnectorElement) {
@@ -364,15 +372,15 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _showNextShape(type: Direction) {
     const { surface } = this.edgeless;
-    surface.viewport.addOverlay(this._overlay);
+    surface.viewport.addOverlay(autoCompleteOverlay);
     const bound = this._computeNextShape(type);
     const path = this._computeLine(type, this._current, bound);
 
-    this._overlay.stroke = this.edgeless.computeValue(
+    autoCompleteOverlay.stroke = this.edgeless.computeValue(
       this._current.strokeColor
     );
-    this._overlay.linePoints = path;
-    this._overlay.shapePoints = rotatePoints(
+    autoCompleteOverlay.linePoints = path;
+    autoCompleteOverlay.shapePoints = rotatePoints(
       ShapeMethodsMap[this._current.shapeType].points(bound),
       bound.center,
       this._current.rotate
@@ -381,7 +389,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _computeNextShape(type: Direction) {
-    const connectedShapes = this.edgeless.connector
+    const connectedShapes = this._surface.connector
       .getConnecttedElements(this._current)
       .filter(e => e instanceof ShapeElement) as ShapeElement[];
     return nextBound(type, this._current, connectedShapes);
@@ -405,12 +413,17 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       endPosition
     );
 
-    return this.edgeless.connector.generateOrthogonalConnectorPath({
+    return this._surface.connector.generateOrthogonalConnectorPath({
       startBound,
       endBound: nextBound,
       startPoint,
       endPoint,
     });
+  }
+
+  private _removeOverlay() {
+    this._timer && clearTimeout(this._timer);
+    this.edgeless.surface.viewport.removeOverlay(autoCompleteOverlay);
   }
 
   override render() {
@@ -421,7 +434,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         !this._isMoving
       )
     ) {
-      this.edgeless.surface.viewport.removeOverlay(this._overlay);
+      this._removeOverlay();
       return nothing;
     }
     const { selectedRect } = this;
@@ -475,8 +488,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
             this._timer = setTimeout(() => this._showNextShape(type), 300);
           }}
           @mouseleave=${() => {
-            this._timer && clearTimeout(this._timer);
-            this.edgeless.surface.viewport.removeOverlay(this._overlay);
+            this._removeOverlay();
           }}
           @pointerdown=${(e: PointerEvent) => {
             this._onPointerDown(e, type);

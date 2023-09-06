@@ -91,6 +91,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
   override render() {
     if (this.edgelessTool.type !== 'frame') return nothing;
     const { edgeless } = this;
+    const { surface } = edgeless;
     return html`
       <div class="frame-menu-container">
         <edgeless-slide-menu .menuWidth=${290} .showNext=${false}>
@@ -103,7 +104,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
               (item, index) => html`
                 <div
                   @click=${() => {
-                    const frames = edgeless.frame.frames;
+                    const frames = surface.frame.frames;
                     const center = edgeless.surface.viewport.center;
                     const bound = new Bound(
                       center.x - item.wh[0] / 2,

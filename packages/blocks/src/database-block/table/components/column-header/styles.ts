@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
@@ -114,7 +115,7 @@ export const styles = css`
     color: inherit;
     font-weight: 600;
     font-size: 14px;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     background: transparent;
   }
   .affine-database-column-input:focus {

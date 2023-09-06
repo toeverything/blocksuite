@@ -1,5 +1,6 @@
 import type { Placement } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BUNDLED_LANGUAGES,
@@ -73,7 +74,7 @@ export class LangList extends LitElement {
         border-radius: 8px;
         padding-top: 2px;
         border: none;
-        font-family: var(--affine-font-family);
+        font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;

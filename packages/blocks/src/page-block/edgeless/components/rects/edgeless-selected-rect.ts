@@ -333,7 +333,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._resizeManager.slots.resizeEnd.on(() => {
         this.selection.elements.forEach(ele => {
           ele instanceof FrameElement &&
-            this.edgeless.frame.calculateFrameColor(ele);
+            this.surface.frame.calculateFrameColor(ele);
         });
       })
     );

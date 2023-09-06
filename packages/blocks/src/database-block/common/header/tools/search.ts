@@ -1,6 +1,7 @@
 import '../../../common/filter/filter-group.js';
 
-import { css, html } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
@@ -85,7 +86,7 @@ const styles = css`
     width: 100%;
     padding: 0 2px 0 30px;
     border: none;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     color: inherit;

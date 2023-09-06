@@ -9,7 +9,15 @@ import './frame/frame-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  unsafeCSS,
+} from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
@@ -49,7 +57,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       justify-content: center;
       transform: translateX(-50%);
       user-select: none;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
     .edgeless-toolbar-container {
       display: flex;
@@ -75,10 +83,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       gap: 10px;
-    }
-    .edgeless-toolbar-left-part svg {
-      fill: var(--affine-icon-color);
-      stroke: none;
     }
     .short-divider {
       width: 1px;
@@ -174,7 +178,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
-    this._frames = edgeless.frame.frames.sort(compare);
+    this._frames = edgeless.surface.frame.frames.sort(compare);
   }
 
   get edgelessTool() {
@@ -203,7 +207,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _updateFrames() {
-    this._frames = this.edgeless.frame.frames.sort(compare);
+    this._frames = this.edgeless.surface.frame.frames.sort(compare);
   }
 
   private _nextFrame() {
@@ -453,7 +457,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
-          .activeMode=${'background'}
           .iconContainerPadding=${4}
           @click=${() => this.setEdgelessTool({ type: 'default' })}
         >
@@ -462,7 +465,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
-          .activeMode=${'background'}
           .iconContainerPadding=${4}
           @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
         >
