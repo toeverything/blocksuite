@@ -41,12 +41,10 @@ export const PageSnapshotSchema: z.ZodType<PageSnapshot> = z.object({
       createDate: z.number(),
       tags: z.array(z.string()),
     }),
-    versions: z
-      .object({
-        block: z.record(z.number()),
-        page: z.number(),
-      })
-      .optional(),
+    versions: z.object({
+      block: z.record(z.number()),
+      page: z.number(),
+    }),
     properties: z.record(z.any()),
   }),
   block: BlockSnapshotSchema,
