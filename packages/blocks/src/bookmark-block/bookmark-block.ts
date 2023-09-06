@@ -18,7 +18,7 @@ import type {
   MenuActionCallback,
   ToolbarActionCallback,
 } from './components/config.js';
-import { allowEmbed, formatEmbedUrl } from './embed/index.js';
+import { embedIframeTemplate } from './embed.js';
 import { DefaultBanner } from './images/banners.js';
 import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
@@ -37,11 +37,9 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       flex-direction: column;
       align-items: center;
       box-shadow: var(--affine-shadow-1);
-      background: var(--affine-card-background-blue);
       border: 3px solid var(--affine-background-secondary-color);
       border-radius: 12px;
       padding: 16px 24px;
-      display: flex;
       cursor: pointer;
       text-decoration: none;
       color: var(--affine-text-primary-color);
@@ -55,10 +53,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       bottom: 0;
       width: 140px;
       height: 93px;
-      margin-left: 20px;
       border-radius: 8px 8px 0 0;
       overflow: hidden;
-      flex-shrink: 0;
     }
     .affine-bookmark-banner.shadow {
       box-shadow: var(--affine-shadow-1);
@@ -154,10 +150,12 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       border-radius: 12px;
     }
 
-    .embed-frame {
+    .affine-bookmark-embed-frame {
+      grid-area: embed;
       width: 100%;
       margin-bottom: 20px;
       border-radius: 8px;
+      overflow: hidden;
     }
   `;
 
@@ -294,41 +292,47 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       this._optionsAbortController?.abort();
     };
 
-  private _isEmbed() {
-    return this.model.type === 'embed' && allowEmbed(this.model.url);
-  }
-
   private _linkCard() {
     const { url, bookmarkTitle, description, icon, image } = this.model;
 
+    const isEmbed = this.model.type === 'embed';
+    const titleIcon =
+      icon && !this._isIconError
+        ? html`<img src="${icon}" alt="icon" @error="${this._onIconError}" />`
+        : WebIcon16;
+
+    const bannerImage = isEmbed
+      ? nothing
+      : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
+          ${image && !this._isImageError
+            ? html`<img
+                src="${image}"
+                alt="image"
+                @error="${this._onImageError}"
+              />`
+            : DefaultBanner}
+        </div>`;
+
     return html`<div
       class="affine-bookmark-link"
+      style="${isEmbed
+        ? nothing
+        : 'background: var(--affine-card-background-blue);'}"
       @click=${this._onCardClick}
       @dblclick=${this._onCardDbClick}
     >
-      ${this._isEmbed()
-        ? html`<iframe
-            class="embed-frame"
-            height="480"
-            scrolling="no"
-            src=${formatEmbedUrl(url)}
-            frameborder="no"
-            loading="lazy"
-            allowTransparency
-            allowfullscreen
-          ></iframe>`
+      ${isEmbed
+        ? html`<div class="affine-bookmark-embed-frame">
+            ${embedIframeTemplate(url)}
+          </div>`
         : nothing}
-      <div class="affine-bookmark-content-wrapper">
+
+      <div
+        class="affine-bookmark-content-wrapper"
+        style="${isEmbed ? nothing : 'padding-right: 165px;'}"
+      >
         <div class="affine-bookmark-title">
-          <div class="affine-bookmark-icon">
-            ${icon && !this._isIconError
-              ? html`<img
-                  src="${icon}"
-                  alt="icon"
-                  @error="${this._onIconError}"
-                />`
-              : WebIcon16}
-          </div>
+          <div class="affine-bookmark-icon">${titleIcon}</div>
           <div class="affine-bookmark-title-content">
             ${bookmarkTitle || 'Bookmark'}
           </div>
@@ -338,17 +342,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         <div class="affine-bookmark-url">${url}</div>
       </div>
 
-      ${this._isEmbed()
-        ? nothing
-        : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-            ${image && !this._isImageError
-              ? html`<img
-                  src="${image}"
-                  alt="image"
-                  @error="${this._onImageError}"
-                />`
-              : DefaultBanner}
-          </div>`}
+      ${bannerImage}
     </div>`;
   }
 
