@@ -436,39 +436,13 @@ export class ContentParser {
 
   public async block2markdown(
     blocks: SelectedBlock[],
-    blobMap: Map<string, string>,
-    level: number = 1
+    blobMap: Map<string, string>
   ): Promise<string> {
-    const { getServiceOrRegister } = await import('../service/index.js');
     let markdownText = '';
     for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
       const block = blocks[currentIndex];
-      const model = block.model;
-      const service = await getServiceOrRegister(model.flavour);
-      const text = await service.block2markdown(
-        model,
-        {
-          begin: block.startPos,
-          end: block.endPos,
-        },
-        blobMap
-      );
-      if (text) {
-        markdownText +=
-          (currentIndex !== 0 ? '\r\n\r\n' : '') +
-          ' '.repeat(4 * (level - 1)) +
-          text;
-      }
-      const childText = await this.block2markdown(
-        block.children,
-        blobMap,
-        ['affine:page', 'affine:note'].includes(model.flavour)
-          ? level
-          : level + 1
-      );
-      if (childText) {
-        markdownText += '\r\n\r\n' + childText;
-      }
+      const text = await this._getMarkdownInfoBySelectionInfo(block, blobMap);
+      markdownText += (currentIndex !== 0 ? '\r\n\r\n' : '') + text;
     }
     return markdownText;
   }
@@ -703,6 +677,53 @@ export class ContentParser {
       begin: selectedBlock.startPos,
       end: selectedBlock.endPos,
     });
+  }
+
+  private async _getMarkdownInfoBySelectionInfo(
+    selectedBlock: SelectedBlock,
+    blobMap: Map<string, string>,
+    level: number = 1
+  ): Promise<string> {
+    let markdownText = '';
+    const { getServiceOrRegister } = await import('../service/index.js');
+    const model = selectedBlock.model;
+    const service = await getServiceOrRegister(model.flavour);
+    markdownText = await service.block2markdown(
+      model,
+      {
+        begin: selectedBlock.startPos,
+        end: selectedBlock.endPos,
+      },
+      blobMap
+    );
+    if (model.flavour === 'affine:list') {
+      markdownText = ' '.repeat(4 * (level - 1)) + markdownText;
+    }
+
+    let childLevel = model.flavour === 'affine:list' ? level + 1 : 1;
+    for (
+      let currentIndex = 0;
+      currentIndex < selectedBlock.children.length;
+      currentIndex++
+    ) {
+      const curChild = selectedBlock.children[currentIndex];
+      if (curChild.model.flavour !== 'affine:list') {
+        childLevel = 1;
+      }
+
+      const childText = await this._getMarkdownInfoBySelectionInfo(
+        curChild,
+        blobMap,
+        childLevel
+      );
+
+      if (childText) {
+        markdownText +=
+          (curChild.model.flavour !== 'affine:note' ? '\r\n\r\n' : '') +
+          childText;
+      }
+    }
+    return markdownText;
   }
 
   private async _convertHtml2Blocks(
