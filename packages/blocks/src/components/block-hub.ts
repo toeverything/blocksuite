@@ -489,7 +489,6 @@ function BlockHubCards(
 }
 
 function BlockHubMenu(
-  enableDatabase: boolean,
   expanded: boolean,
   isGrabbing: boolean,
   visibleCardType: CardListType | null,
@@ -498,7 +497,7 @@ function BlockHubMenu(
   maxHeight: number,
   page: Page
 ) {
-  const menuNum = enableDatabase ? 5 : 4;
+  const menuNum = 5;
   const height = menuNum * 44 + 10;
 
   const blockHubListCards = BlockHubCards(
@@ -573,28 +572,24 @@ function BlockHubMenu(
       >
         ${blockHubFileCards} ${EmbedIcon}
       </div>
-      ${enableDatabase
-        ? html`
-            <div
-              class="block-hub-icon-container has-tool-tip"
-              type="database"
-              draggable="true"
-              affine-flavour="affine:database"
-              selected=${visibleCardType === 'database' ? 'true' : 'false'}
-            >
-              ${DatabaseTableViewIcon}
-              <tool-tip
-                inert
-                role="tooltip"
-                tip-position="left"
-                arrow
-                ?hidden=${!showTooltip}
-              >
-                Drag to create a database
-              </tool-tip>
-            </div>
-          `
-        : null}
+      <div
+        class="block-hub-icon-container has-tool-tip"
+        type="database"
+        draggable="true"
+        affine-flavour="affine:database"
+        selected=${visibleCardType === 'database' ? 'true' : 'false'}
+      >
+        ${DatabaseTableViewIcon}
+        <tool-tip
+          inert
+          role="tooltip"
+          tip-position="left"
+          arrow
+          ?hidden=${!showTooltip}
+        >
+          Drag to create a database
+        </tool-tip>
+      </div>
       <div class="divider"></div>
     </div>
   `;
@@ -674,14 +669,12 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDroppingType: DroppingType = 'none';
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
-  private readonly _enableDatabase: boolean;
   private _mouseRoot: AbstractEditor;
 
   static override styles = styles;
 
   constructor(options: {
     mouseRoot: AbstractEditor;
-    enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
     getHoveringNoteState: (point: Point) => {
       container?: Element;
@@ -701,7 +694,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     super();
     this._page = options.page;
     this._mouseRoot = options.mouseRoot;
-    this._enableDatabase = options.enableDatabase;
     this.getAllowedBlocks = options.getAllowedBlocks;
     this.getHoveringNoteState = options.getHoveringNoteState;
 
@@ -1033,7 +1025,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const blockHubMenu = BlockHubMenu(
-      this._enableDatabase,
       this._expanded,
       this._isGrabbing,
       this._visibleCardType,

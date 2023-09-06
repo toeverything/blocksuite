@@ -343,9 +343,6 @@ export const menuGroups: {
         alias: ['database'],
         icon: DatabaseTableViewIcon20,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_database')) {
-            return false;
-          }
           if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
             return false;
           }
@@ -382,9 +379,6 @@ export const menuGroups: {
         disabled: false,
         icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_database')) {
-            return false;
-          }
           if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
             return false;
           }
