@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { baseTheme } from '@toeverything/theme';
 import { html, type TemplateResult } from 'lit';
 
 let ToastContainer: HTMLDivElement | null = null;
@@ -56,7 +57,7 @@ export const toast = (message: string, duration = 2500) => {
   const styles = `
     max-width: 480px;
     text-align: center;
-    font-family: var(--affine-font-family);
+    baseTheme: ${baseTheme.fontSansFamily};
     font-size: var(--affine-font-sm);
     padding: 6px 12px;
     margin: 10px 0 0 0;

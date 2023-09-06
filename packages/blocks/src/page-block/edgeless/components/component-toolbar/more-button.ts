@@ -3,7 +3,8 @@ import '../toolbar/shape/shape-menu.js';
 
 import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -101,7 +102,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       display: block;
       color: var(--affine-text-primary-color);
       fill: currentColor;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     .more-actions-container {

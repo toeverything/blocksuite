@@ -3,7 +3,8 @@ import '../panel/font-size-panel.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
@@ -101,8 +102,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       width: 52px;
       height: 20px;
       line-height: 20px;
-      font-size: 16px;
-      font-family: 'Avenir Next';
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
