@@ -1,7 +1,10 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
-import type { SerializedBlock } from '../../utils/index.js';
+import type {
+  BlockTransformContext,
+  SerializedBlock,
+} from '../../utils/index.js';
 import { addSerializedBlocks } from '../json2block.js';
 import { BaseService } from '../service.js';
 
@@ -16,6 +19,14 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       focusedBlockModel,
       0
     );
+  }
+
+  override async block2markdown(
+    _block: NoteBlockModel,
+    { childText = '' }: BlockTransformContext = {},
+    _blobMap?: Map<string, string>
+  ): Promise<string> {
+    return childText;
   }
 
   override block2Json(

@@ -81,8 +81,11 @@ export class ParagraphBlockService extends BaseService<ParagraphBlockModel> {
         resultText = text
           .split('\n')
           .reduce((preValue, curValue, index, array) => {
+            if (curValue === '' && index === array.length - 1) {
+              return preValue;
+            }
             preValue += `${index !== 0 ? '\n' : ''}> ${curValue}${
-              index !== array.length - 1 && array.length !== 1 ? '\n>' : ''
+              index < array.length - 2 ? '\n>' : ''
             }`;
             return preValue;
           }, '');

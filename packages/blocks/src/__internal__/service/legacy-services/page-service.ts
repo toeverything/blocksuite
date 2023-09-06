@@ -48,7 +48,7 @@ export class PageBlockService extends BaseService<PageBlockModel> {
       `;
     }
     return `<header><h1 class="page-title">${
-      block.title.toString() ?? DEFAULT_PAGE_NAME
+      block.title.toString() || DEFAULT_PAGE_NAME
     }</h1>${pageMetaHtml}</header><div>${childText}</div>`;
   }
 
@@ -64,7 +64,10 @@ export class PageBlockService extends BaseService<PageBlockModel> {
     block: PageBlockModel,
     { childText = '' }: BlockTransformContext = {}
   ) {
-    return `${block.title.toString() ?? DEFAULT_PAGE_NAME}\r\n\r\n${childText}`;
+    return (
+      `# ${block.title.toString() || DEFAULT_PAGE_NAME}` +
+      (childText ? `\r\n\r\n${childText}` : '')
+    );
   }
 
   // todo we don't support link and database in page block title
