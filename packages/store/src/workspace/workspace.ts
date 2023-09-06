@@ -1,7 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import * as Y from 'yjs';
 
-import { AddonManager, type AddonRegistion } from '../addons/index.js';
 import type { DocProviderCreator } from '../providers/type.js';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
@@ -24,7 +23,6 @@ export class Workspace extends WorkspaceAddonType {
   protected readonly _schema: Schema;
 
   meta: WorkspaceMeta;
-  addons: AddonManager = new AddonManager();
 
   slots = {
     pagesUpdated: new Slot(),
@@ -82,10 +80,6 @@ export class Workspace extends WorkspaceAddonType {
 
   get schema() {
     return this._schema;
-  }
-
-  registerAddon(addon: AddonRegistion) {
-    this.addons.register(addon);
   }
 
   registerProvider(providerCreator: DocProviderCreator, id?: string) {

@@ -13,6 +13,7 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
+import { extensions } from '@blocksuite/blocks/extensions';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
 import {
@@ -24,6 +25,8 @@ import { type Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
+import type { Ref } from 'lit/directives/ref.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
@@ -73,6 +76,10 @@ export class EditorContainer
    */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
+
+  root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
+
+  private _extsLoaded = false;
 
   readonly themeObserver = new ThemeObserver();
 
@@ -224,6 +231,16 @@ export class EditorContainer
       }
     }
 
+    if (this.root.value?.isConnected) {
+      if (this.root.value.isUpdatePending) {
+        this.root.value.updateComplete.then(() =>
+          this._loadBuiltinExts(this.root.value!)
+        );
+      } else {
+        this._loadBuiltinExts(this.root.value);
+      }
+    }
+
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
@@ -257,6 +274,12 @@ export class EditorContainer
     }
   }
 
+  private _loadBuiltinExts(blocksuiteRoot: Element) {
+    if (this._extsLoaded) return;
+    extensions.forEach(extEntry => extEntry(blocksuiteRoot as BlockSuiteRoot));
+    this._extsLoaded = true;
+  }
+
   createContentParser() {
     return new ContentParser(this.page);
   }
@@ -267,6 +290,7 @@ export class EditorContainer
     const rootContainer = keyed(
       this.model.id,
       html`<block-suite-root
+        ${ref(this.root)}
         .page=${this.page}
         .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
       ></block-suite-root>`

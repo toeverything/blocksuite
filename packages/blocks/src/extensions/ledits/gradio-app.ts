@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { createInlineIframe } from './utils';
+import { createInlineIframe } from './utils.js';
 
 @customElement('ledits-gradio-app')
 export class GradioApp extends LitElement {

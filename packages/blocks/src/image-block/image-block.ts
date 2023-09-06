@@ -3,15 +3,13 @@ import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/lit';
-import { offset, shift } from '@floating-ui/dom';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { createLitPortal } from '../components/portal.js';
-import { ImageOptionsTemplate } from './image/image-options.js';
+import { type DocPageBlockComponent } from '../index.js';
+import type { AffineImageToolbarWidget } from '../widgets/image-toolbar/index.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
@@ -266,37 +264,21 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   private _observePosition() {
     const ANCHOR_EL: HTMLElement = this.resizeImg;
 
-    let portal: HTMLElement | null = null;
     this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () => {
-      if (portal?.isConnected) return;
-      const abortController = new AbortController();
-      portal = createLitPortal({
-        template: ImageOptionsTemplate({
-          anchor: ANCHOR_EL,
-          model: this.model,
-          blob: this._blob,
-          abortController,
-        }),
-        computePosition: {
-          referenceElement: ANCHOR_EL,
-          placement: 'right-start',
-          middleware: [
-            offset({
-              mainAxis: 12,
-              crossAxis: 10,
-            }),
-            shift({
-              crossAxis: true,
-              padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
-                bottom: 12,
-                right: 12,
-              },
-            }),
-          ],
-          autoUpdate: true,
-        },
-        abortController,
+      if (!this.page.root) return;
+
+      const docPageElement = this.root.viewStore.fromPath([this.page.root.id])
+        ?.view;
+
+      if (!docPageElement) return;
+
+      (
+        (docPageElement as DocPageBlockComponent).widgetElements
+          ?.imageToolbar as AffineImageToolbarWidget
+      ).show({
+        anchor: this.resizeImg,
+        model: this.model,
+        blob: this._blob,
       });
     });
   }

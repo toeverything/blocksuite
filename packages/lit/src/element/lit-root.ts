@@ -46,6 +46,8 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   rangeManager: RangeManager | null = null;
 
+  ctx: Record<string, unknown> = {};
+
   get uiEventDispatcher(): UIEventDispatcher {
     return this.blockStore.uiEventDispatcher;
   }
