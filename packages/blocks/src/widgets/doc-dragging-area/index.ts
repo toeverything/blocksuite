@@ -220,7 +220,10 @@ export class DocDraggingAreaWidget extends WidgetElement {
     }
   }
 
-  private _runner = (state: PointerEventState, shouldAutoScroll: boolean) => {
+  private _updateDraggingArea = (
+    state: PointerEventState,
+    shouldAutoScroll: boolean
+  ) => {
     const { x, y } = state;
 
     const { scrollTop, scrollLeft } = this._viewportElement;
@@ -281,7 +284,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
         ctx.get('defaultState').event.preventDefault();
         const state = ctx.get('pointerState');
         this._rafID = requestAnimationFrame(() => {
-          this._runner(state, true);
+          this._updateDraggingArea(state, true);
         });
 
         return true;
@@ -327,7 +330,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
       this._clearRaf();
       const state = this._lastPointerState;
       this._rafID = requestAnimationFrame(() => {
-        this._runner(state, true);
+        this._updateDraggingArea(state, true);
       });
 
       return true;
