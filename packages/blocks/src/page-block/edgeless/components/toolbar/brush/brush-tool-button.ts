@@ -47,20 +47,6 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
     #edgeless-pen-icon:hover {
       top: 2px;
     }
-    .arrow-up-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      right: 2px;
-      top: 12px;
-      width: 14px;
-      height: 14px;
-      fill: var(--affine-icon-color);
-    }
-    .arrow-up-icon:hover {
-      background: var(--affine-hover-color);
-    }
   `;
 
   @property({ attribute: false })
@@ -159,7 +145,6 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
           <div style=${styleMap({ color: `var(${this._color})` })}>
             ${EdgelessPenIcon}
           </div>
-          <div class="arrow-up-icon">${ArrowUpIcon}</div>
         </div>
       </edgeless-toolbar-button>
     `;
