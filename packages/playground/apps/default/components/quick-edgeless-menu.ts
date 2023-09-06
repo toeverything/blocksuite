@@ -27,7 +27,12 @@ import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { Utils, type Workspace } from '@blocksuite/store';
+import {
+  exportPagesZip,
+  importPagesZip,
+  Utils,
+  type Workspace,
+} from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
@@ -338,14 +343,12 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.contentParser.exportPng();
   }
 
-  private _exportSnapshot() {
-    const json = this.workspace.exportPageSnapshot(this.page.id);
-    const data =
-      'data:text/json;charset=utf-8,' +
-      encodeURIComponent(JSON.stringify(json, null, 2));
+  private async _exportSnapshot() {
+    const file = await exportPagesZip(this.workspace, [this.page]);
+    const url = URL.createObjectURL(file);
     const a = document.createElement('a');
-    a.setAttribute('href', data);
-    a.setAttribute('download', `${this.page.id}-snapshot.json`);
+    a.setAttribute('href', url);
+    a.setAttribute('download', `${this.page.id}.bs.zip`);
     a.click();
     a.remove();
   }
@@ -353,7 +356,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   private _importSnapshot() {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', '.json');
+    input.setAttribute('accept', '.zip');
     input.multiple = false;
     input.onchange = async () => {
       const file = input.files?.item(0);
@@ -361,8 +364,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        const json = await file.text();
-        await this.workspace.importPageSnapshot(JSON.parse(json), this.page.id);
+        await importPagesZip(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
