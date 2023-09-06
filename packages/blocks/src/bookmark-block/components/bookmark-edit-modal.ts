@@ -3,6 +3,7 @@ import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
+import { baseTheme } from '@toeverything/theme';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -12,7 +13,7 @@ import type { BookmarkBlockModel } from '../bookmark-model.js';
 export const bookmarkModalStyles = html`
   <style>
     .bookmark-modal {
-      font-family: var(--affine-font-family);
+      font-family: ${baseTheme.fontSansFamily};
     }
     .bookmark-modal-container {
       position: fixed;

@@ -32,7 +32,7 @@ const config: PlaywrightTestConfig = {
     actionTimeout: 5_000,
   },
   workers: '80%',
-  retries: 1,
+  retries: process.env.CI ? 1 : 0,
   // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
   // default 'list' when running locally
   // See https://playwright.dev/docs/test-reporters#github-actions-annotations

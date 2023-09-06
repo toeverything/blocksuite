@@ -3,7 +3,8 @@ import '../../../components/tags/multi-tag-view.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -23,6 +24,9 @@ import { DEFAULT_PAGE_NAME, listenBacklinkList } from './backlink/backlink.js';
 @customElement('affine-page-meta-data')
 export class PageMetaData extends WithDisposable(LitElement) {
   static override styles = css`
+    :host {
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+    }
     .meta-data {
       border-radius: 8px;
       display: flex;
