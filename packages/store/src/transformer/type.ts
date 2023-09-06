@@ -24,7 +24,7 @@ export type PageSnapshot = {
       createDate: number;
       tags: string[];
     };
-    versions?: {
+    versions: {
       block: Record<string, number>;
       page: number;
     };
