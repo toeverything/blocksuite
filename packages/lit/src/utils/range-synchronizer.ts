@@ -77,7 +77,7 @@ export class RangeSynchronizer {
         const current = this._selectionManager.find('text');
         if (!current) return;
 
-        this._beforeTextInput(current, event.isComposing);
+        this._beforeTextInput(current, event);
         return;
       })
     );
@@ -106,7 +106,7 @@ export class RangeSynchronizer {
     });
   };
 
-  private _beforeTextInput(selection: TextSelection, composing: boolean) {
+  private _beforeTextInput(selection: TextSelection, event: InputEvent) {
     const { from, to } = selection;
     if (!to || PathFinder.equals(from.path, to.path)) return;
 
@@ -128,11 +128,12 @@ export class RangeSynchronizer {
     const endIsSelectedAll = to.length === endText.length;
 
     this.root.page.transact(() => {
-      if (endIsSelectedAll && composing) {
+      if (endIsSelectedAll && event.isComposing) {
         this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
 
       startText.delete(from.index, from.length);
+      startText.insert(event.data ?? '', from.index);
       if (!endIsSelectedAll) {
         endText.delete(0, to.length);
         startText.join(endText);
@@ -146,7 +147,7 @@ export class RangeSynchronizer {
     const newSelection = this._selectionManager.getInstance('text', {
       from: {
         path: from.path,
-        index: from.index,
+        index: from.index + (event.data?.length ?? 0),
         length: 0,
       },
       to: null,
