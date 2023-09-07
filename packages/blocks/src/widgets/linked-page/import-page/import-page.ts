@@ -1,4 +1,4 @@
-import '../loader.js';
+import '../../../components/loader.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
