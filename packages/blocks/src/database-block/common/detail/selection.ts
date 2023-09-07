@@ -1,4 +1,4 @@
-import type { KanbanViewSelection } from '../../../__internal__/index.js';
+import type { KanbanCardSelection } from '../../../__internal__/index.js';
 import type { KanbanCard } from '../../kanban/card.js';
 import { KanbanCell } from '../../kanban/cell.js';
 import type { RecordDetail } from './detail.js';
@@ -88,13 +88,13 @@ export class DetailSelection {
     }
   }
 
-  getSelectCard(selection: KanbanViewSelection) {
+  getSelectCard(selection: KanbanCardSelection) {
+    const { groupKey, cardId } = selection.cards[0];
+
     return this.viewEle
-      .querySelector(
-        `affine-data-view-kanban-group[data-key="${selection.groupKeys}"]`
-      )
+      .querySelector(`affine-data-view-kanban-group[data-key="${groupKey}"]`)
       ?.querySelector(
-        `affine-data-view-kanban-card[data-card-id="${selection.cardIds}"]`
+        `affine-data-view-kanban-card[data-card-id="${cardId}"]`
       ) as KanbanCard | undefined;
   }
 

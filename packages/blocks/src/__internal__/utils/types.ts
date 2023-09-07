@@ -61,13 +61,34 @@ export type KanbanFocusData = {
   isEditing: boolean;
 };
 
-export type KanbanViewSelection = {
+export type KanbanCellSelection = {
   viewId: string;
   type: 'kanban';
-  groupKeys: string[];
-  cardIds: string[];
-  focus?: KanbanFocusData;
+  selectionType: 'cell';
+  groupKey: string;
+  cardId: string;
+  columnId: string;
+  isEditing: boolean;
 };
+export type KanbanCardSelection = {
+  viewId: string;
+  type: 'kanban';
+  selectionType: 'card';
+  cards: {
+    groupKey: string;
+    cardId: string;
+  }[];
+};
+export type KanbanGroupSelection = {
+  viewId: string;
+  type: 'kanban';
+  selectionType: 'group';
+  groupKeys: string[];
+};
+export type KanbanViewSelection =
+  | KanbanCellSelection
+  | KanbanCardSelection
+  | KanbanGroupSelection;
 
 export type DataViewSelection = TableViewSelection | KanbanViewSelection;
 export type GetDataViewSelection<

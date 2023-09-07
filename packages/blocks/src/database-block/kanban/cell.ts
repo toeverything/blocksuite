@@ -7,6 +7,7 @@ import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
+import type { KanbanCellSelection } from '../../index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,
@@ -100,13 +101,12 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     if (!selectionElement) return;
 
     selectionElement.selection = {
-      groupKeys: [this.groupKey],
-      cardIds: [this.cardId],
-      focus: {
-        columnId: this.column.id,
-        isEditing: editing,
-      },
-    };
+      selectionType: 'cell',
+      groupKey: this.groupKey,
+      cardId: this.cardId,
+      columnId: this.column.id,
+      isEditing: editing,
+    } as KanbanCellSelection;
   };
 
   get selection() {

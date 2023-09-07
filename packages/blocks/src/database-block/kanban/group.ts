@@ -13,6 +13,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../icons/index.js';
+import type { KanbanCellSelection } from '../../index.js';
 import type { GroupRenderProps } from '../common/group-by/matcher.js';
 import type {
   DataViewKanbanManager,
@@ -156,13 +157,12 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
         kanban.selection.selection = {
-          groupKeys: [this.group.key],
-          cardIds: [id],
-          focus: {
-            columnId: this.view.header.titleColumn || this.view.columns[0],
-            isEditing: true,
-          },
-        };
+          selectionType: 'cell',
+          groupKey: this.group.key,
+          cardId: id,
+          columnId: this.view.header.titleColumn || this.view.columns[0],
+          isEditing: true,
+        } as KanbanCellSelection;
       }
     });
   };
@@ -172,13 +172,12 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
         kanban.selection.selection = {
-          groupKeys: [this.group.key],
-          cardIds: [id],
-          focus: {
-            columnId: this.view.header.titleColumn || this.view.columns[0],
-            isEditing: true,
-          },
-        };
+          selectionType: 'cell',
+          groupKey: this.group.key,
+          cardId: id,
+          columnId: this.view.header.titleColumn || this.view.columns[0],
+          isEditing: true,
+        } as KanbanCellSelection;
       }
     });
   };

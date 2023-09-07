@@ -9,6 +9,7 @@ import { html } from 'lit/static-html.js';
 
 import { positionToVRect } from '../../components/menu/index.js';
 import { MoreHorizontalIcon, NewEditIcon } from '../../icons/index.js';
+import type { KanbanCardSelection } from '../../index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type {
   DataViewKanbanColumnManager,
@@ -147,7 +148,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
       const selection = this.getSelection();
       const preSelection = selection?.selection;
 
-      if (preSelection?.cardIds && preSelection.cardIds.length > 1) return;
+      if (preSelection?.selectionType !== 'card') return;
 
       if (selection) {
         selection.selection = undefined;
@@ -274,9 +275,14 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     const ele = e.currentTarget as HTMLElement;
     if (selection) {
       selection.selection = {
-        groupKeys: [this.groupKey],
-        cardIds: [this.cardId],
-      };
+        selectionType: 'card',
+        cards: [
+          {
+            groupKey: this.groupKey,
+            cardId: this.cardId,
+          },
+        ],
+      } as KanbanCardSelection;
       popCardMenu(ele, this.cardId, selection);
     }
   };
@@ -286,9 +292,14 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
     const selection = this.getSelection();
     if (selection) {
       selection.selection = {
-        groupKeys: [this.groupKey],
-        cardIds: [this.cardId],
-      };
+        selectionType: 'card',
+        cards: [
+          {
+            groupKey: this.groupKey,
+            cardId: this.cardId,
+          },
+        ],
+      } as KanbanCardSelection;
       popCardMenu(positionToVRect(e.x, e.y), this.cardId, selection);
     }
   };

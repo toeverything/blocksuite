@@ -1,7 +1,12 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
 
-import type { KanbanViewSelection } from '../../__internal__/index.js';
+import type {
+  KanbanCardSelection,
+  KanbanCellSelection,
+  KanbanGroupSelection,
+  KanbanViewSelection,
+} from '../../__internal__/index.js';
 import { KanbanCard } from './card.js';
 import { KanbanCell } from './cell.js';
 import type { KanbanGroup } from './group.js';
@@ -43,26 +48,23 @@ export class KanbanSelection {
       this.viewEle.setSelection();
       return;
     }
-    const selection: KanbanViewSelection = {
+    const selection = {
       ...data,
       viewId: this.viewEle.view.id,
       type: 'kanban',
-    };
-    if (selection.focus && selection.focus.isEditing) {
-      const focus = selection.focus;
+    } as KanbanViewSelection;
+
+    if (selection.selectionType === 'cell' && selection.isEditing) {
       const container = getFocusCell(this.viewEle, selection);
       const cell = container?.cell;
       const isEditing = cell
         ? cell.beforeEnterEditMode()
-          ? selection.focus.isEditing
+          ? selection.isEditing
           : false
         : false;
       this.viewEle.setSelection({
         ...selection,
-        focus: {
-          ...focus,
-          isEditing,
-        },
+        isEditing,
       });
     } else {
       this.viewEle.setSelection(selection);
@@ -75,7 +77,7 @@ export class KanbanSelection {
 
     const selection = this.selection;
     if (!selection) return;
-    if (selection.focus) return;
+    if (selection.selectionType === 'cell') return;
     event.preventDefault();
 
     const target = event.target as HTMLElement;
@@ -85,25 +87,23 @@ export class KanbanSelection {
       ?.group.key;
     if (!closestCardId) return;
     if (!closestGroupKey) return;
+    if (selection.selectionType !== 'card') return;
 
-    const cardIds =
-      selection.cardIds.indexOf(closestCardId) >= 0
-        ? selection.cardIds.filter(id => id !== closestCardId)
-        : [...selection.cardIds, closestCardId];
-    const groupKeys =
-      selection.groupKeys.indexOf(closestGroupKey) >= 0
-        ? selection.groupKeys.filter(key => key !== closestGroupKey)
-        : [...selection.groupKeys, closestGroupKey];
-
+    const cards =
+      selection.cards.findIndex(card => card.cardId === closestCardId) >= 0
+        ? selection.cards.filter(card => card.cardId !== closestCardId)
+        : [
+            ...selection.cards,
+            { cardId: closestCardId, groupKey: closestGroupKey },
+          ];
     this.selection = {
       ...selection,
-      cardIds,
-      groupKeys,
-    };
+      cards,
+    } as KanbanViewSelection;
   };
 
   blur(selection: KanbanViewSelection) {
-    if (!selection.focus) {
+    if (selection.selectionType !== 'cell') {
       const selectCards = getSelectedCards(this.viewEle, selection);
       selectCards.forEach(card => (card.isFocus = false));
       return;
@@ -115,7 +115,7 @@ export class KanbanSelection {
     container.isFocus = false;
     const cell = container?.cell;
 
-    if (selection.focus.isEditing) {
+    if (selection.isEditing) {
       cell?.onExitEditMode();
       if (cell?.blurCell()) {
         container.blur();
@@ -127,7 +127,7 @@ export class KanbanSelection {
   }
 
   focus(selection: KanbanViewSelection) {
-    if (!selection.focus) {
+    if (selection.selectionType !== 'cell') {
       const selectCards = getSelectedCards(this.viewEle, selection);
       selectCards.forEach((card, index) => {
         if (index === 0) {
@@ -144,7 +144,7 @@ export class KanbanSelection {
     container.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     container.isFocus = true;
     const cell = container?.cell;
-    if (selection.focus.isEditing) {
+    if (selection.isEditing) {
       cell?.onEnterEditMode();
       if (cell?.focusCell()) {
         container.focus();
@@ -156,16 +156,21 @@ export class KanbanSelection {
   }
 
   getNextFocusCell(
-    selection: KanbanViewSelection,
+    selection: KanbanCellSelection,
     index: number,
     nextPosition: 'up' | 'down' | 'left' | 'right'
   ): {
     cell: KanbanCell;
-    cardId?: string[];
-    groupKey?: string[];
+    cardId?: string;
+    groupKey?: string;
   } {
     const kanbanCells = getCardCellsBySelection(this.viewEle, selection);
-    const cards = getGroupCardsBySelection(this.viewEle, selection);
+    const group = this.viewEle.querySelector(
+      `affine-data-view-kanban-group[data-key="${selection.groupKey}"]`
+    );
+    const cards = Array.from(
+      group?.querySelectorAll('affine-data-view-kanban-card') ?? []
+    );
 
     if (nextPosition === 'up') {
       const nextIndex = index - 1;
@@ -239,11 +244,16 @@ export class KanbanSelection {
   }
 
   getNextFocusCard(
-    selection: KanbanViewSelection,
+    selection: KanbanCardSelection,
     index: number,
     nextPosition: 'up' | 'down' | 'left' | 'right'
-  ): { card: KanbanCard; cardId: string[]; groupKey?: string[] } {
-    const kanbanCards = getGroupCardsBySelection(this.viewEle, selection);
+  ): { card: KanbanCard; cards: { cardId: string; groupKey: string }[] } {
+    const group = this.viewEle.querySelector(
+      `affine-data-view-kanban-group[data-key="${selection.cards[0].groupKey}"]`
+    );
+    const kanbanCards = Array.from(
+      group?.querySelectorAll('affine-data-view-kanban-card') ?? []
+    );
 
     if (nextPosition === 'up') {
       const nextIndex = index - 1;
@@ -252,7 +262,12 @@ export class KanbanSelection {
 
       return {
         card,
-        cardId: [card.cardId],
+        cards: [
+          {
+            cardId: card.cardId,
+            groupKey: card.groupKey,
+          },
+        ],
       };
     }
 
@@ -263,7 +278,12 @@ export class KanbanSelection {
 
       return {
         card,
-        cardId: [card.cardId],
+        cards: [
+          {
+            cardId: card.cardId,
+            groupKey: card.groupKey,
+          },
+        ],
       };
     }
 
@@ -298,15 +318,15 @@ export class KanbanSelection {
 
   public focusNext(position: 'up' | 'down' | 'left' | 'right') {
     const selection = this.selection;
-    if (!selection || selection.focus?.isEditing) {
+    if (!selection) {
       return;
     }
 
-    if (selection.focus) {
+    if (selection.selectionType === 'cell' && !selection.isEditing) {
       // cell focus
       const kanbanCells = getCardCellsBySelection(this.viewEle, selection);
       const index = kanbanCells.findIndex(
-        cell => cell.column.id === selection.focus?.columnId
+        cell => cell.column.id === selection.columnId
       );
       const { cell, cardId, groupKey } = this.getNextFocusCell(
         selection,
@@ -316,94 +336,89 @@ export class KanbanSelection {
       if (cell instanceof KanbanCell) {
         this.selection = {
           ...selection,
-          cardIds: cardId ?? selection.cardIds,
-          groupKeys: groupKey ?? selection.groupKeys,
-          focus: {
-            ...selection.focus,
-            columnId: cell.column.id,
-          },
-        };
+          cardId: cardId ?? selection.cardId,
+          groupKey: groupKey ?? selection.groupKey,
+          columnId: cell.column.id,
+        } as KanbanCellSelection;
       }
-    } else {
+    } else if (selection.selectionType === 'card') {
       // card focus
-      const cards = getGroupCardsBySelection(this.viewEle, selection);
-      const index = cards.findIndex(
-        card => card.cardId === selection.cardIds[0]
+      const group = this.viewEle.querySelector(
+        `affine-data-view-kanban-group[data-key="${selection.cards[0].groupKey}"]`
       );
-      const { card, cardId, groupKey } = this.getNextFocusCard(
-        selection,
-        index,
-        position
+      const cardElements = Array.from(
+        group?.querySelectorAll('affine-data-view-kanban-card') ?? []
       );
+
+      const index = cardElements.findIndex(
+        card => card.cardId === selection.cards[0].cardId
+      );
+      const { card, cards } = this.getNextFocusCard(selection, index, position);
       if (card instanceof KanbanCard) {
         this.selection = {
           ...selection,
-          focus: undefined,
-          cardIds: cardId ?? selection.cardIds,
-          groupKeys: groupKey ?? selection.groupKeys,
-        };
+          cards: cards ?? selection.cards,
+        } as KanbanCardSelection;
       }
     }
   }
 
   public focusOut() {
     const selection = this.selection;
-    if (!selection) {
+    if (selection?.selectionType !== 'cell') {
       return;
     }
-    if (selection.focus) {
-      if (selection.focus.isEditing) {
-        this.selection = {
-          ...selection,
-          focus: {
-            ...selection.focus,
-            isEditing: false,
+
+    if (selection.isEditing) {
+      this.selection = {
+        ...selection,
+        isEditing: false,
+      } as KanbanCellSelection;
+    } else {
+      this.selection = {
+        selectionType: 'card',
+        cards: [
+          {
+            cardId: selection.cardId,
+            groupKey: selection.groupKey,
           },
-        };
-      } else {
-        this.selection = {
-          ...selection,
-          focus: undefined,
-        };
-      }
+        ],
+      } as KanbanCardSelection;
     }
   }
 
   public focusIn() {
     const selection = this.selection;
-    if (!selection || selection.focus?.isEditing) {
-      return;
-    }
-    if (selection.focus) {
+    if (!selection) return;
+    if (selection.selectionType === 'cell' && selection.isEditing) return;
+
+    if (selection.selectionType === 'cell') {
       this.selection = {
         ...selection,
-        focus: {
-          ...selection.focus,
-          isEditing: true,
-        },
-      };
+        isEditing: true,
+      } as KanbanCellSelection;
     } else {
       const card = getSelectedCards(this.viewEle, selection)[0];
       const cell = card?.querySelector('affine-data-view-kanban-cell');
       if (cell) {
         this.selection = {
-          ...selection,
-          focus: {
-            columnId: cell.column.id,
-            isEditing: false,
-          },
-        };
+          ...this.selection,
+          columnId: cell.column.id,
+          isEditing: false,
+        } as KanbanViewSelection;
       }
     }
   }
 
   public deleteCard() {
     const selection = this.selection;
-    if (!selection || !!selection.focus) {
+    if (!selection || selection.selectionType === 'cell') {
       return;
     }
-    this.viewEle.view.rowDelete(selection.cardIds);
-    this.selection = undefined;
+    if (selection.selectionType === 'card') {
+      this.viewEle.view.rowDelete(selection.cards.map(v => v.cardId));
+      this.selection = undefined;
+    }
   }
 
   focusFirstCell() {
@@ -412,93 +427,116 @@ export class KanbanSelection {
     const columnId = card && this.viewEle.view.getHeaderTitle(card)?.id;
     if (group && card && columnId) {
       this.selection = {
-        groupKeys: [group.key],
-        cardIds: [card],
-        focus: {
-          columnId,
-          isEditing: true,
-        },
-      };
+        groupKey: group.key,
+        cardId: card,
+        columnId,
+        isEditing: true,
+      } as KanbanCellSelection;
     }
   }
 
   public insertRowBefore() {
     const selection = this.selection;
-    if (!selection) {
+    if (selection?.selectionType !== 'card') {
       return;
     }
-    const id = this.view.addCard(
-      { before: true, id: selection.cardIds[0] },
-      selection.groupKeys[0]
-    );
+
+    const { cardId, groupKey } = selection.cards[0];
+    const id = this.view.addCard({ before: true, id: cardId }, groupKey);
+
     requestAnimationFrame(() => {
       const columnId = this.view.header.titleColumn;
-      this.selection = {
-        groupKeys: selection.groupKeys,
-        cardIds: [id],
-        focus: columnId
-          ? {
-              columnId: columnId,
-              isEditing: true,
-            }
-          : undefined,
-      };
+      if (columnId) {
+        this.selection = {
+          selectionType: 'cell',
+          groupKey,
+          cardId: id,
+          columnId,
+          isEditing: true,
+        } as KanbanCellSelection;
+      } else {
+        this.selection = {
+          selectionType: 'card',
+          cards: [
+            {
+              cardId: id,
+              groupKey,
+            },
+          ],
+        } as KanbanCardSelection;
+      }
     });
   }
 
   public insertRowAfter() {
     const selection = this.selection;
-    if (!selection) {
+    if (selection?.selectionType !== 'card') {
       return;
     }
-    const id = this.view.addCard(
-      { before: false, id: selection.cardIds[0] },
-      selection.groupKeys[0]
-    );
+
+    const { cardId, groupKey } = selection.cards[0];
+    const id = this.view.addCard({ before: false, id: cardId }, groupKey);
+
     requestAnimationFrame(() => {
       const columnId = this.view.header.titleColumn;
-      this.selection = {
-        groupKeys: selection.groupKeys,
-        cardIds: [id],
-        focus: columnId
-          ? {
-              columnId: columnId,
-              isEditing: true,
-            }
-          : undefined,
-      };
+      if (columnId) {
+        this.selection = {
+          selectionType: 'cell',
+          groupKey,
+          cardId: id,
+          columnId,
+          isEditing: true,
+        } as KanbanCellSelection;
+      } else {
+        this.selection = {
+          selectionType: 'card',
+          cards: [
+            {
+              cardId: id,
+              groupKey,
+            },
+          ],
+        } as KanbanCardSelection;
+      }
     });
   }
 
   public moveCard(rowId: string, key: string) {
     const selection = this.selection;
-    if (!selection) {
+    if (selection?.selectionType !== 'card') {
       return;
     }
     this.view.groupHelper?.moveCardTo(
       rowId,
-      selection.groupKeys[0],
+      selection.cards[0].groupKey,
       key,
       'start'
     );
     requestAnimationFrame(() => {
+      if (this.selection?.selectionType !== 'card') return;
+
       this.selection = {
         ...selection,
-        groupKeys: [key],
-      };
+        cards: selection.cards.map(card => ({
+          ...card,
+          groupKey: card.groupKey,
+        })),
+      } as KanbanViewSelection;
     });
   }
 }
 
 type NextFocusCell = {
   cell: KanbanCell;
-  cardId: string[];
-  groupKey: string[];
+  cardId: string;
+  groupKey: string;
 };
 type NextFocusCard = {
   card: KanbanCard;
-  cardId: string[];
-  groupKey: string[];
+  cards: {
+    cardId: string;
+    groupKey: string;
+  }[];
 };
 function getNextGroupFocusElement(
   type: 'cell',
@@ -521,17 +559,22 @@ function getNextGroupFocusElement<T extends 'cell' | 'card'>(
   selection: KanbanViewSelection,
   getNextGroupIndex: (groupIndex: number) => number
 ): NextFocusCell | NextFocusCard {
-  const groupIndex = groups.findIndex(
-    group => group.group.key === selection.groupKeys[0]
-  );
+  const groupIndex = groups.findIndex(group => {
+    if (type === 'cell') {
+      return group.group.key === (selection as KanbanCellSelection).groupKey;
+    }
+    return (
+      group.group.key === (selection as KanbanCardSelection).cards[0].groupKey
+    );
+  });
 
   const nextGroupIndex = getNextGroupIndex(groupIndex);
 
   const nextGroup = groups[nextGroupIndex];
   const element =
     type === 'cell'
-      ? getFocusCell(viewElement, selection)
-      : getSelectedCards(viewElement, selection)[0];
+      ? getFocusCell(viewElement, selection as KanbanCellSelection)
+      : getSelectedCards(viewElement, selection as KanbanCardSelection)[0];
   assertExists(element);
   const rect = element.getBoundingClientRect();
   const nextCards = Array.from(
@@ -556,8 +599,12 @@ function getNextGroupFocusElement<T extends 'cell' | 'card'>(
   if (type === 'card') {
     return {
       card: nextCard,
-      cardId: [nextCard.cardId],
-      groupKey: [nextGroup.group.key],
+      cards: [
+        {
+          cardId: nextCard.cardId,
+          groupKey: nextGroup.group.key,
+        },
+      ],
     };
   }
 
@@ -582,23 +629,21 @@ function getNextGroupFocusElement<T extends 'cell' | 'card'>(
 
   return {
     cell: nextCell,
-    cardId: [nextCard.cardId],
-    groupKey: [nextGroup.group.key],
+    cardId: nextCard.cardId,
+    groupKey: nextGroup.group.key,
   };
 }
 
 function getNextCardFocusCell(
   nextPosition: 'up' | 'down',
   cards: KanbanCard[],
-  selection: KanbanViewSelection,
+  selection: KanbanCellSelection,
   getNextCardIndex: (cardIndex: number) => number
 ): {
   cell: KanbanCell;
-  cardId: string[];
+  cardId: string;
 } {
-  const cardIndex = cards.findIndex(
-    card => card.cardId === selection.cardIds[0]
-  );
+  const cardIndex = cards.findIndex(card => card.cardId === selection.cardId);
   const nextCardIndex = getNextCardIndex(cardIndex);
   const nextCard = cards[nextCardIndex];
   const nextCells = Array.from(
@@ -607,37 +652,42 @@ function getNextCardFocusCell(
   const nextCellIndex = nextPosition === 'up' ? nextCells.length - 1 : 0;
   return {
     cell: nextCells[nextCellIndex],
-    cardId: [nextCard.cardId],
+    cardId: nextCard.cardId,
   };
-}
-
-function getGroupCardsBySelection(
-  viewElement: Element,
-  selection: KanbanViewSelection
-) {
-  const group = viewElement.querySelector(
-    `affine-data-view-kanban-group[data-key="${selection?.groupKeys[0]}"]`
-  );
-  return Array.from(
-    group?.querySelectorAll('affine-data-view-kanban-card') ?? []
-  );
 }
 
 function getCardCellsBySelection(
   viewElement: Element,
-  selection: KanbanViewSelection
+  selection: KanbanCellSelection
 ) {
-  const card = getSelectedCards(viewElement, selection)[0];
+  const card = getSelectedCard(viewElement, selection);
   return Array.from(
-    card.querySelectorAll('affine-data-view-kanban-cell') ?? []
+    card?.querySelectorAll('affine-data-view-kanban-cell') ?? []
+  );
+}
+
+function getSelectedCard(
+  viewElement: Element,
+  selection: KanbanCellSelection
+): KanbanCard | null {
+  const group = viewElement.querySelector(
+    `affine-data-view-kanban-group[data-key="${selection.groupKey}"]`
+  );
+
+  if (!group) return null;
+  return group.querySelector<KanbanCard>(
+    `affine-data-view-kanban-card[data-card-id="${selection.cardId}"]`
   );
 }
 
 function getSelectedCards(
   viewElement: Element,
-  selection: KanbanViewSelection
+  selection: KanbanCardSelection | KanbanGroupSelection
 ): KanbanCard[] {
-  const groups = selection.groupKeys
+  if (selection.selectionType === 'group') return [];
+
+  const groupKeys = selection.cards.map(card => card.groupKey);
+  const groups = groupKeys
     .map(key =>
       viewElement.querySelector(
         `affine-data-view-kanban-group[data-key="${key}"]`
@@ -645,9 +695,10 @@ function getSelectedCards(
     )
     .filter((group): group is Element => group !== null);
 
+  const cardIds = selection.cards.map(card => card.cardId);
   const cards = groups
     .flatMap(group =>
-      selection.cardIds.map(id =>
+      cardIds.map(id =>
         group.querySelector<KanbanCard>(
           `affine-data-view-kanban-card[data-card-id="${id}"]`
         )
@@ -658,13 +709,10 @@ function getSelectedCards(
   return cards;
 }
 
-function getFocusCell(viewElement: Element, selection: KanbanViewSelection) {
-  if (!selection.focus) {
-    return null;
-  }
-  const card = getSelectedCards(viewElement, selection)[0];
-  return card.querySelector<KanbanCell>(
-    `affine-data-view-kanban-cell[data-column-id="${selection.focus.columnId}"]`
+function getFocusCell(viewElement: Element, selection: KanbanCellSelection) {
+  const card = getSelectedCard(viewElement, selection);
+  return card?.querySelector<KanbanCell>(
+    `affine-data-view-kanban-cell[data-column-id="${selection.columnId}"]`
   );
 }
 
