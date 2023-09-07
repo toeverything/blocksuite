@@ -37,7 +37,6 @@
     "pdf-lib": "^1.17.1",
     "shiki": "^0.14.3",
     "sortablejs": "^1.15.0",
-    "turndown": "^7.1.2",
     "webfontloader": "^1.6.28",
     "fractional-indexing": "^3.2.0",
     "zod": "^3.22.2"
