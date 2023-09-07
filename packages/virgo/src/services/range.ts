@@ -35,6 +35,11 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     }
     this._prevVRange = newVRange;
 
+    if (this.vRangeProvider) {
+      this.vRangeProvider.setVRange(newVRange);
+      return;
+    }
+
     if (!sync) {
       return;
     }
@@ -83,11 +88,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
         vRange.index + vRange.length > this.editor.yText.length)
     ) {
       throw new Error('invalid vRange');
-    }
-
-    if (this.vRangeProvider) {
-      this.vRangeProvider.setVRange(vRange);
-      return;
     }
 
     this.editor.slots.vRangeUpdated.emit([vRange, sync]);
