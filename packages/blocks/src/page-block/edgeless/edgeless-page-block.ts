@@ -275,36 +275,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     };
 
     if (
-      this.page.awarenessStore.getFlag('enable_edgeless_toolbar') &&
       !this.components.toolbar &&
       !this.components.zoomToolbar &&
       !this.components.zoomBarToggleButton
     ) {
       createToolbar();
     }
-
-    this._disposables.add(
-      this.page.awarenessStore.slots.update.subscribe(
-        msg => msg.state?.flags.enable_edgeless_toolbar,
-        enable => {
-          if (enable) {
-            if (this.components.toolbar) return;
-            createToolbar();
-            return;
-          }
-
-          this.components.toolbar?.remove();
-          this.components.zoomToolbar?.remove();
-          this.components.zoomBarToggleButton?.remove();
-          this.components.toolbar = null;
-          this.components.zoomToolbar = null;
-          this.components.zoomBarToggleButton = null;
-        },
-        {
-          filter: msg => msg.id === this.page.doc.clientID,
-        }
-      )
-    );
   }
 
   private _initSlotEffects() {

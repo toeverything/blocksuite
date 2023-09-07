@@ -110,9 +110,6 @@ export class SlashMenuWidget extends WidgetElement {
   }
 
   private _onKeyDown = (ctx: UIEventStateContext) => {
-    const flag = this.root.page.awarenessStore.getFlag('enable_slash_menu');
-    if (!flag) return;
-
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     const triggerKey = this.options.isTriggerKey(event);

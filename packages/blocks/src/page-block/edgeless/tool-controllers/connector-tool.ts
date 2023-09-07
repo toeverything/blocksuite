@@ -41,7 +41,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   onContainerDragStart() {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     assertExists(this._source);
     assertExists(this._startPoint);
     this._page.captureSync();
@@ -60,8 +59,6 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
   }
 
   onContainerDragMove(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-
     assertExists(this._connector);
     const { connector, viewport } = this._surface;
 
