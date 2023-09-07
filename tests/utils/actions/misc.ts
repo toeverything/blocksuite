@@ -1034,6 +1034,18 @@ export async function export2Html(page: Page) {
   return promiseResult;
 }
 
+export async function export2markdown(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2markdown(
+      [contentParser.getSelectedBlock(root)],
+      new Map()
+    );
+  });
+  return promiseResult;
+}
+
 export async function getCopyClipItemsInPage(page: Page) {
   const clipItems = await page.evaluate(() => {
     return document

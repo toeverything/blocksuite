@@ -6,13 +6,17 @@ import {
   addNote,
   enterPlaygroundRoom,
   export2Html,
+  export2markdown,
   focusRichText,
   focusTitle,
   initEmptyEdgelessState,
   initEmptyParagraphState,
   pressEnter,
+  pressShiftTab,
+  pressTab,
   switchEditorMode,
   type,
+  updateBlockType,
 } from './utils/actions/index.js';
 import { test } from './utils/playwright.js';
 test('export html title', async ({ page }) => {
@@ -93,5 +97,103 @@ test('export html contain <blockquote>', async ({ page }) => {
   const htmlText = await export2Html(page);
   expect(htmlText).toContain(
     '<header><h1 class="page-title">Untitled</h1></header><div><blockquote class="quote">page quote is here</blockquote></div>'
+  );
+});
+
+test('export markdown title', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusTitle(page);
+  const markdownText1 = await export2markdown(page);
+  expect(markdownText1).toEqual('# Untitled');
+
+  await type(page, 'this is title');
+  const markdownText2 = await export2markdown(page);
+  expect(markdownText2).toEqual('# this is title');
+});
+
+test('export markdown list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await updateBlockType(page, 'affine:list', 'bulleted');
+  await type(page, 'aa');
+  await pressEnter(page);
+  await pressTab(page);
+  await updateBlockType(page, 'affine:list', 'bulleted');
+  await type(page, 'bb');
+  await pressEnter(page);
+  await updateBlockType(page, 'affine:list', 'bulleted');
+  await type(page, 'cc');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await updateBlockType(page, 'affine:list', 'bulleted');
+  await type(page, 'dd');
+  const markdownText = await export2markdown(page);
+  expect(markdownText).toEqual(
+    '# Untitled\r\n\r\n* aa\r\n\r\n    * bb\r\n\r\n    * cc\r\n\r\n* dd'
+  );
+});
+
+test('export markdown list todo', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await updateBlockType(page, 'affine:list', 'todo');
+  await type(page, 'aa');
+  await pressEnter(page);
+  await pressTab(page);
+  await updateBlockType(page, 'affine:list', 'todo');
+  await type(page, 'bb');
+  await pressEnter(page);
+  await updateBlockType(page, 'affine:paragraph');
+  await type(page, 'cc');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await updateBlockType(page, 'affine:list', 'todo');
+  await type(page, 'dd');
+  const markdownText = await export2markdown(page);
+  expect(markdownText).toEqual(
+    '# Untitled\r\n\r\n* [ ] aa\r\n\r\n    * [ ] bb\r\n\r\ncc\r\n\r\n* [ ] dd'
+  );
+});
+
+test('export markdown divider', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await focusRichText(page);
+  await updateBlockType(page, 'affine:divider');
+
+  const markdownText = await export2markdown(page);
+  expect(markdownText).toEqual('# Untitled\r\n\r\n* * *');
+});
+
+test('export markdown code', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '```ts');
+  await type(page, ' ');
+  await type(page, 'console.log(123);\nconst a = 123;');
+
+  const markdownText = await export2markdown(page);
+  expect(markdownText).toEqual(
+    '# Untitled\r\n\r\n```typescript\r\nconsole.log(123);\nconst a = 123;)\r\n```'
+  );
+});
+
+test('export markdown bookmark', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '/bookmark');
+  await pressEnter(page);
+  await type(page, 'https://github.com/toeverything/AFFiNE');
+  await pressEnter(page);
+
+  const markdownText = await export2markdown(page);
+  expect(markdownText).toEqual(
+    '# Untitled\r\n\r\n[Bookmark](https://github.com/toeverything/AFFiNE)'
   );
 });
