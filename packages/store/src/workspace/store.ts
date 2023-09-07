@@ -81,7 +81,7 @@ const flagsPreset = {
   enable_bookmark_operation: false,
   enable_note_index: false,
 
-  enable_bultin_extension: false,
+  enable_bultin_ledits: false,
   readonly: {},
 } satisfies BlockSuiteFlags;
 

@@ -251,7 +251,7 @@ export class AffineImageToolbarWidget extends WidgetElement {
               >Delete</tool-tip
             >
           </icon-button>
-          ${this.page.awarenessStore.getFlag('enable_bultin_extension')
+          ${this.page.awarenessStore.getFlag('enable_bultin_ledits')
             ? html`<icon-button
                 class="has-tool-tip delete-image-button"
                 size="32px"

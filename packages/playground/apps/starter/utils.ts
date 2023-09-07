@@ -244,7 +244,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_bookmark_operation: true,
       enable_note_index: true,
       enable_attachment_block: true,
-      enable_bultin_extension: true,
+      enable_bultin_ledits: true,
       readonly: {
         'space:page0': false,
       },
