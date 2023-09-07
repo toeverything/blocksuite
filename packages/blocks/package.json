@@ -73,11 +73,17 @@
         "types": "./dist/content-parser.d.ts",
         "default": "./dist/content-parser.js"
       }
-    },
-    "files": [
-      "!src"
-    ]
+    }
   },
+  "files": [
+    "dist",
+    "content-parser.d.ts",
+    "content-parser.js",
+    "models.d.ts",
+    "models.js",
+    "std.d.ts",
+    "std.js"
+  ],
   "devDependencies": {
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",

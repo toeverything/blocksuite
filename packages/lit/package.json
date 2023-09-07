@@ -37,9 +37,9 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       }
-    },
-    "files": [
-      "dist"
-    ]
-  }
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }
