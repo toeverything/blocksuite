@@ -25,7 +25,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot,
   }: PageSnapshotPayload): Promise<Markdown> {
     let buffer = '';
-    buffer += `# ${snapshot.meta.page.title}\n`;
+    buffer += `# ${snapshot.meta.title}\n`;
     buffer += await this.convertBlockSnapshotToAdapterTarget({
       snapshot: snapshot.block,
     });

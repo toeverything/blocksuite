@@ -18,16 +18,32 @@ export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
   children: z.lazy(() => BlockSnapshotSchema.array()),
 });
 
+export type WorkspaceInfoSnapshot = {
+  id: string;
+  app: '@toeverything/blocksuite';
+  source: 'github.com/toeverything/blocksuite';
+  type: 'snapshot:workspace:info';
+  blockVersions: Record<string, number>;
+  pageVersion: number;
+  workspaceVersion: number;
+  properties: PagesPropertiesMeta;
+};
+
+export const WorkspaceInfoSnapshotSchema: z.ZodType<WorkspaceInfoSnapshot> =
+  z.object({
+    id: z.string(),
+    app: z.literal('@toeverything/blocksuite'),
+    source: z.literal('github.com/toeverything/blocksuite'),
+    type: z.literal('snapshot:workspace:info'),
+    blockVersions: z.record(z.number()),
+    pageVersion: z.number(),
+    workspaceVersion: z.number(),
+    properties: z.record(z.any()),
+  });
+
 export type PageSnapshot = {
   type: 'snapshot:page';
-  meta: {
-    page: PageMeta;
-    versions: {
-      block: Record<string, number>;
-      page: number;
-    };
-    properties: PagesPropertiesMeta;
-  };
+  meta: PageMeta;
   block: BlockSnapshot;
 };
 
@@ -40,28 +56,6 @@ const PageMetaSchema = z.object({
 
 export const PageSnapshotSchema: z.ZodType<PageSnapshot> = z.object({
   type: z.literal('snapshot:page'),
-  meta: z.object({
-    page: PageMetaSchema,
-    versions: z.object({
-      block: z.record(z.number()),
-      page: z.number(),
-    }),
-    properties: z.record(z.any()),
-  }),
+  meta: PageMetaSchema,
   block: BlockSnapshotSchema,
 });
-
-export type WorkspaceMetaSnapshot = {
-  type: 'snapshot:workspace';
-  workspaceVersion: number;
-  properties: PagesPropertiesMeta;
-  pages: PageMeta[];
-};
-
-export const WorkspaceSnapshotSchema: z.ZodType<WorkspaceMetaSnapshot> =
-  z.object({
-    type: z.literal('snapshot:workspace'),
-    workspaceVersion: z.number(),
-    pages: z.array(PageMetaSchema),
-    properties: z.record(z.any()),
-  });
