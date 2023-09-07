@@ -28,81 +28,33 @@ export async function json2block(
   const { page } = focusedBlockModel;
   // After deleteModelsByRange, selected block is must only, and selection is must caret
   const firstBlock = pastedBlocks[0];
-  const lastBlock = pastedBlocks[pastedBlocks.length - 1];
   const isFocusedBlockEmpty =
     !focusedBlockModel.text?.length && !convertToPastedIfEmpty;
   const shouldMergeFirstBlock =
     !isFocusedBlockEmpty && firstBlock.text && focusedBlockModel.text;
-  const shouldMergeLastBlock = focusedBlockModel.text && lastBlock.text;
+  let shouldMergeLastBlock = focusedBlockModel.children.length > 0;
   const parent = page.getParent(focusedBlockModel);
-
   assertExists(parent);
-  if (pastedBlocks.length === 1) {
-    let lastAddedBlockId;
 
-    if (shouldMergeFirstBlock) {
-      focusedBlockModel.text?.insertList(
-        firstBlock.text || [],
-        textRangePoint.index || 0
-      );
+  let ids: string[] = [];
+  let splitPostModel: BaseBlockModel | null = null;
 
-      const ids = await addSerializedBlocks(
-        page,
-        firstBlock.children || [],
-        focusedBlockModel,
-        0
-      );
-
-      if (firstBlock.children.length === 0) {
-        // TODO: optimize textLength
-        const textLength =
-          firstBlock?.text?.reduce((sum, data) => {
-            return sum + (data.insert?.length || 0);
-          }, 0) ?? 0;
-        await setRange(focusedBlockModel, {
-          index: (textRangePoint.index ?? 0) + textLength,
-          length: 0,
-        });
-      } else {
-        lastAddedBlockId = ids[ids.length - 1];
-      }
-    } else {
-      [lastAddedBlockId] = await addSerializedBlocks(
-        page,
-        pastedBlocks,
-        parent,
-        parent.children.indexOf(focusedBlockModel) + 1
-      );
-    }
-
-    if (lastAddedBlockId) {
-      const lastModel = page.getBlockById(lastAddedBlockId);
-
-      assertExists(lastModel);
-      if (lastModel.text) {
-        const rangeIndex = lastModel.text.length;
-        // Wait for the block's rich text mounted
-        requestAnimationFrame(() => {
-          setRange(lastModel, {
-            index: rangeIndex,
-            length: 0,
-          });
-        });
-      }
-    }
-
-    isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
-    return;
+  if (
+    focusedBlockModel.text?.length !==
+      textRangePoint.index + textRangePoint.length &&
+    (pastedBlocks.length > 1 || firstBlock.children.length > 0)
+  ) {
+    await handleBlockSplit(page, focusedBlockModel, textRangePoint.index, 0);
+    splitPostModel = page.getNextSibling(focusedBlockModel);
+    shouldMergeLastBlock = true;
   }
-
-  await handleBlockSplit(page, focusedBlockModel, textRangePoint.index, 0);
-
   if (shouldMergeFirstBlock) {
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
       textRangePoint.index || 0
     );
-    await addSerializedBlocks(
+
+    ids = await addSerializedBlocks(
       page,
       firstBlock.children || [],
       focusedBlockModel,
@@ -110,29 +62,68 @@ export async function json2block(
     );
   }
 
-  const insertPosition =
-    parent.children.indexOf(focusedBlockModel) +
-    (shouldMergeFirstBlock ? 1 : 0);
-
-  const ids = await addSerializedBlocks(
-    page,
-    pastedBlocks.slice(shouldMergeFirstBlock ? 1 : 0),
-    parent,
-    insertPosition
+  const remainingPastedBlocks = pastedBlocks.slice(
+    shouldMergeFirstBlock ? 1 : 0
   );
 
-  isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
+  // paste multiple blocks.
+  if (remainingPastedBlocks.length > 0) {
+    if (shouldMergeFirstBlock && focusedBlockModel.flavour === 'affine:list') {
+      ids = await addSerializedBlocks(
+        page,
+        remainingPastedBlocks,
+        focusedBlockModel,
+        focusedBlockModel.children.length - 1
+      );
+    } else {
+      const insertPosition =
+        parent.children.indexOf(focusedBlockModel) +
+        (shouldMergeFirstBlock ? 1 : 0);
 
+      ids = await addSerializedBlocks(
+        page,
+        remainingPastedBlocks,
+        parent,
+        insertPosition
+      );
+    }
+  }
+
+  if (ids.length === 0) {
+    const textLength =
+      firstBlock?.text?.reduce((sum, data) => {
+        return sum + (data.insert?.length || 0);
+      }, 0) ?? 0;
+    await setRange(focusedBlockModel, {
+      index: (textRangePoint.index ?? 0) + textLength,
+      length: 0,
+    });
+    return;
+  }
   const lastModel = page.getBlockById(ids[ids.length - 1]);
   assertExists(lastModel);
 
   if (shouldMergeLastBlock) {
-    const rangeOffset = lastModel.text?.length || 0;
-    const nextSiblingModel = page.getNextSibling(lastModel);
-    lastModel.text?.join(nextSiblingModel?.text as Text);
-    assertExists(nextSiblingModel);
-    page.deleteBlock(nextSiblingModel);
+    const nextSiblingModel = splitPostModel || page.getNextSibling(lastModel);
+    console.log(nextSiblingModel);
+    if (nextSiblingModel) {
+      lastModel.text?.join(nextSiblingModel?.text as Text);
+      if (
+        splitPostModel &&
+        splitPostModel.children.length > 0 &&
+        focusedBlockModel
+      ) {
+        page.updateBlock(focusedBlockModel, {
+          children: focusedBlockModel.children.concat(
+            ...splitPostModel.children
+          ),
+        });
+      }
+      page.deleteBlock(nextSiblingModel);
+    }
+
     // Wait for the block's rich text mounted
+    const rangeOffset = lastModel.text?.length || 0;
     requestAnimationFrame(() => {
       setRange(lastModel, {
         index: rangeOffset,
@@ -141,9 +132,12 @@ export async function json2block(
     });
   } else {
     if (lastModel?.text) {
-      setRange(lastModel, {
-        index: lastModel.text.length,
-        length: 0,
+      const rangIndex = lastModel.text.length;
+      requestAnimationFrame(() => {
+        setRange(lastModel, {
+          index: rangIndex,
+          length: 0,
+        });
       });
     } else {
       requestAnimationFrame(() => {
@@ -152,6 +146,8 @@ export async function json2block(
       });
     }
   }
+
+  isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
 }
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
