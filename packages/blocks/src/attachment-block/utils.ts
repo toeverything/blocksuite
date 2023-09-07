@@ -84,7 +84,12 @@ const tempImageMap = new Map<
 
 const withTempConvertData = () => {
   const saveAttachmentData = (newId: string, model: AttachmentBlockModel) => {
-    if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) tempAttachmentMap.clear();
+    if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) {
+      console.warn(
+        'Clear the temp attachment data. It may cause filename loss when converting between image and attachment.'
+      );
+      tempAttachmentMap.clear();
+    }
 
     const { name } = model;
     tempAttachmentMap.set(newId, { name });
@@ -96,7 +101,12 @@ const withTempConvertData = () => {
   };
 
   const saveImageData = (newId: string, model: ImageBlockModel) => {
-    if (tempImageMap.size > MAX_TEMP_DATA_SIZE) tempImageMap.clear();
+    if (tempImageMap.size > MAX_TEMP_DATA_SIZE) {
+      console.warn(
+        'Clear temp image data. It may cause image width and height loss when converting between image and attachment.'
+      );
+      tempImageMap.clear();
+    }
 
     const { width, height } = model;
     tempImageMap.set(newId, { width, height });
