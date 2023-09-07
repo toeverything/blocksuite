@@ -9,7 +9,7 @@ import {
   type EdgelessTool,
   LineWidth,
 } from '../../../../../__internal__/index.js';
-import { EdgelessConnectorIcon } from '../../../../../icons/index.js';
+import { ArrowUpIcon, ConnectorIcon } from '../../../../../icons/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
@@ -26,11 +26,10 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
       display: flex;
       position: relative;
     }
-    edgeless-toolbar-button svg {
-      transition: 0.3s ease-in-out;
-    }
-    edgeless-toolbar-button:hover svg {
-      transform: scale(1.15);
+    .edgeless-connector-button svg + svg {
+      position: absolute;
+      top: 4px;
+      right: 2px;
     }
   `;
 
@@ -51,7 +50,7 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
       this._connectorMenu = null;
     } else {
       this._connectorMenu = createPopper('edgeless-connector-menu', this, {
-        x: 110,
+        x: 50,
         y: -40,
       });
       this._connectorMenu.element.edgelessTool = this.edgelessTool;
@@ -94,10 +93,10 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
     const type = this.edgelessTool?.type;
 
     return html`
-      <edgeless-toolbar-button
+      <edgeless-tool-icon-button
         .tooltip=${this._connectorMenu ? '' : 'Connector'}
         .active=${type === 'connector'}
-        .activeMode=${'background'}
+        .iconContainerPadding=${8}
         class="edgeless-connector-button"
         @click=${() => {
           this.setEdgelessTool({
@@ -109,8 +108,8 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
           this._toggleMenu();
         }}
       >
-        ${EdgelessConnectorIcon}
-      </edgeless-toolbar-button>
+        ${ConnectorIcon} ${ArrowUpIcon}
+      </edgeless-tool-icon-button>
     `;
   }
 }

@@ -1,4 +1,5 @@
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type {
   AttachmentBlockModel,
@@ -9,6 +10,8 @@ import type {
   CodeBlockSchema,
   DatabaseBlockModel,
   DatabaseBlockSchema,
+  DataViewBlockModel,
+  DataViewBlockSchema,
   DividerBlockModel,
   DividerBlockSchema,
   ImageBlockModel,
@@ -35,6 +38,7 @@ export type BlockModels = {
   'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
   'affine:database': DatabaseBlockModel;
+  'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
 };
@@ -49,6 +53,7 @@ export type BlockSchemas = {
   'affine:image': typeof ImageBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
   'affine:database': typeof DatabaseBlockSchema;
+  'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;
   'affine:attachment': typeof AttachmentBlockSchema;
 };
