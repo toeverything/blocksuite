@@ -5,6 +5,8 @@ declare type BlockSuiteFlags = {
   enable_block_hub: boolean;
   enable_slash_menu: boolean;
 
+  enable_expand_database_block: boolean;
+
   /**
    * Block selection can trigger format bar
    *

@@ -176,7 +176,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         class="database-view-button dv-icon-16 dv-hover"
         @click="${this._addViewMenu}"
       >
-        ${AddCursorIcon} <span style="margin-left: 6px;">Add view</span>
+        ${AddCursorIcon}
       </div>`;
     }
     return html`

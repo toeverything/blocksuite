@@ -39,20 +39,21 @@ export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
         }
         .database-block-preview-close {
           position: absolute;
-          right: 8px;
-          top: 8px;
-          padding: 2px;
-          border-radius: 4px;
+          right: -48px;
+          top: 0;
+          padding: 10px;
+          border-radius: 8px;
           cursor: pointer;
           display: flex;
+          background-color: var(--affine-background-primary-color);
         }
         .database-block-preview-close svg {
           color: var(--affine-icon-color);
-          width: 20px;
-          height: 20px;
+          width: 16px;
+          height: 16px;
         }
         .database-block-preview-close:hover {
-          background-color: var(--affine-hover-color);
+          background-color: var(--affine-hover-color-filled);
         }
       </style>
       <div class="database-block-preview-container">
@@ -84,8 +85,17 @@ export class ExpandDatabaseBlockModal extends WithDisposable(
     }
   };
 
+  get database() {
+    return this.closest('affine-database');
+  }
+
   protected override render(): unknown {
-    if (this.closest('database-block-modal-preview')) {
+    if (
+      this.closest('database-block-modal-preview')
+      // !this.database?.page.awarenessStore.getFlag(
+      //   'enable_expand_database_block'
+      // )
+    ) {
       return;
     }
     return html` <div
