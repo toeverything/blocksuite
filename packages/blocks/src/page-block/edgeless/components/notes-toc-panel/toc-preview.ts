@@ -11,6 +11,7 @@ import {
   BulletedListIcon,
   CheckBoxIcon,
   CodeBlockIcon,
+  DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
   DividerIcon,
   ImageIcon,
@@ -23,6 +24,7 @@ import {
   type BookmarkBlockModel,
   type CodeBlockModel,
   type DatabaseBlockModel,
+  type DataViewBlockModel,
   type ImageBlockModel,
   type ListBlockModel,
   type ParagraphBlockModel,
@@ -159,6 +161,12 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
         return html`
           <span class="icon">${AttachmentIcon}</span>
           <span class="text">${block.name}</span>
+        `;
+      case 'affine:data-view':
+        assertType<DataViewBlockModel>(block);
+        return html`
+          <span class="icon">${DatabaseKanbanViewIcon}</span>
+          <span class="text">Database View</span>
         `;
       case 'affine:divider':
         assertType<DividerBlockModel>(block);

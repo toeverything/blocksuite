@@ -87,6 +87,10 @@ export function insideDatabase(model: BaseBlockModel) {
   return isInsideBlockByFlavour(model.page, model, 'affine:database');
 }
 
+export function insideDataView(model: BaseBlockModel) {
+  return isInsideBlockByFlavour(model.page, model, 'affine:data-view');
+}
+
 export function withRemoveEmptyLine(
   fn: SlashItem['action']
 ): SlashItem['action'] {

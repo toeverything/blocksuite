@@ -4,6 +4,7 @@ import { literal, unsafeStatic } from 'lit/static-html.js';
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
+import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
@@ -91,6 +92,12 @@ export const pagePreset: LitBlockSpec[] = [
     },
   },
   {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
+    },
+  },
+  {
     schema: DividerBlockSchema,
     view: {
       component: literal`affine-divider`,
@@ -154,6 +161,12 @@ export const edgelessPreset: LitBlockSpec[] = [
     service: DatabaseService,
     view: {
       component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
     },
   },
   {
