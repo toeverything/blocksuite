@@ -7,12 +7,15 @@ import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { ContentParser } from '../../__internal__/content-parser/index.js';
-import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
-import type { SerializedBlock } from '../../__internal__/utils/index.js';
-import { createPage, openFileOrFiles } from '../../__internal__/utils/index.js';
-import { columnManager } from '../../database-block/common/columns/manager.js';
-import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
+import { ContentParser } from '../../../__internal__/content-parser/index.js';
+import { REFERENCE_NODE } from '../../../__internal__/rich-text/consts.js';
+import type { SerializedBlock } from '../../../__internal__/utils/index.js';
+import {
+  createPage,
+  openFileOrFiles,
+} from '../../../__internal__/utils/index.js';
+import { columnManager } from '../../../database-block/common/columns/manager.js';
+import { richTextPureColumnConfig } from '../../../database-block/common/columns/rich-text/define.js';
 import {
   CloseIcon,
   ExportToHTMLIcon,
@@ -20,8 +23,8 @@ import {
   HelpIcon,
   NewIcon,
   NotionIcon,
-} from '../../icons/index.js';
-import type { Cell, Column } from '../../index.js';
+} from '../../../icons/index.js';
+import type { Cell, Column } from '../../../index.js';
 import { styles } from './styles.js';
 
 export type OnSuccessHandler = (
