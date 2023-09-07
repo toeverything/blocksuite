@@ -10,6 +10,7 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  clickInCenter,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingRect,
@@ -147,7 +148,8 @@ test('when the selection is always a note, it should remain in an active state',
   // assert add text success
   await assertEdgelessSelectedRect(page, [46, 597.5, 448, 128]);
 
-  await page.mouse.click(bound.x + 10, bound.y + 10);
+  await clickInCenter(page, bound);
+  await waitNextFrame(page);
   await assertSelectionInNote(page, ids.noteId);
 });
 
