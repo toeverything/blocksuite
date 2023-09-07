@@ -127,7 +127,6 @@ export async function turnIntoEmbedView(model: AttachmentBlockModel) {
   const imageConvertData = getImageData(model.id);
   const imageProp: ImageBlockProps = {
     sourceId,
-    name: model.name,
     caption: model.caption,
     ...imageConvertData,
   };
@@ -148,7 +147,7 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   const attachmentConvertData = getAttachmentData(model.id);
   const attachmentProp: AttachmentProps = {
     sourceId,
-    name: model.name,
+    name: blob.name,
     size: blob.size,
     type: blob.type,
     caption: model.caption,

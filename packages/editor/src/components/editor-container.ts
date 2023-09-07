@@ -179,12 +179,10 @@ export class EditorContainer
       ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
         const sourceId = await storage.set(file);
-        const name = file.name;
         const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
         return {
           flavour: 'affine:image',
           sourceId,
-          name,
           ...size,
         };
       },
