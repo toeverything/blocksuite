@@ -12,6 +12,7 @@ import {
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { withTempBlobData } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -178,7 +179,11 @@ export class EditorContainer
         file: File
       ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
-        const sourceId = await storage.set(file);
+        const { saveAttachmentData } = withTempBlobData();
+        const sourceId = await storage.set(
+          new Blob([file], { type: file.type })
+        );
+        saveAttachmentData(sourceId, { name: file.name });
         const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
         return {
           flavour: 'affine:image',
@@ -187,7 +192,6 @@ export class EditorContainer
         };
       },
     });
-
     this.fileDropManager.register({
       name: 'Attachment',
       matcher: (file: File) => {
@@ -203,7 +207,9 @@ export class EditorContainer
         file: File
       ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
         const storage = this.page.blobs;
-        const sourceId = await storage.set(file);
+        const sourceId = await storage.set(
+          new Blob([file], { type: file.type })
+        );
         return {
           flavour: 'affine:attachment',
           name: file.name,
