@@ -4,6 +4,7 @@ import { css, unsafeCSS } from 'lit';
 import {
   DEFAULT_ADD_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
+  DEFAULT_COLUMN_TITLE_HEIGHT,
 } from '../../consts.js';
 
 export const styles = css`
@@ -17,7 +18,6 @@ export const styles = css`
 
   .affine-database-column {
     cursor: pointer;
-    transform: translateX(0);
   }
   .database-cell {
     min-width: ${DEFAULT_COLUMN_MIN_WIDTH}px;
@@ -137,8 +137,8 @@ export const styles = css`
   }
 
   .affine-database-add-column-button {
-    visibility: hidden;
-    position: fixed;
+    position: sticky;
+    right: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -147,12 +147,17 @@ export const styles = css`
     cursor: pointer;
   }
   .header-add-column-button {
+    height: ${DEFAULT_COLUMN_TITLE_HEIGHT}px;
+    background-color: var(--affine-background-primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
-    height: 100%;
+    margin-left: 40px;
     cursor: pointer;
+  }
+  .header-add-column-button svg {
+    color: var(--affine-icon-color);
   }
 
   .affine-database-column-move-preview {

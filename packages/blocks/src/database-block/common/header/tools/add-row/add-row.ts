@@ -177,6 +177,7 @@ declare global {
 }
 const createDropPreview = () => {
   const div = document.createElement('div');
+  div.setAttribute('data-is-drop-preview', 'true');
   div.style.pointerEvents = 'none';
   div.style.position = 'fixed';
   div.style.zIndex = '9999';

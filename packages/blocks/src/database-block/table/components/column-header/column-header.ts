@@ -1,15 +1,15 @@
 import './database-header-column.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { autoUpdate, computePosition, shift } from '@floating-ui/dom';
+import { customElement, property } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { getDocPageByElement } from '../../../../__internal__/index.js';
-import { DatabaseAddColumn } from '../../../../icons/index.js';
-import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
+import { renderTemplate } from '../../../../components/uni-component/uni-component.js';
+import { AddCursorIcon } from '../../../../icons/index.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
 
@@ -20,96 +20,63 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   tableViewManager!: DataViewTableManager;
 
-  @query('.affine-database-column-header')
-  private _headerContainer!: HTMLElement;
-
-  @query('.affine-database-add-column-button')
-  private _addColumnButton!: HTMLElement;
-
-  @query('.header-add-column-button')
-  private _headerAddColumnButton!: HTMLElement;
-
-  private _isHeaderHover = false;
-
   private get readonly() {
     return this.tableViewManager.readonly;
   }
+  private addColumnPositionRef = createRef();
+  addColumnButton = renderTemplate(() => {
+    return html`<div
+      @click="${this._onAddColumn}"
+      class="header-add-column-button dv-hover"
+    >
+      ${AddCursorIcon}
+    </div>`;
+  });
 
-  override firstUpdated() {
-    if (this.readonly) return;
-    this._disposables.add(
+  public override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.add(
       this.tableViewManager.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-
-    this._initHeaderMousemoveHandlers();
-
-    const databaseElement = this.closest('.data-view-root');
-    if (databaseElement) {
-      this._initResizeEffect(databaseElement);
-    }
-  }
-
-  private _initResizeEffect(element: Element) {
-    const pageBlock = getDocPageByElement(this);
-    const viewportElement = pageBlock?.viewportElement;
-    if (viewportElement) {
-      const resizeObserver = new ResizeObserver(
-        (entries: ResizeObserverEntry[]) => {
-          for (const { target } of entries) {
-            if (target === viewportElement) {
-              const { right: containerRight } = element.getBoundingClientRect();
-              // calc the position of add column button
-              this._addColumnButton.style.left = `${containerRight}px`;
-              break;
-            }
-          }
-        }
+    this.addColumnButton.style.position = 'absolute';
+    this.addColumnButton.style.zIndex = '1';
+    this.closest('affine-data-view-native')?.append(this.addColumnButton);
+    requestAnimationFrame(() => {
+      const referenceEl = this.addColumnPositionRef.value;
+      if (!referenceEl) {
+        return;
+      }
+      const cleanup = autoUpdate(
+        referenceEl,
+        this.addColumnButton,
+        this.updateAddButton
       );
-      resizeObserver.observe(viewportElement);
-    }
+      this.disposables.add({
+        dispose: cleanup,
+      });
+    });
   }
 
-  private _initHeaderMousemoveHandlers() {
-    this._disposables.addFromEvent(
-      this._headerContainer,
-      'mouseover',
-      event => {
-        this._isHeaderHover = true;
-        this.showAddColumnButton(event);
-      }
-    );
-    this._disposables.addFromEvent(
-      this._headerContainer,
-      'mouseleave',
-      event => {
-        this._isHeaderHover = false;
-        this.showAddColumnButton(event);
-      }
-    );
-  }
-
-  showAddColumnButton = (event?: MouseEvent) => {
-    const databaseElement = this.closest('.data-view-root');
-    assertExists(databaseElement);
-    const { right: boundaryRight } = databaseElement.getBoundingClientRect();
-    const { left: headerAddColumnButtonLeft } =
-      this._headerAddColumnButton.getBoundingClientRect();
-
-    let isInHeader = true;
-    if (event) {
-      // mouse over the header
-      isInHeader =
-        event.offsetY <= DEFAULT_COLUMN_TITLE_HEIGHT && event.offsetY >= 0;
+  updateAddButton = () => {
+    const referenceEl = this.addColumnPositionRef.value;
+    if (!referenceEl) {
+      return;
     }
-
-    const needShow = boundaryRight <= headerAddColumnButtonLeft;
-    if (needShow && this._isHeaderHover && isInHeader) {
-      this._addColumnButton.style.visibility = 'visible';
-    } else {
-      this._addColumnButton.style.visibility = 'hidden';
-    }
+    computePosition(referenceEl, this.addColumnButton, {
+      middleware: [
+        shift({
+          boundary: this.closest('affine-database-table') ?? this,
+          padding: -40,
+        }),
+      ],
+    }).then(({ x, y }) => {
+      Object.assign(this.addColumnButton.style, {
+        left: `${x}px`,
+        top: `${y}px`,
+      });
+    });
   };
 
   private _onAddColumn = () => {
@@ -128,6 +95,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   };
 
   override render() {
+    this.updateAddButton();
     return html`
       <div class="affine-database-column-header database-row">
         ${repeat(
@@ -148,25 +116,10 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
             ></affine-database-header-column>`;
           }
         )}
-        <div class="affine-database-column database-cell add-column-button">
-          ${this.readonly
-            ? null
-            : html` <div
-                class="header-add-column-button"
-                @click="${this._onAddColumn}"
-              >
-                ${DatabaseAddColumn}
-              </div>`}
-        </div>
-        ${this.readonly
-          ? null
-          : html` <div
-              class="affine-database-add-column-button"
-              data-test-id="affine-database-add-column-button"
-              @click="${this._onAddColumn}"
-            >
-              ${DatabaseAddColumn}
-            </div>`}
+        <div
+          style="background-color: var(--affine-border-color);width: 1px;"
+        ></div>
+        <div style="height: 0;" ${ref(this.addColumnPositionRef)}></div>
       </div>
     `;
   }

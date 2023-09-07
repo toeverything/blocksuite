@@ -4,7 +4,6 @@ import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/selection.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
@@ -25,7 +24,6 @@ import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { TableViewClipboard } from './clipboard.js';
-import type { DatabaseColumnHeader } from './components/column-header/column-header.js';
 import { openDetail, popRowMenu } from './components/menu.js';
 import type { DatabaseSelectionView } from './components/selection.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './consts.js';
@@ -169,12 +167,6 @@ export class DatabaseTable extends BaseDataView<
 > {
   static override styles = styles;
 
-  @query('.affine-database-table-container')
-  private _tableContainer!: HTMLDivElement;
-
-  @query('affine-database-column-header')
-  private _columnHeaderComponent!: DatabaseColumnHeader;
-
   @query('affine-database-selection')
   public selection!: DatabaseSelectionView;
 
@@ -199,20 +191,7 @@ export class DatabaseTable extends BaseDataView<
     clipboard.init();
 
     if (this.readonly) return;
-    requestAnimationFrame(() => {
-      const tableContent = this._tableContainer.parentElement;
-      assertExists(tableContent);
-      this._disposables.addFromEvent(
-        tableContent,
-        'scroll',
-        this._onDatabaseScroll
-      );
-    });
   }
-
-  private _onDatabaseScroll = () => {
-    this._columnHeaderComponent.showAddColumnButton();
-  };
 
   public override addRow(position: InsertPosition) {
     this._addRow(this.view, position);
