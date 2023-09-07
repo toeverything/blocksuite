@@ -30,19 +30,17 @@ type TraverseContext = {
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
   private markdownBuffer = new StringBuilder();
 
-  async convertPageSnapshotToAdapterTarget({
-    snapshot,
-  }: PageSnapshotPayload): Promise<Markdown> {
+  async fromPageSnapshot({ snapshot }: PageSnapshotPayload): Promise<Markdown> {
     const buffer = new StringBuilder();
     buffer.write(`# ${snapshot.meta.title}\n`);
     buffer.write(
-      await this.convertBlockSnapshotToAdapterTarget({
+      await this.fromBlockSnapshot({
         snapshot: snapshot.blocks,
       })
     );
     return buffer.toString();
   }
-  async convertBlockSnapshotToAdapterTarget({
+  async fromBlockSnapshot({
     snapshot,
   }: BlockSnapshotPayload): Promise<Markdown> {
     this.traverseSnapshot(snapshot, {
@@ -179,14 +177,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     }
   };
 
-  async convertAdapterTargetToPageSnapshot(
-    _file: Markdown
-  ): Promise<PageSnapshotReturn> {
+  async toPageSnapshot(_file: Markdown): Promise<PageSnapshotReturn> {
     throw new Error('Method not implemented.');
   }
-  async convertAdapterTargetToBlockSnapshot(
-    _file: Markdown
-  ): Promise<BlockSnapshotReturn> {
+  async toBlockSnapshot(_file: Markdown): Promise<BlockSnapshotReturn> {
     throw new Error('Method not implemented.');
   }
 
