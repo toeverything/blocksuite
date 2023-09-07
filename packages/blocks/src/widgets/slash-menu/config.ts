@@ -159,8 +159,6 @@ export const menuGroups: {
       {
         name: 'New Page',
         icon: NewPageIcon,
-        showWhen: model =>
-          !!model.page.awarenessStore.getFlag('enable_linked_page'),
         action: async ({ pageElement, model }) => {
           const newPage = await createPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
@@ -176,9 +174,6 @@ export const menuGroups: {
         alias: ['dual link'],
         icon: DualLinkIcon,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_linked_page')) {
-            return false;
-          }
           const pageBlock = getPageBlock(model);
           assertExists(pageBlock);
           const linkedPageWidgetEle = pageBlock.widgetElements.linkedPage;
@@ -270,8 +265,6 @@ export const menuGroups: {
         icon: AttachmentIcon,
         alias: ['attachment'],
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_attachment_block'))
-            return false;
           if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
             return false;
           return !insideDatabase(model);

@@ -37,8 +37,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-
     this._page.captureSync();
     const { viewport } = this._edgeless.surface;
 
@@ -58,7 +56,6 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     if (!this._draggingElementId) return;
 
     assertExists(this._draggingElementId);
