@@ -40,8 +40,8 @@ export async function json2block(
   let splitPostModel: BaseBlockModel | null = null;
 
   if (
-    focusedBlockModel.text?.length !==
-      textRangePoint.index + textRangePoint.length &&
+    focusedBlockModel.text &&
+    focusedBlockModel.text?.length > textRangePoint.index &&
     (pastedBlocks.length > 1 || firstBlock.children.length > 0)
   ) {
     await handleBlockSplit(page, focusedBlockModel, textRangePoint.index, 0);
@@ -105,7 +105,8 @@ export async function json2block(
 
   if (shouldMergeLastBlock) {
     const nextSiblingModel = splitPostModel || page.getNextSibling(lastModel);
-    console.log(nextSiblingModel);
+    const rangeOffset = lastModel.text?.length || 0;
+
     if (nextSiblingModel) {
       lastModel.text?.join(nextSiblingModel?.text as Text);
       if (
@@ -123,7 +124,6 @@ export async function json2block(
     }
 
     // Wait for the block's rich text mounted
-    const rangeOffset = lastModel.text?.length || 0;
     requestAnimationFrame(() => {
       setRange(lastModel, {
         index: rangeOffset,
@@ -147,7 +147,9 @@ export async function json2block(
     }
   }
 
-  isFocusedBlockEmpty && page.deleteBlock(focusedBlockModel);
+  if (isFocusedBlockEmpty && splitPostModel) {
+    page.deleteBlock(focusedBlockModel);
+  }
 }
 
 async function setRange(model: BaseBlockModel, vRange: VRange) {
