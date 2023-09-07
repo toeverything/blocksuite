@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 
 import {
+  captureHistory,
   dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
@@ -267,6 +268,8 @@ test('split paragraph block with selected text by enter', async ({ page }) => {
 
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
+  // Avoid Yjs history manager merge two operations
+  await captureHistory(page);
 
   // select 'll'
   await page.keyboard.press('ArrowLeft');
@@ -302,7 +305,7 @@ test('add multi line by soft enter', async ({ page }) => {
   await pressArrowLeft(page, 3);
   await assertSelection(page, 0, 2, 0);
   // Avoid Yjs history manager merge two operations
-  await page.waitForTimeout(500);
+  await captureHistory(page);
 
   await pressShiftEnter(page);
   await assertRichTexts(page, ['he\nllo']);
