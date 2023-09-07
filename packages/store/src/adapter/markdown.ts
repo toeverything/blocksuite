@@ -27,7 +27,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     let buffer = '';
     buffer += `# ${snapshot.meta.title}\n`;
     buffer += await this.convertBlockSnapshotToAdapterTarget({
-      snapshot: snapshot.block,
+      snapshot: snapshot.blocks,
     });
     return buffer.toString();
   }

@@ -106,7 +106,7 @@ export class Job {
       })
     );
     return {
-      type: 'snapshot:block',
+      type: 'block',
       ...snapshot,
       children,
     };
@@ -170,11 +170,11 @@ export class Job {
     const root = page.root;
     const meta = this._exportPageMeta(page);
     assertExists(root);
-    const block = await this.blockToSnapshot(root);
+    const blocks = await this.blockToSnapshot(root);
     const pageSnapshot: PageSnapshot = {
-      type: 'snapshot:page',
+      type: 'page',
       meta,
-      block,
+      blocks,
     };
 
     PageSnapshotSchema.parse(pageSnapshot);
@@ -184,11 +184,11 @@ export class Job {
   snapshotToPage = async (snapshot: PageSnapshot): Promise<Page> => {
     PageSnapshotSchema.parse(snapshot);
 
-    const { meta, block } = snapshot;
+    const { meta, blocks } = snapshot;
     const page = this._workspace.createPage({ id: meta.id });
     await page.waitForLoaded();
     this._importPageMeta(page, meta);
-    await this.snapshotToBlock(block, page);
+    await this.snapshotToBlock(blocks, page);
 
     return page;
   };
@@ -197,9 +197,7 @@ export class Job {
     const workspaceMeta = this._getWorkspaceMeta();
 
     const snapshot: WorkspaceInfoSnapshot = {
-      type: 'snapshot:workspace:info',
-      app: '@toeverything/blocksuite',
-      source: 'github.com/toeverything/blocksuite',
+      type: 'info',
       id: this._workspace.id,
       ...workspaceMeta,
     };

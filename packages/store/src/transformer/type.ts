@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { PageMeta, PagesPropertiesMeta } from '../workspace/meta.js';
 
 export type BlockSnapshot = {
-  type: 'snapshot:block';
+  type: 'block';
   id: string;
   flavour: string;
   props: Record<string, unknown>;
@@ -11,7 +11,7 @@ export type BlockSnapshot = {
 };
 
 export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
-  type: z.literal('snapshot:block'),
+  type: z.literal('block'),
   id: z.string(),
   flavour: z.string(),
   props: z.record(z.unknown()),
@@ -20,9 +20,7 @@ export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
 
 export type WorkspaceInfoSnapshot = {
   id: string;
-  app: '@toeverything/blocksuite';
-  source: 'github.com/toeverything/blocksuite';
-  type: 'snapshot:workspace:info';
+  type: 'info';
   blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
@@ -32,9 +30,7 @@ export type WorkspaceInfoSnapshot = {
 export const WorkspaceInfoSnapshotSchema: z.ZodType<WorkspaceInfoSnapshot> =
   z.object({
     id: z.string(),
-    app: z.literal('@toeverything/blocksuite'),
-    source: z.literal('github.com/toeverything/blocksuite'),
-    type: z.literal('snapshot:workspace:info'),
+    type: z.literal('info'),
     blockVersions: z.record(z.number()),
     pageVersion: z.number(),
     workspaceVersion: z.number(),
@@ -42,9 +38,9 @@ export const WorkspaceInfoSnapshotSchema: z.ZodType<WorkspaceInfoSnapshot> =
   });
 
 export type PageSnapshot = {
-  type: 'snapshot:page';
+  type: 'page';
   meta: PageMeta;
-  block: BlockSnapshot;
+  blocks: BlockSnapshot;
 };
 
 const PageMetaSchema = z.object({
@@ -55,7 +51,7 @@ const PageMetaSchema = z.object({
 });
 
 export const PageSnapshotSchema: z.ZodType<PageSnapshot> = z.object({
-  type: z.literal('snapshot:page'),
+  type: z.literal('page'),
   meta: PageMetaSchema,
-  block: BlockSnapshotSchema,
+  blocks: BlockSnapshotSchema,
 });
