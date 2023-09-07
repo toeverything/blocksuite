@@ -20,6 +20,7 @@ import {
   getEditorLocator,
   getRichTextBoundingBox,
   getVirgoSelectionIndex,
+  getVirgoSelectionText,
   importMarkdown,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
@@ -480,26 +481,19 @@ test('copy a nested list block, the clipboard data should be complete', async ({
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  /**
-   * - aaa
-   *   - bbb
-   *     - ccc
-   */
-  await type(page, '-');
-  await pressSpace(page);
-  await type(page, 'aaa');
-  await pressEnter(page);
-
-  await pressTab(page);
-  await type(page, 'bbb');
-  await pressEnter(page);
-
-  await pressTab(page);
-  await type(page, 'ccc');
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+`,
+  };
+  await pasteContent(page, clipData);
 
   const rootListBound = await page.locator('affine-list').first().boundingBox();
   assertExists(rootListBound);
 
+  // use drag element to test.
   await dragBetweenCoords(
     page,
     { x: rootListBound.x + 1, y: rootListBound.y - 1 },
@@ -557,15 +551,14 @@ test('paste a nested list block, the cursor position should be correct', async (
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await type(page, '-');
-  await pressSpace(page);
-  await type(page, 'aaa');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, 'bbb');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, 'ccc');
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+`,
+  };
+  await pasteContent(page, clipData);
 
   const rootListBound = await page.locator('affine-list').first().boundingBox();
   assertExists(rootListBound);
@@ -595,6 +588,8 @@ test('paste a nested list block, the cursor position should be correct', async (
    *       - ccc|b
    *     - ccc
    */
+  const text = await getVirgoSelectionText(page);
+  expect(text).toEqual('cccb');
   const rangeIndex = await getVirgoSelectionIndex(page);
   expect(rangeIndex === 3).toBeTruthy();
 });
@@ -606,19 +601,19 @@ test('paste a nested list block, the content should be correct', async ({
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
-  await type(page, '-');
-  await pressSpace(page);
-  await type(page, 'aaa');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, 'bbb');
-  await pressEnter(page);
-  await pressTab(page);
-  await type(page, 'ccc');
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+`,
+  };
+  await pasteContent(page, clipData);
 
   const rootListBound = await page.locator('affine-list').first().boundingBox();
   assertExists(rootListBound);
 
+  // use drag element to test.
   await dragBetweenCoords(
     page,
     { x: rootListBound.x + 1, y: rootListBound.y - 1 },
@@ -683,6 +678,177 @@ test('paste a nested list block, the content should be correct', async ({
     </affine:list>
   </affine:note>
 </affine:page>`
+  );
+});
+
+test('paste multiple nested list blocks, the cursor position should be correct', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+- 111
+  - 222
+    - 333
+`,
+  };
+  await pasteContent(page, clipData);
+  await focusRichText(page, 1);
+
+  /**
+   * - aaa|
+   *   - bbb
+   *     - ccc
+   * - 111
+   *   - 222
+   *     - 333
+   */
+
+  await pasteContent(page, clipData);
+
+  /**
+   * - aaaaaa
+   *   - bbb
+   *     - ccc
+   *   - 111
+   *     - 222
+   *       - 333|
+   *   - bbb
+   *     - ccc
+   * - 111
+   *   - 222
+   *     - 333
+   */
+  const text = await getVirgoSelectionText(page);
+  expect(text).toEqual('333');
+  const rangeIndex = await getVirgoSelectionIndex(page);
+  expect(rangeIndex === 3).toBeTruthy();
+});
+
+test('paste multiple nested list blocks, the content should be correct', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+- 111
+  - 222
+    - 333
+`,
+  };
+  await pasteContent(page, clipData);
+  await focusRichText(page, 0);
+
+  /**
+   * - aaa|
+   *   - bbb
+   *     - ccc
+   * - 111
+   *   - 222
+   *     - 333
+   */
+
+  await pasteContent(page, clipData);
+
+  /**
+   * - aaaaaa
+   *   - bbb
+   *     - ccc
+   *   - 111
+   *     - 222
+   *       - 333|
+   *   - bbb
+   *     - ccc
+   * - 111
+   *   - 222
+   *     - 333
+   */
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:text="aaaaaa"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="bbb"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="ccc"
+          prop:type="bulleted"
+        />
+      </affine:list>
+      <affine:list
+        prop:checked={false}
+        prop:text="111"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="222"
+          prop:type="bulleted"
+        >
+          <affine:list
+            prop:checked={false}
+            prop:text="333"
+            prop:type="bulleted"
+          />
+        </affine:list>
+      </affine:list>
+      <affine:list
+        prop:checked={false}
+        prop:text="bbb"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="ccc"
+          prop:type="bulleted"
+        />
+      </affine:list>
+    </affine:list>
+    <affine:list
+      prop:checked={false}
+      prop:text="111"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="222"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="333"
+          prop:type="bulleted"
+        />
+      </affine:list>
+    </affine:list>
+  </affine:note>
+</affine:page>
+`
   );
 });
 
