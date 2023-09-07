@@ -9,7 +9,8 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../../../../__internal__/index.js';
 import { createModal } from '../../../../../components/menu/index.js';
-import { ExpandWideIcon } from '../../../../../icons/index.js';
+import { renderTemplate } from '../../../../../components/uni-component/uni-component.js';
+import { CrossIcon, ExpandWideIcon } from '../../../../../icons/index.js';
 import type { DatabaseBlockComponent } from '../../../../database-block.js';
 import { DatabaseSelection } from '../../../selection.js';
 
@@ -20,26 +21,56 @@ export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const close = () => {
     modal.remove();
   };
-  const div = document.createElement('div');
-  div.style.position = 'absolute';
-  div.style.display = 'flex';
-  div.style.padding = '12px';
-  div.style.borderRadius = '8px';
-  div.style.left = '0';
-  div.style.right = '0';
-  div.style.margin = 'auto';
-  div.style.marginTop = '20px';
-  div.style.width = '80%';
-  div.style.maxHeight = '80%';
-  div.style.boxShadow = 'var(--affine-shadow-1)';
-  div.style.backgroundColor = 'var(--affine-background-primary-color)';
-  div.append(viewComponent);
-  div.onclick = e => {
+  const container = renderTemplate(() => {
+    return html`
+      <style>
+        .database-block-preview-container {
+          position: absolute;
+          display: flex;
+          padding: 24px 53px;
+          border-radius: 8px;
+          left: 0;
+          right: 0;
+          margin: 20px auto auto;
+          width: calc(100% - 300px);
+          max-height: calc(100% - 40px);
+          box-shadow: var(--affine-shadow-1);
+          background-color: var(--affine-background-primary-color);
+        }
+        .database-block-preview-close {
+          position: absolute;
+          right: 8px;
+          top: 8px;
+          padding: 2px;
+          border-radius: 4px;
+          cursor: pointer;
+          display: flex;
+        }
+        .database-block-preview-close svg {
+          color: var(--affine-icon-color);
+          width: 20px;
+          height: 20px;
+        }
+        .database-block-preview-close:hover {
+          background-color: var(--affine-hover-color);
+        }
+      </style>
+      <div class="database-block-preview-container">
+        <database-block-modal-preview
+          .database="${database}"
+        ></database-block-modal-preview>
+        <div @click="${close}" class="database-block-preview-close">
+          ${CrossIcon}
+        </div>
+      </div>
+    `;
+  });
+  container.onclick = e => {
     e.stopPropagation();
   };
   modal.onclick = close;
   modal.style.backgroundColor = 'var(--affine-black-60)';
-  modal.append(div);
+  modal.append(container);
 }
 
 @customElement('expand-database-block-modal')

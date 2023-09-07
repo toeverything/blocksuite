@@ -146,7 +146,7 @@ export class AnyRender<T> extends ShadowlessElement {
   }
 }
 
-export const defineComponent = <T>(
+export const renderTemplate = <T>(
   renderTemplate: (props: T) => TemplateResult
 ) => {
   const ins = new AnyRender<T>();

@@ -73,6 +73,9 @@ export class PageMetaData extends WithDisposable(LitElement) {
       justify-content: center;
       margin-right: 12px;
     }
+    .expand svg {
+      color: var(--affine-icon-color);
+    }
 
     .meta-data-expanded {
       padding: 10px 12px 24px;
