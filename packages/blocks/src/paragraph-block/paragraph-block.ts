@@ -212,6 +212,12 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     // Initial placeholder state

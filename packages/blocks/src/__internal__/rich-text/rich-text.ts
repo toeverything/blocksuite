@@ -101,6 +101,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     this._vEditor = null;
   }
 
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.vEditor?.waitForUpdate();
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 

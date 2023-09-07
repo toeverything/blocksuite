@@ -4,11 +4,12 @@ import '../__internal__/rich-text/rich-text.js';
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
@@ -60,6 +61,15 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     }
     this._select();
   };
+
+  @query('rich-text')
+  private _richTextElement?: RichText;
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
+  }
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());

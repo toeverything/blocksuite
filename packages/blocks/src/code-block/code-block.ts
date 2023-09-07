@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -255,6 +256,15 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       throw new Error('Virgo root not found');
     }
     return vRoot.virgoEditor;
+  }
+
+  @query('rich-text')
+  private _richTextElement?: RichText;
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
   }
 
   override connectedCallback() {
