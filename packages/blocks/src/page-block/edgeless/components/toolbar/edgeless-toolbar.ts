@@ -25,6 +25,7 @@ import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js'
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
 import { toast } from '../../../../components/toast.js';
 import {
+  ArrowUpIcon,
   EdgelessEraserIcon,
   EdgelessImageIcon,
   EdgelessTextIcon,
@@ -83,6 +84,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       gap: 8px;
+    }
+    edgeless-tool-icon-button svg + svg {
+      position: absolute;
+      top: 4px;
+      right: 2px;
     }
     .short-divider {
       width: 1px;
@@ -450,21 +456,21 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
     return html`<div class="edgeless-toolbar-left-part">
         <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Select', 'V')}
-          .active=${type === 'default'}
+          .tooltip=${type === 'pan'
+            ? getTooltipWithShortcut('Hand', 'H')
+            : getTooltipWithShortcut('Select', 'V')}
+          .active=${type === 'default' || type === 'pan'}
           .iconContainerPadding=${8}
-          @click=${() => this.setEdgelessTool({ type: 'default' })}
+          @click=${() => {
+            if (type === 'default') {
+              this.setEdgelessTool({ type: 'pan', panning: false });
+            } else {
+              // 'pan' or other cases
+              this.setEdgelessTool({ type: 'default' });
+            }
+          }}
         >
-          ${SelectIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-          .active=${type === 'pan'}
-          .iconContainerPadding=${8}
-          @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
-        >
-          ${HandIcon}
+          ${type === 'pan' ? HandIcon : SelectIcon} ${ArrowUpIcon}
         </edgeless-tool-icon-button>
 
         <edgeless-connector-tool-button
