@@ -12,6 +12,7 @@ import {
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { withTempConvertData } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -178,9 +179,11 @@ export class EditorContainer
         file: File
       ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
+        const { saveAttachmentData } = withTempConvertData();
         const sourceId = await storage.set(
           new Blob([file], { type: file.type })
         );
+        saveAttachmentData(sourceId, { name: file.name });
         const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
         return {
           flavour: 'affine:image',

@@ -17,6 +17,7 @@ import { defaultAttachmentProps } from './attachment-model.js';
 
 // 10MB
 export const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
 export function cloneAttachmentProperties(
   model: BaseBlockModel<AttachmentBlockModel>
@@ -82,8 +83,11 @@ const tempImageMap = new Map<
   }
 >();
 
-const withTempConvertData = () => {
-  const saveAttachmentData = (newId: string, model: AttachmentBlockModel) => {
+/**
+ * @internal
+ */
+export const withTempConvertData = () => {
+  const saveAttachmentData = (sourceId: string, data: { name: string }) => {
     if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) {
       console.warn(
         'Clear the temp attachment data. It may cause filename loss when converting between image and attachment.'
@@ -91,8 +95,7 @@ const withTempConvertData = () => {
       tempAttachmentMap.clear();
     }
 
-    const { name } = model;
-    tempAttachmentMap.set(newId, { name });
+    tempAttachmentMap.set(sourceId, data);
   };
   const getAttachmentData = (blockId: string) => {
     const data = tempAttachmentMap.get(blockId);
@@ -100,7 +103,10 @@ const withTempConvertData = () => {
     return data;
   };
 
-  const saveImageData = (newId: string, model: ImageBlockModel) => {
+  const saveImageData = (
+    sourceId: string,
+    data: { width: number | undefined; height: number | undefined }
+  ) => {
     if (tempImageMap.size > MAX_TEMP_DATA_SIZE) {
       console.warn(
         'Clear temp image data. It may cause image width and height loss when converting between image and attachment.'
@@ -108,8 +114,7 @@ const withTempConvertData = () => {
       tempImageMap.clear();
     }
 
-    const { width, height } = model;
-    tempImageMap.set(newId, { width, height });
+    tempImageMap.set(sourceId, data);
   };
   const getImageData = (blockId: string) => {
     const data = tempImageMap.get(blockId);
@@ -134,14 +139,14 @@ export async function turnIntoEmbedView(model: AttachmentBlockModel) {
   const sourceId = model.sourceId;
   assertExists(sourceId);
   const { saveAttachmentData, getImageData } = withTempConvertData();
+  saveAttachmentData(sourceId, { name: model.name });
   const imageConvertData = getImageData(model.id);
   const imageProp: ImageBlockProps = {
     sourceId,
     caption: model.caption,
     ...imageConvertData,
   };
-  const id = transformModel(model, 'affine:image', imageProp);
-  saveAttachmentData(id, model);
+  transformModel(model, 'affine:image', imageProp);
 }
 
 /**
@@ -154,17 +159,17 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   const sourceId = model.sourceId;
   assertExists(sourceId);
   const { saveImageData, getAttachmentData } = withTempConvertData();
+  saveImageData(sourceId, { width: model.width, height: model.height });
   const attachmentConvertData = getAttachmentData(model.id);
   const attachmentProp: AttachmentProps = {
     sourceId,
-    name: blob.name,
+    name: DEFAULT_ATTACHMENT_NAME,
     size: blob.size,
     type: blob.type,
     caption: model.caption,
     ...attachmentConvertData,
   };
-  const id = transformModel(model, 'affine:attachment', attachmentProp);
-  saveImageData(id, model);
+  transformModel(model, 'affine:attachment', attachmentProp);
 }
 
 async function uploadFileForAttachment(
