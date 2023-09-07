@@ -1,9 +1,5 @@
 declare type BlockSuiteFlags = {
   enable_set_remote_flag: boolean;
-  enable_database: boolean;
-  enable_database_filter: boolean;
-  enable_data_view: boolean;
-  enable_page_tags: boolean;
   enable_drag_handle: boolean;
   enable_surface: boolean;
   enable_block_hub: boolean;
