@@ -20,7 +20,8 @@ import type {
   NoteBlockModel,
   PageBlockModel,
 } from '../../packages/blocks/src/index.js';
-import { assertExists, toHex } from '../../packages/global/src/utils.js';
+import { assertExists } from '../../packages/global/src/utils.js';
+import { toHex } from '../../packages/global/src/utils.js';
 import type { BlockElement } from '../../packages/lit/src/index.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
@@ -77,6 +78,7 @@ export const defaultStore: SerializedStore = {
       'affine:paragraph': 1,
       'affine:page': 2,
       'affine:database': 3,
+      'affine:data-view': 1,
       'affine:list': 1,
       'affine:note': 1,
       'affine:divider': 1,

@@ -5,7 +5,7 @@ import '@blocksuite/editor';
 import '@blocksuite/editor/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProviderCreator, Page } from '@blocksuite/store';
@@ -173,7 +173,6 @@ async function main() {
       return document.querySelector('block-suite-root') as BlockSuiteRoot;
     },
   });
-  workspace.awarenessStore.setFlag('enable_page_tags', true);
 
   subscribePage(workspace);
   initWorkspace(workspace);
