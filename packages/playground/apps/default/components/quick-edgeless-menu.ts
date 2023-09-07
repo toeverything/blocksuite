@@ -30,6 +30,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import {
   exportPagesZip,
   importPagesZip,
+  MarkdownAdapter,
   Utils,
   type Workspace,
 } from '@blocksuite/store';
@@ -339,6 +340,27 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.contentParser.exportMarkdown();
   }
 
+  private _exportMarkDownExperimentalAdapter() {
+    window.job.pageToSnapshot(window.page).then(snapshot => {
+      new MarkdownAdapter()
+        .convertPageSnapshotToAdapterTarget({
+          snapshot,
+        })
+        .then(markdown => {
+          const blob = new Blob([markdown], { type: 'plain/text' });
+          const fileURL = URL.createObjectURL(blob);
+          const element = document.createElement('a');
+          element.setAttribute('href', fileURL);
+          element.setAttribute('download', 'export.md');
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+          URL.revokeObjectURL(fileURL);
+        });
+    });
+  }
+
   private _exportPng() {
     this.contentParser.exportPng();
   }
@@ -574,7 +596,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   <sl-dropdown
                     id="test-operations-dropdown"
                     placement="right-start"
-                    .distance=${41.5}
+                    .distance=${40.5}
                     hoist
                   >
                     <span slot="trigger">Test operations</span>
@@ -587,6 +609,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                       >
                       <sl-menu-item @click=${this._exportMarkDown}>
                         Export Markdown
+                      </sl-menu-item>
+                      <sl-menu-item
+                        @click=${this._exportMarkDownExperimentalAdapter}
+                      >
+                        Export Markdown (Experimental Adapter)
                       </sl-menu-item>
                       <sl-menu-item @click=${this._exportHtml}>
                         Export HTML

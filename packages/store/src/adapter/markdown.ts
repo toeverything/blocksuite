@@ -8,6 +8,7 @@ import {
   type PageSnapshotPayload,
   type PageSnapshotReturn,
 } from './base.js';
+import { StringBuilder } from './string-builder.js';
 
 export type Markdown = string;
 
@@ -20,111 +21,164 @@ const markdownConvertableFlavours = [
   'affine:database',
 ];
 
+type TraverseContext = {
+  indentDepth: number;
+  insideTheLists: boolean;
+  numberedListCount: number[];
+};
+
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
+  private markdownBuffer = new StringBuilder();
+
   async convertPageSnapshotToAdapterTarget({
     snapshot,
   }: PageSnapshotPayload): Promise<Markdown> {
-    let buffer = '';
-    buffer += `# ${snapshot.meta.title}\n`;
-    buffer += await this.convertBlockSnapshotToAdapterTarget({
-      snapshot: snapshot.blocks,
-    });
+    const buffer = new StringBuilder();
+    buffer.write(`# ${snapshot.meta.title}\n`);
+    buffer.write(
+      await this.convertBlockSnapshotToAdapterTarget({
+        snapshot: snapshot.blocks,
+      })
+    );
     return buffer.toString();
   }
   async convertBlockSnapshotToAdapterTarget({
     snapshot,
   }: BlockSnapshotPayload): Promise<Markdown> {
-    let buffer = '';
-    const traverseSnapshot = (snapshot: BlockSnapshot) => {
-      if (markdownConvertableFlavours.includes(snapshot.flavour)) {
-        const text =
-          (snapshot.props.text as { delta: DeltaInsert[] }) ?? undefined;
-        switch (snapshot.flavour) {
-          case 'affine:code': {
-            buffer += `\`\`\`${snapshot.props.language ?? ''}\n`;
-            if (
-              Array.isArray(text?.delta) &&
-              text?.delta.every(delta => typeof delta === 'object')
-            ) {
-              buffer += this.deltaToMarkdown(text?.delta as DeltaInsert[]);
-            }
-            buffer += '\n```\n';
-            break;
+    this.traverseSnapshot(snapshot, {
+      indentDepth: 0,
+      insideTheLists: false,
+      numberedListCount: [0],
+    });
+    return this.markdownBuffer.toString();
+  }
+
+  traverseSnapshot = (snapshot: BlockSnapshot, context: TraverseContext) => {
+    if (markdownConvertableFlavours.includes(snapshot.flavour)) {
+      const text =
+        (snapshot.props.text as { delta: DeltaInsert[] }) ?? undefined;
+      if (context.insideTheLists && snapshot.flavour !== 'affine:list') {
+        this.markdownBuffer.write('\n');
+        context.insideTheLists = false;
+        context.numberedListCount = [0];
+      }
+      switch (snapshot.flavour) {
+        case 'affine:code': {
+          this.markdownBuffer.write(`\`\`\`${snapshot.props.language ?? ''}\n`);
+          if (
+            Array.isArray(text?.delta) &&
+            text?.delta.every(delta => typeof delta === 'object')
+          ) {
+            this.markdownBuffer.write(
+              this.deltaToMarkdown(text?.delta as DeltaInsert[])
+            );
           }
-          case 'affine:paragraph': {
-            switch (snapshot.props.type) {
-              case 'h1': {
-                buffer += '# ';
-                break;
-              }
-              case 'h2': {
-                buffer += '## ';
-                break;
-              }
-              case 'h3': {
-                buffer += '### ';
-                break;
-              }
-              case 'h4': {
-                buffer += '#### ';
-                break;
-              }
-              case 'h5': {
-                buffer += '##### ';
-                break;
-              }
-              case 'h6': {
-                buffer += '###### ';
-                break;
-              }
-              case 'text': {
-                break;
-              }
-              case 'quote': {
-                buffer += '> ';
-                break;
-              }
-            }
-            if (
-              Array.isArray(text?.delta) &&
-              text?.delta.every(delta => typeof delta === 'object')
-            ) {
-              buffer += this.deltaToMarkdown(text?.delta as DeltaInsert[]);
-            }
-            buffer += '\n\n';
-            break;
-          }
-          case 'affine:list': {
-            buffer += '- ';
-            if (
-              Array.isArray(text?.delta) &&
-              text?.delta.every(delta => typeof delta === 'object')
-            ) {
-              buffer += this.deltaToMarkdown(text?.delta as DeltaInsert[]);
-            }
-            buffer += '\n';
-            break;
-          }
-          case 'affine:divider': {
-            buffer += '---\n';
-            break;
-          }
-          case 'affine:image': {
-            break;
-          }
-          case 'affine:database': {
-            break;
-          }
+          this.markdownBuffer.write('\n```\n');
+          break;
         }
-      } else {
-        for (const child of snapshot.children) {
-          traverseSnapshot(child);
+        case 'affine:paragraph': {
+          switch (snapshot.props.type) {
+            case 'h1': {
+              this.markdownBuffer.write('# ');
+              break;
+            }
+            case 'h2': {
+              this.markdownBuffer.write('## ');
+              break;
+            }
+            case 'h3': {
+              this.markdownBuffer.write('### ');
+              break;
+            }
+            case 'h4': {
+              this.markdownBuffer.write('#### ');
+              break;
+            }
+            case 'h5': {
+              this.markdownBuffer.write('##### ');
+              break;
+            }
+            case 'h6': {
+              this.markdownBuffer.write('###### ');
+              break;
+            }
+            case 'text': {
+              break;
+            }
+            case 'quote': {
+              this.markdownBuffer.write('> ');
+              break;
+            }
+          }
+          if (
+            Array.isArray(text?.delta) &&
+            text?.delta.every(delta => typeof delta === 'object')
+          ) {
+            this.markdownBuffer.write(
+              this.deltaToMarkdown(text?.delta as DeltaInsert[])
+            );
+          }
+          this.markdownBuffer.write('\n\n');
+          for (const child of snapshot.children) {
+            context.indentDepth += 1;
+            this.markdownBuffer.write('    '.repeat(context.indentDepth));
+            this.traverseSnapshot(child, context);
+            context.indentDepth -= 1;
+          }
+          break;
+        }
+        case 'affine:list': {
+          if (snapshot.props.type === 'numbered') {
+            console.log(context.numberedListCount);
+            const order = (context.numberedListCount.pop() ?? 0) + 1;
+            this.markdownBuffer.write(`${order}. `);
+            context.numberedListCount.push(order);
+            console.log(context.numberedListCount);
+          } else if (snapshot.props.type === 'checkbox') {
+            this.markdownBuffer.write(
+              snapshot.props.checked ? '- [x] ' : '- [ ] '
+            );
+          } else {
+            this.markdownBuffer.write('- ');
+          }
+          if (
+            Array.isArray(text?.delta) &&
+            text?.delta.every(delta => typeof delta === 'object')
+          ) {
+            this.markdownBuffer.write(
+              this.deltaToMarkdown(text?.delta as DeltaInsert[])
+            );
+          }
+          this.markdownBuffer.write('\n');
+          context.insideTheLists = true;
+          context.numberedListCount.push(0);
+          for (const child of snapshot.children) {
+            context.indentDepth += 1;
+            this.markdownBuffer.write('    '.repeat(context.indentDepth));
+            this.traverseSnapshot(child, context);
+            context.indentDepth -= 1;
+          }
+          context.numberedListCount.pop();
+          break;
+        }
+        case 'affine:divider': {
+          this.markdownBuffer.write('---\n');
+          break;
+        }
+        case 'affine:image': {
+          break;
+        }
+        case 'affine:database': {
+          break;
         }
       }
-    };
-    traverseSnapshot(snapshot);
-    return buffer;
-  }
+    } else {
+      for (const child of snapshot.children) {
+        this.traverseSnapshot(child, context);
+      }
+    }
+  };
+
   async convertAdapterTargetToPageSnapshot(
     _file: Markdown
   ): Promise<PageSnapshotReturn> {
@@ -142,25 +196,25 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   }
 
   deltaToMarkdown(deltas: DeltaInsert[]) {
-    let buffer = '';
+    const buffer = new StringBuilder();
     for (const delta of deltas) {
       const escapedText = this.escapeMarkdown(delta.insert);
       if (delta.attributes?.bold && delta.attributes?.italic) {
-        buffer += `***${escapedText}***`;
+        buffer.write(`***${escapedText}***`);
       } else if (delta.attributes?.bold) {
-        buffer += `**${escapedText}**`;
+        buffer.write(`**${escapedText}**`);
       } else if (delta.attributes?.italic) {
-        buffer += `*${escapedText}*`;
+        buffer.write(`*${escapedText}*`);
       } else if (delta.attributes?.underline) {
-        buffer += `${escapedText}`;
+        buffer.write(`${escapedText}`);
       } else if (delta.attributes?.strike) {
-        buffer += `~~${escapedText}~~`;
+        buffer.write(`~~${escapedText}~~`);
       } else if (delta.attributes?.code) {
-        buffer += `\`${escapedText}\``;
+        buffer.write(`\`${escapedText}\``);
       } else if (delta.attributes?.link) {
-        buffer += `[${escapedText}](${delta.attributes.link})`;
+        buffer.write(`[${escapedText}](${delta.attributes.link})`);
       } else {
-        buffer += `${escapedText}`;
+        buffer.write(`${escapedText}`);
       }
     }
     return buffer.toString();
