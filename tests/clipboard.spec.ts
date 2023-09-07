@@ -470,6 +470,83 @@ test('paste single list block inline should create a new line', async ({
   await assertBlockTypes(page, ['bulleted']);
 });
 
+test('copy nested list block, the clipboard content should be complete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  /**
+   * - aaa
+   *   - bbb
+   *     - ccc
+   */
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, 'aaa');
+  await pressEnter(page);
+
+  await pressTab(page);
+  await type(page, 'bbb');
+  await pressEnter(page);
+
+  await pressTab(page);
+  await type(page, 'ccc');
+
+  const rootListBound = await page.locator('affine-list').first().boundingBox();
+  assertExists(rootListBound);
+
+  await dragBetweenCoords(
+    page,
+    { x: rootListBound.x + 1, y: rootListBound.y - 1 },
+    { x: rootListBound.x + 1, y: rootListBound.y + rootListBound.height - 1 }
+  );
+  await copyByKeyboard(page);
+  const clipItems = await getCopyClipItemsInPage(page);
+  const blockJson = [
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: 'aaa' }],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: 'bbb' }],
+          children: [
+            {
+              flavour: 'affine:list',
+              type: 'bulleted',
+              text: [{ insert: 'ccc' }],
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  const htmlText =
+    `<ul><li>aaa<ul><li>bbb<ul><li>ccc</li></ul></li></ul></li></ul>` +
+    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
+      blockJson
+    ).replace(/"/g, '&quot;')}"></blocksuite>`;
+  const expectClipItems = [
+    { mimeType: 'text/plain', data: 'aaabbbccc' },
+    {
+      mimeType: 'text/html',
+      data: htmlText,
+    },
+    {
+      mimeType: 'blocksuite/page',
+      data: JSON.stringify(blockJson),
+    },
+  ];
+  assertClipData(clipItems, expectClipItems, 'text/plain');
+  assertClipData(clipItems, expectClipItems, 'text/html');
+  assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+});
+
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
