@@ -61,6 +61,10 @@
         "module": "./dist/providers/*.js",
         "import": "./dist/providers/*.js"
       }
-    }
+    },
+    "files": [
+      "dist",
+      "providers"
+    ]
   }
 }

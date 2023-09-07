@@ -73,7 +73,10 @@
         "types": "./dist/content-parser.d.ts",
         "default": "./dist/content-parser.js"
       }
-    }
+    },
+    "files": [
+      "!src"
+    ]
   },
   "devDependencies": {
     "@blocksuite/block-std": "workspace:*",
