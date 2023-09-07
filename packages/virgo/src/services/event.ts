@@ -59,6 +59,32 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 
+  private _isRangeCompletelyInRoot = () => {
+    const selectionRoot = findDocumentOrShadowRoot(this.editor);
+    const selection = selectionRoot.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+    const range = selection.getRangeAt(0);
+
+    const rootElement = this.editor.rootElement;
+    const rootRange = document.createRange();
+    rootRange.selectNode(rootElement);
+
+    if (
+      range.startContainer.compareDocumentPosition(range.endContainer) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+    ) {
+      return (
+        rootRange.comparePoint(range.startContainer, range.startOffset) >= 0 &&
+        rootRange.comparePoint(range.endContainer, range.endOffset) <= 0
+      );
+    } else {
+      return (
+        rootRange.comparePoint(range.endContainer, range.startOffset) >= 0 &&
+        rootRange.comparePoint(range.startContainer, range.endOffset) <= 0
+      );
+    }
+  };
+
   private _onSelectionChange = () => {
     const rootElement = this.editor.rootElement;
     const previousVRange = this.editor.getVRange();
@@ -151,7 +177,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this.editor.rerenderWholeEditor();
     await this.editor.waitForUpdate();
 
-    if (this.editor.isReadonly) return;
+    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
 
     const vRange = this.editor.getVRange();
     if (!vRange) return;
@@ -234,7 +260,12 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
-    if (this.editor.isReadonly || this._isComposing) return;
+    if (
+      this.editor.isReadonly ||
+      this._isComposing ||
+      !this._isRangeCompletelyInRoot()
+    )
+      return;
     if (this._firstRecomputeInFrame) {
       this._firstRecomputeInFrame = false;
       this._onSelectionChange();

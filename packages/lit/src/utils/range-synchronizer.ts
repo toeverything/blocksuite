@@ -26,6 +26,8 @@ export class RangeSynchronizer {
     return this.root.rangeManager;
   }
 
+  private _isComposing = false;
+
   get root() {
     return this.manager.root;
   }
@@ -35,6 +37,13 @@ export class RangeSynchronizer {
       this._selectionManager.slots.changed.on(this._onSelectionModelChanged)
     );
 
+    this.root.uiEventDispatcher.add('compositionStart', () => {
+      this._isComposing = true;
+    });
+    this.root.uiEventDispatcher.add('compositionEnd', () => {
+      this._isComposing = false;
+    });
+
     this.root.disposables.add(
       this.root.uiEventDispatcher.add('selectionChange', () => {
         const selection = window.getSelection();
@@ -43,7 +52,10 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        if (!this.manager.config.shouldSyncSelection(range)) {
+        if (
+          !this.manager.config.shouldSyncSelection(range) ||
+          this._isComposing
+        ) {
           return;
         }
 
@@ -127,6 +139,16 @@ export class RangeSynchronizer {
         this.root.page.deleteBlock(block.model);
       });
     });
+
+    const newSelection = this._selectionManager.getInstance('text', {
+      from: {
+        path: from.path,
+        index: from.index,
+        length: 0,
+      },
+      to: null,
+    });
+    this._selectionManager.set([newSelection]);
 
     return;
   }
