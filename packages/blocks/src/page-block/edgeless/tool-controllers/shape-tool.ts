@@ -69,7 +69,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     this._clearOverlay();
 
     this._page.captureSync();
@@ -106,7 +105,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     this._clearOverlay();
 
     this._page.captureSync();
@@ -122,8 +120,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-
     assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
 
