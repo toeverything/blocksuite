@@ -84,9 +84,20 @@ const tempImageMap = new Map<
 >();
 
 /**
+ * Because the image block and attachment block have different props.
+ * We need to save some data temporarily when converting between them to ensure no data is lost.
+ *
+ * For example, before converting from an image block to an attachment block,
+ * we need to save the image's width and height.
+ *
+ * Similarly, when converting from an attachment block to an image block,
+ * we need to save the attachment's name.
+ *
+ * See also https://github.com/toeverything/blocksuite/pull/4583#pullrequestreview-1610662677
+ *
  * @internal
  */
-export const withTempConvertData = () => {
+export const withTempBlobData = () => {
   const saveAttachmentData = (sourceId: string, data: { name: string }) => {
     if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) {
       console.warn(
@@ -138,9 +149,11 @@ export async function turnIntoEmbedView(model: AttachmentBlockModel) {
 
   const sourceId = model.sourceId;
   assertExists(sourceId);
-  const { saveAttachmentData, getImageData } = withTempConvertData();
+  const { saveAttachmentData, getImageData } = withTempBlobData();
   saveAttachmentData(sourceId, { name: model.name });
-  const imageConvertData = getImageData(model.id);
+  const imageConvertData = model.sourceId
+    ? getImageData(model.sourceId)
+    : undefined;
   const imageProp: ImageBlockProps = {
     sourceId,
     caption: model.caption,
@@ -158,9 +171,9 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
 
   const sourceId = model.sourceId;
   assertExists(sourceId);
-  const { saveImageData, getAttachmentData } = withTempConvertData();
+  const { saveImageData, getAttachmentData } = withTempBlobData();
   saveImageData(sourceId, { width: model.width, height: model.height });
-  const attachmentConvertData = getAttachmentData(model.id);
+  const attachmentConvertData = getAttachmentData(model.sourceId);
   const attachmentProp: AttachmentProps = {
     sourceId,
     name: DEFAULT_ATTACHMENT_NAME,

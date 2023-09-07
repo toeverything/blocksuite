@@ -12,7 +12,7 @@ import {
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
-import { withTempConvertData } from '@blocksuite/blocks';
+import { withTempBlobData } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -179,7 +179,7 @@ export class EditorContainer
         file: File
       ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
-        const { saveAttachmentData } = withTempConvertData();
+        const { saveAttachmentData } = withTempBlobData();
         const sourceId = await storage.set(
           new Blob([file], { type: file.type })
         );
