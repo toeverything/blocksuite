@@ -1,3 +1,4 @@
+// FIXME: this should be move to more appropriate place after extension system has completed
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
