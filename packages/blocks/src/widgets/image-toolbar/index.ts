@@ -25,7 +25,7 @@ import {
 } from '../../image-block/image/utils.js';
 import type { ImageBlockComponent } from '../../image-block/index.js';
 import { type ImageBlockModel } from '../../image-block/index.js';
-import { AddonManager, type ImageAddonRegistion } from './addon-manager.js';
+import { EntryManager, type EntryRegistion } from './entry-manager.js';
 
 @customElement('affine-image-toolbar-widget')
 export class AffineImageToolbarWidget extends WidgetElement {
@@ -60,7 +60,7 @@ export class AffineImageToolbarWidget extends WidgetElement {
     tooltipStyle,
   ];
 
-  static imageAddonManager = new AddonManager();
+  static entryManager = new EntryManager();
 
   private _hovered = false;
   private _hideTimer: ReturnType<typeof setTimeout> | null = null;
@@ -72,12 +72,8 @@ export class AffineImageToolbarWidget extends WidgetElement {
     return this.page.schema.flavourSchemaMap.has('affine:attachment');
   }
 
-  get addonManager(): AddonManager {
-    if (!AffineImageToolbarWidget.imageAddonManager) {
-      AffineImageToolbarWidget.imageAddonManager = new AddonManager();
-    }
-
-    return AffineImageToolbarWidget.imageAddonManager as AddonManager;
+  get entryManager() {
+    return AffineImageToolbarWidget.entryManager;
   }
 
   private _onHover = () => {
@@ -168,8 +164,8 @@ export class AffineImageToolbarWidget extends WidgetElement {
     this.requestUpdate();
   }
 
-  registerEntry(addon: ImageAddonRegistion) {
-    this.addonManager.register(addon);
+  registerEntry(entry: EntryRegistion) {
+    this.entryManager.add(entry);
   }
 
   override connectedCallback() {
@@ -194,7 +190,7 @@ export class AffineImageToolbarWidget extends WidgetElement {
   override render() {
     const { imageModel: model, blob } = this;
     const { readonly } = this.page;
-    const addons = this.addonManager.addons;
+    const entries = this.entryManager.entries;
 
     if (!model) return nothing;
 
@@ -268,21 +264,21 @@ export class AffineImageToolbarWidget extends WidgetElement {
             >
           </icon-button>
           ${repeat(
-            addons,
-            addon => addon.name,
-            addon => html`
+            entries,
+            entry => entry.name,
+            entry => html`
               <icon-button
                 class="has-tool-tip"
                 size="32px"
                 ?disabled=${readonly}
                 @click="${async () => {
                   this.hide();
-                  addon.callback(model, blob as Blob);
+                  entry.callback(model, blob as Blob);
                 }}"
               >
-                ${unsafeHTML(addon.icon)}
+                ${unsafeHTML(entry.icon)}
                 <tool-tip inert tip-position="right" role="tooltip"
-                  >${addon.title}</tool-tip
+                  >${entry.title}</tool-tip
                 >
               </icon-button>
             `
