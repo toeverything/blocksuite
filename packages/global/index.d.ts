@@ -3,7 +3,6 @@ declare type BlockSuiteFlags = {
   enable_block_hub: boolean;
 
   enable_toggle_block: boolean;
-  enable_edgeless_toolbar: boolean;
   enable_bookmark_operation: boolean;
   enable_note_index: boolean;
 

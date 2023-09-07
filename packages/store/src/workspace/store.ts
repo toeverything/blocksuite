@@ -65,7 +65,6 @@ export interface StoreOptions<
 const flagsPreset = {
   enable_set_remote_flag: true,
   enable_block_hub: true,
-  enable_edgeless_toolbar: true,
 
   enable_toggle_block: false,
   enable_bookmark_operation: false,
