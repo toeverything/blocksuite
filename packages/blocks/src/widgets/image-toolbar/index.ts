@@ -3,8 +3,6 @@ import { WidgetElement } from '@blocksuite/lit';
 import { autoUpdate, computePosition, offset, shift } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../__internal__/consts.js';
 import { on } from '../../__internal__/utils/common.js';
@@ -17,6 +15,7 @@ import {
   CopyIcon,
   DeleteIcon,
   DownloadIcon,
+  HighLightDuotoneIcon,
 } from '../../icons/index.js';
 import {
   copyImage,
@@ -25,7 +24,7 @@ import {
 } from '../../image-block/image/utils.js';
 import type { ImageBlockComponent } from '../../image-block/index.js';
 import { type ImageBlockModel } from '../../image-block/index.js';
-import { EntryManager, type EntryRegistion } from './entry-manager.js';
+import { openLeditsEditor } from '../../image-block/ledits/main.js';
 
 @customElement('affine-image-toolbar-widget')
 export class AffineImageToolbarWidget extends WidgetElement {
@@ -60,8 +59,6 @@ export class AffineImageToolbarWidget extends WidgetElement {
     tooltipStyle,
   ];
 
-  static entryManager = new EntryManager();
-
   private _hovered = false;
   private _hideTimer: ReturnType<typeof setTimeout> | null = null;
   private _hiddenCleanup: (() => void)[] = [];
@@ -70,10 +67,6 @@ export class AffineImageToolbarWidget extends WidgetElement {
 
   get supportAttachment() {
     return this.page.schema.flavourSchemaMap.has('affine:attachment');
-  }
-
-  get entryManager() {
-    return AffineImageToolbarWidget.entryManager;
   }
 
   private _onHover = () => {
@@ -164,10 +157,6 @@ export class AffineImageToolbarWidget extends WidgetElement {
     this.requestUpdate();
   }
 
-  registerEntry(entry: EntryRegistion) {
-    this.entryManager.add(entry);
-  }
-
   override connectedCallback() {
     super.connectedCallback();
 
@@ -190,7 +179,6 @@ export class AffineImageToolbarWidget extends WidgetElement {
   override render() {
     const { imageModel: model, blob } = this;
     const { readonly } = this.page;
-    const entries = this.entryManager.entries;
 
     if (!model) return nothing;
 
@@ -263,26 +251,22 @@ export class AffineImageToolbarWidget extends WidgetElement {
               >Delete</tool-tip
             >
           </icon-button>
-          ${repeat(
-            entries,
-            entry => entry.name,
-            entry => html`
-              <icon-button
-                class="has-tool-tip"
+          ${this.page.awarenessStore.getFlag('enable_bultin_extension')
+            ? html`<icon-button
+                class="has-tool-tip delete-image-button"
                 size="32px"
                 ?disabled=${readonly}
-                @click="${async () => {
+                @click="${() => {
                   this.hide();
-                  entry.callback(model, blob as Blob);
+                  openLeditsEditor(model, blob, this.root);
                 }}"
               >
-                ${unsafeHTML(entry.icon)}
+                ${HighLightDuotoneIcon}
                 <tool-tip inert tip-position="right" role="tooltip"
-                  >${entry.title}</tool-tip
+                  >Edit with LEDITS</tool-tip
                 >
-              </icon-button>
-            `
-          )}
+              </icon-button>`
+            : nothing}
         </div>
       </div>
     `;

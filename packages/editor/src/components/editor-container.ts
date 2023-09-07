@@ -13,7 +13,6 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { extensions } from '@blocksuite/blocks/extensions';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
 import {
@@ -78,8 +77,6 @@ export class EditorContainer
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
 
   root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
-
-  private _extsLoaded = false;
 
   readonly themeObserver = new ThemeObserver();
 
@@ -231,16 +228,6 @@ export class EditorContainer
       }
     }
 
-    if (this.root.value?.isConnected) {
-      if (this.root.value.isUpdatePending) {
-        this.root.value.updateComplete.then(() =>
-          this._loadBuiltinExts(this.root.value!)
-        );
-      } else {
-        this._loadBuiltinExts(this.root.value);
-      }
-    }
-
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
       return;
     }
@@ -272,13 +259,6 @@ export class EditorContainer
         JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
       );
     }
-  }
-
-  private _loadBuiltinExts(blocksuiteRoot: BlockSuiteRoot) {
-    if (!this.page.awarenessStore.getFlag('enable_bultin_extension')) return;
-    if (this._extsLoaded) return;
-    extensions.forEach(extEntry => extEntry(blocksuiteRoot));
-    this._extsLoaded = true;
   }
 
   createContentParser() {
