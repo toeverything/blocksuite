@@ -1,5 +1,7 @@
 import './utils/declare-test-window.js';
 
+import { expect } from '@playwright/test';
+
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
@@ -17,6 +19,7 @@ import {
   getCopyClipItemsInPage,
   getEditorLocator,
   getRichTextBoundingBox,
+  getVirgoSelectionIndex,
   importMarkdown,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
@@ -470,7 +473,7 @@ test('paste single list block inline should create a new line', async ({
   await assertBlockTypes(page, ['bulleted']);
 });
 
-test('copy nested list block, the clipboard content should be complete', async ({
+test('copy a nested list block, the clipboard data should be complete', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -545,6 +548,142 @@ test('copy nested list block, the clipboard content should be complete', async (
   assertClipData(clipItems, expectClipItems, 'text/plain');
   assertClipData(clipItems, expectClipItems, 'text/html');
   assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+});
+
+test('paste a nested list block, the cursor position should be correct', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'bbb');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'ccc');
+
+  const rootListBound = await page.locator('affine-list').first().boundingBox();
+  assertExists(rootListBound);
+
+  await dragBetweenCoords(
+    page,
+    { x: rootListBound.x + 1, y: rootListBound.y - 1 },
+    { x: rootListBound.x + 1, y: rootListBound.y + rootListBound.height - 1 }
+  );
+  await copyByKeyboard(page);
+
+  await focusRichText(page, 1);
+  await pressArrowLeft(page);
+
+  /**
+   * - aaa
+   *   - bb|b
+   *     - ccc
+   */
+
+  await pasteByKeyboard(page);
+
+  /**
+   * - aaa
+   *   - bbaaa
+   *     - bbb
+   *       - ccc|b
+   *     - ccc
+   */
+  const rangeIndex = await getVirgoSelectionIndex(page);
+  expect(rangeIndex === 3).toBeTruthy();
+});
+
+test('paste a nested list block, the content should be correct', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'bbb');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'ccc');
+
+  const rootListBound = await page.locator('affine-list').first().boundingBox();
+  assertExists(rootListBound);
+
+  await dragBetweenCoords(
+    page,
+    { x: rootListBound.x + 1, y: rootListBound.y - 1 },
+    { x: rootListBound.x + 1, y: rootListBound.y + rootListBound.height - 1 }
+  );
+  await copyByKeyboard(page);
+
+  await focusRichText(page, 1);
+  await pressArrowLeft(page);
+
+  /**
+   * - aaa
+   *   - bb｜b
+   *     - ccc
+   */
+
+  await pasteByKeyboard(page);
+
+  /**
+   * - aaa
+   *   - bbaaa
+   *     - bbb
+   *       - cccb
+   *     - ccc
+   */
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:text="aaa"
+      prop:type="bulleted"
+    >
+      <affine:list
+        prop:checked={false}
+        prop:text="bbaaa"
+        prop:type="bulleted"
+      >
+        <affine:list
+          prop:checked={false}
+          prop:text="bbb"
+          prop:type="bulleted"
+        >
+          <affine:list
+            prop:checked={false}
+            prop:text="cccb"
+            prop:type="bulleted"
+          />
+        </affine:list>
+        <affine:list
+          prop:checked={false}
+          prop:text="ccc"
+          prop:type="bulleted"
+        />
+      </affine:list>
+    </affine:list>
+  </affine:note>
+</affine:page>`
+  );
 });
 
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
