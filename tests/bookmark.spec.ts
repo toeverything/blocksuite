@@ -57,6 +57,7 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
       prop:description=""
       prop:icon=""
       prop:image=""
+      prop:type="card"
       prop:url="https://google.com"
     />
   </affine:note>
@@ -100,6 +101,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
       prop:description=""
       prop:icon=""
       prop:image=""
+      prop:type="card"
       prop:url="https://google.com"
     />
   </affine:note>
@@ -175,6 +177,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
       prop:description=""
       prop:icon=""
       prop:image=""
+      prop:type="card"
       prop:url="https://google.com"
     />
   </affine:note>
@@ -227,6 +230,7 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
       prop:description=""
       prop:icon=""
       prop:image=""
+      prop:type="card"
       prop:url="https://google.com"
     />
   </affine:note>
