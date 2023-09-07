@@ -567,6 +567,15 @@ export async function initThreeDividers(page: Page) {
   await type(page, '123');
 }
 
+export async function initParagraphsByCount(page: Page, count: number) {
+  await focusRichText(page);
+  for (let i = 0; i < count; i++) {
+    await type(page, `paragraph ${i}`);
+    await pressEnter(page);
+  }
+  await resetHistory(page);
+}
+
 export async function getVirgoSelectionIndex(page: Page) {
   return await page.evaluate(() => {
     const selection = window.getSelection() as Selection;
