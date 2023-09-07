@@ -343,7 +343,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   private _exportMarkDownExperimentalAdapter() {
     window.job.pageToSnapshot(window.page).then(snapshot => {
       new MarkdownAdapter()
-        .convertPageSnapshotToAdapterTarget({
+        .fromPageSnapshot({
           snapshot,
         })
         .then(markdown => {
