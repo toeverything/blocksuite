@@ -2,7 +2,6 @@
   "name": "@blocksuite/lit",
   "version": "0.8.0",
   "description": "Lit renderer for blocksuite store",
-  "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
