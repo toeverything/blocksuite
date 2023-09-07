@@ -91,10 +91,10 @@ export class ExpandDatabaseBlockModal extends WithDisposable(
 
   protected override render(): unknown {
     if (
-      this.closest('database-block-modal-preview')
-      // !this.database?.page.awarenessStore.getFlag(
-      //   'enable_expand_database_block'
-      // )
+      this.closest('database-block-modal-preview') ||
+      !this.database?.page.awarenessStore.getFlag(
+        'enable_expand_database_block'
+      )
     ) {
       return;
     }

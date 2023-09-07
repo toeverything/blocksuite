@@ -71,6 +71,8 @@ const flagsPreset = {
   enable_slash_menu: true,
   enable_attachment_block: true,
 
+  enable_expand_database_block: false,
+
   enable_toggle_block: false,
   enable_block_selection_format_bar: true,
   enable_linked_page: false,
