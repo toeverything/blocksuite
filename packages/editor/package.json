@@ -42,10 +42,10 @@
         "import": "./dist/index.js"
       },
       "./themes/*": "./themes/*"
-    },
-    "files": [
-      "dist",
-      "themes"
-    ]
-  }
+    }
+  },
+  "files": [
+    "dist",
+    "themes"
+  ]
 }
