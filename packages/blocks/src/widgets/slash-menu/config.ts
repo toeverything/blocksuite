@@ -227,9 +227,8 @@ export const menuGroups: {
           if (!parent) {
             return;
           }
-          const props = (
-            await uploadImageFromLocal(pageElement.page.blobs)
-          ).map(
+          const fileData = await uploadImageFromLocal(pageElement.page.blobs);
+          const props = fileData.map(
             ({
               sourceId,
             }): ImageBlockProps & {
