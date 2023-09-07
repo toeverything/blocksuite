@@ -124,7 +124,6 @@ export function locatorEdgelessToolButton(
     case 'brush':
     case 'text':
     case 'eraser':
-    case 'connector':
     case 'shape':
       buttonType = 'edgeless-toolbar-button';
       break;

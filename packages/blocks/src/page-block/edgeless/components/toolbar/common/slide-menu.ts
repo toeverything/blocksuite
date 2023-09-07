@@ -42,12 +42,13 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       position: absolute;
-      width: 18px;
-      height: 18px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       border: 1px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
+      color: var(--affine-icon-color);
       transition:
         transform 0.3s ease-in-out,
         opacity 0.5s ease-in-out;
@@ -58,7 +59,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       opacity: 1;
       top: 50%;
       right: 0;
-      transform: translate(50%, -50%) scale(0.75);
+      transform: translate(50%, -50%) scale(0.5);
     }
     .next-slide-button:hover {
       cursor: pointer;
@@ -68,7 +69,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       opacity: 0;
       top: 50%;
       left: 0;
-      transform: translate(-50%, -50%) scale(0.75);
+      transform: translate(-50%, -50%) scale(0.5);
     }
     .previous-slide-button:hover {
       cursor: pointer;

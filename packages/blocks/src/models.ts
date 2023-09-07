@@ -58,11 +58,10 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   ImageBlockSchema,
   SurfaceBlockSchema,
   BookmarkBlockSchema,
-  // DatabaseBlockSchema,
+  DatabaseBlockSchema,
 ];
 
 export const __unstableSchemas = [
-  DatabaseBlockSchema,
   DataViewBlockSchema,
   AttachmentBlockSchema,
 ] satisfies z.infer<typeof BlockSchema>[];

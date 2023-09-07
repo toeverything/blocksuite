@@ -306,6 +306,7 @@ export class DebugMenu extends ShadowlessElement {
     a.setAttribute('download', `${this.page.id}.bs.zip`);
     a.click();
     a.remove();
+    URL.revokeObjectURL(url);
   }
 
   private _importSnapshot() {

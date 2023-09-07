@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { PageMeta, PagesPropertiesMeta } from '../workspace/meta.js';
 
 export type BlockSnapshot = {
-  type: 'snapshot:block';
+  type: 'block';
   id: string;
   flavour: string;
   props: Record<string, unknown>;
@@ -11,24 +11,36 @@ export type BlockSnapshot = {
 };
 
 export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
-  type: z.literal('snapshot:block'),
+  type: z.literal('block'),
   id: z.string(),
   flavour: z.string(),
   props: z.record(z.unknown()),
   children: z.lazy(() => BlockSnapshotSchema.array()),
 });
 
+export type WorkspaceInfoSnapshot = {
+  id: string;
+  type: 'info';
+  blockVersions: Record<string, number>;
+  pageVersion: number;
+  workspaceVersion: number;
+  properties: PagesPropertiesMeta;
+};
+
+export const WorkspaceInfoSnapshotSchema: z.ZodType<WorkspaceInfoSnapshot> =
+  z.object({
+    id: z.string(),
+    type: z.literal('info'),
+    blockVersions: z.record(z.number()),
+    pageVersion: z.number(),
+    workspaceVersion: z.number(),
+    properties: z.record(z.any()),
+  });
+
 export type PageSnapshot = {
-  type: 'snapshot:page';
-  meta: {
-    page: PageMeta;
-    versions: {
-      block: Record<string, number>;
-      page: number;
-    };
-    properties: PagesPropertiesMeta;
-  };
-  block: BlockSnapshot;
+  type: 'page';
+  meta: PageMeta;
+  blocks: BlockSnapshot;
 };
 
 const PageMetaSchema = z.object({
@@ -39,29 +51,7 @@ const PageMetaSchema = z.object({
 });
 
 export const PageSnapshotSchema: z.ZodType<PageSnapshot> = z.object({
-  type: z.literal('snapshot:page'),
-  meta: z.object({
-    page: PageMetaSchema,
-    versions: z.object({
-      block: z.record(z.number()),
-      page: z.number(),
-    }),
-    properties: z.record(z.any()),
-  }),
-  block: BlockSnapshotSchema,
+  type: z.literal('page'),
+  meta: PageMetaSchema,
+  blocks: BlockSnapshotSchema,
 });
-
-export type WorkspaceMetaSnapshot = {
-  type: 'snapshot:workspace';
-  workspaceVersion: number;
-  properties: PagesPropertiesMeta;
-  pages: PageMeta[];
-};
-
-export const WorkspaceSnapshotSchema: z.ZodType<WorkspaceMetaSnapshot> =
-  z.object({
-    type: z.literal('snapshot:workspace'),
-    workspaceVersion: z.number(),
-    pages: z.array(PageMetaSchema),
-    properties: z.record(z.any()),
-  });

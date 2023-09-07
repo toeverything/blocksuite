@@ -1,10 +1,8 @@
 /// <reference types="node" />
-import type {
-  PlaywrightTestConfig,
-  PlaywrightWorkerOptions,
-} from '@playwright/test';
+import type { PlaywrightWorkerOptions } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
-const config: PlaywrightTestConfig = {
+export default defineConfig({
   testDir: 'tests',
   fullyParallel: true,
   webServer: {
@@ -32,15 +30,9 @@ const config: PlaywrightTestConfig = {
     actionTimeout: 5_000,
   },
   workers: '80%',
-  retries: process.env.CI ? 1 : 0,
+  retries: process.env.CI ? 3 : 0,
   // 'github' for GitHub Actions CI to generate annotations, plus a concise 'dot'
   // default 'list' when running locally
   // See https://playwright.dev/docs/test-reporters#github-actions-annotations
   reporter: process.env.CI ? 'github' : 'list',
-};
-
-if (process.env.CI) {
-  config.retries = 3;
-}
-
-export default config;
+});

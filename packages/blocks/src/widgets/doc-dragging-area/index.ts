@@ -142,6 +142,8 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
 
+  private _lastPointerState: PointerEventState | null = null;
+
   private _dragging = false;
 
   private _offset: {
@@ -218,6 +220,37 @@ export class DocDraggingAreaWidget extends WidgetElement {
     }
   }
 
+  private _updateDraggingArea = (
+    state: PointerEventState,
+    shouldAutoScroll: boolean
+  ) => {
+    const { x, y } = state;
+
+    const { scrollTop, scrollLeft } = this._viewportElement;
+    const { x: startX, y: startY } = state.start;
+    const left = Math.min(this._offset.left + startX, scrollLeft + x);
+    const top = Math.min(this._offset.top + startY, scrollTop + y);
+    const right = Math.max(this._offset.left + startX, scrollLeft + x);
+    const bottom = Math.max(this._offset.top + startY, scrollTop + y);
+    const userRect = {
+      left,
+      top,
+      width: right - left,
+      height: bottom - top,
+    };
+    this.rect = userRect;
+    this._selectBlocksByRect(userRect);
+    this._lastPointerState = state;
+
+    if (shouldAutoScroll) {
+      const result = autoScroll(this._viewportElement, y);
+      if (!result) {
+        this._clearRaf();
+        return;
+      }
+    }
+  };
+
   override connectedCallback() {
     super.connectedCallback();
     this.handleEvent(
@@ -249,35 +282,10 @@ export class DocDraggingAreaWidget extends WidgetElement {
           return;
         }
         ctx.get('defaultState').event.preventDefault();
-
-        const runner = () => {
-          const state = ctx.get('pointerState');
-          const { x, y } = state;
-
-          const { scrollTop, scrollLeft } = this._viewportElement;
-          const { x: startX, y: startY } = state.start;
-          const left = Math.min(this._offset.left + startX, scrollLeft + x);
-          const top = Math.min(this._offset.top + startY, scrollTop + y);
-          const right = Math.max(this._offset.left + startX, scrollLeft + x);
-          const bottom = Math.max(this._offset.top + startY, scrollTop + y);
-          const userRect = {
-            left,
-            top,
-            width: right - left,
-            height: bottom - top,
-          };
-          this.rect = userRect;
-          this._selectBlocksByRect(userRect);
-
-          const result = autoScroll(this._viewportElement, y);
-          if (!result) {
-            this._clearRaf();
-            return;
-          }
-          this._rafID = requestAnimationFrame(runner);
-        };
-
-        this._rafID = requestAnimationFrame(runner);
+        const state = ctx.get('pointerState');
+        this._rafID = requestAnimationFrame(() => {
+          this._updateDraggingArea(state, true);
+        });
 
         return true;
       },
@@ -294,6 +302,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
           top: 0,
           left: 0,
         };
+        this._lastPointerState = null;
       },
       {
         global: true,
@@ -312,6 +321,26 @@ export class DocDraggingAreaWidget extends WidgetElement {
         global: true,
       }
     );
+  }
+
+  override firstUpdated() {
+    this._disposables.addFromEvent(this._viewportElement, 'scroll', () => {
+      if (!this._dragging || !this._lastPointerState) {
+        return;
+      }
+
+      this._clearRaf();
+      const state = this._lastPointerState;
+      this._rafID = requestAnimationFrame(() => {
+        this._updateDraggingArea(state, false);
+      });
+    });
+  }
+
+  override disconnectedCallback() {
+    this._clearRaf();
+    this._disposables.dispose();
+    super.disconnectedCallback();
   }
 
   override render() {
