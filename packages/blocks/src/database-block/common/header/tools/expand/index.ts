@@ -1,34 +1,28 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
-import { DisposableGroup, Slot } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
-import { html } from 'lit';
+import type { PropertyValues } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../../../../__internal__/index.js';
 import { createModal } from '../../../../../components/menu/index.js';
 import { ExpandWideIcon } from '../../../../../icons/index.js';
 import type { DatabaseBlockComponent } from '../../../../database-block.js';
-import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { DatabaseSelection } from '../../../selection.js';
-import { DatabaseTableViewFullScreen } from './table-full-screen-modal.js';
 
-export function showDatabasePreviewModal({
-  databaseBlock,
-}: {
-  databaseBlock: DatabaseBlockComponent;
-}) {
+export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const viewComponent = new DatabaseBlockModalPreview();
-  viewComponent.database = databaseBlock;
+  viewComponent.database = database;
   const modal = createModal();
   const close = () => {
     modal.remove();
   };
   const div = document.createElement('div');
   div.style.position = 'absolute';
+  div.style.display = 'flex';
   div.style.padding = '12px';
   div.style.borderRadius = '8px';
   div.style.left = '0';
@@ -36,6 +30,7 @@ export function showDatabasePreviewModal({
   div.style.margin = 'auto';
   div.style.marginTop = '20px';
   div.style.width = '80%';
+  div.style.maxHeight = '80%';
   div.style.boxShadow = 'var(--affine-shadow-1)';
   div.style.backgroundColor = 'var(--affine-background-primary-color)';
   div.append(viewComponent);
@@ -43,35 +38,8 @@ export function showDatabasePreviewModal({
     e.stopPropagation();
   };
   modal.onclick = close;
+  modal.style.backgroundColor = 'var(--affine-black-60)';
   modal.append(div);
-}
-
-export function showDatabaseTableViewFullModal({
-  page,
-  root,
-  model,
-  container = document.body,
-  abortController = new AbortController(),
-}: {
-  page: Page;
-  root: BlockSuiteRoot;
-  model: DatabaseBlockModel;
-  container?: HTMLElement;
-  abortController?: AbortController;
-}) {
-  const disposables = new DisposableGroup();
-  abortController.signal.addEventListener('abort', () => disposables.dispose());
-
-  const modal = new DatabaseTableViewFullScreen();
-  modal.page = page;
-  modal.root = root;
-  modal.model = model;
-  modal.abortController = abortController;
-  // Mount
-  container.appendChild(modal);
-  disposables.add(() => modal.remove());
-
-  return modal;
 }
 
 @customElement('expand-database-block-modal')
@@ -81,13 +49,14 @@ export class ExpandDatabaseBlockModal extends WithDisposable(
   expandDatabase = () => {
     const database = this.closest('affine-database');
     if (database) {
-      showDatabasePreviewModal({
-        databaseBlock: database,
-      });
+      showDatabasePreviewModal(database);
     }
   };
 
   protected override render(): unknown {
+    if (this.closest('database-block-modal-preview')) {
+      return;
+    }
     return html` <div
       @click="${this.expandDatabase}"
       class="dv-icon-20 dv-pd-2 dv-hover dv-round-4"
@@ -102,6 +71,14 @@ export class ExpandDatabaseBlockModal extends WithDisposable(
 export class DatabaseBlockModalPreview extends WithDisposable(
   ShadowlessElement
 ) {
+  static override styles = css`
+    database-block-modal-preview {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+  `;
   path = ['modal', 'preview'];
   @property({ attribute: false })
   database!: DatabaseBlockComponent;
@@ -117,6 +94,13 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       } else {
         this.selectionUpdated.emit(undefined);
       }
+    });
+  }
+
+  protected override firstUpdated(_changedProperties: PropertyValues) {
+    super.firstUpdated(_changedProperties);
+    requestAnimationFrame(() => {
+      this.querySelector('affine-data-view-native')?.focusFirstCell();
     });
   }
 

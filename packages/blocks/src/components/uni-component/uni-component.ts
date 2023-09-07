@@ -1,6 +1,6 @@
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { LitElement, PropertyValues, TemplateResult } from 'lit';
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -39,6 +39,11 @@ export class UniLit<
   Props,
   Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > extends ShadowlessElement {
+  static override styles = css`
+    uni-lit {
+      display: contents;
+    }
+  `;
   @property({ attribute: false })
   uni?: UniComponent<Props, Expose>;
 

@@ -34,10 +34,16 @@ import type { DataViewTableManager } from './table-view-manager.js';
 const styles = css`
   affine-database-table {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   affine-database-table * {
     box-sizing: border-box;
+  }
+  .affine-database-table {
+    overflow-y: auto;
   }
 
   .affine-database-block-title-container {

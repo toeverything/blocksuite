@@ -366,7 +366,7 @@ export class KanbanSelection {
         cardId: card,
         focus: {
           columnId,
-          isEditing: true,
+          isEditing: false,
         },
       };
     }

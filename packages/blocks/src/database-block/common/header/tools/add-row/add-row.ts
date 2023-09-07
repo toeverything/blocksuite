@@ -1,11 +1,11 @@
-import { DisposableGroup } from '@blocksuite/global/utils';
 import { css, html } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, state } from 'lit/decorators.js';
 
 import { PlusIcon } from '../../../../../icons/index.js';
 import type { InsertPosition } from '../../../../types.js';
+import { startDrag } from '../../../../utils/drag.js';
 import { BaseTool } from '../base-tool.js';
-import { initAddNewRecordHandlers } from './new-record-preview.js';
+import { NewRecordPreview } from './new-record-preview.js';
 
 const styles = css`
   .affine-database-toolbar-item.new-record {
@@ -26,6 +26,7 @@ const styles = css`
   .new-record > tool-tip {
     max-width: 280px;
   }
+
   .new-record svg {
     width: 16px;
     height: 16px;
@@ -41,11 +42,6 @@ const styles = css`
 export class DataViewHeaderToolsAddRow extends BaseTool {
   static override styles = styles;
 
-  @query('.new-record')
-  private _newRecord!: HTMLDivElement;
-
-  private _recordAddDisposables = new DisposableGroup();
-
   @state()
   public showToolBar = false;
 
@@ -53,40 +49,89 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
     return this.view.readonly;
   }
 
-  override firstUpdated() {
+  public override connectedCallback() {
+    super.connectedCallback();
     if (!this.readonly) {
-      this._initAddRecordHandlers();
+      this.disposables.addFromEvent(this, 'pointerdown', e => {
+        this._dragStart(e);
+      });
     }
   }
 
-  override updated(changedProperties: Map<string, unknown>) {
-    super.updated(changedProperties);
-
-    if (!this.readonly) {
-      this._initAddRecordHandlers();
+  _dragStart = (e: MouseEvent) => {
+    const container = this.closest('affine-data-view-native');
+    const tableRect = container
+      ?.querySelector('affine-database-table')
+      ?.getBoundingClientRect();
+    const rows = container?.querySelectorAll('.affine-database-block-row');
+    if (!rows || !tableRect) {
+      return;
     }
-  }
+    const rects = Array.from(rows).map(v => {
+      const rect = v.getBoundingClientRect();
+      return {
+        id: v.getAttribute('data-row-id') as string,
+        top: rect.top,
+        bottom: rect.bottom,
+        mid: (rect.top + rect.bottom) / 2,
+        width: rect.width,
+        left: rect.left,
+      };
+    });
+    const dropPreview = createDropPreview();
+    const dragPreview = createDragPreview();
+
+    const getPosition = (
+      y: number
+    ):
+      | { position: InsertPosition; y: number; x: number; width: number }
+      | undefined => {
+      const data = rects.find(v => y < v.bottom);
+      if (!data || y < data.top) {
+        return;
+      }
+      return {
+        position: {
+          id: data.id,
+          before: y < data.mid,
+        },
+        y: y < data.mid ? data.top : data.bottom,
+        width: data.width,
+        x: data.left,
+      };
+    };
+    startDrag<{ position?: InsertPosition }, MouseEvent>(e, {
+      transform: e => e,
+      onDrag: () => {
+        return {};
+      },
+      onMove: e => {
+        dragPreview.display(e.x, e.y);
+        const p = getPosition(e.y);
+        if (p) {
+          dropPreview.display(tableRect.left, p.y, tableRect.width);
+        } else {
+          dropPreview.remove();
+        }
+        return {
+          position: p?.position,
+        };
+      },
+      onDrop: data => {
+        if (data.position) {
+          this.viewMethod.addRow?.(data.position);
+        }
+      },
+      onClear: () => {
+        dropPreview.remove();
+        dragPreview.remove();
+      },
+    });
+  };
 
   addRow = (position: InsertPosition | number) => {
     this.viewMethod.addRow?.(position);
   };
-
-  private _initAddRecordHandlers() {
-    // remove previous handlers
-    this._recordAddDisposables.dispose();
-    if (!this._newRecord) {
-      return;
-    }
-    const disposables = initAddNewRecordHandlers(
-      this._newRecord,
-      this,
-      this.addRow
-    );
-    if (disposables) {
-      // bind new handlers
-      this._recordAddDisposables = disposables;
-    }
-  }
 
   private _onAddNewRecord = () => {
     if (this.readonly) return;
@@ -130,3 +175,38 @@ declare global {
     'data-view-header-tools-add-row': DataViewHeaderToolsAddRow;
   }
 }
+const createDropPreview = () => {
+  const div = document.createElement('div');
+  div.style.pointerEvents = 'none';
+  div.style.position = 'fixed';
+  div.style.zIndex = '9999';
+  div.style.height = '4px';
+  div.style.borderRadius = '2px';
+  div.style.backgroundColor = 'var(--affine-primary-color)';
+  div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
+  return {
+    display(x: number, y: number, width: number) {
+      document.body.append(div);
+      div.style.left = `${x}px`;
+      div.style.top = `${y - 2}px`;
+      div.style.width = `${width}px`;
+    },
+    remove() {
+      div.remove();
+    },
+  };
+};
+
+const createDragPreview = () => {
+  const preview = new NewRecordPreview();
+  document.body.append(preview);
+  return {
+    display(x: number, y: number) {
+      preview.style.left = `${x}px`;
+      preview.style.top = `${y}px`;
+    },
+    remove() {
+      preview.remove();
+    },
+  };
+};

@@ -58,6 +58,7 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
     ${unsafeCSS(dataViewCommonStyle('affine-data-view-native'))}
     affine-data-view-native {
       background-color: var(--affine-background-primary-color);
+      display: contents;
     }
   `;
   @property({ attribute: false })
@@ -91,6 +92,7 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
     );
     this.disposables.add(
       this.viewSource.updateSlot.on(() => {
+        this.requestUpdate();
         this.viewSource.views.forEach(v => {
           v.updateSlot.emit();
         });
@@ -181,7 +183,9 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
       'data-view-root': true,
     });
     return html`
-      <div class="${containerClass}">${this.renderView(viewData)}</div>
+      <div style="display: contents" class="${containerClass}">
+        ${this.renderView(viewData)}
+      </div>
     `;
   }
 }
