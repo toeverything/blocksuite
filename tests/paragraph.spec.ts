@@ -299,10 +299,10 @@ test('add multi line by soft enter', async ({ page }) => {
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
 
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 3);
   await assertSelection(page, 0, 2, 0);
+  // Avoid Yjs history manager merge two operations
+  await page.waitForTimeout(500);
 
   await pressShiftEnter(page);
   await assertRichTexts(page, ['he\nllo']);
