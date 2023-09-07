@@ -1,7 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
 
-import { downloadBlob } from '../__internal__/utils/filesys.js';
+import {
+  downloadBlob,
+  withTempBlobData,
+} from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { toast } from '../components/toast.js';
 import type {
@@ -57,88 +60,6 @@ export async function downloadAttachment(
   }
   downloadBlob(attachment, attachmentModel.name);
 }
-
-// Use lru strategy is a better choice, but it's just a temporary solution.
-const MAX_TEMP_DATA_SIZE = 100;
-/**
- * TODO @Saul-Mirone use some other way to store the temp data
- *
- * @deprecated Waiting for migration
- */
-const tempAttachmentMap = new Map<
-  string,
-  {
-    // name for the attachment
-    name: string;
-  }
->();
-const tempImageMap = new Map<
-  string,
-  {
-    // This information comes from pictures.
-    // If the user switches between pictures and attachments,
-    // this information should be retained.
-    width: number | undefined;
-    height: number | undefined;
-  }
->();
-
-/**
- * Because the image block and attachment block have different props.
- * We need to save some data temporarily when converting between them to ensure no data is lost.
- *
- * For example, before converting from an image block to an attachment block,
- * we need to save the image's width and height.
- *
- * Similarly, when converting from an attachment block to an image block,
- * we need to save the attachment's name.
- *
- * See also https://github.com/toeverything/blocksuite/pull/4583#pullrequestreview-1610662677
- *
- * @internal
- */
-export const withTempBlobData = () => {
-  const saveAttachmentData = (sourceId: string, data: { name: string }) => {
-    if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) {
-      console.warn(
-        'Clear the temp attachment data. It may cause filename loss when converting between image and attachment.'
-      );
-      tempAttachmentMap.clear();
-    }
-
-    tempAttachmentMap.set(sourceId, data);
-  };
-  const getAttachmentData = (blockId: string) => {
-    const data = tempAttachmentMap.get(blockId);
-    tempAttachmentMap.delete(blockId);
-    return data;
-  };
-
-  const saveImageData = (
-    sourceId: string,
-    data: { width: number | undefined; height: number | undefined }
-  ) => {
-    if (tempImageMap.size > MAX_TEMP_DATA_SIZE) {
-      console.warn(
-        'Clear temp image data. It may cause image width and height loss when converting between image and attachment.'
-      );
-      tempImageMap.clear();
-    }
-
-    tempImageMap.set(sourceId, data);
-  };
-  const getImageData = (blockId: string) => {
-    const data = tempImageMap.get(blockId);
-    tempImageMap.delete(blockId);
-    return data;
-  };
-  return {
-    saveAttachmentData,
-    getAttachmentData,
-    saveImageData,
-    getImageData,
-  };
-};
 
 /**
  * Turn the attachment block into an image block.

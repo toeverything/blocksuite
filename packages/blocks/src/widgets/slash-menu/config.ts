@@ -13,10 +13,7 @@ import {
   uploadImageFromLocal,
 } from '../../__internal__/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
-import {
-  appendAttachmentBlock,
-  withTempBlobData,
-} from '../../attachment-block/utils.js';
+import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
 import { inlineFormatConfig } from '../../common/inline-format-config.js';
 import { paragraphConfig } from '../../common/paragraph-config.js';
@@ -231,11 +228,6 @@ export const menuGroups: {
             return;
           }
           const fileData = await uploadImageFromLocal(pageElement.page.blobs);
-          const { saveAttachmentData } = withTempBlobData();
-          fileData.forEach(({ file, sourceId }) => {
-            saveAttachmentData(sourceId, { name: file.name });
-          });
-
           const props = fileData.map(
             ({
               sourceId,
