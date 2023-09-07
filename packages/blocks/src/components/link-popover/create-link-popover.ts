@@ -36,7 +36,7 @@ function createEditLinkElement(
   linkPanel.previewLink = previewLink;
   linkPanel.showBookmarkOperation =
     !!page.awarenessStore.getFlag('enable_bookmark_operation') &&
-    !isInsideBlockByFlavour(page, model, 'affine:database');
+    !isInsideBlockByFlavour(page, model, 'affine:bookmark');
   container.appendChild(linkPanel);
 
   requestAnimationFrame(() => {

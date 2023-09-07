@@ -198,7 +198,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
               class="bookmark-input title"
               placeholder="Title"
               value=${this.model.bookmarkTitle || 'Bookmark'}
-              tabindex="1"
+              tabindex="0"
               id="${this.id}-title"
             />
           </div>
@@ -209,7 +209,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
               class="bookmark-input description"
               placeholder="Description"
               value=${this.model.description || this.model.url}
-              tabindex="2"
+              tabindex="0"
               id="${this.id}-description"
             />
           </div>
@@ -217,7 +217,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           <div class="bookmark-modal-footer">
             <div
               class="bookmark-confirm-button"
-              tabindex="3"
+              tabindex="0"
               @click=${() => {
                 this._onConfirm();
               }}

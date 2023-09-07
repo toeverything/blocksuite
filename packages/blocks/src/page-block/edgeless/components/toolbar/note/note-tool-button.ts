@@ -32,7 +32,9 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
     }
 
     edgeless-tool-icon-button svg + svg {
-      margin-left: 8px;
+      position: absolute;
+      top: 4px;
+      right: 2px;
     }
   `;
 
@@ -99,6 +101,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .active=${type === 'note'}
+        .iconContainerPadding=${8}
         @click=${() => {
           this.setEdgelessTool({
             type: 'note',

@@ -36,7 +36,7 @@ import {
   CrossIcon,
   DatabaseTableViewIcon,
   DividerIcon,
-  EmbedIcon,
+  EmbedWebIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -570,7 +570,7 @@ function BlockHubMenu(
         type="file"
         selected=${visibleCardType === 'file' ? 'true' : 'false'}
       >
-        ${blockHubFileCards} ${EmbedIcon}
+        ${blockHubFileCards} ${EmbedWebIcon}
       </div>
       <div
         class="block-hub-icon-container has-tool-tip"

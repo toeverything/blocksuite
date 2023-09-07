@@ -1,12 +1,21 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { BaseBlockModel, BlockSchemaType } from '../schema/index.js';
-import type { Workspace } from '../workspace/index.js';
+import type { PageMeta, Workspace } from '../workspace/index.js';
 import type { Page } from '../workspace/index.js';
+import type { PagesPropertiesMeta } from '../workspace/meta.js';
 import { AssetsManager } from './assets.js';
 import { BaseBlockTransformer } from './base.js';
-import type { BlockSnapshot, PageSnapshot } from './type.js';
-import { BlockSnapshotSchema, PageSnapshotSchema } from './type.js';
+import type {
+  BlockSnapshot,
+  PageSnapshot,
+  WorkspaceInfoSnapshot,
+} from './type.js';
+import {
+  BlockSnapshotSchema,
+  PageSnapshotSchema,
+  WorkspaceInfoSnapshotSchema,
+} from './type.js';
 
 export type JobConfig = {
   workspace: Workspace;
@@ -20,6 +29,14 @@ export class Job {
     this._assetsManager = new AssetsManager({ blobs: workspace.blobs });
   }
 
+  get assets() {
+    return this._assetsManager.getAssets();
+  }
+
+  reset() {
+    this._assetsManager.cleanup();
+  }
+
   private _getSchema(flavour: string) {
     const schema = this._workspace.schema.flavourSchemaMap.get(flavour);
     assertExists(schema, `Flavour schema not found for ${flavour}`);
@@ -30,48 +47,47 @@ export class Job {
     return schema.transformer?.() ?? new BaseBlockTransformer();
   }
 
-  private _exportPageMeta(page: Page): PageSnapshot['meta'] {
-    const root = page.root;
+  private _getWorkspaceMeta() {
     const { meta } = this._workspace;
-    const { blockVersions, pageVersion, properties } = meta;
-    const pageMeta = this._workspace.meta.getPageMeta(page.id);
-    assertExists(root);
+    const { blockVersions, pageVersion, workspaceVersion, properties, pages } =
+      meta;
     assertExists(blockVersions);
     assertExists(pageVersion);
+    assertExists(workspaceVersion);
+    assertExists(properties);
+    assertExists(pages);
+    return {
+      blockVersions: { ...blockVersions },
+      pageVersion,
+      workspaceVersion,
+      properties: JSON.parse(JSON.stringify(properties)) as PagesPropertiesMeta,
+      pages: JSON.parse(JSON.stringify(pages)) as PageMeta[],
+    };
+  }
+
+  private _exportPageMeta(page: Page): PageSnapshot['meta'] {
+    const pageMeta = page.meta;
+
     assertExists(pageMeta);
     return {
-      page: {
-        id: pageMeta.id,
-        title: pageMeta.title,
-        createDate: pageMeta.createDate,
-        tags: [...pageMeta.tags],
-      },
-      versions: {
-        block: { ...blockVersions },
-        page: pageVersion,
-      },
-      properties: JSON.parse(JSON.stringify(properties)),
+      id: pageMeta.id,
+      title: pageMeta.title,
+      createDate: pageMeta.createDate,
+      tags: [...pageMeta.tags],
     };
   }
 
   private _importPageMeta(page: Page, meta: PageSnapshot['meta']) {
-    const pageMeta = this._workspace.meta.getPageMeta(page.id);
-    assertExists(pageMeta);
-    const metaTags = this._workspace.meta.properties.tags?.options ?? [];
-    const snapshotTags = meta.properties.tags?.options ?? [];
-    if (snapshotTags) {
-      this._workspace.meta.properties.tags = {
-        options: metaTags,
-      };
-    }
+    const pageMeta = page.meta;
+
     const workspaceTags = this._workspace.meta.properties.tags?.options;
     assertExists(workspaceTags);
-    meta.properties.tags?.options.forEach(tag => {
-      if (metaTags?.some(metaTag => metaTag.id === tag.id)) {
-        return;
+    meta.tags.forEach(tag => {
+      const exists = workspaceTags.some(t => t.id === tag);
+      if (!exists) {
+        throw new Error(`Tag ${tag} is not in workspace options`);
       }
-      workspaceTags.push(tag);
-      pageMeta.tags.push(tag.id);
+      pageMeta.tags.push(tag);
     });
   }
 
@@ -90,17 +106,18 @@ export class Job {
       })
     );
     return {
+      type: 'snapshot:block',
       ...snapshot,
       children,
     };
   }
 
-  async blockToSnapshot(model: BaseBlockModel): Promise<BlockSnapshot> {
+  blockToSnapshot = async (model: BaseBlockModel): Promise<BlockSnapshot> => {
     const snapshot = await this._blockToSnapshot(model);
     BlockSnapshotSchema.parse(snapshot);
 
     return snapshot;
-  }
+  };
 
   private async _snapshotToBlock(
     snapshot: BlockSnapshot,
@@ -139,37 +156,71 @@ export class Job {
     return model;
   }
 
-  snapshotToBlock(
+  snapshotToBlock = (
     snapshot: BlockSnapshot,
     page: Page,
     parent?: string,
     index?: number
-  ): Promise<BaseBlockModel> {
+  ): Promise<BaseBlockModel> => {
     BlockSnapshotSchema.parse(snapshot);
     return this._snapshotToBlock(snapshot, page, parent, index);
-  }
+  };
 
-  async pageToSnapshot(page: Page): Promise<PageSnapshot> {
+  pageToSnapshot = async (page: Page): Promise<PageSnapshot> => {
     const root = page.root;
     const meta = this._exportPageMeta(page);
     assertExists(root);
     const block = await this.blockToSnapshot(root);
-    const pageSnapshot: PageSnapshot = { meta, block };
+    const pageSnapshot: PageSnapshot = {
+      type: 'snapshot:page',
+      meta,
+      block,
+    };
 
     PageSnapshotSchema.parse(pageSnapshot);
     return pageSnapshot;
-  }
+  };
 
-  async snapshotToPage(snapshot: PageSnapshot): Promise<Page> {
+  snapshotToPage = async (snapshot: PageSnapshot): Promise<Page> => {
     PageSnapshotSchema.parse(snapshot);
 
-    // TODO: validate versions and run migration
     const { meta, block } = snapshot;
-    const page = this._workspace.createPage({ id: meta.page.id });
+    const page = this._workspace.createPage({ id: meta.id });
     await page.waitForLoaded();
     this._importPageMeta(page, meta);
     await this.snapshotToBlock(block, page);
 
     return page;
-  }
+  };
+
+  workspaceInfoToSnapshot = (): WorkspaceInfoSnapshot => {
+    const workspaceMeta = this._getWorkspaceMeta();
+
+    const snapshot: WorkspaceInfoSnapshot = {
+      type: 'snapshot:workspace:info',
+      app: '@toeverything/blocksuite',
+      source: 'github.com/toeverything/blocksuite',
+      id: this._workspace.id,
+      ...workspaceMeta,
+    };
+
+    WorkspaceInfoSnapshotSchema.parse(snapshot);
+    return snapshot;
+  };
+
+  snapshotToWorkspaceInfo = (snapshot: WorkspaceInfoSnapshot): void => {
+    WorkspaceInfoSnapshotSchema.parse(snapshot);
+    // TODO: validate versions
+    const { properties } = snapshot;
+    const currentProperties = this._workspace.meta.properties;
+    const newOptions = properties.tags?.options ?? [];
+    const currentOptions = currentProperties.tags?.options ?? [];
+    const options = new Set([...newOptions, ...currentOptions]);
+
+    this._workspace.meta.setProperties({
+      tags: {
+        options: Array.from(options),
+      },
+    });
+  };
 }

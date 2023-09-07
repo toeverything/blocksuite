@@ -36,7 +36,7 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '../../icons/index.js';
-import type { ImageProps } from '../../image-block/image-model.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   getSelectedContentBlockElements,
@@ -232,7 +232,7 @@ export const menuGroups: {
           ).map(
             ({
               sourceId,
-            }): ImageProps & {
+            }): ImageBlockProps & {
               flavour: 'affine:image';
             } => ({
               flavour: 'affine:image',
