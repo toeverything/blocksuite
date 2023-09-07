@@ -131,10 +131,13 @@ export class RangeSynchronizer {
       if (endIsSelectedAll && composing) {
         this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
+
+      startText.delete(from.index, from.length);
       if (!endIsSelectedAll) {
         endText.delete(0, to.length);
         startText.join(endText);
       }
+
       blocks.slice(1).forEach(block => {
         this.root.page.deleteBlock(block.model);
       });
