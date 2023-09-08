@@ -212,7 +212,6 @@ export class KanbanSelection {
 
     if (nextPosition === 'right') {
       return getNextGroupFocusElement(
-        'cell',
         this.viewEle,
         groups,
         selection,
@@ -222,7 +221,6 @@ export class KanbanSelection {
 
     if (nextPosition === 'left') {
       return getNextGroupFocusElement(
-        'cell',
         this.viewEle,
         groups,
         selection,
@@ -285,7 +283,6 @@ export class KanbanSelection {
 
     if (nextPosition === 'right') {
       return getNextGroupFocusElement(
-        'card',
         this.viewEle,
         groups,
         selection,
@@ -295,7 +292,6 @@ export class KanbanSelection {
 
     if (nextPosition === 'left') {
       return getNextGroupFocusElement(
-        'card',
         this.viewEle,
         groups,
         selection,
@@ -439,11 +435,12 @@ export class KanbanSelection {
     const columnId = card && this.viewEle.view.getHeaderTitle(card)?.id;
     if (group && card && columnId) {
       this.selection = {
+        selectionType: 'cell',
         groupKey: group.key,
         cardId: card,
         columnId,
         isEditing: true,
-      } as KanbanCellSelection;
+      };
     }
   }
 
@@ -465,7 +462,7 @@ export class KanbanSelection {
           cardId: id,
           columnId,
           isEditing: true,
-        } as KanbanCellSelection;
+        };
       } else {
         this.selection = {
           selectionType: 'card',
@@ -498,7 +495,7 @@ export class KanbanSelection {
           cardId: id,
           columnId,
           isEditing: true,
-        } as KanbanCellSelection;
+        };
       } else {
         this.selection = {
           selectionType: 'card',
@@ -508,7 +505,7 @@ export class KanbanSelection {
               groupKey,
             },
           ],
-        } as KanbanCardSelection;
+        };
       }
     });
   }
@@ -554,40 +551,35 @@ type NextFocusCard = {
   }[];
 };
 function getNextGroupFocusElement(
-  type: 'cell',
   viewElement: Element,
   groups: KanbanGroup[],
-  selection: KanbanViewSelection,
+  selection: KanbanCellSelection,
   getNextGroupIndex: (groupIndex: number) => number
 ): NextFocusCell;
 function getNextGroupFocusElement(
-  type: 'card',
   viewElement: Element,
   groups: KanbanGroup[],
-  selection: KanbanViewSelection,
+  selection: KanbanCardSelection,
   getNextGroupIndex: (groupIndex: number) => number
 ): NextFocusCard;
-function getNextGroupFocusElement<T extends 'cell' | 'card'>(
-  type: T,
+function getNextGroupFocusElement(
   viewElement: Element,
   groups: KanbanGroup[],
-  selection: KanbanViewSelection,
+  selection: KanbanCellSelection | KanbanCardSelection,
   getNextGroupIndex: (groupIndex: number) => number
 ): NextFocusCell | NextFocusCard {
   const groupIndex = groups.findIndex(group => {
-    if (type === 'cell') {
-      return group.group.key === (selection as KanbanCellSelection).groupKey;
+    if (selection.selectionType === 'cell') {
+      return group.group.key === selection.groupKey;
     }
-    return (
-      group.group.key === (selection as KanbanCardSelection).cards[0].groupKey
-    );
+    return group.group.key === selection.cards[0].groupKey;
   });
 
   const nextGroupIndex = getNextGroupIndex(groupIndex);
 
   const nextGroup = groups[nextGroupIndex];
   const element =
-    type === 'cell'
+    selection.selectionType === 'cell'
       ? getFocusCell(viewElement, selection as KanbanCellSelection)
       : getSelectedCards(viewElement, selection as KanbanCardSelection)[0];
   assertExists(element);
@@ -611,7 +603,7 @@ function getNextGroupFocusElement<T extends 'cell' | 'card'>(
     });
   const nextCard = nextCards[cardPos.index];
 
-  if (type === 'card') {
+  if (selection.selectionType === 'card') {
     return {
       card: nextCard,
       cards: [
