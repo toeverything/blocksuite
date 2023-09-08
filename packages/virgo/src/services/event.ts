@@ -266,6 +266,8 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     )
       return;
 
+    if (!this.editor.getVRange()) return;
+
     // Sometimes input event will directly come from some scripts (e.g. browser extension),
     // so we need to resync the vRange.
     const targetRanges = event.getTargetRanges();
@@ -275,6 +277,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       range.setStart(staticRange.startContainer, staticRange.startOffset);
       range.setEnd(staticRange.endContainer, staticRange.endOffset);
       const vRange = this.editor.toVRange(range);
+
       if (!isMaybeVRangeEqual(this.editor.getVRange(), vRange)) {
         this.editor.setVRange(vRange, false);
       }
