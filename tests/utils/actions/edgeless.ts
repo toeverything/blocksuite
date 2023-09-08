@@ -88,10 +88,6 @@ export async function switchEditorEmbedMode(page: Page) {
   await page.click('sl-button[content="Add container offset"]');
 }
 
-export function locatorPanButton(page: Page, innerContainer = true) {
-  return locatorEdgelessToolButton(page, 'pan', innerContainer);
-}
-
 type BasicEdgelessTool = 'default' | 'pan' | 'note';
 type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
 
@@ -106,11 +102,11 @@ export function locatorEdgelessToolButton(
   innerContainer = true
 ) {
   const text = {
-    default: 'Select',
+    default: /Select|Hand/,
+    pan: /Select|Hand/,
     shape: 'Shape',
     brush: 'Pen',
     eraser: 'Eraser',
-    pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
     note: 'Note',
@@ -205,9 +201,30 @@ export async function setEdgelessTool(
   shape = Shape.Square
 ) {
   switch (mode) {
-    case 'default':
+    case 'default': {
+      const button = locatorEdgelessToolButton(page, 'default', false);
+      const classes = (await button.getAttribute('class'))?.split(' ');
+      if (!classes?.includes('default')) {
+        await button.click();
+        await sleep(100);
+      }
+      break;
+    }
+    case 'pan': {
+      const button = locatorEdgelessToolButton(page, 'default', false);
+      const classes = (await button.getAttribute('class'))?.split(' ');
+      if (classes?.includes('default')) {
+        await button.click();
+        await sleep(100);
+      } else if (classes?.includes('pan')) {
+        await button.click(); // change to default
+        await sleep(100);
+        await button.click(); // change to pan
+        await sleep(100);
+      }
+      break;
+    }
     case 'brush':
-    case 'pan':
     case 'text':
     case 'note':
     case 'eraser':

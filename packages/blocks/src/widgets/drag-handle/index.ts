@@ -615,6 +615,9 @@ export class DragHandleWidget extends WidgetElement {
         this._clearRaf();
         return;
       }
+      this._rafID = requestAnimationFrame(() =>
+        this._updateIndicator(state, true)
+      );
     } else {
       this._clearRaf();
     }
@@ -628,7 +631,6 @@ export class DragHandleWidget extends WidgetElement {
     )
       return;
 
-    this._clearRaf();
     const state = this._lastDragPointerState;
     this._rafID = requestAnimationFrame(() =>
       this._updateIndicator(state, false)
