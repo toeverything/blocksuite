@@ -55,7 +55,10 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.updateAddButton
       );
       this.disposables.add({
-        dispose: cleanup,
+        dispose: () => {
+          cleanup();
+          this.addColumnButton.remove();
+        },
       });
     });
   }
