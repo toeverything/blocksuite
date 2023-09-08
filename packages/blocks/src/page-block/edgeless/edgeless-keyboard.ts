@@ -185,8 +185,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     this.pageElement.handleEvent(
       'keyDown',
       ctx => {
-        const event = ctx.get('defaultState').event;
-        if (event instanceof KeyboardEvent && event.code === 'Space') {
+        const event = ctx.get('keyboardState').raw;
+        if (event.code === 'Space') {
           this._space(event);
         }
       },
@@ -195,8 +195,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     this.pageElement.handleEvent(
       'keyUp',
       ctx => {
-        const event = ctx.get('defaultState').event;
-        if (event instanceof KeyboardEvent && event.code === 'Space') {
+        const event = ctx.get('keyboardState').raw;
+        if (event.code === 'Space') {
           this._space(event);
         }
       },
