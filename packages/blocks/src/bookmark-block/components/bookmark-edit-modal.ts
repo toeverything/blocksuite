@@ -3,6 +3,7 @@ import '../../components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
+import { baseTheme } from '@toeverything/theme';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -12,7 +13,7 @@ import type { BookmarkBlockModel } from '../bookmark-model.js';
 export const bookmarkModalStyles = html`
   <style>
     .bookmark-modal {
-      font-family: var(--affine-font-family);
+      font-family: ${baseTheme.fontSansFamily};
     }
     .bookmark-modal-container {
       position: fixed;
@@ -197,7 +198,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
               class="bookmark-input title"
               placeholder="Title"
               value=${this.model.bookmarkTitle || 'Bookmark'}
-              tabindex="1"
+              tabindex="0"
               id="${this.id}-title"
             />
           </div>
@@ -208,7 +209,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
               class="bookmark-input description"
               placeholder="Description"
               value=${this.model.description || this.model.url}
-              tabindex="2"
+              tabindex="0"
               id="${this.id}-description"
             />
           </div>
@@ -216,7 +217,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
           <div class="bookmark-modal-footer">
             <div
               class="bookmark-confirm-button"
-              tabindex="3"
+              tabindex="0"
               @click=${() => {
                 this._onConfirm();
               }}

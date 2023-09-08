@@ -20,6 +20,7 @@ node_modules
 # Build out
 dist/
 build
+temp
 tsconfig.tsbuildinfo
 tsconfig.*.tsbuildinfo
 .next

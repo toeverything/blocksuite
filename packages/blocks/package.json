@@ -2,7 +2,6 @@
   "name": "@blocksuite/blocks",
   "version": "0.8.0",
   "description": "Default BlockSuite editable blocks.",
-  "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -38,7 +37,6 @@
     "pdf-lib": "^1.17.1",
     "shiki": "^0.14.3",
     "sortablejs": "^1.15.0",
-    "turndown": "^7.1.2",
     "webfontloader": "^1.6.28",
     "fractional-indexing": "^3.2.0",
     "zod": "^3.22.2"
@@ -75,6 +73,15 @@
       }
     }
   },
+  "files": [
+    "dist",
+    "content-parser.d.ts",
+    "content-parser.js",
+    "models.d.ts",
+    "models.js",
+    "std.d.ts",
+    "std.js"
+  ],
   "devDependencies": {
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",

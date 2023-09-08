@@ -26,8 +26,8 @@ import {
   type ConnectorElement,
   ConnectorMode,
   StrokeStyle,
-  type SurfaceManager,
 } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import {
@@ -122,7 +122,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   private _setConnectorMode(mode: ConnectorMode) {
     this.page.captureSync();

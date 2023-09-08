@@ -149,7 +149,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
   }
 
   override onContainerDragEnd(): void {
-    deleteElements(this._edgeless, Array.from(this._eraseTargets));
+    deleteElements(this._surface, Array.from(this._eraseTargets));
     this._reset();
     this._page.captureSync();
   }

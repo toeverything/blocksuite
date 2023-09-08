@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 export const styles = css`
   affine-multi-tag-select {
@@ -36,7 +37,7 @@ export const styles = css`
     flex: 1 1 0;
     height: 24px;
     border: none;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     color: inherit;
     background: transparent;
     line-height: 24px;

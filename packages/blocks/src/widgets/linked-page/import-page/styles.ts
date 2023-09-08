@@ -1,6 +1,7 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
-import { tooltipStyle } from '../tooltip/tooltip.js';
+import { tooltipStyle } from '../../../components/tooltip/tooltip.js';
 
 export const styles = css`
   .container {
@@ -8,7 +9,7 @@ export const styles = css`
     width: 480px;
     left: calc(50% - 480px / 2);
     top: calc(50% - 270px / 2);
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
     padding: 12px 40px 36px;

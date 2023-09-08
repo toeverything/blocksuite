@@ -162,6 +162,7 @@ export const edgelessPreset: LitBlockSpec[] = [
   },
   {
     schema: DatabaseBlockSchema,
+    service: DatabaseService,
     view: {
       component: literal`affine-database`,
     },

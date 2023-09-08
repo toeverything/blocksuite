@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 import { scrollbarStyle } from '../../components/utils.js';
 
@@ -12,7 +13,7 @@ export const styles = css`
     left: 0;
     top: 0;
     box-sizing: border-box;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     padding: 12px 8px;
     display: flex;

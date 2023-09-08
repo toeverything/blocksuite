@@ -73,9 +73,11 @@ export class EdgelessChildNote extends LitElement {
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
   protected override createRenderRoot() {
     return this;
   }
+
   override render() {
     const { model, renderer, index } = this;
     const { xywh, background } = model;

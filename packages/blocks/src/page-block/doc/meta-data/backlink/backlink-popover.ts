@@ -1,5 +1,6 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
 import { scrollbarStyle } from '../../../../components/utils.js';
@@ -27,7 +28,7 @@ const styles = css`
 
     user-select: none;
     font-size: var(--affine-font-sm);
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     fill: var(--affine-text-secondary-color);
     color: var(--affine-text-secondary-color);
     pointer-events: auto;

@@ -75,6 +75,10 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     }
   }
 
+  override async block2markdown(block: CodeBlockModel): Promise<string> {
+    return '```' + block.language + '\r\n' + block.text.toString() + '\r\n```';
+  }
+
   override block2Json(
     block: CodeBlockModel,
     children: SerializedBlock[],

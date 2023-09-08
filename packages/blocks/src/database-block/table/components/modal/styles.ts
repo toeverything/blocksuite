@@ -1,8 +1,9 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 export const modelStyles = css`
   .table-view-modal-overlay {
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
     color: var(--affine-text-primary-color);
@@ -74,7 +75,7 @@ export const fullScreenStyles = css`
     background: var(--affine-white);
     box-shadow: var(--affine-shadow-2);
 
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     line-height: var(--affine-line-height);
     color: var(--affine-text-primary-color);

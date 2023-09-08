@@ -5,11 +5,11 @@ import '@blocksuite/editor';
 import '@blocksuite/editor/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import std from '@blocksuite/blocks/std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProviderCreator, Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
@@ -164,6 +164,7 @@ async function main() {
   const workspace = new Workspace(options);
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
+  window.job = new Job({ workspace });
   window.Y = Workspace.Y;
   window.std = std;
   window.ContentParser = ContentParser;
@@ -172,7 +173,6 @@ async function main() {
       return document.querySelector('block-suite-root') as BlockSuiteRoot;
     },
   });
-  workspace.awarenessStore.setFlag('enable_page_tags', true);
 
   subscribePage(workspace);
   initWorkspace(workspace);

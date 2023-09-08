@@ -3,6 +3,10 @@ export { DragHandleWidget } from './drag-handle/index.js';
 export { EdgelessRemoteSelectionWidget } from './edgeless-remote-selection/index.js';
 export { AffineFormatBarWidget } from './format-bar/index.js';
 export { AffineImageToolbarWidget } from './image-toolbar/index.js';
+export {
+  // It's used in the AFFiNE!
+  showImportModal,
+} from './linked-page/import-page/index.js';
 export { LinkedPageWidget } from './linked-page/index.js';
 export { AffineModalWidget } from './modal-widget/index.js';
 export { AffineRemoteSelectionWidget } from './remote-selection/index.js';

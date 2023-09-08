@@ -1,6 +1,7 @@
 import './components/link-node.js';
 
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
@@ -121,7 +122,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;
