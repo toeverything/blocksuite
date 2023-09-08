@@ -21,7 +21,7 @@ export const getVRangeProvider: (
         },
         to: null,
       });
-      selectionManager.set([textSelection]);
+      selectionManager.setGroup('note', [textSelection]);
     }
   };
   const getVRange = (): VRange | null => {
