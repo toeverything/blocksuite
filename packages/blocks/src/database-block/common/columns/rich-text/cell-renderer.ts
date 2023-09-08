@@ -1,6 +1,7 @@
 import '../../../../__internal__/rich-text/rich-text.js';
 
 import type { Y } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';

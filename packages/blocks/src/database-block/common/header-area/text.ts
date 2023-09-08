@@ -1,10 +1,21 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { Text } from '@blocksuite/store';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 import type * as Y from 'yjs';
 import { Doc, Text as YText, UndoManager } from 'yjs';
 
+import { ClipboardItem } from '../../../__internal__/clipboard/clipboard-item.js';
+import {
+  CLIPBOARD_MIMETYPE,
+  performNativeCopy,
+} from '../../../__internal__/clipboard/utils/pure.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../../__internal__/index.js';
 import type { RichText } from '../../../__internal__/rich-text/rich-text.js';
 import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
 import type { AffineTextSchema } from '../../../__internal__/rich-text/virgo/types.js';
@@ -159,8 +170,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
         .undoManager="${this.undoManager}"
         .textSchema="${textSchema}"
         .readonly="${this.readonly}"
-      ></rich-text>
-      <div class="data-view-header-area-rich-text"></div>`;
+      ></rich-text>`;
   }
 }
 
