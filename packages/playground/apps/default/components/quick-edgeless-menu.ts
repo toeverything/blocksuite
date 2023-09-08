@@ -347,6 +347,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       new MarkdownAdapter()
         .fromPageSnapshot({
           snapshot,
+          assets: job.assetsManager,
         })
         .then(markdown => {
           const blob = new Blob([markdown], { type: 'plain/text' });

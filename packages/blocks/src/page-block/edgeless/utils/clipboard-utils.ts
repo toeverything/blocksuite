@@ -4,7 +4,7 @@ import {
   getBlockClipboardInfo,
   getCopyElements,
 } from '../../../__internal__/clipboard/index.js';
-import type { EdgelessElement } from '../../../index.js';
+import type { EdgelessElement } from '../../../__internal__/index.js';
 import {
   Bound,
   ConnectorElement,

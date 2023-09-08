@@ -66,6 +66,8 @@ const flagsPreset = {
   enable_set_remote_flag: true,
   enable_block_hub: true,
 
+  enable_expand_database_block: false,
+
   enable_toggle_block: false,
   enable_bookmark_operation: false,
   enable_note_index: false,

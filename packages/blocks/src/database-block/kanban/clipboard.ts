@@ -1,6 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 
-import type { KanbanViewSelectionWithType } from '../../index.js';
+import type { KanbanViewSelectionWithType } from '../../__internal__/index.js';
 import {
   BaseViewClipboard,
   type BaseViewClipboardConfig,

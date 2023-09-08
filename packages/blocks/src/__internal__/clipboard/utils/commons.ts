@@ -192,7 +192,11 @@ async function createPageClipboardItems(
 }
 
 export async function copyBlocksInPage(root: BlockSuiteRoot) {
-  const selectedModels = getSelectedContentModels(root, ['text', 'block']);
+  const selectedModels = getSelectedContentModels(root, [
+    'text',
+    'block',
+    'image',
+  ]);
   const textSelection = root.selectionManager.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,
