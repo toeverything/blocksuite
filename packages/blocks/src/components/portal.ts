@@ -88,7 +88,7 @@ type PortalOptions = {
   /**
    * The portal is removed when the AbortSignal is aborted.
    */
-  abortController?: AbortController;
+  signal?: AbortSignal;
   /**
    * Defaults to `true`.
    */
@@ -111,7 +111,7 @@ type PortalOptions = {
 export function createSimplePortal({
   template,
   container = document.body,
-  abortController = new AbortController(),
+  signal = new AbortController().signal,
   renderOptions,
   shadowDom = true,
   identifyWrapper = true,
@@ -123,7 +123,7 @@ export function createSimplePortal({
   if (shadowDom) {
     portalRoot.attachShadow({ mode: 'open' });
   }
-  abortController.signal.addEventListener('abort', () => {
+  signal.addEventListener('abort', () => {
     portalRoot.remove();
   });
 
@@ -154,7 +154,8 @@ export function createSimplePortal({
   return portalRoot;
 }
 
-type AdvancedPortalOptions = Omit<PortalOptions, 'template'> & {
+type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
+  abortController?: AbortController;
   template:
     | Renderable
     | ((context: {
@@ -222,7 +223,7 @@ export function createLitPortal({
 
   const portalRoot = createSimplePortal({
     ...portalOptions,
-    abortController,
+    signal: abortController.signal,
     template: templateWithPosition,
   });
 
