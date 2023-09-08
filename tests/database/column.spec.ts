@@ -83,7 +83,7 @@ test.describe('column operations', () => {
     await type(page, '2');
     await pressEnter(page);
     const columns = page.locator('.affine-database-column');
-    expect(await columns.count()).toBe(4);
+    expect(await columns.count()).toBe(3);
 
     await assertDatabaseColumnOrder(page, ['1', '2']);
   });
@@ -99,7 +99,7 @@ test.describe('column operations', () => {
     await type(page, '2');
     await pressEnter(page);
     const columns = page.locator('.affine-database-column');
-    expect(await columns.count()).toBe(4);
+    expect(await columns.count()).toBe(3);
 
     await assertDatabaseColumnOrder(page, ['2', '1']);
   });
@@ -111,10 +111,10 @@ test.describe('column operations', () => {
     await initDatabaseColumn(page, '1');
 
     const columns = page.locator('.affine-database-column');
-    expect(await columns.count()).toBe(3);
+    expect(await columns.count()).toBe(2);
 
     await performColumnAction(page, '1', 'Delete');
-    expect(await columns.count()).toBe(2);
+    expect(await columns.count()).toBe(1);
   });
 
   test('should support duplicate column', async ({ page }) => {
