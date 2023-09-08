@@ -1,6 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 
-import type { KanbanViewSelection } from '../../index.js';
+import type { KanbanViewSelectionWithType } from '../../index.js';
 import {
   BaseViewClipboard,
   type BaseViewClipboardConfig,
@@ -43,7 +43,7 @@ export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager
 
   private _onCopy = async (
     _context: UIEventStateContext,
-    _kanbanSelection: KanbanViewSelection
+    _kanbanSelection: KanbanViewSelectionWithType
   ) => {
     // todo
     return true;

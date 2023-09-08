@@ -149,6 +149,7 @@ test('when the selection is always a note, it should remain in an active state',
   await assertEdgelessSelectedRect(page, [46, 597.5, 448, 128]);
 
   await clickInCenter(page, bound);
+  await clickInCenter(page, bound);
   await waitNextFrame(page);
   await assertSelectionInNote(page, ids.noteId);
 });
