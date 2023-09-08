@@ -177,7 +177,7 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
   await expect(tooltip).toBeVisible();
 });
 
-test.skip('delete shape block by keyboard', async ({ page }) => {
+test('delete shape block by keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -187,8 +187,7 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
 
   await setEdgelessTool(page, 'default');
   const startPoint = await page.evaluate(() => {
-    // @ts-expect-error
-    const hitbox = window.std.getShapeBlockHitBox('3');
+    const hitbox = document.querySelector('[data-block-id="3"]');
     if (!hitbox) {
       throw new Error('hitbox is null');
     }
