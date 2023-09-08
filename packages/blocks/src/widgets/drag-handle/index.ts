@@ -616,7 +616,7 @@ export class DragHandleWidget extends WidgetElement {
         return;
       }
       this._rafID = requestAnimationFrame(() =>
-        this._updateIndicator(state, false)
+        this._updateIndicator(state, true)
       );
     } else {
       this._clearRaf();
