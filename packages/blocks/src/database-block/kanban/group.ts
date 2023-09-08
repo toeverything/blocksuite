@@ -156,12 +156,11 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
         kanban.selection.selection = {
+          selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
-          focus: {
-            columnId: this.view.header.titleColumn || this.view.columns[0],
-            isEditing: true,
-          },
+          columnId: this.view.header.titleColumn || this.view.columns[0],
+          isEditing: true,
         };
       }
     });
@@ -172,12 +171,11 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
         kanban.selection.selection = {
+          selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
-          focus: {
-            columnId: this.view.header.titleColumn || this.view.columns[0],
-            isEditing: true,
-          },
+          columnId: this.view.header.titleColumn || this.view.columns[0],
+          isEditing: true,
         };
       }
     });
