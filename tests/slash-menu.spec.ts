@@ -87,9 +87,9 @@ test.describe('slash menu should show and hide correctly', () => {
   });
 
   test('delete the slash symbol should close the slash menu', async () => {
+    await waitNextFrame(page, 100);
     await pressBackspace(page);
     await expect(slashMenu).not.toBeVisible();
-    await waitNextFrame(page, 100);
     await assertStoreMatchJSX(
       page,
       `
