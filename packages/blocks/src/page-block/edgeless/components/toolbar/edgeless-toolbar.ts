@@ -394,10 +394,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _renderTools() {
-    const { page } = this.edgeless;
     const { type } = this.edgelessTool;
-
-    if (page.readonly) return nothing;
 
     return html`
       <div class="full-divider"></div>
@@ -521,6 +518,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (this.edgeless.page.readonly) return nothing;
+
     const { type } = this.edgelessTool;
 
     const Content =

@@ -41,6 +41,7 @@ export function AttachmentOptionsTemplate({
   const containerRef = createRef<HTMLDivElement>();
   const disableEmbed = !model.type?.startsWith('image/');
   const readonly = model.page.readonly;
+  const hideEditButton = readonly;
   let moreMenuAbortController: AbortController | null = null;
   return html`<style>
       ${styles}
@@ -90,7 +91,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly}
+        ?hidden=${hideEditButton}
         @click="${() => {
           abortController.abort();
           const renameAbortController = new AbortController();
@@ -116,7 +117,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly}
+        ?hidden=${hideEditButton}
         @click=${() => {
           showCaption();
         }}
@@ -124,7 +125,7 @@ export function AttachmentOptionsTemplate({
         ${CaptionIcon}
         <tool-tip inert tip-position="top" role="tooltip">Caption</tool-tip>
       </icon-button>
-      <div class="divider"></div>
+      <div class="divider" ?hidden=${hideEditButton}></div>
       <icon-button
         size="24px"
         class="has-tool-tip more-button"
