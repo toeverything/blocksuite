@@ -4,6 +4,7 @@ import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
+import { VIRGO_ROOT_ATTR } from './consts.js';
 import { VirgoHookService } from './services/hook.js';
 import {
   VirgoAttributeService,
@@ -202,6 +203,7 @@ export class VEditor<
 
   unmount() {
     render(nothing, this.rootElement);
+    this.rootElement.removeAttribute(VIRGO_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
     this.disposables.dispose();

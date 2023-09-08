@@ -4,7 +4,7 @@ import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import type { VirgoRootElement } from '@blocksuite/virgo';
+import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -250,7 +250,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   get vEditor() {
-    const vRoot = this.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }

@@ -1,5 +1,5 @@
 import type { VirgoElement, VirgoLine } from '../components/index.js';
-import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DomPoint, TextPoint } from '../types.js';
 import { isNativeTextInVText, isVElement, isVLine, isVRoot } from './guard.js';
 import { calculateTextLength, getTextNodesFromElement } from './text.js';
@@ -98,8 +98,8 @@ function getVNodesFromNode(node: Node): VirgoElement[] | VirgoLine[] | null {
 
   const container =
     node instanceof Element
-      ? node.closest('[data-virgo-root="true"]')
-      : node.parentElement?.closest('[data-virgo-root="true"]');
+      ? node.closest(`[${VIRGO_ROOT_ATTR}]`)
+      : node.parentElement?.closest(`[${VIRGO_ROOT_ATTR}]`);
 
   if (container) {
     return Array.from(container.querySelectorAll('v-line'));
