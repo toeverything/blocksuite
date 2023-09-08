@@ -10,7 +10,7 @@ import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export function getSelectedContentModels(
   root: BlockSuiteRoot,
-  types: Extract<BlockSuite.SelectionType, 'block' | 'text'>[]
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
   const selectedElements = getSelectedContentBlockElements(root, types);
   const selectedModels = selectedElements.map(element => element.model);
@@ -22,7 +22,7 @@ export function getSelectedContentModels(
  */
 export function getSelectedContentBlockElements(
   root: BlockSuiteRoot,
-  types: Extract<BlockSuite.SelectionType, 'block' | 'text'>[]
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BlockElement[] {
   const { rangeManager } = root;
   const selectionManager = root.selectionManager;
@@ -59,6 +59,17 @@ export function getSelectedContentBlockElements(
         return el ?? [];
       })
     );
+  }
+
+  if (types.includes('image')) {
+    const viewStore = root.viewStore;
+    const imageSelections = selectionManager.find('image');
+    const imageEle = imageSelections
+      ? viewStore.viewFromPath('block', imageSelections.path)
+      : null;
+    if (imageEle) {
+      dirtyResult.push(imageEle);
+    }
   }
 
   // remove duplicate elements
