@@ -221,13 +221,17 @@ export async function setEdgelessTool(
       if (mode === 'default') {
         if (!classes?.includes('default')) {
           await button.click();
+          await sleep(100);
         }
       } else if (mode === 'pan') {
         if (classes?.includes('default')) {
           await button.click();
+          await sleep(100);
         } else if (classes?.includes('pan')) {
           await button.click(); // change to default
+          await sleep(100);
           await button.click(); // change to pan
+          await sleep(100);
         }
       }
       break;
