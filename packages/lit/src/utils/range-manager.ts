@@ -1,7 +1,12 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { VEditor, VirgoRootElement, VRange } from '@blocksuite/virgo';
+import {
+  type VEditor,
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+  type VRange,
+} from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 import type { BlockSuiteRoot } from '../element/lit-root.js';
@@ -210,8 +215,9 @@ export class RangeManager {
     if (!block) {
       return null;
     }
-    const virgoRoot =
-      block.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const virgoRoot = block.querySelector<VirgoRootElement>(
+      `[${VIRGO_ROOT_ATTR}]`
+    );
     assertExists(
       virgoRoot,
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
@@ -335,7 +341,7 @@ export class RangeManager {
       return;
     }
 
-    return element.closest('[data-virgo-root]') as VirgoRootElement;
+    return element.closest(`[${VIRGO_ROOT_ATTR}]`) as VirgoRootElement;
   }
 
   private _getBlock(element: HTMLElement) {

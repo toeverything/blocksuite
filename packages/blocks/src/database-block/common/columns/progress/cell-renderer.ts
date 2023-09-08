@@ -158,7 +158,7 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     });
   }
 
-  startDrag = (event: PointerEvent) => {
+  startDrag = (event: MouseEvent) => {
     const bgRect = this._progressBg.getBoundingClientRect();
     const min = bgRect.left;
     const max = bgRect.right;

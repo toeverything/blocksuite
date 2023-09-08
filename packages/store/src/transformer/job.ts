@@ -29,6 +29,10 @@ export class Job {
     this._assetsManager = new AssetsManager({ blobs: workspace.blobs });
   }
 
+  get assetsManager() {
+    return this._assetsManager;
+  }
+
   get assets() {
     return this._assetsManager.getAssets();
   }

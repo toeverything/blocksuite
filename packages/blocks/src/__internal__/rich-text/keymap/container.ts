@@ -2,7 +2,11 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { VEditor, VirgoRootElement } from '@blocksuite/virgo';
+import {
+  type VEditor,
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+} from '@blocksuite/virgo';
 
 import { bracketPairs } from '../../../common/bracket-pairs.js';
 import { inlineFormatConfig } from '../../../common/inline-format-config.js';
@@ -37,7 +41,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return sel;
       });
     });
-    blockElement.querySelector<VirgoRootElement>('[data-virgo-root]')?.blur();
+    blockElement
+      .querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`)
+      ?.blur();
     return true;
   };
 
@@ -61,8 +67,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   const _getVirgo = () => {
-    const vRoot =
-      blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const vRoot = blockElement.querySelector<VirgoRootElement>(
+      `[${VIRGO_ROOT_ATTR}]`
+    );
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }
@@ -267,8 +274,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
 
       const text = blockElement.selected;
-      const virgo =
-        blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
+      const virgo = blockElement.querySelector<VirgoRootElement>(
+        `[${VIRGO_ROOT_ATTR}]`
+      );
       if (
         text.from.index === 0 &&
         text.from.length === virgo?.virgoEditor.yText.length

@@ -27,12 +27,15 @@ import { KanbanSelection } from './selection.js';
 const styles = css`
   affine-data-view-kanban {
     user-select: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .affine-data-view-kanban-groups {
     display: flex;
     gap: 20px;
-    overflow-x: auto;
+    overflow: auto;
   }
 
   .add-group-icon {

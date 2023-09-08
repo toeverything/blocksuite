@@ -308,8 +308,7 @@ test('should display the add column button on the right side of database correct
   await initDatabaseColumn(page);
   const normalColumn = page.locator('.affine-database-column').nth(1);
 
-  const addColumnBtn = page.locator('.affine-database-add-column-button');
-  await expect(addColumnBtn).toBeHidden();
+  const addColumnBtn = page.locator('.header-add-column-button');
 
   const box = await getBoundingBox(normalColumn);
   await dragBetweenCoords(
@@ -325,9 +324,6 @@ test('should display the add column button on the right side of database correct
   );
   await focusDatabaseHeader(page);
   await expect(addColumnBtn).toBeVisible();
-
-  await undoByClick(page);
-  await expect(addColumnBtn).toBeHidden();
 });
 
 test('should support drag and drop to move columns', async ({ page }) => {
@@ -407,7 +403,9 @@ test('support drag and drop the add button to insert row', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        await expect(page.locator('affine-drag-indicator div')).toBeVisible();
+        await expect(
+          page.locator('div[data-is-drop-preview="true"]')
+        ).toBeVisible();
       },
     }
   );
@@ -460,10 +458,10 @@ test('should the indicator display correctly when resize the window', async ({
       beforeMouseUp: async () => {
         await waitNextFrame(page);
         const { x: indicatorX } = await getBoundingBox(
-          page.locator('affine-drag-indicator div')
+          page.locator('div[data-is-drop-preview="true"]')
         );
         const { x: databaseX } = await getBoundingBox(
-          page.locator('affine-database')
+          page.locator('affine-database-table')
         );
         expect(indicatorX).toBe(databaseX);
       },

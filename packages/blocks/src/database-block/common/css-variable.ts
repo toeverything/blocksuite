@@ -3,8 +3,14 @@ export const dataViewCommonStyle = (selector: string) => `
       --data-view-cell-text-size:14px;
       --data-view-cell-text-line-height:22px;
   }
+  .dv-pd-2{
+    padding:2px;
+  }
   .dv-pd-4{
     padding:4px;
+  }
+  .dv-pd-8{
+    padding:8px;
   }
   .dv-hover:hover{
     background-color: var(--affine-hover-color);

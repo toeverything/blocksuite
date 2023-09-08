@@ -439,7 +439,7 @@ export class KanbanSelection {
         groupKey: group.key,
         cardId: card,
         columnId,
-        isEditing: true,
+        isEditing: false,
       };
     }
   }
