@@ -40,6 +40,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
+    this.addColumnButton.style.marginLeft = '20px';
     this.addColumnButton.style.position = 'absolute';
     this.addColumnButton.style.zIndex = '1';
     this.closest('affine-data-view-native')?.append(this.addColumnButton);
@@ -68,7 +69,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
       middleware: [
         shift({
           boundary: this.closest('affine-database-table') ?? this,
-          padding: -40,
+          padding: -20,
         }),
       ],
     }).then(({ x, y }) => {

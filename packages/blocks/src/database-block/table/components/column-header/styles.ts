@@ -153,7 +153,6 @@ export const styles = css`
     align-items: center;
     justify-content: center;
     width: 40px;
-    margin-left: 40px;
     cursor: pointer;
   }
   .header-add-column-button svg {
