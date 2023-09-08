@@ -14,7 +14,7 @@ import type { KanbanGroup } from './group.js';
 import type { DataViewKanban } from './kanban-view.js';
 
 export class KanbanSelection {
-  _selection?: KanbanViewSelection;
+  _selection?: KanbanViewSelectionWithType;
 
   get view() {
     return this.viewEle.view;
@@ -37,7 +37,7 @@ export class KanbanSelection {
     ];
   }
 
-  get selection(): KanbanViewSelection | undefined {
+  get selection(): KanbanViewSelectionWithType | undefined {
     return this._selection;
   }
 

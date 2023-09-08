@@ -58,7 +58,7 @@ const styles = css`
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends BaseDataView<
   DataViewKanbanManager,
-  KanbanViewSelection
+  KanbanViewSelectionWithType
 > {
   static override styles = styles;
 
