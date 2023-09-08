@@ -192,11 +192,11 @@ export class AffineImageToolbarWidget extends WidgetElement {
         @mouseout=${this._onHoverLeave}
       >
         <div class="embed-editing-state">
-          ${this.supportAttachment
-            ? html`<icon-button
+          ${readonly || !this.supportAttachment
+            ? nothing
+            : html`<icon-button
                 class="has-tool-tip"
                 size="32px"
-                ?disabled=${readonly}
                 @click=${() => {
                   this.hide();
                   turnImageIntoCardView(model, blob);
@@ -204,19 +204,19 @@ export class AffineImageToolbarWidget extends WidgetElement {
               >
                 ${BookmarkIcon}
                 <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
-              </icon-button>`
-            : nothing}
-          <icon-button
-            class="has-tool-tip"
-            size="32px"
-            ?disabled=${readonly}
-            @click=${() => focusCaption(model)}
-          >
-            ${CaptionIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Caption</tool-tip
-            >
-          </icon-button>
+              </icon-button>`}
+          ${readonly
+            ? nothing
+            : html`<icon-button
+                class="has-tool-tip"
+                size="32px"
+                @click=${() => focusCaption(model)}
+              >
+                ${CaptionIcon}
+                <tool-tip inert tip-position="right" role="tooltip"
+                  >Caption</tool-tip
+                >
+              </icon-button>`}
           <icon-button
             class="has-tool-tip"
             size="32px"
@@ -237,25 +237,27 @@ export class AffineImageToolbarWidget extends WidgetElement {
               >Copy to clipboard</tool-tip
             >
           </icon-button>
-          <icon-button
-            class="has-tool-tip delete-image-button"
-            size="32px"
-            ?disabled=${readonly}
-            @click="${() => {
-              this.hide();
-              model.page.deleteBlock(model);
-            }}"
-          >
-            ${DeleteIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Delete</tool-tip
-            >
-          </icon-button>
-          ${this.page.awarenessStore.getFlag('enable_bultin_ledits')
-            ? html`<icon-button
+          ${readonly
+            ? nothing
+            : html`<icon-button
                 class="has-tool-tip delete-image-button"
                 size="32px"
-                ?disabled=${readonly}
+                @click="${() => {
+                  this.hide();
+                  model.page.deleteBlock(model);
+                }}"
+              >
+                ${DeleteIcon}
+                <tool-tip inert tip-position="right" role="tooltip"
+                  >Delete</tool-tip
+                >
+              </icon-button>`}
+          ${readonly ||
+          !this.page.awarenessStore.getFlag('enable_bultin_ledits')
+            ? nothing
+            : html`<icon-button
+                class="has-tool-tip"
+                size="32px"
                 @click="${() => {
                   this.hide();
                   openLeditsEditor(model, blob, this.root);
@@ -265,8 +267,7 @@ export class AffineImageToolbarWidget extends WidgetElement {
                 <tool-tip inert tip-position="right" role="tooltip"
                   >Edit with LEDITS</tool-tip
                 >
-              </icon-button>`
-            : nothing}
+              </icon-button>`}
         </div>
       </div>
     `;
