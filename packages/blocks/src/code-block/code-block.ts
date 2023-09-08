@@ -300,7 +300,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._observePosition();
     bindContainerHotkey(this);
 
-    const selection = this.root.selectionManager;
+    const selectionManager = this.root.selectionManager;
     const INDENT_SYMBOL = '  ';
     const LINE_BREAK_SYMBOL = '\n';
     const allIndexOf = (
@@ -324,7 +324,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     };
     this.bindHotKey({
       Backspace: () => {
-        const textSelection = selection.find('text');
+        const textSelection = selectionManager.find('text');
         if (!textSelection) {
           return;
         }
@@ -332,11 +332,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const from = textSelection.from;
 
         if (from.index === 0 && from.length === 0) {
-          selection.update(selList => {
-            return selList
-              .filter(sel => !sel.is('text'))
-              .concat(selection.getInstance('block', { path: this.path }));
-          });
+          selectionManager.setGroup('note', [
+            selectionManager.getInstance('block', { path: this.path }),
+          ]);
           return true;
         }
 

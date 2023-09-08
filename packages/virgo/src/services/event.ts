@@ -256,7 +256,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     }
   };
 
-  private _firstRecomputeInFrame = true;
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
@@ -266,13 +265,21 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       !this._isRangeCompletelyInRoot()
     )
       return;
-    if (this._firstRecomputeInFrame) {
-      this._firstRecomputeInFrame = false;
-      this._onSelectionChange();
-      requestAnimationFrame(() => {
-        this._firstRecomputeInFrame = true;
-      });
+
+    // Sometimes input event will directly come from some scripts (e.g. browser extension),
+    // so we need to resync the vRange.
+    const targetRanges = event.getTargetRanges();
+    if (targetRanges.length > 0) {
+      const staticRange = targetRanges[0];
+      const range = document.createRange();
+      range.setStart(staticRange.startContainer, staticRange.startOffset);
+      range.setEnd(staticRange.endContainer, staticRange.endOffset);
+      const vRange = this.editor.toVRange(range);
+      if (!isMaybeVRangeEqual(this.editor.getVRange(), vRange)) {
+        this.editor.setVRange(vRange, false);
+      }
     }
+
     const vRange = this.editor.getVRange();
     if (!vRange) return;
 
