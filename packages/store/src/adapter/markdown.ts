@@ -1,6 +1,7 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 
 import type { BlockSnapshot } from '../transformer/type.js';
+import type { AdapterAssetsManager } from './assets.js';
 import {
   BaseAdapter,
   type BlockSnapshotPayload,
@@ -25,36 +26,58 @@ type TraverseContext = {
   indentDepth: number;
   insideTheLists: boolean;
   numberedListCount: number[];
+  assets?: AdapterAssetsManager;
 };
 
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
   private markdownBuffer = new StringBuilder();
 
-  async fromPageSnapshot({ snapshot }: PageSnapshotPayload): Promise<Markdown> {
+  async fromPageSnapshot({
+    snapshot,
+    assets,
+  }: PageSnapshotPayload): Promise<Markdown> {
     const buffer = new StringBuilder();
     buffer.write(`# ${snapshot.meta.title}\n`);
     buffer.write(
       await this.fromBlockSnapshot({
         snapshot: snapshot.blocks,
+        assets,
       })
     );
     return buffer.toString();
   }
+
   async fromBlockSnapshot({
     snapshot,
+    assets,
   }: BlockSnapshotPayload): Promise<Markdown> {
-    this.traverseSnapshot(snapshot, {
+    await this.traverseSnapshot(snapshot, {
       indentDepth: 0,
       insideTheLists: false,
       numberedListCount: [0],
+      assets,
     });
-    return this.markdownBuffer.toString();
+    const markdown = this.markdownBuffer.toString();
+    this.markdownBuffer.clear();
+    return markdown;
   }
 
-  traverseSnapshot = (snapshot: BlockSnapshot, context: TraverseContext) => {
+  async toPageSnapshot(_file: Markdown): Promise<PageSnapshotReturn> {
+    throw new Error('Method not implemented.');
+  }
+
+  async toBlockSnapshot(_file: Markdown): Promise<BlockSnapshotReturn> {
+    throw new Error('Method not implemented.');
+  }
+
+  private traverseSnapshot = async (
+    snapshot: BlockSnapshot,
+    context: TraverseContext
+  ) => {
     if (markdownConvertableFlavours.includes(snapshot.flavour)) {
-      const text =
-        (snapshot.props.text as { delta: DeltaInsert[] }) ?? undefined;
+      const text = (snapshot.props.text ?? { delta: [] }) as {
+        delta: DeltaInsert[];
+      };
       if (context.insideTheLists && snapshot.flavour !== 'affine:list') {
         this.markdownBuffer.write('\n');
         context.insideTheLists = false;
@@ -63,41 +86,20 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       switch (snapshot.flavour) {
         case 'affine:code': {
           this.markdownBuffer.write(`\`\`\`${snapshot.props.language ?? ''}\n`);
-          if (
-            Array.isArray(text?.delta) &&
-            text?.delta.every(delta => typeof delta === 'object')
-          ) {
-            this.markdownBuffer.write(
-              this.deltaToMarkdown(text?.delta as DeltaInsert[])
-            );
-          }
+          this.writeTextDelta(text);
           this.markdownBuffer.write('\n```\n');
           break;
         }
         case 'affine:paragraph': {
           switch (snapshot.props.type) {
-            case 'h1': {
-              this.markdownBuffer.write('# ');
-              break;
-            }
-            case 'h2': {
-              this.markdownBuffer.write('## ');
-              break;
-            }
-            case 'h3': {
-              this.markdownBuffer.write('### ');
-              break;
-            }
-            case 'h4': {
-              this.markdownBuffer.write('#### ');
-              break;
-            }
-            case 'h5': {
-              this.markdownBuffer.write('##### ');
-              break;
-            }
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
             case 'h6': {
-              this.markdownBuffer.write('###### ');
+              const level = parseInt(snapshot.props.type[1]);
+              this.markdownBuffer.write('#'.repeat(level) + ' ');
               break;
             }
             case 'text': {
@@ -108,30 +110,21 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               break;
             }
           }
-          if (
-            Array.isArray(text?.delta) &&
-            text?.delta.every(delta => typeof delta === 'object')
-          ) {
-            this.markdownBuffer.write(
-              this.deltaToMarkdown(text?.delta as DeltaInsert[])
-            );
-          }
+          this.writeTextDelta(text);
           this.markdownBuffer.write('\n\n');
           for (const child of snapshot.children) {
             context.indentDepth += 1;
             this.markdownBuffer.write('    '.repeat(context.indentDepth));
-            this.traverseSnapshot(child, context);
+            await this.traverseSnapshot(child, context);
             context.indentDepth -= 1;
           }
           break;
         }
         case 'affine:list': {
           if (snapshot.props.type === 'numbered') {
-            console.log(context.numberedListCount);
             const order = (context.numberedListCount.pop() ?? 0) + 1;
             this.markdownBuffer.write(`${order}. `);
             context.numberedListCount.push(order);
-            console.log(context.numberedListCount);
           } else if (snapshot.props.type === 'checkbox') {
             this.markdownBuffer.write(
               snapshot.props.checked ? '- [x] ' : '- [ ] '
@@ -139,21 +132,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           } else {
             this.markdownBuffer.write('- ');
           }
-          if (
-            Array.isArray(text?.delta) &&
-            text?.delta.every(delta => typeof delta === 'object')
-          ) {
-            this.markdownBuffer.write(
-              this.deltaToMarkdown(text?.delta as DeltaInsert[])
-            );
-          }
+          this.writeTextDelta(text);
           this.markdownBuffer.write('\n');
           context.insideTheLists = true;
           context.numberedListCount.push(0);
           for (const child of snapshot.children) {
             context.indentDepth += 1;
             this.markdownBuffer.write('    '.repeat(context.indentDepth));
-            this.traverseSnapshot(child, context);
+            await this.traverseSnapshot(child, context);
             context.indentDepth -= 1;
           }
           context.numberedListCount.pop();
@@ -164,6 +150,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'affine:image': {
+          const blobId = (snapshot.props.sourceId ?? '') as string;
+          await context.assets?.readFromBlob(blobId);
+          const blob = context.assets?.getAssets().get(blobId);
+          if (!blob) {
+            break;
+          }
+          const dataURL = await blobToDataURL(blob);
+          this.markdownBuffer.write(`![](${dataURL})\n`);
           break;
         }
         case 'affine:database': {
@@ -172,16 +166,18 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
     } else {
       for (const child of snapshot.children) {
-        this.traverseSnapshot(child, context);
+        await this.traverseSnapshot(child, context);
       }
     }
   };
 
-  async toPageSnapshot(_file: Markdown): Promise<PageSnapshotReturn> {
-    throw new Error('Method not implemented.');
-  }
-  async toBlockSnapshot(_file: Markdown): Promise<BlockSnapshotReturn> {
-    throw new Error('Method not implemented.');
+  private writeTextDelta(text: { delta: DeltaInsert[] }) {
+    if (
+      Array.isArray(text?.delta) &&
+      text?.delta.every(delta => typeof delta === 'object')
+    ) {
+      this.markdownBuffer.write(this.deltaToMarkdown(text?.delta));
+    }
   }
 
   escapeMarkdown(text: string) {
@@ -213,4 +209,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     }
     return buffer.toString();
   }
+}
+
+function blobToDataURL(blob: Blob) {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
 }
