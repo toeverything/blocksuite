@@ -127,10 +127,6 @@ export class DataViewHeaderToolsSearch extends WithDisposable(
   @state()
   private _showSearch = false;
 
-  private get readonly() {
-    return this.view.readonly;
-  }
-
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
     const inputValue = el.value.trim();
@@ -170,9 +166,6 @@ export class DataViewHeaderToolsSearch extends WithDisposable(
   };
 
   override render() {
-    if (this.readonly) {
-      return;
-    }
     const searchToolClassMap = classMap({
       'affine-database-search-container': true,
       'search-container-expand': this.showSearch,
