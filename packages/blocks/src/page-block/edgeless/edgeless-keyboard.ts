@@ -1,15 +1,14 @@
 import {
-  Bound,
-  ConnectorElement,
-  ConnectorMode,
-  ShapeStyle,
-} from '@blocksuite/phasor';
-
-import {
   type EdgelessTool,
   LineWidth,
   type ShapeToolState,
 } from '../../__internal__/utils/types.js';
+import {
+  Bound,
+  ConnectorElement,
+  ConnectorMode,
+  ShapeStyle,
+} from '../../surface-block/index.js';
 import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -53,6 +52,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._setEdgelessTool(pageElement, {
             type: 'connector',
             mode: ConnectorMode.Orthogonal,
+            color: GET_DEFAULT_LINE_COLOR(),
+            strokeWidth: LineWidth.LINE_WIDTH_TWO,
+          });
+        },
+        c: () => {
+          this._setEdgelessTool(pageElement, {
+            type: 'connector',
+            mode: ConnectorMode.Curve,
             color: GET_DEFAULT_LINE_COLOR(),
             strokeWidth: LineWidth.LINE_WIDTH_TWO,
           });
@@ -101,7 +108,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this.pageElement.selectionManager.elements.length !== 0 &&
             !this.pageElement.selectionManager.editing
           ) {
-            this.pageElement.frame.createFrameOnSelected();
+            pageElement.surface.frame.createFrameOnSelected();
           } else if (!this.pageElement.selectionManager.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
@@ -228,7 +235,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(edgeless, edgeless.selectionManager.elements);
+    deleteElements(edgeless.surface, edgeless.selectionManager.elements);
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
@@ -260,7 +267,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _move(key: string) {
     const edgeless = this.pageElement;
     if (edgeless.selectionManager.editing) return;
-
+    const { surface } = edgeless;
     const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
@@ -282,9 +289,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
       if (isPhasorElement(element)) {
         if (element instanceof ConnectorElement) {
-          this.pageElement.connector.updateXYWH(element, bound);
+          surface.connector.updateXYWH(element, bound);
         }
-        this.pageElement.surface.setElementBound(element.id, bound);
+        surface.setElementBound(element.id, bound);
       } else {
         this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
       }

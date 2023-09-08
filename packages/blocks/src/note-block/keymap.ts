@@ -4,10 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import { getBlockElementByModel } from '../__internal__/utils/query.js';
-import { actionConfig } from '../page-block/const/action-config.js';
-import { moveBlockConfig } from '../page-block/const/move-block-config.js';
-import { paragraphConfig } from '../page-block/const/paragraph-config.js';
-import type { PageBlockComponent } from '../page-block/types.js';
+import { actionConfig } from '../common/actions/action-config.js';
+import { moveBlockConfig } from '../common/move-block-config.js';
+import { paragraphConfig } from '../common/paragraph-config.js';
 import {
   getSelectedContentBlockElements,
   onModelElementUpdated,
@@ -28,6 +27,9 @@ import {
 } from './utils.js';
 
 export const bindHotKey = (blockElement: BlockElement) => {
+  const root = blockElement.root;
+  const selectionManager = blockElement.root.selectionManager;
+
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
   let composition = false;
@@ -294,6 +296,9 @@ export const bindHotKey = (blockElement: BlockElement) => {
       ctx.get('defaultState').event.preventDefault();
       const view = blockElement.root.viewStore;
       const selection = blockElement.root.selectionManager;
+      if (!selection.find('block')) {
+        return;
+      }
       const blocks: BlockSelection[] = [];
       view.walkThrough(nodeView => {
         if (nodeView.type === 'block') {
@@ -315,15 +320,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
     if (!config.hotkey) return;
     blockElement.bindHotKey({
       [config.hotkey]: ctx => {
-        const pageElement = blockElement.closest<PageBlockComponent>(
-          'affine-doc-page,affine-edgeless-page'
-        );
-        if (!pageElement) return;
-
-        if (!config.showWhen(pageElement)) return;
+        if (!config.showWhen(root)) return;
 
         ctx.get('defaultState').event.preventDefault();
-        config.action(pageElement);
+        config.action(root);
       },
     });
   });
@@ -336,11 +336,9 @@ export const bindHotKey = (blockElement: BlockElement) => {
     config.hotkey.forEach(key => {
       blockElement.bindHotKey({
         [key]: ctx => {
-          const selectionManager = blockElement.root.selectionManager;
-
           ctx.get('defaultState').event.preventDefault();
 
-          const selected = getSelectedContentBlockElements(blockElement, [
+          const selected = getSelectedContentBlockElements(root, [
             'text',
             'block',
           ]);
@@ -382,7 +380,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
       blockElement.bindHotKey({
         [key]: context => {
           context.get('defaultState').event.preventDefault();
-          config.action(blockElement);
+          return config.action(blockElement);
         },
       });
     });

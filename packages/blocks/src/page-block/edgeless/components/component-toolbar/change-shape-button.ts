@@ -7,12 +7,6 @@ import './component-toolbar-menu-divider.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  type ShapeElement,
-  ShapeStyle,
-  StrokeStyle,
-  type SurfaceManager,
-} from '@blocksuite/phasor';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -24,11 +18,17 @@ import {
 } from '../../../../__internal__/utils/types.js';
 import {
   ChangeShapeIcon,
-  GeneralShapeStyleIcon,
+  GeneralStyleIcon,
   LineStyleIcon,
-  ScribbledShapeStyleIcon,
+  ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
+import {
+  type ShapeElement,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
   GENERAL_CANVAS_FONT_FAMILY,
@@ -270,7 +270,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
   page!: Page;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
@@ -501,8 +501,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         >
           <div class="shape-style-button">
             ${selectedShapeStyle === ShapeStyle.General
-              ? GeneralShapeStyleIcon
-              : ScribbledShapeStyleIcon}
+              ? GeneralStyleIcon
+              : ScribbledStyleIcon}
             ${ShapeArrowDownSmallIcon}
           </div>
         </edgeless-tool-icon-button>

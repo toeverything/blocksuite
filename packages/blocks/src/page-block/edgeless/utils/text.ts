@@ -1,13 +1,16 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type {
-  FrameElement,
-  IModelCoord,
-  ShapeElement,
-} from '@blocksuite/phasor';
-import { Bound, TextElement } from '@blocksuite/phasor';
 import * as Y from 'yjs';
 
+import type {
+  FrameElement,
+  ShapeElement,
+} from '../../../surface-block/index.js';
+import {
+  Bound,
+  type IModelCoord,
+  TextElement,
+} from '../../../surface-block/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';

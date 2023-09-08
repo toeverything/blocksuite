@@ -1,25 +1,21 @@
 import { type Slot } from '@blocksuite/global/utils';
-import {
-  type BrushElement,
-  type ConnectorElement,
-  type ConnectorMode,
-  type PhasorElement,
-  type ShapeStyle,
-  type ShapeType,
-} from '@blocksuite/phasor';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import type { Clipboard } from '../clipboard/index.js';
+import { type ShapeStyle } from '../../surface-block/consts.js';
+import {
+  type BrushElement,
+  type ConnectorElement,
+  type ConnectorMode,
+  type PhasorElement,
+  type ShapeType,
+} from '../../surface-block/elements/index.js';
 import type { RefNodeSlots } from '../rich-text/reference-node.js';
 import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
-import type {
-  BlockServiceInstanceByKey,
-  ServiceFlavour,
-} from '../service/legacy-services/index.js';
+import type { ServiceFlavour } from '../service/legacy-services/index.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
@@ -60,23 +56,45 @@ export type TableViewSelection = {
   isEditing: boolean;
 };
 
-export type KanbanFocusData = {
+type WithKanbanViewType<T> = T extends unknown
+  ? {
+      viewId: string;
+      type: 'kanban';
+    } & T
+  : never;
+
+export type KanbanCellSelection = {
+  selectionType: 'cell';
+  groupKey: string;
+  cardId: string;
   columnId: string;
   isEditing: boolean;
 };
-
-export type KanbanViewSelection = {
-  viewId: string;
-  type: 'kanban';
+export type KanbanCardSelectionCard = {
   groupKey: string;
   cardId: string;
-  focus?: KanbanFocusData;
 };
+export type KanbanCardSelection = {
+  selectionType: 'card';
+  cards: [KanbanCardSelectionCard, ...KanbanCardSelectionCard[]];
+};
+export type KanbanGroupSelection = {
+  selectionType: 'group';
+  groupKeys: [string, ...string[]];
+};
+export type KanbanViewSelection =
+  | KanbanCellSelection
+  | KanbanCardSelection
+  | KanbanGroupSelection;
+export type KanbanViewSelectionWithType =
+  WithKanbanViewType<KanbanViewSelection>;
 
-export type DataViewSelection = TableViewSelection | KanbanViewSelection;
+export type DataViewSelection =
+  | TableViewSelection
+  | KanbanViewSelectionWithType;
 export type GetDataViewSelection<
   K extends DataViewSelection['type'],
-  T = DataViewSelection
+  T = DataViewSelection,
 > = T extends {
   type: K;
 }
@@ -86,23 +104,7 @@ export type DataViewSelectionState = DataViewSelection | undefined;
 
 /** Common context interface definition for block models. */
 
-/**
- * Functions that a block host provides
- */
-export interface BlockHostContext {
-  getService: <Key extends ServiceFlavour>(
-    flavour: Key
-  ) => BlockServiceInstanceByKey<Key>;
-}
-
 export type CommonSlots = RefNodeSlots;
-
-export interface BlockHost extends BlockHostContext {
-  page: Page;
-  flavour: string;
-  clipboard: Clipboard;
-  readonly slots: CommonSlots;
-}
 
 type EditorMode = 'page' | 'edgeless';
 type EditorSlots = {
@@ -114,15 +116,6 @@ export type AbstractEditor = {
   mode: EditorMode;
   readonly slots: CommonSlots & EditorSlots;
 } & HTMLElement;
-
-/**
- * type of `window.getSelection().type`
- *
- * The attribute must return "None" if this is empty, "Caret" if this's range is collapsed, and "Range" otherwise.
- *
- * More details see https://w3c.github.io/selection-api/#dom-selection-type
- */
-export type DomSelectionType = 'Caret' | 'Range' | 'None';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
@@ -166,7 +159,9 @@ export enum LineWidth {
   LINE_WIDTH_EIGHT = 8,
   LINE_WIDTH_TEN = 10,
   LINE_WIDTH_TWELVE = 12,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Thin = 4,
+  // eslint-disable-next-line @typescript-eslint/no-duplicate-enum-values
   Thick = 10,
 }
 
@@ -245,6 +240,8 @@ export type SerializedBlock = {
   children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
+  name?: string;
+  size?: number;
   width?: number;
   height?: number;
   language?: string;

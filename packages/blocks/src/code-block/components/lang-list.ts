@@ -1,5 +1,6 @@
 import type { Placement } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BUNDLED_LANGUAGES,
@@ -22,8 +23,8 @@ export class LangList extends LitElement {
         display: flex;
         flex-direction: column;
         background: var(--affine-background-overlay-panel-color);
+        color: var(--affine-text-primary-color);
         border-radius: 12px;
-        top: 24px;
         z-index: var(--affine-z-index-popover);
       }
 
@@ -62,6 +63,7 @@ export class LangList extends LitElement {
         border: 1px solid var(--affine-border-color);
         border-radius: 8px;
         padding: 4px 10px;
+        gap: 4px;
       }
 
       #filter-input {
@@ -72,7 +74,7 @@ export class LangList extends LitElement {
         border-radius: 8px;
         padding-top: 2px;
         border: none;
-        font-family: var(--affine-font-family);
+        font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
         font-size: var(--affine-font-sm);
         box-sizing: border-box;
         color: inherit;
@@ -89,11 +91,9 @@ export class LangList extends LitElement {
       }
 
       .search-icon {
-        height: 100%;
         display: flex;
-        padding-right: 4px;
         align-items: center;
-        fill: var(--affine-icon-color);
+        color: var(--affine-icon-color);
       }
     `;
   }

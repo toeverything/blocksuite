@@ -1,8 +1,11 @@
 import { DisposableGroup, noop } from '@blocksuite/global/utils';
-import type { Options, RoughCanvas } from '@blocksuite/phasor';
-import { ShapeStyle } from '@blocksuite/phasor';
-import { Overlay } from '@blocksuite/phasor';
 
+import {
+  type Options,
+  Overlay,
+  type RoughCanvas,
+  ShapeStyle,
+} from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,
@@ -371,8 +374,10 @@ export class NoteOverlay extends ToolOverlay {
     ctx.globalAlpha = this.globalAlpha;
     const overlayX = this.x + NOTE_OVERLAY_OFFSET_X;
     const overlayY = this.y + NOTE_OVERLAY_OFFSET_Y;
+    // Get real color from css variable
+    const computedStyle = getComputedStyle(this.edgeless);
+    ctx.strokeStyle = computedStyle.getPropertyValue(NOTE_OVERLAY_STOKE_COLOR);
     // Draw the overlay rectangle
-    ctx.strokeStyle = NOTE_OVERLAY_STOKE_COLOR;
     ctx.fillStyle =
       this.themeMode === 'light'
         ? NOTE_OVERLAY_LIGHT_BACKGROUND_COLOR
@@ -422,7 +427,7 @@ export class NoteOverlay extends ToolOverlay {
     ctx.fill();
 
     // Draw the overlay text
-    ctx.fillStyle = NOTE_OVERLAY_TEXT_COLOR;
+    ctx.fillStyle = computedStyle.getPropertyValue(NOTE_OVERLAY_TEXT_COLOR);
     let fontSize = 16;
     ctx.font = `${fontSize}px Arial`;
     ctx.textAlign = 'left';

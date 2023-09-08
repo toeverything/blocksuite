@@ -2,10 +2,21 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel, DeltaOperation } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 import type { TemplateResult } from 'lit';
-import { isTemplateResult } from 'lit/directive-helpers.js';
+import type { TemplateResultType } from 'lit/directive-helpers.js';
 
 import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
 import { json2block } from './json2block.js';
+
+// Breaking change introduced in lit@2.8.0
+// https://github.com/lit/lit/pull/3993
+const isTemplateResult = (
+  value: unknown,
+  type?: TemplateResultType
+): value is TemplateResult =>
+  type === undefined
+    ? // This property needs to remain unminified.
+      (value as TemplateResult)?.['_$litType$'] !== undefined
+    : (value as TemplateResult)?.['_$litType$'] === type;
 
 export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
   templateResult2String(temp: TemplateResult): string {
@@ -42,9 +53,21 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     return `${text}${childText}`;
   }
 
+  async block2markdown(
+    block: BlockModel,
+    { begin, end }: BlockTransformContext = {},
+    _blobMap?: Map<string, string>
+  ): Promise<string> {
+    const delta = block.text?.sliceToDelta(begin || 0, end) || [];
+    const text = delta.reduce((markdown: string, item: DeltaOperation) => {
+      return markdown + BaseService.deltaLeaf2markdown(block, item);
+    }, '');
+    return text;
+  }
+
   block2Json(
     block: BlockModel,
-    children?: SerializedBlock[],
+    children: SerializedBlock[],
     begin?: number,
     end?: number
   ): SerializedBlock {
@@ -53,16 +76,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       flavour: block.flavour,
       type: (block as BlockModel & { type: string }).type as string,
       text: delta,
-      children:
-        children ??
-        block.children.map((child, index, array) => {
-          if (index === array.length - 1) {
-            // @ts-ignore
-            return getService(child.flavour).block2Json(child, 0, end);
-          }
-          // @ts-ignore
-          return getService(child.flavour).block2Json(child);
-        }),
+      children,
     };
   }
 
@@ -112,7 +126,7 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
     if (attributes.underline) {
       text = `<u>${text}</u>`;
     }
-    if (attributes.strikethrough) {
+    if (attributes.strike || attributes.strikethrough) {
       text = `<s>${text}</s>`;
     }
     if (attributes.link) {
@@ -129,6 +143,56 @@ export class BaseService<BlockModel extends BaseBlockModel = BaseBlockModel> {
       const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
       const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
       text = `<a href="${referenceLink}">${referenceTitle}</a>`;
+    }
+    return text;
+  }
+
+  private static deltaLeaf2markdown(
+    block: BaseBlockModel,
+    deltaLeaf: DeltaOperation
+  ) {
+    let text = deltaLeaf.insert ?? '';
+    // replace unsafe characters
+    text = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    const attributes = deltaLeaf.attributes;
+    if (!attributes) {
+      return text;
+    }
+    if (attributes.code) {
+      text = '`' + text + '`';
+    }
+    if (attributes.bold) {
+      text = `**${text}**`;
+    }
+    if (attributes.italic) {
+      text = `_${text}_`;
+    }
+    if (attributes.underline) {
+      text = `<u>${text}</u>`;
+    }
+    if (attributes.strike || attributes.strikethrough) {
+      text = `~~${text}~~`;
+    }
+    if (attributes.link) {
+      text = `[${text}](${attributes.link})`;
+    }
+    if (attributes.reference) {
+      const refPageId = attributes.reference.pageId;
+      const workspace = block.page.workspace;
+      const pageMeta = workspace.meta.pageMetas.find(
+        page => page.id === refPageId
+      );
+      const host = window.location.origin;
+      // maybe should use public link at here?
+      const referenceLink = `${host}/workspace/${workspace.id}/${refPageId}`;
+      const referenceTitle = pageMeta ? pageMeta.title : 'Deleted page';
+      text = `[${referenceTitle}](${referenceLink})`;
     }
     return text;
   }

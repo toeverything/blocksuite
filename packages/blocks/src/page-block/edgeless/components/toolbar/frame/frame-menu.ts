@@ -1,12 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';
 
 import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { Bound } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
 export const FrameConfig = [
@@ -27,10 +27,6 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     .frame-menu-container {
       display: flex;
       align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px 8px 0 0;
-      border: 1px solid var(--affine-border-color);
       position: relative;
       cursor: default;
     }
@@ -95,6 +91,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
   override render() {
     if (this.edgelessTool.type !== 'frame') return nothing;
     const { edgeless } = this;
+    const { surface } = edgeless;
     return html`
       <div class="frame-menu-container">
         <edgeless-slide-menu .menuWidth=${290} .showNext=${false}>
@@ -107,7 +104,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
               (item, index) => html`
                 <div
                   @click=${() => {
-                    const frames = edgeless.frame.frames;
+                    const frames = surface.frame.frames;
                     const center = edgeless.surface.viewport.center;
                     const bound = new Bound(
                       center.x - item.wh[0] / 2,

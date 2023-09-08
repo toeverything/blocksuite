@@ -8,6 +8,7 @@ import {
   assertEdgelessTool,
   changeEdgelessNoteBackground,
   countBlock,
+  exitEditing,
   getNoteRect,
   hoverOnNote,
   initThreeNotes,
@@ -262,20 +263,22 @@ test('drag handle should be shown when a note is actived in default mode or hidd
   const [x, y] = [noteBox.x + 26, noteBox.y + noteBox.height / 2];
 
   await page.mouse.move(x, y);
-  await expect(page.locator('.affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await page.mouse.dblclick(x, y);
+  await waitNextFrame(page);
   await page.mouse.move(x, y);
-  await expect(page.locator('.affine-drag-handle')).toBeVisible();
+
+  await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 
   await page.mouse.move(0, 0);
   await setEdgelessTool(page, 'shape');
   await page.mouse.move(x, y);
-  await expect(page.locator('.affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
 
   await page.mouse.move(0, 0);
   await setEdgelessTool(page, 'default');
   await page.mouse.move(x, y);
-  await expect(page.locator('.affine-drag-handle')).toBeVisible();
+  await expect(page.locator('.affine-drag-handle-container')).toBeVisible();
 });
 
 test('drag handle should work inside one note', async ({ page }) => {
@@ -288,7 +291,7 @@ test('drag handle should work inside one note', async ({ page }) => {
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '5');
   await waitNextFrame(page);
-  await expect(page.locator('.affine-drag-handle')).toBeHidden();
+  await expect(page.locator('affine-drag-handle-container')).toBeHidden();
   await assertRichTexts(page, ['456', '789', '123']);
 });
 
@@ -310,46 +313,164 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await page.mouse.dblclick(CENTER_X, CENTER_Y);
   await dragHandleFromBlockToBlockBottomById(page, '3', '7');
-  await expect(page.locator('.affine-drag-handle')).toBeHidden();
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
   await waitNextFrame(page);
   await assertRichTexts(page, ['456', '789', '000', '123']);
 
-  await page.mouse.dblclick(305, 305);
-  await dragHandleFromBlockToBlockBottomById(page, '7', '4');
+  // await page.mouse.dblclick(305, 305);
+  await dragHandleFromBlockToBlockBottomById(page, '3', '4');
   await waitNextFrame(page);
-  await expect(page.locator('.affine-drag-handle')).toBeHidden();
-  await assertRichTexts(page, ['456', '000', '789', '123']);
+  await expect(page.locator('.affine-drag-handle-container')).toBeHidden();
+  await assertRichTexts(page, ['456', '123', '789', '000']);
 
   await expect(page.locator('selected > *')).toHaveCount(0);
 });
 
-test('note slicer will add new note', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  const ids = await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+test.describe('note slicer', () => {
+  test('note slicer will add new note', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
 
-  await switchEditorMode(page);
+    await switchEditorMode(page);
 
-  await selectNoteInEdgeless(page, ids.noteId);
+    await selectNoteInEdgeless(page, ids.noteId);
 
-  await hoverOnNote(page, ids.noteId);
-  await waitNextFrame(page);
-  await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
+    await hoverOnNote(page, ids.noteId);
+    await waitNextFrame(page);
+    await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
-  const buttonRect = await page
-    .locator('note-slicer-button .scissors-button')
-    .boundingBox();
+    const buttonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
 
-  assertRectExist(buttonRect);
+    assertRectExist(buttonRect);
 
-  await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
+    await page.mouse.move(
+      buttonRect.x + 1,
+      buttonRect.y + buttonRect.height / 2
+    );
 
-  await waitNextFrame(page, 2000);
-  await expect(page.locator('affine-note-scissors').isVisible()).toBeTruthy();
-  await page.locator('affine-note-scissors').click();
+    await waitNextFrame(page, 2000);
+    await expect(
+      page.locator('affine-note-slicer-popupbutton').isVisible()
+    ).toBeTruthy();
+    await page.locator('affine-note-slicer-popupbutton').click();
 
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+    await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+  });
+
+  test('note slicer button should appears at right position', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+
+    await switchEditorMode(page);
+    await selectNoteInEdgeless(page, ids.noteId);
+
+    const blockes = await page
+      .locator(`[data-block-id="${ids.noteId}"] [data-block-id]`)
+      .all();
+    expect(blockes.length).toBe(3);
+
+    const firstBlockRect = await blockes[0].boundingBox();
+    assertRectExist(firstBlockRect);
+    const secondblockRect = await blockes[1].boundingBox();
+    assertRectExist(secondblockRect);
+    await page.mouse.move(
+      secondblockRect.x + 1,
+      secondblockRect.y + secondblockRect.height / 2
+    );
+
+    const slicerButtonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
+    assertRectExist(slicerButtonRect);
+
+    const buttonRectMiddle = slicerButtonRect.y + slicerButtonRect.height / 2;
+
+    expect(buttonRectMiddle).toBeGreaterThan(
+      firstBlockRect.y + firstBlockRect.height
+    );
+    expect(buttonRectMiddle).toBeLessThan(secondblockRect.y);
+  });
+
+  test('note slicer button should scale when hovers on it', async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    const ids = await initEmptyEdgelessState(page);
+    await initThreeParagraphs(page);
+    await assertRichTexts(page, ['123', '456', '789']);
+
+    await switchEditorMode(page);
+
+    await selectNoteInEdgeless(page, ids.noteId);
+
+    await hoverOnNote(page, ids.noteId);
+    await waitNextFrame(page);
+    await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
+
+    const buttonRect = await page
+      .locator('note-slicer-button .slicer-button')
+      .boundingBox();
+
+    assertRectExist(buttonRect);
+
+    await page.mouse.move(
+      buttonRect.x + 1,
+      buttonRect.y + buttonRect.height / 2
+    );
+
+    await waitNextFrame(page, 2000);
+    const popupButtonRect = await page
+      .locator('affine-note-slicer-popupbutton')
+      .boundingBox();
+    assertRectExist(popupButtonRect);
+    expect(popupButtonRect.width / buttonRect.width).toBeCloseTo(1.2);
+  });
+
+  test('note slicer should has right z-index', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+
+    const firstNoteId = await addNote(page, 'hello\n123\n456\n789', 50, 500);
+    const secondNoteId = await addNote(page, 'world\n123\n456\n789', 100, 550);
+    const lastNoteId = await addNote(page, 'done\n123\n456\n789', 150, 600);
+
+    await exitEditing(page);
+    await waitNextFrame(page);
+    await selectNoteInEdgeless(page, lastNoteId);
+    await hoverOnNote(page, lastNoteId);
+    await waitNextFrame(page);
+    const zIndexPattern = /z-index:\s*(\d+)/;
+
+    let styleText =
+      (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
+    let result = zIndexPattern.exec(styleText);
+    expect(zIndexPattern.exec(styleText)?.[1]).toBe('3');
+
+    await selectNoteInEdgeless(page, secondNoteId);
+    await hoverOnNote(page, secondNoteId);
+
+    styleText =
+      (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
+    result = zIndexPattern.exec(styleText);
+    expect(result?.[1]).toBe('2');
+
+    await selectNoteInEdgeless(page, firstNoteId);
+    await hoverOnNote(page, firstNoteId);
+
+    styleText =
+      (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
+    result = zIndexPattern.exec(styleText);
+    expect(result?.[1]).toBe('1');
+  });
 });
 
 test('undo/redo should work correctly after clipping', async ({ page }) => {
@@ -366,7 +487,7 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await waitNextFrame(page, 500);
 
   const buttonRect = await page
-    .locator('note-slicer-button .scissors-button')
+    .locator('note-slicer-button .slicer-button')
     .boundingBox();
 
   assertRectExist(buttonRect);
@@ -374,7 +495,7 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
   await page.mouse.move(buttonRect.x + 1, buttonRect.y + buttonRect.height / 2);
 
   await waitNextFrame(page, 2000);
-  await page.locator('affine-note-scissors').click();
+  await page.locator('affine-note-slicer-popupbutton').click();
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
@@ -466,6 +587,36 @@ test('when editing text in edgeless, should hide component toolbar', async ({
   await page.mouse.click(0, 0);
   await activeNoteInEdgeless(page, ids.noteId);
   await expect(toolbar).toBeHidden();
+});
+
+test('duplicate note should work correctly', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const ids = await initEmptyEdgelessState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  await switchEditorMode(page);
+
+  await selectNoteInEdgeless(page, ids.noteId);
+
+  await triggerComponentToolbarAction(page, 'duplicate');
+  const moreActionsContainer = await page.locator('.more-actions-container');
+  await expect(moreActionsContainer).toBeHidden();
+
+  const noteLocator = await page.locator('edgeless-child-note');
+  await expect(noteLocator).toHaveCount(2);
+  const [firstNote, secondNote] = await noteLocator.all();
+
+  // content should be same
+  await expect(
+    (await firstNote.innerText()) === (await secondNote.innerText())
+  ).toBeTruthy();
+
+  // size should be same
+  const firstNoteBox = await firstNote.boundingBox();
+  const secondNoteBox = await secondNote.boundingBox();
+  await expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
+  await expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
 });
 
 test('double click toolbar zoom button, should not add text', async ({

@@ -1,11 +1,11 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import { CutIcon } from '../../../../icons/index.js';
 
 const buttonStyle = css`
-  .scissors-button {
+  .slicer-button {
     display: flex;
     box-sizing: border-box;
     border-radius: 10px;
@@ -24,110 +24,119 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
   static override styles = [
     buttonStyle,
     css`
-      .scissors-button {
-        transform: translate3d(-50%, 0, 0);
+      .slicer-button {
+        transform-origin: center center;
+        transform: translate3d(-50%, 0, 0) scale(calc(1 / var(--affine-zoom)));
         transition: transform 0.1s ease-out;
-      }
-
-      .scissors-button.slideout {
-        transform: translate3d(-150%, 0, 0) translate3d(3px, 0, 0);
       }
     `,
   ];
 
-  @query('.scissors-button')
+  @property({ attribute: false })
+  zoom!: number;
+
+  @query('.slicer-button')
   private _button!: HTMLButtonElement;
 
-  private _externalButton: null | NoteScissorsButton = null;
+  private _externalButton: PopupNoteSlicerButton | null = null;
 
   private _createExternalButton() {
-    const externalButton = document.createElement(
-      'affine-note-scissors'
-    ) as NoteScissorsButton;
+    if (this._externalButton) return this._externalButton;
 
-    document.body.appendChild(externalButton);
+    const externalButton = document.createElement(
+      'affine-note-slicer-popupbutton'
+    ) as PopupNoteSlicerButton;
+
     this._externalButton = externalButton;
+    document.body.appendChild(externalButton);
     this._disposables.addFromEvent(
-      this._externalButton,
+      externalButton,
       'click',
-      this._dispatchClipEvent
+      this._dispatchSliceEvent
     );
     this._disposables.add(() => {
       document.body.removeChild(externalButton);
       this._externalButton = null;
     });
+
+    return externalButton;
   }
 
-  private _popupButton = () => {
-    if (!this._externalButton) return;
+  private _popupExternalButton = () => {
+    this._dispatchPopupEvent();
 
-    const button = this._externalButton;
+    const externalButton = this._createExternalButton();
 
     requestAnimationFrame(() => {
       const rect = this._button.getBoundingClientRect();
 
       this._button.style.visibility = 'hidden';
-      button.show(rect);
-      button.addEventListener(
+      externalButton.show(rect);
+      externalButton.addEventListener(
         'transitionend',
         () => {
-          this._dispatchIndicatorEvent();
+          this._dispatchShowIndicatorEvent();
         },
         { once: true }
       );
     });
   };
 
-  private _dispatchEnterButtonEvent() {
-    const e = new CustomEvent('popupbutton');
+  private _slideout() {
+    const button = this._button;
 
-    this.dispatchEvent(e);
+    requestAnimationFrame(() => {
+      button.style.transform = `translate3d(-${
+        (0.5 + 1 / this.zoom) * 100
+      }%, 0, 0) scale(calc(1 / var(--affine-zoom)))`;
+    });
+
+    button.addEventListener('transitionend', this._popupExternalButton, {
+      once: true,
+    });
   }
 
-  private _dispatchIndicatorEvent() {
+  private _dispatchShowIndicatorEvent() {
     const e = new CustomEvent('showindicator');
 
     this.dispatchEvent(e);
   }
 
-  private _dispatchClipEvent = () => {
-    const e = new CustomEvent('clip');
+  private _dispatchSliceEvent = () => {
+    const e = new CustomEvent('slice');
 
     this.dispatchEvent(e);
   };
 
-  protected override firstUpdated(): void {
-    if (!this._externalButton) {
-      this._createExternalButton();
-    }
-  }
+  private _dispatchPopupEvent = () => {
+    const e = new CustomEvent('popup');
 
-  show() {
-    this._button.addEventListener('transitionend', this._popupButton, {
-      once: true,
-    });
-    this._button.classList.add('slideout');
+    this.dispatchEvent(e);
+  };
+
+  private _popup() {
+    this._slideout();
   }
 
   reset() {
-    this._button.removeEventListener('transitionend', this._popupButton);
-    this._button.classList.remove('slideout');
+    this._button.removeEventListener(
+      'transitionend',
+      this._popupExternalButton
+    );
     this._button.style.removeProperty('visibility');
+    this._button.style.removeProperty('transform');
     this._externalButton?.reset();
   }
 
   override render() {
-    return html`<button
-      class="scissors-button"
-      @mouseenter=${this._dispatchEnterButtonEvent}
-    >
+    return html`<button class="slicer-button" @mouseenter=${this._popup}>
       ${CutIcon}
     </button>`;
   }
 }
 
-@customElement('affine-note-scissors')
-export class NoteScissorsButton extends WithDisposable(LitElement) {
+@customElement('affine-note-slicer-popupbutton')
+export class PopupNoteSlicerButton extends WithDisposable(LitElement) {
   static override styles = [
     buttonStyle,
     css`
@@ -137,7 +146,7 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
         left: 0;
         top: 0;
         z-index: calc(var(--affine-z-index-popover, 0) + 2);
-        transform-origin: top left;
+        transform-origin: center center;
       }
     `,
   ];
@@ -150,9 +159,9 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
 
     const rafId = requestAnimationFrame(() => {
       this.style.transition = `transform 0.1s 0.1s ease-in-out`;
-      this.style.transform = `translate3d(${rect.x + rect.width * 0.8}px, ${
+      this.style.transform = `translate3d(${rect.x + rect.width}px, ${
         rect.y
-      }px, 0)`;
+      }px, 0) scale(1.2)`;
 
       if (rafId === this._rafId) this._rafId = 0;
     });
@@ -167,13 +176,13 @@ export class NoteScissorsButton extends WithDisposable(LitElement) {
   }
 
   override render() {
-    return html`<button class="scissors-button">${CutIcon}</button>`;
+    return html`<button class="slicer-button">${CutIcon}</button>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'note-scissors-button': NoteSlicerButton;
-    'affine-note-scissors': NoteScissorsButton;
+    'note-slicer-button': NoteSlicerButton;
+    'affine-note-slicer-popupbutton': PopupNoteSlicerButton;
   }
 }

@@ -1,16 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import {
-  type FrameElement,
-  getFontString,
-  getLineHeight,
-  getLineWidth,
-} from '@blocksuite/phasor';
-import { VEditor } from '@blocksuite/virgo';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
+import { type FrameElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-frame-title-editor')
@@ -20,45 +15,44 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
-  private _vEditor: VEditor | null = null;
+  private _vInput: VirgoInput | null = null;
+  get vEditor() {
+    assertExists(this._vInput);
+    return this._vInput.vEditor;
+  }
 
   private _frame: FrameElement | null = null;
   private _edgeless: EdgelessPageBlockComponent | null = null;
-
-  get vEditor() {
-    return this._vEditor;
-  }
 
   mount(frame: FrameElement, edgeless: EdgelessPageBlockComponent) {
     this._frame = frame;
     this._edgeless = edgeless;
 
-    this._vEditor = new VEditor(this._frame.title);
+    this._vInput = new VirgoInput({
+      yText: this._frame.title,
+    });
 
     this.requestUpdate();
     requestAnimationFrame(() => {
-      assertExists(this._vEditor);
+      assertExists(this._vInput);
       assertExists(this._frame);
-      this._vEditor.mount(this._virgoContainer);
+      this._vInput.mount(this._virgoContainer);
+      this._vInput.vEditor.selectAll();
       this._edgeless?.surface.updateElementLocalRecord(this._frame.id, {
         titleHide: true,
       });
       const dispatcher = this._edgeless?.dispatcher;
       assertExists(dispatcher);
-      this._disposables.addFromEvent(this._virgoContainer, 'blur', () => {
+      this.disposables.addFromEvent(this._virgoContainer, 'blur', () => {
         this._unmount();
       });
-      this._disposables.add(
-        dispatcher.add('click', () => {
-          return true;
-        })
-      );
-      this._disposables.add(
+
+      this.disposables.add(
         dispatcher.add('doubleClick', () => {
           return true;
         })
       );
-      this._disposables.add(
+      this.disposables.add(
         dispatcher.add('keyDown', ctx => {
           const state = ctx.get('keyboardState');
           if (state.raw.key === 'Enter') {
@@ -80,7 +74,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   private _unmount() {
-    this.vEditor?.unmount();
+    this._vInput?.unmount();
     this._disposables.dispose();
     assertExists(this._frame);
     this._edgeless?.surface.updateElementLocalRecord(this._frame.id, {
@@ -99,36 +93,20 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const viewport = this._edgeless?.surface.viewport;
     let virgoStyle = styleMap({});
     if (viewport && this._frame && this._edgeless) {
-      const padding = this._frame.padding;
-      const zoom = viewport.zoom;
       const bound = this._frame.gridBound;
-      const fontSize = 16;
-      const fontFamily = 'sans-serif';
-      const lineHeight = getLineHeight(fontFamily, fontSize);
-      const font = getFontString({
-        fontSize,
-        fontFamily,
-        lineHeight: lineHeight + 'px',
-      });
-      const width =
-        getLineWidth(this._frame.title.toJSON(), font) +
-        padding[0] * 2 * zoom +
-        2;
-      const radius = this._frame.radius;
       const [x, y] = viewport.toViewCoord(bound.x, bound.y);
       virgoStyle = styleMap({
         position: 'absolute',
         left: x + 'px',
         top: y + 'px',
-        width: width + 'px',
         minWidth: '8px',
-        borderRadius: radius + 'px',
+        borderRadius: '4px',
         fontSize: '16px',
         fontFamily: 'sans-serif',
         color: 'white',
         background: this._frame.color,
         outline: 'none',
-        padding: `${padding[1] * zoom}px ${padding[0] * zoom}px`,
+        padding: `4px 8px`,
         lineHeight: 'initial',
         zIndex: '1',
       });

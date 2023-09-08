@@ -22,7 +22,8 @@ export class SurfaceSelection extends BaseSelection {
       return (
         this.blockId === other.blockId &&
         this.elements.length === other.elements.length &&
-        this.elements.every((id, idx) => id === other.elements[idx])
+        this.elements.every((id, idx) => id === other.elements[idx]) &&
+        this.editing === other.editing
       );
     }
 
@@ -49,7 +50,9 @@ export class SurfaceSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    surface: typeof SurfaceSelection;
+  namespace BlockSuite {
+    interface Selection {
+      surface: typeof SurfaceSelection;
+    }
   }
 }

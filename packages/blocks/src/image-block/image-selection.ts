@@ -26,7 +26,9 @@ export class ImageSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    image: typeof ImageSelection;
+  namespace BlockSuite {
+    interface Selection {
+      image: typeof ImageSelection;
+    }
   }
 }

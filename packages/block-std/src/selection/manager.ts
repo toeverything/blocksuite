@@ -5,6 +5,7 @@ import type { BlockStore } from '../store/index.js';
 import type { BaseSelection } from './base.js';
 import {
   BlockSelection,
+  CursorSelection,
   SurfaceSelection,
   TextSelection,
 } from './variants/index.js';
@@ -42,7 +43,12 @@ export class SelectionManager {
   }
 
   private _setupDefaultSelections() {
-    this.register([TextSelection, BlockSelection, SurfaceSelection]);
+    this.register([
+      TextSelection,
+      BlockSelection,
+      SurfaceSelection,
+      CursorSelection,
+    ]);
   }
 
   private _jsonToSelection = (json: Record<string, unknown>) => {
@@ -53,15 +59,15 @@ export class SelectionManager {
     return ctor.fromJSON(json);
   };
 
-  getInstance<T extends BlockSuiteSelectionType>(
+  getInstance<T extends BlockSuite.SelectionType>(
     type: T,
-    ...args: ConstructorParameters<BlockSuiteSelection[T]>
-  ): BlockSuiteSelectionInstance[T] {
+    ...args: ConstructorParameters<BlockSuite.Selection[T]>
+  ): BlockSuite.SelectionInstance[T] {
     const ctor = this._selectionConstructors[type];
     if (!ctor) {
       throw new Error(`Unknown selection type: ${type}`);
     }
-    return new ctor(...args) as BlockSuiteSelectionInstance[T];
+    return new ctor(...args) as BlockSuite.SelectionInstance[T];
   }
 
   get value() {
@@ -100,14 +106,14 @@ export class SelectionManager {
     }
   }
 
-  find<T extends BlockSuiteSelectionType>(type: T) {
-    return this.value.find((sel): sel is BlockSuiteSelectionInstance[T] =>
+  find<T extends BlockSuite.SelectionType>(type: T) {
+    return this.value.find((sel): sel is BlockSuite.SelectionInstance[T] =>
       sel.is(type)
     );
   }
 
-  filter<T extends BlockSuiteSelectionType>(type: T) {
-    return this.value.filter((sel): sel is BlockSuiteSelectionInstance[T] =>
+  filter<T extends BlockSuite.SelectionType>(type: T) {
+    return this.value.filter((sel): sel is BlockSuite.SelectionInstance[T] =>
       sel.is(type)
     );
   }

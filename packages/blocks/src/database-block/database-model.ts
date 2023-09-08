@@ -202,6 +202,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   updateCell(rowId: string, cell: Cell) {
+    if (rowId === '__proto__') {
+      return;
+    }
     const hasRow = rowId in this.cells;
     if (!hasRow) {
       this.cells[rowId] = {};
@@ -231,6 +234,9 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   updateCells(columnId: string, cells: Record<string, unknown>) {
     this.page.transact(() => {
       Object.entries(cells).forEach(([rowId, value]) => {
+        if (rowId === '__proto__') {
+          return;
+        }
         this.cells[rowId][columnId] = {
           columnId,
           value,
@@ -272,7 +278,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
   props: (internal): Props => ({
     views: [],
-    title: internal.Text(''),
+    title: internal.Text(),
     cells: {},
     columns: [],
   }),

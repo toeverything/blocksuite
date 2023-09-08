@@ -2,16 +2,19 @@ import '../../buttons/tool-icon-button.js';
 import '../../panel/one-row-color-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import { ShapeStyle, type ShapeType } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import {
-  GeneralShapeStyleIcon,
-  ScribbledShapeStyleIcon,
+  GeneralStyleIcon,
+  ScribbledStyleIcon,
 } from '../../../../../icons/index.js';
+import {
+  ShapeStyle,
+  type ShapeType,
+} from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_SHAPE_FILL_COLOR } from '../../component-toolbar/change-shape-button.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
@@ -29,16 +32,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
       display: flex;
       position: absolute;
       z-index: -1;
-    }
-    .shape-menu-container {
-      display: flex;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px 8px 0 0;
-      border: 1px solid var(--affine-border-color);
-      position: relative;
-      cursor: default;
     }
     .menu-content {
       display: flex;
@@ -139,7 +132,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                   this._setShapeStyle(ShapeStyle.General);
                 }}
               >
-                ${GeneralShapeStyleIcon}
+                ${GeneralStyleIcon}
               </edgeless-tool-icon-button>
               <edgeless-tool-icon-button
                 .tooltip=${'Scribbled'}
@@ -150,7 +143,7 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
                   this._setShapeStyle(ShapeStyle.Scribbled);
                 }}
               >
-                ${ScribbledShapeStyleIcon}
+                ${ScribbledStyleIcon}
               </edgeless-tool-icon-button>
             </div>
             <menu-divider .vertical=${true}></menu-divider>

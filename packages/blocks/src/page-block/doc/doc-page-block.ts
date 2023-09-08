@@ -14,7 +14,7 @@ import {
   PAGE_BLOCK_CHILD_PADDING,
   PAGE_BLOCK_PADDING_BOTTOM,
 } from '../../__internal__/consts.js';
-import type { BlockHost, EditingState } from '../../__internal__/index.js';
+import type { EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
@@ -34,10 +34,11 @@ export interface PageViewport {
 }
 
 @customElement('affine-doc-page')
-export class DocPageBlockComponent
-  extends BlockElement<PageBlockModel, BlockService, DocPageBlockWidgetName>
-  implements BlockHost
-{
+export class DocPageBlockComponent extends BlockElement<
+  PageBlockModel,
+  BlockService,
+  DocPageBlockWidgetName
+> {
   static override styles = css`
     .affine-doc-viewport {
       position: relative;
@@ -139,6 +140,7 @@ export class DocPageBlockComponent
     tagClicked: new Slot<{
       tagId: string;
     }>(),
+    viewportUpdated: new Slot<PageViewport>(),
   };
 
   @query('.affine-doc-page-block-title')
@@ -183,10 +185,16 @@ export class DocPageBlockComponent
 
     this._titleVEditor = new VEditor(title.yText);
     this._titleVEditor.mount(this._titleContainer);
-    this._titleVEditor.bindHandlers({
-      keydown: this._onTitleKeyDown,
-      paste: this._onTitlePaste,
-    });
+    this._titleVEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'keydown',
+      this._onTitleKeyDown
+    );
+    this._titleVEditor.disposables.addFromEvent(
+      this._titleContainer,
+      'paste',
+      this._onTitlePaste
+    );
     this.addEventListener('copy', this._onTitleCopy);
 
     // Workaround for virgo skips composition event
@@ -313,6 +321,21 @@ export class DocPageBlockComponent
     );
   }
 
+  private _initViewportResizeEffect() {
+    // when observe viewportElement resize, emit viewport update event
+    const resizeObserver = new ResizeObserver(
+      (entries: ResizeObserverEntry[]) => {
+        for (const { target } of entries) {
+          if (target === this.viewportElement) {
+            this.slots.viewportUpdated.emit(this.viewport);
+            break;
+          }
+        }
+      }
+    );
+    resizeObserver.observe(this.viewportElement);
+  }
+
   private _initReadonlyListener() {
     const page = this.page;
 
@@ -330,10 +353,19 @@ export class DocPageBlockComponent
   override firstUpdated() {
     this._initSlotEffects();
     this._initReadonlyListener();
+    this._initViewportResizeEffect();
   }
 
   override connectedCallback() {
     super.connectedCallback();
+    this.root.rangeManager?.setConfig({
+      shouldSyncSelection: range => {
+        const insideModal = Boolean(
+          range?.startContainer.parentElement?.closest('side-layout-modal')
+        );
+        return !insideModal;
+      },
+    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);

@@ -1,4 +1,9 @@
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
+
+import {
+  type Connectable,
+  type TopLevelBlockModel,
+} from '../../__internal__/utils/types.js';
 import {
   almostEqual,
   AStarRunner,
@@ -21,14 +26,9 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   sign,
-  type SurfaceManager,
   Vec,
-} from '@blocksuite/phasor';
-
-import {
-  type Connectable,
-  type TopLevelBlockModel,
-} from '../../__internal__/utils/types.js';
+} from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import type { Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
@@ -625,7 +625,7 @@ function getNextPoint(
   offsetW = 10,
   offsetH = 10
 ) {
-  const result: IVec = [...point];
+  const result: IVec = Array.from(point);
   if (almostEqual(bound.x, result[0])) result[0] -= offsetX;
   else if (almostEqual(bound.y, result[1])) result[1] -= offsetY;
   else if (almostEqual(bound.maxX, result[0])) result[0] += offsetW;
@@ -745,7 +745,7 @@ function adjustStartEndPoint(
 }
 
 export class ConnectionOverlay extends Overlay {
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
   points: IVec[] = [];
   highlightPoint: IVec | null = null;
   bound: Bound | null = null;
@@ -922,11 +922,15 @@ export class EdgelessConnectorManager {
     });
   }
 
-  updatePath(connector: ConnectorElement, path?: IVec[]) {
+  updatePath(connector: ConnectorElement, path?: PointLocation[]) {
     const { surface } = this._edgeless;
     const points = path ?? this._generateConnectorPath(connector) ?? [];
+
     const bound = getBoundFromPoints(points);
-    const relativePoints = points.map(p => Vec.sub(p, [bound.x, bound.y]));
+    const relativePoints = points.map(p => {
+      p.setVec(Vec.sub(p, [bound.x, bound.y]));
+      return p;
+    });
     connector.path = relativePoints;
     connector.xywh = bound.serialize();
     surface.refresh();
@@ -952,7 +956,7 @@ export class EdgelessConnectorManager {
     const { mode } = connector;
     if (mode === ConnectorMode.Straight) {
       return this._generateStraightConnectorPath(connector);
-    } else {
+    } else if (mode === ConnectorMode.Orthogonal) {
       const start = this._getConnectorEndElement(connector, 'source');
       const end = this._getConnectorEndElement(connector, 'target');
 
@@ -964,13 +968,17 @@ export class EdgelessConnectorManager {
       const endBound = end
         ? Bound.from(getBoundsWithRotation(rBound(end)))
         : null;
-      return this.generateOrthogonalConnectorPath({
+      const path = this.generateOrthogonalConnectorPath({
         startPoint,
         endPoint,
         startBound,
         endBound,
       });
+      return path.map(p => new PointLocation(p));
+    } else if (mode === ConnectorMode.Curve) {
+      return this._generateCurveConnectorPath(connector);
     }
+    throw new Error('unknown connector mode');
   }
 
   private _generateStraightConnectorPath(connector: ConnectorElement) {
@@ -996,6 +1004,72 @@ export class EdgelessConnectorManager {
     }
   }
 
+  private _generateCurveConnectorPath(connector: ConnectorElement) {
+    const { source, target } = connector;
+
+    if (source.id || target.id) {
+      let startPoint: PointLocation;
+      let endPoint: PointLocation;
+      if (!source.position && !target.position) {
+        const start = this._getConnectorEndElement(
+          connector,
+          'source'
+        ) as Connectable;
+        const end = this._getConnectorEndElement(
+          connector,
+          'target'
+        ) as Connectable;
+        const sb = Bound.deserialize(start.xywh);
+        const eb = Bound.deserialize(end.xywh);
+        startPoint = getNearestConnectableAnchor(start, eb.center);
+        endPoint = getNearestConnectableAnchor(end, sb.center);
+      } else {
+        startPoint = this._getConnectionPoint(connector, 'source');
+        endPoint = this._getConnectionPoint(connector, 'target');
+      }
+
+      if (source.id) {
+        const startTangentVertical = Vec.rot(startPoint.tangent, -Math.PI / 2);
+        startPoint.out = Vec.mul(
+          startTangentVertical,
+          Math.max(
+            100,
+            Math.abs(
+              Vec.pry(Vec.sub(endPoint, startPoint), startTangentVertical)
+            ) / 3
+          )
+        );
+      }
+      if (target.id) {
+        const endTangentVertical = Vec.rot(endPoint.tangent, -Math.PI / 2);
+        endPoint.in = Vec.mul(
+          endTangentVertical,
+          Math.max(
+            100,
+            Math.abs(
+              Vec.pry(Vec.sub(startPoint, endPoint), endTangentVertical)
+            ) / 3
+          )
+        );
+      }
+      return [startPoint, endPoint];
+    } else {
+      const endPoint = this._getConnectionPoint(connector, 'target');
+      const startPoint = this._getConnectionPoint(connector, 'source');
+      if (
+        Math.abs(endPoint[0] - startPoint[0]) >
+        Math.abs(endPoint[1] - startPoint[1])
+      ) {
+        startPoint.out = [Vec.mul(Vec.sub(endPoint, startPoint), 2 / 3)[0], 0];
+        endPoint.in = [Vec.mul(Vec.sub(startPoint, endPoint), 2 / 3)[0], 0];
+      } else {
+        startPoint.out = [0, Vec.mul(Vec.sub(endPoint, startPoint), 2 / 3)[1]];
+        endPoint.in = [0, Vec.mul(Vec.sub(startPoint, endPoint), 2 / 3)[1]];
+      }
+      return [startPoint, endPoint];
+    }
+  }
+
   private _prepareOrthogonalConnectorInfo(
     connectorInfo: OrthogonalConnectorInput
   ): [
@@ -1006,7 +1080,7 @@ export class EdgelessConnectorManager {
     Bound | null,
     Bound | null,
     Bound | null,
-    Bound | null
+    Bound | null,
   ] {
     const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 

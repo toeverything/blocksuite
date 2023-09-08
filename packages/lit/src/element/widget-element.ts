@@ -73,7 +73,9 @@ export class WidgetElement extends WithDisposable(LitElement) {
 }
 
 declare global {
-  interface BlockSuiteView {
-    widget: BlockSuiteViewSpec<WidgetElement>;
+  namespace BlockSuite {
+    interface View {
+      widget: BlockSuiteViewSpec<WidgetElement>;
+    }
   }
 }

@@ -2,87 +2,19 @@ import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
-import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import * as Y from 'yjs';
 
 import { createLitPortal } from '../../components/portal.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
+import { MoreIcon } from '../../icons/index.js';
+import { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 import {
-  CaptionIcon,
-  EditIcon,
-  LinkIcon,
-  MoreIcon,
-} from '../../icons/index.js';
-import type { BookmarkBlockModel } from '../bookmark-model.js';
-import {
-  BookmarkOperationMenu,
+  config,
   type MenuActionCallback,
-} from './bookmark-operation-popper.js';
-
-export type ConfigItem = {
-  type: 'link' | 'edit' | 'caption';
-  icon: TemplateResult;
-  tooltip: string;
-  action: (
-    model: BaseBlockModel<BookmarkBlockModel>,
-    callback?: ToolbarActionCallback,
-    element?: HTMLElement
-  ) => void;
-  divider?: boolean;
-};
-
-export type ToolbarActionCallback = (type: ConfigItem['type']) => void;
-const config: ConfigItem[] = [
-  {
-    type: 'link',
-    icon: LinkIcon,
-    tooltip: 'Turn into Link view',
-    action: (model, callback) => {
-      const { page } = model;
-
-      const parent = page.getParent(model);
-      const index = parent?.children.indexOf(model);
-
-      const yText = new Y.Text();
-      const insert = model.bookmarkTitle || model.caption || model.url;
-      yText.insert(0, insert);
-      yText.format(0, insert.length, { link: model.url });
-      const text = new page.Text(yText);
-      page.addBlock(
-        'affine:paragraph',
-        {
-          text,
-        },
-        parent,
-        index
-      );
-
-      model.page.deleteBlock(model);
-      callback?.('link');
-    },
-    divider: true,
-  },
-  {
-    type: 'edit',
-    icon: EditIcon,
-    tooltip: 'Edit',
-    action: (_model, callback) => {
-      callback?.('edit');
-    },
-  },
-  {
-    type: 'caption',
-    icon: CaptionIcon,
-    tooltip: 'Add Caption',
-    action: (_model, callback) => {
-      callback?.('caption');
-    },
-    divider: true,
-  },
-];
+  type ToolbarActionCallback,
+} from './config.js';
 
 @customElement('bookmark-toolbar')
 export class BookmarkToolbar extends WithDisposable(LitElement) {
@@ -92,8 +24,8 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       box-sizing: border-box;
       display: flex;
       align-items: center;
-      padding: 4px 8px;
-      gap: 4px;
+      padding: 8px;
+      gap: 8px;
       height: 40px;
 
       border-radius: 8px;
@@ -165,12 +97,13 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
   override render() {
     const buttons = repeat(
-      config,
+      config.filter(({ showWhen = () => true }) => showWhen(this.model)),
       ({ type }) => type,
-      ({ type, icon, tooltip, action, divider }) => {
+      ({ type, icon, tooltip, action, divider, disableWhen = () => false }) => {
         return html`<icon-button
             size="24px"
             class="bookmark-toolbar-button has-tool-tip ${type}"
+            ?disabled=${disableWhen(this.model)}
             @click=${() => {
               action(this.model, this.onSelected, this);
             }}
@@ -188,8 +121,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
         <div class="more-button-wrapper">
           <icon-button
-            width="32px"
-            height="32px"
+            size="24px"
             class="has-tool-tip more-button"
             @click=${() => {
               this._toggleMenu();

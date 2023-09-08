@@ -6,14 +6,12 @@ import type { Space } from '../workspace/space.js';
 import type { Store } from '../workspace/store.js';
 
 export interface UserInfo {
-  id: number;
   name: string;
-  color: string;
 }
 
 // Raw JSON state in awareness CRDT
 export type RawAwarenessState<
-  Flags extends Record<string, unknown> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
 > = {
   user?: UserInfo;
   flags: Flags;
@@ -21,7 +19,7 @@ export type RawAwarenessState<
 };
 
 export interface AwarenessEvent<
-  Flags extends Record<string, unknown> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   id: number;
   type: 'add' | 'update' | 'remove';
@@ -29,7 +27,7 @@ export interface AwarenessEvent<
 }
 
 export class AwarenessStore<
-  Flags extends Record<string, unknown> = BlockSuiteFlags
+  Flags extends Record<string, unknown> = BlockSuiteFlags,
 > {
   readonly awareness: YAwareness<RawAwarenessState<Flags>>;
   readonly store: Store;

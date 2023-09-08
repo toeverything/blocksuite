@@ -1,8 +1,7 @@
 {
   "name": "@blocksuite/block-std",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Std for blocksuite blocks",
-  "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -34,9 +33,9 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       }
-    },
-    "files": [
-      "dist"
-    ]
-  }
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }

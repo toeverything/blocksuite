@@ -55,7 +55,7 @@ export class PageClipboard implements Clipboard {
 
     let blocks = [];
     const focusedBlockModel = deleteModelsByTextSelection(
-      this._ele,
+      this._ele.root,
       textSelection
     );
     // This assert is unreliable
@@ -94,7 +94,7 @@ export class PageClipboard implements Clipboard {
   };
 
   private async _copyBlocksInPage() {
-    return await copyBlocksInPage(this._ele);
+    return await copyBlocksInPage(this._ele.root);
   }
 
   private _onCut = async (ctx: UIEventStateContext) => {
@@ -104,7 +104,7 @@ export class PageClipboard implements Clipboard {
     if (textSelection) {
       e.preventDefault();
       await this._onCopy(ctx);
-      deleteModelsByTextSelection(this._ele, textSelection);
+      deleteModelsByTextSelection(this._ele.root, textSelection);
       return;
     }
     const blockSelections = this._ele.selection.filter('block');

@@ -1,12 +1,15 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
 
-import { downloadBlob } from '../__internal__/utils/filesys.js';
+import {
+  downloadBlob,
+  withTempBlobData,
+} from '../__internal__/utils/filesys.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { toast } from '../components/toast.js';
 import type {
   ImageBlockModel,
-  ImageProps,
+  ImageBlockProps,
 } from '../image-block/image-model.js';
 import { transformModel } from '../page-block/utils/operations/model.js';
 import type {
@@ -17,6 +20,7 @@ import { defaultAttachmentProps } from './attachment-model.js';
 
 // 10MB
 export const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
 export function cloneAttachmentProperties(
   model: BaseBlockModel<AttachmentBlockModel>
@@ -57,98 +61,49 @@ export async function downloadAttachment(
   downloadBlob(attachment, attachmentModel.name);
 }
 
-// Use lru strategy is a better choice, but it's just a temporary solution.
-const MAX_TEMP_DATA_SIZE = 100;
-/**
- * TODO @Saul-Mirone use some other way to store the temp data
- *
- * @deprecated Waiting for migration
- */
-const tempAttachmentMap = new Map<
-  string,
-  {
-    // name for the attachment
-    name: string;
-  }
->();
-const tempImageMap = new Map<
-  string,
-  {
-    // This information comes from pictures.
-    // If the user switches between pictures and attachments,
-    // this information should be retained.
-    width: number | undefined;
-    height: number | undefined;
-  }
->();
-
-const withTempConvertData = () => {
-  const saveAttachmentData = (newId: string, model: AttachmentBlockModel) => {
-    if (tempAttachmentMap.size > MAX_TEMP_DATA_SIZE) tempAttachmentMap.clear();
-
-    const { name } = model;
-    tempAttachmentMap.set(newId, { name });
-  };
-  const getAttachmentData = (blockId: string) => {
-    const data = tempAttachmentMap.get(blockId);
-    tempAttachmentMap.delete(blockId);
-    return data;
-  };
-
-  const saveImageData = (newId: string, model: ImageBlockModel) => {
-    if (tempImageMap.size > MAX_TEMP_DATA_SIZE) tempImageMap.clear();
-
-    const { width, height } = model;
-    tempImageMap.set(newId, { width, height });
-  };
-  const getImageData = (blockId: string) => {
-    const data = tempImageMap.get(blockId);
-    tempImageMap.delete(blockId);
-    return data;
-  };
-  return {
-    saveAttachmentData,
-    getAttachmentData,
-    saveImageData,
-    getImageData,
-  };
-};
-
 /**
  * Turn the attachment block into an image block.
  */
 export async function turnIntoEmbedView(model: AttachmentBlockModel) {
+  if (!model.page.schema.flavourSchemaMap.has('affine:image'))
+    throw new Error('The image flavour is not supported!');
+
   const sourceId = model.sourceId;
   assertExists(sourceId);
-  const { saveAttachmentData, getImageData } = withTempConvertData();
-  const imageConvertData = getImageData(model.id);
-  const imageProp: ImageProps = {
+  const { saveAttachmentData, getImageData } = withTempBlobData();
+  saveAttachmentData(sourceId, { name: model.name });
+  const imageConvertData = model.sourceId
+    ? getImageData(model.sourceId)
+    : undefined;
+  const imageProp: ImageBlockProps = {
     sourceId,
     caption: model.caption,
     ...imageConvertData,
   };
-  const id = transformModel(model, 'affine:image', imageProp);
-  saveAttachmentData(id, model);
+  transformModel(model, 'affine:image', imageProp);
 }
 
 /**
  * Turn the image block into a attachment block.
  */
 export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
+  if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
+    throw new Error('The attachment flavour is not supported!');
+
   const sourceId = model.sourceId;
   assertExists(sourceId);
-  const { saveImageData, getAttachmentData } = withTempConvertData();
-  const attachmentConvertData = getAttachmentData(model.id);
+  const { saveImageData, getAttachmentData } = withTempBlobData();
+  saveImageData(sourceId, { width: model.width, height: model.height });
+  const attachmentConvertData = getAttachmentData(model.sourceId);
   const attachmentProp: AttachmentProps = {
     sourceId,
-    name: blob.name,
+    name: DEFAULT_ATTACHMENT_NAME,
     size: blob.size,
     type: blob.type,
     caption: model.caption,
     ...attachmentConvertData,
   };
-  const id = transformModel(model, 'affine:attachment', attachmentProp);
-  saveImageData(id, model);
+  transformModel(model, 'affine:attachment', attachmentProp);
 }
 
 async function uploadFileForAttachment(

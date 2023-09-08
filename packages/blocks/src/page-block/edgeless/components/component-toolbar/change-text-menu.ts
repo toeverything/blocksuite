@@ -3,15 +3,8 @@ import '../panel/font-size-panel.js';
 
 import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {
-  Bound,
-  normalizeShapeBound,
-  normalizeTextBound,
-  type ShapeElement,
-  type SurfaceManager,
-  type TextElement,
-} from '@blocksuite/phasor';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
@@ -24,6 +17,14 @@ import {
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '../../../../icons/index.js';
+import {
+  Bound,
+  normalizeShapeBound,
+  normalizeTextBound,
+  type ShapeElement,
+  type TextElement,
+} from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
@@ -101,8 +102,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
       width: 52px;
       height: 20px;
       line-height: 20px;
-      font-size: 16px;
-      font-family: 'Avenir Next';
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-size: 16px;
       font-style: normal;
       font-weight: 400;
@@ -142,7 +142,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   elementType!: EdgelessCanvasTextElementType;
 
   @property({ attribute: false })
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;

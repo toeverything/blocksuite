@@ -2,6 +2,7 @@ import { Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
+import type { BaseBlockTransformer } from '../transformer/base.js';
 import type { Page } from '../workspace/index.js';
 import type { YBlock } from '../workspace/page.js';
 import { NativeWrapper } from '../yjs/native-wrapper.js';
@@ -17,12 +18,12 @@ export type RoleType = (typeof role)[number];
 
 export interface InternalPrimitives {
   Text: (input?: Y.Text | string) => Text;
-  Native: <T>(input?: T) => NativeWrapper<T>;
+  Native: <T>(input: T) => NativeWrapper<T>;
 }
 
 export const internalPrimitives: InternalPrimitives = Object.freeze({
   Text: (input: Y.Text | string = '') => new Text(input),
-  Native: <T>(input: T = {} as T) => new NativeWrapper(input),
+  Native: <T>(input: T) => new NativeWrapper(input),
 });
 
 export const BlockSchema = z.object({
@@ -39,6 +40,11 @@ export const BlockSchema = z.object({
       .optional(),
     toModel: z.function().args().returns(z.custom<BaseBlockModel>()).optional(),
   }),
+  transformer: z
+    .function()
+    .args()
+    .returns(z.custom<BaseBlockTransformer>())
+    .optional(),
   onUpgrade: z
     .function()
     .args(z.any(), z.number(), z.number())
@@ -48,7 +54,6 @@ export const BlockSchema = z.object({
 
 export type BlockSchemaType = z.infer<typeof BlockSchema>;
 
-export type PropsSetter<Props> = (props: Props) => Partial<Props>;
 export type PropsGetter<Props> = (
   internalPrimitives: InternalPrimitives
 ) => Props;
@@ -62,7 +67,7 @@ export type SchemaToModel<
       props: PropsGetter<object>;
       flavour: string;
     };
-  }
+  },
 > = BaseBlockModel<PropsFromGetter<Schema['model']['props']>> &
   ReturnType<Schema['model']['props']> & {
     flavour: Schema['model']['flavour'];
@@ -79,7 +84,8 @@ export function defineBlockSchema<
     parent?: string[];
     children?: string[];
   }>,
-  Model extends BaseBlockModel<Props>
+  Model extends BaseBlockModel<Props>,
+  Transformer extends BaseBlockTransformer<Props>,
 >(options: {
   flavour: Flavour;
   metadata: Metadata;
@@ -90,6 +96,7 @@ export function defineBlockSchema<
     latestVersion: number
   ) => void;
   toModel?: () => Model;
+  transformer?: () => Transformer;
 }): {
   version: number;
   model: {
@@ -102,14 +109,16 @@ export function defineBlockSchema<
     previousVersion: number,
     latestVersion: number
   ) => void;
+  transformer?: () => Transformer;
 };
 
 export function defineBlockSchema({
   flavour,
   props,
   metadata,
-  toModel,
   onUpgrade,
+  toModel,
+  transformer,
 }: {
   flavour: string;
   metadata: {
@@ -119,12 +128,13 @@ export function defineBlockSchema({
     children?: string[];
   };
   props?: (internalPrimitives: InternalPrimitives) => Record<string, unknown>;
-  toModel?: () => BaseBlockModel;
   onUpgrade?: (
     data: Record<string, unknown>,
     previousVersion: number,
     latestVersion: number
   ) => void;
+  toModel?: () => BaseBlockModel;
+  transformer?: () => BaseBlockTransformer;
 }): BlockSchemaType {
   const schema = {
     version: metadata.version,
@@ -137,6 +147,7 @@ export function defineBlockSchema({
       toModel,
     },
     onUpgrade,
+    transformer,
   } satisfies z.infer<typeof BlockSchema>;
   BlockSchema.parse(schema);
   return schema;
@@ -162,7 +173,7 @@ function MagicProps(): {
 
 // @ts-ignore
 export class BaseBlockModel<
-  Props extends object = object
+  Props extends object = object,
 > extends MagicProps()<Props> {
   static version: number;
   flavour!: string;
@@ -170,6 +181,7 @@ export class BaseBlockModel<
   page!: Page;
   id!: string;
   yBlock!: YBlock;
+  keys!: string[];
 
   // text is optional
   text?: Text;
@@ -181,11 +193,6 @@ export class BaseBlockModel<
 
   childMap = new Map<string, number>();
   children: BaseBlockModel[] = [];
-
-  // TODO: infer return type
-  originProp(prop: string & keyof Props) {
-    return this.yBlock.get(`prop:${prop}`);
-  }
 
   isEmpty() {
     return this.children.length === 0;

@@ -1,8 +1,7 @@
 {
   "name": "@blocksuite/lit",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Lit renderer for blocksuite store",
-  "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -19,7 +18,7 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "lit": "^2.7.6"
+    "lit": "^2.8.0"
   },
   "devDependencies": {
     "@blocksuite/block-std": "workspace:*",
@@ -37,9 +36,9 @@
         "module": "./dist/index.js",
         "import": "./dist/index.js"
       }
-    },
-    "files": [
-      "dist"
-    ]
-  }
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }

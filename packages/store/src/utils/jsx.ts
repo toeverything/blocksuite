@@ -1,12 +1,14 @@
 import * as Y from 'yjs';
 
-import type { PrefixedBlockProps } from '../workspace/page.js';
-
-type DocRecord = {
-  [id: string]: PrefixedBlockProps & {
-    'sys:children'?: string[];
-  };
-};
+type DocRecord = Record<
+  string,
+  {
+    'sys:id': string;
+    'sys:flavour': string;
+    'sys:children': string[];
+    [id: string]: unknown;
+  }
+>;
 
 export interface JSXElement {
   // Ad-hoc for `ReactTestComponent` identify.

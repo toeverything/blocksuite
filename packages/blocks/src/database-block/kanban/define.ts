@@ -1,10 +1,14 @@
 import type { FilterGroup } from '../common/ast.js';
 import { columnManager } from '../common/columns/manager.js';
+import { multiSelectPureColumnConfig } from '../common/columns/multi-select/define.js';
+import { numberPureColumnConfig } from '../common/columns/number/define.js';
+import { selectPureColumnConfig } from '../common/columns/select/define.js';
+import { textPureColumnConfig } from '../common/columns/text/define.js';
 import { viewManager } from '../common/data-view.js';
+import { groupByMatcher } from '../common/group-by/matcher.js';
 import { defaultGroupBy } from '../common/group-by/util.js';
 import type { GroupBy } from '../common/types.js';
-import { tTag } from '../logical/data-type.js';
-import { isTArray } from '../logical/typesystem.js';
+import type { Column } from '../table/types.js';
 
 declare global {
   interface DataViewDataTypeMap {
@@ -37,10 +41,29 @@ export type KanbanViewData = {
 viewManager.register('kanban', {
   defaultName: 'Kanban View',
   init(model, id, name) {
-    const column = model.columns.find(column => {
+    const allowList = model.columns.filter(column => {
       const type = columnManager.getColumn(column.type).dataType(column.data);
-      return !!(tTag.is(type) || (isTArray(type) && tTag.is(type.ele)));
+      return !!groupByMatcher.match(type) && column.type !== 'title';
     });
+    const getWeight = (column: Column) => {
+      if (
+        [
+          selectPureColumnConfig.type,
+          multiSelectPureColumnConfig.type,
+        ].includes(column.type)
+      ) {
+        return 3;
+      }
+      if (
+        [numberPureColumnConfig.type, textPureColumnConfig.type].includes(
+          column.type
+        )
+      ) {
+        return 2;
+      }
+      return 1;
+    };
+    const column = allowList.sort((a, b) => getWeight(b) - getWeight(a))[0];
     if (!column) {
       throw new Error('not implement yet');
     }

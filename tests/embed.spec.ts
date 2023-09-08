@@ -153,19 +153,14 @@ test('popup menu should follow position of image when scrolling', async ({
 
   await page.waitForTimeout(150);
 
-  const rect = await page.evaluate(async () => {
-    const image = document.querySelector('.affine-image-wrapper img');
-    if (!image) {
-      throw new Error();
-    }
-    return image.getBoundingClientRect();
-  });
+  const rect = await page.locator('.affine-image-wrapper img').boundingBox();
+  if (!rect) throw new Error('image not found');
 
-  await page.mouse.move(rect.left + rect.width / 2, rect.top + rect.height / 2);
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
 
   await page.waitForTimeout(150);
 
-  const menu = page.locator('.embed-editing-state');
+  const menu = page.locator('affine-image-toolbar-widget');
 
   expect(menu).toBeVisible();
 
@@ -176,7 +171,7 @@ test('popup menu should follow position of image when scrolling', async ({
         throw new Error();
       }
       // const distance = viewport.scrollHeight - viewport.clientHeight;
-      viewport.scrollTo(0, (rect.bottom + rect.top) / 2);
+      viewport.scrollTo(0, (rect.x + rect.height + rect.y) / 2);
     },
     [rect]
   );

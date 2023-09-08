@@ -27,14 +27,20 @@ import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { Utils, type Workspace } from '@blocksuite/store';
+import {
+  exportPagesZip,
+  importPagesZip,
+  Job,
+  MarkdownAdapter,
+  Utils,
+  type Workspace,
+} from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
-import { createViewer } from '../../starter/components/doc-inspector';
 import {
   generateRoomId,
   initCollaborationSocket,
@@ -58,7 +64,12 @@ const basePath = import.meta.env.DEV
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
+function init_css_debug_menu(styleMenu: Pane) {
+  if (styleMenu.title !== 'Waiting') {
+    return;
+  }
+  const style = document.documentElement.style;
+  styleMenu.title = 'CSS Debug Menu';
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({
     title: 'Font Family',
@@ -194,10 +205,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       z-index: 1001 !important;
     }
 
-    .ws-indicator {
+    .top-container {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
       font-size: 16px;
     }
   `;
@@ -330,26 +341,47 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.contentParser.exportMarkdown();
   }
 
+  private _exportMarkDownExperimentalAdapter() {
+    const job = new Job({ workspace: this.workspace });
+    job.pageToSnapshot(window.page).then(snapshot => {
+      new MarkdownAdapter()
+        .fromPageSnapshot({
+          snapshot,
+        })
+        .then(markdown => {
+          const blob = new Blob([markdown], { type: 'plain/text' });
+          const fileURL = URL.createObjectURL(blob);
+          const element = document.createElement('a');
+          element.setAttribute('href', fileURL);
+          element.setAttribute('download', 'export.md');
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+          URL.revokeObjectURL(fileURL);
+        });
+    });
+  }
+
   private _exportPng() {
     this.contentParser.exportPng();
   }
 
-  private _exportSnapshot() {
-    const json = this.workspace.exportPageSnapshot(this.page.id);
-    const data =
-      'data:text/json;charset=utf-8,' +
-      encodeURIComponent(JSON.stringify(json, null, 2));
+  private async _exportSnapshot() {
+    const file = await exportPagesZip(this.workspace, [this.page]);
+    const url = URL.createObjectURL(file);
     const a = document.createElement('a');
-    a.setAttribute('href', data);
-    a.setAttribute('download', `${this.page.id}-snapshot.json`);
+    a.setAttribute('href', url);
+    a.setAttribute('download', `${this.page.id}.bs.zip`);
     a.click();
     a.remove();
+    URL.revokeObjectURL(url);
   }
 
   private _importSnapshot() {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', '.json');
+    input.setAttribute('accept', '.zip');
     input.multiple = false;
     input.onchange = async () => {
       const file = input.files?.item(0);
@@ -357,8 +389,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        const json = await file.text();
-        await this.workspace.importPageSnapshot(JSON.parse(json), this.page.id);
+        await importPagesZip(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
@@ -370,10 +401,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     input.click();
   }
 
-  private async _inspect() {
-    await createViewer(this.workspace.doc.toJSON());
-  }
-
   private _shareUrl() {
     const base64 = Utils.encodeWorkspaceAsYjsUpdateV2(this.workspace);
     const url = new URL(window.location.toString());
@@ -382,6 +409,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _toggleStyleDebugMenu() {
+    init_css_debug_menu(this._styleMenu);
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
     this._showStyleDebugMenu
       ? (this._styleMenu.hidden = false)
@@ -448,7 +476,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     const id = params.get('room') || (await generateRoomId());
     const success = await this._initWebsocketProvider(id);
 
-    if (success) history.replaceState({}, '', `?room=${id}`);
+    if (success) {
+      history.replaceState({}, '', `?room=${id}`);
+      this.requestUpdate();
+    }
   };
 
   private async _initWebsocketProvider(room: string): Promise<boolean> {
@@ -470,11 +501,9 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new Pane({ title: 'CSS Debug Menu' });
+    this._styleMenu = new Pane({ title: 'Waiting' });
     this._styleMenu.hidden = true;
     this._styleMenu.element.style.width = '650';
-    const style = document.documentElement.style;
-    init_css_debug_menu(this._styleMenu, style);
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -543,7 +572,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <div>
+          <div class="top-container">
             <sl-dropdown placement="bottom" hoist>
               <sl-button
                 class="dots-menu"
@@ -570,7 +599,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   <sl-dropdown
                     id="test-operations-dropdown"
                     placement="right-start"
-                    .distance=${42}
+                    .distance=${40.5}
                     hoist
                   >
                     <span slot="trigger">Test operations</span>
@@ -583,6 +612,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                       >
                       <sl-menu-item @click=${this._exportMarkDown}>
                         Export Markdown
+                      </sl-menu-item>
+                      <sl-menu-item
+                        @click=${this._exportMarkDownExperimentalAdapter}
+                      >
+                        Export Markdown (Experimental Adapter)
                       </sl-menu-item>
                       <sl-menu-item @click=${this._exportHtml}>
                         Export HTML
@@ -605,9 +639,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                       <sl-menu-item @click=${this._toggleStyleDebugMenu}>
                         Toggle CSS Debug Menu
                       </sl-menu-item>
-                      <sl-menu-item @click=${this._inspect}>
-                        Inspect Doc</sl-menu-item
-                      >
                     </sl-menu>
                   </sl-dropdown>
                 </sl-menu-item>
@@ -617,11 +648,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     slot="prefix"
                     name=${this._dark ? 'moon' : 'brightness-high'}
                   ></sl-icon>
-                </sl-menu-item>
-                <sl-divider></sl-divider>
-                <sl-menu-item @click=${this._startCollaboration}>
-                  Start Collaboration
-                  <sl-icon slot="prefix" name="people"></sl-icon>
                 </sl-menu-item>
                 <sl-divider></sl-divider>
                 <a
@@ -637,7 +663,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
             </sl-dropdown>
 
             <!-- undo/redo group -->
-            <sl-button-group label="History" style="margin-right: 12px">
+            <sl-button-group label="History">
               <!-- undo -->
               <sl-tooltip content="Undo" placement="bottom" hoist>
                 <sl-button
@@ -667,6 +693,47 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 </sl-button>
               </sl-tooltip>
             </sl-button-group>
+
+            <sl-tooltip content="Start collaboration" placement="bottom" hoist>
+              <sl-button
+                @click=${this._startCollaboration}
+                size="small"
+                .loading=${this._initws}
+                circle
+              >
+                <sl-icon name="people" label="Collaboration"></sl-icon>
+              </sl-button>
+            </sl-tooltip>
+
+            ${new URLSearchParams(location.search).get('room')
+              ? html`<sl-tooltip
+                  content="Your name in Collaboration (default: Unknown)"
+                  placement="bottom"
+                  hoist
+                  ><sl-input
+                    placeholder="Unknown"
+                    clearable
+                    size="small"
+                    @blur=${(e: Event) => {
+                      if ((e.target as HTMLInputElement).value.length > 0) {
+                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                          'user',
+                          {
+                            name: (e.target as HTMLInputElement).value ?? '',
+                          }
+                        );
+                      } else {
+                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                          'user',
+                          {
+                            name: 'Unknown',
+                          }
+                        );
+                      }
+                    }}
+                  ></sl-input
+                ></sl-tooltip>`
+              : nothing}
           </div>
 
           <div>
@@ -697,12 +764,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
               </sl-tooltip>
             </sl-button-group>
 
-            ${this._initws
-              ? html`<div class="ws-indicator">
-                  <sl-icon name="people" label="Collaboration"></sl-icon>
-                  <sl-spinner></sl-spinner>
-                </div>`
-              : nothing}
             ${this._showTabMenu
               ? getTabGroupTemplate({
                   workspace: this.workspace,

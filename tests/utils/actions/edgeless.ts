@@ -4,16 +4,16 @@ import '../declare-test-window.js';
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type {
-  CssVariableName,
-  IPoint,
-  NoteBlockModel,
+import {
+  type CssVariableName,
+  type IPoint,
+  type NoteBlockModel,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists, sleep } from '../../../packages/global/src/utils.js';
-import { Vec } from '../../../packages/phasor/src/utils/vec.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
+  pressEnter,
   selectAllByKeyboard,
   SHIFT_KEY,
   SHORT_KEY,
@@ -26,6 +26,21 @@ import {
   initEmptyEdgelessState,
   waitNextFrame,
 } from './misc.js';
+
+const rotWith = (A: number[], C: number[], r = 0): number[] => {
+  if (r === 0) return A;
+
+  const s = Math.sin(r);
+  const c = Math.cos(r);
+
+  const px = A[0] - C[0];
+  const py = A[1] - C[1];
+
+  const nx = px * c - py * s;
+  const ny = px * s + py * c;
+
+  return [nx + C[0], ny + C[1]];
+};
 
 const AWAIT_TIMEOUT = 500;
 const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
@@ -109,7 +124,6 @@ export function locatorEdgelessToolButton(
     case 'brush':
     case 'text':
     case 'eraser':
-    case 'connector':
     case 'shape':
       buttonType = 'edgeless-toolbar-button';
       break;
@@ -314,7 +328,40 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   await setEdgelessTool(page, 'note');
   await page.mouse.click(x, y);
   await waitNextFrame(page);
-  await type(page, text);
+
+  const paragraphs = text.split('\n');
+  let i = 0;
+  for (const paragraph of paragraphs) {
+    ++i;
+    await type(page, paragraph);
+
+    if (i < paragraphs.length) {
+      await pressEnter(page);
+    }
+  }
+
+  const { id } = await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+
+    return {
+      id: container.selectionManager.state.elements[0],
+    };
+  });
+
+  return id;
+}
+
+export async function exitEditing(page: Page) {
+  await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+
+    container.selectionManager.setSelection({
+      elements: [],
+      editing: false,
+    });
+  });
 }
 
 export async function resizeElementByHandle(
@@ -365,7 +412,7 @@ export async function rotateElementByHandle(
   const x = box.x + box.width / 2;
   const y = box.y + box.height / 2;
 
-  const t = Vec.rotWith([x, y], [cx, cy], (deg * Math.PI) / 180);
+  const t = rotWith([x, y], [cx, cy], (deg * Math.PI) / 180);
 
   await dragBetweenCoords(
     page,
@@ -607,7 +654,8 @@ type Action =
   | 'changeConnectorStrokeColor'
   | 'changeConnectorStrokeStyles'
   | 'addFrame'
-  | 'createFrameOnMoreOption';
+  | 'createFrameOnMoreOption'
+  | 'duplicate';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -621,7 +669,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Bring to front',
+          hasText: 'Bring to Front',
         });
       await actionButton.click();
       break;
@@ -633,7 +681,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Bring forward',
+          hasText: 'Bring Forward',
         });
       await actionButton.click();
       break;
@@ -645,7 +693,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Send backward',
+          hasText: 'Send Backward',
         });
       await actionButton.click();
       break;
@@ -657,7 +705,7 @@ export async function triggerComponentToolbarAction(
       const actionButton = moreButton
         .locator('.more-actions-container .action-item')
         .filter({
-          hasText: 'Send to back',
+          hasText: 'Send to Back',
         });
       await actionButton.click();
       break;
@@ -682,6 +730,18 @@ export async function triggerComponentToolbarAction(
         .locator('.more-actions-container .action-item')
         .filter({
           hasText: 'Frame Section',
+        });
+      await actionButton.click();
+      break;
+    }
+    case 'duplicate': {
+      const moreButton = locatorComponentToolbarMoreButton(page);
+      await moreButton.click();
+
+      const actionButton = moreButton
+        .locator('.more-actions-container .action-item')
+        .filter({
+          hasText: 'Duplicate',
         });
       await actionButton.click();
       break;

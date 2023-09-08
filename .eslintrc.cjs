@@ -5,7 +5,6 @@ const allPackages = [
   'docs',
   'editor',
   'global',
-  'phasor',
   'playground',
   'store',
   'virgo',
@@ -53,9 +52,7 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:react-hooks/recommended',
     'plugin:wc/recommended',
     'plugin:lit/recommended',
   ],
@@ -65,19 +62,21 @@ module.exports = {
     'packages/blocks/dist/*',
     'packages/editor/dist/*',
     'packages/global/dist/*',
-    'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
     'packages/block-std/dist/*',
   ],
   overrides: [
     {
-      plugins: ['react', '@typescript-eslint'],
-      files: ['*.ts', '*.tsx'],
+      plugins: ['@typescript-eslint'],
+      files: ['*.ts'],
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
-        'react/react-in-jsx-scope': 'off',
+        '@typescript-eslint/no-namespace': [
+          'error',
+          { allowDeclarations: true },
+        ],
       },
     },
     ...allPackages.map(pkg => ({
@@ -92,17 +91,12 @@ module.exports = {
       },
     })),
   ],
-  settings: {
-    react: {
-      version: '18',
-    },
-  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['react', '@typescript-eslint', 'simple-import-sort'],
+  plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier'],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',
@@ -133,5 +127,8 @@ module.exports = {
         ],
       },
     ],
+    'prettier/prettier': 'error',
+    'arrow-body-style': 'off',
+    'prefer-arrow-callback': 'off',
   },
 };

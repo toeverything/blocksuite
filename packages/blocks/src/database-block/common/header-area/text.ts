@@ -179,6 +179,41 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       this.richText.vEditor?.focusEnd();
     });
   }
+
+  override onCopy(_e: ClipboardEvent) {
+    let data = '';
+    const range = this.vEditor?.getVRange();
+    if (range) {
+      const start = range.index;
+      const end = range.index + range.length;
+      const value = this.column.getStringValue(this.rowId);
+      data = value?.slice(start, end) ?? '';
+    }
+    const textClipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, data);
+
+    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
+    performNativeCopy([textClipboardItem]);
+    if (savedRange) {
+      resetNativeSelection(savedRange);
+    }
+  }
+
+  override onPaste(e: ClipboardEvent) {
+    const textClipboardData = e.clipboardData?.getData(CLIPBOARD_MIMETYPE.TEXT);
+    if (!textClipboardData) return;
+
+    const range = this.vEditor?.getVRange();
+    const yText = this.vEditor?.yText;
+    if (yText) {
+      const text = new Text(yText);
+      const index = range?.index ?? yText.length;
+      text.insert(textClipboardData, index);
+      this.vEditor?.setVRange({
+        index: index + textClipboardData.length,
+        length: 0,
+      });
+    }
+  }
 }
 
 declare global {

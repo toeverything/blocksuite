@@ -1,7 +1,6 @@
 /// <reference types="@blocksuite/global" />
 // manual import to avoid being tree-shaken
 import './page-block/index.js';
-import './counter-block/index.js';
 import './paragraph-block/index.js';
 import './list-block/index.js';
 import './note-block/index.js';
@@ -31,7 +30,6 @@ export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
 export * from './components/index.js';
-export * from './counter-block/index.js';
 export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
@@ -43,6 +41,8 @@ export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
 export * from './preset/index.js';
 export * from './surface-block/index.js';
+export * from './surface-block/surface-block.js';
+export * from './surface-block/surface-model.js';
 export * from './test-utils/test-utils.js';
 export * from './widgets/index.js';
 const env: Record<string, unknown> =

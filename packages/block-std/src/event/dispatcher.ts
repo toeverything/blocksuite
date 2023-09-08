@@ -8,7 +8,6 @@ import { ClipboardControl } from './control/clipboard.js';
 import { KeyboardControl } from './control/keyboard.js';
 import { PointerControl } from './control/pointer.js';
 import { RangeControl } from './control/range.js';
-import { bindKeymap } from './keymap.js';
 import { toLowerCase } from './utils.js';
 
 const bypassEventNames = [
@@ -135,9 +134,8 @@ export class UIEventDispatcher {
     };
   }
 
-  bindHotkey(keymap: Record<string, UIEventHandler>, options?: EventOptions) {
-    return this.add('keyDown', bindKeymap(keymap), options);
-  }
+  bindHotkey = (...args: Parameters<KeyboardControl['bindHotkey']>) =>
+    this._keyboardControl.bindHotkey(...args);
 
   private get _currentSelections() {
     return this.blockStore.selectionManager.value;

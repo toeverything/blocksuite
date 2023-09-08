@@ -1,5 +1,4 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { deserializeXYWH } from '@blocksuite/phasor';
 import type { TemplateResult } from 'lit';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -15,6 +14,7 @@ import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
 } from '../../../note-block/note-model.js';
+import { deserializeXYWH } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-note-mask')
@@ -73,9 +73,11 @@ export class EdgelessChildNote extends LitElement {
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
   protected override createRenderRoot() {
     return this;
   }
+
   override render() {
     const { model, renderer, index } = this;
     const { xywh, background } = model;
@@ -139,12 +141,13 @@ export class EdgelessNotesContainer extends WithDisposable(LitElement) {
       ${repeat(
         notes,
         child => child.id,
-        (child, index) => html`<edgeless-child-note
-          .index=${index}
-          .model=${child}
-          .renderer=${renderer}
-          .edgeless=${this.edgeless}
-        ></edgeless-child-note>`
+        (child, index) =>
+          html`<edgeless-child-note
+            .index=${index}
+            .model=${child}
+            .renderer=${renderer}
+            .edgeless=${this.edgeless}
+          ></edgeless-child-note>`
       )}
     `;
   }

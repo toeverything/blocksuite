@@ -1,9 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import { Bound, type FrameElement, type IVec, Vec } from '@blocksuite/phasor';
 import * as Y from 'yjs';
 
 import { type FrameTool, type IPoint } from '../../../__internal__/index.js';
+import {
+  Bound,
+  type FrameElement,
+  type IVec,
+  Vec,
+} from '../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
@@ -34,7 +39,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     if (Vec.dist(this._startPoint, currentPoint) < 8 && !this._frameElement)
       return;
     if (!this._frameElement) {
-      const frames = edgeless.frame.frames;
+      const frames = surface.frame.frames;
 
       const id = edgeless.surface.addElement('frame', {
         title: new Y.Text(`Frame ${frames.length + 1}`),

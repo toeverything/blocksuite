@@ -34,9 +34,31 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
     return block.caption ?? '';
   }
 
+  override async block2markdown(
+    block: ImageBlockModel,
+    _ctx: BlockTransformContext = {},
+    blobMap?: Map<string, string>
+  ) {
+    const blobId = block.sourceId;
+    let imageSrc = blobId;
+    if (blobMap) {
+      if (blobMap.has(blobId)) {
+        imageSrc = blobMap.get(blobId) ?? '';
+      } else {
+        const blob = await block.page.blobs.get(blobId);
+        if (blob) {
+          const blobType = await this.getBlobType(blob);
+          imageSrc = `images/${blobId}.${blobType.split('/')[1]}`;
+          blobMap.set(blobId, imageSrc);
+        }
+      }
+    }
+    return `![](${imageSrc})`;
+  }
+
   override block2Json(
     block: ImageBlockModel,
-    _children?: SerializedBlock[],
+    children: SerializedBlock[],
     _begin?: number,
     _end?: number
   ): SerializedBlock {
@@ -46,7 +68,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
       height: block.height,
       caption: block.caption,
       flavour: block.flavour,
-      children: [],
+      children,
     };
   }
 }

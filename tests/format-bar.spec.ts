@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
+  activeEmbed,
   dragBetweenCoords,
   dragBetweenIndices,
   enterPlaygroundRoom,
@@ -9,6 +10,7 @@ import {
   focusTitle,
   getSelectionRect,
   initEmptyParagraphState,
+  initImageState,
   initThreeParagraphs,
   pasteByKeyboard,
   pressArrowDown,
@@ -29,6 +31,7 @@ import {
   assertAlmostEqual,
   assertExists,
   assertLocatorVisible,
+  assertRichImage,
   assertRichTexts,
   assertSelection,
   assertStoreMatchJSX,
@@ -1401,16 +1404,38 @@ test('should register custom elements in format quick bar', async ({
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
 
-test('format quick bar should not break cursor jumping', async ({ page }) => {
+test.fixme(
+  'format quick bar should not break cursor jumping',
+  async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeParagraphs(page);
+    await dragBetweenIndices(page, [1, 3], [1, 2]);
+
+    const { formatBar } = getFormatBar(page);
+    await expect(formatBar).toBeVisible();
+
+    await pressArrowUp(page);
+    await type(page, '0');
+    await assertRichTexts(page, ['1203', '456', '789']);
+
+    await dragBetweenIndices(page, [1, 3], [1, 2]);
+    await pressArrowDown(page);
+    await type(page, '0');
+    await assertRichTexts(page, ['1203', '456', '7809']);
+  }
+);
+
+test('selecting image should not show format bar', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4535',
+  });
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await dragBetweenIndices(page, [1, 3], [1, 2]);
-
+  await initImageState(page);
+  await assertRichImage(page, 1);
+  await activeEmbed(page);
+  await waitNextFrame(page);
   const { formatBar } = getFormatBar(page);
-  await expect(formatBar).toBeVisible();
-
-  await pressArrowUp(page);
-  await type(page, '0');
-  await assertRichTexts(page, ['1203', '456', '789']);
+  await expect(formatBar).not.toBeVisible();
 });

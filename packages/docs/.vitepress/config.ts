@@ -30,13 +30,7 @@ export default defineConfig({
     sidebar: [
       {
         text: 'Introduction',
-        items: [
-          { text: 'BlockSuite Overview', link: '/blocksuite-overview' },
-          {
-            text: 'The Local-First Paradigm',
-            link: '/the-local-first-paradigm',
-          },
-        ],
+        items: [{ text: 'BlockSuite Overview', link: '/blocksuite-overview' }],
       },
       {
         text: 'Using BlockSuite',
@@ -58,6 +52,10 @@ export default defineConfig({
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
+          },
+          {
+            text: 'The Local-First Paradigm',
+            link: '/the-local-first-paradigm',
           },
           {
             text: 'Editor UI Architecture',
@@ -94,7 +92,6 @@ export default defineConfig({
           { text: '🚧 <code>@blocksuite/blocks</code>', link: '' },
           { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
           { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/phasor</code>', link: '' },
         ],
       },
       {

@@ -1,6 +1,6 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
-import type { Page, Text } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
@@ -8,30 +8,34 @@ import type { DatabaseBlockModel } from '../database-model.js';
 import type { InsertPosition } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
 
+export type DataViewHeaderComponentProp<
+  T extends DataViewManager = DataViewManager,
+> = UniComponent<{ viewMethods: DataViewExpose; view: T }>;
+
 export interface DataViewProps<
   T extends DataViewManager = DataViewManager,
-  Selection extends DataViewSelection = DataViewSelection
+  Selection extends DataViewSelection = DataViewSelection,
 > {
-  view: T;
+  header?: DataViewHeaderComponentProp<T>;
 
-  titleText: Text;
+  view: T;
 
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable;
 
   handleEvent: (name: EventName, handler: UIEventHandler) => Disposable;
 
-  modalMode?: boolean;
-
   setSelection: (selection?: Selection) => void;
 
   selectionUpdated: Slot<Selection | undefined>;
 
-  getFlag: Page['awarenessStore']['getFlag'];
+  getFlag?: Page['awarenessStore']['getFlag'];
 }
 
 export interface DataViewExpose {
   addRow?(position: InsertPosition | number): void;
+
   getSelection?(): DataViewSelection | undefined;
+
   focusFirstCell(): void;
 }
 
@@ -57,7 +61,7 @@ export type DataViewDataType = FallBack<
 export type DataViewTypes = DataViewDataType['mode'];
 
 export interface DataViewConfig<
-  Data extends DataViewDataType = DataViewDataType
+  Data extends DataViewDataType = DataViewDataType,
 > {
   type: DataViewTypes;
   defaultName: string;
@@ -65,16 +69,20 @@ export interface DataViewConfig<
   init(model: DatabaseBlockModel, id: string, name: string): Data;
 }
 
+export type DataViewToolsProps<
+  Manager extends DataViewManager = DataViewManager,
+> = {
+  view: Manager;
+  viewMethod: DataViewExpose;
+};
+
 export interface DataViewRendererConfig<
-  _Data extends DataViewDataType = DataViewDataType
+  _Data extends DataViewDataType = DataViewDataType,
 > {
   type: DataViewTypes;
   view: UniComponent<DataViewProps, DataViewExpose>;
   icon: UniComponent;
-  tools?: UniComponent<{
-    view: DataViewManager;
-    viewMethod: DataViewExpose;
-  }>[];
+  tools?: UniComponent<DataViewToolsProps>[];
 }
 
 export class ViewManager {
@@ -100,7 +108,7 @@ export class ViewManager {
   }
 
   get all() {
-    return [...this.map.values()];
+    return Array.from(this.map.values());
   }
 }
 
@@ -129,7 +137,7 @@ export class ViewRendererManager {
   }
 
   get all() {
-    return [...this.map.values()];
+    return Array.from(this.map.values());
   }
 }
 

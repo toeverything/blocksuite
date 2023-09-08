@@ -1,7 +1,6 @@
 import '../../panel/one-row-color-panel.js';
 import '../common/slide-menu.js';
 
-import { ConnectorMode } from '@blocksuite/phasor';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -12,9 +11,11 @@ import {
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
 import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
 import {
+  ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '../../../../../icons/index.js';
+import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';
@@ -31,6 +32,7 @@ function ConnectorModeButtonGroup(
   const { mode } = edgelessTool;
   const straightLineTooltip = getTooltipWithShortcut('Straight', 'L');
   const orthogonalTooltip = getTooltipWithShortcut('Elbowed', 'X');
+  const curveTooltip = getTooltipWithShortcut('Curve', 'C');
   /**
    * There is little hacky on rendering tooltip.
    * We don't want either tooltip overlap the top button or tooltip on left.
@@ -43,9 +45,19 @@ function ConnectorModeButtonGroup(
         .activeMode=${'background'}
         .iconContainerPadding=${2}
         .tooltip=${straightLineTooltip}
+        .tipPosition=${'top-end'}
         @click=${() => setConnectorMode(ConnectorMode.Straight)}
       >
         ${ConnectorLWithArrowIcon}
+      </edgeless-tool-icon-button>
+      <edgeless-tool-icon-button
+        .active=${mode === ConnectorMode.Curve}
+        .activeMode=${'background'}
+        .iconContainerPadding=${2}
+        .tooltip=${curveTooltip}
+        @click=${() => setConnectorMode(ConnectorMode.Curve)}
+      >
+        ${ConnectorCWithArrowIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .active=${mode === ConnectorMode.Orthogonal}
@@ -67,16 +79,6 @@ export class EdgelessConnectorMenu extends LitElement {
       position: absolute;
       display: flex;
       z-index: -1;
-    }
-
-    .connector-submenu-container {
-      display: flex;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border: 1px solid var(--affine-border-color);
-      border-radius: 8px 8px 0 0;
-      cursor: default;
     }
 
     .connector-submenu-content {
@@ -164,25 +166,23 @@ export class EdgelessConnectorMenu extends LitElement {
     );
 
     return html`
-      <div class="connector-submenu-container">
-        <edgeless-slide-menu .menuWidth=${CONNECTOR_SUBMENU_WIDTH}>
-          <div class="connector-submenu-content">
-            ${connectorModeButtonGroup}
-            <div class="submenu-divider"></div>
-            <edgeless-line-width-panel
-              .selectedSize=${strokeWidth}
-              @select=${(e: LineWidthEvent) =>
-                this._setConnectorStrokeWidth(e.detail)}
-            >
-            </edgeless-line-width-panel>
-            <div class="submenu-divider"></div>
-            <edgeless-one-row-color-panel
-              .value=${color}
-              @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
-            ></edgeless-one-row-color-panel>
-          </div>
-        </edgeless-slide-menu>
-      </div>
+      <edgeless-slide-menu .menuWidth=${CONNECTOR_SUBMENU_WIDTH}>
+        <div class="connector-submenu-content">
+          ${connectorModeButtonGroup}
+          <div class="submenu-divider"></div>
+          <edgeless-line-width-panel
+            .selectedSize=${strokeWidth}
+            @select=${(e: LineWidthEvent) =>
+              this._setConnectorStrokeWidth(e.detail)}
+          >
+          </edgeless-line-width-panel>
+          <div class="submenu-divider"></div>
+          <edgeless-one-row-color-panel
+            .value=${color}
+            @select=${(e: ColorEvent) => this._setConnectorColor(e.detail)}
+          ></edgeless-one-row-color-panel>
+        </div>
+      </edgeless-slide-menu>
     `;
   }
 }

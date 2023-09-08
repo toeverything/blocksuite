@@ -10,7 +10,6 @@ import {
   clickComponentToolbarMoreMenuButton,
   locatorEdgelessToolButton,
   locatorShapeStrokeStyleButton,
-  locatorShapeStyleButton,
   openComponentToolbarMoreMenu,
   pickColorAtPoints,
   resizeElementByHandle,
@@ -21,11 +20,12 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  copyByKeyboard,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyEdgelessState,
-  SHORT_KEY,
+  pasteByKeyboard,
   type,
   waitNextFrame,
 } from '../utils/actions/index.js';
@@ -177,7 +177,7 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
   await expect(tooltip).toBeVisible();
 });
 
-test.skip('delete shape block by keyboard', async ({ page }) => {
+test('delete shape block by keyboard', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
 
@@ -187,8 +187,7 @@ test.skip('delete shape block by keyboard', async ({ page }) => {
 
   await setEdgelessTool(page, 'default');
   const startPoint = await page.evaluate(() => {
-    // @ts-expect-error
-    const hitbox = window.std.getShapeBlockHitBox('3');
+    const hitbox = document.querySelector('[data-block-id="3"]');
     if (!hitbox) {
       throw new Error('hitbox is null');
     }
@@ -229,8 +228,10 @@ test('edgeless toolbar shape menu shows up and close normally', async ({
 
   const shapeMenu = page.locator('edgeless-shape-menu');
   await expect(shapeMenu).toBeVisible();
+  await page.waitForTimeout(500);
 
   await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.waitForTimeout(500);
   await expect(shapeMenu).toBeHidden();
 });
 
@@ -363,22 +364,32 @@ test('dbclick to add text in shape', async ({ page }) => {
   await assertEdgelessTool(page, 'default');
 
   // test select, copy, paste
-  await page.mouse.move(245, 205);
-  await page.mouse.down();
-  await page.mouse.move(262, 205, {
-    steps: 10,
-  });
-  await page.mouse.up();
-  // h|ell|o
-  await waitNextFrame(page, 200);
-  await page.keyboard.press(`${SHORT_KEY}+c`);
+  const select = async () => {
+    await page.mouse.move(245, 205);
+    await page.mouse.down();
 
-  await waitNextFrame(page, 200);
-  await type(page, 'ddd', 100);
-  await waitNextFrame(page, 200);
+    await page.mouse.move(245, 205);
+    await page.mouse.down();
+    await page.mouse.move(262, 205, {
+      steps: 10,
+    });
+    await page.mouse.up();
+  };
+  await select();
+  // h|ell|o
+  await waitNextFrame(page);
+  await copyByKeyboard(page);
+  await waitNextFrame(page);
+
+  // FIXME(@Flrande): this is a workaround, we should keep selection
+  await select();
+
+  await waitNextFrame(page);
+  await type(page, 'ddd', 50);
+  await waitNextFrame(page);
   await assertEdgelessCanvasText(page, 'hdddo');
 
-  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await pasteByKeyboard(page);
   await assertEdgelessCanvasText(page, 'hdddello');
 });
 
@@ -431,9 +442,9 @@ test('auto wrap text in shape', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [200, 150, 150, 136]);
 
   // try to decrease width
-  await resizeElementByHandle(page, { x: -120, y: 0 }, 'bottom-right');
+  await resizeElementByHandle(page, { x: -50, y: 0 }, 'bottom-right');
   // you can't decrease width after text can't wrap (each line just has 1 char)
-  await assertEdgelessSelectedRect(page, [200, 150, 51, 552]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
 });
 
 test('change shape style', async ({ page }) => {

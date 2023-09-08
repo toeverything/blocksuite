@@ -16,7 +16,7 @@ import type { WidgetElement } from './widget-element.js';
 export class BlockElement<
   Model extends BaseBlockModel = BaseBlockModel,
   Service extends BlockService = BlockService,
-  WidgetName extends string = string
+  WidgetName extends string = string,
 > extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
@@ -143,6 +143,12 @@ export class BlockElement<
     return this.root.renderModel(model);
   };
 
+  protected override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await Promise.all(this.childBlockElements.map(el => el.updateComplete));
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -186,7 +192,9 @@ export class BlockElement<
 }
 
 declare global {
-  interface BlockSuiteView {
-    block: BlockSuiteViewSpec<BlockElement>;
+  namespace BlockSuite {
+    interface View {
+      block: BlockSuiteViewSpec<BlockElement>;
+    }
   }
 }

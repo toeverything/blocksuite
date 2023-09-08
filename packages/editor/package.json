@@ -1,8 +1,7 @@
 {
   "name": "@blocksuite/editor",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Default BlockSuite-based editor built for AFFiNE.",
-  "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -16,17 +15,17 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.12"
+    "@toeverything/theme": "^0.7.15"
   },
   "dependencies": {
     "@blocksuite/global": "workspace:*",
-    "lit": "^2.7.6"
+    "lit": "^2.8.0"
   },
   "devDependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.12"
+    "@toeverything/theme": "^0.7.15"
   },
   "exports": {
     ".": "./src/index.ts",
@@ -42,10 +41,10 @@
         "import": "./dist/index.js"
       },
       "./themes/*": "./themes/*"
-    },
-    "files": [
-      "dist",
-      "themes"
-    ]
-  }
+    }
+  },
+  "files": [
+    "dist",
+    "themes"
+  ]
 }

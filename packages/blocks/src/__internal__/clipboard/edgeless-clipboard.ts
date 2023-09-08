@@ -1,29 +1,34 @@
 import { assertExists, groupBy } from '@blocksuite/global/utils';
-import type { IBound } from '@blocksuite/phasor';
-import {
-  Bound,
-  compare,
-  type Connection,
-  ConnectorElement,
-  deserializeXYWH,
-  getCommonBound,
-  type PhasorElement,
-  type PhasorElementType,
-  serializeXYWH,
-} from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
 
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
-import { getCopyElements } from '../../page-block/edgeless/utils/clipboard-utils.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
+import {
+  Bound,
+  compare,
+  type Connection,
+  ConnectorElement,
+  deserializeXYWH,
+  FrameElement,
+  getCommonBound,
+  type IBound,
+  type PhasorElement,
+  type PhasorElementType,
+  serializeXYWH,
+} from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
-import { type SerializedBlock, type TopLevelBlockModel } from '../index.js';
+import {
+  type EdgelessElement,
+  type SerializedBlock,
+  type TopLevelBlockModel,
+} from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import type { Clipboard } from './type.js';
@@ -41,6 +46,23 @@ import {
   performNativeCopy,
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
+
+export function getCopyElements(
+  surface: SurfaceBlockComponent,
+  elements: EdgelessElement[]
+) {
+  const set = new Set<EdgelessElement>();
+
+  elements.forEach(element => {
+    if (element instanceof FrameElement) {
+      set.add(element);
+      surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+    } else {
+      set.add(element);
+    }
+  });
+  return Array.from(set);
+}
 
 function prepareConnectorClipboardData(
   connector: ConnectorElement,
@@ -123,12 +145,12 @@ export class EdgelessClipboard implements Clipboard {
 
     const { state, elements } = this.selection;
     if (state.editing) {
-      deleteModelsByTextSelection(this._edgeless);
+      deleteModelsByTextSelection(this._edgeless.root);
       return;
     }
 
     this._page.transact(() => {
-      deleteElements(this._edgeless, elements);
+      deleteElements(this.surface, elements);
     });
 
     this.selection.setSelection({
@@ -144,13 +166,13 @@ export class EdgelessClipboard implements Clipboard {
 
   async copy() {
     const { state } = this.selection;
-    const elements = getCopyElements(this._edgeless, this.selection.elements);
+    const elements = getCopyElements(this.surface, this.selection.elements);
     // when note active, handle copy like page mode
     if (state.editing) {
       if (isPhasorElementWithText(elements[0])) {
         copyOnPhasorElementWithText(this._edgeless);
       } else {
-        await copyBlocksInPage(this._edgeless);
+        await copyBlocksInPage(this._edgeless.root);
       }
       return;
     }
@@ -173,7 +195,7 @@ export class EdgelessClipboard implements Clipboard {
       if (!isPhasorElementWithText(elements[0])) {
         this._pasteInTextNote(e);
       }
-      // use build-in paste handler in virgo when paste in surface text element
+      // use build-in paste handler in virgo-input when paste in surface text element
       return;
     }
 
@@ -209,11 +231,13 @@ export class EdgelessClipboard implements Clipboard {
     }
     this._page.captureSync();
 
-    deleteModelsByTextSelection(this._edgeless);
+    deleteModelsByTextSelection(this._edgeless.root);
 
     const textSelection = this.textSelection;
     assertExists(textSelection);
-    const selectedModels = getSelectedContentModels(this._edgeless, ['text']);
+    const selectedModels = getSelectedContentModels(this._edgeless.root, [
+      'text',
+    ]);
 
     const focusedBlockModel = selectedModels[0];
     assertExists(focusedBlockModel);
@@ -384,7 +408,7 @@ export class EdgelessClipboard implements Clipboard {
         ele.h
       );
       if (ele instanceof ConnectorElement) {
-        this._edgeless.connector.updateXYWH(ele, newBound);
+        this.surface.connector.updateXYWH(ele, newBound);
       } else {
         this.surface.updateElement(ele.id, {
           xywh: newBound.serialize(),

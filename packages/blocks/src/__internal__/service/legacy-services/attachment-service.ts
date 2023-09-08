@@ -11,11 +11,18 @@ export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
     return `Attachment-${block.name}`;
   }
 
-  override block2Json(block: AttachmentBlockModel): SerializedBlock {
+  override async block2markdown(block: AttachmentBlockModel) {
+    return `Attachment-${block.name}`;
+  }
+
+  override block2Json(
+    block: AttachmentBlockModel,
+    children: SerializedBlock[]
+  ): SerializedBlock {
     const clonedProps = cloneAttachmentProperties(block);
     return {
       flavour: block.flavour,
-      children: [],
+      children,
       ...clonedProps,
     };
   }

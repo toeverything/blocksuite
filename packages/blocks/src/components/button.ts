@@ -1,4 +1,5 @@
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -35,17 +36,9 @@ export class IconButton extends LitElement {
       background: transparent;
       cursor: pointer;
       user-select: none;
-      font-family: var(--affine-font-family);
-      fill: var(--affine-icon-color);
-      color: var(--affine-popover-color);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      color: var(--affine-text-primary-color);
       pointer-events: auto;
-    }
-
-    :host > span {
-      flex: 1;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
     }
 
     :host(:hover) {
@@ -60,7 +53,6 @@ export class IconButton extends LitElement {
     :host(:disabled) {
       background: transparent;
       color: var(--affine-text-disable-color);
-      fill: var(--affine-text-disable-color);
       cursor: not-allowed;
     }
 
@@ -69,15 +61,19 @@ export class IconButton extends LitElement {
       background: var(--affine-hover-color);
     }
 
-    /* You can add a 'active' attribute to the button to revert the active style */
-    :host([active]) {
-      fill: var(--affine-primary-color);
-      color: var(--affine-primary-color);
-    }
-
     :host(:active[active]) {
       background: transparent;
-      fill: var(--affine-icon-color);
+    }
+
+    :host > .text {
+      flex: 1;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    ::slotted(svg) {
+      color: var(--svg-icon-color);
     }
   `;
 
@@ -93,12 +89,16 @@ export class IconButton extends LitElement {
   @property()
   text: string | null = null;
 
+  @property({ attribute: true, type: Boolean })
+  active?: boolean = false;
+
   // Do not add `{ attribute: false }` option here, otherwise the `disabled` styles will not work
-  @property({ attribute: true })
-  disabled?: '' = undefined;
+  @property({ attribute: true, type: Boolean })
+  disabled?: boolean = undefined;
 
   constructor() {
     super();
+    // Allow activate button by pressing Enter key
     this.addEventListener('keypress', event => {
       if (this.disabled) {
         return;
@@ -112,8 +112,7 @@ export class IconButton extends LitElement {
     this.addEventListener(
       'click',
       event => {
-        // when disabled is '', it means the attribute is present
-        if (this.disabled === '') {
+        if (this.disabled === true) {
           event.preventDefault();
           event.stopPropagation();
         }
@@ -151,9 +150,19 @@ export class IconButton extends LitElement {
   }
 
   override render() {
+    if (this.disabled) {
+      const disabledColor = 'var(--affine-text-disable-color)';
+      this.style.setProperty('--svg-icon-color', disabledColor);
+    } else {
+      const iconColor = this.active
+        ? 'var(--affine-primary-color)'
+        : 'var(--affine-icon-color)';
+      this.style.setProperty('--svg-icon-color', iconColor);
+    }
+
     return html`<slot></slot>${this.text
         ? // wrap a span around the text so we can ellipsis it automatically
-          html`<span>${this.text}</span>`
+          html`<span class="text">${this.text}</span>`
         : ''}<slot name="suffix"></slot>`;
   }
 }

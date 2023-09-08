@@ -250,20 +250,19 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
               input: {
                 search: true,
               },
-              items: this.tableViewManager.allColumnConfig
-                .filter(v => v.type !== this.column.type)
-                .map(config => {
-                  return {
-                    type: 'action',
-                    name: config.name,
-                    icon: html` <uni-lit
-                      .uni="${this.tableViewManager.getIcon(config.type)}"
-                    ></uni-lit>`,
-                    select: () => {
-                      this.column.updateType?.(config.type);
-                    },
-                  };
-                }),
+              items: this.tableViewManager.allColumnConfig.map(config => {
+                return {
+                  type: 'action',
+                  isSelected: config.type === this.column.type,
+                  name: config.name,
+                  icon: html` <uni-lit
+                    .uni="${this.tableViewManager.getIcon(config.type)}"
+                  ></uni-lit>`,
+                  select: () => {
+                    this.column.updateType?.(config.type);
+                  },
+                };
+              }),
             },
           },
           {
@@ -389,20 +388,19 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           search: true,
           placeholder: 'Search',
         },
-        items: this.tableViewManager.allColumnConfig
-          .filter(v => v.type !== this.column.type)
-          .map(config => {
-            return {
-              type: 'action',
-              name: config.name,
-              icon: html` <uni-lit
-                .uni="${this.tableViewManager.getIcon(config.type)}"
-              ></uni-lit>`,
-              select: () => {
-                this.column.updateType?.(config.type);
-              },
-            };
-          }),
+        items: this.tableViewManager.allColumnConfig.map(config => {
+          return {
+            type: 'action',
+            name: config.name,
+            isSelected: config.type === this.column.type,
+            icon: html` <uni-lit
+              .uni="${this.tableViewManager.getIcon(config.type)}"
+            ></uni-lit>`,
+            select: () => {
+              this.column.updateType?.(config.type);
+            },
+          };
+        }),
       },
     });
   };
@@ -421,7 +419,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       >
         <div class="affine-database-column-text ${column.type}">
           <div
-            class="affine-database-column-type-icon"
+            class="affine-database-column-type-icon dv-hover"
             @click="${this._clickTypeIcon}"
           >
             <uni-lit .uni="${column.icon}"></uni-lit>

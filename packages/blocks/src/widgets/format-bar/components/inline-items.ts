@@ -2,10 +2,9 @@ import { html, nothing } from 'lit';
 
 import type { AffineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import {
+  includeInlineSupportedBlockSelected,
   inlineFormatConfig,
-  noneInlineUnsupportedBlockSelected,
-} from '../../../page-block/const/inline-format-config.js';
-import { isPageComponent } from '../../../page-block/utils/guard.js';
+} from '../../../common/inline-format-config.js';
 import {
   getCombinedFormatInBlockSelections,
   getCombinedFormatInTextSelection,
@@ -14,19 +13,16 @@ import type { AffineFormatBarWidget } from '../format-bar.js';
 import { BackgroundButton } from './background/background-button.js';
 
 export const InlineItems = (formatBar: AffineFormatBarWidget) => {
-  const pageElement = formatBar.pageElement;
-  if (!isPageComponent(pageElement)) {
-    throw new Error('the pageElement of formatBar is not a PageComponent');
-  }
+  const root = formatBar.root;
 
-  if (!noneInlineUnsupportedBlockSelected(pageElement)) {
+  if (!includeInlineSupportedBlockSelected(root)) {
     return nothing;
   }
 
   let type: 'text' | 'block' = 'text';
   let format: AffineTextAttributes = {};
-  const textSelection = pageElement.selection.find('text');
-  const blockSelections = pageElement.selection.filter('block');
+  const textSelection = root.selectionManager.find('text');
+  const blockSelections = root.selectionManager.filter('block');
 
   if (
     !(
@@ -38,35 +34,36 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
   }
 
   if (textSelection) {
-    format = getCombinedFormatInTextSelection(pageElement, textSelection);
+    format = getCombinedFormatInTextSelection(root, textSelection);
     type = 'text';
   } else {
-    format = getCombinedFormatInBlockSelections(pageElement, blockSelections);
+    format = getCombinedFormatInBlockSelections(root, blockSelections);
     type = 'block';
   }
 
   const backgroundButton = BackgroundButton(formatBar);
 
   return html`${inlineFormatConfig
-      .filter(({ showWhen }) => showWhen(pageElement))
+      .filter(({ showWhen }) => showWhen(root))
       .map(
-        ({ id, name, icon, action, activeWhen }) => html`<icon-button
-          size="32px"
-          class="has-tool-tip"
-          data-testid=${id}
-          ?active=${activeWhen(format)}
-          @click=${() => {
-            action({
-              blockElement: pageElement,
-              type,
-              format,
-            });
-            formatBar.requestUpdate();
-          }}
-        >
-          ${icon}
-          <tool-tip inert role="tooltip">${name}</tool-tip>
-        </icon-button>`
+        ({ id, name, icon, action, activeWhen }) =>
+          html`<icon-button
+            size="32px"
+            class="has-tool-tip"
+            data-testid=${id}
+            ?active=${activeWhen(format)}
+            @click=${() => {
+              action({
+                root,
+                type,
+                format,
+              });
+              formatBar.requestUpdate();
+            }}
+          >
+            ${icon}
+            <tool-tip inert role="tooltip">${name}</tool-tip>
+          </icon-button>`
       )}
     <div class="divider"></div>
     ${backgroundButton}

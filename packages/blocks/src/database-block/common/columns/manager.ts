@@ -17,7 +17,7 @@ type JSON =
 
 export interface CellRenderProps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
-  Value = unknown
+  Value = unknown,
 > {
   view: DataViewManager;
   column: DataViewColumnManager<Value, Data>;
@@ -42,19 +42,19 @@ export interface DataViewCellLifeCycle {
 
 export type DataViewCellComponent<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
-  Value = unknown
+  Value = unknown,
 > = UniComponent<CellRenderProps<Data, Value>, DataViewCellLifeCycle>;
 
 export type CellRenderer<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
-  Value = unknown
+  Value = unknown,
 > = {
   view: DataViewCellComponent<Data, Value>;
   edit?: DataViewCellComponent<Data, Value>;
 };
 type ColumnOps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
-  Value = unknown
+  Value = unknown,
 > = {
   name: string;
   defaultData: () => Data;
@@ -117,7 +117,7 @@ export type GetCellDataFromConfig<T extends ColumnConfig> =
 
 export class ColumnConfig<
   T extends NonNullable<unknown> = NonNullable<unknown>,
-  CellData = unknown
+  CellData = unknown,
 > {
   convertMap = new Map();
 

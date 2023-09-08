@@ -129,6 +129,7 @@ async function initEmptyEditor({
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
+        debugMenu.contentParser = editor.createContentParser();
         document.body.appendChild(debugMenu);
         window.debugMenu = debugMenu;
         window.editor = editor;
@@ -564,6 +565,15 @@ export async function initThreeDividers(page: Page) {
   await type(page, '---');
   await pressSpace(page);
   await type(page, '123');
+}
+
+export async function initParagraphsByCount(page: Page, count: number) {
+  await focusRichText(page);
+  for (let i = 0; i < count; i++) {
+    await type(page, `paragraph ${i}`);
+    await pressEnter(page);
+  }
+  await resetHistory(page);
 }
 
 export async function getVirgoSelectionIndex(page: Page) {
@@ -1026,6 +1036,18 @@ export async function export2Html(page: Page) {
     const contentParser = new window.ContentParser(window.page);
     const root = window.page.root as PageBlockModel;
     return contentParser.block2Html(
+      [contentParser.getSelectedBlock(root)],
+      new Map()
+    );
+  });
+  return promiseResult;
+}
+
+export async function export2markdown(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2markdown(
       [contentParser.getSelectedBlock(root)],
       new Map()
     );

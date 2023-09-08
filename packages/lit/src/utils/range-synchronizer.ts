@@ -9,7 +9,7 @@ import { type Text } from '@blocksuite/store';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
-import type { BlockSuiteRoot } from '../element/lit-root.js';
+import type { RangeManager } from './range-manager.js';
 
 /**
  * Two-way binding between native range and text selection
@@ -26,7 +26,11 @@ export class RangeSynchronizer {
     return this.root.rangeManager;
   }
 
-  constructor(public root: BlockSuiteRoot) {
+  get root() {
+    return this.manager.root;
+  }
+
+  constructor(public manager: RangeManager) {
     this.root.disposables.add(
       this._selectionManager.slots.changed.on(this._onSelectionModelChanged)
     );
@@ -39,11 +43,7 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        //FIXME(flrande): skip it before we support render multiple elements for one block
-        if (
-          range &&
-          range.startContainer.parentElement?.closest('side-layout-modal')
-        ) {
+        if (!this.manager.config.shouldSyncSelection(range)) {
           return;
         }
 

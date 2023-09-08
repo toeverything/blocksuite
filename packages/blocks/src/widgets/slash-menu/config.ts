@@ -6,9 +6,7 @@ import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,
-  getNextBlock,
   getPageBlock,
-  getPreviousBlock,
   getVirgoByModel,
   openFileOrFiles,
   resetNativeSelection,
@@ -17,6 +15,8 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
+import { inlineFormatConfig } from '../../common/inline-format-config.js';
+import { paragraphConfig } from '../../common/paragraph-config.js';
 import { toast } from '../../components/toast.js';
 import {
   ArrowDownBigIcon,
@@ -36,9 +36,7 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '../../icons/index.js';
-import type { ImageProps } from '../../image-block/image-model.js';
-import { inlineFormatConfig } from '../../page-block/const/inline-format-config.js';
-import { paragraphConfig } from '../../page-block/const/paragraph-config.js';
+import type { ImageBlockProps } from '../../image-block/image-model.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   getSelectedContentBlockElements,
@@ -79,7 +77,7 @@ export const menuGroups: {
           },
           action: ({ pageElement }) => {
             const selectedBlockElements = getSelectedContentBlockElements(
-              pageElement,
+              pageElement.root,
               ['text', 'block']
             );
             const newModels = updateBlockElementType(
@@ -147,7 +145,7 @@ export const menuGroups: {
         },
         action: ({ pageElement }) => {
           const selectedBlockElements = getSelectedContentBlockElements(
-            pageElement,
+            pageElement.root,
             ['text', 'block']
           );
           updateBlockElementType(selectedBlockElements, flavour, type);
@@ -161,8 +159,6 @@ export const menuGroups: {
       {
         name: 'New Page',
         icon: NewPageIcon,
-        showWhen: model =>
-          !!model.page.awarenessStore.getFlag('enable_linked_page'),
         action: async ({ pageElement, model }) => {
           const newPage = await createPage(pageElement.page.workspace);
           insertContent(model, REFERENCE_NODE, {
@@ -178,9 +174,6 @@ export const menuGroups: {
         alias: ['dual link'],
         icon: DualLinkIcon,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_linked_page')) {
-            return false;
-          }
           const pageBlock = getPageBlock(model);
           assertExists(pageBlock);
           const linkedPageWidgetEle = pageBlock.widgetElements.linkedPage;
@@ -229,12 +222,11 @@ export const menuGroups: {
           if (!parent) {
             return;
           }
-          const props = (
-            await uploadImageFromLocal(pageElement.page.blobs)
-          ).map(
+          const fileData = await uploadImageFromLocal(pageElement.page.blobs);
+          const props = fileData.map(
             ({
               sourceId,
-            }): ImageProps & {
+            }): ImageBlockProps & {
               flavour: 'affine:image';
             } => ({
               flavour: 'affine:image',
@@ -272,8 +264,6 @@ export const menuGroups: {
         icon: AttachmentIcon,
         alias: ['attachment'],
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_attachment_block'))
-            return false;
           if (!model.page.schema.flavourSchemaMap.has('affine:attachment'))
             return false;
           return !insideDatabase(model);
@@ -345,9 +335,6 @@ export const menuGroups: {
         alias: ['database'],
         icon: DatabaseTableViewIcon20,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_database')) {
-            return false;
-          }
           if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
             return false;
           }
@@ -384,9 +371,6 @@ export const menuGroups: {
         disabled: false,
         icon: DatabaseKanbanViewIcon20,
         showWhen: model => {
-          if (!model.page.awarenessStore.getFlag('enable_database')) {
-            return false;
-          }
           if (!model.page.schema.flavourSchemaMap.has('affine:database')) {
             return false;
           }
@@ -427,11 +411,13 @@ export const menuGroups: {
         icon: ArrowUpBigIcon,
         action: async ({ pageElement, model }) => {
           const page = pageElement.page;
-          const previousBlock = getPreviousBlock(model);
-          if (!previousBlock) return;
-          const parent = page.getParent(previousBlock);
-          if (!parent) return;
-          page.moveBlocks([model], parent, previousBlock, true);
+          const previousSiblingModel = page.getPreviousSibling(model);
+          if (!previousSiblingModel) return;
+
+          const parentModel = page.getParent(previousSiblingModel);
+          if (!parentModel) return;
+
+          page.moveBlocks([model], parentModel, previousSiblingModel, true);
         },
       },
       {
@@ -439,11 +425,13 @@ export const menuGroups: {
         icon: ArrowDownBigIcon,
         action: async ({ pageElement, model }) => {
           const page = pageElement.page;
-          const nextBlock = getNextBlock(model);
-          if (!nextBlock) return;
-          const parent = page.getParent(nextBlock);
-          if (!parent) return;
-          page.moveBlocks([model], parent, nextBlock, false);
+          const nextSiblingModel = page.getNextSibling(model);
+          if (!nextSiblingModel) return;
+
+          const parentModel = page.getParent(nextSiblingModel);
+          if (!parentModel) return;
+
+          page.moveBlocks([model], parentModel, nextSiblingModel, false);
         },
       },
       {
@@ -494,6 +482,7 @@ export const menuGroups: {
       },
       {
         name: 'Delete',
+        alias: ['remove'],
         icon: DeleteIcon,
         action: ({ pageElement, model }) => {
           pageElement.page.deleteBlock(model);

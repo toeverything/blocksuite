@@ -15,6 +15,7 @@ import {
   getRichTextBoundingBox,
   initEmptyParagraphState,
   initImageState,
+  initParagraphsByCount,
   initThreeLists,
   initThreeParagraphs,
   pasteByKeyboard,
@@ -30,7 +31,6 @@ import {
   resetHistory,
   selectAllByKeyboard,
   shamefullyBlurActiveElement,
-  SHORT_KEY,
   type,
   undoByClick,
   undoByKeyboard,
@@ -329,10 +329,10 @@ test('should unindent multi-selection block', async ({ page }) => {
 
   // blur
   await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.move(coord.x - 26 - 50, coord.y, { steps: 20 });
   await page.mouse.down();
   // ←
-  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
+  await page.mouse.move(coord.x + 20, coord.y + 30, { steps: 20 });
   await page.mouse.up();
 
   await pressShiftTab(page);
@@ -1431,4 +1431,92 @@ test('should scroll page properly by wheel after inserting a new block and selec
   await page.mouse.wheel(0, distanceToEnd * 2);
   await page.waitForTimeout(250);
   expect(await getViewportScrollTop()).toBe(distanceToEnd);
+});
+
+test('should not select parent block when dragging area only intersects with child', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await assertRichTexts(page, ['123', '456', '789']);
+
+  const coord = await getIndexCoordinate(page, [1, 2]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 10, { steps: 20 });
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 20, coord.y + 50, { steps: 20 });
+  await page.mouse.up();
+
+  let rects = page.locator('.selected,affine-block-selection');
+  await expect(rects).toHaveCount(2);
+
+  // indent children blocks
+  await pressTab(page);
+
+  const secondCoord = await getIndexCoordinate(page, [1, 2]);
+  await page.mouse.click(0, 0);
+  await page.mouse.move(secondCoord.x - 100, secondCoord.y - 10, {
+    steps: 20,
+  });
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(secondCoord.x + 100, secondCoord.y + 10, { steps: 20 });
+  await page.mouse.up();
+
+  rects = page.locator('.selected,affine-block-selection');
+  await expect(rects).toHaveCount(1);
+});
+
+test('scroll should update dragging area and select blocks when dragging', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initParagraphsByCount(page, 20);
+
+  await page.mouse.click(0, 0);
+  async function getViewportScrollTop() {
+    return await page.evaluate(() => {
+      const viewport = document.querySelector('.affine-doc-viewport');
+      if (!viewport) {
+        throw new Error();
+      }
+      return viewport.scrollTop;
+    });
+  }
+
+  await page.mouse.wheel(0, -(await getViewportScrollTop()) * 2);
+  await page.waitForTimeout(250);
+  expect(await getViewportScrollTop()).toBe(0);
+
+  const coord = await getIndexCoordinate(page, [1, 1]);
+
+  // blur
+  await page.mouse.click(0, 0);
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 30, { steps: 20 });
+  await page.mouse.down();
+  // ←
+  await page.mouse.move(coord.x + 100, coord.y + 10, { steps: 20 });
+  await page.waitForTimeout(250);
+
+  let rects = page.locator('.selected,affine-block-selection');
+  await expect(rects).toHaveCount(2);
+
+  // scroll to end by wheel
+  const distanceToEnd = await page.evaluate(() => {
+    const viewport = document.querySelector('.affine-doc-viewport')!;
+    return viewport.scrollHeight - viewport.clientHeight;
+  });
+  await page.mouse.wheel(0, distanceToEnd * 2);
+  await page.waitForTimeout(250);
+  expect(await getViewportScrollTop()).toBe(distanceToEnd);
+
+  await page.mouse.up();
+
+  rects = page.locator('.selected,affine-block-selection');
+  await expect(rects).toHaveCount(8);
 });

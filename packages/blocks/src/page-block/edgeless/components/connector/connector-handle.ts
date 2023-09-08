@@ -1,10 +1,10 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { ConnectorElement } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { ConnectorElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-connector-handle')
@@ -64,6 +64,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
 
   private _capPointerDown(e: PointerEvent, connection: 'target' | 'source') {
     const { edgeless, connector, _disposables } = this;
+    const { surface } = edgeless;
     e.stopPropagation();
     _disposables.addFromEvent(document, 'pointermove', e => {
       const { clientX, clientY } = e;
@@ -72,12 +73,12 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
         clientX - viewportRect.left,
         clientY - viewportRect.top
       );
-      edgeless.connector.updateConnection(connector, modelXY, connection);
+      surface.connector.updateConnection(connector, modelXY, connection);
       this.requestUpdate();
     });
 
     _disposables.addFromEvent(document, 'pointerup', () => {
-      edgeless.connector.clear();
+      surface.connector.clear();
       edgeless.page.captureSync();
       _disposables.dispose();
       this._disposables = new DisposableGroup();

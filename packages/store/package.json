@@ -1,8 +1,7 @@
 {
   "name": "@blocksuite/store",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "BlockSuite data store built for general purpose state management.",
-  "main": "src/index.ts",
   "type": "module",
   "repository": "toeverything/blocksuite",
   "scripts": {
@@ -22,17 +21,17 @@
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.1",
-    "ky": "^0.33.3",
-    "lib0": "^0.2.78",
+    "jszip": "^3.10.1",
+    "lib0": "^0.2.83",
     "merge": "^2.1.1",
     "minimatch": "^9.0.3",
     "nanoid": "^4.0.2",
     "y-protocols": "^1.0.5",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   },
   "devDependencies": {
     "async-call-rpc": "^6.3.1",
-    "lit": "^2.7.6",
+    "lit": "^2.8.0",
     "yjs": "^13.6.7"
   },
   "peerDependencies": {
@@ -62,5 +61,9 @@
         "import": "./dist/providers/*.js"
       }
     }
-  }
+  },
+  "files": [
+    "dist",
+    "providers"
+  ]
 }

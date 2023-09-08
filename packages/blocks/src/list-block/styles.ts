@@ -21,6 +21,7 @@ const listPrefix = css`
     cursor: pointer;
     width: 24px;
     height: 24px;
+    color: var(--affine-icon-color);
   }
 
   .affine-list-block__todo-prefix > svg {
@@ -34,6 +35,7 @@ export const styles = css`
     box-sizing: border-box;
     border-radius: 4px;
     padding: 4px 0;
+    position: relative;
   }
   .affine-list-block-container--first {
     margin-top: 14px;

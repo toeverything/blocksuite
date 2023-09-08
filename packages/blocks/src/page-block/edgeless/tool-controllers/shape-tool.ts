@@ -1,9 +1,13 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import { Bound, ShapeStyle, StrokeStyle } from '@blocksuite/phasor';
 
 import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { hasClassNameInList } from '../../../__internal__/index.js';
+import {
+  Bound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../../surface-block/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -65,7 +69,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     this._clearOverlay();
 
     this._page.captureSync();
@@ -102,7 +105,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     this._clearOverlay();
 
     this._page.captureSync();
@@ -118,8 +120,6 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-
     assertExists(this._draggingElementId);
     assertExists(this._draggingArea);
 

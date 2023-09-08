@@ -50,11 +50,21 @@ export class CheckboxCell extends BaseCellRenderer<boolean> {
     return false;
   }
 
+  override onCopy(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
+  override onPaste(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
   override render() {
     const checked = this.value ?? false;
     const icon = checked ? checkboxChecked() : checkboxUnchecked();
     return html` <div class="affine-database-checkbox-container">
-      <div class="affine-database-checkbox checkbox ${checked && 'checked'}">
+      <div
+        class="affine-database-checkbox checkbox ${checked ? 'checked' : ''}"
+      >
         ${icon}
       </div>
     </div>`;

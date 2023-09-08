@@ -7,7 +7,6 @@ import {
   type UIEventState,
 } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { normalizeWheelDeltaY, type PhasorElement } from '@blocksuite/phasor';
 
 import {
   type EdgelessTool,
@@ -19,6 +18,10 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import {
+  normalizeWheelDeltaY,
+  type PhasorElement,
+} from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
@@ -41,6 +44,7 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (!target || !(target instanceof HTMLElement)) {
     return false;
   }
+
   if (target.tagName === 'INPUT') {
     return true;
   }
@@ -50,6 +54,14 @@ function shouldFilterMouseEvent(event: Event): boolean {
   if (target.tagName === 'AFFINE-DRAG-HANDLE') {
     return true;
   }
+  if (
+    target.tagName === 'EDGELESS-TOOLBAR' ||
+    target.tagName === 'EDGELESS-ZOOM-TOOLBAR' ||
+    target.tagName === 'ZOOM-BAR-TOGGLE-BUTTON'
+  ) {
+    return true;
+  }
+
   return false;
 }
 

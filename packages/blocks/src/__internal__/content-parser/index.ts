@@ -1,5 +1,4 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type { IBound, PhasorElement } from '@blocksuite/phasor';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import { marked } from 'marked';
@@ -11,6 +10,8 @@ import { toast } from '../../components/toast.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
+import type { IBound } from '../../surface-block/consts.js';
+import type { PhasorElement } from '../../surface-block/elements/index.js';
 import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,
@@ -122,7 +123,7 @@ export class ContentParser {
     if (!root) return;
 
     const blobMap = new Map<string, string>();
-    const htmlContent = await this.block2Html(
+    const markdownContent = await this.block2markdown(
       [this.getSelectedBlock(root)],
       blobMap
     );
@@ -130,7 +131,7 @@ export class ContentParser {
     FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       root.id,
-      htmlContent,
+      markdownContent,
       blobMap,
       this._page.blobs
     );
@@ -200,6 +201,8 @@ export class ContentParser {
     ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -212,7 +215,7 @@ export class ContentParser {
           return false;
         }
       },
-      onclone: function (documentClone: Document, element: HTMLElement) {
+      onclone: async function (documentClone: Document, element: HTMLElement) {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
         const layer = documentClone.querySelector('.affine-edgeless-layer');
@@ -228,6 +231,8 @@ export class ContentParser {
             element.style.setProperty('box-shadow', 'none');
           }
         });
+
+        await replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
@@ -274,6 +279,8 @@ export class ContentParser {
     );
     if (!pageContainer) return;
 
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -296,6 +303,9 @@ export class ContentParser {
           return false;
         }
       },
+      onclone: async function (_documentClone: Document, element: HTMLElement) {
+        await replaceRichTextWithSvgElementFunc(element);
+      },
       backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
@@ -307,6 +317,45 @@ export class ContentParser {
     );
     this._checkCanContinueToCanvas(pathname, pageMode);
     return data;
+  }
+
+  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+    const richList = Array.from(element.querySelectorAll('.affine-rich-text'));
+    await Promise.all(
+      richList.map(async rich => {
+        const svgEle = await this._elementToSvgElement(
+          rich.cloneNode(true) as HTMLElement,
+          rich.clientWidth,
+          rich.clientHeight + 1
+        );
+        rich.parentElement?.appendChild(svgEle);
+        rich.parentElement?.removeChild(rich);
+      })
+    );
+  }
+
+  private async _elementToSvgElement(
+    node: HTMLElement,
+    width: number,
+    height: number
+  ) {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(xmlns, 'svg');
+    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('x', '0');
+    foreignObject.setAttribute('y', '0');
+    foreignObject.setAttribute('externalResourcesRequired', 'true');
+
+    svg.appendChild(foreignObject);
+    foreignObject.appendChild(node);
+    return svg;
   }
 
   private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
@@ -341,7 +390,7 @@ export class ContentParser {
 
     FileExporter.exportPng(
       (this._page.root as PageBlockModel).title.toString(),
-      canvasImage.toDataURL('PNG')
+      canvasImage.toDataURL('image/png')
     );
   }
 
@@ -385,6 +434,19 @@ export class ContentParser {
     return htmlText;
   }
 
+  public async block2markdown(
+    blocks: SelectedBlock[],
+    blobMap: Map<string, string>
+  ): Promise<string> {
+    let markdownText = '';
+    for (let currentIndex = 0; currentIndex < blocks.length; currentIndex++) {
+      const block = blocks[currentIndex];
+      const text = await this._getMarkdownInfoBySelectionInfo(block, blobMap);
+      markdownText += (currentIndex !== 0 ? '\r\n\r\n' : '') + text;
+    }
+    return markdownText;
+  }
+
   public async block2Text(blocks: SelectedBlock[]): Promise<string> {
     return (
       await Promise.all(
@@ -426,40 +488,38 @@ export class ContentParser {
       ];
     }
 
-    if (this._page.awarenessStore.getFlag('enable_attachment_block')) {
-      if (file.size > MAX_ATTACHMENT_SIZE) {
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      toast(
+        `You can only upload files less than ${humanFileSize(
+          MAX_ATTACHMENT_SIZE,
+          true,
+          0
+        )}`
+      );
+      return [];
+    }
+    try {
+      const sourceId = await storage.set(
+        new File([file], file.name, { type: file.type })
+      );
+      const attachmentProps: AttachmentProps & {
+        flavour: 'affine:attachment';
+        children: [];
+      } = {
+        flavour: 'affine:attachment',
+        name: file.name,
+        sourceId,
+        size: file.size,
+        type: file.type,
+        children: [],
+      };
+      return [attachmentProps];
+    } catch (error) {
+      console.error(error);
+      if (error instanceof Error) {
         toast(
-          `You can only upload files less than ${humanFileSize(
-            MAX_ATTACHMENT_SIZE,
-            true,
-            0
-          )}`
+          `Failed to upload attachment! ${error.message || error.toString()}`
         );
-        return [];
-      }
-      try {
-        const sourceId = await storage.set(
-          new File([file], file.name, { type: file.type })
-        );
-        const attachmentProps: AttachmentProps & {
-          flavour: 'affine:attachment';
-          children: [];
-        } = {
-          flavour: 'affine:attachment',
-          name: file.name,
-          sourceId,
-          size: file.size,
-          type: file.type,
-          children: [],
-        };
-        return [attachmentProps];
-      } catch (error) {
-        console.error(error);
-        if (error instanceof Error) {
-          toast(
-            `Failed to upload attachment! ${error.message || error.toString()}`
-          );
-        }
       }
     }
     return [];
@@ -615,6 +675,53 @@ export class ContentParser {
       begin: selectedBlock.startPos,
       end: selectedBlock.endPos,
     });
+  }
+
+  private async _getMarkdownInfoBySelectionInfo(
+    selectedBlock: SelectedBlock,
+    blobMap: Map<string, string>,
+    level: number = 1
+  ): Promise<string> {
+    let markdownText = '';
+    const { getServiceOrRegister } = await import('../service/index.js');
+    const model = selectedBlock.model;
+    const service = await getServiceOrRegister(model.flavour);
+    markdownText = await service.block2markdown(
+      model,
+      {
+        begin: selectedBlock.startPos,
+        end: selectedBlock.endPos,
+      },
+      blobMap
+    );
+    if (model.flavour === 'affine:list') {
+      markdownText = ' '.repeat(4 * (level - 1)) + markdownText;
+    }
+
+    let childLevel = model.flavour === 'affine:list' ? level + 1 : 1;
+    for (
+      let currentIndex = 0;
+      currentIndex < selectedBlock.children.length;
+      currentIndex++
+    ) {
+      const curChild = selectedBlock.children[currentIndex];
+      if (curChild.model.flavour !== 'affine:list') {
+        childLevel = 1;
+      }
+
+      const childText = await this._getMarkdownInfoBySelectionInfo(
+        curChild,
+        blobMap,
+        childLevel
+      );
+
+      if (childText) {
+        markdownText +=
+          (curChild.model.flavour !== 'affine:note' ? '\r\n\r\n' : '') +
+          childText;
+      }
+    }
+    return markdownText;
   }
 
   private async _convertHtml2Blocks(

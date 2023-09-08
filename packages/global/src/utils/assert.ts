@@ -26,6 +26,12 @@ export function assertNotExists<T>(
   }
 }
 
+export type Equals<X, Y> =
+  ///
+  (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y ? 1 : 2
+    ? true
+    : false;
+
 type Allowed =
   | unknown
   | void
@@ -39,31 +45,31 @@ type Allowed =
 export function isEqual<T extends Allowed, U extends T>(
   val: T,
   expected: U
-): boolean {
+): Equals<T, U> {
   const a = isPrimitive(val);
   const b = isPrimitive(expected);
   if (a && b) {
     if (!Object.is(val, expected)) {
-      return false;
+      return false as Equals<T, U>;
     }
   } else if (a !== b) {
-    return false;
+    return false as Equals<T, U>;
   } else {
     if (Array.isArray(val) && Array.isArray(expected)) {
       if (val.length !== expected.length) {
-        return false;
+        return false as Equals<T, U>;
       }
-      return val.every((x, i) => isEqual(x, expected[i]));
+      return val.every((x, i) => isEqual(x, expected[i])) as Equals<T, U>;
     } else if (typeof val === 'object' && typeof expected === 'object') {
       const obj1 = Object.entries(val as Record<string, unknown>);
       const obj2 = Object.entries(expected as Record<string, unknown>);
       if (obj1.length !== obj2.length) {
-        return false;
+        return false as Equals<T, U>;
       }
-      return obj1.every((x, i) => isEqual(x, obj2[i]));
+      return obj1.every((x, i) => isEqual(x, obj2[i])) as Equals<T, U>;
     }
   }
-  return true;
+  return true as Equals<T, U>;
 }
 export function assertEquals<T extends Allowed, U extends T>(
   val: T,

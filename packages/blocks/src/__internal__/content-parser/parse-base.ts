@@ -7,7 +7,6 @@ import { getTagColor } from '../../components/tags/colors.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';
-import { REFERENCE_NODE } from '../rich-text/consts.js';
 import type { SerializedBlock } from '../utils/index.js';
 import type { BlockSchemas } from '../utils/model.js';
 import type { ContentParser, ContextedContentParser } from './index.js';
@@ -33,7 +32,7 @@ export type ColumnMeta = {
 
 export type TableTitleColumnHandler = (
   element: Element
-) => Promise<string[] | null>;
+) => Promise<SerializedBlock[] | null>;
 
 // There are these uncommon in-line tags that have not been added
 // tt, acronym, dfn, kbd, samp, var, bdo, br, img, map, object, q, script, sub, sup, button, select, TEXTAREA
@@ -139,9 +138,10 @@ export abstract class BaseParser {
   ): Promise<SerializedBlock[] | null> => {
     let result;
     // custom parser
-    result = await this._contextedContentParser.getParserHtmlText2Block(
-      'CustomNodeParser'
-    )?.(node);
+    result =
+      await this._contextedContentParser.getParserHtmlText2Block(
+        'CustomNodeParser'
+      )?.(node);
     if (result && result.length > 0) {
       return result;
     }
@@ -174,9 +174,10 @@ export abstract class BaseParser {
           });
           break;
         case 'BLOCKQUOTE':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'BlockQuoteParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'BlockQuoteParser'
+            )?.(node);
           break;
         case 'P':
           if (
@@ -186,9 +187,10 @@ export abstract class BaseParser {
               node.firstChild.textContent?.startsWith('[ ] ') ||
               node.firstChild.textContent?.startsWith('[x] '))
           ) {
-            result = await this._contextedContentParser.getParserHtmlText2Block(
-              'ListItemParser'
-            )?.(node);
+            result =
+              await this._contextedContentParser.getParserHtmlText2Block(
+                'ListItemParser'
+              )?.(node);
           } else if (node.firstChild instanceof HTMLImageElement) {
             result = await this._contextedContentParser.getParserHtmlText2Block(
               'EmbedItemParser'
@@ -211,9 +213,10 @@ export abstract class BaseParser {
           }
           break;
         case 'LI':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'ListItemParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'ListItemParser'
+            )?.(node);
           break;
         case 'HR':
           result = await this._contextedContentParser.getParserHtmlText2Block(
@@ -224,27 +227,31 @@ export abstract class BaseParser {
           });
           break;
         case 'PRE':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'CodeBlockParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'CodeBlockParser'
+            )?.(node);
           break;
         case 'FIGURE':
         case 'IMG':
           {
-            result = await this._contextedContentParser.getParserHtmlText2Block(
-              'EmbedItemParser'
-            )?.(node);
+            result =
+              await this._contextedContentParser.getParserHtmlText2Block(
+                'EmbedItemParser'
+              )?.(node);
           }
           break;
         case 'HEADER':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'HeaderParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'HeaderParser'
+            )?.(node);
           break;
         case 'TABLE':
-          result = await this._contextedContentParser.getParserHtmlText2Block(
-            'TableParser'
-          )?.(node);
+          result =
+            await this._contextedContentParser.getParserHtmlText2Block(
+              'TableParser'
+            )?.(node);
           break;
         default:
           break;
@@ -557,29 +564,27 @@ export abstract class BaseParser {
 
     let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
     titleIndex = titleIndex !== -1 ? titleIndex : 0;
+    let children: SerializedBlock[] = rows
+      .map(row => row[titleIndex] ?? '')
+      .map(rawTitle => (Array.isArray(rawTitle) ? rawTitle.join('') : rawTitle))
+      .map(title => ({
+        flavour: 'affine:paragraph',
+        type: 'text',
+        text: [
+          {
+            insert: title,
+          },
+        ],
+        children: [],
+      }));
     if (this._customTableTitleColumnHandler) {
-      const titleColumn = await this._customTableTitleColumnHandler(element);
-      if (titleColumn) {
-        for (let i = 0; i < rows.length; i++) {
-          if (titleIndex < rows[i].length) {
-            const originalContent = rows[i][titleIndex];
-            rows[i].splice(
-              titleIndex,
-              1,
-              titleColumn[i] || originalContent || ''
-            );
-          }
-        }
-      }
+      const customTitleColumn =
+        await this._customTableTitleColumnHandler(element);
+      children = customTitleColumn ?? children;
     }
     const columns: Column[] = getTableColumns(columnMeta, rows, idCounter);
     const databasePropsId = idCounter.next();
-    const { cells, children } = getTableCellsAndChildren(
-      rows,
-      idCounter,
-      columnMeta,
-      columns
-    );
+    const cells = getTableCells(rows, idCounter, columnMeta, columns);
     return [
       {
         flavour: 'affine:database',
@@ -750,7 +755,7 @@ const checkWebComponentIfInline = (element: Element) => {
   );
 };
 
-const getTableCellsAndChildren = (
+const getTableCells = (
   rows: (string | string[])[][],
   idCounter: {
     next: () => number;
@@ -759,37 +764,9 @@ const getTableCellsAndChildren = (
   columns: Column<Record<string, unknown>>[]
 ) => {
   const cells: Record<string, Record<string, Cell>> = {};
-  const children: SerializedBlock[] = [];
   let titleIndex = columnMeta.findIndex(meta => meta.type === 'title');
   titleIndex = titleIndex !== -1 ? titleIndex : 0;
   rows.forEach(row => {
-    const rawTitle = row[titleIndex] ?? 'Undefined';
-    const title = Array.isArray(rawTitle) ? rawTitle.join('') : rawTitle;
-    const referencePattern = /@AffineReference:\((.*)\)/g;
-    const match = referencePattern.exec(title);
-    if (match) {
-      const pageId = match[1];
-      children.push({
-        flavour: 'affine:paragraph',
-        type: 'text',
-        text: [
-          {
-            insert: REFERENCE_NODE,
-            attributes: {
-              reference: { type: 'Subpage', pageId },
-            },
-          },
-        ],
-        children: [],
-      });
-    } else {
-      children.push({
-        flavour: 'affine:paragraph',
-        type: 'text',
-        text: [{ insert: title }],
-        children: [],
-      });
-    }
     const rowId = '' + idCounter.next();
     cells[rowId] = {};
     row.forEach((value, index) => {
@@ -813,7 +790,7 @@ const getTableCellsAndChildren = (
       };
     });
   });
-  return { cells, children };
+  return cells;
 };
 
 const getTableColumns = (

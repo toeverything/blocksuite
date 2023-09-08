@@ -1,4 +1,4 @@
-import type { BaseSelection } from '@blocksuite/block-std';
+import { type BaseSelection, PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
@@ -16,6 +16,8 @@ const heightMap: { [key: string]: number } = {
   quote: 46,
   list: 32,
   database: 28,
+  image: 28,
+  divider: 36,
 };
 
 export const getDragHandleContainerHeight = (model: BaseBlockModel) => {
@@ -38,15 +40,12 @@ export const containChildBlock = (
 ) => {
   return selections.some(selection => {
     const { path } = selection;
-    if (path.length > childPath.length) {
-      return false;
-    }
-    return path.join('|') === childPath.slice(0, -1).join('|');
+    return PathFinder.includes(childPath, path);
   });
 };
 
-export const containBlock = (selections: BaseSelection[], blockId: string) => {
-  return selections.some(selection => selection.blockId === blockId);
+export const containBlock = (blockIDs: string[], targetID: string) => {
+  return blockIDs.some(blockID => blockID === targetID);
 };
 
 // TODO: this is a hack, need to find a better way
@@ -74,4 +73,17 @@ export const getNoteId = (blockElement: BlockElement) => {
 
 export const includeTextSelection = (selections: BaseSelection[]) => {
   return selections.some(selection => selection.type === 'text');
+};
+
+/**
+ * Check if the path of two blocks are equal
+ */
+export const isBlockPathEqual = (
+  path1: string[] | null | undefined,
+  path2: string[] | null | undefined
+) => {
+  if (!path1 || !path2) {
+    return false;
+  }
+  return PathFinder.equals(path1, path2);
 };

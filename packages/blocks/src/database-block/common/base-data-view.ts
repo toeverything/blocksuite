@@ -1,26 +1,26 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page, Text } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
+import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { InsertPosition } from '../types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
 
 export abstract class BaseDataView<
     T extends DataViewManager = DataViewManager,
-    Selection extends DataViewSelection = DataViewSelection
+    Selection extends DataViewSelection = DataViewSelection,
   >
   extends WithDisposable(ShadowlessElement)
   implements DataViewProps<T, Selection>, DataViewExpose
 {
   @property({ attribute: false })
-  view!: T;
-
+  header!: UniComponent<{ viewMethods: DataViewExpose; view: T }>;
   @property({ attribute: false })
-  titleText!: Text;
+  view!: T;
 
   @property({ attribute: false })
   bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;
