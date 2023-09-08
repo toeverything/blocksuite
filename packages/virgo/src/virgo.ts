@@ -4,6 +4,7 @@ import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
+import { VIRGO_ROOT_ATTR } from './consts.js';
 import { VirgoHookService } from './services/hook.js';
 import {
   VirgoAttributeService,
@@ -30,6 +31,7 @@ export type VirgoRootElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
   virgoEditor: VEditor<T>;
+  [VIRGO_ROOT_ATTR]?: 'true';
 };
 
 export class VEditor<
@@ -188,7 +190,7 @@ export class VEditor<
     this._rootElement = virgoElement;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
-    this._rootElement.dataset.virgoRoot = 'true';
+    this._rootElement[VIRGO_ROOT_ATTR] = 'true';
 
     this._bindYTextObserver();
 
@@ -202,6 +204,7 @@ export class VEditor<
 
   unmount() {
     render(nothing, this.rootElement);
+    this.rootElement.removeAttribute(VIRGO_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
     this.disposables.dispose();
