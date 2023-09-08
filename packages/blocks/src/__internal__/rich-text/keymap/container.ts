@@ -114,7 +114,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length !== 0) {
         vEditor.setVRange({
@@ -136,10 +138,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
     ArrowDown: ctx => {
       if (!blockElement.selected?.is('text')) return;
-
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length !== 0) {
         vEditor.setVRange({
@@ -171,7 +174,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length === 0 && vRange.index === vEditor.yText.length) {
         _preventDefault(ctx);
@@ -187,7 +192,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length === 0 && vRange.index === 0) {
         _preventDefault(ctx);
