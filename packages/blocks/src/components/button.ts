@@ -1,5 +1,5 @@
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 /**
@@ -150,6 +150,7 @@ export class IconButton extends LitElement {
   }
 
   override render() {
+    if (this.hidden) return nothing;
     if (this.disabled) {
       const disabledColor = 'var(--affine-text-disable-color)';
       this.style.setProperty('--svg-icon-color', disabledColor);
