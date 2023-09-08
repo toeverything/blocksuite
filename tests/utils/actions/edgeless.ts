@@ -88,10 +88,6 @@ export async function switchEditorEmbedMode(page: Page) {
   await page.click('sl-button[content="Add container offset"]');
 }
 
-export function locatorPanButton(page: Page, innerContainer = true) {
-  return locatorEdgelessToolButton(page, 'pan', innerContainer);
-}
-
 type BasicEdgelessTool = 'default' | 'pan' | 'note';
 type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
 
@@ -205,6 +201,29 @@ export async function setEdgelessTool(
   shape = Shape.Square
 ) {
   switch (mode) {
+    case 'default': {
+      const button = locatorEdgelessToolButton(page, 'default', false);
+      const classes = (await button.getAttribute('class'))?.split(' ');
+      if (!classes?.includes('default')) {
+        await button.click();
+        await sleep(100);
+      }
+      break;
+    }
+    case 'pan': {
+      const button = locatorEdgelessToolButton(page, 'default', false);
+      const classes = (await button.getAttribute('class'))?.split(' ');
+      if (classes?.includes('default')) {
+        await button.click();
+        await sleep(100);
+      } else if (classes?.includes('pan')) {
+        await button.click(); // change to default
+        await sleep(100);
+        await button.click(); // change to pan
+        await sleep(100);
+      }
+      break;
+    }
     case 'brush':
     case 'text':
     case 'note':
@@ -212,28 +231,6 @@ export async function setEdgelessTool(
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
-      break;
-    }
-    case 'default':
-    case 'pan': {
-      const button = locatorEdgelessToolButton(page, 'default', false);
-      const classes = (await button.getAttribute('class'))?.split(' ');
-      if (mode === 'default') {
-        if (!classes?.includes('default')) {
-          await button.click();
-          await sleep(100);
-        }
-      } else if (mode === 'pan') {
-        if (classes?.includes('default')) {
-          await button.click();
-          await sleep(100);
-        } else if (classes?.includes('pan')) {
-          await button.click(); // change to default
-          await sleep(100);
-          await button.click(); // change to pan
-          await sleep(100);
-        }
-      }
       break;
     }
     case 'shape': {
