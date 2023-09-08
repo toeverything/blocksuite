@@ -580,8 +580,8 @@ function getNextGroupFocusElement(
   const nextGroup = groups[nextGroupIndex];
   const element =
     selection.selectionType === 'cell'
-      ? getFocusCell(viewElement, selection as KanbanCellSelection)
-      : getSelectedCards(viewElement, selection as KanbanCardSelection)[0];
+      ? getFocusCell(viewElement, selection)
+      : getSelectedCards(viewElement, selection)[0];
   assertExists(element);
   const rect = element.getBoundingClientRect();
   const nextCards = Array.from(

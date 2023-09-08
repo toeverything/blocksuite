@@ -9,7 +9,6 @@ import { html } from 'lit/static-html.js';
 
 import { positionToVRect } from '../../components/menu/index.js';
 import { MoreHorizontalIcon, NewEditIcon } from '../../icons/index.js';
-import type { KanbanCardSelection } from '../../index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type {
   DataViewKanbanColumnManager,
@@ -286,7 +285,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
             cardId: this.cardId,
           },
         ],
-      } as KanbanCardSelection;
+      };
       popCardMenu(ele, this.cardId, selection);
     }
   };
@@ -303,7 +302,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
             cardId: this.cardId,
           },
         ],
-      } as KanbanCardSelection;
+      };
       popCardMenu(positionToVRect(e.x, e.y), this.cardId, selection);
     }
   };
