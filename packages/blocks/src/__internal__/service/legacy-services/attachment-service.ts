@@ -11,6 +11,10 @@ export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {
     return `Attachment-${block.name}`;
   }
 
+  override async block2markdown(block: AttachmentBlockModel) {
+    return `Attachment-${block.name}`;
+  }
+
   override block2Json(
     block: AttachmentBlockModel,
     children: SerializedBlock[]
