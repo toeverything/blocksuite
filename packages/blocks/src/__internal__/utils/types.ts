@@ -56,41 +56,42 @@ export type TableViewSelection = {
   isEditing: boolean;
 };
 
-export type KanbanFocusData = {
-  columnId: string;
-  isEditing: boolean;
-};
+type WithKanbanViewType<T> = T extends unknown
+  ? {
+      viewId: string;
+      type: 'kanban';
+    } & T
+  : never;
 
 export type KanbanCellSelection = {
-  viewId: string;
-  type: 'kanban';
   selectionType: 'cell';
   groupKey: string;
   cardId: string;
   columnId: string;
   isEditing: boolean;
 };
+export type KanbanCardSelectionCard = {
+  groupKey: string;
+  cardId: string;
+};
 export type KanbanCardSelection = {
-  viewId: string;
-  type: 'kanban';
   selectionType: 'card';
-  cards: {
-    groupKey: string;
-    cardId: string;
-  }[];
+  cards: [KanbanCardSelectionCard, ...KanbanCardSelectionCard[]];
 };
 export type KanbanGroupSelection = {
-  viewId: string;
-  type: 'kanban';
   selectionType: 'group';
-  groupKeys: string[];
+  groupKeys: [string, ...string[]];
 };
 export type KanbanViewSelection =
   | KanbanCellSelection
   | KanbanCardSelection
   | KanbanGroupSelection;
+export type KanbanViewSelectionWithType =
+  WithKanbanViewType<KanbanViewSelection>;
 
-export type DataViewSelection = TableViewSelection | KanbanViewSelection;
+export type DataViewSelection =
+  | TableViewSelection
+  | KanbanViewSelectionWithType;
 export type GetDataViewSelection<
   K extends DataViewSelection['type'],
   T = DataViewSelection,

@@ -10,7 +10,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
-import type { KanbanViewSelection } from '../../__internal__/index.js';
+import type { KanbanViewSelectionWithType } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';

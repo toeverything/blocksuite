@@ -84,6 +84,9 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', e => {
+      if (e.shiftKey) {
+        return;
+      }
       e.stopPropagation();
       const selectionElement = this.closest('affine-data-view-kanban')
         ?.selection;
