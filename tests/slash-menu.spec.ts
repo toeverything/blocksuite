@@ -29,6 +29,65 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
+/**
+ * The query should not include the slash symbol.
+ *
+ * It's depending on the implementation of the slash menu.
+ * Please use this function sparingly.
+ */
+async function assertSlashMenuQueryString(page: Page, expected: string) {
+  const slashMenuRoot = page.locator('affine-slash-menu');
+  await expect(slashMenuRoot).toBeAttached();
+  await expect(slashMenuRoot).toHaveJSProperty('_searchString', expected);
+}
+
+test('should slash menu works with strict fast type', async ({ page }) => {
+  // Try to reduce the delay!
+  const STRICT_FAST_TYPE_DELAY = 10;
+
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  const slashMenu = page.locator(`.slash-menu`);
+
+  await type(page, '/', STRICT_FAST_TYPE_DELAY);
+  await assertSlashMenuQueryString(page, '');
+  await expect(slashMenu).toBeVisible();
+  await assertRichTexts(page, ['/']);
+
+  await page.keyboard.press('Backspace', { delay: STRICT_FAST_TYPE_DELAY });
+  await expect(slashMenu).not.toBeVisible();
+  await assertRichTexts(page, ['']);
+
+  await type(page, 'a/text', STRICT_FAST_TYPE_DELAY);
+  await assertSlashMenuQueryString(page, 'text');
+  await expect(slashMenu).toBeVisible();
+});
+
+test('strict check slash menu should hide after input whitespace', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  const slashMenu = page.locator(`.slash-menu`);
+
+  await focusRichText(page);
+  await type(page, '/', 0);
+  await expect(slashMenu).toBeVisible();
+  await assertSlashMenuQueryString(page, '');
+
+  await type(page, ' ', 0);
+  await assertSlashMenuQueryString(page, ' ');
+  await expect(slashMenu).not.toBeVisible();
+  await assertRichTexts(page, ['/ ']);
+  await page.keyboard.press('Backspace');
+  await expect(slashMenu).toBeVisible();
+  await assertRichTexts(page, ['/']);
+  await page.keyboard.press('Backspace');
+  await expect(slashMenu).not.toBeVisible();
+  await assertRichTexts(page, ['']);
+});
+
 test.describe('slash menu should show and hide correctly', () => {
   // See https://playwright.dev/docs/test-retries#reuse-single-page-between-tests
   test.describe.configure({ mode: 'serial' });
@@ -46,9 +105,11 @@ test.describe('slash menu should show and hide correctly', () => {
   });
 
   test.beforeEach(async () => {
+    await assertRichTexts(page, ['']);
     await focusRichText(page);
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
+    await assertSlashMenuQueryString(page, '');
   });
 
   test.afterEach(async () => {
@@ -57,10 +118,11 @@ test.describe('slash menu should show and hide correctly', () => {
       // Click outside
       await page.mouse.click(0, 50);
     }
+    await expect(slashMenu).not.toBeVisible();
     await focusRichText(page);
-    await waitNextFrame(page);
     // Clear input
     await page.keyboard.press(`${SHORT_KEY}+Backspace`, { delay: 50 });
+    await assertRichTexts(page, ['']);
   });
 
   test('slash menu should hide after click away', async () => {
@@ -81,8 +143,10 @@ test.describe('slash menu should show and hide correctly', () => {
   test('slash menu should hide after input whitespace', async () => {
     await type(page, ' ');
     await expect(slashMenu).not.toBeVisible();
+    await assertSlashMenuQueryString(page, ' ');
     await assertRichTexts(page, ['/ ']);
     await page.keyboard.press('Backspace');
+    await assertSlashMenuQueryString(page, '');
     await expect(slashMenu).toBeVisible();
   });
 
@@ -236,16 +300,6 @@ test.describe('slash menu should show and hide correctly', () => {
     await type(page, 'a');
     await assertRichTexts(page, ['/a']);
   });
-});
-
-test.fixme('should slash menu works with fast type', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-
-  await type(page, 'a/text', 10);
-  const slashMenu = page.locator(`.slash-menu`);
-  await expect(slashMenu).toBeVisible();
 });
 
 test('should clean slash string after soft enter', async ({ page }) => {
