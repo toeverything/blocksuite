@@ -342,9 +342,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportMarkDownExperimentalAdapter() {
-    const job = new Job({
-      workspace: this.workspace,
-    });
+    const job = new Job({ workspace: this.workspace });
     job.pageToSnapshot(window.page).then(snapshot => {
       new MarkdownAdapter()
         .fromPageSnapshot({

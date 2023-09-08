@@ -1,6 +1,5 @@
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 
 import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
 import {
@@ -14,6 +13,7 @@ import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import { popFilterModal } from '../../filter/filter-modal.js';
 import { groupByMatcher } from '../../group-by/matcher.js';
 import { popPropertiesSetting } from '../../properties.js';
+import { BaseTool } from './base-tool.js';
 
 const styles = css`
   .affine-database-toolbar-item.more-action {
@@ -40,13 +40,8 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-view-options')
-export class DataViewHeaderToolsViewOptions extends WithDisposable(
-  ShadowlessElement
-) {
+export class DataViewHeaderToolsViewOptions extends BaseTool<DataViewKanbanManager> {
   static override styles = styles;
-
-  @property({ attribute: false })
-  view!: DataViewKanbanManager;
 
   @query('.more-action')
   private _moreActionContainer!: HTMLDivElement;

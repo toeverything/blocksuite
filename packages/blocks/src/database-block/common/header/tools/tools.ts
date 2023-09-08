@@ -1,7 +1,7 @@
 import './search.js';
 import './filter.js';
 import './view-options.js';
-import './add-row.js';
+import './add-row/add-row.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
@@ -40,7 +40,7 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
   static override styles = styles;
 
   @property({ attribute: false })
-  viewEle!: DataViewExpose;
+  viewMethod!: DataViewExpose;
 
   @property({ attribute: false })
   view!: DataViewManager;
@@ -61,7 +61,7 @@ export class DataViewHeaderTools extends WithDisposable(ShadowlessElement) {
       ${repeat(tools ?? [], uni => {
         const props = {
           view: this.view,
-          viewMethod: this.viewEle,
+          viewMethod: this.viewMethod,
         };
         return renderUniLit(uni, props);
       })}
@@ -74,3 +74,12 @@ declare global {
     'data-view-header-tools': DataViewHeaderTools;
   }
 }
+export const renderTools = (
+  view: DataViewManager,
+  viewMethod: DataViewExpose
+) => {
+  return html` <data-view-header-tools
+    .viewMethod="${viewMethod}"
+    .view="${view}"
+  ></data-view-header-tools>`;
+};
