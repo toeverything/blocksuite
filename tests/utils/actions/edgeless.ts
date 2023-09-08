@@ -106,11 +106,11 @@ export function locatorEdgelessToolButton(
   innerContainer = true
 ) {
   const text = {
-    default: 'Select',
+    default: /Select|Hand/,
+    pan: /Select|Hand/,
     shape: 'Shape',
     brush: 'Pen',
     eraser: 'Eraser',
-    pan: 'Hand',
     text: 'Text',
     connector: 'Connector',
     note: 'Note',
@@ -205,15 +205,31 @@ export async function setEdgelessTool(
   shape = Shape.Square
 ) {
   switch (mode) {
-    case 'default':
     case 'brush':
-    case 'pan':
     case 'text':
     case 'note':
     case 'eraser':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
+      break;
+    }
+    case 'default':
+    case 'pan': {
+      const button = locatorEdgelessToolButton(page, 'default', false);
+      const classes = (await button.getAttribute('class'))?.split(' ');
+      if (mode === 'default') {
+        if (!classes?.includes('default')) {
+          await button.click();
+        }
+      } else if (mode === 'pan') {
+        if (classes?.includes('default')) {
+          await button.click();
+        } else if (classes?.includes('pan')) {
+          await button.click(); // change to default
+          await button.click(); // change to pan
+        }
+      }
       break;
     }
     case 'shape': {

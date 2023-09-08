@@ -66,7 +66,7 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
     const type = this.edgelessTool?.type;
     return html`
       <edgeless-tool-icon-button
-        class="edgeless-default-button"
+        class="edgeless-default-button ${type}"
         .tooltip=${type === 'pan'
           ? getTooltipWithShortcut('Hand', 'H')
           : getTooltipWithShortcut('Select', 'V')}
