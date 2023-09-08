@@ -31,11 +31,11 @@ export function AttachmentOptionsTemplate({
   abortController: AbortController;
 }) {
   const { onHover, onHoverLeave } = createDelayHoverSignal(abortController);
-  anchor.addEventListener('mouseover', onHover);
-  anchor.addEventListener('mouseleave', onHoverLeave);
-  abortController.signal.addEventListener('abort', () => {
-    anchor.removeEventListener('mouseover', onHover);
-    anchor.removeEventListener('mouseleave', onHoverLeave);
+  anchor.addEventListener('mouseover', onHover, {
+    signal: abortController.signal,
+  });
+  anchor.addEventListener('mouseleave', onHoverLeave, {
+    signal: abortController.signal,
   });
 
   const containerRef = createRef<HTMLDivElement>();

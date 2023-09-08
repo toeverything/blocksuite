@@ -32,8 +32,6 @@ export class PanToolController extends EdgelessToolController<PanTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
-
     this._lastPoint = [e.x, e.y];
     this._edgeless.slots.edgelessToolUpdated.emit({
       type: 'pan',
@@ -42,7 +40,6 @@ export class PanToolController extends EdgelessToolController<PanTool> {
   }
 
   onContainerDragMove(e: PointerEventState) {
-    if (!this._page.awarenessStore.getFlag('enable_surface')) return;
     if (!this._lastPoint) return;
 
     const { viewport } = this._edgeless.surface;

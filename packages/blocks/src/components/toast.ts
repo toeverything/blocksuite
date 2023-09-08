@@ -14,9 +14,7 @@ const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
   } else {
-    const { strings, values } = html;
-    const v = [...values, '']; // + last empty part
-    const htmlString = strings.reduce((acc, cur, i) => acc + cur + v[i], '');
+    const htmlString = String.raw(html.strings, ...html.values);
     template.innerHTML = htmlString;
   }
   return template.content.firstChild as T;

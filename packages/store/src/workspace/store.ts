@@ -64,20 +64,9 @@ export interface StoreOptions<
 
 const flagsPreset = {
   enable_set_remote_flag: true,
-  enable_drag_handle: true,
   enable_block_hub: true,
-  enable_surface: true,
-  enable_edgeless_toolbar: true,
-  enable_slash_menu: true,
-  enable_attachment_block: true,
 
-  enable_database: true,
-  enable_database_filter: false,
-  enable_data_view: false,
-  enable_page_tags: false,
   enable_toggle_block: false,
-  enable_block_selection_format_bar: true,
-  enable_linked_page: false,
   enable_bookmark_operation: false,
   enable_note_index: false,
 
