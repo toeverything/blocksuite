@@ -31,7 +31,6 @@ export type VirgoRootElement<
   T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
   virgoEditor: VEditor<T>;
-  [VIRGO_ROOT_ATTR]?: 'true';
 };
 
 export class VEditor<
@@ -190,7 +189,7 @@ export class VEditor<
     this._rootElement = virgoElement;
     render(nothing, this._rootElement);
     this._rootElement.contentEditable = 'true';
-    this._rootElement[VIRGO_ROOT_ATTR] = 'true';
+    this._rootElement.dataset.virgoRoot = 'true';
 
     this._bindYTextObserver();
 
