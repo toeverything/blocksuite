@@ -49,6 +49,7 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
 
   private _changeTool() {
     this._fadeOut();
+    // wait for animation to finish
     setTimeout(() => {
       const type = this.edgelessTool?.type;
       if (type === 'default') {
