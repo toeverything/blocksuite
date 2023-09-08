@@ -19,12 +19,6 @@ export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
   const vEditor = richText.vEditor;
   assertExists(vEditor);
   vEditor.setVRange(vRange);
-
-  return new Promise<void>(resolve => {
-    vEditor.slots.rangeUpdated.once(() => {
-      resolve();
-    });
-  });
 }
 
 export function asyncFocusRichText(

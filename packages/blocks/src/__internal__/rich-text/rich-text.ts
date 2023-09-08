@@ -1,6 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { createVirgoKeyDownHandler, VEditor } from '@blocksuite/virgo';
+import {
+  createVirgoKeyDownHandler,
+  VEditor,
+  type VRangeProvider,
+} from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type * as Y from 'yjs';
@@ -47,6 +51,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   readonly = false;
 
+  @property({ attribute: false })
+  vRangeProvider?: VRangeProvider;
+
   private _vEditor: AffineVEditor | null = null;
   get vEditor() {
     return this._vEditor;
@@ -63,6 +70,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         beforeinput: onVBeforeinput,
         compositionEnd: onVCompositionEnd,
       },
+      vRangeProvider: this.vRangeProvider,
     });
     this._vEditor.setAttributeSchema(this.textSchema.attributesSchema);
     this._vEditor.setAttributeRenderer(this.textSchema.textRenderer());
@@ -91,6 +99,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       this.vEditor.unmount();
     }
     this._vEditor = null;
+  }
+
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.vEditor?.waitForUpdate();
+    return result;
   }
 
   override connectedCallback() {

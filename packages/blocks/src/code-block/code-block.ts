@@ -3,10 +3,10 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
-import { css, html, nothing, render } from 'lit';
+import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -21,6 +21,7 @@ import { z } from 'zod';
 import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -257,6 +258,15 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     return vRoot.virgoEditor;
   }
 
+  @query('rich-text')
+  private _richTextElement?: RichText;
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     // set highlight options getter used by "exportToHtml"
@@ -290,7 +300,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._observePosition();
     bindContainerHotkey(this);
 
-    const selection = this.root.selectionManager;
+    const selectionManager = this.root.selectionManager;
     const INDENT_SYMBOL = '  ';
     const LINE_BREAK_SYMBOL = '\n';
     const allIndexOf = (
@@ -314,7 +324,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     };
     this.bindHotKey({
       Backspace: () => {
-        const textSelection = selection.find('text');
+        const textSelection = selectionManager.find('text');
         if (!textSelection) {
           return;
         }
@@ -322,11 +332,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const from = textSelection.from;
 
         if (from.index === 0 && from.length === 0) {
-          selection.update(selList => {
-            return selList
-              .filter(sel => !sel.is('text'))
-              .concat(selection.getInstance('block', { path: this.path }));
-          });
+          selectionManager.setGroup('note', [
+            selectionManager.getInstance('block', { path: this.path }),
+          ]);
           return true;
         }
 
@@ -582,7 +590,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     );
   }
 
-  override render() {
+  override render(): TemplateResult<1> {
     return html`<div class="affine-code-block-container">
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
@@ -592,6 +600,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .undoManager=${this.model.page.history}
           .textSchema=${this.textSchema}
           .readonly=${this.model.page.readonly}
+          .vRangeProvider=${getVRangeProvider(this)}
         >
         </rich-text>
       </div>

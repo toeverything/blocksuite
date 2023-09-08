@@ -33,6 +33,11 @@ export type VirgoRootElement<
   virgoEditor: VEditor<T>;
 };
 
+export interface VRangeProvider {
+  getVRange(): VRange | null;
+  setVRange(vRange: VRange | null): void;
+}
+
 export class VEditor<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
@@ -69,6 +74,7 @@ export class VEditor<
   shouldCursorScrollIntoView = true;
 
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
+  readonly vRangeProvider: VRangeProvider | null;
 
   slots: {
     mounted: Slot;
@@ -153,6 +159,7 @@ export class VEditor<
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
       hooks?: VirgoHookService<TextAttributes>['hooks'];
+      vRangeProvider?: VRangeProvider;
     } = {}
   ) {
     if (!yText.doc) {
@@ -165,10 +172,11 @@ export class VEditor<
       );
     }
 
-    const { isEmbed = () => false, hooks = {} } = ops;
+    const { isEmbed = () => false, hooks = {}, vRangeProvider = null } = ops;
     this._yText = yText;
     this.isEmbed = isEmbed;
     this._hooksService = new VirgoHookService(this, hooks);
+    this.vRangeProvider = vRangeProvider;
 
     this.slots = {
       mounted: new Slot(),

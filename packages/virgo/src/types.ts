@@ -21,10 +21,7 @@ export interface VRange {
   length: number;
 }
 
-export type VRangeUpdatedProp = [
-  range: VRange | null,
-  type: 'native' | 'input' | 'other' | 'silent',
-];
+export type VRangeUpdatedProp = [range: VRange | null, sync: boolean];
 
 export type DeltaEntry<
   TextAttributes extends BaseTextAttributes = BaseTextAttributes,
