@@ -4,6 +4,8 @@ import type { DocPageBlockComponent } from './doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from './edgeless/edgeless-page-block.js';
 
 export type DocPageBlockWidgetName =
+  | 'modal'
+  | 'imageToolbar'
   | 'slashMenu'
   | 'linkedPage'
   | 'draggingArea'
@@ -11,6 +13,8 @@ export type DocPageBlockWidgetName =
   | typeof AFFINE_FORMAT_BAR_WIDGET_TAG
   | typeof AFFINE_REMOTE_SELECTION_WIDGET_TAG;
 export type EdgelessPageBlockWidgetName =
+  | 'modal'
+  | 'imageToolbar'
   | 'remoteSelection'
   | 'slashMenu'
   | 'linkedPage'
