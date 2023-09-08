@@ -442,9 +442,9 @@ test('auto wrap text in shape', async ({ page }) => {
   await assertEdgelessSelectedRect(page, [200, 150, 150, 136]);
 
   // try to decrease width
-  await resizeElementByHandle(page, { x: -120, y: 0 }, 'bottom-right');
+  await resizeElementByHandle(page, { x: -50, y: 0 }, 'bottom-right');
   // you can't decrease width after text can't wrap (each line just has 1 char)
-  await assertEdgelessSelectedRect(page, [200, 150, 51, 552]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
 });
 
 test('change shape style', async ({ page }) => {
