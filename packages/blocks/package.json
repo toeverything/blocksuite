@@ -48,8 +48,7 @@
     ".": "./src/index.ts",
     "./std": "./src/std.ts",
     "./models": "./src/models.ts",
-    "./content-parser": "./src/content-parser.ts",
-    "./extensions": "./src/extensions/index.ts"
+    "./content-parser": "./src/content-parser.ts"
   },
   "publishConfig": {
     "access": "public",
@@ -61,10 +60,6 @@
       ".": {
         "module": "./dist/index.js",
         "import": "./dist/index.js"
-      },
-      "./extensions": {
-        "types": "./dist/extensions.d.ts",
-        "default": "./dist/extensions.js"
       },
       "./std": {
         "types": "./dist/std.d.ts",
