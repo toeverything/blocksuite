@@ -24,6 +24,7 @@ export const MODIFIER_KEY = IS_MAC ? 'Alt' : 'Shift';
 export const SHIFT_KEY = 'Shift';
 
 export async function type(page: Page, content: string, delay = 50) {
+  await page.waitForTimeout(delay / 10);
   await page.keyboard.type(content, { delay });
 }
 
