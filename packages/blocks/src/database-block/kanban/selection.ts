@@ -86,7 +86,7 @@ export class KanbanSelection {
       cards.findIndex(card => card.cardId === closestCardId) >= 0
         ? cards.filter(card => card.cardId !== closestCardId)
         : [...cards, { cardId: closestCardId, groupKey: closestGroupKey }];
-    this.selection = atLastOne(newCards)
+    this.selection = atLeastOne(newCards)
       ? {
           selectionType: 'card',
           cards: newCards,
@@ -344,7 +344,7 @@ export class KanbanSelection {
       const { card, cards } = this.getNextFocusCard(selection, index, position);
       if (card instanceof KanbanCard) {
         const newCards = cards ?? selection.cards;
-        this.selection = atLastOne(newCards)
+        this.selection = atLeastOne(newCards)
           ? {
               ...selection,
               cards: newCards,
@@ -357,7 +357,7 @@ export class KanbanSelection {
   public focusOut() {
     const selection = this.selection;
     if (selection?.selectionType === 'card') {
-      if (atLastOne(selection.cards)) {
+      if (atLeastOne(selection.cards)) {
         this.selection = {
           ...selection,
           cards: [selection.cards[0]],
@@ -528,7 +528,7 @@ export class KanbanSelection {
         ...card,
         groupKey: card.groupKey,
       }));
-      this.selection = atLastOne(newCards)
+      this.selection = atLeastOne(newCards)
         ? {
             ...selection,
             cards: newCards,
@@ -730,6 +730,6 @@ function getYOffset(srcRect: DOMRect, targetRect: DOMRect) {
       (targetRect.top + (targetRect.bottom - targetRect.top) / 2)
   );
 }
-const atLastOne = <T>(v: T[]): v is [T, ...T[]] => {
+const atLeastOne = <T>(v: T[]): v is [T, ...T[]] => {
   return v.length > 0;
 };
