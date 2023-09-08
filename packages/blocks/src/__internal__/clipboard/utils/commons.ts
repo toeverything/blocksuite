@@ -133,10 +133,11 @@ function selectedModels2selectBlocksInfo(
     };
     if (
       model.flavour === 'affine:database' ||
-      (model.flavour === 'affine:list' && !textSelection)
+      (['affine:list', 'affine:pargraph'].includes(model.flavour) &&
+        !textSelection)
     ) {
-      const databaseBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
-      block.children = databaseBlock.children;
+      const nestedBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
+      block.children = nestedBlock.children;
     }
     blocksMap.set(model.id, block);
 
@@ -209,7 +210,7 @@ export async function copyBlocksInPage(root: BlockSuiteRoot) {
   if (savedRange) {
     resetNativeSelection(savedRange);
   }
-
+  console.log(clipboardItems);
   return clipboardItems;
 }
 
