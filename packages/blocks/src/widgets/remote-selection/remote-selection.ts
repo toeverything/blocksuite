@@ -277,6 +277,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
                   <div
                     style="${styleMap({
                       position: 'absolute',
+                      left: '-4px',
                       bottom: `${
                         cursorRect?.height ? cursorRect.height - 4 : 0
                       }px`,

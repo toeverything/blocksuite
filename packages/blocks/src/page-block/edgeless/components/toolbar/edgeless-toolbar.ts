@@ -68,7 +68,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       box-shadow: var(--affine-shadow-2);
       border: 1px solid var(--affine-border-color);
       border-radius: 40px;
-      min-height: 52px;
+      height: 64px;
     }
     .edgeless-toolbar-container[level='second'] {
       position: absolute;
@@ -82,7 +82,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
     }
     .short-divider {
       width: 1px;
@@ -437,11 +437,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-shape-tool-button>
-        <edgeless-connector-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-connector-tool-button>
       </div>
     `;
   }
@@ -454,19 +449,26 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Select', 'V')}
           .active=${type === 'default'}
-          .iconContainerPadding=${4}
+          .iconContainerPadding=${8}
           @click=${() => this.setEdgelessTool({ type: 'default' })}
         >
           ${SelectIcon}
         </edgeless-tool-icon-button>
+
         <edgeless-tool-icon-button
           .tooltip=${getTooltipWithShortcut('Hand', 'H')}
           .active=${type === 'pan'}
-          .iconContainerPadding=${4}
+          .iconContainerPadding=${8}
           @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
         >
           ${HandIcon}
         </edgeless-tool-icon-button>
+
+        <edgeless-connector-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-connector-tool-button>
 
         ${page.readonly
           ? nothing
@@ -478,7 +480,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Presentation'}
-          .iconContainerPadding=${4}
+          .iconContainerPadding=${8}
           @click=${() => {
             this._index = this._currentFrameIndex;
             if (

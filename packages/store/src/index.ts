@@ -4,6 +4,7 @@
 
 export type { Y };
 
+export * from './adapter/index.js';
 export * from './migration/index.js';
 export { createIndexeddbStorage } from './persistence/blob/indexeddb-storage.js';
 export { createMemoryStorage } from './persistence/blob/memory-storage.js';

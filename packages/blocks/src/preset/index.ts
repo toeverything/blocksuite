@@ -4,6 +4,7 @@ import { literal, unsafeStatic } from 'lit/static-html.js';
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
+import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
@@ -29,6 +30,8 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
+      modal: literal`affine-modal-widget`,
+      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
@@ -49,6 +52,8 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
+      modal: literal`affine-modal-widget`,
+      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
@@ -88,6 +93,12 @@ export const pagePreset: LitBlockSpec[] = [
     service: DatabaseService,
     view: {
       component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
     },
   },
   {
@@ -154,6 +165,12 @@ export const edgelessPreset: LitBlockSpec[] = [
     service: DatabaseService,
     view: {
       component: literal`affine-database`,
+    },
+  },
+  {
+    schema: DataViewBlockSchema,
+    view: {
+      component: literal`affine-data-view`,
     },
   },
   {

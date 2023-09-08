@@ -14,8 +14,8 @@ import type {
   DocProviderCreator,
   Page,
   PassiveDocProvider,
+  Y,
 } from '@blocksuite/store';
-import type { Y } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
 import {
   createIndexeddbStorage,
@@ -236,14 +236,10 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     defaultFlags: {
       enable_toggle_block: featureArgs.includes('toggle'),
       enable_set_remote_flag: true,
-      enable_drag_handle: true,
       enable_block_hub: true,
-      enable_database: true,
-      enable_edgeless_toolbar: true,
-      enable_linked_page: true,
       enable_bookmark_operation: true,
       enable_note_index: true,
-      enable_attachment_block: true,
+      enable_bultin_ledits: true,
       readonly: {
         'space:page0': false,
       },
