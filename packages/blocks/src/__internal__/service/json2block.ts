@@ -30,31 +30,36 @@ export async function json2block(
   const firstBlock = pastedBlocks[0];
   const isFocusedBlockEmpty =
     !focusedBlockModel.text?.length && !convertToPastedIfEmpty;
-  const shouldMergeFirstBlock =
-    !isFocusedBlockEmpty && firstBlock.text && focusedBlockModel.text;
-  let shouldMergeLastBlock = focusedBlockModel.children.length > 0;
+  // maybe there should be more strict
+  const shouldMergeFirstBlock = !isFocusedBlockEmpty && firstBlock.text;
   const parent = page.getParent(focusedBlockModel);
   assertExists(parent);
 
-  let ids: string[] = [];
-  let splitPostModel: BaseBlockModel | null = null;
+  let lastItemMergedIds: string[] = [];
+  let splitSuffixModel: BaseBlockModel | null = null;
+  // make a backup before change focused block's children
+  const focusedBlockChildNum = focusedBlockModel.children.length;
 
+  /**
+   * check if split need, it only should split on the cursor between in focused block,
+   * and there are multiple pasted blocks or single nested pasted block
+   */
   if (
-    focusedBlockModel.text &&
-    focusedBlockModel.text?.length > textRangePoint.index &&
+    !isFocusedBlockEmpty &&
+    Number(focusedBlockModel.text?.length) > textRangePoint.index &&
     (pastedBlocks.length > 1 || firstBlock.children.length > 0)
   ) {
     await handleBlockSplit(page, focusedBlockModel, textRangePoint.index, 0);
-    splitPostModel = page.getNextSibling(focusedBlockModel);
-    shouldMergeLastBlock = true;
+    splitSuffixModel = page.getNextSibling(focusedBlockModel);
   }
+
   if (shouldMergeFirstBlock) {
     focusedBlockModel.text?.insertList(
       firstBlock.text || [],
       textRangePoint.index || 0
     );
 
-    ids = await addSerializedBlocks(
+    lastItemMergedIds = await addSerializedBlocks(
       page,
       firstBlock.children || [],
       focusedBlockModel,
@@ -66,30 +71,37 @@ export async function json2block(
     shouldMergeFirstBlock ? 1 : 0
   );
 
-  // paste multiple blocks.
   if (remainingPastedBlocks.length > 0) {
-    if (shouldMergeFirstBlock && focusedBlockModel.flavour === 'affine:list') {
-      ids = await addSerializedBlocks(
-        page,
-        remainingPastedBlocks,
-        focusedBlockModel,
-        focusedBlockModel.children.length - 1
-      );
-    } else {
-      const insertPosition =
-        parent.children.indexOf(focusedBlockModel) +
-        (shouldMergeFirstBlock ? 1 : 0);
+    const insertPosition =
+      parent.children.indexOf(focusedBlockModel) +
+      (shouldMergeFirstBlock ? 1 : 0);
 
-      ids = await addSerializedBlocks(
-        page,
-        remainingPastedBlocks,
-        parent,
-        insertPosition
-      );
+    lastItemMergedIds = await addSerializedBlocks(
+      page,
+      remainingPastedBlocks,
+      parent,
+      insertPosition
+    );
+
+    /**
+     * if there are focused block children at the beginning,
+     * we should move them to correct position
+     */
+    if (focusedBlockChildNum) {
+      const focusedBlockModelSibling = page.getNextSibling(focusedBlockModel);
+      if (focusedBlockModelSibling) {
+        const children = [...focusedBlockModel.children];
+        page.updateBlock(focusedBlockModelSibling, {
+          children: focusedBlockModelSibling.children.concat(
+            children.splice(-focusedBlockChildNum)
+          ),
+        });
+        page.updateBlock(focusedBlockModel, { children });
+      }
     }
   }
 
-  if (ids.length === 0) {
+  if (lastItemMergedIds.length === 0) {
     const textLength =
       firstBlock?.text?.reduce((sum, data) => {
         return sum + (data.insert?.length || 0);
@@ -100,54 +112,51 @@ export async function json2block(
     });
     return;
   }
-  const lastModel = page.getBlockById(ids[ids.length - 1]);
-  assertExists(lastModel);
 
-  if (shouldMergeLastBlock) {
-    const nextSiblingModel = splitPostModel || page.getNextSibling(lastModel);
-    const rangeOffset = lastModel.text?.length || 0;
+  const lastBlock = pastedBlocks.at(-1);
+  if (lastBlock?.flavour === 'affine:image') {
+    const id = page.addBlock('affine:paragraph', { type: 'text' }, parent);
+    lastItemMergedIds = [id];
+  }
 
-    if (nextSiblingModel) {
-      lastModel.text?.join(nextSiblingModel?.text as Text);
-      if (
-        splitPostModel &&
-        splitPostModel.children.length > 0 &&
-        focusedBlockModel
-      ) {
-        page.updateBlock(focusedBlockModel, {
-          children: focusedBlockModel.children.concat(
-            ...splitPostModel.children
-          ),
-        });
-      }
-      page.deleteBlock(nextSiblingModel);
+  const lastMergedModel = page.getBlockById(
+    lastItemMergedIds[lastItemMergedIds.length - 1]
+  );
+  assertExists(lastMergedModel);
+  const lastMergedModelRangeIndex = lastMergedModel.text?.length;
+
+  if (splitSuffixModel) {
+    lastMergedModel.text?.join(splitSuffixModel.text as Text);
+
+    if (
+      splitSuffixModel &&
+      splitSuffixModel.children.length > 0 &&
+      focusedBlockModel
+    ) {
+      page.updateBlock(focusedBlockModel, {
+        children: focusedBlockModel.children.concat(
+          ...splitSuffixModel.children
+        ),
+      });
     }
+    page.deleteBlock(splitSuffixModel);
+  }
 
-    // Wait for the block's rich text mounted
+  if (lastMergedModel?.text) {
     requestAnimationFrame(() => {
-      setRange(lastModel, {
-        index: rangeOffset,
+      setRange(lastMergedModel, {
+        index: lastMergedModelRangeIndex || 0,
         length: 0,
       });
     });
   } else {
-    if (lastModel?.text) {
-      const rangIndex = lastModel.text.length;
-      requestAnimationFrame(() => {
-        setRange(lastModel, {
-          index: rangIndex,
-          length: 0,
-        });
-      });
-    } else {
-      requestAnimationFrame(() => {
-        // TODO: wait block ready
-        focusBlockByModel(lastModel);
-      });
-    }
+    requestAnimationFrame(() => {
+      // TODO: wait block ready
+      focusBlockByModel(lastMergedModel);
+    });
   }
 
-  if (isFocusedBlockEmpty && splitPostModel) {
+  if (isFocusedBlockEmpty && !shouldMergeFirstBlock) {
     page.deleteBlock(focusedBlockModel);
   }
 }
