@@ -512,6 +512,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     createLitPortal({
+      closeOnClickAway: true,
       template: ({ positionSlot }) => {
         const langList = new LangList();
         langList.currentLanguageId = this._perviousLanguage.id as Lang;

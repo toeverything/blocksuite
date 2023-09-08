@@ -99,6 +99,11 @@ type PortalOptions = {
    * If true, the portalRoot will be added a class `blocksuite-portal`. It's useful for finding the portalRoot.
    */
   identifyWrapper?: boolean;
+  /**
+   * Whether to close the portal when click away(click outside).
+   * @default false
+   */
+  closeOnClickAway?: boolean;
 };
 
 /**
@@ -115,6 +120,7 @@ export function createSimplePortal({
   renderOptions,
   shadowDom = true,
   identifyWrapper = true,
+  closeOnClickAway = false,
 }: PortalOptions) {
   const portalRoot = document.createElement('div');
   if (identifyWrapper) {
@@ -124,7 +130,7 @@ export function createSimplePortal({
     portalRoot.attachShadow({ mode: 'open' });
   }
   abortController.signal.addEventListener('abort', () => {
-    portalRoot.remove();
+    dispose();
   });
 
   const root = shadowDom ? portalRoot.shadowRoot : portalRoot;
@@ -150,6 +156,22 @@ export function createSimplePortal({
 
   updatePortal(updateId);
   container.append(portalRoot);
+
+  function _onClickAway(e: Event) {
+    if (portalRoot.contains(e.target as Node)) return;
+    dispose();
+  }
+
+  if (closeOnClickAway) {
+    // Avoid triggering click away listener on initial render
+    setTimeout(() => document.addEventListener('click', _onClickAway));
+  }
+
+  function dispose() {
+    portalRoot.remove();
+    if (closeOnClickAway) document.removeEventListener('click', _onClickAway);
+  }
+
   return portalRoot;
 }
 
