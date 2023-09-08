@@ -875,3 +875,15 @@ export function assertClipData(
     expectClipItems.find(item => item.mimeType === type)?.data
   );
 }
+
+export async function assertHasClass(locator: Locator, className: string) {
+  expect(
+    (await locator.getAttribute('class'))?.split(' ').includes(className)
+  ).toEqual(true);
+}
+
+export async function assertNotHasClass(locator: Locator, className: string) {
+  expect(
+    (await locator.getAttribute('class'))?.split(' ').includes(className)
+  ).toEqual(false);
+}
