@@ -30,6 +30,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import {
   exportPagesZip,
   importPagesZip,
+  Job,
   MarkdownAdapter,
   Utils,
   type Workspace,
@@ -341,10 +342,14 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportMarkDownExperimentalAdapter() {
-    window.job.pageToSnapshot(window.page).then(snapshot => {
+    const job = new Job({
+      workspace: this.workspace,
+    });
+    job.pageToSnapshot(window.page).then(snapshot => {
       new MarkdownAdapter()
         .fromPageSnapshot({
           snapshot,
+          assets: job.assetsManager,
         })
         .then(markdown => {
           const blob = new Blob([markdown], { type: 'plain/text' });

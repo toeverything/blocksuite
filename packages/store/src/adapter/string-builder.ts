@@ -3,6 +3,11 @@ export class StringBuilder {
 
   write(text: string) {
     this.buffer += text;
+    console.log(text);
+  }
+
+  clear() {
+    this.buffer = '';
   }
 
   toString() {
