@@ -716,9 +716,9 @@ test('paste multiple nested list blocks, the cursor position should be correct',
    * - aaaaaa
    *   - bbb
    *     - ccc
-   *   - 111
-   *     - 222
-   *       - 333|
+   * - 111
+   *   - 222
+   *     - 333|
    *   - bbb
    *     - ccc
    * - 111
@@ -766,9 +766,9 @@ test('paste multiple nested list blocks, the content should be correct', async (
    * - aaaaaa
    *   - bbb
    *     - ccc
-   *   - 111
-   *     - 222
-   *       - 333|
+   * - 111
+   *   - 222
+   *     - 333|
    *   - bbb
    *     - ccc
    * - 111
@@ -777,8 +777,7 @@ test('paste multiple nested list blocks, the content should be correct', async (
    */
   await assertStoreMatchJSX(
     page,
-    /*xml*/ `
-<affine:page>
+    /*xml*/ `<affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:hidden={false}
@@ -800,22 +799,22 @@ test('paste multiple nested list blocks, the content should be correct', async (
           prop:type="bulleted"
         />
       </affine:list>
+    </affine:list>
+    <affine:list
+      prop:checked={false}
+      prop:text="111"
+      prop:type="bulleted"
+    >
       <affine:list
         prop:checked={false}
-        prop:text="111"
+        prop:text="222"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
-          prop:text="222"
+          prop:text="333"
           prop:type="bulleted"
-        >
-          <affine:list
-            prop:checked={false}
-            prop:text="333"
-            prop:type="bulleted"
-          />
-        </affine:list>
+        />
       </affine:list>
       <affine:list
         prop:checked={false}
@@ -847,8 +846,7 @@ test('paste multiple nested list blocks, the content should be correct', async (
       </affine:list>
     </affine:list>
   </affine:note>
-</affine:page>
-`
+</affine:page>`
   );
 });
 
@@ -1164,6 +1162,7 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await pasteByKeyboard(page, false);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['12341234']);
 });
 
