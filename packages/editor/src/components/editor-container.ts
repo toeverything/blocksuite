@@ -25,6 +25,8 @@ import { type Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
+import type { Ref } from 'lit/directives/ref.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
@@ -74,6 +76,8 @@ export class EditorContainer
    */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
+
+  root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
 
   readonly themeObserver = new ThemeObserver();
 
@@ -272,6 +276,7 @@ export class EditorContainer
     const rootContainer = keyed(
       this.model.id,
       html`<block-suite-root
+        ${ref(this.root)}
         .page=${this.page}
         .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
       ></block-suite-root>`
