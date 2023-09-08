@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=16.9.0"
   },
-  "packageManager": "pnpm@8.7.0",
+  "packageManager": "pnpm@8.7.4",
   "scripts": {
     "preview": "pnpm --filter @blocksuite/playground preview",
     "dev": "pnpm --filter @blocksuite/playground dev",
@@ -100,7 +100,7 @@
       ]
     },
     "overrides": {
-      "typescript": "^5",
+      "typescript": "^5.2.2",
       "array-includes": "npm:@nolyfill/array-includes@latest",
       "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
       "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",

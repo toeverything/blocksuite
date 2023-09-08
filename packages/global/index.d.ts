@@ -6,5 +6,6 @@ declare type BlockSuiteFlags = {
   enable_bookmark_operation: boolean;
   enable_note_index: boolean;
 
+  enable_bultin_ledits: boolean;
   readonly: Record<string, boolean>;
 };

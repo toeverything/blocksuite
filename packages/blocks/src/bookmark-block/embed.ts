@@ -12,6 +12,7 @@ const embedConfig: EmbedConfig[] = [
     name: 'figma',
     // See https://www.figma.com/developers/embed
     format: url => {
+      if (!url.hostname.endsWith('figma.com')) return null;
       const urlStr = url.toString();
       const figmaRegex =
         /https:\/\/([\w.-]+\.)?figma.com\/(file|proto)\/([0-9a-zA-Z]{22,128})(?:\/.*)?$/;
@@ -39,7 +40,10 @@ const embedConfig: EmbedConfig[] = [
   },
 ];
 
-const formatEmbedUrl = (urlStr: string): string | null => {
+/**
+ * @internal Just export for test
+ */
+export const formatEmbedUrl = (urlStr: string): string | null => {
   try {
     const url = new URL(urlStr);
     for (const embed of embedConfig) {
