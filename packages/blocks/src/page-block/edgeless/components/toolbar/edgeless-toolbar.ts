@@ -6,6 +6,7 @@ import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 import './frame/frame-tool-button.js';
+import './default/default-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -25,17 +26,14 @@ import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js'
 import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
 import { toast } from '../../../../components/toast.js';
 import {
-  ArrowUpIcon,
   EdgelessEraserIcon,
   EdgelessImageIcon,
   EdgelessTextIcon,
   FrameNavigatorIcon,
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
-  HandIcon,
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
-  SelectIcon,
 } from '../../../../icons/index.js';
 import {
   Bound,
@@ -84,11 +82,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       gap: 8px;
-    }
-    edgeless-tool-icon-button svg + svg {
-      position: absolute;
-      top: 4px;
-      right: 2px;
     }
     .short-divider {
       width: 1px;
@@ -452,26 +445,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private get defaultContent() {
     const { page } = this.edgeless;
-    const { type } = this.edgelessTool;
 
     return html`<div class="edgeless-toolbar-left-part">
-        <edgeless-tool-icon-button
-          .tooltip=${type === 'pan'
-            ? getTooltipWithShortcut('Hand', 'H')
-            : getTooltipWithShortcut('Select', 'V')}
-          .active=${type === 'default' || type === 'pan'}
-          .iconContainerPadding=${8}
-          @click=${() => {
-            if (type === 'default') {
-              this.setEdgelessTool({ type: 'pan', panning: false });
-            } else {
-              // 'pan' or other cases
-              this.setEdgelessTool({ type: 'default' });
-            }
-          }}
-        >
-          ${type === 'pan' ? HandIcon : SelectIcon} ${ArrowUpIcon}
-        </edgeless-tool-icon-button>
+        <edgeless-default-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-default-tool-button>
 
         <edgeless-connector-tool-button
           .edgelessTool=${this.edgelessTool}
