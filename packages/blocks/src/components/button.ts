@@ -65,6 +65,10 @@ export class IconButton extends LitElement {
       background: transparent;
     }
 
+    :host[hidden] {
+      display: none;
+    }
+
     :host > .text {
       flex: 1;
       white-space: nowrap;

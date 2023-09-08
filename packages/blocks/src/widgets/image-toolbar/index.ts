@@ -55,6 +55,9 @@ export class AffineImageToolbarWidget extends WidgetElement {
       .has-tool-tip.delete-image-button:hover > svg {
         color: var(--affine-error-color);
       }
+      .has-tool-tip[hidden] {
+        display: none;
+      }
     `,
     tooltipStyle,
   ];
@@ -192,11 +195,11 @@ export class AffineImageToolbarWidget extends WidgetElement {
         @mouseout=${this._onHoverLeave}
       >
         <div class="embed-editing-state">
-          ${readonly || !this.supportAttachment
-            ? nothing
-            : html`<icon-button
+          ${this.supportAttachment
+            ? html`<icon-button
                 class="has-tool-tip"
                 size="32px"
+                ?hidden=${readonly}
                 @click=${() => {
                   this.hide();
                   turnImageIntoCardView(model, blob);
@@ -204,19 +207,19 @@ export class AffineImageToolbarWidget extends WidgetElement {
               >
                 ${BookmarkIcon}
                 <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
-              </icon-button>`}
-          ${readonly
-            ? nothing
-            : html`<icon-button
-                class="has-tool-tip"
-                size="32px"
-                @click=${() => focusCaption(model)}
-              >
-                ${CaptionIcon}
-                <tool-tip inert tip-position="right" role="tooltip"
-                  >Caption</tool-tip
-                >
-              </icon-button>`}
+              </icon-button>`
+            : nothing}
+          <icon-button
+            class="has-tool-tip"
+            size="32px"
+            ?hidden=${readonly}
+            @click=${() => focusCaption(model)}
+          >
+            ${CaptionIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Caption</tool-tip
+            >
+          </icon-button>
           <icon-button
             class="has-tool-tip"
             size="32px"
@@ -237,37 +240,35 @@ export class AffineImageToolbarWidget extends WidgetElement {
               >Copy to clipboard</tool-tip
             >
           </icon-button>
-          ${readonly
-            ? nothing
-            : html`<icon-button
-                class="has-tool-tip delete-image-button"
-                size="32px"
-                @click="${() => {
-                  this.hide();
-                  model.page.deleteBlock(model);
-                }}"
-              >
-                ${DeleteIcon}
-                <tool-tip inert tip-position="right" role="tooltip"
-                  >Delete</tool-tip
-                >
-              </icon-button>`}
-          ${readonly ||
-          !this.page.awarenessStore.getFlag('enable_bultin_ledits')
-            ? nothing
-            : html`<icon-button
-                class="has-tool-tip"
-                size="32px"
-                @click="${() => {
-                  this.hide();
-                  openLeditsEditor(model, blob, this.root);
-                }}"
-              >
-                ${HighLightDuotoneIcon}
-                <tool-tip inert tip-position="right" role="tooltip"
-                  >Edit with LEDITS</tool-tip
-                >
-              </icon-button>`}
+          <icon-button
+            class="has-tool-tip delete-image-button"
+            size="32px"
+            ?hidden=${readonly}
+            @click="${() => {
+              this.hide();
+              model.page.deleteBlock(model);
+            }}"
+          >
+            ${DeleteIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Delete</tool-tip
+            >
+          </icon-button>
+          <icon-button
+            class="has-tool-tip"
+            size="32px"
+            ?hidden=${readonly ||
+            !this.page.awarenessStore.getFlag('enable_bultin_ledits')}
+            @click="${() => {
+              this.hide();
+              openLeditsEditor(model, blob, this.root);
+            }}"
+          >
+            ${HighLightDuotoneIcon}
+            <tool-tip inert tip-position="right" role="tooltip"
+              >Edit with LEDITS</tool-tip
+            >
+          </icon-button>
         </div>
       </div>
     `;
