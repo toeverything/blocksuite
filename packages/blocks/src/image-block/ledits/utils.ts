@@ -1,15 +1,18 @@
+import { html } from 'lit';
+
 export function createInlineIframe() {
-  const htmlContent = `<!DOCTYPE html>
+  const htmlContent = html`<!doctype html>
     <html>
       <head>
-        <meta charset="utf-8">
+        <meta charset="utf-8" />
         <title>LEDITS - a Hugging Face Space by editing-images</title>
         <script
           type="module"
           src="https://gradio.s3-us-west-2.amazonaws.com/3.36.1/gradio.js"
         ></script>
         <style>
-          html, body {
+          html,
+          body {
             margin: 0;
             padding: 0;
           }
@@ -27,43 +30,47 @@ export function createInlineIframe() {
         const queue = [];
         let ready = false;
 
-        const base64ToBlob = (b64Data, contentType='', sliceSize=256) => {
+        const base64ToBlob = (b64Data, contentType = '', sliceSize = 256) => {
           const byteCharacters = atob(b64Data);
           const byteArrays = [];
-        
-          for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+
+          for (
+            let offset = 0;
+            offset < byteCharacters.length;
+            offset += sliceSize
+          ) {
             const slice = byteCharacters.slice(offset, offset + sliceSize);
-        
+
             const byteNumbers = new Array(slice.length);
             for (let i = 0; i < slice.length; i++) {
               byteNumbers[i] = slice.charCodeAt(i);
             }
-        
+
             const byteArray = new Uint8Array(byteNumbers);
             byteArrays.push(byteArray);
           }
-        
+
           const blob = new Blob(byteArrays, { type: contentType });
           return blob;
-        }
+        };
 
         const getResultImage = () => {
-          const gradioApp = document.querySelector("gradio-app");
-          const resultImg = gradioApp.querySelector("#output_image > img");
-          
-          if(resultImg === null) return null;
-          
-          const pattern = /^data:(image\\/\\w+);/
+          const gradioApp = document.querySelector('gradio-app');
+          const resultImg = gradioApp.querySelector('#output_image > img');
+
+          if (resultImg === null) return null;
+
+          const pattern = /^data:(image\\/\\w+);/;
           const execResult = pattern.exec(resultImg.src);
 
-          if(!execResult) return null;
+          if (!execResult) return null;
 
           return base64ToBlob(resultImg.src.split(',')[1], execResult[1]);
-        }
+        };
 
-        const blobToFile = (blob) => {
-          return new File([blob], "image.png", { type: blob.type });
-        }
+        const blobToFile = blob => {
+          return new File([blob], 'image.png', { type: blob.type });
+        };
 
         function setImage({ image }) {
           const input = getInputElement();
@@ -75,21 +82,24 @@ export function createInlineIframe() {
           input.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
-        window.addEventListener("message", (e) => {
-          const { source, data } = e;
+        window.addEventListener(
+          'message',
+          e => {
+            const { source, data } = e;
 
-          if(ready === false) {
-            queue.push(data);
-          }
-          else {
-            execute(data);
-          }
-        }, false);
+            if (ready === false) {
+              queue.push(data);
+            } else {
+              execute(data);
+            }
+          },
+          false
+        );
 
         function execute(task) {
-          if(!task.type) return;
+          if (!task.type) return;
 
-          switch(task.type) {
+          switch (task.type) {
             case 'set_image':
               setImage(task);
               break;
@@ -104,19 +114,18 @@ export function createInlineIframe() {
         }
 
         function executeQueueTask() {
-          if(!checkInputReady()) {
+          if (!checkInputReady()) {
             setTimeout(executeQueueTask, 500);
-          }
-          else {
+          } else {
             ready = true;
-            for(let task of queue) {
+            for (let task of queue) {
               execute(task);
             }
           }
         }
 
         function getInputElement() {
-          const gradioApp = document.querySelector("gradio-app")
+          const gradioApp = document.querySelector('gradio-app');
           return gradioApp.querySelector('#input_image input[type="file"]');
         }
 
@@ -128,5 +137,7 @@ export function createInlineIframe() {
       </script>
     </html>`;
 
-  return `data:text/html,${encodeURIComponent(htmlContent)}`;
+  return `data:text/html,${encodeURIComponent(
+    String.raw(htmlContent.strings, ...htmlContent.values)
+  )}`;
 }

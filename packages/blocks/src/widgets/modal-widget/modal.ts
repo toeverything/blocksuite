@@ -1,5 +1,6 @@
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 type ModalButton = {
@@ -89,16 +90,14 @@ export class AffineCustomModal extends LitElement {
   `;
 
   options!: ModalOptions;
-  callback?: (div: HTMLDivElement) => void;
+  onOpen!: (div: HTMLDivElement) => void;
 
   close() {
     this.remove();
   }
 
-  override firstUpdated(): void {
-    this.callback?.(
-      this.renderRoot.querySelector('.modal-main') as HTMLDivElement
-    );
+  modalRef(modal: Element | undefined) {
+    this.onOpen?.(modal as HTMLDivElement);
   }
 
   override render() {
@@ -106,7 +105,7 @@ export class AffineCustomModal extends LitElement {
 
     return html`<div class="modal-background">
       <div class="modal-window">
-        <div class="modal-main"></div>
+        <div class="modal-main ${ref(this.modalRef)}"></div>
         <div class="modal-footer">
           ${options.footer
             ? repeat(
@@ -138,7 +137,7 @@ export function createCustomModal(
 ) {
   const modal = new AffineCustomModal();
 
-  modal.callback = options.entry;
+  modal.onOpen = options.entry;
   modal.options = options;
 
   container.appendChild(modal);
