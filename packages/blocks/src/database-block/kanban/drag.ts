@@ -131,7 +131,7 @@ const createDragPreview = (card: KanbanCard, x: number, y: number) => {
   div.style.transform = 'rotate(-3deg)';
   div.style.left = `${x}px`;
   div.style.top = `${y}px`;
-  div.style.zIndex = '999';
+  div.style.zIndex = '9999';
   document.body.append(div);
   return {
     display(x: number, y: number) {

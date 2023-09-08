@@ -39,7 +39,6 @@ async function createTestPage(pageId = 'page0') {
 }
 
 describe('DatabaseManager', () => {
-  let workspace: Workspace;
   let page: Page;
   let db: DatabaseBlockModel;
 
@@ -60,7 +59,6 @@ describe('DatabaseManager', () => {
 
   beforeEach(async () => {
     page = await createTestPage();
-    workspace = page.workspace;
 
     pageBlockId = page.addBlock('affine:page', {
       title: new page.Text('database test'),

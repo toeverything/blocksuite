@@ -787,7 +787,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         rowIndex: 0,
         columnIndex: 0,
       },
-      isEditing: true,
+      isEditing: false,
     };
   }
 

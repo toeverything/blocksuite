@@ -4,9 +4,9 @@ export const startDrag = <
     x: number;
   },
 >(
-  evt: PointerEvent,
+  evt: MouseEvent,
   ops: {
-    transform?: (evt: PointerEvent) => P;
+    transform?: (evt: MouseEvent) => P;
     onDrag: (p: P) => T;
     onMove: (p: P) => T;
     onDrop: (result: T) => void;
