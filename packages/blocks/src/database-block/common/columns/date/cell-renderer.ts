@@ -1,9 +1,12 @@
+import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import format from 'date-fns/format/index.js';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import { DatePicker } from '../../../../components/date-picker/date-picker.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { createLitPortal } from '../../../../components/portal.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { datePureColumnConfig } from './define.js';
@@ -53,6 +56,8 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   @query('input')
   private _inputEle!: HTMLInputElement;
 
+  private _prevPortalAbortController: AbortController | null = null;
+
   override onExitEditMode() {
     this._setValue();
   }
@@ -75,7 +80,28 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   }
 
   private _onFocus = () => {
-    this._inputEle.showPicker();
+    // this._inputEle.showPicker();
+    this._prevPortalAbortController?.abort();
+    const abortController = new AbortController();
+    this._prevPortalAbortController = abortController;
+
+    createLitPortal({
+      abortController,
+      closeOnClickAway: true,
+      computePosition: {
+        referenceElement: this._inputEle,
+        placement: 'bottom',
+        middleware: [offset(10), flip()],
+      },
+      template: ({ positionSlot }) => {
+        const datePicker = new DatePicker();
+        datePicker.value = new Date(this.value ?? Date.now());
+        datePicker.onChange = (date: Date) => {
+          this._setValue(date.toISOString());
+        };
+        return datePicker;
+      },
+    });
   };
 
   override render() {
