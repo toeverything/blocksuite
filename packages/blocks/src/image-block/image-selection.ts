@@ -1,4 +1,9 @@
 import { BaseSelection, PathFinder } from '@blocksuite/block-std';
+import z from 'zod';
+
+const ImageSelectionSchema = z.object({
+  path: z.array(z.string()),
+});
 
 export class ImageSelection extends BaseSelection {
   static override type = 'image';
@@ -19,6 +24,7 @@ export class ImageSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): ImageSelection {
+    ImageSelectionSchema.parse(json);
     return new ImageSelection({
       path: json.path as string[],
     });
