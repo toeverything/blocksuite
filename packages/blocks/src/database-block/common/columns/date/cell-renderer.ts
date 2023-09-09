@@ -93,7 +93,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
         placement: 'bottom',
         middleware: [offset(10), flip()],
       },
-      template: ({ positionSlot }) => {
+      template: () => {
         const datePicker = new DatePicker();
         datePicker.value = new Date(this.value ?? Date.now());
         datePicker.onChange = (date: Date) => {
