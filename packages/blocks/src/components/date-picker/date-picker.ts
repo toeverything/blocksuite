@@ -6,7 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { arrowLeftIcon } from './icons.js';
 import { datePickerStyle } from './style.js';
-import { getMonthMatrix, isCurrentMonth } from './utils.js';
+import { getMonthMatrix, isCurrentMonth, toDate } from './utils.js';
 
 const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const months = [
@@ -39,8 +39,9 @@ export interface DateCell {
 export class DatePicker extends LitElement {
   static override styles = datePickerStyle;
 
-  @property({ type: Date })
-  value?: Date;
+  /** Checked date timestamp */
+  @property({ type: Number })
+  value?: number;
 
   @property({ attribute: false })
   onChange?: (value: Date) => void;
@@ -118,7 +119,7 @@ export class DatePicker extends LitElement {
             label: date.getDate().toString(),
             isToday: isToday(date),
             notCurrentMonth: !isCurrentMonth(date, this._cursor),
-            selected: this.value ? isSameDay(date, this.value) : false,
+            selected: this.value ? isSameDay(date, toDate(this.value)) : false,
           }) satisfies DateCell
       )
     );
@@ -132,7 +133,7 @@ export class DatePicker extends LitElement {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    if (this.value) this._cursor = this.value;
+    if (this.value) this._cursor = toDate(this.value);
     this._getMatrix();
   }
 
@@ -189,7 +190,7 @@ export class DatePicker extends LitElement {
       data-date=${`${cell.date.getFullYear()}-${cell.date.getMonth()}`}
       class=${classes}
       @click=${() => {
-        this.value = cell.date;
+        this.value = cell.date.getTime();
         if (cell.notCurrentMonth) this._cursor = cell.date;
         this.onChange?.(cell.date);
         this._getMatrix();
