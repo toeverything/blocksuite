@@ -22,7 +22,7 @@ if (env[importIdentifier] === true) {
 }
 
 if (typeof window === 'undefined') {
-  throw new Error(
+  console.error(
     'Seems like you are importing @blocksuite/editor in SSR mode. Which is not supported for now.'
   );
 }

@@ -1,5 +1,4 @@
 import { Slot } from '@blocksuite/global/utils';
-import WebfontLoader from 'webfontloader';
 
 export class FontLoader {
   slots: {
@@ -13,13 +12,15 @@ export class FontLoader {
    * @param fonts the font you want to detect, see https://github.com/typekit/webfontloader#custom for more detail
    */
   load(fonts: string[]) {
-    WebfontLoader.load({
-      custom: {
-        families: fonts,
-      },
-      active: () => {
-        fonts.forEach(font => this.slots.loaded.emit(font));
-      },
+    import('webfontloader').then(WebfontLoader => {
+      WebfontLoader.load({
+        custom: {
+          families: fonts,
+        },
+        active: () => {
+          fonts.forEach(font => this.slots.loaded.emit(font));
+        },
+      });
     });
   }
 }
