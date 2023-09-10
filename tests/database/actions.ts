@@ -481,15 +481,6 @@ export async function getElementStyle(
   return style;
 }
 
-export async function addKanbanView(page: Page) {
-  const headerView = page.locator('data-view-header-views');
-  const addViewBtn = headerView.locator('.database-view-button.dv-icon-16');
-  await addViewBtn.click();
-
-  const viewMenu = page.locator(`.affine-menu-action`).nth(1);
-  await viewMenu.click();
-}
-
 export async function focusKanbanCardHeader(page: Page, index = 0) {
   const cardHeader = page.locator('data-view-header-area-text').nth(index);
   await cardHeader.click();

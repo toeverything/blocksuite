@@ -13,11 +13,11 @@ import {
   initDatabaseDynamicRowWithData,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
+  initKanbanViewState,
   waitNextFrame,
 } from '../utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
 import {
-  addKanbanView,
   assertCellsSelection,
   assertDatabaseTitleColumnText,
   assertKanbanCellSelected,
@@ -86,23 +86,10 @@ test.describe('focus', () => {
     await assertRowsSelection(page, [0, 0]);
   });
 
-  test.only("should support move cell's focus by arrow key", async ({
-    page,
-  }) => {
+  test("should support move cell's focus by arrow key", async ({ page }) => {
     await enterPlaygroundRoom(page);
-    await initEmptyDatabaseState(page);
+    await initKanbanViewState(page);
 
-    await initDatabaseColumn(page);
-    await initDatabaseRowWithData(page, 'row1');
-    await initDatabaseDynamicRowWithData(page, '', false);
-    await pressEscape(page);
-
-    await initDatabaseColumn(page);
-    await initDatabaseDynamicRowWithData(page, '', false);
-    await pressEscape(page);
-    await switchColumnType(page, 'Number', 2);
-
-    await addKanbanView(page);
     await focusKanbanCardHeader(page);
     await pressEscape(page);
     await assertKanbanCellSelected(page, {

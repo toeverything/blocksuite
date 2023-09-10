@@ -378,6 +378,50 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initKanbanViewState(page: Page, pageId?: string) {
+  const ids = await page.evaluate(async pageId => {
+    const { page } = window;
+    await page.waitForLoaded();
+
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+      },
+      noteId
+    );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+    database.addColumn('end', {
+      data: { decimal: 0 },
+      name: 'Number',
+      type: 'number',
+    });
+    database.addColumn('end', {
+      data: {},
+      name: 'Text',
+      type: 'rich-text',
+    });
+    page.addBlock(
+      'affine:paragraph',
+      { type: 'text', text: new page.Text() },
+      databaseId
+    );
+    model.initEmpty('kanban');
+    model.applyColumnUpdate();
+    page.captureSync();
+    return { pageId, noteId, databaseId };
+  }, pageId);
+  return ids;
+}
+
 export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   pageId?: string
