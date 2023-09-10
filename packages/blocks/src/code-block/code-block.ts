@@ -2,12 +2,13 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, whenHover } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
@@ -184,8 +185,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('.lang-button')
   private _langButton!: HTMLButtonElement;
 
-  private _optionsPortal: HTMLDivElement | null = null;
-
   @state()
   private _langListAbortController?: AbortController;
 
@@ -261,6 +260,59 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  private _setReference: RefOrCallback;
+  constructor() {
+    super();
+    let abortController = new AbortController();
+    // Call abort() because the portal has not been created yet
+    abortController.abort();
+    const { setReference, setFloating, dispose } = whenHover(isHover => {
+      if (!isHover) {
+        abortController?.abort();
+        return;
+      }
+      if (!abortController.signal.aborted) return;
+      abortController = new AbortController();
+
+      createLitPortal({
+        template: ({ updatePortal }) =>
+          CodeOptionTemplate({
+            ref: setFloating,
+            anchor: this,
+            model: this.model,
+            wrap: this._wrap,
+            onClickWrap: () => {
+              this._onClickWrapBtn();
+              updatePortal();
+            },
+            abortController,
+          }),
+        computePosition: {
+          referenceElement: this,
+          placement: 'right-start',
+          middleware: [
+            offset({
+              mainAxis: 12,
+              crossAxis: 10,
+            }),
+            shift({
+              crossAxis: true,
+              padding: {
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
+                right: 12,
+              },
+            }),
+          ],
+          autoUpdate: true,
+        },
+        abortController,
+      });
+    });
+    this._setReference = setReference;
+    this.disposables.add(dispose);
+  }
+
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await this._richTextElement?.updateComplete;
@@ -297,7 +349,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
-    this._observePosition();
     bindContainerHotkey(this);
 
     const selectionManager = this.root.selectionManager;
@@ -469,47 +520,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._wrap = container.classList.toggle('wrap');
   }
 
-  private _observePosition() {
-    this._disposables.addFromEvent(this, 'mouseenter', () => {
-      if (this._optionsPortal?.isConnected) return;
-      const abortController = new AbortController();
-
-      this._optionsPortal = createLitPortal({
-        template: ({ updatePortal }) =>
-          CodeOptionTemplate({
-            anchor: this,
-            model: this.model,
-            wrap: this._wrap,
-            onClickWrap: () => {
-              this._onClickWrapBtn();
-              updatePortal();
-            },
-            abortController,
-          }),
-        computePosition: {
-          referenceElement: this,
-          placement: 'right-start',
-          middleware: [
-            offset({
-              mainAxis: 12,
-              crossAxis: 10,
-            }),
-            shift({
-              crossAxis: true,
-              padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
-                bottom: 12,
-                right: 12,
-              },
-            }),
-          ],
-          autoUpdate: true,
-        },
-        abortController,
-      });
-    });
-  }
-
   private _onClickLangBtn() {
     if (this.readonly) return;
     if (this._langListAbortController) return;
@@ -592,7 +602,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override render(): TemplateResult<1> {
-    return html`<div class="affine-code-block-container">
+    return html`<div
+      ${ref(this._setReference)}
+      class="affine-code-block-container"
+    >
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
         <div id="line-numbers"></div>
