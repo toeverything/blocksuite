@@ -1,5 +1,11 @@
+import z from 'zod';
+
 import { PathFinder } from '../../utils/index.js';
 import { BaseSelection } from '../base.js';
+
+const BlockSelectionSchema = z.object({
+  path: z.array(z.string()),
+});
 
 export class BlockSelection extends BaseSelection {
   static override type = 'block';
@@ -20,6 +26,7 @@ export class BlockSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): BlockSelection {
+    BlockSelectionSchema.parse(json);
     return new BlockSelection({
       path: json.path as string[],
     });

@@ -76,6 +76,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
     _disposables.add(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         resizedNotes.forEach(([domRect, prevDomRect], id) => {
+          if (page.readonly) return;
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const { index, xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);

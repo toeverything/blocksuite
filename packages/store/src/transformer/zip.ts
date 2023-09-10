@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 
 import type { Page, Workspace } from '../workspace/index.js';
 import { Job } from './job.js';
+import type { JobMiddleware } from './middleware.js';
 import type { PageSnapshot, WorkspaceInfoSnapshot } from './type.js';
 
 export async function exportPagesZip(workspace: Workspace, pages: Page[]) {
@@ -34,13 +35,12 @@ export async function exportPagesZip(workspace: Workspace, pages: Page[]) {
 
 export async function importPagesZip(workspace: Workspace, imported: Blob) {
   const zip = new JSZip();
-  const job = new Job({ workspace });
-  const assetsMap = job.assets;
   const { files } = await zip.loadAsync(imported);
 
   const assetObjs: JSZip.JSZipObject[] = [];
   const snapshotsObjs: JSZip.JSZipObject[] = [];
   let infoObj: JSZip.JSZipObject | undefined;
+  let info: WorkspaceInfoSnapshot | undefined;
 
   Object.entries(files).map(([name, fileObj]) => {
     if (name.includes('MACOSX') || name.includes('DS_Store')) {
@@ -63,6 +63,37 @@ export async function importPagesZip(workspace: Workspace, imported: Blob) {
     }
   });
 
+  {
+    const json = await infoObj?.async('text');
+    assertExists(json);
+    info = JSON.parse(json) as WorkspaceInfoSnapshot;
+  }
+
+  const middleware: JobMiddleware = ({ slots, workspace }) => {
+    slots.beforeImport.on(({ snapshot, type }) => {
+      if (type === 'page') {
+        snapshot.meta.id = workspace.idGenerator();
+        return;
+      }
+      if (type === 'block') {
+        snapshot.id = workspace.idGenerator();
+        return;
+      }
+    });
+    slots.afterImport.on(payload => {
+      if (payload.type === 'page') {
+        workspace.schema.upgradePage(
+          info?.blockVersions ?? {},
+          payload.page.spaceDoc
+        );
+      }
+    });
+  };
+  const job = new Job({ workspace, middlewares: [middleware] });
+  const assetsMap = job.assets;
+
+  job.snapshotToWorkspaceInfo(info);
+
   await Promise.all(
     assetObjs.map(async fileObj => {
       const nameWithExt = fileObj.name.replace('assets/', '');
@@ -72,13 +103,6 @@ export async function importPagesZip(workspace: Workspace, imported: Blob) {
       assetsMap.set(assetsId, file);
     })
   );
-
-  {
-    const json = await infoObj?.async('text');
-    assertExists(json);
-    const info = JSON.parse(json) as WorkspaceInfoSnapshot;
-    job.snapshotToWorkspaceInfo(info);
-  }
 
   const pages = await Promise.all(
     snapshotsObjs.map(async fileObj => {

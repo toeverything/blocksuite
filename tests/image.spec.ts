@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
+  copyByKeyboard,
   dragBetweenCoords,
   dragEmbedResizeByTopLeft,
   dragEmbedResizeByTopRight,
@@ -15,6 +16,7 @@ import {
   initImageState,
   insertThreeLevelLists,
   moveToImage,
+  pasteByKeyboard,
   pressEnter,
   redoByKeyboard,
   type,
@@ -91,6 +93,19 @@ test('can click and delete image', async ({ page }) => {
   await assertRichImage(page, 0);
 });
 
+test('can click and copy image', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await copyByKeyboard(page);
+  await pressEnter(page);
+
+  await pasteByKeyboard(page);
+  await assertRichImage(page, 2);
+});
+
 test('press enter will create new block when click and select image', async ({
   page,
 }) => {
@@ -160,7 +175,7 @@ test('popup menu should follow position of image when scrolling', async ({
 
   await page.waitForTimeout(150);
 
-  const menu = page.locator('.embed-editing-state');
+  const menu = page.locator('affine-image-toolbar-widget');
 
   expect(menu).toBeVisible();
 

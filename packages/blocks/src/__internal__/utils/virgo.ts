@@ -7,12 +7,11 @@ import { checkIsPageModeByDom } from './query.js';
 // If it does not, remove the marks from the previous selection.
 export function clearMarksOnDiscontinuousInput(vEditor: VEditor): void {
   let vRange = vEditor.getVRange();
-  const dispose = vEditor.slots.vRangeUpdated.on(([r, t]) => {
+  const dispose = vEditor.slots.vRangeUpdated.on(([r, s]) => {
     if (
       vRange &&
       r &&
-      ((t === 'native' && r.index === vRange.index) ||
-        (t !== 'native' && r.index === vRange.index + 1))
+      ((!s && r.index === vRange.index) || (s && r.index === vRange.index + 1))
     ) {
       vRange = r;
     } else {
