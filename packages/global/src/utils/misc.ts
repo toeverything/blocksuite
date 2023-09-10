@@ -67,6 +67,8 @@ export const createDelayHoverSignal = (
  *
  * After the mouse leaves the element, there is a 300ms delay by default.
  *
+ * Note: The callback may be called multiple times when the mouse is hovering.
+ *
  * See also https://floating-ui.com/docs/useHover
  *
  * @example
@@ -96,8 +98,10 @@ export const whenHover = (
   whenHoverChange: (isHover: boolean) => void,
   {
     leaveDelay = 300,
+    alwayRunWhenNoFloating = true,
   }: {
     leaveDelay?: number;
+    alwayRunWhenNoFloating?: boolean;
   } = {}
 ) => {
   /**
@@ -106,13 +110,25 @@ export const whenHover = (
   const abortController = new AbortController();
   let hoverState = false;
   let hoverTimeout = 0;
+  let referenceElement: Element | undefined;
+  let floatingElement: Element | undefined;
 
   const onHover = () => {
+    clearTimeout(hoverTimeout);
     if (!hoverState) {
       hoverState = true;
       whenHoverChange(true);
+      return;
     }
-    clearTimeout(hoverTimeout);
+    // Already hovered
+    if (
+      alwayRunWhenNoFloating &&
+      (!floatingElement || !floatingElement.isConnected)
+    ) {
+      // But the floating element is not ready
+      // so we need to run the callback still
+      whenHoverChange(true);
+    }
   };
 
   const onHoverLeave = () => {
@@ -138,7 +154,6 @@ export const whenHover = (
     element.removeEventListener('mouseleave', onHoverLeave);
   };
 
-  let referenceElement: Element | undefined;
   const setReference: RefOrCallback = element => {
     // Clean previous listeners
     removeHoverListener(referenceElement);
@@ -146,7 +161,6 @@ export const whenHover = (
     referenceElement = element;
   };
 
-  let floatingElement: Element | undefined;
   const setFloating: RefOrCallback = element => {
     // Clean previous listeners
     removeHoverListener(floatingElement);
