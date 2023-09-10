@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { arrowLeftIcon } from './icons.js';
 import { datePickerStyle } from './style.js';
-import { getFirstDayOfMonth, getMonthMatrix, toDate } from './utils.js';
+import { getMonthMatrix, toDate } from './utils.js';
 
 const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const months = [
@@ -248,7 +248,7 @@ export class DatePicker extends WithDisposable(LitElement) {
     });
     const dateRaw = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}(${cell.date.getDay()})`;
     return html`<button
-      tabindex=${cell.tabIndex}
+      tabindex=${cell.tabIndex ?? -1}
       aria-label=${dateRaw}
       data-date=${dateRaw}
       class=${classes}
