@@ -175,7 +175,7 @@ export async function json2block(
       firstBlock?.text?.reduce((sum, data) => {
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
-    await setRange(focusedBlockModel, {
+    setRange(focusedBlockModel, {
       index: (textRangePoint.index ?? 0) + textLength,
       length: 0,
     });
