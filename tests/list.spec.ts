@@ -23,7 +23,7 @@ import {
   assertBlockType,
   assertListPrefix,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTextContent,
 } from './utils/asserts.js';
@@ -154,7 +154,7 @@ test('delete at start of list block', async ({ page }) => {
     'affine:paragraph',
     'affine:list',
   ]);
-  await assertSelection(page, 1, 0, 0);
+  await assertRichTextVRange(page, 1, 0, 0);
 
   await undoByClick(page);
   await assertBlockChildrenFlavours(page, '1', [
