@@ -268,7 +268,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     abortController.abort();
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       if (!isHover) {
-        abortController?.abort();
+        abortController.abort();
         return;
       }
       if (!abortController.signal.aborted) return;

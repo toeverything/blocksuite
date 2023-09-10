@@ -1,5 +1,3 @@
-import type { RefOrCallback } from 'lit/directives/ref.js';
-
 export function launchIntoFullscreen(element: Element) {
   if (element.requestFullscreen) {
     element.requestFullscreen();
@@ -73,6 +71,8 @@ export const createDelayHoverSignal = (
  *
  * @example
  * ```ts
+ * private _setReference: RefOrCallback;
+ *
  * constructor() {
  *   let hoverTip: HTMLElement | null = null;
  *   const { setReference, setFloating } = whenHover(isHover => {
@@ -154,14 +154,14 @@ export const whenHover = (
     element.removeEventListener('mouseleave', onHoverLeave);
   };
 
-  const setReference: RefOrCallback = element => {
+  const setReference = (element?: Element) => {
     // Clean previous listeners
     removeHoverListener(referenceElement);
     addHoverListener(element);
     referenceElement = element;
   };
 
-  const setFloating: RefOrCallback = element => {
+  const setFloating = (element?: Element) => {
     // Clean previous listeners
     removeHoverListener(floatingElement);
     addHoverListener(element);
