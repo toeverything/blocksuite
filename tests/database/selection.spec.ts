@@ -17,9 +17,12 @@ import {
 } from '../utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
 import {
+  addKanbanView,
   assertCellsSelection,
   assertDatabaseTitleColumnText,
+  assertKanbanCellSelected,
   assertRowsSelection,
+  focusKanbanCardHeader,
   getDatabaseBodyCell,
   initDatabaseColumn,
   switchColumnType,
@@ -81,6 +84,32 @@ test.describe('focus', () => {
 
     await pressEscape(page);
     await assertRowsSelection(page, [0, 0]);
+  });
+
+  test.only("should support move cell's focus by arrow key", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyDatabaseState(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseRowWithData(page, 'row1');
+    await initDatabaseDynamicRowWithData(page, '', false);
+    await pressEscape(page);
+
+    await initDatabaseColumn(page);
+    await initDatabaseDynamicRowWithData(page, '', false);
+    await pressEscape(page);
+    await switchColumnType(page, 'Number', 2);
+
+    await addKanbanView(page);
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
   });
 });
 

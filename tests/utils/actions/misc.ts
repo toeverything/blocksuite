@@ -4,12 +4,12 @@ import '../declare-test-window.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type {
-  CssVariableName,
-  DatabaseBlockModel,
-  ListType,
-  PageBlockModel,
-  ThemeObserver,
+import {
+  type CssVariableName,
+  type DatabaseBlockModel,
+  type ListType,
+  type PageBlockModel,
+  type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists } from '../../../packages/global/src/utils.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';

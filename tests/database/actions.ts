@@ -480,3 +480,53 @@ export async function getElementStyle(
 
   return style;
 }
+
+export async function addKanbanView(page: Page) {
+  const headerView = page.locator('data-view-header-views');
+  const addViewBtn = headerView.locator('.database-view-button.dv-icon-16');
+  await addViewBtn.click();
+
+  const viewMenu = page.locator(`.affine-menu-action`).nth(1);
+  await viewMenu.click();
+}
+
+export async function focusKanbanCardHeader(page: Page, index = 0) {
+  const cardHeader = page.locator('data-view-header-area-text').nth(index);
+  await cardHeader.click();
+}
+
+export async function assertKanbanCellSelected(
+  page: Page,
+  {
+    groupIndex,
+    cardIndex,
+    cellIndex,
+  }: {
+    groupIndex: number;
+    cardIndex: number;
+    cellIndex: number;
+  }
+) {
+  const border = await page.evaluate(
+    ({ groupIndex, cardIndex, cellIndex }) => {
+      const group = document.querySelector(
+        `affine-data-view-kanban-group:nth-child(${groupIndex + 1})`
+      );
+      const card = group?.querySelector(
+        `affine-data-view-kanban-card:nth-child(${cardIndex + 1})`
+      );
+      const cell = card?.querySelector<HTMLElement>(
+        `affine-data-view-kanban-cell:nth-child(${cellIndex + 1})`
+      );
+      if (!cell) throw new Error(`Missing cell tag`);
+      return cell.style.border;
+    },
+    {
+      groupIndex,
+      cardIndex,
+      cellIndex,
+    }
+  );
+
+  expect(border).toEqual('1px solid var(--affine-primary-color)');
+}
