@@ -210,7 +210,6 @@ export async function copyBlocksInPage(root: BlockSuiteRoot) {
   if (savedRange) {
     resetNativeSelection(savedRange);
   }
-  console.log(clipboardItems);
   return clipboardItems;
 }
 
