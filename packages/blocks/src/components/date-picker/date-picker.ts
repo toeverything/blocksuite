@@ -1,4 +1,5 @@
-import { isSameDay, isToday } from 'date-fns';
+import { WithDisposable } from '@blocksuite/lit';
+import { isSameDay, isSameMonth, isToday } from 'date-fns';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -6,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { arrowLeftIcon } from './icons.js';
 import { datePickerStyle } from './style.js';
-import { getMonthMatrix, isCurrentMonth, toDate } from './utils.js';
+import { getFirstDayOfMonth, getMonthMatrix, toDate } from './utils.js';
 
 const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const months = [
@@ -30,13 +31,14 @@ export interface DateCell {
   isToday: boolean;
   notCurrentMonth: boolean;
   selected?: boolean;
+  tabIndex?: number;
 }
 
 /**
  * Date picker
  */
 @customElement('date-picker')
-export class DatePicker extends LitElement {
+export class DatePicker extends WithDisposable(LitElement) {
   static override styles = datePickerStyle;
 
   /** Checked date timestamp */
@@ -61,6 +63,8 @@ export class DatePicker extends LitElement {
 
   /** current active month */
   private _cursor = new Date();
+  /** keyboard active date */
+  // private _keyCursor: Date = new Date();
   /** date matrix */
   @property({ attribute: false })
   private _matrix: DateCell[][] = [];
@@ -105,28 +109,81 @@ export class DatePicker extends LitElement {
     };
   }
 
+  public focusDateCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.date-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  public isDateCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('date-cell');
+  }
+
   private _moveMonth(offset: number) {
     this._cursor.setMonth(this._cursor.getMonth() + offset);
     this._getMatrix();
   }
 
   private _getMatrix() {
-    this._matrix = getMonthMatrix(this._cursor).map(row =>
-      row.map(
-        date =>
-          ({
-            date,
-            label: date.getDate().toString(),
-            isToday: isToday(date),
-            notCurrentMonth: !isCurrentMonth(date, this._cursor),
-            selected: this.value ? isSameDay(date, toDate(this.value)) : false,
-          }) satisfies DateCell
-      )
+    this._matrix = getMonthMatrix(this._cursor).map(row => {
+      return row.map(date => {
+        const tabIndex = isSameDay(date, this._cursor) ? 0 : -1;
+        return {
+          date,
+          label: date.getDate().toString(),
+          isToday: isToday(date),
+          notCurrentMonth: !isSameMonth(date, this._cursor),
+          selected: this.value ? isSameDay(date, toDate(this.value)) : false,
+          tabIndex,
+        } satisfies DateCell;
+      });
+    });
+  }
+
+  override firstUpdated(): void {
+    this._disposables.addFromEvent(
+      this,
+      'keydown',
+      e => {
+        e.stopPropagation();
+        const directions = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+        if (directions.includes(e.key) && this.isDateCellFocused()) {
+          e.preventDefault();
+
+          if (e.key === 'ArrowLeft') {
+            this._cursor.setDate(this._cursor.getDate() - 1);
+          } else if (e.key === 'ArrowRight') {
+            this._cursor.setDate(this._cursor.getDate() + 1);
+          } else if (e.key === 'ArrowUp') {
+            this._cursor.setDate(this._cursor.getDate() - 7);
+          } else if (e.key === 'ArrowDown') {
+            this._cursor.setDate(this._cursor.getDate() + 7);
+          }
+          this._getMatrix();
+          setTimeout(this.focusDateCell.bind(this));
+        }
+
+        if (e.key === 'Tab') {
+          setTimeout(() => {
+            const focused = this.shadowRoot?.activeElement as HTMLElement;
+            const firstEl = this.shadowRoot?.querySelector('button');
+
+            // check if focus the last element, then focus the first element
+            if (!e.shiftKey && !focused) firstEl?.focus();
+            // check if focused element is inside current date-picker
+            if (e.shiftKey && !this.shadowRoot?.contains(focused))
+              this.focusDateCell();
+          });
+        }
+      },
+      true
     );
   }
 
   override updated(_changedProperties: PropertyValues): void {
-    if (_changedProperties.has('date')) {
+    if (_changedProperties.has('value')) {
       this._getMatrix();
     }
   }
@@ -140,18 +197,20 @@ export class DatePicker extends LitElement {
   /** Actions */
   private _actionHeaderRenderer() {
     return html`<div class="date-picker-header">
-      <div class="date-picker-header__date interactive">
+      <button class="date-picker-header__date interactive">
         <div>${this.monthLabel} ${this.yearLabel}</div>
         <div class="date-picker-small-action down">${arrowLeftIcon}</div>
-      </div>
+      </button>
       <div class="date-picker-header__action">
-        <div
+        <button
+          aria-label="previous month"
           class="date-picker-small-action interactive left"
           @click=${() => this._moveMonth(-1)}
         >
           ${arrowLeftIcon}
-        </div>
-        <div
+        </button>
+        <button
+          aria-label="today"
           class="action-label interactive"
           @click=${() => {
             this._cursor = new Date();
@@ -159,13 +218,14 @@ export class DatePicker extends LitElement {
           }}
         >
           TODAY
-        </div>
-        <div
+        </button>
+        <button
+          aria-label="next month"
           class="date-picker-small-action interactive right"
           @click=${() => this._moveMonth(1)}
         >
           ${arrowLeftIcon}
-        </div>
+        </button>
       </div>
     </div>`;
   }
@@ -186,8 +246,11 @@ export class DatePicker extends LitElement {
       'date-cell--not-curr-month': cell.notCurrentMonth,
       'date-cell--selected': !!cell.selected,
     });
-    return html`<div
-      data-date=${`${cell.date.getFullYear()}-${cell.date.getMonth()}`}
+    const dateRaw = `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}(${cell.date.getDay()})`;
+    return html`<button
+      tabindex=${cell.tabIndex}
+      aria-label=${dateRaw}
+      data-date=${dateRaw}
       class=${classes}
       @click=${() => {
         this.value = cell.date.getTime();
@@ -197,7 +260,7 @@ export class DatePicker extends LitElement {
       }}
     >
       ${cell.label}
-    </div>`;
+    </button>`;
   }
 
   private _weekRenderer(week: DateCell[]) {

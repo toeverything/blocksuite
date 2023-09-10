@@ -54,6 +54,8 @@ export const datePickerStyle = css`
     font-weight: 600;
     padding: 4px 6px;
     border-radius: 8px;
+    font-size: 14px;
+    line-height: 22px;
   }
   .date-picker-header__action {
     display: flex;
@@ -100,40 +102,65 @@ export const datePickerStyle = css`
     user-select: none;
     border-radius: 8px;
   }
+  .date-cell[data-date] {
+    font-weight: 400;
+    font-size: 14px;
+  }
   .date-cell.date-cell--not-curr-month {
     opacity: 0.1;
   }
   .date-cell.date-cell--today {
     color: var(--affine-primary-color);
+    font-weight: 600;
   }
   .date-cell.date-cell--selected {
     background: var(--affine-primary-color);
     color: var(--affine-pure-white);
-  }
-  .date-cell[data-date] {
-    font-weight: 400;
-    font-size: 14px;
+    font-weight: 500;
   }
 
   /** interactive  */
   .interactive {
     cursor: pointer;
-    transition: background 0.23s ease;
+    transition:
+      background 0.23s ease,
+      color 0.23s ease;
     user-select: none;
     position: relative;
+    border: none;
+    background-color: unset;
+    font-family: var(--affine-font-family);
   }
-  .interactive::after {
+  /* --hover */
+  .interactive::after,
+  .interactive::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
     opacity: 0;
-    background: currentColor;
-    transition: opacity 0.23s ease;
     pointer-events: none;
+    transition: opacity 0.23s ease;
+  }
+  .interactive::after {
+    background: currentColor;
   }
   .interactive:hover::after {
     opacity: 0.1;
     /* background: var(--affine-hover-color); */
+  }
+  /* --focus */
+  .interactive::before {
+    transition: none;
+    box-shadow: 0 0 0 3px var(--affine-primary-color);
+  }
+  /* .interactive:active, */
+  .interactive:focus-visible {
+    outline: none;
+    outline: 1px solid var(--affine-primary-color);
+  }
+  /* .interactive:active::before, */
+  .interactive:focus-visible::before {
+    opacity: 0.5;
   }
 `;

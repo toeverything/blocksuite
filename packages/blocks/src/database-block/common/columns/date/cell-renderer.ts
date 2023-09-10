@@ -99,6 +99,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
         datePicker.onChange = (date: Date) => {
           this._setValue(date.toISOString());
         };
+        setTimeout(() => datePicker.focusDateCell());
         return datePicker;
       },
     });

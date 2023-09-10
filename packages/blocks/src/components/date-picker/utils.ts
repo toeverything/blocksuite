@@ -66,12 +66,3 @@ export function getMonthMatrix(maybeDate: MaybeDate) {
   }
   return matrix;
 }
-
-export function isCurrentMonth(maybeDate?: MaybeDate, reference?: MaybeDate) {
-  const date = toDate(maybeDate);
-  const ref = toDate(reference);
-  return (
-    date.getFullYear() === ref.getFullYear() &&
-    date.getMonth() === ref.getMonth()
-  );
-}
