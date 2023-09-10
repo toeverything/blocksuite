@@ -67,6 +67,17 @@ export const datePickerStyle = css`
     font-size: 10px;
     padding: 2px;
     border-radius: 4px;
+    transition: all 0.23s ease;
+    max-width: 100px;
+  }
+  .date-picker-header__action .action-label > span {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   /** days header */
@@ -146,7 +157,7 @@ export const datePickerStyle = css`
     background: currentColor;
   }
   .interactive:hover::after {
-    opacity: 0.1;
+    opacity: 0.04;
     /* background: var(--affine-hover-color); */
   }
   /* --focus */
@@ -162,5 +173,42 @@ export const datePickerStyle = css`
   /* .interactive:active::before, */
   .interactive:focus-visible::before {
     opacity: 0.5;
+  }
+
+  /** Month Select */
+  .date-picker-month {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 32px;
+    justify-items: space-between;
+  }
+  .date-picker-month button {
+    height: 34px;
+    width: 64px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .date-picker-month button.active {
+    color: var(--affine-primary-color);
+    font-weight: 600;
+  }
+  .date-picker .date-picker-header {
+    padding: 0px;
+    transition: padding 0.23s ease;
+  }
+  .date-picker--show-month {
+    gap: 24px;
+  }
+  .date-picker--show-month .date-picker-header {
+    padding: 0 10px;
+  }
+  .date-picker--show-month button.today {
+    opacity: 0;
+    max-width: 0px;
+    padding: 0px;
   }
 `;
