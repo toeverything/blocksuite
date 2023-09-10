@@ -20,47 +20,6 @@ export function launchIntoFullscreen(element: Element) {
 }
 
 /**
- * @deprecated Use {@link whenHover} instead.
- */
-export const createDelayHoverSignal = (
-  abortController: AbortController,
-  hoverDelay = 300
-) => {
-  let hoverState = false;
-  let hoverTimeout = 0;
-
-  const onHover = () => {
-    if (abortController.signal.aborted) {
-      console.warn(
-        'AbortSignal has been aborted! Did you forget to remove the listener?'
-      );
-    }
-    if (!hoverState) {
-      hoverState = true;
-      // abortController.signal.dispatchEvent(new Event('hover'));
-    }
-    clearTimeout(hoverTimeout);
-  };
-  const onHoverLeave = () => {
-    if (abortController.signal.aborted) {
-      console.warn(
-        'AbortSignal has been aborted! Did you forget to remove the listener?'
-      );
-    }
-    clearTimeout(hoverTimeout);
-    hoverTimeout = window.setTimeout(() => {
-      abortController.abort();
-      hoverState = false;
-      // abortController.signal.dispatchEvent(new Event('hoverleave'));
-    }, hoverDelay);
-  };
-  return {
-    onHover,
-    onHoverLeave,
-  };
-};
-
-/**
  * Call the `whenHoverChange` callback when the element is hovered.
  *
  * After the mouse leaves the element, there is a 300ms delay by default.
