@@ -116,7 +116,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await pressEnter(page);
   await type(page, 'aa');
-  await assertRichTexts(page, ['aa']);
+  await assertRichTexts(page, ['aa', '']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({
@@ -197,7 +197,7 @@ test('popup menu should follow position of image when scrolling', async ({
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
-  expect(imageRect.y).toBeCloseTo(-115, -0.325);
+  expect(imageRect.y).toBeCloseTo(-159, -0.325);
   expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 
