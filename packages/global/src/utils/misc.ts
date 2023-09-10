@@ -67,7 +67,7 @@ export const createDelayHoverSignal = (
  *
  * After the mouse leaves the element, there is a 300ms delay by default.
  *
- * Note: The callback may be called multiple times when the mouse is hovering.
+ * Note: The callback may be called multiple times when the mouse is hovering or hovering out.
  *
  * See also https://floating-ui.com/docs/useHover
  *
@@ -95,7 +95,7 @@ export const createDelayHoverSignal = (
  * ```
  */
 export const whenHover = (
-  whenHoverChange: (isHover: boolean) => void,
+  whenHoverChange: (isHover: boolean, event?: Event) => void,
   {
     leaveDelay = 300,
     alwayRunWhenNoFloating = true,
@@ -113,11 +113,11 @@ export const whenHover = (
   let referenceElement: Element | undefined;
   let floatingElement: Element | undefined;
 
-  const onHover = () => {
+  const onHover = (e: Event) => {
     clearTimeout(hoverTimeout);
     if (!hoverState) {
       hoverState = true;
-      whenHoverChange(true);
+      whenHoverChange(true, e);
       return;
     }
     // Already hovered
@@ -127,15 +127,15 @@ export const whenHover = (
     ) {
       // But the floating element is not ready
       // so we need to run the callback still
-      whenHoverChange(true);
+      whenHoverChange(true, e);
     }
   };
 
-  const onHoverLeave = () => {
+  const onHoverLeave = (e: Event) => {
     clearTimeout(hoverTimeout);
     hoverTimeout = window.setTimeout(() => {
       hoverState = false;
-      whenHoverChange(false);
+      whenHoverChange(false, e);
     }, leaveDelay);
   };
 
