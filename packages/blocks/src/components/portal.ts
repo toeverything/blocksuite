@@ -155,7 +155,7 @@ export function createSimplePortal({
 }
 
 type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
-  abortController?: AbortController;
+  abortController: AbortController;
   template:
     | Renderable
     | ((context: {
@@ -209,7 +209,7 @@ type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
  */
 export function createLitPortal({
   computePosition: computePositionOptions,
-  abortController = new AbortController(),
+  abortController,
   closeOnClickAway = false,
   ...portalOptions
 }: AdvancedPortalOptions) {
