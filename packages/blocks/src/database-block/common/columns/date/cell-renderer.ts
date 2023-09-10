@@ -32,6 +32,10 @@ export class DateCell extends BaseCellRenderer<number> {
       line-height: var(--data-view-cell-text-line-height);
       height: var(--data-view-cell-text-line-height);
     }
+
+    input.affine-database-date[type='date']::-webkit-calendar-picker-indicator {
+      display: none;
+    }
   `;
 
   override render() {
@@ -80,12 +84,18 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   }
 
   private _onFocus = () => {
+    if (
+      this._prevPortalAbortController &&
+      !this._prevPortalAbortController.signal.aborted
+    )
+      return;
+
     // this._inputEle.showPicker();
     this._prevPortalAbortController?.abort();
     const abortController = new AbortController();
     this._prevPortalAbortController = abortController;
 
-    createLitPortal({
+    const root = createLitPortal({
       abortController,
       closeOnClickAway: true,
       computePosition: {
@@ -103,6 +113,11 @@ export class DateCellEditing extends BaseCellRenderer<number> {
         return datePicker;
       },
     });
+    // TODO: use z-index from variable,
+    //       for now the slide-layout-modal's z-index is `1001`
+    //       the z-index of popover should be higher than it
+    // root.style.zIndex = 'var(--affine-z-index-popover)';
+    root.style.zIndex = '1002';
   };
 
   override render() {
