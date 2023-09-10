@@ -41,15 +41,17 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   constructor() {
     super();
-    let abortController = new AbortController();
+    let abortController: AbortController | null = null;
+    let optionPortal: HTMLElement | null = null;
 
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       if (!isHover) {
-        abortController.abort();
+        abortController?.abort();
         return;
       }
+      if (optionPortal?.isConnected) return;
       abortController = new AbortController();
-      createLitPortal({
+      optionPortal = createLitPortal({
         template: AttachmentOptionsTemplate({
           ref: setFloating,
           anchor: this,
