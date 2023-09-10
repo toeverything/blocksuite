@@ -1,3 +1,4 @@
+import type { Point } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
   BlockHub,
@@ -6,15 +7,14 @@ import {
   getEdgelessPage,
   getServiceOrRegister,
   PAGE_BLOCK_PADDING_BOTTOM,
+  Rect,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
   getClosestNoteBlockElementById,
   getHoveringNote,
-  type Point,
-  Rect,
-} from '@blocksuite/blocks/std';
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 

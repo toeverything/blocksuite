@@ -73,6 +73,9 @@ export const moreMenuStyles = css`
     padding: 8px;
     gap: 8px;
   }
+  .affine-attachment-options-more icon-button[hidden] {
+    display: none;
+  }
 
   .affine-attachment-options-more icon-button:hover.danger {
     background: var(--affine-background-error-color);

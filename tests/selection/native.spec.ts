@@ -1006,14 +1006,6 @@ test('should add a new line when clicking the bottom of the last non-text block'
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();
 
-  const rect = await page.evaluate(() => {
-    const secondRichText = document.querySelector('affine-code');
-    if (!secondRichText) {
-      throw new Error();
-    }
-
-    return secondRichText.getBoundingClientRect();
-  });
   await type(page, 'ABC');
   await waitNextFrame(page);
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
@@ -1519,7 +1511,7 @@ test('should select when clicking on blank area in edgeless mode', async ({
     throw new Error();
   }
 
-  await click(page, { x: r3.x - 1, y: r3.y + r3.height + 5 });
+  await click(page, { x: r3.x + 40, y: r3.y + 5 });
   await waitNextFrame(page);
 
   expect(await getVirgoSelectionText(page)).toBe('789');

@@ -6,7 +6,6 @@ import '@blocksuite/editor/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { AffineSchemas } from '@blocksuite/blocks/models';
-import std from '@blocksuite/blocks/std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProviderCreator, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
@@ -166,7 +165,6 @@ async function main() {
   window.blockSchemas = AffineSchemas;
   window.job = new Job({ workspace });
   window.Y = Workspace.Y;
-  window.std = std;
   window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'root', {
     get() {

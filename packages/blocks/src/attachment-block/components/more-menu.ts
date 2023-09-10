@@ -32,7 +32,7 @@ export const MoreMenu = ({
         width="126px"
         height="32px"
         text="Duplicate"
-        ?disabled=${readonly}
+        ?hidden=${readonly}
         @click="${() => {
           const prop = {
             flavour: 'affine:attachment',
@@ -48,7 +48,7 @@ export const MoreMenu = ({
         height="32px"
         text="Delete"
         class="danger"
-        ?disabled=${readonly}
+        ?hidden=${readonly}
         @click="${() => {
           model.page.deleteBlock(model);
           abortController.abort();

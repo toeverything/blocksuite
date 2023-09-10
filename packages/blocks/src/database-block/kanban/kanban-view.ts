@@ -10,7 +10,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
-import type { KanbanViewSelection } from '../../__internal__/index.js';
+import type { KanbanViewSelectionWithType } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
@@ -27,12 +27,15 @@ import { KanbanSelection } from './selection.js';
 const styles = css`
   affine-data-view-kanban {
     user-select: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .affine-data-view-kanban-groups {
     display: flex;
     gap: 20px;
-    overflow-x: auto;
+    overflow: auto;
   }
 
   .add-group-icon {
@@ -58,7 +61,7 @@ const styles = css`
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends BaseDataView<
   DataViewKanbanManager,
-  KanbanViewSelection
+  KanbanViewSelectionWithType
 > {
   static override styles = styles;
 
@@ -75,7 +78,9 @@ export class DataViewKanban extends BaseDataView<
         this.requestUpdate();
       })
     );
-    this._disposables.add(this.selection.run());
+    this.selection
+      .run()
+      .forEach(disposable => this._disposables.add(disposable));
     this._disposables.add(this.hotkeys.run());
 
     // init clipboard

@@ -61,6 +61,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -114,6 +118,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -166,6 +174,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -218,6 +230,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -270,6 +286,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -326,6 +346,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -380,6 +404,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: vRange.index + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 

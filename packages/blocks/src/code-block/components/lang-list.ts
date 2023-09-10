@@ -121,10 +121,6 @@ export class LangList extends LitElement {
 
   override async connectedCallback() {
     super.connectedCallback();
-    // Avoid triggering click away listener on initial render
-    setTimeout(() =>
-      document.addEventListener('click', this._clickAwayListener)
-    );
 
     setTimeout(() => {
       this.filterInput?.focus();
@@ -133,15 +129,8 @@ export class LangList extends LitElement {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    document.removeEventListener('click', this._clickAwayListener);
-  }
-
-  private _clickAwayListener = (e: Event) => {
-    if (this.renderRoot.parentElement?.contains(e.target as Node)) {
-      return;
-    }
     this.onClose?.();
-  };
+  }
 
   private _onLanguageClicked(language: ILanguageRegistration | null) {
     this.onSelectLanguage?.(language);

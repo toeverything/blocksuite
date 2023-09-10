@@ -1,7 +1,7 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page, Text } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
@@ -21,9 +21,6 @@ export abstract class BaseDataView<
   header!: UniComponent<{ viewMethods: DataViewExpose; view: T }>;
   @property({ attribute: false })
   view!: T;
-
-  @property({ attribute: false })
-  titleText!: Text;
 
   @property({ attribute: false })
   bindHotkey!: (hotkeys: Record<string, UIEventHandler>) => Disposable;

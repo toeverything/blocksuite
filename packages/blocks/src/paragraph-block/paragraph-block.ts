@@ -1,9 +1,9 @@
 import '../__internal__/rich-text/rich-text.js';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { css, html, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
@@ -212,6 +212,12 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     // Initial placeholder state
@@ -294,7 +300,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     return false;
   };
 
-  override render() {
+  override render(): TemplateResult<1> {
     const { type } = this.model;
 
     // hide placeholder in database
@@ -318,6 +324,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
+            .vRangeProvider=${getVRangeProvider(this)}
             @focusin=${this._onFocusIn}
             @focusout=${this._onFocusOut}
             style=${styleMap({

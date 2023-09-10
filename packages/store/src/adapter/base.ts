@@ -13,18 +13,14 @@ export type PageSnapshotReturn = PageSnapshotPayload;
 export type BlockSnapshotReturn = BlockSnapshotPayload;
 
 export abstract class BaseAdapter<AdapterTarget> {
-  abstract convertPageSnapshotToAdapterTarget({
+  abstract fromPageSnapshot({
     snapshot,
     assets,
   }: PageSnapshotPayload): Promise<AdapterTarget>;
-  abstract convertBlockSnapshotToAdapterTarget({
+  abstract fromBlockSnapshot({
     snapshot,
     assets,
   }: BlockSnapshotPayload): Promise<AdapterTarget>;
-  abstract convertAdapterTargetToPageSnapshot(
-    file: AdapterTarget
-  ): Promise<PageSnapshotReturn>;
-  abstract convertAdapterTargetToBlockSnapshot(
-    file: AdapterTarget
-  ): Promise<BlockSnapshotReturn>;
+  abstract toPageSnapshot(file: AdapterTarget): Promise<PageSnapshotReturn>;
+  abstract toBlockSnapshot(file: AdapterTarget): Promise<BlockSnapshotReturn>;
 }

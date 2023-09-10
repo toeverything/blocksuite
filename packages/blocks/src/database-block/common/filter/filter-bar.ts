@@ -4,9 +4,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { createPopup, eventToVRect } from '../../../components/menu/index.js';
-import { defineComponent } from '../../../components/uni-component/uni-component.js';
+import { renderTemplate } from '../../../components/uni-component/uni-component.js';
 import { AddCursorIcon, CrossIcon, FilterIcon } from '../../../icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
+import type { DataViewManager } from '../data-view-manager.js';
 import { popCreateFilter } from '../ref/ref.js';
 import { popFilterModal } from './filter-modal.js';
 
@@ -110,7 +111,7 @@ export class FilterBar extends WithDisposable(ShadowlessElement) {
   updateMoreFilterPanel?: () => void;
 
   showMoreFilter(e: MouseEvent) {
-    const ins = defineComponent(this.renderMoreFilter);
+    const ins = renderTemplate(this.renderMoreFilter);
     ins.style.position = 'absolute';
     this.updateMoreFilterPanel = () => {
       if (this.data.conditions.length <= 2) {
@@ -206,3 +207,13 @@ declare global {
     'filter-bar': FilterBar;
   }
 }
+export const renderFilterBar = (view?: DataViewManager) => {
+  if (!view || !view.filterVisible) {
+    return;
+  }
+  return html`<filter-bar
+    .vars=${view.vars}
+    .data=${view.filter}
+    .setData=${view.updateFilter.bind(view)}
+  ></filter-bar>`;
+};
