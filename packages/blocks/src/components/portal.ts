@@ -84,7 +84,7 @@ type Renderable =
 
 type PortalOptions = {
   template: Renderable | ((ctx: { updatePortal: () => void }) => Renderable);
-  container?: HTMLElement;
+  container?: Element;
   /**
    * The portal is removed when the AbortSignal is aborted.
    */
