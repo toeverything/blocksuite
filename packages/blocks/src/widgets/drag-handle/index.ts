@@ -39,6 +39,8 @@ import {
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   type IndicatorRect,
   NOTE_CONTAINER_PADDING,
+  type OptionRegistration,
+  OptionsRunner,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
@@ -56,6 +58,8 @@ import {
 @customElement('affine-drag-handle-widget')
 export class DragHandleWidget extends WidgetElement {
   static override styles = styles;
+
+  static optionRunner = new OptionsRunner();
 
   @query('.affine-drag-handle-container')
   private _dragHandleContainer!: HTMLDivElement;
@@ -93,6 +97,14 @@ export class DragHandleWidget extends WidgetElement {
   private _rafID = 0;
   private _anchorModelDisposables: DisposableGroup | null = null;
   private _lastDragPointerState: PointerEventState | null = null;
+
+  get optionRunner() {
+    return DragHandleWidget.optionRunner;
+  }
+
+  registerOption(option: OptionRegistration) {
+    this.optionRunner.add(option);
+  }
 
   protected get _selectedBlocks() {
     return this.root.selectionManager.find('text')
@@ -755,11 +767,7 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
-  /**
-   * When start dragging, should set dragging elements and create drag preview
-   */
-  private _dragStartHandler: UIEventHandler = ctx => {
-    const state = ctx.get('pointerState');
+  private _onDragStart = (state: PointerEventState) => {
     const event = state.raw;
     const { target, button } = event;
     const element = captureEventTarget(target);
@@ -772,7 +780,7 @@ export class DragHandleWidget extends WidgetElement {
       !this._hoveredBlockId ||
       !this._hoveredBlockPath
     ) {
-      return;
+      return false;
     }
 
     // Get current hover block element by path
@@ -781,7 +789,7 @@ export class DragHandleWidget extends WidgetElement {
       this._hoveredBlockPath
     );
     if (!hoverBlockElement) {
-      return;
+      return false;
     }
 
     let selections = this._selectedBlocks;
@@ -844,37 +852,10 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
-  /**
-   * When dragging, should:
-   * Update drag preview position
-   * Update indicator position
-   * Update drop block id
-   */
-  private _dragMoveHandler: UIEventHandler = ctx => {
-    if (!this._dragging || this._draggingElements.length === 0) {
-      return;
-    }
-
-    this._clearRaf();
-    ctx.get('defaultState').event.preventDefault();
-    const state = ctx.get('pointerState');
-    this._rafID = requestAnimationFrame(() =>
-      this._updateIndicator(state, true)
-    );
-
-    return true;
-  };
-
-  /**
-   * When drag end, should move blocks to drop position
-   * @returns
-   */
-  private _dragEndHandler: UIEventHandler = () => {
-    this._clearRaf();
-    this._removeDragPreview();
+  private _onDragEnd = () => {
     if (!this._dragging || this._draggingElements.length === 0) {
       this._hide(true);
-      return;
+      return false;
     }
 
     const targetBlockId = this._dropBlockId;
@@ -882,7 +863,7 @@ export class DragHandleWidget extends WidgetElement {
     const draggingElements = this._draggingElements;
 
     this._hide(true);
-    if (!targetBlockId) return;
+    if (!targetBlockId) return false;
 
     // Should make sure drop block id is not in selected blocks
     if (
@@ -891,7 +872,7 @@ export class DragHandleWidget extends WidgetElement {
         targetBlockId
       )
     ) {
-      return;
+      return false;
     }
 
     const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
@@ -932,6 +913,61 @@ export class DragHandleWidget extends WidgetElement {
     return true;
   };
 
+  /**
+   * When start dragging, should set dragging elements and create drag preview
+   */
+  private _dragStartHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+
+    for (const option of this.optionRunner.options) {
+      if (option.onDragStart(state)) return true;
+    }
+
+    // call default drag start handler if no option return true
+    return this._onDragStart(state);
+  };
+
+  /**
+   * When dragging, should:
+   * Update drag preview position
+   * Update indicator position
+   * Update drop block id
+   */
+  private _dragMoveHandler: UIEventHandler = ctx => {
+    if (!this._dragging || this._draggingElements.length === 0) {
+      return false;
+    }
+
+    this._clearRaf();
+    ctx.get('defaultState').event.preventDefault();
+    const state = ctx.get('pointerState');
+    this._rafID = requestAnimationFrame(() =>
+      this._updateIndicator(state, true)
+    );
+
+    return true;
+  };
+
+  /**
+   * When drag end, should move blocks to drop position
+   * @returns
+   */
+  private _dragEndHandler: UIEventHandler = ctx => {
+    const state = ctx.get('pointerState');
+    this._clearRaf();
+    this._removeDragPreview();
+
+    for (const option of this.optionRunner.options) {
+      if (option.onDragEnd(state)) {
+        this._hide(true);
+        return true;
+      }
+    }
+
+    //call default drag end handler if no option return true
+    return this._onDragEnd();
+  };
+
   private _pointerOutHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
     state.raw.preventDefault();
@@ -954,6 +990,65 @@ export class DragHandleWidget extends WidgetElement {
     }
   };
 
+  private _onDragHandleHover = () => {
+    if (!this._hoveredBlockPath || !this._dragHandleGrabber) return;
+
+    const blockElement = this._getBlockElementFromViewStore(
+      this._hoveredBlockPath
+    );
+    if (!blockElement) return;
+
+    const draggingAreaRect = this._getDraggingAreaRect(blockElement);
+    if (!draggingAreaRect) return;
+
+    const padding = 8 * this._scale;
+    this._dragHandleContainer.style.paddingTop = `${padding}px`;
+    this._dragHandleContainer.style.paddingBottom = `${padding}px`;
+    this._dragHandleContainer.style.transition = `padding 0.25s ease`;
+
+    this._dragHandleGrabber.style.width = `${
+      HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
+    }px`;
+    this._dragHandleGrabber.style.borderRadius = `${
+      DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
+    }px`;
+
+    this._hoverDragHandle = true;
+  };
+
+  private _onDragHandlePointerDown = () => {
+    if (!this._hoveredBlockPath || !this._dragHandleGrabber) return;
+
+    const blockElement = this._getBlockElementFromViewStore(
+      this._hoveredBlockPath
+    );
+    if (!blockElement) return;
+    this._dragHandlePointerDown = true;
+
+    // Show drag hover rect only when pointer down on drag handle for a while
+    // Do not show when just click on drag handle
+    setTimeout(() => {
+      if (this._dragHandlePointerDown) {
+        this._dragHoverRect = this._getDraggingAreaRect(blockElement) ?? null;
+      }
+    }, 100);
+  };
+
+  private _onDragHandlePointerLeave = () => {
+    if (this._dragHandlePointerDown) this._removeHoverRect();
+
+    if (!this._hoveredBlockPath) return;
+
+    const blockElement = this._getBlockElementFromViewStore(
+      this._hoveredBlockPath
+    );
+    if (!blockElement) return;
+
+    if (this._dragging) return;
+    this._show(blockElement);
+    this._hoverDragHandle = false;
+  };
+
   override firstUpdated() {
     this._hide(true);
 
@@ -962,54 +1057,13 @@ export class DragHandleWidget extends WidgetElement {
     this._disposables.addFromEvent(
       this._dragHandleContainer,
       'pointerenter',
-      () => {
-        if (!this._hoveredBlockPath || !this._dragHandleGrabber) return;
-
-        const blockElement = this._getBlockElementFromViewStore(
-          this._hoveredBlockPath
-        );
-        if (!blockElement) return;
-
-        const draggingAreaRect = this._getDraggingAreaRect(blockElement);
-        if (!draggingAreaRect) return;
-
-        const padding = 8 * this._scale;
-        this._dragHandleContainer.style.paddingTop = `${padding}px`;
-        this._dragHandleContainer.style.paddingBottom = `${padding}px`;
-        this._dragHandleContainer.style.transition = `padding 0.25s ease`;
-
-        this._dragHandleGrabber.style.width = `${
-          HOVER_DRAG_HANDLE_GRABBER_WIDTH * this._scale
-        }px`;
-        this._dragHandleGrabber.style.borderRadius = `${
-          DRAG_HANDLE_GRABBER_BORDER_RADIUS * this._scale
-        }px`;
-
-        this._hoverDragHandle = true;
-      }
+      this._onDragHandleHover
     );
 
     this._disposables.addFromEvent(
       this._dragHandleContainer,
       'pointerdown',
-      () => {
-        if (!this._hoveredBlockPath || !this._dragHandleGrabber) return;
-
-        const blockElement = this._getBlockElementFromViewStore(
-          this._hoveredBlockPath
-        );
-        if (!blockElement) return;
-        this._dragHandlePointerDown = true;
-
-        // Show drag hover rect only when pointer down on drag handle for a while
-        // Do not show when just click on drag handle
-        setTimeout(() => {
-          if (this._dragHandlePointerDown) {
-            this._dragHoverRect =
-              this._getDraggingAreaRect(blockElement) ?? null;
-          }
-        }, 100);
-      }
+      this._onDragHandlePointerDown
     );
 
     this._disposables.addFromEvent(
@@ -1024,20 +1078,7 @@ export class DragHandleWidget extends WidgetElement {
     this._disposables.addFromEvent(
       this._dragHandleContainer,
       'pointerleave',
-      () => {
-        if (this._dragHandlePointerDown) this._removeHoverRect();
-
-        if (!this._hoveredBlockPath) return;
-
-        const blockElement = this._getBlockElementFromViewStore(
-          this._hoveredBlockPath
-        );
-        if (!blockElement) return;
-
-        if (this._dragging) return;
-        this._show(blockElement);
-        this._hoverDragHandle = false;
-      }
+      this._onDragHandlePointerLeave
     );
 
     if (isEdgelessPage(this._pageBlockElement)) {
@@ -1061,7 +1102,9 @@ export class DragHandleWidget extends WidgetElement {
         docPage.slots.viewportUpdated.on(() => this._hide())
       );
 
-      this._disposables.addFromEvent(docPage.viewportElement, 'scroll', () => {
+      const viewportElement = docPage.viewportElement;
+      assertExists(viewportElement);
+      this._disposables.addFromEvent(viewportElement, 'scroll', () => {
         this._scrollToUpdateIndicator();
       });
     }

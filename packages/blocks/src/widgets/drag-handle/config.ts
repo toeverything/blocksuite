@@ -1,3 +1,5 @@
+import type { PointerEventState } from '@blocksuite/block-std';
+
 export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 2;
 export const DRAG_HANDLE_GRABBER_HEIGHT = 12;
@@ -20,3 +22,16 @@ export type DropIndicator = {
   dropBlockId: string;
   dropBefore: boolean;
 };
+
+export type OptionRegistration = {
+  onDragStart: (state: PointerEventState) => boolean;
+  onDragEnd: (state: PointerEventState) => boolean;
+};
+
+export class OptionsRunner {
+  options: OptionRegistration[] = [];
+
+  add(registration: OptionRegistration) {
+    this.options.push(registration);
+  }
+}
