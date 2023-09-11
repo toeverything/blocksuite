@@ -75,7 +75,7 @@ export class DragHandleWidget extends WidgetElement {
   indicatorRect: IndicatorRect | null = null;
 
   draggingElements: BlockElement[] = [];
-  dragging = false;
+  optionRunnerDragging = false;
   dropBlockId = '';
   dropBefore = false;
   lastDragPointerState: PointerEventState | null = null;
@@ -343,7 +343,7 @@ export class DragHandleWidget extends WidgetElement {
 
   private _reset() {
     this.draggingElements = [];
-    this.dragging = false;
+    this.optionRunnerDragging = false;
     this.indicatorRect = null;
     this.dropBlockId = '';
     this.dropBefore = false;
@@ -696,7 +696,7 @@ export class DragHandleWidget extends WidgetElement {
     const { target } = state.raw;
     const element = captureEventTarget(target);
     // WHen pointer not on block or on dragging, should do nothing
-    if (!element || this._defaultDragging || this.dragging) {
+    if (!element || this._defaultDragging || this.optionRunnerDragging) {
       return;
     }
 
@@ -929,7 +929,7 @@ export class DragHandleWidget extends WidgetElement {
 
     for (const option of this.optionRunner.options) {
       if (option.onDragStart(state)) {
-        this.dragging = true;
+        this.optionRunnerDragging = true;
         this._hide();
         return true;
       }
@@ -952,7 +952,11 @@ export class DragHandleWidget extends WidgetElement {
     this._updateDragPreviewPosition(this._dragPreview, state);
 
     for (const option of this.optionRunner.options) {
-      if (option.onDragMove(state, () => this.getDropIndicator(state)))
+      if (
+        option.onDragMove(state, this.optionRunnerDragging, () =>
+          this.getDropIndicator(state)
+        )
+      )
         return true;
     }
 
@@ -969,7 +973,7 @@ export class DragHandleWidget extends WidgetElement {
     this._removeDragPreview();
 
     for (const option of this.optionRunner.options) {
-      if (option.onDragEnd(state)) {
+      if (option.onDragEnd(state, this.optionRunnerDragging)) {
         this._hide(true);
         return true;
       }
@@ -1055,7 +1059,7 @@ export class DragHandleWidget extends WidgetElement {
     );
     if (!blockElement) return;
 
-    if (this._defaultDragging || this.dragging) return;
+    if (this._defaultDragging || this.optionRunnerDragging) return;
     this._show(blockElement);
     this._hoverDragHandle = false;
   };

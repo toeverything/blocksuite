@@ -28,9 +28,10 @@ export type DragHandleOption = {
   onDragStart: (state: PointerEventState) => boolean;
   onDragMove: (
     state: PointerEventState,
+    dragging: boolean,
     getDropIndicator: () => DropIndicator | null
   ) => boolean;
-  onDragEnd: (state: PointerEventState) => boolean;
+  onDragEnd: (state: PointerEventState, dragging: boolean) => boolean;
 };
 
 export class DragHandleOptionsRunner {
