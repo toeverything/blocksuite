@@ -260,58 +260,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _setReference: RefOrCallback;
-  constructor() {
-    super();
-    let abortController = new AbortController();
-    // Call abort() because the portal has not been created yet
-    abortController.abort();
-    const { setReference, setFloating, dispose } = whenHover(isHover => {
-      if (!isHover) {
-        abortController.abort();
-        return;
-      }
-      if (!abortController.signal.aborted) return;
-      abortController = new AbortController();
-
-      createLitPortal({
-        template: ({ updatePortal }) =>
-          CodeOptionTemplate({
-            ref: setFloating,
-            anchor: this,
-            model: this.model,
-            wrap: this._wrap,
-            onClickWrap: () => {
-              this._onClickWrapBtn();
-              updatePortal();
-            },
-            abortController,
-          }),
-        computePosition: {
-          referenceElement: this,
-          placement: 'right-start',
-          middleware: [
-            offset({
-              mainAxis: 12,
-              crossAxis: 10,
-            }),
-            shift({
-              crossAxis: true,
-              padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
-                bottom: 12,
-                right: 12,
-              },
-            }),
-          ],
-          autoUpdate: true,
-        },
-        abortController,
-      });
-    });
-    this._setReference = setReference;
-    this.disposables.add(dispose);
-  }
+  private _setReference?: RefOrCallback;
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -349,6 +298,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
+    this._addHoverToolbar();
     bindContainerHotkey(this);
 
     const selectionManager = this.root.selectionManager;
@@ -512,6 +462,57 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     assertExists(richText);
     this._richTextResizeObserver.disconnect();
     this._richTextResizeObserver.observe(richText);
+  }
+
+  private _addHoverToolbar() {
+    let abortController = new AbortController();
+    // Call abort() because the portal has not been created yet
+    abortController.abort();
+    const { setReference, setFloating, dispose } = whenHover(isHover => {
+      if (!isHover) {
+        abortController.abort();
+        return;
+      }
+      if (!abortController.signal.aborted) return;
+      abortController = new AbortController();
+
+      createLitPortal({
+        template: ({ updatePortal }) =>
+          CodeOptionTemplate({
+            ref: setFloating,
+            anchor: this,
+            model: this.model,
+            wrap: this._wrap,
+            onClickWrap: () => {
+              this._onClickWrapBtn();
+              updatePortal();
+            },
+            abortController,
+          }),
+        computePosition: {
+          referenceElement: this,
+          placement: 'right-start',
+          middleware: [
+            offset({
+              mainAxis: 12,
+              crossAxis: 10,
+            }),
+            shift({
+              crossAxis: true,
+              padding: {
+                top: PAGE_HEADER_HEIGHT + 12,
+                bottom: 12,
+                right: 12,
+              },
+            }),
+          ],
+          autoUpdate: true,
+        },
+        abortController,
+      });
+    });
+    this._setReference = setReference;
+    this.disposables.add(dispose);
   }
 
   private _onClickWrapBtn() {

@@ -37,10 +37,35 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
-  private _setReference: RefOrCallback;
+  private _setReference?: RefOrCallback;
 
-  constructor() {
-    super();
+  override connectedCallback() {
+    super.connectedCallback();
+    if (this.model.caption) {
+      this._showCaption = true;
+    }
+    this._checkAttachment();
+    this._addHoverToolbar();
+  }
+
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('sourceId')) {
+      this._checkAttachment();
+    }
+    super.willUpdate(changedProperties);
+  }
+
+  // Check if the attachment is available
+  private async _checkAttachment() {
+    const storage = this.page.blobs;
+    const sourceId = this.model.sourceId;
+    if (!sourceId) return;
+    if (!(await hasBlob(storage, sourceId))) {
+      this._error = true;
+    }
+  }
+
+  private _addHoverToolbar() {
     let abortController: AbortController | null = null;
     let optionPortal: HTMLElement | null = null;
 
@@ -75,31 +100,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     });
     this._setReference = setReference;
     this.disposables.add(dispose);
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    if (this.model.caption) {
-      this._showCaption = true;
-    }
-    this._checkAttachment();
-  }
-
-  override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('sourceId')) {
-      this._checkAttachment();
-    }
-    super.willUpdate(changedProperties);
-  }
-
-  // Check if the attachment is available
-  private async _checkAttachment() {
-    const storage = this.page.blobs;
-    const sourceId = this.model.sourceId;
-    if (!sourceId) return;
-    if (!(await hasBlob(storage, sourceId))) {
-      this._error = true;
-    }
   }
 
   private _focusAttachment() {

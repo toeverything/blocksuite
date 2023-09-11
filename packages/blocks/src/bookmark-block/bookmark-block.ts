@@ -193,10 +193,32 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return this._isLoading;
   }
 
-  private _setReference: RefOrCallback;
-  constructor() {
-    super();
+  private _setReference?: RefOrCallback;
 
+  override firstUpdated() {
+    this.model.propsUpdated.on(() => this.requestUpdate());
+
+    this.updateComplete.then(() => {
+      this._caption = this.model?.caption ?? '';
+
+      if (this._caption) {
+        // Caption input should be toggled manually.
+        // However, it will be lost if the caption is deleted into empty state.
+        this._input.classList.add('caption-show');
+      }
+    });
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    reloadBookmarkBlock(this.model, this);
+    this.slots.openInitialModal.on(() => {
+      this._showCreateModal = true;
+    });
+    this._addHoverToolbar();
+  }
+
+  private _addHoverToolbar() {
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       if (!isHover) {
         this._optionsAbortController?.abort();
@@ -226,28 +248,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     });
     this._setReference = setReference;
     this.disposables.add(dispose);
-  }
-
-  override firstUpdated() {
-    this.model.propsUpdated.on(() => this.requestUpdate());
-
-    this.updateComplete.then(() => {
-      this._caption = this.model?.caption ?? '';
-
-      if (this._caption) {
-        // Caption input should be toggled manually.
-        // However, it will be lost if the caption is deleted into empty state.
-        this._input.classList.add('caption-show');
-      }
-    });
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    reloadBookmarkBlock(this.model, this);
-    this.slots.openInitialModal.on(() => {
-      this._showCreateModal = true;
-    });
   }
 
   private _onInputChange() {

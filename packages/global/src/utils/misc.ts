@@ -32,7 +32,7 @@ export function launchIntoFullscreen(element: Element) {
  * ```ts
  * private _setReference: RefOrCallback;
  *
- * constructor() {
+ * connectedCallback() {
  *   let hoverTip: HTMLElement | null = null;
  *   const { setReference, setFloating } = whenHover(isHover => {
  *     if (!isHover) {
