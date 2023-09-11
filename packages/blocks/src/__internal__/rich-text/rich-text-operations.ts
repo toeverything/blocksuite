@@ -270,7 +270,7 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
  * ```
  * Refer to https://github.com/toeverything/AFFiNE/blob/b59b010decb9c5decd9e3090f1a417696ce86f54/libs/components/editor-blocks/src/utils/indent.ts#L23-L122
  */
-export function handleUnindent(
+export function handleOutdent(
   page: Page,
   model: ExtendedModel,
   offset = 0,
@@ -331,32 +331,58 @@ export function handleUnindent(
   asyncSetVRange(model, { index: offset, length: 0 });
 }
 
-export function handleMultiBlockUnindent(page: Page, models: BaseBlockModel[]) {
+export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
   if (!models.length) return;
 
-  // Find the first model that can be unindented
-  let firstUnindentIndex = -1;
+  // Find the first model that can be outdented
+  let firstOutdentIndex = -1;
   let firstParent: BaseBlockModel | null;
   for (let i = 0; i < models.length; i++) {
     firstParent = page.getParent(models[i]);
     if (firstParent && !matchFlavours(firstParent, ['affine:note'])) {
-      firstUnindentIndex = i;
+      firstOutdentIndex = i;
       break;
     }
   }
 
-  // Find all the models that can be unindented
-  const unindentModels = models.slice(firstUnindentIndex);
+  // Find all the models that can be outdented
+  const outdentModels = models.slice(firstOutdentIndex);
   // Form bottom to top
-  // Only unindent the models which parent is not in the unindentModels
-  // When parent is in the unindentModels
-  // It means that children will be unindented with their parent
-  for (let i = unindentModels.length - 1; i >= 0; i--) {
-    const model = unindentModels[i];
+  // Only outdent the models which parent is not in the outdentModels
+  // When parent is in the outdentModels
+  // It means that children will be outdented with their parent
+  for (let i = outdentModels.length - 1; i >= 0; i--) {
+    const model = outdentModels[i];
     const parent = page.getParent(model);
     assertExists(parent);
-    if (!unindentModels.includes(parent)) {
-      handleUnindent(page, model);
+    if (!outdentModels.includes(parent)) {
+      handleOutdent(page, model);
+    }
+  }
+}
+
+export function handleRemoveAllIndent(
+  page: Page,
+  model: ExtendedModel,
+  offset = 0
+) {
+  let parent = page.getParent(model);
+  while (parent && !matchFlavours(parent, ['affine:note'])) {
+    handleOutdent(page, model, offset);
+    parent = page.getParent(model);
+  }
+}
+
+export function handleRemoveAllIndentForMultiBlocks(
+  page: Page,
+  models: BaseBlockModel[]
+) {
+  for (let i = models.length - 1; i >= 0; i--) {
+    const model = models[i];
+    const parent = page.getParent(model);
+    assertExists(parent);
+    if (!matchFlavours(parent, ['affine:note'])) {
+      handleRemoveAllIndent(page, model);
     }
   }
 }
@@ -591,7 +617,7 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
   // - line1
   // - | <- cursor here
   //   - line3
-  handleUnindent(page, model);
+  handleOutdent(page, model);
   return true;
 }
 
