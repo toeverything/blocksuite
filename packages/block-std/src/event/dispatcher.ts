@@ -78,7 +78,7 @@ export class UIEventDispatcher {
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
 
-  constructor(public blockStore: BlockStdProvider) {
+  constructor(public std: BlockStdProvider) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
@@ -97,7 +97,7 @@ export class UIEventDispatcher {
   }
 
   get root() {
-    return this.blockStore.root;
+    return this.std.root;
   }
 
   run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
@@ -138,7 +138,7 @@ export class UIEventDispatcher {
     this._keyboardControl.bindHotkey(...args);
 
   private get _currentSelections() {
-    return this.blockStore.selection.value;
+    return this.std.selection.value;
   }
 
   private _getEventScope(name: EventName, event: Event) {
@@ -191,12 +191,12 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    const path = this.blockStore.view.getNodeView(target)?.path;
+    const path = this.std.view.getNodeView(target)?.path;
     if (!path) return;
 
     const flavours = path
       .map(blockId => {
-        return this.blockStore.page.getBlockById(blockId)?.flavour;
+        return this.std.page.getBlockById(blockId)?.flavour;
       })
       .filter((flavour): flavour is string => {
         return !!flavour;
@@ -217,7 +217,7 @@ export class UIEventDispatcher {
       .map(selection => selection.path)
       .flatMap(path => {
         return path.map(blockId => {
-          return this.blockStore.page.getBlockById(blockId)?.flavour;
+          return this.std.page.getBlockById(blockId)?.flavour;
         });
       })
       .filter((flavour): flavour is string => {

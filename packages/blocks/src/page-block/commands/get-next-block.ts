@@ -11,7 +11,7 @@ export const getNextBlockCommand: Command<
 > = async (ctx, next) => {
   const path = ctx.path;
   assertExists(path);
-  const viewStore = ctx.blockStore.view;
+  const viewStore = ctx.std.view;
   const nextView = viewStore.findNext(path, nodeView => {
     if (nodeView.type === 'block') {
       return true;

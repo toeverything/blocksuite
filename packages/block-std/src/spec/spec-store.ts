@@ -6,7 +6,7 @@ export class SpecStore<ComponentType = unknown> {
   private _specs: Map<string, BlockSpec<ComponentType>> = new Map();
   private _services: Map<string, BlockService> = new Map();
 
-  constructor(public blockStore: BlockStdProvider) {}
+  constructor(public std: BlockStdProvider) {}
 
   dispose() {
     this._services.forEach(service => {
@@ -66,7 +66,7 @@ export class SpecStore<ComponentType = unknown> {
 
       const service = new newSpec.service({
         flavour,
-        store: this.blockStore,
+        store: this.std,
       });
       this._services.set(flavour, service);
       service.mounted();

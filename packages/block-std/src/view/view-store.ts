@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BlockStdProvider } from '../provider/block-std-provider.js';
+import type { BlockStdProvider } from '../provider/index.js';
 import { PathFinder } from '../utils/index.js';
 import type { NodeView, NodeViewTree, SpecToNodeView } from './type.js';
 
@@ -23,7 +23,7 @@ export class ViewStore<NodeViewType = unknown> {
   private _observer: MutationObserver;
   readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
-  constructor(public blockStore: BlockStdProvider) {
+  constructor(public std: BlockStdProvider) {
     this._observer = new MutationObserver(() => {
       this._cachedPath.clear();
       this._cachedTree = null;
@@ -67,7 +67,7 @@ export class ViewStore<NodeViewType = unknown> {
     if (this._cachedPath.has(node)) {
       return this._cachedPath.get(node) as NodeView<NodeViewType>[];
     }
-    const root = this.blockStore.root;
+    const root = this.std.root;
 
     const iterate = (
       node: Node | null,
@@ -115,7 +115,7 @@ export class ViewStore<NodeViewType = unknown> {
         children,
       };
     };
-    const firstBlock = this.blockStore.root.firstElementChild;
+    const firstBlock = this.std.root.firstElementChild;
     assertExists(firstBlock);
 
     const tree = {
@@ -310,7 +310,7 @@ export class ViewStore<NodeViewType = unknown> {
   };
 
   mount() {
-    this._observer.observe(this.blockStore.root, observeOptions);
+    this._observer.observe(this.std.root, observeOptions);
   }
 
   unmount() {

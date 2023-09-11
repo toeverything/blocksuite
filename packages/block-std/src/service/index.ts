@@ -10,29 +10,29 @@ export interface BlockServiceOptions {
 }
 
 export class BlockService<_Model extends BaseBlockModel = BaseBlockModel> {
-  readonly store: BlockStdProvider;
+  readonly std: BlockStdProvider;
   readonly flavour: string;
   readonly disposables = new DisposableGroup();
 
   constructor(options: BlockServiceOptions) {
     this.flavour = options.flavour;
-    this.store = options.store;
+    this.std = options.store;
   }
 
   get workspace() {
-    return this.store.workspace;
+    return this.std.workspace;
   }
 
   get page() {
-    return this.store.page;
+    return this.std.page;
   }
 
   get selectionManager() {
-    return this.store.selection;
+    return this.std.selection;
   }
 
   get uiEventDispatcher() {
-    return this.store.event;
+    return this.std.event;
   }
 
   // life cycle start

@@ -27,7 +27,7 @@ export class SelectionManager {
     remoteChanged: new Slot<Record<string, BaseSelection[]>>(),
   };
 
-  constructor(public blockStore: BlockStdProvider) {
+  constructor(public std: BlockStdProvider) {
     this._setupDefaultSelections();
   }
 
@@ -39,7 +39,7 @@ export class SelectionManager {
   }
 
   private get _store() {
-    return this.blockStore.workspace.awarenessStore;
+    return this.std.workspace.awarenessStore;
   }
 
   private _setupDefaultSelections() {
@@ -144,8 +144,8 @@ export class SelectionManager {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
-    this.blockStore.page.history.on('stack-item-added', this._itemAdded);
-    this.blockStore.page.history.on('stack-item-popped', this._itemPopped);
+    this.std.page.history.on('stack-item-added', this._itemAdded);
+    this.std.page.history.on('stack-item-popped', this._itemPopped);
     this.disposables.add(
       this._store.slots.update.on(({ id }) => {
         if (id === this._store.awareness.clientID) return;
@@ -155,8 +155,8 @@ export class SelectionManager {
   }
 
   unmount() {
-    this.blockStore.page.history.off('stack-item-added', this._itemAdded);
-    this.blockStore.page.history.off('stack-item-popped', this._itemPopped);
+    this.std.page.history.off('stack-item-added', this._itemAdded);
+    this.std.page.history.off('stack-item-popped', this._itemPopped);
     this.clear();
     this.slots.changed.dispose();
     this.disposables.dispose();

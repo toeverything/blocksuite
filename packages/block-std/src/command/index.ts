@@ -1,7 +1,7 @@
 import type { BlockStdProvider } from '../provider/index.js';
 
 export interface InitCommandCtx {
-  blockStore: BlockStdProvider;
+  std: BlockStdProvider;
 }
 
 export type CommandKeyToData<K extends BlockSuite.CommandDataName> = Pick<
@@ -48,11 +48,11 @@ type Chain<In extends object = {}> = CommonMethods<In> & {
 export class CommandManager {
   private _commands = new Map<string, Command>();
 
-  constructor(public blockStore: BlockStdProvider) {}
+  constructor(public std: BlockStdProvider) {}
 
   private _getCommandCtx = (): InitCommandCtx => {
     return {
-      blockStore: this.blockStore,
+      std: this.std,
     };
   };
 
