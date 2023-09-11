@@ -154,7 +154,10 @@ export function createSimplePortal({
   return portalRoot;
 }
 
-type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
+export type AdvancedPortalOptions = Omit<
+  PortalOptions,
+  'template' | 'signal'
+> & {
   abortController: AbortController;
   template:
     | Renderable
