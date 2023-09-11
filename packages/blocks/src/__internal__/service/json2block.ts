@@ -7,7 +7,7 @@ import type { VRange } from '@blocksuite/virgo';
 import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
 import {
   asyncGetVirgoByModel,
-  focusBlockByModel,
+  getPageBlock,
   type SerializedBlock,
 } from '../utils/index.js';
 import type { BlockModels } from '../utils/model.js';
@@ -148,7 +148,7 @@ export async function json2block(
   }
 
   /**
-   * After all, wo should handle the caret, there are 3 cases.
+   * Finally, wo should handle the caret, there are 3 cases.
    * for 1, it should on focused block's start.
    * for 2, it should in focused block's middle or on focused block's end,
    *        where the first block inserted text's end.
@@ -192,8 +192,17 @@ export async function json2block(
     });
   } else {
     requestAnimationFrame(() => {
-      // TODO: wait block ready
-      lastMergedModel && focusBlockByModel(lastMergedModel);
+      if (lastMergedModel) {
+        const lastMergedBlock = getPageBlock(lastMergedModel);
+        if (!lastMergedBlock) {
+          return;
+        }
+        const selectionManager = lastMergedBlock.root.selectionManager;
+        const blockSelection = selectionManager?.getInstance('block', {
+          path: lastMergedBlock.path ?? [],
+        });
+        selectionManager.set([blockSelection]);
+      }
     });
   }
 

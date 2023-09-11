@@ -133,7 +133,7 @@ function selectedModels2selectBlocksInfo(
     };
     if (
       model.flavour === 'affine:database' ||
-      (['affine:list', 'affine:pargraph'].includes(model.flavour) &&
+      (['affine:list', 'affine:paragraph'].includes(model.flavour) &&
         !textSelection)
     ) {
       const nestedBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
