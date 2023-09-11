@@ -523,3 +523,33 @@ export async function assertKanbanCellSelected(
 
   expect(border).toEqual('1px solid var(--affine-primary-color)');
 }
+
+export async function assertKanbanCardSelected(
+  page: Page,
+  {
+    groupIndex,
+    cardIndex,
+  }: {
+    groupIndex: number;
+    cardIndex: number;
+  }
+) {
+  const border = await page.evaluate(
+    ({ groupIndex, cardIndex }) => {
+      const group = document.querySelector(
+        `affine-data-view-kanban-group:nth-child(${groupIndex + 1})`
+      );
+      const card = group?.querySelector<HTMLElement>(
+        `affine-data-view-kanban-card:nth-child(${cardIndex + 1})`
+      );
+      if (!card) throw new Error(`Missing card tag`);
+      return card.style.border;
+    },
+    {
+      groupIndex,
+      cardIndex,
+    }
+  );
+
+  expect(border).toEqual('1px solid var(--affine-primary-color)');
+}
