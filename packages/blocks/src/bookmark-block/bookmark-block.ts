@@ -3,16 +3,16 @@ import './components/bookmark-edit-modal.js';
 import './components/bookmark-toolbar.js';
 import './components/loader.js';
 
-import { Slot, whenHover } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
-import { createLitPortal } from '../components/portal.js';
+import { WhenHoverController } from '../components/index.js';
 import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
 import type {
@@ -193,7 +193,21 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return this._isLoading;
   }
 
-  private _setReference?: RefOrCallback;
+  private _whenHover = new WhenHoverController(this, ({ setFloating }) => ({
+    template: html`<bookmark-toolbar
+      ${ref(setFloating)}
+      .model=${this.model}
+      .onSelected=${this._onToolbarSelected}
+      .root=${this}
+      .abortController=${this._optionsAbortController}
+    ></bookmark-toolbar>`,
+    computePosition: {
+      referenceElement: this,
+      placement: 'top-end',
+      middleware: [flip(), offset(4)],
+      autoUpdate: true,
+    },
+  }));
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -215,39 +229,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
-    this._addHoverToolbar();
-  }
-
-  private _addHoverToolbar() {
-    const { setReference, setFloating, dispose } = whenHover(isHover => {
-      if (!isHover) {
-        this._optionsAbortController?.abort();
-        return;
-      }
-      if (this._optionsAbortController) return;
-      this._optionsAbortController = new AbortController();
-      this._optionsAbortController.signal.addEventListener('abort', () => {
-        this._optionsAbortController = undefined;
-      });
-      createLitPortal({
-        template: html`<bookmark-toolbar
-          ${ref(setFloating)}
-          .model=${this.model}
-          .onSelected=${this._onToolbarSelected}
-          .root=${this}
-          .abortController=${this._optionsAbortController}
-        ></bookmark-toolbar>`,
-        computePosition: {
-          referenceElement: this,
-          placement: 'top-end',
-          middleware: [flip(), offset(4)],
-          autoUpdate: true,
-        },
-        abortController: this._optionsAbortController,
-      });
-    });
-    this._setReference = setReference;
-    this.disposables.add(dispose);
   }
 
   private _onInputChange() {
@@ -410,7 +391,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
     return html`
       ${editModal}
-      <div ${ref(this._setReference)} class="affine-bookmark-block-container">
+      <div
+        ${ref(this._whenHover.setReference)}
+        class="affine-bookmark-block-container"
+      >
         ${this._isLoading ? loading : this._linkCard()}
         <input
           .disabled=${this.model.page.readonly}

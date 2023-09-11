@@ -1,13 +1,12 @@
-import { whenHover } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { ref, type RefOrCallback } from 'lit/directives/ref.js';
+import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
-import { createLitPortal } from '../components/portal.js';
+import { WhenHoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
 import type {
   AttachmentBlockModel,
@@ -37,7 +36,29 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
-  private _setReference?: RefOrCallback;
+  private _whenHover = new WhenHoverController(
+    this,
+    ({ setFloating, abortController }) => ({
+      template: AttachmentOptionsTemplate({
+        ref: setFloating,
+        anchor: this,
+        model: this.model,
+        showCaption: () => {
+          this._showCaption = true;
+          requestAnimationFrame(() => {
+            this._captionInput.focus();
+          });
+        },
+        abortController,
+      }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    })
+  );
 
   override connectedCallback() {
     super.connectedCallback();
@@ -45,7 +66,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       this._showCaption = true;
     }
     this._checkAttachment();
-    this._addHoverToolbar();
   }
 
   override willUpdate(changedProperties: PropertyValues) {
@@ -63,43 +83,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (!(await hasBlob(storage, sourceId))) {
       this._error = true;
     }
-  }
-
-  private _addHoverToolbar() {
-    let abortController: AbortController | null = null;
-    let optionPortal: HTMLElement | null = null;
-
-    const { setReference, setFloating, dispose } = whenHover(isHover => {
-      if (!isHover) {
-        abortController?.abort();
-        return;
-      }
-      if (optionPortal?.isConnected) return;
-      abortController = new AbortController();
-      optionPortal = createLitPortal({
-        template: AttachmentOptionsTemplate({
-          ref: setFloating,
-          anchor: this,
-          model: this.model,
-          showCaption: () => {
-            this._showCaption = true;
-            requestAnimationFrame(() => {
-              this._captionInput.focus();
-            });
-          },
-          abortController,
-        }),
-        computePosition: {
-          referenceElement: this,
-          placement: 'top-end',
-          middleware: [flip(), offset(4)],
-          autoUpdate: true,
-        },
-        abortController,
-      });
-    });
-    this._setReference = setReference;
-    this.disposables.add(dispose);
   }
 
   private _focusAttachment() {
@@ -171,7 +154,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     }
 
     return html`<div
-        ${ref(this._setReference)}
+        ${ref(this._whenHover.setReference)}
         class="affine-attachment-container"
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
