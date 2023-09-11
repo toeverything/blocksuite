@@ -18,7 +18,7 @@ export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
 
   private get _selectionManager() {
-    return this.root.selectionManager;
+    return this.root.selection;
   }
 
   private get _rangeManager() {
@@ -37,15 +37,15 @@ export class RangeSynchronizer {
       this._selectionManager.slots.changed.on(this._onSelectionModelChanged)
     );
 
-    this.root.uiEventDispatcher.add('compositionStart', () => {
+    this.root.event.add('compositionStart', () => {
       this._isComposing = true;
     });
-    this.root.uiEventDispatcher.add('compositionEnd', () => {
+    this.root.event.add('compositionEnd', () => {
       this._isComposing = false;
     });
 
     this.root.disposables.add(
-      this.root.uiEventDispatcher.add('selectionChange', () => {
+      this.root.event.add('selectionChange', () => {
         const selection = window.getSelection();
         if (!selection) {
           this._selectionManager.clear();
@@ -70,7 +70,7 @@ export class RangeSynchronizer {
     );
 
     this.root.disposables.add(
-      this.root.uiEventDispatcher.add('beforeInput', ctx => {
+      this.root.event.add('beforeInput', ctx => {
         const event = ctx.get('defaultState').event as InputEvent;
         if (this.root.page.readonly) return;
 

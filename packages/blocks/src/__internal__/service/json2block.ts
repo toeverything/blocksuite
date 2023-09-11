@@ -197,7 +197,7 @@ export async function json2block(
         if (!lastMergedBlock) {
           return;
         }
-        const selectionManager = lastMergedBlock.root.selectionManager;
+        const selectionManager = lastMergedBlock.root.selection;
         const blockSelection = selectionManager?.getInstance('block', {
           path: lastMergedBlock.path ?? [],
         });

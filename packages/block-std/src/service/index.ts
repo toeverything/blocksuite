@@ -2,15 +2,15 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
-import type { BlockStore } from '../store/index.js';
+import type { BlockStdProvider } from '../provider/index.js';
 
 export interface BlockServiceOptions {
   flavour: string;
-  store: BlockStore;
+  store: BlockStdProvider;
 }
 
 export class BlockService<_Model extends BaseBlockModel = BaseBlockModel> {
-  readonly store: BlockStore;
+  readonly store: BlockStdProvider;
   readonly flavour: string;
   readonly disposables = new DisposableGroup();
 
@@ -28,11 +28,11 @@ export class BlockService<_Model extends BaseBlockModel = BaseBlockModel> {
   }
 
   get selectionManager() {
-    return this.store.selectionManager;
+    return this.store.selection;
   }
 
   get uiEventDispatcher() {
-    return this.store.uiEventDispatcher;
+    return this.store.event;
   }
 
   // life cycle start

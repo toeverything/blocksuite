@@ -34,7 +34,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   private _select() {
-    const selection = this.root.selectionManager;
+    const selection = this.root.selection;
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))

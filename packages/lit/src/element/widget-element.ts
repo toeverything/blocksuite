@@ -29,7 +29,7 @@ export class WidgetElement extends WithDisposable(LitElement) {
   get pageElement() {
     const parentElement = this.parentElement;
     assertExists(parentElement);
-    const nodeView = this.root.viewStore.getNodeView(parentElement);
+    const nodeView = this.root.view.getNodeView(parentElement);
     assertExists(nodeView);
     return nodeView.view as BlockElement;
   }
@@ -45,7 +45,7 @@ export class WidgetElement extends WithDisposable(LitElement) {
     options?: { global?: boolean }
   ) => {
     this._disposables.add(
-      this.root.uiEventDispatcher.add(name, handler, {
+      this.root.event.add(name, handler, {
         flavour: options?.global ? undefined : this.flavour,
       })
     );
@@ -56,7 +56,7 @@ export class WidgetElement extends WithDisposable(LitElement) {
     options?: { global: boolean }
   ) {
     this._disposables.add(
-      this.root.uiEventDispatcher.bindHotkey(keymap, {
+      this.root.event.bindHotkey(keymap, {
         flavour: options?.global ? undefined : this.flavour,
       })
     );
@@ -64,7 +64,7 @@ export class WidgetElement extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.path = this.root.viewStore.calculatePath(this);
+    this.path = this.root.view.calculatePath(this);
   }
 
   override render(): unknown {

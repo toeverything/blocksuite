@@ -11,7 +11,7 @@ export const getPreviousBlockCommand: Command<
 > = async (ctx, next) => {
   const path = ctx.path;
   assertExists(path);
-  const viewStore = ctx.blockStore.viewStore;
+  const viewStore = ctx.blockStore.view;
   const previousView = viewStore.findPrev(path, nodeView => {
     if (nodeView.type === 'block') {
       return true;

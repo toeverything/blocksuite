@@ -1,6 +1,6 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { BlockStore } from '../store/index.js';
+import type { BlockStdProvider } from '../provider/index.js';
 import { PathFinder } from '../utils/index.js';
 import type { UIEventHandler } from './base.js';
 import { UIEventState, UIEventStateContext } from './base.js';
@@ -78,7 +78,7 @@ export class UIEventDispatcher {
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
 
-  constructor(public blockStore: BlockStore) {
+  constructor(public blockStore: BlockStdProvider) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);
@@ -138,7 +138,7 @@ export class UIEventDispatcher {
     this._keyboardControl.bindHotkey(...args);
 
   private get _currentSelections() {
-    return this.blockStore.selectionManager.value;
+    return this.blockStore.selection.value;
   }
 
   private _getEventScope(name: EventName, event: Event) {
@@ -191,7 +191,7 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    const path = this.blockStore.viewStore.getNodeView(target)?.path;
+    const path = this.blockStore.view.getNodeView(target)?.path;
     if (!path) return;
 
     const flavours = path

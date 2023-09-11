@@ -108,7 +108,7 @@ export class RangeControl {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this._dispatcher.blockStore.viewStore.getNodeView;
+    const getBlockView = this._dispatcher.blockStore.view.getNodeView;
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const leaf = getBlockView(ancestor);
       if (leaf) {

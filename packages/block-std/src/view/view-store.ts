@@ -1,19 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 
+import type { BlockStdProvider } from '../provider/block-std-provider.js';
 import { PathFinder } from '../utils/index.js';
-import type { BlockStore } from './block-store.js';
-
-export type NodeView<T = unknown> = {
-  id: string;
-  path: string[];
-  view: T;
-  type: BlockSuite.ViewType;
-};
-export type NodeViewTree<T> = NodeView<T> & {
-  children: NodeViewTree<T>[];
-};
-
-type SpecToNodeView<T> = T extends BlockSuiteViewSpec<infer U> ? U : unknown;
+import type { NodeView, NodeViewTree, SpecToNodeView } from './type.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface BlockSuiteViewSpec<T = any> {
@@ -34,7 +23,7 @@ export class ViewStore<NodeViewType = unknown> {
   private _observer: MutationObserver;
   readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
-  constructor(public blockStore: BlockStore) {
+  constructor(public blockStore: BlockStdProvider) {
     this._observer = new MutationObserver(() => {
       this._cachedPath.clear();
       this._cachedTree = null;
