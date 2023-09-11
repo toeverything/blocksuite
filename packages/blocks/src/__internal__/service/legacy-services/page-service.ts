@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { DEFAULT_PAGE_NAME } from '../../../components/rich-text/consts.js';
 import { TagsIcon } from '../../../icons/tags.js';
 import type { PageBlockModel } from '../../../page-block/page-model.js';
-import { DEFAULT_PAGE_NAME } from '../../rich-text/consts.js';
 import type {
   BlockTransformContext,
   SerializedBlock,

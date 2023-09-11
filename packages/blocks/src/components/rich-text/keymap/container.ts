@@ -8,6 +8,11 @@ import {
   type VirgoRootElement,
 } from '@blocksuite/virgo';
 
+import {
+  checkFirstLine,
+  checkLastLine,
+} from '../../../__internal__/utils/check-line.js';
+import { matchFlavours } from '../../../__internal__/utils/model.js';
 import { bracketPairs } from '../../../common/bracket-pairs.js';
 import { inlineFormatConfig } from '../../../common/inline-format-config.js';
 import { getNextBlock } from '../../../note-block/utils.js';
@@ -16,9 +21,7 @@ import {
   getCombinedFormatInTextSelection,
   getSelectedContentModels,
 } from '../../../page-block/utils/selection.js';
-import { checkFirstLine, checkLastLine } from '../../utils/check-line.js';
-import { matchFlavours } from '../../utils/model.js';
-import { tryConvertBlock } from '../markdown-convert.js';
+import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
   handleMultiBlockIndent,

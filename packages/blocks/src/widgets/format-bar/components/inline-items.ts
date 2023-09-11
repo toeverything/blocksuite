@@ -1,10 +1,10 @@
 import { html, nothing } from 'lit';
 
-import type { AffineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import {
   includeInlineSupportedBlockSelected,
   inlineFormatConfig,
 } from '../../../common/inline-format-config.js';
+import type { AffineTextAttributes } from '../../../components/rich-text/virgo/types.js';
 import {
   getCombinedFormatInBlockSelections,
   getCombinedFormatInTextSelection,
