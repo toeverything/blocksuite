@@ -1,4 +1,4 @@
-import '../__internal__/rich-text/rich-text.js';
+import '../components/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
@@ -8,6 +8,7 @@ import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
@@ -20,12 +21,13 @@ import { z } from 'zod';
 
 import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
-import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
-import type { RichText } from '../__internal__/rich-text/rich-text.js';
-import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
+import { WhenHoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
+import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
+import type { RichText } from '../components/rich-text/rich-text.js';
+import type { AffineTextSchema } from '../components/rich-text/virgo/types.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -184,8 +186,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('.lang-button')
   private _langButton!: HTMLButtonElement;
 
-  private _optionsPortal: HTMLDivElement | null = null;
-
   @state()
   private _langListAbortController?: AbortController;
 
@@ -261,6 +261,43 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  private _whenHover = new WhenHoverController(
+    this,
+    ({ setFloating, abortController }) => ({
+      template: ({ updatePortal }) =>
+        CodeOptionTemplate({
+          ref: setFloating,
+          anchor: this,
+          model: this.model,
+          wrap: this._wrap,
+          onClickWrap: () => {
+            this._onClickWrapBtn();
+            updatePortal();
+          },
+          abortController,
+        }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'right-start',
+        middleware: [
+          offset({
+            mainAxis: 12,
+            crossAxis: 10,
+          }),
+          shift({
+            crossAxis: true,
+            padding: {
+              top: PAGE_HEADER_HEIGHT + 12,
+              bottom: 12,
+              right: 12,
+            },
+          }),
+        ],
+        autoUpdate: true,
+      },
+    })
+  );
+
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await this._richTextElement?.updateComplete;
@@ -297,10 +334,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
-    this._observePosition();
     bindContainerHotkey(this);
 
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     const INDENT_SYMBOL = '  ';
     const LINE_BREAK_SYMBOL = '\n';
     const allIndexOf = (
@@ -469,47 +505,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._wrap = container.classList.toggle('wrap');
   }
 
-  private _observePosition() {
-    this._disposables.addFromEvent(this, 'mouseenter', () => {
-      if (this._optionsPortal?.isConnected) return;
-      const abortController = new AbortController();
-
-      this._optionsPortal = createLitPortal({
-        template: ({ updatePortal }) =>
-          CodeOptionTemplate({
-            anchor: this,
-            model: this.model,
-            wrap: this._wrap,
-            onClickWrap: () => {
-              this._onClickWrapBtn();
-              updatePortal();
-            },
-            abortController,
-          }),
-        computePosition: {
-          referenceElement: this,
-          placement: 'right-start',
-          middleware: [
-            offset({
-              mainAxis: 12,
-              crossAxis: 10,
-            }),
-            shift({
-              crossAxis: true,
-              padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
-                bottom: 12,
-                right: 12,
-              },
-            }),
-          ],
-          autoUpdate: true,
-        },
-        abortController,
-      });
-    });
-  }
-
   private _onClickLangBtn() {
     if (this.readonly) return;
     if (this._langListAbortController) return;
@@ -592,7 +587,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   override render(): TemplateResult<1> {
-    return html`<div class="affine-code-block-container">
+    return html`<div
+      ${ref(this._whenHover.setReference)}
+      class="affine-code-block-container"
+    >
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
         <div id="line-numbers"></div>

@@ -1,3 +1,5 @@
+import './nodes/index.js';
+
 import { html } from 'lit';
 
 import type { AffineTextSchema } from './types.js';

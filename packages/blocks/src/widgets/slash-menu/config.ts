@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 
-import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
 import { getServiceOrRegister } from '../../__internal__/service/index.js';
 import {
   createPage,
@@ -17,6 +16,7 @@ import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
 import { inlineFormatConfig } from '../../common/inline-format-config.js';
 import { paragraphConfig } from '../../common/paragraph-config.js';
+import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import {
   ArrowDownBigIcon,

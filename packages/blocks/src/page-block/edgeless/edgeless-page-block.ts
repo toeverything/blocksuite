@@ -978,7 +978,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
 
     this.handleEvent('selectionChange', () => {
-      const surface = this.root.selectionManager.value.find(
+      const surface = this.root.selection.value.find(
         (sel): sel is SurfaceSelection => sel.is('surface')
       );
       if (!surface) return;
@@ -994,7 +994,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
-    this.tools = new EdgelessToolsManager(this, this.root.uiEventDispatcher);
+    this.tools = new EdgelessToolsManager(this, this.root.event);
   }
 
   override disconnectedCallback() {

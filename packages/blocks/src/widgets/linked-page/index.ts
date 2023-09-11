@@ -110,7 +110,7 @@ export class LinkedPageWidget extends WidgetElement {
     const eventState = ctx.get('keyboardState');
     const event = eventState.raw;
     if (isControlledKeyboardEvent(event) || event.key.length !== 1) return;
-    const text = this.root.selectionManager.value.find(selection =>
+    const text = this.root.selection.value.find(selection =>
       selection.is('text')
     );
     if (!text) {
