@@ -115,9 +115,7 @@ test.describe('focus', () => {
       cellIndex: 0,
     });
 
-    await pressArrowDown(page);
-    await pressArrowDown(page);
-    await pressArrowDown(page);
+    await pressArrowDown(page, 3);
     await assertKanbanCellSelected(page, {
       groupIndex: 1,
       cardIndex: 0,
