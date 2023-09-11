@@ -100,6 +100,10 @@ export class BlockElement<
     return this.root.selection;
   }
 
+  get std() {
+    return this.root.std;
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,

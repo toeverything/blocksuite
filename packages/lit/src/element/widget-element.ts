@@ -39,6 +39,10 @@ export class WidgetElement extends WithDisposable(LitElement) {
     return this.pageElement.model.flavour;
   }
 
+  get std() {
+    return this.root.std;
+  }
+
   handleEvent = (
     name: EventName,
     handler: UIEventHandler,
