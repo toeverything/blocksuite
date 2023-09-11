@@ -14,6 +14,7 @@ import {
   pressArrowRight,
   pressArrowUp,
   pressBackspace,
+  pressBackspaceWithShortKey,
   pressEnter,
   pressEscape,
   pressShiftEnter,
@@ -345,6 +346,23 @@ test('indent and unindent existing paragraph block', async ({ page }) => {
 
   await redoByKeyboard(page);
   await assertBlockChildrenIds(page, '1', ['2', '3']);
+});
+
+test('remove all indent for a paragraph block', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'world');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'foo');
+  await assertBlockChildrenIds(page, '3', ['4']);
+  await pressBackspaceWithShortKey(page);
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 });
 
 test('update paragraph with children to head type', async ({ page }) => {

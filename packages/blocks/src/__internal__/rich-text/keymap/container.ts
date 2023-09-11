@@ -22,8 +22,10 @@ import { tryConvertBlock } from '../markdown-convert.js';
 import {
   handleIndent,
   handleMultiBlockIndent,
-  handleMultiBlockUnindent,
-  handleUnindent,
+  handleMultiBlockOutdent,
+  handleOutdent,
+  handleRemoveAllIndent,
+  handleRemoveAllIndentForMultiBlocks,
 } from '../rich-text-operations.js';
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 
@@ -317,6 +319,35 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       handleMultiBlockIndent(blockElement.page, models);
       return true;
     },
+    'Mod-Backspace': ctx => {
+      if (
+        !(
+          blockElement.selected?.is('block') ||
+          blockElement.selected?.is('text')
+        )
+      )
+        return;
+
+      const page = blockElement.closest<PageBlockComponent>(
+        'affine-doc-page,affine-edgeless-page'
+      );
+      if (!page) return;
+
+      const textModels = getSelectedContentModels(root, ['text']);
+      if (textModels.length === 1) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+        handleRemoveAllIndent(model.page, model, vRange.index);
+        _preventDefault(ctx);
+
+        return true;
+      }
+
+      const models = getSelectedContentModels(root, ['text', 'block']);
+      handleRemoveAllIndentForMultiBlocks(blockElement.page, models);
+      return true;
+    },
     'Shift-Tab': ctx => {
       if (
         !(
@@ -336,14 +367,14 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
         assertExists(vRange);
-        handleUnindent(model.page, model, vRange.index);
+        handleOutdent(model.page, model, vRange.index);
         _preventDefault(ctx);
 
         return true;
       }
 
       const models = getSelectedContentModels(root, ['text', 'block']);
-      handleMultiBlockUnindent(blockElement.page, models);
+      handleMultiBlockOutdent(blockElement.page, models);
       return true;
     },
     Backspace: ctx => {

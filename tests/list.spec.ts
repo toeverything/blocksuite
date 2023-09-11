@@ -5,6 +5,7 @@ import {
   initEmptyParagraphState,
   pressArrowUp,
   pressBackspace,
+  pressBackspaceWithShortKey,
   pressEnter,
   pressShiftTab,
   pressSpace,
@@ -124,6 +125,20 @@ test('unindent list block', async ({ page }) => {
 
   await pressShiftTab(page);
   await assertBlockChildrenIds(page, '1', ['2', '3', '4']);
+});
+
+test('remove all indent for a list block', async ({ page }) => {
+  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+
+  await focusRichText(page, 1);
+  await page.keyboard.press('Tab', { delay: 50 }); // 0(1(2(3)4))
+  await focusRichText(page, 2);
+  await page.keyboard.press('Tab', { delay: 50 });
+  await page.keyboard.press('Tab', { delay: 50 }); // 0(1(2(3(4))))
+  await assertBlockChildrenIds(page, '3', ['4']);
+  await pressBackspaceWithShortKey(page); // 0(1(2(3)4))
+  await assertBlockChildrenIds(page, '1', ['2', '4']);
+  await assertBlockChildrenIds(page, '2', ['3']);
 });
 
 test('insert new list block by enter', async ({ page }) => {
