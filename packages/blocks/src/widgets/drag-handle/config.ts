@@ -23,23 +23,22 @@ export type DropIndicator = {
   dropBefore: boolean;
 };
 
-export type OptionRegistration = {
+export type DragHandleOption = {
   flavour: string;
   onDragStart: (state: PointerEventState) => boolean;
   onDragMove: (
     state: PointerEventState,
-    callback: (state: PointerEventState) => void
+    getDropIndicator: () => DropIndicator | null
   ) => boolean;
   onDragEnd: (state: PointerEventState) => boolean;
 };
 
-export class OptionsRunner {
-  options: OptionRegistration[] = [];
+export class DragHandleOptionsRunner {
+  options: DragHandleOption[] = [];
 
-  register(registration: OptionRegistration) {
-    if (this.options.find(option => option.flavour === registration.flavour))
-      return;
+  register(option: DragHandleOption) {
+    if (this.options.find(op => op.flavour === option.flavour)) return;
 
-    this.options.push(registration);
+    this.options.push(option);
   }
 }

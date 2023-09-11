@@ -35,12 +35,12 @@ import {
   DRAG_HANDLE_GRABBER_WIDTH,
   DRAG_HANDLE_OFFSET_LEFT,
   DRAG_HOVER_RECT_PADDING,
+  type DragHandleOption,
+  DragHandleOptionsRunner,
   type DropIndicator,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   type IndicatorRect,
   NOTE_CONTAINER_PADDING,
-  type OptionRegistration,
-  OptionsRunner,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
@@ -59,7 +59,11 @@ import {
 export class DragHandleWidget extends WidgetElement {
   static override styles = styles;
 
-  static optionRunner = new OptionsRunner();
+  static staticOptionRunner = new DragHandleOptionsRunner();
+
+  static registerOption(option: DragHandleOption) {
+    DragHandleWidget.staticOptionRunner.register(option);
+  }
 
   @query('.affine-drag-handle-container')
   private _dragHandleContainer!: HTMLDivElement;
@@ -71,6 +75,7 @@ export class DragHandleWidget extends WidgetElement {
   indicatorRect: IndicatorRect | null = null;
 
   draggingElements: BlockElement[] = [];
+  dragging = false;
   dropBlockId = '';
   dropBefore = false;
   lastDragPointerState: PointerEventState | null = null;
@@ -92,18 +97,14 @@ export class DragHandleWidget extends WidgetElement {
   private _hoverDragHandle = false;
   private _dragHandlePointerDown = false;
 
-  private _dragging = false;
+  private _defaultDragging = false;
   private _dragPreviewOffsetY = 0;
   private _dragPreview: DragPreview | null = null;
 
   private _anchorModelDisposables: DisposableGroup | null = null;
 
   get optionRunner() {
-    return DragHandleWidget.optionRunner;
-  }
-
-  registerOption(option: OptionRegistration) {
-    this.optionRunner.register(option);
+    return DragHandleWidget.staticOptionRunner;
   }
 
   get pageBlockElement() {
@@ -342,12 +343,13 @@ export class DragHandleWidget extends WidgetElement {
 
   private _reset() {
     this.draggingElements = [];
+    this.dragging = false;
     this.indicatorRect = null;
     this.dropBlockId = '';
     this.dropBefore = false;
     this.lastDragPointerState = null;
     this.rafID = 0;
-    this._dragging = false;
+    this._defaultDragging = false;
     this._dragHoverRect = null;
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
@@ -610,7 +612,11 @@ export class DragHandleWidget extends WidgetElement {
     dragPreview: DragPreview | null,
     state: PointerEventState
   ) {
-    if (!this._dragging || this.draggingElements.length === 0 || !dragPreview)
+    if (
+      !this._defaultDragging ||
+      this.draggingElements.length === 0 ||
+      !dragPreview
+    )
       return;
 
     const point = new Point(state.x, state.y);
@@ -632,7 +638,7 @@ export class DragHandleWidget extends WidgetElement {
 
   private _scrollToUpdateIndicator = () => {
     if (
-      !this._dragging ||
+      !this._defaultDragging ||
       this.draggingElements.length === 0 ||
       !this.lastDragPointerState
     )
@@ -690,7 +696,7 @@ export class DragHandleWidget extends WidgetElement {
     const { target } = state.raw;
     const element = captureEventTarget(target);
     // WHen pointer not on block or on dragging, should do nothing
-    if (!element || this._dragging) {
+    if (!element || this._defaultDragging || this.dragging) {
       return;
     }
 
@@ -835,14 +841,14 @@ export class DragHandleWidget extends WidgetElement {
 
     this._createDragPreview(blockElementsExcludingChildren, hoverBlockElement);
     this.draggingElements = blockElementsExcludingChildren;
-    this._dragging = true;
+    this._defaultDragging = true;
     this._hide();
 
     return true;
   };
 
   private _onDragMove = (ctx: UIEventStateContext) => {
-    if (!this._dragging || this.draggingElements.length === 0) {
+    if (!this._defaultDragging || this.draggingElements.length === 0) {
       return false;
     }
 
@@ -855,7 +861,7 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   private _onDragEnd = () => {
-    if (!this._dragging || this.draggingElements.length === 0) {
+    if (!this._defaultDragging || this.draggingElements.length === 0) {
       this._hide(true);
       return false;
     }
@@ -922,7 +928,11 @@ export class DragHandleWidget extends WidgetElement {
     const state = ctx.get('pointerState');
 
     for (const option of this.optionRunner.options) {
-      if (option.onDragStart(state)) return true;
+      if (option.onDragStart(state)) {
+        this.dragging = true;
+        this._hide();
+        return true;
+      }
     }
 
     // call default drag start handler if no option return true
@@ -942,7 +952,7 @@ export class DragHandleWidget extends WidgetElement {
     this._updateDragPreviewPosition(this._dragPreview, state);
 
     for (const option of this.optionRunner.options) {
-      if (option.onDragMove(state, () => this.updateIndicator(state)))
+      if (option.onDragMove(state, () => this.getDropIndicator(state)))
         return true;
     }
 
@@ -1045,7 +1055,7 @@ export class DragHandleWidget extends WidgetElement {
     );
     if (!blockElement) return;
 
-    if (this._dragging) return;
+    if (this._defaultDragging || this.dragging) return;
     this._show(blockElement);
     this._hoverDragHandle = false;
   };
