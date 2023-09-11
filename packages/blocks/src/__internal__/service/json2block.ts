@@ -148,7 +148,7 @@ export async function json2block(
   }
 
   /**
-   * Finally, wo should handle the caret, there are 3 cases.
+   * Finally, we should handle the caret, there are 3 cases.
    * for 1, it should on focused block's start.
    * for 2, it should in focused block's middle or on focused block's end,
    *        where the first block inserted text's end.
