@@ -333,7 +333,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = getSelectedContentModels(page, ['text']);
+      const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
@@ -344,7 +344,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(page, ['text', 'block']);
+      const models = getSelectedContentModels(root, ['text', 'block']);
       handleRemoveAllIndentForMultiBlocks(blockElement.page, models);
       return true;
     },
@@ -373,7 +373,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(page, ['text', 'block']);
+      const models = getSelectedContentModels(root, ['text', 'block']);
       handleMultiBlockOutdent(blockElement.page, models);
       return true;
     },
