@@ -425,6 +425,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
           />
         </div>
       </div>
+      ${Object.values(this.widgets)}
     `;
   }
 }
