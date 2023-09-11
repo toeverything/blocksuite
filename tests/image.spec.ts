@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 
 import {
   activeEmbed,
+  copyByKeyboard,
   dragBetweenCoords,
   dragEmbedResizeByTopLeft,
   dragEmbedResizeByTopRight,
@@ -15,6 +16,7 @@ import {
   initImageState,
   insertThreeLevelLists,
   moveToImage,
+  pasteByKeyboard,
   pressEnter,
   redoByKeyboard,
   type,
@@ -91,6 +93,19 @@ test('can click and delete image', async ({ page }) => {
   await assertRichImage(page, 0);
 });
 
+test('can click and copy image', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initImageState(page);
+  await assertRichImage(page, 1);
+
+  await activeEmbed(page);
+  await copyByKeyboard(page);
+  await pressEnter(page);
+
+  await pasteByKeyboard(page);
+  await assertRichImage(page, 2);
+});
+
 test('press enter will create new block when click and select image', async ({
   page,
 }) => {
@@ -101,7 +116,7 @@ test('press enter will create new block when click and select image', async ({
   await activeEmbed(page);
   await pressEnter(page);
   await type(page, 'aa');
-  await assertRichTexts(page, ['aa']);
+  await assertRichTexts(page, ['aa', '']);
 });
 
 test('enter shortcut on focusing embed block and its caption', async ({
@@ -182,7 +197,7 @@ test('popup menu should follow position of image when scrolling', async ({
   const menuRect = await menu.boundingBox();
   if (!imageRect) throw new Error('image not found');
   if (!menuRect) throw new Error('menu not found');
-  expect(imageRect.y).toBeCloseTo(-115, -0.325);
+  expect(imageRect.y).toBeCloseTo(-159, -0.325);
   expect(menuRect.y).toBeCloseTo(65, -0.325);
 });
 

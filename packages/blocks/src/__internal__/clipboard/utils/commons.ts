@@ -131,9 +131,13 @@ function selectedModels2selectBlocksInfo(
       endPos,
       children: [] as SelectedBlock[],
     };
-    if (model.flavour === 'affine:database') {
-      const databaseBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
-      block.children = databaseBlock.children;
+    if (
+      model.flavour === 'affine:database' ||
+      (['affine:list', 'affine:paragraph'].includes(model.flavour) &&
+        !textSelection)
+    ) {
+      const nestedBlock: SelectedBlock = blockModel2selectBlocksInfo(model);
+      block.children = nestedBlock.children;
     }
     blocksMap.set(model.id, block);
 
@@ -192,7 +196,11 @@ async function createPageClipboardItems(
 }
 
 export async function copyBlocksInPage(root: BlockSuiteRoot) {
-  const selectedModels = getSelectedContentModels(root, ['text', 'block']);
+  const selectedModels = getSelectedContentModels(root, [
+    'text',
+    'block',
+    'image',
+  ]);
   const textSelection = root.selectionManager.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,
@@ -206,7 +214,6 @@ export async function copyBlocksInPage(root: BlockSuiteRoot) {
   if (savedRange) {
     resetNativeSelection(savedRange);
   }
-
   return clipboardItems;
 }
 

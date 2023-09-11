@@ -143,6 +143,9 @@ importers:
       w3c-keyname:
         specifier: ^2.2.8
         version: 2.2.8
+      zod:
+        specifier: ^3.22.2
+        version: 3.22.2
     devDependencies:
       '@blocksuite/store':
         specifier: workspace:*

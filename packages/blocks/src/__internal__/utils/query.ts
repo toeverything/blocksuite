@@ -1,6 +1,7 @@
 import { assertExists, clamp } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
+import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../__internal__/utils/model.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
@@ -386,7 +387,7 @@ export function isInsideEdgelessTextEditor(element: unknown): boolean {
 export function isDatabaseInput(element: unknown): boolean {
   return (
     element instanceof HTMLElement &&
-    element.getAttribute('data-virgo-root') === 'true' &&
+    element.getAttribute(VIRGO_ROOT_ATTR) === 'true' &&
     !!element.closest('affine-database')
   );
 }

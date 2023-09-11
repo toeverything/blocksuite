@@ -50,7 +50,7 @@ import {
   assertDivider,
   assertExists,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTitle,
 } from '../utils/asserts.js';
@@ -65,17 +65,17 @@ test('click on blank area', async ({ page }) => {
   const box123 = await getRichTextBoundingBox(page, '2');
   const inside123 = { x: box123.left, y: box123.top + 5 };
   await page.mouse.click(inside123.x, inside123.y);
-  await assertSelection(page, 0, 0, 0);
+  await assertRichTextVRange(page, 0, 0, 0);
 
   const box456 = await getRichTextBoundingBox(page, '3');
   const inside456 = { x: box456.left, y: box456.top + 5 };
   await page.mouse.click(inside456.x, inside456.y);
-  await assertSelection(page, 1, 0, 0);
+  await assertRichTextVRange(page, 1, 0, 0);
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.left, y: box789.bottom - 5 };
   await page.mouse.click(inside789.x, inside789.y);
-  await assertSelection(page, 2, 0, 0);
+  await assertRichTextVRange(page, 2, 0, 0);
 });
 
 test('native range delete', async ({ page }) => {
@@ -1006,14 +1006,6 @@ test('should add a new line when clicking the bottom of the last non-text block'
   const locator = page.locator('affine-code');
   await expect(locator).toBeVisible();
 
-  const rect = await page.evaluate(() => {
-    const secondRichText = document.querySelector('affine-code');
-    if (!secondRichText) {
-      throw new Error();
-    }
-
-    return secondRichText.getBoundingClientRect();
-  });
   await type(page, 'ABC');
   await waitNextFrame(page);
   await assertRichTexts(page, ['123', '456', '789', 'ABC']);
@@ -1519,7 +1511,7 @@ test('should select when clicking on blank area in edgeless mode', async ({
     throw new Error();
   }
 
-  await click(page, { x: r3.x - 1, y: r3.y + r3.height + 5 });
+  await click(page, { x: r3.x + 40, y: r3.y + 5 });
   await waitNextFrame(page);
 
   expect(await getVirgoSelectionText(page)).toBe('789');

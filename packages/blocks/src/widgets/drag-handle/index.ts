@@ -92,6 +92,7 @@ export class DragHandleWidget extends WidgetElement {
 
   private _rafID = 0;
   private _anchorModelDisposables: DisposableGroup | null = null;
+  private _lastDragPointerState: PointerEventState | null = null;
 
   protected get _selectedBlocks() {
     return this.root.selectionManager.find('text')
@@ -168,6 +169,7 @@ export class DragHandleWidget extends WidgetElement {
     this._dropBefore = false;
     this._dragPreviewOffsetY = 0;
     this._rafID = 0;
+    this._lastDragPointerState = null;
   }
 
   private _clearRaf() {
@@ -577,10 +579,62 @@ export class DragHandleWidget extends WidgetElement {
     return dropIndicator;
   };
 
-  private _updateIndicator = (indicator: DropIndicator | null) => {
+  private _updateDropIndicator = (indicator: DropIndicator | null) => {
     this._dropBlockId = indicator?.dropBlockId ?? '';
     this._dropBefore = indicator?.dropBefore ?? false;
     this._indicatorRect = indicator?.rect ?? null;
+  };
+
+  private _updateIndicator = (
+    state: PointerEventState,
+    shouldAutoScroll: boolean
+  ) => {
+    const point = this._getContainerOffsetPoint(state);
+    const closestNoteBlock = this._getClosestNoteBlock(point);
+    if (!closestNoteBlock || this._outOfNoteBlock(closestNoteBlock, point)) {
+      this._dropBlockId = '';
+      this._indicatorRect = null;
+    } else {
+      const dropIndicator = this._getDropIndicator(state);
+      this._updateDropIndicator(dropIndicator);
+    }
+
+    const previewPos = new Point(state.x, state.y);
+    if (this._dragPreview)
+      this._updateDragPreviewPosition(this._dragPreview, previewPos);
+
+    this._lastDragPointerState = state;
+    if (this._pageBlockElement instanceof DocPageBlockComponent) {
+      if (!shouldAutoScroll) return;
+
+      const result = autoScroll(
+        this._pageBlockElement.viewportElement,
+        state.y
+      );
+      if (!result) {
+        this._clearRaf();
+        return;
+      }
+      this._rafID = requestAnimationFrame(() =>
+        this._updateIndicator(state, true)
+      );
+    } else {
+      this._clearRaf();
+    }
+  };
+
+  private _scrollToUpdateIndicator = () => {
+    if (
+      !this._dragging ||
+      this._draggingElements.length === 0 ||
+      !this._lastDragPointerState
+    )
+      return;
+
+    const state = this._lastDragPointerState;
+    this._rafID = requestAnimationFrame(() =>
+      this._updateIndicator(state, false)
+    );
   };
 
   /**
@@ -797,45 +851,16 @@ export class DragHandleWidget extends WidgetElement {
    * Update drop block id
    */
   private _dragMoveHandler: UIEventHandler = ctx => {
-    this._clearRaf();
     if (!this._dragging || this._draggingElements.length === 0) {
       return;
     }
 
+    this._clearRaf();
     ctx.get('defaultState').event.preventDefault();
-
-    const runner = () => {
-      const state = ctx.get('pointerState');
-      const point = this._getContainerOffsetPoint(state);
-      const closestNoteBlock = this._getClosestNoteBlock(point);
-      if (!closestNoteBlock || this._outOfNoteBlock(closestNoteBlock, point)) {
-        this._dropBlockId = '';
-        this._indicatorRect = null;
-      } else {
-        const dropIndicator = this._getDropIndicator(state);
-        this._updateIndicator(dropIndicator);
-      }
-
-      const previewPos = new Point(state.point.x, state.point.y);
-      if (this._dragPreview)
-        this._updateDragPreviewPosition(this._dragPreview, previewPos);
-
-      if (this._pageBlockElement instanceof DocPageBlockComponent) {
-        const result = autoScroll(
-          this._pageBlockElement.viewportElement,
-          state.y
-        );
-        if (!result) {
-          this._clearRaf();
-          return;
-        }
-        this._rafID = requestAnimationFrame(runner);
-      } else {
-        this._clearRaf();
-      }
-    };
-
-    this._rafID = requestAnimationFrame(runner);
+    const state = ctx.get('pointerState');
+    this._rafID = requestAnimationFrame(() =>
+      this._updateIndicator(state, true)
+    );
 
     return true;
   };
@@ -903,25 +928,6 @@ export class DragHandleWidget extends WidgetElement {
         this._setSelectedBlocks(newSelectedBlocks as BlockElement[], noteId);
       }
     }, 0);
-
-    return true;
-  };
-
-  /**
-   * Should hide drag handle when wheel
-   */
-  private _wheelHandler: UIEventHandler = ctx => {
-    this._hide();
-    if (
-      (!this._dragging || this._draggingElements.length === 0) &&
-      !this._dragHandlePointerDown
-    ) {
-      return;
-    }
-
-    const state = ctx.get('defaultState');
-    const event = state.event as WheelEvent;
-    event.preventDefault();
 
     return true;
   };
@@ -1033,18 +1039,6 @@ export class DragHandleWidget extends WidgetElement {
         this._hoverDragHandle = false;
       }
     );
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this.handleEvent('pointerMove', this._pointerMoveHandler);
-    this.handleEvent('click', this._clickHandler);
-    this.handleEvent('dragStart', this._dragStartHandler);
-    this.handleEvent('dragMove', this._dragMoveHandler);
-    this.handleEvent('dragEnd', this._dragEndHandler);
-    this.handleEvent('wheel', this._wheelHandler);
-    this.handleEvent('pointerOut', this._pointerOutHandler);
-    this.handleEvent('beforeInput', () => this._hide());
 
     if (isEdgelessPage(this._pageBlockElement)) {
       const edgelessPage = this._pageBlockElement;
@@ -1057,6 +1051,8 @@ export class DragHandleWidget extends WidgetElement {
         edgelessPage.slots.viewportUpdated.on(() => {
           this._hide();
           this._scale = edgelessPage.surface.viewport.zoom;
+
+          this._scrollToUpdateIndicator();
         })
       );
     } else {
@@ -1064,7 +1060,23 @@ export class DragHandleWidget extends WidgetElement {
       this._disposables.add(
         docPage.slots.viewportUpdated.on(() => this._hide())
       );
+
+      this._disposables.addFromEvent(docPage.viewportElement, 'scroll', () => {
+        this._scrollToUpdateIndicator();
+      });
     }
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.handleEvent('pointerMove', this._pointerMoveHandler);
+    this.handleEvent('click', this._clickHandler);
+    this.handleEvent('dragStart', this._dragStartHandler);
+    this.handleEvent('dragMove', this._dragMoveHandler);
+    this.handleEvent('dragEnd', this._dragEndHandler);
+    this.handleEvent('wheel', () => this._hide());
+    this.handleEvent('pointerOut', this._pointerOutHandler);
+    this.handleEvent('beforeInput', () => this._hide());
   }
 
   override disconnectedCallback() {

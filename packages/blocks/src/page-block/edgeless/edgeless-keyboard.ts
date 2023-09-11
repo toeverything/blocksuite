@@ -9,7 +9,7 @@ import {
   ConnectorMode,
   ShapeStyle,
 } from '../../surface-block/index.js';
-import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
+import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -149,12 +149,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         Delete: () => {
           this._delete();
         },
-        Space: ctx => {
-          const event = ctx.get('defaultState').event;
-          if (event instanceof KeyboardEvent) {
-            this._space(event);
-          }
-        },
         ArrowUp: () => {
           this._move('ArrowUp');
         },
@@ -184,38 +178,46 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         this._shift(event);
       }
     });
+    this._bindToggleHand();
   }
 
-  private _shouldRevertMode = false;
-  private _lastMode: EdgelessTool | null = null;
+  private _bindToggleHand() {
+    this.pageElement.handleEvent(
+      'keyDown',
+      ctx => {
+        const event = ctx.get('keyboardState').raw;
+        if (event.code === 'Space') {
+          this._space(event);
+        }
+      },
+      { global: true }
+    );
+    this.pageElement.handleEvent(
+      'keyUp',
+      ctx => {
+        const event = ctx.get('keyboardState').raw;
+        if (event.code === 'Space') {
+          this._space(event);
+        }
+      },
+      { global: true }
+    );
+  }
+
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
-    const { edgelessTool: edgelessTool } = edgeless.tools;
-    const { state } = edgeless.selectionManager;
-    if (event.type === 'keydown') {
-      if (edgelessTool.type === 'pan') {
-        return;
-      }
-
-      // when user is editing, shouldn't enter pan mode
-      if (edgelessTool.type === 'default' && state.editing) {
-        return;
-      }
-
-      this._shouldRevertMode = true;
-      this._lastMode = edgelessTool;
-      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+    const type = edgeless.edgelessTool.type;
+    const state = edgeless.selectionManager.state;
+    if (type !== 'default' && type !== 'pan') {
       return;
     }
-    if (event.type === 'keyup') {
-      if (
-        edgelessTool.type === 'pan' &&
-        this._shouldRevertMode &&
-        this._lastMode
-      ) {
-        this._setEdgelessTool(edgeless, this._lastMode);
+    if (event.type === 'keydown') {
+      if (type === 'pan' || (type === 'default' && state.editing)) {
+        return;
       }
-      this._shouldRevertMode = false;
+      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+    } else if (event.type === 'keyup') {
+      this._setEdgelessTool(edgeless, { type: 'default' });
     }
   }
 

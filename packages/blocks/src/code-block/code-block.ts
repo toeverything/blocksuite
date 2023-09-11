@@ -2,12 +2,13 @@ import '../__internal__/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
-import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
-import type { VirgoRootElement } from '@blocksuite/virgo';
+import { assertExists, whenHover } from '@blocksuite/global/utils';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
-import { css, html, nothing, render } from 'lit';
+import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import {
@@ -21,6 +22,7 @@ import { z } from 'zod';
 import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
+import type { RichText } from '../__internal__/rich-text/rich-text.js';
 import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
@@ -183,8 +185,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('.lang-button')
   private _langButton!: HTMLButtonElement;
 
-  private _optionsPortal: HTMLDivElement | null = null;
-
   @state()
   private _langListAbortController?: AbortController;
 
@@ -250,11 +250,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   get vEditor() {
-    const vRoot = this.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }
     return vRoot.virgoEditor;
+  }
+
+  @query('rich-text')
+  private _richTextElement?: RichText;
+
+  private _setReference?: RefOrCallback;
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
   }
 
   override connectedCallback() {
@@ -287,10 +298,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       })
     );
 
-    this._observePosition();
+    this._addHoverToolbar();
     bindContainerHotkey(this);
 
-    const selection = this.root.selectionManager;
+    const selectionManager = this.root.selectionManager;
     const INDENT_SYMBOL = '  ';
     const LINE_BREAK_SYMBOL = '\n';
     const allIndexOf = (
@@ -314,7 +325,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     };
     this.bindHotKey({
       Backspace: () => {
-        const textSelection = selection.find('text');
+        const textSelection = selectionManager.find('text');
         if (!textSelection) {
           return;
         }
@@ -322,11 +333,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const from = textSelection.from;
 
         if (from.index === 0 && from.length === 0) {
-          selection.update(selList => {
-            return selList
-              .filter(sel => !sel.is('text'))
-              .concat(selection.getInstance('block', { path: this.path }));
-          });
+          selectionManager.setGroup('note', [
+            selectionManager.getInstance('block', { path: this.path }),
+          ]);
           return true;
         }
 
@@ -455,20 +464,22 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._richTextResizeObserver.observe(richText);
   }
 
-  private _onClickWrapBtn() {
-    const container = this.querySelector('.affine-code-block-container');
-    assertExists(container);
-    this._wrap = container.classList.toggle('wrap');
-  }
+  private _addHoverToolbar() {
+    let abortController = new AbortController();
+    // Call abort() because the portal has not been created yet
+    abortController.abort();
+    const { setReference, setFloating, dispose } = whenHover(isHover => {
+      if (!isHover) {
+        abortController.abort();
+        return;
+      }
+      if (!abortController.signal.aborted) return;
+      abortController = new AbortController();
 
-  private _observePosition() {
-    this._disposables.addFromEvent(this, 'mouseenter', () => {
-      if (this._optionsPortal?.isConnected) return;
-      const abortController = new AbortController();
-
-      this._optionsPortal = createLitPortal({
+      createLitPortal({
         template: ({ updatePortal }) =>
           CodeOptionTemplate({
+            ref: setFloating,
             anchor: this,
             model: this.model,
             wrap: this._wrap,
@@ -500,6 +511,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         abortController,
       });
     });
+    this._setReference = setReference;
+    this.disposables.add(dispose);
+  }
+
+  private _onClickWrapBtn() {
+    const container = this.querySelector('.affine-code-block-container');
+    assertExists(container);
+    this._wrap = container.classList.toggle('wrap');
   }
 
   private _onClickLangBtn() {
@@ -512,6 +531,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     createLitPortal({
+      closeOnClickAway: true,
       template: ({ positionSlot }) => {
         const langList = new LangList();
         langList.currentLanguageId = this._perviousLanguage.id as Lang;
@@ -582,8 +602,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     );
   }
 
-  override render() {
-    return html`<div class="affine-code-block-container">
+  override render(): TemplateResult<1> {
+    return html`<div
+      ${ref(this._setReference)}
+      class="affine-code-block-container"
+    >
       ${this._curLanguageButtonTemplate()}
       <div class="rich-text-container">
         <div id="line-numbers"></div>
@@ -592,6 +615,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .undoManager=${this.model.page.history}
           .textSchema=${this.textSchema}
           .readonly=${this.model.page.readonly}
+          .vRangeProvider=${getVRangeProvider(this)}
         >
         </rich-text>
       </div>

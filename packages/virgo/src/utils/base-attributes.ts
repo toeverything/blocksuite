@@ -8,6 +8,5 @@ export const baseTextAttributes = z.object({
   code: z.literal(true).optional().catch(undefined),
   link: z.string().optional().catch(undefined),
 });
-// .partial();
 
 export type BaseTextAttributes = z.infer<typeof baseTextAttributes>;

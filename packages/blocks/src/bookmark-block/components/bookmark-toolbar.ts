@@ -1,4 +1,3 @@
-import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
@@ -58,17 +57,6 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
 
   @query('.more-button-wrapper')
   moreButton!: HTMLElement;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    const { onHover, onHoverLeave } = createDelayHoverSignal(
-      this.abortController
-    );
-    this.disposables.addFromEvent(this, 'mouseover', onHover);
-    this.disposables.addFromEvent(this, 'mouseleave', onHoverLeave);
-    this.disposables.addFromEvent(this.root, 'mouseover', onHover);
-    this.disposables.addFromEvent(this.root, 'mouseleave', onHoverLeave);
-  }
 
   private _moreMenuAbortController: AbortController | null = null;
 
