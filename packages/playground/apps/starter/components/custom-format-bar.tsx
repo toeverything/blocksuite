@@ -18,7 +18,7 @@ export function registerFormatBarCustomElement() {
           data-testid="custom-format-bar-element"
           onClick={() => {
             const root = formatBar.root;
-            const selectionManager = root.selectionManager;
+            const selectionManager = root.selection;
             console.log('selections', selectionManager.value);
           }}
         >

@@ -33,7 +33,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
   }> = [];
 
   private get _selectionManager() {
-    return this.root.selectionManager;
+    return this.root.selection;
   }
 
   private get _container() {
@@ -126,7 +126,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
-        const blockElement = this.root.viewStore.viewFromPath(
+        const blockElement = this.root.view.viewFromPath(
           'block',
           blockSelection.path
         );
@@ -203,7 +203,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     } else if (blockSelections.length > 0) {
       const lastBlockSelection = blockSelections[blockSelections.length - 1];
 
-      const blockElement = this.root.viewStore.viewFromPath(
+      const blockElement = this.root.view.viewFromPath(
         'block',
         lastBlockSelection.path
       );

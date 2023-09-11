@@ -392,8 +392,8 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.bindHotKey({
       ArrowUp: () => {
-        const view = this.root.viewStore;
-        const selection = this.root.selectionManager;
+        const view = this.root.view;
+        const selection = this.root.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -453,8 +453,8 @@ export class DocPageBlockComponent extends BlockElement<
         return true;
       },
       ArrowDown: () => {
-        const view = this.root.viewStore;
-        const selection = this.root.selectionManager;
+        const view = this.root.view;
+        const selection = this.root.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -537,8 +537,8 @@ export class DocPageBlockComponent extends BlockElement<
       }
 
       requestAnimationFrame(() => {
-        this.root.selectionManager.setGroup('note', [
-          this.root.selectionManager.getInstance('text', {
+        this.root.selection.setGroup('note', [
+          this.root.selection.getInstance('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
               index,

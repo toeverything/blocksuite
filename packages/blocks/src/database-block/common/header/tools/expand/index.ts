@@ -147,7 +147,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
 
   selectionUpdated: Slot<DataViewSelection | undefined> = new Slot();
   setSelection: (selection?: DataViewSelection) => void = selection => {
-    this.database.root.selectionManager.set(
+    this.database.root.selection.set(
       selection
         ? [new DatabaseSelection({ path: this.path, viewSelection: selection })]
         : []
@@ -156,7 +156,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   bindHotkey: (hotkeys: Record<string, UIEventHandler>) => Disposable =
     hotkeys => {
       return {
-        dispose: this.database.root.uiEventDispatcher.bindHotkey(hotkeys, {
+        dispose: this.database.root.event.bindHotkey(hotkeys, {
           path: [],
         }),
       };
@@ -166,7 +166,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
     handler
   ) => {
     return {
-      dispose: this.database.root.uiEventDispatcher.add(name, handler, {
+      dispose: this.database.root.event.add(name, handler, {
         path: [],
       }),
     };

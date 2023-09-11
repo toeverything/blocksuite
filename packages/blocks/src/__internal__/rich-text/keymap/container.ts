@@ -30,7 +30,7 @@ import {
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
-  const selection = blockElement.root.selectionManager;
+  const selection = blockElement.root.selection;
   const model = blockElement.model;
   const root = blockElement.root;
 

@@ -243,7 +243,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   }
 
   private _onCardClick() {
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });

@@ -62,7 +62,7 @@ const updateParagraphType = (
     onModelElementUpdated(codeModel, () => {
       const codeElement = getBlockElementByModel(codeModel);
       assertExists(codeElement);
-      const selectionManager = codeElement.root.selectionManager;
+      const selectionManager = codeElement.root.selection;
       selectionManager.set([
         new TextSelection({
           from: {

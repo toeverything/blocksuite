@@ -1,12 +1,12 @@
+import type { BlockStdProvider } from '../provider/index.js';
 import type { BlockService } from '../service/index.js';
-import type { BlockSpec } from '../spec/index.js';
-import type { BlockStore } from './block-store.js';
+import type { BlockSpec } from './index.js';
 
 export class SpecStore<ComponentType = unknown> {
   private _specs: Map<string, BlockSpec<ComponentType>> = new Map();
   private _services: Map<string, BlockService> = new Map();
 
-  constructor(public blockStore: BlockStore) {}
+  constructor(public std: BlockStdProvider) {}
 
   dispose() {
     this._services.forEach(service => {
@@ -66,7 +66,7 @@ export class SpecStore<ComponentType = unknown> {
 
       const service = new newSpec.service({
         flavour,
-        store: this.blockStore,
+        store: this.std,
       });
       this._services.set(flavour, service);
       service.mounted();
