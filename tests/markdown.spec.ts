@@ -18,6 +18,7 @@ import {
   assertBlockType,
   assertRichTexts,
   assertRichTextVirgoDeltas,
+  assertRichTextVRange,
   assertText,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -198,7 +199,7 @@ test.describe('markdown inline-text', async () => {
 
   test('bolditalic', async ({ page }) => {
     await type(page, 'aa***bb*** ');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -211,14 +212,15 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVRange(page, 0, 11);
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa***bb*** ',
       },
     ]);
     await redoByKeyboard(page);
     await type(page, 'cc');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -251,7 +253,7 @@ test.describe('markdown inline-text', async () => {
 
   test('bold', async ({ page }) => {
     await type(page, 'aa**bb** ');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -263,14 +265,15 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVRange(page, 0, 9);
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa**bb** ',
       },
     ]);
     await redoByKeyboard(page);
     await type(page, 'cc');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -301,7 +304,7 @@ test.describe('markdown inline-text', async () => {
 
   test('italic', async ({ page }) => {
     await type(page, 'aa*bb* ');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -313,14 +316,15 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVRange(page, 0, 7);
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa*bb* ',
       },
     ]);
     await redoByKeyboard(page);
     await type(page, 'cc');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -352,7 +356,7 @@ test.describe('markdown inline-text', async () => {
 
   test('strike', async ({ page }) => {
     await type(page, 'aa~~bb~~ ');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -364,14 +368,15 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVRange(page, 0, 9);
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa~~bb~~ ',
       },
     ]);
     await redoByKeyboard(page);
     await type(page, 'cc');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -402,7 +407,7 @@ test.describe('markdown inline-text', async () => {
 
   test('underline', async ({ page }) => {
     await type(page, 'aa~bb~ ');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -414,14 +419,15 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVRange(page, 0, 7);
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa~bb~ ',
       },
     ]);
     await redoByKeyboard(page);
     await type(page, 'cc');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -452,7 +458,7 @@ test.describe('markdown inline-text', async () => {
 
   test('code', async ({ page }) => {
     await type(page, 'aa`bb` ');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
@@ -464,14 +470,15 @@ test.describe('markdown inline-text', async () => {
       },
     ]);
     await undoByKeyboard(page);
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVRange(page, 0, 7);
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa`bb` ',
       },
     ]);
     await redoByKeyboard(page);
     await type(page, 'cc');
-    assertRichTextVirgoDeltas(page, [
+    await assertRichTextVirgoDeltas(page, [
       {
         insert: 'aa',
       },
