@@ -18,6 +18,7 @@ export class PageKeyboardManager {
             this._page.redo();
           }
         },
+        'Mod-Backspace': () => {},
         Backspace: this._handleDelete,
         Delete: this._handleDelete,
         'Control-d': this._handleDelete,

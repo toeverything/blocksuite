@@ -19,7 +19,7 @@ import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
-import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
+import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 
