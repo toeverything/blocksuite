@@ -1,5 +1,7 @@
 import './utils/declare-test-window.js';
 
+import { expect } from '@playwright/test';
+
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
@@ -17,6 +19,8 @@ import {
   getCopyClipItemsInPage,
   getEditorLocator,
   getRichTextBoundingBox,
+  getVirgoSelectionIndex,
+  getVirgoSelectionText,
   importMarkdown,
   initDatabaseDynamicRowWithData,
   initEmptyDatabaseWithParagraphState,
@@ -27,6 +31,7 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
+  pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressEnter,
@@ -435,6 +440,340 @@ test('should keep first line format when pasted into a new line', async ({
   await assertBlockTypes(page, ['todo']);
 });
 
+test('paste a non-nested list to a non-nested list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- a
+`,
+  };
+
+  await type(page, '-');
+  await pressSpace(page);
+  await type(page, '123');
+  await page.keyboard.press('Control+ArrowLeft');
+
+  // paste on start
+  await pasteContent(page, clipData);
+  await assertRichTexts(page, ['a123']);
+  // - a|123
+  expect(await getVirgoSelectionIndex(page)).toBe(1);
+
+  // paste in middle
+  await pasteContent(page, clipData);
+  await assertRichTexts(page, ['aa123']);
+  // aa|123
+  expect(await getVirgoSelectionIndex(page)).toBe(2);
+
+  await page.keyboard.press('Control+ArrowRight');
+
+  // paste on end
+  await pasteContent(page, clipData);
+  await assertRichTexts(page, ['aa123a']);
+  // aa123a|
+  expect(await getVirgoSelectionIndex(page)).toBe(6);
+
+  await assertBlockTypes(page, ['bulleted']);
+});
+
+test('copy a nested list by clicking button, the clipboard data should be complete', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+`,
+  };
+  await pasteContent(page, clipData);
+
+  const rootListBound = await page.locator('affine-list').first().boundingBox();
+  assertExists(rootListBound);
+
+  // use drag element to test.
+  await dragBetweenCoords(
+    page,
+    { x: rootListBound.x + 1, y: rootListBound.y - 1 },
+    { x: rootListBound.x + 1, y: rootListBound.y + rootListBound.height - 1 }
+  );
+  await copyByKeyboard(page);
+  const clipItems = await getCopyClipItemsInPage(page);
+  const blockJson = [
+    {
+      flavour: 'affine:list',
+      type: 'bulleted',
+      text: [{ insert: 'aaa' }],
+      children: [
+        {
+          flavour: 'affine:list',
+          type: 'bulleted',
+          text: [{ insert: 'bbb' }],
+          children: [
+            {
+              flavour: 'affine:list',
+              type: 'bulleted',
+              text: [{ insert: 'ccc' }],
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+  const htmlText =
+    `<ul><li>aaa<ul><li>bbb<ul><li>ccc</li></ul></li></ul></li></ul>` +
+    `<blocksuite style="display: none" data-type="blocksuite/page" data-clipboard="${JSON.stringify(
+      blockJson
+    ).replace(/"/g, '&quot;')}"></blocksuite>`;
+  const expectClipItems = [
+    { mimeType: 'text/plain', data: 'aaabbbccc' },
+    {
+      mimeType: 'text/html',
+      data: htmlText,
+    },
+    {
+      mimeType: 'blocksuite/page',
+      data: JSON.stringify(blockJson),
+    },
+  ];
+  assertClipData(clipItems, expectClipItems, 'text/plain');
+  assertClipData(clipItems, expectClipItems, 'text/html');
+  assertClipData(clipItems, expectClipItems, 'blocksuite/page');
+});
+
+test('paste a nested list to a nested list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+`,
+  };
+  await pasteContent(page, clipData);
+  await focusRichText(page, 1);
+
+  // paste on start
+  await page.keyboard.press('Control+ArrowLeft');
+
+  /**
+   * - aaa
+   *   - |bbb
+   *     - ccc
+   */
+  await pasteContent(page, clipData);
+  /**
+   * - aaa
+   *   - aaa
+   *     - bbb
+   *        - ccc
+   *   - |bbb
+   *     - ccc
+   */
+
+  await assertRichTexts(page, ['aaa', 'aaa', 'bbb', 'ccc', 'bbb', 'ccc']);
+  expect(await getVirgoSelectionText(page)).toEqual('bbb');
+  expect(await getVirgoSelectionIndex(page)).toEqual(0);
+
+  // paste in middle
+  await undoByKeyboard(page);
+  await pressArrowRight(page);
+
+  /**
+   * - aaa
+   *   - b|bb
+   *     - ccc
+   */
+  await pasteContent(page, clipData);
+  /**
+   * - aaa
+   *   - baaa
+   *     - bbb
+   *       - ccc|bb
+   *     - ccc
+   */
+
+  await assertRichTexts(page, ['aaa', 'baaa', 'bbb', 'cccbb', 'ccc']);
+  expect(await getVirgoSelectionText(page)).toEqual('cccbb');
+  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+
+  // paste on end
+  await undoByKeyboard(page);
+  await page.keyboard.press('Control+ArrowRight');
+
+  /**
+   * - aaa
+   *   - bbb|
+   *     - ccc
+   */
+  await pasteContent(page, clipData);
+  /**
+   * - aaa
+   *   - bbbaaa
+   *     - bbb
+   *       - ccc|
+   *     - ccc
+   */
+
+  await assertRichTexts(page, ['aaa', 'bbbaaa', 'bbb', 'ccc', 'ccc']);
+  expect(await getVirgoSelectionText(page)).toEqual('ccc');
+  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+});
+
+test('paste nested lists to a nested list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+    - ccc
+`,
+  };
+  await pasteContent(page, clipData);
+  await focusRichText(page, 1);
+
+  const clipData2 = {
+    'text/plain': `
+- 111
+  - 222
+- 111
+  - 222
+`,
+  };
+
+  // paste on start
+  await page.keyboard.press('Control+ArrowLeft');
+
+  /**
+   * - aaa
+   *   - |bbb
+   *     - ccc
+   */
+  await pasteContent(page, clipData2);
+  /**
+   * - aaa
+   *   - 111
+   *     - 222
+   *   - 111
+   *     - 222
+   *   - |bbb
+   *     - ccc
+   */
+
+  await assertRichTexts(page, [
+    'aaa',
+    '111',
+    '222',
+    '111',
+    '222',
+    'bbb',
+    'ccc',
+  ]);
+  expect(await getVirgoSelectionText(page)).toEqual('bbb');
+  expect(await getVirgoSelectionIndex(page)).toEqual(0);
+
+  // paste in middle
+  await undoByKeyboard(page);
+  await pressArrowRight(page);
+
+  /**
+   * - aaa
+   *   - b|bb
+   *     - ccc
+   */
+  await pasteContent(page, clipData2);
+  /**
+   * - aaa
+   *   - b111
+   *     - 222
+   *   - 111
+   *     - 222|bb
+   *     - ccc
+   */
+
+  await assertRichTexts(page, ['aaa', 'b111', '222', '111', '222bb', 'ccc']);
+  expect(await getVirgoSelectionText(page)).toEqual('222bb');
+  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+
+  // paste on end
+  await undoByKeyboard(page);
+  await page.keyboard.press('Control+ArrowRight');
+
+  /**
+   * - aaa
+   *   - bbb|
+   *     - ccc
+   */
+  await pasteContent(page, clipData2);
+  /**
+   * - aaa
+   *   - bbb111
+   *     - 222
+   *   - 111
+   *     - 222|
+   *     - ccc
+   */
+
+  await assertRichTexts(page, ['aaa', 'bbb111', '222', '111', '222', 'ccc']);
+  expect(await getVirgoSelectionText(page)).toEqual('222');
+  expect(await getVirgoSelectionIndex(page)).toEqual(3);
+});
+
+test('paste non-nested lists to a nested list', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  const clipData = {
+    'text/plain': `
+- aaa
+  - bbb
+`,
+  };
+  await pasteContent(page, clipData);
+  await focusRichText(page, 0);
+
+  const clipData2 = {
+    'text/plain': `
+- 123
+- 456
+`,
+  };
+
+  // paste on start
+  await page.keyboard.press('Control+ArrowLeft');
+
+  /**
+   * - |aaa
+   *   - bbb
+   */
+  await pasteContent(page, clipData2);
+  /**
+   * - 123
+   * - 456
+   * - |aaa
+   *   - bbb
+   */
+
+  await assertRichTexts(page, ['123', '456', 'aaa', 'bbb']);
+  expect(await getVirgoSelectionText(page)).toEqual('aaa');
+  expect(await getVirgoSelectionIndex(page)).toEqual(0);
+});
+
 test(scoped`cut should work for multi-block selection`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
@@ -747,6 +1086,7 @@ test(scoped`copy and paste to selection block selection`, async ({ page }) => {
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await pasteByKeyboard(page, false);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['12341234']);
 });
 
