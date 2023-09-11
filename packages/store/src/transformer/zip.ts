@@ -104,18 +104,12 @@ export async function importPagesZip(workspace: Workspace, imported: Blob) {
     })
   );
 
-  const pages = await Promise.all(
+  return Promise.all(
     snapshotsObjs.map(async fileObj => {
       const json = await fileObj.async('text');
       const snapshot = JSON.parse(json) as PageSnapshot;
 
-      // TODO: use middleware to handle snapshot transform
-      snapshot.meta.id = workspace.idGenerator();
-
-      const page = await job.snapshotToPage(snapshot);
-      return page;
+      return job.snapshotToPage(snapshot);
     })
   );
-
-  return pages;
 }

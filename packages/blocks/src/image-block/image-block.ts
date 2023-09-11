@@ -220,7 +220,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
     let dragging = false;
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragStart', ctx => {
+      this.root.event.add('dragStart', ctx => {
         const pointerState = ctx.get('pointerState');
         const target = pointerState.event.target;
         if (
@@ -237,7 +237,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       })
     );
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragMove', ctx => {
+      this.root.event.add('dragMove', ctx => {
         const pointerState = ctx.get('pointerState');
         if (dragging) {
           embedResizeManager.onMove(pointerState);
@@ -247,7 +247,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       })
     );
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragEnd', () => {
+      this.root.event.add('dragEnd', () => {
         if (dragging) {
           dragging = false;
           embedResizeManager.onEnd();
@@ -259,7 +259,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _handleSelection() {
-    const selection = this.root.selectionManager;
+    const selection = this.root.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
         const curr = selList.find(
@@ -300,7 +300,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _bindKeymap() {
-    const selection = this.root.selectionManager;
+    const selection = this.root.selection;
     const addParagraph = () => {
       const parent = this.page.getParent(this.model);
       if (!parent) return;

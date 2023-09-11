@@ -82,7 +82,7 @@ export function updateBlockElementType(
   const lastNewModel = newModels[newModels.length - 1];
 
   const allTextUpdated = newModels.map(model => onModelTextUpdated(model));
-  const selectionManager = root.selectionManager;
+  const selectionManager = root.selection;
   const textSelection = selectionManager.find('text');
   const blockSelections = selectionManager.filter('block');
 

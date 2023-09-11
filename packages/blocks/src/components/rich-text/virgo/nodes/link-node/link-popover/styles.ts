@@ -1,7 +1,7 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import { tooltipStyle } from '../tooltip/tooltip.js';
+import { tooltipStyle } from '../../../../../tooltip/tooltip.js';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {

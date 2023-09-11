@@ -84,7 +84,7 @@ type Renderable =
 
 type PortalOptions = {
   template: Renderable | ((ctx: { updatePortal: () => void }) => Renderable);
-  container?: HTMLElement;
+  container?: Element;
   /**
    * The portal is removed when the AbortSignal is aborted.
    */
@@ -154,8 +154,11 @@ export function createSimplePortal({
   return portalRoot;
 }
 
-type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
-  abortController?: AbortController;
+export type AdvancedPortalOptions = Omit<
+  PortalOptions,
+  'template' | 'signal'
+> & {
+  abortController: AbortController;
   template:
     | Renderable
     | ((context: {
@@ -209,7 +212,7 @@ type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
  */
 export function createLitPortal({
   computePosition: computePositionOptions,
-  abortController = new AbortController(),
+  abortController,
   closeOnClickAway = false,
   ...portalOptions
 }: AdvancedPortalOptions) {

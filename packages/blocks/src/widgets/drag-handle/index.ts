@@ -118,9 +118,9 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   get selectedBlocks() {
-    return this.root.selectionManager.find('text')
-      ? this.root.selectionManager.filter('text')
-      : this.root.selectionManager.filter('block');
+    return this.root.selection.find('text')
+      ? this.root.selection.filter('text')
+      : this.root.selection.filter('block');
   }
 
   clearRaf() {
@@ -304,7 +304,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _getBlockElementFromViewStore(path: string[]) {
-    return this.root.viewStore.viewFromPath('block', path);
+    return this.root.view.viewFromPath('block', path);
   }
 
   private get _viewportOffset() {
@@ -522,9 +522,9 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _setSelectedBlocks(blockElements: BlockElement[], noteId?: string) {
-    const { selectionManager } = this.root;
+    const { selection } = this.root;
     const selections = blockElements.map(blockElement =>
-      selectionManager.getInstance('block', {
+      selection.getInstance('block', {
         path: blockElement.path,
       })
     );
@@ -533,7 +533,7 @@ export class DragHandleWidget extends WidgetElement {
     // We need to remain surface selection and set editing as true
     if (isEdgelessPage(this.pageBlockElement)) {
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
-      const surfaceSelection = selectionManager.getInstance(
+      const surfaceSelection = selection.getInstance(
         'surface',
         [surfaceElementId],
         true
@@ -542,7 +542,7 @@ export class DragHandleWidget extends WidgetElement {
       selections.push(surfaceSelection);
     }
 
-    selectionManager.set(selections);
+    selection.set(selections);
   }
 
   private get _rangeManager() {
@@ -740,7 +740,7 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    const { selectionManager } = this.root;
+    const { selection } = this.root;
     const selectedBlocks = this.selectedBlocks;
 
     // Should clear selection if current block is the first selected block
@@ -749,7 +749,7 @@ export class DragHandleWidget extends WidgetElement {
       !includeTextSelection(selectedBlocks) &&
       selectedBlocks[0].blockId === this._hoveredBlockId
     ) {
-      selectionManager.clear(['block']);
+      selection.clear(['block']);
       this._dragHoverRect = null;
       this._showDragHandleOnHoverBlock(this._hoveredBlockPath);
       return;

@@ -53,7 +53,7 @@ import {
   assertRectEqual,
   assertRectExist,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -189,19 +189,19 @@ test('edgeless arrow up/down', async ({ page }) => {
   // 0 for page, 1 for surface, 2 for note, 3 for paragraph
   expect(ids.paragraphId).toBe('3');
   await clickBlockById(page, ids.paragraphId);
-  await assertSelection(page, 0, 5, 0);
+  await assertRichTextVRange(page, 0, 5, 0);
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertSelection(page, 1, 0, 0);
+  await assertRichTextVRange(page, 1, 0, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertSelection(page, 0, 0, 0);
+  await assertRichTextVRange(page, 0, 0, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertSelection(page, 0, 0, 0);
+  await assertRichTextVRange(page, 0, 0, 0);
 });
 
 test('dragging un-selected note', async ({ page }) => {
