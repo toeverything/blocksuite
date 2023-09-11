@@ -553,3 +553,18 @@ export async function assertKanbanCardSelected(
 
   expect(border).toEqual('1px solid var(--affine-primary-color)');
 }
+
+export async function getKanbanCard(
+  page: Page,
+  {
+    groupIndex,
+    cardIndex,
+  }: {
+    groupIndex: number;
+    cardIndex: number;
+  }
+) {
+  const group = page.locator('affine-data-view-kanban-group').nth(groupIndex);
+  const card = group.locator('affine-data-view-kanban-card').nth(cardIndex);
+  return card;
+}

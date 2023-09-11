@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { shiftClick } from 'utils/actions/edgeless.js';
 
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
@@ -29,6 +30,7 @@ import {
   assertRowsSelection,
   focusKanbanCardHeader,
   getDatabaseBodyCell,
+  getKanbanCard,
   initDatabaseColumn,
   switchColumnType,
 } from './actions.js';
@@ -434,6 +436,42 @@ test.describe('kanban view selection', () => {
     await pressArrowLeft(page);
     await assertKanbanCardSelected(page, {
       groupIndex: 2,
+      cardIndex: 0,
+    });
+  });
+
+  test('should support multi card selection', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2'],
+      columns: [
+        {
+          type: 'number',
+          value: [undefined, 1],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await pressEscape(page);
+
+    const card = await getKanbanCard(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+    });
+    const box = await getBoundingBox(card);
+    await shiftClick(page, {
+      x: box.x + box.width / 2,
+      y: box.y + box.height / 2,
+    });
+
+    await assertKanbanCardSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+    });
+    await assertKanbanCardSelected(page, {
+      groupIndex: 1,
       cardIndex: 0,
     });
   });
