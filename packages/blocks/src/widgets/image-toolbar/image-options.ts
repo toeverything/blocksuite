@@ -64,6 +64,9 @@ export function ImageOptionsTemplate({
       .has-tool-tip.delete-image-button:hover > svg {
         color: var(--affine-error-color);
       }
+      icon-button[hidden] {
+        display: none;
+      }
 
       ${tooltipStyle}
     </style>
@@ -132,8 +135,8 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip"
           size="32px"
-          ?hidden=${readonly ||
-          !model.page.awarenessStore.getFlag('enable_bultin_ledits')}
+          ?disabled=${readonly}
+          ?hidden=${!model.page.awarenessStore.getFlag('enable_bultin_ledits')}
           @click="${() => {
             abortController.abort();
             openLeditsEditor(model, blob, root);
