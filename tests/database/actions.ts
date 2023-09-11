@@ -506,9 +506,11 @@ export async function assertKanbanCellSelected(
       const card = group?.querySelector(
         `affine-data-view-kanban-card:nth-child(${cardIndex + 1})`
       );
-      const cell = card?.querySelector<HTMLElement>(
-        `affine-data-view-kanban-cell:nth-child(${cellIndex + 1})`
+      const cells = Array.from(
+        card?.querySelectorAll<HTMLElement>(`affine-data-view-kanban-cell`) ??
+          []
       );
+      const cell = cells[cellIndex];
       if (!cell) throw new Error(`Missing cell tag`);
       return cell.style.border;
     },

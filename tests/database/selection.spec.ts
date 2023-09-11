@@ -2,6 +2,8 @@ import { expect } from '@playwright/test';
 
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
+  pressArrowDown,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -86,14 +88,80 @@ test.describe('focus', () => {
     await assertRowsSelection(page, [0, 0]);
   });
 
-  test("should support move cell's focus by arrow key", async ({ page }) => {
+  test("should support move cell's focus by arrow key(up&down) within a card", async ({
+    page,
+  }) => {
     await enterPlaygroundRoom(page);
-    await initKanbanViewState(page);
+    await initKanbanViewState(page, {
+      rows: ['row1'],
+      columns: [
+        {
+          type: 'number',
+          value: [1],
+        },
+        {
+          type: 'rich-text',
+          value: ['text'],
+        },
+      ],
+    });
 
     await focusKanbanCardHeader(page);
     await pressEscape(page);
     await assertKanbanCellSelected(page, {
-      groupIndex: 0,
+      // group by `number` column, the first(groupIndex: 0) group is `Ungroups`
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+
+    await pressArrowDown(page);
+    await pressArrowDown(page);
+    await pressArrowDown(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+
+    await pressArrowUp(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 2,
+    });
+  });
+
+  test("should support move cell's focus by arrow key(up&down) within multi cards", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2'],
+      columns: [
+        {
+          type: 'number',
+          value: [1, 2],
+        },
+        {
+          type: 'rich-text',
+          value: ['text'],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await pressArrowUp(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 1,
+      cellIndex: 2,
+    });
+
+    await pressArrowDown(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
       cardIndex: 0,
       cellIndex: 0,
     });

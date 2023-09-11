@@ -378,47 +378,68 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
-export async function initKanbanViewState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(async pageId => {
-    const { page } = window;
-    await page.waitForLoaded();
+export async function initKanbanViewState(
+  page: Page,
+  config: {
+    rows: string[];
+    columns: { type: string; value?: unknown[] }[];
+  },
+  pageId?: string
+) {
+  const ids = await page.evaluate(
+    async ({ pageId, config }) => {
+      const { page } = window;
+      await page.waitForLoaded();
 
-    page.captureSync();
-    if (!pageId) {
-      pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+      page.captureSync();
+      if (!pageId) {
+        pageId = page.addBlock('affine:page', {
+          title: new page.Text(),
+        });
+      }
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      const databaseId = page.addBlock(
+        'affine:database',
+        {
+          title: new page.Text('Database 1'),
+        },
+        noteId
+      );
+      const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+      const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+
+      const rowIds = config.rows.map(rowText => {
+        const rowId = page.addBlock(
+          'affine:paragraph',
+          { type: 'text', text: new page.Text(rowText) },
+          databaseId
+        );
+        return rowId;
       });
-    }
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    const databaseId = page.addBlock(
-      'affine:database',
-      {
-        title: new page.Text('Database 1'),
-      },
-      noteId
-    );
-    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
-    const database = page.getBlockById(databaseId) as DatabaseBlockModel;
-    database.addColumn('end', {
-      data: { decimal: 0 },
-      name: 'Number',
-      type: 'number',
-    });
-    database.addColumn('end', {
-      data: {},
-      name: 'Text',
-      type: 'rich-text',
-    });
-    page.addBlock(
-      'affine:paragraph',
-      { type: 'text', text: new page.Text() },
-      databaseId
-    );
-    model.initEmpty('kanban');
-    model.applyColumnUpdate();
-    page.captureSync();
-    return { pageId, noteId, databaseId };
-  }, pageId);
+      config.columns.forEach(column => {
+        const columnId = database.addColumn('end', {
+          data: {},
+          name: column.type,
+          type: column.type,
+        });
+        rowIds.forEach((rowId, index) => {
+          const value = column.value?.[index];
+          if (value !== undefined) {
+            model.updateCell(rowId, {
+              columnId,
+              value,
+            });
+          }
+        });
+      });
+
+      model.initEmpty('kanban');
+      model.applyColumnUpdate();
+      page.captureSync();
+      return { pageId, noteId, databaseId };
+    },
+    { pageId, config }
+  );
   return ids;
 }
 
