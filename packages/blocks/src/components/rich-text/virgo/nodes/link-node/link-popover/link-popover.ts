@@ -1,18 +1,21 @@
 import { html, LitElement, nothing, type PropertyValues } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { createEvent } from '../../__internal__/utils/index.js';
-import { isValidUrl, normalizeUrl } from '../../__internal__/utils/url.js';
-import { allowEmbed } from '../../bookmark-block/embed.js';
+import { createEvent } from '../../../../../../__internal__/utils/common.js';
 import {
-  BookmarkIcon,
+  isValidUrl,
+  normalizeUrl,
+} from '../../../../../../__internal__/utils/url.js';
+import type { BookmarkProps } from '../../../../../../bookmark-block/bookmark-model.js';
+import { allowEmbed } from '../../../../../../bookmark-block/embed.js';
+import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
+import {
   ConfirmIcon,
   EditIcon,
   EmbedWebIcon,
   UnlinkIcon,
-} from '../../icons/index.js';
-import type { BookmarkProps } from '../../index.js';
-import { toast } from '../toast.js';
+} from '../../../../../../icons/text.js';
+import { toast } from '../../../../../toast.js';
 import { linkPopoverStyle } from './styles.js';
 
 @customElement('edit-link-panel')

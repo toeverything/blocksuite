@@ -6,7 +6,7 @@ import {
   type VRange,
 } from '@blocksuite/virgo';
 
-import { matchFlavours } from '../../utils/model.js';
+import { matchFlavours } from '../../../__internal__/utils/model.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,

@@ -1,4 +1,4 @@
-import '../__internal__/rich-text/rich-text.js';
+import '../components/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
@@ -21,13 +21,13 @@ import { z } from 'zod';
 
 import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
-import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
-import type { RichText } from '../__internal__/rich-text/rich-text.js';
-import type { AffineTextSchema } from '../__internal__/rich-text/virgo/types.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
 import { WhenHoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
+import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
+import type { RichText } from '../components/rich-text/rich-text.js';
+import type { AffineTextSchema } from '../components/rich-text/virgo/types.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';

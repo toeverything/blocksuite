@@ -3,15 +3,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../../../__internal__/index.js';
-import { LinkMockSelection } from '../../../../__internal__/rich-text/link-node/mock-selection.js';
-import type { AffineTextAttributes } from '../../../../__internal__/rich-text/virgo/types.js';
 import {
   getEditorContainer,
   getVirgoByModel,
 } from '../../../../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.js';
 import { clearMarksOnDiscontinuousInput } from '../../../../__internal__/utils/virgo.js';
-import { showLinkPopover } from '../../../../components/link-popover/index.js';
+import { showLinkPopover } from '../../../../components/rich-text/virgo/nodes/link-node/link-popover/create-link-popover.js';
+import { LinkMockSelection } from '../../../../components/rich-text/virgo/nodes/link-node/mock-selection.js';
+import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
 import { getSelectedContentModels } from '../../selection.js';
 
 export function formatByTextSelection(
