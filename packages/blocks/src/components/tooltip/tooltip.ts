@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 /**
  * @example
@@ -12,151 +13,122 @@ import { css } from 'lit';
  */
 export const tooltipStyle = css`
   tool-tip {
-    font-family: var(--affine-font-family);
+    --affine-tooltip-offset: 8px;
+    --affine-tooltip-round: 4px;
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     position: absolute;
     inline-size: max-content;
     text-align: center;
     font-size: var(--affine-font-sm);
-    padding: 4px 12px;
+    padding: 5px 12px;
     color: var(--affine-white);
     background: var(--affine-tooltip);
     opacity: 0;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
     pointer-events: none;
     user-select: none;
 
     /* Default is top-start */
     left: 0;
     top: 0;
-    border-radius: 4px;
-    transform: translate(0, calc(-100% - 8px));
+    border-radius: var(--affine-tooltip-round);
+    transform: translate(0, calc(-100% - var(--affine-tooltip-offset)));
   }
   tool-tip:is([tip-position='top']) {
     left: 50%;
-    border-radius: 4px;
-    transform: translate(-50%, calc(-100% - 8px));
+    border-radius: var(--affine-tooltip-round);
+    transform: translate(-50%, calc(-100% - var(--affine-tooltip-offset)));
   }
   tool-tip:is([tip-position='right']) {
     left: unset;
     right: 0;
-    transform: translateX(calc(100% + 8px));
-    border-radius: 0 4px 4px 4px;
+    transform: translateX(calc(100% + var(--affine-tooltip-offset)));
+  }
+  tool-tip:is([tip-position='right']):not(:is([arrow])) {
+    border-top-left-radius: 0;
   }
   tool-tip:is([tip-position='left']) {
     left: 0;
     top: 50%;
-    transform: translate(calc(-100% - 8px), -50%);
-    border-radius: 4px;
+    transform: translate(calc(-100% - var(--affine-tooltip-offset)), -50%);
   }
   tool-tip:is([tip-position='bottom']) {
     top: unset;
     left: 50%;
     bottom: 0;
-    transform: translate(-50%, calc(100% + 8px));
-    border-radius: 4px;
+    transform: translate(-50%, calc(100% + var(--affine-tooltip-offset)));
+  }
+
+  /** basic triangle style */
+  tool-tip:is([arrow])::before {
+    position: absolute;
+    content: '';
+    background: var(--affine-tooltip);
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
   }
 
   /* work for tip-position='top' */
   tool-tip:is([arrow]):is([tip-position='top']) {
-    transform: translate(-50%, calc(-100% - 16px));
+    transform: translate(-50%, calc(-100% - var(--affine-tooltip-offset) * 2));
   }
   tool-tip:is([arrow]):is([tip-position='top'])::before {
-    position: absolute;
-    content: '';
     left: 50%;
     bottom: 0;
-    transform: translate(-50%, 100%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid var(--affine-tooltip);
-    margin-top: -4px;
+    transform: translate(-50%, 40%) scaleX(0.8) rotate(135deg);
   }
 
   /* work for tip-position='right' */
   tool-tip:is([arrow]):is([tip-position='right']) {
-    transform: translateX(calc(100% + 16px));
+    transform: translateX(calc(100% + var(--affine-tooltip-offset) * 2));
   }
   tool-tip:is([arrow]):is([tip-position='right'])::before {
-    position: absolute;
-    content: '';
     left: 0;
     bottom: 50%;
-    transform: translate(-100%, 50%);
-    width: 0;
-    height: 0;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-right: 6px solid var(--affine-tooltip);
+    transform: translate(-40%, 50%) scaleY(0.8) rotate(-135deg);
   }
 
   /* work for tip-position='left' */
   tool-tip:is([arrow]):is([tip-position='left']) {
-    transform: translate(calc(-100% - 16px), -50%);
+    transform: translate(calc(-100% - var(--affine-tooltip-offset) * 2), -50%);
   }
   tool-tip:is([arrow]):is([tip-position='left'])::before {
-    content: '';
-    position: absolute;
-    right: -5px;
+    right: 0;
     bottom: 50%;
-    transform: translateY(50%);
-    width: 0;
-    height: 0;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-left: 6px solid var(--affine-tooltip);
+    transform: translate(40%, 50%) scaleY(0.8) rotate(45deg);
   }
 
   /* work for tip-position='bottom' */
   tool-tip:is([arrow]):is([tip-position='bottom']) {
-    transform: translate(-50%, calc(100% + 16px));
+    transform: translate(-50%, calc(100% + var(--affine-tooltip-offset) * 2));
   }
   tool-tip:is([arrow]):is([tip-position='bottom'])::before {
-    content: '';
-    position: absolute;
     left: 50%;
     bottom: 100%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-bottom: 6px solid var(--affine-tooltip);
+    transform: translate(-50%, 60%) scaleX(0.8) rotate(-45deg);
   }
 
   /* work for tip-position='top-end' */
   tool-tip:is([arrow]):is([tip-position='top-end']) {
-    transform: translate(-15%, calc(-100% - 16px));
+    transform: translate(-15%, calc(-100% - var(--affine-tooltip-offset) * 2));
   }
   tool-tip:is([arrow]):is([tip-position='top-end'])::before {
-    position: absolute;
-    content: '';
     left: 30%;
     bottom: 0;
-    transform: translate(-50%, 100%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid var(--affine-tooltip);
+    transform: translate(-50%, 40%) scaleX(0.8) rotate(135deg);
   }
   /* work for tip-position='top-start' */
   tool-tip:is([arrow]):is([tip-position='top-start']) {
-    transform: translate(-75%, calc(-100% - 16px));
+    transform: translate(-75%, calc(-100% - var(--affine-tooltip-offset) * 2));
   }
   tool-tip:is([arrow]):is([tip-position='top-start'])::before {
-    position: absolute;
-    content: '';
     right: 5%;
     bottom: 0;
-    transform: translate(-50%, 100%);
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid var(--affine-tooltip);
-    margin-top: 10px;
+    transform: translate(-50%, 40%) scaleX(0.8) rotate(135deg);
   }
   .has-tool-tip {
     position: relative;
@@ -164,5 +136,30 @@ export const tooltipStyle = css`
   .has-tool-tip:is(:hover, :focus-visible, :active) > tool-tip {
     opacity: 1;
     transition-delay: 200ms;
+  }
+  /** style for shortcut tooltip */
+  .tooltip-with-shortcut {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .tooltip__shortcut {
+    font-size: 12px;
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 16px;
+    min-width: 16px;
+  }
+  .tooltip__shortcut::before {
+    content: '';
+    border-radius: 4px;
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0.2;
   }
 `;

@@ -3,15 +3,11 @@ import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/lit';
-import { offset, shift } from '@floating-ui/dom';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { createLitPortal } from '../components/portal.js';
-import { ImageOptionsTemplate } from './image/image-options.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import type { ImageBlockModel } from './image-model.js';
@@ -97,7 +93,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   @state()
   private _source!: string;
-  private _blob!: Blob;
+
+  blob!: Blob;
 
   @state()
   private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
@@ -107,21 +104,17 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   _focused = false;
 
   private _retryCount = 0;
+  private _lastSourceId: string = '';
 
   override connectedCallback() {
     super.connectedCallback();
-    this._imageState = 'loading';
     this._fetchImage();
-    this._disposables.add(
-      this.model.page.workspace.slots.blobUpdate.on(this._fetchImage)
-    );
+    this._disposables.add(this.model.propsUpdated.on(this._fetchImage));
 
     this._bindKeymap();
     this._handleSelection();
 
     this._observeDrag();
-    // Wait for DOM to be ready
-    setTimeout(() => this._observePosition());
   }
 
   override disconnectedCallback() {
@@ -197,16 +190,23 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   };
 
   private _fetchImage = () => {
-    if (this._imageState === 'ready') {
+    if (
+      this._imageState === 'ready' &&
+      this._lastSourceId &&
+      this._lastSourceId === this.model.sourceId
+    ) {
       return;
     }
+
     const storage = this.model.page.blobs;
+    this._imageState = 'loading';
     storage
       .get(this.model.sourceId)
       .then(blob => {
         if (blob) {
-          this._blob = blob;
+          this.blob = blob;
           this._source = URL.createObjectURL(blob);
+          this._lastSourceId = this.model.sourceId;
           this._imageState = 'ready';
         } else {
           this._fetchError(new Error('Cannot find blob'));
@@ -256,44 +256,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         return false;
       })
     );
-  }
-
-  private _observePosition() {
-    const ANCHOR_EL: HTMLElement = this.resizeImg;
-
-    let portal: HTMLElement | null = null;
-    this._disposables.addFromEvent(ANCHOR_EL, 'mouseover', () => {
-      if (portal?.isConnected) return;
-      const abortController = new AbortController();
-      portal = createLitPortal({
-        template: ImageOptionsTemplate({
-          anchor: ANCHOR_EL,
-          model: this.model,
-          blob: this._blob,
-          abortController,
-        }),
-        computePosition: {
-          referenceElement: ANCHOR_EL,
-          placement: 'right-start',
-          middleware: [
-            offset({
-              mainAxis: 12,
-              crossAxis: 10,
-            }),
-            shift({
-              crossAxis: true,
-              padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
-                bottom: 12,
-                right: 12,
-              },
-            }),
-          ],
-          autoUpdate: true,
-        },
-        abortController,
-      });
-    });
   }
 
   private _handleSelection() {

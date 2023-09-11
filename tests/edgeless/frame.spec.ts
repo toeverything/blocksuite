@@ -70,7 +70,7 @@ test.describe('frame', () => {
       state: 'attached',
     });
     await type(page, 'ABC');
-    await assertEdgelessCanvasText(page, 'Frame 1ABC');
+    await assertEdgelessCanvasText(page, 'ABC');
   });
 
   test('blur unmount frame editor', async ({ page }) => {

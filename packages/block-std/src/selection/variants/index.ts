@@ -1,11 +1,14 @@
 export * from './block.js';
+export * from './cursor.js';
 export * from './surface.js';
 export * from './text.js';
 
 declare global {
-  type BlockSuiteSelectionType = keyof BlockSuiteSelection;
+  namespace BlockSuite {
+    type SelectionType = keyof Selection;
 
-  type BlockSuiteSelectionInstance = {
-    [P in BlockSuiteSelectionType]: InstanceType<BlockSuiteSelection[P]>;
-  };
+    type SelectionInstance = {
+      [P in SelectionType]: InstanceType<Selection[P]>;
+    };
+  }
 }

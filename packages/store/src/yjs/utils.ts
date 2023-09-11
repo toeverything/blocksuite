@@ -18,6 +18,18 @@ export function isPureObject(value: unknown): value is object {
   );
 }
 
+export function canToProxy(
+  value: unknown
+): value is YMap<unknown> | YArray<unknown> {
+  return value instanceof YArray || value instanceof YMap;
+}
+
+export function canToY(
+  value: unknown
+): value is unknown | Record<string, unknown> {
+  return isPureObject(value) || Array.isArray(value);
+}
+
 export function native2Y<T>(value: T, deep: boolean): Native2Y<T> {
   if (value instanceof YText) {
     if (value.doc) {

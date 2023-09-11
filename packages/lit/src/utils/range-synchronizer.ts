@@ -26,6 +26,8 @@ export class RangeSynchronizer {
     return this.root.rangeManager;
   }
 
+  private _isComposing = false;
+
   get root() {
     return this.manager.root;
   }
@@ -35,6 +37,13 @@ export class RangeSynchronizer {
       this._selectionManager.slots.changed.on(this._onSelectionModelChanged)
     );
 
+    this.root.uiEventDispatcher.add('compositionStart', () => {
+      this._isComposing = true;
+    });
+    this.root.uiEventDispatcher.add('compositionEnd', () => {
+      this._isComposing = false;
+    });
+
     this.root.disposables.add(
       this.root.uiEventDispatcher.add('selectionChange', () => {
         const selection = window.getSelection();
@@ -43,7 +52,10 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-        if (!this.manager.config.shouldSyncSelection(range)) {
+        if (
+          !this.manager.config.shouldSyncSelection(range) ||
+          this._isComposing
+        ) {
           return;
         }
 
@@ -65,7 +77,7 @@ export class RangeSynchronizer {
         const current = this._selectionManager.find('text');
         if (!current) return;
 
-        this._beforeTextInput(current, event.isComposing);
+        this._beforeTextInput(current, event);
         return;
       })
     );
@@ -94,7 +106,7 @@ export class RangeSynchronizer {
     });
   };
 
-  private _beforeTextInput(selection: TextSelection, composing: boolean) {
+  private _beforeTextInput(selection: TextSelection, event: InputEvent) {
     const { from, to } = selection;
     if (!to || PathFinder.equals(from.path, to.path)) return;
 
@@ -116,17 +128,31 @@ export class RangeSynchronizer {
     const endIsSelectedAll = to.length === endText.length;
 
     this.root.page.transact(() => {
-      if (endIsSelectedAll && composing) {
+      if (endIsSelectedAll && event.isComposing) {
         this._shamefullyResetIMERangeBeforeInput(startText, start, from);
       }
+
+      startText.delete(from.index, from.length);
+      startText.insert(event.data ?? '', from.index);
       if (!endIsSelectedAll) {
         endText.delete(0, to.length);
         startText.join(endText);
       }
+
       blocks.slice(1).forEach(block => {
         this.root.page.deleteBlock(block.model);
       });
     });
+
+    const newSelection = this._selectionManager.getInstance('text', {
+      from: {
+        path: from.path,
+        index: from.index + (event.data?.length ?? 0),
+        length: 0,
+      },
+      to: null,
+    });
+    this._selectionManager.set([newSelection]);
 
     return;
   }

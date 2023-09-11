@@ -1,8 +1,8 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Bound } from '@blocksuite/phasor';
 import { type Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -16,6 +16,7 @@ import {
   HiddenCardIcon,
 } from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
+import { Bound } from '../../../../surface-block/index.js';
 import {
   type DragEvent,
   type FitViewEvent,
@@ -72,7 +73,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     .panel-info {
       font-size: 12px;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--affine-text-secondary-color);
 
       display: flex;
@@ -531,18 +532,19 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
             ? repeat(
                 this._hiddenNotes,
                 note => note.note.id,
-                (note, idx) => html`<edgeless-note-toc-card
-                  data-note-id=${note.note.id}
-                  .note=${note.note}
-                  .number=${idx + 1}
-                  .index=${note.index}
-                  .page=${this.page}
-                  .invisible=${true}
-                  style=${this.insertIndex !== undefined
-                    ? 'transform: translateY(20px)'
-                    : ''}
-                  @fitview=${this._fitToElement}
-                ></edgeless-note-toc-card>`
+                (note, idx) =>
+                  html`<edgeless-note-toc-card
+                    data-note-id=${note.note.id}
+                    .note=${note.note}
+                    .number=${idx + 1}
+                    .index=${note.index}
+                    .page=${this.page}
+                    .invisible=${true}
+                    style=${this.insertIndex !== undefined
+                      ? 'transform: translateY(20px)'
+                      : ''}
+                    @fitview=${this._fitToElement}
+                  ></edgeless-note-toc-card>`
               )
             : nothing}
         </div>

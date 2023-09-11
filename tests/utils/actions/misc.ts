@@ -4,12 +4,12 @@ import '../declare-test-window.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type {
-  CssVariableName,
-  DatabaseBlockModel,
-  ListType,
-  PageBlockModel,
-  ThemeObserver,
+import {
+  type CssVariableName,
+  type DatabaseBlockModel,
+  type ListType,
+  type PageBlockModel,
+  type ThemeObserver,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists } from '../../../packages/global/src/utils.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
@@ -129,6 +129,7 @@ async function initEmptyEditor({
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
+        debugMenu.contentParser = editor.createContentParser();
         document.body.appendChild(debugMenu);
         window.debugMenu = debugMenu;
         window.editor = editor;
@@ -377,6 +378,71 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   return ids;
 }
 
+export async function initKanbanViewState(
+  page: Page,
+  config: {
+    rows: string[];
+    columns: { type: string; value?: unknown[] }[];
+  },
+  pageId?: string
+) {
+  const ids = await page.evaluate(
+    async ({ pageId, config }) => {
+      const { page } = window;
+      await page.waitForLoaded();
+
+      page.captureSync();
+      if (!pageId) {
+        pageId = page.addBlock('affine:page', {
+          title: new page.Text(),
+        });
+      }
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      const databaseId = page.addBlock(
+        'affine:database',
+        {
+          title: new page.Text('Database 1'),
+        },
+        noteId
+      );
+      const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+      const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+
+      const rowIds = config.rows.map(rowText => {
+        const rowId = page.addBlock(
+          'affine:paragraph',
+          { type: 'text', text: new page.Text(rowText) },
+          databaseId
+        );
+        return rowId;
+      });
+      config.columns.forEach(column => {
+        const columnId = database.addColumn('end', {
+          data: {},
+          name: column.type,
+          type: column.type,
+        });
+        rowIds.forEach((rowId, index) => {
+          const value = column.value?.[index];
+          if (value !== undefined) {
+            model.updateCell(rowId, {
+              columnId,
+              value,
+            });
+          }
+        });
+      });
+
+      model.initEmpty('kanban');
+      model.applyColumnUpdate();
+      page.captureSync();
+      return { pageId, noteId, databaseId };
+    },
+    { pageId, config }
+  );
+  return ids;
+}
+
 export async function initEmptyDatabaseWithParagraphState(
   page: Page,
   pageId?: string
@@ -564,6 +630,15 @@ export async function initThreeDividers(page: Page) {
   await type(page, '---');
   await pressSpace(page);
   await type(page, '123');
+}
+
+export async function initParagraphsByCount(page: Page, count: number) {
+  await focusRichText(page);
+  for (let i = 0; i < count; i++) {
+    await type(page, `paragraph ${i}`);
+    await pressEnter(page);
+  }
+  await resetHistory(page);
 }
 
 export async function getVirgoSelectionIndex(page: Page) {
@@ -1026,6 +1101,18 @@ export async function export2Html(page: Page) {
     const contentParser = new window.ContentParser(window.page);
     const root = window.page.root as PageBlockModel;
     return contentParser.block2Html(
+      [contentParser.getSelectedBlock(root)],
+      new Map()
+    );
+  });
+  return promiseResult;
+}
+
+export async function export2markdown(page: Page) {
+  const promiseResult = await page.evaluate(() => {
+    const contentParser = new window.ContentParser(window.page);
+    const root = window.page.root as PageBlockModel;
+    return contentParser.block2markdown(
       [contentParser.getSelectedBlock(root)],
       new Map()
     );

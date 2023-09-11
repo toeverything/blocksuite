@@ -22,16 +22,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
       display: flex;
       z-index: -1;
     }
-    .note-menu-container {
-      display: flex;
-      align-items: center;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px 8px 0 0;
-      border: 1px solid var(--affine-border-color);
-      position: relative;
-      cursor: default;
-    }
     .menu-content {
       display: flex;
       align-items: center;
@@ -98,34 +88,32 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
     const { childType } = this.edgelessTool;
 
     return html`
-      <div class="note-menu-container">
-        <edgeless-slide-menu .menuWidth=${NOTE_MENU_WIDTH}>
-          <div class="menu-content">
-            <div class="button-group-label">Blocks</div>
-            <div class="button-group-container">
-              ${NOTE_MENU_ITEMS.map(item => {
-                return html`
-                  <edgeless-tool-icon-button
-                    .active=${childType === item.childType}
-                    .activeMode=${'background'}
-                    .iconContainerPadding=${2}
-                    .tooltip=${item.tooltip}
-                    .tipPosition=${this._getTooltipPosition(item.childType)}
-                    @click=${() =>
-                      this._updateNoteTool(
-                        item.childFlavour,
-                        item.childType,
-                        item.tooltip
-                      )}
-                  >
-                    ${item.icon}
-                  </edgeless-tool-icon-button>
-                `;
-              })}
-            </div>
+      <edgeless-slide-menu .menuWidth=${NOTE_MENU_WIDTH}>
+        <div class="menu-content">
+          <div class="button-group-label">Blocks</div>
+          <div class="button-group-container">
+            ${NOTE_MENU_ITEMS.map(item => {
+              return html`
+                <edgeless-tool-icon-button
+                  .active=${childType === item.childType}
+                  .activeMode=${'background'}
+                  .iconContainerPadding=${2}
+                  .tooltip=${item.tooltip}
+                  .tipPosition=${this._getTooltipPosition(item.childType)}
+                  @click=${() =>
+                    this._updateNoteTool(
+                      item.childFlavour,
+                      item.childType,
+                      item.tooltip
+                    )}
+                >
+                  ${item.icon}
+                </edgeless-tool-icon-button>
+              `;
+            })}
           </div>
-        </edgeless-slide-menu>
-      </div>
+        </div>
+      </edgeless-slide-menu>
     `;
   }
 }

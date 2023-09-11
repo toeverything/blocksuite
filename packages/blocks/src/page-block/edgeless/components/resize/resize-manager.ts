@@ -1,11 +1,11 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
+
+import type { IPoint } from '../../../../__internal__/utils/types.js';
 import {
   Bound,
   getQuadBoundsWithRotation,
   rotatePoints,
-} from '@blocksuite/phasor';
-
-import type { IPoint } from '../../../../__internal__/utils/types.js';
+} from '../../../../surface-block/index.js';
 import { NOTE_MIN_WIDTH } from '../../utils/consts.js';
 import { HandleDirection, type ResizeMode } from './resize-handles.js';
 
@@ -74,6 +74,8 @@ export class HandleResizeManager {
   private _rotation = false;
   private _target: HTMLElement | null = null;
 
+  private _dragging = false;
+
   constructor(
     onDragStart: DragStartHandler,
     onResizeMove: ResizeMoveHandler,
@@ -84,6 +86,10 @@ export class HandleResizeManager {
     this._onResizeMove = onResizeMove;
     this._onRotateMove = onRotateMove;
     this._onDragEnd = onDragEnd;
+  }
+
+  get dragging() {
+    return this._dragging;
   }
 
   get currentRect() {
@@ -604,6 +610,7 @@ export class HandleResizeManager {
       this._origin = { x, y };
     }
 
+    this._dragging = true;
     this._onDragStart();
 
     const _onPointerMove = ({ x, y, shiftKey }: PointerEvent) => {
@@ -621,6 +628,7 @@ export class HandleResizeManager {
     };
 
     const _onPointerUp = (_: PointerEvent) => {
+      this._dragging = false;
       this._onDragEnd();
 
       const { x, y, width, height } = this._currentRect;

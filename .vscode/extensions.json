@@ -2,7 +2,7 @@
   "recommendations": [
     "runem.lit-plugin",
     "ms-playwright.playwright",
-    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
     "zixuanchen.vitest-explorer"
   ]
 }

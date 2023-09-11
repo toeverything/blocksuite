@@ -2,11 +2,15 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { VEditor, VirgoRootElement } from '@blocksuite/virgo';
+import {
+  type VEditor,
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+} from '@blocksuite/virgo';
 
+import { bracketPairs } from '../../../common/bracket-pairs.js';
+import { inlineFormatConfig } from '../../../common/inline-format-config.js';
 import { getNextBlock } from '../../../note-block/utils.js';
-import { bracketPairs } from '../../../page-block/const/bracket-pairs.js';
-import { inlineFormatConfig } from '../../../page-block/const/inline-format-config.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   getCombinedFormatInTextSelection,
@@ -28,6 +32,7 @@ import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selectionManager;
   const model = blockElement.model;
+  const root = blockElement.root;
 
   const _selectBlock = () => {
     selection.update(selList => {
@@ -38,7 +43,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return sel;
       });
     });
-    blockElement.querySelector<VirgoRootElement>('[data-virgo-root]')?.blur();
+    blockElement
+      .querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`)
+      ?.blur();
     return true;
   };
 
@@ -62,8 +69,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   };
 
   const _getVirgo = () => {
-    const vRoot =
-      blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const vRoot = blockElement.querySelector<VirgoRootElement>(
+      `[${VIRGO_ROOT_ATTR}]`
+    );
     if (!vRoot) {
       throw new Error('Virgo root not found');
     }
@@ -108,7 +116,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length !== 0) {
         vEditor.setVRange({
@@ -130,10 +140,11 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
     ArrowDown: ctx => {
       if (!blockElement.selected?.is('text')) return;
-
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length !== 0) {
         vEditor.setVRange({
@@ -165,7 +176,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length === 0 && vRange.index === vEditor.yText.length) {
         _preventDefault(ctx);
@@ -181,7 +194,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
-      assertExists(vRange);
+      if (!vRange) {
+        return;
+      }
 
       if (vRange.length === 0 && vRange.index === 0) {
         _preventDefault(ctx);
@@ -210,13 +225,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       assertExists(vRange);
 
       if (
-        !tryConvertBlock(
-          model.page,
-          model,
-          vEditor,
-          _getPrefixText(vEditor),
-          vRange
-        )
+        !tryConvertBlock(blockElement, vEditor, _getPrefixText(vEditor), vRange)
       ) {
         _preventDefault(ctx);
         return true;
@@ -263,7 +272,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       const prefixText = _getPrefixText(vEditor);
 
-      if (!tryConvertBlock(model.page, model, vEditor, prefixText, vRange)) {
+      if (!tryConvertBlock(blockElement, vEditor, prefixText, vRange)) {
         _preventDefault(ctx);
       }
 
@@ -274,8 +283,9 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!blockElement.selected?.is('text')) return;
 
       const text = blockElement.selected;
-      const virgo =
-        blockElement.querySelector<VirgoRootElement>('[data-virgo-root]');
+      const virgo = blockElement.querySelector<VirgoRootElement>(
+        `[${VIRGO_ROOT_ATTR}]`
+      );
       if (
         text.from.index === 0 &&
         text.from.length === virgo?.virgoEditor.yText.length
@@ -294,12 +304,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       )
         return;
 
-      const page = blockElement.closest<PageBlockComponent>(
-        'affine-doc-page,affine-edgeless-page'
-      );
-      if (!page) return;
-
-      const textModels = getSelectedContentModels(page, ['text']);
+      const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
@@ -310,7 +315,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         return true;
       }
 
-      const models = getSelectedContentModels(page, ['text', 'block']);
+      const models = getSelectedContentModels(root, ['text', 'block']);
       handleMultiBlockIndent(blockElement.page, models);
       return true;
     },
@@ -357,7 +362,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       );
       if (!page) return;
 
-      const textModels = getSelectedContentModels(page, ['text']);
+      const textModels = getSelectedContentModels(root, ['text']);
       if (textModels.length === 1) {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
@@ -404,11 +409,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         _preventDefault(ctx);
 
-        const format = getCombinedFormatInTextSelection(
-          blockElement,
-          textSelection
-        );
-        config.action({ blockElement, type: 'text', format });
+        const format = getCombinedFormatInTextSelection(root, textSelection);
+        config.action({ root, type: 'text', format });
         return true;
       },
     });

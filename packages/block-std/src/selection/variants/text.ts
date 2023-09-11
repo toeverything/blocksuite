@@ -1,3 +1,5 @@
+import z from 'zod';
+
 import { PathFinder } from '../../utils/path-finder.js';
 import { BaseSelection } from '../base.js';
 
@@ -11,6 +13,21 @@ export type TextSelectionProps = {
   from: TextRangePoint;
   to: TextRangePoint | null;
 };
+
+const TextSelectionSchema = z.object({
+  from: z.object({
+    path: z.array(z.string()),
+    index: z.number(),
+    length: z.number(),
+  }),
+  to: z
+    .object({
+      path: z.array(z.string()),
+      index: z.number(),
+      length: z.number(),
+    })
+    .nullable(),
+});
 
 export class TextSelection extends BaseSelection {
   static override type = 'text';
@@ -67,6 +84,7 @@ export class TextSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): TextSelection {
+    TextSelectionSchema.parse(json);
     return new TextSelection({
       from: json.from as TextRangePoint,
       to: json.to as TextRangePoint | null,
@@ -83,7 +101,9 @@ export class TextSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    text: typeof TextSelection;
+  namespace BlockSuite {
+    interface Selection {
+      text: typeof TextSelection;
+    }
   }
 }

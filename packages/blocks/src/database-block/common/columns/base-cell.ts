@@ -1,6 +1,16 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
+import { ClipboardItem } from '../../../__internal__/clipboard/clipboard-item.js';
+import {
+  CLIPBOARD_MIMETYPE,
+  performNativeCopy,
+} from '../../../__internal__/clipboard/utils/pure.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../../__internal__/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
@@ -9,7 +19,7 @@ import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
 
 export abstract class BaseCellRenderer<
     Value,
-    Data extends Record<string, unknown> = Record<string, unknown>
+    Data extends Record<string, unknown> = Record<string, unknown>,
   >
   extends WithDisposable(ShadowlessElement)
   implements DataViewCellLifeCycle, CellRenderProps<Data, Value>
@@ -78,9 +88,45 @@ export abstract class BaseCellRenderer<
         }
       })
     );
+
+    this._disposables.addFromEvent(this, 'copy', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onCopy(e);
+    });
+    this._disposables.addFromEvent(this, 'paste', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onPaste(e);
+    });
   }
 
   forceUpdate(): void {
     this.requestUpdate();
+  }
+
+  onCopy(_e: ClipboardEvent) {
+    const target = _e.target as HTMLElement;
+    if (target instanceof HTMLInputElement) return;
+
+    const data = this.column.getStringValue(this.rowId);
+    const textClipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, data);
+
+    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
+    performNativeCopy([textClipboardItem]);
+    if (savedRange) {
+      resetNativeSelection(savedRange);
+    }
+  }
+
+  onPaste(_e: ClipboardEvent) {
+    const target = _e.target as HTMLElement;
+    if (target instanceof HTMLInputElement) return;
+
+    const textClipboardData = _e.clipboardData?.getData(
+      CLIPBOARD_MIMETYPE.TEXT
+    ) as Value;
+    if (!textClipboardData) return;
+    this.onChange(textClipboardData);
   }
 }

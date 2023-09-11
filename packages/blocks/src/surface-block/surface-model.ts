@@ -1,60 +1,96 @@
-import type { Connection } from '@blocksuite/phasor';
-import type { MigrationRunner } from '@blocksuite/store';
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import type { MigrationRunner, Y } from '@blocksuite/store';
+import {
+  defineBlockSchema,
+  isPureObject,
+  NativeWrapper,
+  type SchemaToModel,
+  Workspace,
+} from '@blocksuite/store';
 
-type SurfaceBlockProps = {
-  elements: Record<string, unknown>;
+import { SurfaceBlockTransformer } from './surface-transformer.js';
+
+export type SurfaceBlockProps = {
+  elements: NativeWrapper<Y.Map<unknown>>;
 };
 
 const migration = {
+  toV5: data => {
+    const { elements } = data;
+    if (isPureObject(elements)) {
+      const yMap = new Workspace.Y.Map();
+
+      Object.entries(elements).forEach(([key, value]) => {
+        const map = new Workspace.Y.Map();
+        Object.entries(value).forEach(([_key, _value]) => {
+          map.set(
+            _key,
+            _value instanceof Workspace.Y.Text ? _value.clone() : _value
+          );
+        });
+        yMap.set(key, map);
+      });
+      const wrapper = new NativeWrapper(yMap);
+      data.elements = wrapper;
+    }
+  },
   toV4: data => {
     const { elements } = data;
-    Object.keys(elements).forEach(key => {
-      const element = elements[key] as Record<string, unknown>;
-      const type = element.type;
+    const value = elements.getValue();
+    if (!value) {
+      return;
+    }
+    for (const [key, element] of value.entries()) {
+      const type = element.get('type') as string;
       if (type === 'shape' || type === 'text') {
-        const isBold = element.isBold;
-        const isItalic = element.isItalic;
-        delete element.isBold;
-        delete element.isItalic;
+        const isBold = element.get('isBold');
+        const isItalic = element.get('isItalic');
+        element.delete('isBold');
+        element.delete('isItalic');
         if (isBold) {
-          element.bold = true;
+          element.set('bold', true);
         }
         if (isItalic) {
-          element.italic = true;
+          element.set('italic', true);
         }
-      } else if (type === 'connector') {
-        const source = element.source as Connection;
-        const target = element.target as Connection;
-        if (!source.position && (!source.id || !elements[source.id])) {
-          delete elements[key];
+      }
+      if (type === 'connector') {
+        const source = element.get('source');
+        const target = element.get('target');
+        const sourceId = source['id'];
+        const targetId = target['id'];
+        if (!source['position'] && (!sourceId || !value.get(sourceId))) {
+          value.delete(key);
           return;
         }
-        if (!target.id && (!target.id || !elements[target.id])) {
-          delete elements[key];
+        if (!target['position'] && (!targetId || !value.get(targetId))) {
+          value.delete(key);
           return;
         }
       }
-    });
+    }
   },
 } satisfies Record<string, MigrationRunner<typeof SurfaceBlockSchema>>;
 
 export const SurfaceBlockSchema = defineBlockSchema({
   flavour: 'affine:surface',
-  props: (): SurfaceBlockProps => ({
-    elements: {},
+  props: (internalPrimitives): SurfaceBlockProps => ({
+    elements: internalPrimitives.Native(new Workspace.Y.Map()),
   }),
   metadata: {
-    version: 4,
+    version: 5,
     role: 'hub',
     parent: ['affine:page'],
     children: [],
   },
   onUpgrade: (data, previousVersion, version) => {
+    if (previousVersion < 5 && version >= 5) {
+      migration.toV5(data);
+    }
     if (previousVersion < 4 && version >= 4) {
       migration.toV4(data);
     }
   },
+  transformer: () => new SurfaceBlockTransformer(),
 });
 
 export type SurfaceBlockModel = SchemaToModel<typeof SurfaceBlockSchema>;

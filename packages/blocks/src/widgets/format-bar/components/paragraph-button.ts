@@ -6,9 +6,9 @@ import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
+import { paragraphConfig } from '../../../common/paragraph-config.js';
 import { ArrowDownIcon } from '../../../icons/index.js';
 import type { Flavour, ParagraphBlockModel } from '../../../models.js';
-import { paragraphConfig } from '../../../page-block/const/paragraph-config.js';
 import { onModelElementUpdated } from '../../../page-block/utils/callback.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
@@ -21,7 +21,6 @@ interface ParagraphPanelProps {
 
 interface ParagraphButtonProps {
   formatBar: AffineFormatBarWidget;
-  page: Page;
   selectedBlockElements: BlockElement[];
 }
 
@@ -87,24 +86,24 @@ const ParagraphPanel = ({
       .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
       .map(
-        ({ flavour, type, name, icon }) => html`<icon-button
-          width="100%"
-          height="32px"
-          style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
-          text="${name}"
-          data-testid="${flavour}/${type}"
-          @click="${() =>
-            updateParagraphType(selectedBlockElements, flavour, type)}"
-        >
-          ${icon}
-        </icon-button>`
+        ({ flavour, type, name, icon }) =>
+          html`<icon-button
+            width="100%"
+            height="32px"
+            style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
+            text="${name}"
+            data-testid="${flavour}/${type}"
+            @click="${() =>
+              updateParagraphType(selectedBlockElements, flavour, type)}"
+          >
+            ${icon}
+          </icon-button>`
       )}
   </div>`;
 };
 
 export const ParagraphButton = ({
   formatBar,
-  page,
   selectedBlockElements,
 }: ParagraphButtonProps) => {
   const paragraphIcon =
@@ -124,7 +123,7 @@ export const ParagraphButton = ({
 
   const paragraphPanel = ParagraphPanel({
     selectedBlockElements,
-    page,
+    page: formatBar.root.page,
   });
 
   const onHover = () => {

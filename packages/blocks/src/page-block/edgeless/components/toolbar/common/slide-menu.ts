@@ -4,19 +4,25 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 const DEFAULT_MENU_WIDTH = 468;
+const MENU_HEIGHT = 40;
 import { ArrowRightSmallIcon } from '../../../../../icons/index.js';
 
 @customElement('edgeless-slide-menu')
 export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   static override styles = css`
     .menu-container {
+      --menu-width: ${DEFAULT_MENU_WIDTH}px;
+      --menu-height: ${MENU_HEIGHT}px;
+      background: var(--affine-background-overlay-panel-color);
+      box-shadow: var(--affine-shadow-2);
+      border-radius: 8px 8px 0 0;
+      border: 1px solid var(--affine-border-color);
       display: flex;
       align-items: center;
       width: var(--menu-width);
       overflow-x: clip;
       position: relative;
-      height: 40px;
-      background: transparent;
+      height: calc(var(--menu-height) + 1px);
       box-sizing: border-box;
       padding: 0 18px;
     }
@@ -27,7 +33,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       position: absolute;
       left: 0;
       top: 0;
-      height: 40px;
+      height: var(--menu-height);
       transition: left 0.5s ease-in-out;
       padding: 0 16px;
     }
@@ -36,13 +42,16 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       align-items: center;
       justify-content: center;
       position: absolute;
-      width: 18px;
-      height: 18px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       border: 1px solid var(--affine-border-color);
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      transition: transform 0.3s ease-in-out, opacity 0.5s ease-in-out;
+      color: var(--affine-icon-color);
+      transition:
+        transform 0.3s ease-in-out,
+        opacity 0.5s ease-in-out;
       z-index: 12;
     }
     .next-slide-button {
@@ -50,7 +59,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       opacity: 1;
       top: 50%;
       right: 0;
-      transform: translate(50%, -50%) scale(0.75);
+      transform: translate(50%, -50%) scale(0.5);
     }
     .next-slide-button:hover {
       cursor: pointer;
@@ -60,7 +69,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       opacity: 0;
       top: 50%;
       left: 0;
-      transform: translate(-50%, -50%) scale(0.75);
+      transform: translate(-50%, -50%) scale(0.5);
     }
     .previous-slide-button:hover {
       cursor: pointer;

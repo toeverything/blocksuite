@@ -1,7 +1,6 @@
-import { expect } from '@playwright/test';
-
 import {
   activeNoteInEdgeless,
+  locatorEdgelessToolButton,
   setEdgelessTool,
   switchEditorMode,
 } from '../utils/actions/edgeless.js';
@@ -11,12 +10,16 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
-  locatorPanButton,
-  pressSpace,
   type,
   waitForVirgoStateUpdated,
+  waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertEdgelessHoverRect, assertRichTexts } from '../utils/asserts.js';
+import {
+  assertEdgelessHoverRect,
+  assertHasClass,
+  assertNotHasClass,
+  assertRichTexts,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test('pan tool basic', async ({ page }) => {
@@ -58,9 +61,9 @@ test('pan tool shortcut', async ({ page }) => {
   await page.mouse.move(start.x + 5, start.y + 5);
   await assertEdgelessHoverRect(page, [100, 100, 100, 100]);
 
-  await pressSpace(page);
-  const panButton = locatorPanButton(page);
-  expect(await panButton.getAttribute('active')).toEqual('');
+  await page.keyboard.down('Space');
+  const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
+  assertHasClass(defaultButton, 'pan');
 
   await dragBetweenCoords(
     page,
@@ -76,9 +79,8 @@ test('pan tool shortcut', async ({ page }) => {
 
   await defaultTool(page);
 
-  expect(await panButton.getAttribute('active')).toBeNull();
-
   await page.mouse.move(start.x + 25, start.y + 25);
+  await page.keyboard.up('Space');
   await assertEdgelessHoverRect(page, [120, 120, 100, 100]);
 });
 
@@ -95,6 +97,7 @@ test('pan tool shortcut when user is editing', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await page.keyboard.down('Space');
-  const panButton = locatorPanButton(page);
-  expect(await panButton.getAttribute('active')).toBeNull();
+  const defaultButton = locatorEdgelessToolButton(page, 'pan', false);
+  assertNotHasClass(defaultButton, 'pan');
+  await waitNextFrame(page);
 });

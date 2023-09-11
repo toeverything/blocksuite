@@ -59,7 +59,7 @@ import {
   assertRichImage,
   assertRichTextModelType,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
@@ -308,7 +308,7 @@ test(scoped`split block when paste`, async ({ page }) => {
   await waitNextFrame(page);
 
   await assertRichTexts(page, ['atext', 'h1c']);
-  await assertSelection(page, 1, 2, 0);
+  await assertRichTextVRange(page, 1, 2, 0);
 
   // FIXME: one redundant step in clipboard operation
   await undoByClick(page);

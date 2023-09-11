@@ -4,7 +4,7 @@ import type { TType } from '../../logical/typesystem.js';
 
 export interface GroupRenderProps<
   Data extends NonNullable<unknown> = NonNullable<unknown>,
-  Value = unknown
+  Value = unknown,
 > {
   data: Data;
   updateData?: (data: Data) => void;

@@ -3,7 +3,7 @@ import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import type { VEditor } from '../virgo.js';
 
 export interface VBeforeinputHookCtx<
-  TextAttributes extends BaseTextAttributes
+  TextAttributes extends BaseTextAttributes,
 > {
   vEditor: VEditor<TextAttributes>;
   raw: InputEvent;
@@ -12,7 +12,7 @@ export interface VBeforeinputHookCtx<
   attributes: TextAttributes;
 }
 export interface VCompositionEndHookCtx<
-  TextAttributes extends BaseTextAttributes
+  TextAttributes extends BaseTextAttributes,
 > {
   vEditor: VEditor<TextAttributes>;
   raw: CompositionEvent;

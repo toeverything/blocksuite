@@ -1,6 +1,6 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 
 import { matchFlavours } from '../../../../__internal__/index.js';
 import { LinkMockSelection } from '../../../../__internal__/rich-text/link-node/mock-selection.js';
@@ -15,18 +15,18 @@ import { showLinkPopover } from '../../../../components/link-popover/index.js';
 import { getSelectedContentModels } from '../../selection.js';
 
 export function formatByTextSelection(
-  blockElement: BlockElement,
+  root: BlockSuiteRoot,
   textSelection: TextSelection,
   key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
   value: string | true | null
 ) {
-  const selectedModels = getSelectedContentModels(blockElement, ['text']);
+  const selectedModels = getSelectedContentModels(root, ['text']);
 
   if (selectedModels.length === 0) {
     throw new Error('No selected models');
   }
 
-  const rangeManager = blockElement.root.rangeManager;
+  const rangeManager = root.rangeManager;
   assertExists(rangeManager);
   const { from, to } = textSelection;
   const startModel = selectedModels[0];
@@ -105,10 +105,7 @@ export function formatByTextSelection(
   });
 }
 
-export function toggleLink(
-  blockElement: BlockElement,
-  textSelection: TextSelection
-) {
+export function toggleLink(root: BlockSuiteRoot, textSelection: TextSelection) {
   if (textSelection.isCollapsed()) {
     return;
   }
@@ -117,13 +114,13 @@ export function toggleLink(
     return;
   }
 
-  const selectedModel = getSelectedContentModels(blockElement, ['text']);
+  const selectedModel = getSelectedContentModels(root, ['text']);
   if (selectedModel.length === 0) {
     return;
   }
 
   const [model] = selectedModel;
-  const page = blockElement.page;
+  const page = root.page;
   const vEditor = getVirgoByModel(model);
   assertExists(vEditor);
 

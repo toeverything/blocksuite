@@ -2,7 +2,7 @@
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { Text, Utils } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
 
 import type { PageBlockModel } from '../../models.js';
 import { supportsChildren } from '../utils/common.js';
@@ -11,7 +11,7 @@ import {
   asyncSetVRange,
 } from '../utils/common-operations.js';
 import type { BlockModelProps } from '../utils/model.js';
-import { matchFlavours } from '../utils/model.js';
+import { isInsideBlockByFlavour, matchFlavours } from '../utils/model.js';
 import {
   getModelByElement,
   getNextBlock,
@@ -39,7 +39,7 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   };
   const [flavour, blockProps] = getProps();
 
-  if (Utils.isInsideBlockByFlavour(page, model, 'affine:database')) {
+  if (isInsideBlockByFlavour(page, model, 'affine:database')) {
     page.captureSync();
     const index = parent.children.findIndex(child => child.id === model.id);
     let newParent: BaseBlockModel = parent;
@@ -395,15 +395,13 @@ function handleCodeBlockForwardDelete(_page: Page, model: ExtendedModel) {
 }
 
 function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
-    return false;
+  if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
 
   return true;
 }
 
 function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
-  if (!Utils.isInsideBlockByFlavour(page, model, 'affine:database'))
-    return false;
+  if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
 
   return true;
 }

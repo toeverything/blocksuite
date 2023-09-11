@@ -5,7 +5,6 @@ const allPackages = [
   'docs',
   'editor',
   'global',
-  'phasor',
   'playground',
   'store',
   'virgo',
@@ -63,7 +62,6 @@ module.exports = {
     'packages/blocks/dist/*',
     'packages/editor/dist/*',
     'packages/global/dist/*',
-    'packages/phasor/dist/*',
     'packages/playground/dist/assets/*',
     'packages/virgo/dist/*',
     'packages/block-std/dist/*',
@@ -75,6 +73,10 @@ module.exports = {
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-namespace': [
+          'error',
+          { allowDeclarations: true },
+        ],
       },
     },
     ...allPackages.map(pkg => ({
@@ -94,7 +96,7 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'simple-import-sort'],
+  plugins: ['@typescript-eslint', 'simple-import-sort', 'prettier'],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',
@@ -125,5 +127,8 @@ module.exports = {
         ],
       },
     ],
+    'prettier/prettier': 'error',
+    'arrow-body-style': 'off',
+    'prefer-arrow-callback': 'off',
   },
 };

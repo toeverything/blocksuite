@@ -27,10 +27,17 @@ import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { Utils, type Workspace } from '@blocksuite/store';
+import {
+  exportPagesZip,
+  importPagesZip,
+  Job,
+  MarkdownAdapter,
+  Utils,
+  type Workspace,
+} from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
@@ -198,10 +205,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       z-index: 1001 !important;
     }
 
-    .ws-indicator {
+    .top-container {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
       font-size: 16px;
     }
   `;
@@ -334,26 +341,48 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.contentParser.exportMarkdown();
   }
 
+  private _exportMarkDownExperimentalAdapter() {
+    const job = new Job({ workspace: this.workspace });
+    job.pageToSnapshot(window.page).then(snapshot => {
+      new MarkdownAdapter()
+        .fromPageSnapshot({
+          snapshot,
+          assets: job.assetsManager,
+        })
+        .then(markdown => {
+          const blob = new Blob([markdown], { type: 'plain/text' });
+          const fileURL = URL.createObjectURL(blob);
+          const element = document.createElement('a');
+          element.setAttribute('href', fileURL);
+          element.setAttribute('download', 'export.md');
+          element.style.display = 'none';
+          document.body.appendChild(element);
+          element.click();
+          document.body.removeChild(element);
+          URL.revokeObjectURL(fileURL);
+        });
+    });
+  }
+
   private _exportPng() {
     this.contentParser.exportPng();
   }
 
-  private _exportSnapshot() {
-    const json = this.workspace.exportPageSnapshot(this.page.id);
-    const data =
-      'data:text/json;charset=utf-8,' +
-      encodeURIComponent(JSON.stringify(json, null, 2));
+  private async _exportSnapshot() {
+    const file = await exportPagesZip(this.workspace, [this.page]);
+    const url = URL.createObjectURL(file);
     const a = document.createElement('a');
-    a.setAttribute('href', data);
-    a.setAttribute('download', `${this.page.id}-snapshot.json`);
+    a.setAttribute('href', url);
+    a.setAttribute('download', `${this.page.id}.bs.zip`);
     a.click();
     a.remove();
+    URL.revokeObjectURL(url);
   }
 
   private _importSnapshot() {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
-    input.setAttribute('accept', '.json');
+    input.setAttribute('accept', '.zip');
     input.multiple = false;
     input.onchange = async () => {
       const file = input.files?.item(0);
@@ -361,8 +390,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        const json = await file.text();
-        await this.workspace.importPageSnapshot(JSON.parse(json), this.page.id);
+        await importPagesZip(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
@@ -449,7 +477,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     const id = params.get('room') || (await generateRoomId());
     const success = await this._initWebsocketProvider(id);
 
-    if (success) history.replaceState({}, '', `?room=${id}`);
+    if (success) {
+      history.replaceState({}, '', `?room=${id}`);
+      this.requestUpdate();
+    }
   };
 
   private async _initWebsocketProvider(room: string): Promise<boolean> {
@@ -542,7 +573,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       </style>
       <div class="quick-edgeless-menu default">
         <div class="default-toolbar">
-          <div style="display: flex; gap: 12px">
+          <div class="top-container">
             <sl-dropdown placement="bottom" hoist>
               <sl-button
                 class="dots-menu"
@@ -569,7 +600,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                   <sl-dropdown
                     id="test-operations-dropdown"
                     placement="right-start"
-                    .distance=${41.5}
+                    .distance=${40.5}
                     hoist
                   >
                     <span slot="trigger">Test operations</span>
@@ -582,6 +613,11 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                       >
                       <sl-menu-item @click=${this._exportMarkDown}>
                         Export Markdown
+                      </sl-menu-item>
+                      <sl-menu-item
+                        @click=${this._exportMarkDownExperimentalAdapter}
+                      >
+                        Export Markdown (Experimental Adapter)
                       </sl-menu-item>
                       <sl-menu-item @click=${this._exportHtml}>
                         Export HTML
@@ -669,6 +705,36 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 <sl-icon name="people" label="Collaboration"></sl-icon>
               </sl-button>
             </sl-tooltip>
+
+            ${new URLSearchParams(location.search).get('room')
+              ? html`<sl-tooltip
+                  content="Your name in Collaboration (default: Unknown)"
+                  placement="bottom"
+                  hoist
+                  ><sl-input
+                    placeholder="Unknown"
+                    clearable
+                    size="small"
+                    @blur=${(e: Event) => {
+                      if ((e.target as HTMLInputElement).value.length > 0) {
+                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                          'user',
+                          {
+                            name: (e.target as HTMLInputElement).value ?? '',
+                          }
+                        );
+                      } else {
+                        this.workspace.awarenessStore.awareness.setLocalStateField(
+                          'user',
+                          {
+                            name: 'Unknown',
+                          }
+                        );
+                      }
+                    }}
+                  ></sl-input
+                ></sl-tooltip>`
+              : nothing}
           </div>
 
           <div>

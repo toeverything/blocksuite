@@ -12,6 +12,7 @@ import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
 import { NoteBlockSchema } from '../note-block/note-model.js';
+import { DocPageService } from '../page-block/doc/doc-page-service.js';
 import { EdgelessPageService } from '../page-block/edgeless/edgeless-page-service.js';
 import {
   type DocPageBlockWidgetName,
@@ -20,24 +21,23 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
-import { AFFINE_DATABASE_CONVERT_WIDGET_TAG } from '../widgets/database-convert/database-convert.js';
 import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
 import { AFFINE_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/remote-selection/remote-selection.js';
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
+  service: DocPageService,
   view: {
     component: literal`affine-doc-page`,
     widgets: {
+      modal: literal`affine-modal-widget`,
+      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
       [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_FORMAT_BAR_WIDGET_TAG
-      )}`,
-      [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_DATABASE_CONVERT_WIDGET_TAG
       )}`,
       [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_REMOTE_SELECTION_WIDGET_TAG
@@ -52,18 +52,18 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
+      modal: literal`affine-modal-widget`,
+      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
       [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_FORMAT_BAR_WIDGET_TAG
       )}`,
-      [AFFINE_DATABASE_CONVERT_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_DATABASE_CONVERT_WIDGET_TAG
-      )}`,
       [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_REMOTE_SELECTION_WIDGET_TAG
       )}`,
+      remoteSelection: literal`affine-edgelss-remote-selection-widget`,
     },
   },
 };
@@ -162,6 +162,7 @@ export const edgelessPreset: LitBlockSpec[] = [
   },
   {
     schema: DatabaseBlockSchema,
+    service: DatabaseService,
     view: {
       component: literal`affine-database`,
     },

@@ -8,6 +8,7 @@
     "dev": "vite --host",
     "dev:hmr": "WC_HMR=1 vite",
     "build": "tsc && vite build",
+    "build:size": "vite build -c vite.config.size.ts",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -15,7 +16,6 @@
     "@blocksuite/editor": "workspace:*",
     "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
-    "@blocksuite/phasor": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@shoelace-style/shoelace": "2.0.0",

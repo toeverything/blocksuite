@@ -1,7 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { Utils } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import { isInsideBlockByFlavour } from '../../__internal__/index.js';
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
@@ -84,11 +84,11 @@ export function formatDate(date: Date) {
 }
 
 export function insideDatabase(model: BaseBlockModel) {
-  return Utils.isInsideBlockByFlavour(model.page, model, 'affine:database');
+  return isInsideBlockByFlavour(model.page, model, 'affine:database');
 }
 
 export function insideDataView(model: BaseBlockModel) {
-  return Utils.isInsideBlockByFlavour(model.page, model, 'affine:data-view');
+  return isInsideBlockByFlavour(model.page, model, 'affine:data-view');
 }
 
 export function withRemoveEmptyLine(

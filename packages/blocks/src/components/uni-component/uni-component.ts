@@ -1,13 +1,13 @@
 import { ShadowlessElement } from '@blocksuite/lit';
 import type { LitElement, PropertyValues, TemplateResult } from 'lit';
-import { html } from 'lit';
+import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { Ref } from 'lit/directives/ref.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 export type UniComponentReturn<
   Props = NonNullable<unknown>,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > = {
   update: (props: Props) => void;
   unmount: () => void;
@@ -15,7 +15,7 @@ export type UniComponentReturn<
 };
 export type UniComponent<
   Props = NonNullable<unknown>,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > = (ele: HTMLElement, props: Props) => UniComponentReturn<Props, Expose>;
 export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
   uni: UniComponent<Props, Expose> | undefined,
@@ -37,8 +37,13 @@ export const renderUniLit = <Props, Expose extends NonNullable<unknown>>(
 @customElement('uni-lit')
 export class UniLit<
   Props,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 > extends ShadowlessElement {
+  static override styles = css`
+    uni-lit {
+      display: contents;
+    }
+  `;
   @property({ attribute: false })
   uni?: UniComponent<Props, Expose>;
 
@@ -92,7 +97,7 @@ export class UniLit<
 
 export const createUniComponentFromWebComponent = <
   T,
-  Expose extends NonNullable<unknown> = NonNullable<unknown>
+  Expose extends NonNullable<unknown> = NonNullable<unknown>,
 >(
   component: typeof LitElement
 ): UniComponent<T, Expose> => {
@@ -108,6 +113,64 @@ export const createUniComponentFromWebComponent = <
         ins.remove();
       },
       expose: ins as never as Expose,
+    };
+  };
+};
+
+@customElement('uni-any-render')
+class UniAnyRender<
+  T,
+  Expose extends NonNullable<unknown>,
+> extends ShadowlessElement {
+  @property({ attribute: false })
+  props!: T;
+  @property({ attribute: false })
+  expose!: Expose;
+  @property({ attribute: false })
+  renderTemplate!: (props: T, expose: Expose) => TemplateResult;
+
+  override render() {
+    return this.renderTemplate(this.props, this.expose);
+  }
+}
+
+@customElement('any-render')
+export class AnyRender<T> extends ShadowlessElement {
+  @property({ attribute: false })
+  props!: T;
+  @property({ attribute: false })
+  renderTemplate!: (props: T) => TemplateResult;
+
+  override render() {
+    return this.renderTemplate(this.props);
+  }
+}
+
+export const renderTemplate = <T>(
+  renderTemplate: (props: T) => TemplateResult
+) => {
+  const ins = new AnyRender<T>();
+  ins.renderTemplate = renderTemplate;
+  return ins;
+};
+
+export const defineUniComponent = <T, Expose extends NonNullable<unknown>>(
+  renderTemplate: (props: T, expose: Expose) => TemplateResult
+): UniComponent<T, Expose> => {
+  return (ele, props) => {
+    const ins = new UniAnyRender<T, Expose>();
+    ins.props = props;
+    ins.expose = {} as Expose;
+    ins.renderTemplate = renderTemplate;
+    ele.appendChild(ins);
+    return {
+      update: props => {
+        ins.props = props;
+      },
+      unmount: () => {
+        ins.remove();
+      },
+      expose: ins.expose,
     };
   };
 };

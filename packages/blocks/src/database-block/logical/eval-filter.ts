@@ -1,5 +1,5 @@
 import type { Filter, Value, VariableOrProperty } from '../common/ast.js';
-import { filterMatcher } from './filter-matcher.js';
+import { filterMatcher } from '../common/filter/matcher/matcher.js';
 import { propertyMatcher } from './property-matcher.js';
 
 const evalRef = (

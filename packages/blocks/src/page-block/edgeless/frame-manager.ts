@@ -1,14 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
+import * as Y from 'yjs';
+
+import type { EdgelessElement } from '../../__internal__/utils/types.js';
+import type { NoteBlockModel } from '../../models.js';
 import {
   Bound,
   FrameElement,
   Overlay,
   type RoughCanvas,
-} from '@blocksuite/phasor';
-import * as Y from 'yjs';
-
-import type { EdgelessElement } from '../../__internal__/utils/types.js';
-import type { NoteBlockModel } from '../../models.js';
+} from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { type Selectable } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
@@ -41,7 +41,7 @@ export class EdgelessFrameManager {
   }
 
   selectFrame(eles: Selectable[]) {
-    const frames = this._edgeless.frame.frames;
+    const frames = this._edgeless.surface.frame.frames;
     if (!eles.some(ele => ele instanceof FrameElement) && frames.length !== 0) {
       const bound = edgelessElementsBound(eles);
       for (let i = frames.length - 1; i >= 0; i--) {

@@ -61,7 +61,9 @@ export class DatabaseSelection extends BaseSelection {
 }
 
 declare global {
-  interface BlockSuiteSelection {
-    database: typeof DatabaseSelection;
+  namespace BlockSuite {
+    interface Selection {
+      database: typeof DatabaseSelection;
+    }
   }
 }

@@ -6,23 +6,25 @@ import './change-note-button.js';
 import './change-text-button.js';
 import './add-frame-button.js';
 import './more-button.js';
+import './align-button.js';
 
 import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type {
-  BrushElement,
-  ConnectorElement,
-  FrameElement,
-  ShapeElement,
-  TextElement,
-} from '@blocksuite/phasor';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import { RenameIcon } from '../../../../icons/edgeless.js';
+import type {
+  BrushElement,
+  ConnectorElement,
+  FrameElement,
+  ShapeElement,
+  TextElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isTopLevelBlock } from '../../utils/query.js';
 import { mountFrameEditor } from '../../utils/text.js';
@@ -57,6 +59,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       box-shadow: var(--affine-menu-shadow);
       border-radius: 8px;
       padding: 0 8px;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     component-toolbar-menu-divider {
@@ -203,6 +206,12 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ></edgeless-add-frame-button>`;
   }
 
+  private _getAlignButton() {
+    return html`<edgeless-align-button
+      .edgeless=${this.edgeless}
+    ></edgeless-align-button>`;
+  }
+
   override render() {
     const groupedSelected = this._groupSelected();
     const { edgeless } = this;
@@ -226,6 +235,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         ].filter(b => !!b && b !== nothing);
 
     if (this.selection.state.elements.length > 1) {
+      buttons.unshift(
+        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+      );
+      buttons.unshift(this._getAlignButton());
       buttons.unshift(
         html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       );

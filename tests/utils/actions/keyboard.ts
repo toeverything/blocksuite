@@ -140,8 +140,8 @@ export async function cutByKeyboard(page: Page) {
  */
 export async function pasteByKeyboard(page: Page, forceFocus = true) {
   if (forceFocus) {
-    const isEditorActive = await page.evaluate(() =>
-      document.activeElement?.closest('editor-container')
+    const isEditorActive = await page.evaluate(
+      () => document.activeElement?.closest('editor-container')
     );
     if (!isEditorActive) {
       await page.click('editor-container');

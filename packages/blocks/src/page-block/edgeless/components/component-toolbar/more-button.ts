@@ -3,8 +3,8 @@ import '../toolbar/shape/shape-menu.js';
 
 import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { FrameElement, type PhasorElement } from '@blocksuite/phasor';
-import { css, html, LitElement, type TemplateResult } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -25,6 +25,10 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../../icons/index.js';
+import {
+  FrameElement,
+  type PhasorElement,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
@@ -51,10 +55,10 @@ type Action =
 const ACTIONS: Action[] = [
   { icon: FrameIcon, name: 'Frame Section', type: 'create-frame' },
   { type: 'divider' },
-  { icon: BringToFrontIcon, name: 'Bring to front', type: 'front' },
-  { icon: BringForwardIcon, name: 'Bring forward', type: 'forward' },
-  { icon: SendBackwardIcon, name: 'Send backward', type: 'backward' },
-  { icon: SendToBackIcon, name: 'Send to back', type: 'back' },
+  { icon: BringToFrontIcon, name: 'Bring to Front', type: 'front' },
+  { icon: BringForwardIcon, name: 'Bring Forward', type: 'forward' },
+  { icon: SendBackwardIcon, name: 'Send Backward', type: 'backward' },
+  { icon: SendToBackIcon, name: 'Send to Back', type: 'back' },
   { type: 'divider' },
   { icon: MoreCopyIcon, name: 'Copy', type: 'copy' },
   { icon: CopyAsPngIcon, name: 'Copy as PNG', type: 'copy-as-png' },
@@ -98,7 +102,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       display: block;
       color: var(--affine-text-primary-color);
       fill: currentColor;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     .more-actions-container {
@@ -199,7 +203,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _delete() {
     this.page.captureSync();
-    deleteElements(this.edgeless, this.selection.elements);
+    deleteElements(this.surface, this.selection.elements);
 
     this.selection.setSelection({
       elements: [],
@@ -231,7 +235,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'create-frame': {
-        this.edgeless.frame.createFrameOnSelected();
+        this.edgeless.surface.frame.createFrameOnSelected();
         break;
       }
       case 'front':

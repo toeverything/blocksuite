@@ -1,4 +1,4 @@
-import type { BaseSelection } from '@blocksuite/block-std';
+import { type BaseSelection, PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
@@ -40,10 +40,7 @@ export const containChildBlock = (
 ) => {
   return selections.some(selection => {
     const { path } = selection;
-    if (path.length > childPath.length) {
-      return false;
-    }
-    return path.join('|') === childPath.slice(0, -1).join('|');
+    return PathFinder.includes(childPath, path);
   });
 };
 
@@ -78,6 +75,15 @@ export const includeTextSelection = (selections: BaseSelection[]) => {
   return selections.some(selection => selection.type === 'text');
 };
 
-export const getBlockIdFromPath = (path: string[]) => {
-  return path[path.length - 1];
+/**
+ * Check if the path of two blocks are equal
+ */
+export const isBlockPathEqual = (
+  path1: string[] | null | undefined,
+  path2: string[] | null | undefined
+) => {
+  if (!path1 || !path2) {
+    return false;
+  }
+  return PathFinder.equals(path1, path2);
 };

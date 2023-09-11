@@ -1,10 +1,13 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { type FrameElement, generateKeyBetween } from '@blocksuite/phasor';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
+import {
+  type FrameElement,
+  generateKeyBetween,
+} from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
 @customElement('edgeless-frame-order-menu')
@@ -171,16 +174,13 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
     const items = repeat(
       this.frames,
       frame => frame.id,
-      (frame, index) => html` <div
-        class="draggable"
-        id=${frame.id}
-        index=${index}
-      >
-        <div class="draggable-bar"></div>
-        <div class="draggable-title">${frame.title}</div>
-        <div class="draggable-index">${index + 1}</div>
-        <div></div>
-      </div>`
+      (frame, index) =>
+        html` <div class="draggable" id=${frame.id} index=${index}>
+          <div class="draggable-bar"></div>
+          <div class="draggable-title">${frame.title}</div>
+          <div class="draggable-index">${index + 1}</div>
+          <div></div>
+        </div>`
     );
     return html`
       <div class="container">

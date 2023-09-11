@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 
 import { BlockSuiteDoc, ProxyManager } from '../yjs/index.js';
-import { NativeWrapper } from '../yjs/native-wrapper';
+import { NativeWrapper } from '../yjs/native-wrapper.js';
 
 const proxyManager = new ProxyManager();
 
@@ -41,12 +41,12 @@ describe('blocksuite yjs', () => {
       const arr = ydoc.getArray('arr');
       arr.push([0]);
 
-      const proxy = proxyManager.createYProxy(arr, {
-        readonly: true,
-      }) as unknown[];
+      const proxy = proxyManager.createYProxy(arr) as unknown[];
+      proxyManager.readonly = true;
       expect(arr.get(0)).toBe(0);
 
       expect(() => proxy.push(1)).toThrowError('Modify data is not allowed');
+      proxyManager.readonly = false;
     });
   });
 
@@ -63,9 +63,7 @@ describe('blocksuite yjs', () => {
       map2.set('foo', 40);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proxy = proxyManager.createYProxy<Record<string, any>>(map, {
-        deep: true,
-      });
+      const proxy = proxyManager.createYProxy<Record<string, any>>(map);
 
       expect(proxy.num).toBe(0);
       expect(proxy.obj.foo).toBe(1);
@@ -76,14 +74,10 @@ describe('blocksuite yjs', () => {
 
       proxy.obj2 = { foo: 2, bar: { num: 3 } };
       expect(map.get('obj2')).toBeInstanceOf(Y.Map);
-      expect(
-        (map.get('obj2') as Y.Map<Y.Map<number>>).get('bar').get('num')
-      ).toBe(3);
+      expect(map.get('obj2').get('bar').get('num')).toBe(3);
 
       proxy.obj2.bar.str = 'hello';
-      expect(
-        (map.get('obj2') as Y.Map<Y.Map<string>>).get('bar').get('str')
-      ).toBe('hello');
+      expect(map.get('obj2').get('bar').get('str')).toBe('hello');
 
       proxy.obj3 = {};
       const { obj3 } = proxy;
@@ -109,12 +103,7 @@ describe('blocksuite yjs', () => {
       const text = new Y.Text('hello');
       inner.set('text', text);
 
-      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(
-        map,
-        {
-          deep: true,
-        }
-      );
+      const proxy = proxyManager.createYProxy<{ inner: { text: Y.Text } }>(map);
       proxy.inner = { ...proxy.inner };
       expect(proxy.inner.text).toBeInstanceOf(Y.Text);
       expect(proxy.inner.text.toJSON()).toBe('hello');
@@ -126,20 +115,30 @@ describe('blocksuite yjs', () => {
       const inner = new Y.Map();
       map.set('inner', inner);
       const native = new NativeWrapper(['hello', 'world']);
-      inner.set('native', native);
+      inner.set('native', native.yMap);
 
       const proxy = proxyManager.createYProxy<{
-        inner: { native: NativeWrapper };
-      }>(map, {
-        deep: true,
-      });
+        inner: {
+          native: NativeWrapper<string[]>;
+          native2: NativeWrapper<number>;
+        };
+      }>(map);
 
-      expect(proxy.inner.native).toEqual({
-        value: ['hello', 'world'],
-      });
+      expect(proxy.inner.native.getValue()).toEqual(['hello', 'world']);
 
-      proxy.inner.native.value = ['hello', 'world', 'foo'];
+      proxy.inner.native.setValue(['hello', 'world', 'foo']);
       expect(native.getValue()).toEqual(['hello', 'world', 'foo']);
+      expect(map.get('inner').get('native').get('value')).toEqual([
+        'hello',
+        'world',
+        'foo',
+      ]);
+
+      const native2 = new NativeWrapper(0);
+      proxy.inner.native2 = native2;
+      expect(map.get('inner').get('native2').get('value')).toBe(0);
+      native2.setValue(1);
+      expect(map.get('inner').get('native2').get('value')).toBe(1);
     });
   });
 });

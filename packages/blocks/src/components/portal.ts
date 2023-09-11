@@ -88,7 +88,7 @@ type PortalOptions = {
   /**
    * The portal is removed when the AbortSignal is aborted.
    */
-  abortController?: AbortController;
+  signal?: AbortSignal;
   /**
    * Defaults to `true`.
    */
@@ -111,7 +111,7 @@ type PortalOptions = {
 export function createSimplePortal({
   template,
   container = document.body,
-  abortController = new AbortController(),
+  signal = new AbortController().signal,
   renderOptions,
   shadowDom = true,
   identifyWrapper = true,
@@ -123,7 +123,7 @@ export function createSimplePortal({
   if (shadowDom) {
     portalRoot.attachShadow({ mode: 'open' });
   }
-  abortController.signal.addEventListener('abort', () => {
+  signal.addEventListener('abort', () => {
     portalRoot.remove();
   });
 
@@ -150,8 +150,38 @@ export function createSimplePortal({
 
   updatePortal(updateId);
   container.append(portalRoot);
+
   return portalRoot;
 }
+
+type AdvancedPortalOptions = Omit<PortalOptions, 'template' | 'signal'> & {
+  abortController?: AbortController;
+  template:
+    | Renderable
+    | ((context: {
+        positionSlot: Slot<ComputePositionReturn>;
+        updatePortal: () => void;
+      }) => Renderable);
+  /**
+   * See https://floating-ui.com/docs/computePosition
+   */
+  computePosition?: {
+    referenceElement: ReferenceElement;
+    /**
+     * Default `false`.
+     */
+    autoUpdate?: true | AutoUpdateOptions;
+    /**
+     * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
+     */
+    abortWhenRefRemoved?: boolean;
+  } & Partial<ComputePositionConfig>;
+  /**
+   * Whether to close the portal when click away(click outside).
+   * @default false
+   */
+  closeOnClickAway?: boolean;
+};
 
 /**
  * Similar to `createSimplePortal`, but supports auto update position.
@@ -180,29 +210,9 @@ export function createSimplePortal({
 export function createLitPortal({
   computePosition: computePositionOptions,
   abortController = new AbortController(),
+  closeOnClickAway = false,
   ...portalOptions
-}: Omit<PortalOptions, 'template'> & {
-  template:
-    | Renderable
-    | ((context: {
-        positionSlot: Slot<ComputePositionReturn>;
-        updatePortal: () => void;
-      }) => Renderable);
-  /**
-   * See https://floating-ui.com/docs/computePosition
-   */
-  computePosition?: {
-    referenceElement: ReferenceElement;
-    /**
-     * Default `false`.
-     */
-    autoUpdate?: true | AutoUpdateOptions;
-    /**
-     * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
-     */
-    abortWhenRefRemoved?: boolean;
-  } & Partial<ComputePositionConfig>;
-}) {
+}: AdvancedPortalOptions) {
   const positionSlot = new Slot<ComputePositionReturn>();
   const template = portalOptions.template;
   const templateWithPosition =
@@ -213,50 +223,71 @@ export function createLitPortal({
 
   const portalRoot = createSimplePortal({
     ...portalOptions,
-    abortController,
+    signal: abortController.signal,
     template: templateWithPosition,
   });
 
-  if (computePositionOptions) {
-    portalRoot.style.position = 'fixed';
-    portalRoot.style.left = '0';
-    portalRoot.style.top = '0';
-    const { referenceElement, ...options } = computePositionOptions;
-    const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
-    const update = () => {
-      if (
-        computePositionOptions.abortWhenRefRemoved !== false &&
-        referenceElement instanceof Element &&
-        !referenceElement.isConnected
-      ) {
-        abortController.abort();
-      }
-      computePosition(referenceElement, portalRoot, options).then(
-        positionReturn => {
-          const { x, y } = positionReturn;
-          // Use transform maybe cause overlay-mask offset issue
-          // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
-          portalRoot.style.left = `${x}px`;
-          portalRoot.style.top = `${y}px`;
-          positionSlot.emit(positionReturn);
+  if (closeOnClickAway) {
+    // Avoid triggering click away listener on initial render
+    setTimeout(() =>
+      document.addEventListener(
+        'click',
+        e => {
+          if (portalRoot.contains(e.target as Node)) return;
+          abortController.abort();
+        },
+        {
+          signal: abortController.signal,
         }
-      );
-    };
-    if (!maybeAutoUpdateOptions) {
-      update();
-    } else {
-      const autoUpdateOptions =
-        maybeAutoUpdateOptions === true ? {} : maybeAutoUpdateOptions;
-      const cleanup = autoUpdate(
-        referenceElement,
-        portalRoot,
-        update,
-        autoUpdateOptions
-      );
-      abortController.signal.addEventListener('abort', () => {
-        cleanup();
-      });
+      )
+    );
+  }
+
+  if (!computePositionOptions) {
+    return portalRoot;
+  }
+
+  const display = portalRoot.style.display;
+  portalRoot.style.display = 'none';
+  portalRoot.style.position = 'fixed';
+  portalRoot.style.left = '0';
+  portalRoot.style.top = '0';
+  const { referenceElement, ...options } = computePositionOptions;
+  const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
+  const update = () => {
+    if (
+      computePositionOptions.abortWhenRefRemoved !== false &&
+      referenceElement instanceof Element &&
+      !referenceElement.isConnected
+    ) {
+      abortController.abort();
     }
+    computePosition(referenceElement, portalRoot, options).then(
+      positionReturn => {
+        const { x, y } = positionReturn;
+        // Use transform maybe cause overlay-mask offset issue
+        // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
+        portalRoot.style.left = `${x}px`;
+        portalRoot.style.top = `${y}px`;
+        portalRoot.style.display = display;
+        positionSlot.emit(positionReturn);
+      }
+    );
+  };
+  if (!maybeAutoUpdateOptions) {
+    update();
+  } else {
+    const autoUpdateOptions =
+      maybeAutoUpdateOptions === true ? {} : maybeAutoUpdateOptions;
+    const cleanup = autoUpdate(
+      referenceElement,
+      portalRoot,
+      update,
+      autoUpdateOptions
+    );
+    abortController.signal.addEventListener('abort', () => {
+      cleanup();
+    });
   }
 
   return portalRoot;

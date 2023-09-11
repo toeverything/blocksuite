@@ -1,5 +1,6 @@
+import { baseTheme } from '@toeverything/theme';
 import format from 'date-fns/format/index.js';
-import { css, html } from 'lit';
+import { css, html, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { createIcon } from '../../../../components/icon/uni-icon.js';
@@ -20,7 +21,7 @@ export class DateCell extends BaseCellRenderer<number> {
       width: 100%;
       padding: 0;
       border: none;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--affine-text-primary-color);
       font-weight: 400;
       background-color: transparent;

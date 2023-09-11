@@ -10,21 +10,21 @@ export const styles = css`
   .affine-drag-handle-container {
     top: 0;
     left: 0;
-    position: fixed;
+    position: absolute;
     display: flex;
     justify-content: center;
     width: ${DRAG_HANDLE_WIDTH}px;
     min-height: 12px;
     pointer-events: auto;
     user-select: none;
-    transition: transform 0.25s ease, height 0.25s ease;
+    box-sizing: border-box;
   }
   .affine-drag-handle-grabber {
     width: 4px;
-    height: 12px;
+    height: 100%;
     border-radius: 1px;
     background: var(--affine-placeholder-color);
-    transition: height 0.25s ease, width 0.25s ease;
+    transition: width 0.25s ease;
   }
   .affine-drag-handle-container:hover {
     cursor: grab;
@@ -48,7 +48,7 @@ export const styles = css`
     z-index: 2;
   }
   .affine-drag-hover-rect {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     border-radius: 6px;

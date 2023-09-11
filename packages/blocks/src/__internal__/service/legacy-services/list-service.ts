@@ -72,6 +72,31 @@ export class ListBlockService extends BaseService<ListBlockModel> {
     return text;
   }
 
+  override async block2markdown(
+    block: ListBlockModel,
+    { begin, end }: BlockTransformContext = {}
+  ) {
+    let text = await super.block2markdown(block, {
+      begin,
+      end,
+    });
+    switch (block.type) {
+      case 'bulleted':
+      case 'toggle':
+        text = `* ${text}`;
+        break;
+      case 'numbered':
+        text = `1. ${text}`;
+        break;
+      case 'todo':
+        text = `* [${block.checked ? 'x' : ' '}] ${text}`;
+        break;
+      default:
+        break;
+    }
+    return text;
+  }
+
   override async json2Block(
     focusedBlockModel: BaseBlockModel,
     pastedBlocks: SerializedBlock[],

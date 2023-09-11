@@ -5,5 +5,5 @@
     "noEmit": true,
     "composite": false
   },
-  "include": ["**.spec.ts", "**.test.ts"]
+  "include": ["**.spec.ts", "**.test.ts", "**/**.ts"]
 }

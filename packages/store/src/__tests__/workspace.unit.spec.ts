@@ -333,24 +333,21 @@ describe('addBlock', () => {
     const page0 = workspace.createPage({ id: 'page0' });
     const page1 = workspace.createPage({ id: 'page1' });
     await Promise.all([page0.waitForLoaded(), page1.waitForLoaded()]);
-    // @ts-expect-error
-    assert.equal(workspace._pages.size, 2);
+    assert.equal(workspace.pages.size, 2);
 
     page0.addBlock('affine:page', {
       title: new page0.Text(),
     });
     workspace.removePage(page0.id);
 
-    // @ts-expect-error
-    assert.equal(workspace._pages.size, 1);
+    assert.equal(workspace.pages.size, 1);
     assert.equal(
       serializeWorkspace(page0.doc).spaces['space:page0'],
       undefined
     );
 
     workspace.removePage(page1.id);
-    // @ts-expect-error
-    assert.equal(workspace._pages.size, 0);
+    assert.equal(workspace.pages.size, 0);
   });
 
   it('can remove page that has not been loaded', async () => {

@@ -13,17 +13,17 @@ export interface PageMeta {
   createDate: number;
 }
 
-type Tag = {
+export type Tag = {
   id: string;
   value: string;
   color: string;
 };
-type PagesPropertiesMeta = {
+export type PagesPropertiesMeta = {
   tags?: {
     options: Tag[];
   };
 };
-type WorkspaceMetaState = {
+export type WorkspaceMetaState = {
   pages?: unknown[];
   properties?: PagesPropertiesMeta;
   workspaceVersion?: number;
@@ -50,9 +50,7 @@ export class WorkspaceMeta {
   constructor(doc: BlockSuiteDoc) {
     this.doc = doc;
     this._yMap = doc.getMap(this.id);
-    this._proxy = doc.getMapProxy<string, WorkspaceMetaState>(this.id, {
-      deep: true,
-    });
+    this._proxy = doc.getMapProxy<string, WorkspaceMetaState>(this.id);
     this._yMap.observeDeep(this._handleWorkspaceMetaEvents);
   }
 
@@ -172,13 +170,13 @@ export class WorkspaceMeta {
     if (!workspaceVersion) {
       this._proxy.workspaceVersion = WORKSPACE_VERSION;
     } else {
-      console.error(`Workspace version already set.`);
+      console.error('Workspace version is already set');
     }
 
     if (!pageVersion) {
       this._proxy.pageVersion = PAGE_VERSION;
     } else {
-      console.error(`Page version already set.`);
+      console.error('Page version is already set');
     }
 
     if (!blockVersions) {
@@ -188,8 +186,20 @@ export class WorkspaceMeta {
       });
       this._proxy.blockVersions = _versions;
     } else {
-      console.error(`Block versions already set.`);
+      console.error('Block versions is already set');
     }
+  }
+
+  updateVersion(workspace: Workspace) {
+    this._proxy.workspaceVersion = WORKSPACE_VERSION;
+
+    this._proxy.pageVersion = PAGE_VERSION;
+
+    const _versions: Record<string, number> = {};
+    workspace.schema.flavourSchemaMap.forEach((schema, flavour) => {
+      _versions[flavour] = schema.version;
+    });
+    this._proxy.blockVersions = _versions;
   }
 
   /**

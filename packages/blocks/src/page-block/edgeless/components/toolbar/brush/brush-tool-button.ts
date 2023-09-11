@@ -1,48 +1,21 @@
 import '../../buttons/toolbar-button.js';
 import './brush-menu.js';
 
-import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type EdgelessTool,
   LineWidth,
 } from '../../../../../__internal__/index.js';
-import { ArrowUpIcon, EdgelessPenIcon } from '../../../../../icons/index.js';
+import { EdgelessPenIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
+import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessBrushMenu } from './brush-menu.js';
-
-interface BrushMenuPopper {
-  element: EdgelessBrushMenu;
-  dispose: () => void;
-}
-
-function createBrushMenuPopper(reference: HTMLElement): BrushMenuPopper {
-  const brushMenu = document.createElement('edgeless-brush-menu');
-  assertExists(reference.shadowRoot);
-  reference.shadowRoot.appendChild(brushMenu);
-
-  // The brush menu should be positioned at the top of the brush button.
-  // And it should be positioned at the top center of the toolbar all the time.
-  const x = 110;
-  const y = -40;
-
-  Object.assign(brushMenu.style, {
-    left: `${x}px`,
-    top: `${y}px`,
-  });
-
-  return {
-    element: brushMenu,
-    dispose: () => {
-      brushMenu.remove();
-    },
-  };
-}
 
 @customElement('edgeless-brush-tool-button')
 export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
@@ -74,20 +47,6 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
     #edgeless-pen-icon:hover {
       top: 2px;
     }
-    .arrow-up-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      right: 2px;
-      top: 12px;
-      width: 14px;
-      height: 14px;
-      fill: var(--affine-icon-color);
-    }
-    .arrow-up-icon:hover {
-      background: var(--affine-hover-color);
-    }
   `;
 
   @property({ attribute: false })
@@ -99,42 +58,33 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  @query('.brush-head-rect')
-  private _brushHeadRect!: SVGElement;
+  @state()
+  private _color: string = DEFAULT_BRUSH_COLOR;
 
-  @query('.brush-midline-rect')
-  private _brushMidlineRect!: SVGElement;
-
-  @query('.brush-midline-stroke')
-  private _brushMidlineStroke!: SVGElement;
-
-  private _brushMenu: BrushMenuPopper | null = null;
+  private _brushMenu: MenuPopper<EdgelessBrushMenu> | null = null;
 
   private _toggleBrushMenu() {
     if (this._brushMenu) {
       this._brushMenu.dispose();
       this._brushMenu = null;
     } else {
-      this._brushMenu = createBrushMenuPopper(this);
+      this._brushMenu = createPopper('edgeless-brush-menu', this, {
+        x: 110,
+        y: -40,
+      });
       this._brushMenu.element.edgelessTool = this.edgelessTool;
       this._brushMenu.element.edgeless = this.edgeless;
     }
   }
 
-  private _setBrushColor(color: string) {
-    this._brushHeadRect.style.fill = `var(${color})`;
-    this._brushMidlineRect.style.fill = `var(${color})`;
-    this._brushMidlineStroke.style.stroke = `var(${color})`;
-  }
-
-  private _tryLoadBrushStateLocalColor(): string | null {
+  private _tryLoadBrushStateLocalColor() {
     const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessBrush';
     const brushData = sessionStorage.getItem(key);
     let color = null;
     if (brushData) {
       color = JSON.parse(brushData).color;
+      this._color = color;
     }
-    return color;
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -153,16 +103,12 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
   override connectedCallback(): void {
     super.connectedCallback();
     this.updateComplete.then(() => {
-      let color = this._tryLoadBrushStateLocalColor();
-      if (!color) {
-        color = DEFAULT_BRUSH_COLOR;
-      }
-      this._setBrushColor(color);
+      this._tryLoadBrushStateLocalColor();
     });
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type === 'brush') {
-          this._setBrushColor(newTool.color);
+          this._color = newTool.color;
         } else {
           this._brushMenu?.dispose();
           this._brushMenu = null;
@@ -196,8 +142,9 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       >
         <div class="edgeless-brush-button">
           <div class=${type === 'brush' ? 'active-mode' : ''}></div>
-          ${EdgelessPenIcon}
-          <div class="arrow-up-icon">${ArrowUpIcon}</div>
+          <div style=${styleMap({ color: `var(${this._color})` })}>
+            ${EdgelessPenIcon}
+          </div>
         </div>
       </edgeless-toolbar-button>
     `;

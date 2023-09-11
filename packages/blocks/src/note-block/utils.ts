@@ -2,8 +2,7 @@ import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { almostEqual } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { deserializeXYWH } from '@blocksuite/phasor';
-import { getTextNodesFromElement } from '@blocksuite/virgo';
+import { getTextNodesFromElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -15,6 +14,7 @@ import {
   caretFromPoint,
 } from '../page-block/text-selection/utils.js';
 import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
+import { deserializeXYWH } from '../surface-block/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 
 const getSelection = (blockComponent: BlockElement) =>
@@ -292,7 +292,7 @@ export function horizontalGetNextCaret(
     };
     move = caretFromPoint(_point.x, _point.y);
   }
-  if (!move || !move.node.parentElement?.closest('[data-virgo-root]')) {
+  if (!move || !move.node.parentElement?.closest(`[${VIRGO_ROOT_ATTR}]`)) {
     const texts = getTextNodesFromElement(block);
     const text = forward ? texts[texts.length - 1] : texts[0];
     return {

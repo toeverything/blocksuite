@@ -9,15 +9,17 @@ import {
   popMenu,
 } from '../../../components/menu/index.js';
 import { AddCursorIcon, DeleteIcon } from '../../../icons/index.js';
-import type { DatabaseBlockModel } from '../../database-model.js';
 import { viewManager, viewRendererManager } from '../data-view.js';
+import type { ViewSource } from '../view-source.js';
 
 @customElement('data-view-header-views')
 export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     data-view-header-views {
+      height: 32px;
       display: flex;
       user-select: none;
+      gap: 4px;
     }
     data-view-header-views::-webkit-scrollbar-thumb {
       width: 1px;
@@ -35,6 +37,8 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     }
 
     .database-view-button .name {
+      display: flex;
+      align-items: center;
       height: 22px;
       max-width: 100px;
       overflow: hidden;
@@ -52,17 +56,14 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
 
     .database-view-button.active {
       color: var(--affine-text-primary-color);
-      background-color: var(--affine-hover-color);
+      background-color: var(--affine-hover-color-filled);
     }
   `;
   @property({ attribute: false })
-  model!: DatabaseBlockModel;
-
-  @property({ attribute: false })
-  currentView?: string;
-
-  @property({ attribute: false })
-  setViewId!: (id: string) => void;
+  viewSource!: ViewSource;
+  get readonly() {
+    return this.viewSource.readonly;
+  }
 
   _addViewMenu(event: MouseEvent) {
     popFilterableSimpleMenu(
@@ -75,10 +76,8 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
             .uni=${viewRendererManager.getView(v.type).icon}
           ></uni-lit>`,
           select: () => {
-            this.model.page.captureSync();
-            const view = this.model.addView(v.type);
-            this.setViewId(view.id);
-            this.model.applyViewsUpdate();
+            const id = this.viewSource.viewAdd(v.type);
+            this.viewSource.selectView(id);
           },
         };
       })
@@ -86,21 +85,23 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   }
 
   _showMore(event: MouseEvent) {
+    const views = this.viewSource.views;
     popFilterableSimpleMenu(event.target as HTMLElement, [
-      ...this.model.views.map(v => ({
+      ...views.map(v => ({
         type: 'action' as const,
         icon: html`<uni-lit
-          .uni=${viewRendererManager.getView(v.mode).icon}
+          .uni=${viewRendererManager.getView(v.view.mode).icon}
         ></uni-lit>`,
-        name: v.name,
+        name: v.view.name,
+        isSelected: this.viewSource.currentViewId === v.view.id,
         select: () => {
-          this.setViewId(v.id);
+          this.viewSource.selectView(v.view.id);
         },
       })),
       {
         type: 'group',
         name: '',
-        hide: () => this.model.page.readonly,
+        hide: () => this.readonly,
         children: () =>
           viewManager.all.map(v => {
             return {
@@ -110,10 +111,8 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
                 .uni=${viewRendererManager.getView(v.type).icon}
               ></uni-lit>`,
               select: () => {
-                this.model.page.captureSync();
-                const view = this.model.addView(v.type);
-                this.setViewId(view.id);
-                this.model.applyViewsUpdate();
+                const id = this.viewSource.viewAdd(v.type);
+                this.viewSource.selectView(id);
               },
             };
           }),
@@ -122,26 +121,25 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
   }
 
   _clickView(event: MouseEvent, id: string) {
-    if (this.currentView !== id) {
-      this.setViewId(id);
+    if (this.viewSource.currentViewId !== id) {
+      this.viewSource.selectView(id);
       return;
     }
-    if (this.model.page.readonly) {
+    if (this.readonly) {
       return;
     }
-    const view = this.model.views.find(v => v.id === id);
+    const view = this.viewSource.views.find(v => v.view.id === id);
     if (!view) {
       return;
     }
     popMenu(event.target as HTMLElement, {
       options: {
         input: {
-          initValue: view.name,
+          initValue: view.view.name,
           onComplete: text => {
-            this.model.updateView(view.id, _data => ({
+            view.updateView(_data => ({
               name: text,
             }));
-            this.model.applyViewsUpdate();
           },
         },
         items: [
@@ -150,8 +148,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
             name: 'Delete',
             icon: DeleteIcon,
             select: () => {
-              this.model.deleteView(view.id);
-              this.model.applyViewsUpdate();
+              view.delete();
             },
             class: 'delete-item',
           },
@@ -162,53 +159,58 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.model.propsUpdated.on(() => {
-      this.requestUpdate();
-    });
+    this.disposables.add(
+      this.viewSource.updateSlot.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   renderMore() {
-    if (this.model.views.length <= 3) {
-      if (this.model.page.readonly) {
+    const views = this.viewSource.views;
+    if (views.length <= 3) {
+      if (this.readonly) {
         return;
       }
       return html`<div
-        class="database-view-button"
+        class="database-view-button dv-icon-16 dv-hover"
         @click="${this._addViewMenu}"
       >
         ${AddCursorIcon}
       </div>`;
     }
     return html`
-      <div class="database-view-button" @click="${this._showMore}">
-        ${this.model.views.length - 3} More
+      <div class="database-view-button dv-hover" @click="${this._showMore}">
+        ${views.length - 3} More
       </div>
     `;
   }
 
   override render() {
-    const views = this.model.views;
-    const i = views.findIndex(v => v.id === this.currentView);
+    const views = this.viewSource.views;
+    const i = views.findIndex(v => v.view.id === this.viewSource.currentViewId);
     const needShow =
       i > 2 ? [...views.slice(0, 2), views[i]] : views.slice(0, 3);
     return html`
       ${repeat(
         needShow,
-        v => v.id,
+        v => v.view.id,
         view => {
           const classList = classMap({
             'database-view-button': true,
-            active: this.currentView === view.id,
+            'dv-hover': true,
+            active: this.viewSource.currentViewId === view.view.id,
           });
           return html` <div
             class="${classList}"
-            @click="${(event: MouseEvent) => this._clickView(event, view.id)}"
+            @click="${(event: MouseEvent) =>
+              this._clickView(event, view.view.id)}"
           >
             <uni-lit
               class="icon"
-              .uni="${viewRendererManager.getView(view.mode).icon}"
+              .uni="${viewRendererManager.getView(view.view.mode).icon}"
             ></uni-lit>
-            <div class="name">${view.name}</div>
+            <div class="name">${view.view.name}</div>
           </div>`;
         }
       )}

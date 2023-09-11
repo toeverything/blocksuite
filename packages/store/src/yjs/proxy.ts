@@ -2,57 +2,35 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Transaction, YArrayEvent, YMapEvent } from 'yjs';
 import { Array as YArray, Map as YMap } from 'yjs';
 
-import type { ProxyConfig } from './config.js';
 import { NativeWrapper } from './native-wrapper.js';
 import type { UnRecord } from './utils.js';
-import { isPureObject, native2Y } from './utils.js';
+import { canToProxy, canToY, native2Y } from './utils.js';
 
 type ProxyTransaction = Transaction & { isLocalProxy?: boolean };
 
 export class ProxyManager {
+  readonly = false;
+
   private _proxies: WeakMap<YArray<unknown> | YMap<unknown>, unknown> =
     new WeakMap();
 
-  private _initialize(
-    array: unknown[],
-    yArray: YArray<unknown>,
-    config: ProxyConfig
-  ): void;
-  private _initialize(
-    object: UnRecord,
-    yMap: YMap<unknown>,
-    config: ProxyConfig
-  ): void;
+  private _initialize(array: unknown[], yArray: YArray<unknown>): void;
+  private _initialize(object: UnRecord, yMap: YMap<unknown>): void;
   private _initialize(
     target: unknown[] | UnRecord,
-    yAbstract: YArray<unknown> | YMap<unknown>,
-    config: ProxyConfig
-  ): void;
-  private _initialize(
-    target: unknown[] | UnRecord,
-    yAbstract: YArray<unknown> | YMap<unknown>,
-    config: ProxyConfig
+    yAbstract: YArray<unknown> | YMap<unknown>
   ): void {
-    const { deep } = config;
-    if (!(yAbstract instanceof YArray || yAbstract instanceof YMap)) {
+    if (!canToProxy(yAbstract)) {
       return;
     }
     yAbstract.forEach((value, key) => {
-      const result =
-        deep && (value instanceof YMap || value instanceof YArray)
-          ? this.createYProxy(value, config)
-          : value;
+      const result = canToProxy(value) ? this.createYProxy(value) : value;
 
       (target as Record<string, unknown>)[key] = result;
     });
   }
 
-  private _subscribeYArray(
-    arr: unknown[],
-    yArray: YArray<unknown>,
-    config: ProxyConfig
-  ) {
-    const { deep = false } = config;
+  private _subscribeYArray(arr: unknown[], yArray: YArray<unknown>) {
     const observer = (
       event: YArrayEvent<unknown> & { transaction: ProxyTransaction }
     ) => {
@@ -69,21 +47,18 @@ export class ProxyManager {
         }
         if (change.insert) {
           const _arr = [change.insert].flat();
-          if (deep) {
-            const proxyList = _arr
-              .filter(value => {
-                return !this._proxies.has(value);
-              })
-              .map(value => {
-                if (value instanceof YMap || value instanceof YArray) {
-                  return this.createYProxy(value, config);
-                }
-                return value;
-              });
-            arr.splice(retain, 0, ...proxyList);
-          } else {
-            arr.splice(retain, 0, ..._arr);
-          }
+
+          const proxyList = _arr
+            .filter(value => {
+              return !this._proxies.has(value);
+            })
+            .map(value => {
+              if (canToProxy(value)) {
+                return this.createYProxy(value);
+              }
+              return value;
+            });
+          arr.splice(retain, 0, ...proxyList);
 
           retain += change.insert.length;
         }
@@ -93,12 +68,7 @@ export class ProxyManager {
     yArray.observe(observer);
   }
 
-  private _subscribeYMap(
-    object: UnRecord,
-    yMap: YMap<unknown>,
-    config: ProxyConfig
-  ) {
-    const { deep = false } = config;
+  private _subscribeYMap(object: UnRecord, yMap: YMap<unknown>) {
     const observer = (
       event: YMapEvent<unknown> & { transaction: ProxyTransaction }
     ) => {
@@ -114,11 +84,11 @@ export class ProxyManager {
           delete object[key];
         } else if (type.action === 'add' || type.action === 'update') {
           const current = yMap.get(key);
-          if (deep && (current instanceof YMap || current instanceof YArray)) {
+          if (canToProxy(current)) {
             if (this._proxies.has(current)) {
               object[key] = this._proxies.get(current);
             } else {
-              object[key] = this.createYProxy(current, config);
+              object[key] = this.createYProxy(current);
             }
           } else {
             object[key] = current;
@@ -143,28 +113,22 @@ export class ProxyManager {
     return changes();
   };
 
-  createYProxy<Data>(
-    yAbstract: YArray<unknown> | YMap<unknown>,
-    config: ProxyConfig = {}
-  ): Data {
+  createYProxy<Data>(yAbstract: YArray<unknown> | YMap<unknown>): Data {
     if (this._proxies.has(yAbstract)) {
       return this._proxies.get(yAbstract) as Data;
     }
-    if (yAbstract instanceof NativeWrapper) {
-      const data = this._createYMapProxy(yAbstract, {
-        ...config,
-        deep: false,
-      }) as Data;
+    if (NativeWrapper.is(yAbstract)) {
+      const data = new NativeWrapper(yAbstract);
       this._proxies.set(yAbstract, data);
-      return data;
+      return data as Data;
     }
     if (yAbstract instanceof YArray) {
-      const data = this._createYArrayProxy(yAbstract, config) as Data;
+      const data = this._createYArrayProxy(yAbstract) as Data;
       this._proxies.set(yAbstract, data);
       return data;
     }
     if (yAbstract instanceof YMap) {
-      const data = this._createYMapProxy(yAbstract, config) as Data;
+      const data = this._createYMapProxy(yAbstract) as Data;
       this._proxies.set(yAbstract, data);
       return data;
     }
@@ -172,23 +136,35 @@ export class ProxyManager {
     throw new TypeError();
   }
 
-  private _createYArrayProxy<T = unknown>(
-    yArray: YArray<unknown>,
-    config: ProxyConfig = {}
-  ): T[] {
-    const { readonly = false, deep = false } = config;
+  transformData(value: unknown, onCreate: (p: unknown) => void) {
+    if (value instanceof NativeWrapper) {
+      onCreate(value.yMap);
+      return value;
+    }
+
+    if (canToY(value)) {
+      const y = native2Y(value as Record<string, unknown> | unknown[], true);
+      onCreate(y);
+      return this.createYProxy(y);
+    }
+
+    onCreate(value);
+    return value;
+  }
+
+  private _createYArrayProxy<T = unknown>(yArray: YArray<unknown>): T[] {
     const array: T[] = [];
     if (!(yArray instanceof YArray)) {
       throw new TypeError();
     }
-    this._initialize(array, yArray as YArray<unknown>, config);
-    this._subscribeYArray(array, yArray, config);
+    this._initialize(array, yArray as YArray<unknown>);
+    this._subscribeYArray(array, yArray);
     return new Proxy(array, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
       set: (target, p, value, receiver) => {
-        if (readonly) {
+        if (this.readonly) {
           throw new Error('Modify data is not allowed');
         }
 
@@ -209,25 +185,15 @@ export class ProxyManager {
             yArray.insert(index, [value]);
           };
 
-          if (deep && (isPureObject(value) || Array.isArray(value))) {
-            const y = native2Y(
-              value as Record<string, unknown> | unknown[],
-              deep
-            );
-            apply(y);
-            const _value = this.createYProxy(y, config);
-            return Reflect.set(target, p, _value, receiver);
-          }
-
-          apply(value);
-          return Reflect.set(target, p, value, receiver);
+          const data = this.transformData(value, apply);
+          return Reflect.set(target, p, data, receiver);
         });
       },
       get: (target, p, receiver) => {
         return Reflect.get(target, p, receiver);
       },
       deleteProperty: (target: T[], p: string | symbol): boolean => {
-        if (readonly) {
+        if (this.readonly) {
           throw new Error('Modify data is not allowed');
         }
 
@@ -247,22 +213,20 @@ export class ProxyManager {
   }
 
   private _createYMapProxy<Data extends Record<string, unknown>>(
-    yMap: YMap<unknown>,
-    config: ProxyConfig = {}
+    yMap: YMap<unknown>
   ): Data {
-    const { readonly = false, deep = false } = config;
     const object = {} as Data;
     if (!(yMap instanceof YMap)) {
       throw new TypeError();
     }
-    this._initialize(object, yMap, config);
-    this._subscribeYMap(object, yMap, config);
+    this._initialize(object, yMap);
+    this._subscribeYMap(object, yMap);
     return new Proxy(object, {
       has: (target, p) => {
         return Reflect.has(target, p);
       },
       set: (target, p, value, receiver) => {
-        if (readonly) {
+        if (this.readonly) {
           throw new Error('Modify data is not allowed');
         }
 
@@ -271,26 +235,15 @@ export class ProxyManager {
         }
 
         return this._applyYChanges(yMap, () => {
-          if (deep && (isPureObject(value) || Array.isArray(value))) {
-            const _y = native2Y(
-              value as Record<string, unknown> | unknown[],
-              deep
-            );
-            yMap.set(p, _y);
-            const _value = this.createYProxy(_y, config);
-
-            return Reflect.set(target, p, _value, receiver);
-          }
-
-          yMap.set(p, value);
-          return Reflect.set(target, p, value, receiver);
+          const data = this.transformData(value, x => yMap.set(p, x));
+          return Reflect.set(target, p, data, receiver);
         });
       },
       get: (target, p, receiver) => {
         return Reflect.get(target, p, receiver);
       },
       deleteProperty: (target: Data, p: string | symbol): boolean => {
-        if (readonly) {
+        if (this.readonly) {
           throw new Error('Modify data is not allowed');
         }
 

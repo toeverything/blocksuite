@@ -1,8 +1,8 @@
 import '../../../common/filter/filter-group.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, html } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, unsafeCSS } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
@@ -12,6 +12,7 @@ import {
 } from '../../../../icons/index.js';
 import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
+import { BaseTool } from './base-tool.js';
 
 const styles = css`
   .affine-database-search-container {
@@ -85,7 +86,7 @@ const styles = css`
     width: 100%;
     padding: 0 2px 0 30px;
     border: none;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-sm);
     box-sizing: border-box;
     color: inherit;
@@ -100,9 +101,9 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-search')
-export class DataViewHeaderToolsSearch extends WithDisposable(
-  ShadowlessElement
-) {
+export class DataViewHeaderToolsSearch extends BaseTool<
+  DataViewTableManager | DataViewKanbanManager
+> {
   get showSearch(): boolean {
     return this._showSearch;
   }
@@ -117,18 +118,11 @@ export class DataViewHeaderToolsSearch extends WithDisposable(
 
   static override styles = styles;
 
-  @property({ attribute: false })
-  view!: DataViewTableManager | DataViewKanbanManager;
-
   @query('.affine-database-search-input')
   private _searchInput!: HTMLInputElement;
 
   @state()
   private _showSearch = false;
-
-  private get readonly() {
-    return this.view.readonly;
-  }
 
   private _onSearch = (event: InputEvent) => {
     const el = event.target as HTMLInputElement;
@@ -169,16 +163,13 @@ export class DataViewHeaderToolsSearch extends WithDisposable(
   };
 
   override render() {
-    if (this.readonly) {
-      return;
-    }
     const searchToolClassMap = classMap({
       'affine-database-search-container': true,
       'search-container-expand': this.showSearch,
     });
     return html`
       <label class="${searchToolClassMap}" @click="${this._clickSearch}">
-        <div class="affine-database-search-input-icon">
+        <div class="affine-database-search-input-icon dv-icon-20">
           ${DatabaseSearchIcon}
         </div>
         <input

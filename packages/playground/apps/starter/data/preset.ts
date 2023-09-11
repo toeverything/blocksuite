@@ -1,10 +1,15 @@
-import { DEFAULT_SHAPE_STROKE_COLOR } from '@blocksuite/blocks';
 import {
   DEFAULT_ROUGHNESS,
+  DEFAULT_SHAPE_STROKE_COLOR,
   serializeXYWH,
   StrokeStyle,
-} from '@blocksuite/phasor';
-import { Text, type Workspace } from '@blocksuite/store';
+} from '@blocksuite/blocks';
+import {
+  native2Y,
+  NativeWrapper,
+  Text,
+  type Workspace,
+} from '@blocksuite/store';
 import * as Y from 'yjs';
 
 import { type InitFn } from './utils';
@@ -35,11 +40,10 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
   });
-  page.addBlock(
-    'affine:surface',
+  const yMap = native2Y(
     {
-      elements: {
-        0: {
+      0: native2Y(
+        {
           id: '0',
           index: 'a0',
           type: 'shape',
@@ -55,7 +59,10 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           strokeStyle: StrokeStyle.Solid,
           roughness: DEFAULT_ROUGHNESS,
         },
-        1: {
+        false
+      ),
+      1: native2Y(
+        {
           id: '1',
           index: 'a1',
           type: 'shape',
@@ -72,7 +79,10 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           strokeStyle: StrokeStyle.Solid,
           roughness: DEFAULT_ROUGHNESS,
         },
-        2: {
+        false
+      ),
+      2: native2Y(
+        {
           id: '2',
           index: 'a2',
           type: 'frame',
@@ -80,7 +90,15 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           batch: 'a0',
           title: new Y.Text('Frame 1'),
         },
-      },
+        false
+      ),
+    },
+    false
+  );
+  page.addBlock(
+    'affine:surface',
+    {
+      elements: new NativeWrapper(yMap),
     },
     pageBlockId
   );

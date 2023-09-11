@@ -4,6 +4,7 @@ import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
 import type { VirgoLine } from './components/index.js';
+import { VIRGO_ROOT_ATTR } from './consts.js';
 import { VirgoHookService } from './services/hook.js';
 import {
   VirgoAttributeService,
@@ -27,13 +28,18 @@ import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
 import { intersectVRange } from './utils/v-range.js';
 
 export type VirgoRootElement<
-  T extends BaseTextAttributes = BaseTextAttributes
+  T extends BaseTextAttributes = BaseTextAttributes,
 > = HTMLElement & {
   virgoEditor: VEditor<T>;
 };
 
+export interface VRangeProvider {
+  getVRange(): VRange | null;
+  setVRange(vRange: VRange | null): void;
+}
+
 export class VEditor<
-  TextAttributes extends BaseTextAttributes = BaseTextAttributes
+  TextAttributes extends BaseTextAttributes = BaseTextAttributes,
 > {
   static nativePointToTextPoint = nativePointToTextPoint;
   static textPointToDomPoint = textPointToDomPoint;
@@ -68,6 +74,7 @@ export class VEditor<
   shouldCursorScrollIntoView = true;
 
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
+  readonly vRangeProvider: VRangeProvider | null;
 
   slots: {
     mounted: Slot;
@@ -152,6 +159,7 @@ export class VEditor<
     ops: {
       isEmbed?: (delta: DeltaInsert<TextAttributes>) => boolean;
       hooks?: VirgoHookService<TextAttributes>['hooks'];
+      vRangeProvider?: VRangeProvider;
     } = {}
   ) {
     if (!yText.doc) {
@@ -164,10 +172,11 @@ export class VEditor<
       );
     }
 
-    const { isEmbed = () => false, hooks = {} } = ops;
+    const { isEmbed = () => false, hooks = {}, vRangeProvider = null } = ops;
     this._yText = yText;
     this.isEmbed = isEmbed;
     this._hooksService = new VirgoHookService(this, hooks);
+    this.vRangeProvider = vRangeProvider;
 
     this.slots = {
       mounted: new Slot(),
@@ -202,6 +211,7 @@ export class VEditor<
 
   unmount() {
     render(nothing, this.rootElement);
+    this.rootElement.removeAttribute(VIRGO_ROOT_ATTR);
     this._rootElement = null;
     this._mounted = false;
     this.disposables.dispose();
@@ -294,6 +304,13 @@ export class VEditor<
     this.rangeService.setVRange({
       index: this.yText.length,
       length: 0,
+    });
+  }
+
+  selectAll(): void {
+    this.rangeService.setVRange({
+      index: 0,
+      length: this.yText.length,
     });
   }
 

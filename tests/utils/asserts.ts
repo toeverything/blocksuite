@@ -33,7 +33,6 @@ import type {
   SerializedStore,
 } from '../../packages/store/src/index.js';
 import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
-import type { PrefixedBlockProps } from '../../packages/store/src/workspace/page.js';
 import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getConnectorPath,
@@ -85,7 +84,7 @@ export const defaultStore: SerializedStore = {
       'affine:divider': 1,
       'affine:image': 1,
       'affine:code': 1,
-      'affine:surface': 4,
+      'affine:surface': 5,
       'affine:bookmark': 1,
       'affine:attachment': 1,
     },
@@ -259,7 +258,7 @@ export async function assertRowCount(page: Page, count: number) {
   expect(actual).toBe(count);
 }
 
-export async function assertSelection(
+export async function assertRichTextVRange(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
@@ -499,9 +498,9 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     window.workspace.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc['space:page0']['0'] as PrefixedBlockProps;
+  const titleNode = jsonDoc['space:page0']['0'] as Record<string, unknown>;
 
-  const markdownVisitor = (node: PrefixedBlockProps): string => {
+  const markdownVisitor = (node: Record<string, unknown>): string => {
     // TODO use schema
     if (node['sys:flavour'] === 'affine:page') {
       return (node['prop:title'] as Text).toString() ?? '';
@@ -521,8 +520,8 @@ export async function assertMatchMarkdown(page: Page, text: string) {
 
   const INDENT_SIZE = 2;
   const visitNodes = (
-    node: PrefixedBlockProps,
-    visitor: (node: PrefixedBlockProps) => string
+    node: Record<string, unknown>,
+    visitor: (node: Record<string, unknown>) => string
   ): string[] => {
     if (!('sys:children' in node) || !Array.isArray(node['sys:children'])) {
       throw new Error("Failed to visit nodes: 'sys:children' is not an array");
@@ -533,7 +532,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
     return [
       visitor(node),
       ...children.flatMap(child =>
-        visitNodes(child as PrefixedBlockProps, visitor).map(line => {
+        visitNodes(child as Record<string, unknown>, visitor).map(line => {
           if (node['sys:flavour'] === 'affine:page') {
             // Ad hoc way to remove the title indent
             return line;
@@ -875,4 +874,16 @@ export function assertClipData(
   expect(clipItems.find(item => item.mimeType === type)?.data).toBe(
     expectClipItems.find(item => item.mimeType === type)?.data
   );
+}
+
+export async function assertHasClass(locator: Locator, className: string) {
+  expect(
+    (await locator.getAttribute('class'))?.split(' ').includes(className)
+  ).toEqual(true);
+}
+
+export async function assertNotHasClass(locator: Locator, className: string) {
+  expect(
+    (await locator.getAttribute('class'))?.split(' ').includes(className)
+  ).toEqual(false);
 }

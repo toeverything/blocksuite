@@ -1,7 +1,7 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
@@ -9,10 +9,10 @@ import { matchFlavours } from '../../__internal__/utils/model.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
 
 export function getSelectedContentModels(
-  blockElement: BlockElement,
-  types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
+  root: BlockSuiteRoot,
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
-  const selectedElements = getSelectedContentBlockElements(blockElement, types);
+  const selectedElements = getSelectedContentBlockElements(root, types);
   const selectedModels = selectedElements.map(element => element.model);
   return selectedModels;
 }
@@ -21,11 +21,11 @@ export function getSelectedContentModels(
  * use `getSelectedBlockElementsByRange` with "flat" mode when in text selection
  */
 export function getSelectedContentBlockElements(
-  blockElement: BlockElement,
-  types: Extract<BlockSuiteSelectionType, 'block' | 'text'>[]
+  root: BlockSuiteRoot,
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BlockElement[] {
-  const { rangeManager } = blockElement.root;
-  const selectionManager = blockElement.root.selectionManager;
+  const { rangeManager } = root;
+  const selectionManager = root.selectionManager;
   const selections = selectionManager.value;
 
   if (selections.length === 0) {
@@ -51,7 +51,7 @@ export function getSelectedContentBlockElements(
   }
 
   if (types.includes('block') && selectionManager.find('block')) {
-    const viewStore = blockElement.root.viewStore;
+    const viewStore = root.viewStore;
     const blockSelections = selectionManager.filter('block');
     dirtyResult.push(
       ...blockSelections.flatMap(selection => {
@@ -59,6 +59,17 @@ export function getSelectedContentBlockElements(
         return el ?? [];
       })
     );
+  }
+
+  if (types.includes('image')) {
+    const viewStore = root.viewStore;
+    const imageSelections = selectionManager.find('image');
+    const imageEle = imageSelections
+      ? viewStore.viewFromPath('block', imageSelections.path)
+      : null;
+    if (imageEle) {
+      dirtyResult.push(imageEle);
+    }
   }
 
   // remove duplicate elements
@@ -126,14 +137,11 @@ function mergeFormat(
  * formats with different values will only return the last one.
  */
 export function getCombinedFormatInTextSelection(
-  blockElement: BlockElement,
+  root: BlockSuiteRoot,
   textSelection: TextSelection,
   loose = false
 ): AffineTextAttributes {
-  const selectedModels = getSelectedContentModels(blockElement, [
-    'text',
-    'block',
-  ]);
+  const selectedModels = getSelectedContentModels(root, ['text', 'block']);
   if (selectedModels.length === 0) {
     return {};
   }
@@ -207,12 +215,12 @@ export function getCombinedFormatInTextSelection(
 }
 
 export function getCombinedFormatInBlockSelections(
-  blockElement: BlockElement,
+  root: BlockSuiteRoot,
   blockSelections: BlockSelection[],
   loose = false
 ): AffineTextAttributes {
-  const viewStore = blockElement.root.viewStore;
-  const selectionManager = blockElement.root.selectionManager;
+  const viewStore = root.viewStore;
+  const selectionManager = root.selectionManager;
 
   const formats = blockSelections.flatMap(blockSelection => {
     const blockElement = viewStore.viewFromPath('block', blockSelection.path);
@@ -228,11 +236,7 @@ export function getCombinedFormatInBlockSelections(
       },
       to: null,
     });
-    const format = getCombinedFormatInTextSelection(
-      blockElement,
-      textSelection,
-      loose
-    );
+    const format = getCombinedFormatInTextSelection(root, textSelection, loose);
 
     return format;
   });

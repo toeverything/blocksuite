@@ -5,11 +5,10 @@ import '@blocksuite/editor';
 import '@blocksuite/editor/themes/affine.css';
 
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import std from '@blocksuite/blocks/std';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProviderCreator, Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import { QuickEdgelessMenu } from './components/quick-edgeless-menu.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
@@ -95,21 +94,36 @@ const syncProviders = async (
     }
   }
 
-  const oldVersions = { ...workspace.meta.blockVersions };
+  const oldMeta = localStorage.getItem('meta');
+  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : {};
 
   let run = true;
   const runWorkspaceMigration = () => {
     if (run) {
       workspace.schema.upgradeWorkspace(workspace.doc);
+      const meta = workspace.doc.toJSON().meta;
+      localStorage.setItem('meta', JSON.stringify(meta));
       run = false;
     }
   };
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded(() => {
+    await page.waitForLoaded().catch(e => {
+      const isValidateError =
+        e instanceof Error && e.message.includes('outdated');
+      if (isValidateError) {
+        page.spaceDoc.once('update', () => {
+          workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+          workspace.meta.updateVersion(workspace);
+          page.trySyncFromExistingDoc();
+        });
+        return;
+      }
+      throw e;
+    });
+    page.spaceDoc.once('update', () => {
       runWorkspaceMigration();
-      workspace.schema.upgradePage(oldVersions, page.spaceDoc);
     });
   });
 };
@@ -149,15 +163,14 @@ async function main() {
   const workspace = new Workspace(options);
   window.workspace = workspace;
   window.blockSchemas = AffineSchemas;
+  window.job = new Job({ workspace });
   window.Y = Workspace.Y;
-  window.std = std;
   window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'root', {
     get() {
       return document.querySelector('block-suite-root') as BlockSuiteRoot;
     },
   });
-  workspace.awarenessStore.setFlag('enable_page_tags', true);
 
   subscribePage(workspace);
   initWorkspace(workspace);

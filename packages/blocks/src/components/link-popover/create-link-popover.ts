@@ -1,10 +1,10 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { Utils } from '@blocksuite/store';
 
 import {
   getDocPage,
   getModelByElement,
+  isInsideBlockByFlavour,
 } from '../../__internal__/utils/index.js';
 import { calcSafeCoordinate } from '../../page-block/utils/position.js';
 import { type LinkDetail, LinkPopover } from './link-popover.js';
@@ -36,7 +36,7 @@ function createEditLinkElement(
   linkPanel.previewLink = previewLink;
   linkPanel.showBookmarkOperation =
     !!page.awarenessStore.getFlag('enable_bookmark_operation') &&
-    !Utils.isInsideBlockByFlavour(page, model, 'affine:database');
+    !isInsideBlockByFlavour(page, model, 'affine:bookmark');
   container.appendChild(linkPanel);
 
   requestAnimationFrame(() => {

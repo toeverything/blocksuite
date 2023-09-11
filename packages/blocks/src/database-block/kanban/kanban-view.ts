@@ -3,16 +3,19 @@ import './header.js';
 import './drag.js';
 import '../common/group-by/define.js';
 
+import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
 
-import type { KanbanViewSelection } from '../../__internal__/index.js';
+import type { KanbanViewSelectionWithType } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
+import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
+import { KanbanViewClipboard } from './clipboard.js';
 import { KanbanGroup } from './group.js';
 import { KanbanHotkeys } from './hotkeys.js';
 import type {
@@ -24,12 +27,15 @@ import { KanbanSelection } from './selection.js';
 const styles = css`
   affine-data-view-kanban {
     user-select: none;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
 
   .affine-data-view-kanban-groups {
     display: flex;
     gap: 20px;
-    overflow-x: auto;
+    overflow: auto;
   }
 
   .add-group-icon {
@@ -55,7 +61,7 @@ const styles = css`
 @customElement('affine-data-view-kanban')
 export class DataViewKanban extends BaseDataView<
   DataViewKanbanManager,
-  KanbanViewSelection
+  KanbanViewSelectionWithType
 > {
   static override styles = styles;
 
@@ -72,8 +78,18 @@ export class DataViewKanban extends BaseDataView<
         this.requestUpdate();
       })
     );
-    this._disposables.add(this.selection.run());
+    this.selection
+      .run()
+      .forEach(disposable => this._disposables.add(disposable));
     this._disposables.add(this.hotkeys.run());
+
+    // init clipboard
+    const clipboard = new KanbanViewClipboard({
+      view: this,
+      data: this.view,
+      disposables: this._disposables,
+    });
+    clipboard.init();
   }
 
   override firstUpdated() {
@@ -139,7 +155,15 @@ export class DataViewKanban extends BaseDataView<
       <div class="add-group-icon">${AddCursorIcon}</div>
     </div>`;
   };
-
+  onWheel = (event: WheelEvent) => {
+    const ele = event.currentTarget;
+    if (ele instanceof HTMLElement) {
+      if (ele.scrollWidth === ele.clientWidth) {
+        return;
+      }
+      event.stopPropagation();
+    }
+  };
   override render() {
     this.groupHelper = this.view.groupHelper;
     const groups = this.groupHelper?.groups;
@@ -148,7 +172,8 @@ export class DataViewKanban extends BaseDataView<
     }
 
     return html`
-      <div class="affine-data-view-kanban-groups">
+      ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
+      <div class="affine-data-view-kanban-groups" @wheel="${this.onWheel}">
         ${repeat(
           groups,
           group => group.key,

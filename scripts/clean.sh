@@ -2,18 +2,18 @@
 
 # ALL_PACKAGES
 packages=(
+  "blocks-std"
   "blocks"
   "docs"
   "editor"
   "global"
-  "phasor"
+  "lit"
   "playground"
   "store"
   "virgo"
-  "lit"
 )
 
 for package in "${packages[@]}"
 do
-  rm -rf "packages/$package/dist"
+  rm -rf "packages/$package/dist" "packages/$package/tsconfig.tsbuildinfo" "test-results"
 done

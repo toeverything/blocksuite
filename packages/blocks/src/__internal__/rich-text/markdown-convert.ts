@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 import { assertExists, isEqual } from '@blocksuite/global/utils';
-import type { Page } from '@blocksuite/store';
+import type { BlockElement } from '@blocksuite/lit';
 import {
   type VEditor,
   VKEYBOARD_ALLOW_DEFAULT,
@@ -19,7 +19,6 @@ import {
   convertToDivider,
   convertToList,
   convertToParagraph,
-  type ExtendedModel,
   matchFlavours,
 } from '../utils/index.js';
 import type { AffineVEditor } from './virgo/types.js';
@@ -62,6 +61,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -115,6 +118,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -167,6 +174,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -219,6 +230,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -271,6 +286,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -327,6 +346,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: startIndex + annotatedText.length + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -381,6 +404,10 @@ const inlineMarkdownMatches: InlineMarkdownMatch[] = [
         },
         ' '
       );
+      vEditor.setVRange({
+        index: vRange.index + 1,
+        length: 0,
+      });
 
       undoManager.stopCapturing();
 
@@ -442,12 +469,12 @@ export function tryFormatInlineStyle(
 }
 
 export function tryConvertBlock(
-  page: Page,
-  model: ExtendedModel,
+  element: BlockElement,
   vEditor: AffineVEditor,
   prefixText: string,
   range: { index: number; length: number }
 ) {
+  const { model } = element;
   if (
     !prefixText.match(
       /^(\d+\.|-|\*|\[ ?\]|\[x\]|(#){1,6}|(-){3}|(\*){3}|>|```([a-zA-Z0-9]*))$/
@@ -506,46 +533,46 @@ export function tryConvertBlock(
   switch (prefixText.trim()) {
     case '[]':
     case '[ ]':
-      isConverted = convertToList(page, model, 'todo', prefixText, {
+      isConverted = convertToList(element, 'todo', prefixText, {
         checked: false,
       });
       break;
     case '[x]':
-      isConverted = convertToList(page, model, 'todo', prefixText, {
+      isConverted = convertToList(element, 'todo', prefixText, {
         checked: true,
       });
       break;
     case '-':
     case '*':
-      isConverted = convertToList(page, model, 'bulleted', prefixText);
+      isConverted = convertToList(element, 'bulleted', prefixText);
       break;
     case '***':
     case '---':
-      isConverted = convertToDivider(page, model, prefixText);
+      isConverted = convertToDivider(element, prefixText);
       break;
     case '#':
-      isConverted = convertToParagraph(page, model, 'h1', prefixText);
+      isConverted = convertToParagraph(element, 'h1', prefixText);
       break;
     case '##':
-      isConverted = convertToParagraph(page, model, 'h2', prefixText);
+      isConverted = convertToParagraph(element, 'h2', prefixText);
       break;
     case '###':
-      isConverted = convertToParagraph(page, model, 'h3', prefixText);
+      isConverted = convertToParagraph(element, 'h3', prefixText);
       break;
     case '####':
-      isConverted = convertToParagraph(page, model, 'h4', prefixText);
+      isConverted = convertToParagraph(element, 'h4', prefixText);
       break;
     case '#####':
-      isConverted = convertToParagraph(page, model, 'h5', prefixText);
+      isConverted = convertToParagraph(element, 'h5', prefixText);
       break;
     case '######':
-      isConverted = convertToParagraph(page, model, 'h6', prefixText);
+      isConverted = convertToParagraph(element, 'h6', prefixText);
       break;
     case '>':
-      isConverted = convertToParagraph(page, model, 'quote', prefixText);
+      isConverted = convertToParagraph(element, 'quote', prefixText);
       break;
     default:
-      isConverted = convertToList(page, model, 'numbered', prefixText);
+      isConverted = convertToList(element, 'numbered', prefixText);
   }
 
   return isConverted ? VKEYBOARD_PREVENT_DEFAULT : VKEYBOARD_ALLOW_DEFAULT;
