@@ -14,14 +14,17 @@ import type {
   JobMiddleware,
   JobSlots,
 } from './middleware.js';
+import { Slice } from './slice.js';
 import type {
   BlockSnapshot,
   PageSnapshot,
+  SliceSnapshot,
   WorkspaceInfoSnapshot,
 } from './type.js';
 import {
   BlockSnapshotSchema,
   PageSnapshotSchema,
+  SliceSnapshotSchema,
   WorkspaceInfoSnapshotSchema,
 } from './type.js';
 
@@ -300,5 +303,79 @@ export class Job {
       type: 'info',
       snapshot,
     });
+  };
+
+  sliceToSnapshot = async (slice: Slice): Promise<SliceSnapshot> => {
+    this._slots.beforeExport.emit({
+      type: 'slice',
+      slice,
+    });
+    const {
+      content,
+      blockVersions,
+      pageVersion,
+      workspaceVersion,
+      properties,
+    } = slice.data;
+    const contentSnapshot = await Promise.all(
+      content.map(block => this._blockToSnapshot(block))
+    );
+    const snapshot: SliceSnapshot = {
+      type: 'slice',
+      content: contentSnapshot,
+      blockVersions,
+      pageVersion,
+      workspaceVersion,
+      properties,
+    };
+    this._slots.afterExport.emit({
+      type: 'slice',
+      slice,
+      snapshot,
+    });
+    SliceSnapshotSchema.parse(snapshot);
+
+    return snapshot;
+  };
+
+  snapshotToSlice = async (
+    snapshot: SliceSnapshot,
+    page: Page,
+    parent?: string,
+    index?: number
+  ): Promise<Slice> => {
+    this._slots.beforeImport.emit({
+      type: 'slice',
+      snapshot,
+    });
+    SliceSnapshotSchema.parse(snapshot);
+    const {
+      content,
+      blockVersions,
+      pageVersion,
+      workspaceVersion,
+      properties,
+    } = snapshot;
+    const contentBlocks = await Promise.all(
+      content.map((block, i) =>
+        this._snapshotToBlock(block, page, parent, (index ?? 0) + i)
+      )
+    );
+    const slice = new Slice({
+      content: contentBlocks,
+      blockVersions,
+      pageVersion,
+      workspaceVersion,
+      properties,
+      workspaceId: this._workspace.id,
+      pageId: page.id,
+    });
+    this._slots.afterImport.emit({
+      type: 'slice',
+      snapshot,
+      slice,
+    });
+
+    return slice;
   };
 }
