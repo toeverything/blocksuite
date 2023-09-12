@@ -155,7 +155,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
-        kanban.selection.selection = {
+        kanban.selectionController.selection = {
           selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,
@@ -170,7 +170,7 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     requestAnimationFrame(() => {
       const kanban = this.closest('affine-data-view-kanban');
       if (kanban) {
-        kanban.selection.selection = {
+        kanban.selectionController.selection = {
           selectionType: 'cell',
           groupKey: this.group.key,
           cardId: id,

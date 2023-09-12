@@ -1,33 +1,19 @@
 // related component
 
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import { html } from 'lit/static-html.js';
+import type { ReactiveController } from 'lit';
 
-import { Point, Rect } from '../../__internal__/index.js';
-import type { InsertPosition } from '../types.js';
-import { startDrag } from '../utils/drag.js';
-import { KanbanCard } from './card.js';
-import { KanbanGroup } from './group.js';
-import type { DataViewKanban } from './kanban-view.js';
+import { Point, Rect } from '../../../__internal__/index.js';
+import type { InsertPosition } from '../../types.js';
+import { startDrag } from '../../utils/drag.js';
+import { KanbanCard } from '../card.js';
+import { KanbanGroup } from '../group.js';
+import type { DataViewKanban } from '../kanban-view.js';
 
-const styles = css`
-  affine-data-view-kanban-drag {
-    background-color: var(--affine-background-primary-color);
+export class KanbanDragController implements ReactiveController {
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
   }
-`;
-
-@customElement('affine-data-view-kanban-drag')
-export class KanbanDrag extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
-
-  @property({ attribute: false })
-  kanbanView!: DataViewKanban;
-
-  @query('.drag-preview')
-  dragPreview!: HTMLDivElement;
 
   dropPreview = createDropPreview();
 
@@ -67,13 +53,12 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
     return position;
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-    if (this.kanbanView.view.readonly) {
+  hostConnected() {
+    if (this.host.view.readonly) {
       return;
     }
-    this._disposables.add(
-      this.kanbanView.handleEvent('dragStart', context => {
+    this.host.disposables.add(
+      this.host.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
@@ -113,8 +98,8 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
           return;
         }
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
-        if (!Rect.fromDOM(this.kanbanView).isPointIn(Point.from(evt))) {
-          const callback = this.kanbanView.onDrag;
+        if (!Rect.fromDOM(this.host).isPointIn(Point.from(evt))) {
+          const callback = this.host.onDrag;
           if (callback) {
             this.dropPreview.remove();
             return {
@@ -157,10 +142,6 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
       },
     });
   };
-
-  override render() {
-    return html` <div class="drag-preview"></div> `;
-  }
 }
 
 const createDragPreview = (card: KanbanCard, x: number, y: number) => {
@@ -235,9 +216,3 @@ const getCardByPoint = (
   const index = positions.findIndex(v => v > y);
   return cards[index];
 };
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-data-view-kanban-drag': KanbanDrag;
-  }
-}

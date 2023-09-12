@@ -88,7 +88,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     }
   `;
   get selection() {
-    return this.closest('affine-database-table')?.selection;
+    return this.closest('affine-database-table')?.selectionController;
   }
   @property({ attribute: false })
   view!: DataViewTableManager;

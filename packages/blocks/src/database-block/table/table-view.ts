@@ -2,11 +2,10 @@
 import './components/column-header/column-header.js';
 import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
-import './components/selection.js';
 import './components/row.js';
 
 import { css } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
@@ -17,10 +16,11 @@ import { PlusIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
-import { TableViewClipboard } from './clipboard.js';
-import { TableDragController } from './components/drag.js';
-import type { DatabaseSelectionView } from './components/selection.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import { TableClipboardController } from './controller/clipboard.js';
+import { TableDragController } from './controller/drag.js';
+import { TableHotkeysController } from './controller/hotkeys.js';
+import { TableSelectionController } from './controller/selection.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`
@@ -175,9 +175,10 @@ export class DataViewTable extends BaseDataView<
 > {
   static override styles = styles;
 
-  @query('affine-database-selection')
-  public selection!: DatabaseSelectionView;
   dragController = new TableDragController(this);
+  selectionController = new TableSelectionController(this);
+  hotkeysController = new TableHotkeysController(this);
+  clipboardController = new TableClipboardController(this);
   private get readonly() {
     return this.view.readonly;
   }
@@ -192,14 +193,6 @@ export class DataViewTable extends BaseDataView<
         });
       })
     );
-
-    // init clipboard
-    const clipboard = new TableViewClipboard({
-      view: this,
-      data: this.view,
-      disposables: this._disposables,
-    });
-    clipboard.init();
 
     if (this.readonly) return;
   }
@@ -223,7 +216,7 @@ export class DataViewTable extends BaseDataView<
           );
     tableViewManager.rowAdd(position);
     requestAnimationFrame(() => {
-      this.selection.selection = {
+      this.selectionController.selection = {
         focus: {
           rowIndex: index,
           columnIndex: 0,
@@ -308,9 +301,6 @@ export class DataViewTable extends BaseDataView<
               .tableViewManager="${this.view}"
             ></affine-database-column-header>
             ${this.renderTable()} ${this._renderColumnWidthDragBar()}
-            <affine-database-selection
-              .tableView="${this}"
-            ></affine-database-selection>
           </div>
         </div>
         ${this.readonly
@@ -330,11 +320,11 @@ export class DataViewTable extends BaseDataView<
   }
 
   focusFirstCell(): void {
-    this.selection.focusFirstCell();
+    this.selectionController.focusFirstCell();
   }
 
   getSelection = () => {
-    return this.selection.selection;
+    return this.selectionController.selection;
   };
 }
 

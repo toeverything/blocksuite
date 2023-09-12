@@ -46,7 +46,7 @@ export function openLeditsEditor(
         onClick: async () => {
           const newBlob = await app.exportImage();
 
-          if (newBlob === blob) {
+          if (!newBlob || newBlob === blob) {
             modal.close();
           }
 

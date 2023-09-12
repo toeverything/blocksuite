@@ -10,9 +10,12 @@ import {
   MoveRightIcon,
 } from '../../icons/index.js';
 import { popSideDetail } from '../common/detail/layout.js';
-import type { KanbanSelection } from './selection.js';
+import type { KanbanSelectionController } from './controller/selection.js';
 
-export const openDetail = (rowId: string, selection: KanbanSelection) => {
+export const openDetail = (
+  rowId: string,
+  selection: KanbanSelectionController
+) => {
   const old = selection.selection;
   selection.selection = undefined;
   popSideDetail({
@@ -27,7 +30,7 @@ export const openDetail = (rowId: string, selection: KanbanSelection) => {
 export const popCardMenu = (
   ele: ReferenceElement,
   rowId: string,
-  selection: KanbanSelection
+  selection: KanbanSelectionController
 ) => {
   popFilterableSimpleMenu(ele, [
     {

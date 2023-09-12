@@ -59,6 +59,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     return this._vEditor;
   }
 
+  private _lastScrollLeft = 0;
+
   private _init() {
     if (this._vEditor) {
       throw new Error('vEditor already exists.');
@@ -90,6 +92,42 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       'keydown',
       keyDownHandler
     );
+
+    vEditor.disposables.add(
+      vEditor.slots.vRangeUpdated.on(([vRange]) => {
+        if (!vRange) return;
+
+        vEditor.waitForUpdate().then(() => {
+          if (!vEditor.mounted) return;
+
+          const range = vEditor.toDomRange(vRange);
+          if (!range) return;
+
+          this.scrollIntoView({
+            block: 'nearest',
+          });
+
+          // make sure the result of moveX is expected
+          this.scrollLeft = 0;
+          const thisRect = this.getBoundingClientRect();
+          const rangeRect = range.getBoundingClientRect();
+          let moveX = 0;
+          if (
+            rangeRect.left + rangeRect.width >
+            thisRect.left + thisRect.width
+          ) {
+            moveX =
+              rangeRect.left +
+              rangeRect.width -
+              (thisRect.left + thisRect.width);
+            moveX = Math.max(this._lastScrollLeft, moveX);
+          }
+
+          this.scrollLeft = moveX;
+        });
+      })
+    );
+
     vEditor.mount(this.virgoContainer);
     vEditor.setReadonly(this.readonly);
   }
@@ -123,6 +161,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
           this._unmount();
         },
       });
+    });
+
+    this.disposables.addFromEvent(this, 'scroll', () => {
+      this._lastScrollLeft = this.scrollLeft;
     });
   }
 

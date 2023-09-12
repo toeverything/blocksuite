@@ -17,6 +17,10 @@ export class VirgoLine extends LitElement {
     return Array.from(this.querySelectorAll('v-element'));
   }
 
+  get vTexts() {
+    return Array.from(this.querySelectorAll('v-text'));
+  }
+
   get textLength() {
     return this.vElements.reduce((acc, el) => acc + el.delta.insert.length, 0);
   }
@@ -28,6 +32,7 @@ export class VirgoLine extends LitElement {
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await Promise.all(this.vElements.map(el => el.updateComplete));
+    await Promise.all(this.vTexts.map(el => el.updateComplete));
     return result;
   }
 
