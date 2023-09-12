@@ -28,6 +28,11 @@ export class VirgoLine extends LitElement {
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await Promise.all(this.vElements.map(el => el.updateComplete));
+    if (this.vElements.length === 0) {
+      const vText = this.querySelector('v-text');
+      assertExists(vText);
+      await vText.updateComplete;
+    }
     return result;
   }
 

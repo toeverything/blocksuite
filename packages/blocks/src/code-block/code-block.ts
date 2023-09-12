@@ -4,7 +4,11 @@ import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import {
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+  type VRangeProvider,
+} from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -112,10 +116,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
       position: relative;
-      width: 90%;
       overflow-x: auto;
       overflow-y: hidden;
       padding-bottom: 20px;
+      width: 90%;
     }
 
     .affine-code-block-container .rich-text-container {
@@ -130,11 +134,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       left: 20px;
       line-height: var(--affine-line-height);
       color: var(--affine-text-secondary-color);
-    }
-
-    .affine-code-block-container .virgo-editor {
-      width: 90%;
-      margin: 0;
     }
 
     .affine-code-block-container affine-code-line span v-text {
@@ -250,6 +249,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
+  private _vRangeProvider: VRangeProvider | null = null;
+
   get vEditor() {
     const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
@@ -358,6 +359,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
       return indexArr;
     };
+
     this.bindHotKey({
       Backspace: () => {
         const textSelection = selectionManager.find('text');
@@ -469,6 +471,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         return;
       },
     });
+
+    this._vRangeProvider = getVRangeProvider(this);
   }
 
   override disconnectedCallback() {
@@ -493,10 +497,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
     }
 
-    const richText = this.querySelector('rich-text');
-    assertExists(richText);
+    assertExists(this._richTextElement);
     this._richTextResizeObserver.disconnect();
-    this._richTextResizeObserver.observe(richText);
+    this._richTextResizeObserver.observe(this._richTextElement);
   }
 
   private _onClickWrapBtn() {
@@ -599,7 +602,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .undoManager=${this.model.page.history}
           .textSchema=${this.textSchema}
           .readonly=${this.model.page.readonly}
-          .vRangeProvider=${getVRangeProvider(this)}
+          .vRangeProvider=${this._vRangeProvider}
         >
         </rich-text>
       </div>

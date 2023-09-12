@@ -1,4 +1,3 @@
-import { VirgoLine } from '../components/index.js';
 import type { VRange } from '../types.js';
 import type { VRangeUpdatedProp } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
@@ -13,7 +12,6 @@ import type { VEditor } from '../virgo.js';
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private _prevVRange: VRange | null = null;
   private _vRange: VRange | null = null;
-  private _lastScrollLeft = 0;
 
   constructor(public readonly editor: VEditor<TextAttributes>) {}
 
@@ -143,10 +141,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return domRangeToVirgoRange(range, rootElement, yText);
   };
 
-  onScrollUpdated = (scrollLeft: number) => {
-    this._lastScrollLeft = scrollLeft;
-  };
-
   private _applyVRange = (vRange: VRange): void => {
     const selectionRoot = findDocumentOrShadowRoot(this.editor);
     const selection = selectionRoot.getSelection();
@@ -161,39 +155,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     selection.removeAllRanges();
     selection.addRange(newRange);
-
-    this._scrollLineIntoViewIfNeeded(newRange);
-    this._scrollCursorIntoViewIfNeeded(newRange);
-
     this.editor.slots.rangeUpdated.emit(newRange);
-  };
-
-  private _scrollLineIntoViewIfNeeded = (range: Range) => {
-    if (this.editor.shouldLineScrollIntoView) {
-      let lineElement: HTMLElement | null = range.endContainer.parentElement;
-      while (!(lineElement instanceof VirgoLine)) {
-        lineElement = lineElement?.parentElement ?? null;
-      }
-      lineElement?.scrollIntoView({
-        block: 'nearest',
-      });
-    }
-  };
-
-  private _scrollCursorIntoViewIfNeeded = (range: Range) => {
-    if (this.editor.shouldCursorScrollIntoView) {
-      const root = this.editor.rootElement;
-
-      const rootRect = root.getBoundingClientRect();
-      const rangeRect = range.getBoundingClientRect();
-
-      let moveX = 0;
-      if (rangeRect.left > rootRect.left) {
-        moveX = Math.max(this._lastScrollLeft, rangeRect.left - rootRect.right);
-      }
-
-      root.scrollLeft = moveX;
-      this._lastScrollLeft = moveX;
-    }
   };
 }

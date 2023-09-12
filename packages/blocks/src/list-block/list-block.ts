@@ -3,6 +3,7 @@ import '../components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import type { VRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
@@ -65,6 +66,8 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  private _vRangeProvider: VRangeProvider | null = null;
+
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await this._richTextElement?.updateComplete;
@@ -79,6 +82,8 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     bindContainerHotkey(this);
+
+    this._vRangeProvider = getVRangeProvider(this);
   }
 
   override render(): TemplateResult<1> {
@@ -110,7 +115,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
-            .vRangeProvider=${getVRangeProvider(this)}
+            .vRangeProvider=${this._vRangeProvider}
           ></rich-text>
         </div>
         ${this.showChildren ? children : nothing}
