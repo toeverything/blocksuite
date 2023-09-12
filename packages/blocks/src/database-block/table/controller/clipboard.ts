@@ -1,43 +1,31 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { ReactiveController } from 'lit';
 
-import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
+import { ClipboardItem } from '../../../__internal__/clipboard/clipboard-item.js';
 import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
-} from '../../__internal__/clipboard/utils/pure.js';
+} from '../../../__internal__/clipboard/utils/pure.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
-} from '../../__internal__/utils/index.js';
-import type { TableViewSelection } from '../../__internal__/utils/types.js';
-import {
-  BaseViewClipboard,
-  type BaseViewClipboardConfig,
-} from '../common/clipboard.js';
-import type { DatabaseCellContainer } from '../table/components/cell-container.js';
-import type { DataViewTable } from '../table/table-view.js';
-import type { DataViewTableManager } from './table-view-manager.js';
+} from '../../../__internal__/utils/index.js';
+import type { TableViewSelection } from '../../../__internal__/utils/types.js';
+import type { DatabaseCellContainer } from '../components/cell-container.js';
+import type { DataViewTable } from '../table-view.js';
+import type { DataViewTableManager } from '../table-view-manager.js';
 
-interface TableViewClipboardConfig
-  extends BaseViewClipboardConfig<DataViewTableManager> {
-  view: DataViewTable;
-}
-
-export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> {
-  private _view: DataViewTable;
-
-  constructor(config: TableViewClipboardConfig) {
-    super(config);
-
-    this._view = config.view;
+export class TableClipboardController implements ReactiveController {
+  constructor(public host: DataViewTable) {
+    host.addController(this);
   }
 
-  override init() {
-    this._disposables.add(
-      this._view.handleEvent('copy', ctx => {
-        const tableSelection = this._view.selectionController.selection;
+  hostConnected() {
+    this.host.disposables.add(
+      this.host.handleEvent('copy', ctx => {
+        const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
         this._onCopy(ctx, tableSelection);
@@ -45,8 +33,8 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
       })
     );
 
-    this._disposables.add(
-      this._view.handleEvent('paste', ctx => {
+    this.host.disposables.add(
+      this.host.handleEvent('paste', ctx => {
         this._onPaste(ctx);
         return true;
       })
@@ -57,8 +45,8 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
     _context: UIEventStateContext,
     tableSelection: TableViewSelection
   ) => {
-    const view = this._view as DataViewTable;
-    const data = this._data;
+    const view = this.host;
+    const data = this.host.view;
 
     // cells
     // For database paste inside.
@@ -96,10 +84,10 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
 
   private _onPaste = (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
-    const view = this._view as DataViewTable;
-    const data = this._data;
+    const view = this.host;
+    const data = this.host.view;
 
-    const tableSelection = this._view.selectionController.selection;
+    const tableSelection = this.host.selectionController.selection;
     if (tableSelection) {
       const htmlClipboardData = event.clipboardData?.getData(
         CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE

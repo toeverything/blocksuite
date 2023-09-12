@@ -1,31 +1,18 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
+import type { ReactiveController } from 'lit';
 
 import type { KanbanViewSelectionWithType } from '../../__internal__/index.js';
-import {
-  BaseViewClipboard,
-  type BaseViewClipboardConfig,
-} from '../common/clipboard.js';
 import type { DataViewKanban } from './kanban-view.js';
-import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
-interface KanbanViewClipboardConfig
-  extends BaseViewClipboardConfig<DataViewKanbanManager> {
-  view: DataViewKanban;
-}
-
-export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager> {
-  private _view: DataViewKanban;
-
-  constructor(config: KanbanViewClipboardConfig) {
-    super(config);
-
-    this._view = config.view;
+export class KanbanClipboardController implements ReactiveController {
+  constructor(public host: DataViewKanban) {
+    host.addController(this);
   }
 
-  override init() {
-    this._disposables.add(
-      this._view.handleEvent('copy', ctx => {
-        const kanbanSelection = this._view.selectionController.selection;
+  hostConnected() {
+    this.host.disposables.add(
+      this.host.handleEvent('copy', ctx => {
+        const kanbanSelection = this.host.selectionController.selection;
         if (!kanbanSelection) return false;
 
         this._onCopy(ctx, kanbanSelection);
@@ -33,8 +20,8 @@ export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager
       })
     );
 
-    this._disposables.add(
-      this._view.handleEvent('paste', ctx => {
+    this.host.disposables.add(
+      this.host.handleEvent('paste', ctx => {
         this._onPaste(ctx);
         return true;
       })

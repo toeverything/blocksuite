@@ -14,7 +14,7 @@ import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
-import { KanbanViewClipboard } from './clipboard.js';
+import { KanbanClipboardController } from './clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
@@ -68,24 +68,18 @@ export class DataViewKanban extends BaseDataView<
   private dragController = new KanbanDragController(this);
   selectionController = new KanbanSelectionController(this);
   hotkeysController = new KanbanHotkeysController(this);
+  clipboardController = new KanbanClipboardController(this);
   @query('.affine-data-view-kanban-groups')
   groups!: HTMLElement;
   groupHelper?: GroupHelper;
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    // init clipboard
-    const clipboard = new KanbanViewClipboard({
-      view: this,
-      data: this.view,
-      disposables: this._disposables,
-    });
-    clipboard.init();
     if (this.view.readonly) {
       return;
     }

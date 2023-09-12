@@ -16,8 +16,8 @@ import { PlusIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
-import { TableViewClipboard } from './clipboard.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
+import { TableClipboardController } from './controller/clipboard.js';
 import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
@@ -178,6 +178,7 @@ export class DataViewTable extends BaseDataView<
   dragController = new TableDragController(this);
   selectionController = new TableSelectionController(this);
   hotkeysController = new TableHotkeysController(this);
+  clipboardController = new TableClipboardController(this);
   private get readonly() {
     return this.view.readonly;
   }
@@ -192,14 +193,6 @@ export class DataViewTable extends BaseDataView<
         });
       })
     );
-
-    // init clipboard
-    const clipboard = new TableViewClipboard({
-      view: this,
-      data: this.view,
-      disposables: this._disposables,
-    });
-    clipboard.init();
 
     if (this.readonly) return;
   }
