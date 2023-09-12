@@ -49,7 +49,6 @@ import {
   getClosestNoteBlock,
   getContainerOffsetPoint,
   getDragHandleContainerHeight,
-  getDropIndicator,
   getNoteId,
   includeTextSelection,
   insideDatabaseTable,
