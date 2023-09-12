@@ -909,6 +909,7 @@ export const CutIcon = html`<svg
   />
 </svg> `;
 
+// use #77757D rather than currentColor
 export const ArrowUpIcon = html`<svg
   width="8"
   height="4"
@@ -920,7 +921,7 @@ export const ArrowUpIcon = html`<svg
     fill-rule="evenodd"
     clip-rule="evenodd"
     d="M7.22586 3.47595C7.05501 3.64681 6.778 3.64681 6.60714 3.47595L4.20608 1.07489C4.09217 0.960983 3.9075 0.960983 3.7936 1.07489L1.39253 3.47595C1.22168 3.64681 0.944665 3.64681 0.773811 3.47595C0.602957 3.3051 0.602957 3.02809 0.773811 2.85724L3.17488 0.456168C3.63049 0.000556783 4.36918 0.000555735 4.82479 0.456168L7.22586 2.85724C7.39672 3.02809 7.39672 3.3051 7.22586 3.47595Z"
-    fill="currentColor"
+    fill="#77757D"
   />
 </svg>`;
 
