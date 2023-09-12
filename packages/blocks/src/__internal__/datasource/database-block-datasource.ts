@@ -19,8 +19,8 @@ import { richTextColumnConfig } from '../../database-block/common/columns/rich-t
 import { selectColumnConfig } from '../../database-block/common/columns/select/cell-renderer.js';
 import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
-import type { InsertPosition } from '../../database-block/index.js';
-import { insertPositionToIndex } from '../../database-block/index.js';
+import type { InsertPosition } from '../../database-block/types.js';
+import { insertPositionToIndex } from '../../database-block/utils/insert.js';
 import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
 import { getIcon } from './block-icons.js';
