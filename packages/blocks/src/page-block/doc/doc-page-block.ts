@@ -19,7 +19,7 @@ import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
-import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
+import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 
@@ -392,8 +392,8 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.bindHotKey({
       ArrowUp: () => {
-        const view = this.root.viewStore;
-        const selection = this.root.selectionManager;
+        const view = this.root.view;
+        const selection = this.root.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -453,8 +453,8 @@ export class DocPageBlockComponent extends BlockElement<
         return true;
       },
       ArrowDown: () => {
-        const view = this.root.viewStore;
-        const selection = this.root.selectionManager;
+        const view = this.root.view;
+        const selection = this.root.selection;
         const sel = selection.value.find(
           sel => sel.is('text') || sel.is('block')
         );
@@ -512,6 +512,7 @@ export class DocPageBlockComponent extends BlockElement<
       let noteId: string;
       let paragraphId: string;
       let index = 0;
+      const readonly = this.model.page.readonly;
       const lastNote = this.model.children
         .slice()
         .reverse()
@@ -520,12 +521,14 @@ export class DocPageBlockComponent extends BlockElement<
             child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
         );
       if (!lastNote) {
+        if (readonly) return;
         noteId = this.page.addBlock('affine:note', {}, this.model.id);
         paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
       } else {
         noteId = lastNote.id;
         const last = lastNote.children.at(-1);
         if (!last || !last.text) {
+          if (readonly) return;
           paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
         } else {
           paragraphId = last.id;
@@ -534,8 +537,8 @@ export class DocPageBlockComponent extends BlockElement<
       }
 
       requestAnimationFrame(() => {
-        this.root.selectionManager.setGroup('note', [
-          this.root.selectionManager.getInstance('text', {
+        this.root.selection.setGroup('note', [
+          this.root.selection.getInstance('text', {
             from: {
               path: [this.model.id, noteId, paragraphId],
               index,

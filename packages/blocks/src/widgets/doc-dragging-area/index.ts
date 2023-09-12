@@ -159,7 +159,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
     const getAllNodeFromTree = (): BlockElement[] => {
       const blockElement: BlockElement[] = [];
-      this.root.viewStore.walkThrough(node => {
+      this.root.view.walkThrough(node => {
         const view = node.view;
         if (!(view instanceof BlockElement)) {
           return true;
@@ -205,12 +205,12 @@ export class DocDraggingAreaWidget extends WidgetElement {
       this._allBlocksWithRect,
       userRect
     ).map(blockPath => {
-      return this.root.selectionManager.getInstance('block', {
+      return this.root.selection.getInstance('block', {
         path: blockPath,
       });
     });
 
-    this.root.selectionManager.setGroup('note', selections);
+    this.root.selection.setGroup('note', selections);
   }
 
   private _clearRaf() {
@@ -329,7 +329,6 @@ export class DocDraggingAreaWidget extends WidgetElement {
         return;
       }
 
-      this._clearRaf();
       const state = this._lastPointerState;
       this._rafID = requestAnimationFrame(() => {
         this._updateDraggingArea(state, false);

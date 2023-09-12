@@ -20,14 +20,21 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
   constructor(public readonly editor: VEditor<TextAttributes>) {}
 
+  get vRangeProvider() {
+    return this.editor.vRangeProvider;
+  }
+
   mount = () => {
     const rootElement = this.editor.rootElement;
 
-    this.editor.disposables.addFromEvent(
-      document,
-      'selectionchange',
-      this._onSelectionChange
-    );
+    if (!this.vRangeProvider) {
+      this.editor.disposables.addFromEvent(
+        document,
+        'selectionchange',
+        this._onSelectionChange
+      );
+    }
+
     this.editor.disposables.addFromEvent(
       rootElement,
       'beforeinput',
@@ -52,6 +59,32 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(rootElement, 'click', this._onClick);
   };
 
+  private _isRangeCompletelyInRoot = () => {
+    const selectionRoot = findDocumentOrShadowRoot(this.editor);
+    const selection = selectionRoot.getSelection();
+    if (!selection || selection.rangeCount === 0) return false;
+    const range = selection.getRangeAt(0);
+
+    const rootElement = this.editor.rootElement;
+    const rootRange = document.createRange();
+    rootRange.selectNode(rootElement);
+
+    if (
+      range.startContainer.compareDocumentPosition(range.endContainer) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+    ) {
+      return (
+        rootRange.comparePoint(range.startContainer, range.startOffset) >= 0 &&
+        rootRange.comparePoint(range.endContainer, range.endOffset) <= 0
+      );
+    } else {
+      return (
+        rootRange.comparePoint(range.endContainer, range.startOffset) >= 0 &&
+        rootRange.comparePoint(range.startContainer, range.endOffset) <= 0
+      );
+    }
+  };
+
   private _onSelectionChange = () => {
     const rootElement = this.editor.rootElement;
     const previousVRange = this.editor.getVRange();
@@ -64,7 +97,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     if (!selection) return;
     if (selection.rangeCount === 0) {
       if (previousVRange !== null) {
-        this.editor.slots.vRangeUpdated.emit([null, 'native']);
+        this.editor.setVRange(null, false);
       }
 
       return;
@@ -99,7 +132,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
         return;
       } else {
         if (previousVRange !== null) {
-          this.editor.slots.vRangeUpdated.emit([null, 'native']);
+          this.editor.setVRange(null, false);
         }
         return;
       }
@@ -110,7 +143,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     const vRange = this.editor.toVRange(selection.getRangeAt(0));
     if (!isMaybeVRangeEqual(previousVRange, vRange)) {
-      this.editor.slots.vRangeUpdated.emit([vRange, 'native']);
+      this.editor.setVRange(vRange, false);
     }
 
     // avoid infinite syncVRange
@@ -144,7 +177,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this.editor.rerenderWholeEditor();
     await this.editor.waitForUpdate();
 
-    if (this.editor.isReadonly) return;
+    if (this.editor.isReadonly || !this._isRangeCompletelyInRoot()) return;
 
     const vRange = this.editor.getVRange();
     if (!vRange) return;
@@ -212,29 +245,44 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       if (newData && newData.length > 0) {
         this.editor.insertText(newVRange, newData, ctx.attributes);
 
-        this.editor.slots.vRangeUpdated.emit([
+        this.editor.setVRange(
           {
             index: newVRange.index + newData.length,
             length: 0,
           },
-          'input',
-        ]);
+          false
+        );
       }
     }
   };
 
-  private _firstRecomputeInFrame = true;
   private _onBeforeInput = (event: InputEvent) => {
     event.preventDefault();
 
-    if (this.editor.isReadonly || this._isComposing) return;
-    if (this._firstRecomputeInFrame) {
-      this._firstRecomputeInFrame = false;
-      this._onSelectionChange();
-      requestAnimationFrame(() => {
-        this._firstRecomputeInFrame = true;
-      });
+    if (
+      this.editor.isReadonly ||
+      this._isComposing ||
+      !this._isRangeCompletelyInRoot()
+    )
+      return;
+
+    if (!this.editor.getVRange()) return;
+
+    // Sometimes input event will directly come from some scripts (e.g. browser extension),
+    // so we need to resync the vRange.
+    const targetRanges = event.getTargetRanges();
+    if (targetRanges.length > 0) {
+      const staticRange = targetRanges[0];
+      const range = document.createRange();
+      range.setStart(staticRange.startContainer, staticRange.startOffset);
+      range.setEnd(staticRange.endContainer, staticRange.endOffset);
+      const vRange = this.editor.toVRange(range);
+
+      if (!isMaybeVRangeEqual(this.editor.getVRange(), vRange)) {
+        this.editor.setVRange(vRange, false);
+      }
     }
+
     const vRange = this.editor.getVRange();
     if (!vRange) return;
 

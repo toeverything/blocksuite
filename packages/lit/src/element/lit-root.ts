@@ -6,7 +6,7 @@ import type {
   UIEventDispatcher,
   ViewStore,
 } from '@blocksuite/block-std';
-import { BlockStore } from '@blocksuite/block-std';
+import { BlockStdProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { nothing, type PropertyValues, type TemplateResult } from 'lit';
@@ -42,28 +42,25 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   modelSubscribed = new Set<string>();
 
-  blockStore!: BlockStore<StaticValue, BlockElement | WidgetElement>;
+  std!: BlockStdProvider<StaticValue, BlockElement | WidgetElement>;
 
   rangeManager: RangeManager | null = null;
 
-  get uiEventDispatcher(): UIEventDispatcher {
-    return this.blockStore.uiEventDispatcher;
+  get event(): UIEventDispatcher {
+    return this.std.event;
   }
 
-  get selectionManager(): SelectionManager {
-    return this.blockStore.selectionManager;
+  get selection(): SelectionManager {
+    return this.std.selection;
   }
 
-  get viewStore(): ViewStore<BlockElement | WidgetElement> {
-    return this.blockStore.viewStore;
+  get view(): ViewStore<BlockElement | WidgetElement> {
+    return this.std.view;
   }
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('blocks')) {
-      this.blockStore.specStore.applySpecs(this.blocks);
-    }
-    if (changedProperties.has('page')) {
-      this.blockStore.page = this.page;
+      this.std.spec.applySpecs(this.blocks);
     }
     super.willUpdate(changedProperties);
   }
@@ -71,24 +68,22 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.blockStore = new BlockStore<StaticValue, BlockElement | WidgetElement>(
-      {
-        root: this,
-        workspace: this.page.workspace,
-        page: this.page,
-      }
-    );
+    this.std = new BlockStdProvider<StaticValue, BlockElement | WidgetElement>({
+      root: this,
+      workspace: this.page.workspace,
+      page: this.page,
+    });
     this._registerView();
 
-    this.blockStore.mount();
-    this.blockStore.specStore.applySpecs(this.blocks);
+    this.std.mount();
+    this.std.spec.applySpecs(this.blocks);
     this.rangeManager = new RangeManager(this);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    this.blockStore.unmount();
+    this.std.unmount();
     this.modelSubscribed.clear();
     this.rangeManager = null;
   }
@@ -110,7 +105,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
       return html`${nothing}`;
     }
 
-    const view = this.blockStore.specStore.getView(flavour);
+    const view = this.std.spec.getView(flavour);
     if (!view) {
       console.warn(`Cannot find view for ${flavour}.`);
       return html`${nothing}`;
@@ -171,7 +166,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     const blockSelector = `[${this.blockIdAttr}]`;
     const widgetSelector = `[${this.widgetIdAttr}]`;
 
-    this.blockStore.viewStore.register<'block'>({
+    this.std.view.register<'block'>({
       type: 'block',
       fromDOM: node => {
         return fromDOM<BlockElement>(
@@ -186,7 +181,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
         getChildren(view, blockSelector, widgetSelector, 'block'),
     });
 
-    this.blockStore.viewStore.register<'widget'>({
+    this.std.view.register<'widget'>({
       type: 'widget',
       fromDOM: node => {
         return fromDOM<WidgetElement>(

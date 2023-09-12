@@ -65,6 +65,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       position: relative;
       box-sizing: border-box;
       overflow: hidden;
+      display: block;
       height: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);

@@ -9,14 +9,10 @@ import { deltaInsertsToChunks, renderElement } from '../utils/index.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
-  private readonly _editor: VEditor<TextAttributes>;
-
-  constructor(editor: VEditor<TextAttributes>) {
-    this._editor = editor;
-  }
+  constructor(public readonly editor: VEditor<TextAttributes>) {}
 
   get deltas() {
-    return this._editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
+    return this.editor.yText.toDelta() as DeltaInsert<TextAttributes>[];
   }
 
   get normalizedDeltas() {
@@ -25,7 +21,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
     // we will divide it into multiple parts.
     const result: DeltaInsert<TextAttributes>[] = [];
     for (const delta of this.deltas) {
-      if (this._editor.isEmbed(delta)) {
+      if (this.editor.isEmbed(delta)) {
         const dividedDeltas = [...delta.insert].map(subInsert => ({
           insert: subInsert,
           attributes: delta.attributes,
@@ -77,7 +73,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
   ): boolean {
     let result = false;
     if (vRange.length >= 1) {
-      this._editor.mapDeltasInVRange(
+      this.editor.mapDeltasInVRange(
         vRange,
         (_, rangeIndex, deltaIndex) => {
           if (
@@ -202,7 +198,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
 
   // render current deltas to VLines
   render = async (syncVRange = true) => {
-    const rootElement = this._editor.rootElement;
+    const rootElement = this.editor.rootElement;
 
     const normalizedDeltas = this.normalizedDeltas;
     const chunks = deltaInsertsToChunks(normalizedDeltas);
@@ -220,7 +216,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
         const elements: VirgoLine['elements'] = lineDeltas.map(
           ([delta, normalizedDeltaIndex]) => {
             let selected = false;
-            const vRange = this._editor.getVRange();
+            const vRange = this.editor.getVRange();
             if (vRange) {
               selected = this.isNormalizedDeltaSelected(
                 normalizedDeltaIndex,
@@ -231,7 +227,7 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
             return [
               renderElement(
                 delta,
-                this._editor.attributeService.normalizeAttributes,
+                this.editor.attributeService.normalizeAttributes,
                 selected
               ),
               delta,
@@ -256,18 +252,18 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
       );
     } catch (error) {
       // Lit may be crashed by IME input and we need to rerender whole editor for it
-      this._editor.rerenderWholeEditor();
-      await this._editor.waitForUpdate();
+      this.editor.rerenderWholeEditor();
+      await this.editor.waitForUpdate();
     }
 
-    await this._editor.waitForUpdate();
+    await this.editor.waitForUpdate();
 
     if (syncVRange) {
       // We need to synchronize the selection immediately after rendering is completed,
       // otherwise there is a possibility of an error in the cursor position
-      this._editor.rangeService.syncVRange();
+      this.editor.rangeService.syncVRange();
     }
 
-    this._editor.slots.updated.emit();
+    this.editor.slots.updated.emit();
   };
 }

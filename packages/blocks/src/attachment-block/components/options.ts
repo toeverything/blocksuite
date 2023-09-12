@@ -1,7 +1,7 @@
-import { assertExists, createDelayHoverSignal } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
-import { createRef, ref } from 'lit/directives/ref.js';
+import { createRef, ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { createLitPortal } from '../../components/portal.js';
@@ -24,21 +24,30 @@ export function AttachmentOptionsTemplate({
   model,
   showCaption,
   abortController,
+  ref: refOrCallback = createRef<HTMLDivElement>(),
 }: {
   anchor: HTMLElement;
   model: AttachmentBlockModel;
   showCaption: () => void;
   abortController: AbortController;
+  ref?: RefOrCallback;
 }) {
-  const { onHover, onHoverLeave } = createDelayHoverSignal(abortController);
-  anchor.addEventListener('mouseover', onHover, {
-    signal: abortController.signal,
-  });
-  anchor.addEventListener('mouseleave', onHoverLeave, {
-    signal: abortController.signal,
-  });
+  let containerEl: Element | undefined;
+  const refCallback = (el: Element | undefined) => {
+    containerEl = el;
 
-  const containerRef = createRef<HTMLDivElement>();
+    if (!refCallback) return;
+    // See also https://github.com/lit/lit/blob/c134604f178e36444261d83eabe9e578c1ed90c4/packages/lit-html/src/directives/ref.ts
+    typeof refOrCallback === 'function'
+      ? refOrCallback(el)
+      : ((
+          refOrCallback as {
+            // RefInternal
+            value: Element | undefined;
+          }
+        ).value = el);
+  };
+
   const disableEmbed = !model.type?.startsWith('image/');
   const readonly = model.page.readonly;
   let moreMenuAbortController: AbortController | null = null;
@@ -47,24 +56,17 @@ export function AttachmentOptionsTemplate({
     </style>
 
     <div
-      ${ref(containerRef)}
+      ${ref(refCallback)}
       class="affine-attachment-options"
       @pointerdown=${stopPropagation}
-      @mouseover=${onHover}
-      @mouseleave=${onHoverLeave}
     >
-      <icon-button class="has-tool-tip" size="24px" disabled ?hidden=${true}>
+      <icon-button class="has-tool-tip" size="24px" ?hidden=${true}>
         ${ViewIcon}
         <tool-tip inert tip-position="top" role="tooltip">Preview</tool-tip>
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
-      <icon-button
-        class="has-tool-tip"
-        size="24px"
-        ?disabled=${readonly}
-        ?hidden=${true}
-      >
+      <icon-button class="has-tool-tip" size="24px" ?hidden=${true || readonly}>
         ${LinkIcon}
         <tool-tip inert tip-position="top" role="tooltip"
           >Turn into Link view</tool-tip
@@ -73,8 +75,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly}
-        ?hidden=${disableEmbed}
+        ?disabled=${readonly || disableEmbed}
         @click="${() => {
           turnIntoEmbedView(model);
           abortController.abort();
@@ -85,12 +86,12 @@ export function AttachmentOptionsTemplate({
           >Turn into Embed view</tool-tip
         >
       </icon-button>
-      <div class="divider" ?hidden=${disableEmbed}></div>
+      <div class="divider"></div>
 
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly}
+        ?hidden=${readonly}
         @click="${() => {
           abortController.abort();
           const renameAbortController = new AbortController();
@@ -116,7 +117,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly}
+        ?hidden=${readonly}
         @click=${() => {
           showCaption();
         }}
@@ -124,7 +125,7 @@ export function AttachmentOptionsTemplate({
         ${CaptionIcon}
         <tool-tip inert tip-position="top" role="tooltip">Caption</tool-tip>
       </icon-button>
-      <div class="divider"></div>
+      <div class="divider" ?hidden=${readonly}></div>
       <icon-button
         size="24px"
         class="has-tool-tip more-button"
@@ -135,14 +136,14 @@ export function AttachmentOptionsTemplate({
             return;
           }
           moreMenuAbortController = new AbortController();
-          const container = containerRef.value;
-          assertExists(container);
+
+          assertExists(containerEl);
           createLitPortal({
-            container,
+            container: containerEl,
             template: MoreMenu({ model, abortController }),
             abortController: moreMenuAbortController,
             computePosition: {
-              referenceElement: container,
+              referenceElement: containerEl,
               placement: 'top-end',
               middleware: [flip(), offset(4)],
             },

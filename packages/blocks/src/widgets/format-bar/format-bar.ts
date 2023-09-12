@@ -41,7 +41,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   private _customElements: HTMLDivElement[] = [];
 
   private get _selectionManager() {
-    return this.root.selectionManager;
+    return this.root.selection;
   }
 
   private _dragging = false;
@@ -97,21 +97,21 @@ export class AffineFormatBarWidget extends WidgetElement {
     }
 
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragStart', () => {
+      this.root.event.add('dragStart', () => {
         this._dragging = true;
         this.requestUpdate();
       })
     );
 
     this._disposables.add(
-      this.root.uiEventDispatcher.add('dragEnd', () => {
+      this.root.event.add('dragEnd', () => {
         this._dragging = false;
         this.requestUpdate();
       })
     );
 
     this._disposables.add(
-      this.root.uiEventDispatcher.add('pointerUp', ctx => {
+      this.root.event.add('pointerUp', ctx => {
         if (this._displayType === 'text') {
           if (this._rangeManager) {
             const e = ctx.get('pointerState');
@@ -162,10 +162,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           this._selectedBlockElements = blockSelections
             .map(selection => {
               const path = selection.path;
-              return this.pageElement.root.viewStore.viewFromPath(
-                'block',
-                path
-              );
+              return this.pageElement.root.view.viewFromPath('block', path);
             })
             .filter((el): el is BlockElement => !!el);
         } else {
@@ -327,7 +324,6 @@ export class AffineFormatBarWidget extends WidgetElement {
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET_TAG}
       @pointerdown=${stopPropagation}
-      @pointermove=${stopPropagation}
     >
       <div class="custom-items"></div>
       ${this._customElements.length > 0

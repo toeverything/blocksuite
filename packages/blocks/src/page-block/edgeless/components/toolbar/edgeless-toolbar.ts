@@ -6,6 +6,7 @@ import './connector/connector-tool-button.js';
 import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 import './frame/frame-tool-button.js';
+import './default/default-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -31,10 +32,8 @@ import {
   FrameNavigatorIcon,
   FrameNavigatorNextIcon,
   FrameNavigatorPrevIcon,
-  HandIcon,
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
-  SelectIcon,
 } from '../../../../icons/index.js';
 import {
   Bound,
@@ -103,18 +102,28 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .eraser-button {
       position: relative;
       height: 66px;
-      width: 30px;
+      width: 60px;
       overflow-y: hidden;
+    }
+    .eraser-button .active-mode {
+      position: absolute;
+      top: 8px;
+      left: 6px;
+      width: 48px;
+      height: 66px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      background: var(--affine-hover-color);
     }
     #edgeless-eraser-icon {
       position: absolute;
-      top: 10px;
+      top: 4px;
       left: 50%;
       transform: translateX(-50%);
       transition: top 0.3s ease-in-out;
     }
     #edgeless-eraser-icon:hover {
-      top: 2px;
+      top: 0px;
     }
     .edgeless-toolbar-right-part {
       display: flex;
@@ -394,10 +403,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _renderTools() {
-    const { page } = this.edgeless;
     const { type } = this.edgelessTool;
-
-    if (page.readonly) return nothing;
 
     return html`
       <div class="full-divider"></div>
@@ -410,10 +416,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-toolbar-button
           .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
           .active=${type === 'eraser'}
-          .activeMode=${'background'}
           @click=${() => this.setEdgelessTool({ type: 'eraser' })}
         >
-          <div class="eraser-button">${EdgelessEraserIcon}</div>
+          <div class="eraser-button">
+            <div class=${type === 'eraser' ? 'active-mode' : ''}></div>
+            ${EdgelessEraserIcon}
+          </div>
         </edgeless-toolbar-button>
       </div>
       <div class="edgeless-toolbar-right-part">
@@ -446,26 +454,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   private get defaultContent() {
     const { page } = this.edgeless;
-    const { type } = this.edgelessTool;
 
     return html`<div class="edgeless-toolbar-left-part">
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Select', 'V')}
-          .active=${type === 'default'}
-          .iconContainerPadding=${8}
-          @click=${() => this.setEdgelessTool({ type: 'default' })}
-        >
-          ${SelectIcon}
-        </edgeless-tool-icon-button>
-
-        <edgeless-tool-icon-button
-          .tooltip=${getTooltipWithShortcut('Hand', 'H')}
-          .active=${type === 'pan'}
-          .iconContainerPadding=${8}
-          @click=${() => this.setEdgelessTool({ type: 'pan', panning: false })}
-        >
-          ${HandIcon}
-        </edgeless-tool-icon-button>
+        <edgeless-default-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-default-tool-button>
 
         <edgeless-connector-tool-button
           .edgelessTool=${this.edgelessTool}
@@ -521,6 +516,8 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (this.edgeless.page.readonly) return nothing;
+
     const { type } = this.edgelessTool;
 
     const Content =

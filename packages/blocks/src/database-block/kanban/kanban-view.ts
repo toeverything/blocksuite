@@ -3,9 +3,9 @@ import './header.js';
 import './drag.js';
 import '../common/group-by/define.js';
 
-import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
@@ -16,6 +16,7 @@ import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import { KanbanViewClipboard } from './clipboard.js';
+import type { KanbanDrag } from './drag.js';
 import { KanbanGroup } from './group.js';
 import { KanbanHotkeys } from './hotkeys.js';
 import type {
@@ -65,6 +66,7 @@ export class DataViewKanban extends BaseDataView<
 > {
   static override styles = styles;
 
+  private dragRef = createRef<KanbanDrag>();
   selection = new KanbanSelection(this);
   hotkeys = new KanbanHotkeys(this);
   @query('.affine-data-view-kanban-groups')
@@ -90,6 +92,9 @@ export class DataViewKanban extends BaseDataView<
       disposables: this._disposables,
     });
     clipboard.init();
+    if (this.view.readonly) {
+      return;
+    }
   }
 
   override firstUpdated() {
@@ -188,6 +193,7 @@ export class DataViewKanban extends BaseDataView<
         ${this.renderAddGroup()}
       </div>
       <affine-data-view-kanban-drag
+        ${ref(this.dragRef)}
         .kanbanView="${this}"
       ></affine-data-view-kanban-drag>
     `;
@@ -199,6 +205,26 @@ export class DataViewKanban extends BaseDataView<
 
   getSelection() {
     return this.selection.selection;
+  }
+
+  public hideIndicator(): void {
+    this.dragRef.value?.dropPreview.remove();
+  }
+
+  public moveTo(id: string, evt: MouseEvent): void {
+    const position = this.dragRef.value?.getInsertPosition(evt);
+    if (position) {
+      position.group.group.helper.moveCardTo(
+        id,
+        '',
+        position.group.group.key,
+        position.position
+      );
+    }
+  }
+
+  public showIndicator(evt: MouseEvent): boolean {
+    return this.dragRef.value?.shooIndicator(evt, undefined) != null;
   }
 }
 

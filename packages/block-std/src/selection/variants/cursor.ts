@@ -1,4 +1,11 @@
+import z from 'zod';
+
 import { BaseSelection } from '../base.js';
+
+const CursorSelectionSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
 
 export class CursorSelection extends BaseSelection {
   static override type = 'cursor';
@@ -30,6 +37,7 @@ export class CursorSelection extends BaseSelection {
   }
 
   static override fromJSON(json: Record<string, unknown>): CursorSelection {
+    CursorSelectionSchema.parse(json);
     return new CursorSelection(json.x as number, json.y as number);
   }
 }

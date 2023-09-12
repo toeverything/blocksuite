@@ -1,5 +1,4 @@
 import type { Disposable, Slot } from '@blocksuite/global/utils';
-import { undefined } from 'zod';
 
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type {
@@ -65,6 +64,8 @@ export interface DataSource {
   ) => Disposable;
 
   detailSlots: DetailSlots;
+
+  rowMove(rowId: string, position: InsertPosition): void;
 }
 
 export abstract class BaseDataSource implements DataSource {
@@ -155,6 +156,8 @@ export abstract class BaseDataSource implements DataSource {
   public get detailSlots(): DetailSlots {
     return {};
   }
+
+  public abstract rowMove(rowId: string, position: InsertPosition): void;
 }
 
 export type DatabaseBlockDatasourceConfig = {

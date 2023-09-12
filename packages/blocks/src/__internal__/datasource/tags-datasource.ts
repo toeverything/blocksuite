@@ -18,6 +18,12 @@ import { BaseDataSource } from './base.js';
 export class TagsDatasource extends BaseDataSource {
   private meta: Workspace['meta'];
 
+  public rowMove(rowId: string, position: InsertPosition): void {
+    // not support
+    rowId;
+    position;
+  }
+
   public get rows(): string[] {
     return this.tags.map(v => v.id);
   }
