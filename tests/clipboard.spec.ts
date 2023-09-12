@@ -31,7 +31,6 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
-  pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressEnter,
@@ -1142,6 +1141,7 @@ test(
     await pressEnter(page);
     await pressEnter(page);
     await pressEnter(page);
+    await waitNextFrame(page);
     await pasteByKeyboard(page);
     await waitNextFrame(page);
 
