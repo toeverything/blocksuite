@@ -1,4 +1,4 @@
-import type { EdgelessElement } from '../../../index.js';
+import type { EdgelessElement } from '../../../__internal__/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { isTopLevelBlock } from './query.js';

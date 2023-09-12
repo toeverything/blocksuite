@@ -22,6 +22,7 @@ import {
   type PhasorElementType,
   serializeXYWH,
 } from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
 import {
   type EdgelessElement,
@@ -47,7 +48,7 @@ import {
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
 export function getCopyElements(
-  edgeless: EdgelessPageBlockComponent,
+  surface: SurfaceBlockComponent,
   elements: EdgelessElement[]
 ) {
   const set = new Set<EdgelessElement>();
@@ -55,7 +56,7 @@ export function getCopyElements(
   elements.forEach(element => {
     if (element instanceof FrameElement) {
       set.add(element);
-      edgeless.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+      surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
     } else {
       set.add(element);
     }
@@ -149,7 +150,7 @@ export class EdgelessClipboard implements Clipboard {
     }
 
     this._page.transact(() => {
-      deleteElements(this._edgeless, elements);
+      deleteElements(this.surface, elements);
     });
 
     this.selection.setSelection({
@@ -165,7 +166,7 @@ export class EdgelessClipboard implements Clipboard {
 
   async copy() {
     const { state } = this.selection;
-    const elements = getCopyElements(this._edgeless, this.selection.elements);
+    const elements = getCopyElements(this.surface, this.selection.elements);
     // when note active, handle copy like page mode
     if (state.editing) {
       if (isPhasorElementWithText(elements[0])) {
@@ -407,7 +408,7 @@ export class EdgelessClipboard implements Clipboard {
         ele.h
       );
       if (ele instanceof ConnectorElement) {
-        this._edgeless.connector.updateXYWH(ele, newBound);
+        this.surface.connector.updateXYWH(ele, newBound);
       } else {
         this.surface.updateElement(ele.id, {
           xywh: newBound.serialize(),

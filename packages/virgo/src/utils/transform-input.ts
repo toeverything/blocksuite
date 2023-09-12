@@ -9,41 +9,41 @@ function handleInsertText<TextAttributes extends BaseTextAttributes>(
   attributes: TextAttributes
 ) {
   if (vRange.index >= 0 && data) {
-    editor.slots.vRangeUpdated.emit([
+    editor.insertText(vRange, data, attributes);
+    editor.setVRange(
       {
         index: vRange.index + data.length,
         length: 0,
       },
-      'input',
-    ]);
-    editor.insertText(vRange, data, attributes);
+      false
+    );
   }
 }
 
 function handleInsertParagraph(vRange: VRange, editor: VEditor) {
   if (vRange.index >= 0) {
-    editor.slots.vRangeUpdated.emit([
+    editor.insertLineBreak(vRange);
+    editor.setVRange(
       {
         index: vRange.index + 1,
         length: 0,
       },
-      'input',
-    ]);
-    editor.insertLineBreak(vRange);
+      false
+    );
   }
 }
 
 function handleDeleteBackward(vRange: VRange, editor: VEditor) {
   if (vRange.index >= 0) {
     if (vRange.length > 0) {
-      editor.slots.vRangeUpdated.emit([
+      editor.deleteText(vRange);
+      editor.setVRange(
         {
           index: vRange.index,
           length: 0,
         },
-        'input',
-      ]);
-      editor.deleteText(vRange);
+        false
+      );
       return;
     }
 
@@ -51,17 +51,17 @@ function handleDeleteBackward(vRange: VRange, editor: VEditor) {
       const originalString = editor.yText.toString().slice(0, vRange.index);
       const segments = [...new Intl.Segmenter().segment(originalString)];
       const deletedLength = segments[segments.length - 1].segment.length;
-      editor.slots.vRangeUpdated.emit([
-        {
-          index: vRange.index - deletedLength,
-          length: 0,
-        },
-        'input',
-      ]);
       editor.deleteText({
         index: vRange.index - deletedLength,
         length: deletedLength,
       });
+      editor.setVRange(
+        {
+          index: vRange.index - deletedLength,
+          length: 0,
+        },
+        false
+      );
     }
   }
 }
@@ -69,31 +69,31 @@ function handleDeleteBackward(vRange: VRange, editor: VEditor) {
 function handleDeleteForward(editor: VEditor, vRange: VRange) {
   if (vRange.index < editor.yText.length) {
     if (vRange.length > 0) {
-      editor.slots.vRangeUpdated.emit([
+      editor.deleteText(vRange);
+      editor.setVRange(
         {
           index: vRange.index,
           length: 0,
         },
-        'input',
-      ]);
-      editor.deleteText(vRange);
+        false
+      );
     } else {
       const originalString = editor.yText.toString();
       const segments = [...new Intl.Segmenter().segment(originalString)];
       const slicedString = originalString.slice(0, vRange.index);
       const slicedSegments = [...new Intl.Segmenter().segment(slicedString)];
       const deletedLength = segments[slicedSegments.length].segment.length;
-      editor.slots.vRangeUpdated.emit([
-        {
-          index: vRange.index,
-          length: 0,
-        },
-        'input',
-      ]);
       editor.deleteText({
         index: vRange.index,
         length: deletedLength,
       });
+      editor.setVRange(
+        {
+          index: vRange.index,
+          length: 0,
+        },
+        false
+      );
     }
   }
 }
@@ -105,17 +105,17 @@ function handleDeleteWordBackward(editor: VEditor, vRange: VRange) {
   if (matches) {
     const deleteLength = matches[0].length;
 
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index - deleteLength,
-        length: 0,
-      },
-      'input',
-    ]);
     editor.deleteText({
       index: vRange.index - deleteLength,
       length: deleteLength,
     });
+    editor.setVRange(
+      {
+        index: vRange.index - deleteLength,
+        length: 0,
+      },
+      false
+    );
   }
 }
 
@@ -124,30 +124,31 @@ function handleDeleteWordForward(editor: VEditor, vRange: VRange) {
   if (matches) {
     const deleteLength = matches[0].length;
 
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index,
-        length: 0,
-      },
-      'input',
-    ]);
     editor.deleteText({
       index: vRange.index,
       length: deleteLength,
     });
+    editor.setVRange(
+      {
+        index: vRange.index,
+        length: 0,
+      },
+      false
+    );
   }
 }
 
 function handleDeleteLine(editor: VEditor, vRange: VRange) {
   if (vRange.length > 0) {
-    editor.slots.vRangeUpdated.emit([
+    editor.deleteText(vRange);
+    editor.setVRange(
       {
         index: vRange.index,
         length: 0,
       },
-      'input',
-    ]);
-    editor.deleteText(vRange);
+      false
+    );
+
     return;
   }
 
@@ -156,17 +157,17 @@ function handleDeleteLine(editor: VEditor, vRange: VRange) {
     const deleteLength =
       vRange.index - Math.max(0, str.slice(0, vRange.index).lastIndexOf('\n'));
 
-    editor.slots.vRangeUpdated.emit([
-      {
-        index: vRange.index - deleteLength,
-        length: 0,
-      },
-      'input',
-    ]);
     editor.deleteText({
       index: vRange.index - deleteLength,
       length: deleteLength,
     });
+    editor.setVRange(
+      {
+        index: vRange.index - deleteLength,
+        length: 0,
+      },
+      false
+    );
   }
 }
 

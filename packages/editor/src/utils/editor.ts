@@ -1,3 +1,4 @@
+import type { Point } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
   BlockHub,
@@ -6,15 +7,14 @@ import {
   getEdgelessPage,
   getServiceOrRegister,
   PAGE_BLOCK_PADDING_BOTTOM,
+  Rect,
   uploadImageFromLocal,
 } from '@blocksuite/blocks';
 import {
   type BlockComponentElement,
   getClosestNoteBlockElementById,
   getHoveringNote,
-  type Point,
-  Rect,
-} from '@blocksuite/blocks/std';
+} from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -29,18 +29,10 @@ export const createBlockHub: (
 ) => BlockHub = (editor: EditorContainer, page: Page) => {
   const blockHub = new BlockHub({
     mouseRoot: editor,
-    enableDatabase: !!page.awarenessStore.getFlag('enable_database'),
     onClickCard: async (data: { flavour: string; type?: string }) => {
       // To make sure get the current page
       const page = editor.page;
       const models = [];
-
-      const isDatabase = data.flavour === 'affine:database';
-
-      if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
-        console.warn('database block is not enabled');
-        return;
-      }
 
       if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(
@@ -85,10 +77,6 @@ export const createBlockHub: (
       const models = [];
       const props = JSON.parse(data);
       const isDatabase = props.flavour === 'affine:database';
-      if (isDatabase && !page.awarenessStore.getFlag('enable_database')) {
-        console.warn('database block is not enabled');
-        return;
-      }
       if (props.flavour === 'affine:image' && props.type === 'image') {
         models.push(
           ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({

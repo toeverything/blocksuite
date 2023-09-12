@@ -9,7 +9,7 @@ import {
   ConnectorMode,
   ShapeStyle,
 } from '../../surface-block/index.js';
-import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
+import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -108,7 +108,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this.pageElement.selectionManager.elements.length !== 0 &&
             !this.pageElement.selectionManager.editing
           ) {
-            this.pageElement.frame.createFrameOnSelected();
+            pageElement.surface.frame.createFrameOnSelected();
           } else if (!this.pageElement.selectionManager.editing) {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
@@ -149,12 +149,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         Delete: () => {
           this._delete();
         },
-        Space: ctx => {
-          const event = ctx.get('defaultState').event;
-          if (event instanceof KeyboardEvent) {
-            this._space(event);
-          }
-        },
         ArrowUp: () => {
           this._move('ArrowUp');
         },
@@ -184,38 +178,46 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         this._shift(event);
       }
     });
+    this._bindToggleHand();
   }
 
-  private _shouldRevertMode = false;
-  private _lastMode: EdgelessTool | null = null;
+  private _bindToggleHand() {
+    this.pageElement.handleEvent(
+      'keyDown',
+      ctx => {
+        const event = ctx.get('keyboardState').raw;
+        if (event.code === 'Space') {
+          this._space(event);
+        }
+      },
+      { global: true }
+    );
+    this.pageElement.handleEvent(
+      'keyUp',
+      ctx => {
+        const event = ctx.get('keyboardState').raw;
+        if (event.code === 'Space') {
+          this._space(event);
+        }
+      },
+      { global: true }
+    );
+  }
+
   private _space(event: KeyboardEvent) {
     const edgeless = this.pageElement;
-    const { edgelessTool: edgelessTool } = edgeless.tools;
-    const { state } = edgeless.selectionManager;
-    if (event.type === 'keydown') {
-      if (edgelessTool.type === 'pan') {
-        return;
-      }
-
-      // when user is editing, shouldn't enter pan mode
-      if (edgelessTool.type === 'default' && state.editing) {
-        return;
-      }
-
-      this._shouldRevertMode = true;
-      this._lastMode = edgelessTool;
-      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+    const type = edgeless.edgelessTool.type;
+    const state = edgeless.selectionManager.state;
+    if (type !== 'default' && type !== 'pan') {
       return;
     }
-    if (event.type === 'keyup') {
-      if (
-        edgelessTool.type === 'pan' &&
-        this._shouldRevertMode &&
-        this._lastMode
-      ) {
-        this._setEdgelessTool(edgeless, this._lastMode);
+    if (event.type === 'keydown') {
+      if (type === 'pan' || (type === 'default' && state.editing)) {
+        return;
       }
-      this._shouldRevertMode = false;
+      this._setEdgelessTool(edgeless, { type: 'pan', panning: false });
+    } else if (event.type === 'keyup') {
+      this._setEdgelessTool(edgeless, { type: 'default' });
     }
   }
 
@@ -235,7 +237,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       return;
     }
 
-    deleteElements(edgeless, edgeless.selectionManager.elements);
+    deleteElements(edgeless.surface, edgeless.selectionManager.elements);
 
     edgeless.selectionManager.clear();
     edgeless.selectionManager.setSelection(edgeless.selectionManager.state);
@@ -267,7 +269,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _move(key: string) {
     const edgeless = this.pageElement;
     if (edgeless.selectionManager.editing) return;
-
+    const { surface } = edgeless;
     const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
       const bound = Bound.deserialize(element.xywh).clone();
@@ -289,9 +291,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
       if (isPhasorElement(element)) {
         if (element instanceof ConnectorElement) {
-          this.pageElement.connector.updateXYWH(element, bound);
+          surface.connector.updateXYWH(element, bound);
         }
-        this.pageElement.surface.setElementBound(element.id, bound);
+        surface.setElementBound(element.id, bound);
       } else {
         this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
       }

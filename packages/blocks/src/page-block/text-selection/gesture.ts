@@ -4,7 +4,7 @@ import type {
   UIEventHandler,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import { getTextNodesFromElement } from '@blocksuite/virgo';
+import { getTextNodesFromElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../doc/doc-page-block.js';
 import type { PageBlockComponent } from '../types.js';
@@ -25,7 +25,7 @@ export class Gesture {
   private _rafID = 0;
 
   private get _selectionManager() {
-    return this.pageElement.root.selectionManager;
+    return this.pageElement.root.selection;
   }
 
   private get _viewportElement() {
@@ -150,7 +150,7 @@ export class Gesture {
 
     const editor = document
       .elementFromPoint(state.x, state.y)
-      ?.closest('[data-virgo-root="true"]');
+      ?.closest(`[${VIRGO_ROOT_ATTR}]`);
 
     if (!editor) return;
 
@@ -245,7 +245,7 @@ export class Gesture {
       return;
     }
 
-    if (!caret.node.parentElement?.closest('[data-virgo-root="true"]')) {
+    if (!caret.node.parentElement?.closest(`[${VIRGO_ROOT_ATTR}]`)) {
       return;
     }
 

@@ -2,11 +2,11 @@ import { assertExists, sleep } from '@blocksuite/global/utils';
 import { BaseBlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
-import type { RichText } from '../__internal__/rich-text/rich-text.js';
-import type { AffineVEditor } from '../__internal__/rich-text/virgo/types.js';
 import { isControlledKeyboardEvent } from '../__internal__/utils/common.js';
 import { getVirgoByModel } from '../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../__internal__/utils/selection.js';
+import type { RichText } from './rich-text/rich-text.js';
+import type { AffineVEditor } from './rich-text/virgo/types.js';
 
 export const createKeydownObserver = ({
   target,

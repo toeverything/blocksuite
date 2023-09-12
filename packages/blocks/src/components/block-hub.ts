@@ -2,7 +2,8 @@ import { IS_FIREFOX } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { css, html } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, unsafeCSS } from 'lit';
 import {
   customElement,
   property,
@@ -22,7 +23,10 @@ import {
   calcDropTarget,
   type DroppingType,
   getClosestBlockElementByPoint,
+  getDocPage,
+  getEdgelessPage,
   getModelByBlockElement,
+  isPageMode,
   Point,
 } from '../__internal__/index.js';
 import {
@@ -35,7 +39,7 @@ import {
   CrossIcon,
   DatabaseTableViewIcon,
   DividerIcon,
-  EmbedIcon,
+  EmbedWebIcon,
   Heading1Icon,
   Heading2Icon,
   Heading3Icon,
@@ -49,6 +53,9 @@ import {
   TextIcon,
   TextIconLarge,
 } from '../icons/index.js';
+import { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
+import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { autoScroll } from '../page-block/text-selection/utils.js';
 import { type DragIndicator } from './drag-indicator.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
@@ -309,7 +316,7 @@ const styles = css`
 
   .block-hub-menu-container {
     display: flex;
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     flex-flow: column;
     justify-content: center;
     align-items: center;
@@ -488,7 +495,6 @@ function BlockHubCards(
 }
 
 function BlockHubMenu(
-  enableDatabase: boolean,
   expanded: boolean,
   isGrabbing: boolean,
   visibleCardType: CardListType | null,
@@ -497,7 +503,7 @@ function BlockHubMenu(
   maxHeight: number,
   page: Page
 ) {
-  const menuNum = enableDatabase ? 5 : 4;
+  const menuNum = 5;
   const height = menuNum * 44 + 10;
 
   const blockHubListCards = BlockHubCards(
@@ -570,30 +576,26 @@ function BlockHubMenu(
         type="file"
         selected=${visibleCardType === 'file' ? 'true' : 'false'}
       >
-        ${blockHubFileCards} ${EmbedIcon}
+        ${blockHubFileCards} ${EmbedWebIcon}
       </div>
-      ${enableDatabase
-        ? html`
-            <div
-              class="block-hub-icon-container has-tool-tip"
-              type="database"
-              draggable="true"
-              affine-flavour="affine:database"
-              selected=${visibleCardType === 'database' ? 'true' : 'false'}
-            >
-              ${DatabaseTableViewIcon}
-              <tool-tip
-                inert
-                role="tooltip"
-                tip-position="left"
-                arrow
-                ?hidden=${!showTooltip}
-              >
-                Drag to create a database
-              </tool-tip>
-            </div>
-          `
-        : null}
+      <div
+        class="block-hub-icon-container has-tool-tip"
+        type="database"
+        draggable="true"
+        affine-flavour="affine:database"
+        selected=${visibleCardType === 'database' ? 'true' : 'false'}
+      >
+        ${DatabaseTableViewIcon}
+        <tool-tip
+          inert
+          role="tooltip"
+          tip-position="left"
+          arrow
+          ?hidden=${!showTooltip}
+        >
+          Drag to create a database
+        </tool-tip>
+      </div>
       <div class="divider"></div>
     </div>
   `;
@@ -673,14 +675,13 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDroppingType: DroppingType = 'none';
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
-  private readonly _enableDatabase: boolean;
   private _mouseRoot: AbstractEditor;
+  private _rafID: number = 0;
 
   static override styles = styles;
 
   constructor(options: {
     mouseRoot: AbstractEditor;
-    enableDatabase: boolean;
     getAllowedBlocks: () => BaseBlockModel[];
     getHoveringNoteState: (point: Point) => {
       container?: Element;
@@ -700,7 +701,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     super();
     this._page = options.page;
     this._mouseRoot = options.mouseRoot;
-    this._enableDatabase = options.enableDatabase;
     this.getAllowedBlocks = options.getAllowedBlocks;
     this.getHoveringNoteState = options.getHoveringNoteState;
 
@@ -952,11 +952,43 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect = result.rect;
       lastModelState = result.modelState;
     }
+    const runner = () => {
+      // only support auto scroll in page mode now
+      if (this._pageBlockElement instanceof DocPageBlockComponent) {
+        const result = autoScroll(
+          this._pageBlockElement.viewportElement,
+          point.y
+        );
+        if (!result) {
+          this._clearRaf();
+          return;
+        }
+        this._rafID = requestAnimationFrame(runner);
+      } else {
+        this._clearRaf();
+      }
+    };
+
+    this._rafID = requestAnimationFrame(runner);
 
     this._lastDroppingType = type;
     this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
   };
+
+  private get _pageBlockElement() {
+    const pageElement = isPageMode(this._page)
+      ? (getDocPage(this._page) as DocPageBlockComponent)
+      : (getEdgelessPage(this._page) as EdgelessPageBlockComponent);
+    return pageElement;
+  }
+
+  private _clearRaf() {
+    if (this._rafID) {
+      cancelAnimationFrame(this._rafID);
+      this._rafID = 0;
+    }
+  }
 
   private _onDragOver = (e: DragEvent) => {
     e.preventDefault();
@@ -1032,7 +1064,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
 
   override render() {
     const blockHubMenu = BlockHubMenu(
-      this._enableDatabase,
       this._expanded,
       this._isGrabbing,
       this._visibleCardType,

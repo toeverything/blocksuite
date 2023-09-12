@@ -8,7 +8,6 @@ import {
   pressArrowUp,
   pressEnter,
   pressEscape,
-  SHORT_KEY,
   type,
 } from '../utils/actions/keyboard.js';
 import {

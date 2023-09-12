@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 import { scrollbarStyle } from '../../components/utils.js';
 
@@ -64,7 +65,7 @@ export const styles = css`
   }
 
   .slash-category-name {
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-sm);
     white-space: nowrap;
     cursor: pointer;

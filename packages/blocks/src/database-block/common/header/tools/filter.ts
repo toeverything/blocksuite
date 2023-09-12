@@ -1,14 +1,13 @@
 import '../../../common/filter/filter-group.js';
 
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { eventToVRect } from '../../../../components/menu/index.js';
 import { FilterIcon } from '../../../../icons/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { popCreateFilter } from '../../../common/ref/ref.js';
-import type { DataViewManager } from '../../data-view-manager.js';
+import { BaseTool } from './base-tool.js';
 
 const styles = css`
   .affine-database-filter-button {
@@ -33,13 +32,8 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-filter')
-export class DataViewHeaderToolsFilter extends WithDisposable(
-  ShadowlessElement
-) {
+export class DataViewHeaderToolsFilter extends BaseTool {
   static override styles = styles;
-
-  @property({ attribute: false })
-  view!: DataViewManager;
 
   override connectedCallback() {
     super.connectedCallback();

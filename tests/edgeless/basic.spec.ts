@@ -38,7 +38,7 @@ import {
   assertEdgelessSelectedRect,
   assertNoteXYWH,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
   assertZoomLevel,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -52,10 +52,10 @@ test('switch to edgeless mode', async ({ page }) => {
   await focusRichText(page);
   await type(page, 'hello');
   await assertRichTexts(page, ['hello']);
-  await assertSelection(page, 0, 5, 0);
+  await assertRichTextVRange(page, 0, 5, 0);
 
   await switchEditorMode(page);
-  const locator = page.locator('.affine-edgeless-page-block-container');
+  const locator = page.locator('affine-edgeless-block-container');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
   await waitNextFrame(page);

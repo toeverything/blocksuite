@@ -258,7 +258,7 @@ export async function assertRowCount(page: Page, count: number) {
   expect(actual).toBe(count);
 }
 
-export async function assertSelection(
+export async function assertRichTextVRange(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,
@@ -874,4 +874,16 @@ export function assertClipData(
   expect(clipItems.find(item => item.mimeType === type)?.data).toBe(
     expectClipItems.find(item => item.mimeType === type)?.data
   );
+}
+
+export async function assertHasClass(locator: Locator, className: string) {
+  expect(
+    (await locator.getAttribute('class'))?.split(' ').includes(className)
+  ).toEqual(true);
+}
+
+export async function assertNotHasClass(locator: Locator, className: string) {
+  expect(
+    (await locator.getAttribute('class'))?.split(' ').includes(className)
+  ).toEqual(false);
 }

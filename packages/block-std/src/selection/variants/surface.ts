@@ -1,4 +1,11 @@
+import z from 'zod';
+
 import { BaseSelection } from '../base.js';
+
+const SurfaceSelectionSchema = z.object({
+  elements: z.array(z.string()),
+  editing: z.boolean(),
+});
 
 export class SurfaceSelection extends BaseSelection {
   static override type = 'surface';
@@ -22,7 +29,8 @@ export class SurfaceSelection extends BaseSelection {
       return (
         this.blockId === other.blockId &&
         this.elements.length === other.elements.length &&
-        this.elements.every((id, idx) => id === other.elements[idx])
+        this.elements.every((id, idx) => id === other.elements[idx]) &&
+        this.editing === other.editing
       );
     }
 
@@ -41,6 +49,7 @@ export class SurfaceSelection extends BaseSelection {
   static override fromJSON(
     json: Record<string, unknown> | { elements: string[]; editing: boolean }
   ): SurfaceSelection {
+    SurfaceSelectionSchema.parse(json);
     return new SurfaceSelection(
       json.elements as string[],
       json.editing as boolean

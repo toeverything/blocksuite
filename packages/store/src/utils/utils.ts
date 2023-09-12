@@ -132,6 +132,7 @@ export function schemaToModel(
   Object.assign(blockModel, props);
 
   blockModel.id = id;
+  blockModel.keys = Object.keys(props);
   blockModel.flavour = schema.model.flavour;
   blockModel.role = schema.model.role;
   blockModel.page = page;

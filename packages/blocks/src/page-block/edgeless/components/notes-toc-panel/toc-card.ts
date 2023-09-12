@@ -1,7 +1,8 @@
 import { noop, pickArray } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -164,13 +165,13 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
     .card-number > .number {
       text-align: center;
       font-size: 12px;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       font-weight: 600;
       line-height: 16px;
     }
 
     .card-content {
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       user-select: none;
     }
 

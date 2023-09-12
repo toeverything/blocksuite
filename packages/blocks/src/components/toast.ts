@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import { baseTheme } from '@toeverything/theme';
 import { html, type TemplateResult } from 'lit';
 
 let ToastContainer: HTMLDivElement | null = null;
@@ -13,9 +14,7 @@ const htmlToElement = <T extends ChildNode>(html: string | TemplateResult) => {
     html = html.trim(); // Never return a text node of whitespace as the result
     template.innerHTML = html;
   } else {
-    const { strings, values } = html;
-    const v = [...values, '']; // + last empty part
-    const htmlString = strings.reduce((acc, cur, i) => acc + cur + v[i], '');
+    const htmlString = String.raw(html.strings, ...html.values);
     template.innerHTML = htmlString;
   }
   return template.content.firstChild as T;
@@ -56,7 +55,7 @@ export const toast = (message: string, duration = 2500) => {
   const styles = `
     max-width: 480px;
     text-align: center;
-    font-family: var(--affine-font-family);
+    baseTheme: ${baseTheme.fontSansFamily};
     font-size: var(--affine-font-sm);
     padding: 6px 12px;
     margin: 10px 0 0 0;

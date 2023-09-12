@@ -4,13 +4,13 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
-import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { matchFlavours } from '../../__internal__/utils/model.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
+import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
 
 export function getSelectedContentModels(
   root: BlockSuiteRoot,
-  types: Extract<BlockSuite.SelectionType, 'block' | 'text'>[]
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
   const selectedElements = getSelectedContentBlockElements(root, types);
   const selectedModels = selectedElements.map(element => element.model);
@@ -22,10 +22,10 @@ export function getSelectedContentModels(
  */
 export function getSelectedContentBlockElements(
   root: BlockSuiteRoot,
-  types: Extract<BlockSuite.SelectionType, 'block' | 'text'>[]
+  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BlockElement[] {
   const { rangeManager } = root;
-  const selectionManager = root.selectionManager;
+  const selectionManager = root.selection;
   const selections = selectionManager.value;
 
   if (selections.length === 0) {
@@ -51,7 +51,7 @@ export function getSelectedContentBlockElements(
   }
 
   if (types.includes('block') && selectionManager.find('block')) {
-    const viewStore = root.viewStore;
+    const viewStore = root.view;
     const blockSelections = selectionManager.filter('block');
     dirtyResult.push(
       ...blockSelections.flatMap(selection => {
@@ -59,6 +59,17 @@ export function getSelectedContentBlockElements(
         return el ?? [];
       })
     );
+  }
+
+  if (types.includes('image')) {
+    const viewStore = root.view;
+    const imageSelections = selectionManager.find('image');
+    const imageEle = imageSelections
+      ? viewStore.viewFromPath('block', imageSelections.path)
+      : null;
+    if (imageEle) {
+      dirtyResult.push(imageEle);
+    }
   }
 
   // remove duplicate elements
@@ -208,8 +219,8 @@ export function getCombinedFormatInBlockSelections(
   blockSelections: BlockSelection[],
   loose = false
 ): AffineTextAttributes {
-  const viewStore = root.viewStore;
-  const selectionManager = root.selectionManager;
+  const viewStore = root.view;
+  const selectionManager = root.selection;
 
   const formats = blockSelections.flatMap(blockSelection => {
     const blockElement = viewStore.viewFromPath('block', blockSelection.path);

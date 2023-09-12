@@ -1,7 +1,12 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { VEditor, VirgoRootElement, VRange } from '@blocksuite/virgo';
+import {
+  type VEditor,
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+  type VRange,
+} from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 import type { BlockSuiteRoot } from '../element/lit-root.js';
@@ -47,7 +52,7 @@ export class RangeManager {
     this._range = null;
     window.getSelection()?.removeAllRanges();
     if (sync) {
-      this.root.selectionManager.clear(['text']);
+      this.root.selection.clear(['text']);
     }
   }
 
@@ -68,18 +73,14 @@ export class RangeManager {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    const fromBlock = this.root.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       this.clearRange();
       return;
     }
 
     const startRange = this.pointToRange(from);
-    this._setUpRangePoint(from);
     const endRange = to ? this.pointToRange(to) : null;
-    if (to) {
-      this._setUpRangePoint(to);
-    }
 
     if (!startRange) {
       this.clearRange(false);
@@ -94,7 +95,7 @@ export class RangeManager {
       return null;
     }
 
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     this._range = range;
 
     const { startContainer, endContainer } = range;
@@ -179,7 +180,7 @@ export class RangeManager {
 
   textSelectionToRange(selection: TextSelection): Range | null {
     const { from, to } = selection;
-    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    const fromBlock = this.root.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       return null;
     }
@@ -210,12 +211,13 @@ export class RangeManager {
   }
 
   private _calculateVirgo(point: TextRangePoint): [VEditor, VRange] | null {
-    const block = this.root.viewStore.viewFromPath('block', point.path);
+    const block = this.root.view.viewFromPath('block', point.path);
     if (!block) {
       return null;
     }
-    const virgoRoot =
-      block.querySelector<VirgoRootElement>('[data-virgo-root]');
+    const virgoRoot = block.querySelector<VirgoRootElement>(
+      `[${VIRGO_ROOT_ATTR}]`
+    );
     assertExists(
       virgoRoot,
       `Cannot find virgo element in block ${point.path.join(' > ')}}`
@@ -233,16 +235,6 @@ export class RangeManager {
         length,
       },
     ];
-  }
-
-  private _setUpRangePoint(point: TextRangePoint) {
-    const result = this._calculateVirgo(point);
-    if (!result) {
-      return;
-    }
-    const [virgoEditor, vRange] = result;
-
-    virgoEditor.setVRange(vRange, false);
   }
 
   private _nodeToPoint(node: Node) {
@@ -349,7 +341,7 @@ export class RangeManager {
       return;
     }
 
-    return element.closest('[data-virgo-root]') as VirgoRootElement;
+    return element.closest(`[${VIRGO_ROOT_ATTR}]`) as VirgoRootElement;
   }
 
   private _getBlock(element: HTMLElement) {

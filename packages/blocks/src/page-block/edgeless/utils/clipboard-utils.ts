@@ -4,7 +4,7 @@ import {
   getBlockClipboardInfo,
   getCopyElements,
 } from '../../../__internal__/clipboard/index.js';
-import type { EdgelessElement } from '../../../index.js';
+import type { EdgelessElement } from '../../../__internal__/index.js';
 import {
   Bound,
   ConnectorElement,
@@ -25,7 +25,7 @@ export async function duplicate(
   const { surface, page } = edgeless;
   const totalBound = edgelessElementsBound(elements);
   const newElements = await Promise.all(
-    getCopyElements(edgeless, elements).map(async element => {
+    getCopyElements(surface, elements).map(async element => {
       const bound =
         element instanceof FrameElement
           ? Bound.deserialize(element.xywh)
@@ -56,7 +56,7 @@ export async function duplicate(
         const newElement = surface.pickById(id);
         assertExists(newElement);
         if (newElement instanceof ConnectorElement) {
-          edgeless.connector.updateXYWH(newElement, bound);
+          surface.connector.updateXYWH(newElement, bound);
         }
         return id;
       }

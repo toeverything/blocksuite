@@ -8,14 +8,18 @@ import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
-import { createLitPortal } from '../components/portal.js';
+import { WhenHoverController } from '../components/index.js';
 import { WebIcon16 } from '../icons/text.js';
 import type { BookmarkBlockModel } from './bookmark-model.js';
-import type { MenuActionCallback } from './components/bookmark-operation-popper.js';
-import type { ToolbarActionCallback } from './components/bookmark-toolbar.js';
+import type {
+  MenuActionCallback,
+  ToolbarActionCallback,
+} from './components/config.js';
+import { embedIframeTemplate } from './embed.js';
 import { DefaultBanner } from './images/banners.js';
 import { DarkLoadingBanner, LoadingBanner } from './images/icons.js';
 import { reloadBookmarkBlock } from './utils.js';
@@ -30,13 +34,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       position: relative;
     }
     .affine-bookmark-link {
-      height: 112px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       box-shadow: var(--affine-shadow-1);
-      background: var(--affine-card-background-blue);
       border: 3px solid var(--affine-background-secondary-color);
       border-radius: 12px;
       padding: 16px 24px;
-      display: flex;
       cursor: pointer;
       text-decoration: none;
       color: var(--affine-text-primary-color);
@@ -45,12 +49,13 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       position: relative;
     }
     .affine-bookmark-banner {
+      position: absolute;
+      right: 24px;
+      bottom: 0;
       width: 140px;
       height: 93px;
-      margin-left: 20px;
       border-radius: 8px 8px 0 0;
       overflow: hidden;
-      flex-shrink: 0;
     }
     .affine-bookmark-banner.shadow {
       box-shadow: var(--affine-shadow-1);
@@ -63,6 +68,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       object-fit: cover;
     }
     .affine-bookmark-content-wrapper {
+      width: 100%;
       flex-grow: 1;
       overflow: hidden;
     }
@@ -144,6 +150,14 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       color: var(--affine-placeholder-color);
       border-radius: 12px;
     }
+
+    .affine-bookmark-embed-frame {
+      grid-area: embed;
+      width: 100%;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
   `;
 
   slots = {
@@ -179,6 +193,22 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return this._isLoading;
   }
 
+  private _whenHover = new WhenHoverController(this, ({ setFloating }) => ({
+    template: html`<bookmark-toolbar
+      ${ref(setFloating)}
+      .model=${this.model}
+      .onSelected=${this._onToolbarSelected}
+      .root=${this}
+      .abortController=${this._optionsAbortController}
+    ></bookmark-toolbar>`,
+    computePosition: {
+      referenceElement: this,
+      placement: 'top-end',
+      middleware: [flip(), offset(4)],
+      autoUpdate: true,
+    },
+  }));
+
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
 
@@ -212,31 +242,8 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     }
   }
 
-  private _onHover() {
-    if (this._optionsAbortController) return;
-    this._optionsAbortController = new AbortController();
-    this._optionsAbortController.signal.addEventListener('abort', () => {
-      this._optionsAbortController = undefined;
-    });
-    createLitPortal({
-      template: html`<bookmark-toolbar
-        .model=${this.model}
-        .onSelected=${this._onToolbarSelected}
-        .root=${this}
-        .abortController=${this._optionsAbortController}
-      ></bookmark-toolbar>`,
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-end',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-      abortController: this._optionsAbortController,
-    });
-  }
-
   private _onCardClick() {
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });
@@ -279,8 +286,62 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
       this._optionsAbortController?.abort();
     };
 
-  override render() {
+  private _linkCard() {
     const { url, bookmarkTitle, description, icon, image } = this.model;
+
+    const isEmbed = this.model.type === 'embed';
+    const titleIcon =
+      icon && !this._isIconError
+        ? html`<img src="${icon}" alt="icon" @error="${this._onIconError}" />`
+        : WebIcon16;
+
+    const bannerImage = isEmbed
+      ? nothing
+      : html`<div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
+          ${image && !this._isImageError
+            ? html`<img
+                src="${image}"
+                alt="image"
+                @error="${this._onImageError}"
+              />`
+            : DefaultBanner}
+        </div>`;
+
+    return html`<div
+      class="affine-bookmark-link"
+      style="${isEmbed
+        ? nothing
+        : 'background: var(--affine-card-background-blue);'}"
+      @click=${this._onCardClick}
+      @dblclick=${this._onCardDbClick}
+    >
+      ${isEmbed
+        ? html`<div class="affine-bookmark-embed-frame">
+            ${embedIframeTemplate(url)}
+          </div>`
+        : nothing}
+
+      <div
+        class="affine-bookmark-content-wrapper"
+        style="${isEmbed ? nothing : 'padding-right: 165px;'}"
+      >
+        <div class="affine-bookmark-title">
+          <div class="affine-bookmark-icon">${titleIcon}</div>
+          <div class="affine-bookmark-title-content">
+            ${bookmarkTitle || 'Bookmark'}
+          </div>
+        </div>
+
+        <div class="affine-bookmark-description">${description || url}</div>
+        <div class="affine-bookmark-url">${url}</div>
+      </div>
+
+      ${bannerImage}
+    </div>`;
+  }
+
+  override render() {
+    const { url } = this.model;
     const mode = queryCurrentMode();
 
     const createModal = this._showCreateModal
@@ -324,41 +385,6 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
         </div>`
       : nothing;
 
-    const linkCard = html`<div
-      class="affine-bookmark-link"
-      @click=${this._onCardClick}
-      @dblclick=${this._onCardDbClick}
-    >
-      <div class="affine-bookmark-content-wrapper">
-        <div class="affine-bookmark-title">
-          <div class="affine-bookmark-icon">
-            ${icon && !this._isIconError
-              ? html`<img
-                  src="${icon}"
-                  alt="icon"
-                  @error="${this._onIconError}"
-                />`
-              : WebIcon16}
-          </div>
-          <div class="affine-bookmark-title-content">
-            ${bookmarkTitle || 'Bookmark'}
-          </div>
-        </div>
-
-        <div class="affine-bookmark-description">${description || url}</div>
-        <div class="affine-bookmark-url">${url}</div>
-      </div>
-      <div class="affine-bookmark-banner ${image ? 'shadow' : ''}">
-        ${image && !this._isImageError
-          ? html`<img
-              src="${image}"
-              alt="image"
-              @error="${this._onImageError}"
-            />`
-          : DefaultBanner}
-      </div>
-    </div>`;
-
     if (!url) {
       return createModal;
     }
@@ -366,10 +392,10 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return html`
       ${editModal}
       <div
+        ${ref(this._whenHover.setReference)}
         class="affine-bookmark-block-container"
-        @mouseover="${this._onHover}"
       >
-        ${this._isLoading ? loading : linkCard}
+        ${this._isLoading ? loading : this._linkCard()}
         <input
           .disabled=${this.model.page.readonly}
           placeholder="Write a caption"
