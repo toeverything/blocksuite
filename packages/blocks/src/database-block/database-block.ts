@@ -29,7 +29,7 @@ import { renderFilterBar } from './common/filter/filter-bar.js';
 import { renderTools } from './common/header/tools/tools.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { SingleViewSource, ViewSource } from './common/view-source.js';
-import type { DataViewNative } from './data-view.js';
+import type { DataViewNative, DataViewNativeConfig } from './data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
 
@@ -50,6 +50,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       border-radius: 4px;
     }
   `;
+  onDrag = (evt: MouseEvent, id: string): (() => void) => {
+    console.log(evt, id);
+    return () => {};
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -81,9 +85,6 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     this.disposables.add(
       DragHandleWidget.registerOption({
         flavour: DatabaseBlockSchema.model.flavour,
-        onDragStart: () => {
-          return false;
-        },
         onDragMove: state => {
           const target = captureEventTarget(state.raw.target);
           const view = this.view;
@@ -97,7 +98,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
           }
           return false;
         },
-        onDragEnd: (state, _, draggingElements) => {
+        onDragEnd: (state, draggingElements) => {
           const target = state.raw.target;
           const view = this.view;
           if (
@@ -198,6 +199,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     }
     return this._viewSource;
   }
+
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
@@ -213,6 +215,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.root.page.awarenessStore
     );
   }
+
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.root.event.bindHotkey(hotkeys, {
@@ -227,23 +230,28 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       }),
     };
   };
+
   override render() {
+    const config: DataViewNativeConfig = {
+      bindHotkey: this._bindHotkey,
+      handleEvent: this._handleEvent,
+      getFlag: this.getFlag,
+      selectionUpdated: this.selectionUpdated,
+      setSelection: this.setSelection,
+      dataSource: this.dataSource,
+      viewSource: this.viewSource,
+      headerComponent: this.headerComponent,
+      onDrag: this.onDrag,
+    };
     return html`
       <div style="position: relative">
         <affine-data-view-native
           ${ref(this._view)}
-          .bindHotkey="${this._bindHotkey}"
-          .handleEvent="${this._handleEvent}"
-          .getFlag="${this.getFlag}"
-          .selectionUpdated="${this.selectionUpdated}"
-          .setSelection="${this.setSelection}"
-          .dataSource="${this.dataSource}"
-          .viewSource="${this.viewSource}"
-          .headerComponent="${this.headerComponent}"
+          .config="${config}"
         ></affine-data-view-native>
         ${when(
           this.selected?.is('block'),
-          () => html`<affine-block-selection></affine-block-selection>`
+          () => html` <affine-block-selection></affine-block-selection>`
         )}
       </div>
     `;

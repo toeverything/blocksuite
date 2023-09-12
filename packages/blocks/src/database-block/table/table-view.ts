@@ -161,7 +161,7 @@ const styles = css`
     align-items: center;
     position: sticky;
     left: 0;
-    width: 4px;
+    width: 8px;
     flex-shrink: 0;
     background-color: var(--affine-background-primary-color);
   }
@@ -274,14 +274,18 @@ export class DataViewTable extends BaseDataView<
       >
         <div class="data-view-table-left-bar">
           <div
-            class="show-on-hover-row data-view-table-view-drag-handler"
-            style="width: 4px;
+            class="data-view-table-view-drag-handler"
+            style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
+          >
+            <div
+              class="show-on-hover-row"
+              style="width: 4px;
             border-radius: 2px;
             height: 12px;
             background-color: var(--affine-placeholder-color);
-            cursor:grab;
 "
-          ></div>
+            ></div>
+          </div>
         </div>
         ${repeat(
           view.columnManagerList,

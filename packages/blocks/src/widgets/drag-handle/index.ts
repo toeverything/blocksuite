@@ -75,7 +75,6 @@ export class DragHandleWidget extends WidgetElement {
   indicatorRect: IndicatorRect | null = null;
 
   draggingElements: BlockElement[] = [];
-  optionRunnerDragging = false;
   dropBlockId = '';
   dropBefore = false;
   lastDragPointerState: PointerEventState | null = null;
@@ -97,7 +96,7 @@ export class DragHandleWidget extends WidgetElement {
   private _hoverDragHandle = false;
   private _dragHandlePointerDown = false;
 
-  private _defaultDragging = false;
+  private _dragging = false;
   private _dragPreviewOffsetY = 0;
   private _dragPreview: DragPreview | null = null;
 
@@ -343,13 +342,12 @@ export class DragHandleWidget extends WidgetElement {
 
   private _reset() {
     this.draggingElements = [];
-    this.optionRunnerDragging = false;
     this.indicatorRect = null;
     this.dropBlockId = '';
     this.dropBefore = false;
     this.lastDragPointerState = null;
     this.rafID = 0;
-    this._defaultDragging = false;
+    this._dragging = false;
     this._dragHoverRect = null;
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
@@ -612,11 +610,7 @@ export class DragHandleWidget extends WidgetElement {
     dragPreview: DragPreview | null,
     state: PointerEventState
   ) {
-    if (
-      !this._defaultDragging ||
-      this.draggingElements.length === 0 ||
-      !dragPreview
-    )
+    if (!this._dragging || this.draggingElements.length === 0 || !dragPreview)
       return;
 
     const point = new Point(state.x, state.y);
@@ -638,7 +632,7 @@ export class DragHandleWidget extends WidgetElement {
 
   private _scrollToUpdateIndicator = () => {
     if (
-      !this._defaultDragging ||
+      !this._dragging ||
       this.draggingElements.length === 0 ||
       !this.lastDragPointerState
     )
@@ -696,7 +690,7 @@ export class DragHandleWidget extends WidgetElement {
     const { target } = state.raw;
     const element = captureEventTarget(target);
     // WHen pointer not on block or on dragging, should do nothing
-    if (!element || this._defaultDragging || this.optionRunnerDragging) {
+    if (!element || this._dragging) {
       return;
     }
 
@@ -841,17 +835,13 @@ export class DragHandleWidget extends WidgetElement {
 
     this._createDragPreview(blockElementsExcludingChildren, hoverBlockElement);
     this.draggingElements = blockElementsExcludingChildren;
-    this._defaultDragging = true;
+    this._dragging = true;
     this._hide();
 
     return true;
   };
 
   private _onDragMove = (ctx: UIEventStateContext) => {
-    if (!this._defaultDragging || this.draggingElements.length === 0) {
-      return false;
-    }
-
     this.clearRaf();
 
     const state = ctx.get('pointerState');
@@ -861,11 +851,6 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   private _onDragEnd = () => {
-    if (!this._defaultDragging || this.draggingElements.length === 0) {
-      this._hide(true);
-      return false;
-    }
-
     const targetBlockId = this.dropBlockId;
     const shouldInsertBefore = this.dropBefore;
     const draggingElements = this.draggingElements;
@@ -926,15 +911,6 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragStartHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
-
-    for (const option of this.optionRunner.options) {
-      if (option.onDragStart(state)) {
-        this.optionRunnerDragging = true;
-        this._hide();
-        return true;
-      }
-    }
-
     // call default drag start handler if no option return true
     return this._onDragStart(state);
   };
@@ -946,27 +922,22 @@ export class DragHandleWidget extends WidgetElement {
    * Update drop block id
    */
   private _dragMoveHandler: UIEventHandler = ctx => {
+    if (!this._dragging || this.draggingElements.length === 0) {
+      return false;
+    }
+
     ctx.get('defaultState').event.preventDefault();
 
     const state = ctx.get('pointerState');
     this._updateDragPreviewPosition(this._dragPreview, state);
 
     for (const option of this.optionRunner.options) {
-      if (
-        option.onDragMove(
-          state,
-          this.optionRunnerDragging,
-          this.draggingElements,
-          () => this.getDropIndicator(state)
-        )
-      ) {
-        if (!this.optionRunnerDragging) this.optionRunnerDragging = true;
+      if (option.onDragMove(state, this.draggingElements)) {
         return true;
       }
     }
 
     // call default drag move handler if no option return true
-    this.optionRunnerDragging = false;
     return this._onDragMove(ctx);
   };
 
@@ -975,18 +946,16 @@ export class DragHandleWidget extends WidgetElement {
    * @returns
    */
   private _dragEndHandler: UIEventHandler = ctx => {
-    const state = ctx.get('pointerState');
     this.clearRaf();
     this._removeDragPreview();
+    if (!this._dragging || this.draggingElements.length === 0) {
+      this._hide(true);
+      return false;
+    }
+    const state = ctx.get('pointerState');
 
     for (const option of this.optionRunner.options) {
-      if (
-        option.onDragEnd(
-          state,
-          this.optionRunnerDragging,
-          this.draggingElements
-        )
-      ) {
+      if (option.onDragEnd(state, this.draggingElements)) {
         this._hide(true);
         return true;
       }
@@ -1072,7 +1041,7 @@ export class DragHandleWidget extends WidgetElement {
     );
     if (!blockElement) return;
 
-    if (this._defaultDragging || this.optionRunnerDragging) return;
+    if (this._dragging) return;
     this._show(blockElement);
     this._hoverDragHandle = false;
   };

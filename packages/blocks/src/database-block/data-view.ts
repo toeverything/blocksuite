@@ -5,7 +5,6 @@ import './kanban/renderer.js';
 
 import { Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -23,7 +22,6 @@ import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type {
   DataViewExpose,
-  DataViewHeaderComponentProp,
   DataViewProps,
   DataViewTypes,
 } from './common/data-view.js';
@@ -52,6 +50,18 @@ const ViewManagerMap: Record<
   table: DataViewTableManager,
   kanban: DataViewKanbanManager,
 };
+
+export type DataViewNativeConfig = {
+  bindHotkey: DataViewProps['bindHotkey'];
+  handleEvent: DataViewProps['handleEvent'];
+  getFlag?: DataViewProps['getFlag'];
+  selectionUpdated: Slot<DataViewSelection | undefined>;
+  setSelection: (selection: DataViewSelection | undefined) => void;
+  dataSource: DataSource;
+  viewSource: ViewSource;
+  headerComponent: DataViewProps['header'];
+  onDrag?: DataViewProps['onDrag'];
+};
 @customElement('affine-data-view-native')
 export class DataViewNative extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -62,21 +72,7 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
     }
   `;
   @property({ attribute: false })
-  bindHotkey!: BaseDataView['bindHotkey'];
-  @property({ attribute: false })
-  handleEvent!: BaseDataView['handleEvent'];
-  @property({ attribute: false })
-  getFlag?: Page['awarenessStore']['getFlag'];
-  @property({ attribute: false })
-  selectionUpdated!: Slot<DataViewSelection>;
-  @property({ attribute: false })
-  setSelection!: (selection: DataViewSelection | undefined) => void;
-  @property({ attribute: false })
-  dataSource!: DataSource;
-  @property({ attribute: false })
-  viewSource!: ViewSource;
-  @property({ attribute: false })
-  headerComponent!: DataViewHeaderComponentProp;
+  config!: DataViewNativeConfig;
 
   public get expose() {
     return this._view.value;
@@ -84,7 +80,7 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
-      this.selectionUpdated.on(selection => {
+      this.config.selectionUpdated.on(selection => {
         Object.entries(this.viewMap).forEach(([id, v]) => {
           if (!selection || selection.viewId !== id) {
             v.selectionUpdated.emit(undefined);
@@ -95,9 +91,9 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
       })
     );
     this.disposables.add(
-      this.viewSource.updateSlot.on(() => {
+      this.config.viewSource.updateSlot.on(() => {
         this.requestUpdate();
-        this.viewSource.views.forEach(v => {
+        this.config.viewSource.views.forEach(v => {
           v.updateSlot.emit();
         });
       })
@@ -117,32 +113,32 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
 
   private getView(id: string): ViewProps {
     if (!this.viewMap[id]) {
-      const singleViewSource = this.viewSource.viewGet(id);
+      const singleViewSource = this.config.viewSource.viewGet(id);
 
       const view = new ViewManagerMap[singleViewSource.view.mode](
         singleViewSource,
-        this.dataSource
+        this.config.dataSource
       );
       this.viewMap[id] = {
         view: view,
         viewUpdated: singleViewSource.updateSlot,
         selectionUpdated: new Slot<DataViewSelectionState>(),
         setSelection: selection => {
-          this.setSelection(selection);
+          this.config.setSelection(selection);
         },
         handleEvent: (name, handler) =>
-          this.handleEvent(name, context => {
-            if (this.viewSource.currentViewId === id) {
+          this.config.handleEvent(name, context => {
+            if (this.config.viewSource.currentViewId === id) {
               return handler(context);
             }
           }),
         bindHotkey: hotkeys =>
-          this.bindHotkey(
+          this.config.bindHotkey(
             Object.fromEntries(
               Object.entries(hotkeys).map(([key, fn]) => [
                 key,
                 ctx => {
-                  if (this.viewSource.currentViewId === id) {
+                  if (this.config.viewSource.currentViewId === id) {
                     return fn(ctx);
                   }
                 },
@@ -160,12 +156,13 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
     }
     const props: DataViewProps = {
       view: viewData.view,
-      header: this.headerComponent,
+      header: this.config.headerComponent,
       selectionUpdated: viewData.selectionUpdated,
       setSelection: viewData.setSelection,
       bindHotkey: viewData.bindHotkey,
       handleEvent: viewData.handleEvent,
-      getFlag: this.getFlag,
+      getFlag: this.config.getFlag,
+      onDrag: this.config.onDrag,
     };
     return keyed(
       viewData.view.id,
@@ -178,10 +175,10 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const views = this.viewSource.views;
+    const views = this.config.viewSource.views;
     const viewData = views
       .map(view => this.getView(view.view.id))
-      .find(v => v.view.id === this.viewSource.currentViewId);
+      .find(v => v.view.id === this.config.viewSource.currentViewId);
     const containerClass = classMap({
       'toolbar-hover-container': true,
       'data-view-root': true,

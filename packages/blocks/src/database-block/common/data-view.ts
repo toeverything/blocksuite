@@ -28,6 +28,8 @@ export interface DataViewProps<
 
   selectionUpdated: Slot<Selection | undefined>;
 
+  onDrag?: (evt: MouseEvent, id: string) => () => void;
+
   getFlag?: Page['awarenessStore']['getFlag'];
 }
 

@@ -65,7 +65,6 @@ export class TableDragController implements ReactiveController {
           this.host.contains(target) &&
           target.closest('.data-view-table-view-drag-handler')
         ) {
-          console.log('asd');
           event.preventDefault();
           const row = target.closest('.affine-database-block-row');
           if (row) {
@@ -79,6 +78,10 @@ export class TableDragController implements ReactiveController {
   }
 
   dragStart = (row: Element, evt: PointerEvent) => {
+    const id = row.getAttribute('data-row-id');
+    if (!id) {
+      return;
+    }
     const eleRect = row.getBoundingClientRect();
     const offsetLeft = evt.x - eleRect.left;
     const offsetTop = evt.y - eleRect.top;
@@ -88,32 +91,51 @@ export class TableDragController implements ReactiveController {
       evt.y - offsetTop
     );
     startDrag<
-      {
-        position?: InsertPosition;
-      },
+      | undefined
+      | {
+          type: 'self';
+          position: InsertPosition;
+        }
+      | { type: 'out'; callback: () => void },
       PointerEvent
     >(evt, {
-      onDrag: () => ({}),
+      onDrag: () => undefined,
       onMove: evt => {
+        if (!this.host.contains(evt.target as Node)) {
+          const callback = this.host.onDrag;
+          if (callback) {
+            this.dropPreview.remove();
+            return {
+              type: 'out',
+              callback: callback(evt, id),
+            };
+          }
+          return;
+        }
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
         const result = this.showIndicator(evt);
         if (result) {
           return {
+            type: 'self',
             position: result.position,
           };
         }
-        return {};
+        return;
       },
       onClear: () => {
         preview.remove();
         this.dropPreview.remove();
       },
-      onDrop: ({ position }) => {
-        if (position) {
-          const id = row.getAttribute('data-row-id');
-          if (id) {
-            this.host.view.rowMove(id, position);
-          }
+      onDrop: result => {
+        if (!result) {
+          return;
+        }
+        if (result.type === 'out') {
+          result.callback();
+          return;
+        }
+        if (result.type === 'self') {
+          this.host.view.rowMove(id, result.position);
         }
       },
     });

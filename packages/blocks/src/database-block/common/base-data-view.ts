@@ -38,6 +38,9 @@ export abstract class BaseDataView<
   selectionUpdated!: Slot<Selection | undefined>;
 
   @property({ attribute: false })
+  onDrag?: (evt: MouseEvent, id: string) => () => void;
+
+  @property({ attribute: false })
   getFlag!: Page['awarenessStore']['getFlag'];
 
   addRow?(position: InsertPosition): void;
