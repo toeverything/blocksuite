@@ -76,8 +76,8 @@ fill="#77757D"
 
 export const toggleRight = html`
   <svg
-    width="20"
-    height="20"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -87,8 +87,8 @@ export const toggleRight = html`
 
 export const toggleDown = html`
   <svg
-    width="20"
-    height="20"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     style="transform: rotate(90deg)"
     xmlns="http://www.w3.org/2000/svg"

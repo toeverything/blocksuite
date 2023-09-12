@@ -35,7 +35,8 @@ const toggleStyles = css`
     display: flex;
     position: absolute;
     left: 0;
-    transform: translateX(-100%);
+    top: 50%;
+    transform: translate(-100%, -50%);
     border-radius: 4px;
     cursor: pointer;
     opacity: 0;
