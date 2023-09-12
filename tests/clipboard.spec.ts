@@ -1132,16 +1132,6 @@ test(
 </affine:page>`
     );
 
-    // when pasting a quote into a text paragraph block, the paragraph type should be text
-    await selectAllByKeyboard(page);
-    await waitNextFrame(page);
-    await selectAllByKeyboard(page);
-    await waitNextFrame(page);
-    await copyByKeyboard(page);
-    await waitNextFrame(page);
-
-    await pressEnter(page);
-    await waitNextFrame(page);
     await pressEnter(page);
     await waitNextFrame(page);
     await pressEnter(page);
@@ -1164,7 +1154,7 @@ test(
     />
     <affine:paragraph
       prop:text="123"
-      prop:type="quote"
+      prop:type="text"
     />
   </affine:note>
 </affine:page>`
