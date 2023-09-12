@@ -18,6 +18,26 @@ export const BlockSnapshotSchema: z.ZodType<BlockSnapshot> = z.object({
   children: z.lazy(() => BlockSnapshotSchema.array()),
 });
 
+export type SliceSnapshot = {
+  type: 'slice';
+  content: BlockSnapshot[];
+  blockVersions: Record<string, number>;
+  pageVersion: number;
+  workspaceVersion: number;
+  workspaceId: string;
+  pageId: string;
+};
+
+export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
+  type: z.literal('slice'),
+  content: BlockSnapshotSchema.array(),
+  blockVersions: z.record(z.number()),
+  pageVersion: z.number(),
+  workspaceVersion: z.number(),
+  workspaceId: z.string(),
+  pageId: z.string(),
+});
+
 export type WorkspaceInfoSnapshot = {
   id: string;
   type: 'info';
