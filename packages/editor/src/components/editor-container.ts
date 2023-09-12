@@ -6,12 +6,13 @@ import {
   edgelessPreset,
   FileDropManager,
   getServiceOrRegister,
-  type ImageProps,
+  type ImageBlockProps,
   type PageBlockModel,
   pagePreset,
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
+import { withTempBlobData } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
@@ -24,6 +25,8 @@ import { type Page } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
+import type { Ref } from 'lit/directives/ref.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 
 import { checkEditorElementActive, createBlockHub } from '../utils/editor.js';
 
@@ -73,6 +76,8 @@ export class EditorContainer
    */
   @query('affine-edgeless-page')
   private _edgelessPageBlock?: EdgelessPageBlockComponent;
+
+  root: Ref<BlockSuiteRoot> = createRef<BlockSuiteRoot>();
 
   readonly themeObserver = new ThemeObserver();
 
@@ -176,9 +181,13 @@ export class EditorContainer
       matcher: file => file.type.startsWith('image'),
       handler: async (
         file: File
-      ): Promise<ImageProps & { flavour: 'affine:image' }> => {
+      ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
-        const sourceId = await storage.set(file);
+        const { saveAttachmentData } = withTempBlobData();
+        const sourceId = await storage.set(
+          new Blob([file], { type: file.type })
+        );
+        saveAttachmentData(sourceId, { name: file.name });
         const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
         return {
           flavour: 'affine:image',
@@ -187,33 +196,33 @@ export class EditorContainer
         };
       },
     });
-    if (this.page.awarenessStore.getFlag('enable_attachment_block')) {
-      this.fileDropManager.register({
-        name: 'Attachment',
-        matcher: (file: File) => {
-          // TODO limit size in blob
-          const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
-          if (file.size > MAX_ATTACHMENT_SIZE) {
-            console.warn('You can only upload files less than 10M.');
-            return false;
-          }
-          return true;
-        },
-        handler: async (
-          file: File
-        ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
-          const storage = this.page.blobs;
-          const sourceId = await storage.set(file);
-          return {
-            flavour: 'affine:attachment',
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            sourceId,
-          };
-        },
-      });
-    }
+    this.fileDropManager.register({
+      name: 'Attachment',
+      matcher: (file: File) => {
+        // TODO limit size in blob
+        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+        if (file.size > MAX_ATTACHMENT_SIZE) {
+          console.warn('You can only upload files less than 10M.');
+          return false;
+        }
+        return true;
+      },
+      handler: async (
+        file: File
+      ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+        const storage = this.page.blobs;
+        const sourceId = await storage.set(
+          new Blob([file], { type: file.type })
+        );
+        return {
+          flavour: 'affine:attachment',
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          sourceId,
+        };
+      },
+    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -267,6 +276,7 @@ export class EditorContainer
     const rootContainer = keyed(
       this.model.id,
       html`<block-suite-root
+        ${ref(this.root)}
         .page=${this.page}
         .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
       ></block-suite-root>`

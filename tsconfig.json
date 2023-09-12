@@ -57,10 +57,18 @@
     },
     {
       "path": "./tests"
+    },
+    {
+      "path": "./scripts"
     }
   ],
   "ts-node": {
     "esm": true,
-    "experimentalSpecifierResolution": "node"
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "noUnusedLocals": false,
+      "noUnusedParameters": false,
+      "noImplicitReturns": false
+    }
   }
 }

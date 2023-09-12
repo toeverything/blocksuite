@@ -1,10 +1,11 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
 
-import type { BlockStore } from '../store/index.js';
+import type { BlockStdProvider } from '../provider/index.js';
 import type { BaseSelection } from './base.js';
 import {
   BlockSelection,
+  CursorSelection,
   SurfaceSelection,
   TextSelection,
 } from './variants/index.js';
@@ -26,7 +27,7 @@ export class SelectionManager {
     remoteChanged: new Slot<Record<string, BaseSelection[]>>(),
   };
 
-  constructor(public blockStore: BlockStore) {
+  constructor(public std: BlockStdProvider) {
     this._setupDefaultSelections();
   }
 
@@ -38,11 +39,16 @@ export class SelectionManager {
   }
 
   private get _store() {
-    return this.blockStore.workspace.awarenessStore;
+    return this.std.workspace.awarenessStore;
   }
 
   private _setupDefaultSelections() {
-    this.register([TextSelection, BlockSelection, SurfaceSelection]);
+    this.register([
+      TextSelection,
+      BlockSelection,
+      SurfaceSelection,
+      CursorSelection,
+    ]);
   }
 
   private _jsonToSelection = (json: Record<string, unknown>) => {
@@ -138,8 +144,8 @@ export class SelectionManager {
     if (this.disposables.disposed) {
       this.disposables = new DisposableGroup();
     }
-    this.blockStore.page.history.on('stack-item-added', this._itemAdded);
-    this.blockStore.page.history.on('stack-item-popped', this._itemPopped);
+    this.std.page.history.on('stack-item-added', this._itemAdded);
+    this.std.page.history.on('stack-item-popped', this._itemPopped);
     this.disposables.add(
       this._store.slots.update.on(({ id }) => {
         if (id === this._store.awareness.clientID) return;
@@ -149,8 +155,8 @@ export class SelectionManager {
   }
 
   unmount() {
-    this.blockStore.page.history.off('stack-item-added', this._itemAdded);
-    this.blockStore.page.history.off('stack-item-popped', this._itemPopped);
+    this.std.page.history.off('stack-item-added', this._itemAdded);
+    this.std.page.history.off('stack-item-popped', this._itemPopped);
     this.clear();
     this.slots.changed.dispose();
     this.disposables.dispose();

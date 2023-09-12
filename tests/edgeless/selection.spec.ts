@@ -10,6 +10,7 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
+  clickInCenter,
   dragBetweenCoords,
   enterPlaygroundRoom,
   getBoundingRect,
@@ -19,7 +20,6 @@ import {
   pressEnter,
   selectAllByKeyboard,
   triggerComponentToolbarAction,
-  waitForVirgoStateUpdated,
   waitNextFrame,
 } from '../utils/actions/index.js';
 import {
@@ -139,7 +139,7 @@ test('when the selection is always a note, it should remain in an active state',
   const newNoteY = bound.y + bound.height + 100;
   // add text
   await page.mouse.click(newNoteX, newNoteY);
-  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
   await page.keyboard.type('hello');
   await pressEnter(page);
   // should wait for virgo update and resizeObserver callback
@@ -147,7 +147,9 @@ test('when the selection is always a note, it should remain in an active state',
   // assert add text success
   await assertEdgelessSelectedRect(page, [46, 597.5, 448, 128]);
 
-  await page.mouse.click(bound.x + 10, bound.y + 10);
+  await clickInCenter(page, bound);
+  await clickInCenter(page, bound);
+  await waitNextFrame(page);
   await assertSelectionInNote(page, ids.noteId);
 });
 

@@ -28,7 +28,7 @@ import {
 
 export const bindHotKey = (blockElement: BlockElement) => {
   const root = blockElement.root;
-  const selectionManager = blockElement.root.selectionManager;
+  const selectionManager = blockElement.root.selection;
 
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
@@ -247,7 +247,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
       if (!blockSelection) {
         return;
       }
-      const selection = blockElement.root.selectionManager;
+      const selection = blockElement.root.selection;
       selection.update(selList => {
         return selList.filter(sel => !sel.is('block'));
       });
@@ -258,7 +258,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
       if (!blockSelection) {
         return;
       }
-      const element = blockElement.root.viewStore.viewFromPath(
+      const element = blockElement.root.view.viewFromPath(
         'block',
         blockSelection.path
       );
@@ -277,7 +277,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
       const blockId = page.addBlock('affine:paragraph', {}, parent, index + 1);
 
-      const selection = element.root.selectionManager;
+      const selection = element.root.selection;
       const sel = selection.getInstance('text', {
         from: {
           path: element.parentPath.concat(blockId),
@@ -294,8 +294,8 @@ export const bindHotKey = (blockElement: BlockElement) => {
     },
     'Mod-a': ctx => {
       ctx.get('defaultState').event.preventDefault();
-      const view = blockElement.root.viewStore;
-      const selection = blockElement.root.selectionManager;
+      const view = blockElement.root.view;
+      const selection = blockElement.root.selection;
       if (!selection.find('block')) {
         return;
       }

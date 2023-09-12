@@ -1,4 +1,5 @@
 import { ShadowlessElement } from '@blocksuite/lit';
+import { baseTheme } from '@toeverything/theme';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
@@ -13,7 +14,7 @@ export class DragPreview extends ShadowlessElement {
         display: block;
         position: absolute;
         box-sizing: border-box;
-        font-family: var(--affine-font-family);
+        font-family: ${baseTheme.fontSansFamily};
         font-size: var(--affine-font-base);
         line-height: var(--affine-line-height);
         color: var(--affine-text-primary-color);

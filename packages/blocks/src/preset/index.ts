@@ -30,6 +30,7 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
+      modal: literal`affine-modal-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
@@ -50,6 +51,7 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
+      modal: literal`affine-modal-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
@@ -59,6 +61,7 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
       [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_REMOTE_SELECTION_WIDGET_TAG
       )}`,
+      remoteSelection: literal`affine-edgelss-remote-selection-widget`,
     },
   },
 };
@@ -113,6 +116,9 @@ export const pagePreset: LitBlockSpec[] = [
     service: ImageService,
     view: {
       component: literal`affine-image`,
+      widgets: {
+        imageToolbar: literal`affine-image-toolbar-widget`,
+      },
     },
   },
   {
@@ -157,6 +163,7 @@ export const edgelessPreset: LitBlockSpec[] = [
   },
   {
     schema: DatabaseBlockSchema,
+    service: DatabaseService,
     view: {
       component: literal`affine-database`,
     },
@@ -184,6 +191,9 @@ export const edgelessPreset: LitBlockSpec[] = [
     service: ImageService,
     view: {
       component: literal`affine-image`,
+      widgets: {
+        imageToolbar: literal`affine-image-toolbar-widget`,
+      },
     },
   },
   {

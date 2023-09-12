@@ -10,13 +10,9 @@ import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { remoteColorManager } from '../../page-block/remote-color-manager/index.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
-import {
-  cursorStyle,
-  filterCoveringRects,
-  multiPlayersColor,
-  selectionStyle,
-} from './utils.js';
+import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
 export const AFFINE_REMOTE_SELECTION_WIDGET_TAG =
   'affine-remote-selection-widget';
@@ -37,7 +33,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
   }> = [];
 
   private get _selectionManager() {
-    return this.root.selectionManager;
+    return this.root.selection;
   }
 
   private get _container() {
@@ -47,8 +43,6 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
   private get _containerRect() {
     return this.offsetParent?.getBoundingClientRect();
   }
-
-  private _colorMap = new Map<number, string>();
 
   private _resizeObserver: ResizeObserver = new ResizeObserver(() => {
     this.requestUpdate();
@@ -75,6 +69,11 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
           this.requestUpdate();
         }, 100)
       )
+    );
+    this._disposables.add(
+      this.page.awarenessStore.slots.update.on(({ type, id }) => {
+        if (type === 'remove') remoteColorManager.delete(id);
+      })
     );
     this.handleEvent('wheel', () => {
       this.requestUpdate();
@@ -127,7 +126,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
       }
     } else if (blockSelections.length > 0) {
       return blockSelections.flatMap(blockSelection => {
-        const blockElement = this.root.viewStore.viewFromPath(
+        const blockElement = this.root.view.viewFromPath(
           'block',
           blockSelection.path
         );
@@ -204,7 +203,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
     } else if (blockSelections.length > 0) {
       const lastBlockSelection = blockSelections[blockSelections.length - 1];
 
-      const blockElement = this.root.viewStore.viewFromPath(
+      const blockElement = this.root.view.viewFromPath(
         'block',
         lastBlockSelection.path
       );
@@ -229,7 +228,6 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
   override render() {
     if (this._remoteSelections.length === 0) {
-      this._colorMap.clear();
       return nothing;
     }
 
@@ -256,12 +254,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
     return html`<div>
       ${selections.flatMap(selection => {
-        if (!this._colorMap.has(selection.id)) {
-          const color = multiPlayersColor.pick();
-          assertExists(color);
-          this._colorMap.set(selection.id, color);
-        }
-        const color = this._colorMap.get(selection.id) as string;
+        const color = remoteColorManager.get(selection.id) as string;
         const cursorRect = this._getCursorRect(selection.selections);
 
         return selection.rects
@@ -284,18 +277,22 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
                   <div
                     style="${styleMap({
                       position: 'absolute',
+                      left: '-4px',
                       bottom: `${
                         cursorRect?.height ? cursorRect.height - 4 : 0
                       }px`,
-                      padding: '0 3px 0 3px',
                       backgroundColor: color,
                       color: 'white',
-                      whiteSpace: 'nowrap',
+                      maxWidth: '160px',
+                      padding: '0 3px',
                       border: '1px solid var(--affine-pure-black-20)',
+                      boxShadow: '0px 1px 6px 0px rgba(0, 0, 0, 0.16)',
                       borderRadius: '4px',
                       fontSize: '12px',
-                      fontWeight: '400',
-                      fontHeight: '20px',
+                      lineHeight: '18px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
                     })}"
                   >
                     ${selection.user?.name ?? 'Unknown'}

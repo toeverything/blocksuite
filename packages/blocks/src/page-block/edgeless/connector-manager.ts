@@ -26,9 +26,9 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   sign,
-  type SurfaceManager,
   Vec,
 } from '../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import type { Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
@@ -745,7 +745,7 @@ function adjustStartEndPoint(
 }
 
 export class ConnectionOverlay extends Overlay {
-  surface!: SurfaceManager;
+  surface!: SurfaceBlockComponent;
   points: IVec[] = [];
   highlightPoint: IVec | null = null;
   bound: Bound | null = null;

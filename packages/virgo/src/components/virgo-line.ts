@@ -3,7 +3,7 @@ import { html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { VIRGO_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
 import type { DeltaInsert } from '../types.js';
 import type { VirgoRootElement } from '../virgo.js';
 import { EmbedGap } from './embed-gap.js';
@@ -41,7 +41,7 @@ export class VirgoLine extends LitElement {
     }
 
     const rootElement = this.closest(
-      '[data-virgo-root="true"]'
+      `[${VIRGO_ROOT_ATTR}]`
     ) as VirgoRootElement;
     assertExists(rootElement, 'v-line must be inside a v-root');
     const virgoEditor = rootElement.virgoEditor;

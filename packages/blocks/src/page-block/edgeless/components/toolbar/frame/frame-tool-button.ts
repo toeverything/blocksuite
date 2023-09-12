@@ -19,24 +19,10 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
-    .frame-button-group {
-      display: flex;
-      position: relative;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-    }
-
-    edgeless-tool-icon-button svg {
-      fill: var(--affine-icon-color);
-      stroke: none;
-    }
-
     edgeless-tool-icon-button svg + svg {
       position: absolute;
-      top: 2px;
-      right: 0px;
+      top: 4px;
+      right: 2px;
     }
   `;
 
@@ -103,8 +89,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
         .active=${type === 'frame'}
-        .activeMode=${'background'}
-        .iconContainerPadding=${0}
+        .iconContainerPadding=${8}
         @click=${() => {
           this.setEdgelessTool({
             type: 'frame',
@@ -112,7 +97,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
           this._toggleFrameMenu();
         }}
       >
-        <div class="frame-button-group">${LargeFrameIcon} ${ArrowUpIcon}</div>
+        ${LargeFrameIcon} ${ArrowUpIcon}
       </edgeless-tool-icon-button>
     `;
   }

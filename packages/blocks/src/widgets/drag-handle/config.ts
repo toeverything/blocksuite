@@ -7,3 +7,16 @@ export const DRAG_HANDLE_GRABBER_MARGIN = 4;
 export const NOTE_CONTAINER_PADDING = 24;
 export const DRAG_HOVER_RECT_PADDING = 4;
 export const HOVER_DRAG_HANDLE_GRABBER_WIDTH = 2;
+
+export type IndicatorRect = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
+export type DropIndicator = {
+  rect: IndicatorRect | null;
+  dropBlockId: string;
+  dropBefore: boolean;
+};

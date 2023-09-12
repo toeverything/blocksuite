@@ -1,10 +1,10 @@
 import { html, nothing } from 'lit';
 
-import type { AffineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
 import {
   includeInlineSupportedBlockSelected,
   inlineFormatConfig,
 } from '../../../common/inline-format-config.js';
+import type { AffineTextAttributes } from '../../../components/rich-text/virgo/types.js';
 import {
   getCombinedFormatInBlockSelections,
   getCombinedFormatInTextSelection,
@@ -21,8 +21,8 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
 
   let type: 'text' | 'block' = 'text';
   let format: AffineTextAttributes = {};
-  const textSelection = root.selectionManager.find('text');
-  const blockSelections = root.selectionManager.filter('block');
+  const textSelection = root.selection.find('text');
+  const blockSelections = root.selection.filter('block');
 
   if (
     !(

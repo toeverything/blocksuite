@@ -6,7 +6,7 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import type { ViewSource } from '../common/view-source.js';
+import type { SingleViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
@@ -24,7 +24,7 @@ export class DataViewTableManager extends BaseDataViewManager {
   ) => void;
 
   constructor(
-    private viewSource: ViewSource<TableViewData>,
+    private viewSource: SingleViewSource<TableViewData>,
     dataSource: DataSource
   ) {
     super(dataSource);

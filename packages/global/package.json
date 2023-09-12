@@ -44,12 +44,12 @@
       "./debug": "./dist/debug.js",
       "./error": "./dist/error/index.js",
       "./config": "./dist/config/index.js"
-    },
-    "files": [
-      "dist",
-      "index.d.ts"
-    ]
+    }
   },
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
   "dependencies": {
     "ansi-colors": "^4.1.3",
     "zod": "^3.22.2"

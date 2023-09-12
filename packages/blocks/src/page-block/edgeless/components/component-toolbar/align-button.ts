@@ -6,6 +6,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { EdgelessElement } from '../../../../__internal__/index.js';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
@@ -17,7 +18,6 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '../../../../icons/edgeless.js';
-import type { EdgelessElement } from '../../../../index.js';
 import { Bound, ConnectorElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
@@ -46,7 +46,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
         xywh: bound.serialize(),
       });
     } else if (ele instanceof ConnectorElement) {
-      this.edgeless.connector.updateXYWH(ele, bound);
+      this.edgeless.surface.connector.updateXYWH(ele, bound);
     } else {
       this.edgeless.surface.updateElement(ele.id, {
         xywh: bound.serialize(),

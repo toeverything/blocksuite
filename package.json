@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=16.9.0"
   },
-  "packageManager": "pnpm@8.7.0",
+  "packageManager": "pnpm@8.7.4",
   "scripts": {
     "preview": "pnpm --filter @blocksuite/playground preview",
     "dev": "pnpm --filter @blocksuite/playground dev",
@@ -39,6 +39,9 @@
     "build:editor": "pnpm --filter @blocksuite/editor build",
     "build:playground": "pnpm --filter @blocksuite/playground build",
     "build:docs": "pnpm --filter @blocksuite/docs build",
+    "size:data": "node --loader ts-node/esm ./scripts/size-data.ts",
+    "size:report": "node --loader ts-node/esm ./scripts/size-report.ts",
+    "size:generate": "./scripts/size-generate.sh",
     "clean": "./scripts/clean.sh",
     "release-note:draft": "node --loader ts-node/esm ./scripts/release-note/convert.ts",
     "release-note:validate": "node --loader ts-node/esm ./scripts/release-note/validate.ts",
@@ -74,10 +77,14 @@
     "lint-staged": "^14.0.1",
     "lit-analyzer": "2.0.0-pre.3",
     "madge": "^6.1.0",
+    "markdown-table": "^3.0.3",
     "micromatch": "^4.0.5",
     "nyc": "^15.1.0",
     "prettier": "^3.0.3",
+    "pretty-bytes": "^6.1.1",
     "pretty-format": "^29.6.3",
+    "rollup": "^3.28.1",
+    "terser": "^5.19.2",
     "ts-lit-plugin": "^1.2.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
@@ -93,7 +100,7 @@
       ]
     },
     "overrides": {
-      "typescript": "^5",
+      "typescript": "^5.2.2",
       "array-includes": "npm:@nolyfill/array-includes@latest",
       "array.prototype.flat": "npm:@nolyfill/array.prototype.flat@latest",
       "array.prototype.flatmap": "npm:@nolyfill/array.prototype.flatmap@latest",

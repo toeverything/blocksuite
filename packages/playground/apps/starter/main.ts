@@ -7,11 +7,10 @@ import '@blocksuite/editor/themes/affine.css';
 
 import { TestUtils } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
-import std from '@blocksuite/blocks/std';
+import { AffineSchemas } from '@blocksuite/blocks/models';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProvider, Page } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import { CustomNavigationPanel } from './components/custom-navigation-panel';
 import { DebugMenu } from './components/debug-menu.js';
@@ -99,16 +98,15 @@ async function main() {
   }
   const workspace = new Workspace(options);
   window.workspace = workspace;
+  window.job = new Job({ workspace });
   window.blockSchemas = AffineSchemas;
   window.Y = Workspace.Y;
-  window.std = std;
   window.ContentParser = ContentParser;
   Object.defineProperty(globalThis, 'root', {
     get() {
       return document.querySelector('block-suite-root') as BlockSuiteRoot;
     },
   });
-  workspace.awarenessStore.setFlag('enable_page_tags', true);
 
   const syncProviders = async (providers: DocProvider[]) => {
     for (const provider of providers) {

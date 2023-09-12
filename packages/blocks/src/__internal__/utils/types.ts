@@ -1,6 +1,8 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
+import type { RefNodeSlots } from '../../components/rich-text/virgo/nodes/reference-node.js';
+import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
 import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
@@ -13,8 +15,6 @@ import {
   type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
-import type { RefNodeSlots } from '../rich-text/reference-node.js';
-import type { AffineTextAttributes } from '../rich-text/virgo/types.js';
 import type { ServiceFlavour } from '../service/legacy-services/index.js';
 import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
@@ -56,20 +56,42 @@ export type TableViewSelection = {
   isEditing: boolean;
 };
 
-export type KanbanFocusData = {
+type WithKanbanViewType<T> = T extends unknown
+  ? {
+      viewId: string;
+      type: 'kanban';
+    } & T
+  : never;
+
+export type KanbanCellSelection = {
+  selectionType: 'cell';
+  groupKey: string;
+  cardId: string;
   columnId: string;
   isEditing: boolean;
 };
-
-export type KanbanViewSelection = {
-  viewId: string;
-  type: 'kanban';
+export type KanbanCardSelectionCard = {
   groupKey: string;
   cardId: string;
-  focus?: KanbanFocusData;
 };
+export type KanbanCardSelection = {
+  selectionType: 'card';
+  cards: [KanbanCardSelectionCard, ...KanbanCardSelectionCard[]];
+};
+export type KanbanGroupSelection = {
+  selectionType: 'group';
+  groupKeys: [string, ...string[]];
+};
+export type KanbanViewSelection =
+  | KanbanCellSelection
+  | KanbanCardSelection
+  | KanbanGroupSelection;
+export type KanbanViewSelectionWithType =
+  WithKanbanViewType<KanbanViewSelection>;
 
-export type DataViewSelection = TableViewSelection | KanbanViewSelection;
+export type DataViewSelection =
+  | TableViewSelection
+  | KanbanViewSelectionWithType;
 export type GetDataViewSelection<
   K extends DataViewSelection['type'],
   T = DataViewSelection,
@@ -218,6 +240,8 @@ export type SerializedBlock = {
   children: SerializedBlock[];
   sourceId?: string;
   caption?: string;
+  name?: string;
+  size?: number;
   width?: number;
   height?: number;
   language?: string;

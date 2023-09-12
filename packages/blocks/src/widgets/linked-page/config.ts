@@ -3,12 +3,12 @@ import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { REFERENCE_NODE } from '../../__internal__/rich-text/consts.js';
 import { createPage } from '../../__internal__/utils/common-operations.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
-import { showImportModal } from '../../components/import-page/index.js';
+import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { ImportIcon, NewPageIcon, PageIcon } from '../../icons/index.js';
+import { showImportModal } from './import-page/index.js';
 
 export type LinkedPageOptions = {
   triggerKeys: string[];

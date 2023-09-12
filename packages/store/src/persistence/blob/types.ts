@@ -7,7 +7,7 @@ export interface BlobStorageCRUD {
 
 export interface BlobManager {
   get: (key: string) => Promise<Blob | null>;
-  set: (value: Blob) => Promise<string>;
+  set: (value: Blob, key?: string) => Promise<string>;
   delete: (key: string) => Promise<void>;
   list: () => Promise<string[]>;
 }

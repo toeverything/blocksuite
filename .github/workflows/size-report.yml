@@ -1,0 +1,73 @@
+name: Size Report
+
+env:
+  # 7 GiB by default on GitHub, setting to 6 GiB
+  # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+  NODE_OPTIONS: --max-old-space-size=6144
+
+on:
+  schedule:
+    # At the end of every day
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  size-report:
+    name: Size Report
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Download Previous Size Data
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: size-report.yml
+          name: size-data
+          path: temp/size-prev
+          if_no_artifact_found: warn
+
+      - run: pnpm run size:generate
+
+      - name: Upload Size Data
+        uses: actions/upload-artifact@v3
+        with:
+          name: size-data
+          path: temp/size
+
+      - name: Read Size Report
+        id: size-report
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: ./size-report.md
+
+      - name: Create commit comment
+        uses: peter-evans/commit-comment@v2
+        with:
+          body: ${{ steps.size-report.outputs.content }}

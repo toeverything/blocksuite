@@ -1,4 +1,5 @@
-import { css } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, unsafeCSS } from 'lit';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 
@@ -10,7 +11,7 @@ export const renameStyles = css`
     gap: 12px;
     width: 340px;
 
-    font-family: var(--affine-font-family);
+    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     color: var(--affine-text-primary-color);
     border-radius: 8px;
     padding: 12px;
@@ -72,9 +73,15 @@ export const moreMenuStyles = css`
     padding: 8px;
     gap: 8px;
   }
+  .affine-attachment-options-more icon-button[hidden] {
+    display: none;
+  }
 
   .affine-attachment-options-more icon-button:hover.danger {
     background: var(--affine-background-error-color);
+    color: var(--affine-error-color);
+  }
+  .affine-attachment-options-more icon-button:hover.danger > svg {
     color: var(--affine-error-color);
   }
 `;

@@ -1,7 +1,8 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type Page } from '@blocksuite/store';
-import { css, html, LitElement, nothing } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -72,7 +73,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
 
     .panel-info {
       font-size: 12px;
-      font-family: var(--affine-font-family);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--affine-text-secondary-color);
 
       display: flex;

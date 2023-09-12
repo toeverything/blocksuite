@@ -45,6 +45,10 @@ export class BookmarkBlockService extends BaseService<BookmarkBlockModel> {
     return block.url;
   }
 
+  override async block2markdown(block: BookmarkBlockModel) {
+    return `[${block.bookmarkTitle || 'Bookmark'}](${block.url})`;
+  }
+
   override block2Json(
     block: BookmarkBlockModel,
     children: SerializedBlock[]

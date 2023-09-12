@@ -58,6 +58,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
     return tableContainer;
   }
 
+  get viewData() {
+    return this.tableView.view;
+  }
+
   override firstUpdated() {
     this.bindKeyMap();
     this.handleDragEvent();
@@ -323,13 +327,44 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
           if (!selection) {
             return;
           }
-          const rowsSelection = selection.rowsSelection;
-          if (rowsSelection && !selection.columnsSelection) {
+          const { focus, rowsSelection, columnsSelection, isEditing } =
+            selection;
+          if (rowsSelection && !columnsSelection) {
             const rows = this.tableView.view.rows.filter(
               (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
             );
             this.tableView.view.rowDelete(rows);
             this.focusTo(rowsSelection.start - 1, selection.focus.columnIndex);
+          } else if (focus && !isEditing) {
+            const data = this.viewData;
+            const view = this.tableView;
+            if (rowsSelection && columnsSelection) {
+              // multi cell
+              for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
+                const { start, end } = columnsSelection;
+                for (let j = start; j <= end; j++) {
+                  const container = view.selection.getCellContainer(i, j);
+                  const rowId = container?.dataset.rowId;
+                  const columnId = container?.dataset.columnId;
+                  if (rowId && columnId) {
+                    const value = container?.column.setValueFromString('');
+                    data.cellUpdateValue(rowId, columnId, value);
+                  }
+                }
+              }
+            } else {
+              // single cell
+              const container = this.getCellContainer(
+                focus.rowIndex,
+                focus.columnIndex
+              );
+              const rowId = container?.dataset.rowId;
+              const columnId = container?.dataset.columnId;
+              if (rowId && columnId) {
+                const value = container?.column.setValueFromString('');
+                data.cellUpdateValue(rowId, columnId, value);
+              }
+            }
           }
         },
         Escape: () => {
@@ -752,7 +787,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
         rowIndex: 0,
         columnIndex: 0,
       },
-      isEditing: true,
+      isEditing: false,
     };
   }
 

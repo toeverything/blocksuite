@@ -6,8 +6,6 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { matchFlavours } from '../../__internal__/utils/model.js';
-import { contains } from '../../__internal__/utils/query.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 
@@ -18,8 +16,8 @@ type Rect = {
   height: number;
 };
 
-type BlockWithRect = {
-  block: BlockElement;
+type BlockInfo = {
+  element: BlockElement;
   rect: Rect;
 };
 
@@ -32,81 +30,98 @@ function rectIntersects(a: Rect, b: Rect) {
   );
 }
 
-function rectIncludes(a: Rect, b: Rect) {
-  return (
-    a.left <= b.left &&
-    a.left + a.width >= b.left + b.width &&
-    a.top <= b.top &&
-    a.top + a.height >= b.top + b.height
-  );
+function rectIncludesTopAndBottom(a: Rect, b: Rect) {
+  return a.top <= b.top && a.top + a.height >= b.top + b.height;
 }
 
-function filterBlocksExcludeSubtrees(
-  blockWithRects: BlockWithRect[],
-  userRect: Rect
-) {
-  const len = blockWithRects.length;
-  const blockPaths: string[][] = [];
+function filterBlockInfos(blockInfos: BlockInfo[], userRect: Rect) {
+  const results: BlockInfo[] = [];
+  for (const blockInfo of blockInfos) {
+    const rect = blockInfo.rect;
+    if (userRect.top + userRect.height < rect.top) break;
 
-  // empty
+    results.push(blockInfo);
+  }
+
+  return results;
+}
+
+function filterBlockInfosByParent(
+  parentInfos: BlockInfo,
+  userRect: Rect,
+  filteredBlockInfos: BlockInfo[]
+) {
+  const targetBlock = parentInfos.element;
+  let results = [parentInfos];
+  if (targetBlock.childElementCount > 0) {
+    const childBlockInfos = targetBlock.childBlockElements
+      .map(el =>
+        filteredBlockInfos.find(
+          blockInfo => blockInfo.element.model.id === el.model.id
+        )
+      )
+      .filter(block => block) as BlockInfo[];
+    const firstIndex = childBlockInfos.findIndex(
+      bl => rectIntersects(bl.rect, userRect) && bl.rect.top < userRect.top
+    );
+    const lastIndex = childBlockInfos.findIndex(
+      bl =>
+        rectIntersects(bl.rect, userRect) &&
+        bl.rect.top + bl.rect.height > userRect.top + userRect.height
+    );
+
+    if (firstIndex !== -1 && lastIndex !== -1) {
+      results = childBlockInfos.slice(firstIndex, lastIndex + 1);
+    }
+  }
+
+  return results;
+}
+
+function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
+  const filteredBlockInfos = filterBlockInfos(blockInfos, userRect);
+  const len = filteredBlockInfos.length;
+  const blockPaths: string[][] = [];
+  let singleTargetParentBlock: BlockInfo | null = null;
+  let blocks: BlockInfo[] = [];
   if (len === 0) return blockPaths;
 
-  let prevIndex = -1;
+  // To get the single target parent block info
+  for (const block of filteredBlockInfos) {
+    const rect = block.rect;
 
-  for (let i = 0; i < len; i++) {
-    const { rect, block } = blockWithRects[i];
-    if (rectIntersects(rect, userRect)) {
-      if (prevIndex === -1) {
-        prevIndex = i;
-        if (rectIncludes(userRect, rect)) {
-          const prevBlock = blockWithRects[prevIndex].block;
-          // inside database block
-          if (matchFlavours(prevBlock.model, ['affine:database'])) {
-            continue;
-          }
-        }
-      } else {
-        let prevBlock = blockWithRects[prevIndex].block;
-        // prev block before and contains block
-        if (contains(prevBlock, block)) {
-          if (matchFlavours(prevBlock.model, ['affine:database'])) {
-            continue;
-          } else {
-            // not continuous block
-            if (blockPaths.length > 1) {
-              continue;
-            }
-            prevIndex = i;
-            blockPaths.shift();
-          }
-        } else {
-          // backward search parent block and remove its subtree
-          // only keep blocks of same level
-          const { previousElementSibling } = block;
-          // previousElementSibling is not prev block and previousElementSibling contains prev block
-          if (
-            previousElementSibling &&
-            previousElementSibling !== prevBlock &&
-            contains(previousElementSibling, prevBlock)
-          ) {
-            let n = i;
-            let m = blockPaths.length;
-            while (n--) {
-              prevBlock = blockWithRects[n].block;
-              if (prevBlock === previousElementSibling) {
-                blockPaths.push(prevBlock.path);
-                break;
-              } else if (m > 0) {
-                blockPaths.pop();
-                m--;
-              }
-            }
-          }
-          prevIndex = i;
-        }
+    if (
+      rectIntersects(userRect, rect) &&
+      rectIncludesTopAndBottom(rect, userRect)
+    ) {
+      singleTargetParentBlock = block;
+    }
+  }
+
+  if (singleTargetParentBlock) {
+    blocks = filterBlockInfosByParent(
+      singleTargetParentBlock,
+      userRect,
+      filteredBlockInfos
+    );
+  } else {
+    // If there is no block contains the top and bottom of the userRect
+    // Then get all the blocks that intersect with the userRect
+    for (const block of filteredBlockInfos) {
+      if (rectIntersects(userRect, block.rect)) {
+        blocks.push(block);
       }
+    }
+  }
 
-      blockPaths.push(block.path);
+  // Filter out the blocks which parent is in the blocks
+  for (let i = 0; i < blocks.length; i++) {
+    const parent = blocks[i].element.parentPath.join('|');
+    const isParentInBlocks = blocks.some(
+      block => block.element.path.join('|') === parent
+    );
+    if (!isParentInBlocks) {
+      blockPaths.push(blocks[i].element.path);
     }
   }
 
@@ -127,6 +142,8 @@ export class DocDraggingAreaWidget extends WidgetElement {
 
   static excludeFlavours: string[] = ['affine:note', 'affine:surface'];
 
+  private _lastPointerState: PointerEventState | null = null;
+
   private _dragging = false;
 
   private _offset: {
@@ -137,12 +154,12 @@ export class DocDraggingAreaWidget extends WidgetElement {
     left: 0,
   };
 
-  private get _allBlocksWithRect(): BlockWithRect[] {
+  private get _allBlocksWithRect(): BlockInfo[] {
     const viewportElement = this._viewportElement;
 
     const getAllNodeFromTree = (): BlockElement[] => {
       const blockElement: BlockElement[] = [];
-      this.root.viewStore.walkThrough(node => {
+      this.root.view.walkThrough(node => {
         const view = node.view;
         if (!(view instanceof BlockElement)) {
           return true;
@@ -164,7 +181,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
     return elements.map(element => {
       const bounding = element.getBoundingClientRect();
       return {
-        block: element,
+        element,
         rect: {
           left: bounding.left + viewportElement.scrollLeft - rootRect.left,
           top: bounding.top + viewportElement.scrollTop - rootRect.top,
@@ -184,16 +201,16 @@ export class DocDraggingAreaWidget extends WidgetElement {
   }
 
   private _selectBlocksByRect(userRect: Rect) {
-    const selections = filterBlocksExcludeSubtrees(
+    const selections = getSelectingBlockPaths(
       this._allBlocksWithRect,
       userRect
     ).map(blockPath => {
-      return this.root.selectionManager.getInstance('block', {
+      return this.root.selection.getInstance('block', {
         path: blockPath,
       });
     });
 
-    this.root.selectionManager.setGroup('note', selections);
+    this.root.selection.setGroup('note', selections);
   }
 
   private _clearRaf() {
@@ -202,6 +219,37 @@ export class DocDraggingAreaWidget extends WidgetElement {
       this._rafID = 0;
     }
   }
+
+  private _updateDraggingArea = (
+    state: PointerEventState,
+    shouldAutoScroll: boolean
+  ) => {
+    const { x, y } = state;
+
+    const { scrollTop, scrollLeft } = this._viewportElement;
+    const { x: startX, y: startY } = state.start;
+    const left = Math.min(this._offset.left + startX, scrollLeft + x);
+    const top = Math.min(this._offset.top + startY, scrollTop + y);
+    const right = Math.max(this._offset.left + startX, scrollLeft + x);
+    const bottom = Math.max(this._offset.top + startY, scrollTop + y);
+    const userRect = {
+      left,
+      top,
+      width: right - left,
+      height: bottom - top,
+    };
+    this.rect = userRect;
+    this._selectBlocksByRect(userRect);
+    this._lastPointerState = state;
+
+    if (shouldAutoScroll) {
+      const result = autoScroll(this._viewportElement, y);
+      if (!result) {
+        this._clearRaf();
+        return;
+      }
+    }
+  };
 
   override connectedCallback() {
     super.connectedCallback();
@@ -234,35 +282,10 @@ export class DocDraggingAreaWidget extends WidgetElement {
           return;
         }
         ctx.get('defaultState').event.preventDefault();
-
-        const runner = () => {
-          const state = ctx.get('pointerState');
-          const { x, y } = state;
-
-          const { scrollTop, scrollLeft } = this._viewportElement;
-          const { x: startX, y: startY } = state.start;
-          const left = Math.min(this._offset.left + startX, scrollLeft + x);
-          const top = Math.min(this._offset.top + startY, scrollTop + y);
-          const right = Math.max(this._offset.left + startX, scrollLeft + x);
-          const bottom = Math.max(this._offset.top + startY, scrollTop + y);
-          const userRect = {
-            left,
-            top,
-            width: right - left,
-            height: bottom - top,
-          };
-          this.rect = userRect;
-          this._selectBlocksByRect(userRect);
-
-          const result = autoScroll(this._viewportElement, y);
-          if (!result) {
-            this._clearRaf();
-            return;
-          }
-          this._rafID = requestAnimationFrame(runner);
-        };
-
-        this._rafID = requestAnimationFrame(runner);
+        const state = ctx.get('pointerState');
+        this._rafID = requestAnimationFrame(() => {
+          this._updateDraggingArea(state, true);
+        });
 
         return true;
       },
@@ -279,6 +302,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
           top: 0,
           left: 0,
         };
+        this._lastPointerState = null;
       },
       {
         global: true,
@@ -297,6 +321,26 @@ export class DocDraggingAreaWidget extends WidgetElement {
         global: true,
       }
     );
+  }
+
+  override firstUpdated() {
+    this._disposables.addFromEvent(this._viewportElement, 'scroll', () => {
+      if (!this._dragging || !this._lastPointerState) {
+        return;
+      }
+
+      this._clearRaf();
+      const state = this._lastPointerState;
+      this._rafID = requestAnimationFrame(() => {
+        this._updateDraggingArea(state, false);
+      });
+    });
+  }
+
+  override disconnectedCallback() {
+    this._clearRaf();
+    this._disposables.dispose();
+    super.disconnectedCallback();
   }
 
   override render() {

@@ -1,19 +1,20 @@
 /// <reference types="vite/client" />
-import '../__internal__/rich-text/rich-text.js';
+import '../components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
-import { html, nothing } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import { html, nothing, type TemplateResult } from 'lit';
+import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
-import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
-import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
+import type { RichText } from '../components/rich-text/rich-text.js';
+import { attributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
-} from '../__internal__/rich-text/virgo/types.js';
+} from '../components/rich-text/virgo/types.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -33,7 +34,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   private _select() {
-    const selection = this.root.selectionManager;
+    const selection = this.root.selection;
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))
@@ -61,6 +62,15 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     this._select();
   };
 
+  @query('rich-text')
+  private _richTextElement?: RichText;
+
+  override async getUpdateComplete() {
+    const result = await super.getUpdateComplete();
+    await this._richTextElement?.updateComplete;
+    return result;
+  }
+
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
     this.model.childrenUpdated.on(() => this.requestUpdate());
@@ -71,7 +81,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     bindContainerHotkey(this);
   }
 
-  override render() {
+  override render(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
     const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
@@ -100,6 +110,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
+            .vRangeProvider=${getVRangeProvider(this)}
           ></rich-text>
         </div>
         ${this.showChildren ? children : nothing}

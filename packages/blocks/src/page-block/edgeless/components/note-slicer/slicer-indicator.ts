@@ -14,8 +14,10 @@ export class NoteSlicerIndicator extends WithDisposable(LitElement) {
     :host {
       visibility: hidden;
       z-index: 1;
-      width: 1px;
+      width: 0px;
       transition: width 0.1s ease-in-out;
+      transform: scale(1 / var(--affine-zoom));
+      transform-origin: left center;
     }
 
     .indicator-line {
