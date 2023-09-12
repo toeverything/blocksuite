@@ -1,25 +1,29 @@
-// operations used in rich-text level
-
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import type { PageBlockModel } from '../../models.js';
-import { supportsChildren } from '../utils/common.js';
+import { supportsChildren } from '../../__internal__/utils/common.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
-} from '../utils/common-operations.js';
-import type { BlockModelProps } from '../utils/model.js';
-import { isInsideBlockByFlavour, matchFlavours } from '../utils/model.js';
+} from '../../__internal__/utils/common-operations.js';
+import type { BlockModelProps } from '../../__internal__/utils/model.js';
+import {
+  isInsideBlockByFlavour,
+  matchFlavours,
+} from '../../__internal__/utils/model.js';
 import {
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
   getVirgoByModel,
-} from '../utils/query.js';
-import { focusBlockByModel, focusTitle } from '../utils/selection.js';
-import type { ExtendedModel } from '../utils/types.js';
+} from '../../__internal__/utils/query.js';
+import {
+  focusBlockByModel,
+  focusTitle,
+} from '../../__internal__/utils/selection.js';
+import type { ExtendedModel } from '../../__internal__/utils/types.js';
+import type { PageBlockModel } from '../../models.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);

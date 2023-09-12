@@ -86,7 +86,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private _focusAttachment() {
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });

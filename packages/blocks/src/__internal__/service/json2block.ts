@@ -4,7 +4,7 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
-import { handleBlockSplit } from '../rich-text/rich-text-operations.js';
+import { handleBlockSplit } from '../../components/rich-text/rich-text-operations.js';
 import {
   asyncGetVirgoByModel,
   getPageBlock,
@@ -197,7 +197,7 @@ export async function json2block(
         if (!lastMergedBlock) {
           return;
         }
-        const selectionManager = lastMergedBlock.root.selectionManager;
+        const selectionManager = lastMergedBlock.root.selection;
         const blockSelection = selectionManager?.getInstance('block', {
           path: lastMergedBlock.path ?? [],
         });

@@ -34,7 +34,7 @@ export class PageKeyboardManager {
   }
 
   private get _selection() {
-    return this.pageElement.root.selectionManager;
+    return this.pageElement.root.selection;
   }
 
   private get _currentSelection() {
@@ -85,7 +85,7 @@ export class PageKeyboardManager {
   ) {
     const current = selections[0];
     const first = this._page.getBlockById(current.blockId);
-    const firstElement = this.pageElement.root.viewStore.viewFromPath(
+    const firstElement = this.pageElement.root.view.viewFromPath(
       'block',
       current.path
     );

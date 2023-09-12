@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import '../__internal__/rich-text/rich-text.js';
+import '../components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
@@ -8,13 +8,13 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
-import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
-import type { RichText } from '../__internal__/rich-text/rich-text.js';
-import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
+import type { RichText } from '../components/rich-text/rich-text.js';
+import { attributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
-} from '../__internal__/rich-text/virgo/types.js';
+} from '../components/rich-text/virgo/types.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -34,7 +34,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   };
 
   private _select() {
-    const selection = this.root.selectionManager;
+    const selection = this.root.selection;
     selection.update(selList => {
       return selList
         .filter(sel => !sel.is('text') && !sel.is('block'))

@@ -1,12 +1,12 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { isInsideBlockByFlavour } from '../../../../../../__internal__/utils/model.js';
 import {
   getDocPage,
   getModelByElement,
-  isInsideBlockByFlavour,
-} from '../../__internal__/utils/index.js';
-import { calcSafeCoordinate } from '../../page-block/utils/position.js';
+} from '../../../../../../__internal__/utils/query.js';
+import { calcSafeCoordinate } from '../../../../../../page-block/utils/position.js';
 import { type LinkDetail, LinkPopover } from './link-popover.js';
 
 function updatePosition(element: LinkPopover, anchorEl: HTMLElement) {

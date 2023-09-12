@@ -6,6 +6,7 @@ import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 import { matchFlavours } from '../../__internal__/utils/model.js';
 import { type AbstractEditor } from '../../__internal__/utils/types.js';
 import type { Loader } from '../../components/loader.js';
+import type { RichText } from '../../components/rich-text/rich-text.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -14,7 +15,6 @@ import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
-import type { RichText } from '../rich-text/rich-text.js';
 import type { Rect } from './rect.js';
 import { type Point } from './rect.js';
 

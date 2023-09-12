@@ -5,11 +5,11 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { showLinkPopover } from '../../../components/link-popover/index.js';
-import type { BookmarkProps } from '../../../index.js';
-import { getModelByElement } from '../../utils/index.js';
-import { affineTextStyles } from '../virgo/affine-text.js';
-import type { AffineTextAttributes } from '../virgo/types.js';
+import { getModelByElement } from '../../../../../__internal__/utils/query.js';
+import type { BookmarkProps } from '../../../../../bookmark-block/bookmark-model.js';
+import type { AffineTextAttributes } from '../../types.js';
+import { affineTextStyles } from '../affine-text.js';
+import { showLinkPopover } from './link-popover/create-link-popover.js';
 
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {

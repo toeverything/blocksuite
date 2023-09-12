@@ -201,7 +201,7 @@ export async function copyBlocksInPage(root: BlockSuiteRoot) {
     'block',
     'image',
   ]);
-  const textSelection = root.selectionManager.find('text');
+  const textSelection = root.selection.find('text');
   const clipboardItems = await createPageClipboardItems(
     selectedModels,
     textSelection

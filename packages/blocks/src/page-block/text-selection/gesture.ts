@@ -25,7 +25,7 @@ export class Gesture {
   private _rafID = 0;
 
   private get _selectionManager() {
-    return this.pageElement.root.selectionManager;
+    return this.pageElement.root.selection;
   }
 
   private get _viewportElement() {

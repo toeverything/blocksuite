@@ -2,8 +2,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { isInsideBlockByFlavour } from '../../__internal__/index.js';
-import type { AffineTextAttributes } from '../../__internal__/rich-text/virgo/types.js';
 import { getVirgoByModel } from '../../__internal__/utils/query.js';
+import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 
 export type SlashMenuOptions = {
