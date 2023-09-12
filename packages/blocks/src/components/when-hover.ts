@@ -17,6 +17,10 @@ type OptionsParams = Omit<
 type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
 
 type HoverOptions = {
+  /**
+   * Set the portal as hover element automatically.
+   * @default true
+   */
   setPortalAsFloating: boolean;
 } & WhenHoverOptions;
 
