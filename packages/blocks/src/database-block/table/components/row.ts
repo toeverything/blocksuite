@@ -124,106 +124,105 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     };
     popRowMenu(positionToVRect(e.x, e.y), this.rowId, selection);
   };
+
+  public override connectedCallback() {
+    super.connectedCallback();
+    this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
+  }
+
   protected override render(): unknown {
     const view = this.view;
     return html`
-      <div
-        class="affine-database-block-row database-row"
-        data-row-index="${this.rowIndex}"
-        data-row-id="${this.rowId}"
-        @contextmenu="${this.contextMenu}"
-      >
-        <div class="data-view-table-left-bar">
+      <div class="data-view-table-left-bar">
+        <div
+          class="data-view-table-view-drag-handler"
+          style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
+        >
           <div
-            class="data-view-table-view-drag-handler"
-            style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
-          >
-            <div
-              class="show-on-hover-row"
-              style="width: 4px;
+            class="show-on-hover-row"
+            style="width: 4px;
             border-radius: 2px;
             height: 12px;
             background-color: var(--affine-placeholder-color);
 "
-            ></div>
-          </div>
+          ></div>
         </div>
-        ${repeat(
-          view.columnManagerList,
-          v => v.id,
-          (column, i) => {
-            const clickDetail = () => {
-              if (!this.selection) {
-                return;
-              }
-              this.setSelection({
-                rowsSelection: {
-                  start: this.rowIndex,
-                  end: this.rowIndex,
-                },
-                focus: {
-                  rowIndex: this.rowIndex,
-                  columnIndex: i,
-                },
-                isEditing: false,
-              });
-              openDetail(this.rowId, this.selection);
-            };
-            const openMenu = (e: MouseEvent) => {
-              if (!this.selection) {
-                return;
-              }
-              const ele = e.currentTarget as HTMLElement;
-              this.setSelection({
-                rowsSelection: {
-                  start: this.rowIndex,
-                  end: this.rowIndex,
-                },
-                focus: {
-                  rowIndex: this.rowIndex,
-                  columnIndex: i,
-                },
-                isEditing: false,
-              });
-              popRowMenu(ele, this.rowId, this.selection);
-            };
-            return html`
-              <div>
-                <affine-database-cell-container
-                  class="database-cell"
-                  style=${styleMap({
-                    width: `${column.width}px`,
-                    border: i === 0 ? 'none' : undefined,
-                  })}
-                  .view="${view}"
-                  .column="${column}"
-                  .rowId="${this.rowId}"
-                  data-row-id="${this.rowId}"
-                  .rowIndex="${this.rowIndex}"
-                  data-row-index="${this.rowIndex}"
-                  .columnId="${column.id}"
-                  data-column-id="${column.id}"
-                  .columnIndex="${i}"
-                  data-column-index="${i}"
-                >
-                </affine-database-cell-container>
-              </div>
-              ${column.dataViewManager.header.titleColumn === column.id &&
-              !view.readonly
-                ? html` <div class="row-ops">
-                    <div class="row-op" @click="${clickDetail}">
-                      ${NewEditIcon}
-                    </div>
-                    <div class="row-op" @click="${openMenu}">
-                      ${MoreHorizontalIcon}
-                    </div>
-                  </div>`
-                : ''}
-            `;
-          }
-        )}
-        <div class="database-cell add-column-button"></div>
       </div>
+      ${repeat(
+        view.columnManagerList,
+        v => v.id,
+        (column, i) => {
+          const clickDetail = () => {
+            if (!this.selection) {
+              return;
+            }
+            this.setSelection({
+              rowsSelection: {
+                start: this.rowIndex,
+                end: this.rowIndex,
+              },
+              focus: {
+                rowIndex: this.rowIndex,
+                columnIndex: i,
+              },
+              isEditing: false,
+            });
+            openDetail(this.rowId, this.selection);
+          };
+          const openMenu = (e: MouseEvent) => {
+            if (!this.selection) {
+              return;
+            }
+            const ele = e.currentTarget as HTMLElement;
+            this.setSelection({
+              rowsSelection: {
+                start: this.rowIndex,
+                end: this.rowIndex,
+              },
+              focus: {
+                rowIndex: this.rowIndex,
+                columnIndex: i,
+              },
+              isEditing: false,
+            });
+            popRowMenu(ele, this.rowId, this.selection);
+          };
+          return html`
+            <div>
+              <affine-database-cell-container
+                class="database-cell"
+                style=${styleMap({
+                  width: `${column.width}px`,
+                  border: i === 0 ? 'none' : undefined,
+                })}
+                .view="${view}"
+                .column="${column}"
+                .rowId="${this.rowId}"
+                data-row-id="${this.rowId}"
+                .rowIndex="${this.rowIndex}"
+                data-row-index="${this.rowIndex}"
+                .columnId="${column.id}"
+                data-column-id="${column.id}"
+                .columnIndex="${i}"
+                data-column-index="${i}"
+              >
+              </affine-database-cell-container>
+            </div>
+            ${column.dataViewManager.header.titleColumn === column.id &&
+            !view.readonly
+              ? html` <div class="row-ops">
+                  <div class="row-op" @click="${clickDetail}">
+                    ${NewEditIcon}
+                  </div>
+                  <div class="row-op" @click="${openMenu}">
+                    ${MoreHorizontalIcon}
+                  </div>
+                </div>`
+              : ''}
+          `;
+        }
+      )}
+      <div class="database-cell add-column-button"></div>
     `;
   }
 }

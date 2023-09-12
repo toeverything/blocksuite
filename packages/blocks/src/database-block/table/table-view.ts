@@ -257,6 +257,9 @@ export class DataViewTable extends BaseDataView<
           id => id,
           (id, idx) => {
             return html`<data-view-table-row
+              class="affine-database-block-row database-row"
+              data-row-index="${idx}"
+              data-row-id="${id}"
               .view="${this.view}"
               .rowId="${id}"
               .rowIndex="${idx}"
