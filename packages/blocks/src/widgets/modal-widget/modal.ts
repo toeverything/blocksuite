@@ -57,7 +57,6 @@ export class AffineCustomModal extends LitElement {
       padding: 24px;
       position: absolute;
       box-sizing: border-box;
-      width: 100%;
       bottom: 0;
       right: 0;
     }
@@ -97,7 +96,7 @@ export class AffineCustomModal extends LitElement {
   }
 
   modalRef(modal: Element | undefined) {
-    this.onOpen?.(modal as HTMLDivElement);
+    if (modal) this.onOpen?.(modal as HTMLDivElement);
   }
 
   override render() {
@@ -105,7 +104,7 @@ export class AffineCustomModal extends LitElement {
 
     return html`<div class="modal-background">
       <div class="modal-window">
-        <div class="modal-main ${ref(this.modalRef)}"></div>
+        <div class="modal-main" ${ref(this.modalRef)}></div>
         <div class="modal-footer">
           ${options.footer
             ? repeat(
