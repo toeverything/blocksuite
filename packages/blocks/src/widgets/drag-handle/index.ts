@@ -14,11 +14,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   calcDropTarget,
-  findClosestBlockElement,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
-  getClosestBlockElementByPoint,
-  getHoveringNote,
   getModelByBlockElement,
   isEdgelessPage,
   isPageMode,
@@ -48,6 +45,9 @@ import {
   captureEventTarget,
   containBlock,
   containChildBlock,
+  getClosestBlockByPoint,
+  getClosestNoteBlock,
+  getContainerOffsetPoint,
   getDragHandleContainerHeight,
   getNoteId,
   includeTextSelection,
@@ -129,40 +129,6 @@ export class DragHandleWidget extends WidgetElement {
     }
   }
 
-  getClosestNoteBlock = (point: Point) => {
-    return isPageMode(this.page)
-      ? findClosestBlockElement(this.pageBlockElement, point, 'affine-note')
-      : getHoveringNote(point)?.querySelector('affine-note');
-  };
-
-  getClosestBlockElementByPoint(point: Point) {
-    const closestNoteBlock = this.getClosestNoteBlock(point);
-    if (!closestNoteBlock) return null;
-    const noteRect = Rect.fromDOM(closestNoteBlock);
-    const blockElement = getClosestBlockElementByPoint(point, {
-      container: closestNoteBlock,
-      rect: noteRect,
-    });
-    const blockSelector =
-      '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
-    const closestBlockElement = (
-      blockElement
-        ? blockElement
-        : findClosestBlockElement(
-            closestNoteBlock as BlockElement,
-            point.clone(),
-            blockSelector
-          )
-    ) as BlockElement;
-    return closestBlockElement;
-  }
-
-  getContainerOffsetPoint = (state: PointerEventState) => {
-    const x = state.point.x + state.containerOffset.x;
-    const y = state.point.y + state.containerOffset.y;
-    return new Point(x, y);
-  };
-
   outOfNoteBlock = (noteBlock: Element, point: Point) => {
     // TODO: need to find a better way to check if the point is out of note block
     const rect = noteBlock.getBoundingClientRect();
@@ -184,8 +150,12 @@ export class DragHandleWidget extends WidgetElement {
    */
   getDropIndicator = (state: PointerEventState): DropIndicator | null => {
     let dropIndicator = null;
-    const point = this.getContainerOffsetPoint(state);
-    const closestBlockElement = this.getClosestBlockElementByPoint(point);
+    const point = getContainerOffsetPoint(state);
+    const closestBlockElement = getClosestBlockByPoint(
+      this.page,
+      this.pageBlockElement,
+      point
+    );
     if (!closestBlockElement) {
       return dropIndicator;
     }
@@ -259,8 +229,12 @@ export class DragHandleWidget extends WidgetElement {
     state: PointerEventState,
     shouldAutoScroll: boolean = false
   ) => {
-    const point = this.getContainerOffsetPoint(state);
-    const closestNoteBlock = this.getClosestNoteBlock(point);
+    const point = getContainerOffsetPoint(state);
+    const closestNoteBlock = getClosestNoteBlock(
+      this.page,
+      this.pageBlockElement,
+      point
+    );
     if (!closestNoteBlock || this.outOfNoteBlock(closestNoteBlock, point)) {
       this.dropBlockId = '';
       this.indicatorRect = null;
@@ -650,8 +624,12 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _pointerMoveOnBlock = (ctx: UIEventStateContext) => {
     const state = ctx.get('pointerState');
-    const point = this.getContainerOffsetPoint(state);
-    const closestBlockElement = this.getClosestBlockElementByPoint(point);
+    const point = getContainerOffsetPoint(state);
+    const closestBlockElement = getClosestBlockByPoint(
+      this.page,
+      this.pageBlockElement,
+      point
+    );
     if (!closestBlockElement) {
       this._hoveredBlockId = '';
       this._hoveredBlockPath = null;
@@ -701,8 +679,12 @@ export class DragHandleWidget extends WidgetElement {
 
     // TODO: need to optimize
     // When pointer out of note block hover area or inside database, should hide drag handle
-    const point = this.getContainerOffsetPoint(state);
-    const closestNoteBlock = this.getClosestNoteBlock(point);
+    const point = getContainerOffsetPoint(state);
+    const closestNoteBlock = getClosestNoteBlock(
+      this.page,
+      this.pageBlockElement,
+      point
+    );
     if (
       !closestNoteBlock ||
       !this._canEditing(closestNoteBlock as BlockElement) ||
