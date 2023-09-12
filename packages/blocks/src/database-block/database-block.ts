@@ -18,8 +18,13 @@ import { html } from 'lit/static-html.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelection } from '../__internal__/index.js';
+import { Rect } from '../__internal__/index.js';
+import { DragIndicator } from '../components/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
-import { captureEventTarget } from '../widgets/drag-handle/utils.js';
+import {
+  captureEventTarget,
+  getDropIndicator,
+} from '../widgets/drag-handle/utils.js';
 import { DragHandleWidget } from '../widgets/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
@@ -50,8 +55,28 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       border-radius: 4px;
     }
   `;
+  indicator = new DragIndicator();
   onDrag = (evt: MouseEvent, id: string): (() => void) => {
-    console.log(evt, id);
+    const result = getDropIndicator(evt);
+    if (result && result.rect) {
+      document.body.append(this.indicator);
+      this.indicator.rect = Rect.fromLWTH(
+        result.rect.left,
+        result.rect.width,
+        result.rect.top,
+        result.rect.height
+      );
+      return () => {
+        this.indicator.remove();
+        const model = this.page.getBlockById(id);
+        const target = this.page.getBlockById(result.dropBlockId);
+        const parent = this.page.getParent(result.dropBlockId);
+        if (model && target && parent) {
+          this.page.moveBlocks([model], parent, target, result.dropBefore);
+        }
+      };
+    }
+    this.indicator.remove();
     return () => {};
   };
 

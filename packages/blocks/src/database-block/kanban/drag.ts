@@ -6,6 +6,7 @@ import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { Point, Rect } from '../../__internal__/index.js';
 import type { InsertPosition } from '../types.js';
 import { startDrag } from '../utils/drag.js';
 import { KanbanCard } from './card.js';
@@ -97,41 +98,60 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
     );
     const currentGroup = ele.closest('affine-data-view-kanban-group');
     startDrag<
-      {
-        drop?: {
+      | { type: 'out'; callback: () => void }
+      | {
+          type: 'self';
           key: string;
           position: InsertPosition;
-        };
-      },
+        }
+      | undefined,
       PointerEvent
     >(evt, {
-      onDrag: () => ({}),
+      onDrag: () => undefined,
       onMove: evt => {
+        if (!(evt.target instanceof HTMLElement)) {
+          return;
+        }
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
+        if (!Rect.fromDOM(this.kanbanView).isPointIn(Point.from(evt))) {
+          const callback = this.kanbanView.onDrag;
+          if (callback) {
+            this.dropPreview.remove();
+            return {
+              type: 'out',
+              callback: callback(evt, ele.cardId),
+            };
+          }
+          return;
+        }
         const result = this.shooIndicator(evt, ele);
         if (result) {
           return {
-            drop: {
-              key: result.group.group.key,
-              position: result.position,
-            },
+            type: 'self',
+            key: result.group.group.key,
+            position: result.position,
           };
         }
-        return {};
+        return;
       },
       onClear: () => {
         preview.remove();
         this.dropPreview.remove();
       },
-      onDrop: ({ drop }) => {
-        preview.remove();
-        this.dropPreview.remove();
-        if (drop && currentGroup) {
+      onDrop: result => {
+        if (!result) {
+          return;
+        }
+        if (result.type === 'out') {
+          result.callback();
+          return;
+        }
+        if (result && currentGroup) {
           currentGroup.group.helper.moveCardTo(
             ele.cardId,
             currentGroup.group.key,
-            drop.key,
-            drop.position
+            result.key,
+            result.position
           );
         }
       },
