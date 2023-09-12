@@ -77,8 +77,8 @@ export const config: ConfigItem[] = [
     type: 'card',
     icon: BookmarkIcon,
     tooltip: 'Turn into Card view',
-    showWhen: model => model.type && model.type !== 'card',
-    disableWhen: model => model.page.readonly,
+    showWhen: model =>
+      !model.page.readonly && model.type && model.type !== 'card',
     action: (model, callback) => {
       model.page.updateBlock<Partial<BookmarkProps>>(model, {
         type: 'card',
@@ -91,8 +91,8 @@ export const config: ConfigItem[] = [
     type: 'embed',
     icon: EmbedWebIcon,
     tooltip: 'Turn into Embed view',
-    showWhen: model => model.type !== 'embed' && allowEmbed(model.url),
-    disableWhen: model => model.page.readonly,
+    showWhen: model =>
+      !model.page.readonly && model.type !== 'embed' && allowEmbed(model.url),
     action: (model, callback) => {
       model.page.updateBlock<Partial<BookmarkProps>>(model, {
         type: 'embed',
@@ -105,7 +105,7 @@ export const config: ConfigItem[] = [
     type: 'edit',
     icon: EditIcon,
     tooltip: 'Edit',
-    disableWhen: model => model.page.readonly,
+    showWhen: model => !model.page.readonly,
     action: (_model, callback) => {
       callback?.('edit');
     },
@@ -114,7 +114,7 @@ export const config: ConfigItem[] = [
     type: 'caption',
     icon: CaptionIcon,
     tooltip: 'Add Caption',
-    disableWhen: model => model.page.readonly,
+    showWhen: model => !model.page.readonly,
     action: (_model, callback) => {
       callback?.('caption');
     },
@@ -153,7 +153,7 @@ export const moreOperations: MoreOperation[] = [
     type: 'duplicate',
     icon: DuplicateIcon,
     label: 'Duplicate',
-    disableWhen: model => model.page.readonly,
+    showWhen: model => !model.page.readonly,
     action: (model, callback) => {
       const { page } = model;
 
@@ -171,7 +171,8 @@ export const moreOperations: MoreOperation[] = [
     type: 'reload',
     icon: RefreshIcon,
     label: 'Reload',
-    disableWhen: model => model.page.readonly || !tryGetBookmarkAPI(),
+    showWhen: model => !model.page.readonly,
+    disableWhen: () => !tryGetBookmarkAPI(),
     action: (model, callback) => {
       reloadBookmarkBlock(
         model,
@@ -185,7 +186,7 @@ export const moreOperations: MoreOperation[] = [
     type: 'delete',
     icon: DeleteIcon,
     label: 'Delete',
-    disableWhen: model => model.page.readonly,
+    showWhen: model => !model.page.readonly,
     action: (model, callback) => {
       model.page.deleteBlock(model);
       callback?.('delete');
