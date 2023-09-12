@@ -31,7 +31,6 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
     component: literal`affine-doc-page`,
     widgets: {
       modal: literal`affine-modal-widget`,
-      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
@@ -53,7 +52,6 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
     component: literal`affine-edgeless-page`,
     widgets: {
       modal: literal`affine-modal-widget`,
-      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
@@ -118,6 +116,9 @@ export const pagePreset: LitBlockSpec[] = [
     service: ImageService,
     view: {
       component: literal`affine-image`,
+      widgets: {
+        imageToolbar: literal`affine-image-toolbar-widget`,
+      },
     },
   },
   {
@@ -190,6 +191,9 @@ export const edgelessPreset: LitBlockSpec[] = [
     service: ImageService,
     view: {
       component: literal`affine-image`,
+      widgets: {
+        imageToolbar: literal`affine-image-toolbar-widget`,
+      },
     },
   },
   {

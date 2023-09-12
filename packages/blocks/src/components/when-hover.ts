@@ -1,6 +1,5 @@
 import { DisposableGroup, whenHover } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
-import type { RefOrCallback } from 'lit/directives/ref.js';
 
 import type { AdvancedPortalOptions } from './portal.js';
 import { createLitPortal } from './portal.js';
@@ -15,11 +14,14 @@ export class WhenHoverController implements ReactiveController {
   host: ReactiveControllerHost;
 
   private _abortController?: AbortController;
-  private _setReference?: RefOrCallback;
+  private _setReference?: (element?: Element | undefined) => void;
   private _portal?: HTMLDivElement;
   private readonly _options: (options: OptionsParams) => WhenHoverOptions;
 
   get setReference() {
+    if (!this._setReference) {
+      throw new Error('setReference is not ready');
+    }
     return this._setReference;
   }
 
@@ -62,6 +64,7 @@ export class WhenHoverController implements ReactiveController {
     this._setReference = setReference;
     this._disposables.add(dispose);
   }
+
   hostDisconnected() {
     this._disposables.dispose();
   }
