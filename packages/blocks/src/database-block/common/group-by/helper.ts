@@ -193,10 +193,14 @@ export class GroupHelper {
     if (fromGroupKey !== toGroupKey) {
       const columnId = this.columnId;
       const remove = this.groupConfig()?.removeFromGroup ?? (() => undefined);
-      let newValue = remove(
-        this.groupMap[fromGroupKey].value,
-        this.viewManager.cellGetJsonValue(rowId, columnId)
-      );
+      const group = this.groupMap[fromGroupKey];
+      let newValue: unknown = undefined;
+      if (group) {
+        newValue = remove(
+          group.value,
+          this.viewManager.cellGetJsonValue(rowId, columnId)
+        );
+      }
       const addTo = this.groupConfig()?.addToGroup ?? (value => value);
       newValue = addTo(this.groupMap[toGroupKey].value, newValue);
       this.viewManager.cellUpdateValue(rowId, columnId, newValue);
@@ -206,7 +210,6 @@ export class GroupHelper {
     rows.splice(index, 0, rowId);
     this.changeCardSort(toGroupKey, rows);
   }
-
   get addGroup() {
     return this.viewManager.columnConfigManager.getColumn(this.column.type).ops
       .addGroup;
