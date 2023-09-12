@@ -98,6 +98,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         if (!vRange) return;
 
         vEditor.waitForUpdate().then(() => {
+          if (!vEditor.mounted) return;
+
           const range = vEditor.toDomRange(vRange);
           if (!range) return;
 
