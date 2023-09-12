@@ -1,9 +1,6 @@
 /* eslint-disable */
-import { html } from 'lit';
-
 export function createInlineIframe() {
-  const pattern = '^data:(image/\\w+);';
-  const htmlContent = html`<!doctype html>
+  const htmlContent = `<!doctype html>
     <html>
       <head>
         <meta charset="utf-8" />
@@ -62,7 +59,7 @@ export function createInlineIframe() {
 
           if (resultImg === null) return null;
 
-          const pattern = new RegExp(${pattern});
+          const pattern = /^data:(image\\/\\w+);/;
           const execResult = pattern.exec(resultImg.src);
 
           if (!execResult) return null;
@@ -138,7 +135,5 @@ export function createInlineIframe() {
       </script>
     </html>`;
 
-  return `data:text/html,${encodeURIComponent(
-    String.raw(htmlContent.strings, ...htmlContent.values)
-  )}`;
+  return `data:text/html,${encodeURIComponent(htmlContent)}`;
 }
