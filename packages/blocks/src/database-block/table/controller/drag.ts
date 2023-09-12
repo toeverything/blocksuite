@@ -4,8 +4,8 @@ import type { ReactiveController } from 'lit';
 
 import type { InsertPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
+import { TableRow } from '../components/row.js';
 import type { DataViewTable } from '../table-view.js';
-import { TableRow } from './row.js';
 
 export class TableDragController implements ReactiveController {
   constructor(private host: DataViewTable) {
