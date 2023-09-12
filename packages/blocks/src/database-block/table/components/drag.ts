@@ -5,6 +5,7 @@ import type { ReactiveController } from 'lit';
 import type { InsertPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
 import type { DataViewTable } from '../table-view.js';
+import { TableRow } from './row.js';
 
 export class TableDragController implements ReactiveController {
   constructor(private host: DataViewTable) {
@@ -66,8 +67,9 @@ export class TableDragController implements ReactiveController {
           target.closest('.data-view-table-view-drag-handler')
         ) {
           event.preventDefault();
-          const row = target.closest('.affine-database-block-row');
+          const row = target.closest('data-view-table-row');
           if (row) {
+            getSelection()?.removeAllRanges();
             this.dragStart(row, event);
           }
           return true;
@@ -77,11 +79,7 @@ export class TableDragController implements ReactiveController {
     );
   }
 
-  dragStart = (row: Element, evt: PointerEvent) => {
-    const id = row.getAttribute('data-row-id');
-    if (!id) {
-      return;
-    }
+  dragStart = (row: TableRow, evt: PointerEvent) => {
     const eleRect = row.getBoundingClientRect();
     const offsetLeft = evt.x - eleRect.left;
     const offsetTop = evt.y - eleRect.top;
@@ -101,18 +99,18 @@ export class TableDragController implements ReactiveController {
     >(evt, {
       onDrag: () => undefined,
       onMove: evt => {
+        preview.display(evt.x - offsetLeft, evt.y - offsetTop);
         if (!this.host.contains(evt.target as Node)) {
           const callback = this.host.onDrag;
           if (callback) {
             this.dropPreview.remove();
             return {
               type: 'out',
-              callback: callback(evt, id),
+              callback: callback(evt, row.rowId),
             };
           }
           return;
         }
-        preview.display(evt.x - offsetLeft, evt.y - offsetTop);
         const result = this.showIndicator(evt);
         if (result) {
           return {
@@ -135,20 +133,25 @@ export class TableDragController implements ReactiveController {
           return;
         }
         if (result.type === 'self') {
-          this.host.view.rowMove(id, result.position);
+          this.host.view.rowMove(row.rowId, result.position);
         }
       },
     });
   };
 }
 
-const createDragPreview = (row: Element, x: number, y: number) => {
+const createDragPreview = (row: TableRow, x: number, y: number) => {
   const div = document.createElement('div');
-  // div.append(row.cloneNode(true));
+  const cloneRow = new TableRow();
+  cloneRow.view = row.view;
+  cloneRow.rowIndex = row.rowIndex;
+  cloneRow.rowId = row.rowId;
+  div.append(cloneRow);
   div.style.width = `${row.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
-  // div.style.pointerEvents = 'none';
-  div.style.transform = 'rotate(-3deg)';
+  div.style.pointerEvents = 'none';
+  div.style.backgroundColor = 'var(--affine-background-primary-color)';
+  div.style.boxShadow = 'var(--affine-shadow-2)';
   div.style.left = `${x}px`;
   div.style.top = `${y}px`;
   div.style.zIndex = '9999';

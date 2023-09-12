@@ -663,18 +663,23 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
       return;
     }
     const tableRect = this.tableContainer.getBoundingClientRect();
-    const { left, top, width, height, scale } = this.getRect(
+    // eslint-disable-next-line prefer-const
+    let { left, top, width, height, scale } = this.getRect(
       rowSelection?.start ?? 0,
       rowSelection?.end ?? this.tableView.view.rows.length - 1,
       columnSelection?.start ?? 0,
       columnSelection?.end ?? this.tableView.view.columnManagerList.length - 1
     );
+    const isRowSelection = rowSelection && !columnSelection;
+    if (isRowSelection) {
+      left = tableRect.left;
+      width = tableRect.width;
+    }
     div.style.left = `${left - tableRect.left / scale}px`;
     div.style.top = `${top - tableRect.top / scale}px`;
     div.style.width = `${width}px`;
     div.style.height = `${height}px`;
     div.style.display = 'block';
-    const isRowSelection = rowSelection && !columnSelection;
     div.style.border = isRowSelection
       ? '1px solid var(--affine-primary-color)'
       : 'unset';
