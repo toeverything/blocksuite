@@ -63,6 +63,9 @@ export class DocPageBlockComponent extends BlockElement<
       padding-left: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
       /* prettier-ignore */
       padding-right: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
+      /* TODO update theme after pass test */
+      padding-left: 96px;
+      padding-right: 96px;
     }
 
     .affine-doc-page-block-title {
