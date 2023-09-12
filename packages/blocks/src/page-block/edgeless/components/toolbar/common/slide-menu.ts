@@ -111,9 +111,9 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       const leftMin = 0;
       const leftMax = this._slideMenuContent.clientWidth - this.menuWidth + 2; // border is 2
       if (left === leftMin) {
-        this._previousSlideButton.style.opacity = 0;
+        this._previousSlideButton.style.opacity = '0';
       } else if (left === leftMax) {
-        this._nextSlideButton.style.opacity = 0;
+        this._nextSlideButton.style.opacity = '0';
       }
     });
   }
