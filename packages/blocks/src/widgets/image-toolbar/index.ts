@@ -9,40 +9,36 @@ import { ImageOptionsTemplate } from './image-options.js';
 
 @customElement('affine-image-toolbar-widget')
 export class AffineImageToolbarWidget extends WidgetElement {
-  private _whenHover = new WhenHoverController(
-    this,
-    ({ setFloating, abortController }) => {
-      const imageBlock = this.pageElement as ImageBlockComponent;
-      return {
-        template: ImageOptionsTemplate({
-          ref: setFloating,
-          model: imageBlock.model,
-          blob: imageBlock.blob,
-          abortController,
-          root: this.pageElement.root,
-        }),
-        computePosition: {
-          referenceElement: imageBlock.resizeImg,
-          placement: 'right-start',
-          middleware: [
-            offset({
-              mainAxis: 12,
-              crossAxis: 10,
-            }),
-            shift({
-              crossAxis: true,
-              padding: {
-                top: PAGE_HEADER_HEIGHT + 12,
-                bottom: 12,
-                right: 12,
-              },
-            }),
-          ],
-          autoUpdate: true,
-        },
-      };
-    }
-  );
+  private _whenHover = new WhenHoverController(this, ({ abortController }) => {
+    const imageBlock = this.pageElement as ImageBlockComponent;
+    return {
+      template: ImageOptionsTemplate({
+        model: imageBlock.model,
+        blob: imageBlock.blob,
+        abortController,
+        root: this.pageElement.root,
+      }),
+      computePosition: {
+        referenceElement: imageBlock.resizeImg,
+        placement: 'right-start',
+        middleware: [
+          offset({
+            mainAxis: 12,
+            crossAxis: 10,
+          }),
+          shift({
+            crossAxis: true,
+            padding: {
+              top: PAGE_HEADER_HEIGHT + 12,
+              bottom: 12,
+              right: 12,
+            },
+          }),
+        ],
+        autoUpdate: true,
+      },
+    };
+  });
 
   override connectedCallback() {
     super.connectedCallback();

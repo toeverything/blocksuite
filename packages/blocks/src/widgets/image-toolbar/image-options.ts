@@ -28,7 +28,7 @@ export function ImageOptionsTemplate({
   abortController,
   root,
 }: {
-  ref: RefOrCallback;
+  ref?: RefOrCallback;
   model: ImageBlockModel;
   blob: Blob;
   abortController: AbortController;
