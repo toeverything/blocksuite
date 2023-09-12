@@ -24,7 +24,8 @@ export type SliceSnapshot = {
   blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
-  properties: PagesPropertiesMeta;
+  workspaceId: string;
+  pageId: string;
 };
 
 export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
@@ -33,7 +34,8 @@ export const SliceSnapshotSchema: z.ZodType<SliceSnapshot> = z.object({
   blockVersions: z.record(z.number()),
   pageVersion: z.number(),
   workspaceVersion: z.number(),
-  properties: z.record(z.any()),
+  workspaceId: z.string(),
+  pageId: z.string(),
 });
 
 export type WorkspaceInfoSnapshot = {

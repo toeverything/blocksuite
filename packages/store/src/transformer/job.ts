@@ -315,18 +315,20 @@ export class Job {
       blockVersions,
       pageVersion,
       workspaceVersion,
-      properties,
+      pageId,
+      workspaceId,
     } = slice.data;
     const contentSnapshot = await Promise.all(
       content.map(block => this._blockToSnapshot(block))
     );
     const snapshot: SliceSnapshot = {
       type: 'slice',
-      content: contentSnapshot,
+      workspaceId,
+      pageId,
       blockVersions,
       pageVersion,
       workspaceVersion,
-      properties,
+      content: contentSnapshot,
     };
     this._slots.afterExport.emit({
       type: 'slice',
@@ -354,7 +356,8 @@ export class Job {
       blockVersions,
       pageVersion,
       workspaceVersion,
-      properties,
+      workspaceId,
+      pageId,
     } = snapshot;
     const contentBlocks = await Promise.all(
       content.map((block, i) =>
@@ -366,9 +369,8 @@ export class Job {
       blockVersions,
       pageVersion,
       workspaceVersion,
-      properties,
-      workspaceId: this._workspace.id,
-      pageId: page.id,
+      workspaceId,
+      pageId,
     });
     this._slots.afterImport.emit({
       type: 'slice',

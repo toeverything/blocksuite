@@ -1,5 +1,4 @@
 import type { BaseBlockModel } from '../schema/index.js';
-import type { PagesPropertiesMeta } from '../workspace/meta.js';
 
 type SliceData = {
   content: BaseBlockModel[];
@@ -8,7 +7,6 @@ type SliceData = {
   blockVersions: Record<string, number>;
   pageVersion: number;
   workspaceVersion: number;
-  properties: PagesPropertiesMeta;
 };
 
 export class Slice {
@@ -28,10 +26,6 @@ export class Slice {
 
   get workspaceVersion() {
     return this.data.workspaceVersion;
-  }
-
-  get properties() {
-    return this.data.properties;
   }
 
   get workspaceId() {
