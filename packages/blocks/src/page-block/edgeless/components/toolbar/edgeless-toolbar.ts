@@ -102,18 +102,28 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .eraser-button {
       position: relative;
       height: 66px;
-      width: 30px;
+      width: 60px;
       overflow-y: hidden;
+    }
+    .eraser-button .active-mode {
+      position: absolute;
+      top: 8px;
+      left: 6px;
+      width: 48px;
+      height: 66px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      background: var(--affine-hover-color);
     }
     #edgeless-eraser-icon {
       position: absolute;
-      top: 10px;
+      top: 4px;
       left: 50%;
       transform: translateX(-50%);
       transition: top 0.3s ease-in-out;
     }
     #edgeless-eraser-icon:hover {
-      top: 2px;
+      top: 0px;
     }
     .edgeless-toolbar-right-part {
       display: flex;
@@ -406,10 +416,12 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-toolbar-button
           .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
           .active=${type === 'eraser'}
-          .activeMode=${'background'}
           @click=${() => this.setEdgelessTool({ type: 'eraser' })}
         >
-          <div class="eraser-button">${EdgelessEraserIcon}</div>
+          <div class="eraser-button">
+            <div class=${type === 'eraser' ? 'active-mode' : ''}></div>
+            ${EdgelessEraserIcon}
+          </div>
         </edgeless-toolbar-button>
       </div>
       <div class="edgeless-toolbar-right-part">

@@ -50,7 +50,6 @@ export function AttachmentOptionsTemplate({
 
   const disableEmbed = !model.type?.startsWith('image/');
   const readonly = model.page.readonly;
-  const hideEditButton = readonly;
   let moreMenuAbortController: AbortController | null = null;
   return html`<style>
       ${styles}
@@ -61,18 +60,13 @@ export function AttachmentOptionsTemplate({
       class="affine-attachment-options"
       @pointerdown=${stopPropagation}
     >
-      <icon-button class="has-tool-tip" size="24px" disabled ?hidden=${true}>
+      <icon-button class="has-tool-tip" size="24px" ?hidden=${true}>
         ${ViewIcon}
         <tool-tip inert tip-position="top" role="tooltip">Preview</tool-tip>
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
-      <icon-button
-        class="has-tool-tip"
-        size="24px"
-        ?disabled=${readonly}
-        ?hidden=${true}
-      >
+      <icon-button class="has-tool-tip" size="24px" ?hidden=${true || readonly}>
         ${LinkIcon}
         <tool-tip inert tip-position="top" role="tooltip"
           >Turn into Link view</tool-tip
@@ -81,8 +75,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?disabled=${readonly}
-        ?hidden=${disableEmbed}
+        ?disabled=${readonly || disableEmbed}
         @click="${() => {
           turnIntoEmbedView(model);
           abortController.abort();
@@ -93,12 +86,12 @@ export function AttachmentOptionsTemplate({
           >Turn into Embed view</tool-tip
         >
       </icon-button>
-      <div class="divider" ?hidden=${disableEmbed}></div>
+      <div class="divider"></div>
 
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?hidden=${hideEditButton}
+        ?hidden=${readonly}
         @click="${() => {
           abortController.abort();
           const renameAbortController = new AbortController();
@@ -124,7 +117,7 @@ export function AttachmentOptionsTemplate({
       <icon-button
         class="has-tool-tip"
         size="24px"
-        ?hidden=${hideEditButton}
+        ?hidden=${readonly}
         @click=${() => {
           showCaption();
         }}
@@ -132,7 +125,7 @@ export function AttachmentOptionsTemplate({
         ${CaptionIcon}
         <tool-tip inert tip-position="top" role="tooltip">Caption</tool-tip>
       </icon-button>
-      <div class="divider" ?hidden=${hideEditButton}></div>
+      <div class="divider" ?hidden=${readonly}></div>
       <icon-button
         size="24px"
         class="has-tool-tip more-button"

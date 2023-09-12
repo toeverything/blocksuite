@@ -193,21 +193,23 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return this._isLoading;
   }
 
-  private _whenHover = new WhenHoverController(this, ({ setFloating }) => ({
-    template: html`<bookmark-toolbar
-      ${ref(setFloating)}
-      .model=${this.model}
-      .onSelected=${this._onToolbarSelected}
-      .root=${this}
-      .abortController=${this._optionsAbortController}
-    ></bookmark-toolbar>`,
-    computePosition: {
-      referenceElement: this,
-      placement: 'top-end',
-      middleware: [flip(), offset(4)],
-      autoUpdate: true,
-    },
-  }));
+  private _whenHover = new WhenHoverController(this, ({ abortController }) => {
+    this._optionsAbortController = abortController;
+    return {
+      template: html`<bookmark-toolbar
+        .model=${this.model}
+        .onSelected=${this._onToolbarSelected}
+        .root=${this}
+        .abortController=${abortController}
+      ></bookmark-toolbar>`,
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    };
+  });
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());

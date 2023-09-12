@@ -28,7 +28,7 @@ export function ImageOptionsTemplate({
   abortController,
   root,
 }: {
-  ref: RefOrCallback;
+  ref?: RefOrCallback;
   model: ImageBlockModel;
   blob: Blob;
   abortController: AbortController;
@@ -64,9 +64,6 @@ export function ImageOptionsTemplate({
       .has-tool-tip.delete-image-button:hover > svg {
         color: var(--affine-error-color);
       }
-      icon-button[hidden] {
-        display: none;
-      }
 
       ${tooltipStyle}
     </style>
@@ -81,7 +78,7 @@ export function ImageOptionsTemplate({
           ? html`<icon-button
               class="has-tool-tip"
               size="32px"
-              ?disabled=${readonly}
+              ?hidden=${readonly}
               @click=${() => {
                 abortController.abort();
                 turnImageIntoCardView(model, blob);
@@ -94,7 +91,7 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip"
           size="32px"
-          ?disabled=${readonly}
+          ?hidden=${readonly}
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
@@ -123,7 +120,7 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip delete-image-button"
           size="32px"
-          ?disabled=${readonly}
+          ?hidden=${readonly}
           @click="${() => {
             abortController.abort();
             model.page.deleteBlock(model);
@@ -135,8 +132,8 @@ export function ImageOptionsTemplate({
         <icon-button
           class="has-tool-tip"
           size="32px"
-          ?disabled=${readonly}
-          ?hidden=${!model.page.awarenessStore.getFlag('enable_bultin_ledits')}
+          ?hidden=${readonly ||
+          !model.page.awarenessStore.getFlag('enable_bultin_ledits')}
           @click="${() => {
             abortController.abort();
             openLeditsEditor(model, blob, root);

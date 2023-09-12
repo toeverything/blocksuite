@@ -94,7 +94,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
     const { surface } = edgeless;
     return html`
       <div class="frame-menu-container">
-        <edgeless-slide-menu .menuWidth=${290} .showNext=${false}>
+        <edgeless-slide-menu .menuWidth=${304} .showNext=${false}>
           <div class="menu-content">
             <div class="frame-add-button custom">Custom</div>
             <menu-divider .vertical=${true}></menu-divider>
