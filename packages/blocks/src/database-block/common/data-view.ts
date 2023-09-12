@@ -37,6 +37,12 @@ export interface DataViewExpose {
   getSelection?(): DataViewSelection | undefined;
 
   focusFirstCell(): void;
+
+  showIndicator?(evt: MouseEvent): boolean;
+
+  hideIndicator?(): void;
+
+  moveTo?(id: string, evt: MouseEvent): void;
 }
 
 declare global {

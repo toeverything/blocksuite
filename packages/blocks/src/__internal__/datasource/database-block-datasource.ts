@@ -3,6 +3,7 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
+import { undefined } from 'zod';
 
 import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
@@ -20,7 +21,7 @@ import { selectColumnConfig } from '../../database-block/common/columns/select/c
 import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
 import type { InsertPosition } from '../../database-block/index.js';
-import { insertPositionToIndex } from '../../database-block/utils/insert.js';
+import { insertPositionToIndex } from '../../database-block/index.js';
 import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
 import { getIcon } from './block-icons.js';
@@ -320,6 +321,15 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       ...super.detailSlots,
       header: createUniComponentFromWebComponent(BlockRenderer),
     };
+  }
+
+  public rowMove(rowId: string, position: InsertPosition): void {
+    const model = this.page.getBlockById(rowId);
+    if (model) {
+      const index = insertPositionToIndex(position, this._model.children);
+      const target = this._model.children[index];
+      this.page.moveBlocks([model], this._model, target);
+    }
   }
 }
 

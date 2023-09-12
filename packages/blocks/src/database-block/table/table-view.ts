@@ -4,7 +4,6 @@ import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/selection.js';
 
-import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -24,6 +23,7 @@ import { BaseDataView } from '../common/base-data-view.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { TableViewClipboard } from './clipboard.js';
+import { TableDragController } from './components/drag.js';
 import { openDetail, popRowMenu } from './components/menu.js';
 import type { DatabaseSelectionView } from './components/selection.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './consts.js';
@@ -156,12 +156,20 @@ const styles = css`
   .database-cell {
     border-left: 1px solid var(--affine-border-color);
   }
-
+  .data-view-table-left-bar {
+    display: flex;
+    align-items: center;
+    position: sticky;
+    left: 0;
+    width: 4px;
+    flex-shrink: 0;
+    background-color: var(--affine-background-primary-color);
+  }
   ${tooltipStyle}
 `;
 
 @customElement('affine-database-table')
-export class DatabaseTable extends BaseDataView<
+export class DataViewTable extends BaseDataView<
   DataViewTableManager,
   TableViewSelection
 > {
@@ -169,7 +177,7 @@ export class DatabaseTable extends BaseDataView<
 
   @query('affine-database-selection')
   public selection!: DatabaseSelectionView;
-
+  dragController = new TableDragController(this);
   private get readonly() {
     return this.view.readonly;
   }
@@ -264,6 +272,17 @@ export class DatabaseTable extends BaseDataView<
         data-row-id="${rowId}"
         @contextmenu="${contextMenu}"
       >
+        <div class="data-view-table-left-bar">
+          <div
+            class="show-on-hover-row data-view-table-view-drag-handler"
+            style="width: 4px;
+            border-radius: 2px;
+            height: 12px;
+            background-color: var(--affine-placeholder-color);
+            cursor:grab;
+"
+          ></div>
+        </div>
         ${repeat(
           view.columnManagerList,
           v => v.id,
@@ -383,6 +402,12 @@ export class DatabaseTable extends BaseDataView<
         .affine-database-block-row:hover .row-ops {
           visibility: visible;
         }
+        .affine-database-block-row .show-on-hover-row {
+          visibility: hidden;
+        }
+        .affine-database-block-row:hover .show-on-hover-row {
+          visibility: visible;
+        }
 
         .row-op {
           display: flex;
@@ -435,6 +460,22 @@ export class DatabaseTable extends BaseDataView<
       event.stopPropagation();
     }
   };
+
+  public hideIndicator(): void {
+    this.dragController.dropPreview.remove();
+  }
+
+  public moveTo(id: string, evt: MouseEvent): void {
+    const result = this.dragController.getInsertPosition(evt);
+    if (result) {
+      this.view.rowMove(id, result.position);
+    }
+  }
+
+  public showIndicator(evt: MouseEvent): boolean {
+    return this.dragController.showIndicator(evt) != null;
+  }
+
   override render() {
     const addRow = (position: InsertPosition) => {
       this._addRow(this.view, position);
@@ -481,6 +522,6 @@ export class DatabaseTable extends BaseDataView<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-database-table': DatabaseTable;
+    'affine-database-table': DataViewTable;
   }
 }

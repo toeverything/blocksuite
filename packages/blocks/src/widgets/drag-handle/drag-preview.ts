@@ -41,7 +41,7 @@ export class DragPreview extends ShadowlessElement {
 
       affine-drag-preview.grabbing {
         cursor: grabbing;
-        pointer-events: auto;
+        /*pointer-events: auto;*/
       }
 
       affine-drag-preview.grabbing:after {

@@ -17,16 +17,16 @@ import {
   type BaseViewClipboardConfig,
 } from '../common/clipboard.js';
 import type { DatabaseCellContainer } from '../table/components/cell-container.js';
-import type { DatabaseTable } from '../table/table-view.js';
+import type { DataViewTable } from '../table/table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
 interface TableViewClipboardConfig
   extends BaseViewClipboardConfig<DataViewTableManager> {
-  view: DatabaseTable;
+  view: DataViewTable;
 }
 
 export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> {
-  private _view: DatabaseTable;
+  private _view: DataViewTable;
 
   constructor(config: TableViewClipboardConfig) {
     super(config);
@@ -57,7 +57,7 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
     _context: UIEventStateContext,
     tableSelection: TableViewSelection
   ) => {
-    const view = this._view as DatabaseTable;
+    const view = this._view as DataViewTable;
     const data = this._data;
 
     // cells
@@ -96,7 +96,7 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
 
   private _onPaste = (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
-    const view = this._view as DatabaseTable;
+    const view = this._view as DataViewTable;
     const data = this._data;
 
     const tableSelection = this._view.selection.selection;
@@ -165,7 +165,7 @@ function getSelectionFromHTMLString(type: CLIPBOARD_MIMETYPE, html: string) {
 function copyCellsValue(
   selection: TableViewSelection,
   data: DataViewTableManager,
-  view: DatabaseTable
+  view: DataViewTable
 ) {
   const { rowsSelection, columnsSelection, focus } = selection;
   const values: string[][] = [];
@@ -212,7 +212,7 @@ type CopyedSelectionData = CopyedColumn[][];
 function getCopyedValuesFromSelection(
   selection: TableViewSelection,
   data: DataViewTableManager,
-  view: DatabaseTable
+  view: DataViewTable
 ): CopyedSelectionData {
   const { rowsSelection, columnsSelection, focus } = selection;
   const values: CopyedColumn[][] = [];
@@ -328,7 +328,7 @@ function getTargetRangeFromSelection(
 
 function pasteToCells(
   data: DataViewTableManager,
-  view: DatabaseTable,
+  view: DataViewTable,
   copyedSelectionData: CopyedSelectionData,
   rowStartIndex: number,
   columnStartIndex: number,

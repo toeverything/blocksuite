@@ -10,7 +10,7 @@ import type {
   TableViewSelection,
 } from '../../../__internal__/utils/types.js';
 import { startDrag } from '../../utils/drag.js';
-import type { DatabaseTable } from '../table-view.js';
+import type { DataViewTable } from '../table-view.js';
 import type { DatabaseCellContainer } from './cell-container.js';
 import { popRowMenu } from './menu.js';
 
@@ -46,7 +46,7 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
   `;
 
   @property({ attribute: false })
-  tableView!: DatabaseTable;
+  tableView!: DataViewTable;
 
   private _tableViewSelection?: TableViewSelection;
   private focusRef = createRef<HTMLDivElement>();
@@ -136,9 +136,10 @@ export class DatabaseSelectionView extends WithDisposable(ShadowlessElement) {
               return false;
             }
             this.startDrag(event, cell);
+            event.preventDefault();
+            return true;
           }
-          event.preventDefault();
-          return true;
+          return false;
         }
         return false;
       })

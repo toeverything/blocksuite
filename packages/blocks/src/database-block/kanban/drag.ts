@@ -28,6 +28,44 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
   @query('.drag-preview')
   dragPreview!: HTMLDivElement;
 
+  dropPreview = createDropPreview();
+
+  getInsertPosition = (
+    evt: MouseEvent
+  ):
+    | { group: KanbanGroup; card?: KanbanCard; position: InsertPosition }
+    | undefined => {
+    const eles = document.elementsFromPoint(evt.x, evt.y);
+    const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
+    if (target) {
+      const card = getCardByPoint(target, evt.y);
+      return {
+        group: target,
+        card,
+        position: card
+          ? {
+              before: true,
+              id: card.cardId,
+            }
+          : 'end',
+      };
+    } else {
+      return;
+    }
+  };
+  shooIndicator = (
+    evt: MouseEvent,
+    self: KanbanCard | undefined
+  ): { group: KanbanGroup; position: InsertPosition } | undefined => {
+    const position = this.getInsertPosition(evt);
+    if (position) {
+      this.dropPreview.display(position.group, self, position.card);
+    } else {
+      this.dropPreview.remove();
+    }
+    return position;
+  };
+
   override connectedCallback() {
     super.connectedCallback();
     if (this.kanbanView.view.readonly) {
@@ -57,7 +95,6 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
       evt.x - offsetLeft,
       evt.y - offsetTop
     );
-    const dropPreview = createDropPreview();
     const currentGroup = ele.closest('affine-data-view-kanban-group');
     startDrag<
       {
@@ -71,33 +108,24 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
       onDrag: () => ({}),
       onMove: evt => {
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
-        const eles = document.elementsFromPoint(evt.x, evt.y);
-        const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
-        if (target) {
-          const card = getCardByPoint(target, evt.y);
-          dropPreview.display(target, ele, card);
+        const result = this.shooIndicator(evt, ele);
+        if (result) {
           return {
             drop: {
-              key: target.group.key,
-              position: card
-                ? {
-                    before: true,
-                    id: card.cardId,
-                  }
-                : 'end',
+              key: result.group.group.key,
+              position: result.position,
             },
           };
         }
-        dropPreview.remove();
         return {};
       },
       onClear: () => {
         preview.remove();
-        dropPreview.remove();
+        this.dropPreview.remove();
       },
       onDrop: ({ drop }) => {
         preview.remove();
-        dropPreview.remove();
+        this.dropPreview.remove();
         if (drop && currentGroup) {
           currentGroup.group.helper.moveCardTo(
             ele.cardId,
@@ -151,7 +179,11 @@ const createDropPreview = () => {
   div.style.backgroundColor = 'var(--affine-primary-color)';
   div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
   return {
-    display(group: KanbanGroup, self: KanbanCard, card?: KanbanCard) {
+    display(
+      group: KanbanGroup,
+      self: KanbanCard | undefined,
+      card?: KanbanCard
+    ) {
       const target = card ?? group.querySelector('.add-card');
       assertExists(target);
       if (target.previousElementSibling === self || target === self) {

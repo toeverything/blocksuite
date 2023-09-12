@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { Disposable } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
@@ -43,9 +44,15 @@ export type DragHandleOption = {
 export class DragHandleOptionsRunner {
   options: DragHandleOption[] = [];
 
-  register(option: DragHandleOption) {
-    if (this.options.find(op => op.flavour === option.flavour)) return;
+  register(option: DragHandleOption): Disposable {
+    if (this.options.find(op => op.flavour === option.flavour))
+      return { dispose() {} };
 
     this.options.push(option);
+    return {
+      dispose: () => {
+        this.options.splice(this.options.indexOf(option), 1);
+      },
+    };
   }
 }

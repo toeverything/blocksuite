@@ -11,7 +11,7 @@ import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { createRef } from 'lit/directives/ref.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
@@ -19,6 +19,8 @@ import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelection } from '../__internal__/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
+import { captureEventTarget } from '../widgets/drag-handle/utils.js';
+import { DragHandleWidget } from '../widgets/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -27,7 +29,9 @@ import { renderFilterBar } from './common/filter/filter-bar.js';
 import { renderTools } from './common/header/tools/tools.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { SingleViewSource, ViewSource } from './common/view-source.js';
+import type { DataViewNative } from './data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseBlockSchema } from './database-model.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
@@ -73,9 +77,59 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       );
       return !!selection;
     });
+    let canDrop = false;
+    this.disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: DatabaseBlockSchema.model.flavour,
+        onDragStart: () => {
+          return false;
+        },
+        onDragMove: state => {
+          const target = captureEventTarget(state.raw.target);
+          const view = this.view;
+          if (view && target instanceof HTMLElement && this.contains(target)) {
+            canDrop = view.showIndicator?.(state.raw) ?? false;
+            return false;
+          }
+          if (canDrop) {
+            view?.hideIndicator?.();
+            canDrop = false;
+          }
+          return false;
+        },
+        onDragEnd: (state, _, draggingElements) => {
+          const target = state.raw.target;
+          const view = this.view;
+          if (
+            canDrop &&
+            view &&
+            view.moveTo &&
+            target instanceof HTMLElement &&
+            this.parentElement?.contains(target)
+          ) {
+            const blocks = draggingElements.map(v => v.model);
+            this.model.page.moveBlocks(blocks, this.model);
+            blocks.forEach(model => {
+              view.moveTo?.(model.id, state.raw);
+            });
+            view.hideIndicator?.();
+            return false;
+          }
+          if (canDrop) {
+            view?.hideIndicator?.();
+            canDrop = false;
+          }
+          return false;
+        },
+      })
+    );
   }
 
-  private _view = createRef<DataViewExpose>();
+  private _view = createRef<DataViewNative>();
+
+  get view() {
+    return this._view.value?.expose;
+  }
 
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
@@ -177,6 +231,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     return html`
       <div style="position: relative">
         <affine-data-view-native
+          ${ref(this._view)}
           .bindHotkey="${this._bindHotkey}"
           .handleEvent="${this._handleEvent}"
           .getFlag="${this.getFlag}"

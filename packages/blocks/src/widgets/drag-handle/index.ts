@@ -62,7 +62,7 @@ export class DragHandleWidget extends WidgetElement {
   static staticOptionRunner = new DragHandleOptionsRunner();
 
   static registerOption(option: DragHandleOption) {
-    DragHandleWidget.staticOptionRunner.register(option);
+    return DragHandleWidget.staticOptionRunner.register(option);
   }
 
   @query('.affine-drag-handle-container')

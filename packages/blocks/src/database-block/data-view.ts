@@ -77,6 +77,10 @@ export class DataViewNative extends WithDisposable(ShadowlessElement) {
   viewSource!: ViewSource;
   @property({ attribute: false })
   headerComponent!: DataViewHeaderComponentProp;
+
+  public get expose() {
+    return this._view.value;
+  }
   override connectedCallback() {
     super.connectedCallback();
     this.disposables.add(
