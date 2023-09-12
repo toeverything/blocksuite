@@ -1,8 +1,8 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import type { ReactiveController } from 'lit';
 
-import type { KanbanViewSelectionWithType } from '../../__internal__/index.js';
-import type { DataViewKanban } from './kanban-view.js';
+import type { KanbanViewSelectionWithType } from '../../../__internal__/index.js';
+import type { DataViewKanban } from '../kanban-view.js';
 
 export class KanbanClipboardController implements ReactiveController {
   constructor(public host: DataViewKanban) {
