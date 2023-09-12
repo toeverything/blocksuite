@@ -953,13 +953,20 @@ export class DragHandleWidget extends WidgetElement {
 
     for (const option of this.optionRunner.options) {
       if (
-        option.onDragMove(state, this.optionRunnerDragging, () =>
-          this.getDropIndicator(state)
+        option.onDragMove(
+          state,
+          this.optionRunnerDragging,
+          this.draggingElements,
+          () => this.getDropIndicator(state)
         )
-      )
+      ) {
+        if (!this.optionRunnerDragging) this.optionRunnerDragging = true;
         return true;
+      }
     }
 
+    // call default drag move handler if no option return true
+    this.optionRunnerDragging = false;
     return this._onDragMove(ctx);
   };
 
@@ -973,7 +980,13 @@ export class DragHandleWidget extends WidgetElement {
     this._removeDragPreview();
 
     for (const option of this.optionRunner.options) {
-      if (option.onDragEnd(state, this.optionRunnerDragging)) {
+      if (
+        option.onDragEnd(
+          state,
+          this.optionRunnerDragging,
+          this.draggingElements
+        )
+      ) {
         this._hide(true);
         return true;
       }

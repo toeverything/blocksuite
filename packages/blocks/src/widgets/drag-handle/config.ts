@@ -1,4 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
+import type { BlockElement } from '@blocksuite/lit';
 
 export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 2;
@@ -29,9 +30,14 @@ export type DragHandleOption = {
   onDragMove: (
     state: PointerEventState,
     dragging: boolean,
+    draggingElements: BlockElement[],
     getDropIndicator: () => DropIndicator | null
   ) => boolean;
-  onDragEnd: (state: PointerEventState, dragging: boolean) => boolean;
+  onDragEnd: (
+    state: PointerEventState,
+    dragging: boolean,
+    draggingElements: BlockElement[]
+  ) => boolean;
 };
 
 export class DragHandleOptionsRunner {
