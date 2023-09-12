@@ -3,7 +3,6 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
-import { undefined } from 'zod';
 
 import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
 import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
