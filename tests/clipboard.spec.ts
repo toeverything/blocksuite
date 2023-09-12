@@ -1146,7 +1146,7 @@ test(
     await waitNextFrame(page);
     await pressEnter(page);
     await waitNextFrame(page);
-    await pasteByKeyboard(page);
+    await pasteByKeyboard(page, false);
     await waitNextFrame(page);
 
     await assertStoreMatchJSX(
