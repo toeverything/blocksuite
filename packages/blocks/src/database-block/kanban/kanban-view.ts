@@ -1,11 +1,10 @@
 import './group.js';
 import './header.js';
-import './drag.js';
+import './controller/drag.js';
 import '../common/group-by/define.js';
 
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
-import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 import Sortable from 'sortablejs';
@@ -16,14 +15,14 @@ import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import { KanbanViewClipboard } from './clipboard.js';
-import type { KanbanDrag } from './drag.js';
+import { KanbanDragController } from './controller/drag.js';
+import { KanbanHotkeysController } from './controller/hotkeys.js';
+import { KanbanSelectionController } from './controller/selection.js';
 import { KanbanGroup } from './group.js';
-import { KanbanHotkeys } from './hotkeys.js';
 import type {
   DataViewKanbanManager,
   GroupHelper,
 } from './kanban-view-manager.js';
-import { KanbanSelection } from './selection.js';
 
 const styles = css`
   affine-data-view-kanban {
@@ -66,9 +65,9 @@ export class DataViewKanban extends BaseDataView<
 > {
   static override styles = styles;
 
-  private dragRef = createRef<KanbanDrag>();
-  selection = new KanbanSelection(this);
-  hotkeys = new KanbanHotkeys(this);
+  private dragController = new KanbanDragController(this);
+  selectionController = new KanbanSelectionController(this);
+  hotkeysController = new KanbanHotkeysController(this);
   @query('.affine-data-view-kanban-groups')
   groups!: HTMLElement;
   groupHelper?: GroupHelper;
@@ -80,11 +79,6 @@ export class DataViewKanban extends BaseDataView<
         this.requestUpdate();
       })
     );
-    this.selection
-      .run()
-      .forEach(disposable => this._disposables.add(disposable));
-    this._disposables.add(this.hotkeys.run());
-
     // init clipboard
     const clipboard = new KanbanViewClipboard({
       view: this,
@@ -192,27 +186,23 @@ export class DataViewKanban extends BaseDataView<
         )}
         ${this.renderAddGroup()}
       </div>
-      <affine-data-view-kanban-drag
-        ${ref(this.dragRef)}
-        .kanbanView="${this}"
-      ></affine-data-view-kanban-drag>
     `;
   }
 
   focusFirstCell(): void {
-    this.selection.focusFirstCell();
+    this.selectionController.focusFirstCell();
   }
 
   getSelection() {
-    return this.selection.selection;
+    return this.selectionController.selection;
   }
 
   public hideIndicator(): void {
-    this.dragRef.value?.dropPreview.remove();
+    this.dragController.dropPreview.remove();
   }
 
   public moveTo(id: string, evt: MouseEvent): void {
-    const position = this.dragRef.value?.getInsertPosition(evt);
+    const position = this.dragController.getInsertPosition(evt);
     if (position) {
       position.group.group.helper.moveCardTo(
         id,
@@ -224,7 +214,7 @@ export class DataViewKanban extends BaseDataView<
   }
 
   public showIndicator(evt: MouseEvent): boolean {
-    return this.dragRef.value?.shooIndicator(evt, undefined) != null;
+    return this.dragController.shooIndicator(evt, undefined) != null;
   }
 }
 

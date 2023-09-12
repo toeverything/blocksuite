@@ -25,7 +25,7 @@ export class KanbanViewClipboard extends BaseViewClipboard<DataViewKanbanManager
   override init() {
     this._disposables.add(
       this._view.handleEvent('copy', ctx => {
-        const kanbanSelection = this._view.selection.selection;
+        const kanbanSelection = this._view.selectionController.selection;
         if (!kanbanSelection) return false;
 
         this._onCopy(ctx, kanbanSelection);

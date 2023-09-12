@@ -9,13 +9,16 @@ import {
   MoveRightIcon,
 } from '../../../icons/index.js';
 import { popSideDetail } from '../../common/detail/layout.js';
-import type { DatabaseSelectionView } from './selection.js';
+import type { TableSelectionController } from '../controller/selection.js';
 
-export const openDetail = (rowId: string, selection: DatabaseSelectionView) => {
+export const openDetail = (
+  rowId: string,
+  selection: TableSelectionController
+) => {
   const old = selection.selection;
   selection.selection = undefined;
   popSideDetail({
-    view: selection.tableView.view,
+    view: selection.host.view,
     rowId: rowId,
     onClose: () => {
       selection.selection = old;
@@ -26,7 +29,7 @@ export const openDetail = (rowId: string, selection: DatabaseSelectionView) => {
 export const popRowMenu = (
   ele: ReferenceElement,
   rowId: string,
-  selection: DatabaseSelectionView
+  selection: TableSelectionController
 ) => {
   popFilterableSimpleMenu(ele, [
     {

@@ -269,7 +269,7 @@ export class KanbanCard extends WithDisposable(ShadowlessElement) {
   };
 
   private getSelection() {
-    return this.closest('affine-data-view-kanban')?.selection;
+    return this.closest('affine-data-view-kanban')?.selectionController;
   }
 
   private clickMore = (e: MouseEvent) => {
