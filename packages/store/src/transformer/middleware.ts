@@ -3,9 +3,11 @@ import type { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '../schema/index.js';
 import type { Page, Workspace } from '../workspace/index.js';
 import type { AssetsManager } from './assets.js';
+import type { Slice } from './slice.js';
 import type {
   BlockSnapshot,
   PageSnapshot,
+  SliceSnapshot,
   WorkspaceInfoSnapshot,
 } from './type.js';
 
@@ -17,6 +19,10 @@ export type BeforeImportPayload =
   | {
       snapshot: PageSnapshot;
       type: 'page';
+    }
+  | {
+      snapshot: SliceSnapshot;
+      type: 'slice';
     }
   | {
       snapshot: WorkspaceInfoSnapshot;
@@ -33,6 +39,10 @@ export type BeforeExportPayload =
       type: 'page';
     }
   | {
+      slice: Slice;
+      type: 'slice';
+    }
+  | {
       type: 'info';
     };
 
@@ -46,6 +56,11 @@ export type FinalPayload =
       snapshot: PageSnapshot;
       type: 'page';
       page: Page;
+    }
+  | {
+      snapshot: SliceSnapshot;
+      type: 'slice';
+      slice: Slice;
     }
   | {
       snapshot: WorkspaceInfoSnapshot;

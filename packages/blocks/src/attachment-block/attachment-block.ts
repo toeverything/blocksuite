@@ -36,29 +36,25 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
-  private _whenHover = new WhenHoverController(
-    this,
-    ({ setFloating, abortController }) => ({
-      template: AttachmentOptionsTemplate({
-        ref: setFloating,
-        anchor: this,
-        model: this.model,
-        showCaption: () => {
-          this._showCaption = true;
-          requestAnimationFrame(() => {
-            this._captionInput.focus();
-          });
-        },
-        abortController,
-      }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-end',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
+  private _whenHover = new WhenHoverController(this, ({ abortController }) => ({
+    template: AttachmentOptionsTemplate({
+      anchor: this,
+      model: this.model,
+      showCaption: () => {
+        this._showCaption = true;
+        requestAnimationFrame(() => {
+          this._captionInput.focus();
+        });
       },
-    })
-  );
+      abortController,
+    }),
+    computePosition: {
+      referenceElement: this,
+      placement: 'top-end',
+      middleware: [flip(), offset(4)],
+      autoUpdate: true,
+    },
+  }));
 
   override connectedCallback() {
     super.connectedCallback();

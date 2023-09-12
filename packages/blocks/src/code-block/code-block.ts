@@ -262,42 +262,38 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _whenHover = new WhenHoverController(
-    this,
-    ({ setFloating, abortController }) => ({
-      template: ({ updatePortal }) =>
-        CodeOptionTemplate({
-          ref: setFloating,
-          anchor: this,
-          model: this.model,
-          wrap: this._wrap,
-          onClickWrap: () => {
-            this._onClickWrapBtn();
-            updatePortal();
-          },
-          abortController,
+  private _whenHover = new WhenHoverController(this, ({ abortController }) => ({
+    template: ({ updatePortal }) =>
+      CodeOptionTemplate({
+        anchor: this,
+        model: this.model,
+        wrap: this._wrap,
+        onClickWrap: () => {
+          this._onClickWrapBtn();
+          updatePortal();
+        },
+        abortController,
+      }),
+    computePosition: {
+      referenceElement: this,
+      placement: 'right-start',
+      middleware: [
+        offset({
+          mainAxis: 12,
+          crossAxis: 10,
         }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'right-start',
-        middleware: [
-          offset({
-            mainAxis: 12,
-            crossAxis: 10,
-          }),
-          shift({
-            crossAxis: true,
-            padding: {
-              top: PAGE_HEADER_HEIGHT + 12,
-              bottom: 12,
-              right: 12,
-            },
-          }),
-        ],
-        autoUpdate: true,
-      },
-    })
-  );
+        shift({
+          crossAxis: true,
+          padding: {
+            top: PAGE_HEADER_HEIGHT + 12,
+            bottom: 12,
+            right: 12,
+          },
+        }),
+      ],
+      autoUpdate: true,
+    },
+  }));
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();

@@ -1,13 +1,32 @@
-import { DisposableGroup, whenHover } from '@blocksuite/global/utils';
+import {
+  DisposableGroup,
+  whenHover,
+  type WhenHoverOptions,
+} from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import type { AdvancedPortalOptions } from './portal.js';
 import { createLitPortal } from './portal.js';
 
-type OptionsParams = Omit<ReturnType<typeof whenHover>, 'dispose'> & {
+type OptionsParams = Omit<
+  ReturnType<typeof whenHover>,
+  'setFloating' | 'dispose'
+> & {
   abortController: AbortController;
 };
-type WhenHoverOptions = Omit<AdvancedPortalOptions, 'abortController'>;
+type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
+
+type HoverOptions = {
+  /**
+   * Set the portal as hover element automatically.
+   * @default true
+   */
+  setPortalAsFloating: boolean;
+} & WhenHoverOptions;
+
+const DEFAULT_HOVER_OPTIONS: HoverOptions = {
+  setPortalAsFloating: true,
+};
 
 export class WhenHoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
@@ -16,7 +35,8 @@ export class WhenHoverController implements ReactiveController {
   private _abortController?: AbortController;
   private _setReference?: (element?: Element | undefined) => void;
   private _portal?: HTMLDivElement;
-  private readonly _options: (options: OptionsParams) => WhenHoverOptions;
+  private readonly _onHover: (options: OptionsParams) => HoverPortalOptions;
+  private readonly _hoverOptions: HoverOptions;
 
   get setReference() {
     if (!this._setReference) {
@@ -31,10 +51,12 @@ export class WhenHoverController implements ReactiveController {
 
   constructor(
     host: ReactiveControllerHost,
-    options: (options: OptionsParams) => WhenHoverOptions
+    onHover: (options: OptionsParams) => HoverPortalOptions,
+    hoverOptions?: Partial<HoverOptions>
   ) {
     (this.host = host).addController(this);
-    this._options = options;
+    this._onHover = onHover;
+    this._hoverOptions = { ...DEFAULT_HOVER_OPTIONS, ...hoverOptions };
   }
 
   hostConnected() {
@@ -52,15 +74,19 @@ export class WhenHoverController implements ReactiveController {
       this._abortController.signal.addEventListener('abort', () => {
         this._abortController = undefined;
       });
-      this._portal = createLitPortal({
-        ...this._options({
-          setReference,
-          setFloating,
-          abortController: this._abortController,
-        }),
+      const portalOptions = this._onHover({
+        setReference,
         abortController: this._abortController,
       });
-    });
+      this._portal = createLitPortal({
+        ...portalOptions,
+        abortController: this._abortController,
+      });
+
+      if (this._hoverOptions.setPortalAsFloating) {
+        setFloating(this._portal);
+      }
+    }, this._hoverOptions);
     this._setReference = setReference;
     this._disposables.add(dispose);
   }
