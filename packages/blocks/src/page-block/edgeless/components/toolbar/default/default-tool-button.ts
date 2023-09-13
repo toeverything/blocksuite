@@ -38,6 +38,18 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
   @query('.current-icon')
   currentIcon!: HTMLInputElement;
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    if (!localStorage.defaultTool) {
+      localStorage.defaultTool = 'default';
+    }
+    this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
+      if (type === 'default' || type === 'pan') {
+        localStorage.defaultTool = type;
+      }
+    });
+  }
+
   private _fadeOut() {
     this.currentIcon.style.opacity = '0';
     this.currentIcon.style.transform = `translateY(-5px)`;
@@ -51,7 +63,11 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
   private _changeTool() {
     const type = this.edgelessTool?.type;
     if (type !== 'default' && type !== 'pan') {
-      this.setEdgelessTool({ type: 'default' });
+      if (localStorage.defaultTool === 'default') {
+        this.setEdgelessTool({ type: 'default' });
+      } else if (localStorage.defaultTool === 'pan') {
+        this.setEdgelessTool({ type: 'pan', panning: false });
+      }
       return;
     }
     this._fadeOut();
@@ -81,9 +97,9 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
         .iconContainerPadding=${8}
         @click=${this._changeTool}
       >
-        <span class="current-icon"
-          >${type === 'pan' ? HandIcon : SelectIcon}</span
-        >
+        <span class="current-icon">
+          ${localStorage.defaultTool === 'default' ? SelectIcon : HandIcon}
+        </span>
         <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
           ${ArrowUpIcon}
         </span>
