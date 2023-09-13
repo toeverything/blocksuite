@@ -23,7 +23,7 @@ import { DragIndicator } from '../components/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
 import {
   captureEventTarget,
-  getDropIndicator,
+  getDropResult,
 } from '../widgets/drag-handle/utils.js';
 import { DragHandleWidget } from '../widgets/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
@@ -57,7 +57,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   `;
   indicator = new DragIndicator();
   onDrag = (evt: MouseEvent, id: string): (() => void) => {
-    const result = getDropIndicator(evt);
+    const result = getDropResult(evt);
     if (result && result.rect) {
       document.body.append(this.indicator);
       this.indicator.rect = Rect.fromLWTH(

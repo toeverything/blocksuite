@@ -23,10 +23,11 @@ import {
   Point,
   Rect,
 } from '../../__internal__/index.js';
-import { DragIndicator } from '../../index.js';
 import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
+import { DragPreview } from './components/drag-preview.js';
+import { DropIndicator } from './components/drop-indicator.js';
 import {
   DRAG_HANDLE_GRABBER_BORDER_RADIUS,
   DRAG_HANDLE_GRABBER_HEIGHT,
@@ -35,11 +36,10 @@ import {
   DRAG_HOVER_RECT_PADDING,
   type DragHandleOption,
   DragHandleOptionsRunner,
-  type DropIndicator,
+  type DropResult,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
-import { DragPreview } from './drag-preview.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
   captureEventTarget,
@@ -76,7 +76,7 @@ export class DragHandleWidget extends WidgetElement {
   dropBefore = false;
   dragging = false;
   dragPreview: DragPreview | null = null;
-  dropIndicator: DragIndicator | null = null;
+  dropIndicator: DropIndicator | null = null;
   lastDragPointerState: PointerEventState | null = null;
   scale = 1;
   rafID = 0;
@@ -148,7 +148,7 @@ export class DragHandleWidget extends WidgetElement {
   /**
    * When dragging, should update indicator position and target drop block id
    */
-  getDropIndicator = (state: PointerEventState): DropIndicator | null => {
+  getDropResult = (state: PointerEventState): DropResult | null => {
     let dropIndicator = null;
     const point = getContainerOffsetPoint(state);
     const closestBlockElement = getClosestBlockByPoint(
@@ -220,11 +220,11 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   createDropIndicator = () => {
-    if (!this.dropIndicator) this.dropIndicator = new DragIndicator();
+    if (!this.dropIndicator) this.dropIndicator = new DropIndicator();
     this.pageElement.append(this.dropIndicator);
   };
 
-  updateDropIndicator = (indicator: DropIndicator | null) => {
+  updateDropIndicator = (indicator: DropResult | null) => {
     this.dropBlockId = indicator?.dropBlockId ?? '';
     this.dropBefore = indicator?.dropBefore ?? false;
     if (this.dropIndicator) {
@@ -253,7 +253,7 @@ export class DragHandleWidget extends WidgetElement {
       this.dropBlockId = '';
       // this.indicatorRect = null;
     } else {
-      const dropIndicator = this.getDropIndicator(state);
+      const dropIndicator = this.getDropResult(state);
       this.updateDropIndicator(dropIndicator);
     }
 
