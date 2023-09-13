@@ -808,7 +808,7 @@ const getTableColumns = (
         .filter((value, index, array) => array.indexOf(value) === index)
         .map(uniqueValue => {
           return {
-            id: nanoid(),
+            id: nanoid('unknown'),
             value: uniqueValue,
             color: getTagColor(),
           };

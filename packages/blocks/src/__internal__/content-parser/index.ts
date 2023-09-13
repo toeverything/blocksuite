@@ -880,7 +880,7 @@ export class ContentParser {
     const pageMetaData = this._getMetaDataFromhtmlText(text);
     const tags = pageMetaData.tags.map(tag => {
       return {
-        id: nanoid(),
+        id: nanoid('unknown'),
         value: tag.trim(),
         color: getTagColor(),
       };
