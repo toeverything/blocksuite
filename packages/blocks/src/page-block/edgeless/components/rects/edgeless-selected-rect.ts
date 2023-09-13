@@ -11,6 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
+import type { NoteBlockModel } from '../../../../index.js';
 import {
   type Bound,
   ConnectorElement,
@@ -581,18 +582,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    const isSingleHiddenNote =
+    const isSingleNote =
       elements.length === 1 &&
       isTopLevelBlock(elements[0]) &&
-      matchFlavours(elements[0], ['affine:note']) &&
-      elements[0].hidden;
+      matchFlavours(elements[0], ['affine:note']);
+    const isSingleHiddenNote =
+      isSingleNote && (elements[0] as NoteBlockModel).hidden;
 
     this._selectedRect = {
       width,
       height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
-      borderRadius: 8 * zoom,
+      borderRadius: isSingleNote ? 8 * zoom : 0,
       left,
       top,
       rotate,
