@@ -148,7 +148,7 @@ async function initWorkspace(workspace: Workspace) {
     await initContentByInitParam(
       workspace,
       params.get('init') ?? 'empty',
-      'page0'
+      'space:page0'
     );
   } else {
     await syncProviders(workspace, getProviderCreators());
