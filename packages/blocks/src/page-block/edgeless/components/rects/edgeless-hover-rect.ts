@@ -12,7 +12,12 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
   static override styles = css`
     :host {
       pointer-events: none;
+      position: absolute;
+      left: 0;
+      top: 0;
+      contain: size layout;
     }
+
     .affine-edgeless-hover-rect {
       position: absolute;
       top: 0;
