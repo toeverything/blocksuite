@@ -32,11 +32,11 @@ import {
   DRAG_HANDLE_GRABBER_BORDER_RADIUS,
   DRAG_HANDLE_GRABBER_HEIGHT,
   DRAG_HANDLE_GRABBER_WIDTH,
-  DRAG_HANDLE_OFFSET_LEFT,
   DRAG_HOVER_RECT_PADDING,
   type DragHandleOption,
   DragHandleOptionsRunner,
   type DropResult,
+  getDragHandleLeftPadding,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
@@ -458,9 +458,12 @@ export class DragHandleWidget extends WidgetElement {
 
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
 
+    // Ad-hoc solution for list with toggle icon
+    const offsetLeft = getDragHandleLeftPadding(blockElement);
+
     const posLeft =
       left -
-      (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this.scale +
+      (DRAG_HANDLE_WIDTH + offsetLeft) * this.scale +
       this._viewportOffset.left;
     const posTop = this._getTopWithBlockElement(blockElement);
 
@@ -578,8 +581,10 @@ export class DragHandleWidget extends WidgetElement {
       });
     }
 
+    const offsetLeft = getDragHandleLeftPadding(blockElement);
+
     // Add padding to hover rect
-    left -= (DRAG_HANDLE_WIDTH + DRAG_HANDLE_OFFSET_LEFT) * this.scale;
+    left -= (DRAG_HANDLE_WIDTH + offsetLeft) * this.scale;
     top -= DRAG_HOVER_RECT_PADDING * this.scale;
     right += DRAG_HOVER_RECT_PADDING * this.scale;
     bottom += DRAG_HOVER_RECT_PADDING * this.scale;
