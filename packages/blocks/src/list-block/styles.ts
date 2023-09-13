@@ -33,10 +33,12 @@ const listPrefix = css`
 const toggleStyles = css`
   .toggle-icon {
     display: flex;
+    align-items: center;
+    height: 16px;
+    margin: 4px 0;
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translate(-100%, -50%);
+    transform: translateX(-100%);
     border-radius: 4px;
     cursor: pointer;
     opacity: 0;
