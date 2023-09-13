@@ -23,7 +23,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
         scale(var(--affine-zoom));
     }
 
-    .note-status {
+    .status-label {
       position: absolute;
       top: calc(-32px / var(--affine-zoom));
       left: calc(4px / var(--affine-zoom));
@@ -43,13 +43,13 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
       transform-origin: top left;
     }
 
-    .note-status > .number-label {
+    .status-label > .text {
       display: flex;
       padding: 4px 6px;
       flex-direction: column;
     }
 
-    .note-status > .number-label.hidden {
+    .status-label > .text.hidden {
       display: flex;
       padding: 4px;
       flex-direction: unset;
@@ -116,14 +116,14 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
 
           return html`<div
             data-note-id=${note.id}
-            class="note-status"
+            class="status-label"
             style=${styleMap({
               transform: `translate(${x}px, ${y}px) scale(calc(1 / var(--affine-zoom)))`,
             })}
           >
             ${note.hidden
-              ? html`<span class="number-label hidden">${HiddenIcon}</span>`
-              : html`<span class="number-label">${idx}</span>`}
+              ? html`<span class="text hidden">${HiddenIcon}</span>`
+              : html`<span class="text">${idx}</span>`}
           </div>`;
         }
       )}
