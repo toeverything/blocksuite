@@ -75,6 +75,7 @@ describe('workspace.search works', () => {
     const schema = new Schema();
     const workspace2 = new Workspace({
       schema,
+      id: 'test',
     });
     const page2 = workspace2.createPage({
       id: 'page0',
