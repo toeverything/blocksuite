@@ -512,6 +512,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                 @mouseenter="${this.mouseEnterHeader}"
               >
                 <input
+                  autocomplete="off"
                   ${ref(this.inputRef)}
                   type="text"
                   placeholder="${this.options.input?.placeholder ?? ''}"
