@@ -201,7 +201,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     }
   }
 
-  override updated() {
+  override firstUpdated() {
     assertExists(this._richTextElement);
     this.disposables.addFromEvent(
       this._richTextElement,
