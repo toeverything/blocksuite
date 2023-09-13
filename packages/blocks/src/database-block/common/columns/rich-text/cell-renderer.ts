@@ -120,6 +120,16 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
+  @query('rich-text')
+  private _richTextElement?: RichText;
+
+  get vEditor() {
+    assertExists(this._richTextElement);
+    const vEditor = this._richTextElement.vEditor;
+    assertExists(vEditor);
+    return vEditor;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     if (!this.value) {
@@ -198,6 +208,10 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       'keydown',
       this._handleKeyDown
     );
+
+    this._richTextElement?.updateComplete.then(() => {
+      this.vEditor.focusEnd();
+    });
   }
 
   private _initYText = (text?: string) => {
