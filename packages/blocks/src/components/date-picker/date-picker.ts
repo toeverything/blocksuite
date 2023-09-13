@@ -1,6 +1,12 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { isSameDay, isSameMonth, isToday } from 'date-fns';
-import { html, LitElement, nothing, type PropertyValues } from 'lit';
+import {
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -34,6 +40,11 @@ export interface DateCell {
   tabIndex?: number;
 }
 
+type NavActionArg = {
+  action: () => void;
+  disable?: boolean;
+};
+
 /**
  * Date picker
  */
@@ -66,11 +77,18 @@ export class DatePicker extends WithDisposable(LitElement) {
   /** web-accessibility for month select */
   @property({ attribute: false })
   private _monthCursor = 0;
+  @property({ attribute: false })
+  private _yearCursor = 0;
   /** date matrix */
   @property({ attribute: false })
   private _matrix: DateCell[][] = [];
   @property({ attribute: false })
-  private _showMonthSelect = false;
+  private _yearMatrix: number[] = [];
+  @property({ attribute: false })
+  private _mode: 'date' | 'month' | 'year' = 'date';
+
+  private _maxYear = 2099;
+  private _minYear = 1970;
 
   get year() {
     return this._cursor.getFullYear();
@@ -100,7 +118,11 @@ export class DatePicker extends WithDisposable(LitElement) {
   }
   get cardHeight() {
     const rowNum = 7;
-    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) + 2;
+    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
+  }
+  get minHeight() {
+    const rowNum = 8;
+    return this.size * rowNum + this.padding * 2 + this.gapV * (rowNum - 1) - 2;
   }
 
   get _cardStyle() {
@@ -135,26 +157,50 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   public focusMonthCell() {
     const lastEl = this.shadowRoot?.querySelector(
-      'button.date-picker-month[tabindex="0"]'
+      'button.month-cell[tabindex="0"]'
     ) as HTMLElement;
     lastEl?.focus();
   }
 
   public isMonthCellFocused() {
     const focused = this.shadowRoot?.activeElement as HTMLElement;
-    return focused?.classList.contains('date-picker-month');
+    return focused?.classList.contains('month-cell');
+  }
+
+  public focusYearCell() {
+    const lastEl = this.shadowRoot?.querySelector(
+      'button.year-cell[tabindex="0"]'
+    ) as HTMLElement;
+    lastEl?.focus();
+  }
+
+  public isYearCellFocused() {
+    const focused = this.shadowRoot?.activeElement as HTMLElement;
+    return focused?.classList.contains('year-cell');
   }
 
   public openMonthSelector() {
-    this._showMonthSelect = true;
     this._monthCursor = this.month;
+    this._mode = 'month';
   }
   public closeMonthSelector() {
-    this._showMonthSelect = false;
+    this._mode = 'date';
   }
   public toggleMonthSelector() {
-    if (this._showMonthSelect) this.closeMonthSelector();
+    if (this._mode === 'month') this.closeMonthSelector();
     else this.openMonthSelector();
+  }
+  public openYearSelector() {
+    this._yearCursor = this.year;
+    this._mode = 'year';
+    this._getYearMatrix();
+  }
+  public closeYearSelector() {
+    this._mode = 'date';
+  }
+  public toggleYearSelector() {
+    if (this._mode === 'year') this.closeYearSelector();
+    else this.openYearSelector();
   }
 
   private _moveMonth(offset: number) {
@@ -163,6 +209,20 @@ export class DatePicker extends WithDisposable(LitElement) {
   }
   private _moveYear(offset: number) {
     this._cursor.setFullYear(this._cursor.getFullYear() + offset);
+    this._getMatrix();
+  }
+  private _modeDecade(offset: number) {
+    this._yearCursor = Math.max(
+      this._minYear,
+      Math.min(this._maxYear, this._yearCursor + offset)
+    );
+    this._getYearMatrix();
+  }
+
+  private _onChange(date: Date) {
+    if (!isSameMonth(date, this._cursor)) this._cursor = date;
+    this.value = date.getTime();
+    this.onChange?.(date);
     this._getMatrix();
   }
 
@@ -180,6 +240,18 @@ export class DatePicker extends WithDisposable(LitElement) {
         } satisfies DateCell;
       });
     });
+  }
+
+  private _getYearMatrix() {
+    // every decade has 12 years
+    const no = Math.floor((this._yearCursor - this._minYear) / 12);
+    const decade = no * 12;
+    const start = this._minYear + decade;
+    const end = start + 12;
+    this._yearMatrix = Array.from(
+      { length: end - start },
+      (_, i) => start + i
+    ).filter(v => v >= this._minYear && v <= this._maxYear);
   }
 
   override firstUpdated(): void {
@@ -219,6 +291,20 @@ export class DatePicker extends WithDisposable(LitElement) {
           setTimeout(this.focusMonthCell.bind(this));
         }
 
+        if (directions.includes(e.key) && this.isYearCellFocused()) {
+          e.preventDefault();
+          if (e.key === 'ArrowLeft') {
+            this._modeDecade(-1);
+          } else if (e.key === 'ArrowRight') {
+            this._modeDecade(1);
+          } else if (e.key === 'ArrowUp') {
+            this._modeDecade(-3);
+          } else if (e.key === 'ArrowDown') {
+            this._modeDecade(3);
+          }
+          setTimeout(this.focusYearCell.bind(this));
+        }
+
         if (e.key === 'Tab') {
           setTimeout(() => {
             const focused = this.shadowRoot?.activeElement as HTMLElement;
@@ -236,6 +322,10 @@ export class DatePicker extends WithDisposable(LitElement) {
     );
   }
 
+  private _switchMode<T>(map: Record<typeof this._mode, T>) {
+    return (map[this._mode] as T) ?? nothing;
+  }
+
   override updated(_changedProperties: PropertyValues): void {
     if (_changedProperties.has('value')) {
       this._getMatrix();
@@ -249,50 +339,37 @@ export class DatePicker extends WithDisposable(LitElement) {
   }
 
   /** Actions */
-  private _actionHeaderRenderer() {
-    return html`<div class="date-picker-header">
+  private _navAction(
+    prev: NavActionArg | NavActionArg['action'],
+    curr: NavActionArg | NavActionArg['action'],
+    slot?: TemplateResult
+  ) {
+    const onPrev = typeof prev === 'function' ? prev : prev.action;
+    const onNext = typeof curr === 'function' ? curr : curr.action;
+    const prevDisable = typeof prev === 'function' ? false : prev.disable;
+    const nextDisable = typeof curr === 'function' ? false : curr.disable;
+    const classes = classMap({
+      'date-picker-header__action': true,
+      'with-slot': !!slot,
+    });
+    return html`<div class=${classes}>
       <button
-        class="date-picker-header__date interactive"
-        @click=${() => this.toggleMonthSelector()}
+        aria-label="previous month"
+        class="date-picker-small-action interactive left"
+        @click=${onPrev}
+        ?disabled=${prevDisable}
       >
-        <div>
-          ${this._showMonthSelect ? nothing : this.monthLabel} ${this.yearLabel}
-        </div>
-        ${this._showMonthSelect
-          ? nothing
-          : html`<div class="date-picker-small-action down">
-              ${arrowLeftIcon}
-            </div>`}
+        ${arrowLeftIcon}
       </button>
-      <div class="date-picker-header__action">
-        <button
-          aria-label="previous month"
-          class="date-picker-small-action interactive left"
-          @click=${() =>
-            this._showMonthSelect ? this._moveYear(-1) : this._moveMonth(-1)}
-        >
-          ${arrowLeftIcon}
-        </button>
-        <button
-          tabindex=${this._showMonthSelect ? -1 : 0}
-          aria-label="today"
-          class="action-label interactive today"
-          @click=${() => {
-            this._cursor = new Date();
-            this._getMatrix();
-          }}
-        >
-          <span>TODAY</span>
-        </button>
-        <button
-          aria-label="next month"
-          class="date-picker-small-action interactive right"
-          @click=${() =>
-            this._showMonthSelect ? this._moveYear(1) : this._moveMonth(1)}
-        >
-          ${arrowLeftIcon}
-        </button>
-      </div>
+      ${slot ?? nothing}
+      <button
+        aria-label="next month"
+        class="date-picker-small-action interactive right"
+        @click=${onNext}
+        ?disabled=${nextDisable}
+      >
+        ${arrowLeftIcon}
+      </button>
     </div>`;
   }
 
@@ -319,60 +396,164 @@ export class DatePicker extends WithDisposable(LitElement) {
       data-date=${dateRaw}
       class=${classes}
       @click=${() => {
-        this.value = cell.date.getTime();
-        if (cell.notCurrentMonth) this._cursor = cell.date;
-        this.onChange?.(cell.date);
-        this._getMatrix();
+        this._onChange(cell.date);
       }}
     >
       ${cell.label}
     </button>`;
   }
 
-  private _weekRenderer(week: DateCell[]) {
-    return html`<div class="date-picker-week">
-      ${week.map(cell => this._cellRenderer(cell))}
-    </div>`;
+  private _dateContent() {
+    return html` <div class="date-picker-header">
+        <div class="date-picker-header__buttons">
+          <button
+            class="date-picker-header__date interactive"
+            @click=${() => this.toggleMonthSelector()}
+          >
+            <div>${this.monthLabel}</div>
+          </button>
+
+          <button
+            class="date-picker-header__date interactive"
+            @click=${() => this.toggleYearSelector()}
+          >
+            <div>${this.yearLabel}</div>
+          </button>
+        </div>
+
+        ${this._navAction(
+          () => this._moveMonth(-1),
+          () => this._moveMonth(1),
+          html`<button
+            tabindex="0"
+            aria-label="today"
+            class="action-label interactive today"
+            @click=${() => {
+              this._onChange(new Date());
+            }}
+          >
+            <span>TODAY</span>
+          </button>`
+        )}
+      </div>
+      ${this._dayHeaderRenderer()}
+      <div class="date-picker-weeks">
+        ${this._matrix.map(
+          week =>
+            html`<div class="date-picker-week">
+              ${week.map(cell => this._cellRenderer(cell))}
+            </div>`
+        )}
+      </div>`;
   }
 
-  private _monthSelectRenderer() {
-    return html`<div class="date-picker-month">
-      ${months.map((month, index) => {
-        const isActive = index === this._cursor.getMonth();
-        const classes = classMap({
-          'date-picker-month': true,
-          interactive: true,
-          active: isActive,
-        });
-        return html`<button
-          tabindex=${this._monthCursor === index ? 0 : -1}
-          aria-label=${month}
-          class=${classes}
-          @click=${() => {
-            this._cursor.setMonth(index);
-            this._showMonthSelect = false;
-            this._getMatrix();
-          }}
+  private _monthContent() {
+    return html` <div class="date-picker-header">
+        <button
+          class="date-picker-header__date interactive"
+          @click=${() => this.toggleMonthSelector()}
         >
-          ${month}
-        </button>`;
-      })}
-    </div>`;
+          <div>${this.yearLabel}</div>
+        </button>
+
+        ${this._navAction(
+          {
+            action: () => this._moveYear(-1),
+            disable: this._cursor.getFullYear() <= this._minYear,
+          },
+          {
+            action: () => this._moveYear(1),
+            disable: this._cursor.getFullYear() >= this._maxYear,
+          }
+        )}
+      </div>
+      <div class="date-picker-month">
+        ${months.map((month, index) => {
+          const isActive = index === this._cursor.getMonth();
+          const classes = classMap({
+            'month-cell': true,
+            interactive: true,
+            active: isActive,
+          });
+          return html`<button
+            tabindex=${this._monthCursor === index ? 0 : -1}
+            aria-label=${month}
+            class=${classes}
+            @click=${() => {
+              this._cursor.setMonth(index);
+              this._mode = 'date';
+              this._getMatrix();
+            }}
+          >
+            ${month}
+          </button>`;
+        })}
+      </div>`;
+  }
+
+  private _yearContent() {
+    return html`<div class="date-picker-header">
+        <button
+          class="date-picker-header__date interactive"
+          @click=${() => this.toggleYearSelector()}
+        >
+          <div>
+            ${this._yearMatrix[0]}-${this._yearMatrix[
+              this._yearMatrix.length - 1
+            ]}
+          </div>
+        </button>
+        ${this._navAction(
+          {
+            action: () => this._modeDecade(-12),
+            disable: this._yearCursor - 12 <= this._minYear,
+          },
+          {
+            action: () => this._modeDecade(12),
+            disable: this._yearCursor + 12 >= this._maxYear,
+          }
+        )}
+      </div>
+      <div class="date-picker-year">
+        ${this._yearMatrix.map(year => {
+          const isActive = year === this._cursor.getFullYear();
+          const classes = classMap({
+            'year-cell': true,
+            interactive: true,
+            active: isActive,
+          });
+          return html`<button
+            tabindex=${this._yearCursor === year ? 0 : -1}
+            aria-label=${year}
+            class=${classes}
+            @click=${() => {
+              this._cursor.setFullYear(year);
+              this._mode = 'date';
+              this._getMatrix();
+            }}
+          >
+            ${year}
+          </button>`;
+        })}
+      </div>`;
   }
 
   override render() {
     const classes = classMap({
       'date-picker': true,
-      'date-picker--show-month': this._showMonthSelect,
+      [`date-picker--mode-${this._mode}`]: true,
     });
-    return html`<div class=${classes} style=${styleMap(this._cardStyle)}>
-      ${this._actionHeaderRenderer()}
-      ${this._showMonthSelect
-        ? this._monthSelectRenderer()
-        : html` ${this._dayHeaderRenderer()}
-            <div class="date-picker-weeks">
-              ${this._matrix.map(week => this._weekRenderer(week))}
-            </div>`}
+    const wrapperStyle = styleMap({
+      'min-height': `${this.minHeight}px`,
+    });
+    return html`<div style=${wrapperStyle} class="date-picker-height-wrapper">
+      <div class=${classes} style=${styleMap(this._cardStyle)}>
+        ${this._switchMode({
+          date: this._dateContent(),
+          month: this._monthContent(),
+          year: this._yearContent(),
+        })}
+      </div>
     </div>`;
   }
 }
