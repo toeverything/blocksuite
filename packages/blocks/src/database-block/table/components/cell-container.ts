@@ -51,7 +51,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   column!: DataViewTableColumnManager;
 
   private get selectionView() {
-    return this.closest('affine-database-table')?.selection;
+    return this.closest('affine-database-table')?.selectionController;
   }
 
   private _selectCurrentCell = (editing: boolean) => {

@@ -1,7 +1,5 @@
 import type { VEditor } from '@blocksuite/virgo';
 
-import { checkIsPageModeByDom } from './query.js';
-
 // When the user selects a range, check if it matches the previous selection.
 // If it does, apply the marks from the previous selection.
 // If it does not, remove the marks from the previous selection.
@@ -19,8 +17,4 @@ export function clearMarksOnDiscontinuousInput(vEditor: VEditor): void {
       dispose.dispose();
     }
   });
-}
-
-export function setupVirgoScroll(ele: Element, vEditor: VEditor): void {
-  vEditor.shouldLineScrollIntoView = checkIsPageModeByDom(ele);
 }

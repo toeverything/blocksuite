@@ -1,12 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Text } from '@blocksuite/store';
+import type { Y } from '@blocksuite/store';
+import { Text, Workspace } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import * as Y from 'yjs';
-import { Doc, Text as YText } from 'yjs';
 
 import { ClipboardItem } from '../../../__internal__/clipboard/clipboard-item.js';
 import {
@@ -88,7 +87,7 @@ export const addHistoryToVEditor = (vEditor: VEditor) => {
   vEditor.slots.rangeUpdated.on(vRange => {
     range = vRange;
   });
-  const undoManager = new Y.UndoManager(vEditor.yText, {
+  const undoManager = new Workspace.Y.UndoManager(vEditor.yText, {
     trackedOrigins: new Set([vEditor.yText.doc?.clientID]),
   });
   undoManager.on('stack-item-added', (event: { stackItem: StackItem }) => {
@@ -148,7 +147,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
 
   protected initVirgo(container: HTMLElement): VEditor {
     const yText = this.getYText(
-      this.titleColumn.getValue(this.rowId) as YText | string | undefined
+      this.titleColumn.getValue(this.rowId) as Y.Text | string | undefined
     );
     const vEditor = new VEditor(yText);
     this.vEditor = vEditor;
@@ -179,17 +178,17 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     );
   }
 
-  private getYText(text?: string | YText) {
-    if (this.isRichText && (text instanceof YText || text == null)) {
+  private getYText(text?: string | Y.Text) {
+    if (this.isRichText && (text instanceof Workspace.Y.Text || text == null)) {
       let yText = text;
       if (!yText) {
-        yText = new YText();
+        yText = new Workspace.Y.Text();
         this.titleColumn?.setValue(this.rowId, yText);
       }
       return yText;
     }
-    const yText = new Doc().getText('title');
-    if (text instanceof YText) {
+    const yText = new Workspace.Y.Doc().getText('title');
+    if (text instanceof Workspace.Y.Text) {
       return text;
     }
     yText.insert(0, text ?? '');

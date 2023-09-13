@@ -1,9 +1,28 @@
-import { type BaseSelection, PathFinder } from '@blocksuite/block-std';
+import {
+  type BaseSelection,
+  PathFinder,
+  type PointerEventState,
+} from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import type { BaseBlockModel, Page } from '@blocksuite/store';
 
+import {
+  calcDropTarget,
+  findClosestBlockElement,
+  getClosestBlockElementByPoint,
+  getHoveringNote,
+  isPageMode,
+  matchFlavours,
+  Point,
+  Rect,
+} from '../../__internal__/index.js';
+import type { BlockComponentElement } from '../../index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
-import { DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT } from './config.js';
+import {
+  DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT,
+  type DropIndicator,
+} from './config.js';
 
 const heightMap: { [key: string]: number } = {
   text: 23,
@@ -86,4 +105,105 @@ export const isBlockPathEqual = (
     return false;
   }
   return PathFinder.equals(path1, path2);
+};
+
+export const getContainerOffsetPoint = (state: PointerEventState) => {
+  const x = state.point.x + state.containerOffset.x;
+  const y = state.point.y + state.containerOffset.y;
+  return new Point(x, y);
+};
+
+export const getClosestNoteBlock = (
+  page: Page,
+  pageBlock: BlockComponentElement,
+  point: Point
+) => {
+  return isPageMode(page)
+    ? findClosestBlockElement(pageBlock, point, 'affine-note')
+    : getHoveringNote(point)?.querySelector('affine-note');
+};
+
+export const getClosestBlockByPoint = (
+  page: Page,
+  pageBlock: BlockComponentElement,
+  point: Point
+) => {
+  const closestNoteBlock = getClosestNoteBlock(page, pageBlock, point);
+  if (!closestNoteBlock) return null;
+  const noteRect = Rect.fromDOM(closestNoteBlock);
+  const blockElement = getClosestBlockElementByPoint(point, {
+    container: closestNoteBlock,
+    rect: noteRect,
+  });
+  const blockSelector =
+    '.affine-note-block-container > .affine-block-children-container > [data-block-id]';
+  const closestBlockElement = (
+    blockElement
+      ? blockElement
+      : findClosestBlockElement(
+          closestNoteBlock as BlockElement,
+          point.clone(),
+          blockSelector
+        )
+  ) as BlockElement;
+  return closestBlockElement;
+};
+
+export const getDropIndicator = (
+  event: MouseEvent,
+  scale: number = 1
+): DropIndicator | null => {
+  let dropIndicator = null;
+  let dropBlockId = '';
+  let dropBefore = false;
+
+  const target = captureEventTarget(event.target);
+  const rootElement = target?.closest('block-suite-root');
+  const offset = {
+    x: rootElement?.getBoundingClientRect().left ?? 0,
+    y: rootElement?.getBoundingClientRect().top ?? 0,
+  };
+
+  const point = new Point(event.x + offset.x, event.y + offset.y);
+  const closestBlockElement = getClosestBlockElementByPoint(
+    point
+  ) as BlockElement;
+  if (!closestBlockElement) {
+    return dropIndicator;
+  }
+
+  const blockId = closestBlockElement.model.id;
+  assertExists(blockId);
+
+  dropBlockId = blockId;
+
+  let rect = null;
+  let targetElement = null;
+  const model = closestBlockElement.model;
+
+  const isDatabase = matchFlavours(model, ['affine:database'] as const);
+  if (isDatabase) {
+    return dropIndicator;
+  }
+
+  const result = calcDropTarget(point, model, closestBlockElement, [], scale);
+
+  if (result) {
+    rect = result.rect;
+    targetElement = result.modelState.element;
+    dropBefore = result.type === 'before' ? true : false;
+  }
+
+  if (targetElement) {
+    const targetBlockId = targetElement.getAttribute('data-block-id');
+    if (targetBlockId) dropBlockId = targetBlockId;
+  }
+
+  dropIndicator = {
+    rect,
+    dropBlockId,
+    dropBefore,
+  };
+
+  return dropIndicator;
 };

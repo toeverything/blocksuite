@@ -1,43 +1,31 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { ReactiveController } from 'lit';
 
-import { ClipboardItem } from '../../__internal__/clipboard/clipboard-item.js';
+import { ClipboardItem } from '../../../__internal__/clipboard/clipboard-item.js';
 import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
-} from '../../__internal__/clipboard/utils/pure.js';
+} from '../../../__internal__/clipboard/utils/pure.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
-} from '../../__internal__/utils/index.js';
-import type { TableViewSelection } from '../../__internal__/utils/types.js';
-import {
-  BaseViewClipboard,
-  type BaseViewClipboardConfig,
-} from '../common/clipboard.js';
-import type { DatabaseCellContainer } from '../table/components/cell-container.js';
-import type { DatabaseTable } from '../table/table-view.js';
-import type { DataViewTableManager } from './table-view-manager.js';
+} from '../../../__internal__/utils/index.js';
+import type { TableViewSelection } from '../../../__internal__/utils/types.js';
+import type { DatabaseCellContainer } from '../components/cell-container.js';
+import type { DataViewTable } from '../table-view.js';
+import type { DataViewTableManager } from '../table-view-manager.js';
 
-interface TableViewClipboardConfig
-  extends BaseViewClipboardConfig<DataViewTableManager> {
-  view: DatabaseTable;
-}
-
-export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> {
-  private _view: DatabaseTable;
-
-  constructor(config: TableViewClipboardConfig) {
-    super(config);
-
-    this._view = config.view;
+export class TableClipboardController implements ReactiveController {
+  constructor(public host: DataViewTable) {
+    host.addController(this);
   }
 
-  override init() {
-    this._disposables.add(
-      this._view.handleEvent('copy', ctx => {
-        const tableSelection = this._view.selection.selection;
+  hostConnected() {
+    this.host.disposables.add(
+      this.host.handleEvent('copy', ctx => {
+        const tableSelection = this.host.selectionController.selection;
         if (!tableSelection) return false;
 
         this._onCopy(ctx, tableSelection);
@@ -45,8 +33,8 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
       })
     );
 
-    this._disposables.add(
-      this._view.handleEvent('paste', ctx => {
+    this.host.disposables.add(
+      this.host.handleEvent('paste', ctx => {
         this._onPaste(ctx);
         return true;
       })
@@ -57,8 +45,8 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
     _context: UIEventStateContext,
     tableSelection: TableViewSelection
   ) => {
-    const view = this._view as DatabaseTable;
-    const data = this._data;
+    const view = this.host;
+    const data = this.host.view;
 
     // cells
     // For database paste inside.
@@ -96,10 +84,10 @@ export class TableViewClipboard extends BaseViewClipboard<DataViewTableManager> 
 
   private _onPaste = (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
-    const view = this._view as DatabaseTable;
-    const data = this._data;
+    const view = this.host;
+    const data = this.host.view;
 
-    const tableSelection = this._view.selection.selection;
+    const tableSelection = this.host.selectionController.selection;
     if (tableSelection) {
       const htmlClipboardData = event.clipboardData?.getData(
         CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
@@ -165,7 +153,7 @@ function getSelectionFromHTMLString(type: CLIPBOARD_MIMETYPE, html: string) {
 function copyCellsValue(
   selection: TableViewSelection,
   data: DataViewTableManager,
-  view: DatabaseTable
+  view: DataViewTable
 ) {
   const { rowsSelection, columnsSelection, focus } = selection;
   const values: string[][] = [];
@@ -176,7 +164,10 @@ function copyCellsValue(
       id => data.columnGetType(id) === 'title'
     );
     for (let i = start; i <= end; i++) {
-      const container = view.selection.getCellContainer(i, titleIndex);
+      const container = view.selectionController.getCellContainer(
+        i,
+        titleIndex
+      );
       const value = (cellToStringMap['title']?.(container) ?? '') as string;
       values.push([value]);
     }
@@ -186,7 +177,7 @@ function copyCellsValue(
       const value: string[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = data.columnGet(data.columns[j]);
-        const container = view.selection.getCellContainer(i, j);
+        const container = view.selectionController.getCellContainer(i, j);
         const cellValue = (cellToStringMap[column.type]?.(container) ??
           '') as string;
         value.push(cellValue);
@@ -196,7 +187,7 @@ function copyCellsValue(
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
     const column = data.columnGet(data.columns[focus.columnIndex]);
-    const container = view.selection.getCellContainer(
+    const container = view.selectionController.getCellContainer(
       focus.rowIndex,
       focus.columnIndex
     );
@@ -212,7 +203,7 @@ type CopyedSelectionData = CopyedColumn[][];
 function getCopyedValuesFromSelection(
   selection: TableViewSelection,
   data: DataViewTableManager,
-  view: DatabaseTable
+  view: DataViewTable
 ): CopyedSelectionData {
   const { rowsSelection, columnsSelection, focus } = selection;
   const values: CopyedColumn[][] = [];
@@ -223,7 +214,7 @@ function getCopyedValuesFromSelection(
       const cellValues: CopyedColumn[] = [];
       for (let j = 0; j < data.columns.length; j++) {
         const column = data.columnGet(data.columns[j]);
-        const container = view.selection.getCellContainer(i, j);
+        const container = view.selectionController.getCellContainer(i, j);
         const value = cellToStringMap[column.type]?.(container);
         cellValues.push({ type: column.type, value });
       }
@@ -235,7 +226,7 @@ function getCopyedValuesFromSelection(
       const cellValues: CopyedColumn[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = data.columnGet(data.columns[j]);
-        const container = view.selection.getCellContainer(i, j);
+        const container = view.selectionController.getCellContainer(i, j);
         const value = cellToStringMap[column.type]?.(container);
         cellValues.push({ type: column.type, value });
       }
@@ -243,7 +234,7 @@ function getCopyedValuesFromSelection(
     }
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
-    const container = view.selection.getCellContainer(
+    const container = view.selectionController.getCellContainer(
       focus.rowIndex,
       focus.columnIndex
     );
@@ -328,7 +319,7 @@ function getTargetRangeFromSelection(
 
 function pasteToCells(
   data: DataViewTableManager,
-  view: DatabaseTable,
+  view: DataViewTable,
   copyedSelectionData: CopyedSelectionData,
   rowStartIndex: number,
   columnStartIndex: number,
@@ -348,7 +339,7 @@ function pasteToCells(
       const srcColumnIndex = j % srcColumnLength;
       const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
 
-      const targetContainer = view.selection.getCellContainer(
+      const targetContainer = view.selectionController.getCellContainer(
         rowIndex,
         columnIndex
       );

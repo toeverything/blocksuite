@@ -39,10 +39,9 @@ export class DragPreview extends ShadowlessElement {
         margin-top: 0;
       }
 
-      affine-drag-preview.grabbing {
+      /* affine-drag-preview.grabbing {
         cursor: grabbing;
-        pointer-events: auto;
-      }
+      } */
 
       affine-drag-preview.grabbing:after {
         content: '';

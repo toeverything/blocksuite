@@ -17,7 +17,6 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
       position: absolute;
       top: 0;
       left: 0;
-      border-radius: 0;
       pointer-events: none;
       box-sizing: border-box;
       z-index: 1;
@@ -44,6 +43,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
   protected override render() {
     const { edgeless } = this;
+    const zoom = this.edgeless.surface.viewport.zoom;
     const hoverState = edgeless.tools.getHoverState();
     if (!hoverState || edgeless.selectionManager.state.editing) return nothing;
     const rect = hoverState.rect;
@@ -56,6 +56,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
       top: rect.y + 'px',
       width: rect.width + 'px',
       height: rect.height + 'px',
+      borderRadius: isNote ? 8 * zoom + 'px' : '',
       backgroundColor: isNote ? 'var(--affine-hover-color)' : '',
     };
 

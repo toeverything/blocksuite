@@ -70,9 +70,6 @@ export class VEditor<
 
   private _mounted = false;
 
-  shouldLineScrollIntoView = true;
-  shouldCursorScrollIntoView = true;
-
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
   readonly vRangeProvider: VRangeProvider | null;
 
@@ -82,8 +79,8 @@ export class VEditor<
     updated: Slot;
     vRangeUpdated: Slot<VRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
-    scrollUpdated: Slot<number>;
   };
+
   get yText() {
     return this._yText;
   }
@@ -140,6 +137,7 @@ export class VEditor<
   toDomRange = this.rangeService.toDomRange;
   toVRange = this.rangeService.toVRange;
   getVRange = this.rangeService.getVRange;
+  isVRangeValid = this.rangeService.isVRangeValid;
   setVRange = this.rangeService.setVRange;
   syncVRange = this.rangeService.syncVRange;
 
@@ -184,11 +182,9 @@ export class VEditor<
       updated: new Slot(),
       vRangeUpdated: new Slot<VRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
-      scrollUpdated: new Slot<number>(),
     };
 
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
-    this.slots.scrollUpdated.on(this.rangeService.onScrollUpdated);
   }
 
   mount(rootElement: HTMLElement) {

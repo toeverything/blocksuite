@@ -1,40 +1,64 @@
 // related component
 
 import { assertExists } from '@blocksuite/global/utils';
-import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
-import { html } from 'lit/static-html.js';
+import type { ReactiveController } from 'lit';
 
-import type { InsertPosition } from '../types.js';
-import { startDrag } from '../utils/drag.js';
-import { KanbanCard } from './card.js';
-import { KanbanGroup } from './group.js';
-import type { DataViewKanban } from './kanban-view.js';
+import { Point, Rect } from '../../../__internal__/index.js';
+import type { InsertPosition } from '../../types.js';
+import { startDrag } from '../../utils/drag.js';
+import { KanbanCard } from '../card.js';
+import { KanbanGroup } from '../group.js';
+import type { DataViewKanban } from '../kanban-view.js';
 
-const styles = css`
-  affine-data-view-kanban-drag {
-    background-color: var(--affine-background-primary-color);
+export class KanbanDragController implements ReactiveController {
+  constructor(private host: DataViewKanban) {
+    this.host.addController(this);
   }
-`;
 
-@customElement('affine-data-view-kanban-drag')
-export class KanbanDrag extends WithDisposable(ShadowlessElement) {
-  static override styles = styles;
+  dropPreview = createDropPreview();
 
-  @property({ attribute: false })
-  kanbanView!: DataViewKanban;
-
-  @query('.drag-preview')
-  dragPreview!: HTMLDivElement;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    if (this.kanbanView.view.readonly) {
+  getInsertPosition = (
+    evt: MouseEvent
+  ):
+    | { group: KanbanGroup; card?: KanbanCard; position: InsertPosition }
+    | undefined => {
+    const eles = document.elementsFromPoint(evt.x, evt.y);
+    const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
+    if (target) {
+      const card = getCardByPoint(target, evt.y);
+      return {
+        group: target,
+        card,
+        position: card
+          ? {
+              before: true,
+              id: card.cardId,
+            }
+          : 'end',
+      };
+    } else {
       return;
     }
-    this._disposables.add(
-      this.kanbanView.handleEvent('dragStart', context => {
+  };
+  shooIndicator = (
+    evt: MouseEvent,
+    self: KanbanCard | undefined
+  ): { group: KanbanGroup; position: InsertPosition } | undefined => {
+    const position = this.getInsertPosition(evt);
+    if (position) {
+      this.dropPreview.display(position.group, self, position.card);
+    } else {
+      this.dropPreview.remove();
+    }
+    return position;
+  };
+
+  hostConnected() {
+    if (this.host.view.readonly) {
+      return;
+    }
+    this.host.disposables.add(
+      this.host.handleEvent('dragStart', context => {
         const event = context.get('pointerState').raw;
         const target = event.target;
         if (target instanceof Element) {
@@ -57,62 +81,67 @@ export class KanbanDrag extends WithDisposable(ShadowlessElement) {
       evt.x - offsetLeft,
       evt.y - offsetTop
     );
-    const dropPreview = createDropPreview();
     const currentGroup = ele.closest('affine-data-view-kanban-group');
     startDrag<
-      {
-        drop?: {
+      | { type: 'out'; callback: () => void }
+      | {
+          type: 'self';
           key: string;
           position: InsertPosition;
-        };
-      },
+        }
+      | undefined,
       PointerEvent
     >(evt, {
-      onDrag: () => ({}),
+      onDrag: () => undefined,
       onMove: evt => {
+        if (!(evt.target instanceof HTMLElement)) {
+          return;
+        }
         preview.display(evt.x - offsetLeft, evt.y - offsetTop);
-        const eles = document.elementsFromPoint(evt.x, evt.y);
-        const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
-        if (target) {
-          const card = getCardByPoint(target, evt.y);
-          dropPreview.display(target, ele, card);
+        if (!Rect.fromDOM(this.host).isPointIn(Point.from(evt))) {
+          const callback = this.host.onDrag;
+          if (callback) {
+            this.dropPreview.remove();
+            return {
+              type: 'out',
+              callback: callback(evt, ele.cardId),
+            };
+          }
+          return;
+        }
+        const result = this.shooIndicator(evt, ele);
+        if (result) {
           return {
-            drop: {
-              key: target.group.key,
-              position: card
-                ? {
-                    before: true,
-                    id: card.cardId,
-                  }
-                : 'end',
-            },
+            type: 'self',
+            key: result.group.group.key,
+            position: result.position,
           };
         }
-        dropPreview.remove();
-        return {};
+        return;
       },
       onClear: () => {
         preview.remove();
-        dropPreview.remove();
+        this.dropPreview.remove();
       },
-      onDrop: ({ drop }) => {
-        preview.remove();
-        dropPreview.remove();
-        if (drop && currentGroup) {
+      onDrop: result => {
+        if (!result) {
+          return;
+        }
+        if (result.type === 'out') {
+          result.callback();
+          return;
+        }
+        if (result && currentGroup) {
           currentGroup.group.helper.moveCardTo(
             ele.cardId,
             currentGroup.group.key,
-            drop.key,
-            drop.position
+            result.key,
+            result.position
           );
         }
       },
     });
   };
-
-  override render() {
-    return html` <div class="drag-preview"></div> `;
-  }
 }
 
 const createDragPreview = (card: KanbanCard, x: number, y: number) => {
@@ -151,7 +180,11 @@ const createDropPreview = () => {
   div.style.backgroundColor = 'var(--affine-primary-color)';
   div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
   return {
-    display(group: KanbanGroup, self: KanbanCard, card?: KanbanCard) {
+    display(
+      group: KanbanGroup,
+      self: KanbanCard | undefined,
+      card?: KanbanCard
+    ) {
       const target = card ?? group.querySelector('.add-card');
       assertExists(target);
       if (target.previousElementSibling === self || target === self) {
@@ -183,9 +216,3 @@ const getCardByPoint = (
   const index = positions.findIndex(v => v > y);
   return cards[index];
 };
-
-declare global {
-  interface HTMLElementTagNameMap {
-    'affine-data-view-kanban-drag': KanbanDrag;
-  }
-}
