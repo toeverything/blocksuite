@@ -35,7 +35,7 @@ export const popCardMenu = (
   popFilterableSimpleMenu(ele, [
     {
       type: 'action',
-      name: 'Expand card',
+      name: 'Expand Card',
       icon: ExpandFullIcon,
       select: () => {
         openDetail(rowId, selection);
@@ -43,7 +43,7 @@ export const popCardMenu = (
     },
     {
       type: 'sub-menu',
-      name: 'Move to',
+      name: 'Move To',
       icon: ArrowRightBigIcon,
       options: {
         input: {
@@ -97,7 +97,7 @@ export const popCardMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Insert before',
+          name: 'Insert Before',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
@@ -109,7 +109,7 @@ export const popCardMenu = (
         },
         {
           type: 'action',
-          name: 'Insert after',
+          name: 'Insert After',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
@@ -127,7 +127,7 @@ export const popCardMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Delete card',
+          name: 'Delete Card',
           class: 'delete-item',
           icon: DeleteIcon,
           select: () => {

@@ -43,12 +43,21 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
 
-  override firstUpdated() {
+  override connectedCallback() {
+    super.connectedCallback();
     this._disposables.add(
       this.tableViewManager.slots.update.on(() => {
         this.requestUpdate();
       })
     );
+    this.closest('affine-database-table')?.handleEvent('dragStart', context => {
+      const target = context.get('pointerState').raw.target;
+      if (target instanceof Element && this.contains(target)) {
+        this._drag(context.get('pointerState').raw);
+        return true;
+      }
+      return false;
+    });
   }
 
   private _columnsOffset = (header: Element, _scale: number) => {
@@ -243,7 +252,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         items: [
           {
             type: 'sub-menu',
-            name: 'Column type',
+            name: 'Column Type',
             icon: TextIcon,
             hide: () => !this.column.updateType || this.column.type === 'title',
             options: {
@@ -267,7 +276,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Duplicate column',
+            name: 'Duplicate Column',
             icon: DatabaseDuplicate,
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
@@ -283,7 +292,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Insert left column',
+            name: 'Insert Left Column',
             icon: DatabaseInsertLeft,
             select: () => {
               this.tableViewManager.columnAdd({
@@ -301,7 +310,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Insert right column',
+            name: 'Insert Right Column',
             icon: DatabaseInsertRight,
             select: () => {
               this.tableViewManager.columnAdd({
@@ -319,7 +328,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move left',
+            name: 'Move Left',
             icon: DatabaseMoveLeft,
             hide: () => this.column.isFirst,
             select: () => {
@@ -337,7 +346,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move right',
+            name: 'Move Right',
             icon: DatabaseMoveRight,
             hide: () => this.column.isLast,
             select: () => {
@@ -359,7 +368,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             children: () => [
               {
                 type: 'action',
-                name: 'Delete column',
+                name: 'Delete Column',
                 icon: DeleteIcon,
                 hide: () => !this.column.delete || this.column.type === 'title',
                 select: () => {
@@ -430,10 +439,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         </div>
         ${this.readonly
           ? null
-          : html` <div
-              class="affine-database-column-move"
-              @mousedown="${this._drag}"
-            >
+          : html` <div class="affine-database-column-move">
               ${DatabaseDragIcon}
             </div>`}
       </div>

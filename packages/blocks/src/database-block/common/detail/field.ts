@@ -135,7 +135,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
         items: [
           {
             type: 'sub-menu',
-            name: 'Column type',
+            name: 'Column Type',
             icon: TextIcon,
             hide: () => !this.column.updateType || this.column.type === 'title',
             options: {
@@ -160,7 +160,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Duplicate column',
+            name: 'Duplicate Column',
             icon: DatabaseDuplicate,
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
@@ -169,7 +169,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move up',
+            name: 'Move Up',
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
@@ -190,7 +190,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move down',
+            name: 'Move Down',
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
@@ -217,7 +217,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
             children: () => [
               {
                 type: 'action',
-                name: 'Delete column',
+                name: 'Delete Column',
                 icon: DeleteIcon,
                 hide: () => !this.column.delete || this.column.type === 'title',
                 select: () => {

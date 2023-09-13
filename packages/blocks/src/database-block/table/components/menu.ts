@@ -34,7 +34,7 @@ export const popRowMenu = (
   popFilterableSimpleMenu(ele, [
     {
       type: 'action',
-      name: 'Expand row',
+      name: 'Expand Row',
       icon: ExpandFullIcon,
       select: () => {
         openDetail(rowId, selection);
@@ -68,7 +68,7 @@ export const popRowMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Insert before',
+          name: 'Insert Before',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
@@ -80,7 +80,7 @@ export const popRowMenu = (
         },
         {
           type: 'action',
-          name: 'Insert after',
+          name: 'Insert After',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
@@ -106,7 +106,7 @@ export const popRowMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Delete row',
+          name: 'Delete Row',
           class: 'delete-item',
           icon: DeleteIcon,
           select: () => {
