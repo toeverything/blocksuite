@@ -5,7 +5,7 @@ import './components/cell-container.js';
 import './components/selection.js';
 
 import type { WheelEvent } from 'happy-dom';
-import { css } from 'lit';
+import { css, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -318,17 +318,18 @@ export class DatabaseTable extends BaseDataView<
                 >
                 </affine-database-cell-container>
               </div>
-              ${column.dataViewManager.header.titleColumn === column.id &&
-              !view.readonly
-                ? html` <div class="row-ops">
+              ${column.dataViewManager.header.titleColumn === column.id
+                ? html`<div class="row-ops">
                     <div class="row-op" @click="${clickDetail}">
                       ${NewEditIcon}
                     </div>
-                    <div class="row-op" @click="${openMenu}">
-                      ${MoreHorizontalIcon}
-                    </div>
+                    ${!view.readonly
+                      ? html`<div class="row-op" @click="${openMenu}">
+                          ${MoreHorizontalIcon}
+                        </div>`
+                      : nothing}
                   </div>`
-                : ''}
+                : nothing}
             `;
           }
         )}

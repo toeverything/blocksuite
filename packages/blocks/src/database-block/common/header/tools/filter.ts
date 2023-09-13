@@ -1,6 +1,6 @@
 import '../../../common/filter/filter-group.js';
 
-import { css, html } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { eventToVRect } from '../../../../components/menu/index.js';
@@ -34,6 +34,10 @@ const styles = css`
 @customElement('data-view-header-tools-filter')
 export class DataViewHeaderToolsFilter extends BaseTool {
   static override styles = styles;
+
+  private get readonly() {
+    return this.view.readonly;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
@@ -81,7 +85,8 @@ export class DataViewHeaderToolsFilter extends BaseTool {
   }
 
   override render() {
-    return html` <div
+    if (this.readonly) return nothing;
+    return html`<div
       @click="${this.addFilter}"
       class="affine-database-filter-button dv-icon-20"
     >

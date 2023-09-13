@@ -139,7 +139,7 @@ export class AnyRender<T> extends ShadowlessElement {
   @property({ attribute: false })
   props!: T;
   @property({ attribute: false })
-  renderTemplate!: (props: T) => TemplateResult;
+  renderTemplate!: (props: T) => TemplateResult | null;
 
   override render() {
     return this.renderTemplate(this.props);
@@ -147,7 +147,7 @@ export class AnyRender<T> extends ShadowlessElement {
 }
 
 export const renderTemplate = <T>(
-  renderTemplate: (props: T) => TemplateResult
+  renderTemplate: (props: T) => TemplateResult | null
 ) => {
   const ins = new AnyRender<T>();
   ins.renderTemplate = renderTemplate;

@@ -25,6 +25,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
   private addColumnPositionRef = createRef();
   addColumnButton = renderTemplate(() => {
+    if (this.readonly) return null;
+
     return html`<div
       @click="${this._onAddColumn}"
       class="header-add-column-button dv-hover"
