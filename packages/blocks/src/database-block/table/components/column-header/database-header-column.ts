@@ -43,12 +43,21 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
 
-  override firstUpdated() {
+  override connectedCallback() {
+    super.connectedCallback();
     this._disposables.add(
       this.tableViewManager.slots.update.on(() => {
         this.requestUpdate();
       })
     );
+    this.closest('affine-database-table')?.handleEvent('dragStart', context => {
+      const target = context.get('pointerState').raw.target;
+      if (target instanceof Element && this.contains(target)) {
+        this._drag(context.get('pointerState').raw);
+        return true;
+      }
+      return false;
+    });
   }
 
   private _columnsOffset = (header: Element, _scale: number) => {
@@ -430,10 +439,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         </div>
         ${this.readonly
           ? null
-          : html` <div
-              class="affine-database-column-move"
-              @mousedown="${this._drag}"
-            >
+          : html` <div class="affine-database-column-move">
               ${DatabaseDragIcon}
             </div>`}
       </div>
