@@ -78,7 +78,7 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = workspace.createPage({ id: 'page0' });
+    const page = workspace.createPage({ id: 'space:page0' });
     await page.waitForLoaded();
     const actual = serializeWorkspace(workspace.doc);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
@@ -92,7 +92,7 @@ describe('basic', () => {
       [spaceMetaId]: {
         pages: [
           {
-            id: 'page0',
+            id: 'space:page0',
             title: '',
             tags: [],
           },
@@ -147,7 +147,7 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     const workspace2 = new Workspace(options);
     const page = workspace.createPage({
-      id: '0',
+      id: 'space:0',
     });
     await page.waitForLoaded();
     page.addBlock('affine:page', {
@@ -175,7 +175,7 @@ describe('basic', () => {
       // apply page update
       const update = encodeStateAsUpdate(page.spaceDoc);
       expect(workspace2.pages.size).toBe(1);
-      const page2 = workspace2.getPage('0');
+      const page2 = workspace2.getPage('space:0');
       assertExists(page2);
       applyUpdate(page2.spaceDoc, update);
       expect(workspace2.doc.toJSON()['spaces']).toEqual({
