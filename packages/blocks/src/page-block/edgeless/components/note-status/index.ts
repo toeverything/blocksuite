@@ -7,7 +7,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { matchFlavours } from '../../../../__internal__/index.js';
 import { HiddenIcon } from '../../../../icons/index.js';
-import { deserializeXYWH, type NoteBlockModel } from '../../../../index.js';
+import { type NoteBlockModel } from '../../../../note-block/note-model.js';
+import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-note-status')
