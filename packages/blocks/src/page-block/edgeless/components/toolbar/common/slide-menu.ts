@@ -125,6 +125,9 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
 
   private _handleWheel(event: WheelEvent) {
     event.stopPropagation();
+    this._menuContainer.scrollBy({
+      left: event.deltaY,
+    });
   }
 
   private _handleSlideButtonClick(direction: 'left' | 'right') {
