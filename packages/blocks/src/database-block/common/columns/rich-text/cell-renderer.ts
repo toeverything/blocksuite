@@ -1,11 +1,10 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Y } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import { Text, Workspace } from '@blocksuite/store';
 import { VEditor } from '@blocksuite/virgo';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
-import { Text as YText } from 'yjs';
 
 import { ClipboardItem } from '../../../../__internal__/clipboard/clipboard-item.js';
 import {
@@ -141,7 +140,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   }
 
   private _initYText = (text?: string) => {
-    const yText = new YText(text);
+    const yText = new Workspace.Y.Text(text);
     this.onChange(yText);
     return yText;
   };
@@ -231,7 +230,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   }
 
   private _initYText = (text?: string) => {
-    const yText = new YText(text);
+    const yText = new Workspace.Y.Text(text);
 
     this.onChange(yText);
     return yText;

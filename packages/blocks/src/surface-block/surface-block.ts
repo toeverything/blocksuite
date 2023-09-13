@@ -2,9 +2,9 @@ import '../page-block/edgeless/edgeless-blocks-container.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import * as Y from 'yjs';
 
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
@@ -406,7 +406,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     const id = generateElementId();
 
-    const yMap = new Y.Map();
+    const yMap = new Workspace.Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
     const batch = this.getBatch(properties.batch ?? this._defaultBatch);
@@ -420,8 +420,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     this._transact(() => {
       for (const [key, value] of Object.entries(props)) {
-        if ((key === 'text' || key === 'title') && !(value instanceof Y.Text)) {
-          yMap.set(key, new Y.Text(value));
+        if (
+          (key === 'text' || key === 'title') &&
+          !(value instanceof Workspace.Y.Text)
+        ) {
+          yMap.set(key, new Workspace.Y.Text(value));
         } else {
           yMap.set(key, value);
         }
