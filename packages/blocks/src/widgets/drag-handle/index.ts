@@ -765,17 +765,12 @@ export class DragHandleWidget extends WidgetElement {
 
   private _onDragStart = (state: PointerEventState) => {
     const event = state.raw;
-    const { target, button } = event;
+    const { target } = event;
     const element = captureEventTarget(target);
     const inside = !!element?.closest('affine-drag-handle-widget');
     // Should only start dragging when pointer down on drag handle
     // And current mouse button is left button
-    if (
-      button !== 0 ||
-      !inside ||
-      !this._hoveredBlockId ||
-      !this._hoveredBlockPath
-    ) {
+    if (!inside || !this._hoveredBlockId || !this._hoveredBlockPath) {
       return false;
     }
 
@@ -912,6 +907,10 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragStartHandler: UIEventHandler = ctx => {
     const state = ctx.get('pointerState');
+    // If not click left button to start dragging, should do nothing
+    const { button } = state.raw;
+    if (button !== 0) return false;
+
     // call default drag start handler if no option return true
     for (const option of this.optionRunner.options) {
       if (option.onDragStart?.(state, this.startDragging)) {

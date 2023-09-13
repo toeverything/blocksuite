@@ -176,14 +176,17 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
           if (!insideImageBlock || this._shouldResizeImage(state.raw.target))
             return false;
 
-          // If start dragging from the image block, clear the selection
-          // And take over dragStart event and start dragging
+          // If start dragging from the image element
+          // Set selection and take over dragStart event to start dragging
+          const imageBlock = target?.closest('affine-image');
+          if (!imageBlock) return false;
+
           this.root.selection.set([
             this.root.selection.getInstance('block', {
-              path: this.path,
+              path: imageBlock.path,
             }),
           ]);
-          startDragging([this as BlockElement], state);
+          startDragging([imageBlock], state);
           return true;
         },
       })
