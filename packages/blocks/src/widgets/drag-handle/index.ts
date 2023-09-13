@@ -23,6 +23,7 @@ import {
   Point,
   Rect,
 } from '../../__internal__/index.js';
+import { DragIndicator } from '../../index.js';
 import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
@@ -36,7 +37,6 @@ import {
   DragHandleOptionsRunner,
   type DropIndicator,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
-  type IndicatorRect,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
 import { DragPreview } from './drag-preview.js';
@@ -71,14 +71,12 @@ export class DragHandleWidget extends WidgetElement {
   @query('.affine-drag-handle-grabber')
   private _dragHandleGrabber!: HTMLDivElement;
 
-  @state()
-  indicatorRect: IndicatorRect | null = null;
-
   draggingElements: BlockElement[] = [];
   dropBlockId = '';
   dropBefore = false;
   dragging = false;
   dragPreview: DragPreview | null = null;
+  dropIndicator: DragIndicator | null = null;
   lastDragPointerState: PointerEventState | null = null;
   scale = 1;
   rafID = 0;
@@ -221,10 +219,24 @@ export class DragHandleWidget extends WidgetElement {
     return dropIndicator;
   };
 
+  createDropIndicator = () => {
+    if (!this.dropIndicator) this.dropIndicator = new DragIndicator();
+    this.pageElement.append(this.dropIndicator);
+  };
+
   updateDropIndicator = (indicator: DropIndicator | null) => {
     this.dropBlockId = indicator?.dropBlockId ?? '';
     this.dropBefore = indicator?.dropBefore ?? false;
-    this.indicatorRect = indicator?.rect ?? null;
+    if (this.dropIndicator) {
+      this.dropIndicator.rect = indicator?.rect ?? null;
+    }
+  };
+
+  removeDropIndicator = () => {
+    if (this.dropIndicator) {
+      this.dropIndicator.remove();
+      this.dropIndicator = null;
+    }
   };
 
   updateIndicator = (
@@ -239,7 +251,7 @@ export class DragHandleWidget extends WidgetElement {
     );
     if (!closestNoteBlock || this.outOfNoteBlock(closestNoteBlock, point)) {
       this.dropBlockId = '';
-      this.indicatorRect = null;
+      // this.indicatorRect = null;
     } else {
       const dropIndicator = this.getDropIndicator(state);
       this.updateDropIndicator(dropIndicator);
@@ -327,6 +339,7 @@ export class DragHandleWidget extends WidgetElement {
     this.draggingElements = blockElements;
     this.createDragPreview(blockElements, state);
     this.dragging = true;
+    this.createDropIndicator();
     this.hide();
   };
 
@@ -386,7 +399,6 @@ export class DragHandleWidget extends WidgetElement {
 
   private _reset() {
     this.draggingElements = [];
-    this.indicatorRect = null;
     this.dropBlockId = '';
     this.dropBefore = false;
     this.lastDragPointerState = null;
@@ -396,6 +408,7 @@ export class DragHandleWidget extends WidgetElement {
       x: 0,
       y: 0,
     };
+
     this._dragHoverRect = null;
     this._hoveredBlockId = '';
     this._hoveredBlockPath = null;
@@ -403,6 +416,9 @@ export class DragHandleWidget extends WidgetElement {
     this._lastShowedBlock = null;
     this._hoverDragHandle = false;
     this._dragHandlePointerDown = false;
+
+    this.removeDragPreview();
+    this.removeDropIndicator();
   }
 
   private _resetDragHandleGrabber() {
@@ -940,7 +956,6 @@ export class DragHandleWidget extends WidgetElement {
    */
   private _dragEndHandler: UIEventHandler = ctx => {
     this.clearRaf();
-    this.removeDragPreview();
     if (!this.dragging || this.draggingElements.length === 0) {
       this.hide(true);
       return false;
@@ -1115,24 +1130,13 @@ export class DragHandleWidget extends WidgetElement {
   override disconnectedCallback() {
     this.hide(true);
     this.removeDragPreview();
+    this.removeDropIndicator();
     this._disposables.dispose();
     this._anchorModelDisposables?.dispose();
     super.disconnectedCallback();
   }
 
   override render() {
-    const indicatorStyle = styleMap(
-      this.indicatorRect
-        ? {
-            width: `${this.indicatorRect.width}px`,
-            height: `${this.indicatorRect.height}px`,
-            transform: `translate(${this.indicatorRect.left}px, ${this.indicatorRect.top}px)`,
-          }
-        : {
-            display: 'none',
-          }
-    );
-
     const hoverRectStyle = styleMap(
       this._dragHoverRect
         ? {
@@ -1151,7 +1155,6 @@ export class DragHandleWidget extends WidgetElement {
         <div class="affine-drag-handle-container">
           <div class="affine-drag-handle-grabber"></div>
         </div>
-        <div class="affine-drag-indicator" style=${indicatorStyle}></div>
         <div class="affine-drag-hover-rect" style=${hoverRectStyle}></div>
       </div>
     `;
