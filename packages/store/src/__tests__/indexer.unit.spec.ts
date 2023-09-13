@@ -206,12 +206,12 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page0',
+        pageId: 'space:page0',
         type: 'LinkedPage',
       },
       {
         blockId: '6',
-        pageId: 'page1',
+        pageId: 'space:page1',
         type: 'LinkedPage',
       },
     ]);
@@ -219,12 +219,12 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page1.id)).toStrictEqual([
       {
         blockId: '3',
-        pageId: 'page0',
+        pageId: 'space:page0',
         type: 'LinkedPage',
       },
       {
         blockId: '7',
-        pageId: 'page1',
+        pageId: 'space:page1',
         type: 'LinkedPage',
       },
     ]);
@@ -236,12 +236,12 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page0',
+        pageId: 'space:page0',
         type: 'LinkedPage',
       },
       {
         blockId: '6',
-        pageId: 'page1',
+        pageId: 'space:page1',
         type: 'LinkedPage',
       },
     ]);
