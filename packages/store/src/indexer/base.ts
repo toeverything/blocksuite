@@ -78,9 +78,6 @@ export class BlockIndexer {
     });
 
     Array.from(doc.spaces.keys())
-      .map(pageId =>
-        pageId.startsWith('space:') ? pageId.slice('space:'.length) : pageId
-      )
       .map(pageId => ({ pageId, page: this._getPage(pageId) }))
       .forEach(({ pageId, page }) => {
         assertExists(page, `Failed to find page '${pageId}'`);
