@@ -93,10 +93,14 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
 
   override render() {
     const { selection, notes } = this;
+    const firstSelectedElement = selection.elements[0];
 
     if (
       selection.state.elements.length !== 1 ||
-      !matchFlavours(selection.elements[0] as BaseBlockModel, ['affine:note'])
+      (firstSelectedElement &&
+        !matchFlavours(selection.elements[0] as BaseBlockModel, [
+          'affine:note',
+        ]))
     )
       return nothing;
 
