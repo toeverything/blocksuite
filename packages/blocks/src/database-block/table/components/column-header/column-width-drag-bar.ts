@@ -44,6 +44,18 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   @state()
   dragLeft = 0;
 
+  public override connectedCallback() {
+    super.connectedCallback();
+    this.closest('affine-database-table')?.handleEvent('dragStart', context => {
+      const target = context.get('pointerState').raw.target;
+      if (target instanceof Element && this.contains(target)) {
+        this._startDrag(context.get('pointerState').raw);
+        return true;
+      }
+      return false;
+    });
+  }
+
   private _bar = createRef<HTMLElement>();
   private _startDrag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
@@ -107,12 +119,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
       opacity: this.dragLeft ? '1' : undefined,
     });
     return html`
-      <div
-        ${ref(this._bar)}
-        style=${style}
-        class="column-width-drag-bar"
-        @mousedown="${this._startDrag}"
-      >
+      <div ${ref(this._bar)} style=${style} class="column-width-drag-bar">
         <div class="preview-bar" style=${barStyle}></div>
       </div>
     `;

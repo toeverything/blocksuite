@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import * as Y from 'yjs';
+import { Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../__internal__/utils/types.js';
 import type { NoteBlockModel } from '../../models.js';
@@ -110,7 +110,7 @@ export class EdgelessFrameManager {
       bound = bound.expand(0, offset);
     }
     const id = _edgeless.surface.addElement('frame', {
-      title: new Y.Text(`Frame ${frames.length + 1}`),
+      title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
       batch: 'a0',
       xywh: bound.serialize(),
     });

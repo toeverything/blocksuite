@@ -75,16 +75,20 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return this._vRange;
   };
 
+  isVRangeValid = (vRange: VRange | null): boolean => {
+    return !(
+      vRange &&
+      (vRange.index < 0 ||
+        vRange.index + vRange.length > this.editor.yText.length)
+    );
+  };
+
   /**
    * the vRange is synced to the native selection asynchronically
    * if sync is true, the native selection will be synced immediately
    */
   setVRange = (vRange: VRange | null, sync = true): void => {
-    if (
-      vRange &&
-      (vRange.index < 0 ||
-        vRange.index + vRange.length > this.editor.yText.length)
-    ) {
+    if (!this.isVRangeValid(vRange)) {
       throw new Error('invalid vRange');
     }
 

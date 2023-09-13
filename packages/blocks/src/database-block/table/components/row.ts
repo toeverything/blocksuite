@@ -128,6 +128,8 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   public override connectedCallback() {
     super.connectedCallback();
     this.disposables.addFromEvent(this, 'contextmenu', this.contextMenu);
+    // eslint-disable-next-line wc/no-self-class
+    this.classList.add('affine-database-block-row', 'database-row');
   }
 
   protected override render(): unknown {

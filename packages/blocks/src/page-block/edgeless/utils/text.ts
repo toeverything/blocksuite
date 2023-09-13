@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import * as Y from 'yjs';
+import { Workspace } from '@blocksuite/store';
 
 import type {
   FrameElement,
@@ -89,7 +89,7 @@ export function addText(
     );
     const id = edgeless.surface.addElement('text', {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
-      text: new Y.Text(),
+      text: new Workspace.Y.Text(),
       textAlign: 'left',
       fontSize: 24,
       color: GET_DEFAULT_LINE_COLOR(),

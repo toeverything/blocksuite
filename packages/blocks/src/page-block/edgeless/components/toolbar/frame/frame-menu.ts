@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
-import * as Y from 'yjs';
 
 import { type EdgelessTool } from '../../../../../__internal__/index.js';
 import { Bound } from '../../../../../surface-block/index.js';
@@ -113,7 +113,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                       item.wh[1]
                     );
                     const id = edgeless.surface.addElement('frame', {
-                      title: new Y.Text(`Frame ${frames.length + 1}`),
+                      title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
                       batch: 'a0',
                       xywh: bound.serialize(),
                     });

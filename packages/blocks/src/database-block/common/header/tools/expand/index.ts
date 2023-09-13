@@ -11,6 +11,7 @@ import type { DataViewSelection } from '../../../../../__internal__/index.js';
 import { createModal } from '../../../../../components/menu/index.js';
 import { renderTemplate } from '../../../../../components/uni-component/uni-component.js';
 import { CrossIcon, ExpandWideIcon } from '../../../../../icons/index.js';
+import type { DataViewNativeConfig } from '../../../../data-view.js';
 import type { DatabaseBlockComponent } from '../../../../database-block.js';
 import { DatabaseSelection } from '../../../selection.js';
 
@@ -173,17 +174,18 @@ export class DatabaseBlockModalPreview extends WithDisposable(
   };
 
   protected override render(): unknown {
+    const config: DataViewNativeConfig = {
+      bindHotkey: this.bindHotkey,
+      handleEvent: this.handleEvent,
+      getFlag: this.database.getFlag,
+      selectionUpdated: this.selectionUpdated,
+      setSelection: this.setSelection,
+      dataSource: this.database.dataSource,
+      viewSource: this.database.viewSource,
+      headerComponent: this.database.headerComponent,
+    };
     return html`
-      <affine-data-view-native
-        .bindHotkey="${this.bindHotkey}"
-        .handleEvent="${this.handleEvent}"
-        .getFlag="${this.database.getFlag}"
-        .selectionUpdated="${this.selectionUpdated}"
-        .setSelection="${this.setSelection}"
-        .dataSource="${this.database.dataSource}"
-        .viewSource="${this.database.viewSource}"
-        .headerComponent="${this.database.headerComponent}"
-      ></affine-data-view-native>
+      <affine-data-view-native .config="${config}"></affine-data-view-native>
     `;
   }
 }

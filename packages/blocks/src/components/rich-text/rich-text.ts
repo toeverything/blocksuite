@@ -1,13 +1,15 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Y } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import {
   createVirgoKeyDownHandler,
   VEditor,
+  type VRange,
   type VRangeProvider,
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import type * as Y from 'yjs';
 
 import { tryFormatInlineStyle } from './markdown/inline.js';
 import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
@@ -16,6 +18,11 @@ import {
   type AffineTextSchema,
   type AffineVEditor,
 } from './virgo/types.js';
+
+interface RichTextStackItem {
+  meta: Map<'richtext-v-range', VRange | null>;
+  type: 'undo' | 'redo';
+}
 
 @customElement('rich-text')
 export class RichText extends WithDisposable(ShadowlessElement) {
@@ -43,9 +50,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   yText!: Y.Text;
 
   @property({ attribute: false })
-  undoManager!: Y.UndoManager;
-
-  @property({ attribute: false })
   textSchema!: AffineTextSchema;
 
   @property({ attribute: false })
@@ -53,6 +57,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   vRangeProvider?: VRangeProvider;
+  @property({ attribute: false })
+  undoManager!: Y.UndoManager;
 
   private _vEditor: AffineVEditor | null = null;
   get vEditor() {
@@ -132,7 +138,21 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     vEditor.setReadonly(this.readonly);
   }
 
-  _unmount() {
+  private _onStackItemAdded = (event: { stackItem: RichTextStackItem }) => {
+    const vRange = this.vEditor?.getVRange();
+    if (vRange) {
+      event.stackItem.meta.set('richtext-v-range', vRange);
+    }
+  };
+
+  private _onStackItemPopped = (event: { stackItem: RichTextStackItem }) => {
+    const vRange = event.stackItem.meta.get('richtext-v-range');
+    if (vRange && this.vEditor?.isVRangeValid(vRange)) {
+      this.vEditor?.setVRange(vRange);
+    }
+  };
+
+  private _unmount() {
     if (this.vEditor?.mounted) {
       this.vEditor.unmount();
     }
@@ -149,8 +169,37 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
 
     assertExists(this.yText, 'rich-text need yText to init.');
-    assertExists(this.undoManager, 'rich-text need undoManager to init.');
+    assertExists(this.yText.doc, 'yText should be bind to yDoc.');
     assertExists(this.textSchema, 'rich-text need textSchema to init.');
+
+    // Rich-Text controls undo-redo itself if undoManager is not provided
+    if (!this.undoManager) {
+      this.undoManager = new Workspace.Y.UndoManager(this.yText, {
+        trackedOrigins: new Set([this.yText.doc.clientID]),
+      });
+
+      this.disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === 'z') {
+            if (e.shiftKey) {
+              this.undoManager.redo();
+            } else {
+              this.undoManager.undo();
+            }
+            e.stopPropagation();
+          }
+        }
+      });
+
+      this.undoManager.on('stack-item-added', this._onStackItemAdded);
+      this.undoManager.on('stack-item-popped', this._onStackItemPopped);
+      this.disposables.add({
+        dispose: () => {
+          this.undoManager.off('stack-item-added', this._onStackItemAdded);
+          this.undoManager.off('stack-item-popped', this._onStackItemPopped);
+        },
+      });
+    }
 
     this.updateComplete.then(() => {
       this._unmount();
