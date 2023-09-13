@@ -50,7 +50,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       'compositionend',
       this._onCompositionEnd
     );
-    this.editor.disposables.addFromEvent(rootElement, 'scroll', this._onScroll);
     this.editor.disposables.addFromEvent(
       rootElement,
       'keydown',
@@ -307,10 +306,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
       newVRange,
       this.editor as VEditor
     );
-  };
-
-  private _onScroll = () => {
-    this.editor.slots.scrollUpdated.emit(this.editor.rootElement.scrollLeft);
   };
 
   private _onKeyDown = (event: KeyboardEvent) => {

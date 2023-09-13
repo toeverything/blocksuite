@@ -116,7 +116,10 @@ export function calcDropTarget(
 
     prev = element.previousElementSibling;
     if (prev) {
-      if (prev === draggingElements[draggingElements.length - 1]) {
+      if (
+        draggingElements.length &&
+        prev === draggingElements[draggingElements.length - 1]
+      ) {
         type = 'none';
       } else {
         prevRect = getRectByBlockElement(prev);
@@ -138,7 +141,7 @@ export function calcDropTarget(
 
     next = element.nextElementSibling;
     if (next) {
-      if (next === draggingElements[0]) {
+      if (draggingElements.length && next === draggingElements[0]) {
         type = 'none';
         next = null;
       }

@@ -9,13 +9,16 @@ import {
   MoveRightIcon,
 } from '../../../icons/index.js';
 import { popSideDetail } from '../../common/detail/layout.js';
-import type { DatabaseSelectionView } from './selection.js';
+import type { TableSelectionController } from '../controller/selection.js';
 
-export const openDetail = (rowId: string, selection: DatabaseSelectionView) => {
+export const openDetail = (
+  rowId: string,
+  selection: TableSelectionController
+) => {
   const old = selection.selection;
   selection.selection = undefined;
   popSideDetail({
-    view: selection.tableView.view,
+    view: selection.host.view,
     rowId: rowId,
     onClose: () => {
       selection.selection = old;
@@ -26,12 +29,12 @@ export const openDetail = (rowId: string, selection: DatabaseSelectionView) => {
 export const popRowMenu = (
   ele: ReferenceElement,
   rowId: string,
-  selection: DatabaseSelectionView
+  selection: TableSelectionController
 ) => {
   popFilterableSimpleMenu(ele, [
     {
       type: 'action',
-      name: 'Expand row',
+      name: 'Expand Row',
       icon: ExpandFullIcon,
       select: () => {
         openDetail(rowId, selection);
@@ -65,7 +68,7 @@ export const popRowMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Insert before',
+          name: 'Insert Before',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
@@ -77,7 +80,7 @@ export const popRowMenu = (
         },
         {
           type: 'action',
-          name: 'Insert after',
+          name: 'Insert After',
           icon: html` <div
             style="transform: rotate(90deg);display:flex;align-items:center;"
           >
@@ -103,7 +106,7 @@ export const popRowMenu = (
       children: () => [
         {
           type: 'action',
-          name: 'Delete row',
+          name: 'Delete Row',
           class: 'delete-item',
           icon: DeleteIcon,
           select: () => {

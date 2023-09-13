@@ -6,7 +6,12 @@ export const DRAG_HANDLE_WIDTH = 16; // px
 export const styles = css`
   .affine-drag-handle-widget {
     display: flex;
+    position: absolute;
+    left: 0;
+    top: 0;
+    contain: size layout;
   }
+
   .affine-drag-handle-container {
     top: 0;
     left: 0;

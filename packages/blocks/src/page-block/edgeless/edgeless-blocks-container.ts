@@ -7,7 +7,7 @@ import './components/note-slicer/index.js';
 import { throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
-import { html, LitElement, nothing } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -26,6 +26,15 @@ import { getBackgroundGrid } from './utils/query.js';
 
 @customElement('affine-edgeless-block-container')
 export class EdgelessBlockContainer extends WithDisposable(LitElement) {
+  static override styles = css`
+    .widgets-container {
+      position: absolute;
+      left: 0;
+      top: 0;
+      contain: size layout;
+    }
+  `;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -203,12 +212,13 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
           y: -top,
         }}
       ></affine-selected-blocks>
-      <edgeless-hover-rect .edgeless=${edgeless}> </edgeless-hover-rect>
+      <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
-      ${EdgelessNotesStatus(edgeless, edgeless.notes)} ${widgets}
+      ${EdgelessNotesStatus(edgeless, edgeless.notes)}
+      <div class="widgets-container">${widgets}</div>
     `;
   }
 

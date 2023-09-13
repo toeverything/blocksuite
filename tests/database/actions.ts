@@ -81,6 +81,11 @@ export function getDatabaseBodyRow(page: Page, rowIndex = 0) {
   return rows.nth(rowIndex);
 }
 
+export function getDatabaseTableContainer(page: Page) {
+  const container = page.locator('.affine-database-table-container');
+  return container;
+}
+
 export async function assertDatabaseTitleColumnText(
   page: Page,
   title: string,
@@ -348,7 +353,8 @@ export async function assertRowsSelection(
 ) {
   const selection = page.locator('.database-selection');
   const selectionBox = await getBoundingBox(selection);
-
+  const containerBox = await getDatabaseTableContainer(page).boundingBox();
+  assertExists(containerBox);
   const startIndex = rowIndexes[0];
   const endIndex = rowIndexes[1];
 
@@ -365,7 +371,7 @@ export async function assertRowsSelection(
       x: rowBox.x,
       y: rowBox.y,
       height: rowBox.height,
-      width: lastCell.x + lastCell.width - rowBox.x,
+      width: containerBox.width,
     });
   } else {
     // multiple rows
@@ -382,7 +388,7 @@ export async function assertRowsSelection(
     expect(selectionBox).toEqual({
       x: startRowBox.x,
       y: startRowBox.y,
-      width: lastCell.x + lastCell.width - startRowBox.x,
+      width: containerBox.width,
       height: startRowBox.height + endRowBox.height,
     });
   }

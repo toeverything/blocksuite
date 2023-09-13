@@ -1,9 +1,8 @@
 import './group.js';
 import './header.js';
-import './drag.js';
+import './controller/drag.js';
 import '../common/group-by/define.js';
 
-import type { WheelEvent } from 'happy-dom';
 import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -15,14 +14,15 @@ import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
-import { KanbanViewClipboard } from './clipboard.js';
+import { KanbanClipboardController } from './controller/clipboard.js';
+import { KanbanDragController } from './controller/drag.js';
+import { KanbanHotkeysController } from './controller/hotkeys.js';
+import { KanbanSelectionController } from './controller/selection.js';
 import { KanbanGroup } from './group.js';
-import { KanbanHotkeys } from './hotkeys.js';
 import type {
   DataViewKanbanManager,
   GroupHelper,
 } from './kanban-view-manager.js';
-import { KanbanSelection } from './selection.js';
 
 const styles = css`
   affine-data-view-kanban {
@@ -65,31 +65,24 @@ export class DataViewKanban extends BaseDataView<
 > {
   static override styles = styles;
 
-  selection = new KanbanSelection(this);
-  hotkeys = new KanbanHotkeys(this);
+  private dragController = new KanbanDragController(this);
+  selectionController = new KanbanSelectionController(this);
+  hotkeysController = new KanbanHotkeysController(this);
+  clipboardController = new KanbanClipboardController(this);
   @query('.affine-data-view-kanban-groups')
   groups!: HTMLElement;
   groupHelper?: GroupHelper;
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    this.selection
-      .run()
-      .forEach(disposable => this._disposables.add(disposable));
-    this._disposables.add(this.hotkeys.run());
-
-    // init clipboard
-    const clipboard = new KanbanViewClipboard({
-      view: this,
-      data: this.view,
-      disposables: this._disposables,
-    });
-    clipboard.init();
+    if (this.view.readonly) {
+      return;
+    }
   }
 
   override firstUpdated() {
@@ -187,18 +180,35 @@ export class DataViewKanban extends BaseDataView<
         )}
         ${this.renderAddGroup()}
       </div>
-      <affine-data-view-kanban-drag
-        .kanbanView="${this}"
-      ></affine-data-view-kanban-drag>
     `;
   }
 
   focusFirstCell(): void {
-    this.selection.focusFirstCell();
+    this.selectionController.focusFirstCell();
   }
 
   getSelection() {
-    return this.selection.selection;
+    return this.selectionController.selection;
+  }
+
+  public hideIndicator(): void {
+    this.dragController.dropPreview.remove();
+  }
+
+  public moveTo(id: string, evt: MouseEvent): void {
+    const position = this.dragController.getInsertPosition(evt);
+    if (position) {
+      position.group.group.helper.moveCardTo(
+        id,
+        '',
+        position.group.group.key,
+        position.position
+      );
+    }
+  }
+
+  public showIndicator(evt: MouseEvent): boolean {
+    return this.dragController.shooIndicator(evt, undefined) != null;
   }
 }
 
