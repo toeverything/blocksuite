@@ -27,11 +27,18 @@ export type DropIndicator = {
 
 export type DragHandleOption = {
   flavour: string;
-  onDragMove: (
+  onDragStart?: (
     state: PointerEventState,
-    draggingElements: BlockElement[]
+    startDragging: (
+      blockElements: BlockElement[],
+      state: PointerEventState
+    ) => void
   ) => boolean;
-  onDragEnd: (
+  onDragMove?: (
+    state: PointerEventState,
+    draggingElements?: BlockElement[]
+  ) => boolean;
+  onDragEnd?: (
     state: PointerEventState,
     draggingElements: BlockElement[]
   ) => boolean;

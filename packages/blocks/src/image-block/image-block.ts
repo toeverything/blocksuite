@@ -8,9 +8,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
+import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
-import type { ImageBlockModel } from './image-model.js';
+import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
@@ -64,6 +66,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     .resizable-img {
       position: relative;
       border-radius: 8px;
+      cursor: pointer;
     }
 
     .resizable-img img {
@@ -115,6 +118,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._handleSelection();
 
     this._observeDrag();
+    this._registerDragHandleOption();
   }
 
   override disconnectedCallback() {
@@ -160,6 +164,26 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       }
     });
   }
+
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: ImageBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const insideImageBlock = target?.closest('.resizable-img');
+          if (!insideImageBlock) return false;
+
+          // If start dragging from the image block, clear the selection
+          // And take over dragStart event and start dragging
+          this.root.selection.clear();
+          startDragging([this as BlockElement], state);
+          return true;
+        },
+      })
+    );
+  };
 
   private _onInputChange() {
     this._caption = this._input.value;
