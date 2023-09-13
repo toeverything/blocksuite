@@ -154,7 +154,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   @state()
   edgelessTool: EdgelessTool = {
-    type: localStorage.defaultTool,
+    type: localStorage.defaultTool ?? 'default',
   };
 
   @query('affine-edgeless-block-container')
