@@ -137,6 +137,7 @@ export class VEditor<
   toDomRange = this.rangeService.toDomRange;
   toVRange = this.rangeService.toVRange;
   getVRange = this.rangeService.getVRange;
+  isVRangeValid = this.rangeService.isVRangeValid;
   setVRange = this.rangeService.setVRange;
   syncVRange = this.rangeService.syncVRange;
 
