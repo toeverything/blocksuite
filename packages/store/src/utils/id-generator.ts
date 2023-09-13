@@ -15,10 +15,12 @@ export function createAutoIncrementIdGeneratorByClientId(
   return () => `${clientId}:${i++}`;
 }
 
-export function uuidv4() {
-  return uuidv4IdGenerator();
-}
+export const uuidv4: IdGenerator = type => {
+  const base = uuidv4IdGenerator();
+  return `${type}:${base}`;
+};
 
-export function nanoid() {
-  return nanoidGenerator(10);
-}
+export const nanoid: IdGenerator = type => {
+  const base = nanoidGenerator(10);
+  return `${type}:${base}`;
+};
