@@ -252,7 +252,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         items: [
           {
             type: 'sub-menu',
-            name: 'Column type',
+            name: 'Column Type',
             icon: TextIcon,
             hide: () => !this.column.updateType || this.column.type === 'title',
             options: {
@@ -276,7 +276,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Duplicate column',
+            name: 'Duplicate Column',
             icon: DatabaseDuplicate,
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
@@ -292,7 +292,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Insert left column',
+            name: 'Insert Left Column',
             icon: DatabaseInsertLeft,
             select: () => {
               this.tableViewManager.columnAdd({
@@ -310,7 +310,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Insert right column',
+            name: 'Insert Right Column',
             icon: DatabaseInsertRight,
             select: () => {
               this.tableViewManager.columnAdd({
@@ -328,7 +328,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move left',
+            name: 'Move Left',
             icon: DatabaseMoveLeft,
             hide: () => this.column.isFirst,
             select: () => {
@@ -346,7 +346,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move right',
+            name: 'Move Right',
             icon: DatabaseMoveRight,
             hide: () => this.column.isLast,
             select: () => {
@@ -368,7 +368,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             children: () => [
               {
                 type: 'action',
-                name: 'Delete column',
+                name: 'Delete Column',
                 icon: DeleteIcon,
                 hide: () => !this.column.delete || this.column.type === 'title',
                 select: () => {
