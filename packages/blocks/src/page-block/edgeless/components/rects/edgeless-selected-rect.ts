@@ -66,6 +66,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     :host {
       display: block;
       user-select: none;
+      contain: size layout;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
 
     .affine-edgeless-selected-rect {
