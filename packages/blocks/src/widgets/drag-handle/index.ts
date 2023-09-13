@@ -184,8 +184,6 @@ export class DragHandleWidget extends WidgetElement {
     let targetElement = null;
     const model = closestBlockElement.model;
 
-    // Handle special case at this iteration
-    // TODO: should consider drop in database next iteration
     const isDatabase = matchFlavours(model, ['affine:database'] as const);
     if (isDatabase) {
       return dropIndicator;
