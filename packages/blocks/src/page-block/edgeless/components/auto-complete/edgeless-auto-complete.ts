@@ -1,9 +1,9 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import * as Y from 'yjs';
 
 import { AutoCompleteArrowIcon } from '../../../../icons/index.js';
 import {
@@ -300,7 +300,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private _createShape() {
     return this.edgeless.surface.addElement(this._current.type, {
       ...this._current.serialize(),
-      text: new Y.Text(),
+      text: new Workspace.Y.Text(),
     });
   }
 

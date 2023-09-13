@@ -1,5 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { Y } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import {
   createVirgoKeyDownHandler,
   VEditor,
@@ -8,7 +10,6 @@ import {
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import * as Y from 'yjs';
 
 import { tryFormatInlineStyle } from './markdown/inline.js';
 import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
@@ -173,7 +174,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
 
     // Rich-Text controls undo-redo itself if undoManager is not provided
     if (!this.undoManager) {
-      this.undoManager = new Y.UndoManager(this.yText, {
+      this.undoManager = new Workspace.Y.UndoManager(this.yText, {
         trackedOrigins: new Set([this.yText.doc.clientID]),
       });
 

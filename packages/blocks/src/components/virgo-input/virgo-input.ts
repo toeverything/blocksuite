@@ -1,5 +1,5 @@
+import { Workspace, type Y } from '@blocksuite/store';
 import { VEditor, type VRange } from '@blocksuite/virgo';
-import * as Y from 'yjs';
 
 interface StackItem {
   meta: Map<'v-range', VRange | null>;
@@ -9,7 +9,7 @@ interface StackItem {
 export class VirgoInput {
   static Y_TEXT_NAME = 'Y_TEXT_NAME';
 
-  yDoc: Y.Doc = new Y.Doc();
+  yDoc: Y.Doc = new Workspace.Y.Doc();
   yText: Y.Text;
 
   vEditor: VEditor;
@@ -44,7 +44,7 @@ export class VirgoInput {
       this.type = type;
     }
 
-    if (yText instanceof Y.Text) {
+    if (yText instanceof Workspace.Y.Text) {
       if (yText.doc) {
         this.yText = yText;
         this.yDoc = yText.doc;
@@ -56,7 +56,7 @@ export class VirgoInput {
       this.yText.insert(0, text);
     }
 
-    this.undoManager = new Y.UndoManager(this.yText, {
+    this.undoManager = new Workspace.Y.UndoManager(this.yText, {
       trackedOrigins: new Set([this.yDoc.clientID]),
     });
     this.undoManager.on(

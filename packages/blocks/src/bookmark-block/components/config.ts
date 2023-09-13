@@ -1,6 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
+import { Workspace } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
-import * as Y from 'yjs';
 
 import { toast } from '../..//components/toast.js';
 import { copyBlocks } from '../../__internal__/clipboard/utils/commons.js';
@@ -55,7 +55,7 @@ export const config: ConfigItem[] = [
       const parent = page.getParent(model);
       const index = parent?.children.indexOf(model);
 
-      const yText = new Y.Text();
+      const yText = new Workspace.Y.Text();
       const insert = model.bookmarkTitle || model.caption || model.url;
       yText.insert(0, insert);
       yText.format(0, insert.length, { link: model.url });
