@@ -132,8 +132,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
 
   override connectedCallback() {
     super.connectedCallback();
-    if (!this.value) {
-      this._initYText();
+    if (!this.value || typeof this.value === 'string') {
+      this._initYText(this.value);
     }
   }
 
@@ -196,8 +196,8 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
 
   override connectedCallback() {
     super.connectedCallback();
-    if (!this.value) {
-      this._initYText();
+    if (!this.value || typeof this.value === 'string') {
+      this._initYText(this.value);
     }
   }
 
