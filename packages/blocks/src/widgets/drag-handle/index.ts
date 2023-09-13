@@ -284,7 +284,7 @@ export class DragHandleWidget extends WidgetElement {
       const container = document.createElement('div');
       container.classList.add('affine-block-element');
       render(element.render(), container);
-      container.querySelector('.selected')?.classList.remove('selected');
+      container.querySelector('affine-block-selection')?.remove();
       fragment.appendChild(container);
     });
 

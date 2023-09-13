@@ -173,11 +173,16 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
           // Check if start dragging from the image block
           const target = captureEventTarget(state.raw.target);
           const insideImageBlock = target?.closest('.resizable-img');
-          if (!insideImageBlock) return false;
+          if (!insideImageBlock || this._shouldResizeImage(state.raw.target))
+            return false;
 
           // If start dragging from the image block, clear the selection
           // And take over dragStart event and start dragging
-          this.root.selection.clear();
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: this.path,
+            }),
+          ]);
           startDragging([this as BlockElement], state);
           return true;
         },
@@ -239,6 +244,15 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .catch(this._fetchError);
   };
 
+  private _shouldResizeImage = (target: EventTarget | null) => {
+    return !!(
+      target &&
+      target instanceof HTMLElement &&
+      this.contains(target) &&
+      target.classList.contains('resize')
+    );
+  };
+
   private _observeDrag() {
     const embedResizeManager = new ImageResizeManager();
 
@@ -247,12 +261,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       this.root.event.add('dragStart', ctx => {
         const pointerState = ctx.get('pointerState');
         const target = pointerState.event.target;
-        if (
-          target &&
-          target instanceof HTMLElement &&
-          this.contains(target) &&
-          target.classList.contains('resize')
-        ) {
+        if (this._shouldResizeImage(target)) {
           dragging = true;
           embedResizeManager.onStart(pointerState);
           return true;
