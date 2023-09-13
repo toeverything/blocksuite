@@ -140,10 +140,10 @@ export class Store {
   }
 
   addSpace(space: Space) {
-    this.spaces.set(space.prefixedId, space);
+    this.spaces.set(space.id, space);
   }
 
   removeSpace(space: Space) {
-    this.spaces.delete(space.prefixedId);
+    this.spaces.delete(space.id);
   }
 }

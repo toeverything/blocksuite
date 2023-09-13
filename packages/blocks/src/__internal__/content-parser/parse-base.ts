@@ -596,7 +596,7 @@ export abstract class BaseParser {
           columns: columns,
           views: [
             {
-              id: this._page.generateId(),
+              id: this._page.generateBlockId(),
               name: 'Table View',
               mode: 'table',
               columns: [],

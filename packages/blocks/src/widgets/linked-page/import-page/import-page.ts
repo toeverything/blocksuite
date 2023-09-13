@@ -355,7 +355,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                 columns: columns,
                 views: [
                   {
-                    id: page.generateId(),
+                    id: page.generateBlockId(),
                     name: 'Table View',
                     mode: 'table',
                     columns: [],
