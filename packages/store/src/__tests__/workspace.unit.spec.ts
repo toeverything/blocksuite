@@ -35,8 +35,8 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true, schema };
 }
 
-const defaultPageId = 'page0';
-const spaceId = `space:${defaultPageId}`;
+const defaultPageId = 'space:page0';
+const spaceId = defaultPageId;
 const spaceMetaId = 'meta';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -606,7 +606,7 @@ describe('workspace search', () => {
   it('search page meta title', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'page0' });
+    const page = workspace.createPage({ id: 'space:page0' });
     await page.waitForLoaded();
     const pageId = page.addBlock('affine:page', {
       title: new page.Text('test123'),
