@@ -40,18 +40,39 @@ export type DragHandleOption = {
 };
 
 export class DragHandleOptionsRunner {
-  options: DragHandleOption[] = [];
+  private optionMap: Map<DragHandleOption, number> = new Map();
+
+  get options(): DragHandleOption[] {
+    return Array.from(this.optionMap.keys());
+  }
 
   register(option: DragHandleOption): Disposable {
-    if (this.options.find(op => op.flavour === option.flavour))
-      return { dispose() {} };
+    const currentOption =
+      this.getExistingOptionWithSameFlavour(option) || option;
+    const count = this.optionMap.get(currentOption) || 0;
+    this.optionMap.set(currentOption, count + 1);
 
-    this.options.push(option);
     return {
       dispose: () => {
-        // TODO: Need a better way to remove options if there are no blocks of same flavour
-        // this.options.splice(this.options.indexOf(option), 1);
+        this.decreaseOptionCount(currentOption);
       },
     };
+  }
+
+  private getExistingOptionWithSameFlavour(
+    option: DragHandleOption
+  ): DragHandleOption | undefined {
+    return Array.from(this.optionMap.keys()).find(
+      op => op.flavour === option.flavour
+    );
+  }
+
+  private decreaseOptionCount(option: DragHandleOption) {
+    const count = this.optionMap.get(option) || 0;
+    if (count > 1) {
+      this.optionMap.set(option, count - 1);
+    } else {
+      this.optionMap.delete(option);
+    }
   }
 }
