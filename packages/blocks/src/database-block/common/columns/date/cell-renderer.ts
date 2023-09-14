@@ -98,10 +98,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
 
     abortController.signal.addEventListener(
       'abort',
-      () => {
-        this._prevPortalAbortController = null;
-        this._datePicker = null;
-      },
+      () => (this._datePicker = null),
       { once: true }
     );
 

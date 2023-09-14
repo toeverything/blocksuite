@@ -220,11 +220,11 @@ export class DatePicker extends WithDisposable(LitElement) {
     this._getYearMatrix();
   }
 
-  private _onChange(date: Date) {
+  private _onChange(date: Date, emit = true) {
     this._cursor = date;
     this.value = date.getTime();
-    this.onChange?.(date);
     this._getMatrix();
+    emit && this.onChange?.(date);
   }
 
   private _getMatrix() {
@@ -330,7 +330,7 @@ export class DatePicker extends WithDisposable(LitElement) {
   override updated(_changedProperties: PropertyValues): void {
     if (_changedProperties.has('value')) {
       // this._getMatrix();
-      if (this.value) this._onChange(toDate(this.value));
+      if (this.value) this._onChange(toDate(this.value), false);
       else this._getMatrix();
     }
   }
