@@ -1,8 +1,12 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type {
+  RichTextCell,
+  RichTextCellEditing,
+} from '../../packages/blocks/src/database-block/common/columns/rich-text/cell-renderer.js';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ColumnType } from '../../packages/blocks/src/index.js';
-import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ZERO_WIDTH_SPACE } from '../../packages/virgo/src/consts.js';
 import {
@@ -199,7 +203,7 @@ export async function assertDatabaseCellRichTexts(
     text: string;
   }
 ) {
-  const cellContainer = await page.locator(
+  const cellContainer = page.locator(
     `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
   );
 
@@ -210,7 +214,7 @@ export async function assertDatabaseCellRichTexts(
 
   const richText = (await cellEditing.count()) === 0 ? cell : cellEditing;
   const actualTexts = await richText.evaluate(ele => {
-    return (ele as RichText).vEditor?.yText.toString();
+    return (ele as RichTextCellEditing).vEditor?.yTextString;
   });
   expect(actualTexts).toEqual(text);
 }
@@ -260,8 +264,10 @@ export async function assertDatabaseCellLink(
         `.database-cell:nth-child(${columnIndex + 1})`
       );
       const richText =
-        cell?.querySelector<RichText>('affine-database-link-cell') ??
-        cell?.querySelector<RichText>('affine-database-link-cell-editing');
+        cell?.querySelector<RichTextCell>('affine-database-link-cell') ??
+        cell?.querySelector<RichTextCellEditing>(
+          'affine-database-link-cell-editing'
+        );
       if (!richText) throw new Error('Missing database rich text cell');
       return richText.vEditor.yText.toString();
     },

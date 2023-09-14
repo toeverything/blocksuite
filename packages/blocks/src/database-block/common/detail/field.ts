@@ -103,6 +103,10 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   editing = false;
   private _cell = createRef<DataViewCellLifeCycle>();
 
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   public get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value;
   }
@@ -119,9 +123,12 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
   public _click = (e: MouseEvent) => {
     e.stopPropagation();
+    if (this.readonly) return;
+
     this.changeEditing(true);
   };
   public _clickLeft = (e: MouseEvent) => {
+    if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
     const columns = this.view.detailColumns;
     popMenu(ele, {

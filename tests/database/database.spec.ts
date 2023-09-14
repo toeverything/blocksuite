@@ -16,7 +16,6 @@ import {
   pressEnter,
   pressEscape,
   pressShiftEnter,
-  redoByClick,
   redoByKeyboard,
   selectAllByKeyboard,
   type,

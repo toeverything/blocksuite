@@ -21,7 +21,7 @@ import { StringBuilder } from './string-builder.js';
 
 export type Markdown = string;
 
-const markdownConvertableFlavours = [
+const markdownConvertibleFlavours = [
   'affine:code',
   'affine:paragraph',
   'affine:list',
@@ -70,10 +70,21 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return markdown;
   }
 
-  async fromSliceSnapshot(
-    _payload: FromSliceSnapshotPayload
-  ): Promise<Markdown> {
-    throw new Error('Method not implemented.');
+  async fromSliceSnapshot({
+    snapshot,
+    assets,
+  }: FromSliceSnapshotPayload): Promise<Markdown> {
+    for (const contentSlice of snapshot.content) {
+      await this.traverseSnapshot(contentSlice, {
+        indentDepth: 0,
+        insideTheLists: false,
+        numberedListCount: [0],
+        assets,
+      });
+    }
+    const markdown = this.markdownBuffer.toString();
+    this.markdownBuffer.clear();
+    return markdown;
   }
 
   async toPageSnapshot(
@@ -98,7 +109,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot: BlockSnapshot,
     context: TraverseContext
   ) => {
-    if (!markdownConvertableFlavours.includes(snapshot.flavour)) {
+    if (!markdownConvertibleFlavours.includes(snapshot.flavour)) {
       for (const child of snapshot.children) {
         await this.traverseSnapshot(child, context);
       }
