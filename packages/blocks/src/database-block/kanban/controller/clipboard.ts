@@ -16,10 +16,9 @@ export class KanbanClipboardController implements ReactiveController {
   hostConnected() {
     this.host.disposables.add(
       this.host.handleEvent('copy', ctx => {
-        if (this.readonly) return false;
-
         const kanbanSelection = this.host.selectionController.selection;
         if (!kanbanSelection) return false;
+
         this._onCopy(ctx, kanbanSelection);
         return true;
       })
