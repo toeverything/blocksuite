@@ -1,5 +1,4 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
-import { PathFinder } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { Slice } from '@blocksuite/store';
@@ -81,21 +80,20 @@ export class ClipboardController implements ReactiveController {
   private _onPaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
-    const sel = this._std.selection.getGroup('note').at(0);
-    if (!sel) {
-      return;
-    }
 
-    const parent = this._std.view.getParent(sel.path);
-    const index = parent?.children.findIndex(x => {
-      return PathFinder.equals(x.path, sel.path);
-    });
+    this._std.command
+      .pipe()
+      .getBlockIndex()
+      .inline(async (ctx, next) => {
+        await this._std.clipboard.paste(
+          e,
+          this._std.page,
+          ctx.parentBlock.model.id,
+          ctx.blockIndex ? ctx.blockIndex + 1 : undefined
+        );
 
-    this._std.clipboard.paste(
-      e,
-      this._std.page,
-      parent?.id,
-      index ? index + 1 : undefined
-    );
+        return next();
+      })
+      .run();
   };
 }

@@ -1,6 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 
 import {
+  getBlockIndexCommand,
   getNextBlockCommand,
   getPreviousBlockCommand,
   getSelectedModelsCommand,
@@ -12,5 +13,6 @@ export class DocPageService extends BlockService {
     this.std.command.add('getNextBlock', getNextBlockCommand);
     this.std.command.add('getPreviousBlock', getPreviousBlockCommand);
     this.std.command.add('getSelectedModels', getSelectedModelsCommand);
+    this.std.command.add('getBlockIndex', getBlockIndexCommand);
   }
 }

@@ -16,7 +16,7 @@ export type Command<
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
   next: (ctx?: CommandKeyToData<Out>) => Promise<void>
-) => Promise<void>;
+) => void | Promise<void>;
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
   : Omit<A, keyof B>;
