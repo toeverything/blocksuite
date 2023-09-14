@@ -330,8 +330,8 @@ describe('addBlock', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    const page0 = workspace.createPage({ id: 'page0' });
-    const page1 = workspace.createPage({ id: 'page1' });
+    const page0 = workspace.createPage({ id: 'space:page0' });
+    const page1 = workspace.createPage({ id: 'space:page1' });
     await Promise.all([page0.waitForLoaded(), page1.waitForLoaded()]);
     assert.equal(workspace.pages.size, 2);
 
@@ -354,7 +354,7 @@ describe('addBlock', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    const page0 = workspace.createPage({ id: 'page0' });
+    const page0 = workspace.createPage({ id: 'space:page0' });
 
     workspace.removePage(page0.id);
     assert.equal(workspace.pages.size, 0);
@@ -363,7 +363,7 @@ describe('addBlock', () => {
   it('can set page state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    workspace.createPage({ id: 'page0' });
+    workspace.createPage({ id: 'space:page0' });
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(({ id, title }) => ({
@@ -372,7 +372,7 @@ describe('addBlock', () => {
       })),
       [
         {
-          id: 'page0',
+          id: 'space:page0',
           title: '',
         },
       ]
@@ -384,7 +384,7 @@ describe('addBlock', () => {
     });
 
     // @ts-ignore
-    workspace.setPageMeta('page0', { favorite: true });
+    workspace.setPageMeta('space:page0', { favorite: true });
     assert.deepEqual(
       // @ts-ignore
       workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
@@ -394,7 +394,7 @@ describe('addBlock', () => {
       })),
       [
         {
-          id: 'page0',
+          id: 'space:page0',
           title: '',
           favorite: true,
         },
@@ -551,7 +551,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'page0' });
+    const page = workspace.createPage({ id: 'space:page0' });
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -565,7 +565,7 @@ describe('workspace.exportJSX works', () => {
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    workspace.createPage({ id: 'page0' });
+    workspace.createPage({ id: 'space:page0' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
@@ -573,7 +573,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace with multiple blocks children matches snapshot', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'page0' });
+    const page = workspace.createPage({ id: 'space:page0' });
     await page.waitForLoaded();
 
     const pageId = page.addBlock('affine:page', {
