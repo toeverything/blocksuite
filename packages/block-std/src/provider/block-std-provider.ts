@@ -1,5 +1,6 @@
 import type { Page, Workspace } from '@blocksuite/store';
 
+import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';
 import { UIEventDispatcher } from '../event/index.js';
 import { SelectionManager } from '../selection/index.js';
@@ -21,6 +22,7 @@ export class BlockStdProvider<ComponentType = unknown, NodeView = unknown> {
   readonly root: HTMLElement;
   readonly spec: SpecStore<ComponentType>;
   readonly view: ViewStore<NodeView>;
+  readonly clipboard: Clipboard;
 
   constructor(options: BlockStdProviderOptions) {
     this.root = options.root;
@@ -31,6 +33,7 @@ export class BlockStdProvider<ComponentType = unknown, NodeView = unknown> {
     this.command = new CommandManager(this);
     this.spec = new SpecStore<ComponentType>(this);
     this.view = new ViewStore<NodeView>(this);
+    this.clipboard = new Clipboard(this);
   }
 
   mount() {

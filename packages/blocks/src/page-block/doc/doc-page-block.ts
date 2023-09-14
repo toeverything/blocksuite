@@ -1,8 +1,7 @@
 import './meta-data/meta-data.js';
 
 import { type BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
@@ -13,8 +12,8 @@ import { PageClipboard } from '../../__internal__/clipboard/index.js';
 import { PAGE_BLOCK_CHILD_PADDING } from '../../__internal__/consts.js';
 import type { EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import { ClipboardController } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -113,7 +112,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   clipboard = new PageClipboard(this);
 
-  getService = getService;
+  clipboardController = new ClipboardController(this);
 
   @state()
   private _isComposing = false;

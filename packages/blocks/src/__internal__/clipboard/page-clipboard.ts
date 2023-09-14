@@ -82,7 +82,6 @@ export class PageClipboard implements Clipboard {
 
   private _onCopy = async (ctx: UIEventStateContext) => {
     const e = ctx.get('clipboardState').raw;
-
     e.preventDefault();
     this._page.captureSync();
 
