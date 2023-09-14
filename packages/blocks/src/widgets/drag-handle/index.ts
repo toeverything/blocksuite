@@ -254,7 +254,6 @@ export class DragHandleWidget extends WidgetElement {
     shouldAutoScroll: boolean = false
   ) => {
     const point = getContainerOffsetPoint(state);
-    // const point = new Point(state.x, state.y);
     const closestNoteBlock = getClosestNoteBlock(
       this.page,
       this.pageBlockElement,
@@ -313,7 +312,6 @@ export class DragHandleWidget extends WidgetElement {
       fragment.appendChild(container);
     });
 
-    // const point = new Point(state.x, state.y);
     this.dragPreviewOffset = this.calculatePreviewOffset(blockElements, state);
     const posX = state.x - this.dragPreviewOffset.x;
     const posY = state.y - this.dragPreviewOffset.y;
