@@ -61,6 +61,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
   private _inputEle!: HTMLInputElement;
 
   private _prevPortalAbortController: AbortController | null = null;
+  private _datePicker: DatePicker | null = null;
 
   override onExitEditMode() {
     this._setValue();
@@ -95,6 +96,15 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     const abortController = new AbortController();
     this._prevPortalAbortController = abortController;
 
+    abortController.signal.addEventListener(
+      'abort',
+      () => {
+        this._prevPortalAbortController = null;
+        this._datePicker = null;
+      },
+      { once: true }
+    );
+
     const root = createLitPortal({
       abortController,
       closeOnClickAway: true,
@@ -110,6 +120,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
           this._setValue(date.toISOString());
         };
         setTimeout(() => datePicker.focusDateCell());
+        this._datePicker = datePicker;
         return datePicker;
       },
     });
@@ -120,6 +131,12 @@ export class DateCellEditing extends BaseCellRenderer<number> {
     root.style.zIndex = '1002';
   };
 
+  private _onInput(e: InputEvent) {
+    if (!this._datePicker) return;
+    const v = (e.target as HTMLInputElement).value;
+    this._datePicker.value = v ? new Date(v).getTime() : undefined;
+  }
+
   override render() {
     const value = this.value ? format(this.value, 'yyyy-MM-dd') : '';
     return html`<input
@@ -127,6 +144,7 @@ export class DateCellEditing extends BaseCellRenderer<number> {
       class="affine-database-date date"
       .value="${value}"
       @focus=${this._onFocus}
+      @input=${this._onInput}
     />`;
   }
 }

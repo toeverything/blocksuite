@@ -143,9 +143,9 @@ export const datePickerStyle = css`
   /** interactive  */
   .interactive {
     cursor: pointer;
-    transition:
+    /* transition:
       background 0.23s ease,
-      color 0.23s ease;
+      color 0.23s ease; */
     user-select: none;
     position: relative;
     border: none;

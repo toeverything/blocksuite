@@ -13,7 +13,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { arrowLeftIcon } from './icons.js';
 import { datePickerStyle } from './style.js';
-import { getMonthMatrix, toDate } from './utils.js';
+import { clamp, getMonthMatrix, toDate } from './utils.js';
 
 const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 const months = [
@@ -191,7 +191,7 @@ export class DatePicker extends WithDisposable(LitElement) {
     else this.openMonthSelector();
   }
   public openYearSelector() {
-    this._yearCursor = this.year;
+    this._yearCursor = clamp(this._minYear, this._maxYear, this.year);
     this._mode = 'year';
     this._getYearMatrix();
   }
@@ -212,15 +212,16 @@ export class DatePicker extends WithDisposable(LitElement) {
     this._getMatrix();
   }
   private _modeDecade(offset: number) {
-    this._yearCursor = Math.max(
+    this._yearCursor = clamp(
       this._minYear,
-      Math.min(this._maxYear, this._yearCursor + offset)
+      this._maxYear,
+      this._yearCursor + offset
     );
     this._getYearMatrix();
   }
 
   private _onChange(date: Date) {
-    if (!isSameMonth(date, this._cursor)) this._cursor = date;
+    this._cursor = date;
     this.value = date.getTime();
     this.onChange?.(date);
     this._getMatrix();
@@ -328,7 +329,9 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   override updated(_changedProperties: PropertyValues): void {
     if (_changedProperties.has('value')) {
-      this._getMatrix();
+      // this._getMatrix();
+      if (this.value) this._onChange(toDate(this.value));
+      else this._getMatrix();
     }
   }
 
@@ -492,25 +495,23 @@ export class DatePicker extends WithDisposable(LitElement) {
   }
 
   private _yearContent() {
+    const startYear = this._yearMatrix[0];
+    const endYear = this._yearMatrix[this._yearMatrix.length - 1];
     return html`<div class="date-picker-header">
         <button
           class="date-picker-header__date interactive"
           @click=${() => this.toggleYearSelector()}
         >
-          <div>
-            ${this._yearMatrix[0]}-${this._yearMatrix[
-              this._yearMatrix.length - 1
-            ]}
-          </div>
+          <div>${startYear}-${endYear}</div>
         </button>
         ${this._navAction(
           {
             action: () => this._modeDecade(-12),
-            disable: this._yearCursor - 12 <= this._minYear,
+            disable: startYear <= this._minYear,
           },
           {
             action: () => this._modeDecade(12),
-            disable: this._yearCursor + 12 >= this._maxYear,
+            disable: endYear >= this._maxYear,
           }
         )}
       </div>
