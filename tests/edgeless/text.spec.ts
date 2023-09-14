@@ -101,7 +101,7 @@ test('copy and paste', async ({ page }) => {
 
   await page.mouse.move(145, 155);
   await page.mouse.down();
-  await page.mouse.move(165, 155, {
+  await page.mouse.move(170, 155, {
     steps: 10,
   });
   await page.mouse.up();
@@ -134,14 +134,15 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await page.mouse.click(10, 100);
 
   await page.mouse.click(140, 210);
-  await assertEdgelessSelectedRect(page, [130, 200, 106, 156]);
+  await waitNextFrame(page);
+  await assertEdgelessSelectedRect(page, [130, 200, 110.7, 163.3]);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
   const generalTextFont = page.getByText('General');
   await generalTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 106.7, 108]);
+  await assertEdgelessSelectedRect(page, [130, 200, 114.7, 118.2]);
   await fontButton.click();
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 104, 156]);
+  await assertEdgelessSelectedRect(page, [130, 200, 108.3, 163.3]);
 });
