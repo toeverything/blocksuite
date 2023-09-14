@@ -237,6 +237,12 @@ export class DragHandleWidget extends WidgetElement {
     }
   };
 
+  resetDropResult = () => {
+    this.dropBlockId = '';
+    this.dropBefore = false;
+    if (this.dropIndicator) this.dropIndicator.rect = null;
+  };
+
   updateIndicator = (
     state: PointerEventState,
     shouldAutoScroll: boolean = false
@@ -248,8 +254,7 @@ export class DragHandleWidget extends WidgetElement {
       point
     );
     if (!closestNoteBlock || this.outOfNoteBlock(closestNoteBlock, point)) {
-      this.dropBlockId = '';
-      // this.indicatorRect = null;
+      this.resetDropResult();
     } else {
       const dropIndicator = this.getDropResult(state);
       this.updateDropIndicator(dropIndicator);
@@ -293,8 +298,7 @@ export class DragHandleWidget extends WidgetElement {
       width = Math.max(width, element.getBoundingClientRect().width);
       const container = document.createElement('div');
       container.classList.add('affine-block-element');
-      render(element.render(), container);
-      container.querySelector('affine-block-selection')?.remove();
+      render(this.root.renderModel(element.model), container);
       fragment.appendChild(container);
     });
 
