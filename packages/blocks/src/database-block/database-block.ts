@@ -315,7 +315,7 @@ class DatabaseBlockViewSource implements ViewSource {
   }
 
   public get readonly(): boolean {
-    return false;
+    return this.model.page.readonly;
   }
 
   public viewAdd(type: DataViewTypes): string {
