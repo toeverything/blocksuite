@@ -173,7 +173,7 @@ async function main() {
   });
 
   subscribePage(workspace);
-  initWorkspace(workspace);
+  await initWorkspace(workspace);
 }
 
 main();

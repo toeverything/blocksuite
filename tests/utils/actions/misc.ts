@@ -311,24 +311,22 @@ export async function enterPlaygroundWithList(
 }
 
 // XXX: This doesn't add surface yet, the page state should not be switched to edgeless.
-export async function initEmptyParagraphState(page: Page, pageId?: string) {
-  const ids = await page.evaluate(async pageId => {
+export async function initEmptyParagraphState(page: Page) {
+  const ids = await page.evaluate(async () => {
     const { page } = window;
     await page.waitForLoaded();
     page.captureSync();
 
-    if (!pageId) {
-      pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
-      });
-    }
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
+    });
 
     const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
     // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
     return { pageId, noteId, paragraphId };
-  }, pageId);
+  });
   return ids;
 }
 
