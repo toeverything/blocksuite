@@ -2,16 +2,18 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
 import type { TextTool } from '../../../__internal__/index.js';
+import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { addText } from '../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export class TextToolController extends EdgelessToolController<TextTool> {
   readonly tool = <TextTool>{
     type: 'text',
+    color: GET_DEFAULT_LINE_COLOR(),
   };
 
   onContainerClick(e: PointerEventState): void {
-    addText(this._edgeless, e);
+    addText(this._edgeless, e, this.tool.color);
   }
 
   onContainerContextMenu(): void {

@@ -79,7 +79,8 @@ export function mountFrameEditor(
 
 export function addText(
   edgeless: EdgelessPageBlockComponent,
-  event: PointerEventState
+  event: PointerEventState,
+  color: string = GET_DEFAULT_LINE_COLOR()
 ) {
   const selected = edgeless.surface.pickTop(event.x, event.y);
   if (!selected) {
@@ -92,7 +93,7 @@ export function addText(
       text: new Workspace.Y.Text(),
       textAlign: 'left',
       fontSize: 24,
-      color: GET_DEFAULT_LINE_COLOR(),
+      color: color,
       bold: false,
       italic: false,
     });

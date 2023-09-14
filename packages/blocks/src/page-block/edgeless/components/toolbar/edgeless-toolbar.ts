@@ -7,6 +7,7 @@ import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 import './frame/frame-tool-button.js';
 import './default/default-tool-button.js';
+import './text/text-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -425,15 +426,18 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         </edgeless-toolbar-button>
       </div>
       <div class="edgeless-toolbar-right-part">
-        <edgeless-toolbar-button
-          class="transform-button"
-          .tooltip=${getTooltipWithShortcut('Text', 'T')}
-          .active=${type === 'text'}
-          .activeMode=${'background'}
-          @click=${() => this.setEdgelessTool({ type: 'text' })}
+        <edgeless-shape-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-shape-tool-button>
+        <edgeless-text-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
         >
           ${EdgelessTextIcon}
-        </edgeless-toolbar-button>
+        </edgeless-text-tool-button>
         <edgeless-toolbar-button
           class="transform-button"
           .disabled=${this._imageLoading}
@@ -443,11 +447,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
-        <edgeless-shape-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-shape-tool-button>
       </div>
     `;
   }
