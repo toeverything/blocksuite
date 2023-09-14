@@ -1,58 +1,12 @@
-import type { TextRangePoint, UIEventHandler } from '@blocksuite/block-std';
+import type { UIEventHandler } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import type { JobMiddleware } from '@blocksuite/store';
 import { Slice } from '@blocksuite/store';
-import type { ReactiveController } from 'lit';
-import type { ReactiveControllerHost } from 'lit';
+import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { ClipboardAdapter } from './adapter.js';
-
-export * from './adapter.js';
-
-const copyMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
-  return ({ slots }) => {
-    slots.afterExport.on(payload => {
-      if (payload.type === 'block') {
-        const handlePoint = (point: TextRangePoint) => {
-          const { index, length } = point;
-          if (!snapshot.props.text) {
-            return;
-          }
-          (snapshot.props.text as Record<string, unknown>).delta =
-            model.text?.sliceToDelta(index, length + index);
-        };
-        const snapshot = payload.snapshot;
-        snapshot.id = std.page.workspace.idGenerator();
-
-        const model = payload.model;
-        const text = std.selection.find('text');
-        if (text && PathFinder.id(text.from.path) === model.id) {
-          handlePoint(text.from);
-          return;
-        }
-        if (text && text.to && PathFinder.id(text.to.path) === model.id) {
-          handlePoint(text.to);
-          return;
-        }
-      }
-    });
-  };
-};
-
-const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
-  return ({ slots }) => {
-    slots.beforeImport.on(payload => {
-      if (payload.type === 'block') {
-        const text = std.selection.find('text');
-        console.log(payload);
-        console.log(text);
-      }
-    });
-  };
-};
+import { copyMiddleware, pasteMiddleware } from './middleware.js';
 
 export class ClipboardController implements ReactiveController {
   protected _disposables = new DisposableGroup();
