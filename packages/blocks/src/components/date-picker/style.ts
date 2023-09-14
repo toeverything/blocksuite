@@ -23,8 +23,11 @@ export const datePickerStyle = css`
     justify-content: center;
     width: 20px;
     height: 20px;
-    color: var(--affine-icon-color);
     border-radius: 4px;
+  }
+  .interactive.date-picker-small-action,
+  .interactive.action-label.today {
+    color: var(--affine-icon-color);
   }
   .date-picker-small-action:hover {
     color: var(--affine-icon-hover-color);
@@ -73,7 +76,7 @@ export const datePickerStyle = css`
     gap: 4px;
   }
   .date-picker-header__action .action-label {
-    font-size: 10px;
+    font-size: 12px;
     padding: 0px 4px;
     height: 20px;
     border-radius: 4px;
@@ -151,6 +154,7 @@ export const datePickerStyle = css`
     border: none;
     background-color: unset;
     font-family: var(--affine-font-family);
+    color: var(--affine-text-primary-color);
   }
   /* --hover */
   .interactive::after,
@@ -191,27 +195,35 @@ export const datePickerStyle = css`
   }
 
   /** Month Select */
+  .date-picker-month {
+    --btn-width: 36px;
+  }
+  .date-picker-year {
+    --btn-width: 46px;
+  }
   .date-picker-month,
   .date-picker-year {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, var(--btn-width));
     gap: 18px 32px;
-    justify-items: space-between;
+    justify-content: space-between;
   }
   .date-picker-month button,
   .date-picker-year button {
     height: 34px;
-    width: 64px;
-    padding: 4px 10px;
+    width: fit-content;
+    padding: 4px;
     border-radius: 8px;
     font-size: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: var(--btn-width);
   }
   .date-picker-month button.active,
   .date-picker-year button.active {
     color: var(--affine-primary-color);
+    /* background: var(--affine-primary-color); */
     font-weight: 600;
   }
   .date-picker .date-picker-header {
@@ -224,6 +236,6 @@ export const datePickerStyle = css`
   }
   .date-picker--mode-month .date-picker-header,
   .date-picker--mode-year .date-picker-header {
-    padding: 0 10px;
+    /* padding: 0 10px; */
   }
 `;

@@ -79,6 +79,8 @@ export class DatePicker extends WithDisposable(LitElement) {
   private _monthCursor = 0;
   @property({ attribute: false })
   private _yearCursor = 0;
+  @property({ attribute: false })
+  private _monthPickYearCursor = 0;
   /** date matrix */
   @property({ attribute: false })
   private _matrix: DateCell[][] = [];
@@ -181,6 +183,7 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   public openMonthSelector() {
     this._monthCursor = this.month;
+    this._monthPickYearCursor = this.year;
     this._mode = 'month';
   }
   public closeMonthSelector() {
@@ -205,10 +208,6 @@ export class DatePicker extends WithDisposable(LitElement) {
 
   private _moveMonth(offset: number) {
     this._cursor.setMonth(this._cursor.getMonth() + offset);
-    this._getMatrix();
-  }
-  private _moveYear(offset: number) {
-    this._cursor.setFullYear(this._cursor.getFullYear() + offset);
     this._getMatrix();
   }
   private _modeDecade(offset: number) {
@@ -456,23 +455,28 @@ export class DatePicker extends WithDisposable(LitElement) {
           class="date-picker-header__date interactive"
           @click=${() => this.toggleMonthSelector()}
         >
-          <div>${this.yearLabel}</div>
+          <div>${this._monthPickYearCursor}</div>
         </button>
 
         ${this._navAction(
           {
-            action: () => this._moveYear(-1),
-            disable: this._cursor.getFullYear() <= this._minYear,
+            action: () => this._monthPickYearCursor--,
+            disable: this._monthPickYearCursor <= this._minYear,
           },
           {
-            action: () => this._moveYear(1),
-            disable: this._cursor.getFullYear() >= this._maxYear,
+            action: () => this._monthPickYearCursor++,
+            disable: this._monthPickYearCursor >= this._maxYear,
           }
         )}
       </div>
       <div class="date-picker-month">
         ${months.map((month, index) => {
-          const isActive = index === this._cursor.getMonth();
+          const isActive = this.value
+            ? isSameMonth(
+                this.value,
+                new Date(this._monthPickYearCursor, index, 1)
+              )
+            : false;
           const classes = classMap({
             'month-cell': true,
             interactive: true,
@@ -484,6 +488,7 @@ export class DatePicker extends WithDisposable(LitElement) {
             class=${classes}
             @click=${() => {
               this._cursor.setMonth(index);
+              this._cursor.setFullYear(this._monthPickYearCursor);
               this._mode = 'date';
               this._getMatrix();
             }}
