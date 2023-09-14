@@ -55,7 +55,7 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
     super.connectedCallback();
 
     this._disposables.add(
-      this.editor.slots.pageLinkClicked.on(this._switchPage)
+      this.editor.slots.pageLinkClicked.on(e => this._switchPage(e))
     );
     this.page = this.editor.page;
 
