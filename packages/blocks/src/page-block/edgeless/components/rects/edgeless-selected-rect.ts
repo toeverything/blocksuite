@@ -71,6 +71,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       position: absolute;
       top: 0;
       left: 0;
+      z-index: 1;
     }
 
     .affine-edgeless-selected-rect {
