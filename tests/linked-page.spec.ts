@@ -464,7 +464,7 @@ test.describe('reference node', () => {
   test('should create reference node works', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
-    const defaultPageId = 'page0';
+    const defaultPageId = 'space:page0';
     const { id: newId } = await addNewPage(page);
     await switchToPage(page, newId);
     await focusTitle(page);
