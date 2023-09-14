@@ -139,7 +139,6 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<DataViewKanbanManag
             select: () => {
               this.view.duplicateView();
             },
-            class: 'delete-item',
           },
           {
             type: 'group',
