@@ -261,3 +261,135 @@ test('should attachment can be deleted works', async ({ page }) => {
     noteId
   );
 });
+
+test(`support dragging attachment block directly`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+
+  const { insertAttachment, waitLoading, getName, getSize } =
+    getAttachment(page);
+
+  await focusRichText(page);
+  await insertAttachment();
+
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  expect(await getName()).toBe(FILE_NAME);
+  expect(await getSize()).toBe('45.8 kB');
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:attachment
+    prop:loadingKey={null}
+    prop:name="${FILE_NAME}"
+    prop:size={${FILE_SIZE}}
+    prop:sourceId="${FILE_ID}"
+    prop:type="image/png"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  const attachmentBlock = page.locator('affine-attachment');
+  const rect = await attachmentBlock.boundingBox();
+  if (!rect) {
+    throw new Error('image not found');
+  }
+
+  // add new paragraph blocks
+  await page.mouse.click(rect.x + 20, rect.y + rect.height + 20);
+  await focusRichText(page);
+  await type(page, '111');
+  await page.waitForTimeout(200);
+  await pressEnter(page);
+
+  await type(page, '222');
+  await page.waitForTimeout(200);
+  await pressEnter(page);
+
+  await type(page, '333');
+  await page.waitForTimeout(200);
+
+  await page.waitForTimeout(200);
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:attachment
+      prop:loadingKey={null}
+      prop:name="${FILE_NAME}"
+      prop:size={${FILE_SIZE}}
+      prop:sourceId="${FILE_ID}"
+      prop:type="image/png"
+    />
+    <affine:paragraph
+      prop:text="111"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="222"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="333"
+      prop:type="text"
+    />
+  </affine:note>
+</affine:page>`
+  );
+
+  // drag bookmark block
+  await page.mouse.move(rect.x + 20, rect.y + 20);
+  await page.mouse.down();
+  await page.waitForTimeout(200);
+
+  await page.mouse.move(rect.x + 40, rect.y + rect.height + 80);
+  await page.waitForTimeout(200);
+
+  await page.mouse.up();
+  await page.waitForTimeout(200);
+
+  const rects = page.locator('affine-block-selection');
+  await expect(rects).toHaveCount(1);
+
+  await assertStoreMatchJSX(
+    page,
+    /*xml*/ `<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="111"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="222"
+      prop:type="text"
+    />
+    <affine:attachment
+      prop:loadingKey={null}
+      prop:name="${FILE_NAME}"
+      prop:size={${FILE_SIZE}}
+      prop:sourceId="${FILE_ID}"
+      prop:type="image/png"
+    />
+    <affine:paragraph
+      prop:text="333"
+      prop:type="text"
+    />
+  </affine:note>
+</affine:page>`
+  );
+});

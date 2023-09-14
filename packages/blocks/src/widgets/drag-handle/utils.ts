@@ -21,7 +21,7 @@ import type { BlockComponentElement } from '../../index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import {
   DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT,
-  type DropIndicator,
+  type DropResult,
 } from './config.js';
 
 const heightMap: { [key: string]: number } = {
@@ -149,10 +149,10 @@ export const getClosestBlockByPoint = (
   return closestBlockElement;
 };
 
-export const getDropIndicator = (
+export const getDropResult = (
   event: MouseEvent,
   scale: number = 1
-): DropIndicator | null => {
+): DropResult | null => {
   let dropIndicator = null;
   let dropBlockId = '';
   let dropBefore = false;

@@ -213,8 +213,8 @@ test('select image should not show format bar', async ({ page }) => {
   }
   await dragBetweenCoords(
     page,
-    { x: rect.x + 20, y: rect.y + 20 },
-    { x: rect.x - 20, y: rect.y - 20 }
+    { x: rect.x - 20, y: rect.y + 20 },
+    { x: rect.x + 20, y: rect.y + 40 }
   );
   const rects = page.locator('affine-block-selection');
   await expect(rects).toHaveCount(1);
