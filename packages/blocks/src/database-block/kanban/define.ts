@@ -8,6 +8,7 @@ import { viewManager } from '../common/data-view.js';
 import { groupByMatcher } from '../common/group-by/matcher.js';
 import { defaultGroupBy } from '../common/group-by/util.js';
 import type { GroupBy } from '../common/types.js';
+import type { Sort } from '../common/types.js';
 import type { Column } from '../table/types.js';
 
 declare global {
@@ -30,6 +31,7 @@ export type KanbanViewData = {
   columns: KanbanViewColumn[];
   filter: FilterGroup;
   groupBy?: GroupBy;
+  sort?: Sort;
   header: {
     titleColumn?: string;
     iconColumn?: string;
