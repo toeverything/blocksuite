@@ -9,12 +9,17 @@ export class KanbanClipboardController implements ReactiveController {
     host.addController(this);
   }
 
+  private get readonly() {
+    return this.host.view.readonly;
+  }
+
   hostConnected() {
     this.host.disposables.add(
       this.host.handleEvent('copy', ctx => {
+        if (this.readonly) return false;
+
         const kanbanSelection = this.host.selectionController.selection;
         if (!kanbanSelection) return false;
-
         this._onCopy(ctx, kanbanSelection);
         return true;
       })
@@ -22,6 +27,8 @@ export class KanbanClipboardController implements ReactiveController {
 
     this.host.disposables.add(
       this.host.handleEvent('paste', ctx => {
+        if (this.readonly) return false;
+
         this._onPaste(ctx);
         return true;
       })
