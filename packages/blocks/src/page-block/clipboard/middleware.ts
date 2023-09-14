@@ -5,7 +5,11 @@ import type { JobMiddleware } from '@blocksuite/store';
 
 export const copyMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
   return ({ slots }) => {
+    const idMap = new Map<string, string>();
     slots.afterExport.on(payload => {
+      if (payload.type === 'slice') {
+        console.log(payload);
+      }
       if (payload.type === 'block') {
         const handlePoint = (point: TextRangePoint) => {
           const { index, length } = point;
@@ -16,7 +20,15 @@ export const copyMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
             model.text?.sliceToDelta(index, length + index);
         };
         const snapshot = payload.snapshot;
-        snapshot.id = std.page.workspace.idGenerator();
+        const original = snapshot.id;
+        let newId: string;
+        if (idMap.has(original)) {
+          newId = idMap.get(original)!;
+        } else {
+          newId = std.page.workspace.idGenerator();
+          idMap.set(original, newId);
+        }
+        snapshot.id = newId;
 
         const model = payload.model;
         const text = std.selection.find('text');
@@ -38,8 +50,7 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
     slots.beforeImport.on(payload => {
       if (payload.type === 'block') {
         const text = std.selection.find('text');
-        console.log(payload);
-        console.log(text);
+        text;
       }
     });
   };

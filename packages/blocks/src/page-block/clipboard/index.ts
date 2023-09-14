@@ -1,6 +1,7 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { Slice } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
@@ -32,32 +33,36 @@ export class ClipboardController implements ReactiveController {
       this._disposables = new DisposableGroup();
     }
     if (this._enabled) {
-      this.host.handleEvent('copy', this._onCopy);
-      this.host.handleEvent('paste', this._onPaste);
-
-      this._std.clipboard.registerAdapter(
-        ClipboardAdapter.MIME,
-        this._clipboardAdapter,
-        100
-      );
-      const copy = copyMiddleware(this._std);
-      const paste = pasteMiddleware(this._std);
-      this._std.clipboard.use(copy);
-      this._std.clipboard.use(paste);
-
-      this._disposables.add({
-        dispose: () => {
-          this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
-          this._std.clipboard.unuse(copy);
-          this._std.clipboard.unuse(paste);
-        },
-      });
+      this._init();
     }
   }
 
   hostDisconnected() {
     this._disposables.dispose();
   }
+
+  private _init = () => {
+    this.host.handleEvent('copy', this._onCopy);
+    this.host.handleEvent('paste', this._onPaste);
+
+    this._std.clipboard.registerAdapter(
+      ClipboardAdapter.MIME,
+      this._clipboardAdapter,
+      100
+    );
+    const copy = copyMiddleware(this._std);
+    const paste = pasteMiddleware(this._std);
+    this._std.clipboard.use(copy);
+    this._std.clipboard.use(paste);
+
+    this._disposables.add({
+      dispose: () => {
+        this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
+        this._std.clipboard.unuse(copy);
+        this._std.clipboard.unuse(paste);
+      },
+    });
+  };
 
   private _onCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
@@ -70,7 +75,19 @@ export class ClipboardController implements ReactiveController {
         if (!ctx.selectedModels) {
           return;
         }
-        const slice = Slice.fromModels(this._std.page, ctx.selectedModels);
+        const models: BaseBlockModel[] = ctx.selectedModels.slice();
+        const traverse = (model: BaseBlockModel) => {
+          model.children.forEach(child => {
+            const idx = models.findIndex(m => m.id === child.id);
+            if (idx >= 0) {
+              models.splice(idx, 1);
+            }
+            traverse(child);
+          });
+        };
+        models.forEach(traverse);
+
+        const slice = Slice.fromModels(this._std.page, models);
         await this._std.clipboard.copy(e, slice);
         return next();
       })
