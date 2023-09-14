@@ -74,15 +74,14 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot,
     assets,
   }: FromSliceSnapshotPayload): Promise<Markdown> {
-    snapshot.content.forEach(
-      async contentSlice =>
-        await this.traverseSnapshot(contentSlice, {
-          indentDepth: 0,
-          insideTheLists: false,
-          numberedListCount: [0],
-          assets,
-        })
-    );
+    for (const contentSlice of snapshot.content) {
+      await this.traverseSnapshot(contentSlice, {
+        indentDepth: 0,
+        insideTheLists: false,
+        numberedListCount: [0],
+        assets,
+      });
+    }
     const markdown = this.markdownBuffer.toString();
     this.markdownBuffer.clear();
     return markdown;
