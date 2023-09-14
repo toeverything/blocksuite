@@ -39,19 +39,6 @@ export const styles = css`
       display: none;
     }
   }
-  .affine-drag-indicator {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: var(--affine-primary-color);
-    transition-property: width, height, transform;
-    transition-duration: 100ms;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-delay: 0s;
-    transform-origin: 0 0;
-    pointer-events: none;
-    z-index: 2;
-  }
   .affine-drag-hover-rect {
     position: absolute;
     top: 0;

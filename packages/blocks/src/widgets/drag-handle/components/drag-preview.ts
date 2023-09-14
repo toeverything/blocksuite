@@ -27,7 +27,7 @@ export class DragPreview extends ShadowlessElement {
         pointer-events: none;
         caret-color: transparent;
         transform-origin: 0 0;
-        z-index: 2;
+        z-index: 3;
       }
 
       affine-drag-preview > .affine-block-element {
@@ -39,9 +39,9 @@ export class DragPreview extends ShadowlessElement {
         margin-top: 0;
       }
 
-      /* affine-drag-preview.grabbing {
+      affine-drag-preview.grabbing {
         cursor: grabbing;
-      } */
+      }
 
       affine-drag-preview.grabbing:after {
         content: '';
