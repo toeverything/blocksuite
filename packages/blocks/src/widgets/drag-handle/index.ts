@@ -199,6 +199,12 @@ export class DragHandleWidget extends WidgetElement {
 
     if (result) {
       rect = result.rect;
+      if (rect) {
+        rect.left = rect.left - state.containerOffset.x;
+        rect.top = rect.top - state.containerOffset.y;
+        rect.right = rect.right - state.containerOffset.x;
+        rect.bottom = rect.bottom - state.containerOffset.y;
+      }
       targetElement = result.modelState.element;
       this.dropBefore = result.type === 'before' ? true : false;
     }
@@ -248,6 +254,7 @@ export class DragHandleWidget extends WidgetElement {
     shouldAutoScroll: boolean = false
   ) => {
     const point = getContainerOffsetPoint(state);
+    // const point = new Point(state.x, state.y);
     const closestNoteBlock = getClosestNoteBlock(
       this.page,
       this.pageBlockElement,
@@ -277,12 +284,16 @@ export class DragHandleWidget extends WidgetElement {
     }
   };
 
-  calculatePreviewOffset = (blockElements: BlockElement[], point: Point) => {
+  calculatePreviewOffset = (
+    blockElements: BlockElement[],
+    state: PointerEventState
+  ) => {
     const { top, left } = blockElements[0].getBoundingClientRect();
-    const { x, y } = point;
+    const { x: offsetX, y: offsetY } = state.containerOffset;
+    const { x, y } = state.point;
     return {
-      x: x - left,
-      y: y - top,
+      x: x - left + offsetX,
+      y: y - top + offsetY,
     };
   };
 
@@ -302,9 +313,8 @@ export class DragHandleWidget extends WidgetElement {
       fragment.appendChild(container);
     });
 
-    // const { left, top } = hoverBlockElement.getBoundingClientRect();
-    const point = new Point(state.x, state.y);
-    this.dragPreviewOffset = this.calculatePreviewOffset(blockElements, point);
+    // const point = new Point(state.x, state.y);
+    this.dragPreviewOffset = this.calculatePreviewOffset(blockElements, state);
     const posX = state.x - this.dragPreviewOffset.x;
     const posY = state.y - this.dragPreviewOffset.y;
     this.dragPreview.style.width = `${width / this.scale}px`;
