@@ -49,7 +49,8 @@ export class DragHandleOptionsRunner {
     this.options.push(option);
     return {
       dispose: () => {
-        this.options.splice(this.options.indexOf(option), 1);
+        // TODO: Need a better way to remove options if there are no blocks of same flavour
+        // this.options.splice(this.options.indexOf(option), 1);
       },
     };
   }
