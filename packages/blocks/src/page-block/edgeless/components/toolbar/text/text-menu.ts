@@ -39,7 +39,6 @@ export class EdgelessTextMenu extends WithDisposable(LitElement) {
     if (this.edgelessTool.type !== 'text') return nothing;
 
     const { color } = this.edgelessTool;
-    console.log('color', color);
     return html`
       <edgeless-slide-menu .menuWidth=${285}>
         <div class="menu-content">

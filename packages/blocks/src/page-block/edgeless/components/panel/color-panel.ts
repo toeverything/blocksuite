@@ -41,6 +41,9 @@ export const LINE_COLORS: CssVariableName[] = [
 export const GET_DEFAULT_LINE_COLOR = () =>
   queryCurrentMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
 
+export const GET_DEFAULT_TEXT_COLOR = () =>
+  queryCurrentMode() === 'dark' ? LINE_COLORS[1] : LINE_COLORS[0];
+
 export const DEFAULT_BRUSH_COLOR = '--affine-palette-line-blue';
 
 export function isTransparent(color: CssVariableName) {

@@ -9,7 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { type EdgelessTool } from '../../../../../__internal__/index.js';
 import { EdgelessTextIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';
+import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessTextMenu } from './text-menu.js';
@@ -38,7 +38,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   @state()
-  private _color: string = GET_DEFAULT_LINE_COLOR();
+  private _color: string = GET_DEFAULT_TEXT_COLOR();
 
   private _textMenu: MenuPopper<EdgelessTextMenu> | null = null;
 
@@ -101,7 +101,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
         @click=${() => {
           this.setEdgelessTool({
             type: 'text',
-            color: GET_DEFAULT_LINE_COLOR(),
+            color: GET_DEFAULT_TEXT_COLOR(),
           });
           this._toggleTextMenu();
         }}
