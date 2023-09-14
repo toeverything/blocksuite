@@ -16,6 +16,7 @@ import {
   calcDropTarget,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
+  getCurrentNativeRange,
   getModelByBlockElement,
   isEdgelessPage,
   isPageMode,
@@ -36,7 +37,6 @@ import {
   type DragHandleOption,
   DragHandleOptionsRunner,
   type DropResult,
-  getDragHandleLeftPadding,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
@@ -49,10 +49,12 @@ import {
   getClosestNoteBlock,
   getContainerOffsetPoint,
   getDragHandleContainerHeight,
+  getDragHandleLeftPadding,
   getNoteId,
   includeTextSelection,
   insideDatabaseTable,
   isBlockPathEqual,
+  updateDragHandleClassName,
 } from './utils.js';
 
 @customElement('affine-drag-handle-widget')
@@ -354,6 +356,7 @@ export class DragHandleWidget extends WidgetElement {
   };
 
   hide = (force = false) => {
+    updateDragHandleClassName();
     if (!this._dragHandleContainer) return;
 
     this._hoverDragHandle = false;
@@ -459,7 +462,10 @@ export class DragHandleWidget extends WidgetElement {
     const containerHeight = getDragHandleContainerHeight(blockElement.model);
 
     // Ad-hoc solution for list with toggle icon
-    const offsetLeft = getDragHandleLeftPadding(blockElement);
+    const blockElements = this._getHoveredBlocks();
+    const offsetLeft = getDragHandleLeftPadding(blockElements);
+    updateDragHandleClassName(blockElements);
+    // End of ad-hoc solution
 
     const posLeft =
       left -
@@ -526,10 +532,44 @@ export class DragHandleWidget extends WidgetElement {
     this._show(blockElement);
   }
 
+  private _getHoveredBlocks(): BlockElement[] {
+    if (!this._hoveredBlockPath) return [];
+    const hoverBlock = this._getBlockElementFromViewStore(
+      this._hoveredBlockPath
+    );
+    if (!hoverBlock) return [];
+    const selections = this.selectedBlocks;
+    let blockElements: BlockElement[] = [];
+    // When current selection is TextSelection, should cover all the blocks in native range
+    if (selections.length > 0 && includeTextSelection(selections)) {
+      const range = getCurrentNativeRange();
+      blockElements = this._rangeManager.getSelectedBlockElementsByRange(
+        range,
+        {
+          match: el => el.model.role === 'content',
+          mode: 'highest',
+        }
+      );
+    } else {
+      blockElements = this.selectedBlocks
+        .map(block => this._getBlockElementFromViewStore(block.path))
+        .filter((block): block is BlockElement => !!block);
+    }
+
+    if (
+      containBlock(
+        blockElements.map(block => PathFinder.id(block.path)),
+        PathFinder.id(this._hoveredBlockPath)
+      )
+    ) {
+      return blockElements;
+    }
+    return [hoverBlock];
+  }
+
   private _getDraggingAreaRect(blockElement: BlockElement) {
     if (!this._hoveredBlockPath) return;
 
-    const selections = this.selectedBlocks;
     // When hover block is in selected blocks, should show hover rect on the selected blocks
     // Top: the top of the first selected block
     // Left: the left of the first selected block
@@ -537,51 +577,16 @@ export class DragHandleWidget extends WidgetElement {
     // Bottom: the bottom of the last selected block
     let { left, top, right, bottom } = blockElement.getBoundingClientRect();
 
-    // When current selection is TextSelection, should cover all the blocks in native range
-    if (selections.length > 0 && includeTextSelection(selections)) {
-      const nativeSelection = document.getSelection();
-      if (nativeSelection && nativeSelection.rangeCount > 0) {
-        const range = nativeSelection.getRangeAt(0);
-        const blockElements =
-          this._rangeManager.getSelectedBlockElementsByRange(range, {
-            match: el => el.model.role === 'content',
-            mode: 'highest',
-          });
+    const blockElements = this._getHoveredBlocks();
 
-        if (
-          containBlock(
-            blockElements.map(block => PathFinder.id(block.path)),
-            PathFinder.id(this._hoveredBlockPath)
-          )
-        ) {
-          blockElements.forEach(blockElement => {
-            left = Math.min(left, blockElement.getBoundingClientRect().left);
-            top = Math.min(top, blockElement.getBoundingClientRect().top);
-            right = Math.max(right, blockElement.getBoundingClientRect().right);
-            bottom = Math.max(
-              bottom,
-              blockElement.getBoundingClientRect().bottom
-            );
-          });
-        }
-      }
-    } else if (
-      containBlock(
-        selections.map(selection => selection.blockId),
-        PathFinder.id(this._hoveredBlockPath)
-      )
-    ) {
-      this.selectedBlocks.forEach(block => {
-        const blockElement = this._getBlockElementFromViewStore(block.path);
-        if (!blockElement) return;
-        left = Math.min(left, blockElement.getBoundingClientRect().left);
-        top = Math.min(top, blockElement.getBoundingClientRect().top);
-        right = Math.max(right, blockElement.getBoundingClientRect().right);
-        bottom = Math.max(bottom, blockElement.getBoundingClientRect().bottom);
-      });
-    }
+    blockElements.forEach(blockElement => {
+      left = Math.min(left, blockElement.getBoundingClientRect().left);
+      top = Math.min(top, blockElement.getBoundingClientRect().top);
+      right = Math.max(right, blockElement.getBoundingClientRect().right);
+      bottom = Math.max(bottom, blockElement.getBoundingClientRect().bottom);
+    });
 
-    const offsetLeft = getDragHandleLeftPadding(blockElement);
+    const offsetLeft = getDragHandleLeftPadding(blockElements);
 
     // Add padding to hover rect
     left -= (DRAG_HANDLE_WIDTH + offsetLeft) * this.scale;

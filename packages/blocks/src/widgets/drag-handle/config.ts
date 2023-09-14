@@ -3,7 +3,6 @@ import type { Disposable } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 import type { Rect } from '../../__internal__/index.js';
-import { matchFlavours } from '../../__internal__/utils/model.js';
 
 export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 2;
@@ -77,14 +76,4 @@ export class DragHandleOptionsRunner {
       this.optionMap.delete(option);
     }
   }
-}
-
-export function getDragHandleLeftPadding(blockElement: BlockElement) {
-  const isToggleList =
-    matchFlavours(blockElement.model, ['affine:list']) &&
-    blockElement.model.children.length > 0;
-  const offsetLeft = isToggleList
-    ? LIST_DRAG_HANDLE_OFFSET_LEFT
-    : DRAG_HANDLE_OFFSET_LEFT;
-  return offsetLeft;
 }

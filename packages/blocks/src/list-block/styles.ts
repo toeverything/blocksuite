@@ -53,6 +53,10 @@ const toggleStyles = css`
   .toggle-icon__collapsed {
     opacity: 1;
   }
+
+  .with-drag-handle .toggle-icon {
+    opacity: 1;
+  }
 `;
 
 export const styles = css`
