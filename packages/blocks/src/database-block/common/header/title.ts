@@ -5,20 +5,16 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
 import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
-import { DATABASE_TITLE_LENGTH } from './consts.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     .affine-database-title {
+      position: relative;
       flex: 1;
-      height: 28px;
-      min-width: 100px;
-      width: max-content;
     }
 
     .database-title {
-      height: 30px;
       font-size: 20px;
       font-weight: 600;
       line-height: 28px;
@@ -31,7 +27,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
     .database-title [data-virgo-text='true'] {
       display: block;
-      white-space: pre !important;
+      word-break: break-all !important;
     }
 
     .database-title.ellipsis [data-virgo-text='true'] {
@@ -87,17 +83,11 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     disposables.addFromEvent(this._titleContainer, 'compositionend', () => {
       this.compositionInput = false;
     });
-
-    // prevent block selection
-    const onStopPropagation = (event: Event) => event.stopPropagation();
-    this._disposables.addFromEvent(this, 'pointerdown', onStopPropagation);
-    this._disposables.addFromEvent(this, 'pointermove', onStopPropagation);
   }
 
   private _initTitleVEditor() {
     this.titleVInput = new VirgoInput({
       yText: this.titleText.yText,
-      maxLength: DATABASE_TITLE_LENGTH,
     });
 
     this.titleVInput.vEditor.disposables.addFromEvent(
@@ -116,7 +106,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
   }
 
   private _handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.isComposing) {
       // prevent insert v-line
       event.preventDefault();
       // insert new row
@@ -146,6 +136,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
       ></div>
+      <div class="database-title" style="float:left;height: 0;">Untitled</div>
     </div>`;
   }
 }

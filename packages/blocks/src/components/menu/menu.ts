@@ -65,7 +65,7 @@ type GetMenuByType<T extends Menu['type'], M extends Menu = Menu> = M extends {
 }
   ? M
   : never;
-type MenuOptions = {
+export type MenuOptions = {
   onComplete?: () => void;
   onClose?: () => void;
   input?: {

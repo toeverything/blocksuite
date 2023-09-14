@@ -4,6 +4,7 @@ import { customElement, query } from 'lit/decorators.js';
 import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
 import {
   DeleteIcon,
+  DuplicateIcon,
   FilterIcon,
   GroupingIcon,
   InfoIcon,
@@ -129,6 +130,16 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<DataViewKanbanManag
                   };
                 }),
             },
+          },
+
+          {
+            type: 'action',
+            name: 'Duplicate',
+            icon: DuplicateIcon,
+            select: () => {
+              this.view.duplicateView();
+            },
+            class: 'delete-item',
           },
           {
             type: 'group',
