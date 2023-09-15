@@ -143,7 +143,7 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
         if (firstBlock.props.type) {
           firstBlock.props.type = (fromBlock.model as ParagraphBlockModel).type;
         }
-        if (lastBlock.props.type) {
+        if (lastBlock.props.type && to) {
           lastBlock.props.type = (toBlock.model as ParagraphBlockModel).type;
         }
         firstTextSnapshot.delta = [...fromDelta, ...firstDelta];
