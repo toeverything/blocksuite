@@ -38,6 +38,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         t: () => {
           this._setEdgelessTool(pageElement, {
             type: 'text',
+            color: GET_DEFAULT_LINE_COLOR(),
           });
         },
         l: () => {
