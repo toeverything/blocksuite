@@ -10,10 +10,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
-import {
-  PAGE_BLOCK_CHILD_PADDING,
-  PAGE_BLOCK_PADDING_BOTTOM,
-} from '../../__internal__/consts.js';
+import { PAGE_BLOCK_CHILD_PADDING } from '../../__internal__/consts.js';
 import type { EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
@@ -60,7 +57,6 @@ export class DocPageBlockComponent extends BlockElement<
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
-      padding-bottom: ${PAGE_BLOCK_PADDING_BOTTOM}px;
 
       /* Leave a place for drag-handle */
       /* Do not use prettier format this style, or it will be broken */
