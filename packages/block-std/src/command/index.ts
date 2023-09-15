@@ -81,7 +81,7 @@ export class CommandManager {
             await cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
         };
-        return runCmds(ctx, cmds);
+        return runCmds(ctx as BlockSuite.CommandData, cmds);
       },
       with: value => {
         return this.createChain(methods, [

@@ -75,15 +75,27 @@ export class ClipboardController implements ReactiveController {
         if (!ctx.selectedModels) {
           return;
         }
-        const models: BaseBlockModel[] = ctx.selectedModels.slice();
+        const models: BaseBlockModel[] = ctx.selectedModels.map(model =>
+          model.clone()
+        );
         const traverse = (model: BaseBlockModel) => {
-          model.children.forEach(child => {
+          const children = model.children.filter(child => {
+            const idx = models.findIndex(m => m.id === child.id);
+            if (idx < 0) {
+              model.childMap.delete(child.id);
+            }
+            return idx >= 0;
+          });
+
+          children.forEach(child => {
             const idx = models.findIndex(m => m.id === child.id);
             if (idx >= 0) {
               models.splice(idx, 1);
             }
             traverse(child);
           });
+          model.children = children;
+          return;
         };
         models.forEach(traverse);
 
