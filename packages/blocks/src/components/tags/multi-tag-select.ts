@@ -198,7 +198,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     const tagColor = this.color;
     this.clearColor();
     const newSelect: SelectTag = {
-      id: nanoid(),
+      id: nanoid('unknown'),
       value: name,
       color: tagColor,
       parentId: groupInfo.parent?.id,
