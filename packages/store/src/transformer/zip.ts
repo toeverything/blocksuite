@@ -72,11 +72,11 @@ export async function importPagesZip(workspace: Workspace, imported: Blob) {
   const middleware: JobMiddleware = ({ slots, workspace }) => {
     slots.beforeImport.on(({ snapshot, type }) => {
       if (type === 'page') {
-        snapshot.meta.id = workspace.idGenerator();
+        snapshot.meta.id = workspace.idGenerator('page');
         return;
       }
       if (type === 'block') {
-        snapshot.id = workspace.idGenerator();
+        snapshot.id = workspace.idGenerator('block');
         return;
       }
     });

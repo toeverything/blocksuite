@@ -58,8 +58,8 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       z-index: 12;
     }
     .next-slide-button {
+      opacity: 0;
       display: flex;
-      opacity: 1;
       top: 50%;
       right: 0;
       transform: translate(50%, -50%) scale(0.5);
@@ -100,21 +100,23 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
   @query('.slide-menu-content')
   private _slideMenuContent!: HTMLDivElement;
 
-  override firstUpdated() {
-    // Add a event listener to the slide menu content
-    // When the content position is changed, hide the corresponding button
-    this._disposables.addFromEvent(this._menuContainer, 'scrollend', () => {
-      this._previousSlideButton.style.opacity = '1';
-      this._nextSlideButton.style.opacity = '1';
+  private _toggleSlideButton(scrollLeft: number) {
+    this._previousSlideButton.style.opacity = '1';
+    this._nextSlideButton.style.opacity = '1';
+    const leftMin = 0;
+    const leftMax = this._slideMenuContent.clientWidth - this.menuWidth + 2; // border is 2
+    if (scrollLeft === leftMin) {
+      this._previousSlideButton.style.opacity = '0';
+    }
+    if (scrollLeft === leftMax) {
+      this._nextSlideButton.style.opacity = '0';
+    }
+  }
 
-      const left = this._menuContainer.scrollLeft;
-      const leftMin = 0;
-      const leftMax = this._slideMenuContent.clientWidth - this.menuWidth + 2; // border is 2
-      if (left === leftMin) {
-        this._previousSlideButton.style.opacity = '0';
-      } else if (left === leftMax) {
-        this._nextSlideButton.style.opacity = '0';
-      }
+  override firstUpdated() {
+    this._toggleSlideButton(this._menuContainer.scrollLeft);
+    this._disposables.addFromEvent(this._menuContainer, 'scrollend', () => {
+      this._toggleSlideButton(this._menuContainer.scrollLeft);
     });
   }
 

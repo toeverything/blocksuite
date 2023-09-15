@@ -1,19 +1,16 @@
 import type { Point } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
+  type BlockComponentElement,
   BlockHub,
   getAllowSelectedBlocks,
   getBookmarkInitialProps,
+  getClosestNoteBlockElementById,
   getEdgelessPage,
+  getHoveringNote,
   getServiceOrRegister,
-  PAGE_BLOCK_PADDING_BOTTOM,
   Rect,
   uploadImageFromLocal,
-} from '@blocksuite/blocks';
-import {
-  type BlockComponentElement,
-  getClosestNoteBlockElementById,
-  getHoveringNote,
 } from '@blocksuite/blocks';
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
@@ -196,11 +193,9 @@ export const createBlockHub: (
       if (editor.mode === 'page') {
         const docPageBlock = editor.querySelector('affine-doc-page');
         assertExists(docPageBlock);
-        const rect = Rect.fromDOMRect(
+        state.rect = Rect.fromDOMRect(
           docPageBlock.pageBlockContainer.getBoundingClientRect()
         );
-        rect.height -= PAGE_BLOCK_PADDING_BOTTOM;
-        state.rect = rect;
       } else {
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
