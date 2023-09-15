@@ -31,15 +31,6 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   editor!: EditorContainer;
 
-  private _switchPage({ pageId }: { pageId: string }) {
-    if (this.page && this.page.id !== pageId) {
-      const newPage = this.editor.page.workspace.getPage(pageId);
-      if (newPage) {
-        this.page = newPage;
-      }
-    }
-  }
-
   private _renderPanel() {
     return html`<edgeless-toc-notes-panel
       .page=${this.page}
@@ -53,10 +44,6 @@ export class CustomNavigationPanel extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-
-    this._disposables.add(
-      this.editor.slots.pageLinkClicked.on(this._switchPage)
-    );
     this.page = this.editor.page;
 
     registerTOCComponents(components => {

@@ -8,9 +8,12 @@ import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { WhenHoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
-import type {
-  AttachmentBlockModel,
-  AttachmentProps,
+import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { captureEventTarget } from '../widgets/drag-handle/utils.js';
+import {
+  type AttachmentBlockModel,
+  AttachmentBlockSchema,
+  type AttachmentProps,
 } from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import {
@@ -62,6 +65,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
       this._showCaption = true;
     }
     this._checkAttachment();
+    this._registerDragHandleOption();
   }
 
   override willUpdate(changedProperties: PropertyValues) {
@@ -119,6 +123,30 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         : null}
     `;
   }
+
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: AttachmentBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const attachmentBlock = target?.closest('affine-attachment');
+          if (!attachmentBlock) return false;
+
+          // If start dragging from the attachment element
+          // Set selection and take over dragStart event to start dragging
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: attachmentBlock.path,
+            }),
+          ]);
+          startDragging([attachmentBlock], state);
+          return true;
+        },
+      })
+    );
+  };
 
   override render() {
     const isLoading =

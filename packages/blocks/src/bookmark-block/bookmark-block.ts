@@ -14,7 +14,12 @@ import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { WhenHoverController } from '../components/index.js';
 import { WebIcon16 } from '../icons/text.js';
-import type { BookmarkBlockModel } from './bookmark-model.js';
+import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { captureEventTarget } from '../widgets/drag-handle/utils.js';
+import {
+  type BookmarkBlockModel,
+  BookmarkBlockSchema,
+} from './bookmark-model.js';
 import type {
   MenuActionCallback,
   ToolbarActionCallback,
@@ -231,7 +236,32 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
+    this._registerDragHandleOption();
   }
+
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: BookmarkBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const bookmarkBlock = target?.closest('affine-bookmark');
+          if (!bookmarkBlock) return false;
+
+          // If start dragging from the bookmark element
+          // Set selection and take over dragStart event to start dragging
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: bookmarkBlock.path,
+            }),
+          ]);
+          startDragging([bookmarkBlock], state);
+          return true;
+        },
+      })
+    );
+  };
 
   private _onInputChange() {
     this._caption = this._input.value;

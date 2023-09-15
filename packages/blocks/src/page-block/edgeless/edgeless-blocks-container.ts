@@ -4,7 +4,7 @@ import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
 import './components/note-slicer/index.js';
 
-import { throttle } from '@blocksuite/global/utils';
+import { noop, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
@@ -18,11 +18,12 @@ import {
 import { getRectByBlockElement } from '../../__internal__/utils/query.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
 import { almostEqual, Bound } from '../../surface-block/index.js';
-import { EdgelessNotesStatus } from './components/notes-status.js';
-import { updateNotesPosition } from './components/utils.js';
+import { EdgelessNoteStatus } from './components/note-status/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid } from './utils/query.js';
+
+noop(EdgelessNoteStatus);
 
 @customElement('affine-edgeless-block-container')
 export class EdgelessBlockContainer extends WithDisposable(LitElement) {
@@ -160,8 +161,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         if (_selection.selectedBlocks.length) {
           _selection.setSelectedBlocks([..._selection.selectedBlocks]);
         }
-
-        updateNotesPosition(edgeless, edgeless.notes);
       })
     );
 
@@ -217,7 +216,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
-      ${EdgelessNotesStatus(edgeless, edgeless.notes)}
+      <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status>
       <div class="widgets-container">${widgets}</div>
     `;
   }
