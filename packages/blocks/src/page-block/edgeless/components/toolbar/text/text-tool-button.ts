@@ -56,6 +56,16 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
     }
   }
 
+  private _tryLoadTextStateLocalColor() {
+    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessText';
+    const textData = sessionStorage.getItem(key);
+    let color = null;
+    if (textData) {
+      color = JSON.parse(textData).color;
+      this._color = color;
+    }
+  }
+
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('edgelessTool')) {
       if (this.edgelessTool.type !== 'text') {
@@ -71,6 +81,9 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this.updateComplete.then(() => {
+      this._tryLoadTextStateLocalColor();
+    });
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type === 'text') {

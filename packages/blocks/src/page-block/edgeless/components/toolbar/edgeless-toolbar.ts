@@ -267,6 +267,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     _disposables.add(
       slots.edgelessToolUpdated.on(() => {
         this._trySaveBrushStateLocalRecord();
+        this._trySaveTextStateLocalRecord();
         this.requestUpdate();
       })
     );
@@ -310,6 +311,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         JSON.stringify({
           color: edgelessTool.color,
           lineWidth: edgelessTool.lineWidth,
+        })
+      );
+    }
+  };
+
+  private _trySaveTextStateLocalRecord = () => {
+    const edgelessTool = this.edgeless.tools.edgelessTool;
+    const { type } = edgelessTool;
+    if (type === 'text') {
+      sessionStorage.setItem(
+        'blocksuite:' + this.edgeless.page.id + ':edgelessText',
+        JSON.stringify({
+          color: edgelessTool.color,
         })
       );
     }
