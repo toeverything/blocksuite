@@ -21,7 +21,10 @@ export class PageClipboard implements Clipboard {
 
   init(page: Page) {
     this._page = page;
-
+    const disable = page.awarenessStore.getFlag('enable_transformer_clipboard');
+    if (disable) {
+      return;
+    }
     this._ele.handleEvent('cut', ctx => {
       this._onCut(ctx);
     });
