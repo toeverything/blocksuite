@@ -59,7 +59,7 @@ export async function getNoteRect(
 ) {
   const xywh: string | null = await page.evaluate(
     ([id]) => {
-      const page = window.workspace.getPage('space:page0');
+      const page = window.workspace.getPage('page:home');
       const block = page?.getBlockById(id.noteId);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).xywh;

@@ -22,7 +22,7 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true, schema };
 }
 
-async function createTestPage(pageId = 'space:page0', workspace?: Workspace) {
+async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
@@ -76,7 +76,7 @@ describe('workspace.search works', () => {
       id: 'test',
     });
     const page2 = workspace2.createPage({
-      id: 'space:page0',
+      id: 'page:home',
     });
     applyUpdate(page2.spaceDoc, update);
     expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
@@ -124,7 +124,7 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(subpage.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'space:page0',
+        pageId: 'page:home',
         type: 'Subpage',
       },
     ]);
@@ -206,7 +206,7 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'space:page0',
+        pageId: 'page:home',
         type: 'LinkedPage',
       },
       {
@@ -219,7 +219,7 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page1.id)).toStrictEqual([
       {
         blockId: '3',
-        pageId: 'space:page0',
+        pageId: 'page:home',
         type: 'LinkedPage',
       },
       {
@@ -236,7 +236,7 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'space:page0',
+        pageId: 'page:home',
         type: 'LinkedPage',
       },
       {

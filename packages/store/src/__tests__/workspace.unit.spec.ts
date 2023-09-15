@@ -35,7 +35,7 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true, schema };
 }
 
-const defaultPageId = 'space:page0';
+const defaultPageId = 'page:home';
 const spaceId = defaultPageId;
 const spaceMetaId = 'meta';
 
@@ -78,7 +78,7 @@ describe('basic', () => {
     const workspace = new Workspace(options);
     assert.equal(workspace.isEmpty, true);
 
-    const page = workspace.createPage({ id: 'space:page0' });
+    const page = workspace.createPage({ id: 'page:home' });
     await page.waitForLoaded();
     const actual = serializeWorkspace(workspace.doc);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
@@ -92,7 +92,7 @@ describe('basic', () => {
       [spaceMetaId]: {
         pages: [
           {
-            id: 'space:page0',
+            id: 'page:home',
             title: '',
             tags: [],
           },
@@ -330,7 +330,7 @@ describe('addBlock', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    const page0 = workspace.createPage({ id: 'space:page0' });
+    const page0 = workspace.createPage({ id: 'page:home' });
     const page1 = workspace.createPage({ id: 'space:page1' });
     await Promise.all([page0.waitForLoaded(), page1.waitForLoaded()]);
     assert.equal(workspace.pages.size, 2);
@@ -341,10 +341,7 @@ describe('addBlock', () => {
     workspace.removePage(page0.id);
 
     assert.equal(workspace.pages.size, 1);
-    assert.equal(
-      serializeWorkspace(page0.doc).spaces['space:page0'],
-      undefined
-    );
+    assert.equal(serializeWorkspace(page0.doc).spaces['page:home'], undefined);
 
     workspace.removePage(page1.id);
     assert.equal(workspace.pages.size, 0);
@@ -354,7 +351,7 @@ describe('addBlock', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
 
-    const page0 = workspace.createPage({ id: 'space:page0' });
+    const page0 = workspace.createPage({ id: 'page:home' });
 
     workspace.removePage(page0.id);
     assert.equal(workspace.pages.size, 0);
@@ -363,7 +360,7 @@ describe('addBlock', () => {
   it('can set page state', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    workspace.createPage({ id: 'space:page0' });
+    workspace.createPage({ id: 'page:home' });
 
     assert.deepEqual(
       workspace.meta.pageMetas.map(({ id, title }) => ({
@@ -372,7 +369,7 @@ describe('addBlock', () => {
       })),
       [
         {
-          id: 'space:page0',
+          id: 'page:home',
           title: '',
         },
       ]
@@ -384,7 +381,7 @@ describe('addBlock', () => {
     });
 
     // @ts-ignore
-    workspace.setPageMeta('space:page0', { favorite: true });
+    workspace.setPageMeta('page:home', { favorite: true });
     assert.deepEqual(
       // @ts-ignore
       workspace.meta.pageMetas.map(({ id, title, favorite }) => ({
@@ -394,7 +391,7 @@ describe('addBlock', () => {
       })),
       [
         {
-          id: 'space:page0',
+          id: 'page:home',
           title: '',
           favorite: true,
         },
@@ -551,7 +548,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'space:page0' });
+    const page = workspace.createPage({ id: 'page:home' });
 
     page.addBlock('affine:page', { title: new page.Text('hello') });
 
@@ -565,7 +562,7 @@ describe('workspace.exportJSX works', () => {
   it('empty workspace matches snapshot', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    workspace.createPage({ id: 'space:page0' });
+    workspace.createPage({ id: 'page:home' });
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot('null');
   });
@@ -573,7 +570,7 @@ describe('workspace.exportJSX works', () => {
   it('workspace with multiple blocks children matches snapshot', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'space:page0' });
+    const page = workspace.createPage({ id: 'page:home' });
     await page.waitForLoaded();
 
     const pageId = page.addBlock('affine:page', {
@@ -606,7 +603,7 @@ describe('workspace search', () => {
   it('search page meta title', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
-    const page = workspace.createPage({ id: 'space:page0' });
+    const page = workspace.createPage({ id: 'page:home' });
     await page.waitForLoaded();
     const pageId = page.addBlock('affine:page', {
       title: new page.Text('test123'),
@@ -616,7 +613,7 @@ describe('workspace search', () => {
     const result = workspace.search('test');
     expect(result).toMatchInlineSnapshot(`
       Map {
-        "0" => "space:page0",
+        "0" => "page:home",
       }
     `);
   });
