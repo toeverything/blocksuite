@@ -28,3 +28,18 @@ export function insertPositionToIndex<T>(
   }
   return arr.findIndex(v => key(v) === position) + 1;
 }
+export const arrayMove = <T>(
+  arr: T[],
+  from: (t: T) => boolean,
+  to: (arr: T[]) => number
+): T[] => {
+  const columnIndex = arr.findIndex(v => from(v));
+  if (columnIndex < 0) {
+    return arr;
+  }
+  const newArr = [...arr];
+  const [ele] = newArr.splice(columnIndex, 1);
+  const index = to(newArr);
+  newArr.splice(index, 0, ele);
+  return newArr;
+};

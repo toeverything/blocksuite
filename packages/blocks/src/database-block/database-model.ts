@@ -9,7 +9,7 @@ import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
 import { viewManager } from './common/data-view.js';
 import type { Column } from './table/types.js';
 import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
-import { insertPositionToIndex } from './utils/insert.js';
+import { arrayMove, insertPositionToIndex } from './utils/insert.js';
 
 type Props = {
   views: DataViewDataType[];
@@ -96,6 +96,21 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
     });
     return view;
   }
+  duplicateView(id: string): string {
+    const newId = this.page.generateBlockId();
+    this.page.transact(() => {
+      const index = this.views.findIndex(v => v.id === id);
+      const view = this.views[index];
+      if (view) {
+        this.views.splice(
+          index + 1,
+          0,
+          JSON.parse(JSON.stringify({ ...view, id: newId }))
+        );
+      }
+    });
+    return newId;
+  }
 
   deleteView(id: string) {
     this.page.captureSync();
@@ -115,6 +130,16 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         }
         return { ...v, ...update(v) } as DataViewDataType;
       });
+    });
+    this.applyViewsUpdate();
+  }
+  moveViewTo(id: string, position: InsertPosition) {
+    this.page.transact(() => {
+      this.views = arrayMove(
+        this.views,
+        v => v.id === id,
+        arr => insertPositionToIndex(position, arr)
+      );
     });
     this.applyViewsUpdate();
   }

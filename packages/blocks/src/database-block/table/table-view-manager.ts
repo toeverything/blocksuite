@@ -184,6 +184,9 @@ export class DataViewTableManager extends BaseDataViewManager {
     return this.view.columns.find(v => v.id === columnId)?.hide ?? false;
   }
 
+  public duplicateView(): void {
+    this.viewSource.duplicate();
+  }
   public deleteView(): void {
     this.viewSource.delete();
   }
