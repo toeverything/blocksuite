@@ -248,15 +248,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       .catch(this._fetchError);
   };
 
-  // private _shouldResizeImage = (target: EventTarget | null) => {
-  //   return !!(
-  //     target &&
-  //     target instanceof HTMLElement &&
-  //     this.contains(target) &&
-  //     target.classList.contains('resize')
-  //   );
-  // };
-
   private _observeDrag() {
     const embedResizeManager = new ImageResizeManager();
 
