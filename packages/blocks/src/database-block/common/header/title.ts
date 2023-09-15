@@ -114,12 +114,15 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       return;
     }
   };
-
+  @state()
+  private isActive = false;
   private _onTitleFocus = () => {
+    this.isActive = true;
     this.titleVInput?.setActive(true);
   };
 
   private _onTitleBlur = () => {
+    this.isActive = false;
     this.titleVInput?.setActive(false);
   };
 
@@ -129,6 +132,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     const classList = classMap({
       'database-title': true,
       'database-title-empty': isEmpty,
+      ellipsis: !this.isActive,
     });
     return html`<div class="affine-database-title">
       <div

@@ -59,6 +59,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       border-radius: 4px;
     }
     .database-ops {
+      margin-top: 4px;
       padding: 2px;
       border-radius: 4px;
       display: flex;
@@ -253,6 +254,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private renderTitle = (dataViewMethod: DataViewExpose) => {
     const addRow = () => dataViewMethod.addRow?.('start');
     return html` <affine-database-title
+      style="overflow: hidden"
       .titleText="${this.model.title}"
       .readonly="${this.model.page.readonly}"
       .onPressEnterKey="${addRow}"
@@ -272,9 +274,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     }) => {
       return html`
         <div style="margin-bottom: 16px;display:flex;flex-direction: column">
-          <div
-            style="display:flex;align-items:center;gap:8px;padding: 0 6px;margin-bottom: 8px;"
-          >
+          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
             ${this.renderTitle(viewMethods)} ${this.renderDatabaseOps()}
             ${this.renderReference()}
           </div>
