@@ -40,7 +40,7 @@ export class EdgelessTextMenu extends WithDisposable(LitElement) {
 
     const { color } = this.edgelessTool;
     return html`
-      <edgeless-slide-menu .menuWidth=${285}>
+      <edgeless-slide-menu .menuWidth=${476}>
         <div class="menu-content">
           <edgeless-one-row-color-panel
             .value=${color}

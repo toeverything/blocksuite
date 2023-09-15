@@ -48,7 +48,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
       this._textMenu = null;
     } else {
       this._textMenu = createPopper('edgeless-text-menu', this, {
-        x: 300,
+        x: 130,
         y: -40,
       });
       this._textMenu.element.edgelessTool = this.edgelessTool;
