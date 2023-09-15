@@ -27,7 +27,7 @@ const replaceId = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
       if (idMap.has(original)) {
         newId = idMap.get(original)!;
       } else {
-        newId = std.page.workspace.idGenerator();
+        newId = std.page.workspace.idGenerator('block');
         idMap.set(original, newId);
       }
       snapshot.id = newId;
