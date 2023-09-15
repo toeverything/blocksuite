@@ -112,3 +112,12 @@ async function getBlobByModel(model: ImageBlockModel) {
   const blob = await store.get(model.sourceId);
   return blob;
 }
+
+export function shouldResizeImage(node: Node, target: EventTarget | null) {
+  return !!(
+    target &&
+    target instanceof HTMLElement &&
+    node.contains(target) &&
+    target.classList.contains('resize')
+  );
+}
