@@ -113,7 +113,7 @@ export async function switchReadonly(page: Page) {
       };
     };
     const page = defaultPage.page;
-    page.awarenessStore.setFlag('readonly', { 'space:page0': true });
+    page.awarenessStore.setFlag('readonly', { 'page:home': true });
   });
 }
 
