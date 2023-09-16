@@ -14,7 +14,7 @@ import {
 import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
 import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
-import { inlineFormatConfig } from '../../common/inline-format-config.js';
+import { formatConfig } from '../../common/format/config.js';
 import { paragraphConfig } from '../../common/paragraph-config.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
@@ -105,7 +105,7 @@ export const menuGroups: {
   },
   {
     name: 'Style',
-    items: inlineFormatConfig
+    items: formatConfig
       .filter(i => !['Link', 'Code'].includes(i.name))
       .map(({ name, icon, id }) => ({
         name,

@@ -14,13 +14,10 @@ import {
 } from '../../../__internal__/utils/check-line.js';
 import { matchFlavours } from '../../../__internal__/utils/model.js';
 import { bracketPairs } from '../../../common/bracket-pairs.js';
-import { inlineFormatConfig } from '../../../common/inline-format-config.js';
+import { formatConfig } from '../../../common/format/config.js';
 import { getNextBlock } from '../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
-import {
-  getCombinedFormatInTextSelection,
-  getSelectedContentModels,
-} from '../../../page-block/utils/selection.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
@@ -400,7 +397,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
   });
 
-  inlineFormatConfig.forEach(config => {
+  formatConfig.forEach(config => {
     if (!config.hotkey) return;
 
     blockElement.bindHotKey({
@@ -412,8 +409,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
         _preventDefault(ctx);
 
-        const format = getCombinedFormatInTextSelection(root, textSelection);
-        config.action({ root, type: 'text', format });
+        config.action(root);
         return true;
       },
     });

@@ -1,4 +1,3 @@
-import type { NullablePartial } from '@blocksuite/global/utils';
 import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
@@ -353,7 +352,7 @@ export class VEditor<
 
   formatText(
     vRange: VRange,
-    attributes: NullablePartial<TextAttributes>,
+    attributes: TextAttributes,
     options: {
       match?: (delta: DeltaInsert, deltaVRange: VRange) => boolean;
       mode?: 'replace' | 'merge';
@@ -365,8 +364,11 @@ export class VEditor<
     deltas
       .filter(([delta, deltaVRange]) => match(delta, deltaVRange))
       .forEach(([_delta, deltaVRange]) => {
-        const targetVRange = intersectVRange(vRange, deltaVRange);
+        const normalizedAttributes =
+          this._attributeService.normalizeAttributes(attributes);
+        if (!normalizedAttributes) return;
 
+        const targetVRange = intersectVRange(vRange, deltaVRange);
         if (!targetVRange) return;
 
         if (mode === 'replace') {
@@ -377,7 +379,7 @@ export class VEditor<
           this.yText.format(
             targetVRange.index,
             targetVRange.length,
-            attributes
+            normalizedAttributes
           );
         });
       });

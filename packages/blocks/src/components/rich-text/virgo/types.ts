@@ -13,8 +13,10 @@ export const affineTextAttributes = baseTextAttributes.extend({
       type: z.enum(['Subpage', 'LinkedPage']),
       pageId: z.string(),
     })
-    .optional(),
-  background: z.string().optional().catch(undefined),
+    .optional()
+    .nullable()
+    .catch(undefined),
+  background: z.string().optional().nullable().catch(undefined),
 });
 
 export type AffineTextAttributes = z.infer<typeof affineTextAttributes>;

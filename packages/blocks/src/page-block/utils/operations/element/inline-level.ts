@@ -2,108 +2,14 @@ import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import { matchFlavours } from '../../../../__internal__/index.js';
 import {
   getEditorContainer,
   getVirgoByModel,
 } from '../../../../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.js';
-import { clearMarksOnDiscontinuousInput } from '../../../../__internal__/utils/virgo.js';
 import { showLinkPopover } from '../../../../components/rich-text/virgo/nodes/link-node/link-popover/create-link-popover.js';
 import { LinkMockSelection } from '../../../../components/rich-text/virgo/nodes/link-node/mock-selection.js';
-import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
 import { getSelectedContentModels } from '../../selection.js';
-
-export function formatByTextSelection(
-  root: BlockSuiteRoot,
-  textSelection: TextSelection,
-  key: keyof Omit<AffineTextAttributes, 'link' | 'reference'>,
-  value: string | true | null
-) {
-  const selectedModels = getSelectedContentModels(root, ['text']);
-
-  if (selectedModels.length === 0) {
-    throw new Error('No selected models');
-  }
-
-  const rangeManager = root.rangeManager;
-  assertExists(rangeManager);
-  const { from, to } = textSelection;
-  const startModel = selectedModels[0];
-  const endModel = selectedModels[selectedModels.length - 1];
-  // edge case 1: collapsed range
-  if (textSelection.isCollapsed()) {
-    // Collapsed range
-
-    const vEditor = getVirgoByModel(startModel);
-    const delta = vEditor?.getDeltaByRangeIndex(from.index);
-    if (!vEditor || !delta) return;
-    vEditor.setMarks({
-      ...vEditor.marks,
-      [key]:
-        (vEditor.marks && vEditor.marks[key]) ||
-        (delta.attributes && delta.attributes[key])
-          ? null
-          : value,
-    });
-    clearMarksOnDiscontinuousInput(vEditor);
-
-    return;
-  }
-
-  // edge case 2: same model
-  if (textSelection.isInSameBlock()) {
-    if (matchFlavours(startModel, ['affine:code'])) return;
-    const vEditor = getVirgoByModel(startModel);
-    vEditor?.slots.updated.once(() => {
-      rangeManager.syncTextSelectionToRange(textSelection);
-    });
-    startModel.text?.format(from.index, from.length, {
-      [key]: value,
-    });
-    return;
-  }
-  // common case
-  // format start model
-  if (!matchFlavours(startModel, ['affine:code'])) {
-    startModel.text?.format(from.index, from.length, {
-      [key]: value,
-    });
-  }
-  // format end model
-  if (!matchFlavours(endModel, ['affine:code'])) {
-    endModel.text?.format(to?.index ?? 0, to?.length ?? 0, {
-      [key]: value,
-    });
-  }
-  // format between models
-  selectedModels
-    .slice(1, -1)
-    .filter(model => !matchFlavours(model, ['affine:code']))
-    .forEach(model => {
-      model.text?.format(0, model.text.length, {
-        [key]: value,
-      });
-    });
-
-  const allTextUpdated = selectedModels
-    .filter(model => !matchFlavours(model, ['affine:code']))
-    .map(
-      model =>
-        // We can not use `onModelTextUpdated` here because it is asynchronous, which
-        // will make updated event emit before we observe it.
-        new Promise(resolve => {
-          const vEditor = getVirgoByModel(model);
-          vEditor?.slots.updated.once(() => {
-            resolve(vEditor);
-          });
-        })
-    );
-
-  Promise.all(allTextUpdated).then(() => {
-    rangeManager.syncTextSelectionToRange(textSelection);
-  });
-}
 
 export function toggleLink(root: BlockSuiteRoot, textSelection: TextSelection) {
   if (textSelection.isCollapsed()) {

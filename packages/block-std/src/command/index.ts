@@ -104,7 +104,7 @@ export class CommandManager {
           ...cmds,
           async (_, next) => {
             for (const chain of chains) {
-              chain.run();
+              await chain.run();
               if (success) {
                 await next();
                 break;
