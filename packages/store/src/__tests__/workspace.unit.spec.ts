@@ -142,6 +142,26 @@ describe('basic', () => {
     });
   });
 
+  it('init workspace with custom id generator', async () => {
+    const options = createTestOptions();
+    let id = 100;
+    const workspace = new Workspace({
+      ...options,
+      idGenerator: type => {
+        assert.equal(type, 'page');
+        return String(id++);
+      },
+    });
+    {
+      const page = workspace.createPage();
+      assert.equal(page.id, '100');
+    }
+    {
+      const page = workspace.createPage();
+      assert.equal(page.id, '101');
+    }
+  });
+
   it('workspace pages with yjs applyUpdate', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
