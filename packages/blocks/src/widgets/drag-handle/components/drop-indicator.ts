@@ -33,7 +33,8 @@ export class DropIndicator extends LitElement {
     const style = styleMap({
       width: `${width}px`,
       height: `${height}px`,
-      transform: `translate(${left}px, ${top}px)`,
+      top: `${top}px`,
+      left: `${left}px`,
     });
     return html`<div class="affine-drop-indicator" style=${style}></div>`;
   }

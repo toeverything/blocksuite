@@ -596,7 +596,7 @@ export abstract class BaseParser {
           columns: columns,
           views: [
             {
-              id: this._page.generateId(),
+              id: this._page.generateBlockId(),
               name: 'Table View',
               mode: 'table',
               columns: [],
@@ -808,7 +808,7 @@ const getTableColumns = (
         .filter((value, index, array) => array.indexOf(value) === index)
         .map(uniqueValue => {
           return {
-            id: nanoid(),
+            id: nanoid('unknown'),
             value: uniqueValue,
             color: getTagColor(),
           };
