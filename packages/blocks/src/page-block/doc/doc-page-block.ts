@@ -523,12 +523,22 @@ export class DocPageBlockComponent extends BlockElement<
       } else {
         noteId = lastNote.id;
         const last = lastNote.children.at(-1);
-        if (!last || !last.text) {
+        if (
+          !last ||
+          matchFlavours(last, [
+            'affine:code',
+            'affine:divider',
+            'affine:image',
+            'affine:database',
+            'affine:bookmark',
+            'affine:attachment',
+          ])
+        ) {
           if (readonly) return;
           paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
         } else {
           paragraphId = last.id;
-          index = last.text.length ?? 0;
+          index = last.text?.length ?? 0;
         }
       }
 
