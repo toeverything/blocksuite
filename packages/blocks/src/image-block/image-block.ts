@@ -2,6 +2,7 @@ import './image/placeholder/image-not-found.js';
 import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -90,7 +91,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   _input!: HTMLInputElement;
 
   @query('.resizable-img')
-  public readonly resizeImg!: HTMLElement;
+  public readonly resizeImg?: HTMLElement;
 
   @state()
   private _caption!: string;
@@ -131,13 +132,15 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
+    const imageContainer = this.resizeImg;
+    assertExists(imageContainer);
 
     // exclude padding and border width
     const { width, height } = this.model;
 
     if (width && height) {
-      this.resizeImg.style.width = width + 'px';
-      this.resizeImg.style.height = height + 'px';
+      imageContainer.style.width = width + 'px';
+      imageContainer.style.height = height + 'px';
     }
 
     this.updateComplete.then(() => {
