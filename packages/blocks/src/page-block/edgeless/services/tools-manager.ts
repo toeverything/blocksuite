@@ -216,13 +216,6 @@ export class EdgelessToolsManager {
     });
     this._add('click', ctx => {
       const event = ctx.get('pointerState');
-      if (
-        !isInsidePageTitle(event.raw.target) &&
-        !isDatabaseInput(event.raw.target) &&
-        !isInsideEdgelessTextEditor(event.raw.target)
-      ) {
-        event.raw.preventDefault();
-      }
       this._onContainerClick(event);
     });
     this._add('doubleClick', ctx => {
