@@ -18,6 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
+    "@types/mdast": "^4.0.0",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.1",
@@ -26,6 +27,9 @@
     "merge": "^2.1.1",
     "minimatch": "^9.0.3",
     "nanoid": "^4.0.2",
+    "remark-parse": "^10.0.2",
+    "remark-stringify": "^10.0.3",
+    "unified": "^10.0.0",
     "y-protocols": "^1.0.5",
     "zod": "^3.22.2"
   },
