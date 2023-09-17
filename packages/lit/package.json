@@ -10,7 +10,7 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "peerDependencies": {
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/store": "workspace:*"

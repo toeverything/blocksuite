@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",

@@ -54,7 +54,7 @@
   },
   "keywords": [],
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",

@@ -35,7 +35,7 @@
     }
   },
   "author": "toeverything",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "publishConfig": {
     "access": "public",
     "exports": {
