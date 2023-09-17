@@ -22,6 +22,7 @@ import type {
 import {
   calcDropTarget,
   type DroppingType,
+  getBlockElementByModel,
   getClosestBlockElementByPoint,
   getDocPage,
   getEdgelessPage,
@@ -921,11 +922,23 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._resetDropState();
       return;
     }
-    const element = getClosestBlockElementByPoint(
+    let element: Element | null = null;
+    element = getClosestBlockElementByPoint(
       point,
       { container, rect: noteRect, snapToEdge: { x: false, y: true } },
       scale
     );
+    if (!element) {
+      const { min, max } = noteRect;
+      // 24 refers to the padding of page.
+      if (point.x >= min.x + 24 && point.x <= max.x - 24) {
+        const lastBlock = this._pageBlockElement.model.lastChild();
+        if (lastBlock) {
+          const lastElement = getBlockElementByModel(lastBlock);
+          element = lastElement;
+        }
+      }
+    }
     if (!element) {
       // if (this._mouseRoot.mode === 'page') {
       //   return;
