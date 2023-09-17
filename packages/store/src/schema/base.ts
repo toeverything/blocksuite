@@ -175,7 +175,6 @@ function MagicProps(): {
 export class BaseBlockModel<
   Props extends object = object,
 > extends MagicProps()<Props> {
-  static version: number;
   flavour!: string;
   role!: RoleType;
   page!: Page;
@@ -228,5 +227,9 @@ export class BaseBlockModel<
     this.deleted.dispose();
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
+  }
+
+  clone(): this {
+    return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
   }
 }
