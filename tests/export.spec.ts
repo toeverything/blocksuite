@@ -17,6 +17,7 @@ import {
   switchEditorMode,
   type,
   updateBlockType,
+  waitNextFrame,
 } from './utils/actions/index.js';
 import { test } from './utils/playwright.js';
 test('export html title', async ({ page }) => {
@@ -27,8 +28,10 @@ test('export html title', async ({ page }) => {
 
   await switchEditorMode(page);
 
-  await addNote(page, 'hello', 30, 40);
-  await addNote(page, 'world', 80, 40);
+  await addNote(page, 'hello', 30, 140);
+  await waitNextFrame(page);
+  await addNote(page, 'world', 80, 340);
+  await waitNextFrame(page);
 
   const htmlText = await export2Html(page);
   expect(htmlText).toEqual(
