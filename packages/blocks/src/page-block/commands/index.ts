@@ -1,3 +1,4 @@
+export * from './copy-selected-block.js';
 export * from './delete-selected-block.js';
 export * from './delete-selected-text.js';
 export * from './get-block-index.js';

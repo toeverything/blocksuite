@@ -1,6 +1,7 @@
 import { BlockService } from '@blocksuite/block-std';
 
 import {
+  copySelectedBlockCommand,
   deleteSelectedBlockCommand,
   deleteSelectedTextCommand,
   getBlockIndexCommand,
@@ -18,6 +19,7 @@ export class DocPageService extends BlockService {
       .add('getSelectedModels', getSelectedModelsCommand)
       .add('getBlockIndex', getBlockIndexCommand)
       .add('deleteSelectedText', deleteSelectedTextCommand)
-      .add('deleteSelectedBlock', deleteSelectedBlockCommand);
+      .add('deleteSelectedBlock', deleteSelectedBlockCommand)
+      .add('copySelectedBlock', copySelectedBlockCommand);
   }
 }

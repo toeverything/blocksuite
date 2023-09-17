@@ -1,12 +1,10 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
-import { Slice } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { ClipboardAdapter } from './adapter.js';
-import { copyMiddleware, pasteMiddleware } from './middleware.js';
+import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
 export class ClipboardController implements ReactiveController {
   protected _disposables = new DisposableGroup();
@@ -65,87 +63,25 @@ export class ClipboardController implements ReactiveController {
     });
   };
 
+  private _copySelected = (event: ClipboardEvent) => {
+    return this._std.command
+      .pipe()
+      .getSelectedModels({})
+      .copySelectedBlock({ event });
+  };
+
   private _onCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._std.command
-      .pipe()
-      .getSelectedModels({})
-      .inline(async (ctx, next) => {
-        if (!ctx.selectedModels) {
-          return;
-        }
-        const models: BaseBlockModel[] = ctx.selectedModels.map(model =>
-          model.clone()
-        );
-        const traverse = (model: BaseBlockModel) => {
-          const children = model.children.filter(child => {
-            const idx = models.findIndex(m => m.id === child.id);
-            if (idx < 0) {
-              model.childMap.delete(child.id);
-            }
-            return idx >= 0;
-          });
-
-          children.forEach(child => {
-            const idx = models.findIndex(m => m.id === child.id);
-            if (idx >= 0) {
-              models.splice(idx, 1);
-            }
-            traverse(child);
-          });
-          model.children = children;
-          return;
-        };
-        models.forEach(traverse);
-
-        const slice = Slice.fromModels(this._std.page, models);
-        await this._std.clipboard.copy(e, slice);
-        return next();
-      })
-      .run();
+    this._copySelected(e).run();
   };
 
   private _onCut: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._std.command
-      .pipe()
-      .getSelectedModels({})
-      .inline(async (ctx, next) => {
-        if (!ctx.selectedModels) {
-          return;
-        }
-        const models: BaseBlockModel[] = ctx.selectedModels.map(model =>
-          model.clone()
-        );
-        const traverse = (model: BaseBlockModel) => {
-          const children = model.children.filter(child => {
-            const idx = models.findIndex(m => m.id === child.id);
-            if (idx < 0) {
-              model.childMap.delete(child.id);
-            }
-            return idx >= 0;
-          });
-
-          children.forEach(child => {
-            const idx = models.findIndex(m => m.id === child.id);
-            if (idx >= 0) {
-              models.splice(idx, 1);
-            }
-            traverse(child);
-          });
-          model.children = children;
-          return;
-        };
-        models.forEach(traverse);
-
-        const slice = Slice.fromModels(this._std.page, models);
-        await this._std.clipboard.copy(e, slice);
-        return next();
-      })
+    this._copySelected(e)
       .try(cmd => [cmd.deleteSelectedText(), cmd.deleteSelectedBlock()])
       .run();
   };
