@@ -169,7 +169,7 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
       if (payload.type === 'block' && payload.snapshot.id === lastSnapshotId) {
         const point = to ?? from;
         const parentId = PathFinder.parent(point.path);
-        std.selection.set([
+        std.selection.setGroup('note', [
           std.selection.getInstance('text', {
             from: {
               path: parentId.concat(payload.snapshot.id),

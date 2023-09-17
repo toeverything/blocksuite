@@ -44,6 +44,7 @@ export class ClipboardController implements ReactiveController {
   private _init = () => {
     this.host.handleEvent('copy', this._onCopy);
     this.host.handleEvent('paste', this._onPaste);
+    this.host.handleEvent('cut', this._onCut);
 
     this._std.clipboard.registerAdapter(
       ClipboardAdapter.MIME,
@@ -103,6 +104,49 @@ export class ClipboardController implements ReactiveController {
         await this._std.clipboard.copy(e, slice);
         return next();
       })
+      .run();
+  };
+
+  private _onCut: UIEventHandler = ctx => {
+    const e = ctx.get('clipboardState').raw;
+    e.preventDefault();
+
+    this._std.command
+      .pipe()
+      .getSelectedModels({})
+      .inline(async (ctx, next) => {
+        if (!ctx.selectedModels) {
+          return;
+        }
+        const models: BaseBlockModel[] = ctx.selectedModels.map(model =>
+          model.clone()
+        );
+        const traverse = (model: BaseBlockModel) => {
+          const children = model.children.filter(child => {
+            const idx = models.findIndex(m => m.id === child.id);
+            if (idx < 0) {
+              model.childMap.delete(child.id);
+            }
+            return idx >= 0;
+          });
+
+          children.forEach(child => {
+            const idx = models.findIndex(m => m.id === child.id);
+            if (idx >= 0) {
+              models.splice(idx, 1);
+            }
+            traverse(child);
+          });
+          model.children = children;
+          return;
+        };
+        models.forEach(traverse);
+
+        const slice = Slice.fromModels(this._std.page, models);
+        await this._std.clipboard.copy(e, slice);
+        return next();
+      })
+      .try(cmd => [cmd.deleteSelectedText(), cmd.deleteSelectedBlock()])
       .run();
   };
 

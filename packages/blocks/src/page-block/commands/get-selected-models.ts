@@ -3,11 +3,11 @@ import { assertInstanceOf } from '@blocksuite/global/utils';
 import { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getSelectedContentBlockElements } from '../utils/index.js';
+import { getSelectedContentModels } from '../utils/index.js';
 
 export const getSelectedModelsCommand: Command<
   never,
-  'selectedModels' | 'isTextSelection',
+  'selectedModels',
   {
     selectionType?: Extract<
       BlockSuite.SelectionType,
@@ -15,27 +15,22 @@ export const getSelectedModelsCommand: Command<
     >[];
   }
 > = (ctx, next) => {
-  const { root, selection } = ctx.std;
+  const { root } = ctx.std;
   try {
     assertInstanceOf(root, BlockSuiteRoot);
   } catch {
     return Promise.resolve();
   }
   const selectionType = ctx.selectionType ?? ['block', 'text', 'image'];
-  const selectedElements = getSelectedContentBlockElements(root, selectionType);
-  const textSelection = selection.find('text');
-  const selectedModels = selectedElements.map(selectedElement => {
-    return selectedElement.model;
-  });
+  const selectedModels = getSelectedContentModels(root, selectionType);
 
-  return next({ selectedModels, isTextSelection: !!textSelection });
+  return next({ selectedModels });
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandData {
       selectedModels?: BaseBlockModel[];
-      isTextSelection?: boolean;
     }
 
     interface Commands {
