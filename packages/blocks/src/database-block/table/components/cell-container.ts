@@ -58,7 +58,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-data-view-table-group')?.group?.key;
   }
 
-  private _selectCurrentCell = (editing: boolean) => {
+  public selectCurrentCell = (editing: boolean) => {
     if (this.selectionView) {
       this.selectionView.selection = {
         groupKey: this.groupKey,
@@ -91,7 +91,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', () => {
       if (!this.isEditing) {
-        this._selectCurrentCell(!this.column.readonly);
+        this.selectCurrentCell(!this.column.readonly);
       }
     });
   }
@@ -106,7 +106,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       column: this.column,
       rowId: this.rowId,
       isEditing: this.isEditing,
-      selectCurrentCell: this._selectCurrentCell,
+      selectCurrentCell: this.selectCurrentCell,
     };
     return renderUniLit(uni, props, {
       ref: this._cell,

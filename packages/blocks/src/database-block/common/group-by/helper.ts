@@ -159,14 +159,15 @@ export class GroupHelper {
 
   moveCardTo(
     rowId: string,
-    fromGroupKey: string,
+    fromGroupKey: string | undefined,
     toGroupKey: string,
     position: InsertPosition
   ) {
     if (fromGroupKey !== toGroupKey) {
       const columnId = this.columnId;
       const remove = this.groupConfig()?.removeFromGroup ?? (() => undefined);
-      const group = this.groupMap[fromGroupKey];
+      const group =
+        fromGroupKey != null ? this.groupMap[fromGroupKey] : undefined;
       let newValue: unknown = undefined;
       if (group) {
         newValue = remove(
