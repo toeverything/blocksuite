@@ -795,11 +795,7 @@ test('getLine', async ({ page }) => {
 
   await page.waitForTimeout(100);
 
-  await type(page, 'abc');
-  await press(page, 'Enter');
-  await type(page, 'def');
-  await press(page, 'Enter');
-  await type(page, 'ghi');
+  await type(page, 'abc\ndef\nghi');
 
   expect(await editorA.innerText()).toBe('abc\ndef\nghi');
   expect(await editorB.innerText()).toBe('abc\ndef\nghi');
@@ -871,6 +867,7 @@ test('embed', async ({ page }) => {
   expect(await editorA.innerText()).toBe('abcde');
 
   await press(page, 'ArrowLeft');
+  await page.waitForTimeout(100);
   page.keyboard.down('Shift');
   await press(page, 'ArrowLeft');
   await press(page, 'ArrowLeft');

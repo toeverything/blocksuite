@@ -35,7 +35,9 @@ export class WhenHoverController implements ReactiveController {
   private _abortController?: AbortController;
   private _setReference?: (element?: Element | undefined) => void;
   private _portal?: HTMLDivElement;
-  private readonly _onHover: (options: OptionsParams) => HoverPortalOptions;
+  private readonly _onHover: (
+    options: OptionsParams
+  ) => HoverPortalOptions | null;
   private readonly _hoverOptions: HoverOptions;
 
   get setReference() {
@@ -51,7 +53,7 @@ export class WhenHoverController implements ReactiveController {
 
   constructor(
     host: ReactiveControllerHost,
-    onHover: (options: OptionsParams) => HoverPortalOptions,
+    onHover: (options: OptionsParams) => HoverPortalOptions | null,
     hoverOptions?: Partial<HoverOptions>
   ) {
     (this.host = host).addController(this);
@@ -78,6 +80,10 @@ export class WhenHoverController implements ReactiveController {
         setReference,
         abortController: this._abortController,
       });
+      if (!portalOptions) {
+        this._abortController.abort();
+        return;
+      }
       this._portal = createLitPortal({
         ...portalOptions,
         abortController: this._abortController,

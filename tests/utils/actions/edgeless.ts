@@ -350,7 +350,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   let i = 0;
   for (const paragraph of paragraphs) {
     ++i;
-    await type(page, paragraph);
+    await type(page, paragraph, 20);
 
     if (i < paragraphs.length) {
       await pressEnter(page);

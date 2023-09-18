@@ -235,6 +235,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     blobStorages,
     defaultFlags: {
       enable_toggle_block: featureArgs.includes('toggle'),
+      enable_transformer_clipboard: featureArgs.includes('clipboard'),
       enable_set_remote_flag: true,
       enable_block_hub: true,
       enable_bookmark_operation: true,

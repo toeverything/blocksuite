@@ -127,7 +127,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this.selection.setSelectedBlocks([]);
     // click the inner area of active text and note element
     if (editing && elements.length === 1 && elements[0] === element.id) {
-      handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
       return;
     }
 
