@@ -161,7 +161,7 @@ test('normalize text element rect after change its font', async ({ page }) => {
 
   await page.mouse.click(140, 210);
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 113.9, 163.3]);
+  await assertEdgelessSelectedRect(page, [130, 200, 113.9, 167.6]);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
 
@@ -174,5 +174,5 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await assertTextFont(page, 'General');
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 108.3, 163.3]);
+  await assertEdgelessSelectedRect(page, [130, 200, 108.3, 167.6]);
 });

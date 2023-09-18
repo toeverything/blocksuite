@@ -69,6 +69,7 @@ test('can drag selected non-active note', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
 
   // selected, non-active
@@ -85,6 +86,7 @@ test('resize note in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await activeNoteInEdgeless(page, ids.noteId);
   await waitNextFrame(page, 400);
   await type(page, 'hello');
@@ -125,7 +127,7 @@ test('add Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-
+  await zoomResetByKeyboard(page);
   await addNote(page, 'hello', 300, 300);
 
   await assertEdgelessTool(page, 'default');
@@ -138,6 +140,7 @@ test('add empty Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await setEdgelessTool(page, 'note');
 
   // add note at 300,300
