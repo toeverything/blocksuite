@@ -240,20 +240,6 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       return true;
     },
-    'Shift-Enter': () => {
-      if (!blockElement.selected?.is('text')) return;
-
-      const vEditor = _getVirgo();
-      const vRange = vEditor.getVRange();
-      assertExists(vRange);
-      vEditor.insertText(vRange, '\n');
-      vEditor.setVRange({
-        index: vRange.index + 1,
-        length: 0,
-      });
-
-      return true;
-    },
     'Mod-Enter': ctx => {
       if (!blockElement.selected?.is('text')) return;
 
