@@ -51,9 +51,11 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
   ): Promise<SliceSnapshot>;
 }
 
+type Keyof<T> = T extends unknown ? keyof T : never;
+
 export type ASTWalkerContext<TNode> = {
   skip: () => void;
-  addNode: (node: TNode, prop: keyof TNode, index?: number) => void;
+  addNode: (node: TNode, prop: Keyof<TNode>, index?: number) => void;
 };
 
 type WalkerFn<ONode, TNode> = (
@@ -62,22 +64,26 @@ type WalkerFn<ONode, TNode> = (
   context: ASTWalkerContext<TNode>
 ) => void;
 
-type NodeProps<Node> = {
+type NodeProps<Node extends object> = {
   node: Node;
   parent: Node | null;
-  prop: keyof Node | null;
+  prop: Keyof<Node> | null;
   index: number | null;
 };
+
+type AddTNodeProps<TNode extends object> = {
+  node: TNode;
+  prop: Keyof<TNode>;
+  index?: number;
+} | null;
 
 // Ported from https://github.com/Rich-Harris/estree-walker MIT License
 export class ASTWalker<ONode extends object, TNode extends object> {
   private _should_skip = false;
 
-  private _addedTNode: {
-    node: TNode;
-    prop: keyof TNode;
-    index?: number;
-  } | null = null;
+  private _addedTNode: AddTNodeProps<TNode> = null;
+
+  private _lastAddedTNode: AddTNodeProps<TNode> = null;
 
   private _enter: WalkerFn<ONode, TNode> | undefined;
   private _leave: WalkerFn<ONode, TNode> | undefined;
@@ -87,8 +93,8 @@ export class ASTWalker<ONode extends object, TNode extends object> {
   constructor() {
     this.context = {
       skip: () => (this._should_skip = true),
-      addNode: (node: TNode, prop: keyof TNode, index?: number) =>
-        (this._addedTNode = { node: node, prop: prop, index: index }),
+      addNode: (node: TNode, prop: Keyof<TNode>, index?: number) =>
+        (this._lastAddedTNode = this._addedTNode = { node, prop, index }),
     };
   }
 
@@ -117,8 +123,11 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     this._leave = fn;
   };
 
-  walk = (_oNode: ONode, _tNode: TNode) => {
-    /* empty */
+  walk = (oNode: ONode, tNode: TNode) => {
+    this._visit(
+      { node: oNode, parent: null, prop: null, index: null },
+      { node: tNode, parent: null, prop: null, index: null }
+    );
   };
 
   private _visit = (o: NodeProps<ONode>, t: NodeProps<TNode>) => {
@@ -128,7 +137,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
       const should_skip = this._should_skip;
       const addedTNode = this._addedTNode;
       this._resetContext();
-      this._enter(o.node as ONode, o.parent, this.context);
+      this._enter(o.node, o.parent, this.context);
 
       if (addedTNode) {
         if (addedTNode.index !== undefined) {
@@ -157,17 +166,35 @@ export class ASTWalker<ONode extends object, TNode extends object> {
             const item = nodes[i];
             if (item !== null && typeof item === 'object') {
               this._visit(
-                { node: item, parent: o.node, prop: key, index: i },
-                // FIXME: t.node is not correct
-                { node: t.node, parent: null, prop: null, index: null }
+                {
+                  node: item,
+                  parent: o.node,
+                  prop: key as unknown as Keyof<ONode>,
+                  index: i,
+                },
+                {
+                  node: this._lastAddedTNode?.node ?? t.node,
+                  parent: t.node,
+                  prop: this._lastAddedTNode?.prop ?? null,
+                  index: this._lastAddedTNode?.index ?? null,
+                }
               );
             }
           }
         } else {
           this._visit(
-            { node: value as ONode, parent: o.node, prop: key, index: null },
-            // FIXME: t.node is not correct
-            { node: t.node, parent: null, prop: null, index: null }
+            {
+              node: value as ONode,
+              parent: o.node,
+              prop: key as unknown as Keyof<ONode>,
+              index: null,
+            },
+            {
+              node: this._lastAddedTNode?.node ?? t.node,
+              parent: t.node,
+              prop: this._lastAddedTNode?.prop ?? null,
+              index: this._lastAddedTNode?.index ?? null,
+            }
           );
         }
       }
@@ -177,7 +204,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
       const should_skip = this._should_skip;
       const addedTNode = this._addedTNode;
       this._resetContext();
-      this._leave(o.node as ONode, o.parent, this.context);
+      this._leave(o.node, o.parent, this.context);
 
       if (addedTNode) {
         if (addedTNode.index !== undefined) {

@@ -1,4 +1,5 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
+import type { RootContentMap } from 'mdast';
 
 import type {
   BlockSnapshot,
@@ -13,6 +14,7 @@ import type {
   ToSliceSnapshotPayload,
 } from './base.js';
 import {
+  ASTWalker,
   BaseAdapter,
   type FromBlockSnapshotPayload,
   type FromPageSnapshotPayload,
@@ -20,6 +22,16 @@ import {
 import { StringBuilder } from './string-builder.js';
 
 export type Markdown = string;
+
+type MdastUnionType<
+  K extends keyof RootContentMap,
+  V extends RootContentMap[K],
+> = V;
+
+type MarkdownAST = MdastUnionType<
+  keyof RootContentMap,
+  RootContentMap[keyof RootContentMap]
+>;
 
 const markdownConvertibleFlavours = [
   'affine:code',
@@ -204,6 +216,61 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         break;
       }
     }
+  };
+
+  traverseSnapshot2 = async (snapshot: BlockSnapshot) => {
+    const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
+    walker.setEnter((node, _parent, context) => {
+      const text = (snapshot.props.text ?? { delta: [] }) as {
+        delta: DeltaInsert[];
+      };
+      switch (node.flavour) {
+        case 'affine:code': {
+          context.addNode(
+            {
+              type: 'code',
+              lang: (node.props.language as string) ?? null,
+              meta: null,
+              value: this.deltaToMarkdown(text.delta),
+            },
+            'children'
+          );
+          break;
+        }
+        case 'affine:paragraph': {
+          switch (snapshot.props.type) {
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6': {
+              break;
+            }
+            case 'text': {
+              break;
+            }
+            case 'quote': {
+              this.markdownBuffer.write('> ');
+              break;
+            }
+          }
+          break;
+        }
+        case 'affine:list': {
+          break;
+        }
+        case 'affine:divider': {
+          break;
+        }
+        case 'affine:image': {
+          break;
+        }
+        case 'affine:database': {
+          break;
+        }
+      }
+    });
   };
 
   private writeTextDelta(text: { delta: DeltaInsert[] }) {
