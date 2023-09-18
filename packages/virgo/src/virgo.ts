@@ -222,8 +222,7 @@ export class VEditor<
 
   requestUpdate(syncVRange = true): void {
     Promise.resolve().then(() => {
-      assertExists(this._rootElement);
-
+      if (!this.mounted) return;
       this._deltaService.render(syncVRange);
     });
   }
