@@ -84,10 +84,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     return this._edgeless.selectionManager;
   }
 
-  get selectedBlocks() {
-    return this.selection.selectedBlocks;
-  }
-
   get state() {
     return this.selection.state;
   }
@@ -124,7 +120,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _handleClickOnSelected(element: Selectable, e: PointerEventState) {
     const { elements, editing } = this.state;
-    this.selection.setSelectedBlocks([]);
     // click the inner area of active text and note element
     if (editing && elements.length === 1 && elements[0] === element.id) {
       return;
@@ -143,7 +138,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         requestAnimationFrame(() => {
           handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
         });
-        this.selection.setSelectedBlocks([]);
         return;
       }
     }
@@ -196,11 +190,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.y += delta.y;
 
     this._page.updateBlock(block, { xywh: bound.serialize() });
-
-    // TODO: refactor
-    if (this.selectedBlocks.length) {
-      this.selection.setSelectedBlocks(this.selectedBlocks);
-    }
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {

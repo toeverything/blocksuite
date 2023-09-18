@@ -310,7 +310,6 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       page.getBlockById(newNoteId) as NoteBlockModel
     );
 
-    this.selection.setSelectedBlocks([]);
     this._hide();
   }
 
