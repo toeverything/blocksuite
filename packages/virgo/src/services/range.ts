@@ -10,7 +10,6 @@ import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
-  private _prevVRange: VRange | null = null;
   private _vRange: VRange | null = null;
 
   constructor(public readonly editor: VEditor<TextAttributes>) {}
@@ -20,25 +19,20 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   }
 
   onVRangeUpdated = ([newVRange, sync]: VRangeUpdatedProp) => {
+    const eq = isMaybeVRangeEqual(this._vRange, newVRange);
     this._vRange = newVRange;
 
-    if (
-      this.editor.mounted &&
-      newVRange &&
-      !isMaybeVRangeEqual(this._prevVRange, newVRange)
-    ) {
-      // no need to sync and native selection behavior about shift+arrow will
-      // be broken if we sync
+    // try to trigger update because the `selected` state of the virgo element may change
+    if (this.editor.mounted && !eq) {
       this.editor.requestUpdate(false);
     }
-    this._prevVRange = newVRange;
 
-    if (this.vRangeProvider) {
+    if (this.vRangeProvider && !eq) {
       this.vRangeProvider.setVRange(newVRange);
       return;
     }
 
-    if (!sync) {
+    if (!sync || eq) {
       return;
     }
 

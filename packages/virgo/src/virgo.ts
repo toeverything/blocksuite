@@ -36,6 +36,7 @@ export type VirgoRootElement<
 export interface VRangeProvider {
   getVRange(): VRange | null;
   setVRange(vRange: VRange | null): void;
+  vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
 }
 
 export class VEditor<
@@ -184,6 +185,11 @@ export class VEditor<
       rangeUpdated: new Slot<Range>(),
     };
 
+    if (vRangeProvider) {
+      vRangeProvider.vRangeUpdatedSlot.on(prop => {
+        this.slots.vRangeUpdated.emit(prop);
+      });
+    }
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
   }
 
