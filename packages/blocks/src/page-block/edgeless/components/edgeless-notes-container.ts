@@ -61,7 +61,7 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
 }
 
 @customElement('edgeless-child-note')
-export class EdgelessChildNote extends LitElement {
+export class EdgelessChildNote extends WithDisposable(LitElement) {
   @property({ attribute: false })
   index!: number;
 
@@ -76,6 +76,15 @@ export class EdgelessChildNote extends LitElement {
 
   protected override createRenderRoot() {
     return this;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._disposables.add(
+      this.model.propsUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   override render() {
