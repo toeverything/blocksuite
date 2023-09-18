@@ -86,7 +86,11 @@ export class Clipboard {
     if (!data) {
       return;
     }
-    const items: Record<string, string> = {};
+    const items: Record<string, string> = {
+      'text/plain': '',
+      'text/html': '',
+      'image/png': '',
+    };
     await Promise.all(
       Array.from(this._adapterMap.keys()).map(async type => {
         const item = await this._getClipboardItem(slice, type);
@@ -95,16 +99,35 @@ export class Clipboard {
         }
       })
     );
+    const text = items['text/plain'];
+    const innerHTML = items['text/html'];
+    const png = items['image/png'];
+
+    delete items['text/plain'];
+    delete items['text/html'];
+    delete items['image/png'];
+
     const snapshot = lz.compressToEncodedURIComponent(JSON.stringify(items));
-    const html = `<div data-blocksuite-snapshot=${snapshot}></div>`;
-    const blob = new Blob([html], {
+    const html = `<div data-blocksuite-snapshot=${snapshot}>${innerHTML}</div>`;
+    const htmlBlob = new Blob([html], {
       type: 'text/html',
     });
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        'text/html': blob,
-      }),
-    ]);
+    const clipboardItems: Record<string, Blob> = {
+      'text/html': htmlBlob,
+    };
+    if (text.length > 0) {
+      const textBlob = new Blob([text], {
+        type: 'text/plain',
+      });
+      clipboardItems['text/plain'] = textBlob;
+    }
+    if (png.length > 0) {
+      const pngBlob = new Blob([png], {
+        type: 'image/png',
+      });
+      clipboardItems['image/png'] = pngBlob;
+    }
+    await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
   };
 
   paste = async (
