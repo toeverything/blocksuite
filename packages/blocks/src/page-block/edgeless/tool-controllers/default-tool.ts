@@ -318,7 +318,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         return await this._cloneSelected(selected, surface);
       })
     )) as Selectable[];
-
+    this._toBeMoved = elements;
     this._setSelectionState(
       elements.map(el => el.id),
       false
