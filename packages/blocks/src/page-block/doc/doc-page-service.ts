@@ -23,9 +23,9 @@ export class DocPageService extends BlockService {
       .add('getBlockIndex', getBlockIndexCommand)
       .add('deleteSelectedText', deleteSelectedTextCommand)
       .add('deleteSelectedBlock', deleteSelectedBlockCommand)
-      .add('copySelectedBlock', copySelectedBlockCommand);
-    this.std.command.add('formatText', formatTextCommand);
-    this.std.command.add('formatBlock', formatBlockCommand);
-    this.std.command.add('formatNative', formatNativeCommand);
+      .add('copySelectedBlock', copySelectedBlockCommand)
+      .add('formatText', formatTextCommand)
+      .add('formatBlock', formatBlockCommand)
+      .add('formatNative', formatNativeCommand);
   }
 }
