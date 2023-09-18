@@ -194,6 +194,8 @@ export class VEditor<
   }
 
   mount(rootElement: HTMLElement) {
+    this._mounted = true;
+
     const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
     virgoElement.virgoEditor = this;
     this._rootElement = virgoElement;
@@ -207,7 +209,6 @@ export class VEditor<
 
     this._eventService.mount();
 
-    this._mounted = true;
     this.slots.mounted.emit();
   }
 
