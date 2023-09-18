@@ -835,7 +835,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (readonly !== page.readonly) {
           readonly = page.readonly;
           this.slots.readonlyUpdated.emit(readonly);
-          this.requestUpdate();
         }
       })
     );

@@ -164,6 +164,20 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
+
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    assertExists(page.root);
+
+    _disposables.add(
+      page.root.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   override render() {
