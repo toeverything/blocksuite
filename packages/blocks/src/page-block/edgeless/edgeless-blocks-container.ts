@@ -38,10 +38,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  private get _selection() {
-    return this.edgeless.selectionManager;
-  }
-
   private _noteResizeObserver = new NoteResizeObserver();
 
   private _initNoteHeightUpdate() {
@@ -68,7 +64,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    const { _disposables, edgeless, _selection } = this;
+    const { _disposables, edgeless } = this;
     const { surface, page } = edgeless;
 
     this._initNoteHeightUpdate();
