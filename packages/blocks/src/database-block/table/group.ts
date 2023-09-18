@@ -15,6 +15,9 @@ const styles = css`
   affine-data-view-table-group:hover .data-view-table-group-add-row {
     opacity: 1;
   }
+  affine-data-view-table-group:hover .group-header-op {
+    visibility: visible;
+  }
   .data-view-table-group-add-row {
     display: flex;
     width: 100%;
@@ -105,15 +108,19 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
     });
   };
   private clickGroupOptions = (e: MouseEvent) => {
+    const group = this.group;
+    if (!group) {
+      return;
+    }
     const ele = e.currentTarget as HTMLElement;
     popFilterableSimpleMenu(ele, [
       {
         type: 'action',
         name: 'Ungroup',
-        hide: () => this.group.value == null,
+        hide: () => group.value == null,
         select: () => {
-          this.group.rows.forEach(id => {
-            this.group.helper.removeFromGroup(id, this.group.key);
+          group.rows.forEach(id => {
+            group.helper.removeFromGroup(id, group.key);
           });
         },
       },
@@ -121,7 +128,7 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
         type: 'action',
         name: 'Delete Cards',
         select: () => {
-          this.view.rowDelete(this.group.rows);
+          this.view.rowDelete(group.rows);
         },
       },
     ]);
@@ -170,9 +177,13 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
     return html`
       <div>
         <div
-          style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;"
+          style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;"
         >
-          ${renderGroupTitle(this.group, this.view.readonly)}
+          ${renderGroupTitle(this.group, {
+            readonly: this.view.readonly,
+            clickAdd: this.clickAddRowInStart,
+            clickOps: this.clickGroupOptions,
+          })}
         </div>
       </div>
       ${this.renderRows(this.group.rows)}

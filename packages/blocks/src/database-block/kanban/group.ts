@@ -7,11 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import { popFilterableSimpleMenu } from '../../components/menu/index.js';
-import {
-  AddCursorIcon,
-  MoreHorizontalIcon,
-  PlusIcon,
-} from '../../icons/index.js';
+import { AddCursorIcon } from '../../icons/index.js';
 import type { GroupData } from '../common/group-by/helper.js';
 import { renderGroupTitle } from '../common/group-by/util.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
@@ -41,47 +37,8 @@ const styles = css`
     font-size: var(--data-view-cell-text-size);
   }
 
-  .group-header-icon {
-    display: flex;
-    align-items: center;
-    margin-right: -4px;
-  }
-
-  .group-header-icon svg {
-    width: 16px;
-    height: 16px;
-    color: var(--affine-icon-color);
-    fill: var(--affine-icon-color);
-  }
-
-  .group-header-ops {
-    display: flex;
-    align-items: center;
-  }
-
-  .group-header-op {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    visibility: hidden;
-    transition: visibility 100ms ease-in-out;
-  }
-
   affine-data-view-kanban-group:hover .group-header-op {
     visibility: visible;
-  }
-
-  .group-header-op:hover {
-    background-color: var(--affine-hover-color);
-  }
-
-  .group-header-op svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--affine-icon-color);
-    color: var(--affine-icon-color);
   }
 
   .group-body {
@@ -188,18 +145,12 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     return html`
       <div class="group-header">
         <div class="group-header-title">
-          ${renderGroupTitle(this.group, this.view.readonly)}
+          ${renderGroupTitle(this.group, {
+            readonly: this.view.readonly,
+            clickAdd: this.clickAddCardInStart,
+            clickOps: this.clickGroupOptions,
+          })}
         </div>
-        ${this.view.readonly
-          ? nothing
-          : html`<div class="group-header-ops">
-              <div @click="${this.clickAddCardInStart}" class="group-header-op">
-                ${PlusIcon}
-              </div>
-              <div @click="${this.clickGroupOptions}" class="group-header-op">
-                ${MoreHorizontalIcon}
-              </div>
-            </div>`}
       </div>
       <div class="group-body">
         ${repeat(
