@@ -27,7 +27,19 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
   mount = () => {
     const rootElement = this.editor.rootElement;
 
-    if (!this.vRangeProvider) {
+    if (this.vRangeProvider) {
+      this.editor.disposables.addFromEvent(document, 'selectionchange', () => {
+        const selectionRoot = findDocumentOrShadowRoot(this.editor);
+        const selection = selectionRoot.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+
+        // try to trigger update because the `selected` state of the virgo element may change
+        if (range.intersectsNode(rootElement)) {
+          this.editor.requestUpdate(false);
+        }
+      });
+    } else {
       this.editor.disposables.addFromEvent(
         document,
         'selectionchange',

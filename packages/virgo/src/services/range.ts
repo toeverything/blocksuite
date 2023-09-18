@@ -22,6 +22,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   onVRangeUpdated = ([newVRange, sync]: VRangeUpdatedProp) => {
     this._vRange = newVRange;
 
+    // try to trigger update because the `selected` state of the virgo element may change
     if (
       this.editor.mounted &&
       newVRange &&
