@@ -18,7 +18,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return this.editor.vRangeProvider;
   }
 
-  onVRangeUpdated = ([newVRange, sync]: VRangeUpdatedProp) => {
+  onVRangeUpdated = async ([newVRange, sync]: VRangeUpdatedProp) => {
     const eq = isMaybeVRangeEqual(this._vRange, newVRange);
     if (eq) {
       return;
@@ -28,6 +28,8 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     // try to trigger update because the `selected` state of the virgo element may change
     if (this.editor.mounted) {
+      // range change may happen before the editor is prepared
+      await this.editor.waitForUpdate();
       this.editor.requestUpdate(false);
     }
 

@@ -194,8 +194,6 @@ export class VEditor<
   }
 
   mount(rootElement: HTMLElement) {
-    this._mounted = true;
-
     const virgoElement = rootElement as VirgoRootElement<TextAttributes>;
     virgoElement.virgoEditor = this;
     this._rootElement = virgoElement;
@@ -205,11 +203,11 @@ export class VEditor<
 
     this._bindYTextObserver();
 
-    this._deltaService.render();
-
     this._eventService.mount();
 
+    this._mounted = true;
     this.slots.mounted.emit();
+    this._deltaService.render();
   }
 
   unmount() {
@@ -222,9 +220,7 @@ export class VEditor<
   }
 
   requestUpdate(syncVRange = true): void {
-    Promise.resolve().then(() => {
-      this._deltaService.render(syncVRange);
-    });
+    this._deltaService.render(syncVRange);
   }
 
   async waitForUpdate() {
