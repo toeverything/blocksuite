@@ -155,8 +155,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
     const { sortedNotes, surface, renderModel } = edgeless;
     if (!surface) return nothing;
 
-    const { viewport } = surface;
-    const { left, top } = viewport;
     const widgets = html`${repeat(
       Object.entries(edgeless.widgets),
       ([id]) => id,
