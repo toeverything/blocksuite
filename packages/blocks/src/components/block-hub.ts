@@ -931,7 +931,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     if (!element) {
       const { min, max } = noteRect;
       // 24 refers to the padding of page.
-      if (point.x >= min.x + 24 && point.x <= max.x - 24) {
+      if (point.x >= min.x + 24 && point.x <= max.x - 24 && point.y >= min.y) {
         const lastBlock = this._pageBlockElement.model.lastChild();
         if (lastBlock) {
           const lastElement = getBlockElementByModel(lastBlock);

@@ -191,11 +191,9 @@ export const createBlockHub: (
       };
 
       if (editor.mode === 'page') {
-        const docPageBlock = editor.querySelector('affine-doc-page');
-        assertExists(docPageBlock);
-        state.rect = Rect.fromDOMRect(
-          docPageBlock.pageBlockContainer.getBoundingClientRect()
-        );
+        const noteBlock = editor.querySelector('affine-note');
+        assertExists(noteBlock);
+        state.rect = Rect.fromDOMRect(noteBlock.getBoundingClientRect());
       } else {
         const edgelessPageBlock = editor.querySelector('affine-edgeless-page');
         assertExists(edgelessPageBlock);
