@@ -462,10 +462,7 @@ const createDragPreview = (
   const div = document.createElement('div');
   div.append(content);
   // div.style.pointerEvents='none';
-  div.style.backgroundColor = 'var(--affine-background-primary-color)';
-  div.style.opacity = '0.95';
-  div.style.boxShadow =
-    '0px 0px 12px 0px rgba(66, 65, 73, 0.14), 0px 0px 0px 0.5px #e3e3e4 inset';
+  div.style.opacity = '0.8';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;

@@ -14,7 +14,6 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
     affine-data-view-column-preview {
       pointer-events: none;
       display: block;
-      background-color: var(--affine-background-hover-color);
     }
   `;
   @property({ attribute: false })
@@ -23,34 +22,54 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
   column!: DataViewColumnManager;
   @property({ attribute: false })
   table!: HTMLElement;
-
-  override render() {
-    const rows = this.tableViewManager.rows;
+  private renderGroup(rows: string[]) {
     const columnIndex = this.tableViewManager.columnGetIndex(this.column.id);
     return html`
-      <affine-database-header-column
-        .tableViewManager="${this.tableViewManager}"
-        .column="${this.column}"
-      ></affine-database-header-column>
-      ${repeat(rows, (id, index) => {
-        const height = this.table.querySelector(
-          `affine-database-cell-container[data-row-id="${id}"]`
-        )?.clientHeight;
-        const style = styleMap({
-          height: height + 'px',
-        });
-        return html` <div style="${style}">
-          <affine-database-cell-container
-            .column="${this.column}"
-            .view="${this.tableViewManager}"
-            .rowId="${id}"
-            .columnId="${this.column.id}"
-            .rowIndex="${index}"
-            .columnIndex="${columnIndex}"
-          ></affine-database-cell-container>
-        </div>`;
-      })}
+      <div
+        style="background-color: var(--affine-background-primary-color);border-top: 1px solid var(--affine-border-color);box-shadow: var(--affine-shadow-2);"
+      >
+        <affine-database-header-column
+          .tableViewManager="${this.tableViewManager}"
+          .column="${this.column}"
+        ></affine-database-header-column>
+        ${repeat(rows, (id, index) => {
+          const height = this.table.querySelector(
+            `affine-database-cell-container[data-row-id="${id}"]`
+          )?.clientHeight;
+          const style = styleMap({
+            height: height + 'px',
+          });
+          return html`<div
+            style="border-top: 1px solid var(--affine-border-color)"
+          >
+            <div style="${style}">
+              <affine-database-cell-container
+                .column="${this.column}"
+                .view="${this.tableViewManager}"
+                .rowId="${id}"
+                .columnId="${this.column.id}"
+                .rowIndex="${index}"
+                .columnIndex="${columnIndex}"
+              ></affine-database-cell-container>
+            </div>
+          </div>`;
+        })}
+      </div>
+      <div style="height: 29px;"></div>
     `;
+  }
+  override render() {
+    const groupHelper = this.tableViewManager.groupHelper;
+    if (!groupHelper) {
+      const rows = this.tableViewManager.rows;
+      return this.renderGroup(rows);
+    }
+    return groupHelper.groups.map(group => {
+      return html`
+        <div style="height: 40px;"></div>
+        ${this.renderGroup(group.rows)}
+      `;
+    });
   }
 }
 
