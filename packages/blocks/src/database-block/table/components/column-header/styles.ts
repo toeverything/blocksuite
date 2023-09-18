@@ -8,6 +8,12 @@ import {
 } from '../../consts.js';
 
 export const styles = css`
+  .data-view-table-add-column {
+    opacity: 0;
+  }
+  affine-data-view-table-group:hover .data-view-table-add-column {
+    opacity: 1;
+  }
   .affine-database-column-header {
     position: relative;
     display: flex;

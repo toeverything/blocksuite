@@ -494,7 +494,7 @@ const createDropPreview = (container: Element, height: number) => {
   div.style.display = 'none';
   div.style.top = `0px`;
   div.style.zIndex = '9';
-  div.style.backgroundColor = 'blue';
+  div.style.backgroundColor = 'var(--affine-primary-color)';
   container.append(div);
   return {
     display(offset: number) {

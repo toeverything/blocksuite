@@ -28,7 +28,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
     .preview-bar {
       width: 2px;
       height: 100%;
-      background-color: blue;
+      background-color: var(--affine-primary-color);
       transition: 0.3s opacity;
       opacity: 0;
     }

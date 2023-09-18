@@ -40,6 +40,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
+    this.addColumnButton.classList.add('data-view-table-add-column');
     this.addColumnButton.style.marginLeft = '20px';
     this.addColumnButton.style.position = 'absolute';
     this.addColumnButton.style.zIndex = '1';
