@@ -4,9 +4,8 @@ import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
 import './components/note-slicer/index.js';
 
-import { noop, throttle } from '@blocksuite/global/utils';
+import { assertExists, noop, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -42,6 +41,8 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
   private _initNoteHeightUpdate() {
     const { page } = this.edgeless;
+    assertExists(page.root);
+
     const resetNoteResizeObserver = throttle(
       () => {
         requestAnimationFrame(() => {
@@ -51,15 +52,9 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
       16,
       { leading: true }
     );
-    const listenChildrenUpdate = (root: BaseBlockModel<object> | null) => {
-      if (!root) return;
 
-      this._disposables.add(root.childrenUpdated.on(resetNoteResizeObserver));
-    };
-
-    listenChildrenUpdate(page.root);
     this._disposables.add(
-      page.slots.rootAdded.on(root => listenChildrenUpdate(root))
+      page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
   }
 
@@ -145,6 +140,20 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
     _disposables.add(
       page.slots.historyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    assertExists(page.root);
+
+    _disposables.add(
+      page.root.childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );
