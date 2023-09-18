@@ -341,8 +341,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
         assertExists(vRange);
-        handleRemoveAllIndent(model.page, model, vRange.index);
-        _preventDefault(ctx);
+        if (vRange.index === 0) {
+          handleRemoveAllIndent(model.page, model, vRange.index);
+          _preventDefault(ctx);
+        }
 
         return true;
       }
