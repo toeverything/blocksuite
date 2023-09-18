@@ -18,6 +18,7 @@ import {
   setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   click,
@@ -509,6 +510,7 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await activeNoteInEdgeless(page, ids.noteId);
   await waitNextFrame(page, 400);
   // current implementation may be a little inefficient
