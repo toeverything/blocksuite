@@ -267,8 +267,6 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
 
     if (!this.editor.getVRange()) return;
 
-    // Sometimes input event will directly come from some scripts (e.g. browser extension),
-    // so we need to resync the vRange.
     const targetRanges = event.getTargetRanges();
     if (targetRanges.length > 0) {
       const staticRange = targetRanges[0];
