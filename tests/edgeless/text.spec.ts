@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
   assertEdgelessTool,
@@ -17,6 +17,32 @@ import {
   assertEdgelessSelectedRect,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
+
+async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
+  const fontButton = page.locator('.text-font-family-button');
+  const fontPanel = page.locator('edgeless-font-family-panel');
+  const isFontPanelShow = await fontPanel.isVisible();
+  if (!isFontPanelShow) {
+    if (!fontButton.isVisible())
+      throw new Error('edgeless change text toolbar is not visible');
+
+    await fontButton.click();
+  }
+
+  const generalButton = fontPanel.locator('.general-button');
+  const scibbledButton = fontPanel.locator('.scibbled-button');
+  if (font === 'General') {
+    await expect(
+      generalButton.locator('.active-mode-background[active]')
+    ).toBeVisible();
+    return;
+  }
+  if (font === 'Scribbled') {
+    await expect(
+      scibbledButton.locator('.active-mode-background[active]')
+    ).toBeVisible();
+  }
+}
 
 // it's flaky
 test('add text element in default mode', async ({ page }) => {
@@ -135,13 +161,17 @@ test('normalize text element rect after change its font', async ({ page }) => {
 
   await page.mouse.click(140, 210);
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 110.7, 163.3]);
+  await assertEdgelessSelectedRect(page, [130, 200, 113.9, 163.3]);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
+
+  // Default is Scribbled
+  await assertTextFont(page, 'Scribbled');
   const generalTextFont = page.getByText('General');
   await generalTextFont.click();
   await assertEdgelessSelectedRect(page, [130, 200, 114.7, 118.2]);
   await fontButton.click();
+  await assertTextFont(page, 'General');
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
   await assertEdgelessSelectedRect(page, [130, 200, 108.3, 163.3]);
