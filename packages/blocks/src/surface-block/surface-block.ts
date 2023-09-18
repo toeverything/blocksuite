@@ -168,7 +168,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.init();
   }
 
-  private _getCSSPropertyValue = (value: string) => {
+  getCSSPropertyValue = (value: string) => {
     const root = this.root;
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
@@ -297,7 +297,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, this);
-    element.computedValue = this._getCSSPropertyValue;
+    element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
     this._addToBatch(element);
@@ -349,7 +349,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, this);
-      element.computedValue = this._getCSSPropertyValue;
+      element.computedValue = this.getCSSPropertyValue;
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
