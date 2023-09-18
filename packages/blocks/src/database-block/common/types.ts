@@ -8,7 +8,11 @@ export type GroupBy = {
     desc: boolean;
   };
 };
-
+export type GroupProperty = {
+  key: string;
+  hide?: boolean;
+  manuallyCardSort: string[];
+};
 export type SortBy = {
   ref: VariableOrProperty;
   desc: boolean;

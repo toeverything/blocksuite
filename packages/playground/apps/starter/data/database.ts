@@ -68,7 +68,15 @@ export const database: InitFn = async (workspace: Workspace, id: string) => {
     'end',
     multiSelectColumnConfig.create(multiSelectColumnConfig.name)
   );
-
+  database.updateView(database.views[0].id, () => {
+    return {
+      groupBy: {
+        columnId: database.columns[1].id,
+        type: 'groupBy',
+        name: 'select',
+      },
+    };
+  });
   const paragraphTypes: ParagraphType[] = [
     'text',
     'quote',

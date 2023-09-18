@@ -63,6 +63,7 @@ export class TableSelectionController implements ReactiveController {
         });
         if (old) {
           const container = this.getCellContainer(
+            old.groupKey,
             old.focus.rowIndex,
             old.focus.columnIndex
           );
@@ -80,6 +81,7 @@ export class TableSelectionController implements ReactiveController {
 
         if (tableSelection) {
           const container = this.getCellContainer(
+            tableSelection.groupKey,
             tableSelection.focus.rowIndex,
             tableSelection.focus.columnIndex
           );
@@ -180,6 +182,7 @@ export class TableSelectionController implements ReactiveController {
     if (selection.isEditing) {
       const focus = selection.focus;
       const container = this.getCellContainer(
+        selection.groupKey,
         focus.rowIndex,
         focus.columnIndex
       );
@@ -194,15 +197,15 @@ export class TableSelectionController implements ReactiveController {
     }
   }
 
-  cellPosition(left: number, top: number) {
-    const rows = this.rows();
+  cellPosition(groupKey: string | undefined, left: number, top: number) {
+    const rows = this.rows(groupKey);
     const cells = rows
-      .item(0)
+      ?.item(0)
       .querySelectorAll('affine-database-cell-container');
-    const rowOffsets: number[] = Array.from(rows).map(
+    const rowOffsets: number[] = Array.from(rows ?? []).map(
       v => v.getBoundingClientRect().top - top
     );
-    const columnOffsets: number[] = Array.from(cells).map(
+    const columnOffsets: number[] = Array.from(cells ?? []).map(
       v => v.getBoundingClientRect().left - left
     );
     return (x1: number, x2: number, y1: number, y2: number) => {
@@ -242,16 +245,22 @@ export class TableSelectionController implements ReactiveController {
   }
 
   startDrag(evt: PointerEvent, cell: DatabaseCellContainer) {
+    const groupKey = cell.closest('affine-data-view-table-group')?.group?.key;
     const table = this.tableContainer;
     const tableRect = table.getBoundingClientRect();
     const startOffsetX = evt.x - tableRect.left;
     const startOffsetY = evt.y - tableRect.top;
-    const offsetToSelection = this.cellPosition(tableRect.left, tableRect.top);
+    const offsetToSelection = this.cellPosition(
+      groupKey,
+      tableRect.left,
+      tableRect.top
+    );
     const select = (selection: {
       row: MultiSelection;
       column: MultiSelection;
     }) => {
       this.selection = {
+        groupKey: groupKey,
         rowsSelection: selection.row,
         columnsSelection: selection.column,
         focus: {
@@ -338,17 +347,25 @@ export class TableSelectionController implements ReactiveController {
   }
 
   getCellContainer(
+    groupKey: string | undefined,
     rowIndex: number,
     columnIndex: number
   ): DatabaseCellContainer | undefined {
-    const row = this.rows().item(rowIndex);
+    const row = this.rows(groupKey)?.item(rowIndex);
     return row
       ?.querySelectorAll('affine-database-cell-container')
       .item(columnIndex);
   }
 
-  private rows() {
-    return this.tableContainer.querySelectorAll('.affine-database-block-row');
+  private rows(groupKey: string | undefined) {
+    const container =
+      groupKey != null
+        ? this.tableContainer.querySelector(
+            `affine-data-view-table-group[data-group-key="${groupKey}"]`
+          )
+        : this.tableContainer;
+    assertExists(container);
+    return container.querySelectorAll('.affine-database-block-row');
   }
 
   selectionStyleUpdateTask = 0;
@@ -356,6 +373,7 @@ export class TableSelectionController implements ReactiveController {
   updateSelection(tableSelection?: TableViewSelection) {
     const update = () => {
       this.updateSelectionStyle(
+        tableSelection?.groupKey,
         tableSelection?.rowsSelection,
         tableSelection?.columnsSelection
       );
@@ -363,6 +381,7 @@ export class TableSelectionController implements ReactiveController {
       const isRowSelection =
         tableSelection?.rowsSelection && !tableSelection?.columnsSelection;
       this.updateFocusSelectionStyle(
+        tableSelection?.groupKey,
         tableSelection?.focus,
         isRowSelection,
         tableSelection?.isEditing
@@ -383,6 +402,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   updateSelectionStyle(
+    groupKey: string | undefined,
     rowSelection?: MultiSelection,
     columnSelection?: MultiSelection
   ) {
@@ -395,6 +415,7 @@ export class TableSelectionController implements ReactiveController {
     const tableRect = this.tableContainer.getBoundingClientRect();
     // eslint-disable-next-line prefer-const
     let { left, top, width, height, scale } = this.getRect(
+      groupKey,
       rowSelection?.start ?? 0,
       rowSelection?.end ?? this.host.view.rows.length - 1,
       columnSelection?.start ?? 0,
@@ -416,6 +437,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   updateFocusSelectionStyle(
+    groupKey: string | undefined,
     focus?: CellFocus,
     isRowSelection?: boolean,
     isEditing = false
@@ -424,10 +446,11 @@ export class TableSelectionController implements ReactiveController {
     if (!div) return;
     if (focus && !isRowSelection) {
       // Check if row is removed.
-      const rows = this.rows();
+      const rows = this.rows(groupKey) ?? [];
       if (rows.length <= focus.rowIndex) return;
 
       const { left, top, width, height, scale } = this.getRect(
+        groupKey,
         focus.rowIndex,
         focus.rowIndex,
         focus.columnIndex,
@@ -448,8 +471,14 @@ export class TableSelectionController implements ReactiveController {
     }
   }
 
-  getRect(top: number, bottom: number, left: number, right: number) {
-    const rows = this.rows();
+  getRect(
+    groupKey: string | undefined,
+    top: number,
+    bottom: number,
+    left: number,
+    right: number
+  ) {
+    const rows = this.rows(groupKey);
     const topRow = rows.item(top);
     const bottomRow = rows.item(bottom);
     const topCells = topRow.querySelectorAll('affine-database-cell-container');

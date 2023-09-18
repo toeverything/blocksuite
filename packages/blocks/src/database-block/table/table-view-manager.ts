@@ -6,8 +6,12 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
+import { GroupHelper, sortByManually } from '../common/group-by/helper.js';
+import { groupByMatcher } from '../common/group-by/matcher.js';
+import { defaultGroupBy } from '../common/group-by/util.js';
 import type { SingleViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
+import type { TType } from '../logical/typesystem.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { headerRenderer } from './components/header-cell.js';
@@ -137,6 +141,18 @@ export class DataViewTableManager extends BaseDataViewManager {
     );
   }
 
+  public override rowAdd(
+    insertPosition: InsertPosition | number,
+    groupKey?: string
+  ): string {
+    const id = super.rowAdd(insertPosition);
+    if (!groupKey) {
+      return id;
+    }
+    this.groupHelper?.addToGroup(id, groupKey);
+    return id;
+  }
+
   public get columnsWithoutFilter(): string[] {
     const needShow = new Set(this.dataSource.properties);
     const result: string[] = [];
@@ -209,6 +225,103 @@ export class DataViewTableManager extends BaseDataViewManager {
 
   public hasHeader(rowId: string): boolean {
     return Object.values(this.header).some(id => this.cellGetValue(rowId, id));
+  }
+
+  changeGroup(columnId: string) {
+    const column = this.columnGet(columnId);
+    this.updateView(_view => {
+      return {
+        groupBy: defaultGroupBy(column.id, column.type, column.data),
+      };
+    });
+  }
+
+  checkGroup(columnId: string, type: TType, target: TType): boolean {
+    if (!groupByMatcher.isMatched(type, target)) {
+      this.changeGroup(columnId);
+      return false;
+    }
+    return true;
+  }
+
+  get groupProperties() {
+    return this.view.groupProperties ?? [];
+  }
+  public get groupHelper(): GroupHelper | undefined {
+    const groupBy = this.view.groupBy;
+    if (!groupBy) {
+      return;
+    }
+    const result = groupByMatcher.find(v => v.data.name === groupBy.name);
+    if (!result) {
+      return;
+    }
+    const groupByConfig = result.data;
+    const type = this.columnGetDataType(groupBy.columnId);
+    if (!this.checkGroup(groupBy.columnId, result.type, type)) {
+      // reset groupBy config
+      return this.groupHelper;
+    }
+    return new GroupHelper(groupBy, groupByConfig, type, this, {
+      sortGroup: ids =>
+        sortByManually(
+          ids,
+          v => v,
+          this.groupProperties.map(v => v.key)
+        ),
+      sortRow: (key, ids) => {
+        const property = this.groupProperties.find(v => v.key === key);
+        return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
+      },
+      changeGroupSort: keys => {
+        const map = new Map(this.groupProperties.map(v => [v.key, v]));
+        this.updateView(() => {
+          return {
+            groupProperties: keys.map(key => {
+              const property = map.get(key);
+              if (property) {
+                return property;
+              }
+              return {
+                key,
+                hide: false,
+                manuallyCardSort: [],
+              };
+            }),
+          };
+        });
+      },
+      changeRowSort: (groupKeys, groupKey, keys) => {
+        const map = new Map(this.groupProperties.map(v => [v.key, v]));
+        this.updateView(() => {
+          return {
+            groupProperties: groupKeys.map(key => {
+              if (key === groupKey) {
+                const group = map.get(key);
+                return group
+                  ? {
+                      ...group,
+                      manuallyCardSort: keys,
+                    }
+                  : {
+                      key,
+                      hide: false,
+                      manuallyCardSort: keys,
+                    };
+              } else {
+                return (
+                  map.get(key) ?? {
+                    key,
+                    hide: false,
+                    manuallyCardSort: [],
+                  }
+                );
+              }
+            }),
+          };
+        });
+      },
+    });
   }
 }
 

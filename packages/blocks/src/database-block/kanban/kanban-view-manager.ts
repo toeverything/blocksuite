@@ -16,14 +16,6 @@ import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { headerRenderer } from './header-cell.js';
 
-export type KanbanGroupData = {
-  key: string;
-  name: string;
-  helper: GroupHelper;
-  type: TType;
-  value: unknown;
-  rows: string[];
-};
 type KanbanViewData = RealDataViewDataTypeMap['kanban'];
 
 export class DataViewKanbanManager extends BaseDataViewManager {
@@ -216,20 +208,27 @@ export class DataViewKanbanManager extends BaseDataViewManager {
           };
         });
       },
-      changeRowSort: (groupKey, keys) => {
+      changeRowSort: (groupKeys, groupKey, keys) => {
         const map = new Map(this.view.groupProperties.map(v => [v.key, v]));
-        this.updateView(view => {
+        this.updateView(() => {
           return {
-            groupProperties: view.groupProperties.map(property => {
-              if (property.key === groupKey) {
-                return {
-                  ...property,
-                  manuallyCardSort: keys,
-                };
+            groupProperties: groupKeys.map(key => {
+              if (key === groupKey) {
+                const group = map.get(key);
+                return group
+                  ? {
+                      ...group,
+                      manuallyCardSort: keys,
+                    }
+                  : {
+                      key,
+                      hide: false,
+                      manuallyCardSort: keys,
+                    };
               } else {
                 return (
-                  map.get(property.key) ?? {
-                    key: property.key,
+                  map.get(key) ?? {
+                    key,
                     hide: false,
                     manuallyCardSort: [],
                   }

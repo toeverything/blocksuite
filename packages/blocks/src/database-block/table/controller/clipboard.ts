@@ -120,6 +120,7 @@ export class TableClipboardController implements ReactiveController {
         data,
         view,
         copyedSelectionData,
+        tableSelection.groupKey,
         rowStartIndex,
         columnStartIndex,
         rowLength,
@@ -155,7 +156,7 @@ function copyCellsValue(
   data: DataViewTableManager,
   view: DataViewTable
 ) {
-  const { rowsSelection, columnsSelection, focus } = selection;
+  const { rowsSelection, columnsSelection, focus, groupKey } = selection;
   const values: string[][] = [];
   if (rowsSelection && !columnsSelection) {
     // rows
@@ -165,6 +166,7 @@ function copyCellsValue(
     );
     for (let i = start; i <= end; i++) {
       const container = view.selectionController.getCellContainer(
+        groupKey,
         i,
         titleIndex
       );
@@ -177,7 +179,11 @@ function copyCellsValue(
       const value: string[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = data.columnGet(data.columns[j]);
-        const container = view.selectionController.getCellContainer(i, j);
+        const container = view.selectionController.getCellContainer(
+          groupKey,
+          i,
+          j
+        );
         const cellValue = (cellToStringMap[column.type]?.(container) ??
           '') as string;
         value.push(cellValue);
@@ -188,6 +194,7 @@ function copyCellsValue(
     // single cell
     const column = data.columnGet(data.columns[focus.columnIndex]);
     const container = view.selectionController.getCellContainer(
+      groupKey,
       focus.rowIndex,
       focus.columnIndex
     );
@@ -205,7 +212,7 @@ function getCopyedValuesFromSelection(
   data: DataViewTableManager,
   view: DataViewTable
 ): CopyedSelectionData {
-  const { rowsSelection, columnsSelection, focus } = selection;
+  const { rowsSelection, columnsSelection, focus, groupKey } = selection;
   const values: CopyedColumn[][] = [];
   if (rowsSelection && !columnsSelection) {
     // rows
@@ -214,7 +221,11 @@ function getCopyedValuesFromSelection(
       const cellValues: CopyedColumn[] = [];
       for (let j = 0; j < data.columns.length; j++) {
         const column = data.columnGet(data.columns[j]);
-        const container = view.selectionController.getCellContainer(i, j);
+        const container = view.selectionController.getCellContainer(
+          groupKey,
+          i,
+          j
+        );
         const value = cellToStringMap[column.type]?.(container);
         cellValues.push({ type: column.type, value });
       }
@@ -226,7 +237,11 @@ function getCopyedValuesFromSelection(
       const cellValues: CopyedColumn[] = [];
       for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
         const column = data.columnGet(data.columns[j]);
-        const container = view.selectionController.getCellContainer(i, j);
+        const container = view.selectionController.getCellContainer(
+          groupKey,
+          i,
+          j
+        );
         const value = cellToStringMap[column.type]?.(container);
         cellValues.push({ type: column.type, value });
       }
@@ -235,6 +250,7 @@ function getCopyedValuesFromSelection(
   } else if (!rowsSelection && !columnsSelection && focus) {
     // single cell
     const container = view.selectionController.getCellContainer(
+      groupKey,
       focus.rowIndex,
       focus.columnIndex
     );
@@ -321,6 +337,7 @@ function pasteToCells(
   data: DataViewTableManager,
   view: DataViewTable,
   copyedSelectionData: CopyedSelectionData,
+  groupKey: string | undefined,
   rowStartIndex: number,
   columnStartIndex: number,
   rowLength: number,
@@ -340,6 +357,7 @@ function pasteToCells(
       const srcColumn = srcColumns[srcRowIndex][srcColumnIndex];
 
       const targetContainer = view.selectionController.getCellContainer(
+        groupKey,
         rowIndex,
         columnIndex
       );

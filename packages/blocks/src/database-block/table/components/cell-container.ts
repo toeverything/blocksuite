@@ -54,9 +54,14 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     return this.closest('affine-database-table')?.selectionController;
   }
 
+  private get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
+  }
+
   private _selectCurrentCell = (editing: boolean) => {
     if (this.selectionView) {
       this.selectionView.selection = {
+        groupKey: this.groupKey,
         focus: {
           rowIndex: this.rowIndex,
           columnIndex: this.columnIndex,

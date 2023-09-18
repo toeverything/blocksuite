@@ -1,12 +1,19 @@
-import type { KanbanGroupProperty } from '../../kanban/define.js';
-import type { KanbanGroupData } from '../../kanban/kanban-view-manager.js';
 import type { TType } from '../../logical/typesystem.js';
 import type { InsertPosition } from '../../types.js';
 import { insertPositionToIndex } from '../../utils/insert.js';
 import type { DataViewManager } from '../data-view-manager.js';
-import type { GroupBy } from '../types.js';
+import type { GroupBy, GroupProperty } from '../types.js';
 import type { GroupByConfig } from './matcher.js';
 import { groupByMatcher } from './matcher.js';
+
+export type GroupData = {
+  key: string;
+  name: string;
+  helper: GroupHelper;
+  type: TType;
+  value: unknown;
+  rows: string[];
+};
 
 export class GroupHelper {
   constructor(
@@ -92,14 +99,14 @@ export class GroupHelper {
     });
   }
 
-  public readonly groups: KanbanGroupData[];
-  public readonly groupMap: Record<string, KanbanGroupData>;
+  public readonly groups: GroupData[];
+  public readonly groupMap: Record<string, GroupData>;
 
   groupConfig() {
     return groupByMatcher.findData(v => v.name === this.groupBy.name);
   }
 
-  defaultGroupProperty(key: string): KanbanGroupProperty {
+  defaultGroupProperty(key: string): GroupProperty {
     return {
       key,
       hide: false,
@@ -127,40 +134,16 @@ export class GroupHelper {
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
-  changeCardSort(groupKeys: string[], groupKey: string, cardIds: string[]) {
-    this.ops.changeRowSort(groupKeys, groupKey, cardIds);
-    // const map = new Map(this.properties.map(v => [v.key, v]));
-    // const group =
-    //   this.properties.find(v => v.key === groupKey) ??
-    //   this.defaultGroupProperty(groupKey);
-    // this._changeProperties(
-    //   this.groups.map(v => {
-    //     if (v.key === groupKey) {
-    //       return {
-    //         ...group,
-    //         manuallyCardSort: cardIds,
-    //       };
-    //     }
-    //     return map.get(v.key) ?? this.defaultGroupProperty(v.key);
-    //   })
-    // );
+  changeCardSort(groupKey: string, cardIds: string[]) {
+    this.ops.changeRowSort(
+      this.groups.map(v => v.key),
+      groupKey,
+      cardIds
+    );
   }
 
   changeGroupSort(keys: string[]) {
     this.ops.changeGroupSort(keys);
-    // const map = new Map(this.properties.map(v => [v.key, v]));
-    // const newProperties = keys.map(key => {
-    //   const property = map.get(key);
-    //   if (property) {
-    //     return property;
-    //   }
-    //   return {
-    //     key,
-    //     hide: false,
-    //     manuallyCardSort: [],
-    //   };
-    // });
-    // this._changeProperties(newProperties);
   }
 
   public moveGroupTo(groupKey: string, position: InsertPosition) {

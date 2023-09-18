@@ -9,7 +9,8 @@ import {
   InfoIcon,
   MoreHorizontalIcon,
 } from '../../../../icons/index.js';
-import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
+import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { popFilterModal } from '../../filter/filter-modal.js';
 import { groupByMatcher } from '../../group-by/matcher.js';
 import { popPropertiesSetting } from '../../properties.js';
@@ -40,7 +41,9 @@ const styles = css`
 `;
 
 @customElement('data-view-header-tools-view-options')
-export class DataViewHeaderToolsViewOptions extends BaseTool<DataViewKanbanManager> {
+export class DataViewHeaderToolsViewOptions extends BaseTool<
+  DataViewKanbanManager | DataViewTableManager
+> {
   static override styles = styles;
 
   @query('.more-action')
@@ -102,7 +105,6 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<DataViewKanbanManag
             type: 'sub-menu',
             name: 'Group By',
             icon: GroupingIcon,
-            hide: () => !(this.view instanceof DataViewKanbanManager),
             options: {
               input: {
                 search: true,

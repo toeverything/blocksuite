@@ -1,7 +1,6 @@
 import type { FilterGroup } from '../common/ast.js';
 import { viewManager } from '../common/data-view.js';
-import type { Sort } from '../common/types.js';
-import type { GroupBy } from '../common/types.js';
+import type { GroupBy, GroupProperty, Sort } from '../common/types.js';
 
 declare global {
   interface DataViewDataTypeMap {
@@ -16,8 +15,9 @@ export type TableViewColumn = {
 export type TableViewData = {
   columns: TableViewColumn[];
   filter: FilterGroup;
-  sort?: Sort;
   groupBy?: GroupBy;
+  groupProperties?: GroupProperty[];
+  sort?: Sort;
   header?: {
     titleColumn?: string;
     iconColumn?: string;

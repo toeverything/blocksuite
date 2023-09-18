@@ -7,8 +7,7 @@ import { textPureColumnConfig } from '../common/columns/text/define.js';
 import { viewManager } from '../common/data-view.js';
 import { groupByMatcher } from '../common/group-by/matcher.js';
 import { defaultGroupBy } from '../common/group-by/util.js';
-import type { GroupBy } from '../common/types.js';
-import type { Sort } from '../common/types.js';
+import type { GroupBy, GroupProperty, Sort } from '../common/types.js';
 import type { Column } from '../table/types.js';
 
 declare global {
@@ -21,12 +20,6 @@ export type KanbanViewColumn = {
   hide?: boolean;
 };
 
-export type KanbanGroupProperty = {
-  key: string;
-  hide?: boolean;
-  manuallyCardSort: string[];
-};
-
 export type KanbanViewData = {
   columns: KanbanViewColumn[];
   filter: FilterGroup;
@@ -37,7 +30,7 @@ export type KanbanViewData = {
     iconColumn?: string;
     coverColumn?: string;
   };
-  groupProperties: KanbanGroupProperty[];
+  groupProperties: GroupProperty[];
 };
 
 viewManager.register('kanban', {

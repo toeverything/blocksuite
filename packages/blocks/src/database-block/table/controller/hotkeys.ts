@@ -18,8 +18,13 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection) {
             return;
           }
-          const { focus, rowsSelection, columnsSelection, isEditing } =
-            selection;
+          const {
+            focus,
+            rowsSelection,
+            columnsSelection,
+            isEditing,
+            groupKey,
+          } = selection;
           if (rowsSelection && !columnsSelection) {
             const rows = this.host.view.rows.filter(
               (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
@@ -37,6 +42,7 @@ export class TableHotkeysController implements ReactiveController {
                 const { start, end } = columnsSelection;
                 for (let j = start; j <= end; j++) {
                   const container = this.selectionController.getCellContainer(
+                    groupKey,
                     i,
                     j
                   );
@@ -51,6 +57,7 @@ export class TableHotkeysController implements ReactiveController {
             } else {
               // single cell
               const container = this.selectionController.getCellContainer(
+                groupKey,
                 focus.rowIndex,
                 focus.columnIndex
               );
@@ -114,6 +121,7 @@ export class TableHotkeysController implements ReactiveController {
             return false;
           }
           const cell = this.selectionController.getCellContainer(
+            selection.groupKey,
             selection.focus.rowIndex,
             selection.focus.columnIndex
           );
@@ -254,6 +262,7 @@ export class TableHotkeysController implements ReactiveController {
             return;
           }
           const cell = this.selectionController.getCellContainer(
+            selection.groupKey,
             selection.focus.rowIndex,
             selection.focus.columnIndex
           );

@@ -13,6 +13,7 @@ export const styles = css`
     display: flex;
     flex-direction: row;
     border-bottom: 1px solid var(--affine-border-color);
+    border-top: 1px solid var(--affine-border-color);
     box-sizing: border-box;
   }
 
