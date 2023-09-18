@@ -6,10 +6,7 @@ import type {
   Slice,
 } from '@blocksuite/store';
 import { Job } from '@blocksuite/store';
-import {
-  compressToEncodedURIComponent,
-  decompressFromEncodedURIComponent,
-} from 'lz-string';
+import * as lz from 'lz-string';
 
 import type { BlockStdProvider } from '../provider/index.js';
 
@@ -98,7 +95,7 @@ export class Clipboard {
         }
       })
     );
-    const snapshot = compressToEncodedURIComponent(JSON.stringify(items));
+    const snapshot = lz.compressToEncodedURIComponent(JSON.stringify(items));
     const html = `<div data-blocksuite-snapshot=${snapshot}></div>`;
     const blob = new Blob([html], {
       type: 'text/html',
@@ -129,7 +126,7 @@ export class Clipboard {
       );
       assertExists(dom);
       const json = JSON.parse(
-        decompressFromEncodedURIComponent(
+        lz.decompressFromEncodedURIComponent(
           dom.dataset.blocksuiteSnapshot as string
         )
       );
