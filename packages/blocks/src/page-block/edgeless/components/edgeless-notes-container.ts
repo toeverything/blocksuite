@@ -80,8 +80,15 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
+
     this._disposables.add(
       this.model.propsUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );
