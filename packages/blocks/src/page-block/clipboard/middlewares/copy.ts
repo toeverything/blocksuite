@@ -21,24 +21,6 @@ const handlePoint = (
     model.text?.sliceToDelta(index, length + index);
 };
 
-const replaceId = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
-  const idMap = new Map<string, string>();
-  slots.afterExport.on(payload => {
-    if (payload.type === 'block') {
-      const snapshot = payload.snapshot;
-      const original = snapshot.id;
-      let newId: string;
-      if (idMap.has(original)) {
-        newId = idMap.get(original)!;
-      } else {
-        newId = std.page.workspace.idGenerator('block');
-        idMap.set(original, newId);
-      }
-      snapshot.id = newId;
-    }
-  });
-};
-
 const sliceText = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
   slots.afterExport.on(payload => {
     if (payload.type === 'block') {
@@ -60,7 +42,6 @@ const sliceText = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
 
 export const copyMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
   return ({ slots }) => {
-    replaceId(slots, std);
     sliceText(slots, std);
   };
 };

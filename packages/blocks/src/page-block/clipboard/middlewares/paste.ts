@@ -1,4 +1,8 @@
-import type { TextRangePoint, TextSelection } from '@blocksuite/block-std';
+import type {
+  BaseSelection,
+  TextRangePoint,
+  TextSelection,
+} from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
@@ -11,6 +15,7 @@ import type {
 } from '@blocksuite/store';
 import type { Text } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { JobSlots } from '@blocksuite/store';
 
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 
@@ -67,6 +72,12 @@ class PasteTr {
     this.lastSnapshot = findLast(snapshot.content[snapshot.content.length - 1]);
     this.lastIndex = this.endPointState.text.length - end.index - end.length;
   }
+
+  canMerge = () => {
+    const firstTextSnapshot = this._textFromSnapshot(this.firstSnapshot);
+    const lastTextSnapshot = this._textFromSnapshot(this.lastSnapshot);
+    return firstTextSnapshot && lastTextSnapshot;
+  };
 
   private _textFromSnapshot = (snapshot: BlockSnapshot) => {
     return snapshot.props.text as Record<'delta', DeltaOperation[]>;
@@ -142,11 +153,13 @@ class PasteTr {
   };
 
   pasted = () => {
-    this.std.page.deleteBlock(this.fromPointState.model);
-    if (this.to) {
-      const toBlock = this._blockFromPath(this.to.path);
-      if (toBlock) {
-        this.std.page.deleteBlock(toBlock.model);
+    if (this.canMerge() || this.endPointState.text.length === 0) {
+      this.std.page.deleteBlock(this.fromPointState.model);
+      if (this.to) {
+        const toBlock = this._blockFromPath(this.to.path);
+        if (toBlock) {
+          this.std.page.deleteBlock(toBlock.model);
+        }
       }
     }
   };
@@ -162,16 +175,25 @@ class PasteTr {
     }
 
     const parentId = PathFinder.parent(this.endPointState.point.path);
-    this.std.selection.setGroup('note', [
-      this.std.selection.getInstance('text', {
+
+    let selection: BaseSelection;
+
+    if (!this.canMerge()) {
+      selection = this.std.selection.getInstance('block', {
+        path: parentId.concat(blockId),
+      });
+    } else {
+      selection = this.std.selection.getInstance('text', {
         from: {
           path: parentId.concat(blockId),
           index,
           length: 0,
         },
         to: null,
-      }),
-    ]);
+      });
+    }
+
+    this.std.selection.setGroup('note', [selection]);
   };
 
   merge() {
@@ -184,9 +206,28 @@ class PasteTr {
   }
 }
 
+const replaceId = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
+  const idMap = new Map<string, string>();
+  slots.beforeImport.on(payload => {
+    if (payload.type === 'block') {
+      const snapshot = payload.snapshot;
+      const original = snapshot.id;
+      let newId: string;
+      if (idMap.has(original)) {
+        newId = idMap.get(original)!;
+      } else {
+        newId = std.page.workspace.idGenerator('block');
+        idMap.set(original, newId);
+      }
+      snapshot.id = newId;
+    }
+  });
+};
+
 export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
   return ({ slots }) => {
     let tr: PasteTr | undefined;
+    replaceId(slots, std);
     slots.beforeImport.on(payload => {
       if (payload.type === 'slice') {
         const text = std.selection.find('text');
@@ -194,8 +235,9 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
           return;
         }
         tr = new PasteTr(std, text, payload.snapshot);
-
-        tr.merge();
+        if (tr.canMerge()) {
+          tr.merge();
+        }
       }
     });
     slots.afterImport.on(payload => {
