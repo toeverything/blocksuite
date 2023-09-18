@@ -37,7 +37,7 @@ richTextPureColumnConfig.registerConvert(
     const getTag = (name: string) => {
       if (options[name]) return options[name];
       const tag: SelectTag = {
-        id: nanoid(),
+        id: nanoid('unknown'),
         value: name,
         color: getTagColor(),
       };
@@ -67,7 +67,7 @@ richTextPureColumnConfig.registerConvert(
     const getTag = (name: string) => {
       if (options[name]) return options[name];
       const tag: SelectTag = {
-        id: nanoid(),
+        id: nanoid('unknown'),
         value: name,
         color: getTagColor(),
       };

@@ -171,6 +171,8 @@ export class Job {
     this._slots.beforeImport.emit({
       type: 'block',
       snapshot,
+      parent,
+      index,
     });
     const { children, flavour, props, id } = snapshot;
     const schema = this._getSchema(flavour);
@@ -203,6 +205,8 @@ export class Job {
       type: 'block',
       snapshot,
       model,
+      parent,
+      index,
     });
 
     return model;

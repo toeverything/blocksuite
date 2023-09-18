@@ -235,13 +235,14 @@ export function createWorkspaceOptions(): WorkspaceOptions {
     blobStorages,
     defaultFlags: {
       enable_toggle_block: featureArgs.includes('toggle'),
+      enable_transformer_clipboard: featureArgs.includes('clipboard'),
       enable_set_remote_flag: true,
       enable_block_hub: true,
       enable_bookmark_operation: true,
       enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
-        'space:page0': false,
+        'page:home': false,
       },
     },
   };
@@ -260,14 +261,6 @@ export function isValidUrl(urlLike: string) {
 export const createEditor = (page: Page, element: HTMLElement) => {
   const editor = new EditorContainer();
   editor.page = page;
-  editor.slots.pageLinkClicked.on(({ pageId }) => {
-    const target = page.workspace.getPage(pageId);
-    if (!target) {
-      throw new Error(`Failed to jump to page ${pageId}`);
-    }
-    editor.page = target;
-  });
-
   element.append(editor);
 
   editor.createBlockHub().then(blockHub => {

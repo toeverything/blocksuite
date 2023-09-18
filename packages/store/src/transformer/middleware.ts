@@ -15,14 +15,16 @@ export type BeforeImportPayload =
   | {
       snapshot: BlockSnapshot;
       type: 'block';
-    }
-  | {
-      snapshot: PageSnapshot;
-      type: 'page';
+      parent?: string;
+      index?: number;
     }
   | {
       snapshot: SliceSnapshot;
       type: 'slice';
+    }
+  | {
+      snapshot: PageSnapshot;
+      type: 'page';
     }
   | {
       snapshot: WorkspaceInfoSnapshot;
@@ -51,6 +53,8 @@ export type FinalPayload =
       snapshot: BlockSnapshot;
       type: 'block';
       model: BaseBlockModel;
+      parent?: string;
+      index?: number;
     }
   | {
       snapshot: PageSnapshot;

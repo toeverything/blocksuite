@@ -59,7 +59,7 @@ export async function getNoteRect(
 ) {
   const xywh: string | null = await page.evaluate(
     ([id]) => {
-      const page = window.workspace.getPage('page0');
+      const page = window.workspace.getPage('page:home');
       const block = page?.getBlockById(id.noteId);
       if (block?.flavour === 'affine:note') {
         return (block as NoteBlockModel).xywh;
@@ -350,7 +350,7 @@ export async function addNote(page: Page, text: string, x: number, y: number) {
   let i = 0;
   for (const paragraph of paragraphs) {
     ++i;
-    await type(page, paragraph);
+    await type(page, paragraph, 20);
 
     if (i < paragraphs.length) {
       await pressEnter(page);

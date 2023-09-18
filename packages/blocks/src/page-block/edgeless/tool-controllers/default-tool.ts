@@ -19,6 +19,7 @@ import {
   TextElement,
 } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
+import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
@@ -126,7 +127,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this.selection.setSelectedBlocks([]);
     // click the inner area of active text and note element
     if (editing && elements.length === 1 && elements[0] === element.id) {
-      handleNativeRangeAtPoint(e.raw.clientX, e.raw.clientY);
       return;
     }
 
@@ -262,7 +262,13 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       expand: 10,
     });
     if (!selected) {
-      addText(this._edgeless, e);
+      const key = 'blocksuite:' + this._edgeless.page.id + ':edgelessText';
+      const textData = sessionStorage.getItem(key);
+      const color =
+        textData && JSON.parse(textData).color
+          ? JSON.parse(textData).color
+          : GET_DEFAULT_TEXT_COLOR();
+      addText(this._edgeless, e, color);
       return;
     } else {
       if (selected instanceof TextElement) {

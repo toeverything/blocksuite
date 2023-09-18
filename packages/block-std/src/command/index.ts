@@ -16,7 +16,7 @@ export type Command<
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
   next: (ctx?: CommandKeyToData<Out>) => Promise<void>
-) => Promise<void>;
+) => void | Promise<void>;
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
   : Omit<A, keyof B>;
@@ -81,7 +81,7 @@ export class CommandManager {
             await cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
         };
-        return runCmds(ctx, cmds);
+        return runCmds(ctx as BlockSuite.CommandData, cmds);
       },
       with: value => {
         return this.createChain(methods, [
@@ -104,7 +104,7 @@ export class CommandManager {
           ...cmds,
           async (_, next) => {
             for (const chain of chains) {
-              chain.run();
+              await chain.run();
               if (success) {
                 await next();
                 break;
