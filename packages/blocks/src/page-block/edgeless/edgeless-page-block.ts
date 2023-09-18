@@ -767,7 +767,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.selectionManager.setSelectedBlocks([]);
       this.selectionManager.setSelection({
         elements: [noteBlock.id],
         editing: false,
@@ -810,9 +809,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.selectionManager.setSelectedBlocks([
-        ...this.selectionManager.selectedBlocks,
-      ]);
       this.selectionManager.setSelection(this.selectionManager.state);
     });
 

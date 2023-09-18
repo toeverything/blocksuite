@@ -33,8 +33,6 @@ export class EdgelessSelectionManager {
 
     cursorUpdated: new Slot<CursorSelection>(),
     remoteCursorUpdated: new Slot(),
-
-    blocksUpdated: new Slot<BlockComponentElement[]>(),
   };
 
   lastState: SurfaceSelection | null = null;
@@ -48,8 +46,6 @@ export class EdgelessSelectionManager {
 
   remoteCursor: Record<string, CursorSelection> = {};
   remoteSelection: Record<string, SurfaceSelection> = {};
-
-  selectedBlocks: BlockComponentElement[] = [];
 
   private _selectedElements: Set<string> = new Set();
   private _remoteSelectedElements: Set<string> = new Set();
@@ -204,11 +200,6 @@ export class EdgelessSelectionManager {
     const instance = this._selection.getInstance('cursor', cursor.x, cursor.y);
 
     this._selection.setGroup('edgeless', [this.state, instance]);
-  }
-
-  setSelectedBlocks(blocks: BlockComponentElement[]) {
-    this.selectedBlocks = blocks;
-    this.slots.blocksUpdated.emit(blocks);
   }
 
   clear() {
