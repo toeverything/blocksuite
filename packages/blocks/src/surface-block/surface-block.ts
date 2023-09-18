@@ -6,6 +6,8 @@ import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
+import { getThemePropertyValue } from '../__internal__/theme/utils.js';
+import { type CssVariableName, isCssVariable } from '../index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
@@ -26,7 +28,6 @@ import {
   type PhasorElementType,
 } from './elements/index.js';
 import type {
-  ComputedValue,
   HitTestOptions,
   SurfaceElement,
 } from './elements/surface-element.js';
@@ -125,9 +126,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  private _computedValue!: ComputedValue;
-
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
@@ -169,6 +167,23 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     this.init();
   }
+
+  private _getCSSPropertyValue = (value: string) => {
+    const root = this.root;
+    if (isCssVariable(value)) {
+      const cssValue = getThemePropertyValue(root, value as CssVariableName);
+      if (cssValue === undefined) {
+        console.error(
+          new Error(
+            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
+          )
+        );
+      }
+      return cssValue ?? value;
+    }
+
+    return value;
+  };
 
   private _initEvents() {
     this._disposables.add(
@@ -282,7 +297,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, this);
-    element.computedValue = this._computedValue;
+    element.computedValue = this._getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
     this._addToBatch(element);
@@ -334,7 +349,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, this);
-      element.computedValue = this._computedValue;
+      element.computedValue = this._getCSSPropertyValue;
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
