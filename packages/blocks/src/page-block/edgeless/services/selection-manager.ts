@@ -175,11 +175,15 @@ export class EdgelessSelectionManager {
     this.mount();
   }
 
-  hasRemote(element: string) {
+  isSelectedByRemote(element: string) {
     return this._remoteSelectedElements.has(element);
   }
 
-  has(element: string) {
+  /**
+   * check if the element is selected by local user
+   * @param element
+   */
+  isSelected(element: string) {
     return this._selectedElements.has(element);
   }
 
