@@ -6,7 +6,7 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
-import { GroupHelper } from '../common/group-by/helper.js';
+import { GroupHelper, sortByManually } from '../common/group-by/helper.js';
 import { groupByMatcher } from '../common/group-by/matcher.js';
 import { defaultGroupBy } from '../common/group-by/util.js';
 import type { SingleViewSource } from '../common/view-source.js';
@@ -187,20 +187,59 @@ export class DataViewKanbanManager extends BaseDataViewManager {
       // reset groupBy config
       return this.groupHelper;
     }
-    return new GroupHelper(
-      groupBy,
-      this.view.groupProperties,
-      properties => {
-        this.updateView(_v => {
+    return new GroupHelper(groupBy, groupByConfig, type, this, {
+      sortGroup: ids =>
+        sortByManually(
+          ids,
+          v => v,
+          this.view.groupProperties.map(v => v.key)
+        ),
+      sortRow: (key, ids) => {
+        const property = this.view.groupProperties.find(v => v.key === key);
+        return sortByManually(ids, v => v, property?.manuallyCardSort ?? []);
+      },
+      changeGroupSort: keys => {
+        const map = new Map(this.view.groupProperties.map(v => [v.key, v]));
+        this.updateView(() => {
           return {
-            groupProperties: properties,
+            groupProperties: keys.map(key => {
+              const property = map.get(key);
+              if (property) {
+                return property;
+              }
+              return {
+                key,
+                hide: false,
+                manuallyCardSort: [],
+              };
+            }),
           };
         });
       },
-      groupByConfig,
-      type,
-      this
-    );
+      changeRowSort: (groupKey, keys) => {
+        const map = new Map(this.view.groupProperties.map(v => [v.key, v]));
+        this.updateView(view => {
+          return {
+            groupProperties: view.groupProperties.map(property => {
+              if (property.key === groupKey) {
+                return {
+                  ...property,
+                  manuallyCardSort: keys,
+                };
+              } else {
+                return (
+                  map.get(property.key) ?? {
+                    key: property.key,
+                    hide: false,
+                    manuallyCardSort: [],
+                  }
+                );
+              }
+            }),
+          };
+        });
+      },
+    });
   }
 
   public addCard(position: InsertPosition, group: string) {

@@ -11,11 +11,19 @@ import { groupByMatcher } from './matcher.js';
 export class GroupHelper {
   constructor(
     private groupBy: GroupBy,
-    private properties: KanbanGroupProperty[],
-    private _changeProperties: (properties: KanbanGroupProperty[]) => void,
     config: GroupByConfig,
     type: TType,
-    private viewManager: DataViewManager
+    private viewManager: DataViewManager,
+    private ops: {
+      sortGroup: (keys: string[]) => string[];
+      sortRow: (groupKey: string, rowIds: string[]) => string[];
+      changeGroupSort: (keys: string[]) => void;
+      changeRowSort: (
+        groupKeys: string[],
+        groupKey: string,
+        keys: string[]
+      ) => void;
+    }
   ) {
     this.groupMap = Object.fromEntries(
       config.defaultKeys(type).map(({ key, value }) => [
@@ -47,31 +55,11 @@ export class GroupHelper {
         this.groupMap[key].rows.push(id);
       });
     });
-    const keys = new Set(Object.keys(this.groupMap));
-    const groups: string[] = [];
-    const processRowsSort = (key: string) => {
-      const rowIds = new Set(this.groupMap[key].rows);
-      const rowSort =
-        this.properties.find(v => v.key === key)?.manuallyCardSort ?? [];
-      const result: string[] = [];
-      for (const id of rowSort) {
-        if (rowIds.has(id)) {
-          rowIds.delete(id);
-          result.push(id);
-        }
-      }
-      result.push(...rowIds);
-      this.groupMap[key].rows = result;
-    };
-    for (const property of this.properties) {
-      if (keys.has(property.key)) {
-        keys.delete(property.key);
-        groups.push(property.key);
-      }
-    }
-    groups.push(...keys);
-    groups.forEach(processRowsSort);
-    this.groups = groups.map(key => this.groupMap[key]);
+    const sortedGroup = ops.sortGroup(Object.keys(this.groupMap));
+    sortedGroup.forEach(key => {
+      this.groupMap[key].rows = ops.sortRow(key, this.groupMap[key].rows);
+    });
+    this.groups = sortedGroup.map(key => this.groupMap[key]);
   }
 
   get dataType() {
@@ -139,38 +127,40 @@ export class GroupHelper {
     this.viewManager.cellUpdateValue(rowId, columnId, newValue);
   }
 
-  changeCardSort(groupKey: string, cardIds: string[]) {
-    const map = new Map(this.properties.map(v => [v.key, v]));
-    const group =
-      this.properties.find(v => v.key === groupKey) ??
-      this.defaultGroupProperty(groupKey);
-    this._changeProperties(
-      this.groups.map(v => {
-        if (v.key === groupKey) {
-          return {
-            ...group,
-            manuallyCardSort: cardIds,
-          };
-        }
-        return map.get(v.key) ?? this.defaultGroupProperty(v.key);
-      })
-    );
+  changeCardSort(groupKeys: string[], groupKey: string, cardIds: string[]) {
+    this.ops.changeRowSort(groupKeys, groupKey, cardIds);
+    // const map = new Map(this.properties.map(v => [v.key, v]));
+    // const group =
+    //   this.properties.find(v => v.key === groupKey) ??
+    //   this.defaultGroupProperty(groupKey);
+    // this._changeProperties(
+    //   this.groups.map(v => {
+    //     if (v.key === groupKey) {
+    //       return {
+    //         ...group,
+    //         manuallyCardSort: cardIds,
+    //       };
+    //     }
+    //     return map.get(v.key) ?? this.defaultGroupProperty(v.key);
+    //   })
+    // );
   }
 
   changeGroupSort(keys: string[]) {
-    const map = new Map(this.properties.map(v => [v.key, v]));
-    const newProperties = keys.map(key => {
-      const property = map.get(key);
-      if (property) {
-        return property;
-      }
-      return {
-        key,
-        hide: false,
-        manuallyCardSort: [],
-      };
-    });
-    this._changeProperties(newProperties);
+    this.ops.changeGroupSort(keys);
+    // const map = new Map(this.properties.map(v => [v.key, v]));
+    // const newProperties = keys.map(key => {
+    //   const property = map.get(key);
+    //   if (property) {
+    //     return property;
+    //   }
+    //   return {
+    //     key,
+    //     hide: false,
+    //     manuallyCardSort: [],
+    //   };
+    // });
+    // this._changeProperties(newProperties);
   }
 
   public moveGroupTo(groupKey: string, position: InsertPosition) {
@@ -215,3 +205,20 @@ export class GroupHelper {
       .addGroup;
   }
 }
+export const sortByManually = <T>(
+  arr: T[],
+  getId: (v: T) => string,
+  ids: string[]
+) => {
+  const map = new Map(arr.map(v => [getId(v), v]));
+  const result: T[] = [];
+  for (const id of ids) {
+    const value = map.get(id);
+    if (value) {
+      map.delete(id);
+      result.push(value);
+    }
+  }
+  result.push(...map.values());
+  return result;
+};
