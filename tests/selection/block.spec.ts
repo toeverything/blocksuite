@@ -1498,7 +1498,9 @@ test('scroll should update dragging area and select blocks when dragging', async
   // blur
   await page.mouse.click(0, 0);
   await page.mouse.move(coord.x - 26 - 24, coord.y - 30, { steps: 20 });
+  await waitNextFrame(page);
   await page.mouse.down();
+  await waitNextFrame(page);
   // ←
   await page.mouse.move(coord.x + 100, coord.y + 10, { steps: 20 });
   await page.waitForTimeout(250);
