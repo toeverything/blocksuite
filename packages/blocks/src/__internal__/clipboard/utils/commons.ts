@@ -327,7 +327,6 @@ export function copyOnPhasorElementWithText(
       edgelessTextEditor.setKeeping(false);
 
       // restore focus and selection
-      vEditor.rootElement.focus();
       vEditor.setVRange(vRange);
     }
   }
