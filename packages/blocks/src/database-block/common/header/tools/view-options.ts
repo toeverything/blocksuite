@@ -1,6 +1,7 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
+import type { Menu } from '../../../../components/menu/menu.js';
 import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
 import {
   DeleteIcon,
@@ -9,8 +10,8 @@ import {
   InfoIcon,
   MoreHorizontalIcon,
 } from '../../../../icons/index.js';
-import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../../table/table-view-manager.js';
+import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
+import { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { popFilterModal } from '../../filter/filter-modal.js';
 import { groupByMatcher } from '../../group-by/matcher.js';
 import { popPropertiesSetting } from '../../properties.js';
@@ -110,26 +111,49 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
                 search: true,
                 placeholder: 'Search',
               },
-              items: this.view.columnsWithoutFilter
-                .filter(id => {
-                  if (this.view.columnGet(id).type === 'title') {
-                    return false;
-                  }
-                  return !!groupByMatcher.match(
-                    this.view.columnGet(id).dataType
-                  );
-                })
-                .map(id => {
-                  const column = this.view.columnGet(id);
-                  return {
-                    type: 'action',
-                    name: column.name,
-                    icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
-                    select: () => {
-                      this.view.changeGroup(id);
+              items: [
+                ...this.view.columnsWithoutFilter
+                  .filter(id => {
+                    if (this.view.columnGet(id).type === 'title') {
+                      return false;
+                    }
+                    return !!groupByMatcher.match(
+                      this.view.columnGet(id).dataType
+                    );
+                  })
+                  .map<Menu>(id => {
+                    const column = this.view.columnGet(id);
+                    return {
+                      type: 'action',
+                      name: column.name,
+                      isSelected: this.view.view.groupBy?.columnId === id,
+                      icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
+                      select: () => {
+                        this.view.changeGroup(id);
+                      },
+                    };
+                  }),
+                {
+                  type: 'group',
+                  name: '',
+                  hide: () =>
+                    this.view instanceof DataViewKanbanManager ||
+                    this.view.view.groupBy == null,
+                  children: () => [
+                    {
+                      type: 'action',
+                      icon: DeleteIcon,
+                      class: 'delete-item',
+                      name: 'Remove Grouping',
+                      select: () => {
+                        if (this.view instanceof DataViewTableManager) {
+                          this.view.changeGroup(undefined);
+                        }
+                      },
                     },
-                  };
-                }),
+                  ],
+                },
+              ],
             },
           },
           {

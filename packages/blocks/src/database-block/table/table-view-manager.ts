@@ -227,7 +227,15 @@ export class DataViewTableManager extends BaseDataViewManager {
     return Object.values(this.header).some(id => this.cellGetValue(rowId, id));
   }
 
-  changeGroup(columnId: string) {
+  changeGroup(columnId: string | undefined) {
+    if (columnId == null) {
+      this.updateView(() => {
+        return {
+          groupBy: undefined,
+        };
+      });
+      return;
+    }
     const column = this.columnGet(columnId);
     this.updateView(_view => {
       return {
