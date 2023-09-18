@@ -134,8 +134,18 @@ export class EdgelessSelectionManager {
 
         Object.keys(states).forEach(id => {
           const selections = states[id];
+          let hasTextSelection = false;
+          let hasBlockSelection = false;
 
           selections.forEach(selection => {
+            if (selection.is('text')) {
+              hasTextSelection = true;
+            }
+
+            if (selection.is('block')) {
+              hasBlockSelection = true;
+            }
+
             if (selection.is('surface')) {
               remoteSelection[id] = selection;
               selection.elements.forEach(id => remoteSelectedElements.add(id));
@@ -145,6 +155,10 @@ export class EdgelessSelectionManager {
               remoteCursors[id] = selection;
             }
           });
+
+          if (hasBlockSelection || hasTextSelection) {
+            delete remoteCursors[id];
+          }
         });
 
         this.remoteCursor = remoteCursors;
