@@ -18,7 +18,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.15",
+    "@toeverything/theme": "^0.7.16",
     "nanoid": "^4"
   },
   "dependencies": {
@@ -78,7 +78,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.15",
+    "@toeverything/theme": "^0.7.16",
     "@types/marked": "^4.3.1",
     "@types/sortablejs": "^1.15.1"
   }
