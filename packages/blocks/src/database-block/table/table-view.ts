@@ -234,7 +234,7 @@ export class DataViewTable extends BaseDataView<
   public moveTo(id: string, evt: MouseEvent): void {
     const result = this.dragController.getInsertPosition(evt);
     if (result) {
-      this.view.rowMove(id, result.position);
+      this.view.rowMove(id, result.position, undefined, result.groupKey);
     }
   }
 

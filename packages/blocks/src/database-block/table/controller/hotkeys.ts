@@ -26,9 +26,13 @@ export class TableHotkeysController implements ReactiveController {
             groupKey,
           } = selection;
           if (rowsSelection && !columnsSelection) {
-            const rows = this.host.view.rows.filter(
-              (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
-            );
+            const rows = Array.from(
+              this.selectionController.rows(selection.groupKey)
+            )
+              .filter(
+                (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
+              )
+              .map(v => v.rowId);
             this.selectionController.focusTo('up');
             this.host.view.rowDelete(rows);
           } else if (focus && !isEditing) {

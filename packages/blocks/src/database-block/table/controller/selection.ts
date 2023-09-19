@@ -396,7 +396,7 @@ export class TableSelectionController implements ReactiveController {
       .item(columnIndex);
   }
 
-  private rows(groupKey: string | undefined) {
+  public rows(groupKey: string | undefined) {
     const container =
       groupKey != null
         ? this.tableContainer.querySelector(
@@ -404,13 +404,17 @@ export class TableSelectionController implements ReactiveController {
           )
         : this.tableContainer;
     assertExists(container);
-    return container.querySelectorAll('.affine-database-block-row');
+    return container.querySelectorAll('data-view-table-row');
   }
 
   selectionStyleUpdateTask = 0;
 
   updateSelection(tableSelection?: TableViewSelection) {
-    const update = () => {
+    const update = (): boolean => {
+      const result = this.checkSelection();
+      if (!result) {
+        return false;
+      }
       this.updateSelectionStyle(
         tableSelection?.groupKey,
         tableSelection?.rowsSelection,
@@ -425,19 +429,23 @@ export class TableSelectionController implements ReactiveController {
         isRowSelection,
         tableSelection?.isEditing
       );
+      return true;
     };
+    this._tableViewSelection = tableSelection;
     if (!tableSelection) {
       cancelAnimationFrame(this.selectionStyleUpdateTask);
       update();
     } else {
       const task = () => {
-        update();
         cancelAnimationFrame(this.selectionStyleUpdateTask);
+        if (!update()) {
+          this.selection = undefined;
+          return;
+        }
         this.selectionStyleUpdateTask = requestAnimationFrame(task);
       };
       task();
     }
-    this._tableViewSelection = tableSelection;
   }
 
   updateSelectionStyle(
@@ -635,17 +643,24 @@ export class TableSelectionController implements ReactiveController {
   }
 
   public deleteRow(rowId: string) {
-    const index = this.view.rows.findIndex(id => id === rowId);
     this.view.rowDelete([rowId]);
-    requestAnimationFrame(() => {
-      this.selection = {
-        focus: {
-          rowIndex: index - 1,
-          columnIndex: this.selection?.focus.columnIndex ?? 0,
-        },
-        isEditing: true,
-      };
-    });
+    this.focusTo('up');
+  }
+
+  private checkSelection() {
+    const selection = this.selection;
+    if (!selection) {
+      return true;
+    }
+    const cell = this.getCellContainer(
+      selection.groupKey,
+      selection.focus.rowIndex,
+      selection.focus.columnIndex
+    );
+    if (!cell) {
+      return false;
+    }
+    return true;
   }
 }
 

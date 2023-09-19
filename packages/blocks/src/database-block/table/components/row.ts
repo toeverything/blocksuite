@@ -97,6 +97,10 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   rowId!: string;
 
+  public get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
+  }
+
   setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
     if (this.selection) {
       this.selection.selection = selection;

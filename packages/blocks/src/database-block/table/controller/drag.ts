@@ -17,11 +17,17 @@ export class TableDragController implements ReactiveController {
   getInsertPosition = (
     evt: MouseEvent
   ):
-    | { position: InsertPosition; y: number; width: number; x: number }
+    | {
+        groupKey: string | undefined;
+        position: InsertPosition;
+        y: number;
+        width: number;
+        x: number;
+      }
     | undefined => {
     const y = evt.y;
     const tableRect = this.host.getBoundingClientRect();
-    const rows = this.host.querySelectorAll('.affine-database-block-row');
+    const rows = this.host.querySelectorAll('data-view-table-row');
     if (!rows || !tableRect || y < tableRect.top) {
       return;
     }
@@ -31,6 +37,7 @@ export class TableDragController implements ReactiveController {
       const mid = (rect.top + rect.bottom) / 2;
       if (y < rect.bottom) {
         return {
+          groupKey: row.groupKey,
           position: {
             id: row.getAttribute('data-row-id') as string,
             before: y < mid,
@@ -88,10 +95,12 @@ export class TableDragController implements ReactiveController {
       evt.x - offsetLeft,
       evt.y - offsetTop
     );
+    const fromGroup = row.groupKey;
     startDrag<
       | undefined
       | {
           type: 'self';
+          groupKey?: string;
           position: InsertPosition;
         }
       | { type: 'out'; callback: () => void },
@@ -115,6 +124,7 @@ export class TableDragController implements ReactiveController {
         if (result) {
           return {
             type: 'self',
+            groupKey: result.groupKey,
             position: result.position,
           };
         }
@@ -133,7 +143,12 @@ export class TableDragController implements ReactiveController {
           return;
         }
         if (result.type === 'self') {
-          this.host.view.rowMove(row.rowId, result.position);
+          this.host.view.rowMove(
+            row.rowId,
+            result.position,
+            fromGroup,
+            result.groupKey
+          );
         }
       },
     });

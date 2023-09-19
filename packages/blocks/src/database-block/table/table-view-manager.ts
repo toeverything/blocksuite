@@ -71,6 +71,19 @@ export class DataViewTableManager extends BaseDataViewManager {
     });
   }
 
+  public override rowMove(
+    rowId: string,
+    position: InsertPosition,
+    fromGroup?: string,
+    toGroup?: string
+  ) {
+    if (toGroup == null) {
+      super.rowMove(rowId, position);
+      return;
+    }
+    this.groupHelper?.moveCardTo(rowId, fromGroup, toGroup, position);
+  }
+
   private syncView() {
     if (this.view.columns.length === this.columns.length) {
       return;

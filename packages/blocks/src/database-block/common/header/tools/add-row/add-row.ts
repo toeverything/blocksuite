@@ -59,6 +59,8 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
   }
 
   _dragStart = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const container = this.closest('affine-data-view-native');
     const tableRect = container
       ?.querySelector('affine-database-table')
