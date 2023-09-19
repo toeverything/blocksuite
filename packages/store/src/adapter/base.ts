@@ -87,6 +87,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
 
   private _enter: WalkerFn<ONode, TNode> | undefined;
   private _leave: WalkerFn<ONode, TNode> | undefined;
+  private _isONode!: (node: unknown) => node is ONode;
 
   private context: ASTWalkerContext<TNode>;
 
@@ -121,6 +122,10 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     ) => void
   ) => {
     this._leave = fn;
+  };
+
+  setONodeTypeGuard = (fn: (node: unknown) => node is ONode) => {
+    this._isONode = fn;
   };
 
   walk = (oNode: ONode, tNode: TNode) => {
@@ -161,10 +166,9 @@ export class ASTWalker<ONode extends object, TNode extends object> {
 
       if (value && typeof value === 'object') {
         if (Array.isArray(value)) {
-          const nodes = value;
-          for (let i = 0; i < nodes.length; i += 1) {
-            const item = nodes[i];
-            if (item !== null && typeof item === 'object') {
+          for (let i = 0; i < value.length; i += 1) {
+            const item = value[i];
+            if (item !== null && this._isONode(item)) {
               this._visit(
                 {
                   node: item,
@@ -181,10 +185,10 @@ export class ASTWalker<ONode extends object, TNode extends object> {
               );
             }
           }
-        } else {
+        } else if (this._isONode(value)) {
           this._visit(
             {
-              node: value as ONode,
+              node: value,
               parent: o.node,
               prop: key as unknown as Keyof<ONode>,
               index: null,

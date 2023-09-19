@@ -1,10 +1,11 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
-import type { RootContentMap } from 'mdast';
+import type { Heading, RootContentMap } from 'mdast';
 
-import type {
-  BlockSnapshot,
-  PageSnapshot,
-  SliceSnapshot,
+import {
+  type BlockSnapshot,
+  BlockSnapshotSchema,
+  type PageSnapshot,
+  type SliceSnapshot,
 } from '../transformer/type.js';
 import type { AdapterAssetsManager } from './assets.js';
 import type {
@@ -220,6 +221,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
 
   traverseSnapshot2 = async (snapshot: BlockSnapshot) => {
     const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
+    walker.setONodeTypeGuard(
+      (node): node is BlockSnapshot =>
+        BlockSnapshotSchema.safeParse(node).success
+    );
     walker.setEnter((node, _parent, context) => {
       const text = (snapshot.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
@@ -231,9 +236,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               type: 'code',
               lang: (node.props.language as string) ?? null,
               meta: null,
-              value: this.deltaToMarkdown(text.delta),
+              value: text.delta.map(delta => delta.insert).join(''),
             },
-            'children'
+            'children',
+            node?.children?.length
           );
           break;
         }
@@ -245,13 +251,21 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             case 'h4':
             case 'h5':
             case 'h6': {
+              context.addNode(
+                {
+                  type: 'heading',
+                  depth: parseInt(snapshot.props.type[1]) as Heading['depth'],
+                  children: [],
+                },
+                'children',
+                node?.children?.length
+              );
               break;
             }
             case 'text': {
               break;
             }
             case 'quote': {
-              this.markdownBuffer.write('> ');
               break;
             }
           }
