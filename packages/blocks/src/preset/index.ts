@@ -21,8 +21,9 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/doc-remote-selection/doc-remote-selection.js';
+import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/edgeless-remote-selection/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
-import { AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/remote-selection/remote-selection.js';
 
 const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -61,7 +62,9 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
       [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG
       )}`,
-      remoteSelection: literal`affine-edgelss-remote-selection-widget`,
+      [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG
+      )}`,
     },
   },
 };

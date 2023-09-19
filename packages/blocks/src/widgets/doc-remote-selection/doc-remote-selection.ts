@@ -25,7 +25,7 @@ export interface SelectionRect {
 }
 
 @customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG)
-export class AffineRemoteSelectionWidget extends WidgetElement {
+export class AffineDocRemoteSelectionWidget extends WidgetElement {
   private _remoteSelections: Array<{
     id: number;
     selections: BaseSelection[];
@@ -312,6 +312,6 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: AffineRemoteSelectionWidget;
+    [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: AffineDocRemoteSelectionWidget;
   }
 }

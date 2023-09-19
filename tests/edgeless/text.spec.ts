@@ -3,7 +3,6 @@ import { expect } from '@playwright/test';
 import {
   assertEdgelessTool,
   enterPlaygroundRoom,
-  getEdgelessSelectedRect,
   initEmptyEdgelessState,
   pressArrowLeft,
   setEdgelessTool,
