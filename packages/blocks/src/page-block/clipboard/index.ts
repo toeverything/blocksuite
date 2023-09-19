@@ -96,8 +96,8 @@ export class ClipboardController implements ReactiveController {
     this._std.command
       .pipe()
       .getBlockIndex()
-      .inline(async (ctx, next) => {
-        await this._std.clipboard.paste(
+      .inline((ctx, next) => {
+        this._std.clipboard.paste(
           e,
           this._std.page,
           ctx.parentBlock.model.id,
