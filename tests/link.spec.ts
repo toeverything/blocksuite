@@ -269,8 +269,6 @@ test('should keyboard work in link popover', async ({ page }) => {
   await assertKeyboardWorkInInput(page, linkPopoverInput);
   await page.mouse.click(1, 1);
 
-  // ---
-
   const linkLocator = page.locator(`text="${linkText}"`);
   const linkPopover = page.locator('.affine-link-popover');
   await expect(linkLocator).toBeVisible();
