@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { popFilterableSimpleMenu } from '../../components/menu/index.js';
 import { PlusIcon } from '../../icons/index.js';
 import type { GroupData } from '../common/group-by/helper.js';
-import { renderGroupTitle } from '../common/group-by/util.js';
+import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
