@@ -12,6 +12,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 
 import {
   getBlockElementById,
+  getClosestBlockElementByElement,
   getModelByElement,
 } from '../../../../__internal__/utils/index.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
@@ -86,14 +87,15 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
         `Reference node must be initialized with '${REFERENCE_NODE}', but got '${this.delta.insert}'`
       );
     }
-    const model = getModelByElement(this);
-    const page = model.page;
+
+    const closestBlock = getClosestBlockElementByElement(this);
+    if (!closestBlock) return;
+
+    const page = closestBlock.page;
 
     this._updateRefMeta(page);
     this._disposables.add(
-      model.page.workspace.slots.pagesUpdated.on(() =>
-        this._updateRefMeta(page)
-      )
+      page.workspace.slots.pagesUpdated.on(() => this._updateRefMeta(page))
     );
   }
 
