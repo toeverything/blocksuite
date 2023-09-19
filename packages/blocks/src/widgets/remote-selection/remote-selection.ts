@@ -14,8 +14,8 @@ import { remoteColorManager } from '../../page-block/remote-color-manager/index.
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
-export const AFFINE_REMOTE_SELECTION_WIDGET_TAG =
-  'affine-remote-selection-widget';
+export const AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG =
+  'affine-doc-remote-selection-widget';
 
 export interface SelectionRect {
   width: number;
@@ -24,7 +24,7 @@ export interface SelectionRect {
   left: number;
 }
 
-@customElement(AFFINE_REMOTE_SELECTION_WIDGET_TAG)
+@customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG)
 export class AffineRemoteSelectionWidget extends WidgetElement {
   private _remoteSelections: Array<{
     id: number;
@@ -52,7 +52,7 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this._selectionManager.slots.remoteChanged.on(
         throttle((remoteSelections: Record<string, BaseSelection[]>) => {
           const status = this.page.awarenessStore.getStates();
@@ -70,12 +70,16 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
         }, 100)
       )
     );
-    this._disposables.add(
+    this.disposables.add(
       this.page.awarenessStore.slots.update.on(({ type, id }) => {
         if (type === 'remove') remoteColorManager.delete(id);
       })
     );
     this.handleEvent('wheel', () => {
+      this.requestUpdate();
+    });
+
+    this.disposables.addFromEvent(window, 'resize', () => {
       this.requestUpdate();
     });
   }
@@ -308,6 +312,6 @@ export class AffineRemoteSelectionWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: AffineRemoteSelectionWidget;
+    [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: AffineRemoteSelectionWidget;
   }
 }
