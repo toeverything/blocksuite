@@ -26,7 +26,6 @@
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.1",
     "@types/webfontloader": "^1.6.35",
-    "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
     "file-type": "^16.5.4",
     "html2canvas": "^1.4.1",

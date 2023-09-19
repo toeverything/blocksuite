@@ -168,9 +168,6 @@ importers:
       '@types/webfontloader':
         specifier: ^1.6.35
         version: 1.6.35
-      buffer:
-        specifier: ^6.0.3
-        version: 6.0.3
       date-fns:
         specifier: ^2.30.0
         version: 2.30.0
@@ -343,6 +340,9 @@ importers:
       browser-fs-access:
         specifier: ^0.32.1
         version: 0.32.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       intl-segmenter-polyfill-rs:
         specifier: ^0.1.6
         version: 0.1.6
@@ -401,9 +401,6 @@ importers:
       '@types/flexsearch':
         specifier: ^0.7.3
         version: 0.7.3
-      buffer:
-        specifier: ^6.0.3
-        version: 6.0.3
       flexsearch:
         specifier: 0.7.21
         version: 0.7.21

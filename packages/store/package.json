@@ -18,7 +18,6 @@
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.3",
-    "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.1",
     "jszip": "^3.10.1",
