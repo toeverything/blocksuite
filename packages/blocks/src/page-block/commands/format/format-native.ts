@@ -3,7 +3,7 @@ import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import { BLOCK_ID_ATTR } from '../../../__internal__/consts.js';
-import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../common/format/config.js';
+import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../common/format/constant.js';
 import type { AffineTextAttributes } from '../../../components/rich-text/virgo/types.js';
 import type { Flavour } from '../../../models.js';
 

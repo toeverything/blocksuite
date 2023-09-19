@@ -3,7 +3,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import { clearMarksOnDiscontinuousInput } from '../../../__internal__/utils/virgo.js';
-import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../common/format/config.js';
+import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../common/format/constant.js';
 import type { AffineTextAttributes } from '../../../components/rich-text/virgo/types.js';
 import type { Flavour } from '../../../models.js';
 import { getSelectedContentBlockElements } from '../../utils/selection.js';
