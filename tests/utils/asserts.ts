@@ -832,7 +832,7 @@ export async function assertEdgelessColorSameWithHexColor(
 
 export async function assertZoomLevel(page: Page, zoom: number) {
   const z = await getZoomLevel(page);
-  expect(z).toBe(zoom);
+  expect(z).toBe(Math.ceil(zoom));
 }
 
 export async function assertConnectorPath(

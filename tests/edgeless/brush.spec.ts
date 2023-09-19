@@ -9,6 +9,7 @@ import {
   setEdgelessTool,
   switchEditorMode,
   updateExistedBrushElementSize,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
@@ -151,6 +152,7 @@ test('change brush element size by component-toolbar', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   const start = { x: 100, y: 100 };
   const end = { x: 200, y: 200 };
