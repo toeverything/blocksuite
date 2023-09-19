@@ -11,7 +11,7 @@ import type { Column } from './table/types.js';
 import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
 import { arrayMove, insertPositionToIndex } from './utils/insert.js';
 
-type Props = {
+export type DatabaseBlockProps = {
   views: DataViewDataType[];
   title: Text;
   cells: SerializedCells;
@@ -26,7 +26,7 @@ type SerializedCells = {
   };
 };
 
-export class DatabaseBlockModel extends BaseBlockModel<Props> {
+export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
   getViewList() {
     return this.views;
   }
@@ -301,7 +301,7 @@ const migration = {
 
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
-  props: (internal): Props => ({
+  props: (internal): DatabaseBlockProps => ({
     views: [],
     title: internal.Text(),
     cells: {},
@@ -313,9 +313,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
     parent: ['affine:note'],
     children: ['affine:paragraph', 'affine:list'],
   },
-  toModel: () => {
-    return new DatabaseBlockModel();
-  },
+  toModel: () => new DatabaseBlockModel(),
   onUpgrade: (data, previousVersion, latestVersion) => {
     if (previousVersion < 3 && latestVersion >= 3) {
       migration.toV3(data);
