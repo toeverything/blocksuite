@@ -107,16 +107,16 @@ export class CommandManager {
         const chains = fn(this.createChain(methods, cmds)).map(chain =>
           chain.inline(async (_, next) => {
             success = true;
-            await next();
+            next();
           })
         );
         return this.createChain(methods, [
           ...cmds,
           async (_, next) => {
             for (const chain of chains) {
-              await chain.run();
+              chain.run();
               if (success) {
-                await next();
+                next();
                 break;
               }
             }
