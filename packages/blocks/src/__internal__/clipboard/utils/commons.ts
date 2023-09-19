@@ -322,13 +322,15 @@ export function copyOnPhasorElementWithText(
       const clipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
 
       edgelessTextEditor.setKeeping(true);
-      // this function will make virgo editor lose focus
       performNativeCopy([clipboardItem]);
       edgelessTextEditor.setKeeping(false);
 
-      // restore focus and selection
-      vEditor.rootElement.focus();
-      vEditor.setVRange(vRange);
+      // `performNativeCopy` will trigger selection change and make virgo
+      // execute `setVRange(null)`, so we need to use `setTimeout` to
+      // make sure `setVRange(vRange)` is executed after `setVRange(null)`.
+      setTimeout(() => {
+        vEditor.setVRange(vRange);
+      });
     }
   }
 }

@@ -198,6 +198,8 @@ export class VirgoDeltaService<TextAttributes extends BaseTextAttributes> {
 
   // render current deltas to VLines
   render = async (syncVRange = true) => {
+    if (!this.editor.mounted) return;
+
     const rootElement = this.editor.rootElement;
 
     const normalizedDeltas = this.normalizedDeltas;
