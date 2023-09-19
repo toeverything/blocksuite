@@ -376,7 +376,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const bound = this._computeNextShape(type);
     const path = this._computeLine(type, this._current, bound);
 
-    autoCompleteOverlay.stroke = this.edgeless.computeValue(
+    autoCompleteOverlay.stroke = this._surface.getCSSPropertyValue(
       this._current.strokeColor
     );
     autoCompleteOverlay.linePoints = path;

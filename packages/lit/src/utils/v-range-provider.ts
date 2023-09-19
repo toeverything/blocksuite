@@ -1,5 +1,9 @@
-import { assertExists } from '@blocksuite/global/utils';
-import type { VRange, VRangeProvider } from '@blocksuite/virgo';
+import { assertExists, Slot } from '@blocksuite/global/utils';
+import type {
+  VRange,
+  VRangeProvider,
+  VRangeUpdatedProp,
+} from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
 
@@ -9,6 +13,7 @@ export const getVRangeProvider: (
   const root = element.root;
   const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
+
   const setVRange = (vRange: VRange | null) => {
     if (!vRange) {
       selectionManager.clear(['text']);
@@ -63,8 +68,15 @@ export const getVRangeProvider: (
     };
   };
 
+  const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
+  selectionManager.slots.changed.on(() => {
+    const vRange = getVRange();
+    vRangeUpdatedSlot.emit([vRange, false]);
+  });
+
   return {
     setVRange,
     getVRange,
+    vRangeUpdatedSlot,
   };
 };

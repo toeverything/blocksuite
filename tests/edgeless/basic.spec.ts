@@ -5,7 +5,9 @@ import { expect } from '@playwright/test';
 import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
 import { assertExists } from '../../packages/global/src/utils.js';
 import {
+  createShapeElement,
   decreaseZoomLevel,
+  deleteAll,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
@@ -13,6 +15,7 @@ import {
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
   setEdgelessTool,
+  Shape,
   shiftClick,
   switchEditorMode,
   zoomByMouseWheel,
@@ -34,11 +37,11 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
-  assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
   assertNoteXYWH,
   assertRichTexts,
   assertRichTextVRange,
+  assertSelectedBound,
   assertZoomLevel,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -114,20 +117,19 @@ test('option/alt mouse drag duplicate a new element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await deleteAll(page);
 
-  const start = { x: 100, y: 100 };
-  const end = { x: 200, y: 200 };
-  await addBasicRectShapeElement(page, start, end);
-  await optionMouseDrag(page, { x: 150, y: 110 }, { x: 250, y: 150 });
-
-  await assertEdgelessSelectedRect(page, [200, 140, 100, 100]);
+  const start = [0, 0];
+  const end = [100, 100];
+  await createShapeElement(page, start, end, Shape.Square);
+  await optionMouseDrag(page, [50, 50], [150, 50]);
+  await assertSelectedBound(page, [100, 0, 100, 100]);
 
   await undoByClick(page);
-  await assertEdgelessNonSelectedRect(page);
+  await assertSelectedBound(page, [0, 0, 100, 100]);
 
   await redoByClick(page);
-  await click(page, { x: 250, y: 150 });
-  await assertEdgelessSelectedRect(page, [200, 140, 100, 100]);
+  await assertSelectedBound(page, [100, 0, 100, 100]);
 });
 
 test('should cancel select when the selected point is outside the current selected element', async ({

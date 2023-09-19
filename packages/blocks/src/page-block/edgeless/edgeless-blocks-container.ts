@@ -4,18 +4,16 @@ import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
 import './components/note-slicer/index.js';
 
-import { noop, throttle } from '@blocksuite/global/utils';
+import { assertExists, noop, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
+import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
-import { getRectByBlockElement } from '../../__internal__/utils/query.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
 import { almostEqual, Bound } from '../../surface-block/index.js';
 import { EdgelessNoteStatus } from './components/note-status/index.js';
@@ -39,17 +37,12 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @state()
-  private _selectedBlockRects: DOMRect[] = [];
-
-  private get _selection() {
-    return this.edgeless.selectionManager;
-  }
-
   private _noteResizeObserver = new NoteResizeObserver();
 
   private _initNoteHeightUpdate() {
     const { page } = this.edgeless;
+    assertExists(page.root);
+
     const resetNoteResizeObserver = throttle(
       () => {
         requestAnimationFrame(() => {
@@ -59,20 +52,14 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
       16,
       { leading: true }
     );
-    const listenChildrenUpdate = (root: BaseBlockModel<object> | null) => {
-      if (!root) return;
 
-      this._disposables.add(root.childrenUpdated.on(resetNoteResizeObserver));
-    };
-
-    listenChildrenUpdate(page.root);
     this._disposables.add(
-      page.slots.rootAdded.on(root => listenChildrenUpdate(root))
+      page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
   }
 
   override firstUpdated() {
-    const { _disposables, edgeless, _selection } = this;
+    const { _disposables, edgeless } = this;
     const { surface, page } = edgeless;
 
     this._initNoteHeightUpdate();
@@ -126,15 +113,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         edgeless.slots.selectedRectUpdated.emit({ type: 'resize' });
       })
     );
-    _disposables.add(
-      _selection.slots.blocksUpdated.on(selectedBlocks => {
-        _selection.selectedBlocks = selectedBlocks;
-        // TODO: remove `requestAnimationFrame`
-        requestAnimationFrame(() => {
-          this._selectedBlockRects = selectedBlocks.map(getRectByBlockElement);
-        });
-      })
-    );
 
     _disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
@@ -157,10 +135,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         this.style.setProperty('--affine-edgeless-grid', grid);
         this.style.setProperty('--affine-edgeless-x', `${translateX}px`);
         this.style.setProperty('--affine-edgeless-y', `${translateY}px`);
-
-        if (_selection.selectedBlocks.length) {
-          _selection.setSelectedBlocks([..._selection.selectedBlocks]);
-        }
       })
     );
 
@@ -169,15 +143,27 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
+
+    _disposables.add(
+      edgeless.slots.readonlyUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    assertExists(page.root);
+
+    _disposables.add(
+      page.root.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
   }
 
   override render() {
-    const { edgeless, _selectedBlockRects } = this;
+    const { edgeless } = this;
     const { sortedNotes, surface, renderModel } = edgeless;
     if (!surface) return nothing;
 
-    const { viewport } = surface;
-    const { left, top } = viewport;
     const widgets = html`${repeat(
       Object.entries(edgeless.widgets),
       ([id]) => id,
@@ -200,17 +186,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
           ></edgeless-notes-container>
         </div>
       </div>
-      <affine-selected-blocks
-        .mouseRoot=${edgeless.mouseRoot}
-        .state=${{
-          rects: _selectedBlockRects,
-          grab: false,
-        }}
-        .offset=${{
-          x: -left,
-          y: -top,
-        }}
-      ></affine-selected-blocks>
       <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}

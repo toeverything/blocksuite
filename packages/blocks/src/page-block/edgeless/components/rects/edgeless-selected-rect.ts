@@ -656,7 +656,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.selection.has(id)) this._updateSelectedRect();
+    if (this.selection.isSelected(id)) this._updateSelectedRect();
   };
 
   override firstUpdated() {

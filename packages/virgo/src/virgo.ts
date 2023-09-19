@@ -35,6 +35,7 @@ export type VirgoRootElement<
 export interface VRangeProvider {
   getVRange(): VRange | null;
   setVRange(vRange: VRange | null): void;
+  vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
 }
 
 export class VEditor<
@@ -183,6 +184,11 @@ export class VEditor<
       rangeUpdated: new Slot<Range>(),
     };
 
+    if (vRangeProvider) {
+      vRangeProvider.vRangeUpdatedSlot.on(prop => {
+        this.slots.vRangeUpdated.emit(prop);
+      });
+    }
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
   }
 
@@ -196,12 +202,11 @@ export class VEditor<
 
     this._bindYTextObserver();
 
-    this._deltaService.render();
-
     this._eventService.mount();
 
     this._mounted = true;
     this.slots.mounted.emit();
+    this._deltaService.render();
   }
 
   unmount() {
@@ -214,11 +219,7 @@ export class VEditor<
   }
 
   requestUpdate(syncVRange = true): void {
-    Promise.resolve().then(() => {
-      assertExists(this._rootElement);
-
-      this._deltaService.render(syncVRange);
-    });
+    this._deltaService.render(syncVRange);
   }
 
   async waitForUpdate() {

@@ -620,10 +620,21 @@ export async function getZoomLevel(page: Page) {
   return Number(text.replace('%', ''));
 }
 
-export async function optionMouseDrag(page: Page, start: IPoint, end: IPoint) {
-  await page.keyboard.down(MODIFIER_KEY);
-  await dragBetweenCoords(page, start, end, { steps: 30 });
-  await page.keyboard.up(MODIFIER_KEY);
+export async function optionMouseDrag(
+  page: Page,
+  start: number[],
+  end: number[]
+) {
+  start = await toViewCoord(page, start);
+  end = await toViewCoord(page, end);
+  await page.keyboard.down('Alt');
+  await dragBetweenCoords(
+    page,
+    { x: start[0], y: start[1] },
+    { x: end[0], y: end[1] },
+    { steps: 30 }
+  );
+  await page.keyboard.up('Alt');
 }
 
 export async function shiftClick(page: Page, point: IPoint) {
