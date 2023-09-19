@@ -1,5 +1,5 @@
 export { DocDraggingAreaWidget } from './doc-dragging-area/index.js';
-export { AffineDocRemoteSelectionWidget as AffineRemoteSelectionWidget } from './doc-remote-selection/index.js';
+export { AffineDocRemoteSelectionWidget } from './doc-remote-selection/index.js';
 export { DragHandleWidget } from './drag-handle/index.js';
 export { EdgelessRemoteSelectionWidget } from './edgeless-remote-selection/index.js';
 export { AffineFormatBarWidget } from './format-bar/index.js';
