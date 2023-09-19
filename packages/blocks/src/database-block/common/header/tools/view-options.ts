@@ -5,6 +5,7 @@ import type { Menu } from '../../../../components/menu/menu.js';
 import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
 import {
   DeleteIcon,
+  DuplicateIcon,
   FilterIcon,
   GroupingIcon,
   InfoIcon,
@@ -154,6 +155,15 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
                   ],
                 },
               ],
+            },
+          },
+
+          {
+            type: 'action',
+            name: 'Duplicate',
+            icon: DuplicateIcon,
+            select: () => {
+              this.view.duplicateView();
             },
           },
           {

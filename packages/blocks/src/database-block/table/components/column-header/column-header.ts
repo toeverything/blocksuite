@@ -2,6 +2,7 @@ import './database-header-column.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { autoUpdate, computePosition, shift } from '@floating-ui/dom';
+import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -25,6 +26,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
   private addColumnPositionRef = createRef();
   addColumnButton = renderTemplate(() => {
+    if (this.readonly) return nothing;
+
     return html`<div
       @click="${this._onAddColumn}"
       class="header-add-column-button dv-hover"

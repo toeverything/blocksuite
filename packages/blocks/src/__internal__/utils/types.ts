@@ -168,6 +168,7 @@ export enum LineWidth {
 
 export type TextTool = {
   type: 'text';
+  color: CssVariableName;
 };
 
 export type BrushTool = {

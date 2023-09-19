@@ -1,12 +1,17 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type {
+  JobMiddleware,
+  Page,
+  PageSnapshot,
+  Workspace,
+  WorkspaceInfoSnapshot,
+} from '@blocksuite/store';
+import { Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 
-import type { Page, Workspace } from '../workspace/index.js';
-import { Job } from './job.js';
-import type { JobMiddleware } from './middleware.js';
-import type { PageSnapshot, WorkspaceInfoSnapshot } from './type.js';
+import { replaceIdMiddleware } from './utils.js';
 
-export async function exportPagesZip(workspace: Workspace, pages: Page[]) {
+export async function exportPages(workspace: Workspace, pages: Page[]) {
   const zip = new JSZip();
 
   const job = new Job({ workspace });
@@ -33,7 +38,7 @@ export async function exportPagesZip(workspace: Workspace, pages: Page[]) {
   return zip.generateAsync({ type: 'blob' });
 }
 
-export async function importPagesZip(workspace: Workspace, imported: Blob) {
+export async function importPages(workspace: Workspace, imported: Blob) {
   const zip = new JSZip();
   const { files } = await zip.loadAsync(imported);
 
@@ -69,17 +74,7 @@ export async function importPagesZip(workspace: Workspace, imported: Blob) {
     info = JSON.parse(json) as WorkspaceInfoSnapshot;
   }
 
-  const middleware: JobMiddleware = ({ slots, workspace }) => {
-    slots.beforeImport.on(({ snapshot, type }) => {
-      if (type === 'page') {
-        snapshot.meta.id = workspace.idGenerator();
-        return;
-      }
-      if (type === 'block') {
-        snapshot.id = workspace.idGenerator();
-        return;
-      }
-    });
+  const migrationMiddleware: JobMiddleware = ({ slots, workspace }) => {
     slots.afterImport.on(payload => {
       if (payload.type === 'page') {
         workspace.schema.upgradePage(
@@ -89,7 +84,10 @@ export async function importPagesZip(workspace: Workspace, imported: Blob) {
       }
     });
   };
-  const job = new Job({ workspace, middlewares: [middleware] });
+  const job = new Job({
+    workspace,
+    middlewares: [replaceIdMiddleware, migrationMiddleware],
+  });
   const assetsMap = job.assets;
 
   job.snapshotToWorkspaceInfo(info);

@@ -11,7 +11,7 @@ import {
   type IModelCoord,
   TextElement,
 } from '../../../surface-block/index.js';
-import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
+import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
@@ -79,7 +79,8 @@ export function mountFrameEditor(
 
 export function addText(
   edgeless: EdgelessPageBlockComponent,
-  event: PointerEventState
+  event: PointerEventState,
+  color: string = GET_DEFAULT_TEXT_COLOR()
 ) {
   const selected = edgeless.surface.pickTop(event.x, event.y);
   if (!selected) {
@@ -92,7 +93,7 @@ export function addText(
       text: new Workspace.Y.Text(),
       textAlign: 'left',
       fontSize: 24,
-      color: GET_DEFAULT_LINE_COLOR(),
+      color: color,
       bold: false,
       italic: false,
     });

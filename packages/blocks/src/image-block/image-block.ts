@@ -2,15 +2,19 @@ import './image/placeholder/image-not-found.js';
 import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
+import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
-import type { ImageBlockModel } from './image-model.js';
+import { shouldResizeImage } from './image/utils.js';
+import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
@@ -64,6 +68,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     .resizable-img {
       position: relative;
       border-radius: 8px;
+      cursor: pointer;
     }
 
     .resizable-img img {
@@ -86,7 +91,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   _input!: HTMLInputElement;
 
   @query('.resizable-img')
-  public readonly resizeImg!: HTMLElement;
+  public readonly resizeImg?: HTMLElement;
 
   @state()
   private _caption!: string;
@@ -115,6 +120,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._handleSelection();
 
     this._observeDrag();
+    this._registerDragHandleOption();
   }
 
   override disconnectedCallback() {
@@ -126,13 +132,15 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
+    const imageContainer = this.resizeImg;
+    assertExists(imageContainer);
 
     // exclude padding and border width
     const { width, height } = this.model;
 
     if (width && height) {
-      this.resizeImg.style.width = width + 'px';
-      this.resizeImg.style.height = height + 'px';
+      imageContainer.style.width = width + 'px';
+      imageContainer.style.height = height + 'px';
     }
 
     this.updateComplete.then(() => {
@@ -160,6 +168,34 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       }
     });
   }
+
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: ImageBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const insideImageBlock = target?.closest('.resizable-img');
+          if (!insideImageBlock) return false;
+
+          // If start dragging from the image element
+          // Set selection and take over dragStart event to start dragging
+          const imageBlock = target?.closest('affine-image');
+          if (!imageBlock || shouldResizeImage(imageBlock, target))
+            return false;
+
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: imageBlock.path,
+            }),
+          ]);
+          startDragging([imageBlock], state);
+          return true;
+        },
+      })
+    );
+  };
 
   private _onInputChange() {
     this._caption = this._input.value;
@@ -223,12 +259,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       this.root.event.add('dragStart', ctx => {
         const pointerState = ctx.get('pointerState');
         const target = pointerState.event.target;
-        if (
-          target &&
-          target instanceof HTMLElement &&
-          this.contains(target) &&
-          target.classList.contains('resize')
-        ) {
+        if (shouldResizeImage(this, target)) {
           dragging = true;
           embedResizeManager.onStart(pointerState);
           return true;

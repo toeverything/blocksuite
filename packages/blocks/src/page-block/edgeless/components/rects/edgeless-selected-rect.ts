@@ -71,6 +71,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       position: absolute;
       top: 0;
       left: 0;
+      z-index: 1;
     }
 
     .affine-edgeless-selected-rect {
@@ -655,7 +656,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.selection.has(id)) this._updateSelectedRect();
+    if (this.selection.isSelected(id)) this._updateSelectedRect();
   };
 
   override firstUpdated() {

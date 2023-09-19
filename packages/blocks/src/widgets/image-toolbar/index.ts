@@ -11,6 +11,8 @@ import { ImageOptionsTemplate } from './image-options.js';
 export class AffineImageToolbarWidget extends WidgetElement {
   private _whenHover = new WhenHoverController(this, ({ abortController }) => {
     const imageBlock = this.pageElement as ImageBlockComponent;
+    const imageContainer = imageBlock.resizeImg;
+    if (!imageContainer) return null;
     return {
       template: ImageOptionsTemplate({
         model: imageBlock.model,
@@ -19,7 +21,7 @@ export class AffineImageToolbarWidget extends WidgetElement {
         root: this.pageElement.root,
       }),
       computePosition: {
-        referenceElement: imageBlock.resizeImg,
+        referenceElement: imageContainer,
         placement: 'right-start',
         middleware: [
           offset({

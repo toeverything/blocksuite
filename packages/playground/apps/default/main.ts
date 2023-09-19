@@ -148,7 +148,7 @@ async function initWorkspace(workspace: Workspace) {
     await initContentByInitParam(
       workspace,
       params.get('init') ?? 'empty',
-      'page0'
+      'page:home'
     );
   } else {
     await syncProviders(workspace, getProviderCreators());
@@ -173,7 +173,7 @@ async function main() {
   });
 
   subscribePage(workspace);
-  initWorkspace(workspace);
+  await initWorkspace(workspace);
 }
 
 main();

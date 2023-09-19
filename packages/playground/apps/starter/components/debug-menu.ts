@@ -21,18 +21,14 @@ import {
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   SIZE_VARIABLES,
+  Transformer,
   VARIABLES,
 } from '@blocksuite/blocks';
 import { EDITOR_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
-import {
-  exportPagesZip,
-  importPagesZip,
-  Utils,
-  type Workspace,
-} from '@blocksuite/store';
+import { Utils, type Workspace } from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
@@ -299,7 +295,7 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await exportPagesZip(this.workspace, [this.page]);
+    const file = await Transformer.Zip.exportPages(this.workspace, [this.page]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -320,7 +316,7 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
       try {
-        await importPagesZip(this.workspace, file);
+        await Transformer.Zip.importPages(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
@@ -727,7 +723,7 @@ export class DebugMenu extends ShadowlessElement {
 }
 
 function createPageBlock(workspace: Workspace) {
-  const id = workspace.idGenerator();
+  const id = workspace.idGenerator('page');
   createPage(workspace, { id }).catch(console.error);
 }
 

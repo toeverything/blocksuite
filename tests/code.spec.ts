@@ -411,10 +411,9 @@ test('split code with selection by enter', async ({ page }) => {
   await type(page, 'hello');
 
   // select 'll'
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 1);
   await page.keyboard.down('Shift');
-  await page.keyboard.press('ArrowLeft');
-  await page.keyboard.press('ArrowLeft');
+  await pressArrowLeft(page, 2);
   await page.keyboard.up('Shift');
 
   await pressEnter(page);

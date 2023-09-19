@@ -29,12 +29,7 @@ import {
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
-import type { CssVariableName } from '../../__internal__/theme/css-variables.js';
-import { isCssVariable } from '../../__internal__/theme/css-variables.js';
-import {
-  getThemePropertyValue,
-  listenToThemeChange,
-} from '../../__internal__/theme/utils.js';
+import { listenToThemeChange } from '../../__internal__/theme/utils.js';
 import { toast } from '../../components/toast.js';
 import type {
   EdgelessPageBlockWidgetName,
@@ -154,7 +149,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   @state()
   edgelessTool: EdgelessTool = {
-    type: 'default',
+    type: localStorage.defaultTool ?? 'default',
   };
 
   @query('affine-edgeless-block-container')
@@ -238,26 +233,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.model.children.find(
       child => child.flavour === 'affine:surface'
     ) as SurfaceBlockModel;
-  }
-
-  computeValue(value: string) {
-    const { parentElement } = this;
-    assertExists(parentElement);
-    if (isCssVariable(value)) {
-      const cssValue = getThemePropertyValue(
-        parentElement,
-        value as CssVariableName
-      );
-      if (cssValue === undefined) {
-        console.error(
-          new Error(
-            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
-          )
-        );
-      }
-      return cssValue ?? value;
-    }
-    return value;
   }
 
   private _handleToolbarFlag() {
@@ -767,7 +742,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
-      this.selectionManager.setSelectedBlocks([]);
       this.selectionManager.setSelection({
         elements: [noteBlock.id],
         editing: false,
@@ -810,9 +784,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initResizeEffect() {
     const resizeObserver = new ResizeObserver((_: ResizeObserverEntry[]) => {
       this.surface.onResize();
-      this.selectionManager.setSelectedBlocks([
-        ...this.selectionManager.selectedBlocks,
-      ]);
       this.selectionManager.setSelection(this.selectionManager.state);
     });
 
@@ -860,7 +831,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (readonly !== page.readonly) {
           readonly = page.readonly;
           this.slots.readonlyUpdated.emit(readonly);
-          this.requestUpdate();
         }
       })
     );
@@ -1023,7 +993,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
         .root=${this.root}
         .page=${this.page}
         .model=${this.surfaceBlockModel}
-        ._computedValue=${this.computeValue.bind(this)}
       >
       </affine-surface>
     `;

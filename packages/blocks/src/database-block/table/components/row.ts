@@ -1,5 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css } from 'lit';
+import { css, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -210,17 +210,18 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               >
               </affine-database-cell-container>
             </div>
-            ${column.dataViewManager.header.titleColumn === column.id &&
-            !view.readonly
-              ? html` <div class="row-ops">
+            ${column.dataViewManager.header.titleColumn === column.id
+              ? html`<div class="row-ops">
                   <div class="row-op" @click="${clickDetail}">
                     ${NewEditIcon}
                   </div>
-                  <div class="row-op" @click="${openMenu}">
-                    ${MoreHorizontalIcon}
-                  </div>
+                  ${!view.readonly
+                    ? html`<div class="row-op" @click="${openMenu}">
+                        ${MoreHorizontalIcon}
+                      </div>`
+                    : nothing}
                 </div>`
-              : ''}
+              : nothing}
           `;
         }
       )}

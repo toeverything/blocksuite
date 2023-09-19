@@ -77,8 +77,12 @@ groupByMatcher.register(tArray(tTag.create()), {
     }
     return [ungroups];
   },
-  addToGroup: (value, old) =>
-    Array.isArray(old) ? [...old, value] : value ? [value] : [],
+  addToGroup: (value, old) => {
+    if (value == null) {
+      return old;
+    }
+    return Array.isArray(old) ? [...old, value] : [value];
+  },
   removeFromGroup: (value, old) => {
     if (Array.isArray(old)) {
       return old.filter(v => v !== value);
