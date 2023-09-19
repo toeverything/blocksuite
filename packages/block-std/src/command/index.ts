@@ -30,12 +30,14 @@ type OutDataOfCommand<C> = C extends Command<any, infer K, any>
   : never;
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
-  run(): Promise<void>;
+  run(): Promise<boolean>;
   with<T extends Partial<BlockSuite.CommandData>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
   ) => Chain<In & CommandKeyToData<InlineOut>>;
-  try: (fn: (chain: Chain<In>) => Chain<In>[]) => Chain<In>;
+  try: <InlineOut extends BlockSuite.CommandDataName = never>(
+    fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
+  ) => Chain<In & CommandKeyToData<InlineOut>>;
 };
 const cmdSymbol = Symbol('cmds');
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -71,7 +73,7 @@ export class CommandManager {
   ): Chain => {
     return {
       [cmdSymbol]: cmds,
-      run: () => {
+      run: async () => {
         const ctx = this._getCommandCtx();
         const runCmds = async (
           ctx: BlockSuite.CommandData,
@@ -81,7 +83,15 @@ export class CommandManager {
             await cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
         };
-        return runCmds(ctx as BlockSuite.CommandData, cmds);
+        let success = false;
+        await runCmds(ctx as BlockSuite.CommandData, [
+          ...cmds,
+          async (_, next) => {
+            success = true;
+            await next();
+          },
+        ]);
+        return success;
       },
       with: value => {
         return this.createChain(methods, [

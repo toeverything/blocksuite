@@ -100,7 +100,7 @@ export class UIEventDispatcher {
     return this.std.root;
   }
 
-  run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
+  async run(name: EventName, context: UIEventStateContext, scope?: EventScope) {
     const { event } = context.get('defaultState');
     if (!scope) {
       scope = this._getEventScope(name, event);
@@ -111,7 +111,7 @@ export class UIEventDispatcher {
 
     for (const runner of scope.runners) {
       const { fn } = runner;
-      const result = fn(context);
+      const result = await fn(context);
       if (result) {
         return;
       }

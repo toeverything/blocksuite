@@ -67,12 +67,12 @@ export function bindKeymap(
   bindings: Record<string, UIEventHandler>
 ): UIEventHandler {
   const map = normalize(bindings);
-  return ctx => {
+  return async ctx => {
     const state = ctx.get('keyboardState');
     const event = state.raw;
     const name = keyName(event);
     const direct = map[modifiers(name, event)];
-    if (direct && direct(ctx)) {
+    if (direct && (await direct(ctx))) {
       return true;
     }
     if (name.length !== 1 || name === ' ') {
@@ -81,7 +81,7 @@ export function bindKeymap(
 
     if (event.shiftKey) {
       const noShift = map[modifiers(name, event, false)];
-      if (noShift && noShift(ctx)) {
+      if (noShift && (await noShift(ctx))) {
         return true;
       }
     }
@@ -95,7 +95,7 @@ export function bindKeymap(
     const baseName = base[event.keyCode];
     if (special && baseName && baseName !== name) {
       const fromCode = map[modifiers(baseName, event)];
-      if (fromCode && fromCode(ctx)) {
+      if (fromCode && (await fromCode(ctx))) {
         return true;
       }
     }
