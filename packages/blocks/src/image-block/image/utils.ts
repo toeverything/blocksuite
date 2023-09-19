@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { Buffer } from 'buffer';
 
 import { downloadBlob } from '../../__internal__/utils/filesys.js';
 import { getBlockElementByModel } from '../../__internal__/utils/query.js';
@@ -16,9 +15,6 @@ async function getImageBlob(model: ImageBlockModel) {
     // FIXME: this file-type will be removed in future, see https://github.com/toeverything/AFFiNE/issues/3245
     // @ts-ignore
     const FileType = await import('file-type/browser.js');
-    if (window.Buffer === undefined) {
-      window.Buffer = Buffer;
-    }
     const buffer = await blob.arrayBuffer();
     const fileType = await FileType.fromBuffer(buffer);
 
