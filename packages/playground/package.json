@@ -40,6 +40,7 @@
   },
   "license": "MPL-2.0",
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@tweakpane/core": "^1.1.9",
     "@types/micromatch": "^4.0.2",
     "magic-string": "^0.29.0",

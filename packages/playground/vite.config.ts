@@ -1,5 +1,6 @@
 import path, { resolve } from 'node:path';
 
+import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
@@ -12,6 +13,18 @@ const enableIstanbul = !!process.env.CI || !!process.env.COVERAGE;
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          buffer: true,
+        }),
+      ],
+    },
+  },
   plugins: [
     react(),
     hmrPlugin,
