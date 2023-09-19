@@ -31,17 +31,11 @@ export class LinkPopover extends LitElement {
   @property()
   type: 'create' | 'edit' = 'create';
 
-  @property({ type: Boolean })
-  showMask = true;
-
   @property()
   text = '';
 
   @property()
   previewLink = '';
-
-  @property({ type: Boolean })
-  showBookmarkOperation = false;
 
   @state()
   private _bodyOverflowStyle = '';
@@ -61,7 +55,7 @@ export class LinkPopover extends LitElement {
   override connectedCallback() {
     super.connectedCallback();
 
-    if (this.showMask) {
+    if (this.type === 'edit') {
       // Disable body scroll
       this._bodyOverflowStyle = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -79,7 +73,7 @@ export class LinkPopover extends LitElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    if (this.showMask) {
+    if (this.type === 'edit') {
       // Restore body scroll style
       document.body.style.overflow = this._bodyOverflowStyle;
     }
@@ -196,27 +190,25 @@ export class LinkPopover extends LitElement {
         <span style="overflow: hidden;">${this.previewLink}</span>
       </div>
       <span class="affine-link-popover-dividing-line"></span>
-      ${this.showBookmarkOperation
+      <icon-button
+        class="has-tool-tip"
+        data-testid="unlink"
+        @click=${this._onLinkToCard}
+      >
+        ${BookmarkIcon}
+        <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+      </icon-button>
+      ${allowEmbed(this.previewLink)
         ? html`<icon-button
-              class="has-tool-tip"
-              data-testid="unlink"
-              @click=${this._onLinkToCard}
-            >
-              ${BookmarkIcon}
-              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
-            </icon-button>
-            ${allowEmbed(this.previewLink)
-              ? html`<icon-button
-                  class="has-tool-tip"
-                  data-testid="unlink"
-                  @click=${this._onLinkToEmbed}
-                >
-                  ${EmbedWebIcon}
-                  <tool-tip inert role="tooltip">Turn into Embed view</tool-tip>
-                </icon-button>`
-              : nothing}
-            <span class="affine-link-popover-dividing-line"></span>`
+            class="has-tool-tip"
+            data-testid="unlink"
+            @click=${this._onLinkToEmbed}
+          >
+            ${EmbedWebIcon}
+            <tool-tip inert role="tooltip">Turn into Embed view</tool-tip>
+          </icon-button>`
         : nothing}
+      <span class="affine-link-popover-dividing-line"></span>
       <icon-button
         class="has-tool-tip"
         data-testid="unlink"
@@ -286,9 +278,10 @@ export class LinkPopover extends LitElement {
   }
 
   override render() {
-    const mask = this.showMask
-      ? html`<div class="overlay-mask" @click="${this._hide}"></div>`
-      : html``;
+    const mask =
+      this.type === 'edit'
+        ? html`<div class="overlay-mask" @click="${this._hide}"></div>`
+        : html``;
 
     const popover =
       this.type === 'create' ? this.simpleTemplate() : this.editTemplate();

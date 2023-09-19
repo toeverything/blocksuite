@@ -1,7 +1,5 @@
 import { assertExists, noop } from '@blocksuite/global/utils';
-import type { BaseBlockModel } from '@blocksuite/store';
 
-import { isInsideBlockByFlavour } from '../../../../../../__internal__/utils/model.js';
 import {
   getDocPage,
   getModelByElement,
@@ -24,19 +22,10 @@ function updatePosition(element: LinkPopover, anchorEl: HTMLElement) {
 function createEditLinkElement(
   anchorEl: HTMLElement,
   container: HTMLElement,
-  {
-    showMask,
-    previewLink,
-    model,
-  }: { showMask: boolean; previewLink: string; model: BaseBlockModel }
+  previewLink: string
 ) {
-  const page = model.page;
   const linkPanel = new LinkPopover();
-  linkPanel.showMask = showMask;
   linkPanel.previewLink = previewLink;
-  linkPanel.showBookmarkOperation =
-    !!page.awarenessStore.getFlag('enable_bookmark_operation') &&
-    !isInsideBlockByFlavour(page, model, 'affine:bookmark');
   container.appendChild(linkPanel);
 
   requestAnimationFrame(() => {
@@ -93,22 +82,18 @@ function bindHoverState(
 
 interface LinkPopoverOptions {
   anchorEl: HTMLElement;
-  model: BaseBlockModel;
   container?: HTMLElement;
   text?: string;
   link?: string;
-  showMask?: boolean;
   interactionKind?: 'always' | 'hover';
   abortController?: AbortController;
 }
 
 export async function showLinkPopover({
   anchorEl,
-  model,
   container = document.body,
   text = '',
   link = '',
-  showMask = true,
   interactionKind = 'always',
   abortController = new AbortController(),
 }: LinkPopoverOptions): Promise<LinkDetail> {
@@ -118,11 +103,7 @@ export async function showLinkPopover({
     return Promise.resolve({ type: 'cancel' });
   }
 
-  const editLinkEle = createEditLinkElement(anchorEl, container, {
-    showMask,
-    previewLink: link,
-    model,
-  });
+  const editLinkEle = createEditLinkElement(anchorEl, container, link);
 
   const unsubscribeHoverAbort =
     interactionKind === 'hover'
@@ -141,7 +122,6 @@ export async function showLinkPopover({
       }
 
       editLinkEle.type = 'edit';
-      editLinkEle.showMask = true;
       editLinkEle.text = text;
       unsubscribeHoverAbort();
       requestAnimationFrame(() => {

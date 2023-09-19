@@ -1,37 +1,30 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
-import {
-  getEditorContainer,
-  getVirgoByModel,
-} from '../../../../__internal__/utils/query.js';
+import { getEditorContainer } from '../../../../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.js';
 import { showLinkPopover } from '../../../../components/rich-text/virgo/nodes/link-node/link-popover/create-link-popover.js';
 import { LinkMockSelection } from '../../../../components/rich-text/virgo/nodes/link-node/mock-selection.js';
-import { getSelectedContentModels } from '../../selection.js';
 
 export function toggleLink(root: BlockSuiteRoot, textSelection: TextSelection) {
-  if (textSelection.isCollapsed()) {
-    return;
-  }
+  const selection = document.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+  const range = selection.getRangeAt(0);
 
-  if (!textSelection.isInSameBlock()) {
-    return;
-  }
+  const { startContainer } = range;
+  const vRoot = startContainer.parentElement?.closest<VirgoRootElement>(
+    `[${VIRGO_ROOT_ATTR}]`
+  );
+  if (!vRoot) return;
 
-  const selectedModel = getSelectedContentModels(root, ['text']);
-  if (selectedModel.length === 0) {
-    return;
-  }
-
-  const [model] = selectedModel;
-  const page = root.page;
-  const vEditor = getVirgoByModel(model);
+  const vEditor = vRoot.virgoEditor;
   assertExists(vEditor);
 
   const vRange = textSelection.from;
   const format = vEditor.getFormat(vRange);
+  const page = root.page;
 
   if (format.link) {
     page.captureSync();
@@ -66,7 +59,6 @@ export function toggleLink(root: BlockSuiteRoot, textSelection: TextSelection) {
   const clear = createMockSelection();
   showLinkPopover({
     anchorEl: vEditor.rootElement,
-    model,
   }).then(linkState => {
     if (linkState.type !== 'confirm') {
       clear();
