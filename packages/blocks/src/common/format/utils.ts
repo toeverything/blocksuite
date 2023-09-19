@@ -16,7 +16,7 @@ import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
-} from './config.js';
+} from './constant.js';
 
 function getCombinedFormatFromVEditors(
   vEditors: [AffineVEditor, VRange | null][]

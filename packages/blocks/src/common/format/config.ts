@@ -10,7 +10,6 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '../../icons/index.js';
-import type { Flavour } from '../../models.js';
 import { toggleLink } from '../../page-block/utils/operations/element/inline-level.js';
 import { commonActiveWhen, handleCommonStyle } from './utils.js';
 
@@ -22,19 +21,6 @@ export interface formatConfig {
   activeWhen: (root: BlockSuiteRoot) => boolean;
   action: (root: BlockSuiteRoot) => void;
 }
-
-// corresponding to `formatText` command
-export const FORMAT_TEXT_SUPPORT_FLAVOURS: Flavour[] = [
-  'affine:paragraph',
-  'affine:list',
-];
-// corresponding to `formatBlock` command
-export const FORMAT_BLOCK_SUPPORT_FLAVOURS: Flavour[] = [
-  'affine:paragraph',
-  'affine:list',
-];
-// corresponding to `formatNative` command
-export const FORMAT_NATIVE_SUPPORT_FLAVOURS: Flavour[] = ['affine:database'];
 
 export const formatConfig: formatConfig[] = [
   {
