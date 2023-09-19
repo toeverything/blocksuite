@@ -46,6 +46,7 @@ type PageOptions = {
   doc: BlockSuiteDoc;
   awarenessStore: AwarenessStore;
   idGenerator?: IdGenerator;
+  generateGUID?: (id: string) => string;
 };
 
 export class Page extends Space<FlatBlockMap> {
@@ -91,8 +92,9 @@ export class Page extends Space<FlatBlockMap> {
     doc,
     awarenessStore,
     idGenerator = uuidv4,
+    generateGUID = id => id,
   }: PageOptions) {
-    super(id, doc, awarenessStore);
+    super(id, doc, awarenessStore, generateGUID);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
   }

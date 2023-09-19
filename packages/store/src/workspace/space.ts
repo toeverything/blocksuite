@@ -28,11 +28,18 @@ export class Space<
   protected readonly _proxy: State;
   protected readonly _ySpaceDoc: Y.Doc;
   protected readonly _yBlocks: Y.Map<State[keyof State]>;
+  private readonly _generateGUID: (id: string) => string;
 
-  constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
+  constructor(
+    id: string,
+    doc: BlockSuiteDoc,
+    awarenessStore: AwarenessStore,
+    generateGUID: (id: string) => string
+  ) {
     this.id = id;
     this.doc = doc;
     this.awarenessStore = awarenessStore;
+    this._generateGUID = generateGUID;
 
     this._ySpaceDoc = this._initSubDoc();
 
@@ -84,8 +91,9 @@ export class Space<
   private _initSubDoc = () => {
     let subDoc = this.doc.spaces.get(this.id);
     if (!subDoc) {
+      const guid = this._generateGUID(this.id);
       subDoc = new Y.Doc({
-        guid: this.id,
+        guid,
       });
       this.doc.spaces.set(this.id, subDoc);
       this._loaded = true;

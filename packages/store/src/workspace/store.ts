@@ -57,6 +57,8 @@ export interface StoreOptions<
   id: string;
   providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
+  // backward compatibility
+  generateGUID?: (id: string) => string;
   idGenerator?: Generator | IdGenerator;
   defaultFlags?: Partial<Flags>;
   blobStorages?: ((id: string) => BlobStorage)[];
