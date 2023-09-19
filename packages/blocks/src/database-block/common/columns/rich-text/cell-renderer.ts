@@ -332,7 +332,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     if (yText) {
       const text = new Text(yText);
       const index = range?.index ?? yText.length;
-      text.insert(textClipboardData, index);
+      if (range?.length) {
+        text.replace(range.index, range.length, textClipboardData);
+      } else {
+        text.insert(textClipboardData, index);
+      }
       this.vEditor?.setVRange({
         index: index + textClipboardData.length,
         length: 0,
