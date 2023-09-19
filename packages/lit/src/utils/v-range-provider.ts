@@ -41,8 +41,12 @@ export const getVRangeProvider: (
     }
 
     const { from, to } = textSelection;
-    const selectedElements =
-      rangeManager.getSelectedBlockElementsByRange(range);
+    const selectedElements = rangeManager.getSelectedBlockElementsByRange(
+      range,
+      {
+        mode: 'flat',
+      }
+    );
     if (!selectedElements.includes(element)) {
       return null;
     }
