@@ -483,6 +483,7 @@ export async function initDatabaseRow(page: Page) {
 
 export async function initDatabaseRowWithData(page: Page, data: string) {
   await initDatabaseRow(page);
+  await waitNextFrame(page, 50);
   await type(page, data);
 }
 

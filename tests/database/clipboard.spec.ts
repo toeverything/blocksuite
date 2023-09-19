@@ -65,6 +65,7 @@ test.describe('copy&paste when selecting', () => {
     await initDatabaseRowWithData(page, 'abc123');
     await initDatabaseRowWithData(page, '');
     await pressEscape(page);
+    await waitNextFrame(page, 100);
     await pressArrowUp(page);
 
     await copyByKeyboard(page);
@@ -135,8 +136,11 @@ test.describe('copy&paste when selecting', () => {
 
     await initDatabaseColumn(page);
     await initDatabaseRowWithData(page, 'text1');
+    await pressEscape(page);
+    await waitNextFrame(page, 100);
     await initDatabaseDynamicRowWithData(page, 'abc', false);
     await pressEscape(page);
+    await waitNextFrame(page, 100);
     await initDatabaseColumn(page);
     await switchColumnType(page, 'Number', 2);
     const numberCell = getDatabaseBodyCell(page, {
