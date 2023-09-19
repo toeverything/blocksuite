@@ -44,10 +44,9 @@ export class UIEventStateContext {
   };
 }
 
-type MaybePromise<T> = T | Promise<T>;
 export type UIEventHandler = (
   context: UIEventStateContext
-) => MaybePromise<boolean | null | undefined | void>;
+) => boolean | null | undefined | void;
 
 declare global {
   interface BlockSuiteUIEventState {

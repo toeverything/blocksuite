@@ -76,7 +76,7 @@ export const getPrevBlockCommand: Command<
     path?: string[];
     filter?: Filter;
   }
-> = async (ctx, next) => {
+> = (ctx, next) => {
   const path = ctx.path ?? ctx.currentSelectionPath;
   assertExists(path);
 
@@ -87,7 +87,7 @@ export const getPrevBlockCommand: Command<
   );
 
   if (prevBlock) {
-    await next({ prevBlock });
+    return next({ prevBlock });
   }
 };
 

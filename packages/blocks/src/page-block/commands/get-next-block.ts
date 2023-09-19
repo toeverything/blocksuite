@@ -55,19 +55,18 @@ export const getNextBlockCommand: Command<
     path?: string[];
     filter?: Filter;
   }
-> = async (ctx, next) => {
+> = (ctx, next) => {
   const path = ctx.path ?? ctx.currentSelectionPath;
   assertExists(path);
-  const filter: Filter =
-    ctx.filter ??
-    (() => {
-      return true;
-    });
 
-  const nextBlock = getNextBlock(ctx.std as BlockElement['std'], path, filter);
+  const nextBlock = getNextBlock(
+    ctx.std as BlockElement['std'],
+    path,
+    ctx.filter
+  );
 
   if (nextBlock) {
-    await next({ nextBlock });
+    return next({ nextBlock });
   }
 };
 

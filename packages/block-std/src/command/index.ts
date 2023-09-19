@@ -15,8 +15,8 @@ export type Command<
   InData extends object = {},
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
-  next: (ctx?: CommandKeyToData<Out>) => Promise<void>
-) => void | Promise<void>;
+  next: (ctx?: CommandKeyToData<Out>) => void
+) => void;
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
   : Omit<A, keyof B>;
@@ -30,7 +30,7 @@ type OutDataOfCommand<C> = C extends Command<any, infer K, any>
   : never;
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
-  run(): Promise<boolean>;
+  run(): boolean;
   with<T extends Partial<BlockSuite.CommandData>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
@@ -73,18 +73,18 @@ export class CommandManager {
   ): Chain => {
     return {
       [cmdSymbol]: cmds,
-      run: async () => {
+      run: () => {
         const ctx = this._getCommandCtx();
         const runCmds = async (
           ctx: BlockSuite.CommandData,
           [cmd, ...rest]: Command[]
         ) => {
           if (cmd) {
-            await cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
+            cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
         };
         let success = false;
-        await runCmds(ctx as BlockSuite.CommandData, [
+        runCmds(ctx as BlockSuite.CommandData, [
           ...cmds,
           async (_, next) => {
             success = true;
