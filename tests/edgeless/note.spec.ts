@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
 import {
   activeNoteInEdgeless,
   addNote,
@@ -70,7 +70,7 @@ test('can drag selected non-active note', async ({ page }) => {
 
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -79,7 +79,7 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 95]);
 });
 
 test('resize note in edgeless mode', async ({ page }) => {
