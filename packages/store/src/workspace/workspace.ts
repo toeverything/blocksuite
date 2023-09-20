@@ -98,40 +98,45 @@ export class Workspace extends WorkspaceAddonType {
   }
 
   private _bindSpacesEvents() {
-    this._store.doc.spaces.observe(event => {
-      this._handleVersion();
-      event.changes.keys.forEach((change, pageId) => {
-        switch (change.action) {
-          case 'add': {
-            if (this._hasPage(pageId)) return;
+    this._store.doc.spaces.observe(this._handleSpaceEvent);
+    this._store.doc.once('destroy', () => {
+      this._store.doc.spaces.unobserve(this._handleSpaceEvent);
+    });
+  }
 
-            const page = new Page({
-              id: pageId,
-              workspace: this,
-              doc: this.doc,
-              awarenessStore: this.awarenessStore,
-              idGenerator: this._store.idGenerator,
-            });
+  private _handleSpaceEvent(event: Y.YMapEvent<Y.Doc>) {
+    this._handleVersion();
+    event.changes.keys.forEach((change, pageId) => {
+      switch (change.action) {
+        case 'add': {
+          if (this._hasPage(pageId)) return;
 
-            // This page is loaded from yjs update,
-            //  so we don't need to load it manually.
-            this._store.addSpace(page);
-            this.slots.pageAdded.emit(page.id);
-            return;
-          }
-          case 'delete': {
-            const pageMeta = this.meta.getPageMeta(pageId);
-            if (!pageMeta) return;
-            this.meta.removePageMeta(pageId);
-            this.slots.pageRemoved.emit(pageId);
-            return;
-          }
-          case 'update': {
-            // have no idea what to do here
-            return;
-          }
+          const page = new Page({
+            id: pageId,
+            workspace: this,
+            doc: this.doc,
+            awarenessStore: this.awarenessStore,
+            idGenerator: this._store.idGenerator,
+          });
+
+          // This page is loaded from yjs update,
+          //  so we don't need to load it manually.
+          this._store.addSpace(page);
+          this.slots.pageAdded.emit(page.id);
+          return;
         }
-      });
+        case 'delete': {
+          const pageMeta = this.meta.getPageMeta(pageId);
+          if (!pageMeta) return;
+          this.meta.removePageMeta(pageId);
+          this.slots.pageRemoved.emit(pageId);
+          return;
+        }
+        case 'update': {
+          // have no idea what to do here
+          return;
+        }
+      }
     });
   }
 
