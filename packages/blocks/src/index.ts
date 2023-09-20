@@ -21,6 +21,7 @@ export * from './__internal__/utils/filesys.js';
 export * from './__internal__/utils/query.js';
 export * from './__internal__/utils/rect.js';
 export * from './__internal__/utils/types.js';
+export * from './api/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';

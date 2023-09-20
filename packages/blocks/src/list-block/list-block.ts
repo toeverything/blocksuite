@@ -21,6 +21,7 @@ import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { playCheckAnimation } from './utils/icons.js';
+import { toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
@@ -86,6 +87,29 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     this._vRangeProvider = getVRangeProvider(this);
   }
 
+  private _toggleTemplate() {
+    const toggleChildren = () => (this.showChildren = !this.showChildren);
+    const noChildren = this.model.children.length === 0;
+    const toggleDownTemplate = html`<div
+      class="toggle-icon"
+      @click=${toggleChildren}
+    >
+      ${toggleDown}
+    </div>`;
+    const toggleRightTemplate = html`<div
+      class="toggle-icon toggle-icon__collapsed"
+      @click=${toggleChildren}
+    >
+      ${toggleRight}
+    </div>`;
+    const toggleIcon = noChildren
+      ? nothing
+      : this.showChildren
+      ? toggleDownTemplate
+      : toggleRightTemplate;
+    return toggleIcon;
+  }
+
   override render(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, showChildren, _onClickIcon } = this;
@@ -109,7 +133,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     return html`
       <div class=${`affine-list-block-container ${top}`}>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
-          ${listIcon}
+          ${this._toggleTemplate()} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}

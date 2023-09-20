@@ -1,7 +1,6 @@
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { StackItem } from '@blocksuite/store';
 
-import type { BlockStdProvider } from '../provider/index.js';
 import type { BaseSelection } from './base.js';
 import {
   BlockSelection,
@@ -27,7 +26,7 @@ export class SelectionManager {
     remoteChanged: new Slot<Record<string, BaseSelection[]>>(),
   };
 
-  constructor(public std: BlockStdProvider) {
+  constructor(public std: BlockSuite.Std) {
     this._setupDefaultSelections();
   }
 

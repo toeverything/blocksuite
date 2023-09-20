@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
 import {
   activeNoteInEdgeless,
   addNote,
@@ -18,6 +18,7 @@ import {
   setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   click,
@@ -68,7 +69,8 @@ test('can drag selected non-active note', async ({ page }) => {
   await assertRichTexts(page, ['hello']);
 
   await switchEditorMode(page);
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
+  await zoomResetByKeyboard(page);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
 
   // selected, non-active
   await page.mouse.click(CENTER_X, CENTER_Y);
@@ -77,13 +79,14 @@ test('can drag selected non-active note', async ({ page }) => {
     { x: CENTER_X, y: CENTER_Y },
     { x: CENTER_X, y: CENTER_Y + 100 }
   );
-  await assertNoteXYWH(page, [0, 100, EDITOR_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 100, NOTE_WIDTH, 95]);
 });
 
 test('resize note in edgeless mode', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await activeNoteInEdgeless(page, ids.noteId);
   await waitNextFrame(page, 400);
   await type(page, 'hello');
@@ -124,7 +127,7 @@ test('add Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
-
+  await zoomResetByKeyboard(page);
   await addNote(page, 'hello', 300, 300);
 
   await assertEdgelessTool(page, 'default');
@@ -137,6 +140,7 @@ test('add empty Note', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await setEdgelessTool(page, 'note');
 
   // add note at 300,300
@@ -509,6 +513,7 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await activeNoteInEdgeless(page, ids.noteId);
   await waitNextFrame(page, 400);
   // current implementation may be a little inefficient

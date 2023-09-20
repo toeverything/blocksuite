@@ -6,6 +6,7 @@ import type { Rect } from '../../__internal__/index.js';
 
 export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 2;
+export const LIST_DRAG_HANDLE_OFFSET_LEFT = 18;
 export const DRAG_HANDLE_GRABBER_HEIGHT = 12;
 export const DRAG_HANDLE_GRABBER_WIDTH = 4;
 export const DRAG_HANDLE_GRABBER_BORDER_RADIUS = 4;
