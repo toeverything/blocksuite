@@ -13,15 +13,15 @@ export interface BlockStdProviderOptions {
   page: Page;
 }
 
-export class BlockStdProvider<ComponentType = unknown, NodeView = unknown> {
+export class BlockStdProvider {
   readonly page: Page;
   readonly workspace: Workspace;
   readonly event: UIEventDispatcher;
   readonly selection: SelectionManager;
   readonly command: CommandManager;
   readonly root: HTMLElement;
-  readonly spec: SpecStore<ComponentType>;
-  readonly view: ViewStore<NodeView>;
+  readonly spec: SpecStore<Values<BlockSuite.ComponentType>>;
+  readonly view: ViewStore<Values<BlockSuite.NodeView>>;
   readonly clipboard: Clipboard;
 
   constructor(options: BlockStdProviderOptions) {
@@ -31,8 +31,8 @@ export class BlockStdProvider<ComponentType = unknown, NodeView = unknown> {
     this.event = new UIEventDispatcher(this);
     this.selection = new SelectionManager(this);
     this.command = new CommandManager(this);
-    this.spec = new SpecStore<ComponentType>(this);
-    this.view = new ViewStore<NodeView>(this);
+    this.spec = new SpecStore<Values<BlockSuite.ComponentType>>(this);
+    this.view = new ViewStore<Values<BlockSuite.NodeView>>(this);
     this.clipboard = new Clipboard(this);
   }
 
@@ -57,6 +57,6 @@ declare global {
     interface ComponentType {}
     interface NodeView {}
 
-    type Std = BlockStdProvider<Values<ComponentType>, Values<NodeView>>;
+    type Std = BlockStdProvider;
   }
 }

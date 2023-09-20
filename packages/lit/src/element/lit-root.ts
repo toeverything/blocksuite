@@ -68,7 +68,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.std = new BlockStdProvider<StaticValue, BlockElement | WidgetElement>({
+    this.std = new BlockStdProvider({
       root: this,
       workspace: this.page.workspace,
       page: this.page,
