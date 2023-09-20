@@ -64,7 +64,12 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
     const rect = bar.getBoundingClientRect();
     const scale = rect.width / dragBarWidth;
     const tableRect = tableContainer.getBoundingClientRect();
-    const left = rect.left + rect.width / 2 - this.column.width * scale - scale;
+    const left =
+      tableContainer
+        .querySelector(
+          `affine-database-header-column[data-column-id='${this.column.id}']`
+        )
+        ?.getBoundingClientRect().left ?? 0;
     const groups = tableContainer.querySelectorAll(
       'affine-data-view-table-group'
     );
@@ -156,7 +161,7 @@ const createWidthAdjustPreview = (
     div.style.top = `${top}px`;
     div.style.left = `0`;
     div.style.zIndex = '9';
-    div.style.backgroundColor = 'rgba(0,0,0,0.3)';
+    div.style.backgroundColor = 'var(--affine-background-secondary-color)';
     previewContainer.append(div);
   });
 
