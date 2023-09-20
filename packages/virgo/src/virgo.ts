@@ -2,7 +2,6 @@ import { assertExists, DisposableGroup, Slot } from '@blocksuite/global/utils';
 import { nothing, render } from 'lit';
 import type * as Y from 'yjs';
 
-import type { VirgoLine } from './components/index.js';
 import { VIRGO_ROOT_ATTR } from './consts.js';
 import { VirgoHookService } from './services/hook.js';
 import {
@@ -11,19 +10,13 @@ import {
   VirgoEventService,
   VirgoRangeService,
 } from './services/index.js';
-import type {
-  DeltaInsert,
-  TextPoint,
-  VRange,
-  VRangeUpdatedProp,
-} from './types.js';
+import type { DeltaInsert, VRange, VRangeUpdatedProp } from './types.js';
 import {
   type BaseTextAttributes,
-  findDocumentOrShadowRoot,
   nativePointToTextPoint,
   textPointToDomPoint,
 } from './utils/index.js';
-import { calculateTextLength, getTextNodesFromElement } from './utils/text.js';
+import { getTextNodesFromElement } from './utils/text.js';
 import { intersectVRange } from './utils/v-range.js';
 
 export type VirgoRootElement<
@@ -137,6 +130,10 @@ export class VEditor<
   toDomRange = this.rangeService.toDomRange;
   toVRange = this.rangeService.toVRange;
   getVRange = this.rangeService.getVRange;
+  getVRangeFromElement = this.rangeService.getVRangeFromElement;
+  getNativeSelection = this.rangeService.getNativeSelection;
+  getTextPoint = this.rangeService.getTextPoint;
+  getLine = this.rangeService.getLine;
   isVRangeValid = this.rangeService.isVRangeValid;
   setVRange = this.rangeService.setVRange;
   syncVRange = this.rangeService.syncVRange;
@@ -225,63 +222,6 @@ export class VEditor<
   async waitForUpdate() {
     const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
     await Promise.all(vLines.map(line => line.updateComplete));
-  }
-
-  getNativeSelection(): Selection | null {
-    const selectionRoot = findDocumentOrShadowRoot(this);
-    const selection = selectionRoot.getSelection();
-    if (!selection) return null;
-    if (selection.rangeCount === 0) return null;
-
-    return selection;
-  }
-
-  getTextPoint(rangeIndex: VRange['index']): TextPoint {
-    assertExists(this._rootElement);
-    const vLines = Array.from(this._rootElement.querySelectorAll('v-line'));
-
-    let index = 0;
-    for (const vLine of vLines) {
-      const texts = VEditor.getTextNodesFromElement(vLine);
-
-      for (const text of texts) {
-        if (!text.textContent) {
-          throw new Error('text element should have textContent');
-        }
-        if (index + text.textContent.length >= rangeIndex) {
-          return [text, rangeIndex - index];
-        }
-        index += calculateTextLength(text);
-      }
-
-      index += 1;
-    }
-
-    throw new Error('failed to find leaf');
-  }
-
-  // the number is related to the VirgoLine's textLength
-  getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
-    assertExists(this._rootElement);
-    const lineElements = Array.from(
-      this._rootElement.querySelectorAll('v-line')
-    );
-
-    let index = 0;
-    for (const lineElement of lineElements) {
-      if (rangeIndex >= index && rangeIndex <= index + lineElement.textLength) {
-        return [lineElement, rangeIndex - index] as const;
-      }
-      if (
-        rangeIndex === index + lineElement.textLength &&
-        rangeIndex === this.yText.length
-      ) {
-        return [lineElement, rangeIndex - index] as const;
-      }
-      index += lineElement.textLength + 1;
-    }
-
-    throw new Error('failed to find line');
   }
 
   setReadonly(isReadonly: boolean): void {

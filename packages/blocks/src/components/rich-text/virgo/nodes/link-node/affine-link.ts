@@ -1,15 +1,20 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { type DeltaInsert, VEditor, ZERO_WIDTH_SPACE } from '@blocksuite/virgo';
+import {
+  type DeltaInsert,
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+  ZERO_WIDTH_SPACE,
+} from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getModelByElement } from '../../../../../__internal__/utils/query.js';
-import type { BookmarkProps } from '../../../../../bookmark-block/bookmark-model.js';
 import type { AffineTextAttributes } from '../../types.js';
 import { affineTextStyles } from '../affine-text.js';
-import { showLinkPopover } from './link-popover/show-link-popover.js';
+import type { LinkPopup } from './link-popup/link-popup.js';
+import { toggleLinkPopup } from './link-popup/toggle-link-popup.js';
 
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
@@ -26,13 +31,23 @@ export class AffineLink extends ShadowlessElement {
     return link;
   }
 
+  get vEditor() {
+    const vRoot = this.closest<VirgoRootElement<AffineTextAttributes>>(
+      `[${VIRGO_ROOT_ATTR}]`
+    );
+    assertExists(vRoot);
+    return vRoot.virgoEditor;
+  }
+
   @property({ attribute: false })
   popoverHoverOpenDelay = 150;
 
   @state()
   private _popoverTimer = 0;
 
-  private _isHovering = false;
+  private _isLinkHover = false;
+  private _isLinkPopupHover = false;
+  private _popup: LinkPopup | null = null;
 
   static override styles = css`
     affine-link > a {
@@ -55,161 +70,60 @@ export class AffineLink extends ShadowlessElement {
 
   constructor() {
     super();
-    this.addEventListener('mouseenter', this.onHover);
+    this.addEventListener('mouseenter', this._onHover);
     this.addEventListener('mouseleave', this._onHoverEnd);
   }
 
-  onHover(e: MouseEvent) {
-    if (this._isHovering) {
+  private _onHover(e: MouseEvent) {
+    if (this._isLinkHover) {
       return;
     } else {
-      this._isHovering = true;
+      this._isLinkHover = true;
     }
 
     const model = getModelByElement(this);
     if (model.page.readonly) return;
 
     this._popoverTimer = window.setTimeout(() => {
-      this.onDelayHover(e);
+      this._onDelayHover(e);
     }, this.popoverHoverOpenDelay);
   }
 
-  async onDelayHover(e: MouseEvent) {
+  private _onDelayHover(e: MouseEvent) {
     if (!(e.target instanceof HTMLElement) || !document.contains(e.target)) {
       return;
     }
 
-    const text = this.delta.insert;
-    const linkState = await showLinkPopover({
-      anchorEl: e.target as HTMLElement,
-      text,
-      link: this.link,
+    const selfVRange = this.vEditor.getVRangeFromElement(this);
+    assertExists(selfVRange);
+    const popup = toggleLinkPopup(this.vEditor, 'view', selfVRange);
+    popup.addEventListener('mouseenter', () => {
+      this._isLinkPopupHover = true;
     });
-    if (linkState.type === 'confirm') {
-      const link = linkState.link;
-      const newText = linkState.text;
-      const isUpdateText = newText !== text;
-      this._updateLink(link, isUpdateText ? newText : undefined);
-      return;
-    }
-    if (linkState.type === 'remove') {
-      this._updateLink();
-      return;
-    }
-    if (linkState.type === 'toBookmark') {
-      this._onConvertToBookmark(linkState.bookmarkType);
-      return;
-    }
-  }
-
-  /**
-   * If no pass text, use the original text
-   */
-  private _updateLink(link?: string, text?: string) {
-    const model = getModelByElement(this);
-    const { page } = model;
-    const oldStr = this.delta.insert;
-    const oldTextAttributes = this.delta.attributes;
-
-    const textElement = this.querySelector('[data-virgo-text="true"]');
-    assertExists(textElement);
-    const textNode = Array.from(textElement.childNodes).find(
-      (node): node is Text => node instanceof Text
-    );
-    assertExists(textNode);
-    const richText = this.closest('rich-text');
-    assertExists(richText);
-    const domPoint = VEditor.textPointToDomPoint(
-      textNode,
-      0,
-      richText.virgoContainer
-    );
-    assertExists(domPoint);
-    const vEditor = richText.vEditor;
-    assertExists(vEditor);
-
-    if (link) {
-      if (text) {
-        page.captureSync();
-        vEditor.deleteText({
-          index: domPoint.index,
-          length: textNode.length,
-        });
-        vEditor.insertText({ index: domPoint.index, length: 0 }, text);
-        vEditor.formatText(
-          {
-            index: domPoint.index,
-            length: text.length,
-          },
-          { link }
-        );
-      } else {
-        page.captureSync();
-        vEditor.formatText(
-          {
-            index: domPoint.index,
-            length: oldStr.length,
-          },
-          { link }
-        );
-      }
-    } else {
-      page.captureSync();
-      const newAttributes = { ...oldTextAttributes };
-      delete newAttributes.link;
-      vEditor.formatText(
-        {
-          index: domPoint.index,
-          length: oldStr.length,
-        },
-        newAttributes,
-        {
-          mode: 'replace',
-        }
-      );
-    }
-  }
-  private _onConvertToBookmark(type: BookmarkProps['type']) {
-    const model = getModelByElement(this);
-    const { page } = model;
-
-    const textElement = this.querySelector('[data-virgo-text="true"]');
-    assertExists(textElement);
-    const textNode = Array.from(textElement.childNodes).find(
-      (node): node is Text => node instanceof Text
-    );
-    assertExists(textNode);
-    const richText = this.closest('rich-text');
-    assertExists(richText);
-    const domPoint = VEditor.textPointToDomPoint(
-      textNode,
-      0,
-      richText.virgoContainer
-    );
-    assertExists(domPoint);
-    const vEditor = richText.vEditor;
-    assertExists(vEditor);
-
-    const parent = page.getParent(model);
-    assertExists(parent);
-    const index = parent.children.indexOf(model);
-
-    const props = {
-      type,
-      url: this.link,
-      title: this.delta.insert,
-    } as BookmarkProps;
-
-    page.addBlock('affine:bookmark', props, parent, index + 1);
-    vEditor.deleteText({
-      index: domPoint.index,
-      length: textNode.length,
+    popup.addEventListener('mouseleave', () => {
+      this._isLinkPopupHover = false;
+      popup.remove();
+      this._popup = null;
     });
+    this._popup = popup;
   }
 
   private _onHoverEnd() {
-    this._isHovering = false;
+    this._isLinkHover = false;
     clearTimeout(this._popoverTimer);
+
+    new Promise<void>(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    }).then(() => {
+      if (!this._isLinkPopupHover) {
+        if (this._popup) {
+          this._popup.remove();
+          this._popup = null;
+        }
+      }
+    });
   }
 
   // Workaround for links not working in contenteditable div

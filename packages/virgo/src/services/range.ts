@@ -1,4 +1,7 @@
-import type { VRange } from '../types.js';
+import { assertExists } from '@blocksuite/global/utils';
+
+import type { VirgoLine } from '../components/virgo-line.js';
+import type { TextPoint, VRange } from '../types.js';
 import type { VRangeUpdatedProp } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { findDocumentOrShadowRoot } from '../utils/query.js';
@@ -6,8 +9,9 @@ import {
   domRangeToVirgoRange,
   virgoRangeToDomRange,
 } from '../utils/range-conversion.js';
+import { calculateTextLength } from '../utils/text.js';
 import { isMaybeVRangeEqual } from '../utils/v-range.js';
-import type { VEditor } from '../virgo.js';
+import { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private _vRange: VRange | null = null;
@@ -16,6 +20,10 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
   get vRangeProvider() {
     return this.editor.vRangeProvider;
+  }
+
+  get rootElement() {
+    return this.editor.rootElement;
   }
 
   onVRangeUpdated = async ([newVRange, sync]: VRangeUpdatedProp) => {
@@ -62,6 +70,15 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     requestAnimationFrame(fn);
   };
 
+  getNativeSelection(): Selection | null {
+    const selectionRoot = findDocumentOrShadowRoot(this.editor);
+    const selection = selectionRoot.getSelection();
+    if (!selection) return null;
+    if (selection.rangeCount === 0) return null;
+
+    return selection;
+  }
+
   getVRange = (): VRange | null => {
     if (this.vRangeProvider) {
       return this.vRangeProvider.getVRange();
@@ -69,6 +86,66 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     return this._vRange;
   };
+
+  getVRangeFromElement = (element: Element): VRange | null => {
+    const range = document.createRange();
+    const text = element.querySelector('[data-virgo-text');
+    if (!text) {
+      return null;
+    }
+    const textNode = text.childNodes[1];
+    assertExists(textNode instanceof Text);
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, textNode.textContent?.length ?? 0);
+    const vRange = this.toVRange(range);
+    return vRange;
+  };
+
+  getTextPoint(rangeIndex: VRange['index']): TextPoint {
+    const vLines = Array.from(this.rootElement.querySelectorAll('v-line'));
+
+    let index = 0;
+    for (const vLine of vLines) {
+      const texts = VEditor.getTextNodesFromElement(vLine);
+
+      for (const text of texts) {
+        if (!text.textContent) {
+          throw new Error('text element should have textContent');
+        }
+        if (index + text.textContent.length >= rangeIndex) {
+          return [text, rangeIndex - index];
+        }
+        index += calculateTextLength(text);
+      }
+
+      index += 1;
+    }
+
+    throw new Error('failed to find leaf');
+  }
+
+  // the number is related to the VirgoLine's textLength
+  getLine(rangeIndex: VRange['index']): readonly [VirgoLine, number] {
+    const lineElements = Array.from(
+      this.rootElement.querySelectorAll('v-line')
+    );
+
+    let index = 0;
+    for (const lineElement of lineElements) {
+      if (rangeIndex >= index && rangeIndex <= index + lineElement.textLength) {
+        return [lineElement, rangeIndex - index] as const;
+      }
+      if (
+        rangeIndex === index + lineElement.textLength &&
+        rangeIndex === this.editor.yTextLength
+      ) {
+        return [lineElement, rangeIndex - index] as const;
+      }
+      index += lineElement.textLength + 1;
+    }
+
+    throw new Error('failed to find line');
+  }
 
   isVRangeValid = (vRange: VRange | null): boolean => {
     return !(

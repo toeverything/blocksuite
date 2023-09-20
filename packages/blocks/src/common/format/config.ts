@@ -1,6 +1,10 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
+import { toggleLinkPopup } from '../../components/rich-text/virgo/nodes/link-node/link-popup/toggle-link-popup.js';
+import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -9,7 +13,6 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '../../icons/index.js';
-import { toggleLink } from '../../page-block/utils/operations/element/inline-level.js';
 import { commonActiveWhen, handleCommonStyle } from './utils.js';
 
 export interface formatConfig {
@@ -78,22 +81,25 @@ export const formatConfig: formatConfig[] = [
     icon: LinkIcon,
     hotkey: 'Mod-k',
     activeWhen: root => commonActiveWhen(root, 'link'),
-    action: root => {
-      const resetPayload = {
-        root,
-        styles: {
-          reference: null,
-        },
-      };
-      root.std.command
-        .pipe()
-        .try(chain => [
-          chain.formatText(resetPayload),
-          chain.formatBlock(resetPayload),
-          chain.formatNative(resetPayload),
-        ])
-        .run();
-      toggleLink(root);
+    action: () => {
+      const selection = document.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+      const range = selection.getRangeAt(0);
+
+      const vRoot = range.commonAncestorContainer.parentElement?.closest<
+        VirgoRootElement<AffineTextAttributes>
+      >(`[${VIRGO_ROOT_ATTR}]`);
+      if (!vRoot) return;
+
+      const vEditor = vRoot.virgoEditor;
+      const vText =
+        range.commonAncestorContainer.parentElement?.closest(
+          '[data-virgo-text]'
+        );
+      if (!vText) return;
+      const goalVRange = vEditor.getVRangeFromElement(vText);
+      assertExists(goalVRange);
+      toggleLinkPopup(vEditor, 'create', goalVRange);
     },
   },
 ];
