@@ -2,8 +2,10 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
+import { v4 as uuid } from 'uuid';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
+import type { Doc as YDoc, Map as YMap } from 'yjs';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
@@ -28,11 +30,11 @@ export const BlockSchemas = [
   DividerBlockSchema,
 ];
 
-function createTestOptions() {
+function createTestOptions(id = 'test-workspace') {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id, idGenerator, isSSR: true, schema };
 }
 
 const defaultPageId = 'page:home';
@@ -111,6 +113,33 @@ describe('basic', () => {
         },
       },
     });
+  });
+
+  it('can blocks init in 10 rounds', async () => {
+    const workspace1 = new Workspace(createTestOptions(uuid()));
+    const page1 = workspace1.createPage({ id: uuid() });
+    const id = page1.addBlock('affine:page', {});
+    // randomly create 10 workspaces
+    for (let i = 0; i < 10; i++) {
+      const pageId = uuid();
+      const workspace2 = new Workspace(createTestOptions(uuid()));
+      const page2 = workspace2.createPage({ id: pageId });
+      {
+        applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
+        const page2Doc = (workspace2.doc.getMap('spaces') as YMap<YDoc>).get(
+          pageId
+        );
+        expect(page2Doc, `page2Doc not found in round ${i}`).not.toBe(
+          undefined
+        );
+        applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
+        const blocks = page2Doc.getMap('blocks');
+        expect(blocks.get(id)).not.toBe(undefined);
+      }
+      const block = page2.getBlockById(id);
+      expect(block, `block ${id} not found in round ${i}`).not.toBe(null);
+      expect(block.id).toBe(id);
+    }
   });
 
   it('init with provider', async () => {
