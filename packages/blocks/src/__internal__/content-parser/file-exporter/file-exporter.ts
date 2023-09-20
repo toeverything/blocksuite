@@ -1,7 +1,6 @@
 /* eslint-disable no-control-regex */
 import type { BlobManager } from '@blocksuite/store';
 
-import { NOTE_WIDTH } from '../../consts.js';
 import { globalCSS } from './exporter-style.js';
 
 // Context: Lean towards breaking out any localizable content into constants so it's
@@ -119,7 +118,7 @@ function wrapHtmlWithHtmlDocumentText(pageTitle: string, htmlContent: string) {
   ${htmlCss}
 </head>
 <body>
-<div style="margin:0 auto;padding:1rem;max-width:${NOTE_WIDTH}px">
+<div style="box-sizing: border-box;margin:0 auto; padding: 0 var(--affine-editor-side-padding); max-width: var(--affine-editor-width);">
 ${htmlContent}
 </div>
 </body>
