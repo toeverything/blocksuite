@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BlockStdProvider } from '../provider/index.js';
 import { PathFinder } from '../utils/index.js';
 import type { NodeView, NodeViewTree, SpecToNodeView } from './type.js';
 
@@ -17,20 +16,20 @@ const observeOptions = {
   subtree: true,
 };
 
-export class ViewStore<NodeViewType = unknown> {
-  private _cachedTree: NodeViewTree<NodeViewType> | null = null;
-  private _cachedPath: Map<Node, NodeView<NodeViewType>[]> = new Map();
+export class ViewStore {
+  private _cachedTree: NodeViewTree | null = null;
+  private _cachedPath: Map<Node, NodeView[]> = new Map();
   private _observer: MutationObserver;
   readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
-  constructor(public std: BlockStdProvider) {
+  constructor(public std: BlockSuite.Std) {
     this._observer = new MutationObserver(() => {
       this._cachedPath.clear();
       this._cachedTree = null;
     });
   }
 
-  getChildren = (path: string[]): NodeViewTree<NodeViewType>[] => {
+  getChildren = (path: string[]): NodeViewTree[] => {
     const node = this.fromPath(path);
     if (!node) {
       return [];
@@ -42,13 +41,13 @@ export class ViewStore<NodeViewType = unknown> {
     this.viewSpec.add(spec);
   }
 
-  getNodeView = (node: Node): NodeView<NodeViewType> | null => {
+  getNodeView = (node: Node): NodeView | null => {
     for (const [_, spec] of this.viewSpec.entries()) {
       const view = spec.fromDOM(node);
       if (view) {
         return {
           ...view,
-        } as NodeView<NodeViewType>;
+        } as NodeView;
       }
     }
     return null;
@@ -65,14 +64,14 @@ export class ViewStore<NodeViewType = unknown> {
 
   private _calculateNodeViewPath = (node: Node) => {
     if (this._cachedPath.has(node)) {
-      return this._cachedPath.get(node) as NodeView<NodeViewType>[];
+      return this._cachedPath.get(node) as NodeView[];
     }
     const root = this.std.root;
 
     const iterate = (
       node: Node | null,
-      path: Array<NodeView<NodeViewType>>
-    ): Array<NodeView<NodeViewType>> => {
+      path: Array<NodeView>
+    ): Array<NodeView> => {
       if (!node || node === root) return path;
       const nodeView = this.getNodeView(node);
       if (!nodeView) {
@@ -92,12 +91,12 @@ export class ViewStore<NodeViewType = unknown> {
     return path;
   };
 
-  getNodeViewTree = (): NodeViewTree<NodeViewType> => {
+  getNodeViewTree = (): NodeViewTree => {
     if (this._cachedTree) {
       return this._cachedTree;
     }
 
-    const iterate = (node: Node): NodeViewTree<NodeViewType> => {
+    const iterate = (node: Node): NodeViewTree => {
       const nodeView = this.getNodeView(node);
       if (!nodeView) {
         throw new Error('nodeView not found');
@@ -122,14 +121,14 @@ export class ViewStore<NodeViewType = unknown> {
       id: '__root__',
       path: [],
       children: [iterate(firstBlock)],
-    } as Partial<NodeViewTree<NodeViewType>> as NodeViewTree<NodeViewType>;
+    } as Partial<NodeViewTree> as NodeViewTree;
     this._cachedTree = tree;
     return tree;
   };
 
   fromPath = (path: string[]) => {
     const tree = this.getNodeViewTree();
-    return path.reduce((curr: NodeViewTree<NodeViewType> | null, id) => {
+    return path.reduce((curr: NodeViewTree | null, id) => {
       if (!curr) {
         return null;
       }
@@ -162,9 +161,9 @@ export class ViewStore<NodeViewType = unknown> {
 
   walkThrough = (
     fn: (
-      nodeView: NodeViewTree<NodeViewType>,
+      nodeView: NodeViewTree,
       index: number,
-      parent: NodeViewTree<NodeViewType>
+      parent: NodeViewTree
     ) => undefined | null | true,
     path: string[] = []
   ) => {
@@ -172,8 +171,7 @@ export class ViewStore<NodeViewType = unknown> {
     assertExists(tree, `Invalid path to get node in view: ${path}`);
 
     const iterate =
-      (parent: NodeViewTree<NodeViewType>) =>
-      (node: NodeViewTree<NodeViewType>, index: number) => {
+      (parent: NodeViewTree) => (node: NodeViewTree, index: number) => {
         const result = fn(node, index, parent);
         if (result === true) {
           return;
@@ -194,11 +192,11 @@ export class ViewStore<NodeViewType = unknown> {
   findPrev = (
     path: string[],
     fn: (
-      nodeView: NodeViewTree<NodeViewType>,
+      nodeView: NodeViewTree,
       index: number,
-      parent: NodeViewTree<NodeViewType>
+      parent: NodeViewTree
     ) => undefined | null | true
-  ): NodeViewTree<NodeViewType> | null => {
+  ): NodeViewTree | null => {
     const getPrev = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {
@@ -224,7 +222,7 @@ export class ViewStore<NodeViewType = unknown> {
       };
     };
 
-    let output: null | NodeViewTree<NodeViewType> = null;
+    let output: null | NodeViewTree = null;
     const iterate = (path: string[]) => {
       const state = getPrev(path);
       if (!state) {
@@ -249,11 +247,11 @@ export class ViewStore<NodeViewType = unknown> {
   findNext = (
     path: string[],
     fn: (
-      nodeView: NodeViewTree<NodeViewType>,
+      nodeView: NodeViewTree,
       index: number,
-      parent: NodeViewTree<NodeViewType>
+      parent: NodeViewTree
     ) => undefined | null | true
-  ): NodeViewTree<NodeViewType> | null => {
+  ): NodeViewTree | null => {
     const getNext = (path: string[]) => {
       const parent = this.getParent(path);
       if (!parent) {
@@ -279,7 +277,7 @@ export class ViewStore<NodeViewType = unknown> {
       };
     };
 
-    let output: null | NodeViewTree<NodeViewType> = null;
+    let output: null | NodeViewTree = null;
     const iterate = (path: string[]) => {
       const state = getNext(path);
       if (!state) {
@@ -320,7 +318,7 @@ export class ViewStore<NodeViewType = unknown> {
     this.viewSpec.clear();
   }
 
-  private _indexOf = (path: string[], parent: NodeViewTree<unknown>) => {
+  private _indexOf = (path: string[], parent: NodeViewTree) => {
     return parent.children.findIndex(x => x.id === path[path.length - 1]);
   };
 }
