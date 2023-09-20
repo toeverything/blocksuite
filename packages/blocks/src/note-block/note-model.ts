@@ -1,6 +1,6 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-import { EDITOR_WIDTH } from '../__internal__/consts.js';
+import { NOTE_WIDTH } from '../__internal__/consts.js';
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
 
 export const NOTE_COLORS: CssVariableName[] = [
@@ -17,7 +17,7 @@ export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: () => ({
-    xywh: `[0,0,${EDITOR_WIDTH},95]`,
+    xywh: `[0,0,${NOTE_WIDTH},95]`,
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,

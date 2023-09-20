@@ -65,6 +65,14 @@ export class DocPageBlockComponent extends BlockElement<
       padding-right: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
     }
 
+    /* Extra small devices (phones, 640px and down) */
+    @media screen and (max-width: 640px) {
+      .affine-doc-page-block-container {
+        padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
+        padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
+      }
+    }
+
     .affine-doc-page-block-title {
       width: 100%;
       font-size: 40px;

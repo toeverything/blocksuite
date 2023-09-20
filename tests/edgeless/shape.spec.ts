@@ -16,6 +16,7 @@ import {
   setEdgelessTool,
   switchEditorMode,
   triggerComponentToolbarAction,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
@@ -334,6 +335,7 @@ test('click to add shape', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   await setEdgelessTool(page, 'shape');
   await waitNextFrame(page, 500);
@@ -350,6 +352,7 @@ test('dbclick to add text in shape', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   await setEdgelessTool(page, 'shape');
   await waitNextFrame(page, 500);
@@ -397,6 +400,7 @@ test('auto wrap text in shape', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   await setEdgelessTool(page, 'shape');
   await waitNextFrame(page, 500);

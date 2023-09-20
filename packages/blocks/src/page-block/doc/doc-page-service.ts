@@ -5,9 +5,11 @@ import {
   deleteSelectedBlockCommand,
   deleteSelectedTextCommand,
   getBlockIndexCommand,
+  getBlockSelectionsCommand,
   getNextBlockCommand,
-  getPreviousBlockCommand,
+  getPrevBlockCommand,
   getSelectedModelsCommand,
+  getTextSelectionCommand,
 } from '../commands/index.js';
 
 export class DocPageService extends BlockService {
@@ -15,11 +17,13 @@ export class DocPageService extends BlockService {
     super.mounted();
     this.std.command
       .add('getNextBlock', getNextBlockCommand)
-      .add('getPreviousBlock', getPreviousBlockCommand)
+      .add('getPrevBlock', getPrevBlockCommand)
       .add('getSelectedModels', getSelectedModelsCommand)
       .add('getBlockIndex', getBlockIndexCommand)
       .add('deleteSelectedText', deleteSelectedTextCommand)
       .add('deleteSelectedBlock', deleteSelectedBlockCommand)
-      .add('copySelectedBlock', copySelectedBlockCommand);
+      .add('copySelectedBlock', copySelectedBlockCommand)
+      .add('getBlockSelections', getBlockSelectionsCommand)
+      .add('getTextSelection', getTextSelectionCommand);
   }
 }

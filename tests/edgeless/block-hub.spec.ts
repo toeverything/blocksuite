@@ -1,6 +1,10 @@
 import { expect } from '@playwright/test';
 
-import { deleteAll, switchEditorMode } from '../utils/actions/edgeless.js';
+import {
+  deleteAll,
+  switchEditorMode,
+  zoomResetByKeyboard,
+} from '../utils/actions/edgeless.js';
 import {
   click,
   dragBetweenCoords,
@@ -23,6 +27,7 @@ test('block hub should drag and drop a card into existing note', async ({
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
 
@@ -55,6 +60,7 @@ test('block hub should add new note when dragged to blank area', async ({
   await assertRichTexts(page, ['123', '456', '789']);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
 
