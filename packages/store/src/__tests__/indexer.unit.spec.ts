@@ -68,16 +68,13 @@ describe('workspace.search works', () => {
       expect(workspace.search('索尼')).toStrictEqual(new Map([['3', `${id}`]]));
     });
 
-    const update = encodeStateAsUpdate(page.spaceDoc);
-    const schema = new Schema();
     const workspace2 = new Workspace({
-      schema,
+      schema: page.workspace.schema,
       id: 'test',
     });
-    const page2 = workspace2.createPage({
-      id: 'page:home',
-    });
-    applyUpdate(page2.spaceDoc, update);
+    applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace.doc));
+    const page2 = workspace2.getPage('page:home');
+    applyUpdate(page2.spaceDoc, encodeStateAsUpdate(page.spaceDoc));
     expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
     queueMicrotask(() => {
       expect(workspace2.search('处理器')).toStrictEqual(

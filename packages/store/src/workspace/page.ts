@@ -94,7 +94,6 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
-    this._handleVersion();
 
     this.syncFromExistingDoc();
   }
@@ -640,10 +639,6 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   public syncFromExistingDoc() {
-    if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
-      this._handleVersion();
-    }
-
     this._initYBlocks();
 
     const visited = new Set<string>();
@@ -881,19 +876,4 @@ export class Page extends Space<FlatBlockMap> {
     }
     this.slots.yUpdated.emit();
   };
-
-  validateVersion() {
-    this.workspace.meta.validateVersion(this.workspace);
-  }
-
-  private _handleVersion() {
-    // Page doc is always after workspace root doc, so we can safely assume that
-    //  if the workspace root doc has the version,
-    //  the page doc is loaded from the outside.
-    if (!this.workspace.meta.hasVersion) {
-      this.workspace.meta.writeVersion(this.workspace);
-    } else {
-      this.validateVersion();
-    }
-  }
 }

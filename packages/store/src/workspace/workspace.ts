@@ -99,6 +99,7 @@ export class Workspace extends WorkspaceAddonType {
 
   private _bindSpacesEvents() {
     this._store.doc.spaces.observe(event => {
+      this._handleVersion();
       event.changes.keys.forEach((change, pageId) => {
         switch (change.action) {
           case 'add': {
@@ -204,5 +205,20 @@ export class Workspace extends WorkspaceAddonType {
     this._store.removeSpace(page);
     page.remove();
     this.slots.pageRemoved.emit(pageId);
+  }
+
+  public validateVersion() {
+    this.meta.validateVersion(this);
+  }
+
+  private _handleVersion() {
+    // Page doc is always after workspace root doc, so we can safely assume that
+    //  if the workspace root doc has the version,
+    //  the page doc is loaded from the outside.
+    if (!this.meta.hasVersion) {
+      this.meta.writeVersion(this);
+    } else {
+      this.validateVersion();
+    }
   }
 }
