@@ -179,7 +179,7 @@ test('copy to clipboard as PNG', async ({ page, context }) => {
   await assertBlockCount(page, 'note', 1);
 });
 
-test.only('should auto panning when selection rectangle reaches viewport edges', async ({
+test('should auto panning when selection rectangle reaches viewport edges', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
