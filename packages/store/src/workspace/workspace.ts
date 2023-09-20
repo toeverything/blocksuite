@@ -111,8 +111,9 @@ export class Workspace extends WorkspaceAddonType {
               awarenessStore: this.awarenessStore,
               idGenerator: this._store.idGenerator,
             });
-            // this page is loaded from yjs update,
-            // so we don't need to load it manually.
+
+            // This page is loaded from yjs update,
+            //  so we don't need to load it manually.
             this._store.addSpace(page);
             this.slots.pageAdded.emit(page.id);
             return;
