@@ -2,7 +2,6 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
-import { sleep } from '@blocksuite/global/utils';
 import { v4 as uuid } from 'uuid';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
@@ -119,20 +118,24 @@ describe('basic', () => {
     });
   });
 
-  it('can blocks init', async () => {
+  it('can blocks init in 10 rounds', async () => {
+    const workspace1 = new Workspace(createTestOptions(uuid()));
+    const page1 = workspace1.createPage({ id: uuid() });
+    const id = page1.addBlock('affine:page', {});
+    // randomly create 10 workspaces
     for (let i = 0; i < 10; i++) {
-      const workspace1 = new Workspace(createTestOptions(uuid()));
       const pageId = uuid();
-      const page1 = workspace1.createPage({ id: pageId });
       const workspace2 = new Workspace(createTestOptions(uuid()));
       await page1.waitForLoaded();
       const page2 = workspace2.createPage({ id: pageId });
       await page2.waitForLoaded();
-      const id = page1.addBlock('affine:page', {});
       {
         applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
         const page2Doc = (workspace2.doc.getMap('spaces') as YMap<Doc>).get(
           pageId
+        );
+        expect(page2Doc, `page2Doc not found in round ${i}`).not.toBe(
+          undefined
         );
         applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
         const blocks = page2Doc.getMap('blocks');
