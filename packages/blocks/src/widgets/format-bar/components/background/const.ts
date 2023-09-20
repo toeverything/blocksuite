@@ -26,4 +26,9 @@ export const backgroundConfig: BackgroundConfig[] = [
     color: `var(--affine-text-highlight-${color})`,
     hotkey: null,
   })),
+  {
+    name: 'Spoiler',
+    color: 'var(--affine-text-primary-color)',
+    hotkey: null,
+  },
 ];
