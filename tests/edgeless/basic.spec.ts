@@ -2,7 +2,7 @@
 
 import { expect } from '@playwright/test';
 
-import { EDITOR_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
 import { assertExists } from '../../packages/global/src/utils.js';
 import {
   createShapeElement,
@@ -74,10 +74,10 @@ test('can zoom viewport', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
 
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [80, 402.5, EDITOR_WIDTH, 95];
+  const original = [80, 402.5, NOTE_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
   await assertZoomLevel(page, 100);
 
@@ -107,10 +107,10 @@ test('zoom by mouse', async ({ page }) => {
   await zoomResetByKeyboard(page);
   await assertZoomLevel(page, 100);
 
-  await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
+  await assertNoteXYWH(page, [0, 0, NOTE_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [80, 402.5, EDITOR_WIDTH, 95];
+  const original = [80, 402.5, NOTE_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);

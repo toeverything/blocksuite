@@ -24,7 +24,7 @@ import {
   Transformer,
   VARIABLES,
 } from '@blocksuite/blocks';
-import { EDITOR_WIDTH } from '@blocksuite/blocks';
+import { NOTE_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
@@ -272,7 +272,7 @@ export class DebugMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},${EDITOR_WIDTH},95]`;
+    const xywh = `[0,${count * 60},${NOTE_WIDTH},95]`;
 
     const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
     this.page.addBlock('affine:paragraph', {}, noteId);
