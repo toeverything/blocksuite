@@ -42,7 +42,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   modelSubscribed = new Set<string>();
 
-  std!: BlockStdProvider<StaticValue, BlockElement | WidgetElement>;
+  std!: BlockSuite.Std;
 
   rangeManager: RangeManager | null = null;
 
@@ -250,5 +250,16 @@ function getChildren(
 declare global {
   interface HTMLElementTagNameMap {
     'block-suite-root': BlockSuiteRoot;
+  }
+
+  namespace BlockSuite {
+    interface ComponentType {
+      lit: StaticValue;
+    }
+
+    interface NodeView {
+      block: BlockElement;
+      widget: WidgetElement;
+    }
   }
 }

@@ -1,4 +1,3 @@
-import type { BlockStdProvider } from '../provider/index.js';
 import type { BlockService } from '../service/index.js';
 import type { BlockSpec } from './index.js';
 
@@ -6,7 +5,7 @@ export class SpecStore<ComponentType = unknown> {
   private _specs: Map<string, BlockSpec<ComponentType>> = new Map();
   private _services: Map<string, BlockService> = new Map();
 
-  constructor(public std: BlockStdProvider) {}
+  constructor(public std: BlockSuite.Std) {}
 
   dispose() {
     this._services.forEach(service => {

@@ -49,3 +49,14 @@ export class BlockStdProvider<ComponentType = unknown, NodeView = unknown> {
     this.spec.dispose();
   }
 }
+
+type Values<T> = T[keyof T] extends never ? unknown : T[keyof T];
+
+declare global {
+  namespace BlockSuite {
+    interface ComponentType {}
+    interface NodeView {}
+
+    type Std = BlockStdProvider<Values<ComponentType>, Values<NodeView>>;
+  }
+}

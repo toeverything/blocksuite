@@ -1,6 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
 
-import type { BlockStdProvider } from '../provider/index.js';
 import { PathFinder } from '../utils/index.js';
 import type { NodeView, NodeViewTree, SpecToNodeView } from './type.js';
 
@@ -23,7 +22,7 @@ export class ViewStore<NodeViewType = unknown> {
   private _observer: MutationObserver;
   readonly viewSpec = new Set<BlockSuiteViewSpec>();
 
-  constructor(public std: BlockStdProvider) {
+  constructor(public std: BlockSuite.Std) {
     this._observer = new MutationObserver(() => {
       this._cachedPath.clear();
       this._cachedTree = null;
