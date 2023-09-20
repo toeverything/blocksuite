@@ -7,9 +7,11 @@ import { formatBlockCommand } from '../commands/format/format-block.js';
 import { formatNativeCommand } from '../commands/format/format-native.js';
 import { formatTextCommand } from '../commands/format/format-text.js';
 import { getBlockIndexCommand } from '../commands/get-block-index.js';
+import { getBlockSelectionsCommand } from '../commands/get-block-selection-by-side.js';
 import { getNextBlockCommand } from '../commands/get-next-block.js';
-import { getPreviousBlockCommand } from '../commands/get-previous-block.js';
+import { getPrevBlockCommand } from '../commands/get-prev-block.js';
 import { getSelectedModelsCommand } from '../commands/get-selected-models.js';
+import { getTextSelectionCommand } from '../commands/get-text-selection.js';
 import type { PageBlockModel } from '../page-model.js';
 
 export class EdgelessPageService extends BlockService<PageBlockModel> {
@@ -17,7 +19,7 @@ export class EdgelessPageService extends BlockService<PageBlockModel> {
     super.mounted();
     this.std.command
       .add('getNextBlock', getNextBlockCommand)
-      .add('getPreviousBlock', getPreviousBlockCommand)
+      .add('getPrevBlock', getPrevBlockCommand)
       .add('getSelectedModels', getSelectedModelsCommand)
       .add('getBlockIndex', getBlockIndexCommand)
       .add('deleteSelectedText', deleteSelectedTextCommand)
@@ -25,7 +27,9 @@ export class EdgelessPageService extends BlockService<PageBlockModel> {
       .add('copySelectedBlock', copySelectedBlockCommand)
       .add('formatText', formatTextCommand)
       .add('formatBlock', formatBlockCommand)
-      .add('formatNative', formatNativeCommand);
+      .add('formatNative', formatNativeCommand)
+      .add('getBlockSelections', getBlockSelectionsCommand)
+      .add('getTextSelection', getTextSelectionCommand);
   }
 
   override unmounted() {

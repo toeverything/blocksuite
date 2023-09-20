@@ -55,7 +55,7 @@ export const formatBlockCommand: Command<
   });
 
   await Promise.all(selectedElements.map(el => el.updateComplete));
-  await next();
+  next();
 };
 
 declare global {

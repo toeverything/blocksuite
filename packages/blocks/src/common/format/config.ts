@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 
@@ -93,12 +92,8 @@ export const formatConfig: formatConfig[] = [
           chain.formatBlock(resetPayload),
           chain.formatNative(resetPayload),
         ])
-        .run()
-        .then(() => {
-          const textSelection = root.selection.find('text');
-          assertExists(textSelection);
-          toggleLink(root, textSelection);
-        });
+        .run();
+      toggleLink(root);
     },
   },
 ];

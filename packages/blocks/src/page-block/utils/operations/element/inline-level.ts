@@ -1,4 +1,3 @@
-import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
@@ -8,7 +7,7 @@ import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.
 import { showLinkPopover } from '../../../../components/rich-text/virgo/nodes/link-node/link-popover/create-link-popover.js';
 import { LinkMockSelection } from '../../../../components/rich-text/virgo/nodes/link-node/mock-selection.js';
 
-export function toggleLink(root: BlockSuiteRoot, textSelection: TextSelection) {
+export function toggleLink(root: BlockSuiteRoot) {
   const selection = document.getSelection();
   if (!selection || selection.rangeCount === 0) return;
   const range = selection.getRangeAt(0);
@@ -22,7 +21,8 @@ export function toggleLink(root: BlockSuiteRoot, textSelection: TextSelection) {
   const vEditor = vRoot.virgoEditor;
   assertExists(vEditor);
 
-  const vRange = textSelection.from;
+  const vRange = vEditor.getVRange();
+  if (!vRange) return;
   const format = vEditor.getFormat(vRange);
   const page = root.page;
 

@@ -80,7 +80,7 @@ export const formatTextCommand: Command<
 
   root.rangeManager?.syncTextSelectionToRange(textSelection);
 
-  await next();
+  next();
 };
 
 declare global {
