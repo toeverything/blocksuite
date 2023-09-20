@@ -70,7 +70,7 @@ test.describe('copy&paste when selecting', () => {
 
     await copyByKeyboard(page);
     await pressArrowDown(page);
-    await pasteByKeyboard(page);
+    await pasteByKeyboard(page, false);
     await waitNextFrame(page);
     await assertDatabaseTitleColumnText(page, 'abc123', 1);
   });
@@ -156,7 +156,7 @@ test.describe('copy&paste when selecting', () => {
 
     await initDatabaseRowWithData(page, '');
     await pressEscape(page);
-    await pasteByKeyboard(page);
+    await pasteByKeyboard(page, false);
     await waitNextFrame(page);
 
     await assertDatabaseTitleColumnText(page, 'text1', 1);

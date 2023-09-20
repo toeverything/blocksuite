@@ -290,7 +290,7 @@ test('should support drag to change column width', async ({ page }) => {
     }
   );
 
-  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance + 1);
+  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
   await assertColumnWidth(normalColumn, normalColumnWidth);
 
   await undoByClick(page);
