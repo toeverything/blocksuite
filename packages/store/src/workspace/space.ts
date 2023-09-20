@@ -22,9 +22,9 @@ export class Space<
    * @internal Used for convenient access to the underlying Yjs map,
    * can be used interchangeably with ySpace
    */
-  protected _proxy: State;
-  protected _ySpaceDoc: Y.Doc;
-  protected _yBlocks: Y.Map<State[keyof State]>;
+  protected readonly _proxy: State;
+  protected readonly _ySpaceDoc: Y.Doc;
+  protected readonly _yBlocks: Y.Map<State[keyof State]>;
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     this.id = id;
