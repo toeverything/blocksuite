@@ -213,8 +213,7 @@ export class Workspace extends WorkspaceAddonType {
 
   private _handleVersion() {
     // Page doc is always after workspace root doc, so we can safely assume that
-    //  if the workspace root doc has the version,
-    //  the page doc is loaded from the outside.
+    //  the workspace root doc version is the source of truth.
     if (!this.meta.hasVersion) {
       this.meta.writeVersion(this);
     } else {
