@@ -23,6 +23,7 @@ import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { calPanDelta, type MoveDelta } from '../utils/panning-utils.js';
 import {
   isPhasorElement,
   isTopLevelBlock,
@@ -60,7 +61,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   dragType = DefaultModeDragType.None;
 
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
-  private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
+  // private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
+  private _dragStartModelCoord: { x: number; y: number } = { x: 0, y: 0 };
+  private _dragLastModelCoord: { x: number; y: number } = { x: 0, y: 0 };
   private _lastMoveDelta = { x: 0, y: 0 };
   private _lock = false;
   // Do not select the text, when click again after activating the note.
@@ -69,12 +72,21 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _selectedBounds: Bound[] = [];
   private _toBeMoved: Selectable[] = [];
   private _frames = new Set<FrameElement>();
+  private _autoPanTimer: number | null = null;
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
+      const [startX, startY] = this._surface.toViewCoord(
+        this._dragStartModelCoord.x,
+        this._dragStartModelCoord.y
+      );
+      const [endX, endY] = this._surface.toViewCoord(
+        this._dragLastModelCoord.x,
+        this._dragLastModelCoord.y
+      );
       return {
-        start: new DOMPoint(this._dragStartPos.x, this._dragStartPos.y),
-        end: new DOMPoint(this._dragLastPos.x, this._dragLastPos.y),
+        start: new DOMPoint(startX, startY),
+        end: new DOMPoint(endX, endY),
       };
     }
     return null;
@@ -364,6 +376,59 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
+  private _updateSelectingState = (e: PointerEventState) => {
+    const { surface } = this._edgeless;
+    const startX = this._dragStartModelCoord.x;
+    const startY = this._dragStartModelCoord.y;
+    const [curX, curY] = surface.toModelCoord(e.x, e.y);
+    const x = Math.min(startX, curX);
+    const y = Math.min(startY, curY);
+
+    // const [x, y] = surface.toModelCoord(viewX, viewY);
+    const w = Math.abs(startX - curX);
+    const h = Math.abs(startY - curY);
+    // const { zoom } = surface.viewport;
+    const bound = new Bound(x, y, w, h);
+
+    const blocks = pickBlocksByBound(this._blocks, bound);
+    const elements = surface.pickByBound(bound);
+    this._setSelectionState(
+      [
+        ...blocks.map(block => block.id),
+        ...elements.map(element => element.id),
+      ],
+      false
+    );
+
+    this._dragLastModelCoord = { x: curX, y: curY };
+    this._forceUpdateSelection(this.dragType, true);
+    this._edgeless.slots.draggingAreaUpdated.emit();
+  };
+
+  private _stopAutoPan = () => {
+    if (this._autoPanTimer) {
+      clearTimeout(this._autoPanTimer);
+      this._autoPanTimer = null;
+    }
+  };
+
+  private _startAutoPan = (delta: MoveDelta, e: PointerEventState) => {
+    this._stopAutoPan();
+
+    this._autoPanTimer = window.setInterval(() => {
+      const { viewport } = this._edgeless.surface;
+      viewport.applyDeltaCenter(delta.x, delta.y);
+      this._updateSelectingState(e);
+    }, 30);
+  };
+
+  private _clearSelectingState = () => {
+    this._stopAutoPan();
+    this._dragStartModelCoord = { x: 0, y: 0 };
+    this._dragLastModelCoord = { x: 0, y: 0 };
+    this._edgeless.slots.draggingAreaUpdated.emit();
+  };
+
   async onContainerDragStart(e: PointerEventState) {
     // Determine the drag type based on the current state and event
     let dragType = this._determineDragType(e);
@@ -393,7 +458,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const { x, y } = e;
     this.dragType = dragType;
     this._dragStartPos = { x, y };
-    this._dragLastPos = { x, y };
+    // this._dragLastPos = { x, y };
+    const [startX, startY] = this._surface.toModelCoord(x, y);
+    this._dragStartModelCoord = { x: startX, y: startY };
+    this._dragLastModelCoord = { x: startX, y: startY };
 
     this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
 
@@ -404,31 +472,17 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDragMove(e: PointerEventState) {
     const { surface } = this._edgeless;
-    const zoom = surface.viewport.zoom;
+    const { viewport } = surface;
+    const zoom = viewport.zoom;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
-        const startX = this._dragStartPos.x;
-        const startY = this._dragStartPos.y;
-        const viewX = Math.min(startX, e.x);
-        const viewY = Math.min(startY, e.y);
-
-        const [x, y] = surface.toModelCoord(viewX, viewY);
-        const w = Math.abs(startX - e.x);
-        const h = Math.abs(startY - e.y);
-        const { zoom } = surface.viewport;
-        const bound = new Bound(x, y, w / zoom, h / zoom);
-
-        const blocks = pickBlocksByBound(this._blocks, bound);
-        const elements = surface.pickByBound(bound);
-        this._setSelectionState(
-          [
-            ...blocks.map(block => block.id),
-            ...elements.map(element => element.id),
-          ],
-          false
-        );
-
-        this._forceUpdateSelection(this.dragType, true);
+        this._updateSelectingState(e);
+        const moveDelta = calPanDelta(viewport, e);
+        if (moveDelta) {
+          this._startAutoPan(moveDelta, e);
+        } else {
+          this._stopAutoPan();
+        }
         break;
       }
       case DefaultModeDragType.AltCloning:
@@ -486,10 +540,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         break;
       }
     }
-    this._dragLastPos = {
-      x: e.x,
-      y: e.y,
-    };
   }
 
   onContainerDragEnd() {
@@ -503,7 +553,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
     const { surface } = this._edgeless;
     this._dragStartPos = { x: 0, y: 0 };
-    this._dragLastPos = { x: 0, y: 0 };
     this._selectedBounds = [];
     this._lastMoveDelta = { x: 0, y: 0 };
     surface.snap.cleanupAlignables();
@@ -515,6 +564,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._frames.clear();
     this._toBeMoved = [];
     this._forceUpdateSelection(this.dragType);
+    this._clearSelectingState();
     this.dragType = DefaultModeDragType.None;
   }
 
