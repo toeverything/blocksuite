@@ -77,20 +77,24 @@ test('can zoom viewport', async ({ page }) => {
   await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 402.5, EDITOR_WIDTH, 95];
+  const original = [80, 402.5, EDITOR_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
-  let box = await getEdgelessHoverRect(page);
+  await assertZoomLevel(page, 100);
 
   await decreaseZoomLevel(page);
+  await assertZoomLevel(page, 75);
   await decreaseZoomLevel(page);
+  await assertZoomLevel(page, 50);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  box = await getEdgelessHoverRect(page);
+  const box = await getEdgelessHoverRect(page);
   const zoomed = [box.x, box.y, original[2] * 0.5, original[3] * 0.5];
   await assertEdgelessHoverRect(page, zoomed);
 
   await increaseZoomLevel(page);
+  await assertZoomLevel(page, 75);
   await increaseZoomLevel(page);
+  await assertZoomLevel(page, 100);
   await page.mouse.move(CENTER_X, CENTER_Y);
   await assertEdgelessHoverRect(page, original);
 });
@@ -100,16 +104,20 @@ test('zoom by mouse', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+  await assertZoomLevel(page, 100);
+
   await assertNoteXYWH(page, [0, 0, EDITOR_WIDTH, 95]);
   await page.mouse.move(CENTER_X, CENTER_Y);
 
-  const original = [50, 402.5, EDITOR_WIDTH, 95];
+  const original = [80, 402.5, EDITOR_WIDTH, 95];
   await assertEdgelessHoverRect(page, original);
 
   await zoomByMouseWheel(page, 0, 125);
   await page.mouse.move(CENTER_X, CENTER_Y);
+  await assertZoomLevel(page, 75);
 
-  const zoomed = [150, 414.375, original[2] * 0.75, original[3] * 0.75];
+  const zoomed = [172.5, 414.375, original[2] * 0.75, original[3] * 0.75];
   await assertEdgelessHoverRect(page, zoomed);
 });
 
@@ -117,6 +125,7 @@ test('option/alt mouse drag duplicate a new element', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await deleteAll(page);
 
   const start = [0, 0];
@@ -138,6 +147,7 @@ test('should cancel select when the selected point is outside the current select
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
 
   const firstStart = { x: 100, y: 100 };
   const firstEnd = { x: 200, y: 200 };
@@ -252,6 +262,7 @@ test('Before and after switching to Edgeless, the previous zoom ratio and positi
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
   await assertZoomLevel(page, 100);
   await increaseZoomLevel(page);
   await assertZoomLevel(page, 125);

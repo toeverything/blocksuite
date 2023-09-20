@@ -1,4 +1,7 @@
-import { switchEditorMode } from '../utils/actions/edgeless.js';
+import {
+  switchEditorMode,
+  zoomResetByKeyboard,
+} from '../utils/actions/edgeless.js';
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
@@ -18,6 +21,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
 
     await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
     await page.mouse.move(110, 110);
@@ -57,6 +61,7 @@ test.describe('resizing shapes and aspect ratio will be maintained', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
 
     await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
     await page.mouse.move(110, 110);

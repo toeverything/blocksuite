@@ -67,6 +67,7 @@ import {
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
+  assertZoomLevel,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
@@ -1020,13 +1021,20 @@ test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
     { x: 800, y: 800 },
     { steps: 10 }
   );
-  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 463.5]);
+  const zoom = 1.075;
+  await assertZoomLevel(page, zoom * 100);
+  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH * zoom, 472]);
 
   await copyByKeyboard(page);
   await page.mouse.move(800, 400);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [400, 168.25, EDITOR_WIDTH, 463.5]);
+  await assertEdgelessSelectedRect(page, [
+    370,
+    163.99,
+    EDITOR_WIDTH * zoom,
+    472,
+  ]);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {
