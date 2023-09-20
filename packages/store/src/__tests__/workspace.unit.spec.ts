@@ -198,6 +198,7 @@ describe('basic', () => {
       const page2 = workspace2.getPage('space:0');
       assertExists(page2);
       applyUpdate(page2.spaceDoc, update);
+      page2.spaceDoc.emit('load', []);
       expect(workspace2.doc.toJSON()['spaces']).toEqual({
         'space:0': {
           blocks: {

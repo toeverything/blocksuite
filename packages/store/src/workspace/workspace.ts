@@ -37,7 +37,8 @@ export class Workspace extends WorkspaceAddonType {
     this._store = new Store(storeOptions);
 
     this.meta = new WorkspaceMeta(this.doc);
-    this._bindPageMetaEvents();
+
+    this._bindSpacesEvents();
   }
 
   get id() {
@@ -96,26 +97,39 @@ export class Workspace extends WorkspaceAddonType {
     return space ?? null;
   }
 
-  private _bindPageMetaEvents() {
-    this.meta.pageMetaAdded.on(pageId => {
-      const page = new Page({
-        id: pageId,
-        workspace: this,
-        doc: this.doc,
-        awarenessStore: this.awarenessStore,
-        idGenerator: this._store.idGenerator,
+  private _bindSpacesEvents() {
+    this._store.doc.spaces.observe(event => {
+      event.changes.keys.forEach((change, pageId) => {
+        switch (change.action) {
+          case 'add': {
+            if (this._hasPage(pageId)) return;
+
+            const page = new Page({
+              id: pageId,
+              workspace: this,
+              doc: this.doc,
+              awarenessStore: this.awarenessStore,
+              idGenerator: this._store.idGenerator,
+            });
+            // this page is loaded from yjs update,
+            // so we don't need to load it manually.
+            this._store.addSpace(page);
+            this.slots.pageAdded.emit(page.id);
+            return;
+          }
+          case 'delete': {
+            const pageMeta = this.meta.getPageMeta(pageId);
+            if (!pageMeta) return;
+            this.meta.removePageMeta(pageId);
+            this.slots.pageRemoved.emit(pageId);
+            return;
+          }
+          case 'update': {
+            // have no idea what to do here
+            return;
+          }
+        }
       });
-      this._store.addSpace(page);
-      this.slots.pageAdded.emit(page.id);
-    });
-
-    this.meta.pageMetasUpdated.on(() => this.slots.pagesUpdated.emit());
-
-    this.meta.pageMetaRemoved.on(id => {
-      const page = this.getPage(id) as Page;
-      this._store.removeSpace(page);
-      page.remove();
-      this.slots.pageRemoved.emit(id);
     });
   }
 
@@ -148,6 +162,23 @@ export class Workspace extends WorkspaceAddonType {
       createDate: +new Date(),
       tags: [],
     });
+
+    const page = new Page({
+      id: pageId,
+      workspace: this,
+      doc: this.doc,
+      awarenessStore: this.awarenessStore,
+      idGenerator: this._store.idGenerator,
+    });
+
+    // Explicitly load the page,
+    //  because the user calls `createPage` to create a page.
+    //  This indicates that the user wants to create a page,
+    //  not necessarily to wait for the page to load from the outside.
+    page.spaceDoc.emit('load', []);
+    this._store.addSpace(page);
+    this.slots.pageAdded.emit(page.id);
+
     return this.getPage(pageId) as Page;
   }
 
@@ -170,5 +201,7 @@ export class Workspace extends WorkspaceAddonType {
     page.dispose();
     this.meta.removePageMeta(pageId);
     this._store.removeSpace(page);
+    page.remove();
+    this.slots.pageRemoved.emit(pageId);
   }
 }
