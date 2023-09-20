@@ -59,23 +59,35 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   private _bar = createRef<HTMLElement>();
   private _startDrag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
-    const database = this.closest('affine-database-table');
-    const offsetParent = database?.offsetParent;
     const bar = this._bar.value;
     assertExists(bar);
-    assertExists(database);
-    assertExists(offsetParent);
     const rect = bar.getBoundingClientRect();
     const scale = rect.width / dragBarWidth;
     const tableRect = tableContainer.getBoundingClientRect();
     const left = rect.left + rect.width / 2 - this.column.width * scale - scale;
-
+    const groups = tableContainer.querySelectorAll(
+      'affine-data-view-table-group'
+    );
+    const rectList = Array.from(groups).map(group => {
+      const groupRect = group.getBoundingClientRect();
+      const top =
+        group
+          .querySelector('affine-database-column-header')
+          ?.getBoundingClientRect().top ?? groupRect.top;
+      const bottom =
+        group
+          .querySelector('.affine-database-block-rows')
+          ?.getBoundingClientRect().bottom ?? groupRect.bottom;
+      return {
+        top: top - tableRect.top,
+        bottom: bottom - tableRect.top,
+      };
+    });
     const preview = createWidthAdjustPreview(
-      database,
-      scale,
-      this.column.width,
-      tableRect.height / scale,
-      tableRect.top - scale,
+      document.body,
+      this.column.width * scale,
+      tableRect.top,
+      rectList,
       left
     );
     tableContainer.style.pointerEvents = 'none';
@@ -90,7 +102,7 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
           )
         );
         this.dragLeft = width - this.column.width;
-        preview.display(width);
+        preview.display(width * scale);
         return {
           width,
         };
@@ -128,33 +140,36 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
 
 const createWidthAdjustPreview = (
   container: Element,
-  scale: number,
   width: number,
-  height: number,
   top: number,
+  lines: { top: number; bottom: number }[],
   left: number
 ) => {
-  const div = document.createElement('div');
-  div.style.pointerEvents = 'none';
-  div.style.position = 'absolute';
-  div.style.width = `${width}px`;
-  div.style.height = `${height}px`;
-  div.style.zIndex = '9';
-  div.style.backgroundColor = 'rgba(0,0,0,0.3)';
-  container.append(div);
-  const parent = div.offsetParent;
-  assertExists(parent);
-  const rect = parent.getBoundingClientRect();
-  const offsetLeft = (left - rect.left) / scale;
-  const offsetTop = (top - rect.top) / scale;
-  div.style.left = `${offsetLeft}px`;
-  div.style.top = `${offsetTop}px`;
+  const previewContainer = document.createElement('div');
+  previewContainer.style.position = 'fixed';
+  lines.forEach(({ top, bottom }) => {
+    const div = document.createElement('div');
+    div.style.pointerEvents = 'none';
+    div.style.position = 'absolute';
+    div.style.width = `100%`;
+    div.style.height = `${bottom - top}px`;
+    div.style.top = `${top}px`;
+    div.style.left = `0`;
+    div.style.zIndex = '9';
+    div.style.backgroundColor = 'rgba(0,0,0,0.3)';
+    previewContainer.append(div);
+  });
+
+  container.append(previewContainer);
+  previewContainer.style.left = `${left}px`;
+  previewContainer.style.top = `${top}px`;
+  previewContainer.style.width = `${width}px`;
   return {
     display(width: number) {
-      div.style.width = `${width}px`;
+      previewContainer.style.width = `${width}px`;
     },
     remove() {
-      div.remove();
+      previewContainer.remove();
     },
   };
 };
