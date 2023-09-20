@@ -438,6 +438,9 @@ importers:
       lit:
         specifier: ^2.8.0
         version: 2.8.0
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
       yjs:
         specifier: ^13.6.8
         version: 13.6.8
@@ -6999,6 +7002,11 @@ packages:
 
   /uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    hasBin: true
+    dev: true
+
+  /uuid@9.0.1:
+    resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
     hasBin: true
     dev: true
 
