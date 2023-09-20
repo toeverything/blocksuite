@@ -104,7 +104,7 @@ export class Workspace extends WorkspaceAddonType {
     });
   }
 
-  private _handleSpaceEvent(event: Y.YMapEvent<Y.Doc>) {
+  private _handleSpaceEvent = (event: Y.YMapEvent<Y.Doc>) => {
     this._handleVersion();
     event.changes.keys.forEach((change, pageId) => {
       switch (change.action) {
@@ -138,7 +138,7 @@ export class Workspace extends WorkspaceAddonType {
         }
       }
     });
-  }
+  };
 
   /**
    * By default, only an empty page will be created.
