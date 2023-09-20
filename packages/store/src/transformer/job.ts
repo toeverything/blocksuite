@@ -175,6 +175,7 @@ export class Job {
       index,
     });
     const { children, flavour, props, id } = snapshot;
+
     const schema = this._getSchema(flavour);
     const snapshotLeaf = {
       id,
@@ -185,7 +186,9 @@ export class Job {
     const modelData = await transformer.fromSnapshot({
       json: snapshotLeaf,
       assets: this._assetsManager,
+      children,
     });
+
     page.addBlock(
       modelData.flavour,
       { ...modelData.props, id: modelData.id },
@@ -193,11 +196,9 @@ export class Job {
       index
     );
 
-    // Transform children one by one to make sure the order is correct
-    await children.reduce(async (acc, child, index): Promise<void> => {
-      await acc;
+    for (const child of children) {
       await this._snapshotToBlock(child, page, id, index);
-    }, Promise.resolve());
+    }
 
     const model = page.getBlockById(id);
     assertExists(model);

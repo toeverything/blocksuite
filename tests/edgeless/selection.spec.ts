@@ -36,6 +36,7 @@ test('should update rect of selection when resizing viewport', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await actions.switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
 
   await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
@@ -81,6 +82,7 @@ test('select multiple shapes and translate', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await page.mouse.move(110, 110);
@@ -109,6 +111,7 @@ test('selection box of shape element sync on fast dragging', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
 
   await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -131,6 +134,7 @@ test('when the selection is always a note, it should remain in an active state',
   await initThreeParagraphs(page);
 
   await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
   const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
   await setEdgelessTool(page, 'note');
@@ -145,7 +149,7 @@ test('when the selection is always a note, it should remain in an active state',
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [46, 597.5, 448, 128]);
+  await assertEdgelessSelectedRect(page, [76, 597.5, 448, 128]);
 
   await clickInCenter(page, bound);
   await clickInCenter(page, bound);

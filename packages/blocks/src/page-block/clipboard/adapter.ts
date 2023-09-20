@@ -57,11 +57,11 @@ export class ClipboardAdapter extends BaseAdapter<string> {
     const map = assets.getAssets();
     const blobs = await Array.from(map.entries()).reduce(
       async (acc, [id, blob]) => {
-        const text = encode(await blob.arrayBuffer());
+        const content = encode(await blob.arrayBuffer());
         const file: FileSnapshot = {
           name: blob.name,
           type: blob.type,
-          content: text,
+          content,
         };
         return {
           ...acc,

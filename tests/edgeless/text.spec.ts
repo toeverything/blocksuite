@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import {
   assertEdgelessTool,
@@ -17,6 +17,32 @@ import {
   assertEdgelessSelectedRect,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
+
+async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
+  const fontButton = page.locator('.text-font-family-button');
+  const fontPanel = page.locator('edgeless-font-family-panel');
+  const isFontPanelShow = await fontPanel.isVisible();
+  if (!isFontPanelShow) {
+    if (!fontButton.isVisible())
+      throw new Error('edgeless change text toolbar is not visible');
+
+    await fontButton.click();
+  }
+
+  const generalButton = fontPanel.locator('.general-button');
+  const scibbledButton = fontPanel.locator('.scibbled-button');
+  if (font === 'General') {
+    await expect(
+      generalButton.locator('.active-mode-background[active]')
+    ).toBeVisible();
+    return;
+  }
+  if (font === 'Scribbled') {
+    await expect(
+      scibbledButton.locator('.active-mode-background[active]')
+    ).toBeVisible();
+  }
+}
 
 // it's flaky
 test('add text element in default mode', async ({ page }) => {
@@ -101,7 +127,7 @@ test('copy and paste', async ({ page }) => {
 
   await page.mouse.move(145, 155);
   await page.mouse.down();
-  await page.mouse.move(165, 155, {
+  await page.mouse.move(170, 155, {
     steps: 10,
   });
   await page.mouse.up();
@@ -134,14 +160,21 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await page.mouse.click(10, 100);
 
   await page.mouse.click(140, 210);
-  await assertEdgelessSelectedRect(page, [130, 200, 106, 156]);
+  await waitNextFrame(page);
+  await assertEdgelessSelectedRect(page, [130, 200, 113.9, 167.6]);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
+
+  // Default is Scribbled
+  await assertTextFont(page, 'Scribbled');
   const generalTextFont = page.getByText('General');
   await generalTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 106.7, 108]);
+  await waitNextFrame(page);
+  await assertEdgelessSelectedRect(page, [130, 200, 114.7, 116]);
   await fontButton.click();
+  await assertTextFont(page, 'General');
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
-  await assertEdgelessSelectedRect(page, [130, 200, 104, 156]);
+  await waitNextFrame(page);
+  await assertEdgelessSelectedRect(page, [130, 200, 111.7, 167.6]);
 });

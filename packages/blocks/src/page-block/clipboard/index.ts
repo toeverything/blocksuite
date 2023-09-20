@@ -3,6 +3,7 @@ import { DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
+import { replaceIdMiddleware } from '../../api/transformer/utils.js';
 import { ClipboardAdapter } from './adapter.js';
 import { copyMiddleware, pasteMiddleware } from './middlewares/index.js';
 
@@ -53,12 +54,14 @@ export class ClipboardController implements ReactiveController {
     const paste = pasteMiddleware(this._std);
     this._std.clipboard.use(copy);
     this._std.clipboard.use(paste);
+    this._std.clipboard.use(replaceIdMiddleware);
 
     this._disposables.add({
       dispose: () => {
         this._std.clipboard.unregisterAdapter(ClipboardAdapter.MIME);
         this._std.clipboard.unuse(copy);
         this._std.clipboard.unuse(paste);
+        this._std.clipboard.unuse(replaceIdMiddleware);
       },
     });
   };
@@ -93,8 +96,8 @@ export class ClipboardController implements ReactiveController {
     this._std.command
       .pipe()
       .getBlockIndex()
-      .inline(async (ctx, next) => {
-        await this._std.clipboard.paste(
+      .inline((ctx, next) => {
+        this._std.clipboard.paste(
           e,
           this._std.page,
           ctx.parentBlock.model.id,
