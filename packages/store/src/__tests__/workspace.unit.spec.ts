@@ -2,8 +2,11 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
+import { assertEquals } from '@blocksuite/global/utils';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
+import type { Doc } from 'yjs';
+import type { Map as YMap } from 'yjs';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
@@ -28,11 +31,11 @@ export const BlockSchemas = [
   DividerBlockSchema,
 ];
 
-function createTestOptions() {
+function createTestOptions(id = 'test-workspace') {
   const idGenerator = Generator.AutoIncrement;
   const schema = new Schema();
   schema.register(BlockSchemas);
-  return { id: 'test-workspace', idGenerator, isSSR: true, schema };
+  return { id, idGenerator, isSSR: true, schema };
 }
 
 const defaultPageId = 'page:home';
@@ -113,6 +116,27 @@ describe('basic', () => {
         },
       },
     });
+  });
+
+  it('can blocks init', async () => {
+    const workspace1 = new Workspace(createTestOptions('workspace1'));
+    const page1 = workspace1.createPage({ id: 'page1' });
+    const workspace2 = new Workspace(createTestOptions('workspace2'));
+    await Promise.all([page1.waitForLoaded()]);
+    const id = page1.addBlock('affine:page', {});
+    {
+      applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
+      const page2Doc = (workspace2.doc.getMap('spaces') as YMap<Doc>).get(
+        'page1'
+      );
+      applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
+      page2Doc.emit('load', []);
+    }
+    const page2 = workspace2.getPage('page1');
+    expect(page2).not.toBe(null);
+    const block = page2.getBlockById(id);
+    expect(block).not.toBe(null);
+    expect(block.id).toBe(id);
   });
 
   it('init with provider', async () => {

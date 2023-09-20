@@ -32,7 +32,7 @@
   "devDependencies": {
     "async-call-rpc": "^6.3.1",
     "lit": "^2.8.0",
-    "yjs": "^13.6.7"
+    "yjs": "^13.6.8"
   },
   "peerDependencies": {
     "async-call-rpc": "^6",

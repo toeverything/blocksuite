@@ -17,7 +17,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "lit": "^2.8.0",
-    "yjs": "^13.6.7"
+    "yjs": "^13.6.8"
   },
   "peerDependencies": {
     "lit": "^2.7",
