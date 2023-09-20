@@ -119,24 +119,26 @@ describe('basic', () => {
   });
 
   it('can blocks init', async () => {
-    const workspace1 = new Workspace(createTestOptions('workspace1'));
-    const page1 = workspace1.createPage({ id: 'page1' });
-    const workspace2 = new Workspace(createTestOptions('workspace2'));
-    await Promise.all([page1.waitForLoaded()]);
-    const page2 = workspace2.createPage({ id: 'page1' });
-    await page2.waitForLoaded();
-    const id = page1.addBlock('affine:page', {});
-    {
-      applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
-      const page2Doc = (workspace2.doc.getMap('spaces') as YMap<Doc>).get(
-        'page1'
-      );
-      applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
+    for (let i = 0; i < 1e3; i++) {
+      const workspace1 = new Workspace(createTestOptions('workspace1'));
+      const page1 = workspace1.createPage({ id: 'page1' });
+      const workspace2 = new Workspace(createTestOptions('workspace2'));
+      await Promise.all([page1.waitForLoaded()]);
+      const page2 = workspace2.createPage({ id: 'page1' });
+      await page2.waitForLoaded();
+      const id = page1.addBlock('affine:page', {});
+      {
+        applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
+        const page2Doc = (workspace2.doc.getMap('spaces') as YMap<Doc>).get(
+          'page1'
+        );
+        applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
+      }
+      expect(page2).not.toBe(null);
+      const block = page2.getBlockById(id);
+      expect(block).not.toBe(null);
+      expect(block.id).toBe(id);
     }
-    expect(page2).not.toBe(null);
-    const block = page2.getBlockById(id);
-    expect(block).not.toBe(null);
-    expect(block.id).toBe(id);
   });
 
   it('init with provider', async () => {
