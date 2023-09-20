@@ -123,6 +123,8 @@ describe('basic', () => {
     const page1 = workspace1.createPage({ id: 'page1' });
     const workspace2 = new Workspace(createTestOptions('workspace2'));
     await Promise.all([page1.waitForLoaded()]);
+    const page2 = workspace2.createPage({ id: 'page1' });
+    await page2.waitForLoaded();
     const id = page1.addBlock('affine:page', {});
     {
       applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
@@ -130,9 +132,7 @@ describe('basic', () => {
         'page1'
       );
       applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
-      page2Doc.emit('load', []);
     }
-    const page2 = workspace2.getPage('page1');
     expect(page2).not.toBe(null);
     const block = page2.getBlockById(id);
     expect(block).not.toBe(null);
