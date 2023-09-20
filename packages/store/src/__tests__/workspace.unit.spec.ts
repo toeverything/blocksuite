@@ -133,8 +133,9 @@ describe('basic', () => {
           'page1'
         );
         applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
+        const blocks = page2Doc.getMap('blocks');
+        expect(blocks.get(id)).not.toBe(undefined);
       }
-      expect(page2).not.toBe(null);
       const block = page2.getBlockById(id);
       expect(block).not.toBe(null);
       expect(block.id).toBe(id);
