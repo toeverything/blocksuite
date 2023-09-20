@@ -1542,7 +1542,9 @@ test('press ArrowUp in the edge of two line', async ({ page }) => {
     page,
     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
+  await waitNextFrame(page);
   await pressArrowLeft(page);
+  await waitNextFrame(page);
   await assertRichTextVRange(page, 0, 93);
 
   // aaa...
@@ -1553,6 +1555,7 @@ test('press ArrowUp in the edge of two line', async ({ page }) => {
   await waitNextFrame(page);
   await assertRichTextVRange(page, 0, 0);
   await pressArrowUp(page);
+  await waitNextFrame(page);
   await assertTitle(page, '');
   await type(page, 'title');
   await assertTitle(page, 'title');
