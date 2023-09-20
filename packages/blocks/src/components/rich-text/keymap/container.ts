@@ -132,7 +132,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         length: 0,
       });
       assertExists(range);
-      if (checkFirstLine(range, vEditor.rootElement)) {
+      if (
+        !vEditor.yTextString.slice(0, vRange.index).includes('\n') &&
+        checkFirstLine(range)
+      ) {
         _preventDefault(ctx);
         return;
       }
