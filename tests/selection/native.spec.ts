@@ -1540,7 +1540,8 @@ test('press ArrowUp in the edge of two line', async ({ page }) => {
   await focusRichText(page, 0);
   await type(
     page,
-    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    // we need more four characters to get our expected result in local
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
   await pressArrowLeft(page);
