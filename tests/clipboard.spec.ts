@@ -3,7 +3,7 @@ import './utils/declare-test-window.js';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
 import {
   activeNoteInEdgeless,
@@ -1023,18 +1023,13 @@ test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
   );
   const zoom = 1.075;
   await assertZoomLevel(page, zoom * 100);
-  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH * zoom, 472]);
+  await assertEdgelessSelectedRect(page, [50, 100, NOTE_WIDTH * zoom, 472]);
 
   await copyByKeyboard(page);
   await page.mouse.move(800, 400);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [
-    370,
-    163.99,
-    EDITOR_WIDTH * zoom,
-    472,
-  ]);
+  await assertEdgelessSelectedRect(page, [370, 163.99, NOTE_WIDTH * zoom, 472]);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {

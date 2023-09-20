@@ -2,7 +2,7 @@ export const BLOCK_ID_ATTR = 'data-block-id';
 export const BLOCK_SERVICE_LOADING_ATTR = 'data-service-loading';
 export const SCROLL_THRESHOLD = 100;
 
-export const EDITOR_WIDTH = 800;
+export const NOTE_WIDTH = 800;
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
 export const PAGE_BLOCK_CHILD_PADDING = 24;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;
