@@ -175,16 +175,14 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       return this.renderRows(this.view.rows);
     }
     return html`
-      <div>
-        <div
-          style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;"
-        >
-          ${renderGroupTitle(this.group, {
-            readonly: this.view.readonly,
-            clickAdd: this.clickAddRowInStart,
-            clickOps: this.clickGroupOptions,
-          })}
-        </div>
+      <div
+        style="position: sticky;left: 0;width: max-content;padding: 6px 0;margin-bottom: 4px;display:flex;align-items:center;gap: 12px;max-width: 400px"
+      >
+        ${renderGroupTitle(this.group, {
+          readonly: this.view.readonly,
+          clickAdd: this.clickAddRowInStart,
+          clickOps: this.clickGroupOptions,
+        })}
       </div>
       ${this.renderRows(this.group.rows)}
     `;

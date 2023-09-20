@@ -43,28 +43,44 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
-    this.addColumnButton.classList.add('data-view-table-add-column');
-    this.addColumnButton.style.marginLeft = '20px';
-    this.addColumnButton.style.position = 'absolute';
-    this.addColumnButton.style.zIndex = '1';
-    this.closest('affine-data-view-native')?.append(this.addColumnButton);
-    requestAnimationFrame(() => {
-      const referenceEl = this.addColumnPositionRef.value;
-      if (!referenceEl) {
-        return;
-      }
-      const cleanup = autoUpdate(
-        referenceEl,
-        this.addColumnButton,
-        this.updateAddButton
-      );
-      this.disposables.add({
-        dispose: () => {
-          cleanup();
-          this.addColumnButton.remove();
-        },
+    const group = this.closest('affine-data-view-table-group');
+    if (group) {
+      this.disposables.addFromEvent(group, 'mouseenter', () => {
+        this.addColumnButton.style.visibility = 'visible';
       });
-    });
+      this.disposables.addFromEvent(group, 'mouseleave', () => {
+        this.addColumnButton.style.visibility = 'hidden';
+      });
+      this.disposables.addFromEvent(this.addColumnButton, 'mouseenter', () => {
+        this.addColumnButton.style.visibility = 'visible';
+      });
+      this.disposables.addFromEvent(this.addColumnButton, 'mouseleave', () => {
+        this.addColumnButton.style.visibility = 'hidden';
+      });
+      this.addColumnButton.style.visibility = 'hidden';
+      this.addColumnButton.style.transition = 'visibility 0.2s';
+      this.addColumnButton.style.marginLeft = '20px';
+      this.addColumnButton.style.position = 'absolute';
+      this.addColumnButton.style.zIndex = '1';
+      this.closest('affine-data-view-native')?.append(this.addColumnButton);
+      requestAnimationFrame(() => {
+        const referenceEl = this.addColumnPositionRef.value;
+        if (!referenceEl) {
+          return;
+        }
+        const cleanup = autoUpdate(
+          referenceEl,
+          this.addColumnButton,
+          this.updateAddButton
+        );
+        this.disposables.add({
+          dispose: () => {
+            cleanup();
+            this.addColumnButton.remove();
+          },
+        });
+      });
+    }
   }
 
   updateAddButton = () => {

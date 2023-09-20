@@ -98,7 +98,9 @@ export const renderGroupTitle = (
         color: var(--affine-icon-color);
       }
     </style>
-    <div style="display:flex;align-items:center;gap: 8px;">
+    <div
+      style="display:flex;align-items:center;gap: 8px;overflow: hidden;height: 22px;"
+    >
       ${icon} ${renderUniLit(data.view, props)} ${renderCount(groupData)}
     </div>
     ${ops.readonly

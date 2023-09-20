@@ -142,6 +142,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
     ${renderUniLit(this.editing && edit ? edit : view, props, {
       ref: this._cell,
       class: 'kanban-cell',
+      style: { display: 'block', flex: '1', overflow: 'hidden' },
     })}`;
   }
 }

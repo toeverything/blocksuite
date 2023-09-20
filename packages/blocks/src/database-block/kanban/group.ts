@@ -27,6 +27,8 @@ const styles = css`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
+    overflow: hidden;
   }
 
   .group-header-title {
@@ -144,13 +146,11 @@ export class KanbanGroup extends WithDisposable(ShadowlessElement) {
     const cards = this.group.rows;
     return html`
       <div class="group-header">
-        <div class="group-header-title">
-          ${renderGroupTitle(this.group, {
-            readonly: this.view.readonly,
-            clickAdd: this.clickAddCardInStart,
-            clickOps: this.clickGroupOptions,
-          })}
-        </div>
+        ${renderGroupTitle(this.group, {
+          readonly: this.view.readonly,
+          clickAdd: this.clickAddCardInStart,
+          clickOps: this.clickGroupOptions,
+        })}
       </div>
       <div class="group-body">
         ${repeat(

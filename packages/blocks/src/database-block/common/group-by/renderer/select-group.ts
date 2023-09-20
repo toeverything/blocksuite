@@ -15,6 +15,9 @@ export class SelectGroupView extends BaseGroup<
   string
 > {
   static override styles = css`
+    data-view-group-title-select-view {
+      overflow: hidden;
+    }
     .data-view-group-title-select-view {
       width: 100%;
       cursor: pointer;
