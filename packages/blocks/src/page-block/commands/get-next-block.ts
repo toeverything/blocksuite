@@ -5,7 +5,7 @@ import type { BlockElement } from '@blocksuite/lit';
 type Filter = (view: BlockElement) => boolean;
 
 function getNextSibling(
-  std: BlockElement['std'],
+  std: BlockSuite.Std,
   blockElement: BlockElement,
   filter?: Filter
 ) {
@@ -24,7 +24,7 @@ function getNextSibling(
 }
 
 function getNextBlock(
-  std: BlockElement['std'],
+  std: BlockSuite.Std,
   path: string[],
   filter?: (block: BlockElement) => boolean
 ) {
@@ -59,11 +59,7 @@ export const getNextBlockCommand: Command<
   const path = ctx.path ?? ctx.currentSelectionPath;
   assertExists(path);
 
-  const nextBlock = getNextBlock(
-    ctx.std as BlockElement['std'],
-    path,
-    ctx.filter
-  );
+  const nextBlock = getNextBlock(ctx.std, path, ctx.filter);
 
   if (nextBlock) {
     return next({ nextBlock });

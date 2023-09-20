@@ -15,8 +15,6 @@ import {
 import {
   ensureBlockInContainer,
   getBlockSelectionBySide,
-  getNextBlock,
-  getPrevBlock,
   moveCursorToNextBlockElement,
   moveCursorToPrevBlockElement,
   pathToBlock,
@@ -179,60 +177,72 @@ export const bindHotKey = (blockElement: BlockElement) => {
         .run();
     },
     'Shift-ArrowDown': () => {
-      if (!anchorSel) {
-        anchorSel = getBlockSelectionBySide(blockElement, true);
-      }
-
-      if (!anchorSel) {
-        return null;
-      }
-
-      const anchorBlock = pathToBlock(blockElement, anchorSel.path);
-      if (!anchorBlock) {
-        return null;
-      }
-
-      focusBlock = getNextBlock(focusBlock ?? anchorBlock);
-
-      if (!focusBlock) {
-        return;
-      }
-
-      if (!ensureBlockInContainer(focusBlock, blockElement)) {
-        return;
-      }
-
-      selectBetween(anchorBlock, focusBlock, true);
-
-      return true;
+      let anchorBlock: BlockElement | null = null;
+      return root.std.command
+        .pipe()
+        .getBlockSelections()
+        .inline<'currentSelectionPath'>((ctx, next) => {
+          if (!anchorSel) {
+            anchorSel = ctx.blockSelections.at(-1) ?? null;
+          }
+          if (!anchorSel) {
+            return;
+          }
+          anchorBlock = pathToBlock(blockElement, anchorSel.path);
+          if (!anchorBlock) {
+            return;
+          }
+          return next({
+            currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+          });
+        })
+        .getNextBlock({})
+        .inline((ctx, next) => {
+          focusBlock = ctx.nextBlock;
+          if (!ensureBlockInContainer(focusBlock, blockElement)) {
+            return;
+          }
+          if (!anchorBlock) {
+            return;
+          }
+          selectBetween(anchorBlock, focusBlock, true);
+          return next();
+        })
+        .run();
     },
     'Shift-ArrowUp': () => {
-      if (!anchorSel) {
-        anchorSel = getBlockSelectionBySide(blockElement, false);
-      }
-
-      if (!anchorSel) {
-        return null;
-      }
-
-      const anchorBlock = pathToBlock(blockElement, anchorSel.path);
-      if (!anchorBlock) {
-        return null;
-      }
-
-      focusBlock = getPrevBlock(focusBlock ?? anchorBlock);
-
-      if (!focusBlock) {
-        return;
-      }
-
-      if (!ensureBlockInContainer(focusBlock, blockElement)) {
-        return;
-      }
-
-      selectBetween(anchorBlock, focusBlock, false);
-
-      return true;
+      let anchorBlock: BlockElement | null = null;
+      return root.std.command
+        .pipe()
+        .getBlockSelections()
+        .inline<'currentSelectionPath'>((ctx, next) => {
+          if (!anchorSel) {
+            anchorSel = ctx.blockSelections.at(0) ?? null;
+          }
+          if (!anchorSel) {
+            return;
+          }
+          anchorBlock = pathToBlock(blockElement, anchorSel.path);
+          if (!anchorBlock) {
+            return;
+          }
+          return next({
+            currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+          });
+        })
+        .getPrevBlock({})
+        .inline((ctx, next) => {
+          focusBlock = ctx.prevBlock;
+          if (!ensureBlockInContainer(focusBlock, blockElement)) {
+            return;
+          }
+          if (!anchorBlock) {
+            return;
+          }
+          selectBetween(anchorBlock, focusBlock, false);
+          return next();
+        })
+        .run();
     },
     Escape: () => {
       const blockSelection = getBlockSelectionBySide(blockElement, true);

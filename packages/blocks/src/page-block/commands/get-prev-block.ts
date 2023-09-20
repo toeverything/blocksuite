@@ -5,11 +5,7 @@ import type { BlockElement } from '@blocksuite/lit';
 
 type Filter = (view: BlockElement) => boolean;
 
-function getPrevSibling(
-  std: BlockElement['std'],
-  path: string[],
-  filter?: Filter
-) {
+function getPrevSibling(std: BlockSuite.Std, path: string[], filter?: Filter) {
   const view = std.view;
   const nextView = view.findPrev(path, node => {
     if (node.type !== 'block') {
@@ -24,10 +20,7 @@ function getPrevSibling(
   return view.viewFromPath('block', nextView.path);
 }
 
-function getLastGrandChild(
-  std: BlockElement['std'],
-  blockElement: BlockElement
-) {
+function getLastGrandChild(std: BlockSuite.Std, blockElement: BlockElement) {
   const view = std.view;
   let output = blockElement;
   view.walkThrough((node, _index, parent) => {
@@ -44,7 +37,7 @@ function getLastGrandChild(
 }
 
 function getPrevBlock(
-  std: BlockElement['std'],
+  std: BlockSuite.Std,
   path: string[],
   filter?: (block: BlockElement) => boolean
 ) {
@@ -80,11 +73,7 @@ export const getPrevBlockCommand: Command<
   const path = ctx.path ?? ctx.currentSelectionPath;
   assertExists(path);
 
-  const prevBlock = getPrevBlock(
-    ctx.std as BlockElement['std'],
-    path,
-    ctx.filter
-  );
+  const prevBlock = getPrevBlock(ctx.std, path, ctx.filter);
 
   if (prevBlock) {
     return next({ prevBlock });
