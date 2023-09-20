@@ -61,7 +61,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   dragType = DefaultModeDragType.None;
 
   private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
-  // private _dragLastPos: { x: number; y: number } = { x: 0, y: 0 };
   private _dragStartModelCoord: { x: number; y: number } = { x: 0, y: 0 };
   private _dragLastModelCoord: { x: number; y: number } = { x: 0, y: 0 };
   private _lastMoveDelta = { x: 0, y: 0 };
@@ -384,10 +383,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const x = Math.min(startX, curX);
     const y = Math.min(startY, curY);
 
-    // const [x, y] = surface.toModelCoord(viewX, viewY);
     const w = Math.abs(startX - curX);
     const h = Math.abs(startY - curY);
-    // const { zoom } = surface.viewport;
     const bound = new Bound(x, y, w, h);
 
     const blocks = pickBlocksByBound(this._blocks, bound);
@@ -463,7 +460,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const { x, y } = e;
     this.dragType = dragType;
     this._dragStartPos = { x, y };
-    // this._dragLastPos = { x, y };
     const [startX, startY] = this._surface.toModelCoord(x, y);
     this._dragStartModelCoord = { x: startX, y: startY };
     this._dragLastModelCoord = { x: startX, y: startY };
