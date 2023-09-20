@@ -20,8 +20,8 @@ export class BlockStdProvider {
   readonly selection: SelectionManager;
   readonly command: CommandManager;
   readonly root: HTMLElement;
-  readonly spec: SpecStore<Values<BlockSuite.ComponentType>>;
-  readonly view: ViewStore<Values<BlockSuite.NodeView>>;
+  readonly spec: SpecStore;
+  readonly view: ViewStore;
   readonly clipboard: Clipboard;
 
   constructor(options: BlockStdProviderOptions) {
@@ -31,8 +31,8 @@ export class BlockStdProvider {
     this.event = new UIEventDispatcher(this);
     this.selection = new SelectionManager(this);
     this.command = new CommandManager(this);
-    this.spec = new SpecStore<Values<BlockSuite.ComponentType>>(this);
-    this.view = new ViewStore<Values<BlockSuite.NodeView>>(this);
+    this.spec = new SpecStore(this);
+    this.view = new ViewStore(this);
     this.clipboard = new Clipboard(this);
   }
 
@@ -55,7 +55,10 @@ type Values<T> = T[keyof T] extends never ? unknown : T[keyof T];
 declare global {
   namespace BlockSuite {
     interface ComponentType {}
-    interface NodeView {}
+    interface NodeViewType {}
+
+    type Component = Values<ComponentType>;
+    type NodeView = Values<NodeViewType>;
 
     type Std = BlockStdProvider;
   }

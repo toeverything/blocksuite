@@ -21,15 +21,10 @@ import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
-export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
-  StaticValue,
-  WidgetNames
->;
-
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  blocks!: LitBlockSpec[];
+  blocks!: BlockSpec[];
 
   @property({ attribute: false })
   page!: Page;
@@ -54,7 +49,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     return this.std.selection;
   }
 
-  get view(): ViewStore<BlockElement | WidgetElement> {
+  get view(): ViewStore {
     return this.std.view;
   }
 
@@ -257,7 +252,7 @@ declare global {
       lit: StaticValue;
     }
 
-    interface NodeView {
+    interface NodeViewType {
       block: BlockElement;
       widget: WidgetElement;
     }

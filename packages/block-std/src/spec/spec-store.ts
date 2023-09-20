@@ -1,8 +1,8 @@
 import type { BlockService } from '../service/index.js';
 import type { BlockSpec } from './index.js';
 
-export class SpecStore<ComponentType = unknown> {
-  private _specs: Map<string, BlockSpec<ComponentType>> = new Map();
+export class SpecStore {
+  private _specs: Map<string, BlockSpec> = new Map();
   private _services: Map<string, BlockService> = new Map();
 
   constructor(public std: BlockSuite.Std) {}
@@ -15,7 +15,7 @@ export class SpecStore<ComponentType = unknown> {
     this._services.clear();
   }
 
-  applySpecs(specs: Array<BlockSpec<ComponentType>>) {
+  applySpecs(specs: Array<BlockSpec>) {
     const oldSpecs = this._specs;
     const newSpecs = this._buildSpecMap(specs);
     this._diffServices(oldSpecs, newSpecs);
@@ -36,8 +36,8 @@ export class SpecStore<ComponentType = unknown> {
   }
 
   private _diffServices(
-    oldSpecs: Map<string, BlockSpec<ComponentType>>,
-    newSpecs: Map<string, BlockSpec<ComponentType>>
+    oldSpecs: Map<string, BlockSpec>,
+    newSpecs: Map<string, BlockSpec>
   ) {
     oldSpecs.forEach((oldSpec, flavour) => {
       if (
@@ -72,8 +72,8 @@ export class SpecStore<ComponentType = unknown> {
     });
   }
 
-  private _buildSpecMap(specs: Array<BlockSpec<ComponentType>>) {
-    const specMap = new Map<string, BlockSpec<ComponentType>>();
+  private _buildSpecMap(specs: Array<BlockSpec>) {
+    const specMap = new Map<string, BlockSpec>();
     specs.forEach(spec => {
       specMap.set(spec.schema.model.flavour, spec);
     });

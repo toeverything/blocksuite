@@ -1,4 +1,4 @@
-import type { LitBlockSpec } from '@blocksuite/lit';
+import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
@@ -25,7 +25,7 @@ import { AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/doc-remote-se
 import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/edgeless-remote-selection/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
 
-const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
+const pageBlockSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: DocPageService,
   view: {
@@ -46,7 +46,7 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
   },
 };
 
-const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
+const edgelessBlockSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: EdgelessPageService,
   view: {
@@ -69,7 +69,7 @@ const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
   },
 };
 
-export const pagePreset: LitBlockSpec[] = [
+export const pagePreset: BlockSpec[] = [
   pageBlockSpec,
   {
     schema: SurfaceBlockSchema,
@@ -144,7 +144,7 @@ export const pagePreset: LitBlockSpec[] = [
   },
 ];
 
-export const edgelessPreset: LitBlockSpec[] = [
+export const edgelessPreset: BlockSpec[] = [
   edgelessBlockSpec,
   {
     schema: SurfaceBlockSchema,
