@@ -2,7 +2,8 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
-import { assertEquals } from '@blocksuite/global/utils';
+import { sleep } from '@blocksuite/global/utils';
+import { v4 as uuid } from 'uuid';
 import { assert, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
 import type { Doc } from 'yjs';
@@ -119,25 +120,27 @@ describe('basic', () => {
   });
 
   it('can blocks init', async () => {
-    for (let i = 0; i < 1e3; i++) {
-      const workspace1 = new Workspace(createTestOptions('workspace1'));
-      const page1 = workspace1.createPage({ id: 'page1' });
-      const workspace2 = new Workspace(createTestOptions('workspace2'));
-      await Promise.all([page1.waitForLoaded()]);
-      const page2 = workspace2.createPage({ id: 'page1' });
+    for (let i = 0; i < 10; i++) {
+      const workspace1 = new Workspace(createTestOptions(uuid()));
+      const pageId = uuid();
+      const page1 = workspace1.createPage({ id: pageId });
+      const workspace2 = new Workspace(createTestOptions(uuid()));
+      await page1.waitForLoaded();
+      const page2 = workspace2.createPage({ id: pageId });
       await page2.waitForLoaded();
       const id = page1.addBlock('affine:page', {});
       {
         applyUpdate(workspace2.doc, encodeStateAsUpdate(workspace1.doc));
         const page2Doc = (workspace2.doc.getMap('spaces') as YMap<Doc>).get(
-          'page1'
+          pageId
         );
         applyUpdate(page2Doc, encodeStateAsUpdate(page1.spaceDoc));
         const blocks = page2Doc.getMap('blocks');
         expect(blocks.get(id)).not.toBe(undefined);
       }
+      await sleep(100);
       const block = page2.getBlockById(id);
-      expect(block).not.toBe(null);
+      expect(block, `block ${id} not found in round ${i}`).not.toBe(null);
       expect(block.id).toBe(id);
     }
   });
