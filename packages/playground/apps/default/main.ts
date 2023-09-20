@@ -93,6 +93,9 @@ const syncProviders = async (
     }
   }
 
+  const oldMeta = localStorage.getItem('meta');
+  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : {};
+
   let run = true;
   const runWorkspaceMigration = () => {
     if (run) {
@@ -105,6 +108,11 @@ const syncProviders = async (
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
+    page.spaceDoc.once('update', () => {
+      workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+      workspace.meta.updateVersion(workspace);
+      page.syncFromExistingDoc();
+    });
     page.spaceDoc.once('update', () => {
       runWorkspaceMigration();
     });

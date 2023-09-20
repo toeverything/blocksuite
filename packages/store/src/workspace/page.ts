@@ -94,7 +94,9 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
-    this._trySyncFromExistingDoc();
+    this._handleVersion();
+
+    this.syncFromExistingDoc();
   }
 
   get readonly() {
@@ -637,7 +639,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
   }
 
-  private _trySyncFromExistingDoc() {
+  public syncFromExistingDoc() {
     if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
       this._handleVersion();
     }
@@ -885,11 +887,12 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   private _handleVersion() {
-    // Initialization from empty yDoc, indicating that the document is new.
+    // Page doc is always after workspace root doc, so we can safely assume that
+    //  if the workspace root doc has the version,
+    //  the page doc is loaded from the outside.
     if (!this.workspace.meta.hasVersion) {
       this.workspace.meta.writeVersion(this.workspace);
     } else {
-      // Initialization from existing yDoc, indicating that the document is loaded from storage.
       this.validateVersion();
     }
   }
