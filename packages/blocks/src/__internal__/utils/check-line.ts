@@ -157,14 +157,16 @@ export function isAtLineEdge(range: Range) {
   return nextRange;
 }
 
-export function checkFirstLine(range: Range, container: Element) {
+export function checkFirstLine(range: Range) {
   if (!range.collapsed) {
     throw new Error(
       'Failed to determine if the caret is at the first line! expected a collapsed range but got' +
         range
     );
   }
-  if (!container.contains(range.commonAncestorContainer)) {
+
+  const container = range.startContainer.parentElement;
+  if (!container) {
     throw new Error(
       'Failed to determine if the caret is at the first line! expected the range to be inside the container but got' +
         range +
@@ -172,19 +174,21 @@ export function checkFirstLine(range: Range, container: Element) {
         container
     );
   }
+
   const containerRect = container.getBoundingClientRect();
-  const rangeRect = range.getBoundingClientRect();
-  if (rangeRect.left === 0 && rangeRect.top === 0) {
-    // Workaround select to empty line will get empty range
-    // See https://w3c.github.io/csswg-drafts/cssom-view/#dom-range-getboundingclientrect
-    // At empty line, it is the first line and also is the last line
-    return true;
+  const rangeRects = range.getClientRects();
+  if (rangeRects.length === 0) {
+    throw new Error(
+      'Failed to determine if the caret is at the first line! expected the range to have at least one client rect but got' +
+        range
+    );
   }
-  const lineHeight = rangeRect.height;
-  // If the caret at the start of second line, as known as line edge,
-  // the range bounding rect may be incorrect, we need to check the scenario.
-  const isFirstLine = containerRect.top > rangeRect.top - lineHeight / 2;
-  return isFirstLine;
+
+  // aaa
+  // |bbb
+  // there two rects in this case, one is the end of first line, the other is the start of second line
+  const rangeRect = rangeRects[rangeRects.length - 1];
+  return rangeRect.top === containerRect.top;
 }
 
 export function checkLastLine(range: Range, container: HTMLElement) {
