@@ -29,11 +29,9 @@ export const test = addOnFactory<keyof TestAddon>(
         const visited = new Set();
         let page = this.getPage(pageId);
         if (page) {
-          await page.waitForLoaded();
           page.clear();
         } else {
           page = this.createPage({ id: pageId });
-          await page.waitForLoaded();
         }
 
         const sanitize = async (props: Record<string, unknown>) => {

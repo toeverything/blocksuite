@@ -68,7 +68,6 @@ async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
   return page;
 }
 
@@ -79,7 +78,6 @@ describe('basic', () => {
     assert.equal(workspace.isEmpty, true);
 
     const page = workspace.createPage({ id: 'page:home' });
-    await page.waitForLoaded();
     const actual = serializeWorkspace(workspace.doc);
     const actualPage = actual[spaceMetaId].pages[0] as PageMeta;
 
@@ -162,6 +160,26 @@ describe('basic', () => {
     }
   });
 
+  it('lazy load pages', async () => {
+    const remoteWorkspace = new Workspace(createTestOptions());
+    let blockId: string;
+    let pageUpdate: Uint8Array;
+    {
+      const page = remoteWorkspace.createPage({ id: 'page0' });
+      assert.equal(remoteWorkspace.pages.size, 1);
+      blockId = page.addBlock('affine:page', {});
+      pageUpdate = encodeStateAsUpdate(page.spaceDoc);
+    }
+    const localWorkspace = new Workspace(createTestOptions());
+    assert.equal(localWorkspace.pages.size, 0);
+    applyUpdate(localWorkspace.doc, encodeStateAsUpdate(remoteWorkspace.doc));
+    assert.equal(localWorkspace.pages.size, 1);
+    const page = localWorkspace.getPage('page0');
+    expect(page.getBlockById(blockId)).toBe(null);
+    applyUpdate(page.spaceDoc, pageUpdate);
+    expect(page.getBlockById(blockId)).not.toBe(null);
+  });
+
   it('workspace pages with yjs applyUpdate', async () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
@@ -169,7 +187,6 @@ describe('basic', () => {
     const page = workspace.createPage({
       id: 'space:0',
     });
-    await page.waitForLoaded();
     page.addBlock('affine:page', {
       title: new page.Text(),
     });
@@ -198,7 +215,6 @@ describe('basic', () => {
       const page2 = workspace2.getPage('space:0');
       assertExists(page2);
       applyUpdate(page2.spaceDoc, update);
-      page2.spaceDoc.emit('load', []);
       expect(workspace2.doc.toJSON()['spaces']).toEqual({
         'space:0': {
           blocks: {
@@ -211,13 +227,6 @@ describe('basic', () => {
           },
         },
       });
-      const fn = vi.fn(({ loaded }) => {
-        expect(loaded.size).toBe(1);
-      });
-      workspace2.doc.once('subdocs', fn);
-      expect(fn).toBeCalledTimes(0);
-      await page2.waitForLoaded();
-      expect(fn).toBeCalledTimes(1);
     }
   });
 });
@@ -353,7 +362,6 @@ describe('addBlock', () => {
 
     const page0 = workspace.createPage({ id: 'page:home' });
     const page1 = workspace.createPage({ id: 'space:page1' });
-    await Promise.all([page0.waitForLoaded(), page1.waitForLoaded()]);
     assert.equal(workspace.pages.size, 2);
 
     page0.addBlock('affine:page', {
@@ -592,7 +600,6 @@ describe('workspace.exportJSX works', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.waitForLoaded();
 
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
@@ -625,7 +632,6 @@ describe('workspace search', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.waitForLoaded();
     const pageId = page.addBlock('affine:page', {
       title: new page.Text('test123'),
     });

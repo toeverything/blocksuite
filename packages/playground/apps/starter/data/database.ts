@@ -15,7 +15,6 @@ import { type InitFn } from './utils';
 
 export const database: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.waitForLoaded();
   page.awarenessStore.setFlag('enable_expand_database_block', true);
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

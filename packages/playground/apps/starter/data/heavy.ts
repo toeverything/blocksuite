@@ -14,7 +14,6 @@ export const heavy: InitFn = async (workspace: Workspace, pageId: string) => {
   };
 
   const page = workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

@@ -7,7 +7,6 @@ export const edgelessEmpty: InitFn = async (
   id: string
 ) => {
   const page = workspace.createPage({ id });
-  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

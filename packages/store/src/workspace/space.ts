@@ -16,8 +16,6 @@ export class Space<
   readonly doc: BlockSuiteDoc;
   readonly awarenessStore: AwarenessStore;
 
-  private _loaded!: boolean;
-
   /**
    * @internal Used for convenient access to the underlying Yjs map,
    * can be used interchangeably with ySpace
@@ -39,23 +37,8 @@ export class Space<
     this._proxy = this.doc.proxy.createYProxy(this._yBlocks as Y.Map<unknown>);
   }
 
-  get loaded() {
-    return this._loaded;
-  }
-
   get spaceDoc() {
     return this._ySpaceDoc;
-  }
-
-  async waitForLoaded() {
-    if (this.loaded) {
-      return this;
-    }
-
-    this._ySpaceDoc.load();
-    await this._ySpaceDoc.whenLoaded;
-
-    return this;
   }
 
   remove() {
@@ -65,7 +48,6 @@ export class Space<
 
   destroy() {
     this._ySpaceDoc.destroy();
-    this._loaded = false;
   }
 
   clear() {

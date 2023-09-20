@@ -54,7 +54,6 @@ export class Page extends Space<FlatBlockMap> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _synced = false;
   private _shouldTransact = true;
 
   readonly slots = {
@@ -95,6 +94,7 @@ export class Page extends Space<FlatBlockMap> {
     super(id, doc, awarenessStore);
     this._workspace = workspace;
     this._idGenerator = idGenerator;
+    this._trySyncFromExistingDoc();
   }
 
   get readonly() {
@@ -637,11 +637,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
   }
 
-  trySyncFromExistingDoc() {
-    if (this._synced) {
-      throw new Error('Cannot sync from existing doc more than once');
-    }
-
+  private _trySyncFromExistingDoc() {
     if ((this.workspace.meta.pages?.length ?? 0) <= 1) {
       this._handleVersion();
     }
@@ -655,8 +651,6 @@ export class Page extends Space<FlatBlockMap> {
       visited.add(id);
       this._handleYBlockAdd(visited, id);
     });
-
-    this._synced = true;
   }
 
   dispose() {
@@ -668,10 +662,8 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    if (this._synced) {
-      this._yBlocks.unobserveDeep(this._handleYEvents);
-      this._yBlocks.clear();
-    }
+    this._yBlocks.unobserveDeep(this._handleYEvents);
+    this._yBlocks.clear();
   }
 
   private _initYBlocks() {
@@ -900,14 +892,5 @@ export class Page extends Space<FlatBlockMap> {
       // Initialization from existing yDoc, indicating that the document is loaded from storage.
       this.validateVersion();
     }
-  }
-
-  override async waitForLoaded() {
-    await super.waitForLoaded();
-    if (!this._synced) {
-      this.trySyncFromExistingDoc();
-    }
-
-    return this;
   }
 }

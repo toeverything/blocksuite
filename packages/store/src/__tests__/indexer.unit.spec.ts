@@ -26,7 +26,6 @@ async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
   return page;
 }
 

@@ -6,7 +6,6 @@ import { type InitFn } from './utils';
 
 export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
@@ -42,7 +41,6 @@ export const multiEditorVertical: InitFn = async (
   pageId: string
 ) => {
   const page = workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {

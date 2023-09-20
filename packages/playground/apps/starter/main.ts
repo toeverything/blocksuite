@@ -83,7 +83,6 @@ export async function initPageContentByParam(
   if (functionMap.has(param)) {
     functionMap.get(param)?.(workspace, pageId);
     const page = workspace.getPage(pageId);
-    await page?.waitForLoaded();
     page?.resetHistory();
     return;
   }
@@ -123,7 +122,6 @@ async function main() {
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded();
   });
 
   window.testUtils = new TestUtils();

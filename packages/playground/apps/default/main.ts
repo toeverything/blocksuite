@@ -69,7 +69,6 @@ export async function initContentByInitParam(
   if (presetsMap.has(param)) {
     presetsMap.get(param)?.(workspace, pageId);
     const page = workspace.getPage(pageId);
-    await page?.waitForLoaded();
     page?.resetHistory();
   }
 }
@@ -94,9 +93,6 @@ const syncProviders = async (
     }
   }
 
-  const oldMeta = localStorage.getItem('meta');
-  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : {};
-
   let run = true;
   const runWorkspaceMigration = () => {
     if (run) {
@@ -109,19 +105,6 @@ const syncProviders = async (
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded().catch(e => {
-      const isValidateError =
-        e instanceof Error && e.message.includes('outdated');
-      if (isValidateError) {
-        page.spaceDoc.once('update', () => {
-          workspace.schema.upgradePage(oldVersions, page.spaceDoc);
-          workspace.meta.updateVersion(workspace);
-          page.trySyncFromExistingDoc();
-        });
-        return;
-      }
-      throw e;
-    });
     page.spaceDoc.once('update', () => {
       runWorkspaceMigration();
     });

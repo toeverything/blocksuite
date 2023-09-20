@@ -168,7 +168,6 @@ export async function createPage(
   options: { id?: string; title?: string } = {}
 ) {
   const page = workspace.createPage({ id: options.id });
-  await page.waitForLoaded();
 
   const pageBlockId = page.addBlock('affine:page', {
     title: new page.Text(options.title ?? ''),

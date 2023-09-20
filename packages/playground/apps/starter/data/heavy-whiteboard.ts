@@ -35,7 +35,6 @@ export const heavyWhiteboard: InitFn = async (
   };
 
   const page = workspace.createPage({ id });
-  await page.waitForLoaded();
 
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
