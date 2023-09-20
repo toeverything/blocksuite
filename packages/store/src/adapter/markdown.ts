@@ -219,32 +219,33 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     }
   };
 
-  traverseSnapshot2 = async (snapshot: BlockSnapshot) => {
+  traverseSnapshot2 = async () => {
     const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
     walker.setONodeTypeGuard(
       (node): node is BlockSnapshot =>
         BlockSnapshotSchema.safeParse(node).success
     );
-    walker.setEnter((node, _parent, context) => {
-      const text = (snapshot.props.text ?? { delta: [] }) as {
+    walker.setEnter((o, t, context) => {
+      const text = (o.node.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
       };
-      switch (node.flavour) {
+      switch (o.node.flavour) {
         case 'affine:code': {
           context.addNode(
+            t.node,
             {
               type: 'code',
-              lang: (node.props.language as string) ?? null,
+              lang: (o.node.props.language as string) ?? null,
               meta: null,
               value: text.delta.map(delta => delta.insert).join(''),
             },
             'children',
-            node?.children?.length
+            o.node.children.length
           );
           break;
         }
         case 'affine:paragraph': {
-          switch (snapshot.props.type) {
+          switch (o.node.props.type) {
             case 'h1':
             case 'h2':
             case 'h3':
@@ -252,26 +253,79 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             case 'h5':
             case 'h6': {
               context.addNode(
+                t.node,
                 {
                   type: 'heading',
-                  depth: parseInt(snapshot.props.type[1]) as Heading['depth'],
-                  children: [],
+                  depth: parseInt(o.node.props.type[1]) as Heading['depth'],
+                  children: this.deltaToMdAST(text.delta),
                 },
                 'children',
-                node?.children?.length
+                o.node.children.length
               );
               break;
             }
             case 'text': {
+              context.addNode(
+                t.node,
+                {
+                  type: 'paragraph',
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children',
+                o.node.children.length
+              );
               break;
             }
             case 'quote': {
+              context.addNode(
+                t.node,
+                {
+                  type: 'blockquote',
+                  children: [
+                    {
+                      type: 'paragraph',
+                      children: this.deltaToMdAST(text.delta),
+                    },
+                  ],
+                },
+                'children',
+                o.node.children.length
+              );
               break;
             }
           }
           break;
         }
         case 'affine:list': {
+          // check if the list is of the same type
+          // if true, add the list item to the list
+          if (
+            t.parent?.type === 'list' &&
+            t.parent.ordered === (o.node.props.type === 'numbered') &&
+            t.parent.children[0].checked ===
+              (o.node.props.type === 'todo'
+                ? (o.node.props.checked as boolean)
+                : undefined)
+          ) {
+            context.addNode(
+              t.parent,
+              {
+                type: 'listItem',
+                checked:
+                  o.node.props.type === 'todo'
+                    ? (o.node.props.checked as boolean)
+                    : undefined,
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: this.deltaToMdAST(text.delta),
+                  },
+                ],
+              },
+              'children',
+              o.node.children.length
+            );
+          }
           break;
         }
         case 'affine:divider': {
@@ -329,6 +383,43 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       buffer.write(markdownText);
     }
     return buffer.toString();
+  }
+
+  deltaToMdAST(deltas: DeltaInsert[]) {
+    return deltas.map(delta => {
+      let mdast: MarkdownAST = {
+        type: 'text',
+        value: delta.attributes?.underline
+          ? `<u>${delta.insert}</u>`
+          : delta.insert,
+      };
+      if (delta.attributes?.bold) {
+        mdast = {
+          type: 'strong',
+          children: [mdast],
+        };
+      }
+      if (delta.attributes?.italic) {
+        mdast = {
+          type: 'emphasis',
+          children: [mdast],
+        };
+      }
+      if (delta.attributes?.strike) {
+        mdast = {
+          type: 'delete',
+          children: [mdast],
+        };
+      }
+      if (delta.attributes?.link) {
+        mdast = {
+          type: 'link',
+          url: delta.attributes.link,
+          children: [mdast],
+        };
+      }
+      return mdast;
+    });
   }
 }
 

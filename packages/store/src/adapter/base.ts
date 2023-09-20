@@ -55,12 +55,19 @@ type Keyof<T> = T extends unknown ? keyof T : never;
 
 export type ASTWalkerContext<TNode> = {
   skip: () => void;
-  addNode: (node: TNode, prop: Keyof<TNode>, index?: number) => void;
+  addNode: (
+    mountPoint: TNode,
+    node: TNode,
+    prop: Keyof<TNode>,
+    index?: number
+  ) => void;
+  set: (key: string, value: unknown) => void;
+  get: (key: string) => unknown;
 };
 
-type WalkerFn<ONode, TNode> = (
-  node: ONode,
-  parent: ONode | null,
+type WalkerFn<ONode extends object, TNode extends object> = (
+  o: NodeProps<ONode>,
+  t: NodeProps<TNode>,
   context: ASTWalkerContext<TNode>
 ) => void;
 
@@ -72,6 +79,7 @@ type NodeProps<Node extends object> = {
 };
 
 type AddTNodeProps<TNode extends object> = {
+  mountPoint: TNode;
   node: TNode;
   prop: Keyof<TNode>;
   index?: number;
@@ -90,12 +98,21 @@ export class ASTWalker<ONode extends object, TNode extends object> {
   private _isONode!: (node: unknown) => node is ONode;
 
   private context: ASTWalkerContext<TNode>;
+  private contextMap: Map<string, unknown> = new Map();
 
   constructor() {
     this.context = {
       skip: () => (this._should_skip = true),
-      addNode: (node: TNode, prop: Keyof<TNode>, index?: number) =>
-        (this._lastAddedTNode = this._addedTNode = { node, prop, index }),
+      addNode: (
+        mountPoint: TNode,
+        node: TNode,
+        prop: Keyof<TNode>,
+        index?: number
+      ) =>
+        (this._lastAddedTNode = this._addedTNode =
+          { mountPoint, node, prop, index }),
+      set: (key: string, value: unknown) => this.contextMap.set(key, value),
+      get: (key: string) => this.contextMap.get(key),
     };
   }
 
@@ -104,23 +121,11 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     this._addedTNode = null;
   };
 
-  setEnter = (
-    fn: (
-      node: ONode,
-      parent: ONode | null,
-      context: ASTWalkerContext<TNode>
-    ) => void
-  ) => {
+  setEnter = (fn: WalkerFn<ONode, TNode>) => {
     this._enter = fn;
   };
 
-  setLeave = (
-    fn: (
-      node: ONode,
-      parent: ONode | null,
-      context: ASTWalkerContext<TNode>
-    ) => void
-  ) => {
+  setLeave = (fn: WalkerFn<ONode, TNode>) => {
     this._leave = fn;
   };
 
@@ -142,7 +147,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
       const should_skip = this._should_skip;
       const addedTNode = this._addedTNode;
       this._resetContext();
-      this._enter(o.node, o.parent, this.context);
+      this._enter(o, t, this.context);
 
       if (addedTNode) {
         if (addedTNode.index !== undefined) {
@@ -178,7 +183,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
                 },
                 {
                   node: this._lastAddedTNode?.node ?? t.node,
-                  parent: t.node,
+                  parent: this._lastAddedTNode?.node ? t.node : t.parent,
                   prop: this._lastAddedTNode?.prop ?? null,
                   index: this._lastAddedTNode?.index ?? null,
                 }
@@ -195,7 +200,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
             },
             {
               node: this._lastAddedTNode?.node ?? t.node,
-              parent: t.node,
+              parent: this._lastAddedTNode?.node ? t.node : t.parent,
               prop: this._lastAddedTNode?.prop ?? null,
               index: this._lastAddedTNode?.index ?? null,
             }
@@ -208,7 +213,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
       const should_skip = this._should_skip;
       const addedTNode = this._addedTNode;
       this._resetContext();
-      this._leave(o.node, o.parent, this.context);
+      this._leave(o, t, this.context);
 
       if (addedTNode) {
         if (addedTNode.index !== undefined) {
