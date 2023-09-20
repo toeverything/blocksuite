@@ -7,6 +7,8 @@ export type MoveDelta = {
   y: number;
 };
 
+const PANNING_DISTANCE = 30;
+
 export function calPanDelta(
   viewport: Renderer,
   e: PointerEventState,
@@ -25,22 +27,21 @@ export function calPanDelta(
   if (!(nearLeft || nearRight || nearTop || nearBottom)) return null;
 
   // Calculate move delta
-  const delta: MoveDelta = {
-    x: 0,
-    y: 0,
-  };
+  let deltaX = 0;
+  let deltaY = 0;
 
+  // Use PANNING_DISTANCE to limit the max delta, avoid panning too fast
   if (nearLeft) {
-    delta.x = x - (left + edgeDistance);
+    deltaX = Math.max(-PANNING_DISTANCE, x - (left + edgeDistance));
   } else if (nearRight) {
-    delta.x = x - (left + width - edgeDistance);
+    deltaX = Math.min(PANNING_DISTANCE, x - (left + width - edgeDistance));
   }
 
   if (nearTop) {
-    delta.y = y - (top + edgeDistance);
+    deltaY = Math.max(-PANNING_DISTANCE, y - (top + edgeDistance));
   } else if (nearBottom) {
-    delta.y = y - (top + height - edgeDistance);
+    deltaY = Math.min(PANNING_DISTANCE, y - (top + height - edgeDistance));
   }
 
-  return delta;
+  return { x: deltaX, y: deltaY };
 }

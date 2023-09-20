@@ -405,25 +405,30 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._edgeless.slots.draggingAreaUpdated.emit();
   };
 
-  private _stopAutoPan = () => {
+  private _panViewport = (delta: MoveDelta) => {
+    const { viewport } = this._edgeless.surface;
+    viewport.applyDeltaCenter(delta.x, delta.y);
+  };
+
+  private _stopAutoPanning = () => {
     if (this._autoPanTimer) {
       clearTimeout(this._autoPanTimer);
       this._autoPanTimer = null;
     }
   };
 
-  private _startAutoPan = (delta: MoveDelta, e: PointerEventState) => {
-    this._stopAutoPan();
+  private _startAutoPanning = (delta: MoveDelta, e: PointerEventState) => {
+    this._panViewport(delta);
+    this._stopAutoPanning();
 
     this._autoPanTimer = window.setInterval(() => {
-      const { viewport } = this._edgeless.surface;
-      viewport.applyDeltaCenter(delta.x, delta.y);
+      this._panViewport(delta);
       this._updateSelectingState(e);
     }, 30);
   };
 
   private _clearSelectingState = () => {
-    this._stopAutoPan();
+    this._stopAutoPanning();
     this._dragStartModelCoord = { x: 0, y: 0 };
     this._dragLastModelCoord = { x: 0, y: 0 };
     this._edgeless.slots.draggingAreaUpdated.emit();
@@ -479,9 +484,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         this._updateSelectingState(e);
         const moveDelta = calPanDelta(viewport, e);
         if (moveDelta) {
-          this._startAutoPan(moveDelta, e);
+          this._startAutoPanning(moveDelta, e);
         } else {
-          this._stopAutoPan();
+          this._stopAutoPanning();
         }
         break;
       }
