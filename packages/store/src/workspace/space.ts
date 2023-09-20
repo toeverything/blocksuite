@@ -22,15 +22,17 @@ export class Space<
    * @internal Used for convenient access to the underlying Yjs map,
    * can be used interchangeably with ySpace
    */
-  protected _proxy!: State;
-  protected _ySpaceDoc!: Y.Doc;
-  protected _yBlocks!: Y.Map<State[keyof State]>;
+  protected _proxy: State;
+  protected _ySpaceDoc: Y.Doc;
+  protected _yBlocks: Y.Map<State[keyof State]>;
 
   constructor(id: string, doc: BlockSuiteDoc, awarenessStore: AwarenessStore) {
     this.id = id;
     this.doc = doc;
     this.awarenessStore = awarenessStore;
 
+    // Always create a new sub document even if it not exists.
+    //  This is safe because CRDT will merge the changes correctly.
     this._ySpaceDoc = this._initSubDoc();
 
     this._yBlocks = this._ySpaceDoc.getMap('blocks');
@@ -75,23 +77,14 @@ export class Space<
     if (!subDoc) {
       subDoc = new Y.Doc({
         guid: this.id,
+        // lazy load guarantee
+        autoLoad: false,
+        shouldLoad: false,
       });
       this.doc.spaces.set(this.id, subDoc);
-    } else {
-      this.doc.on('subdocs', this._onSubdocEvent);
     }
 
     return subDoc;
-  };
-
-  private _onSubdocEvent = ({ loaded }: { loaded: Set<Y.Doc> }): void => {
-    const result = Array.from(loaded).find(
-      doc => doc.guid === this._ySpaceDoc.guid
-    );
-    if (!result) {
-      return;
-    }
-    this.doc.off('subdocs', this._onSubdocEvent);
   };
 
   /**
