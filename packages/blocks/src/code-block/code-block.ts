@@ -27,7 +27,7 @@ import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
@@ -262,7 +262,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _whenHover = new WhenHoverController(this, ({ abortController }) => ({
+  private _whenHover = new HoverController(this, ({ abortController }) => ({
     template: ({ updatePortal }) =>
       CodeOptionTemplate({
         anchor: this,

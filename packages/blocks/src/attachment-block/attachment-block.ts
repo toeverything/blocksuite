@@ -6,7 +6,7 @@ import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
 import { DragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
@@ -39,7 +39,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
-  private _whenHover = new WhenHoverController(this, ({ abortController }) => ({
+  private _whenHover = new HoverController(this, ({ abortController }) => ({
     template: AttachmentOptionsTemplate({
       anchor: this,
       model: this.model,

@@ -12,7 +12,7 @@ import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { WebIcon16 } from '../icons/text.js';
 import { DragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
@@ -198,7 +198,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return this._isLoading;
   }
 
-  private _whenHover = new WhenHoverController(this, ({ abortController }) => {
+  private _whenHover = new HoverController(this, ({ abortController }) => {
     this._optionsAbortController = abortController;
     return {
       template: html`<bookmark-toolbar
