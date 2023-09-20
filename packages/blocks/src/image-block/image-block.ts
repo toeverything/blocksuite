@@ -6,6 +6,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { DragHandleWidget } from '../widgets/drag-handle/index.js';
@@ -401,6 +402,16 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   override render() {
+    const resizeImgStyle = {
+      width: 'unset',
+      height: 'unset',
+    };
+    const { width, height } = this.model;
+    if (width && height) {
+      resizeImgStyle.width = `${width}px`;
+      resizeImgStyle.height = `${height}px`;
+    }
+
     const img = {
       waitUploaded: html`<affine-image-block-loading-card
         content="Delivering content..."
@@ -415,7 +426,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     return html`
       <div style="position: relative;">
         <div class="affine-image-wrapper">
-          <div class="resizable-img">
+          <div class="resizable-img" style=${styleMap(resizeImgStyle)}>
             ${img} ${this._imageResizeBoardTemplate()}
           </div>
         </div>
