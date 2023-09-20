@@ -134,7 +134,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
   private _drag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
+    const headerContainer = this.closest('affine-database-column-header');
     const scrollContainer = tableContainer?.parentElement;
+    assertExists(headerContainer);
     assertExists(tableContainer);
     assertExists(scrollContainer);
     const columnHeaderRect = this.getBoundingClientRect();
@@ -149,7 +151,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       (columnHeaderRect.left - headerContainerRect.left) / scale;
     const max = (headerContainerRect.width - columnHeaderRect.width) / scale;
 
-    const { computeInsertInfo } = this._columnsOffset(tableContainer, scale);
+    const { computeInsertInfo } = this._columnsOffset(headerContainer, scale);
     const column = new DataViewColumnPreview();
     column.tableViewManager = this.tableViewManager;
     column.column = this.column;
