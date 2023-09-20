@@ -1,8 +1,6 @@
 import { lightCssVariables } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import { NOTE_WIDTH } from '../../consts.js';
-
 const quoteCSSContent = `
   .quote {
     line-height: 26px;
@@ -38,8 +36,6 @@ const cssVariables = Object.keys(lightCssVariables)
 
 export const globalCSS = css`
   :root {
-    --affine-editor-width: ${NOTE_WIDTH}px;
-
     ${unsafeCSS(cssVariables)}
   }
   body {
