@@ -39,25 +39,28 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
-  private _whenHover = new HoverController(this, ({ abortController }) => ({
-    template: AttachmentOptionsTemplate({
-      anchor: this,
-      model: this.model,
-      showCaption: () => {
-        this._showCaption = true;
-        requestAnimationFrame(() => {
-          this._captionInput.focus();
-        });
+  private _hoverController = new HoverController(
+    this,
+    ({ abortController }) => ({
+      template: AttachmentOptionsTemplate({
+        anchor: this,
+        model: this.model,
+        showCaption: () => {
+          this._showCaption = true;
+          requestAnimationFrame(() => {
+            this._captionInput.focus();
+          });
+        },
+        abortController,
+      }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
       },
-      abortController,
-    }),
-    computePosition: {
-      referenceElement: this,
-      placement: 'top-end',
-      middleware: [flip(), offset(4)],
-      autoUpdate: true,
-    },
-  }));
+    })
+  );
 
   override connectedCallback() {
     super.connectedCallback();
@@ -178,7 +181,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     }
 
     return html`<div
-        ${ref(this._whenHover.setReference)}
+        ${ref(this._hoverController.setReference)}
         class="affine-attachment-container"
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
