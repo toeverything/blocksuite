@@ -138,7 +138,6 @@ describe('basic', () => {
         const blocks = page2Doc.getMap('blocks');
         expect(blocks.get(id)).not.toBe(undefined);
       }
-      await sleep(100);
       const block = page2.getBlockById(id);
       expect(block, `block ${id} not found in round ${i}`).not.toBe(null);
       expect(block.id).toBe(id);
