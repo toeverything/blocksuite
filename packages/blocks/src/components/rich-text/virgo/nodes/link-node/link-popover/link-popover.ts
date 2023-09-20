@@ -1,5 +1,6 @@
+import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement, nothing, type PropertyValues } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import { createEvent } from '../../../../../../__internal__/utils/common.js';
 import {
@@ -18,8 +19,8 @@ import {
 import { toast } from '../../../../../toast.js';
 import { linkPopoverStyle } from './styles.js';
 
-@customElement('edit-link-panel')
-export class LinkPopover extends LitElement {
+@customElement('link-popover')
+export class LinkPopover extends WithDisposable(LitElement) {
   static override styles = linkPopoverStyle;
 
   @property()
@@ -29,19 +30,13 @@ export class LinkPopover extends LitElement {
   top = '0';
 
   @property()
-  type: 'create' | 'edit' = 'create';
+  type: 'create' | 'edit' | 'view' = 'create';
 
   @property()
   text = '';
 
   @property()
-  previewLink = '';
-
-  @state()
-  private _bodyOverflowStyle = '';
-
-  @state()
-  private _disableConfirm = true;
+  link = '';
 
   @query('#text-input')
   textInput: HTMLInputElement | undefined;
@@ -52,6 +47,9 @@ export class LinkPopover extends LitElement {
   @query('.popover-container')
   popoverContainer: HTMLDivElement | undefined;
 
+  private _bodyOverflowStyle = '';
+  private _disableConfirm = true;
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -59,6 +57,11 @@ export class LinkPopover extends LitElement {
       // Disable body scroll
       this._bodyOverflowStyle = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
+      this.disposables.add({
+        dispose: () => {
+          document.body.style.overflow = this._bodyOverflowStyle;
+        },
+      });
     }
   }
 
@@ -67,15 +70,6 @@ export class LinkPopover extends LitElement {
 
     if (this.linkInput) {
       this.linkInput.focus();
-    }
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-
-    if (this.type === 'edit') {
-      // Restore body scroll style
-      document.body.style.overflow = this._bodyOverflowStyle;
     }
   }
 
@@ -111,7 +105,7 @@ export class LinkPopover extends LitElement {
   }
 
   private _onCopy() {
-    navigator.clipboard.writeText(this.previewLink);
+    navigator.clipboard.writeText(this.link);
     toast('Copied link to clipboard');
   }
 
@@ -157,7 +151,7 @@ export class LinkPopover extends LitElement {
     return;
   }
 
-  confirmBtnTemplate() {
+  private _confirmBtnTemplate() {
     return html`<icon-button
       class="affine-confirm-button"
       ?disabled=${this._disableConfirm}
@@ -166,7 +160,7 @@ export class LinkPopover extends LitElement {
     >`;
   }
 
-  createLinkTemplate() {
+  private _createTemplate() {
     return html`<div class="affine-link-popover">
       <input
         id="link-input"
@@ -174,20 +168,20 @@ export class LinkPopover extends LitElement {
         type="text"
         spellcheck="false"
         placeholder="Paste or type a link"
-        value=${this.previewLink}
+        value=${this.link}
         @keydown=${this._onKeydown}
         @input=${this._onInput}
       />
       <span class="affine-link-popover-dividing-line"></span>
-      ${this.confirmBtnTemplate()}
+      ${this._confirmBtnTemplate()}
     </div>`;
   }
 
-  previewTemplate() {
+  private _viewTemplate() {
     return html`<div class="affine-link-popover">
       <div class="affine-link-preview has-tool-tip" @click=${this._onCopy}>
         <tool-tip inert role="tooltip">Click to copy link</tool-tip>
-        <span style="overflow: hidden;">${this.previewLink}</span>
+        <span style="overflow: hidden;">${this.link}</span>
       </div>
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button
@@ -198,7 +192,7 @@ export class LinkPopover extends LitElement {
         ${BookmarkIcon}
         <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
       </icon-button>
-      ${allowEmbed(this.previewLink)
+      ${allowEmbed(this.link)
         ? html`<icon-button
             class="has-tool-tip"
             data-testid="unlink"
@@ -229,24 +223,7 @@ export class LinkPopover extends LitElement {
     </div>`;
   }
 
-  simpleTemplate() {
-    const isCreateLink = !this.previewLink;
-    return isCreateLink ? this.createLinkTemplate() : this.previewTemplate();
-  }
-
-  /**
-   * ```
-   * ┌─────────────────┐
-   * │ ┌──────────┐    │
-   * │ │Text      │    │
-   * │ └──────────┘    │
-   * │ ┌──────────┐    │
-   * │ │Link      │ X  │
-   * │ └──────────┘    │
-   * └─────────────────┘
-   * ```
-   */
-  editTemplate() {
+  private _editTemplate() {
     return html`<div class="affine-link-edit-popover">
       <div class="affine-edit-text-area">
         <input
@@ -267,24 +244,28 @@ export class LinkPopover extends LitElement {
           type="text"
           spellcheck="false"
           placeholder="Paste or type a link"
-          value=${this.previewLink}
+          value=${this.link}
           @keydown=${this._onKeydown}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-link-text" for="link-input">Link</label>
       </div>
-      ${this.confirmBtnTemplate()}
+      ${this._confirmBtnTemplate()}
     </div>`;
   }
 
   override render() {
     const mask =
-      this.type === 'edit'
+      this.type === 'edit' || this.type === 'create'
         ? html`<div class="overlay-mask" @click="${this._hide}"></div>`
         : html``;
 
     const popover =
-      this.type === 'create' ? this.simpleTemplate() : this.editTemplate();
+      this.type === 'create'
+        ? this._createTemplate()
+        : this.type === 'view'
+        ? this._viewTemplate()
+        : this._editTemplate();
 
     return html`
       <div class="overlay-root">
@@ -303,7 +284,7 @@ export class LinkPopover extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edit-link-panel': LinkPopover;
+    'link-popover': LinkPopover;
   }
   interface HTMLElementEventMap {
     updateLink: CustomEvent<LinkDetail>;

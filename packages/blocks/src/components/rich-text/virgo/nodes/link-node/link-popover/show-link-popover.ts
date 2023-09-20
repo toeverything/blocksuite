@@ -19,13 +19,23 @@ function updatePosition(element: LinkPopover, anchorEl: HTMLElement) {
   element.top = `${safeCoordinate.y}px`;
 }
 
-function createEditLinkElement(
-  anchorEl: HTMLElement,
-  container: HTMLElement,
-  previewLink: string
-) {
+function createEditLinkElement({
+  anchorEl,
+  container,
+  text,
+  link,
+  type,
+}: {
+  anchorEl: HTMLElement;
+  container: HTMLElement;
+  text: LinkPopover['text'];
+  link: LinkPopover['link'];
+  type: LinkPopover['type'];
+}) {
   const linkPanel = new LinkPopover();
-  linkPanel.previewLink = previewLink;
+  linkPanel.text = text;
+  linkPanel.link = link;
+  linkPanel.type = type;
   container.appendChild(linkPanel);
 
   requestAnimationFrame(() => {
@@ -83,9 +93,9 @@ function bindHoverState(
 interface LinkPopoverOptions {
   anchorEl: HTMLElement;
   container?: HTMLElement;
-  text?: string;
-  link?: string;
-  interactionKind?: 'always' | 'hover';
+  text?: LinkPopover['text'];
+  link?: LinkPopover['link'];
+  type?: LinkPopover['type'];
   abortController?: AbortController;
 }
 
@@ -94,7 +104,7 @@ export async function showLinkPopover({
   container = document.body,
   text = '',
   link = '',
-  interactionKind = 'always',
+  type = 'view',
   abortController = new AbortController(),
 }: LinkPopoverOptions): Promise<LinkDetail> {
   assertExists(anchorEl, "Can't show tooltip without anchor element!");
@@ -103,10 +113,16 @@ export async function showLinkPopover({
     return Promise.resolve({ type: 'cancel' });
   }
 
-  const editLinkEle = createEditLinkElement(anchorEl, container, link);
+  const editLinkEle = createEditLinkElement({
+    anchorEl,
+    container,
+    text,
+    link,
+    type,
+  });
 
   const unsubscribeHoverAbort =
-    interactionKind === 'hover'
+    type === 'view'
       ? bindHoverState(anchorEl, editLinkEle, abortController)
       : noop;
 

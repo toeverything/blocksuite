@@ -9,7 +9,7 @@ import { getModelByElement } from '../../../../../__internal__/utils/query.js';
 import type { BookmarkProps } from '../../../../../bookmark-block/bookmark-model.js';
 import type { AffineTextAttributes } from '../../types.js';
 import { affineTextStyles } from '../affine-text.js';
-import { showLinkPopover } from './link-popover/create-link-popover.js';
+import { showLinkPopover } from './link-popover/show-link-popover.js';
 
 @customElement('affine-link')
 export class AffineLink extends ShadowlessElement {
@@ -84,7 +84,6 @@ export class AffineLink extends ShadowlessElement {
       anchorEl: e.target as HTMLElement,
       text,
       link: this.link,
-      interactionKind: 'hover',
     });
     if (linkState.type === 'confirm') {
       const link = linkState.link;

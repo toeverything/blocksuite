@@ -4,7 +4,7 @@ import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import { getEditorContainer } from '../../../../__internal__/utils/query.js';
 import { getCurrentNativeRange } from '../../../../__internal__/utils/selection.js';
-import { showLinkPopover } from '../../../../components/rich-text/virgo/nodes/link-node/link-popover/create-link-popover.js';
+import { showLinkPopover } from '../../../../components/rich-text/virgo/nodes/link-node/link-popover/show-link-popover.js';
 import { LinkMockSelection } from '../../../../components/rich-text/virgo/nodes/link-node/mock-selection.js';
 
 export function toggleLink(root: BlockSuiteRoot) {
@@ -59,6 +59,7 @@ export function toggleLink(root: BlockSuiteRoot) {
   const clear = createMockSelection();
   showLinkPopover({
     anchorEl: vEditor.rootElement,
+    type: 'create',
   }).then(linkState => {
     if (linkState.type !== 'confirm') {
       clear();
