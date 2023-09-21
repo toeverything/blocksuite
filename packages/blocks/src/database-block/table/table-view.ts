@@ -210,7 +210,7 @@ export class DataViewTable extends BaseDataView<
     return html` <div style="display:flex;">
       <div
         class="dv-hover dv-round-8"
-        style="display:flex;align-items:center;gap: 10px;padding: 6px 12px 6px 8px;color: var(--affine-text-secondary-color);font-size: 12px;line-height: 20px;position: sticky;left: 0;"
+        style="display:flex;align-items:center;gap: 10px;padding: 6px 12px 6px 8px;color: var(--affine-text-secondary-color);font-size: 12px;line-height: 20px;position: sticky;left: ${LEFT_TOOL_BAR_WIDTH}px;"
         @click="${add}"
       >
         <div class="dv-icon-16" style="display:flex;">${AddCursorIcon}</div>

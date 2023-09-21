@@ -8,6 +8,7 @@ import { popFilterableSimpleMenu } from '../../components/menu/index.js';
 import { PlusIcon } from '../../icons/index.js';
 import type { GroupData } from '../common/group-by/helper.js';
 import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';
+import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
@@ -35,7 +36,7 @@ const styles = css`
 
   .data-view-table-group-add-row-button {
     position: sticky;
-    left: 8px;
+    left: ${8 + LEFT_TOOL_BAR_WIDTH}px;
     display: flex;
     align-items: center;
     justify-content: center;
