@@ -389,16 +389,30 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     return ImageSelectedRectsContainer(readonly);
   }
 
-  override render() {
-    const resizeImgStyle = {
-      width: this.resizeImg?.style.width ?? 'unset',
-      height: this.resizeImg?.style.height ?? 'unset',
-    };
-    const { width, height } = this.model;
-    if (!this._isDragging && width && height) {
-      resizeImgStyle.width = `${width}px`;
-      resizeImgStyle.height = `${height}px`;
+  private _normalizeImageSize() {
+    // If is dragging, we should use the real size of the image
+    if (this._isDragging && this.resizeImg) {
+      return {
+        width: this.resizeImg.style.width,
+        height: this.resizeImg.style.height,
+      };
     }
+
+    const { width, height } = this.model;
+    if (!width || !height || width === 0 || height === 0) {
+      return {
+        width: 'unset',
+        height: 'unset',
+      };
+    }
+    return {
+      width: `${width}px`,
+      height: `${height}px`,
+    };
+  }
+
+  override render() {
+    const resizeImgStyle = this._normalizeImageSize();
 
     const img = {
       waitUploaded: html`<affine-image-block-loading-card
