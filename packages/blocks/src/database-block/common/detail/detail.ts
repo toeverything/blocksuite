@@ -108,26 +108,29 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   override render() {
     const columns = this.columns;
 
+    //FIXME: simulate as a widget
     return html`
-      ${this.renderHeader()}
-      ${repeat(
-        columns,
-        v => v,
-        column => {
-          return html` <affine-data-view-record-field
-            .view="${this.view}"
-            .column="${column}"
-            .rowId="${this.rowId}"
-            data-column-id="${column.id}"
-          ></affine-data-view-record-field>`;
-        }
-      )}
-      ${!this.readonly
-        ? html`<div class="add-property" @click="${this._clickAddProperty}">
-            <div class="icon">${PlusIcon}</div>
-            Add Property
-          </div>`
-        : nothing}
+      <div data-widget-id="affine-detail-widget">
+        ${this.renderHeader()}
+        ${repeat(
+          columns,
+          v => v,
+          column => {
+            return html` <affine-data-view-record-field
+              .view="${this.view}"
+              .column="${column}"
+              .rowId="${this.rowId}"
+              data-column-id="${column.id}"
+            ></affine-data-view-record-field>`;
+          }
+        )}
+        ${!this.readonly
+          ? html`<div class="add-property" @click="${this._clickAddProperty}">
+              <div class="icon">${PlusIcon}</div>
+              Add Property
+            </div>`
+          : nothing}
+      </div>
     `;
   }
 

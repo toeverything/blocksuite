@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type {
   ClientRectObject,
@@ -569,7 +570,7 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-export const createModal = () => {
+export const createModal = (container: HTMLElement) => {
   const div = document.createElement('div');
   div.style.position = 'fixed';
   div.style.left = '0';
@@ -577,7 +578,7 @@ export const createModal = () => {
   div.style.width = '100vw';
   div.style.height = '100vh';
   div.style.zIndex = '1001';
-  document.body.querySelector('block-suite-root')?.append(div);
+  container.append(div);
   return div;
 };
 export const positionToVRect = (x: number, y: number): VirtualElement => {
@@ -607,7 +608,9 @@ export const createPopup = (
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
-  const modal = createModal();
+  const root = document.querySelector('block-suite-root');
+  assertExists(root);
+  const modal = createModal(root);
   modal.append(content);
   computePosition(target, content, {
     middleware: options?.middleware ?? [
