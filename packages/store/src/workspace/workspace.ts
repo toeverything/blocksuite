@@ -105,7 +105,6 @@ export class Workspace extends WorkspaceAddonType {
   }
 
   private _handleSpaceEvent = (event: Y.YMapEvent<Y.Doc>) => {
-    this._handleVersion();
     event.changes.keys.forEach((change, pageId) => {
       switch (change.action) {
         case 'add': {
@@ -210,19 +209,5 @@ export class Workspace extends WorkspaceAddonType {
     this._store.removeSpace(page);
     page.remove();
     this.slots.pageRemoved.emit(pageId);
-  }
-
-  public validateVersion() {
-    this.meta.validateVersion(this);
-  }
-
-  private _handleVersion() {
-    // Page doc is always after workspace root doc, so we can safely assume that
-    //  the workspace root doc version is the source of truth.
-    if (!this.meta.hasVersion) {
-      this.meta.writeVersion(this);
-    } else {
-      this.validateVersion();
-    }
   }
 }
