@@ -12,6 +12,9 @@ import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`
+  affine-data-view-table-group .group-header-op {
+    visibility: visible;
+  }
   .data-view-table-group-add-row {
     display: flex;
     width: 100%;

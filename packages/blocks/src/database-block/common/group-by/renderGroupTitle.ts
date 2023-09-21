@@ -70,7 +70,6 @@ export const renderGroupTitle = (
         cursor: pointer;
         padding: 4px;
         border-radius: 4px;
-        visibility: hidden;
         transition: visibility 100ms ease-in-out;
       }
 
