@@ -189,6 +189,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
+    draggingAreaUpdated: new Slot(),
   };
 
   @query('affine-surface')
