@@ -91,8 +91,7 @@ export class RangeControl {
         paths
           .flatMap(path => {
             return path.map(blockId => {
-              return this._dispatcher.blockStore.page.getBlockById(blockId)
-                ?.flavour;
+              return this._dispatcher.std.page.getBlockById(blockId)?.flavour;
             });
           })
           .filter((flavour): flavour is string => {
@@ -108,7 +107,7 @@ export class RangeControl {
     const start = range.startContainer;
     const end = range.endContainer;
     const ancestor = range.commonAncestorContainer;
-    const getBlockView = this._dispatcher.blockStore.viewStore.getNodeView;
+    const getBlockView = this._dispatcher.std.view.getNodeView;
     if (ancestor.nodeType === Node.TEXT_NODE) {
       const leaf = getBlockView(ancestor);
       if (leaf) {

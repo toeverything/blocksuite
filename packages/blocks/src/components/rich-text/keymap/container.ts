@@ -8,6 +8,11 @@ import {
   type VirgoRootElement,
 } from '@blocksuite/virgo';
 
+import {
+  checkFirstLine,
+  checkLastLine,
+} from '../../../__internal__/utils/check-line.js';
+import { matchFlavours } from '../../../__internal__/utils/model.js';
 import { bracketPairs } from '../../../common/bracket-pairs.js';
 import { inlineFormatConfig } from '../../../common/inline-format-config.js';
 import { getNextBlock } from '../../../note-block/utils.js';
@@ -16,19 +21,19 @@ import {
   getCombinedFormatInTextSelection,
   getSelectedContentModels,
 } from '../../../page-block/utils/selection.js';
-import { checkFirstLine, checkLastLine } from '../../utils/check-line.js';
-import { matchFlavours } from '../../utils/model.js';
-import { tryConvertBlock } from '../markdown-convert.js';
+import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
   handleMultiBlockIndent,
-  handleMultiBlockUnindent,
-  handleUnindent,
+  handleMultiBlockOutdent,
+  handleOutdent,
+  handleRemoveAllIndent,
+  handleRemoveAllIndentForMultiBlocks,
 } from '../rich-text-operations.js';
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
-  const selection = blockElement.root.selectionManager;
+  const selection = blockElement.root.selection;
   const model = blockElement.model;
   const root = blockElement.root;
 
@@ -317,6 +322,35 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       handleMultiBlockIndent(blockElement.page, models);
       return true;
     },
+    'Mod-Backspace': ctx => {
+      if (
+        !(
+          blockElement.selected?.is('block') ||
+          blockElement.selected?.is('text')
+        )
+      )
+        return;
+
+      const page = blockElement.closest<PageBlockComponent>(
+        'affine-doc-page,affine-edgeless-page'
+      );
+      if (!page) return;
+
+      const textModels = getSelectedContentModels(root, ['text']);
+      if (textModels.length === 1) {
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+        handleRemoveAllIndent(model.page, model, vRange.index);
+        _preventDefault(ctx);
+
+        return true;
+      }
+
+      const models = getSelectedContentModels(root, ['text', 'block']);
+      handleRemoveAllIndentForMultiBlocks(blockElement.page, models);
+      return true;
+    },
     'Shift-Tab': ctx => {
       if (
         !(
@@ -336,14 +370,14 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
         assertExists(vRange);
-        handleUnindent(model.page, model, vRange.index);
+        handleOutdent(model.page, model, vRange.index);
         _preventDefault(ctx);
 
         return true;
       }
 
       const models = getSelectedContentModels(root, ['text', 'block']);
-      handleMultiBlockUnindent(blockElement.page, models);
+      handleMultiBlockOutdent(blockElement.page, models);
       return true;
     },
     Backspace: ctx => {

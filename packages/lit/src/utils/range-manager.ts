@@ -52,7 +52,7 @@ export class RangeManager {
     this._range = null;
     window.getSelection()?.removeAllRanges();
     if (sync) {
-      this.root.selectionManager.clear(['text']);
+      this.root.selection.clear(['text']);
     }
   }
 
@@ -73,7 +73,7 @@ export class RangeManager {
     }
 
     const { from, to } = selection;
-    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    const fromBlock = this.root.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       this.clearRange();
       return;
@@ -95,7 +95,7 @@ export class RangeManager {
       return null;
     }
 
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     this._range = range;
 
     const { startContainer, endContainer } = range;
@@ -180,7 +180,7 @@ export class RangeManager {
 
   textSelectionToRange(selection: TextSelection): Range | null {
     const { from, to } = selection;
-    const fromBlock = this.root.viewStore.viewFromPath('block', from.path);
+    const fromBlock = this.root.view.viewFromPath('block', from.path);
     if (!fromBlock) {
       return null;
     }
@@ -211,7 +211,7 @@ export class RangeManager {
   }
 
   private _calculateVirgo(point: TextRangePoint): [VEditor, VRange] | null {
-    const block = this.root.viewStore.viewFromPath('block', point.path);
+    const block = this.root.view.viewFromPath('block', point.path);
     if (!block) {
       return null;
     }

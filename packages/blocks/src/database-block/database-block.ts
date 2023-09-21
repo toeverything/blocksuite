@@ -50,7 +50,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.root.selectionManager.slots.changed.on(selections => {
+      this.root.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
             if (!PathFinder.equals(selection.path, this.path)) {
@@ -161,14 +161,14 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   }
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
-      dispose: this.root.uiEventDispatcher.bindHotkey(hotkeys, {
+      dispose: this.root.event.bindHotkey(hotkeys, {
         path: this.path,
       }),
     };
   };
   _handleEvent: DataViewProps['handleEvent'] = (name, handler) => {
     return {
-      dispose: this.root.uiEventDispatcher.add(name, handler, {
+      dispose: this.root.event.add(name, handler, {
         path: this.path,
       }),
     };

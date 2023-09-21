@@ -10,12 +10,15 @@ import {
 import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { FontLinkedPageIcon, FontPageIcon } from '../../icons/index.js';
-import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import { getBlockElementById, getModelByElement } from '../utils/index.js';
-import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from './consts.js';
-import { affineTextStyles } from './virgo/affine-text.js';
-import type { AffineTextAttributes } from './virgo/types.js';
+import {
+  getBlockElementById,
+  getModelByElement,
+} from '../../../../__internal__/utils/index.js';
+import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
+import type { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
+import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
+import type { AffineTextAttributes } from '../types.js';
+import { affineTextStyles } from './affine-text.js';
 
 export type RefNodeSlots = {
   pageLinkClicked: Slot<{ pageId: string; blockId?: string }>;

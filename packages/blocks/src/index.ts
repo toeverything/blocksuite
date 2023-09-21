@@ -5,17 +5,12 @@ import './paragraph-block/index.js';
 import './list-block/index.js';
 import './note-block/index.js';
 import './divider-block/index.js';
-import './__internal__/rich-text/link-node/index.js';
-import './__internal__/rich-text/reference-node.js';
 import './code-block/affine-code-line.js';
-import './__internal__/rich-text/virgo/affine-text.js';
-import './__internal__/rich-text/link-node/affine-link.js';
 import './image-block/index.js';
 import './surface-block/index.js';
 import './database-block/index.js';
 
 export * from './__internal__/consts.js';
-export * from './__internal__/rich-text/rich-text-operations.js';
 export { getServiceOrRegister } from './__internal__/service/index.js';
 export type { BaseService } from './__internal__/service/service.js';
 export type { CssVariableName } from './__internal__/theme/css-variables.js';

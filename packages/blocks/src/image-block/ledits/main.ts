@@ -18,7 +18,7 @@ function createGradioApp() {
 function getPageElement(root: BlockSuiteRoot) {
   assertExists(root.page.root?.id);
 
-  const page = root.viewStore.viewFromPath('block', [
+  const page = root.view.viewFromPath('block', [
     root.page.root.id,
   ]) as DocPageBlockComponent;
 

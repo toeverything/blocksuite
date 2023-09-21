@@ -23,7 +23,10 @@ import {
   calcDropTarget,
   type DroppingType,
   getClosestBlockElementByPoint,
+  getDocPage,
+  getEdgelessPage,
   getModelByBlockElement,
+  isPageMode,
   Point,
 } from '../__internal__/index.js';
 import {
@@ -50,6 +53,9 @@ import {
   TextIcon,
   TextIconLarge,
 } from '../icons/index.js';
+import { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
+import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
+import { autoScroll } from '../page-block/text-selection/utils.js';
 import { type DragIndicator } from './drag-indicator.js';
 import { tooltipStyle } from './tooltip/tooltip.js';
 
@@ -670,6 +676,7 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
   private _lastDraggingFlavour: string | null = null;
   private _timer: number | null = null;
   private _mouseRoot: AbstractEditor;
+  private _rafID: number = 0;
 
   static override styles = styles;
 
@@ -945,11 +952,43 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       rect = result.rect;
       lastModelState = result.modelState;
     }
+    const runner = () => {
+      // only support auto scroll in page mode now
+      if (this._pageBlockElement instanceof DocPageBlockComponent) {
+        const result = autoScroll(
+          this._pageBlockElement.viewportElement,
+          point.y
+        );
+        if (!result) {
+          this._clearRaf();
+          return;
+        }
+        this._rafID = requestAnimationFrame(runner);
+      } else {
+        this._clearRaf();
+      }
+    };
+
+    this._rafID = requestAnimationFrame(runner);
 
     this._lastDroppingType = type;
     this._indicator.rect = rect;
     this._lastDroppingTarget = lastModelState;
   };
+
+  private get _pageBlockElement() {
+    const pageElement = isPageMode(this._page)
+      ? (getDocPage(this._page) as DocPageBlockComponent)
+      : (getEdgelessPage(this._page) as EdgelessPageBlockComponent);
+    return pageElement;
+  }
+
+  private _clearRaf() {
+    if (this._rafID) {
+      cancelAnimationFrame(this._rafID);
+      this._rafID = 0;
+    }
+  }
 
   private _onDragOver = (e: DragEvent) => {
     e.preventDefault();

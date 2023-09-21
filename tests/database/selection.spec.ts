@@ -1,7 +1,12 @@
 import { expect } from '@playwright/test';
+import { shiftClick } from 'utils/actions/edgeless.js';
 
 import { dragBetweenCoords } from '../utils/actions/drag.js';
 import {
+  pressArrowDown,
+  pressArrowLeft,
+  pressArrowRight,
+  pressArrowUp,
   pressBackspace,
   pressEnter,
   pressEscape,
@@ -13,14 +18,19 @@ import {
   initDatabaseDynamicRowWithData,
   initDatabaseRowWithData,
   initEmptyDatabaseState,
+  initKanbanViewState,
   waitNextFrame,
 } from '../utils/actions/misc.js';
 import { test } from '../utils/playwright.js';
 import {
   assertCellsSelection,
   assertDatabaseTitleColumnText,
+  assertKanbanCardSelected,
+  assertKanbanCellSelected,
   assertRowsSelection,
+  focusKanbanCardHeader,
   getDatabaseBodyCell,
+  getKanbanCard,
   initDatabaseColumn,
   switchColumnType,
 } from './actions.js';
@@ -251,5 +261,218 @@ test.describe('cell-level selection', () => {
       columnIndex: 1,
     });
     expect(await selectCell2.innerText()).toBe('');
+  });
+});
+
+test.describe('kanban view selection', () => {
+  test("should support move cell's focus by arrow key(up&down) within a card", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1'],
+      columns: [
+        {
+          type: 'number',
+          value: [1],
+        },
+        {
+          type: 'rich-text',
+          value: ['text'],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await assertKanbanCellSelected(page, {
+      // group by `number` column, the first(groupIndex: 0) group is `Ungroups`
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+
+    await pressArrowDown(page, 3);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+
+    await pressArrowUp(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 2,
+    });
+  });
+
+  test("should support move cell's focus by arrow key(up&down) within multi cards", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2'],
+      columns: [
+        {
+          type: 'number',
+          value: [1, 2],
+        },
+        {
+          type: 'rich-text',
+          value: ['text'],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await pressArrowUp(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 1,
+      cellIndex: 2,
+    });
+
+    await pressArrowDown(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+  });
+
+  test("should support move cell's focus by arrow key(left&right)", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2', 'row3'],
+      columns: [
+        {
+          type: 'number',
+          value: [undefined, 1, 10],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+
+    await pressArrowRight(page, 3);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+
+    await pressArrowLeft(page);
+    await assertKanbanCellSelected(page, {
+      groupIndex: 2,
+      cardIndex: 0,
+      cellIndex: 0,
+    });
+  });
+
+  test("should support move card's focus by arrow key(up&down)", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2', 'row3'],
+      columns: [
+        {
+          type: 'number',
+          value: [undefined, undefined, undefined],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await pressEscape(page);
+    await assertKanbanCardSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+    });
+
+    await pressArrowDown(page, 3);
+    await assertKanbanCardSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+    });
+
+    await pressArrowUp(page);
+    await assertKanbanCardSelected(page, {
+      groupIndex: 0,
+      cardIndex: 2,
+    });
+  });
+
+  test("should support move card's focus by arrow key(left&right)", async ({
+    page,
+  }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2', 'row3'],
+      columns: [
+        {
+          type: 'number',
+          value: [undefined, 1, 10],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await pressEscape(page);
+
+    await pressArrowRight(page, 3);
+    await assertKanbanCardSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+    });
+
+    await pressArrowLeft(page);
+    await assertKanbanCardSelected(page, {
+      groupIndex: 2,
+      cardIndex: 0,
+    });
+  });
+
+  test('should support multi card selection', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initKanbanViewState(page, {
+      rows: ['row1', 'row2'],
+      columns: [
+        {
+          type: 'number',
+          value: [undefined, 1],
+        },
+      ],
+    });
+
+    await focusKanbanCardHeader(page);
+    await pressEscape(page);
+    await pressEscape(page);
+
+    const card = await getKanbanCard(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+    });
+    const box = await getBoundingBox(card);
+    await shiftClick(page, {
+      x: box.x + box.width / 2,
+      y: box.y + box.height / 2,
+    });
+
+    await assertKanbanCardSelected(page, {
+      groupIndex: 0,
+      cardIndex: 0,
+    });
+    await assertKanbanCardSelected(page, {
+      groupIndex: 1,
+      cardIndex: 0,
+    });
   });
 });

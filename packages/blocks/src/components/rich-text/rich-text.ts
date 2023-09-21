@@ -9,7 +9,7 @@ import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type * as Y from 'yjs';
 
-import { tryFormatInlineStyle } from './markdown-convert.js';
+import { tryFormatInlineStyle } from './markdown/inline.js';
 import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
 import {
   type AffineTextAttributes,

@@ -1,6 +1,6 @@
-import { createDelayHoverSignal } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
+import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
@@ -13,12 +13,12 @@ import { copyCode } from '../../page-block/doc/utils.js';
 import type { CodeBlockModel } from '../code-model.js';
 
 export function CodeOptionTemplate({
-  anchor,
+  ref: containerRef,
   model,
   wrap,
-  abortController,
   onClickWrap,
 }: {
+  ref?: RefOrCallback;
   anchor: HTMLElement;
   model: BaseBlockModel;
   wrap: boolean;
@@ -27,14 +27,6 @@ export function CodeOptionTemplate({
 }) {
   const page = model.page;
   const readonly = page.readonly;
-
-  const { onHover, onHoverLeave } = createDelayHoverSignal(abortController);
-  anchor.addEventListener('mouseover', onHover);
-  anchor.addEventListener('mouseleave', onHoverLeave);
-  abortController.signal.addEventListener('abort', () => {
-    anchor.removeEventListener('mouseover', onHover);
-    anchor.removeEventListener('mouseleave', onHoverLeave);
-  });
 
   return html`
     <style>
@@ -56,11 +48,7 @@ export function CodeOptionTemplate({
       ${tooltipStyle}
     </style>
 
-    <div
-      class="affine-codeblock-option"
-      @mouseover=${onHover}
-      @mouseleave=${onHoverLeave}
-    >
+    <div ${ref(containerRef)} class="affine-codeblock-option">
       <icon-button
         size="32px"
         class="has-tool-tip"

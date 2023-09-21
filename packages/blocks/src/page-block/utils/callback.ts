@@ -2,11 +2,11 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
-import type { RichText } from '../../__internal__/rich-text/rich-text.js';
 import {
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
 } from '../../__internal__/utils/query.js';
+import type { RichText } from '../../components/rich-text/rich-text.js';
 
 export async function onModelTextUpdated(
   model: BaseBlockModel,

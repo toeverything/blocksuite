@@ -18,9 +18,9 @@ import { deserializeXYWH } from '../surface-block/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 
 const getSelection = (blockComponent: BlockElement) =>
-  blockComponent.root.selectionManager;
+  blockComponent.root.selection;
 
-const getView = (blockComponent: BlockElement) => blockComponent.root.viewStore;
+const getView = (blockComponent: BlockElement) => blockComponent.root.view;
 
 export const pathToBlock = (blockElement: BlockElement, path: string[]) =>
   getView(blockElement).viewFromPath('block', path);

@@ -18,8 +18,8 @@ import {
   hasNativeSelection,
   resetNativeSelection,
 } from '../../../__internal__/index.js';
-import { attributeRenderer } from '../../../__internal__/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../../../__internal__/rich-text/virgo/types.js';
+import { attributeRenderer } from '../../../components/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../../../components/rich-text/virgo/types.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';

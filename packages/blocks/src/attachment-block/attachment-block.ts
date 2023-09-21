@@ -2,10 +2,11 @@ import { BlockElement } from '@blocksuite/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
-import { createLitPortal } from '../components/portal.js';
+import { WhenHoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
 import type {
   AttachmentBlockModel,
@@ -35,6 +36,30 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
+  private _whenHover = new WhenHoverController(
+    this,
+    ({ setFloating, abortController }) => ({
+      template: AttachmentOptionsTemplate({
+        ref: setFloating,
+        anchor: this,
+        model: this.model,
+        showCaption: () => {
+          this._showCaption = true;
+          requestAnimationFrame(() => {
+            this._captionInput.focus();
+          });
+        },
+        abortController,
+      }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    })
+  );
+
   override connectedCallback() {
     super.connectedCallback();
     if (this.model.caption) {
@@ -61,39 +86,12 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private _focusAttachment() {
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     const blockSelection = selectionManager.getInstance('block', {
       path: this.path,
     });
     selectionManager.setGroup('note', [blockSelection]);
   }
-
-  private _optionsPortal: HTMLDivElement | null = null;
-
-  private _onHover = () => {
-    if (this._optionsPortal?.isConnected) return;
-    const abortController = new AbortController();
-    this._optionsPortal = createLitPortal({
-      template: AttachmentOptionsTemplate({
-        anchor: this,
-        model: this.model,
-        showCaption: () => {
-          this._showCaption = true;
-          requestAnimationFrame(() => {
-            this._captionInput.focus();
-          });
-        },
-        abortController,
-      }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'top-end',
-        middleware: [flip(), offset(4)],
-        autoUpdate: true,
-      },
-      abortController,
-    });
-  };
 
   private async _downloadAttachment() {
     downloadAttachment(this.model);
@@ -156,8 +154,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     }
 
     return html`<div
+        ${ref(this._whenHover.setReference)}
         class="affine-attachment-container"
-        @mouseover=${this._onHover}
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
       >

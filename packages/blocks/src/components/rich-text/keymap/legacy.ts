@@ -6,13 +6,13 @@ import {
   type VRange,
 } from '@blocksuite/virgo';
 
-import { matchFlavours } from '../../utils/model.js';
+import { matchFlavours } from '../../../__internal__/utils/model.js';
 import {
   handleBlockEndEnter,
   handleBlockSplit,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
-  handleUnindent,
+  handleOutdent,
 } from '../rich-text-operations.js';
 import type { AffineVEditor } from '../virgo/types.js';
 
@@ -81,7 +81,7 @@ export function hardEnter(
     // After
     // - line1
     // - | <-- will unindent the block
-    handleUnindent(page, model, range.index);
+    handleOutdent(page, model, range.index);
     return VKEYBOARD_PREVENT_DEFAULT;
   }
 

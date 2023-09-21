@@ -1,4 +1,4 @@
-import '../__internal__/rich-text/rich-text.js';
+import '../components/rich-text/rich-text.js';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
@@ -10,13 +10,13 @@ import { when } from 'lit/directives/when.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
 import { isPageMode, matchFlavours } from '../__internal__/index.js';
-import { bindContainerHotkey } from '../__internal__/rich-text/keymap/index.js';
-import type { RichText } from '../__internal__/rich-text/rich-text.js';
-import { attributeRenderer } from '../__internal__/rich-text/virgo/attribute-renderer.js';
+import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
+import type { RichText } from '../components/rich-text/rich-text.js';
+import { attributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
 import {
   affineTextAttributes,
   type AffineTextSchema,
-} from '../__internal__/rich-text/virgo/types.js';
+} from '../components/rich-text/virgo/types.js';
 import { BlockHubIcon20 } from '../icons/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 

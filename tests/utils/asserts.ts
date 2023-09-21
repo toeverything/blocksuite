@@ -258,7 +258,7 @@ export async function assertRowCount(page: Page, count: number) {
   expect(actual).toBe(count);
 }
 
-export async function assertSelection(
+export async function assertRichTextVRange(
   page: Page,
   richTextIndex: number,
   rangeIndex: number,

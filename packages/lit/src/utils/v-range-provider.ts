@@ -7,7 +7,7 @@ export const getVRangeProvider: (
   element: BlockElement
 ) => VRangeProvider = element => {
   const root = element.root;
-  const selectionManager = root.selectionManager;
+  const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
   const setVRange = (vRange: VRange | null) => {
     if (!vRange) {

@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 
-import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../components/rich-text/virgo/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -33,12 +33,12 @@ function handleCommonStyle({
   value: true | null;
 }) {
   if (type === 'text') {
-    const textSelection = root.selectionManager.find('text');
+    const textSelection = root.selection.find('text');
     assertExists(textSelection);
     formatByTextSelection(root, textSelection, style, value);
   } else {
-    const blockSelections = root.selectionManager.filter('block');
-    const viewStore = root.viewStore;
+    const blockSelections = root.selection.filter('block');
+    const viewStore = root.view;
     for (const blockSelection of blockSelections) {
       const blockElement = viewStore.viewFromPath('block', blockSelection.path);
       if (blockElement && blockElement.model.text) {
@@ -164,7 +164,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
     activeWhen: (format: AffineTextAttributes) => 'link' in format,
     // Only can show link button when selection is in one line paragraph
     showWhen: root => {
-      const textSelection = root.selectionManager.find('text');
+      const textSelection = root.selection.find('text');
       const selectedModels = getSelectedContentModels(root, ['text', 'block']);
       return (
         !!textSelection &&
@@ -176,7 +176,7 @@ export const inlineFormatConfig: InlineFormatConfig[] = [
       );
     },
     action: ({ root }) => {
-      const textSelection = root.selectionManager.find('text');
+      const textSelection = root.selection.find('text');
       assertExists(textSelection);
       toggleLink(root, textSelection);
     },

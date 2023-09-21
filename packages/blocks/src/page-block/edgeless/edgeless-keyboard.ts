@@ -9,7 +9,7 @@ import {
   ConnectorMode,
   ShapeStyle,
 } from '../../surface-block/index.js';
-import { PageKeyboardManager } from '../keyborad/keyboard-manager.js';
+import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

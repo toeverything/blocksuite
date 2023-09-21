@@ -187,7 +187,7 @@ export class DatabaseConvertView extends WithDisposable(LitElement) {
     databaseModel.applyColumnUpdate();
     this.page.moveBlocks(selectedModels, databaseModel);
 
-    const selectionManager = this.root.selectionManager;
+    const selectionManager = this.root.selection;
     selectionManager.clear();
 
     this.remove();

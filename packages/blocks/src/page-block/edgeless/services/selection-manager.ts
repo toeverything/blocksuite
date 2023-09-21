@@ -75,7 +75,7 @@ export class EdgelessSelectionManager {
   }
 
   private get _selection() {
-    return this.container.root.selectionManager;
+    return this.container.root.selection;
   }
 
   private _setState(selection: SurfaceSelection) {

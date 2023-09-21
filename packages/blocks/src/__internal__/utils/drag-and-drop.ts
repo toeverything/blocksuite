@@ -14,7 +14,7 @@ import { type Point, Rect } from './rect.js';
 import { type EditingState } from './types.js';
 
 /**
- * A droppping type.
+ * A dropping type.
  */
 export type DroppingType = 'none' | 'before' | 'after' | 'database';
 

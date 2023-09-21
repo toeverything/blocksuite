@@ -95,9 +95,9 @@ export class DragHandleWidget extends WidgetElement {
   private _lastDragPointerState: PointerEventState | null = null;
 
   protected get _selectedBlocks() {
-    return this.root.selectionManager.find('text')
-      ? this.root.selectionManager.filter('text')
-      : this.root.selectionManager.filter('block');
+    return this.root.selection.find('text')
+      ? this.root.selection.filter('text')
+      : this.root.selection.filter('block');
   }
 
   private _handleAnchorModelDisposables(blockElement: BlockElement) {
@@ -117,7 +117,7 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _getBlockElementFromViewStore(path: string[]) {
-    return this.root.viewStore.viewFromPath('block', path);
+    return this.root.view.viewFromPath('block', path);
   }
 
   private get _viewportOffset() {
@@ -317,7 +317,7 @@ export class DragHandleWidget extends WidgetElement {
       )
     ) {
       this._selectedBlocks.forEach(block => {
-        const blockElement = this.root.viewStore.viewFromPath(
+        const blockElement = this.root.view.viewFromPath(
           'block',
           block.path as string[]
         );
@@ -344,9 +344,9 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private _setSelectedBlocks(blockElements: BlockElement[], noteId?: string) {
-    const { selectionManager } = this.root;
+    const { selection } = this.root;
     const selections = blockElements.map(blockElement =>
-      selectionManager.getInstance('block', {
+      selection.getInstance('block', {
         path: blockElement.path,
       })
     );
@@ -355,7 +355,7 @@ export class DragHandleWidget extends WidgetElement {
     // We need to remain surface selection and set editing as true
     if (isEdgelessPage(this._pageBlockElement)) {
       const surfaceElementId = noteId ? noteId : getNoteId(blockElements[0]);
-      const surfaceSelection = selectionManager.getInstance(
+      const surfaceSelection = selection.getInstance(
         'surface',
         [surfaceElementId],
         true
@@ -364,7 +364,7 @@ export class DragHandleWidget extends WidgetElement {
       selections.push(surfaceSelection);
     }
 
-    selectionManager.set(selections);
+    selection.set(selections);
   }
 
   private get _pageBlockElement() {
@@ -727,7 +727,7 @@ export class DragHandleWidget extends WidgetElement {
       return;
     }
 
-    const { selectionManager } = this.root;
+    const { selection } = this.root;
     const selectedBlocks = this._selectedBlocks;
 
     // Should clear selection if current block is the first selected block
@@ -736,14 +736,14 @@ export class DragHandleWidget extends WidgetElement {
       !includeTextSelection(selectedBlocks) &&
       selectedBlocks[0].blockId === this._hoveredBlockId
     ) {
-      selectionManager.clear(['block']);
+      selection.clear(['block']);
       this._dragHoverRect = null;
       this._showDragHandleOnHoverBlock(this._hoveredBlockPath);
       return;
     }
 
     // Should select the block if current block is not selected
-    const blockElement = this.root.viewStore.viewFromPath(
+    const blockElement = this.root.view.viewFromPath(
       'block',
       this._hoveredBlockPath
     );
@@ -776,7 +776,7 @@ export class DragHandleWidget extends WidgetElement {
     }
 
     // Get current hover block element by path
-    const hoverBlockElement = this.root.viewStore.viewFromPath(
+    const hoverBlockElement = this.root.view.viewFromPath(
       'block',
       this._hoveredBlockPath
     );
@@ -812,7 +812,7 @@ export class DragHandleWidget extends WidgetElement {
         this._hoveredBlockId
       )
     ) {
-      const blockElement = this.root.viewStore.viewFromPath(
+      const blockElement = this.root.view.viewFromPath(
         'block',
         this._hoveredBlockPath
       );
@@ -823,10 +823,7 @@ export class DragHandleWidget extends WidgetElement {
 
     const blockElements = this._selectedBlocks
       .map(selection => {
-        return this.root.viewStore.viewFromPath(
-          'block',
-          selection.path as string[]
-        );
+        return this.root.view.viewFromPath('block', selection.path as string[]);
       })
       .filter((element): element is BlockElement<BaseBlockModel> => !!element);
 
@@ -920,7 +917,7 @@ export class DragHandleWidget extends WidgetElement {
       if (parentElement) {
         const newSelectedBlocks = selectedBlocks
           .map(block => parentElement.path.concat(block.id))
-          .map(path => this.root.viewStore.viewFromPath('block', path));
+          .map(path => this.root.view.viewFromPath('block', path));
 
         if (!newSelectedBlocks) return;
 

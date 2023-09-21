@@ -21,12 +21,12 @@ const updateBackground = (
 ) => {
   lastUsedColor = color;
 
-  const textSelection = root.selectionManager.find('text');
+  const textSelection = root.selection.find('text');
 
   if (!textSelection) {
-    const blockSelections = root.selectionManager.filter('block');
+    const blockSelections = root.selection.filter('block');
     for (const blockSelection of blockSelections) {
-      const el = root.viewStore.viewFromPath('block', blockSelection.path);
+      const el = root.view.viewFromPath('block', blockSelection.path);
       if (el && el.model.text) {
         el.model.text.format(0, el.model.text.length, {
           background: color,

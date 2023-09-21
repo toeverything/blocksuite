@@ -8,7 +8,7 @@ import {
 export class DocPageService extends BlockService {
   override mounted() {
     super.mounted();
-    this.store.commandManager.add('getNextBlock', getNextBlockCommand);
-    this.store.commandManager.add('getPreviousBlock', getPreviousBlockCommand);
+    this.std.command.add('getNextBlock', getNextBlockCommand);
+    this.std.command.add('getPreviousBlock', getPreviousBlockCommand);
   }
 }

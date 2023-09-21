@@ -50,7 +50,7 @@ import {
   assertDivider,
   assertExists,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
   assertStoreMatchJSX,
   assertTitle,
 } from '../utils/asserts.js';
@@ -65,17 +65,17 @@ test('click on blank area', async ({ page }) => {
   const box123 = await getRichTextBoundingBox(page, '2');
   const inside123 = { x: box123.left, y: box123.top + 5 };
   await page.mouse.click(inside123.x, inside123.y);
-  await assertSelection(page, 0, 0, 0);
+  await assertRichTextVRange(page, 0, 0, 0);
 
   const box456 = await getRichTextBoundingBox(page, '3');
   const inside456 = { x: box456.left, y: box456.top + 5 };
   await page.mouse.click(inside456.x, inside456.y);
-  await assertSelection(page, 1, 0, 0);
+  await assertRichTextVRange(page, 1, 0, 0);
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const inside789 = { x: box789.left, y: box789.bottom - 5 };
   await page.mouse.click(inside789.x, inside789.y);
-  await assertSelection(page, 2, 0, 0);
+  await assertRichTextVRange(page, 2, 0, 0);
 });
 
 test('native range delete', async ({ page }) => {

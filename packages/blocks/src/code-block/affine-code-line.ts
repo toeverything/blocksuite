@@ -5,8 +5,8 @@ import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import type { IThemedToken } from 'shiki';
 
-import type { AffineTextAttributes } from '../__internal__/rich-text/virgo/types.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
+import type { AffineTextAttributes } from '../components/rich-text/virgo/types.js';
 import type { HighlightOptionsGetter } from './code-model.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {

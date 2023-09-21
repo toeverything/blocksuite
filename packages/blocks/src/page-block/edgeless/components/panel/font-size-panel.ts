@@ -1,6 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { TEXT_FONT_SIZE } from '../text/types.js';
 
 const MIN_FONT_SIZE = 1;
@@ -106,8 +107,11 @@ export class EdgelessFontSizePanel extends LitElement {
     if (this.onPopperCose) this.onPopperCose();
   }
 
-  private _onInputKeyPress = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+  private _onKeydown = (e: KeyboardEvent) => {
+    e.stopPropagation();
+
+    if (e.key === 'Enter' && !e.isComposing) {
+      e.preventDefault();
       const input = e.target as HTMLInputElement;
       // Handle edge case where user enters a non-number
       if (isNaN(parseInt(input.value))) {
@@ -187,7 +191,9 @@ export class EdgelessFontSizePanel extends LitElement {
               inputmode="numeric"
               pattern="[0-9]*"
               placeholder=${Math.trunc(this.fontSize)}
-              @keypress=${this._onInputKeyPress}
+              @keydown=${this._onKeydown}
+              @input=${stopPropagation}
+              @pointerdown=${stopPropagation}
             />
           </div>
         </div>

@@ -6,7 +6,7 @@ import { getVirgoByModel } from '../../utils/query.js';
 
 export function deleteModelsByTextSelection(
   root: BlockSuiteRoot,
-  textSelection = root.selectionManager.find('text')
+  textSelection = root.selection.find('text')
 ) {
   assertExists(textSelection);
   const page = root.page;

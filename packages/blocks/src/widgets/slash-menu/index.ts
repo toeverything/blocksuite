@@ -114,7 +114,7 @@ export class SlashMenuWidget extends WidgetElement {
     const event = eventState.raw;
     const triggerKey = this.options.isTriggerKey(event);
     if (triggerKey === false) return;
-    const text = this.root.selectionManager.value.find(selection =>
+    const text = this.root.selection.value.find(selection =>
       selection.is('text')
     );
     if (!text) {

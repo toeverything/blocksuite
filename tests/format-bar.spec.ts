@@ -33,7 +33,7 @@ import {
   assertLocatorVisible,
   assertRichImage,
   assertRichTexts,
-  assertSelection,
+  assertRichTextVRange,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
@@ -727,7 +727,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
   );
   await page.waitForTimeout(10);
   // The paragraph button should prevent selection after click
-  await assertSelection(page, 0, 0, 3);
+  await assertRichTextVRange(page, 0, 0, 3);
 });
 
 test('should format quick bar be able to copy', async ({ page }) => {
@@ -739,9 +739,9 @@ test('should format quick bar be able to copy', async ({ page }) => {
 
   const copyBtn = page.locator(`.affine-format-bar-widget [data-testid=copy]`);
   await expect(copyBtn).toBeVisible();
-  await assertSelection(page, 1, 0, 3);
+  await assertRichTextVRange(page, 1, 0, 3);
   await copyBtn.click();
-  await assertSelection(page, 1, 0, 3);
+  await assertRichTextVRange(page, 1, 0, 3);
 
   await pressArrowRight(page, 1);
   await pasteByKeyboard(page);
@@ -1337,7 +1337,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   const { formatBar } = getFormatBar(page);
   await expect(formatBar).toBeVisible();
 
-  await assertSelection(page, 0, 0, 5);
+  await assertRichTextVRange(page, 0, 0, 5);
 
   await page.mouse.click(0, 0);
 
@@ -1359,7 +1359,7 @@ test('should show format-quick-bar and select all text of the block when triple 
   await page.mouse.down(options);
   await page.mouse.up(options);
 
-  await assertSelection(page, 0, 0, 'hello world'.length);
+  await assertRichTextVRange(page, 0, 0, 'hello world'.length);
 });
 
 test('should update the format quick bar state when there is a change in keyboard selection', async ({

@@ -17,11 +17,11 @@ import {
   hasNativeSelection,
   resetNativeSelection,
 } from '../../../../__internal__/index.js';
+import { createIcon } from '../../../../components/icon/uni-icon.js';
 import type {
   AffineTextAttributes,
   AffineVEditor,
-} from '../../../../__internal__/rich-text/virgo/types.js';
-import { createIcon } from '../../../../components/icon/uni-icon.js';
+} from '../../../../components/rich-text/virgo/types.js';
 import { addHistoryToVEditor } from '../../header-area/text.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
