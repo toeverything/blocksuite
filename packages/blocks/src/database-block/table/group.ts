@@ -12,22 +12,16 @@ import type { DataViewTable } from './table-view.js';
 import type { DataViewTableManager } from './table-view-manager.js';
 
 const styles = css`
-  affine-data-view-table-group:hover .data-view-table-group-add-row {
-    opacity: 1;
-  }
-  affine-data-view-table-group:hover .group-header-op {
-    visibility: visible;
-  }
   .data-view-table-group-add-row {
     display: flex;
     width: 100%;
     height: 28px;
     position: relative;
     z-index: 0;
-    background-color: var(--affine-hover-color-filled);
-    opacity: 0;
     cursor: pointer;
     transition: opacity 0.2s ease-in-out;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--affine-border-color);
   }
 
   @media print {
@@ -36,25 +30,17 @@ const styles = css`
     }
   }
 
-  .data-view-table-group-add-row:hover {
-    opacity: 1;
-  }
-
   .data-view-table-group-add-row-button {
-    padding-left: 16px;
     position: sticky;
-    left: 0;
+    left: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 10px;
     user-select: none;
-    font-size: 14px;
-  }
-
-  .data-view-table-group-add-row-button svg {
-    width: 16px;
-    height: 16px;
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--affine-text-secondary-color);
   }
 `;
 
@@ -156,11 +142,11 @@ export class TableGroup extends WithDisposable(ShadowlessElement) {
       ${this.view.readonly
         ? null
         : html` <div
-            class="data-view-table-group-add-row"
+            class="data-view-table-group-add-row dv-hover"
             @click="${this.clickAddRow}"
           >
             <div
-              class="data-view-table-group-add-row-button"
+              class="data-view-table-group-add-row-button dv-icon-16"
               data-test-id="affine-database-add-row-button"
               role="button"
             >

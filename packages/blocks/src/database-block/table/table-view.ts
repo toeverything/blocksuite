@@ -9,9 +9,12 @@ import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
+import { popMenu } from '../../components/menu/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
+import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
+import type { GroupHelper } from '../common/group-by/helper.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
@@ -183,18 +186,54 @@ export class DataViewTable extends BaseDataView<
       };
     });
   };
-
+  renderAddGroup = (groupHelper: GroupHelper) => {
+    const addGroup = groupHelper.addGroup;
+    if (!addGroup) {
+      return;
+    }
+    const add = (e: MouseEvent) => {
+      const ele = e.currentTarget as HTMLElement;
+      popMenu(ele, {
+        options: {
+          input: {
+            onComplete: text => {
+              const column = groupHelper.column;
+              if (column) {
+                column.updateData(() => addGroup(text, column.data) as never);
+              }
+            },
+          },
+          items: [],
+        },
+      });
+    };
+    return html` <div style="display:flex;">
+      <div
+        class="dv-hover dv-round-8"
+        style="display:flex;align-items:center;gap: 10px;padding: 6px 12px 6px 8px;color: var(--affine-text-secondary-color);font-size: 12px;line-height: 20px;position: sticky;left: 0;"
+        @click="${add}"
+      >
+        <div class="dv-icon-16" style="display:flex;">${AddCursorIcon}</div>
+        <div>New Group</div>
+      </div>
+    </div>`;
+  };
   private renderTable() {
     const groupHelper = this.view.groupHelper;
     if (groupHelper) {
-      return groupHelper.groups.map(group => {
-        return html`<affine-data-view-table-group
-          data-group-key="${group.key}"
-          .view="${this.view}"
-          .viewEle="${this}"
-          .group="${group}"
-        ></affine-data-view-table-group>`;
-      });
+      return html`
+        <div style="display:flex;flex-direction: column;gap: 16px;">
+          ${groupHelper.groups.map(group => {
+            return html`<affine-data-view-table-group
+              data-group-key="${group.key}"
+              .view="${this.view}"
+              .viewEle="${this}"
+              .group="${group}"
+            ></affine-data-view-table-group>`;
+          })}
+          ${this.renderAddGroup(groupHelper)}
+        </div>
+      `;
     }
     return html`<affine-data-view-table-group
       .view="${this.view}"
