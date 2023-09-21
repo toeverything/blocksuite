@@ -347,7 +347,10 @@ test('should support drag and drop to move columns', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        const indicator = page.locator('affine-database-column-width-drag-bar');
+        const indicator = page
+          .locator('.vertical-indicator-container')
+          .locator('.vertical-indicator-group')
+          .first();
         await expect(indicator).toBeVisible();
 
         const { box } = await getDatabaseHeaderColumn(page, 2);

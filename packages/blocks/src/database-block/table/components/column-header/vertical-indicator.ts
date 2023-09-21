@@ -18,7 +18,7 @@ type GroupRectList = {
 @customElement('data-view-table-vertical-indicator')
 export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    affine-database-column-width-drag-bar {
+    data-view-table-vertical-indicator {
       position: fixed;
       left: 0;
       top: 0;
@@ -26,29 +26,29 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
       pointer-events: none;
     }
 
-    .width-drag-bar-container {
+    .vertical-indicator-container {
       position: absolute;
       pointer-events: none;
     }
 
-    .width-drag-bar-group {
+    .vertical-indicator-group {
       position: absolute;
       z-index: 1;
       width: 100%;
       background-color: var(--affine-hover-color);
       pointer-events: none;
     }
-    .width-drag-bar-group::after {
+    .vertical-indicator-group::after {
       position: absolute;
       z-index: 1;
       width: 2px;
       height: 100%;
       content: '';
-      right: -1px;
+      right: 0;
       background-color: var(--affine-primary-color);
       border-radius: 1px;
     }
-    .with-shadow.width-drag-bar-group::after {
+    .with-shadow.vertical-indicator-group::after {
       box-shadow: 0px 0px 8px 0px rgba(30, 150, 235, 0.35);
     }
   `;
@@ -67,10 +67,10 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
     const containerStyle = styleMap({
       top: `${this.top}px`,
       left: `${this.left}px`,
-      width: `${this.width}px`,
+      width: `${Math.max(this.width, 1)}px`,
     });
     return html`
-      <div class="width-drag-bar-container" style=${containerStyle}>
+      <div class="vertical-indicator-container" style=${containerStyle}>
         ${repeat(this.lines, ({ top, bottom }) => {
           const groupStyle = styleMap({
             top: `${top}px`,
@@ -78,7 +78,7 @@ export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
           });
           const groupClass = classMap({
             'with-shadow': this.shadow,
-            'width-drag-bar-group': true,
+            'vertical-indicator-group': true,
           });
           return html`<div class="${groupClass}" style=${groupStyle}></div>`;
         })}
