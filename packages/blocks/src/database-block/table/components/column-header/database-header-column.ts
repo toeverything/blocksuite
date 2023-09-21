@@ -3,6 +3,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -29,10 +30,18 @@ import type {
 } from '../../table-view-manager.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
+import {
+  hideWidthAdjustmentBar,
+  showWidthAdjustmentBar,
+  startDragWidthAdjustmentBar,
+} from './column-width-drag-bar.js';
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   static override styles = css`
+    affine-database-header-column {
+      display: flex;
+    }
     .affine-database-header-column-grabbing * {
       cursor: grabbing;
     }
@@ -42,22 +51,36 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
-
+  private widthDragBar = createRef();
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.tableViewManager.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    this.closest('affine-database-table')?.handleEvent('dragStart', context => {
-      const target = context.get('pointerState').raw.target;
-      if (target instanceof Element && this.contains(target)) {
-        this._drag(context.get('pointerState').raw);
-        return true;
-      }
-      return false;
-    });
+    const table = this.closest('affine-database-table');
+    if (table) {
+      this.disposables.add(
+        table.handleEvent('dragStart', context => {
+          const event = context.get('pointerState').raw;
+          const target = event.target;
+          if (target instanceof Element) {
+            if (this.widthDragBar.value?.contains(target)) {
+              event.preventDefault();
+              this.widthDragStart(event);
+              return true;
+            }
+            if (this.contains(target)) {
+              event.preventDefault();
+              this._drag(event);
+              return true;
+            }
+          }
+          return false;
+        })
+      );
+    }
   }
 
   private _columnsOffset = (header: Element, _scale: number) => {
@@ -415,7 +438,26 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     });
   };
-
+  private drawWidthDragBarTask = 0;
+  private drawWidthDragBar = () => {
+    showWidthAdjustmentBar(
+      getTableContainer(this),
+      this.getBoundingClientRect().right
+    );
+    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
+  };
+  private _enterWidthDragBar = () => {
+    if (this.drawWidthDragBarTask) {
+      cancelAnimationFrame(this.drawWidthDragBarTask);
+      this.drawWidthDragBarTask = 0;
+    }
+    this.drawWidthDragBar();
+  };
+  private _leaveWidthDragBar = () => {
+    cancelAnimationFrame(this.drawWidthDragBarTask);
+    this.drawWidthDragBarTask = 0;
+    hideWidthAdjustmentBar();
+  };
   override render() {
     const column = this.column;
     const style = styleMap({
@@ -445,7 +487,24 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
               ${DatabaseDragIcon}
             </div>`}
       </div>
+      <div
+        ${ref(this.widthDragBar)}
+        @mouseenter=${this._enterWidthDragBar}
+        @mouseleave=${this._leaveWidthDragBar}
+        style="width: 0;position: relative;height: 100%;z-index: 1;cursor: col-resize"
+      >
+        <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
+      </div>
     `;
+  }
+
+  private widthDragStart(event: PointerEvent) {
+    startDragWidthAdjustmentBar(
+      event,
+      getTableContainer(this),
+      this.getBoundingClientRect().width,
+      this.column
+    );
   }
 }
 

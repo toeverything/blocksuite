@@ -15,6 +15,7 @@ export const styles = css`
     border-bottom: 1px solid var(--affine-border-color);
     border-top: 1px solid var(--affine-border-color);
     box-sizing: border-box;
+    user-select: none;
   }
 
   .affine-database-column {

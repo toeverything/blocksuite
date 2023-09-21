@@ -7,7 +7,6 @@ import './group.js';
 
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
@@ -186,20 +185,6 @@ export class DataViewTable extends BaseDataView<
     });
   };
 
-  private _renderColumnWidthDragBar = () => {
-    let left = LEFT_TOOL_BAR_WIDTH;
-    return repeat(
-      this.view.columnManagerList,
-      v => v.id,
-      column => {
-        left += column.width;
-        return html` <affine-database-column-width-drag-bar
-          .left="${left}"
-          .column="${column}"
-        ></affine-database-column-width-drag-bar>`;
-      }
-    );
-  };
   private renderTable() {
     const groupHelper = this.view.groupHelper;
     if (groupHelper) {
@@ -248,7 +233,7 @@ export class DataViewTable extends BaseDataView<
       <div class="affine-database-table">
         <div class="affine-database-block-table" @wheel="${this.onWheel}">
           <div class="affine-database-table-container">
-            ${this.renderTable()} ${this._renderColumnWidthDragBar()}
+            ${this.renderTable()}
           </div>
         </div>
       </div>
