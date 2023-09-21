@@ -6,7 +6,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-dragging-area-rect')
-export class EdgelessHoverRect extends WithDisposable(LitElement) {
+export class EdgelessDraggingAreaRect extends WithDisposable(LitElement) {
   static override styles = css`
     .affine-edgeless-dragging-area {
       position: absolute;
@@ -21,7 +21,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
   protected override firstUpdated() {
     this._disposables.add(
-      this.edgeless.slots.hoverUpdated.on(() => this.requestUpdate())
+      this.edgeless.slots.draggingAreaUpdated.on(() => this.requestUpdate())
     );
   }
 
@@ -43,6 +43,6 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-dragging-area-rect': EdgelessHoverRect;
+    'edgeless-dragging-area-rect': EdgelessDraggingAreaRect;
   }
 }
