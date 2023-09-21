@@ -81,11 +81,6 @@ function toggleStyle(
   vEditor.syncVRange();
 }
 
-const textSchema: AffineTextSchema = {
-  attributesSchema: affineTextAttributes,
-  textRenderer: attributeRenderer,
-};
-
 @customElement('affine-database-rich-text-cell')
 export class RichTextCell extends BaseCellRenderer<Y.Text> {
   static override styles = css`
@@ -120,6 +115,11 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
+  readonly textSchema: AffineTextSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributeRenderer,
+  };
+
   @query('rich-text')
   private _richTextElement?: RichText;
 
@@ -145,7 +145,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
-      .textSchema=${textSchema}
+      .textSchema=${this.textSchema}
       .readonly=${true}
       class="affine-database-rich-text virgo-editor"
     ></rich-text>`;
@@ -183,6 +183,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       flex-grow: 1;
     }
   `;
+
+  readonly textSchema: AffineTextSchema = {
+    attributesSchema: affineTextAttributes,
+    textRenderer: attributeRenderer,
+  };
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -347,7 +352,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
-      .textSchema=${textSchema}
+      .textSchema=${this.textSchema}
       class="affine-database-rich-text virgo-editor"
     ></rich-text>`;
   }
