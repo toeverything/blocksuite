@@ -44,7 +44,7 @@ export class TableDragController implements ReactiveController {
           },
           y: y < mid ? rect.top : rect.bottom,
           width: tableRect.width,
-          x: rect.left,
+          x: tableRect.left,
         };
       }
     }
