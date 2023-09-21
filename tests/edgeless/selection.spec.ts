@@ -315,7 +315,7 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   await page.waitForTimeout(300);
 });
 
-test.only('should also update dragging area when viewport changes', async ({
+test('should also update dragging area when viewport changes', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
