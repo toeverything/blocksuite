@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -90,7 +91,10 @@ export const popSideDetail = (ops: {
   rowId: string;
   onClose?: () => void;
 }) => {
-  const modal = createModal();
+  //FIXME: to make widget path work
+  const page = document.querySelector('affine-doc-page');
+  assertExists(page);
+  const modal = createModal(page);
   const close = () => {
     modal.remove();
     ops.onClose?.();

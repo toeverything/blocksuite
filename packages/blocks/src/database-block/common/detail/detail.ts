@@ -108,6 +108,7 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   override render() {
     const columns = this.columns;
 
+    //FIXME: simulate as a widget
     return html`
       <div data-widget-id="affine-detail-widget">
         ${this.renderHeader()}
