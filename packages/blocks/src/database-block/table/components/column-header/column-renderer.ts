@@ -55,7 +55,7 @@ export class DataViewColumnPreview extends WithDisposable(ShadowlessElement) {
           </div>`;
         })}
       </div>
-      <div style="height: 29px;"></div>
+      <div style="height: 45px;"></div>
     `;
   }
   override render() {
