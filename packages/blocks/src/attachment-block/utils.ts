@@ -164,7 +164,7 @@ export async function appendAttachmentBlock(
   }
 
   const page = model.page;
-  const loadingKey = page.generateId();
+  const loadingKey = page.generateBlockId();
   setAttachmentLoading(loadingKey, true);
   const props: AttachmentProps & { flavour: 'affine:attachment' } = {
     flavour: 'affine:attachment',

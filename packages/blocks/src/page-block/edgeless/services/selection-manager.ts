@@ -2,7 +2,6 @@ import type { CursorSelection } from '@blocksuite/block-std';
 import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { BlockComponentElement } from '../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from './tools-manager.js';
 
@@ -33,8 +32,6 @@ export class EdgelessSelectionManager {
 
     cursorUpdated: new Slot<CursorSelection>(),
     remoteCursorUpdated: new Slot(),
-
-    blocksUpdated: new Slot<BlockComponentElement[]>(),
   };
 
   lastState: SurfaceSelection | null = null;
@@ -48,8 +45,6 @@ export class EdgelessSelectionManager {
 
   remoteCursor: Record<string, CursorSelection> = {};
   remoteSelection: Record<string, SurfaceSelection> = {};
-
-  selectedBlocks: BlockComponentElement[] = [];
 
   private _selectedElements: Set<string> = new Set();
   private _remoteSelectedElements: Set<string> = new Set();
@@ -134,8 +129,18 @@ export class EdgelessSelectionManager {
 
         Object.keys(states).forEach(id => {
           const selections = states[id];
+          let hasTextSelection = false;
+          let hasBlockSelection = false;
 
           selections.forEach(selection => {
+            if (selection.is('text')) {
+              hasTextSelection = true;
+            }
+
+            if (selection.is('block')) {
+              hasBlockSelection = true;
+            }
+
             if (selection.is('surface')) {
               remoteSelection[id] = selection;
               selection.elements.forEach(id => remoteSelectedElements.add(id));
@@ -145,6 +150,10 @@ export class EdgelessSelectionManager {
               remoteCursors[id] = selection;
             }
           });
+
+          if (hasBlockSelection || hasTextSelection) {
+            delete remoteCursors[id];
+          }
         });
 
         this.remoteCursor = remoteCursors;
@@ -161,11 +170,15 @@ export class EdgelessSelectionManager {
     this.mount();
   }
 
-  hasRemote(element: string) {
+  isSelectedByRemote(element: string) {
     return this._remoteSelectedElements.has(element);
   }
 
-  has(element: string) {
+  /**
+   * check if the element is selected by local user
+   * @param element
+   */
+  isSelected(element: string) {
     return this._selectedElements.has(element);
   }
 
@@ -186,11 +199,6 @@ export class EdgelessSelectionManager {
     const instance = this._selection.getInstance('cursor', cursor.x, cursor.y);
 
     this._selection.setGroup('edgeless', [this.state, instance]);
-  }
-
-  setSelectedBlocks(blocks: BlockComponentElement[]) {
-    this.selectedBlocks = blocks;
-    this.slots.blocksUpdated.emit(blocks);
   }
 
   clear() {

@@ -185,9 +185,6 @@ export class SearchIndexer {
 
   private _getPage(key: string): Doc | undefined {
     try {
-      if (!key.startsWith('space:')) {
-        key = `space:${key}`;
-      }
       return this._doc.spaces.get(key);
     } catch (_) {
       return undefined;

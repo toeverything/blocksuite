@@ -103,6 +103,10 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
   editing = false;
   private _cell = createRef<DataViewCellLifeCycle>();
 
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   public get cell(): DataViewCellLifeCycle | undefined {
     return this._cell.value;
   }
@@ -119,9 +123,12 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
 
   public _click = (e: MouseEvent) => {
     e.stopPropagation();
+    if (this.readonly) return;
+
     this.changeEditing(true);
   };
   public _clickLeft = (e: MouseEvent) => {
+    if (this.readonly) return;
     const ele = e.currentTarget as HTMLElement;
     const columns = this.view.detailColumns;
     popMenu(ele, {
@@ -135,7 +142,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
         items: [
           {
             type: 'sub-menu',
-            name: 'Column type',
+            name: 'Column Type',
             icon: TextIcon,
             hide: () => !this.column.updateType || this.column.type === 'title',
             options: {
@@ -160,7 +167,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Duplicate column',
+            name: 'Duplicate Column',
             icon: DatabaseDuplicate,
             hide: () => !this.column.duplicate || this.column.type === 'title',
             select: () => {
@@ -169,7 +176,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move up',
+            name: 'Move Up',
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
@@ -190,7 +197,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
           },
           {
             type: 'action',
-            name: 'Move down',
+            name: 'Move Down',
             icon: html` <div
               style="transform: rotate(90deg);display:flex;align-items:center;"
             >
@@ -217,7 +224,7 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
             children: () => [
               {
                 type: 'action',
-                name: 'Delete column',
+                name: 'Delete Column',
                 icon: DeleteIcon,
                 hide: () => !this.column.delete || this.column.type === 'title',
                 select: () => {

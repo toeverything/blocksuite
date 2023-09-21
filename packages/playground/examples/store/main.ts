@@ -10,7 +10,7 @@ function initPage() {
   const schema = new Schema();
   schema.register(TodoSchema);
   const workspace = new Workspace({ id: 'todo', schema });
-  const page = workspace.createPage({ id: 'page0' });
+  const page = workspace.createPage({ id: 'page:home' });
   page.addBlock('todo:container');
   return page;
 }

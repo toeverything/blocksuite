@@ -50,6 +50,7 @@ export type MultiSelection = {
 export type TableViewSelection = {
   viewId: string;
   type: 'table';
+  groupKey?: string;
   rowsSelection?: MultiSelection;
   columnsSelection?: MultiSelection;
   focus: CellFocus;
@@ -167,6 +168,7 @@ export enum LineWidth {
 
 export type TextTool = {
   type: 'text';
+  color: CssVariableName;
 };
 
 export type BrushTool = {

@@ -1,8 +1,7 @@
 import './meta-data/meta-data.js';
 
 import { type BlockService } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
 import { css, html } from 'lit';
@@ -10,14 +9,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageClipboard } from '../../__internal__/clipboard/index.js';
-import {
-  PAGE_BLOCK_CHILD_PADDING,
-  PAGE_BLOCK_PADDING_BOTTOM,
-} from '../../__internal__/consts.js';
+import { PAGE_BLOCK_CHILD_PADDING } from '../../__internal__/consts.js';
 import type { EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import { ClipboardController } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
@@ -60,7 +56,6 @@ export class DocPageBlockComponent extends BlockElement<
       margin: 0 auto;
       /* cursor: crosshair; */
       cursor: default;
-      padding-bottom: ${PAGE_BLOCK_PADDING_BOTTOM}px;
 
       /* Leave a place for drag-handle */
       /* Do not use prettier format this style, or it will be broken */
@@ -68,6 +63,14 @@ export class DocPageBlockComponent extends BlockElement<
       padding-left: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
       /* prettier-ignore */
       padding-right: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
+    }
+
+    /* Extra small devices (phones, 640px and down) */
+    @media screen and (max-width: 640px) {
+      .affine-doc-page-block-container {
+        padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
+        padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
+      }
     }
 
     .affine-doc-page-block-title {
@@ -117,7 +120,7 @@ export class DocPageBlockComponent extends BlockElement<
 
   clipboard = new PageClipboard(this);
 
-  getService = getService;
+  clipboardController = new ClipboardController(this);
 
   @state()
   private _isComposing = false;
@@ -358,14 +361,6 @@ export class DocPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.rangeManager?.setConfig({
-      shouldSyncSelection: range => {
-        const insideModal = Boolean(
-          range?.startContainer.parentElement?.closest('side-layout-modal')
-        );
-        return !insideModal;
-      },
-    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
@@ -527,12 +522,22 @@ export class DocPageBlockComponent extends BlockElement<
       } else {
         noteId = lastNote.id;
         const last = lastNote.children.at(-1);
-        if (!last || !last.text) {
+        if (
+          !last ||
+          matchFlavours(last, [
+            'affine:code',
+            'affine:divider',
+            'affine:image',
+            'affine:database',
+            'affine:bookmark',
+            'affine:attachment',
+          ])
+        ) {
           if (readonly) return;
           paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
         } else {
           paragraphId = last.id;
-          index = last.text.length ?? 0;
+          index = last.text?.length ?? 0;
         }
       }
 

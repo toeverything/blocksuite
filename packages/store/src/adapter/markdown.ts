@@ -1,19 +1,27 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 
-import type { BlockSnapshot } from '../transformer/type.js';
+import type {
+  BlockSnapshot,
+  PageSnapshot,
+  SliceSnapshot,
+} from '../transformer/type.js';
 import type { AdapterAssetsManager } from './assets.js';
+import type {
+  FromSliceSnapshotPayload,
+  ToBlockSnapshotPayload,
+  ToPageSnapshotPayload,
+  ToSliceSnapshotPayload,
+} from './base.js';
 import {
   BaseAdapter,
-  type BlockSnapshotPayload,
-  type BlockSnapshotReturn,
-  type PageSnapshotPayload,
-  type PageSnapshotReturn,
+  type FromBlockSnapshotPayload,
+  type FromPageSnapshotPayload,
 } from './base.js';
 import { StringBuilder } from './string-builder.js';
 
 export type Markdown = string;
 
-const markdownConvertableFlavours = [
+const markdownConvertibleFlavours = [
   'affine:code',
   'affine:paragraph',
   'affine:list',
@@ -35,7 +43,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async fromPageSnapshot({
     snapshot,
     assets,
-  }: PageSnapshotPayload): Promise<Markdown> {
+  }: FromPageSnapshotPayload): Promise<Markdown> {
     const buffer = new StringBuilder();
     buffer.write(`# ${snapshot.meta.title}\n`);
     buffer.write(
@@ -50,7 +58,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async fromBlockSnapshot({
     snapshot,
     assets,
-  }: BlockSnapshotPayload): Promise<Markdown> {
+  }: FromBlockSnapshotPayload): Promise<Markdown> {
     await this.traverseSnapshot(snapshot, {
       indentDepth: 0,
       insideTheLists: false,
@@ -62,11 +70,38 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return markdown;
   }
 
-  async toPageSnapshot(_file: Markdown): Promise<PageSnapshotReturn> {
+  async fromSliceSnapshot({
+    snapshot,
+    assets,
+  }: FromSliceSnapshotPayload): Promise<Markdown> {
+    for (const contentSlice of snapshot.content) {
+      await this.traverseSnapshot(contentSlice, {
+        indentDepth: 0,
+        insideTheLists: false,
+        numberedListCount: [0],
+        assets,
+      });
+    }
+    const markdown = this.markdownBuffer.toString();
+    this.markdownBuffer.clear();
+    return markdown;
+  }
+
+  async toPageSnapshot(
+    _payload: ToPageSnapshotPayload<Markdown>
+  ): Promise<PageSnapshot> {
     throw new Error('Method not implemented.');
   }
 
-  async toBlockSnapshot(_file: Markdown): Promise<BlockSnapshotReturn> {
+  async toBlockSnapshot(
+    _payload: ToBlockSnapshotPayload<Markdown>
+  ): Promise<BlockSnapshot> {
+    throw new Error('Method not implemented.');
+  }
+
+  async toSliceSnapshot(
+    _payload: ToSliceSnapshotPayload<Markdown>
+  ): Promise<SliceSnapshot> {
     throw new Error('Method not implemented.');
   }
 
@@ -74,7 +109,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot: BlockSnapshot,
     context: TraverseContext
   ) => {
-    if (!markdownConvertableFlavours.includes(snapshot.flavour)) {
+    if (!markdownConvertibleFlavours.includes(snapshot.flavour)) {
       for (const child of snapshot.children) {
         await this.traverseSnapshot(child, context);
       }

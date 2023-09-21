@@ -4,6 +4,7 @@ import './note-menu.js';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
@@ -31,10 +32,11 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
-    edgeless-tool-icon-button svg + svg {
+    .arrow-up-icon {
       position: absolute;
       top: 4px;
       right: 2px;
+      font-size: 0;
     }
   `;
 
@@ -96,7 +98,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
 
   override render() {
     const type = this.edgelessTool?.type;
-
+    const arrowColor = type === 'note' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
@@ -113,7 +115,10 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
           this._toggleNoteMenu();
         }}
       >
-        ${NoteIcon} ${ArrowUpIcon}
+        ${NoteIcon}
+        <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
+          ${ArrowUpIcon}
+        </span>
       </edgeless-tool-icon-button>
     `;
   }

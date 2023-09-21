@@ -2,10 +2,15 @@ import '../page-block/edgeless/edgeless-blocks-container.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import * as Y from 'yjs';
 
+import {
+  type CssVariableName,
+  isCssVariable,
+} from '../__internal__/theme/css-variables.js';
+import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
@@ -26,7 +31,6 @@ import {
   type PhasorElementType,
 } from './elements/index.js';
 import type {
-  ComputedValue,
   HitTestOptions,
   SurfaceElement,
 } from './elements/surface-element.js';
@@ -65,6 +69,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       position: relative;
       box-sizing: border-box;
       overflow: hidden;
+      display: block;
       height: 100%;
       font-family: var(--affine-font-family);
       font-size: var(--affine-font-base);
@@ -124,9 +129,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
-  private _computedValue!: ComputedValue;
-
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
@@ -168,6 +170,23 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     this.init();
   }
+
+  getCSSPropertyValue = (value: string) => {
+    const root = this.root;
+    if (isCssVariable(value)) {
+      const cssValue = getThemePropertyValue(root, value as CssVariableName);
+      if (cssValue === undefined) {
+        console.error(
+          new Error(
+            `All variables should have a value. Please check for any dirty data or variable renaming.Variable: ${value}`
+          )
+        );
+      }
+      return cssValue ?? value;
+    }
+
+    return value;
+  };
 
   private _initEvents() {
     this._disposables.add(
@@ -281,7 +300,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, this);
-    element.computedValue = this._computedValue;
+    element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
     this._addToBatch(element);
@@ -333,7 +352,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, this);
-      element.computedValue = this._computedValue;
+      element.computedValue = this.getCSSPropertyValue;
       element.mount(this._renderer);
       this._elements.set(element.id, element);
 
@@ -405,7 +424,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     const id = generateElementId();
 
-    const yMap = new Y.Map();
+    const yMap = new Workspace.Y.Map();
 
     const defaultProps = ElementDefaultProps[type];
     const batch = this.getBatch(properties.batch ?? this._defaultBatch);
@@ -419,8 +438,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     this._transact(() => {
       for (const [key, value] of Object.entries(props)) {
-        if ((key === 'text' || key === 'title') && !(value instanceof Y.Text)) {
-          yMap.set(key, new Y.Text(value));
+        if (
+          (key === 'text' || key === 'title') &&
+          !(value instanceof Workspace.Y.Text)
+        ) {
+          yMap.set(key, new Workspace.Y.Text(value));
         } else {
           yMap.set(key, value);
         }

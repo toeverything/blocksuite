@@ -38,6 +38,8 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     { xywh: serializeXYWH(0, 100, 800, 640) },
     pageBlockId
   );
+
+  page.addBlock('affine:surface', {}, pageBlockId);
   // Import preset markdown content inside note block
   const contentParser = new window.ContentParser(page);
 

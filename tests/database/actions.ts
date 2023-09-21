@@ -1,8 +1,12 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import type {
+  RichTextCell,
+  RichTextCellEditing,
+} from '../../packages/blocks/src/database-block/common/columns/rich-text/cell-renderer.js';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { ColumnType } from '../../packages/blocks/src/index.js';
-import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ZERO_WIDTH_SPACE } from '../../packages/virgo/src/consts.js';
 import {
@@ -21,6 +25,7 @@ import { assertExists } from '../utils/asserts.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
   const editor = getEditorLocator(page);
+  await editor.locator('affine-data-view-table-group').first().hover();
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
   await waitNextFrame(page, 100);
@@ -79,6 +84,11 @@ export function getDatabaseBodyRows(page: Page) {
 export function getDatabaseBodyRow(page: Page, rowIndex = 0) {
   const rows = getDatabaseBodyRows(page);
   return rows.nth(rowIndex);
+}
+
+export function getDatabaseTableContainer(page: Page) {
+  const container = page.locator('.affine-database-table-container');
+  return container;
 }
 
 export async function assertDatabaseTitleColumnText(
@@ -194,7 +204,7 @@ export async function assertDatabaseCellRichTexts(
     text: string;
   }
 ) {
-  const cellContainer = await page.locator(
+  const cellContainer = page.locator(
     `affine-database-cell-container[data-row-index='${rowIndex}'][data-column-index='${columnIndex}']`
   );
 
@@ -205,7 +215,7 @@ export async function assertDatabaseCellRichTexts(
 
   const richText = (await cellEditing.count()) === 0 ? cell : cellEditing;
   const actualTexts = await richText.evaluate(ele => {
-    return (ele as RichText).vEditor?.yText.toString();
+    return (ele as RichTextCellEditing).vEditor?.yTextString;
   });
   expect(actualTexts).toEqual(text);
 }
@@ -255,8 +265,10 @@ export async function assertDatabaseCellLink(
         `.database-cell:nth-child(${columnIndex + 1})`
       );
       const richText =
-        cell?.querySelector<RichText>('affine-database-link-cell') ??
-        cell?.querySelector<RichText>('affine-database-link-cell-editing');
+        cell?.querySelector<RichTextCell>('affine-database-link-cell') ??
+        cell?.querySelector<RichTextCellEditing>(
+          'affine-database-link-cell-editing'
+        );
       if (!richText) throw new Error('Missing database rich text cell');
       return richText.vEditor.yText.toString();
     },
@@ -348,7 +360,8 @@ export async function assertRowsSelection(
 ) {
   const selection = page.locator('.database-selection');
   const selectionBox = await getBoundingBox(selection);
-
+  const containerBox = await getDatabaseTableContainer(page).boundingBox();
+  assertExists(containerBox);
   const startIndex = rowIndexes[0];
   const endIndex = rowIndexes[1];
 
@@ -365,7 +378,7 @@ export async function assertRowsSelection(
       x: rowBox.x,
       y: rowBox.y,
       height: rowBox.height,
-      width: lastCell.x + lastCell.width - rowBox.x,
+      width: containerBox.width,
     });
   } else {
     // multiple rows
@@ -382,7 +395,7 @@ export async function assertRowsSelection(
     expect(selectionBox).toEqual({
       x: startRowBox.x,
       y: startRowBox.y,
-      width: lastCell.x + lastCell.width - startRowBox.x,
+      width: containerBox.width,
       height: startRowBox.height + endRowBox.height,
     });
   }

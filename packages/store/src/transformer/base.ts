@@ -9,6 +9,7 @@ type BlockSnapshotLeaf = Pick<BlockSnapshot, 'id' | 'flavour' | 'props'>;
 export type FromSnapshotPayload = {
   json: BlockSnapshotLeaf;
   assets: AssetsManager;
+  children: BlockSnapshot[];
 };
 
 export type ToSnapshotPayload<Props extends object> = {

@@ -1,8 +1,8 @@
 import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
-import * as Y from 'yjs';
 
 import type { BlockModels } from '../../../../__internal__/utils/model.js';
 import {
@@ -99,7 +99,10 @@ export class TOCBlockPreview extends WithDisposable(LitElement) {
 
     this._disposables.add(
       this.block.page.slots.onYEvent.on(({ event }) => {
-        if (event instanceof Y.YTextEvent && event.path[0] === this.block.id) {
+        if (
+          event instanceof Workspace.Y.YTextEvent &&
+          event.path[0] === this.block.id
+        ) {
           this.requestUpdate();
         }
       })

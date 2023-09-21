@@ -213,7 +213,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
         },
         select: () => {
           const conditions = [...this.data.conditions];
-          conditions.splice(i + 1, 0, structuredClone(conditions[i]));
+          conditions.splice(
+            i + 1,
+            0,
+            JSON.parse(JSON.stringify(conditions[i]))
+          );
           this.setData({ ...this.data, conditions: conditions });
         },
       },

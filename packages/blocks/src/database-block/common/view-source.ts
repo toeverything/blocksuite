@@ -1,5 +1,6 @@
 import type { Slot } from '@blocksuite/global/utils';
 
+import type { InsertPosition } from '../types.js';
 import type { DataViewDataType, DataViewTypes } from './data-view.js';
 
 export interface SingleViewSource<
@@ -15,6 +16,7 @@ export interface SingleViewSource<
   updateSlot: Slot;
 
   isDeleted(): boolean;
+  duplicate(): void;
 }
 
 export interface ViewSource {
@@ -26,4 +28,7 @@ export interface ViewSource {
   viewGet(id: string): SingleViewSource;
   viewAdd(type: DataViewTypes): string;
   updateSlot: Slot;
+
+  moveTo(id: string, position: InsertPosition): void;
+  duplicate(id: string): void;
 }

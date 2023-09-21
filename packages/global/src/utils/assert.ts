@@ -80,3 +80,16 @@ export function assertEquals<T extends Allowed, U extends T>(
     throw new Error(message);
   }
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Class<T> = new (...args: any[]) => T;
+
+export function assertInstanceOf<T>(
+  val: unknown,
+  expected: Class<T>,
+  message = 'val is not instance of expected'
+): asserts val is T {
+  if (!(val instanceof expected)) {
+    throw new Error(message);
+  }
+}

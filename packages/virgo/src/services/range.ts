@@ -1,4 +1,3 @@
-import { VirgoLine } from '../components/index.js';
 import type { VRange } from '../types.js';
 import type { VRangeUpdatedProp } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
@@ -11,9 +10,7 @@ import { isMaybeVRangeEqual } from '../utils/v-range.js';
 import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
-  private _prevVRange: VRange | null = null;
   private _vRange: VRange | null = null;
-  private _lastScrollLeft = 0;
 
   constructor(public readonly editor: VEditor<TextAttributes>) {}
 
@@ -21,23 +18,19 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return this.editor.vRangeProvider;
   }
 
-  onVRangeUpdated = ([newVRange, sync]: VRangeUpdatedProp) => {
+  onVRangeUpdated = async ([newVRange, sync]: VRangeUpdatedProp) => {
+    const eq = isMaybeVRangeEqual(this._vRange, newVRange);
+    if (eq) {
+      return;
+    }
+
     this._vRange = newVRange;
 
-    if (
-      this.editor.mounted &&
-      newVRange &&
-      !isMaybeVRangeEqual(this._prevVRange, newVRange)
-    ) {
-      // no need to sync and native selection behavior about shift+arrow will
-      // be broken if we sync
+    // try to trigger update because the `selected` state of the virgo element may change
+    if (this.editor.mounted) {
+      // range change may happen before the editor is prepared
+      await this.editor.waitForUpdate();
       this.editor.requestUpdate(false);
-    }
-    this._prevVRange = newVRange;
-
-    if (this.vRangeProvider) {
-      this.vRangeProvider.setVRange(newVRange);
-      return;
     }
 
     if (!sync) {
@@ -77,17 +70,26 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return this._vRange;
   };
 
+  isVRangeValid = (vRange: VRange | null): boolean => {
+    return !(
+      vRange &&
+      (vRange.index < 0 ||
+        vRange.index + vRange.length > this.editor.yText.length)
+    );
+  };
+
   /**
    * the vRange is synced to the native selection asynchronically
    * if sync is true, the native selection will be synced immediately
    */
   setVRange = (vRange: VRange | null, sync = true): void => {
-    if (
-      vRange &&
-      (vRange.index < 0 ||
-        vRange.index + vRange.length > this.editor.yText.length)
-    ) {
+    if (!this.isVRangeValid(vRange)) {
       throw new Error('invalid vRange');
+    }
+
+    if (this.vRangeProvider) {
+      this.vRangeProvider.setVRange(vRange);
+      return;
     }
 
     this.editor.slots.vRangeUpdated.emit([vRange, sync]);
@@ -143,10 +145,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     return domRangeToVirgoRange(range, rootElement, yText);
   };
 
-  onScrollUpdated = (scrollLeft: number) => {
-    this._lastScrollLeft = scrollLeft;
-  };
-
   private _applyVRange = (vRange: VRange): void => {
     const selectionRoot = findDocumentOrShadowRoot(this.editor);
     const selection = selectionRoot.getSelection();
@@ -161,39 +159,6 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     selection.removeAllRanges();
     selection.addRange(newRange);
-
-    this._scrollLineIntoViewIfNeeded(newRange);
-    this._scrollCursorIntoViewIfNeeded(newRange);
-
     this.editor.slots.rangeUpdated.emit(newRange);
-  };
-
-  private _scrollLineIntoViewIfNeeded = (range: Range) => {
-    if (this.editor.shouldLineScrollIntoView) {
-      let lineElement: HTMLElement | null = range.endContainer.parentElement;
-      while (!(lineElement instanceof VirgoLine)) {
-        lineElement = lineElement?.parentElement ?? null;
-      }
-      lineElement?.scrollIntoView({
-        block: 'nearest',
-      });
-    }
-  };
-
-  private _scrollCursorIntoViewIfNeeded = (range: Range) => {
-    if (this.editor.shouldCursorScrollIntoView) {
-      const root = this.editor.rootElement;
-
-      const rootRect = root.getBoundingClientRect();
-      const rangeRect = range.getBoundingClientRect();
-
-      let moveX = 0;
-      if (rangeRect.left > rootRect.left) {
-        moveX = Math.max(this._lastScrollLeft, rangeRect.left - rootRect.right);
-      }
-
-      root.scrollLeft = moveX;
-      this._lastScrollLeft = moveX;
-    }
   };
 }

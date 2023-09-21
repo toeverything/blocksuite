@@ -1,4 +1,4 @@
-import type * as Y from 'yjs';
+import type { Y } from '@blocksuite/store';
 
 import type { IBound, ShapeStyle, StrokeStyle } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';

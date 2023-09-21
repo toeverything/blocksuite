@@ -61,15 +61,18 @@ export class SelectCellEditing extends BaseCellRenderer<
 
   private popTagSelect = () => {
     this._disposables.add({
-      dispose: popTagSelect(this, {
-        mode: 'single',
-        options: this._options,
-        onOptionsChange: this._onOptionsChange,
-        value: this._value,
-        onChange: this._onChange,
-        onComplete: this._editComplete,
-        minWidth: 400,
-      }),
+      dispose: popTagSelect(
+        this.querySelector('affine-multi-tag-view') ?? this,
+        {
+          mode: 'single',
+          options: this._options,
+          onOptionsChange: this._onOptionsChange,
+          value: this._value,
+          onChange: this._onChange,
+          onComplete: this._editComplete,
+          minWidth: 400,
+        }
+      ),
     });
   };
 

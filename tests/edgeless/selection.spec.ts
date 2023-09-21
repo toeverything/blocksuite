@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import * as actions from '../utils/actions/edgeless.js';
 import {
   createShapeElement,
@@ -36,6 +38,7 @@ test('should update rect of selection when resizing viewport', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await actions.switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
 
   await addBasicRectShapeElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await dragBetweenCoords(page, { x: 120, y: 90 }, { x: 220, y: 130 });
@@ -81,6 +84,7 @@ test('select multiple shapes and translate', async ({ page }) => {
   await initEmptyEdgelessState(page);
 
   await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
 
   await addBasicBrushElement(page, { x: 100, y: 100 }, { x: 200, y: 200 });
   await page.mouse.move(110, 110);
@@ -109,6 +113,7 @@ test('selection box of shape element sync on fast dragging', async ({
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
 
   await setEdgelessTool(page, 'shape');
   await dragBetweenCoords(page, { x: 100, y: 100 }, { x: 200, y: 200 });
@@ -131,6 +136,7 @@ test('when the selection is always a note, it should remain in an active state',
   await initThreeParagraphs(page);
 
   await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
   const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
   await setEdgelessTool(page, 'note');
@@ -145,7 +151,7 @@ test('when the selection is always a note, it should remain in an active state',
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [46, 597.5, 448, 128]);
+  await assertEdgelessSelectedRect(page, [76, 597.5, 448, 128]);
 
   await clickInCenter(page, bound);
   await clickInCenter(page, bound);
@@ -171,4 +177,140 @@ test('copy to clipboard as PNG', async ({ page, context }) => {
   await waitNextFrame(page);
   await page.pause();
   await assertBlockCount(page, 'note', 1);
+});
+
+test('should auto panning when selection rectangle reaches viewport edges', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
+
+  await addBasicRectShapeElement(page, { x: 200, y: 100 }, { x: 300, y: 200 });
+  await page.mouse.move(210, 110);
+  await assertEdgelessHoverRect(page, [200, 100, 100, 100]);
+
+  const selectedRectClass = '.affine-edgeless-selected-rect';
+
+  // Panning to the left
+  await setEdgelessTool(page, 'pan');
+  await dragBetweenCoords(
+    page,
+    {
+      x: 600,
+      y: 200,
+    },
+    {
+      x: 200,
+      y: 200,
+    }
+  );
+  await setEdgelessTool(page, 'default');
+  await page.mouse.click(210, 110);
+  let selectedRect = await page.locator(selectedRectClass);
+  expect(selectedRect).toBeHidden();
+  // Click to start selection and hold the mouse to trigger auto panning to the left
+  await page.mouse.move(210, 110);
+  await page.mouse.down();
+  await page.mouse.move(0, 210, { steps: 20 });
+  await page.waitForTimeout(500);
+  await page.mouse.up();
+
+  // Expect to select the shape element
+  selectedRect = await page.locator(selectedRectClass);
+  await page.waitForTimeout(300);
+  expect(selectedRect).toBeVisible();
+
+  // Panning to the top
+  await page.mouse.click(400, 600);
+  await setEdgelessTool(page, 'pan');
+  await dragBetweenCoords(
+    page,
+    {
+      x: 400,
+      y: 600,
+    },
+    {
+      x: 400,
+      y: 100,
+    }
+  );
+  await setEdgelessTool(page, 'default');
+  await page.mouse.click(600, 100);
+  selectedRect = await page.locator(selectedRectClass);
+  expect(selectedRect).toBeHidden();
+  // Click to start selection and hold the mouse to trigger auto panning to the top
+  await page.mouse.move(600, 100);
+  await page.mouse.down();
+  await page.mouse.move(400, 0, { steps: 20 });
+  await page.waitForTimeout(500);
+  await page.mouse.up();
+
+  // Expect to select the empty note
+  selectedRect = await page.locator(selectedRectClass);
+  await page.waitForTimeout(300);
+  expect(selectedRect).toBeVisible();
+
+  // Panning to the right
+  await page.mouse.click(100, 600);
+  await setEdgelessTool(page, 'pan');
+  await dragBetweenCoords(
+    page,
+    {
+      x: 20,
+      y: 600,
+    },
+    {
+      x: 960,
+      y: 600,
+    }
+  );
+  await setEdgelessTool(page, 'default');
+  await page.mouse.click(800, 600);
+  selectedRect = await page.locator(selectedRectClass);
+  expect(selectedRect).toBeHidden();
+  // Click to start selection and hold the mouse to trigger auto panning to the right
+  await page.mouse.move(800, 600);
+  await page.mouse.down();
+  await page.mouse.move(960, 300, { steps: 20 });
+  await page.waitForTimeout(800);
+  await page.mouse.up();
+
+  // Expect to select the empty note
+  selectedRect = await page.locator(selectedRectClass);
+  await page.waitForTimeout(300);
+  expect(selectedRect).toBeVisible();
+
+  // Panning to the bottom
+  await page.mouse.click(400, 100);
+  await setEdgelessTool(page, 'pan');
+  await dragBetweenCoords(
+    page,
+    {
+      x: 400,
+      y: 100,
+    },
+    {
+      x: 400,
+      y: 800,
+    }
+  );
+  await setEdgelessTool(page, 'default');
+  await page.mouse.click(700, 800);
+  selectedRect = await page.locator(selectedRectClass);
+  expect(selectedRect).toBeHidden();
+  // Click to start selection and hold the mouse to trigger auto panning to the right
+  await page.mouse.move(700, 800);
+  await page.mouse.down();
+  await page.mouse.move(700, 1200, { steps: 20 });
+  await page.waitForTimeout(500);
+  await page.mouse.up();
+
+  // Expect to select the empty note
+  selectedRect = await page.locator(selectedRectClass);
+  await page.waitForTimeout(300);
+  expect(selectedRect).toBeVisible();
+  await page.waitForTimeout(300);
 });

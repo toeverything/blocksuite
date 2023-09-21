@@ -11,14 +11,24 @@ import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { createRef } from 'lit/directives/ref.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
+import { copyBlocks } from '../__internal__/clipboard/index.js';
 import type { DataSource } from '../__internal__/datasource/base.js';
 import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelection } from '../__internal__/index.js';
+import { Rect } from '../__internal__/index.js';
+import { DragIndicator } from '../components/index.js';
+import { popMenu } from '../components/menu/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
+import { CopyIcon, DeleteIcon, MoreHorizontalIcon } from '../icons/index.js';
+import {
+  captureEventTarget,
+  getDropResult,
+} from '../widgets/drag-handle/utils.js';
+import { DragHandleWidget } from '../widgets/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -27,7 +37,10 @@ import { renderFilterBar } from './common/filter/filter-bar.js';
 import { renderTools } from './common/header/tools/tools.js';
 import { DatabaseSelection } from './common/selection.js';
 import type { SingleViewSource, ViewSource } from './common/view-source.js';
+import type { DataViewNative, DataViewNativeConfig } from './data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
+import { DatabaseBlockSchema } from './database-model.js';
+import type { InsertPosition } from './types.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
@@ -45,12 +58,104 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       background-color: var(--affine-hover-color);
       border-radius: 4px;
     }
+    .database-ops {
+      margin-top: 4px;
+      padding: 2px;
+      border-radius: 4px;
+      display: flex;
+      cursor: pointer;
+    }
+    .database-ops svg {
+      width: 16px;
+      height: 16px;
+      color: var(--affine-icon-color);
+    }
+    .database-ops:hover {
+      background-color: var(--affine-hover-color);
+    }
   `;
+  indicator = new DragIndicator();
+  onDrag = (evt: MouseEvent, id: string): (() => void) => {
+    const result = getDropResult(evt);
+    if (result && result.rect) {
+      document.body.append(this.indicator);
+      this.indicator.rect = Rect.fromLWTH(
+        result.rect.left,
+        result.rect.width,
+        result.rect.top,
+        result.rect.height
+      );
+      return () => {
+        this.indicator.remove();
+        const model = this.page.getBlockById(id);
+        const target = this.page.getBlockById(result.dropBlockId);
+        const parent = this.page.getParent(result.dropBlockId);
+        if (model && target && parent) {
+          this.page.moveBlocks([model], parent, target, result.dropBefore);
+        }
+      };
+    }
+    this.indicator.remove();
+    return () => {};
+  };
+  private _clickDatabaseOps = (e: MouseEvent) => {
+    popMenu(e.currentTarget as HTMLElement, {
+      options: {
+        input: {
+          initValue: this.model.title.toString(),
+          placeholder: 'Untitled',
+          onComplete: text => {
+            this.model.title.replace(0, this.model.title.length, text);
+          },
+        },
+        items: [
+          {
+            type: 'action',
+            icon: CopyIcon,
+            name: 'Copy',
+            select: () => {
+              copyBlocks([this.model]);
+            },
+          },
+          // {
+          //   type: 'action',
+          //   icon: DuplicateIcon,
+          //   name: 'Duplicate',
+          //   select: () => {
+          //   },
+          // },
+          {
+            type: 'group',
+            name: '',
+            children: () => [
+              {
+                type: 'action',
+                icon: DeleteIcon,
+                class: 'delete-item',
+                name: 'Delete Database',
+                select: () => {
+                  this.model.children.slice().forEach(block => {
+                    this.page.deleteBlock(block);
+                  });
+                  this.page.deleteBlock(this.model);
+                },
+              },
+            ],
+          },
+        ],
+      },
+    });
+  };
+  private renderDatabaseOps() {
+    return html`<div class="database-ops" @click="${this._clickDatabaseOps}">
+      ${MoreHorizontalIcon}
+    </div>`;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.root.selection.slots.changed.on(selections => {
+      this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
             if (!PathFinder.equals(selection.path, this.path)) {
@@ -73,9 +178,56 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       );
       return !!selection;
     });
+    let canDrop = false;
+    this.disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: DatabaseBlockSchema.model.flavour,
+        onDragMove: state => {
+          const target = captureEventTarget(state.raw.target);
+          const view = this.view;
+          if (view && target instanceof HTMLElement && this.contains(target)) {
+            canDrop = view.showIndicator?.(state.raw) ?? false;
+            return false;
+          }
+          if (canDrop) {
+            view?.hideIndicator?.();
+            canDrop = false;
+          }
+          return false;
+        },
+        onDragEnd: (state, draggingElements) => {
+          const target = state.raw.target;
+          const view = this.view;
+          if (
+            canDrop &&
+            view &&
+            view.moveTo &&
+            target instanceof HTMLElement &&
+            this.parentElement?.contains(target)
+          ) {
+            const blocks = draggingElements.map(v => v.model);
+            this.model.page.moveBlocks(blocks, this.model);
+            blocks.forEach(model => {
+              view.moveTo?.(model.id, state.raw);
+            });
+            view.hideIndicator?.();
+            return false;
+          }
+          if (canDrop) {
+            view?.hideIndicator?.();
+            canDrop = false;
+          }
+          return false;
+        },
+      })
+    );
   }
 
-  private _view = createRef<DataViewExpose>();
+  private _view = createRef<DataViewNative>();
+
+  get view() {
+    return this._view.value?.expose;
+  }
 
   private _dataSource?: DataSource;
   public get dataSource(): DataSource {
@@ -102,6 +254,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   private renderTitle = (dataViewMethod: DataViewExpose) => {
     const addRow = () => dataViewMethod.addRow?.('start');
     return html` <affine-database-title
+      style="overflow: hidden"
       .titleText="${this.model.title}"
       .readonly="${this.model.page.readonly}"
       .onPressEnterKey="${addRow}"
@@ -121,10 +274,9 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     }) => {
       return html`
         <div style="margin-bottom: 16px;display:flex;flex-direction: column">
-          <div
-            style="display:flex;align-items:center;gap:12px;padding: 0 6px;margin-bottom: 8px;"
-          >
-            ${this.renderTitle(viewMethods)} ${this.renderReference()}
+          <div style="display:flex;gap:8px;padding: 0 6px;margin-bottom: 8px;">
+            ${this.renderTitle(viewMethods)} ${this.renderDatabaseOps()}
+            ${this.renderReference()}
           </div>
           <div
             style="display:flex;align-items:center;justify-content: space-between;gap: 12px"
@@ -144,6 +296,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     }
     return this._viewSource;
   }
+
   setSelection = (selection: DataViewSelection | undefined) => {
     this.selection.setGroup(
       'note',
@@ -159,6 +312,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       this.root.page.awarenessStore
     );
   }
+
   _bindHotkey: DataViewProps['bindHotkey'] = hotkeys => {
     return {
       dispose: this.root.event.bindHotkey(hotkeys, {
@@ -173,22 +327,31 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       }),
     };
   };
+
   override render() {
+    const config: DataViewNativeConfig = {
+      bindHotkey: this._bindHotkey,
+      handleEvent: this._handleEvent,
+      getFlag: this.getFlag,
+      selectionUpdated: this.selectionUpdated,
+      setSelection: this.setSelection,
+      dataSource: this.dataSource,
+      viewSource: this.viewSource,
+      headerComponent: this.headerComponent,
+      onDrag: this.onDrag,
+    };
     return html`
       <div style="position: relative">
         <affine-data-view-native
-          .bindHotkey="${this._bindHotkey}"
-          .handleEvent="${this._handleEvent}"
-          .getFlag="${this.getFlag}"
-          .selectionUpdated="${this.selectionUpdated}"
-          .setSelection="${this.setSelection}"
-          .dataSource="${this.dataSource}"
-          .viewSource="${this.viewSource}"
-          .headerComponent="${this.headerComponent}"
+          ${ref(this._view)}
+          .config="${config}"
         ></affine-data-view-native>
         ${when(
           this.selected?.is('block'),
-          () => html`<affine-block-selection></affine-block-selection>`
+          () =>
+            html` <affine-block-selection
+              style="z-index: 1"
+            ></affine-block-selection>`
         )}
       </div>
     `;
@@ -227,7 +390,7 @@ class DatabaseBlockViewSource implements ViewSource {
   }
 
   public get readonly(): boolean {
-    return false;
+    return this.model.page.readonly;
   }
 
   public viewAdd(type: DataViewTypes): string {
@@ -252,6 +415,9 @@ class DatabaseBlockViewSource implements ViewSource {
       const slot = new Slot();
       this.updateSlot.pipe(slot);
       result = {
+        duplicate(): void {
+          self.duplicate(id);
+        },
         get view() {
           const view = getView();
           if (!view) {
@@ -281,5 +447,14 @@ class DatabaseBlockViewSource implements ViewSource {
       this.viewMap.set(id, result);
     }
     return result;
+  }
+
+  public duplicate(id: string): void {
+    const newId = this.model.duplicateView(id);
+    this.selectView(newId);
+  }
+
+  public moveTo(id: string, position: InsertPosition): void {
+    this.model.moveViewTo(id, position);
   }
 }

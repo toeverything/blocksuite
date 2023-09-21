@@ -1,10 +1,10 @@
-import { SchemaValidateError } from '@blocksuite/global/error';
+import { MigrationError, SchemaValidateError } from '@blocksuite/global/error';
 import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
 import type * as Y from 'yjs';
 
 import { SCHEMA_NOT_FOUND_MESSAGE } from '../consts.js';
-import { workspaceMigrations } from '../migration/index.js';
+import { pageMigrations, workspaceMigrations } from '../migration/index.js';
 import { ProxyManager } from '../yjs/index.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
@@ -13,6 +13,14 @@ import { toBlockMigrationData } from './utils.js';
 export class Schema {
   readonly flavourSchemaMap = new Map<string, BlockSchemaType>();
   readonly proxy = new ProxyManager();
+
+  get versions() {
+    return Object.fromEntries(
+      Array.from(this.flavourSchemaMap.values()).map(
+        (schema): [string, number] => [schema.model.flavour, schema.version]
+      )
+    );
+  }
 
   toJSON() {
     return Object.fromEntries(
@@ -109,7 +117,8 @@ export class Schema {
           migration.migrate(rootData);
         }
       } catch (err) {
-        throw new Error(`migrate workspace failed: ${migration.desc}`);
+        console.error(err);
+        throw new MigrationError(migration.desc);
       }
     });
   };
@@ -125,6 +134,17 @@ export class Schema {
       );
       this.upgradeBlock(flavour, currentVersion, block);
     });
+    const versions = this.versions;
+    pageMigrations.forEach(migration => {
+      try {
+        if (migration.condition(pageData, oldVersions, versions)) {
+          migration.migrate(pageData, oldVersions, versions);
+        }
+      } catch (err) {
+        console.error(err);
+        throw new MigrationError(migration.desc);
+      }
+    });
   };
 
   upgradeBlock = (
@@ -132,16 +152,21 @@ export class Schema {
     oldVersion: number,
     blockData: Y.Map<unknown>
   ) => {
-    const currentSchema = this.flavourSchemaMap.get(flavour);
-    assertExists(currentSchema);
-    const { onUpgrade, version } = currentSchema;
-    if (!onUpgrade) {
-      return;
+    try {
+      const currentSchema = this.flavourSchemaMap.get(flavour);
+      assertExists(currentSchema);
+      const { onUpgrade, version } = currentSchema;
+      if (!onUpgrade) {
+        return;
+      }
+
+      const data = toBlockMigrationData(blockData, this.proxy);
+
+      return onUpgrade(data, oldVersion, version);
+    } catch (err) {
+      console.error(err);
+      throw new MigrationError(`upgrade block ${flavour} failed`);
     }
-
-    const data = toBlockMigrationData(blockData, this.proxy);
-
-    return onUpgrade(data, oldVersion, version);
   };
 
   private _upgradeBlockVersions = (rootData: Y.Doc) => {

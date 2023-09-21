@@ -13,7 +13,7 @@ import {
 
 import {
   BLOCK_ID_ATTR,
-  EDITOR_WIDTH,
+  NOTE_WIDTH,
 } from '../../packages/blocks/src/__internal__/consts.js';
 import type {
   CssVariableName,
@@ -69,7 +69,7 @@ export const defaultStore: SerializedStore = {
     },
     pages: [
       {
-        id: 'page0',
+        id: 'page:home',
         title: '',
         tags: [],
       },
@@ -92,7 +92,7 @@ export const defaultStore: SerializedStore = {
     pageVersion: PAGE_VERSION,
   },
   spaces: {
-    'space:page0': {
+    'page:home': {
       blocks: {
         '0': {
           'prop:title': '',
@@ -104,7 +104,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
+          'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
@@ -498,7 +498,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
   const jsonDoc = (await page.evaluate(() =>
     window.workspace.doc.toJSON()
   )) as SerializedStore;
-  const titleNode = jsonDoc['space:page0']['0'] as Record<string, unknown>;
+  const titleNode = jsonDoc['page:home']['0'] as Record<string, unknown>;
 
   const markdownVisitor = (node: Record<string, unknown>): string => {
     // TODO use schema
@@ -528,7 +528,7 @@ export async function assertMatchMarkdown(page: Page, text: string) {
       // return visitor(node);
     }
 
-    const children = node['sys:children'].map(id => jsonDoc['space:page0'][id]);
+    const children = node['sys:children'].map(id => jsonDoc['page:home'][id]);
     return [
       visitor(node),
       ...children.flatMap(child =>
@@ -832,7 +832,7 @@ export async function assertEdgelessColorSameWithHexColor(
 
 export async function assertZoomLevel(page: Page, zoom: number) {
   const z = await getZoomLevel(page);
-  expect(z).toBe(zoom);
+  expect(z).toBe(Math.ceil(zoom));
 }
 
 export async function assertConnectorPath(

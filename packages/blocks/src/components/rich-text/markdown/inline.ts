@@ -1,4 +1,5 @@
 /* eslint-disable no-useless-escape */
+import type { Y } from '@blocksuite/store';
 import {
   type VEditor,
   VKEYBOARD_ALLOW_DEFAULT,
@@ -7,7 +8,6 @@ import {
   type VKeyboardBindingHandler,
   type VRange,
 } from '@blocksuite/virgo';
-import type * as Y from 'yjs';
 
 interface InlineMarkdownMatch {
   name: string;

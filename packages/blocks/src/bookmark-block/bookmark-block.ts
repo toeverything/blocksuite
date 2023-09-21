@@ -12,9 +12,14 @@ import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { WebIcon16 } from '../icons/text.js';
-import type { BookmarkBlockModel } from './bookmark-model.js';
+import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { captureEventTarget } from '../widgets/drag-handle/utils.js';
+import {
+  type BookmarkBlockModel,
+  BookmarkBlockSchema,
+} from './bookmark-model.js';
 import type {
   MenuActionCallback,
   ToolbarActionCallback,
@@ -193,21 +198,23 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     return this._isLoading;
   }
 
-  private _whenHover = new WhenHoverController(this, ({ setFloating }) => ({
-    template: html`<bookmark-toolbar
-      ${ref(setFloating)}
-      .model=${this.model}
-      .onSelected=${this._onToolbarSelected}
-      .root=${this}
-      .abortController=${this._optionsAbortController}
-    ></bookmark-toolbar>`,
-    computePosition: {
-      referenceElement: this,
-      placement: 'top-end',
-      middleware: [flip(), offset(4)],
-      autoUpdate: true,
-    },
-  }));
+  private _whenHover = new HoverController(this, ({ abortController }) => {
+    this._optionsAbortController = abortController;
+    return {
+      template: html`<bookmark-toolbar
+        .model=${this.model}
+        .onSelected=${this._onToolbarSelected}
+        .root=${this}
+        .abortController=${abortController}
+      ></bookmark-toolbar>`,
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
+      },
+    };
+  });
 
   override firstUpdated() {
     this.model.propsUpdated.on(() => this.requestUpdate());
@@ -229,7 +236,32 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
     this.slots.openInitialModal.on(() => {
       this._showCreateModal = true;
     });
+    this._registerDragHandleOption();
   }
+
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      DragHandleWidget.registerOption({
+        flavour: BookmarkBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const bookmarkBlock = target?.closest('affine-bookmark');
+          if (!bookmarkBlock) return false;
+
+          // If start dragging from the bookmark element
+          // Set selection and take over dragStart event to start dragging
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: bookmarkBlock.path,
+            }),
+          ]);
+          startDragging([bookmarkBlock], state);
+          return true;
+        },
+      })
+    );
+  };
 
   private _onInputChange() {
     this._caption = this._input.value;

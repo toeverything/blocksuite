@@ -1,4 +1,4 @@
-import type * as Y from 'yjs';
+import type { Y } from '@blocksuite/store';
 
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';

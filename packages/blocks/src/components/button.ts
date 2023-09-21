@@ -65,7 +65,8 @@ export class IconButton extends LitElement {
       background: transparent;
     }
 
-    :host[hidden] {
+    /* not supported "until-found" yet */
+    :host([hidden]) {
       display: none;
     }
 

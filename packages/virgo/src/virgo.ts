@@ -36,6 +36,7 @@ export type VirgoRootElement<
 export interface VRangeProvider {
   getVRange(): VRange | null;
   setVRange(vRange: VRange | null): void;
+  vRangeUpdatedSlot: Slot<VRangeUpdatedProp>;
 }
 
 export class VEditor<
@@ -70,9 +71,6 @@ export class VEditor<
 
   private _mounted = false;
 
-  shouldLineScrollIntoView = true;
-  shouldCursorScrollIntoView = true;
-
   readonly isEmbed: (delta: DeltaInsert<TextAttributes>) => boolean;
   readonly vRangeProvider: VRangeProvider | null;
 
@@ -82,8 +80,8 @@ export class VEditor<
     updated: Slot;
     vRangeUpdated: Slot<VRangeUpdatedProp>;
     rangeUpdated: Slot<Range>;
-    scrollUpdated: Slot<number>;
   };
+
   get yText() {
     return this._yText;
   }
@@ -140,6 +138,7 @@ export class VEditor<
   toDomRange = this.rangeService.toDomRange;
   toVRange = this.rangeService.toVRange;
   getVRange = this.rangeService.getVRange;
+  isVRangeValid = this.rangeService.isVRangeValid;
   setVRange = this.rangeService.setVRange;
   syncVRange = this.rangeService.syncVRange;
 
@@ -184,11 +183,14 @@ export class VEditor<
       updated: new Slot(),
       vRangeUpdated: new Slot<VRangeUpdatedProp>(),
       rangeUpdated: new Slot<Range>(),
-      scrollUpdated: new Slot<number>(),
     };
 
+    if (vRangeProvider) {
+      vRangeProvider.vRangeUpdatedSlot.on(prop => {
+        this.slots.vRangeUpdated.emit(prop);
+      });
+    }
     this.slots.vRangeUpdated.on(this.rangeService.onVRangeUpdated);
-    this.slots.scrollUpdated.on(this.rangeService.onScrollUpdated);
   }
 
   mount(rootElement: HTMLElement) {
@@ -201,12 +203,11 @@ export class VEditor<
 
     this._bindYTextObserver();
 
-    this._deltaService.render();
-
     this._eventService.mount();
 
     this._mounted = true;
     this.slots.mounted.emit();
+    this._deltaService.render();
   }
 
   unmount() {
@@ -219,11 +220,7 @@ export class VEditor<
   }
 
   requestUpdate(syncVRange = true): void {
-    Promise.resolve().then(() => {
-      assertExists(this._rootElement);
-
-      this._deltaService.render(syncVRange);
-    });
+    this._deltaService.render(syncVRange);
   }
 
   async waitForUpdate() {

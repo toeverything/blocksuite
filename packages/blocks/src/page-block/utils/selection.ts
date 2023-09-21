@@ -87,14 +87,16 @@ export function getSelectedContentBlockElements(
         position & Node.DOCUMENT_POSITION_CONTAINED_BY
       ) {
         return -1;
-      } else if (
+      }
+
+      if (
         position & Node.DOCUMENT_POSITION_PRECEDING ||
         position & Node.DOCUMENT_POSITION_CONTAINS
       ) {
         return 1;
-      } else {
-        return 0;
       }
+
+      return 0;
     });
 
   return result;

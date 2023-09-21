@@ -1,4 +1,4 @@
-import type { LitBlockSpec } from '@blocksuite/lit';
+import type { BlockSpec } from '@blocksuite/block-std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
@@ -21,17 +21,17 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/doc-remote-selection/doc-remote-selection.js';
+import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/edgeless-remote-selection/index.js';
 import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
-import { AFFINE_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/remote-selection/remote-selection.js';
 
-const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
+const pageBlockSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: DocPageService,
   view: {
     component: literal`affine-doc-page`,
     widgets: {
       modal: literal`affine-modal-widget`,
-      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       draggingArea: literal`affine-doc-dragging-area-widget`,
@@ -39,36 +39,37 @@ const pageBlockSpec: LitBlockSpec<DocPageBlockWidgetName> = {
       [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_FORMAT_BAR_WIDGET_TAG
       )}`,
-      [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_REMOTE_SELECTION_WIDGET_TAG
+      [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG
       )}`,
     },
   },
 };
 
-const edgelessBlockSpec: LitBlockSpec<EdgelessPageBlockWidgetName> = {
+const edgelessBlockSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: EdgelessPageService,
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
       modal: literal`affine-modal-widget`,
-      imageToolbar: literal`affine-image-toolbar-widget`,
       slashMenu: literal`affine-slash-menu-widget`,
       linkedPage: literal`affine-linked-page-widget`,
       dragHandle: literal`affine-drag-handle-widget`,
       [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
         AFFINE_FORMAT_BAR_WIDGET_TAG
       )}`,
-      [AFFINE_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_REMOTE_SELECTION_WIDGET_TAG
+      [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG
       )}`,
-      remoteSelection: literal`affine-edgelss-remote-selection-widget`,
+      [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
+        AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG
+      )}`,
     },
   },
 };
 
-export const pagePreset: LitBlockSpec[] = [
+export const pagePreset: BlockSpec[] = [
   pageBlockSpec,
   {
     schema: SurfaceBlockSchema,
@@ -118,6 +119,9 @@ export const pagePreset: LitBlockSpec[] = [
     service: ImageService,
     view: {
       component: literal`affine-image`,
+      widgets: {
+        imageToolbar: literal`affine-image-toolbar-widget`,
+      },
     },
   },
   {
@@ -140,7 +144,7 @@ export const pagePreset: LitBlockSpec[] = [
   },
 ];
 
-export const edgelessPreset: LitBlockSpec[] = [
+export const edgelessPreset: BlockSpec[] = [
   edgelessBlockSpec,
   {
     schema: SurfaceBlockSchema,
@@ -190,6 +194,9 @@ export const edgelessPreset: LitBlockSpec[] = [
     service: ImageService,
     view: {
       component: literal`affine-image`,
+      widgets: {
+        imageToolbar: literal`affine-image-toolbar-widget`,
+      },
     },
   },
   {

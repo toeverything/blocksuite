@@ -111,10 +111,10 @@ export async function importNotion(workspace: Workspace, file: File) {
             continue;
           }
         }
-        pageMap.set(file, workspace.idGenerator());
+        pageMap.set(file, workspace.idGenerator('page'));
       }
       if (i === 0 && fileName.endsWith('.csv')) {
-        pageMap.set(file, workspace.idGenerator());
+        pageMap.set(file, workspace.idGenerator('page'));
       }
       if (fileName.endsWith('.zip')) {
         const innerZipFile = await zipFile.file(fileName)?.async('blob');
@@ -355,7 +355,7 @@ export async function importNotion(workspace: Workspace, file: File) {
                 columns: columns,
                 views: [
                   {
-                    id: page.generateId(),
+                    id: page.generateBlockId(),
                     name: 'Table View',
                     mode: 'table',
                     columns: [],

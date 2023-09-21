@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { Workspace } from '@blocksuite/store';
 import { html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import * as Y from 'yjs';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
@@ -77,7 +77,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
   mount(element: ShapeElement, edgeless: EdgelessPageBlockComponent) {
     if (!element.text) {
-      const text = new Y.Text();
+      const text = new Workspace.Y.Text();
       edgeless.surface.updateElement<'shape'>(element.id, {
         text,
         color: GET_DEFAULT_LINE_COLOR(),

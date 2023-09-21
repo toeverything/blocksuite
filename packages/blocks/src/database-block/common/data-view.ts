@@ -28,6 +28,8 @@ export interface DataViewProps<
 
   selectionUpdated: Slot<Selection | undefined>;
 
+  onDrag?: (evt: MouseEvent, id: string) => () => void;
+
   getFlag?: Page['awarenessStore']['getFlag'];
 }
 
@@ -37,6 +39,12 @@ export interface DataViewExpose {
   getSelection?(): DataViewSelection | undefined;
 
   focusFirstCell(): void;
+
+  showIndicator?(evt: MouseEvent): boolean;
+
+  hideIndicator?(): void;
+
+  moveTo?(id: string, evt: MouseEvent): void;
 }
 
 declare global {

@@ -3,6 +3,7 @@ import '../components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import type { VRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
@@ -20,6 +21,7 @@ import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
 import { playCheckAnimation } from './utils/icons.js';
+import { toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
@@ -65,6 +67,8 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
+  private _vRangeProvider: VRangeProvider | null = null;
+
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
     await this._richTextElement?.updateComplete;
@@ -79,6 +83,31 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     bindContainerHotkey(this);
+
+    this._vRangeProvider = getVRangeProvider(this);
+  }
+
+  private _toggleTemplate() {
+    const toggleChildren = () => (this.showChildren = !this.showChildren);
+    const noChildren = this.model.children.length === 0;
+    const toggleDownTemplate = html`<div
+      class="toggle-icon"
+      @click=${toggleChildren}
+    >
+      ${toggleDown}
+    </div>`;
+    const toggleRightTemplate = html`<div
+      class="toggle-icon toggle-icon__collapsed"
+      @click=${toggleChildren}
+    >
+      ${toggleRight}
+    </div>`;
+    const toggleIcon = noChildren
+      ? nothing
+      : this.showChildren
+      ? toggleDownTemplate
+      : toggleRightTemplate;
+    return toggleIcon;
   }
 
   override render(): TemplateResult<1> {
@@ -104,13 +133,13 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     return html`
       <div class=${`affine-list-block-container ${top}`}>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
-          ${listIcon}
+          ${this._toggleTemplate()} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
-            .vRangeProvider=${getVRangeProvider(this)}
+            .vRangeProvider=${this._vRangeProvider}
           ></rich-text>
         </div>
         ${this.showChildren ? children : nothing}

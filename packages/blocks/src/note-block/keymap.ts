@@ -15,9 +15,6 @@ import {
 import {
   ensureBlockInContainer,
   getBlockSelectionBySide,
-  getNextBlock,
-  getPrevBlock,
-  getTextSelection,
   moveCursorToNextBlockElement,
   moveCursorToPrevBlockElement,
   pathToBlock,
@@ -32,7 +29,6 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
   let anchorSel: BlockSelection | null = null;
   let focusBlock: BlockElement | null = null;
-  let composition = false;
   const reset = () => {
     anchorSel = null;
     focusBlock = null;
@@ -45,202 +41,208 @@ export const bindHotKey = (blockElement: BlockElement) => {
     }
     reset();
   });
-  blockElement.handleEvent('compositionStart', () => {
-    composition = true;
-  });
-  blockElement.handleEvent('compositionEnd', () => {
-    composition = false;
-  });
   blockElement.bindHotKey({
     ArrowDown: () => {
-      reset();
+      return root.std.command
+        .pipe()
+        .inline((_, next) => {
+          reset();
+          return next();
+        })
+        .try<'textSelection' | 'blockSelections'>(cmd => [
+          cmd
+            .getTextSelection()
+            .inline<'currentSelectionPath'>(async (ctx, next) => {
+              const textSelection = ctx.textSelection;
+              const end = textSelection.to ?? textSelection.from;
+              return next({ currentSelectionPath: end.path });
+            })
+            .getNextBlock({
+              filter: block => !!block.model.text,
+            })
+            .inline((ctx, next) => {
+              moveCursorToNextBlockElement(ctx.nextBlock);
+              return next();
+            }),
 
-      if (composition) {
-        return true;
-      }
+          cmd
+            .getBlockSelections()
+            .inline<'currentSelectionPath'>(async (ctx, next) => {
+              const blockSelection = ctx.blockSelections.at(-1);
+              if (!blockSelection) {
+                return;
+              }
+              return next({ currentSelectionPath: blockSelection.path });
+            })
+            .getNextBlock({})
+            .inline((ctx, next) => {
+              const { nextBlock } = ctx;
 
-      const textSelection = getTextSelection(blockElement);
-      if (textSelection) {
-        const end = textSelection.to ?? textSelection.from;
-        const block = pathToBlock(blockElement, end.path);
-        if (!block) {
-          return;
-        }
-        const nextBlock = getNextBlock(block, block => !!block.model.text);
-        if (!nextBlock) {
-          return;
-        }
-        moveCursorToNextBlockElement(nextBlock);
-        return true;
-      }
+              if (!ensureBlockInContainer(nextBlock, blockElement)) {
+                return;
+              }
 
-      const blockSelection = getBlockSelectionBySide(blockElement, true);
-      if (!blockSelection) {
-        return;
-      }
-      const focus = pathToBlock(blockElement, blockSelection.path);
-      if (!focus) {
-        return;
-      }
-
-      const nextBlock = getNextBlock(focus);
-
-      if (!nextBlock || !ensureBlockInContainer(nextBlock, blockElement)) {
-        return;
-      }
-
-      setBlockSelection(nextBlock);
-
-      return true;
+              setBlockSelection(nextBlock);
+              return next();
+            }),
+        ])
+        .run();
     },
     ArrowUp: () => {
-      reset();
+      return root.std.command
+        .pipe()
+        .inline((_, next) => {
+          reset();
+          return next();
+        })
+        .try<'textSelection' | 'blockSelections'>(cmd => [
+          cmd
+            .getTextSelection()
+            .inline<'currentSelectionPath'>(async (ctx, next) => {
+              const textSelection = ctx.textSelection;
+              return next({ currentSelectionPath: textSelection.from.path });
+            })
+            .getPrevBlock({
+              filter: block => !!block.model.text,
+            })
+            .inline((ctx, next) => {
+              moveCursorToPrevBlockElement(ctx.prevBlock);
+              return next();
+            }),
 
-      if (composition) {
-        return true;
-      }
+          cmd
+            .getBlockSelections()
+            .inline<'currentSelectionPath'>(async (ctx, next) => {
+              const blockSelection = ctx.blockSelections.at(0);
+              if (!blockSelection) {
+                return;
+              }
+              return next({ currentSelectionPath: blockSelection.path });
+            })
+            .getPrevBlock({})
+            .inline((ctx, next) => {
+              const { prevBlock } = ctx;
 
-      const textSelection = getTextSelection(blockElement);
-      if (textSelection) {
-        const start = textSelection.from;
-        const block = pathToBlock(blockElement, start.path);
-        if (!block) {
-          return;
-        }
-        const prevBlock = getPrevBlock(block, block => !!block.model.text);
-        if (!prevBlock) {
-          return;
-        }
-        moveCursorToPrevBlockElement(prevBlock);
-        return true;
-      }
+              if (!ensureBlockInContainer(prevBlock, blockElement)) {
+                return;
+              }
 
-      const blockSelection = getBlockSelectionBySide(blockElement, false);
-      if (!blockSelection) {
-        return;
-      }
-      const focus = pathToBlock(blockElement, blockSelection.path);
-      if (!focus) {
-        return;
-      }
-
-      const prevBlock = getPrevBlock(focus);
-
-      if (!prevBlock || !ensureBlockInContainer(prevBlock, blockElement)) {
-        return;
-      }
-
-      setBlockSelection(prevBlock);
-
-      return true;
+              setBlockSelection(prevBlock);
+              return next();
+            }),
+        ])
+        .run();
     },
     ArrowLeft: () => {
-      reset();
-
-      if (composition) {
-        return true;
-      }
-
-      const textSelection = getTextSelection(blockElement);
-      if (!textSelection) {
-        return;
-      }
-
-      const start = textSelection.from;
-      const block = pathToBlock(blockElement, start.path);
-      if (!block) {
-        return;
-      }
-      const prevBlock = getPrevBlock(block, block => !!block.model.text);
-      if (!prevBlock) {
-        return;
-      }
-
-      setTextSelectionBySide(prevBlock, true);
-
-      return true;
+      return root.std.command
+        .pipe()
+        .inline((_, next) => {
+          reset();
+          return next();
+        })
+        .getTextSelection()
+        .inline<'currentSelectionPath'>(async (ctx, next) => {
+          const textSelection = ctx.textSelection;
+          return next({ currentSelectionPath: textSelection.from.path });
+        })
+        .getPrevBlock({
+          filter: block => !!block.model.text,
+        })
+        .inline((ctx, next) => {
+          setTextSelectionBySide(ctx.prevBlock, true);
+          return next();
+        })
+        .run();
     },
     ArrowRight: () => {
-      reset();
-
-      if (composition) {
-        return true;
-      }
-
-      const textSelection = getTextSelection(blockElement);
-      if (!textSelection) {
-        return;
-      }
-
-      const start = textSelection.to ?? textSelection.from;
-      const block = pathToBlock(blockElement, start.path);
-      if (!block) {
-        return;
-      }
-      const nextBlock = getNextBlock(block, block => !!block.model.text);
-      if (!nextBlock) {
-        return;
-      }
-
-      setTextSelectionBySide(nextBlock, false);
-
-      return true;
+      return root.std.command
+        .pipe()
+        .inline((_, next) => {
+          reset();
+          return next();
+        })
+        .getTextSelection()
+        .inline<'currentSelectionPath'>(async (ctx, next) => {
+          const textSelection = ctx.textSelection;
+          const end = textSelection.to ?? textSelection.from;
+          return next({ currentSelectionPath: end.path });
+        })
+        .getNextBlock({
+          filter: block => !!block.model.text,
+        })
+        .inline((ctx, next) => {
+          setTextSelectionBySide(ctx.nextBlock, false);
+          return next();
+        })
+        .run();
     },
     'Shift-ArrowDown': () => {
-      if (!anchorSel) {
-        anchorSel = getBlockSelectionBySide(blockElement, true);
-      }
-
-      if (!anchorSel) {
-        return null;
-      }
-
-      const anchorBlock = pathToBlock(blockElement, anchorSel.path);
-      if (!anchorBlock) {
-        return null;
-      }
-
-      focusBlock = getNextBlock(focusBlock ?? anchorBlock);
-
-      if (!focusBlock) {
-        return;
-      }
-
-      if (!ensureBlockInContainer(focusBlock, blockElement)) {
-        return;
-      }
-
-      selectBetween(anchorBlock, focusBlock, true);
-
-      return true;
+      let anchorBlock: BlockElement | null = null;
+      return root.std.command
+        .pipe()
+        .getBlockSelections()
+        .inline<'currentSelectionPath'>((ctx, next) => {
+          if (!anchorSel) {
+            anchorSel = ctx.blockSelections.at(-1) ?? null;
+          }
+          if (!anchorSel) {
+            return;
+          }
+          anchorBlock = pathToBlock(blockElement, anchorSel.path);
+          if (!anchorBlock) {
+            return;
+          }
+          return next({
+            currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+          });
+        })
+        .getNextBlock({})
+        .inline((ctx, next) => {
+          focusBlock = ctx.nextBlock;
+          if (!ensureBlockInContainer(focusBlock, blockElement)) {
+            return;
+          }
+          if (!anchorBlock) {
+            return;
+          }
+          selectBetween(anchorBlock, focusBlock, true);
+          return next();
+        })
+        .run();
     },
     'Shift-ArrowUp': () => {
-      if (!anchorSel) {
-        anchorSel = getBlockSelectionBySide(blockElement, false);
-      }
-
-      if (!anchorSel) {
-        return null;
-      }
-
-      const anchorBlock = pathToBlock(blockElement, anchorSel.path);
-      if (!anchorBlock) {
-        return null;
-      }
-
-      focusBlock = getPrevBlock(focusBlock ?? anchorBlock);
-
-      if (!focusBlock) {
-        return;
-      }
-
-      if (!ensureBlockInContainer(focusBlock, blockElement)) {
-        return;
-      }
-
-      selectBetween(anchorBlock, focusBlock, false);
-
-      return true;
+      let anchorBlock: BlockElement | null = null;
+      return root.std.command
+        .pipe()
+        .getBlockSelections()
+        .inline<'currentSelectionPath'>((ctx, next) => {
+          if (!anchorSel) {
+            anchorSel = ctx.blockSelections.at(0) ?? null;
+          }
+          if (!anchorSel) {
+            return;
+          }
+          anchorBlock = pathToBlock(blockElement, anchorSel.path);
+          if (!anchorBlock) {
+            return;
+          }
+          return next({
+            currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+          });
+        })
+        .getPrevBlock({})
+        .inline((ctx, next) => {
+          focusBlock = ctx.prevBlock;
+          if (!ensureBlockInContainer(focusBlock, blockElement)) {
+            return;
+          }
+          if (!anchorBlock) {
+            return;
+          }
+          selectBetween(anchorBlock, focusBlock, false);
+          return next();
+        })
+        .run();
     },
     Escape: () => {
       const blockSelection = getBlockSelectionBySide(blockElement, true);

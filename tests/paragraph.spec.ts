@@ -360,6 +360,9 @@ test('remove all indent for a paragraph block', async ({ page }) => {
   await pressTab(page);
   await type(page, 'foo');
   await assertBlockChildrenIds(page, '3', ['4']);
+  await assertRichTexts(page, ['hello', 'world', 'foo']);
+  await pressBackspaceWithShortKey(page);
+  await assertRichTexts(page, ['hello', 'world', '']);
   await pressBackspaceWithShortKey(page);
   await assertBlockChildrenIds(page, '1', ['2', '4']);
   await assertBlockChildrenIds(page, '2', ['3']);

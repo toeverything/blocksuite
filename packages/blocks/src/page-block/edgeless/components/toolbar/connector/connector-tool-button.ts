@@ -4,6 +4,7 @@ import './connector-menu.js';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   type EdgelessTool,
@@ -26,10 +27,11 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
       display: flex;
       position: relative;
     }
-    .edgeless-connector-button svg + svg {
+    .arrow-up-icon {
       position: absolute;
       top: 4px;
       right: 2px;
+      font-size: 0;
     }
   `;
 
@@ -91,7 +93,7 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
 
   override render() {
     const type = this.edgelessTool?.type;
-
+    const arrowColor = type === 'connector' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._connectorMenu ? '' : 'Connector'}
@@ -108,7 +110,10 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
           this._toggleMenu();
         }}
       >
-        ${ConnectorIcon} ${ArrowUpIcon}
+        ${ConnectorIcon}
+        <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
+          ${ArrowUpIcon}
+        </span>
       </edgeless-tool-icon-button>
     `;
   }

@@ -22,7 +22,7 @@ function createTestOptions() {
   return { id: 'test-workspace', idGenerator, isSSR: true, schema };
 }
 
-async function createTestPage(pageId = 'page0', workspace?: Workspace) {
+async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   const options = createTestOptions();
   const _workspace = workspace || new Workspace(options);
   const page = _workspace.createPage({ id: pageId });
@@ -64,29 +64,28 @@ describe('workspace.search works', () => {
 
     queueMicrotask(() => {
       expect(workspace.search('处理器')).toStrictEqual(
-        new Map([['2', `space:${id}`]])
+        new Map([['2', `${id}`]])
       );
-      expect(workspace.search('索尼')).toStrictEqual(
-        new Map([['3', `space:${id}`]])
-      );
+      expect(workspace.search('索尼')).toStrictEqual(new Map([['3', `${id}`]]));
     });
 
     const update = encodeStateAsUpdate(page.spaceDoc);
     const schema = new Schema();
     const workspace2 = new Workspace({
       schema,
+      id: 'test',
     });
     const page2 = workspace2.createPage({
-      id: 'page0',
+      id: 'page:home',
     });
     applyUpdate(page2.spaceDoc, update);
     expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
     queueMicrotask(() => {
       expect(workspace2.search('处理器')).toStrictEqual(
-        new Map([['2', `space:${id}`]])
+        new Map([['2', `${id}`]])
       );
       expect(workspace2.search('索尼')).toStrictEqual(
-        new Map([['3', `space:${id}`]])
+        new Map([['3', `${id}`]])
       );
     });
   });
@@ -125,7 +124,7 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(subpage.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page0',
+        pageId: 'page:home',
         type: 'Subpage',
       },
     ]);
@@ -140,7 +139,7 @@ describe('backlink works', () => {
   it('backlink indexer works with linked page', async () => {
     const page0 = await createTestPage();
     const workspace = page0.workspace;
-    const page1 = await createTestPage('page1', workspace);
+    const page1 = await createTestPage('space:page1', workspace);
     const backlinkIndexer = workspace.indexer.backlink;
 
     const page0Id = page0.addBlock('affine:page');
@@ -207,12 +206,12 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page0',
+        pageId: 'page:home',
         type: 'LinkedPage',
       },
       {
         blockId: '6',
-        pageId: 'page1',
+        pageId: 'space:page1',
         type: 'LinkedPage',
       },
     ]);
@@ -220,12 +219,12 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page1.id)).toStrictEqual([
       {
         blockId: '3',
-        pageId: 'page0',
+        pageId: 'page:home',
         type: 'LinkedPage',
       },
       {
         blockId: '7',
-        pageId: 'page1',
+        pageId: 'space:page1',
         type: 'LinkedPage',
       },
     ]);
@@ -237,12 +236,12 @@ describe('backlink works', () => {
     expect(backlinkIndexer.getBacklink(page0.id)).toStrictEqual([
       {
         blockId: '2',
-        pageId: 'page0',
+        pageId: 'page:home',
         type: 'LinkedPage',
       },
       {
         blockId: '6',
-        pageId: 'page1',
+        pageId: 'space:page1',
         type: 'LinkedPage',
       },
     ]);

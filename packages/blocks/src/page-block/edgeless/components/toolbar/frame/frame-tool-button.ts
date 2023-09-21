@@ -4,6 +4,7 @@ import './frame-menu.js';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import { ArrowUpIcon, LargeFrameIcon } from '../../../../../icons/index.js';
@@ -19,10 +20,11 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
       display: flex;
     }
 
-    edgeless-tool-icon-button svg + svg {
+    .arrow-up-icon {
       position: absolute;
       top: 4px;
       right: 2px;
+      font-size: 0;
     }
   `;
 
@@ -84,7 +86,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
 
   override render() {
     const type = this.edgelessTool?.type;
-
+    const arrowColor = type === 'frame' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
@@ -97,7 +99,10 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
           this._toggleFrameMenu();
         }}
       >
-        ${LargeFrameIcon} ${ArrowUpIcon}
+        ${LargeFrameIcon}
+        <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
+          ${ArrowUpIcon}
+        </span>
       </edgeless-tool-icon-button>
     `;
   }

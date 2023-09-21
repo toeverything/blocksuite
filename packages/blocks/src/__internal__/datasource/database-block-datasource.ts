@@ -19,7 +19,7 @@ import { richTextColumnConfig } from '../../database-block/common/columns/rich-t
 import { selectColumnConfig } from '../../database-block/common/columns/select/cell-renderer.js';
 import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
 import type { DatabaseBlockModel } from '../../database-block/database-model.js';
-import type { InsertPosition } from '../../database-block/index.js';
+import type { InsertPosition } from '../../database-block/types.js';
 import { insertPositionToIndex } from '../../database-block/utils/insert.js';
 import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
@@ -320,6 +320,15 @@ export class DatabaseBlockDatasource extends BaseDataSource {
       ...super.detailSlots,
       header: createUniComponentFromWebComponent(BlockRenderer),
     };
+  }
+
+  public rowMove(rowId: string, position: InsertPosition): void {
+    const model = this.page.getBlockById(rowId);
+    if (model) {
+      const index = insertPositionToIndex(position, this._model.children);
+      const target = this._model.children[index];
+      this.page.moveBlocks([model], this._model, target);
+    }
   }
 }
 

@@ -77,7 +77,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
   onContainerDragMove(e: PointerEventState) {
     if (this._draggingArea) {
       this._draggingArea.end = new DOMPoint(e.x, e.y);
-      this._edgeless.slots.hoverUpdated.emit();
+      this._edgeless.slots.draggingAreaUpdated.emit();
     }
   }
 
@@ -98,6 +98,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
     }
     this._dragStartEvent = null;
     this._draggingArea = null;
+    this._edgeless.slots.draggingAreaUpdated.emit();
   }
 
   private _updateOverlayPosition(x: number, y: number) {

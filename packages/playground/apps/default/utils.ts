@@ -159,7 +159,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
       enable_note_index: true,
       enable_bultin_ledits: true,
       readonly: {
-        'space:page0': false,
+        'page:home': false,
       },
     },
   };

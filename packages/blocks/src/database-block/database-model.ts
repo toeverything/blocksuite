@@ -9,9 +9,9 @@ import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
 import { viewManager } from './common/data-view.js';
 import type { Column } from './table/types.js';
 import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
-import { insertPositionToIndex } from './utils/insert.js';
+import { arrayMove, insertPositionToIndex } from './utils/insert.js';
 
-type Props = {
+export type DatabaseBlockProps = {
   views: DataViewDataType[];
   title: Text;
   cells: SerializedCells;
@@ -26,7 +26,7 @@ type SerializedCells = {
   };
 };
 
-export class DatabaseBlockModel extends BaseBlockModel<Props> {
+export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
   getViewList() {
     return this.views;
   }
@@ -48,7 +48,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   initTemplate(viewType: DataViewTypes) {
-    const ids = [nanoid(), nanoid(), nanoid()];
+    const ids = [nanoid('unknown'), nanoid('unknown'), nanoid('unknown')];
     const statusId = this.addColumn(
       'end',
       selectPureColumnConfig.create('Status', {
@@ -88,13 +88,28 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
   }
 
   addView(type: DataViewTypes) {
-    const id = this.page.generateId();
+    const id = this.page.generateBlockId();
     const viewConfig = viewManager.getView(type);
     const view = viewConfig.init(this, id, viewConfig.defaultName);
     this.page.transact(() => {
       this.views.push(view);
     });
     return view;
+  }
+  duplicateView(id: string): string {
+    const newId = this.page.generateBlockId();
+    this.page.transact(() => {
+      const index = this.views.findIndex(v => v.id === id);
+      const view = this.views[index];
+      if (view) {
+        this.views.splice(
+          index + 1,
+          0,
+          JSON.parse(JSON.stringify({ ...view, id: newId }))
+        );
+      }
+    });
+    return newId;
   }
 
   deleteView(id: string) {
@@ -115,6 +130,16 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
         }
         return { ...v, ...update(v) } as DataViewDataType;
       });
+    });
+    this.applyViewsUpdate();
+  }
+  moveViewTo(id: string, position: InsertPosition) {
+    this.page.transact(() => {
+      this.views = arrayMove(
+        this.views,
+        v => v.id === id,
+        arr => insertPositionToIndex(position, arr)
+      );
     });
     this.applyViewsUpdate();
   }
@@ -145,7 +170,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
       id?: string;
     }
   ): string {
-    const id = column.id ?? this.page.generateId();
+    const id = column.id ?? this.page.generateBlockId();
     if (this.columns.find(v => v.id === id)) {
       return id;
     }
@@ -248,7 +273,7 @@ export class DatabaseBlockModel extends BaseBlockModel<Props> {
 
 const migration = {
   toV3: data => {
-    const id = nanoid();
+    const id = nanoid('unknown');
     // @ts-expect-error
     const title = data['titleColumnName'];
     // @ts-expect-error
@@ -276,7 +301,7 @@ const migration = {
 
 export const DatabaseBlockSchema = defineBlockSchema({
   flavour: 'affine:database',
-  props: (internal): Props => ({
+  props: (internal): DatabaseBlockProps => ({
     views: [],
     title: internal.Text(),
     cells: {},
@@ -288,9 +313,7 @@ export const DatabaseBlockSchema = defineBlockSchema({
     parent: ['affine:note'],
     children: ['affine:paragraph', 'affine:list'],
   },
-  toModel: () => {
-    return new DatabaseBlockModel();
-  },
+  toModel: () => new DatabaseBlockModel(),
   onUpgrade: (data, previousVersion, latestVersion) => {
     if (previousVersion < 3 && latestVersion >= 3) {
       migration.toV3(data);

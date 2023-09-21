@@ -3,7 +3,7 @@ import './utils/declare-test-window.js';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { EDITOR_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
 import {
   activeNoteInEdgeless,
@@ -31,7 +31,6 @@ import {
   pasteByKeyboard,
   pasteContent,
   pressArrowDown,
-  pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
   pressEnter,
@@ -68,6 +67,7 @@ import {
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
+  assertZoomLevel,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
@@ -1021,13 +1021,15 @@ test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
     { x: 800, y: 800 },
     { steps: 10 }
   );
-  await assertEdgelessSelectedRect(page, [50, 100, EDITOR_WIDTH, 463.5]);
+  const zoom = 1.075;
+  await assertZoomLevel(page, zoom * 100);
+  await assertEdgelessSelectedRect(page, [50, 100, NOTE_WIDTH * zoom, 472]);
 
   await copyByKeyboard(page);
   await page.mouse.move(800, 400);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [400, 168.25, EDITOR_WIDTH, 463.5]);
+  await assertEdgelessSelectedRect(page, [370, 163.99, NOTE_WIDTH * zoom, 472]);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {
@@ -1133,16 +1135,11 @@ test(
 </affine:page>`
     );
 
-    // when pasting a quote into a text paragraph block, the paragraph type should be text
-    await selectAllByKeyboard(page);
-    await selectAllByKeyboard(page);
-    await copyByKeyboard(page);
+    await pressEnter(page);
     await waitNextFrame(page);
-
     await pressEnter(page);
-    await pressEnter(page);
-    await pressEnter(page);
-    await pasteByKeyboard(page);
+    await waitNextFrame(page);
+    await pasteByKeyboard(page, false);
     await waitNextFrame(page);
 
     await assertStoreMatchJSX(
@@ -1160,7 +1157,7 @@ test(
     />
     <affine:paragraph
       prop:text="123"
-      prop:type="quote"
+      prop:type="text"
     />
   </affine:note>
 </affine:page>`

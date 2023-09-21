@@ -8,7 +8,14 @@ import {
   popFilterableSimpleMenu,
   popMenu,
 } from '../../../components/menu/index.js';
-import { AddCursorIcon, DeleteIcon } from '../../../icons/index.js';
+import { renderUniLit } from '../../../components/uni-component/uni-component.js';
+import {
+  AddCursorIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  MoveLeftIcon,
+  MoveRightIcon,
+} from '../../../icons/index.js';
 import { viewManager, viewRendererManager } from '../data-view.js';
 import type { ViewSource } from '../view-source.js';
 
@@ -47,6 +54,7 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
 
     .database-view-button .icon {
       margin-right: 6px;
+      display: block;
     }
 
     .database-view-button .icon svg {
@@ -128,7 +136,9 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
     if (this.readonly) {
       return;
     }
-    const view = this.viewSource.views.find(v => v.view.id === id);
+    const views = this.viewSource.views;
+    const index = views.findIndex(v => v.view.id === id);
+    const view = views[index];
     if (!view) {
       return;
     }
@@ -145,12 +155,69 @@ export class DataViewHeaderViews extends WithDisposable(ShadowlessElement) {
         items: [
           {
             type: 'action',
-            name: 'Delete',
-            icon: DeleteIcon,
+            name: 'Edit View',
+            icon: renderUniLit(
+              viewRendererManager.getView(view.view.mode).icon,
+              {}
+            ),
             select: () => {
-              view.delete();
+              const element = this.closest(
+                'affine-data-view-native'
+              )?.querySelector('data-view-header-tools-view-options')
+                ?.firstElementChild;
+              if (element instanceof HTMLElement) {
+                element?.click();
+              }
             },
-            class: 'delete-item',
+          },
+          {
+            type: 'action',
+            name: 'Move Left',
+            hide: () => index === 0,
+            icon: MoveLeftIcon,
+            select: () => {
+              const target = views[index - 1];
+              this.viewSource.moveTo(
+                view.view.id,
+                target ? { before: true, id: target.view.id } : 'start'
+              );
+            },
+          },
+          {
+            type: 'action',
+            name: 'Move Right',
+            icon: MoveRightIcon,
+            hide: () => index === views.length - 1,
+            select: () => {
+              const target = views[index + 1];
+              this.viewSource.moveTo(
+                view.view.id,
+                target ? { before: false, id: target.view.id } : 'end'
+              );
+            },
+          },
+          {
+            type: 'action',
+            name: 'Duplicate',
+            icon: DuplicateIcon,
+            select: () => {
+              this.viewSource.duplicate(view.view.id);
+            },
+          },
+          {
+            type: 'group',
+            name: '',
+            children: () => [
+              {
+                type: 'action',
+                name: 'Delete View',
+                icon: DeleteIcon,
+                select: () => {
+                  view.delete();
+                },
+                class: 'delete-item',
+              },
+            ],
           },
         ],
       },

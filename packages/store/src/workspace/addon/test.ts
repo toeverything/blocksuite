@@ -188,7 +188,7 @@ export const test = addOnFactory<keyof TestAddon>(
        */
       exportPageYDoc(pageId: string) {
         const pages = this.doc.getMap('spaces');
-        const pageDoc = pages.get(`space:${pageId}`);
+        const pageDoc = pages.get(pageId);
 
         if (!(pageDoc instanceof Y.Doc)) {
           throw new Error(`Page ${pageId} not found or not a Y.Doc`);
@@ -209,10 +209,7 @@ export const test = addOnFactory<keyof TestAddon>(
       /** @internal Only for testing */
       exportJSX(blockId?: string, pageId = this.meta.pageMetas.at(0)?.id) {
         assertExists(pageId);
-        const prefixedPageId = pageId.startsWith('space:')
-          ? pageId
-          : `space:${pageId}`;
-        const doc = this.doc.spaces.get(prefixedPageId);
+        const doc = this.doc.spaces.get(pageId);
         assertExists(doc);
         const pageJson = serializeYDoc(doc);
         if (!pageJson) {

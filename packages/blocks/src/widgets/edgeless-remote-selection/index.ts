@@ -15,7 +15,10 @@ import {
 } from '../../page-block/edgeless/utils/query.js';
 import { remoteColorManager } from '../../page-block/remote-color-manager/index.js';
 
-@customElement('affine-edgelss-remote-selection-widget')
+export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG =
+  'affine-edgeless-remote-selection-widget';
+
+@customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG)
 export class EdgelessRemoteSelectionWidget extends WidgetElement {
   static override styles = css`
     :host {
@@ -171,7 +174,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
   private _updateOnElementChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.selection.hasRemote(id)) this._updateRemoteRects();
+    if (this.selection.isSelectedByRemote(id)) this._updateRemoteRects();
   };
 
   override connectedCallback() {
@@ -255,6 +258,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-edgelss-remote-selection-widget': EdgelessRemoteSelectionWidget;
+    [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG]: EdgelessRemoteSelectionWidget;
   }
 }

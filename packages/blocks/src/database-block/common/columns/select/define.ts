@@ -26,7 +26,7 @@ export const selectPureColumnConfig = columnManager.register<
     return {
       options: [
         ...oldData.options,
-        { id: nanoid(), value: text, color: getTagColor() },
+        { id: nanoid('unknown'), value: text, color: getTagColor() },
       ],
     };
   },
@@ -45,7 +45,7 @@ export const selectPureColumnConfig = columnManager.register<
     optionNames.forEach((name, index) => {
       if (!optionMap[name]) {
         const newOption: SelectTag = {
-          id: nanoid(),
+          id: nanoid('unknown'),
           value: name,
           color: getTagColor(),
         };

@@ -3,6 +3,7 @@ import '../components/rich-text/rich-text.js';
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
+import type { VRangeProvider } from '@blocksuite/virgo';
 import { css, html, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -209,6 +210,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
 
   private _placeholderDisposables = new DisposableGroup();
 
+  private _vRangeProvider: VRangeProvider | null = null;
+
   @query('rich-text')
   private _richTextElement?: RichText;
 
@@ -223,6 +226,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
     // Initial placeholder state
     this._updatePlaceholder();
     bindContainerHotkey(this);
+
+    this._vRangeProvider = getVRangeProvider(this);
   }
 
   override firstUpdated() {
@@ -324,7 +329,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             .undoManager=${this.model.page.history}
             .textSchema=${this.textSchema}
             .readonly=${this.model.page.readonly}
-            .vRangeProvider=${getVRangeProvider(this)}
+            .vRangeProvider=${this._vRangeProvider}
             @focusin=${this._onFocusIn}
             @focusout=${this._onFocusOut}
             style=${styleMap({

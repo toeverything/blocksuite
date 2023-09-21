@@ -29,23 +29,24 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
       width: 40px;
       overflow-y: hidden;
     }
-    #edgeless-pen-icon {
-      position: absolute;
-      top: 10px;
-      left: 3px;
-      transition: top 0.3s ease-in-out;
-    }
     .active-mode {
-      height: 66px;
-      width: 40px;
-      top: 10px;
       position: absolute;
-      border-top-left-radius: 30px;
-      border-top-right-radius: 30px;
+      top: 4px;
+      left: 5px;
+      width: 30px;
+      height: 66px;
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
       background: var(--affine-hover-color);
     }
+    #edgeless-pen-icon {
+      position: absolute;
+      left: 3px;
+      transform: translateY(10px);
+      transition: transform 0.3s ease-in-out;
+    }
     #edgeless-pen-icon:hover {
-      top: 2px;
+      transform: translateY(5px);
     }
   `;
 

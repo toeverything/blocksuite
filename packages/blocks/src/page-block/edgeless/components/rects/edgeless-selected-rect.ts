@@ -11,6 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
+import type { NoteBlockModel } from '../../../../index.js';
 import {
   type Bound,
   ConnectorElement,
@@ -66,6 +67,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     :host {
       display: block;
       user-select: none;
+      contain: size layout;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
 
     .affine-edgeless-selected-rect {
@@ -581,18 +587,19 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    const isSingleHiddenNote =
+    const isSingleNote =
       elements.length === 1 &&
       isTopLevelBlock(elements[0]) &&
-      matchFlavours(elements[0], ['affine:note']) &&
-      elements[0].hidden;
+      matchFlavours(elements[0], ['affine:note']);
+    const isSingleHiddenNote =
+      isSingleNote && (elements[0] as NoteBlockModel).hidden;
 
     this._selectedRect = {
       width,
       height,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
-      borderRadius: 8 * zoom,
+      borderRadius: isSingleNote ? 8 * zoom : 0,
       left,
       top,
       rotate,
@@ -649,7 +656,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.selection.has(id)) this._updateSelectedRect();
+    if (this.selection.isSelected(id)) this._updateSelectedRect();
   };
 
   override firstUpdated() {

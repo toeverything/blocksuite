@@ -50,7 +50,7 @@
   },
   "lint-staged": {
     "*": "prettier --write --cache --ignore-unknown",
-    "*.{ts,tsx,js,jsx}": "npx eslint --cache --fix"
+    "*.{ts,tsx,js,jsx}": "eslint --cache --fix"
   },
   "keywords": [],
   "author": "toeverything",

@@ -1,7 +1,7 @@
 import './field.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { css, unsafeCSS } from 'lit';
+import { css, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
@@ -64,6 +64,10 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   rowId!: string;
   selection = new DetailSelection(this);
 
+  private get readonly() {
+    return this.view.readonly;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
@@ -104,23 +108,28 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   override render() {
     const columns = this.columns;
 
+    //FIXME: simulate as a widget
     return html`
-      ${this.renderHeader()}
-      ${repeat(
-        columns,
-        v => v,
-        column => {
-          return html` <affine-data-view-record-field
-            .view="${this.view}"
-            .column="${column}"
-            .rowId="${this.rowId}"
-            data-column-id="${column.id}"
-          ></affine-data-view-record-field>`;
-        }
-      )}
-      <div class="add-property" @click="${this._clickAddProperty}">
-        <div class="icon">${PlusIcon}</div>
-        Add Property
+      <div data-widget-id="affine-detail-widget">
+        ${this.renderHeader()}
+        ${repeat(
+          columns,
+          v => v,
+          column => {
+            return html` <affine-data-view-record-field
+              .view="${this.view}"
+              .column="${column}"
+              .rowId="${this.rowId}"
+              data-column-id="${column.id}"
+            ></affine-data-view-record-field>`;
+          }
+        )}
+        ${!this.readonly
+          ? html`<div class="add-property" @click="${this._clickAddProperty}">
+              <div class="icon">${PlusIcon}</div>
+              Add Property
+            </div>`
+          : nothing}
       </div>
     `;
   }

@@ -57,7 +57,7 @@ export interface StoreOptions<
   id: string;
   providerCreators?: DocProviderCreator[];
   awareness?: Awareness<RawAwarenessState<Flags>>;
-  idGenerator?: Generator;
+  idGenerator?: Generator | IdGenerator;
   defaultFlags?: Partial<Flags>;
   blobStorages?: ((id: string) => BlobStorage)[];
 }
@@ -65,6 +65,8 @@ export interface StoreOptions<
 const flagsPreset = {
   enable_set_remote_flag: true,
   enable_block_hub: true,
+
+  enable_transformer_clipboard: false,
 
   enable_expand_database_block: false,
 
@@ -91,7 +93,7 @@ export class Store {
       awareness,
       idGenerator,
       defaultFlags,
-    }: StoreOptions = { id: nanoid() }
+    }: StoreOptions = { id: nanoid('workspace') }
   ) {
     this.id = id;
     this.doc = new BlockSuiteDoc({ guid: id });
@@ -101,25 +103,29 @@ export class Store {
       merge(true, flagsPreset, defaultFlags)
     );
 
-    switch (idGenerator) {
-      case Generator.AutoIncrement: {
-        this.idGenerator = createAutoIncrementIdGenerator();
-        break;
-      }
-      case Generator.AutoIncrementByClientId: {
-        this.idGenerator = createAutoIncrementIdGeneratorByClientId(
-          this.doc.clientID
-        );
-        break;
-      }
-      case Generator.UUIDv4: {
-        this.idGenerator = uuidv4;
-        break;
-      }
-      case Generator.NanoID:
-      default: {
-        this.idGenerator = nanoid;
-        break;
+    if (typeof idGenerator === 'function') {
+      this.idGenerator = idGenerator;
+    } else {
+      switch (idGenerator) {
+        case Generator.AutoIncrement: {
+          this.idGenerator = createAutoIncrementIdGenerator();
+          break;
+        }
+        case Generator.AutoIncrementByClientId: {
+          this.idGenerator = createAutoIncrementIdGeneratorByClientId(
+            this.doc.clientID
+          );
+          break;
+        }
+        case Generator.UUIDv4: {
+          this.idGenerator = uuidv4;
+          break;
+        }
+        case Generator.NanoID:
+        default: {
+          this.idGenerator = nanoid;
+          break;
+        }
       }
     }
 
@@ -140,10 +146,10 @@ export class Store {
   }
 
   addSpace(space: Space) {
-    this.spaces.set(space.prefixedId, space);
+    this.spaces.set(space.id, space);
   }
 
   removeSpace(space: Space) {
-    this.spaces.delete(space.prefixedId);
+    this.spaces.delete(space.id);
   }
 }

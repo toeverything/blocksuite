@@ -51,12 +51,17 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
   column!: DataViewTableColumnManager;
 
   private get selectionView() {
-    return this.closest('affine-database-table')?.selection;
+    return this.closest('affine-database-table')?.selectionController;
   }
 
-  private _selectCurrentCell = (editing: boolean) => {
+  private get groupKey() {
+    return this.closest('affine-data-view-table-group')?.group?.key;
+  }
+
+  public selectCurrentCell = (editing: boolean) => {
     if (this.selectionView) {
       this.selectionView.selection = {
+        groupKey: this.groupKey,
         focus: {
           rowIndex: this.rowIndex,
           columnIndex: this.columnIndex,
@@ -86,7 +91,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
     super.connectedCallback();
     this._disposables.addFromEvent(this, 'click', () => {
       if (!this.isEditing) {
-        this._selectCurrentCell(!this.column.readonly);
+        this.selectCurrentCell(!this.column.readonly);
       }
     });
   }
@@ -101,7 +106,7 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       column: this.column,
       rowId: this.rowId,
       isEditing: this.isEditing,
-      selectCurrentCell: this._selectCurrentCell,
+      selectCurrentCell: this.selectCurrentCell,
     };
     return renderUniLit(uni, props, {
       ref: this._cell,

@@ -38,7 +38,7 @@ export function ListIcon(
       </div>`;
     case 'toggle':
       return html`<div class="affine-list-block__prefix" @click=${onClick}>
-        ${showChildren ? toggleDown() : toggleRight(model.children.length > 0)}
+        ${showChildren ? toggleDown : toggleRight}
       </div>`;
     default:
       console.error('Unknown list type', model.type, model);

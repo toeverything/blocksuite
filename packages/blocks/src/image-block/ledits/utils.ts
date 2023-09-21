@@ -60,7 +60,7 @@ export function createInlineIframe() {
 
           if (resultImg === null) return null;
 
-          const pattern = /^data:(image\\/\\w+);/;
+          const pattern = /^data:(image/w+);/;
           const execResult = pattern.exec(resultImg.src);
 
           if (!execResult) return null;
@@ -105,7 +105,6 @@ export function createInlineIframe() {
               break;
             case 'export_image':
               const resultImage = getResultImage();
-              console.log(resultImage);
               window.parent.postMessage({ blob: resultImage }, '*');
               break;
             default:

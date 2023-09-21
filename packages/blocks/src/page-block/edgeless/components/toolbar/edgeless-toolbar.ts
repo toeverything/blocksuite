@@ -7,6 +7,7 @@ import './note/note-tool-button.js';
 import './frame/frame-order-button.js';
 import './frame/frame-tool-button.js';
 import './default/default-tool-button.js';
+import './text/text-tool-button.js';
 
 import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -102,18 +103,28 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .eraser-button {
       position: relative;
       height: 66px;
-      width: 30px;
+      width: 60px;
       overflow-y: hidden;
+    }
+    .eraser-button .active-mode {
+      position: absolute;
+      top: 8px;
+      left: 6px;
+      width: 48px;
+      height: 66px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      background: var(--affine-hover-color);
     }
     #edgeless-eraser-icon {
       position: absolute;
-      top: 10px;
+      top: 4px;
       left: 50%;
       transform: translateX(-50%);
       transition: top 0.3s ease-in-out;
     }
     #edgeless-eraser-icon:hover {
-      top: 2px;
+      top: 0px;
     }
     .edgeless-toolbar-right-part {
       display: flex;
@@ -256,6 +267,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     _disposables.add(
       slots.edgelessToolUpdated.on(() => {
         this._trySaveBrushStateLocalRecord();
+        this._trySaveTextStateLocalRecord();
         this.requestUpdate();
       })
     );
@@ -299,6 +311,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         JSON.stringify({
           color: edgelessTool.color,
           lineWidth: edgelessTool.lineWidth,
+        })
+      );
+    }
+  };
+
+  private _trySaveTextStateLocalRecord = () => {
+    const edgelessTool = this.edgeless.tools.edgelessTool;
+    const { type } = edgelessTool;
+    if (type === 'text') {
+      sessionStorage.setItem(
+        'blocksuite:' + this.edgeless.page.id + ':edgelessText',
+        JSON.stringify({
+          color: edgelessTool.color,
         })
       );
     }
@@ -406,22 +431,27 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         <edgeless-toolbar-button
           .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
           .active=${type === 'eraser'}
-          .activeMode=${'background'}
           @click=${() => this.setEdgelessTool({ type: 'eraser' })}
         >
-          <div class="eraser-button">${EdgelessEraserIcon}</div>
+          <div class="eraser-button">
+            <div class=${type === 'eraser' ? 'active-mode' : ''}></div>
+            ${EdgelessEraserIcon}
+          </div>
         </edgeless-toolbar-button>
       </div>
       <div class="edgeless-toolbar-right-part">
-        <edgeless-toolbar-button
-          class="transform-button"
-          .tooltip=${getTooltipWithShortcut('Text', 'T')}
-          .active=${type === 'text'}
-          .activeMode=${'background'}
-          @click=${() => this.setEdgelessTool({ type: 'text' })}
+        <edgeless-shape-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-shape-tool-button>
+        <edgeless-text-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
         >
           ${EdgelessTextIcon}
-        </edgeless-toolbar-button>
+        </edgeless-text-tool-button>
         <edgeless-toolbar-button
           class="transform-button"
           .disabled=${this._imageLoading}
@@ -431,11 +461,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         >
           ${EdgelessImageIcon}
         </edgeless-toolbar-button>
-        <edgeless-shape-tool-button
-          .edgelessTool=${this.edgelessTool}
-          .edgeless=${this.edgeless}
-          .setEdgelessTool=${this.setEdgelessTool}
-        ></edgeless-shape-tool-button>
       </div>
     `;
   }

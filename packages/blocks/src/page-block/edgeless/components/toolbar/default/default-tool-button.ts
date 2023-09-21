@@ -1,6 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { type EdgelessTool } from '../../../../../__internal__/index.js';
 import {
@@ -14,14 +15,14 @@ import { getTooltipWithShortcut } from '../../utils.js';
 @customElement('edgeless-default-tool-button')
 export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
   static override styles = css`
-    edgeless-tool-icon-button > svg {
+    .current-icon {
+      transition: 100ms;
+    }
+    .arrow-up-icon {
       position: absolute;
       top: 4px;
       right: 2px;
-    }
-
-    .current-icon {
-      transition: 100ms;
+      font-size: 0;
     }
   `;
 
@@ -37,6 +38,18 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
   @query('.current-icon')
   currentIcon!: HTMLInputElement;
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    if (!localStorage.defaultTool) {
+      localStorage.defaultTool = 'default';
+    }
+    this.edgeless.slots.edgelessToolUpdated.on(({ type }) => {
+      if (type === 'default' || type === 'pan') {
+        localStorage.defaultTool = type;
+      }
+    });
+  }
+
   private _fadeOut() {
     this.currentIcon.style.opacity = '0';
     this.currentIcon.style.transform = `translateY(-5px)`;
@@ -48,15 +61,22 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
   }
 
   private _changeTool() {
+    const type = this.edgelessTool?.type;
+    if (type !== 'default' && type !== 'pan') {
+      if (localStorage.defaultTool === 'default') {
+        this.setEdgelessTool({ type: 'default' });
+      } else if (localStorage.defaultTool === 'pan') {
+        this.setEdgelessTool({ type: 'pan', panning: false });
+      }
+      return;
+    }
     this._fadeOut();
     // wait for animation to finish
     setTimeout(() => {
-      const type = this.edgelessTool?.type;
       if (type === 'default') {
         this.currentIcon;
         this.setEdgelessTool({ type: 'pan', panning: false });
-      } else {
-        // 'pan' or other cases
+      } else if (type === 'pan') {
         this.setEdgelessTool({ type: 'default' });
       }
       this._fadeIn();
@@ -65,6 +85,8 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
 
   override render() {
     const type = this.edgelessTool?.type;
+    const arrowColor =
+      type === 'default' || type === 'pan' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
         class="edgeless-default-button ${type}"
@@ -75,9 +97,12 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
         .iconContainerPadding=${8}
         @click=${this._changeTool}
       >
-        <span class="current-icon"
-          >${type === 'pan' ? HandIcon : SelectIcon}</span
-        >${ArrowUpIcon}
+        <span class="current-icon">
+          ${localStorage.defaultTool === 'default' ? SelectIcon : HandIcon}
+        </span>
+        <span class="arrow-up-icon" style=${styleMap({ color: arrowColor })}>
+          ${ArrowUpIcon}
+        </span>
       </edgeless-tool-icon-button>
     `;
   }

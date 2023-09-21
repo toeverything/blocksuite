@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import * as Y from 'yjs';
+import { Workspace } from '@blocksuite/store';
 
 import { type FrameTool, type IPoint } from '../../../__internal__/index.js';
 import {
@@ -42,7 +42,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
       const frames = surface.frame.frames;
 
       const id = edgeless.surface.addElement('frame', {
-        title: new Y.Text(`Frame ${frames.length + 1}`),
+        title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
         batch: 'a0',
         xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
       });

@@ -128,7 +128,9 @@ export interface DataViewManager {
   ): Disposable;
 
   columnMove(columnId: string, position: InsertPosition): void;
+  rowMove(rowId: string, position: InsertPosition): void;
 
+  duplicateView(): void;
   deleteView(): void;
 
   get isDeleted(): boolean;
@@ -469,6 +471,12 @@ export abstract class BaseDataViewManager implements DataViewManager {
   get filterVisible(): boolean {
     return this._filterVisible ?? this.filter.conditions.length > 0;
   }
+
+  public rowMove(rowId: string, position: InsertPosition): void {
+    this.dataSource.rowMove(rowId, position);
+  }
+
+  public abstract duplicateView(): void;
 }
 
 export abstract class BaseDataViewColumnManager

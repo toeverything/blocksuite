@@ -4,7 +4,11 @@ import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import {
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+  type VRangeProvider,
+} from '@blocksuite/virgo';
 import { flip, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -23,7 +27,7 @@ import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
@@ -112,10 +116,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       /* to make sure the resize observer can be triggered as expected */
       display: block;
       position: relative;
-      width: 90%;
       overflow-x: auto;
       overflow-y: hidden;
       padding-bottom: 20px;
+      width: 90%;
     }
 
     .affine-code-block-container .rich-text-container {
@@ -130,11 +134,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       left: 20px;
       line-height: var(--affine-line-height);
       color: var(--affine-text-secondary-color);
-    }
-
-    .affine-code-block-container .virgo-editor {
-      width: 90%;
-      margin: 0;
     }
 
     .affine-code-block-container affine-code-line span v-text {
@@ -250,6 +249,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
+  private _vRangeProvider: VRangeProvider | null = null;
+
   get vEditor() {
     const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
@@ -261,42 +262,38 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _whenHover = new WhenHoverController(
-    this,
-    ({ setFloating, abortController }) => ({
-      template: ({ updatePortal }) =>
-        CodeOptionTemplate({
-          ref: setFloating,
-          anchor: this,
-          model: this.model,
-          wrap: this._wrap,
-          onClickWrap: () => {
-            this._onClickWrapBtn();
-            updatePortal();
-          },
-          abortController,
+  private _whenHover = new HoverController(this, ({ abortController }) => ({
+    template: ({ updatePortal }) =>
+      CodeOptionTemplate({
+        anchor: this,
+        model: this.model,
+        wrap: this._wrap,
+        onClickWrap: () => {
+          this._onClickWrapBtn();
+          updatePortal();
+        },
+        abortController,
+      }),
+    computePosition: {
+      referenceElement: this,
+      placement: 'right-start',
+      middleware: [
+        offset({
+          mainAxis: 12,
+          crossAxis: 10,
         }),
-      computePosition: {
-        referenceElement: this,
-        placement: 'right-start',
-        middleware: [
-          offset({
-            mainAxis: 12,
-            crossAxis: 10,
-          }),
-          shift({
-            crossAxis: true,
-            padding: {
-              top: PAGE_HEADER_HEIGHT + 12,
-              bottom: 12,
-              right: 12,
-            },
-          }),
-        ],
-        autoUpdate: true,
-      },
-    })
-  );
+        shift({
+          crossAxis: true,
+          padding: {
+            top: PAGE_HEADER_HEIGHT + 12,
+            bottom: 12,
+            right: 12,
+          },
+        }),
+      ],
+      autoUpdate: true,
+    },
+  }));
 
   override async getUpdateComplete() {
     const result = await super.getUpdateComplete();
@@ -358,6 +355,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
       return indexArr;
     };
+
     this.bindHotKey({
       Backspace: () => {
         const textSelection = selectionManager.find('text');
@@ -469,6 +467,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         return;
       },
     });
+
+    this._vRangeProvider = getVRangeProvider(this);
   }
 
   override disconnectedCallback() {
@@ -493,10 +493,9 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
     }
 
-    const richText = this.querySelector('rich-text');
-    assertExists(richText);
+    assertExists(this._richTextElement);
     this._richTextResizeObserver.disconnect();
-    this._richTextResizeObserver.observe(richText);
+    this._richTextResizeObserver.observe(this._richTextElement);
   }
 
   private _onClickWrapBtn() {
@@ -599,7 +598,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .undoManager=${this.model.page.history}
           .textSchema=${this.textSchema}
           .readonly=${this.model.page.readonly}
-          .vRangeProvider=${getVRangeProvider(this)}
+          .vRangeProvider=${this._vRangeProvider}
         >
         </rich-text>
       </div>

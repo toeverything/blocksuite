@@ -2,6 +2,7 @@ import './database-header-column.js';
 
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { autoUpdate, computePosition, shift } from '@floating-ui/dom';
+import { nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -25,6 +26,8 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
   }
   private addColumnPositionRef = createRef();
   addColumnButton = renderTemplate(() => {
+    if (this.readonly) return nothing;
+
     return html`<div
       @click="${this._onAddColumn}"
       class="header-add-column-button dv-hover"
@@ -40,27 +43,44 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
         this.requestUpdate();
       })
     );
-    this.addColumnButton.style.marginLeft = '20px';
-    this.addColumnButton.style.position = 'absolute';
-    this.addColumnButton.style.zIndex = '1';
-    this.closest('affine-data-view-native')?.append(this.addColumnButton);
-    requestAnimationFrame(() => {
-      const referenceEl = this.addColumnPositionRef.value;
-      if (!referenceEl) {
-        return;
-      }
-      const cleanup = autoUpdate(
-        referenceEl,
-        this.addColumnButton,
-        this.updateAddButton
-      );
-      this.disposables.add({
-        dispose: () => {
-          cleanup();
-          this.addColumnButton.remove();
-        },
+    const group = this.closest('affine-data-view-table-group');
+    if (group) {
+      this.disposables.addFromEvent(group, 'mouseenter', () => {
+        this.addColumnButton.style.visibility = 'visible';
       });
-    });
+      this.disposables.addFromEvent(group, 'mouseleave', () => {
+        this.addColumnButton.style.visibility = 'hidden';
+      });
+      this.disposables.addFromEvent(this.addColumnButton, 'mouseenter', () => {
+        this.addColumnButton.style.visibility = 'visible';
+      });
+      this.disposables.addFromEvent(this.addColumnButton, 'mouseleave', () => {
+        this.addColumnButton.style.visibility = 'hidden';
+      });
+      this.addColumnButton.style.visibility = 'hidden';
+      this.addColumnButton.style.transition = 'visibility 0.2s';
+      this.addColumnButton.style.marginLeft = '20px';
+      this.addColumnButton.style.position = 'absolute';
+      this.addColumnButton.style.zIndex = '1';
+      this.closest('affine-data-view-native')?.append(this.addColumnButton);
+      requestAnimationFrame(() => {
+        const referenceEl = this.addColumnPositionRef.value;
+        if (!referenceEl) {
+          return;
+        }
+        const cleanup = autoUpdate(
+          referenceEl,
+          this.addColumnButton,
+          this.updateAddButton
+        );
+        this.disposables.add({
+          dispose: () => {
+            cleanup();
+            this.addColumnButton.remove();
+          },
+        });
+      });
+    }
   }
 
   updateAddButton = () => {
@@ -102,6 +122,7 @@ export class DatabaseColumnHeader extends WithDisposable(ShadowlessElement) {
     this.updateAddButton();
     return html`
       <div class="affine-database-column-header database-row">
+        <div class="data-view-table-left-bar"></div>
         ${repeat(
           this.tableViewManager.columnManagerList,
           column => column.id,

@@ -59,6 +59,8 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
   }
 
   _dragStart = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const container = this.closest('affine-data-view-native');
     const tableRect = container
       ?.querySelector('affine-database-table')
@@ -78,8 +80,6 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
         left: rect.left,
       };
     });
-    const dropPreview = createDropPreview();
-    const dragPreview = createDragPreview();
 
     const getPosition = (
       y: number
@@ -100,6 +100,9 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
         x: data.left,
       };
     };
+
+    const dropPreview = createDropPreview();
+    const dragPreview = createDragPreview();
     startDrag<{ position?: InsertPosition }, MouseEvent>(e, {
       transform: e => e,
       onDrag: () => {

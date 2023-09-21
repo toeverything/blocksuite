@@ -141,4 +141,10 @@ export class AllPageDatasource extends BaseDataSource {
   };
 
   public allPropertyConfig: ColumnConfig[] = [];
+
+  public rowMove(rowId: string, position: InsertPosition): void {
+    // not support
+    rowId;
+    position;
+  }
 }
