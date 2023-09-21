@@ -626,7 +626,7 @@ export const createPopup = (
       top: `${y}px`,
     });
   });
-  modal.onclick = ev => {
+  modal.onmousedown = ev => {
     if (ev.target === modal) {
       modal.remove();
       options?.onClose?.();

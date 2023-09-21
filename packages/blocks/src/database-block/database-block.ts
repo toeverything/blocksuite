@@ -348,7 +348,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         ></affine-data-view-native>
         ${when(
           this.selected?.is('block'),
-          () => html` <affine-block-selection></affine-block-selection>`
+          () =>
+            html` <affine-block-selection
+              style="z-index: 1"
+            ></affine-block-selection>`
         )}
       </div>
     `;
