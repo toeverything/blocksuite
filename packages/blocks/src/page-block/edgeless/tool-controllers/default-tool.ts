@@ -13,17 +13,19 @@ import {
   ConnectorElement,
   FrameElement,
   type HitTestOptions,
+  type IVec,
   type PhasorElement,
   type PhasorElementType,
   ShapeElement,
   TextElement,
+  Vec,
 } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
-import { calPanDelta, type MoveDelta } from '../utils/panning-utils.js';
+import { calPanDelta } from '../utils/panning-utils.js';
 import {
   isPhasorElement,
   isTopLevelBlock,
@@ -60,10 +62,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   override enableHover = true;
   dragType = DefaultModeDragType.None;
 
-  private _dragStartPos: { x: number; y: number } = { x: 0, y: 0 };
-  private _dragStartModelCoord: { x: number; y: number } = { x: 0, y: 0 };
-  private _dragLastModelCoord: { x: number; y: number } = { x: 0, y: 0 };
-  private _lastMoveDelta = { x: 0, y: 0 };
+  private _dragStartPos: IVec = [0, 0];
+  private _dragStartModelCoord: IVec = [0, 0];
+  private _dragLastModelCoord: IVec = [0, 0];
+  private _lastMoveDelta: IVec = [0, 0];
   private _lock = false;
   // Do not select the text, when click again after activating the note.
   private _isDoubleClickedOnMask = false;
@@ -76,12 +78,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
       const [startX, startY] = this._surface.toViewCoord(
-        this._dragStartModelCoord.x,
-        this._dragStartModelCoord.y
+        this._dragStartModelCoord[0],
+        this._dragStartModelCoord[1]
       );
       const [endX, endY] = this._surface.toViewCoord(
-        this._dragLastModelCoord.x,
-        this._dragLastModelCoord.y
+        this._dragLastModelCoord[0],
+        this._dragLastModelCoord[1]
       );
       return {
         start: new DOMPoint(startX, startY),
@@ -172,7 +174,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _handleSurfaceDragMove(
     selected: PhasorElement,
     initialBound: Bound,
-    delta: { x: number; y: number }
+    delta: IVec
   ) {
     if (!this._lock) {
       this._lock = true;
@@ -181,8 +183,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
     const { surface } = this._edgeless;
     const bound = initialBound.clone();
-    bound.x += delta.x;
-    bound.y += delta.y;
+    bound.x += delta[0];
+    bound.y += delta[1];
 
     if (selected instanceof ConnectorElement) {
       this._surface.connector.updateXYWH(selected, bound);
@@ -194,11 +196,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _handleBlockDragMove(
     block: TopLevelBlockModel,
     initialBound: Bound,
-    delta: { x: number; y: number }
+    delta: IVec
   ) {
     const bound = initialBound.clone();
-    bound.x += delta.x;
-    bound.y += delta.y;
+    bound.x += delta[0];
+    bound.y += delta[1];
 
     this._page.updateBlock(block, { xywh: bound.serialize() });
   }
@@ -226,11 +228,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _forceUpdateSelection(
     type: DefaultModeDragType,
     dragging = false,
-    delta = { x: 0, y: 0 }
+    delta: IVec = [0, 0]
   ) {
     this._edgeless.slots.selectedRectUpdated.emit({
       type: type === DefaultModeDragType.Selecting ? 'select' : 'move',
-      delta,
+      delta: Vec.toPoint(delta),
       dragging,
     });
   }
@@ -377,8 +379,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _updateSelectingState = (e: PointerEventState) => {
     const { surface } = this._edgeless;
-    const startX = this._dragStartModelCoord.x;
-    const startY = this._dragStartModelCoord.y;
+    const startX = this._dragStartModelCoord[0];
+    const startY = this._dragStartModelCoord[1];
     const [curX, curY] = surface.toModelCoord(e.x, e.y);
     const x = Math.min(startX, curX);
     const y = Math.min(startY, curY);
@@ -397,14 +399,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       false
     );
 
-    this._dragLastModelCoord = { x: curX, y: curY };
+    this._dragLastModelCoord = [curX, curY];
     this._forceUpdateSelection(this.dragType, true);
     this._edgeless.slots.draggingAreaUpdated.emit();
   };
 
-  private _panViewport = (delta: MoveDelta) => {
+  private _panViewport = (delta: IVec) => {
     const { viewport } = this._edgeless.surface;
-    viewport.applyDeltaCenter(delta.x, delta.y);
+    viewport.applyDeltaCenter(delta[0], delta[1]);
   };
 
   private _stopAutoPanning = () => {
@@ -414,7 +416,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   };
 
-  private _startAutoPanning = (delta: MoveDelta, e: PointerEventState) => {
+  private _startAutoPanning = (delta: IVec, e: PointerEventState) => {
     this._panViewport(delta);
     this._stopAutoPanning();
 
@@ -426,8 +428,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _clearSelectingState = () => {
     this._stopAutoPanning();
-    this._dragStartModelCoord = { x: 0, y: 0 };
-    this._dragLastModelCoord = { x: 0, y: 0 };
+    this._dragStartModelCoord = [0, 0];
+    this._dragLastModelCoord = [0, 0];
     this._edgeless.slots.draggingAreaUpdated.emit();
   };
 
@@ -459,10 +461,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {
     const { x, y } = e;
     this.dragType = dragType;
-    this._dragStartPos = { x, y };
+    this._dragStartPos = [x, y];
     const [startX, startY] = this._surface.toModelCoord(x, y);
-    this._dragStartModelCoord = { x: startX, y: startY };
-    this._dragLastModelCoord = { x: startX, y: startY };
+    this._dragStartModelCoord = [startX, startY];
+    this._dragLastModelCoord = [startX, startY];
 
     this._alignBound = this._surface.snap.setupAlignables(this._toBeMoved);
 
@@ -496,17 +498,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           return;
         }
 
-        const dx = (e.x - this._dragStartPos.x) / zoom;
-        const dy = (e.y - this._dragStartPos.y) / zoom;
+        const dx = (e.x - this._dragStartPos[0]) / zoom;
+        const dy = (e.y - this._dragStartPos[1]) / zoom;
         const curBound = this._alignBound.clone();
         curBound.x += dx;
         curBound.y += dy;
 
         const alignRst = surface.snap.align(curBound);
-        const delta = {
-          x: dx + alignRst.dx,
-          y: dy + alignRst.dy,
-        };
+        const delta = [dx + alignRst.dx, dy + alignRst.dy];
 
         this._toBeMoved.forEach((element, index) => {
           if (isPhasorElement(element)) {
@@ -529,10 +528,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           ? surface.frame.setHighlight(frame)
           : surface.frame.clearHighlight();
 
-        this._forceUpdateSelection(this.dragType, true, {
-          x: delta.x - this._lastMoveDelta.x,
-          y: delta.y - this._lastMoveDelta.y,
-        });
+        this._forceUpdateSelection(
+          this.dragType,
+          true,
+          Vec.sub(delta, this._lastMoveDelta)
+        );
         this._lastMoveDelta = delta;
         break;
       }
@@ -553,9 +553,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return;
     }
     const { surface } = this._edgeless;
-    this._dragStartPos = { x: 0, y: 0 };
+    this._dragStartPos = [0, 0];
     this._selectedBounds = [];
-    this._lastMoveDelta = { x: 0, y: 0 };
+    this._lastMoveDelta = [0, 0];
     surface.snap.cleanupAlignables();
     surface.frame.clearHighlight();
     this._addFrames();

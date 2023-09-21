@@ -1,11 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 
+import type { IVec } from '../../../surface-block/index.js';
 import type { Renderer } from '../../../surface-block/renderer.js';
-
-export type MoveDelta = {
-  x: number;
-  y: number;
-};
 
 const PANNING_DISTANCE = 30;
 
@@ -13,7 +9,7 @@ export function calPanDelta(
   viewport: Renderer,
   e: PointerEventState,
   edgeDistance = 20
-): MoveDelta | null {
+): IVec | null {
   // Get viewport edge
   const { left, top, width, height } = viewport;
   // Get pointer position
@@ -43,5 +39,5 @@ export function calPanDelta(
     deltaY = Math.min(PANNING_DISTANCE, y - (top + height - edgeDistance));
   }
 
-  return { x: deltaX, y: deltaY };
+  return [deltaX, deltaY];
 }
