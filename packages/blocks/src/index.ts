@@ -65,7 +65,7 @@ if (env[importIdentifier] === true) {
 }
 
 if (typeof window === 'undefined') {
-  console.error(
+  throw new Error(
     'Seems like you are importing @blocksuite/blocks in SSR mode. Which is not supported for now.'
   );
 }
