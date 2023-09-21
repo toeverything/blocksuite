@@ -87,7 +87,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
       height: 16px;
     }
   `;
-  get selection() {
+  get selectionController() {
     return this.closest('affine-database-table')?.selectionController;
   }
   @property({ attribute: false })
@@ -102,12 +102,12 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
   }
 
   setSelection = (selection?: Omit<TableViewSelection, 'viewId' | 'type'>) => {
-    if (this.selection) {
-      this.selection.selection = selection;
+    if (this.selectionController) {
+      this.selectionController.selection = selection;
     }
   };
   contextMenu = (e: MouseEvent) => {
-    const selection = this.selection;
+    const selection = this.selectionController;
     if (!selection) {
       return;
     }
@@ -135,13 +135,40 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
     // eslint-disable-next-line wc/no-self-class
     this.classList.add('affine-database-block-row', 'database-row');
   }
-
+  private _clickDragHandler = () => {
+    const selectionController = this.selectionController;
+    if (selectionController) {
+      if (
+        selectionController.isRowSelection(this.groupKey, this.rowIndex) &&
+        selectionController.selection
+      ) {
+        selectionController.selection = {
+          ...selectionController.selection,
+          rowsSelection: undefined,
+        };
+      } else {
+        selectionController.selection = {
+          groupKey: this.groupKey,
+          rowsSelection: {
+            start: this.rowIndex,
+            end: this.rowIndex,
+          },
+          focus: {
+            rowIndex: this.rowIndex,
+            columnIndex: 0,
+          },
+          isEditing: false,
+        };
+      }
+    }
+  };
   protected override render(): unknown {
     const view = this.view;
     return html`
       <div class="data-view-table-left-bar">
         <div
           class="data-view-table-view-drag-handler"
+          @click=${this._clickDragHandler}
           style="width: 8px;height: 100%;display:flex;align-items:center;justify-content:center;cursor:grab;"
         >
           <div
@@ -159,7 +186,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
         v => v.id,
         (column, i) => {
           const clickDetail = () => {
-            if (!this.selection) {
+            if (!this.selectionController) {
               return;
             }
             this.setSelection({
@@ -173,10 +200,10 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            openDetail(this.rowId, this.selection);
+            openDetail(this.rowId, this.selectionController);
           };
           const openMenu = (e: MouseEvent) => {
-            if (!this.selection) {
+            if (!this.selectionController) {
               return;
             }
             const ele = e.currentTarget as HTMLElement;
@@ -191,7 +218,7 @@ export class TableRow extends WithDisposable(ShadowlessElement) {
               },
               isEditing: false,
             });
-            popRowMenu(ele, this.rowId, this.selection);
+            popRowMenu(ele, this.rowId, this.selectionController);
           };
           return html`
             <div>

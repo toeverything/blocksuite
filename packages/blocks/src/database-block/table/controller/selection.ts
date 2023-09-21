@@ -662,6 +662,17 @@ export class TableSelectionController implements ReactiveController {
     }
     return true;
   }
+  isRowSelection(groupKey: string | undefined, rowIndex: number) {
+    const selection = this.selection;
+    if (!selection || selection.groupKey != groupKey) {
+      return false;
+    }
+    const { rowsSelection, columnsSelection } = selection;
+    if (!rowsSelection || columnsSelection) {
+      return false;
+    }
+    return rowsSelection.start === rowIndex && rowsSelection.end === rowIndex;
+  }
 }
 
 @customElement('data-view-table-selection')
