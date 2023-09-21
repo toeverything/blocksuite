@@ -31,10 +31,10 @@ import type {
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
 import {
-  hideWidthAdjustmentBar,
-  showWidthAdjustmentBar,
+  getTableGroupRects,
+  getVerticalIndicator,
   startDragWidthAdjustmentBar,
-} from './column-width-drag-bar.js';
+} from './vertical-indicator.js';
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
@@ -101,9 +101,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         x: v.offsetLeft + v.offsetWidth / 2,
         ele: v,
       });
-      offsetArr.push(v.offsetLeft);
+      offsetArr.push(
+        v.getBoundingClientRect().left - header.getBoundingClientRect().left
+      );
       if (i === columnsArr.length - 1) {
-        offsetArr.push(v.offsetLeft + v.offsetWidth);
+        offsetArr.push(
+          v.getBoundingClientRect().right - header.getBoundingClientRect().left
+        );
       }
     }
     left.reverse();
@@ -186,10 +190,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       startOffset,
       column
     );
-    const dropPreview = createDropPreview(
-      tableContainer,
-      headerContainerRect.height
-    );
+    const rectList = getTableGroupRects(tableContainer);
+    const dropPreview = getVerticalIndicator();
 
     const cancelScroll = startFrameLoop(delta => {
       const offset = delta * 0.4;
@@ -222,9 +224,16 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           columnHeaderRect.width / scale
         );
         if (insertInfo.insertOffset != null) {
-          dropPreview.display(insertInfo.insertOffset);
+          dropPreview.display(
+            0,
+            headerContainerRect.top,
+            rectList,
+            tableContainer.getBoundingClientRect().left +
+              insertInfo.insertOffset,
+            true
+          );
         } else {
-          dropPreview.hide();
+          dropPreview.remove();
         }
         dragPreview.display(currentOffset);
         return {
@@ -440,8 +449,13 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
   private drawWidthDragBarTask = 0;
   private drawWidthDragBar = () => {
-    showWidthAdjustmentBar(
-      getTableContainer(this),
+    const tableContainer = getTableContainer(this);
+    const tableRect = tableContainer.getBoundingClientRect();
+    const rectList = getTableGroupRects(tableContainer);
+    getVerticalIndicator().display(
+      0,
+      tableRect.top,
+      rectList,
       this.getBoundingClientRect().right
     );
     this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
@@ -456,7 +470,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   private _leaveWidthDragBar = () => {
     cancelAnimationFrame(this.drawWidthDragBarTask);
     this.drawWidthDragBarTask = 0;
-    hideWidthAdjustmentBar();
+    getVerticalIndicator().remove();
   };
   override render() {
     const column = this.column;
@@ -534,33 +548,6 @@ const createDragPreview = (
   return {
     display(offset: number) {
       div.style.left = `${Math.round(offset)}px`;
-    },
-    remove() {
-      div.remove();
-    },
-  };
-};
-
-const createDropPreview = (container: Element, height: number) => {
-  const width = 4;
-  const div = document.createElement('div');
-  // div.style.pointerEvents='none';
-  div.className = 'database-move-column-drop-preview';
-  div.style.position = 'absolute';
-  div.style.width = `${width}px`;
-  div.style.height = `${height}px`;
-  div.style.display = 'none';
-  div.style.top = `0px`;
-  div.style.zIndex = '9';
-  div.style.backgroundColor = 'var(--affine-primary-color)';
-  container.append(div);
-  return {
-    display(offset: number) {
-      div.style.display = 'block';
-      div.style.left = `${offset - width / 2}px`;
-    },
-    hide() {
-      div.style.display = 'none';
     },
     remove() {
       div.remove();

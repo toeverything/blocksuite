@@ -187,8 +187,8 @@ const createDropPreview = () => {
   div.style.pointerEvents = 'none';
   div.style.position = 'fixed';
   div.style.zIndex = '9999';
-  div.style.height = '4px';
-  div.style.borderRadius = '2px';
+  div.style.height = '2px';
+  div.style.borderRadius = '1px';
   div.style.backgroundColor = 'var(--affine-primary-color)';
   div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
   return {

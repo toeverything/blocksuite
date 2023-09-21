@@ -1,6 +1,7 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -14,8 +15,8 @@ type GroupRectList = {
   bottom: number;
 }[];
 
-@customElement('affine-database-column-width-drag-bar')
-export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
+@customElement('data-view-table-vertical-indicator')
+export class TableVerticalIndicator extends WithDisposable(ShadowlessElement) {
   static override styles = css`
     affine-database-column-width-drag-bar {
       position: fixed;
@@ -27,13 +28,28 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
 
     .width-drag-bar-container {
       position: absolute;
+      pointer-events: none;
     }
 
     .width-drag-bar-group {
       position: absolute;
+      z-index: 1;
       width: 100%;
-      border-right: 2px solid var(--affine-primary-color);
       background-color: var(--affine-hover-color);
+      pointer-events: none;
+    }
+    .width-drag-bar-group::after {
+      position: absolute;
+      z-index: 1;
+      width: 2px;
+      height: 100%;
+      content: '';
+      right: -1px;
+      background-color: var(--affine-primary-color);
+      border-radius: 1px;
+    }
+    .with-shadow.width-drag-bar-group::after {
+      box-shadow: 0px 0px 8px 0px rgba(30, 150, 235, 0.35);
     }
   `;
   @property({ attribute: false })
@@ -44,6 +60,8 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
   width!: number;
   @property({ attribute: false })
   lines!: GroupRectList;
+  @property({ attribute: false })
+  shadow = false;
 
   protected override render(): unknown {
     const containerStyle = styleMap({
@@ -58,17 +76,18 @@ export class ColumnWidthDragBar extends WithDisposable(ShadowlessElement) {
             top: `${top}px`,
             height: `${bottom - top}px`,
           });
-          return html`<div
-            class="width-drag-bar-group"
-            style=${groupStyle}
-          ></div>`;
+          const groupClass = classMap({
+            'with-shadow': this.shadow,
+            'width-drag-bar-group': true,
+          });
+          return html`<div class="${groupClass}" style=${groupStyle}></div>`;
         })}
       </div>
     `;
   }
 }
 
-const getGroupRectList = (tableContainer: HTMLElement) => {
+export const getTableGroupRects = (tableContainer: HTMLElement) => {
   const tableRect = tableContainer.getBoundingClientRect();
   const groups = tableContainer.querySelectorAll(
     'affine-data-view-table-group'
@@ -103,8 +122,8 @@ export const startDragWidthAdjustmentBar = (
         `affine-database-header-column[data-column-id='${column.id}']`
       )
       ?.getBoundingClientRect().left ?? 0;
-  const rectList = getGroupRectList(tableContainer);
-  const preview = getWidthAdjustPreview();
+  const rectList = getTableGroupRects(tableContainer);
+  const preview = getVerticalIndicator();
   preview.display(column.width * scale, tableRect.top, rectList, left);
   tableContainer.style.pointerEvents = 'none';
   startDrag<{ width: number }>(evt, {
@@ -127,37 +146,34 @@ export const startDragWidthAdjustmentBar = (
     },
   });
 };
-export const showWidthAdjustmentBar = (
-  tableContainer: HTMLElement,
-  left: number
-) => {
-  const tableRect = tableContainer.getBoundingClientRect();
-  const rectList = getGroupRectList(tableContainer);
-  return getWidthAdjustPreview().display(0, tableRect.top, rectList, left);
-};
-export const hideWidthAdjustmentBar = () => {
-  return getWidthAdjustPreview().remove();
-};
-let preview: WidthAdjustPreview | null = null;
-type WidthAdjustPreview = {
+let preview: VerticalIndicator | null = null;
+type VerticalIndicator = {
   display: (
     width: number,
     top: number,
     lines: GroupRectList,
-    left: number
+    left: number,
+    shadow?: boolean
   ) => void;
   remove: () => void;
 };
-const getWidthAdjustPreview = (): WidthAdjustPreview => {
+export const getVerticalIndicator = (): VerticalIndicator => {
   if (!preview) {
-    const dragBar = new ColumnWidthDragBar();
+    const dragBar = new TableVerticalIndicator();
     preview = {
-      display(width: number, top: number, lines: GroupRectList, left: number) {
+      display(
+        width: number,
+        top: number,
+        lines: GroupRectList,
+        left: number,
+        shadow = false
+      ) {
         document.body.append(dragBar);
         dragBar.left = left;
         dragBar.lines = lines;
         dragBar.top = top;
         dragBar.width = width;
+        dragBar.shadow = shadow;
       },
       remove() {
         dragBar.remove();

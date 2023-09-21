@@ -1,6 +1,5 @@
 // related component
 import './components/column-header/column-header.js';
-import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/row.js';
 import './group.js';
