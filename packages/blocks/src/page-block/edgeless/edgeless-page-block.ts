@@ -935,14 +935,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.rangeManager?.setConfig({
-      shouldSyncSelection: range => {
-        const insideModal = Boolean(
-          range?.startContainer.parentElement?.closest('side-layout-modal')
-        );
-        return !insideModal;
-      },
-    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
