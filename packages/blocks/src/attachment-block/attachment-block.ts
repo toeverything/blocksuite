@@ -6,7 +6,7 @@ import { ref } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
 import { DragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
@@ -39,25 +39,28 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
-  private _whenHover = new WhenHoverController(this, ({ abortController }) => ({
-    template: AttachmentOptionsTemplate({
-      anchor: this,
-      model: this.model,
-      showCaption: () => {
-        this._showCaption = true;
-        requestAnimationFrame(() => {
-          this._captionInput.focus();
-        });
+  private _hoverController = new HoverController(
+    this,
+    ({ abortController }) => ({
+      template: AttachmentOptionsTemplate({
+        anchor: this,
+        model: this.model,
+        showCaption: () => {
+          this._showCaption = true;
+          requestAnimationFrame(() => {
+            this._captionInput.focus();
+          });
+        },
+        abortController,
+      }),
+      computePosition: {
+        referenceElement: this,
+        placement: 'top-end',
+        middleware: [flip(), offset(4)],
+        autoUpdate: true,
       },
-      abortController,
-    }),
-    computePosition: {
-      referenceElement: this,
-      placement: 'top-end',
-      middleware: [flip(), offset(4)],
-      autoUpdate: true,
-    },
-  }));
+    })
+  );
 
   override connectedCallback() {
     super.connectedCallback();
@@ -178,7 +181,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     }
 
     return html`<div
-        ${ref(this._whenHover.setReference)}
+        ${ref(this._hoverController.setReference)}
         class="affine-attachment-container"
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
