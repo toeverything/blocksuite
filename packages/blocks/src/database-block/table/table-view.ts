@@ -1,19 +1,20 @@
 // related component
 import './components/column-header/column-header.js';
-import './components/column-header/column-width-drag-bar.js';
 import './components/cell-container.js';
 import './components/row.js';
+import './group.js';
 
 import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
+import { popMenu } from '../../components/menu/index.js';
 import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
-import { PlusIcon } from '../../icons/index.js';
+import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
+import type { GroupHelper } from '../common/group-by/helper.js';
 import type { InsertPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
@@ -53,7 +54,6 @@ const styles = css`
     z-index: 1;
     overflow-x: scroll;
     overflow-y: hidden;
-    border-top: 1.5px solid var(--affine-border-color);
   }
 
   .affine-database-block-table:hover {
@@ -108,45 +108,6 @@ const styles = css`
     cursor: pointer;
   }
 
-  .affine-database-block-footer {
-    display: flex;
-    width: 100%;
-    height: 28px;
-    position: relative;
-    margin-top: -8px;
-    z-index: 0;
-    background-color: var(--affine-hover-color-filled);
-    opacity: 0;
-  }
-
-  @media print {
-    .affine-database-block-footer {
-      display: none;
-    }
-  }
-
-  .affine-database-block-footer:hover {
-    opacity: 1;
-  }
-
-  .affine-database-block-add-row {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    user-select: none;
-    font-size: 14px;
-  }
-
-  .affine-database-block-add-row svg {
-    width: 16px;
-    height: 16px;
-  }
-
   .database-cell {
     border-left: 1px solid var(--affine-border-color);
   }
@@ -188,7 +149,7 @@ export class DataViewTable extends BaseDataView<
     this._disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
-        this.querySelectorAll('data-view-table-row').forEach(v => {
+        this.querySelectorAll('affine-data-view-table-group').forEach(v => {
           v.requestUpdate();
         });
       })
@@ -225,41 +186,59 @@ export class DataViewTable extends BaseDataView<
       };
     });
   };
-
-  private _renderColumnWidthDragBar = () => {
-    let left = LEFT_TOOL_BAR_WIDTH;
-    return repeat(
-      this.view.columnManagerList,
-      v => v.id,
-      column => {
-        left += column.width;
-        return html` <affine-database-column-width-drag-bar
-          .left="${left}"
-          .column="${column}"
-        ></affine-database-column-width-drag-bar>`;
-      }
-    );
-  };
-
-  private renderTable() {
-    const view = this.view;
-    return html`
-      <div class="affine-database-block-rows">
-        ${repeat(
-          view.rows,
-          id => id,
-          (id, idx) => {
-            return html`<data-view-table-row
-              data-row-index="${idx}"
-              data-row-id="${id}"
-              .view="${this.view}"
-              .rowId="${id}"
-              .rowIndex="${idx}"
-            ></data-view-table-row>`;
-          }
-        )}
+  renderAddGroup = (groupHelper: GroupHelper) => {
+    const addGroup = groupHelper.addGroup;
+    if (!addGroup) {
+      return;
+    }
+    const add = (e: MouseEvent) => {
+      const ele = e.currentTarget as HTMLElement;
+      popMenu(ele, {
+        options: {
+          input: {
+            onComplete: text => {
+              const column = groupHelper.column;
+              if (column) {
+                column.updateData(() => addGroup(text, column.data) as never);
+              }
+            },
+          },
+          items: [],
+        },
+      });
+    };
+    return html` <div style="display:flex;">
+      <div
+        class="dv-hover dv-round-8"
+        style="display:flex;align-items:center;gap: 10px;padding: 6px 12px 6px 8px;color: var(--affine-text-secondary-color);font-size: 12px;line-height: 20px;position: sticky;left: ${LEFT_TOOL_BAR_WIDTH}px;"
+        @click="${add}"
+      >
+        <div class="dv-icon-16" style="display:flex;">${AddCursorIcon}</div>
+        <div>New Group</div>
       </div>
-    `;
+    </div>`;
+  };
+  private renderTable() {
+    const groupHelper = this.view.groupHelper;
+    if (groupHelper) {
+      return html`
+        <div style="display:flex;flex-direction: column;gap: 16px;">
+          ${groupHelper.groups.map(group => {
+            return html`<affine-data-view-table-group
+              data-group-key="${group.key}"
+              .view="${this.view}"
+              .viewEle="${this}"
+              .group="${group}"
+            ></affine-data-view-table-group>`;
+          })}
+          ${this.renderAddGroup(groupHelper)}
+        </div>
+      `;
+    }
+    return html`<affine-data-view-table-group
+      .view="${this.view}"
+      .viewEle="${this}"
+    ></affine-data-view-table-group>`;
   }
   onWheel = (event: WheelEvent) => {
     const ele = event.currentTarget;
@@ -278,7 +257,7 @@ export class DataViewTable extends BaseDataView<
   public moveTo(id: string, evt: MouseEvent): void {
     const result = this.dragController.getInsertPosition(evt);
     if (result) {
-      this.view.rowMove(id, result.position);
+      this.view.rowMove(id, result.position, undefined, result.groupKey);
     }
   }
 
@@ -287,33 +266,14 @@ export class DataViewTable extends BaseDataView<
   }
 
   override render() {
-    const addRow = (position: InsertPosition) => {
-      this._addRow(this.view, position);
-    };
-
     return html`
       ${renderUniLit(this.header, { view: this.view, viewMethods: this })}
       <div class="affine-database-table">
         <div class="affine-database-block-table" @wheel="${this.onWheel}">
           <div class="affine-database-table-container">
-            <affine-database-column-header
-              .tableViewManager="${this.view}"
-            ></affine-database-column-header>
-            ${this.renderTable()} ${this._renderColumnWidthDragBar()}
+            ${this.renderTable()}
           </div>
         </div>
-        ${this.readonly
-          ? null
-          : html` <div class="affine-database-block-footer">
-              <div
-                class="affine-database-block-add-row"
-                data-test-id="affine-database-add-row-button"
-                role="button"
-                @click="${() => addRow('end')}"
-              >
-                ${PlusIcon}<span>New Record</span>
-              </div>
-            </div>`}
       </div>
     `;
   }

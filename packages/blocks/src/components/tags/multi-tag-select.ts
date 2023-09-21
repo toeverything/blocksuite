@@ -1,6 +1,7 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nanoid } from '@blocksuite/store';
-import { autoPlacement, offset } from '@floating-ui/dom';
+import type { Middleware } from '@floating-ui/dom';
+import { autoPlacement, detectOverflow } from '@floating-ui/dom';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -485,15 +486,28 @@ export const popTagSelect = (
   };
   const remove = createPopup(target, component, {
     onClose: ops.onComplete,
-    middleware: [
-      offset(state => {
-        return {
-          mainAxis: -state.rects.reference.height,
-          crossAxis:
-            state.rects.floating.width / 2 - state.rects.reference.width / 2,
-        };
-      }),
-    ],
+    middleware: [middleware],
   });
   return remove;
+};
+const middleware: Middleware = {
+  name: 'middleware',
+  fn: async state => {
+    const overflow = await detectOverflow(state);
+    const referenceRect = state.elements.reference.getBoundingClientRect();
+    const top = referenceRect.top;
+    const left = referenceRect.left;
+    let y = top - 12;
+    let x = left - 12;
+    if (overflow.bottom > 0) {
+      y = top - state.elements.floating.getBoundingClientRect().height;
+    }
+    if (overflow.right > 0) {
+      x = left - overflow.right;
+    }
+    return {
+      y,
+      x,
+    };
+  },
 };

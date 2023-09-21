@@ -25,6 +25,7 @@ import { assertExists } from '../utils/asserts.js';
 
 export async function initDatabaseColumn(page: Page, title = '') {
   const editor = getEditorLocator(page);
+  await editor.locator('affine-data-view-table-group').first().hover();
   const columnAddBtn = editor.locator('.header-add-column-button');
   await columnAddBtn.click();
   await waitNextFrame(page, 100);
