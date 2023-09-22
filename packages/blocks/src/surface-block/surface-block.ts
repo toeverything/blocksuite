@@ -66,7 +66,7 @@ import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
-import type { Bound } from './utils/bound.js';
+import { Bound } from './utils/bound.js';
 import { getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
@@ -155,6 +155,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   private _defaultBatch = 'a1';
   private _batches = new Map<string, Batch<IEdgelessElement>>();
+  private _lastTime = 0;
+  private _cachedViewport = new Bound();
 
   slots = {
     elementUpdated: new Slot<{
@@ -523,7 +525,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private _updateViewportEvents() {
-    const { _disposables, page } = this;
+    const { _disposables, page, edgeless } = this;
     _disposables.add(
       page.slots.blockUpdated.on(({ id, type }) => {
         if (type === 'add') {
@@ -537,6 +539,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         }
       })
     );
+    _disposables.add(
+      edgeless.slots.elementSizeUpdated.on(id => {
+        const element = getEdgelessElement(edgeless, id);
+        assertExists(element);
+        this.fitElementToViewport(element);
+      })
+    );
+
     _disposables.add(
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
@@ -854,10 +864,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const { viewport } = this;
     let bound = getGridBound(ele);
     bound = bound.expand(30);
-    if (viewport.viewportBounds.contains(bound)) return;
+    if (Date.now() - this._lastTime > 200)
+      this._cachedViewport = viewport.viewportBounds;
+    this._lastTime = Date.now();
 
-    const newViewBound = viewport.viewportBounds.unite(bound);
-    viewport.setViewportByBound(newViewBound, [0, 0, 0, 0], true);
+    if (this._cachedViewport.contains(bound)) return;
+
+    this._cachedViewport = this._cachedViewport.unite(bound);
+    viewport.setViewportByBound(this._cachedViewport, [0, 0, 0, 0], true);
   }
 
   hasElement(id: string) {
