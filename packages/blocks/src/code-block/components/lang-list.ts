@@ -1,6 +1,6 @@
 import type { Placement } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BUNDLED_LANGUAGES,
@@ -9,7 +9,7 @@ import {
 } from 'shiki';
 
 import { scrollbarStyle } from '../../components/utils.js';
-import { SearchIcon } from '../../icons/index.js';
+import { DoneIcon, SearchIcon } from '../../icons/index.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
@@ -51,9 +51,17 @@ export class LangList extends LitElement {
 
       .lang-item {
         display: flex;
-        justify-content: flex-start;
-        padding-left: 12px;
+        justify-content: space-between;
+        padding: 12px;
         margin-bottom: 5px;
+      }
+      .lang-item-active {
+        color: var(--affine-blue-600);
+        background: var(--affine-hover-color-filled);
+      }
+      .lang-item-active svg {
+        width: 20px;
+        height: 20px;
       }
 
       .input-wrapper {
@@ -200,19 +208,23 @@ export class LangList extends LitElement {
           />
         </div>
         <div class="lang-list-button-container">
-          ${filteredLanguages.map(
-            (language, index) => html`
+          ${filteredLanguages.map((language, index) => {
+            const isActive = index === this._currentSelectedIndex;
+            return html`
               <icon-button
                 width="100%"
                 height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
-                class="lang-item"
-                ?hover=${index === this._currentSelectedIndex}
+                class=${[
+                  'lang-item',
+                  isActive ? 'lang-item-active' : null,
+                ].join(' ')}
               >
                 ${language.displayName ?? language.id}
+                <slot name="suffix">${isActive ? DoneIcon : nothing}</slot>
               </icon-button>
-            `
-          )}
+            `;
+          })}
         </div>
       </div>
     `;
