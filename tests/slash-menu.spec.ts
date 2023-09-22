@@ -361,6 +361,7 @@ test.describe('slash search', () => {
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:type="todo"
   />
 </affine:note>`,
@@ -800,6 +801,7 @@ test('delete block by slash menu should remove children', async ({ page }) => {
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="123"
     prop:type="bulleted"
   />

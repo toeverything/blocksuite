@@ -848,6 +848,7 @@ test('cut will delete all content, and copy will reappear content', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:type="bulleted"
     />
   </affine:note>
@@ -897,22 +898,26 @@ test('cut will delete all content, and copy will reappear content', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="1"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="2"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="3"
         prop:type="bulleted"
       />
     </affine:list>
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="4"
       prop:type="bulleted"
     />

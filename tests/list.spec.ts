@@ -211,16 +211,19 @@ test('nested list blocks', async ({ page }) => {
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="123"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="456"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="789"
           prop:type="bulleted"
         />
@@ -244,16 +247,19 @@ test('nested list blocks', async ({ page }) => {
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="123"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="456"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="789"
         prop:type="bulleted"
       />
@@ -390,6 +396,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   >
     <affine:list
       prop:checked={true}
+      prop:collapsed={false}
       prop:text="todo item"
       prop:type="todo"
     />
@@ -412,6 +419,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   />
   <affine:list
     prop:checked={true}
+    prop:collapsed={false}
     prop:text="todo item"
     prop:type="todo"
   />
