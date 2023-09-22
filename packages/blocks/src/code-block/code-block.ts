@@ -513,6 +513,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       this._langListAbortController = undefined;
     });
 
+    const MAX_LANG_SELECT_HEIGHT = 440;
     createLitPortal({
       closeOnClickAway: true,
       template: ({ positionSlot }) => {
@@ -539,7 +540,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
             apply({ availableHeight, elements }) {
               Object.assign(elements.floating.style, {
                 height: '100%',
-                maxHeight: `${availableHeight}px`,
+                maxHeight: `${Math.min(
+                  MAX_LANG_SELECT_HEIGHT,
+                  availableHeight
+                )}px`,
               });
             },
           }),
