@@ -9,7 +9,7 @@ import {
   type VirgoRootElement,
   type VRangeProvider,
 } from '@blocksuite/virgo';
-import { flip, offset, shift, size } from '@floating-ui/dom';
+import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
@@ -533,7 +533,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         placement: 'bottom-start',
         middleware: [
           offset(4),
-          flip(),
+          autoPlacement({ allowedPlacements: ['top-start', 'bottom-start'] }),
           size({
             padding: 12,
             apply({ availableHeight, elements }) {
