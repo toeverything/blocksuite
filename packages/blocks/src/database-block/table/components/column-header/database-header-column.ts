@@ -3,12 +3,12 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu, positionToVRect } from '../../../../components/menu/menu.js';
 import {
-  DatabaseDragIcon,
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
@@ -42,6 +42,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
+
+  @property({ attribute: false })
+  grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   override connectedCallback() {
     super.connectedCallback();
@@ -182,10 +185,12 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       x: number;
       insertPosition?: InsertPosition;
     }>(evt, {
-      onDrag: evt => ({
-        x: evt.x,
-      }),
+      onDrag: evt => {
+        this.grabStatus = 'grabbing';
+        return { x: evt.x };
+      },
       onMove: ({ x }: { x: number }) => {
+        this.grabStatus = 'grabbing';
         const currentOffset = getResultInRange(
           (x - tableContainer.getBoundingClientRect().left - rectOffsetLeft) /
             scale,
@@ -208,6 +213,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         };
       },
       onDrop: ({ insertPosition }) => {
+        this.grabStatus = 'grabEnd';
         if (insertPosition) {
           this.tableViewManager.columnMove(this.column.id, insertPosition);
         }
@@ -419,6 +425,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const style = styleMap({
       height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
+    const classes = classMap({ [this.grabStatus]: true });
     return html`
       <div
         style=${style}
@@ -439,8 +446,12 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         </div>
         ${this.readonly
           ? null
-          : html` <div class="affine-database-column-move">
-              ${DatabaseDragIcon}
+          : html`<div class=${classes}>
+              <div class="affine-database-column-move">
+                <div class="control-h"></div>
+                <div class="control-l"></div>
+                <div class="control-r"></div>
+              </div>
             </div>`}
       </div>
     `;

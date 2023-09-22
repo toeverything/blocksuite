@@ -53,7 +53,17 @@ const styles = css`
     z-index: 1;
     overflow-x: scroll;
     overflow-y: hidden;
-    border-top: 1.5px solid var(--affine-border-color);
+    /* border-top: 1.5px solid var(--affine-border-color); */
+    padding-top: 1.5px;
+  }
+  .affine-database-block-table::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 1.5px;
+    background-color: var(--affine-border-color);
   }
 
   .affine-database-block-table:hover {

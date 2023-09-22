@@ -37,6 +37,7 @@ export const styles = css`
     height: 100%;
     padding: 8px;
     box-sizing: border-box;
+    position: relative;
   }
   .affine-database-column-content:hover,
   .affine-database-column-content.edit {
@@ -71,6 +72,7 @@ export const styles = css`
     display: flex;
     align-items: center;
     overflow: hidden;
+    position: relative;
   }
   .affine-database-column-content:hover .affine-database-column-text-icon {
     opacity: 1;
@@ -124,6 +126,8 @@ export const styles = css`
   .affine-database-column-move {
     display: flex;
     align-items: center;
+    position: absolute;
+    inset: 0;
   }
   .affine-database-column-move svg {
     width: 10px;
@@ -165,5 +169,85 @@ export const styles = css`
     width: 100px;
     height: 100px;
     background: var(--affine-text-emphasis-color);
+  }
+
+  .affine-database-column-move {
+    --color: var(--affine-border-color);
+    --active: #aaa;
+    --bw: 1px;
+    --bw2: -1px;
+  }
+  .affine-database-column-move .control-l::before,
+  .affine-database-column-move .control-h::before,
+  .affine-database-column-move .control-l::after,
+  .affine-database-column-move .control-h::after,
+  .affine-database-column-move .control-r {
+    --delay: 0s;
+    content: '';
+    position: absolute;
+    transition:
+      all 0.2s ease var(--delay),
+      opacity 0.2s ease 0s;
+  }
+  .affine-database-column-move .control-r {
+    --delay: 0.4s;
+    width: 6px;
+    border-radius: 2px;
+    height: 40%;
+    background: var(--color);
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+  }
+  .grabbing .affine-database-column-move .control-r,
+  .affine-database-column-move:hover .control-r {
+    opacity: 1;
+  }
+  .control-h::before,
+  .control-h::after {
+    --delay: 0.2s;
+    width: 0%;
+    height: var(--bw);
+    right: var(--bw2);
+    background: var(--active);
+  }
+  .control-h::before {
+    top: var(--bw2);
+  }
+  .control-h::after {
+    bottom: var(--bw2);
+  }
+  .control-l::before,
+  .control-l::after {
+    --delay: 0s;
+    width: var(--bw);
+    height: 0%;
+    background: var(--active);
+    left: var(--bw2);
+  }
+  .control-l::before {
+    top: 0;
+  }
+  .control-l::after {
+    bottom: 0;
+  }
+
+  .grabbing .affine-database-column-move .control-r {
+    --delay: 0s;
+    right: var(--bw2);
+    width: var(--bw);
+    height: 100%;
+    background: var(--active);
+  }
+  .grabbing .affine-database-column-move .control-h::before,
+  .grabbing .affine-database-column-move .control-h::after {
+    --delay: 0.2s;
+    width: calc(100% - var(--bw2) * 2);
+  }
+  .grabbing .affine-database-column-move .control-l::before,
+  .grabbing .affine-database-column-move .control-l::after {
+    --delay: 0.4s;
+    height: calc(50% - var(--bw2) * 2);
   }
 `;
