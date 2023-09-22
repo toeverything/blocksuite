@@ -255,6 +255,7 @@ export function createLitPortal({
   portalRoot.style.position = 'fixed';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
+  portalRoot.style.zIndex = '1';
   const { referenceElement, ...options } = computePositionOptions;
   const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
   const update = () => {
