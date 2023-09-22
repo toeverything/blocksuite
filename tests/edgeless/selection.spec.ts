@@ -314,3 +314,50 @@ test('should auto panning when selection rectangle reaches viewport edges', asyn
   expect(selectedRect).toBeVisible();
   await page.waitForTimeout(300);
 });
+
+test('should also update dragging area when viewport changes', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+
+  await switchEditorMode(page);
+  await actions.zoomResetByKeyboard(page);
+
+  // Panning to the top
+  await page.mouse.click(400, 600);
+  await setEdgelessTool(page, 'pan');
+  await dragBetweenCoords(
+    page,
+    {
+      x: 400,
+      y: 600,
+    },
+    {
+      x: 400,
+      y: 100,
+    }
+  );
+  await setEdgelessTool(page, 'default');
+  await page.mouse.click(200, 300);
+
+  const selectedRectClass = '.affine-edgeless-selected-rect';
+  let selectedRect = await page.locator(selectedRectClass);
+  expect(selectedRect).toBeHidden();
+  // set up initial dragging area
+  await page.mouse.move(200, 300);
+  await page.mouse.down();
+  await page.mouse.move(600, 200, { steps: 20 });
+  await page.waitForTimeout(300);
+
+  // wheel the viewport to the top
+  await page.mouse.wheel(0, -300);
+  await page.waitForTimeout(300);
+  await page.mouse.up();
+
+  // Expect to select the empty note
+  selectedRect = await page.locator(selectedRectClass);
+  await page.waitForTimeout(300);
+  expect(selectedRect).toBeVisible();
+  await page.waitForTimeout(300);
+});

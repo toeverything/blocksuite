@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists, noop } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
 
 import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import {
@@ -63,6 +63,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   dragType = DefaultModeDragType.None;
 
   private _dragStartPos: IVec = [0, 0];
+  private _dragLastPos: IVec = [0, 0];
   private _dragStartModelCoord: IVec = [0, 0];
   private _dragLastModelCoord: IVec = [0, 0];
   private _lastMoveDelta: IVec = [0, 0];
@@ -74,6 +75,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _toBeMoved: Selectable[] = [];
   private _frames = new Set<FrameElement>();
   private _autoPanTimer: number | null = null;
+  private _dragging = false;
+  private _draggingAreaDisposables: DisposableGroup | null = null;
 
   override get draggingArea() {
     if (this.dragType === DefaultModeDragType.Selecting) {
@@ -377,11 +380,16 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     });
   }
 
-  private _updateSelectingState = (e: PointerEventState) => {
+  private _updateSelectingState = () => {
     const { surface } = this._edgeless;
+    const { viewport } = surface;
     const startX = this._dragStartModelCoord[0];
     const startY = this._dragStartModelCoord[1];
-    const [curX, curY] = surface.toModelCoord(e.x, e.y);
+    // Should convert the last drag position to model coordinate
+    const [curX, curY] = viewport.toModelCoord(
+      this._dragLastPos[0],
+      this._dragLastPos[1]
+    );
     const x = Math.min(startX, curX);
     const y = Math.min(startY, curY);
 
@@ -399,6 +407,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       false
     );
 
+    // Record the last model coordinate for dragging area updating
     this._dragLastModelCoord = [curX, curY];
     this._forceUpdateSelection(this.dragType, true);
     this._edgeless.slots.draggingAreaUpdated.emit();
@@ -416,18 +425,28 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
   };
 
-  private _startAutoPanning = (delta: IVec, e: PointerEventState) => {
+  private _clearDraggingAreaDisposable = () => {
+    if (this._draggingAreaDisposables) {
+      this._draggingAreaDisposables.dispose();
+      this._draggingAreaDisposables = null;
+    }
+  };
+
+  private _startAutoPanning = (delta: IVec) => {
     this._panViewport(delta);
     this._stopAutoPanning();
 
     this._autoPanTimer = window.setInterval(() => {
       this._panViewport(delta);
-      this._updateSelectingState(e);
+      this._updateSelectingState();
     }, 30);
   };
 
   private _clearSelectingState = () => {
     this._stopAutoPanning();
+    this._clearDraggingAreaDisposable();
+    this._dragging = false;
+    this._dragLastPos = [0, 0];
     this._dragStartModelCoord = [0, 0];
     this._dragLastModelCoord = [0, 0];
     this._edgeless.slots.draggingAreaUpdated.emit();
@@ -461,7 +480,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {
     const { x, y } = e;
     this.dragType = dragType;
+    this._dragging = true;
     this._dragStartPos = [x, y];
+    this._dragLastPos = [x, y];
     const [startX, startY] = this._surface.toModelCoord(x, y);
     this._dragStartModelCoord = [startX, startY];
     this._dragLastModelCoord = [startX, startY];
@@ -471,6 +492,25 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._selectedBounds = this._toBeMoved.map(element =>
       Bound.deserialize(element.xywh)
     );
+
+    // If the drag type is selecting, set up the dragging area disposable group
+    // If the viewport updates when dragging, should update the dragging area and selection
+    if (this.dragType === DefaultModeDragType.Selecting) {
+      this._clearDraggingAreaDisposable();
+
+      this._draggingAreaDisposables = new DisposableGroup();
+      this._draggingAreaDisposables.add(
+        this._edgeless.slots.viewportUpdated.on(() => {
+          if (
+            this.dragType === DefaultModeDragType.Selecting &&
+            this._dragging &&
+            !this._autoPanTimer
+          ) {
+            this._updateSelectingState();
+          }
+        })
+      );
+    }
   }
 
   onContainerDragMove(e: PointerEventState) {
@@ -479,10 +519,12 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const zoom = viewport.zoom;
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
-        this._updateSelectingState(e);
+        // Record the last drag pointer position for auto panning and view port updating
+        this._dragLastPos = [e.x, e.y];
+        this._updateSelectingState();
         const moveDelta = calPanDelta(viewport, e);
         if (moveDelta) {
-          this._startAutoPanning(moveDelta, e);
+          this._startAutoPanning(moveDelta);
         } else {
           this._stopAutoPanning();
         }
@@ -554,6 +596,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
     const { surface } = this._edgeless;
     this._dragStartPos = [0, 0];
+    this._dragLastPos = [0, 0];
     this._selectedBounds = [];
     this._lastMoveDelta = [0, 0];
     surface.snap.cleanupAlignables();
@@ -582,6 +625,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   beforeModeSwitch() {
+    this._stopAutoPanning();
+    this._clearDraggingAreaDisposable();
     noop();
   }
 
