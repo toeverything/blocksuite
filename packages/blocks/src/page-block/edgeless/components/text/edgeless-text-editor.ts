@@ -10,6 +10,7 @@ import {
   Bound,
   type TextElement,
   toRadian,
+  Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
@@ -17,49 +18,59 @@ import { deleteElements } from '../../utils/crud.js';
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   static PLACEHOLDER_TEXT = 'Type from here';
+  static HORIZONTAL_PADDING = 10;
+  static VERTICAL_PADDING = 6;
+  static BORDER_WIDTH = 1;
+
   static override styles = css`
     .edgeless-text-editor {
-      --horizontal-padding: 10px;
-      --vertical-padding: 6px;
-      --border-width: 1px;
-
-      min-width: fit-content;
       position: absolute;
       z-index: 10;
       margin-right: -100%;
-      border: var(--border-width) solid var(--affine-primary-color, #1e96eb);
+      border: ${EdgelessTextEditor.BORDER_WIDTH}px solid
+        var(--affine-primary-color, #1e96eb);
       box-shadow: 0px 0px 0px 2px rgba(30, 150, 235, 0.3);
       border-radius: 4px;
-      padding: var(--vertical-padding) var(--horizontal-padding);
-      transform-origin: left top;
+      padding: ${EdgelessTextEditor.VERTICAL_PADDING}px
+        ${EdgelessTextEditor.HORIZONTAL_PADDING}px;
       line-height: initial;
+      overflow: visible;
+      box-sizing: content-box;
+      left: 0;
+      top: 0;
     }
 
     .edgeless-text-editor-placeholder {
-      left: var(--horizontal-padding);
-      top: var(--vertical-padding);
-      pointer-events: none;
       font-size: 12px;
+      pointer-events: none;
       color: var(--affine-text-disable-color);
       white-space: nowrap;
     }
 
     .edgeless-text-editor .virgo-container {
+      white-space: nowrap;
       outline: none;
+      width: fit-content;
+    }
+
+    .edgeless-text-editor .virgo-container span {
+      white-space: pre !important;
+      word-break: keep-all !important;
+      overflow-wrap: normal !important;
     }
   `;
 
   @query('.virgo-container')
   private _virgoContainer!: HTMLDivElement;
 
-  private _vInput: VirgoInput | null = null;
+  private _vInput!: VirgoInput;
   get vEditor() {
     assertExists(this._vInput);
     return this._vInput.vEditor;
   }
 
-  private _element: TextElement | null = null;
-  private _edgeless: EdgelessPageBlockComponent | null = null;
+  private _element!: TextElement;
+  private _edgeless!: EdgelessPageBlockComponent;
   private _keeping = false;
   private _isComposition = false;
 
@@ -153,7 +164,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
     const lines = Array.from(this._virgoContainer.querySelectorAll('v-line'));
     const lineHeight = lines[0].offsetHeight;
-    const newWidth = this._virgoContainer.offsetWidth;
+    const newWidth = this._virgoContainer.scrollWidth;
     const newHeight = lines.length * lineHeight;
     const bound = new Bound(element.x, element.y, newWidth, newHeight);
     const { x, y, w, h, rotate } = element;
@@ -224,50 +235,55 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     this._element = element;
     this._edgeless = edgeless;
     this._vInput = new VirgoInput({
-      yText: this._element.text,
+      yText: element.text,
     });
 
-    this._vInput.vEditor.slots.updated.on(() => {
+    const { _disposables } = this;
+    const { dispatcher } = edgeless;
+    const { _vInput: vInput } = this;
+
+    assertExists(dispatcher);
+
+    vInput.vEditor.slots.updated.on(() => {
       this._updateRect();
       this.requestUpdate();
     });
 
-    this._disposables.add(
-      this._edgeless.surface.slots.elementUpdated.on(({ id }) => {
-        if (id === this._element?.id) {
-          this.requestUpdate();
-        }
+    _disposables.add(
+      edgeless.surface.slots.elementUpdated.on(({ id }) => {
+        if (id === element.id) this.requestUpdate();
       })
     );
+    _disposables.add(dispatcher.add('click', () => true));
+    _disposables.add(dispatcher.add('doubleClick', () => true));
+    _disposables.add(() => {
+      edgeless.surface.updateElementLocalRecord(element.id, {
+        display: true,
+      });
+
+      if (element.text.length === 0) {
+        deleteElements(edgeless.surface, [element]);
+      }
+
+      edgeless.selectionManager.setSelection({
+        elements: [],
+        editing: false,
+      });
+    });
+
+    edgeless.surface.updateElementLocalRecord(this._element.id, {
+      display: false,
+    });
 
     this.requestUpdate();
-
-    requestAnimationFrame(() => {
-      assertExists(this._vInput);
-      assertExists(this._element);
-
-      this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
-        display: false,
-      });
-      this._vInput.mount(this._virgoContainer);
-
-      const dispatcher = this._edgeless?.dispatcher;
-      assertExists(dispatcher);
-      this._disposables.addFromEvent(this._virgoContainer, 'blur', () => {
-        if (this._keeping) return;
-        this._unmount();
-      });
-      this._disposables.add(
-        dispatcher.add('click', () => {
-          return true;
-        })
+    this.updateComplete.then(() => {
+      vInput.mount(this._virgoContainer);
+      _disposables.addFromEvent(
+        this._virgoContainer,
+        'blur',
+        () => !this._keeping && this._unmount()
       );
-      this._disposables.add(
-        dispatcher.add('doubleClick', () => {
-          return true;
-        })
-      );
-      this._disposables.addFromEvent(
+      _disposables.addFromEvent(
         this._virgoContainer,
         'compositionstart',
         () => {
@@ -275,35 +291,16 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           this.requestUpdate();
         }
       );
-      this._disposables.addFromEvent(
-        this._virgoContainer,
-        'compositionend',
-        () => {
-          this._isComposition = false;
-          this.requestUpdate();
-        }
-      );
+      _disposables.addFromEvent(this._virgoContainer, 'compositionend', () => {
+        this._isComposition = false;
+        this.requestUpdate();
+      });
     });
   }
 
   private _unmount() {
-    this._vInput?.unmount();
-    assertExists(this._element);
-    assertExists(this._edgeless);
-    this._edgeless?.surface.updateElementLocalRecord(this._element.id, {
-      display: true,
-    });
-
-    if (this._element?.text.length === 0) {
-      deleteElements(this._edgeless.surface, [this._element]);
-    }
-
+    this._vInput.unmount();
     this.remove();
-    assertExists(this._edgeless);
-    this._edgeless.selectionManager.setSelection({
-      elements: [],
-      editing: false,
-    });
   }
 
   _renderPlaceholder() {
@@ -320,25 +317,99 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     return nothing;
   }
 
+  getTransformOrigin(textAlign: TextElement['textAlign']) {
+    switch (textAlign) {
+      case 'left':
+        return 'left top';
+      case 'center':
+        return 'center top';
+      case 'right':
+        return 'right top';
+    }
+  }
+
+  getTransformOffset(textAlign: TextElement['textAlign']) {
+    switch (textAlign) {
+      case 'left':
+        return '0%, 0%';
+      case 'center':
+        return '-50%, 0%';
+      case 'right':
+        return '-100%, 0%';
+    }
+  }
+
+  getVisualPosition(element: TextElement) {
+    const { x, y, w, h, rotate, textAlign } = element;
+    switch (textAlign) {
+      case 'left':
+        return Vec.rotWith([x, y], [x + w / 2, y + h / 2], toRadian(rotate));
+      case 'center':
+        return Vec.rotWith(
+          [x + w / 2, y],
+          [x + w / 2, y + h / 2],
+          toRadian(rotate)
+        );
+      case 'right':
+        return Vec.rotWith(
+          [x + w, y],
+          [x + w / 2, y + h / 2],
+          toRadian(rotate)
+        );
+    }
+  }
+
+  getPaddingOffset(textAlign: TextElement['textAlign']) {
+    const { VERTICAL_PADDING, HORIZONTAL_PADDING, BORDER_WIDTH } =
+      EdgelessTextEditor;
+
+    switch (textAlign) {
+      case 'left':
+        return `-${HORIZONTAL_PADDING + BORDER_WIDTH}px, -${
+          VERTICAL_PADDING + BORDER_WIDTH
+        }px`;
+      case 'center':
+        return `${BORDER_WIDTH}px, -${VERTICAL_PADDING + BORDER_WIDTH}px`;
+      case 'right':
+        return `${HORIZONTAL_PADDING + BORDER_WIDTH * 3}px, -${
+          VERTICAL_PADDING + BORDER_WIDTH
+        }px`;
+    }
+  }
+
   override render() {
     if (!this._element) return nothing;
 
+    const { fontFamily, fontSize, textAlign } = this._element;
+    const transformOrigin = this.getTransformOrigin(textAlign);
+    const offset = this.getTransformOffset(textAlign);
+    const paddingOffset = this.getPaddingOffset(textAlign);
+    const [x, y] = this.getVisualPosition(this._element);
     const placeholder = this._renderPlaceholder();
-    const { x, y, fontFamily, fontSize, textAlign } = this._element;
     const hasPlaceholder = placeholder !== nothing;
+
+    const transformOperation = [
+      'translate(var(--affine-edgeless-x), var(--affine-edgeless-y))',
+      `translate(calc(${x}px * var(--affine-zoom)), calc(${y}px * var(--affine-zoom)))`,
+      `translate(${offset})`,
+      `scale(var(--affine-zoom))`,
+      `rotate(${this._element.rotate}deg)`,
+      `translate(${paddingOffset})`,
+    ];
+    const left =
+      textAlign === 'left'
+        ? EdgelessTextEditor.HORIZONTAL_PADDING + 'px'
+        : textAlign === 'center'
+        ? '50%'
+        : `calc(100% - ${EdgelessTextEditor.HORIZONTAL_PADDING}px)`;
 
     return html`<div
       style=${styleMap({
         textAlign,
         fontFamily,
-        left: `calc((${
-          x - 1
-        }px - var(--horizontal-padding)) * var(--affine-zoom))`,
-        top: `calc((${
-          y - 1
-        }px - var(--vertical-padding)) * var(--affine-zoom))`,
         fontSize: `${fontSize}px`,
-        transform: `translate(var(--affine-edgeless-x), var(--affine-edgeless-y)) scale(var(--affine-zoom)) translate(50%, 50%)  rotate(${this._element.rotate}deg) translate(-50%, -50%)`,
+        transform: transformOperation.join(' '),
+        transformOrigin,
         color: isCssVariable(this._element.color)
           ? `var(${this._element.color})`
           : this._element.color,
@@ -351,6 +422,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           ? styleMap({
               position: 'absolute',
               minWidth: '2px',
+              top: EdgelessTextEditor.VERTICAL_PADDING + 'px',
+              left,
             })
           : nothing}
       ></div>
