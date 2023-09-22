@@ -6,7 +6,7 @@ import type {
   ReferenceElement,
   VirtualElement,
 } from '@floating-ui/dom';
-import { autoPlacement, computePosition } from '@floating-ui/dom';
+import { computePosition, flip, offset, shift } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
@@ -16,7 +16,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { regularizationNumberInRange } from '../../__internal__/utils/math.js';
-import { ArrowDownIcon, DoneIcon } from '../../icons/index.js';
+import { ArrowRightSmallIcon, DoneIcon } from '../../icons/index.js';
 import {
   checkboxChecked,
   checkboxUnchecked,
@@ -405,10 +405,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           };
           this.append(subMenu);
           computePosition(this, subMenu, {
+            placement: 'right-start',
             middleware: [
-              autoPlacement({
-                allowedPlacements: ['left-start', 'right-start'],
+              flip({
+                fallbackPlacements: ['left-start', 'right-end', 'left-end'],
               }),
+              offset(4),
             ],
           }).then(({ x, y }) => {
             Object.assign(subMenu.style, {
@@ -427,12 +429,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
             <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
             </div>
-            <div
-              class=""
-              style="display:flex;align-items:center;transform: rotate(-90deg)"
-            >
-              ${ArrowDownIcon}
-            </div>`,
+            ${ArrowRightSmallIcon}`,
           mouseEnter: select,
           select,
           class: '',
@@ -615,16 +612,7 @@ export const createPopup = (
   const modal = createModal(root);
   modal.append(content);
   computePosition(target, content, {
-    middleware: options?.middleware ?? [
-      autoPlacement({
-        allowedPlacements: [
-          'left-start',
-          'right-start',
-          'top-start',
-          'bottom-start',
-        ],
-      }),
-    ],
+    middleware: options?.middleware ?? [shift({ crossAxis: true })],
   }).then(({ x, y }) => {
     Object.assign(content.style, {
       left: `${x}px`,

@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { createPopup, eventToVRect } from '../../../components/menu/index.js';
-import { renderTemplate } from '../../../components/uni-component/uni-component.js';
+import { renderTemplate } from '../../../components/uni-component/render-template.js';
 import { AddCursorIcon, CrossIcon, FilterIcon } from '../../../icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import type { DataViewManager } from '../data-view-manager.js';
