@@ -136,7 +136,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
-      background-color: var(--affine-blue-affine-blue-600, #1e96eb);
+      background-color: var(--affine-blue-600);
       position: absolute;
       contain: layout size;
       width: 235px;
