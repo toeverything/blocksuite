@@ -1,16 +1,25 @@
 import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
+import './shape-element.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type {
   EdgelessTool,
   ShapeToolState,
 } from '../../../../../__internal__/index.js';
-import { EdgelessGeneralShapeIcon } from '../../../../../icons/index.js';
+import {
+  diamondSvg,
+  EdgelessGeneralShapeIcon,
+  ellipseSvg,
+  rectSvg,
+  roundedSvg,
+  triangleSvg,
+} from '../../../../../icons/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
@@ -44,6 +53,32 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
       top: 6px;
       right: 4px;
     }
+
+    :host {
+      --width: 92px;
+      --height: 64px;
+      position: relative;
+      width: var(--width);
+      height: var(--height);
+    }
+
+    .container-clip {
+      padding: 10000px 10000px 0;
+      margin: -10000px -10000px 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .shapes {
+      height: var(--height);
+      width: var(--width);
+      color: #9747ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      pointer-events: auto;
+    }
   `;
 
   @property({ attribute: false })
@@ -69,9 +104,10 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     if (this._shapeMenu) {
       this._shapeMenu.dispose();
       this._shapeMenu = null;
+      this.setEdgelessTool({ type: 'default' });
     } else {
       this._shapeMenu = createPopper('edgeless-shape-menu', this, {
-        x: 110,
+        x: -240,
         y: -40,
       });
       this._shapeMenu.element.edgelessTool = this.edgelessTool;
@@ -136,6 +172,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         this._shapeToolLocalState = shapeToolState;
         // Update shape icon color
         this._shapeIconColor = newTool.strokeColor;
+        //
+        this.active(newTool.shape);
       })
     );
   }
@@ -147,37 +185,68 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
+  private _shapes = [
+    { name: 'rect', svg: rectSvg },
+    { name: 'triangle', svg: triangleSvg },
+    { name: 'ellipse', svg: ellipseSvg },
+    { name: 'diamond', svg: diamondSvg },
+    { name: 'roundedRect', svg: roundedSvg },
+  ];
+
+  @state()
+  private _data = {
+    activeShape: this._shapes[0].name,
+    order: this._shapes.map((_, i) => i + 1),
+  };
+
+  active(name: string) {
+    const { order } = this._data;
+    const index = this._shapes.findIndex(({ name: n }) => n === name);
+    const prevOrder = order[index];
+    const newOrder = order.map((o, i) =>
+      o < prevOrder ? o + 1 : o === prevOrder ? 1 : o
+    );
+    this._data.activeShape = name;
+    this._data.order = newOrder;
+  }
+
+  getContainerRect = () => {
+    return this.getBoundingClientRect();
+  };
+
+  handleClick = () => {
+    this.setEdgelessTool({
+      type: 'shape',
+      shape: this._shapeToolLocalState?.shape ?? 'rect',
+      fillColor:
+        this._shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
+      strokeColor:
+        this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
+      shapeStyle: this._shapeToolLocalState?.shapeStyle ?? ShapeStyle.General,
+    });
+    this._toggleShapeMenu();
+  };
+
   override render() {
     const type = this.edgelessTool?.type;
 
     return html`
-      <edgeless-toolbar-button
-        .tooltip=${this._shapeMenu ? '' : getTooltipWithShortcut('Shape', 'S')}
-        .active=${type === 'shape'}
-        .activeMode=${'background'}
-        .iconContainerPadding=${0}
-        @click=${() => {
-          this.setEdgelessTool({
-            type: 'shape',
-            shape: this._shapeToolLocalState?.shape ?? 'rect',
-            fillColor:
-              this._shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
-            strokeColor:
-              this._shapeToolLocalState?.strokeColor ??
-              DEFAULT_SHAPE_STROKE_COLOR,
-            shapeStyle:
-              this._shapeToolLocalState?.shapeStyle ?? ShapeStyle.Scribbled,
-          });
-          this._toggleShapeMenu();
-        }}
-      >
+      <div class="container-clip">
         <div
-          class="shape-button-group"
+          class="shapes"
           style=${styleMap({ color: `var(${this._shapeIconColor})` })}
         >
-          ${EdgelessGeneralShapeIcon}
+          ${repeat(this._shapes, (shape, index) => {
+            return html`<edgeless-shape-element
+              .shape=${shape}
+              .order=${this._data.order[index]}
+              .getContainerRect=${this.getContainerRect}
+              .handleClick=${this.handleClick}
+              .edgeless=${this.edgeless}
+            ></edgeless-shape-element>`;
+          })}
         </div>
-      </edgeless-toolbar-button>
+      </div>
     `;
   }
 }
