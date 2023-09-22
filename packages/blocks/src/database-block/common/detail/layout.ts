@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement } from '@blocksuite/lit';
+import { autoUpdate, computePosition, size } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
@@ -95,9 +96,27 @@ export const popSideDetail = (ops: {
   const page = document.querySelector('affine-doc-page');
   assertExists(page);
   const modal = createModal(page);
+  // fit to the size of the page element
+  const cancel = autoUpdate(page, modal, () => {
+    computePosition(page, modal, {
+      middleware: [
+        size({
+          apply: ({ rects }) => {
+            Object.assign(modal.style, {
+              left: `${rects.reference.x}px`,
+              top: `${rects.reference.y}px`,
+              width: `${rects.reference.width}px`,
+              height: `${rects.reference.height}px`,
+            });
+          },
+        }),
+      ],
+    });
+  });
   const close = () => {
     modal.remove();
     ops.onClose?.();
+    cancel();
   };
   const detail = new RecordDetail();
   detail.view = ops.view;
