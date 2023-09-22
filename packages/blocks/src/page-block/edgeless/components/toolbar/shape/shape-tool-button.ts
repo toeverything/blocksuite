@@ -201,7 +201,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     const { order } = this._data;
     const index = this._shapes.findIndex(({ name: n }) => n === name);
     const prevOrder = order[index];
-    const newOrder = order.map((o, i) =>
+    const newOrder = order.map(o =>
       o < prevOrder ? o + 1 : o === prevOrder ? 1 : o
     );
     this._data.activeShape = name;
@@ -226,8 +226,6 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   };
 
   override render() {
-    const type = this.edgelessTool?.type;
-
     return html`
       <div class="container-clip">
         <div
