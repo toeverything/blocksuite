@@ -75,6 +75,7 @@ import {
   normalizeWheelDeltaY,
 } from './utils/index.js';
 import { serializeXYWH } from './utils/xywh.js';
+import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 
 type id = string;
 export enum EdgelessBlocksFlavour {
@@ -257,7 +258,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         if (element instanceof ConnectorElement) {
           // FIXME waiting for refactor
           if (!this.connector.hasRelatedElement(element)) return;
-
           this.connector.updatePath(element);
         }
       })
@@ -522,6 +522,30 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
+  private _updateViewportEvents() {
+    const { _disposables, page } = this;
+    _disposables.add(
+      page.slots.blockUpdated.on(({ id, type }) => {
+        if (type === 'add') {
+          const model = page.getBlockById(id) as TopLevelBlockModel;
+          assertExists(model);
+          if (isNoteBlock(model)) {
+            requestAnimationFrame(() => {
+              this.fitElementToViewport(model);
+            });
+          }
+        }
+      })
+    );
+    _disposables.add(
+      this.slots.elementAdded.on(id => {
+        const element = this.pickById(id);
+        assertExists(element);
+        this.fitElementToViewport(element);
+      })
+    );
+  }
+
   override render() {
     if (!this._isEdgeless) return nothing;
     return html`
@@ -538,6 +562,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   init() {
     this._syncFromExistingContainer();
+    this._updateViewportEvents();
   }
 
   // query
@@ -823,6 +848,16 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         this._yContainer.delete(id);
       });
     }
+  }
+
+  fitElementToViewport(ele: EdgelessElement) {
+    const { viewport } = this;
+    let bound = getGridBound(ele);
+    bound = bound.expand(30);
+    if (viewport.viewportBounds.contains(bound)) return;
+
+    const newViewBound = viewport.viewportBounds.unite(bound);
+    viewport.setViewportByBound(newViewBound, [0, 0, 0, 0], true);
   }
 
   hasElement(id: string) {

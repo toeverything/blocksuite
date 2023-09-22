@@ -12,7 +12,6 @@ import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
   ConnectorElement,
-  inflateBound,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
@@ -88,7 +87,6 @@ export async function duplicate(
       }
     })
   );
-  handleZoom(newElements, edgeless);
 
   if (select) {
     edgeless.selectionManager.setSelection({
@@ -96,21 +94,4 @@ export async function duplicate(
       editing: false,
     });
   }
-}
-
-function handleZoom(
-  newElementIds: string[],
-  edgeless: EdgelessPageBlockComponent
-) {
-  const { surface, page } = edgeless;
-  const { viewport } = surface;
-  const newElements = Array.from(
-    newElementIds,
-    id => surface.pickById(id) ?? page.getBlockById(id)
-  );
-  let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
-  totalBound = inflateBound(totalBound, 30);
-  let currentViewBound = Bound.from(viewport.viewportBounds);
-  currentViewBound = currentViewBound.unite(totalBound);
-  viewport.setViewportByBound(currentViewBound, [0, 0, 0, 0], true);
 }

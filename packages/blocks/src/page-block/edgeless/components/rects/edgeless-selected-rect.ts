@@ -48,6 +48,7 @@ import {
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
+import { FrameBlockModel } from '../../../../index.js';
 
 export type SelectedRect = {
   left: number;
@@ -708,6 +709,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   }
 
+  private _canAutoComplete() {
+    return (
+      this.selection.elements.length === 1 &&
+      (this.selection.elements[0] instanceof ShapeElement ||
+        isNoteBlock(this.selection.elements[0]))
+    );
+  }
+
   override render() {
     const { selection } = this;
     const elements = selection.elements;
@@ -755,13 +764,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     return html`
-      ${page.readonly
-        ? nothing
-        : html`<edgeless-auto-complete
+      ${!page.readonly && this._canAutoComplete()
+        ? html`<edgeless-auto-complete
+            .current=${this.selection.elements[0]}
             .edgeless=${edgeless}
             .selectedRect=${_selectedRect}
           >
-          </edgeless-auto-complete>`}
+          </edgeless-auto-complete>`
+        : nothing}
       <div
         class="affine-edgeless-selected-rect"
         style=${styleMap({
