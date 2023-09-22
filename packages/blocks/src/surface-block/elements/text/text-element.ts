@@ -1,11 +1,10 @@
 import type { IModelCoord } from '../../consts.js';
-import { Bound, getBoundFromPoints } from '../../utils/bound.js';
+import { Bound } from '../../utils/bound.js';
 import {
   getPointFromBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
-  pointOnPolygonStoke,
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
