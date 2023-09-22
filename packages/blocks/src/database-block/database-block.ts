@@ -155,7 +155,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.root.selection.slots.changed.on(selections => {
+      this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
             if (!PathFinder.equals(selection.path, this.path)) {

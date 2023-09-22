@@ -30,6 +30,8 @@ type GroupMenu = MenuCommon & {
   name: string;
   children: () => NormalMenu[];
 };
+// eslint-disable-next-line @typescript-eslint/ban-types
+type MenuClass = (string & {}) | 'delete-item';
 type NormalMenu = MenuCommon &
   (
     | {
@@ -41,7 +43,7 @@ type NormalMenu = MenuCommon &
         postfix?: TemplateResult;
         select: () => void;
         onHover?: (hover: boolean) => void;
-        class?: string;
+        class?: MenuClass;
       }
     | {
         type: 'checkbox';
@@ -60,7 +62,7 @@ type NormalMenu = MenuCommon &
         options: MenuOptions;
       }
   );
-type Menu = GroupMenu | NormalMenu;
+export type Menu = GroupMenu | NormalMenu;
 type GetMenuByType<T extends Menu['type'], M extends Menu = Menu> = M extends {
   type: T;
 }

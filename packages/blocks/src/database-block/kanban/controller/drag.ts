@@ -175,8 +175,8 @@ const createDragPreview = (card: KanbanCard, x: number, y: number) => {
 };
 const createDropPreview = () => {
   const div = document.createElement('div');
-  div.style.height = '4px';
-  div.style.borderRadius = '2px';
+  div.style.height = '2px';
+  div.style.borderRadius = '1px';
   div.style.backgroundColor = 'var(--affine-primary-color)';
   div.style.boxShadow = '0px 0px 8px 0px rgba(30, 150, 235, 0.35)';
   return {

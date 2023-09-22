@@ -14,15 +14,13 @@ import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
+import type { GroupHelper } from '../common/group-by/helper.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
 import { KanbanGroup } from './group.js';
-import type {
-  DataViewKanbanManager,
-  GroupHelper,
-} from './kanban-view-manager.js';
+import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`
   affine-data-view-kanban {
