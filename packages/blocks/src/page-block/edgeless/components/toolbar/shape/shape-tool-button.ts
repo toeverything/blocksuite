@@ -14,7 +14,6 @@ import type {
 } from '../../../../../__internal__/index.js';
 import {
   diamondSvg,
-  EdgelessGeneralShapeIcon,
   ellipseSvg,
   rectSvg,
   roundedSvg,
@@ -26,7 +25,6 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../../component-toolbar/change-shape-button.js';
-import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 
