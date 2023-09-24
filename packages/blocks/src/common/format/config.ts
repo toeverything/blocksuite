@@ -92,12 +92,7 @@ export const formatConfig: formatConfig[] = [
       if (!vRoot) return;
 
       const vEditor = vRoot.virgoEditor;
-      const vText =
-        range.commonAncestorContainer.parentElement?.closest(
-          '[data-virgo-text]'
-        );
-      if (!vText) return;
-      const goalVRange = vEditor.getVRangeFromElement(vText);
+      const goalVRange = vEditor.getVRange();
       assertExists(goalVRange);
       toggleLinkPopup(vEditor, 'create', goalVRange);
     },

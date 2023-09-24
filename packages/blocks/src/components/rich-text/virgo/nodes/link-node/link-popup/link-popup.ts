@@ -124,11 +124,19 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _onConfirm() {
+    if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
+
     assertExists(this.linkInput);
     const link = normalizeUrl(this.linkInput.value);
-    const text = this.textInput?.value ?? link;
 
-    if (this.vEditor.isVRangeValid(this.goalVRange)) {
+    if (this.type === 'create') {
+      this.vEditor.formatText(this.goalVRange, {
+        link: link,
+        reference: null,
+      });
+      this.vEditor.setVRange(this.goalVRange);
+    } else if (this.type === 'edit') {
+      const text = this.textInput?.value ?? link;
       this.vEditor.insertText(this.goalVRange, text, {
         link: link,
         reference: null,
@@ -268,6 +276,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
   }
 
   private _editTemplate() {
+    this.updateComplete.then(() => {
+      assertExists(this.textInput);
+      this.textInput.value = this.currentText;
+      assertExists(this.linkInput);
+      this.linkInput.value = this.currentLink;
+    });
+
     return html`<div class="affine-link-edit-popover">
       <div class="affine-edit-text-area">
         <input
