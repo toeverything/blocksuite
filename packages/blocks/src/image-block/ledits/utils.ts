@@ -1,6 +1,8 @@
+/* eslint-disable prettier/prettier */
 import { html } from 'lit';
 
 export function createInlineIframe() {
+  /* prettier-ignore */
   const htmlContent = html`<!doctype html>
     <html>
       <head>
@@ -60,7 +62,7 @@ export function createInlineIframe() {
 
           if (resultImg === null) return null;
 
-          const pattern = /^data:(image/w+);/;
+          const pattern = /^data:(image\/\w+);/;
           const execResult = pattern.exec(resultImg.src);
 
           if (!execResult) return null;
