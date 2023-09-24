@@ -47,6 +47,9 @@ export class LangList extends LitElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
       }
 
       ${scrollbarStyle('.lang-list-button-container')}
@@ -55,7 +58,6 @@ export class LangList extends LitElement {
         display: flex;
         justify-content: space-between;
         padding: 12px;
-        margin-bottom: 5px;
       }
       .lang-item-active {
         color: var(--affine-blue-600);
@@ -66,14 +68,25 @@ export class LangList extends LitElement {
         height: 20px;
       }
 
+      .divider {
+        height: 1px;
+        background-color: var(--affine-divider-color);
+        margin: 8px 0;
+        flex-shrink: 0;
+      }
+
       .input-wrapper {
         display: flex;
-        margin-top: 8px;
         margin-left: 4px;
-        border: 1px solid var(--affine-border-color);
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 4px 10px;
         gap: 4px;
+        border: 1px solid transparent;
+      }
+
+      .input-wrapper:focus-within {
+        border: 1px solid var(--affine-blue-600);
+        box-shadow: var(--affine-active-shadow);
       }
 
       #filter-input {
@@ -201,7 +214,7 @@ export class LangList extends LitElement {
           <input
             id="filter-input"
             type="text"
-            placeholder="Search"
+            placeholder="Search for a language"
             @input="${() => {
               this._filterText = this.filterInput?.value;
               this._currentSelectedIndex = 0;
@@ -209,6 +222,7 @@ export class LangList extends LitElement {
             @keydown="${onLanguageSelect}"
           />
         </div>
+        <div class="divider"></div>
         <div class="lang-list-button-container">
           ${filteredLanguages.map((language, index) => {
             const isActive = index === this._currentSelectedIndex;
