@@ -514,6 +514,10 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     });
 
     const MAX_LANG_SELECT_HEIGHT = 440;
+    const portalPadding = {
+      top: PAGE_HEADER_HEIGHT + 12,
+      bottom: 12,
+    } as const;
     createLitPortal({
       closeOnClickAway: true,
       template: ({ positionSlot }) => {
@@ -534,16 +538,28 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         placement: 'bottom-start',
         middleware: [
           offset(4),
-          autoPlacement({ allowedPlacements: ['top-start', 'bottom-start'] }),
+          autoPlacement({
+            allowedPlacements: ['top-start', 'bottom-start'],
+            padding: portalPadding,
+          }),
           size({
-            padding: 12,
-            apply({ availableHeight, elements }) {
+            padding: portalPadding,
+            apply({ availableHeight, elements, placement }) {
               Object.assign(elements.floating.style, {
                 height: '100%',
                 maxHeight: `${Math.min(
                   MAX_LANG_SELECT_HEIGHT,
                   availableHeight
                 )}px`,
+                ...(placement.startsWith('top')
+                  ? {
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                    }
+                  : {
+                      display: null,
+                      alignItems: null,
+                    }),
               });
             },
           }),

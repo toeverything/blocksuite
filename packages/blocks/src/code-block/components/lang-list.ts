@@ -19,7 +19,8 @@ export class LangList extends LitElement {
   static override get styles() {
     return css`
       :host {
-        height: 100%;
+        max-height: 100%;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         background: var(--affine-background-overlay-panel-color);
@@ -32,6 +33,7 @@ export class LangList extends LitElement {
         box-sizing: border-box;
         display: flex;
         height: 100%;
+        overflow: hidden;
         flex-direction: column;
         box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
