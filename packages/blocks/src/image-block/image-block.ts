@@ -2,7 +2,6 @@ import './image/placeholder/image-not-found.js';
 import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -110,6 +109,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   private _retryCount = 0;
   private _lastSourceId: string = '';
+  private _isDragging = false;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -132,17 +132,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
-    const imageContainer = this.resizeImg;
-    assertExists(imageContainer);
-
-    // exclude padding and border width
-    const { width, height } = this.model;
-
-    if (width && height) {
-      imageContainer.style.width = width + 'px';
-      imageContainer.style.height = height + 'px';
-    }
-
     this.updateComplete.then(() => {
       this._caption = this.model?.caption ?? '';
 
@@ -254,13 +243,12 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   private _observeDrag() {
     const embedResizeManager = new ImageResizeManager();
 
-    let dragging = false;
     this._disposables.add(
       this.root.event.add('dragStart', ctx => {
         const pointerState = ctx.get('pointerState');
         const target = pointerState.event.target;
         if (shouldResizeImage(this, target)) {
-          dragging = true;
+          this._isDragging = true;
           embedResizeManager.onStart(pointerState);
           return true;
         }
@@ -270,7 +258,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     this._disposables.add(
       this.root.event.add('dragMove', ctx => {
         const pointerState = ctx.get('pointerState');
-        if (dragging) {
+        if (this._isDragging) {
           embedResizeManager.onMove(pointerState);
           return true;
         }
@@ -279,8 +267,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     );
     this._disposables.add(
       this.root.event.add('dragEnd', () => {
-        if (dragging) {
-          dragging = false;
+        if (this._isDragging) {
+          this._isDragging = false;
           embedResizeManager.onEnd();
           return true;
         }
@@ -401,16 +389,30 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     return ImageSelectedRectsContainer(readonly);
   }
 
-  override render() {
-    const resizeImgStyle = {
-      width: 'unset',
-      height: 'unset',
-    };
-    const { width, height } = this.model;
-    if (width && height) {
-      resizeImgStyle.width = `${width}px`;
-      resizeImgStyle.height = `${height}px`;
+  private _normalizeImageSize() {
+    // If is dragging, we should use the real size of the image
+    if (this._isDragging && this.resizeImg) {
+      return {
+        width: this.resizeImg.style.width,
+        height: this.resizeImg.style.height,
+      };
     }
+
+    const { width, height } = this.model;
+    if (!width || !height || width === 0 || height === 0) {
+      return {
+        width: 'unset',
+        height: 'unset',
+      };
+    }
+    return {
+      width: `${width}px`,
+      height: `${height}px`,
+    };
+  }
+
+  override render() {
+    const resizeImgStyle = this._normalizeImageSize();
 
     const img = {
       waitUploaded: html`<affine-image-block-loading-card

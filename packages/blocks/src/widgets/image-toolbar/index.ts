@@ -3,13 +3,13 @@ import { offset, shift } from '@floating-ui/dom';
 import { customElement } from 'lit/decorators.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../__internal__/consts.js';
-import { WhenHoverController } from '../../components/when-hover.js';
+import { HoverController } from '../../components/when-hover.js';
 import type { ImageBlockComponent } from '../../image-block/image-block.js';
 import { ImageOptionsTemplate } from './image-options.js';
 
 @customElement('affine-image-toolbar-widget')
 export class AffineImageToolbarWidget extends WidgetElement {
-  private _whenHover = new WhenHoverController(this, ({ abortController }) => {
+  private _whenHover = new HoverController(this, ({ abortController }) => {
     const imageBlock = this.pageElement as ImageBlockComponent;
     const imageContainer = imageBlock.resizeImg;
     if (!imageContainer) return null;

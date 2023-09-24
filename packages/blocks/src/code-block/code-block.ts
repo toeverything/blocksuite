@@ -9,7 +9,7 @@ import {
   type VirgoRootElement,
   type VRangeProvider,
 } from '@blocksuite/virgo';
-import { flip, offset, shift, size } from '@floating-ui/dom';
+import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
@@ -27,7 +27,7 @@ import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
 import { queryCurrentMode } from '../__internal__/index.js';
 import { getService } from '../__internal__/service/index.js';
 import { listenToThemeChange } from '../__internal__/theme/utils.js';
-import { WhenHoverController } from '../components/index.js';
+import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
@@ -262,7 +262,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   @query('rich-text')
   private _richTextElement?: RichText;
 
-  private _whenHover = new WhenHoverController(this, ({ abortController }) => ({
+  private _whenHover = new HoverController(this, ({ abortController }) => ({
     template: ({ updatePortal }) =>
       CodeOptionTemplate({
         anchor: this,
@@ -533,7 +533,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         placement: 'bottom-start',
         middleware: [
           offset(4),
-          flip(),
+          autoPlacement({ allowedPlacements: ['top-start', 'bottom-start'] }),
           size({
             padding: 12,
             apply({ availableHeight, elements }) {

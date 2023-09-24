@@ -28,7 +28,7 @@ const DEFAULT_HOVER_OPTIONS: HoverOptions = {
   setPortalAsFloating: true,
 };
 
-export class WhenHoverController implements ReactiveController {
+export class HoverController implements ReactiveController {
   protected _disposables = new DisposableGroup();
   host: ReactiveControllerHost;
 

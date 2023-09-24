@@ -155,7 +155,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this._disposables.add(
-      this.root.selection.slots.changed.on(selections => {
+      this.selection.slots.changed.on(selections => {
         const databaseSelection = selections.find(
           (selection): selection is DatabaseSelection => {
             if (!PathFinder.equals(selection.path, this.path)) {
@@ -348,7 +348,10 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
         ></affine-data-view-native>
         ${when(
           this.selected?.is('block'),
-          () => html` <affine-block-selection></affine-block-selection>`
+          () =>
+            html` <affine-block-selection
+              style="z-index: 1"
+            ></affine-block-selection>`
         )}
       </div>
     `;

@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type {
   ClientRectObject,
@@ -29,6 +30,8 @@ type GroupMenu = MenuCommon & {
   name: string;
   children: () => NormalMenu[];
 };
+// eslint-disable-next-line @typescript-eslint/ban-types
+type MenuClass = (string & {}) | 'delete-item';
 type NormalMenu = MenuCommon &
   (
     | {
@@ -40,7 +43,7 @@ type NormalMenu = MenuCommon &
         postfix?: TemplateResult;
         select: () => void;
         onHover?: (hover: boolean) => void;
-        class?: string;
+        class?: MenuClass;
       }
     | {
         type: 'checkbox';
@@ -59,7 +62,7 @@ type NormalMenu = MenuCommon &
         options: MenuOptions;
       }
   );
-type Menu = GroupMenu | NormalMenu;
+export type Menu = GroupMenu | NormalMenu;
 type GetMenuByType<T extends Menu['type'], M extends Menu = Menu> = M extends {
   type: T;
 }
@@ -569,7 +572,7 @@ declare global {
     'affine-menu': MenuComponent<unknown>;
   }
 }
-export const createModal = () => {
+export const createModal = (container: HTMLElement) => {
   const div = document.createElement('div');
   div.style.position = 'fixed';
   div.style.left = '0';
@@ -577,7 +580,7 @@ export const createModal = () => {
   div.style.width = '100vw';
   div.style.height = '100vh';
   div.style.zIndex = '1001';
-  document.body.querySelector('block-suite-root')?.append(div);
+  container.append(div);
   return div;
 };
 export const positionToVRect = (x: number, y: number): VirtualElement => {
@@ -607,7 +610,9 @@ export const createPopup = (
     middleware?: Array<Middleware | null | undefined | false>;
   }
 ) => {
-  const modal = createModal();
+  const root = document.querySelector('block-suite-root');
+  assertExists(root);
+  const modal = createModal(root);
   modal.append(content);
   computePosition(target, content, {
     middleware: options?.middleware ?? [
@@ -626,7 +631,7 @@ export const createPopup = (
       top: `${y}px`,
     });
   });
-  modal.onclick = ev => {
+  modal.onmousedown = ev => {
     if (ev.target === modal) {
       modal.remove();
       options?.onClose?.();

@@ -189,6 +189,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     pageLinkClicked: new Slot<{ pageId: string; blockId?: string }>(),
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
+    draggingAreaUpdated: new Slot(),
   };
 
   @query('affine-surface')
@@ -935,14 +936,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.rangeManager?.setConfig({
-      shouldSyncSelection: range => {
-        const insideModal = Boolean(
-          range?.startContainer.parentElement?.closest('side-layout-modal')
-        );
-        return !insideModal;
-      },
-    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new EdgelessPageKeyboardManager(this);
