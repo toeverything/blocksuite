@@ -1,17 +1,17 @@
-import type { InsertPosition } from '../types.js';
+import type { InsertToPosition } from '../types.js';
 
 export function insertPositionToIndex<
   T extends {
     id: string;
   },
->(position: InsertPosition, arr: T[]): number;
+>(position: InsertToPosition, arr: T[]): number;
 export function insertPositionToIndex<T>(
-  position: InsertPosition,
+  position: InsertToPosition,
   arr: T[],
   key: (value: T) => string
 ): number;
 export function insertPositionToIndex<T>(
-  position: InsertPosition,
+  position: InsertToPosition,
   arr: T[],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   key: (value: T) => string = (value: any) => value.id

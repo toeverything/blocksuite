@@ -18,7 +18,7 @@ import {
   DeleteIcon,
   TextIcon,
 } from '../../../../icons/index.js';
-import type { InsertPosition } from '../../../types.js';
+import type { InsertToPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
@@ -112,7 +112,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     }
     left.reverse();
     const getInsertPosition = (offset: number, width: number) => {
-      let result: InsertPosition | undefined = undefined;
+      let result: InsertToPosition | undefined = undefined;
       for (let i = 0; i < left.length; i++) {
         const { x, ele } = left[i];
         if (x < offset) {
@@ -144,7 +144,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       return result;
     };
     const fixedColumns = columnsArr.map(v => ({ id: v.column.id }));
-    const getInsertOffset = (insertPosition: InsertPosition) => {
+    const getInsertOffset = (insertPosition: InsertToPosition) => {
       return offsetArr[insertPositionToIndex(insertPosition, fixedColumns)];
     };
     return {
@@ -207,7 +207,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     html?.classList.toggle('affine-database-header-column-grabbing', true);
     const drag = startDrag<{
       x: number;
-      insertPosition?: InsertPosition;
+      insertPosition?: InsertToPosition;
     }>(evt, {
       onDrag: evt => ({
         x: evt.x,

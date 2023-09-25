@@ -2,7 +2,7 @@ import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
 import { PlusIcon } from '../../../../../icons/index.js';
-import type { InsertPosition } from '../../../../types.js';
+import type { InsertToPosition } from '../../../../types.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { BaseTool } from '../base-tool.js';
 import { NewRecordPreview } from './new-record-preview.js';
@@ -84,7 +84,7 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
     const getPosition = (
       y: number
     ):
-      | { position: InsertPosition; y: number; x: number; width: number }
+      | { position: InsertToPosition; y: number; x: number; width: number }
       | undefined => {
       const data = rects.find(v => y < v.bottom);
       if (!data || y < data.top) {
@@ -103,7 +103,7 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
 
     const dropPreview = createDropPreview();
     const dragPreview = createDragPreview();
-    startDrag<{ position?: InsertPosition }, MouseEvent>(e, {
+    startDrag<{ position?: InsertToPosition }, MouseEvent>(e, {
       transform: e => e,
       onDrag: () => {
         return {};
@@ -132,7 +132,7 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
     });
   };
 
-  addRow = (position: InsertPosition | number) => {
+  addRow = (position: InsertToPosition | number) => {
     this.viewMethod.addRow?.(position);
   };
 

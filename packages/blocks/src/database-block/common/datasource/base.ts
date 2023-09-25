@@ -1,14 +1,14 @@
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 
-import type { UniComponent } from '../../components/uni-component/uni-component.js';
-import type {
-  ColumnConfig,
-  ColumnConfigManager,
-} from '../../database-block/common/columns/manager.js';
-import { columnManager } from '../../database-block/common/columns/manager.js';
-import type { DataViewManager } from '../../database-block/common/data-view-manager.js';
-import type { InsertPosition } from '../../database-block/index.js';
-import { DEFAULT_COLUMN_WIDTH } from '../../database-block/table/consts.js';
+import type { UniComponent } from '../../../components/uni-component/uni-component.js';
+import { DEFAULT_COLUMN_WIDTH } from '../../table/consts.js';
+import type { InsertToPosition } from '../../types.js';
+import {
+  type ColumnConfig,
+  type ColumnConfigManager,
+  columnManager,
+} from '../columns/manager.js';
+import type { DataViewManager } from '../data-view-manager.js';
 
 export type DetailSlotProps = { view: DataViewManager; rowId: string };
 
@@ -29,7 +29,7 @@ export interface DataSource {
     value: unknown
   ) => unknown;
   cellChangeValue: (rowId: string, propertyId: string, value: unknown) => void;
-  rowAdd: (insertPosition: InsertPosition | number) => string;
+  rowAdd: (InsertToPosition: InsertToPosition | number) => string;
   rowDelete: (ids: string[]) => void;
   propertyGetName: (propertyId: string) => string;
   propertyGetDefaultWidth: (propertyId: string) => number;
@@ -42,7 +42,7 @@ export interface DataSource {
     propertyId: string,
     data: Record<string, unknown>
   ) => void;
-  propertyAdd: (insertPosition: InsertPosition, type?: string) => string;
+  propertyAdd: (InsertToPosition: InsertToPosition, type?: string) => string;
   propertyDelete: (id: string) => void;
   propertyDuplicate: (columnId: string) => string;
 
@@ -65,7 +65,7 @@ export interface DataSource {
 
   detailSlots: DetailSlots;
 
-  rowMove(rowId: string, position: InsertPosition): void;
+  rowMove(rowId: string, position: InsertToPosition): void;
 }
 
 export abstract class BaseDataSource implements DataSource {
@@ -95,7 +95,7 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract properties: string[];
 
-  public abstract propertyAdd(insertPosition: InsertPosition): string;
+  public abstract propertyAdd(InsertToPosition: InsertToPosition): string;
 
   public abstract propertyChangeData(
     propertyId: string,
@@ -136,7 +136,7 @@ export abstract class BaseDataSource implements DataSource {
 
   public abstract propertyGetType(propertyId: string): string;
 
-  public abstract rowAdd(insertPosition: InsertPosition | number): string;
+  public abstract rowAdd(InsertToPosition: InsertToPosition | number): string;
 
   public abstract rowDelete(ids: string[]): void;
 
@@ -157,7 +157,7 @@ export abstract class BaseDataSource implements DataSource {
     return {};
   }
 
-  public abstract rowMove(rowId: string, position: InsertPosition): void;
+  public abstract rowMove(rowId: string, position: InsertToPosition): void;
 }
 
 export type DatabaseBlockDatasourceConfig = {

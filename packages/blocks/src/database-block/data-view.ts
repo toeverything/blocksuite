@@ -12,7 +12,6 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataSource } from '../__internal__/datasource/base.js';
 import type {
   DataViewSelection,
   DataViewSelectionState,
@@ -27,6 +26,7 @@ import type {
 } from './common/data-view.js';
 import { viewRendererManager } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
+import type { DataSource } from './common/datasource/base.js';
 import type { SingleViewSource, ViewSource } from './common/view-source.js';
 import { DataViewKanbanManager } from './kanban/kanban-view-manager.js';
 import { DataViewTableManager } from './table/table-view-manager.js';
