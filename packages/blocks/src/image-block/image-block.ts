@@ -8,7 +8,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
@@ -160,7 +160,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   private _registerDragHandleOption = () => {
     this._disposables.add(
-      DragHandleWidget.registerOption({
+      AffineDragHandleWidget.registerOption({
         flavour: ImageBlockSchema.model.flavour,
         onDragStart: (state, startDragging) => {
           // Check if start dragging from the image block

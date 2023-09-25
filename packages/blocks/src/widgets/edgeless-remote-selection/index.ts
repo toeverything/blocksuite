@@ -15,11 +15,11 @@ import {
 } from '../../page-block/edgeless/utils/query.js';
 import { remoteColorManager } from '../../page-block/remote-color-manager/index.js';
 
-export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG =
+export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';
 
-@customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG)
-export class EdgelessRemoteSelectionWidget extends WidgetElement {
+@customElement(AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET)
+export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlockComponent> {
   static override styles = css`
     :host {
       pointer-events: none;
@@ -81,7 +81,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
   `;
 
   get edgeless() {
-    return this.pageElement as EdgelessPageBlockComponent;
+    return this.blockElement;
   }
 
   @state()
@@ -258,6 +258,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG]: EdgelessRemoteSelectionWidget;
+    [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET]: EdgelessRemoteSelectionWidget;
   }
 }

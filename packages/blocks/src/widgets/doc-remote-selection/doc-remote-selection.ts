@@ -14,9 +14,6 @@ import { remoteColorManager } from '../../page-block/remote-color-manager/index.
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
-export const AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG =
-  'affine-doc-remote-selection-widget';
-
 export interface SelectionRect {
   width: number;
   height: number;
@@ -24,7 +21,10 @@ export interface SelectionRect {
   left: number;
 }
 
-@customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG)
+export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
+  'affine-doc-remote-selection-widget';
+
+@customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
 export class AffineDocRemoteSelectionWidget extends WidgetElement {
   private _remoteSelections: Array<{
     id: number;
@@ -91,7 +91,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   private _getSelectionRect(selections: BaseSelection[]): SelectionRect[] {
-    if (!isPageComponent(this.pageElement)) {
+    if (!isPageComponent(this.blockElement)) {
       throw new Error('remote selection widget must be used in page component');
     }
 
@@ -158,7 +158,7 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
   }
 
   private _getCursorRect(selections: BaseSelection[]): SelectionRect | null {
-    if (!isPageComponent(this.pageElement)) {
+    if (!isPageComponent(this.blockElement)) {
       throw new Error('remote selection widget must be used in page component');
     }
 
@@ -312,6 +312,6 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: AffineDocRemoteSelectionWidget;
+    [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: AffineDocRemoteSelectionWidget;
   }
 }

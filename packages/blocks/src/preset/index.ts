@@ -22,9 +22,14 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
-import { AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/doc-remote-selection/doc-remote-selection.js';
-import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG } from '../widgets/edgeless-remote-selection/index.js';
-import { AFFINE_FORMAT_BAR_WIDGET_TAG } from '../widgets/format-bar/format-bar.js';
+import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../widgets/doc-dragging-area/index.js';
+import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
+import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/index.js';
+import { AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET } from '../widgets/edgeless-remote-selection/index.js';
+import { AFFINE_FORMAT_BAR_WIDGET } from '../widgets/format-bar/format-bar.js';
+import { AFFINE_LINKED_PAGE_WIDGET } from '../widgets/linked-page/index.js';
+import { AFFINE_MODAL_WIDGET } from '../widgets/modal-widget/index.js';
+import { AFFINE_SLASH_MENU_WIDGET } from '../widgets/slash-menu/index.js';
 
 const pageBlockSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -32,16 +37,24 @@ const pageBlockSpec: BlockSpec<DocPageBlockWidgetName> = {
   view: {
     component: literal`affine-doc-page`,
     widgets: {
-      modal: literal`affine-modal-widget`,
-      slashMenu: literal`affine-slash-menu-widget`,
-      linkedPage: literal`affine-linked-page-widget`,
-      draggingArea: literal`affine-doc-dragging-area-widget`,
-      dragHandle: literal`affine-drag-handle-widget`,
-      [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_FORMAT_BAR_WIDGET_TAG
+      [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}}`,
+      [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
+        AFFINE_SLASH_MENU_WIDGET
       )}`,
-      [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG
+      [AFFINE_LINKED_PAGE_WIDGET]: literal`${unsafeStatic(
+        AFFINE_LINKED_PAGE_WIDGET
+      )}`,
+      [AFFINE_DOC_DRAGGING_AREA_WIDGET]: literal`${unsafeStatic(
+        AFFINE_DOC_DRAGGING_AREA_WIDGET
+      )}`,
+      [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
+        AFFINE_DRAG_HANDLE_WIDGET
+      )}`,
+      [AFFINE_FORMAT_BAR_WIDGET]: literal`${unsafeStatic(
+        AFFINE_FORMAT_BAR_WIDGET
+      )}`,
+      [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
+        AFFINE_DOC_REMOTE_SELECTION_WIDGET
       )}`,
     },
   },
@@ -53,18 +66,24 @@ const edgelessBlockSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   view: {
     component: literal`affine-edgeless-page`,
     widgets: {
-      modal: literal`affine-modal-widget`,
-      slashMenu: literal`affine-slash-menu-widget`,
-      linkedPage: literal`affine-linked-page-widget`,
-      dragHandle: literal`affine-drag-handle-widget`,
-      [AFFINE_FORMAT_BAR_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_FORMAT_BAR_WIDGET_TAG
+      [AFFINE_MODAL_WIDGET]: literal`${unsafeStatic(AFFINE_MODAL_WIDGET)}}`,
+      [AFFINE_SLASH_MENU_WIDGET]: literal`${unsafeStatic(
+        AFFINE_SLASH_MENU_WIDGET
       )}`,
-      [AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_DOC_REMOTE_SELECTION_WIDGET_TAG
+      [AFFINE_LINKED_PAGE_WIDGET]: literal`${unsafeStatic(
+        AFFINE_LINKED_PAGE_WIDGET
       )}`,
-      [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG]: literal`${unsafeStatic(
-        AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET_TAG
+      [AFFINE_DRAG_HANDLE_WIDGET]: literal`${unsafeStatic(
+        AFFINE_DRAG_HANDLE_WIDGET
+      )}`,
+      [AFFINE_FORMAT_BAR_WIDGET]: literal`${unsafeStatic(
+        AFFINE_FORMAT_BAR_WIDGET
+      )}`,
+      [AFFINE_DOC_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
+        AFFINE_DOC_REMOTE_SELECTION_WIDGET
+      )}`,
+      [AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET]: literal`${unsafeStatic(
+        AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET
       )}`,
     },
   },

@@ -74,8 +74,10 @@ function showSlashMenu({
   return slashMenu;
 }
 
-@customElement('affine-slash-menu-widget')
-export class SlashMenuWidget extends WidgetElement {
+export const AFFINE_SLASH_MENU_WIDGET = 'affine-slash-menu-widget';
+
+@customElement(AFFINE_SLASH_MENU_WIDGET)
+export class AffineSlashMenuWidget extends WidgetElement {
   static DEFAULT_OPTIONS: SlashMenuOptions = {
     isTriggerKey: (event: KeyboardEvent): false | string => {
       const triggerKeys = [
@@ -102,7 +104,7 @@ export class SlashMenuWidget extends WidgetElement {
     menus: menuGroups,
   };
 
-  options = SlashMenuWidget.DEFAULT_OPTIONS;
+  options = AffineSlashMenuWidget.DEFAULT_OPTIONS;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -129,7 +131,7 @@ export class SlashMenuWidget extends WidgetElement {
     const vEditor = getVirgoByModel(model);
     if (!vEditor) return;
     vEditor.slots.rangeUpdated.once(() => {
-      const pageElement = this.pageElement;
+      const pageElement = this.blockElement;
       if (!isPageComponent(pageElement)) {
         throw new Error('SlashMenuWidget should be used in PageBlock');
       }
@@ -147,4 +149,10 @@ export class SlashMenuWidget extends WidgetElement {
       });
     });
   };
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [AFFINE_SLASH_MENU_WIDGET]: AffineSlashMenuWidget;
+  }
 }

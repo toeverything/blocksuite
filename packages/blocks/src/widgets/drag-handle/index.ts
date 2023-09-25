@@ -25,7 +25,7 @@ import {
   Rect,
 } from '../../__internal__/index.js';
 import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
@@ -57,14 +57,18 @@ import {
   updateDragHandleClassName,
 } from './utils.js';
 
-@customElement('affine-drag-handle-widget')
-export class DragHandleWidget extends WidgetElement {
+export const AFFINE_DRAG_HANDLE_WIDGET = 'affine-drag-handle-widget';
+
+@customElement(AFFINE_DRAG_HANDLE_WIDGET)
+export class AffineDragHandleWidget extends WidgetElement<
+  EdgelessPageBlockComponent | DocPageBlockComponent
+> {
   static override styles = styles;
 
   static staticOptionRunner = new DragHandleOptionsRunner();
 
   static registerOption(option: DragHandleOption) {
-    return DragHandleWidget.staticOptionRunner.register(option);
+    return AffineDragHandleWidget.staticOptionRunner.register(option);
   }
 
   @query('.affine-drag-handle-container')
@@ -105,11 +109,11 @@ export class DragHandleWidget extends WidgetElement {
   private _anchorModelDisposables: DisposableGroup | null = null;
 
   get optionRunner() {
-    return DragHandleWidget.staticOptionRunner;
+    return AffineDragHandleWidget.staticOptionRunner;
   }
 
   get pageBlockElement() {
-    const pageElement = this.pageElement;
+    const pageElement = this.blockElement;
     const pageBlock = isPageMode(this.page)
       ? (pageElement as DocPageBlockComponent)
       : (pageElement as EdgelessPageBlockComponent);
@@ -227,7 +231,7 @@ export class DragHandleWidget extends WidgetElement {
 
   createDropIndicator = () => {
     if (!this.dropIndicator) this.dropIndicator = new DropIndicator();
-    this.pageElement.append(this.dropIndicator);
+    this.blockElement.append(this.dropIndicator);
   };
 
   updateDropIndicator = (indicator: DropResult | null) => {
@@ -387,14 +391,14 @@ export class DragHandleWidget extends WidgetElement {
   }
 
   private get _viewportOffset() {
-    if (!isPageMode(this.page)) {
-      const pageBlock = this.pageElement as EdgelessPageBlockComponent;
+    if (this.blockElement instanceof EdgelessPageBlockComponent) {
+      const pageBlock = this.blockElement;
       return {
         left: -pageBlock.surface.viewport.left,
         top: -pageBlock.surface.viewport.top,
       };
     } else {
-      const pageBlock = this.pageElement as DocPageBlockComponent;
+      const pageBlock = this.blockElement;
       return {
         left: pageBlock.viewport.scrollLeft - pageBlock.viewport.left,
         top: pageBlock.viewport.scrollTop - pageBlock.viewport.top,
@@ -1182,6 +1186,6 @@ export class DragHandleWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-drag-handle-widget': DragHandleWidget;
+    [AFFINE_DRAG_HANDLE_WIDGET]: AffineDragHandleWidget;
   }
 }
