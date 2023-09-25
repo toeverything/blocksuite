@@ -20,6 +20,7 @@ export class LangList extends LitElement {
     return css`
       :host {
         max-height: 100%;
+        width: 230px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -37,13 +38,12 @@ export class LangList extends LitElement {
         flex-direction: column;
         box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
-        padding: 12px 8px;
+        padding: 8px;
       }
 
       .lang-list-button-container {
         flex: 1;
-        overflow: scroll;
-        height: 424px;
+        overflow-y: scroll;
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
