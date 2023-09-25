@@ -1,7 +1,12 @@
+export const dataViewCssVariable = () => {
+  return `
+  --data-view-cell-text-size:14px;
+  --data-view-cell-text-line-height:22px;
+`;
+};
 export const dataViewCommonStyle = (selector: string) => `
   ${selector}{
-      --data-view-cell-text-size:14px;
-      --data-view-cell-text-line-height:22px;
+      ${dataViewCssVariable()}
   }
   .dv-pd-2{
     padding:2px;

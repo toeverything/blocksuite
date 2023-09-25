@@ -1,4 +1,5 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -6,6 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
 import { createPopup } from '../../components/menu/index.js';
+import { ArrowLeftBigIcon } from '../../icons/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
@@ -50,7 +52,7 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       border-radius: 8px;
       box-shadow: var(--affine-shadow-2);
       padding: 8px;
-      min-width: 250px;
+      min-width: 300px;
     }
 
     .properties-group-header {
@@ -67,6 +69,9 @@ export class DataViewPropertiesSettingView extends WithDisposable(
       font-size: 12px;
       line-height: 20px;
       color: var(--affine-text-secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .properties-group-op {
@@ -156,6 +161,8 @@ export class DataViewPropertiesSettingView extends WithDisposable(
   `;
   @property({ attribute: false })
   view!: DataViewManager;
+  @property({ attribute: false })
+  onBack?: () => void;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -235,7 +242,16 @@ export class DataViewPropertiesSettingView extends WithDisposable(
     const clickChangeAll = () => this.clickChangeAll(isAllShowed);
     return html`
       <div class="properties-group-header">
-        <div class="properties-group-title">PROPERTIES</div>
+        <div class="properties-group-title dv-icon-20">
+          <div
+            @click=${this.onBack}
+            style="display:flex;"
+            class="dv-hover dv-round-4 dv-pd-2"
+          >
+            ${ArrowLeftBigIcon}
+          </div>
+          PROPERTIES
+        </div>
         <div class="properties-group-op" @click="${clickChangeAll}">
           ${isAllShowed ? 'Hide All' : 'Show All'}
         </div>
@@ -254,13 +270,18 @@ declare global {
 }
 
 export const popPropertiesSetting = (
-  target: HTMLElement,
+  target: ReferenceElement,
   props: {
     view: DataViewManager;
     onClose?: () => void;
+    onBack?: () => void;
   }
 ) => {
   const view = new DataViewPropertiesSettingView();
   view.view = props.view;
-  createPopup(target, view, { onClose: props.onClose });
+  view.onBack = () => {
+    close();
+    props.onBack?.();
+  };
+  const close = createPopup(target, view, { onClose: props.onClose });
 };
