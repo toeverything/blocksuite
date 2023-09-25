@@ -24,7 +24,7 @@ import { DragIndicator } from '../components/index.js';
 import { popMenu } from '../components/menu/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
 import { CopyIcon, DeleteIcon, MoreHorizontalIcon } from '../icons/index.js';
-import { AffineDragHandleWidget } from '../index.js';
+import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import {
   captureEventTarget,
   getDropResult,
