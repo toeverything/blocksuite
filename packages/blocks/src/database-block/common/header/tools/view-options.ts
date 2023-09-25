@@ -149,7 +149,7 @@ export const popViewOptions = (
             if (!groupBy) {
               popSelectGroupByProperty(target, view);
             } else {
-              popGroupSetting(target, view, groupBy.columnId);
+              popGroupSetting(target, view, reopen);
             }
           },
         },

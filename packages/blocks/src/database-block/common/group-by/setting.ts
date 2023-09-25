@@ -14,7 +14,6 @@ import { ArrowRightSmallIcon, DeleteIcon } from '../../../icons/index.js';
 import { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { DataViewTableManager } from '../../table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';
-import { popViewOptions } from '../header/tools/view-options.js';
 import type { GroupRenderProps } from './matcher.js';
 import { groupByMatcher } from './matcher.js';
 
@@ -205,9 +204,16 @@ export const popSelectGroupByProperty = (
 export const popGroupSetting = (
   target: ReferenceElement,
   view: DataViewTableManager | DataViewKanbanManager,
-  columnId: string
+  onBack: () => void
 ) => {
-  const type = view.columnGetType(columnId);
+  const groupBy = view.view.groupBy;
+  if (groupBy == null) {
+    return;
+  }
+  const reopen = () => {
+    popGroupSetting(target, view, onBack);
+  };
+  const type = view.columnGetType(groupBy.columnId);
   const icon = view.getIcon(type);
   const menuHandler = popMenu(target, {
     options: {
@@ -216,7 +222,7 @@ export const popGroupSetting = (
       },
       items: [
         menuTitleItem('GROUP', () => {
-          popViewOptions(target, view);
+          onBack();
           menuHandler.close();
         }),
         {
@@ -231,15 +237,12 @@ export const popGroupSetting = (
                   style="display:flex;align-items:center;gap: 4px;font-size: 12px;line-height: 20px;color: var(--affine-text-secondary-color);margin-right: 4px;margin-left: 8px;"
                   class="dv-icon-16"
                 >
-                  ${renderUniLit(icon, {})} ${view.columnGetName(columnId)}
+                  ${renderUniLit(icon, {})}
+                  ${view.columnGetName(groupBy.columnId)}
                 </div>
                 ${ArrowRightSmallIcon}
               `,
-              options: selectGroupByProperty(view, () => {
-                if (view.view.groupBy) {
-                  popGroupSetting(target, view, view.view.groupBy.columnId);
-                }
-              }),
+              options: selectGroupByProperty(view, reopen),
             },
           ],
         },
@@ -251,7 +254,7 @@ export const popGroupSetting = (
               type: 'custom',
               render: html` <data-view-group-setting
                 .view="${view}"
-                .columnId="${columnId}"
+                .columnId="${groupBy.columnId}"
               ></data-view-group-setting>`,
             },
           ],
