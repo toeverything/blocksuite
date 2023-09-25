@@ -259,5 +259,8 @@ export const scrollbarStyle = (container: string) => {
       border-radius: 2px;
       background-color: #b1b1b1;
     }
+    ${unsafeCSS(container)}::-webkit-scrollbar-corner {
+      display: none;
+    }
   `;
 };

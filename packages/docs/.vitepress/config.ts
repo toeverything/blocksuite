@@ -54,20 +54,12 @@ export default defineConfig({
             link: '/unidirectional-data-flow',
           },
           {
-            text: 'The Local-First Paradigm',
-            link: '/the-local-first-paradigm',
-          },
-          {
             text: 'Editor UI Architecture',
             link: '/editor-ui-architecture',
             items: [
               {
                 text: 'Editors as Hosts',
                 link: '/editors-as-hosts',
-              },
-              {
-                text: 'Rich Text Orchestration',
-                link: '/rich-text-orchestration',
               },
               {
                 text: 'Framework Integration',
