@@ -15,7 +15,7 @@ import {
 } from '../../icons/index.js';
 import { commonActiveWhen, handleCommonStyle } from './utils.js';
 
-export interface formatConfig {
+export interface FormatConfig {
   id: string;
   name: string;
   icon: TemplateResult<1>;
@@ -24,7 +24,7 @@ export interface formatConfig {
   action: (root: BlockSuiteRoot) => void;
 }
 
-export const formatConfig: formatConfig[] = [
+export const formatConfig: FormatConfig[] = [
   {
     id: 'bold',
     name: 'Bold',
