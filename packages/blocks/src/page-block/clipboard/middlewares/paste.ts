@@ -5,17 +5,15 @@ import type {
 } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import type {
+  BaseBlockModel,
   BlockSnapshot,
   DeltaOperation,
   JobMiddleware,
   SliceSnapshot,
+  Text,
 } from '@blocksuite/store';
-import type { Text } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { JobSlots } from '@blocksuite/store';
 
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 
@@ -206,28 +204,9 @@ class PasteTr {
   }
 }
 
-const replaceId = (slots: JobSlots, std: BlockSuiteRoot['std']) => {
-  const idMap = new Map<string, string>();
-  slots.beforeImport.on(payload => {
-    if (payload.type === 'block') {
-      const snapshot = payload.snapshot;
-      const original = snapshot.id;
-      let newId: string;
-      if (idMap.has(original)) {
-        newId = idMap.get(original)!;
-      } else {
-        newId = std.page.workspace.idGenerator('block');
-        idMap.set(original, newId);
-      }
-      snapshot.id = newId;
-    }
-  });
-};
-
 export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
   return ({ slots }) => {
     let tr: PasteTr | undefined;
-    replaceId(slots, std);
     slots.beforeImport.on(payload => {
       if (payload.type === 'slice') {
         const text = std.selection.find('text');

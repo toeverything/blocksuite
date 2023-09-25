@@ -2,19 +2,13 @@ import type { BlockSchemaType } from '@blocksuite/store';
 
 import type { BlockServiceConstructor } from '../service/index.js';
 
-export interface BlockView<
-  ComponentType = unknown,
-  WidgetNames extends string = string,
-> {
-  component: ComponentType;
-  widgets?: Record<WidgetNames, ComponentType>;
+export interface BlockView<WidgetNames extends string = string> {
+  component: BlockSuite.Component;
+  widgets?: Record<WidgetNames, BlockSuite.Component>;
 }
 
-export interface BlockSpec<
-  ComponentType = unknown,
-  WidgetNames extends string = string,
-> {
+export interface BlockSpec<WidgetNames extends string = string> {
   schema: BlockSchemaType;
   service?: BlockServiceConstructor;
-  view: BlockView<ComponentType, WidgetNames>;
+  view: BlockView<WidgetNames>;
 }

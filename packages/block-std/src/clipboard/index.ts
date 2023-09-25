@@ -8,8 +8,6 @@ import type {
 import { Job } from '@blocksuite/store';
 import * as lz from 'lz-string';
 
-import type { BlockStdProvider } from '../provider/index.js';
-
 type AdapterMap = Map<
   string,
   {
@@ -22,7 +20,7 @@ export class Clipboard {
   private _jobMiddlewares: JobMiddleware[] = [];
   private _adapterMap: AdapterMap = new Map();
 
-  constructor(public std: BlockStdProvider) {}
+  constructor(public std: BlockSuite.Std) {}
 
   use = (middleware: JobMiddleware) => {
     this._jobMiddlewares.push(middleware);

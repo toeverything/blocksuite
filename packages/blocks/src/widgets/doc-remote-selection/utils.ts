@@ -1,7 +1,7 @@
 import type { DirectiveResult } from 'lit/directive.js';
 import { styleMap, type StyleMapDirective } from 'lit/directives/style-map.js';
 
-import type { SelectionRect } from './remote-selection.js';
+import type { SelectionRect } from './doc-remote-selection.js';
 
 export function selectionStyle(
   rect: SelectionRect,

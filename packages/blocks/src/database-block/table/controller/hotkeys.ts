@@ -18,17 +18,23 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection) {
             return;
           }
-          const { focus, rowsSelection, columnsSelection, isEditing } =
-            selection;
+          const {
+            focus,
+            rowsSelection,
+            columnsSelection,
+            isEditing,
+            groupKey,
+          } = selection;
           if (rowsSelection && !columnsSelection) {
-            const rows = this.host.view.rows.filter(
-              (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
-            );
+            const rows = Array.from(
+              this.selectionController.rows(selection.groupKey)
+            )
+              .filter(
+                (_, i) => i >= rowsSelection.start && i <= rowsSelection.end
+              )
+              .map(v => v.rowId);
+            this.selectionController.focusTo('up');
             this.host.view.rowDelete(rows);
-            this.selectionController.focusTo(
-              rowsSelection.start - 1,
-              selection.focus.columnIndex
-            );
           } else if (focus && !isEditing) {
             const data = this.host.view;
             if (rowsSelection && columnsSelection) {
@@ -37,6 +43,7 @@ export class TableHotkeysController implements ReactiveController {
                 const { start, end } = columnsSelection;
                 for (let j = start; j <= end; j++) {
                   const container = this.selectionController.getCellContainer(
+                    groupKey,
                     i,
                     j
                   );
@@ -51,6 +58,7 @@ export class TableHotkeysController implements ReactiveController {
             } else {
               // single cell
               const container = this.selectionController.getCellContainer(
+                groupKey,
                 focus.rowIndex,
                 focus.columnIndex
               );
@@ -114,11 +122,15 @@ export class TableHotkeysController implements ReactiveController {
             return false;
           }
           const cell = this.selectionController.getCellContainer(
+            selection.groupKey,
             selection.focus.rowIndex,
             selection.focus.columnIndex
           );
           if (cell) {
-            this.selectionController.insertRowAfter(cell.rowId);
+            this.selectionController.insertRowAfter(
+              selection.groupKey,
+              cell.rowId
+            );
           }
           return true;
         },
@@ -127,24 +139,8 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-
-          const event = ctx.get('keyboardState').raw;
-          event.preventDefault();
-          const focuedColumnIndex = selection.focus.columnIndex;
-          const focuedRowIndex = selection.focus.rowIndex;
-          const columnLength = this.host.view.columnManagerList.length;
-          const rowLength = this.host.view.rows.length;
-          if (
-            focuedColumnIndex === columnLength - 1 &&
-            focuedRowIndex === rowLength - 1
-          )
-            return true;
-
-          const isBoundary = focuedColumnIndex === columnLength - 1;
-          const columnIndex = isBoundary ? 0 : focuedColumnIndex + 1;
-          const rowIndex = isBoundary ? focuedRowIndex + 1 : focuedRowIndex;
-
-          this.selectionController.focusTo(rowIndex, columnIndex);
+          ctx.get('keyboardState').raw.preventDefault();
+          this.selectionController.focusTo('right');
           return true;
         },
         'Shift-Tab': ctx => {
@@ -152,21 +148,8 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-
-          const event = ctx.get('keyboardState').raw;
-          event.preventDefault();
-          const columnLength = this.host.view.columnManagerList.length;
-          const focuedColumnIndex = selection.focus.columnIndex;
-          const focuedRowIndex = selection.focus.rowIndex;
-          if (focuedColumnIndex === 0 && focuedRowIndex === 0) return true;
-
-          const isBoundary = focuedColumnIndex === 0;
-          const columnIndex = isBoundary
-            ? columnLength - 1
-            : focuedColumnIndex - 1;
-          const rowIndex = isBoundary ? focuedRowIndex - 1 : focuedRowIndex;
-
-          this.selectionController.focusTo(rowIndex, columnIndex);
+          ctx.get('keyboardState').raw.preventDefault();
+          this.selectionController.focusTo('left');
           return true;
         },
         ArrowLeft: context => {
@@ -174,12 +157,7 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          const length = this.host.view.columnManagerList.length;
-          const column = selection.focus.columnIndex - 1;
-          this.selectionController.focusTo(
-            selection.focus.rowIndex + (column < 0 ? -1 : 0),
-            column < 0 ? length - 1 : column
-          );
+          this.selectionController.focusTo('left');
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -188,12 +166,7 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          const length = this.host.view.columnManagerList.length;
-          const column = selection.focus.columnIndex + 1;
-          this.selectionController.focusTo(
-            selection.focus.rowIndex + (column >= length ? 1 : 0),
-            column % length
-          );
+          this.selectionController.focusTo('right');
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -202,10 +175,7 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          this.selectionController.focusTo(
-            selection.focus.rowIndex - 1,
-            selection.focus.columnIndex
-          );
+          this.selectionController.focusTo('up');
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -214,10 +184,7 @@ export class TableHotkeysController implements ReactiveController {
           if (!selection || selection.isEditing) {
             return false;
           }
-          this.selectionController.focusTo(
-            selection.focus.rowIndex + 1,
-            selection.focus.columnIndex
-          );
+          this.selectionController.focusTo('down');
           context.get('keyboardState').raw.preventDefault();
           return true;
         },
@@ -254,6 +221,7 @@ export class TableHotkeysController implements ReactiveController {
             return;
           }
           const cell = this.selectionController.getCellContainer(
+            selection.groupKey,
             selection.focus.rowIndex,
             selection.focus.columnIndex
           );

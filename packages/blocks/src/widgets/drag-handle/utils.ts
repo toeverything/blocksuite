@@ -21,7 +21,9 @@ import type { BlockComponentElement } from '../../index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import {
   DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT,
+  DRAG_HANDLE_OFFSET_LEFT,
   type DropResult,
+  LIST_DRAG_HANDLE_OFFSET_LEFT,
 } from './config.js';
 
 const heightMap: { [key: string]: number } = {
@@ -207,3 +209,23 @@ export const getDropResult = (
 
   return dropIndicator;
 };
+
+export function getDragHandleLeftPadding(blockElements: BlockElement[]) {
+  const hasToggleList = blockElements.some(
+    blockElement =>
+      matchFlavours(blockElement.model, ['affine:list']) &&
+      blockElement.model.children.length > 0
+  );
+  const offsetLeft = hasToggleList
+    ? LIST_DRAG_HANDLE_OFFSET_LEFT
+    : DRAG_HANDLE_OFFSET_LEFT;
+  return offsetLeft;
+}
+
+let previousEle: BlockElement[] = [];
+export function updateDragHandleClassName(blockElements: BlockElement[] = []) {
+  const className = 'with-drag-handle';
+  previousEle.forEach(blockElement => blockElement.classList.remove(className));
+  previousEle = blockElements;
+  blockElements.forEach(blockElement => blockElement.classList.add(className));
+}

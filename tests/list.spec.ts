@@ -1,8 +1,11 @@
+import { expect, type Locator, type Page } from '@playwright/test';
+
 import {
   enterPlaygroundRoom,
   enterPlaygroundWithList,
   focusRichText,
   initEmptyParagraphState,
+  initThreeLists,
   pressArrowUp,
   pressBackspace,
   pressBackspaceWithShortKey,
@@ -578,4 +581,97 @@ test('add number prefix to a todo item should not forcefully change it into numb
   await focusRichText(page, 0, { clickPosition: { x: 0, y: 0 } });
   await type(page, '1. ');
   await assertListPrefix(page, ['']);
+});
+
+test.describe('toggle list', () => {
+  const getToggleIcon = (page: Page) => page.locator('.toggle-icon');
+
+  async function isToggleIconVisible(toggleIcon: Locator) {
+    const connected = await toggleIcon.isVisible();
+    if (!connected) return false;
+    const element = await toggleIcon.elementHandle();
+    if (!element) return false;
+    const opacity = await element.evaluate(node => {
+      // https://stackoverflow.com/questions/11365296/how-do-i-get-the-opacity-of-an-element-using-javascript
+      return window.getComputedStyle(node).getPropertyValue('opacity');
+    });
+    if (!opacity || typeof opacity !== 'string') {
+      throw new Error('opacity is not a string');
+    }
+    const isVisible = opacity !== '0';
+    return isVisible;
+  }
+
+  async function assertToggleIconVisible(toggleIcon: Locator, expected = true) {
+    expect(await isToggleIconVisible(toggleIcon)).toBe(expected);
+  }
+
+  test('click toggle icon should collapsed list', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeLists(page);
+    const toggleIcon = getToggleIcon(page);
+    const prefixes = page.locator('.affine-list-block__prefix');
+    const parentPrefix = prefixes.nth(1);
+
+    await expect(prefixes).toHaveCount(3);
+    await parentPrefix.hover();
+    await assertToggleIconVisible(toggleIcon);
+
+    await toggleIcon.click();
+    await expect(prefixes).toHaveCount(2);
+
+    // Collapsed toggle icon should be show always
+    await page.mouse.move(0, 0);
+    await assertToggleIconVisible(toggleIcon);
+
+    await toggleIcon.click();
+    await expect(prefixes).toHaveCount(3);
+
+    await page.mouse.move(0, 0);
+    await waitNextFrame(page, 200);
+    await assertToggleIconVisible(toggleIcon, false);
+  });
+
+  test('indent item should expand toggle', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeLists(page);
+    await focusRichText(page, 2);
+    await pressEnter(page);
+    await pressEnter(page);
+    await type(page, '012');
+
+    const toggleIcon = getToggleIcon(page);
+    const prefixes = page.locator('.affine-list-block__prefix');
+
+    await toggleIcon.click();
+    await expect(prefixes).toHaveCount(3);
+
+    await focusRichText(page, 2);
+    await pressTab(page);
+    await waitNextFrame(page, 200);
+    await expect(prefixes).toHaveCount(4);
+  });
+
+  test('toggle icon should be show when hover', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeLists(page);
+    const toggleIcon = getToggleIcon(page);
+
+    const prefixes = page.locator('.affine-list-block__prefix');
+    const parentPrefix = prefixes.nth(1);
+    const childrenPrefix = prefixes.nth(2);
+
+    await assertToggleIconVisible(toggleIcon, false);
+    await parentPrefix.hover();
+    await assertToggleIconVisible(toggleIcon);
+
+    await page.mouse.move(0, 0);
+    await waitNextFrame(page, 200);
+    await assertToggleIconVisible(toggleIcon, false);
+    await childrenPrefix.hover();
+    await assertToggleIconVisible(toggleIcon);
+  });
 });

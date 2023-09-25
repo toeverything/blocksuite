@@ -70,15 +70,17 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    this._disposables.addFromEvent(this, 'click', e => {
+    this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       this.selection.selection = undefined;
     });
+    //FIXME: simulate as a widget
+    this.setAttribute('data-widget-id', 'affine-detail-widget');
   }
 
   @query('.add-property')

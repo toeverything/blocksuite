@@ -593,7 +593,8 @@ export async function zoomOutByKeyboard(page: Page) {
 
 export async function zoomResetByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+0`, { delay: 50 });
-  await waitNextFrame(page);
+  // Wait for animation
+  await waitNextFrame(page, 200);
 }
 
 export async function zoomInByKeyboard(page: Page) {

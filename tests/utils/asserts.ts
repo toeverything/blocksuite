@@ -13,7 +13,7 @@ import {
 
 import {
   BLOCK_ID_ATTR,
-  EDITOR_WIDTH,
+  NOTE_WIDTH,
 } from '../../packages/blocks/src/__internal__/consts.js';
 import type {
   CssVariableName,
@@ -83,6 +83,7 @@ export const defaultStore: SerializedStore = {
       'affine:note': 1,
       'affine:divider': 1,
       'affine:image': 1,
+      'affine:frame': 1,
       'affine:code': 1,
       'affine:surface': 5,
       'affine:bookmark': 1,
@@ -104,7 +105,7 @@ export const defaultStore: SerializedStore = {
           'sys:flavour': 'affine:note',
           'sys:id': '1',
           'sys:children': ['2'],
-          'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
+          'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
           'prop:background': '--affine-background-secondary-color',
           'prop:index': 'a0',
           'prop:hidden': false,
@@ -832,7 +833,7 @@ export async function assertEdgelessColorSameWithHexColor(
 
 export async function assertZoomLevel(page: Page, zoom: number) {
   const z = await getZoomLevel(page);
-  expect(z).toBe(zoom);
+  expect(z).toBe(Math.ceil(zoom));
 }
 
 export async function assertConnectorPath(

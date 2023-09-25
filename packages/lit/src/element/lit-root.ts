@@ -21,15 +21,13 @@ import type { BlockElement } from './block-element.js';
 import { ShadowlessElement } from './shadowless-element.js';
 import type { WidgetElement } from './widget-element.js';
 
-export type LitBlockSpec<WidgetNames extends string = string> = BlockSpec<
-  StaticValue,
-  WidgetNames
->;
-
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  blocks!: LitBlockSpec[];
+  blocks!: BlockSpec[];
+
+  @property({ attribute: false })
+  mode!: 'page' | 'edgeless';
 
   @property({ attribute: false })
   page!: Page;
@@ -42,7 +40,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   modelSubscribed = new Set<string>();
 
-  std!: BlockStdProvider<StaticValue, BlockElement | WidgetElement>;
+  std!: BlockSuite.Std;
 
   rangeManager: RangeManager | null = null;
 
@@ -54,7 +52,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     return this.std.selection;
   }
 
-  get view(): ViewStore<BlockElement | WidgetElement> {
+  get view(): ViewStore {
     return this.std.view;
   }
 
@@ -68,7 +66,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   override connectedCallback() {
     super.connectedCallback();
 
-    this.std = new BlockStdProvider<StaticValue, BlockElement | WidgetElement>({
+    this.std = new BlockStdProvider({
       root: this,
       workspace: this.page.workspace,
       page: this.page,
@@ -250,5 +248,16 @@ function getChildren(
 declare global {
   interface HTMLElementTagNameMap {
     'block-suite-root': BlockSuiteRoot;
+  }
+
+  namespace BlockSuite {
+    interface ComponentType {
+      lit: StaticValue;
+    }
+
+    interface NodeViewType {
+      block: BlockElement;
+      widget: WidgetElement;
+    }
   }
 }

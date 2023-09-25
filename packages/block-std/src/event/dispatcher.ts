@@ -1,6 +1,5 @@
 import { DisposableGroup } from '@blocksuite/global/utils';
 
-import type { BlockStdProvider } from '../provider/index.js';
 import { PathFinder } from '../utils/index.js';
 import type { UIEventHandler } from './base.js';
 import { UIEventState, UIEventStateContext } from './base.js';
@@ -78,7 +77,7 @@ export class UIEventDispatcher {
   private _rangeControl: RangeControl;
   private _clipboardControl: ClipboardControl;
 
-  constructor(public std: BlockStdProvider) {
+  constructor(public std: BlockSuite.Std) {
     this._pointerControl = new PointerControl(this);
     this._keyboardControl = new KeyboardControl(this);
     this._rangeControl = new RangeControl(this);

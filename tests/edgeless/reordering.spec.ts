@@ -5,6 +5,7 @@ import {
   initThreeOverlapNotes,
   switchEditorMode,
   triggerComponentToolbarAction,
+  zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
   enterPlaygroundRoom,
@@ -122,6 +123,7 @@ test.describe('reordering notes', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
     await initThreeOverlapNotes(page);
     await waitNextFrame(page);
     await page.mouse.click(0, 0);

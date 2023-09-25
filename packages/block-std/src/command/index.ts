@@ -1,7 +1,5 @@
-import type { BlockStdProvider } from '../provider/index.js';
-
 export interface InitCommandCtx {
-  std: BlockStdProvider;
+  std: BlockSuite.Std;
 }
 
 export type CommandKeyToData<K extends BlockSuite.CommandDataName> = Pick<
@@ -15,8 +13,8 @@ export type Command<
   InData extends object = {},
 > = (
   ctx: CommandKeyToData<In> & InitCommandCtx & InData,
-  next: (ctx?: CommandKeyToData<Out>) => Promise<void>
-) => void | Promise<void>;
+  next: (ctx?: CommandKeyToData<Out>) => void
+) => void;
 type Omit1<A, B> = [keyof Omit<A, keyof B>] extends [never]
   ? void
   : Omit<A, keyof B>;
@@ -30,12 +28,14 @@ type OutDataOfCommand<C> = C extends Command<any, infer K, any>
   : never;
 // eslint-disable-next-line @typescript-eslint/ban-types
 type CommonMethods<In extends object = {}> = {
-  run(): Promise<void>;
+  run(): boolean;
   with<T extends Partial<BlockSuite.CommandData>>(value: T): Chain<In & T>;
   inline: <InlineOut extends BlockSuite.CommandDataName = never>(
     command: Command<Extract<keyof In, BlockSuite.CommandDataName>, InlineOut>
   ) => Chain<In & CommandKeyToData<InlineOut>>;
-  try: (fn: (chain: Chain<In>) => Chain<In>[]) => Chain<In>;
+  try: <InlineOut extends BlockSuite.CommandDataName = never>(
+    fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
+  ) => Chain<In & CommandKeyToData<InlineOut>>;
 };
 const cmdSymbol = Symbol('cmds');
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -48,7 +48,7 @@ type Chain<In extends object = {}> = CommonMethods<In> & {
 export class CommandManager {
   private _commands = new Map<string, Command>();
 
-  constructor(public std: BlockStdProvider) {}
+  constructor(public std: BlockSuite.Std) {}
 
   private _getCommandCtx = (): InitCommandCtx => {
     return {
@@ -78,10 +78,18 @@ export class CommandManager {
           [cmd, ...rest]: Command[]
         ) => {
           if (cmd) {
-            await cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
+            cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
         };
-        return runCmds(ctx as BlockSuite.CommandData, cmds);
+        let success = false;
+        runCmds(ctx as BlockSuite.CommandData, [
+          ...cmds,
+          async (_, next) => {
+            success = true;
+            await next();
+          },
+        ]);
+        return success;
       },
       with: value => {
         return this.createChain(methods, [
@@ -97,16 +105,16 @@ export class CommandManager {
         const chains = fn(this.createChain(methods, cmds)).map(chain =>
           chain.inline(async (_, next) => {
             success = true;
-            await next();
+            next();
           })
         );
         return this.createChain(methods, [
           ...cmds,
           async (_, next) => {
             for (const chain of chains) {
-              await chain.run();
+              chain.run();
               if (success) {
-                await next();
+                next();
                 break;
               }
             }

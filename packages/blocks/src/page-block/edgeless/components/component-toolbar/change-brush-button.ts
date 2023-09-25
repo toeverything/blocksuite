@@ -11,7 +11,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { LineWidth } from '../../../../__internal__/utils/types.js';
-import type { BrushElement } from '../../../../surface-block/index.js';
+import type {
+  BrushElement,
+  PhasorElementType,
+} from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
@@ -119,7 +122,9 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.lineWidth !== size) {
-        this.surface.updateElement<'brush'>(element.id, { lineWidth: size });
+        this.surface.updateElement<PhasorElementType.BRUSH>(element.id, {
+          lineWidth: size,
+        });
       }
     });
   }
@@ -128,7 +133,9 @@ export class EdgelessChangeBrushButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.color !== color) {
-        this.surface.updateElement<'brush'>(element.id, { color });
+        this.surface.updateElement<PhasorElementType.BRUSH>(element.id, {
+          color,
+        });
       }
     });
     if (color && this._selectedColor !== color) {

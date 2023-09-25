@@ -290,7 +290,7 @@ test('should support drag to change column width', async ({ page }) => {
     }
   );
 
-  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance + 1);
+  await assertColumnWidth(titleColumn, titleColumnWidth + dragDistance);
   await assertColumnWidth(normalColumn, normalColumnWidth);
 
   await undoByClick(page);
@@ -347,7 +347,10 @@ test('should support drag and drop to move columns', async ({ page }) => {
       steps: 50,
       beforeMouseUp: async () => {
         await waitNextFrame(page);
-        const indicator = page.locator('.database-move-column-drop-preview');
+        const indicator = page
+          .locator('.vertical-indicator-container')
+          .locator('.vertical-indicator-group')
+          .first();
         await expect(indicator).toBeVisible();
 
         const { box } = await getDatabaseHeaderColumn(page, 2);

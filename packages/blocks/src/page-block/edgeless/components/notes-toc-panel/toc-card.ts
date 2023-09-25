@@ -158,7 +158,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
       justify-content: center;
       align-items: center;
       border-radius: 4px;
-      background: var(--light-affine-blue-affine-blue-600, #1e96eb);
+      background: var(--affine-blue-600);
       color: var(--affine-white);
     }
 

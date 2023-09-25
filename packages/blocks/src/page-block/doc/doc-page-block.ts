@@ -65,6 +65,14 @@ export class DocPageBlockComponent extends BlockElement<
       padding-right: var(--affine-editor-side-padding, ${PAGE_BLOCK_CHILD_PADDING}px);
     }
 
+    /* Extra small devices (phones, 640px and down) */
+    @media screen and (max-width: 640px) {
+      .affine-doc-page-block-container {
+        padding-left: ${PAGE_BLOCK_CHILD_PADDING}px;
+        padding-right: ${PAGE_BLOCK_CHILD_PADDING}px;
+      }
+    }
+
     .affine-doc-page-block-title {
       width: 100%;
       font-size: 40px;
@@ -353,14 +361,6 @@ export class DocPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.root.rangeManager?.setConfig({
-      shouldSyncSelection: range => {
-        const insideModal = Boolean(
-          range?.startContainer.parentElement?.closest('side-layout-modal')
-        );
-        return !insideModal;
-      },
-    });
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);

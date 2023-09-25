@@ -5,7 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { matchFlavours } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { isTopLevelBlock } from '../../utils/query.js';
+import { isNoteBlock } from '../../utils/query.js';
 
 @customElement('edgeless-hover-rect')
 export class EdgelessHoverRect extends WithDisposable(LitElement) {
@@ -53,7 +53,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
     if (!hoverState || edgeless.selectionManager.state.editing) return nothing;
     const rect = hoverState.rect;
     const isNote =
-      isTopLevelBlock(hoverState.content) &&
+      isNoteBlock(hoverState.content) &&
       matchFlavours(hoverState.content, ['affine:note']);
 
     const style = {

@@ -6,7 +6,7 @@ export const copySelectedBlockCommand: Command<
   'selectedModels',
   never,
   { event: ClipboardEvent }
-> = async (ctx, next) => {
+> = (ctx, next) => {
   if (!ctx.selectedModels) {
     return;
   }
@@ -35,7 +35,7 @@ export const copySelectedBlockCommand: Command<
   models.forEach(traverse);
 
   const slice = Slice.fromModels(ctx.std.page, models);
-  await ctx.std.clipboard.copy(ctx.event, slice);
+  ctx.std.clipboard.copy(ctx.event, slice);
   return next();
 };
 

@@ -26,7 +26,7 @@ import {
   type DefaultToolController,
 } from '../../tool-controllers/default-tool.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
-import { isTopLevelBlock } from '../../utils/query.js';
+import { isNoteBlock } from '../../utils/query.js';
 import { NoteSlicerButton } from './slicer-button.js';
 import { NoteSlicerIndicator } from './slicer-indicator.js';
 import { findClosestBlock } from './utils.js';
@@ -130,16 +130,19 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       this._zoom < 0.4 ||
       this._notHovering ||
       !block ||
-      !isTopLevelBlock(block)
+      !isNoteBlock(block)
     ) {
       this._hide();
       return;
     }
+    if (isNoteBlock(block)) {
+      const editingState = this._getEditingState(e, block);
 
-    const editingState = this._getEditingState(e, block);
-
-    if (editingState) {
-      this._show(e, editingState);
+      if (editingState) {
+        this._show(e, editingState);
+      } else {
+        this._hide();
+      }
     } else {
       this._hide();
     }

@@ -12,6 +12,7 @@ import {
   enterPlaygroundRoom,
   fillLine,
   focusRichText,
+  focusRichTextEnd,
   focusTitle,
   getCenterPosition,
   getCursorBlockIdAndHeight,
@@ -35,6 +36,7 @@ import {
   pressEnter,
   pressEscape,
   pressForwardDelete,
+  pressShiftEnter,
   pressShiftTab,
   redoByKeyboard,
   selectAllByKeyboard,
@@ -1529,4 +1531,42 @@ test('press ArrowLeft in the start of first paragraph should not focus on title'
 
   await type(page, 'title');
   await assertTitle(page, '');
+});
+
+test('press ArrowUp in the edge of two line', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page, 0);
+  await type(
+    page,
+    // we need more four characters to get our expected result in local
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+  );
+  await waitNextFrame(page);
+  await pressArrowLeft(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 0, 89);
+
+  // aaa...
+  // |a
+  await pressArrowUp(page);
+  // |aaa...
+  // a
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 0, 0);
+  await pressArrowUp(page);
+  await waitNextFrame(page);
+  await assertTitle(page, '');
+  await type(page, 'title');
+  await assertTitle(page, 'title');
+
+  await focusRichTextEnd(page, 0);
+  await pressEnter(page);
+  await waitNextFrame(page);
+  await pressShiftEnter(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 1, 1);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 1, 0);
 });

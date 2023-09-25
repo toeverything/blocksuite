@@ -14,6 +14,8 @@ import type {
   DataViewBlockSchema,
   DividerBlockModel,
   DividerBlockSchema,
+  FrameBlockModel,
+  FrameBlockSchema,
   ImageBlockModel,
   ImageBlockSchema,
   ListBlockModel,
@@ -37,6 +39,7 @@ export type BlockModels = {
   'affine:divider': DividerBlockModel;
   'affine:image': ImageBlockModel;
   'affine:surface': SurfaceBlockModel;
+  'affine:frame': FrameBlockModel;
   'affine:database': DatabaseBlockModel;
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
@@ -52,6 +55,7 @@ export type BlockSchemas = {
   'affine:divider': typeof DividerBlockSchema;
   'affine:image': typeof ImageBlockSchema;
   'affine:surface': typeof SurfaceBlockSchema;
+  'affine:frame': typeof FrameBlockSchema;
   'affine:database': typeof DatabaseBlockSchema;
   'affine:data-view': typeof DataViewBlockSchema;
   'affine:bookmark': typeof BookmarkBlockSchema;

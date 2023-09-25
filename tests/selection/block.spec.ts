@@ -1495,13 +1495,12 @@ test('scroll should update dragging area and select blocks when dragging', async
 
   const coord = await getIndexCoordinate(page, [1, 1]);
 
-  // blur
-  await page.mouse.click(0, 0);
-  await page.mouse.move(coord.x - 26 - 24, coord.y - 30, { steps: 20 });
+  await page.mouse.move(coord.x - 26 - 24, coord.y - 30, { steps: 40 });
+  await waitNextFrame(page, 300);
   await page.mouse.down();
-  // ←
-  await page.mouse.move(coord.x + 100, coord.y + 10, { steps: 20 });
-  await page.waitForTimeout(250);
+  await waitNextFrame(page, 300);
+  await page.mouse.move(coord.x + 100, coord.y + 10, { steps: 40 });
+  await waitNextFrame(page, 300);
 
   let rects = page.locator('.selected,affine-block-selection');
   await expect(rects).toHaveCount(2);

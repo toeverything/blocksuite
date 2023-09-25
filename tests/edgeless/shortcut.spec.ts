@@ -85,6 +85,7 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
 
     const start = { x: 0, y: 0 };
     const end = { x: 200, y: 200 };
@@ -100,6 +101,7 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
 
     await zoomOutByKeyboard(page);
 
@@ -115,10 +117,13 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
+    let zoom = await getZoomLevel(page);
+    expect(zoom).toBe(100);
 
     await zoomOutByKeyboard(page);
 
-    let zoom = await getZoomLevel(page);
+    zoom = await getZoomLevel(page);
     expect(zoom).toBe(75);
 
     await zoomResetByKeyboard(page);
@@ -130,6 +135,7 @@ test.describe('zooming', () => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
 
     await zoomInByKeyboard(page);
 

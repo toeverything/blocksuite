@@ -7,7 +7,7 @@ import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
-import { EDITOR_WIDTH } from '../../../blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../../blocks/src/__internal__/consts.js';
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
@@ -279,7 +279,7 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
+        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -474,7 +474,7 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
+        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -502,7 +502,7 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${EDITOR_WIDTH},95]`,
+        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
         'prop:index': 'a0',
         'prop:hidden': false,
       },
