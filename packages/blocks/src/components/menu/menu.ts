@@ -11,6 +11,7 @@ import type { TemplateResult } from 'lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { ifDefined } from 'lit/directives/if-defined.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -573,7 +574,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     return html`
       <div
         class="affine-menu"
-        style=${this.options.style}
+        style=${ifDefined(this.options.style)}
         @click="${this._clickContainer}"
       >
         ${this.options.input
