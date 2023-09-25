@@ -94,6 +94,15 @@ export const formatConfig: formatConfig[] = [
       const vEditor = vRoot.virgoEditor;
       const goalVRange = vEditor.getVRange();
       assertExists(goalVRange);
+
+      if (goalVRange.length === 0) return;
+
+      const format = vEditor.getFormat(goalVRange);
+      if (format.link) {
+        vEditor.formatText(goalVRange, { link: null });
+        return;
+      }
+
       toggleLinkPopup(vEditor, 'create', goalVRange);
     },
   },

@@ -3,7 +3,7 @@ import type { BlockElement } from '@blocksuite/lit';
 import { WithDisposable } from '@blocksuite/lit';
 import type { VRange } from '@blocksuite/virgo/types';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
-import { html, LitElement, nothing, type PropertyValues } from 'lit';
+import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
 import { BLOCK_ID_ATTR } from '../../../../../../__internal__/consts.js';
@@ -20,6 +20,7 @@ import {
   EmbedWebIcon,
   UnlinkIcon,
 } from '../../../../../../icons/text.js';
+import type { IconButton } from '../../../../../button.js';
 import { toast } from '../../../../../toast.js';
 import type { AffineVEditor } from '../../../types.js';
 import { linkPopupStyle } from './styles.js';
@@ -44,11 +45,17 @@ export class LinkPopup extends WithDisposable(LitElement) {
   popupContainer?: HTMLDivElement;
   @query('.mock-selection')
   mockSelection?: HTMLDivElement;
+  @query('.affine-confirm-button')
+  confirmButton?: IconButton;
 
   private _bodyOverflowStyle = '';
 
   override connectedCallback() {
     super.connectedCallback();
+
+    if (this.goalVRange.length === 0) {
+      throw new Error('Cannot toggle link popup on empty range');
+    }
 
     if (this.type === 'edit' || this.type === 'create') {
       // disable body scroll
@@ -59,18 +66,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
           document.body.style.overflow = this._bodyOverflowStyle;
         },
       });
-
-      this.disposables.addFromEvent(this, 'blur', () => {
-        this.remove();
-      });
-    }
-  }
-
-  override firstUpdated(_changedProperties: PropertyValues): void {
-    super.firstUpdated(_changedProperties);
-
-    if (this.linkInput) {
-      this.linkInput.focus();
     }
   }
 
@@ -84,6 +79,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
       const rangeRect = range.getBoundingClientRect();
       this.mockSelection.style.left = `${rangeRect.left}px`;
       this.mockSelection.style.top = `${rangeRect.top}px`;
+      this.mockSelection.style.width = `${rangeRect.width}px`;
+      this.mockSelection.style.height = `${rangeRect.height}px`;
     }
 
     const visualElement = {
@@ -105,11 +102,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
     });
   }
 
-  get isLinkInputValueValid() {
-    const link = this.linkInput?.value;
-    return !!(link && isValidUrl(link));
-  }
-
   get currentText() {
     return this.vEditor.yTextString.slice(
       this.goalVRange.index,
@@ -128,6 +120,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
 
     assertExists(this.linkInput);
     const link = normalizeUrl(this.linkInput.value);
+    if (!isValidUrl(link)) return;
 
     if (this.type === 'create') {
       this.vEditor.formatText(this.goalVRange, {
@@ -189,16 +182,28 @@ export class LinkPopup extends WithDisposable(LitElement) {
     }
   }
 
+  private _updateConfirmBtn() {
+    assertExists(this.confirmButton);
+    const link = this.linkInput?.value;
+    this.confirmButton.disabled = !(link && isValidUrl(link));
+    this.confirmButton.requestUpdate();
+  }
+
   private _confirmBtnTemplate() {
     return html`<icon-button
       class="affine-confirm-button"
-      ?disabled=${this.isLinkInputValueValid}
       @click=${this._onConfirm}
       >${ConfirmIcon}</icon-button
     >`;
   }
 
   private _createTemplate() {
+    this.updateComplete.then(() => {
+      this.linkInput?.focus();
+
+      this._updateConfirmBtn();
+    });
+
     return html`<div class="affine-link-popover">
       <input
         id="link-input"
@@ -206,8 +211,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         type="text"
         spellcheck="false"
         placeholder="Paste or type a link"
-        @keydown=${this._onKeydown}
-        @input=${() => this.requestUpdate()}
+        @input=${this._updateConfirmBtn}
       />
       <span class="affine-link-popover-dividing-line"></span>
       ${this._confirmBtnTemplate()}
@@ -266,7 +270,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         data-testid="edit"
         @click=${() => {
           this.type = 'edit';
-          this.requestUpdate();
         }}
       >
         ${EditIcon}
@@ -281,6 +284,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
       this.textInput.value = this.currentText;
       assertExists(this.linkInput);
       this.linkInput.value = this.currentLink;
+
+      this.textInput.select();
+
+      this._updateConfirmBtn();
     });
 
     return html`<div class="affine-link-edit-popover">
@@ -290,7 +297,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           id="text-input"
           type="text"
           placeholder="Enter text"
-          @keydown=${this._onKeydown}
+          @input=${this._updateConfirmBtn}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-text-text" for="text-input">Text</label>
@@ -302,7 +309,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           type="text"
           spellcheck="false"
           placeholder="Paste or type a link"
-          @keydown=${this._onKeydown}
+          @input=${this._updateConfirmBtn}
         />
         <span class="affine-link-popover-dividing-line"></span>
         <label class="affine-edit-link-text" for="link-input">Link</label>
@@ -314,7 +321,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   override render() {
     const mask =
       this.type === 'edit' || this.type === 'create'
-        ? html`<div class="overlay-mask"></div>`
+        ? html`<div class="overlay-mask" @click=${() => this.remove()}></div>`
         : nothing;
 
     const popover =
@@ -327,7 +334,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
     return html`
       <div class="overlay-root">
         ${mask}
-        <div class="popup-container">${popover}</div>
+        <div class="popup-container" @keydown=${this._onKeydown}>
+          ${popover}
+        </div>
         <div class="mock-selection"></div>
       </div>
     `;

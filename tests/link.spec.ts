@@ -234,7 +234,7 @@ test('should mock selection not stored', async ({ page }) => {
   await dragBetweenIndices(page, [0, 0], [0, 8]);
   await pressCreateLinkShortCut(page);
 
-  const mockSelectNode = page.locator('link-mock-selection > div');
+  const mockSelectNode = page.locator('.mock-selection');
   await expect(mockSelectNode).toHaveCount(1);
   await expect(mockSelectNode).toBeVisible();
 
@@ -331,25 +331,25 @@ test('create link with paste', async ({ page }) => {
   await type(page, 'aaa');
 
   const linkPopoverLocator = page.locator('.affine-link-popover');
-  const confirmBtn = linkPopoverLocator.locator('icon-button');
+  const confirmBtn = page.locator('.affine-link-popover icon-button');
 
   await dragBetweenIndices(page, [0, 0], [0, 3]);
   await pressCreateLinkShortCut(page);
   await expect(linkPopoverLocator).toBeVisible();
-  await expect(confirmBtn).toHaveAttribute('disabled', '');
+  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'true');
 
   await type(page, 'affine.pro');
-  await expect(confirmBtn).not.toHaveAttribute('disabled', '');
+  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'false');
   await selectAllByKeyboard(page);
   await cutByKeyboard(page);
 
   // press enter should not trigger confirm
   await pressEnter(page);
   await expect(linkPopoverLocator).toBeVisible();
-  await expect(confirmBtn).toHaveAttribute('disabled', '');
+  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'true');
 
   await pasteByKeyboard(page, false);
-  await expect(confirmBtn).not.toHaveAttribute('disabled', '');
+  await expect(confirmBtn).toHaveAttribute('data-test-disabled', 'false');
   await pressEnter(page);
   await expect(linkPopoverLocator).not.toBeVisible();
   await assertStoreMatchJSX(
