@@ -1,5 +1,6 @@
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
 import {
@@ -51,9 +52,6 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
 > {
   static override styles = styles;
 
-  @query('.more-action')
-  private _moreActionContainer!: HTMLDivElement;
-
   showToolBar(show: boolean) {
     const tools = this.closest('data-view-header-tools');
     if (tools) {
@@ -64,91 +62,9 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
   private _clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
     this.showToolBar(true);
-    popMenu(this._moreActionContainer, {
-      options: {
-        input: {
-          initValue: this.view.name,
-          onComplete: text => {
-            this.view.updateName(text);
-          },
-        },
-        items: [
-          {
-            type: 'action',
-            name: 'Properties',
-            icon: InfoIcon,
-            postfix: ArrowRightSmallIcon,
-            select: () => {
-              requestAnimationFrame(() => {
-                this.showToolBar(true);
-                popPropertiesSetting(this._moreActionContainer, {
-                  view: this.view,
-                  onClose: () => this.showToolBar(false),
-                });
-              });
-            },
-          },
-          {
-            type: 'action',
-            name: 'Filter',
-            icon: FilterIcon,
-            postfix: ArrowRightSmallIcon,
-            select: () => {
-              popFilterModal(eventToVRect(e), {
-                vars: this.view.vars,
-                value: this.view.filter,
-                onChange: this.view.updateFilter.bind(this.view),
-                isRoot: true,
-                onDelete: () => {
-                  this.view.updateFilter({
-                    ...this.view.filter,
-                    conditions: [],
-                  });
-                },
-              });
-            },
-          },
-          {
-            type: 'action',
-            name: 'Group',
-            icon: GroupingIcon,
-            postfix: ArrowRightSmallIcon,
-            select: () => {
-              if (!this.view.view.groupBy) {
-                popSelectGroupByProperty(this._moreActionContainer, this.view);
-              } else {
-                popGroupSetting(this._moreActionContainer, this.view);
-              }
-            },
-          },
-          {
-            type: 'action',
-            name: 'Duplicate',
-            icon: DuplicateIcon,
-            select: () => {
-              this.view.duplicateView();
-            },
-          },
-          {
-            type: 'group',
-            name: '',
-            children: () => [
-              {
-                type: 'action',
-                name: 'Delete View',
-                icon: DeleteIcon,
-                select: () => {
-                  this.view.deleteView();
-                },
-                class: 'delete-item',
-              },
-            ],
-          },
-        ],
-        onClose: () => {
-          this.showToolBar(false);
-        },
-      },
+    const target = eventToVRect(e);
+    popViewOptions(target, this.view, () => {
+      this.showToolBar(false);
     });
   };
 
@@ -170,3 +86,98 @@ declare global {
     'data-view-header-tools-view-options': DataViewHeaderToolsViewOptions;
   }
 }
+export const popViewOptions = (
+  target: ReferenceElement,
+  view: DataViewTableManager | DataViewKanbanManager,
+  onClose?: () => void
+) => {
+  const reopen = () => {
+    popViewOptions(target, view);
+  };
+  popMenu(target, {
+    options: {
+      style: 'min-width:300px',
+      input: {
+        initValue: view.name,
+        onComplete: text => {
+          view.updateName(text);
+        },
+      },
+      items: [
+        {
+          type: 'action',
+          name: 'Properties',
+          icon: InfoIcon,
+          postfix: ArrowRightSmallIcon,
+          select: () => {
+            requestAnimationFrame(() => {
+              popPropertiesSetting(target, {
+                view: view,
+                onBack: reopen,
+              });
+            });
+          },
+        },
+        {
+          type: 'action',
+          name: 'Filter',
+          icon: FilterIcon,
+          postfix: ArrowRightSmallIcon,
+          select: () => {
+            popFilterModal(target, {
+              vars: view.vars,
+              value: view.filter,
+              onChange: view.updateFilter.bind(view),
+              isRoot: true,
+              onBack: reopen,
+              onDelete: () => {
+                view.updateFilter({
+                  ...view.filter,
+                  conditions: [],
+                });
+              },
+            });
+          },
+        },
+        {
+          type: 'action',
+          name: 'Group',
+          icon: GroupingIcon,
+          postfix: ArrowRightSmallIcon,
+          select: () => {
+            const groupBy = view.view.groupBy;
+            if (!groupBy) {
+              popSelectGroupByProperty(target, view);
+            } else {
+              popGroupSetting(target, view, groupBy.columnId);
+            }
+          },
+        },
+        {
+          type: 'action',
+          name: 'Duplicate',
+          icon: DuplicateIcon,
+          select: () => {
+            view.duplicateView();
+          },
+        },
+        {
+          type: 'group',
+          name: '',
+          children: () => [
+            {
+              type: 'action',
+              name: 'Delete View',
+              icon: DeleteIcon,
+              select: () => {
+                view.deleteView();
+              },
+              class: 'delete-item',
+            },
+          ],
+        },
+      ],
+      onClose: onClose,
+    },
+  });
+};

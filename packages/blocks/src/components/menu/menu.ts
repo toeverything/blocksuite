@@ -58,8 +58,13 @@ type NormalMenu = MenuCommon &
         type: 'sub-menu';
         name: string;
         label?: TemplateResult;
+        postfix?: TemplateResult;
         icon?: TemplateResult;
         options: MenuOptions;
+      }
+    | {
+        type: 'custom';
+        render: TemplateResult;
       }
   );
 export type Menu = GroupMenu | NormalMenu;
@@ -71,6 +76,7 @@ type GetMenuByType<T extends Menu['type'], M extends Menu = Menu> = M extends {
 export type MenuOptions = {
   onComplete?: () => void;
   onClose?: () => void;
+  style?: string;
   input?: {
     search?: boolean;
     placeholder?: string;
@@ -82,7 +88,8 @@ export type MenuOptions = {
   items: Menu[];
 };
 
-type Item = {
+type SelectItem = {
+  type: 'select';
   select: () => void;
   label: TemplateResult;
   upDivider?: boolean;
@@ -90,6 +97,17 @@ type Item = {
   mouseEnter?: () => void;
   onHover?: (hover: boolean) => void;
   class?: string;
+};
+type Item =
+  | SelectItem
+  | {
+      type: 'ui';
+      render: TemplateResult;
+      upDivider?: boolean;
+      downDivider?: boolean;
+    };
+const isSelectableItem = (item: Item): item is SelectItem => {
+  return item.type === 'select';
 };
 
 @customElement('affine-menu')
@@ -223,7 +241,8 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   private _selectedIndex?: number;
   private subMenu?: HTMLElement;
   private inputRef = createRef<HTMLInputElement>();
-  private items!: Array<Item>;
+  private allItems: Array<Item & { index?: number }> = [];
+  private selectableItems!: Array<SelectItem>;
   private _checked: Record<string, boolean> = {};
 
   private setChecked(name: string, checked: boolean) {
@@ -239,21 +258,27 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     return this.isSearchMode ? 0 : -1;
   }
 
-  private get selectedIndex(): number {
-    return this._selectedIndex ?? this.minIndex;
+  private get selectedIndex(): number | undefined {
+    return this._selectedIndex;
   }
 
   private set selectedIndex(index: number | undefined) {
     const old =
-      this._selectedIndex != null ? this.items[this._selectedIndex] : undefined;
+      this._selectedIndex != null
+        ? this.selectableItems[this._selectedIndex]
+        : undefined;
     old?.onHover?.(false);
+    if (index == null) {
+      this._selectedIndex = index;
+      return;
+    }
     const newIndex = regularizationNumberInRange(
       index ?? this.minIndex,
       this.minIndex,
-      this.items.length
+      this.selectableItems.length
     );
     this._selectedIndex = newIndex;
-    this.items[newIndex]?.onHover?.(true);
+    this.selectableItems[newIndex]?.onHover?.(true);
   }
 
   private get text() {
@@ -298,12 +323,14 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
         }
         if (e.key === 'ArrowUp') {
           e.preventDefault();
-          this.selectedIndex = this.selectedIndex - 1;
+          this.selectedIndex =
+            this.selectedIndex != null ? this.selectedIndex - 1 : this.minIndex;
           return;
         }
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          this.selectedIndex = this.selectedIndex + 1;
+          this.selectedIndex =
+            this.selectedIndex != null ? this.selectedIndex + 1 : this.minIndex;
           return;
         }
       });
@@ -317,6 +344,12 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
 
   private show(item: Menu): boolean {
     if (this.isSearchMode) {
+      if (item.type === 'group') {
+        return !item.hide?.();
+      }
+      if (item.type === 'custom') {
+        return this.text.length === 0;
+      }
       if (!item.name.toLowerCase().includes(this.text.toLowerCase())) {
         return false;
       }
@@ -338,6 +371,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
         : nothing;
       return [
         {
+          type: 'select',
           label: html`
             ${icon}
             <div class="affine-menu-action-text">
@@ -361,6 +395,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       const checked = this.getChecked(menu.name) ?? menu.checked;
       return [
         {
+          type: 'select',
           label: html`
             <div class="icon">
               ${checked ? checkboxChecked() : checkboxUnchecked()}
@@ -421,18 +456,30 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           this.subMenu = subMenu;
         });
       };
+      const postfix = html` <div class="icon">
+        ${menu.postfix ?? ArrowRightSmallIcon}
+      </div>`;
       return [
         {
+          type: 'select',
           label: html`${menu.icon
               ? html` <div class="icon">${menu.icon}</div>`
               : nothing}
             <div class="affine-menu-action-text">
               ${menu.label ?? menu.name}
             </div>
-            ${ArrowRightSmallIcon}`,
+            ${postfix}`,
           mouseEnter: select,
           select,
           class: '',
+        },
+      ];
+    },
+    custom: menu => {
+      return [
+        {
+          type: 'ui',
+          render: menu.render,
         },
       ];
     },
@@ -460,11 +507,13 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     this.focusInput();
   };
 
-  private get selectedItem(): Item | undefined {
-    return this.items[this.selectedIndex];
+  private get selectedItem(): SelectItem | undefined {
+    return this.selectedIndex != null
+      ? this.selectableItems[this.selectedIndex]
+      : undefined;
   }
 
-  private _mouseEnter = (index: number) => {
+  private _mouseEnter = (index?: number) => {
     if (this._isConsciousChoice()) {
       return;
     }
@@ -494,8 +543,25 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     this._mouseEnter(-1);
   };
 
+  processItems() {
+    this.allItems = [];
+    this.selectableItems = [];
+    this.options.items
+      .flatMap(item => this.process(item))
+      .forEach(item => {
+        const isSelectable = isSelectableItem(item);
+        this.allItems.push({
+          ...item,
+          index: isSelectable ? this.selectableItems.length : undefined,
+        });
+        if (isSelectable) {
+          this.selectableItems.push(item);
+        }
+      });
+  }
+
   override render() {
-    this.items = this.options.items.flatMap(item => this.process(item));
+    this.processItems();
     this.selectedIndex = this._selectedIndex;
     const showHeader = this.showHeader();
     const headerStyle = styleMap({
@@ -503,8 +569,13 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       height: showHeader ? undefined : '0',
       overflow: showHeader ? undefined : 'hidden',
     });
+    const showHeaderDivider = this.selectableItems.length > 0 && showHeader;
     return html`
-      <div class="affine-menu" @click="${this._clickContainer}">
+      <div
+        class="affine-menu"
+        style=${this.options.style}
+        @click="${this._clickContainer}"
+      >
         ${this.options.input
           ? html` <div
                 class="affine-menu-header"
@@ -520,19 +591,31 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
                   @input="${this._inputText}"
                 />
               </div>
-              ${this.items.length && showHeader
+              ${showHeaderDivider
                 ? html` <div class="affine-menu-divider"></div>`
                 : null}`
           : null}
         <div class="affine-menu-body">
-          ${this.items.length === 0 && this.isSearchMode
+          ${this.selectableItems.length === 0 && this.isSearchMode
             ? html` <div class="no-results">No Results</div>`
             : ''}
-          ${repeat(this.items, (menu, i) => {
-            const divider = menu.upDivider || this.items[i - 1]?.downDivider;
+          ${repeat(this.allItems, (menu, index) => {
+            const i = menu.index;
+            const hideDividerWhenHeaderDividerIsShow =
+              i === 0 && showHeaderDivider;
+            const divider =
+              menu.upDivider || this.allItems[index - 1]?.downDivider;
             const mouseEnter = () => {
               this._mouseEnter(i);
             };
+            if (menu.type === 'ui') {
+              return html`
+                ${divider
+                  ? html` <div class="affine-menu-divider"></div>`
+                  : null}
+                <div @mouseenter=${mouseEnter}>${menu.render}</div>
+              `;
+            }
             const itemClass = menu.class ?? '';
             const classes = classMap({
               'affine-menu-action': true,
@@ -540,7 +623,9 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
               [itemClass]: true,
             });
             return html`
-              ${divider ? html` <div class="affine-menu-divider"></div>` : null}
+              ${divider && !hideDividerWhenHeaderDividerIsShow
+                ? html` <div class="affine-menu-divider"></div>`
+                : null}
               <div
                 class="${classes}"
                 @click="${menu.select}"
@@ -636,14 +721,16 @@ export const createPopup = (
     modal.remove();
   };
 };
-
+export type MenuHandler = {
+  close: () => void;
+};
 export const popMenu = <T>(
   target: ReferenceElement,
   props: {
     options: MenuOptions;
     middleware?: Array<Middleware | null | undefined | false>;
   }
-) => {
+): MenuHandler => {
   const menu = new MenuComponent<T>();
   menu.options = {
     ...props.options,
@@ -656,6 +743,9 @@ export const popMenu = <T>(
     onClose: props.options.onClose,
     middleware: props.middleware,
   });
+  return {
+    close,
+  };
 };
 export const popFilterableSimpleMenu = (
   target: ReferenceElement,
