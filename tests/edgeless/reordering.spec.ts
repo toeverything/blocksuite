@@ -135,7 +135,7 @@ test.describe('reordering notes', () => {
     await page.mouse.click(0, 0);
   }
 
-  test.only('bring to front', async ({ page }) => {
+  test('bring to front', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyEdgelessState(page);
     await switchEditorMode(page);

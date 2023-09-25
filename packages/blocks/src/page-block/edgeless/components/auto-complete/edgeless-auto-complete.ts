@@ -303,7 +303,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return surface.pickById(id) as ConnectorElement;
   }
 
-  private async _createElement() {
+  private async _createEdgelessElement() {
     if (this._isShape(this.current)) {
       return this.edgeless.surface.addElement(this.current.type, {
         ...this.current.serialize(),
@@ -328,7 +328,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   private async _generateElementOnClick(type: Direction) {
     const { surface, page } = this.edgeless;
     const bound = this._computeNextBound(type);
-    const id = await this._createElement();
+    const id = await this._createEdgelessElement();
     if (this._isShape(this.current)) {
       surface.updateElement(id, { xywh: bound.serialize() });
       const { startPosition, endPosition } = getPosition(type);
@@ -370,7 +370,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const angle = normalizeDegAngle(
       toDegree(Vec.angle(connector.path[len - 2], connector.path[len - 1]))
     );
-    const id = await this._createElement();
+    const id = await this._createEdgelessElement();
     let nextBound: Bound;
     let position: Connection['position'];
 
