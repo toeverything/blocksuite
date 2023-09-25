@@ -83,25 +83,20 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     w1: number,
     h1: number
   ): { x: number; y: number } {
-    // Step 1
     const centerX = rect.x + rect.w / 2;
     const centerY = rect.y + rect.h / 2;
 
-    // Step 2
     let deltaXPrime =
       (rect.w / 2) * Math.cos(rect.r) - (-rect.h / 2) * Math.sin(rect.r);
     let deltaYPrime =
       (rect.w / 2) * Math.sin(rect.r) + (-rect.h / 2) * Math.cos(rect.r);
 
-    // Step 3
     const vX = centerX + deltaXPrime;
     const vY = centerY + deltaYPrime;
 
-    // Step 4
     deltaXPrime = (w1 / 2) * Math.cos(rect.r) - (-h1 / 2) * Math.sin(rect.r);
     deltaYPrime = (w1 / 2) * Math.sin(rect.r) + (-h1 / 2) * Math.cos(rect.r);
 
-    // Step 5
     const newCenterX = vX - deltaXPrime;
     const newCenterY = vY - deltaYPrime;
 
