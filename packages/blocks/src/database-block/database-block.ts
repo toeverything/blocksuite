@@ -24,11 +24,11 @@ import { DragIndicator } from '../components/index.js';
 import { popMenu } from '../components/menu/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
 import { CopyIcon, DeleteIcon, MoreHorizontalIcon } from '../icons/index.js';
+import { AffineDragHandleWidget } from '../index.js';
 import {
   captureEventTarget,
   getDropResult,
 } from '../widgets/drag-handle/utils.js';
-import { DragHandleWidget } from '../widgets/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -180,7 +180,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     });
     let canDrop = false;
     this.disposables.add(
-      DragHandleWidget.registerOption({
+      AffineDragHandleWidget.registerOption({
         flavour: DatabaseBlockSchema.model.flavour,
         onDragMove: state => {
           const target = captureEventTarget(state.raw.target);
