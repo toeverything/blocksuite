@@ -7,6 +7,7 @@ import {
   Bound,
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
+  PhasorElementType,
   ShapeStyle,
   type ShapeType,
   StrokeStyle,
@@ -203,7 +204,7 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
       coord.y
     );
     const xywh = new Bound(modelX, modelY, 100, 100).serialize();
-    this.edgeless.surface.addElement('shape', {
+    this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,
       strokeColor: this.strokeColor,

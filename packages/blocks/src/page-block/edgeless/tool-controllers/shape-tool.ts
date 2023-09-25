@@ -133,6 +133,19 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     const id = this._draggingElementId;
     assertExists(id);
 
+    if (this._draggingArea) {
+      const width = Math.abs(
+        this._draggingArea?.end.x - this._draggingArea?.start.x
+      );
+      const height = Math.abs(
+        this._draggingArea?.end.y - this._draggingArea?.start.y
+      );
+      if (width < 20 && height < 20) {
+        this._surface.removeElement(id);
+        return;
+      }
+    }
+
     this._draggingElementId = null;
     this._draggingArea = null;
 
