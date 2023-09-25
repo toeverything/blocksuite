@@ -1,7 +1,10 @@
 import type { BlockElement } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
-import { asyncFocusRichText } from '../../../../__internal__/utils/common-operations.js';
+import {
+  asyncFocusRichText,
+  asyncSetVRange,
+} from '../../../../__internal__/utils/common-operations.js';
 import { assertFlavours } from '../../../../__internal__/utils/model.js';
 import type { Flavour } from '../../../../models.js';
 import { onModelTextUpdated } from '../../callback.js';
@@ -36,6 +39,7 @@ export function updateBlockElementType(
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
     }
+    asyncSetVRange(model, { index: model.text?.length ?? 0, length: 0 });
     return [model];
   }
   if (flavour === 'affine:divider') {

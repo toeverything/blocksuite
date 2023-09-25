@@ -6,10 +6,7 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  matchFlavours,
-  type TopLevelBlockModel,
-} from '../../../../__internal__/index.js';
+import { matchFlavours } from '../../../../__internal__/index.js';
 import {
   CardIcon,
   DualLinkIcon,
@@ -136,7 +133,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     .insert-indicator {
       height: 2px;
       border-radius: 1px;
-      background-color: var(--affine-blue-affine-blue-600, #1e96eb);
+      background-color: var(--affine-blue-600);
       position: absolute;
       contain: layout size;
       width: 235px;
@@ -253,7 +250,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
       if (!matchFlavours(block, ['affine:note'])) return;
 
       const tocNoteItem = {
-        note: block as TopLevelBlockModel,
+        note: block as NoteBlockModel,
         index,
         number: index + 1,
       };

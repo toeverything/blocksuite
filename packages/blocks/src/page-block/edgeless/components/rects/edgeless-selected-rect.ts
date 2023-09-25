@@ -9,14 +9,12 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import { matchFlavours } from '../../../../__internal__/utils/model.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
-import type { NoteBlockModel } from '../../../../index.js';
+import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type Bound,
   ConnectorElement,
   deserializeXYWH,
-  FrameElement,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -32,6 +30,8 @@ import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
+  isFrameBlock,
+  isNoteBlock,
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../utils/query.js';
@@ -338,8 +338,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this._disposables.add(
       this._resizeManager.slots.resizeEnd.on(() => {
         this.selection.elements.forEach(ele => {
-          ele instanceof FrameElement &&
-            this.surface.frame.calculateFrameColor(ele);
+          isFrameBlock(ele) && this.surface.frame.calculateFrameColor(ele);
         });
       })
     );
@@ -373,8 +372,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let hasNote = false;
 
     for (const element of elements) {
-      if (isTopLevelBlock(element)) {
+      if (isNoteBlock(element)) {
         hasNote = true;
+      } else if (isFrameBlock(element)) {
+        isAllConnector = false;
       } else {
         if (element.type !== 'connector') isAllConnector = false;
         if (element.type !== 'shape') isAllShapes = false;
@@ -419,7 +420,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const element = selectedMap.get(id);
       if (!element) return;
 
-      if (isTopLevelBlock(element)) {
+      if (isNoteBlock(element)) {
         let height = deserializeXYWH(element.xywh)[3];
         // // Limit the width of the selected note
         // if (noteW < NOTE_MIN_WIDTH) {
@@ -432,11 +433,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         page.updateBlock(element, {
           xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
         });
+      } else if (isFrameBlock(element)) {
+        page.updateBlock(element, {
+          xywh: bound.serialize(),
+        });
       } else {
         if (element instanceof TextElement) {
           const p = bound.h / element.h;
           bound.w = element.w * p;
-          surface.updateElement<'text'>(id, {
+          surface.updateElement<PhasorElementType.TEXT>(id, {
             xywh: bound.serialize(),
             fontSize: element.fontSize * p,
           });
@@ -533,7 +538,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } else {
       this._cursorRotate = 0;
     }
-
     this.slots.cursorUpdated.emit(cursor);
   };
 
@@ -558,7 +562,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const rect = componentToolbar.getBoundingClientRect();
-    const offset = 34;
+
+    let offset = 34;
+    if (this.selection.elements.find(ele => isFrameBlock(ele))) {
+      offset += 10;
+    }
     let top = y - rect.height - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
@@ -587,12 +595,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    const isSingleNote =
-      elements.length === 1 &&
-      isTopLevelBlock(elements[0]) &&
-      matchFlavours(elements[0], ['affine:note']);
+    const isSingleNote = elements.length === 1 && isNoteBlock(elements[0]);
     const isSingleHiddenNote =
-      isSingleNote && (elements[0] as NoteBlockModel).hidden;
+      isSingleNote && isNoteBlock(elements[0]) && elements[0].hidden;
 
     this._selectedRect = {
       width,
@@ -702,10 +707,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   }
 
-  private _canRotate() {
-    return !this.selection.elements.some(ele => ele instanceof FrameElement);
-  }
-
   override render() {
     const { selection } = this;
     const elements = selection.elements;
@@ -727,11 +728,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       ? ResizeHandles(
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
-            if (
-              (<HTMLElement>e.target).classList.contains('rotate') &&
-              !this._canRotate()
-            )
-              return;
             _resizeManager.onPointerDown(e, direction);
           },
           (
@@ -743,7 +739,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               point?: IVec;
             }
           ) => {
-            if (options?.type === 'rotate' && !this._canRotate()) return;
             _updateCursor(dragging, options);
           }
         )

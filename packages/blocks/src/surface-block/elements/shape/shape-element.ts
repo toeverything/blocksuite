@@ -4,7 +4,8 @@ import type { Bound } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/math-utils.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
-import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
+import type { HitTestOptions } from '../edgeless-element.js';
+import { SurfaceElement } from '../surface-element.js';
 import type { ITextDelta } from '../text/types.js';
 import {
   deltaInsertsToChunks,

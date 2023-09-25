@@ -122,7 +122,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ctx.get('defaultState').event.preventDefault();
           this.pageElement.selectionManager.setSelection({
             elements: [
-              ...this.pageElement.notes.map(note => note.id),
+              ...this.pageElement.surface.blocks.map(block => block.id),
               ...this.pageElement.surface.getElements().map(el => el.id),
             ],
             editing: false,

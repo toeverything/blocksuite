@@ -8,6 +8,7 @@ import { DataViewBlockSchema } from '../data-view-block/index.js';
 import { DatabaseBlockSchema } from '../database-block/database-model.js';
 import { DatabaseService } from '../database-block/database-service.js';
 import { DividerBlockSchema } from '../divider-block/divider-model.js';
+import { FrameBlockSchema } from '../frame-block/index.js';
 import { ImageBlockSchema } from '../image-block/image-model.js';
 import { ImageService } from '../image-block/index.js';
 import { ListBlockSchema } from '../list-block/list-model.js';
@@ -162,6 +163,12 @@ export const edgelessPreset: BlockSpec[] = [
     schema: NoteBlockSchema,
     view: {
       component: literal`affine-note`,
+    },
+  },
+  {
+    schema: FrameBlockSchema,
+    view: {
+      component: literal`affine-frame`,
     },
   },
   {

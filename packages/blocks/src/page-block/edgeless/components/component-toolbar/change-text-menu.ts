@@ -21,6 +21,7 @@ import {
   Bound,
   normalizeShapeBound,
   normalizeTextBound,
+  PhasorElementType,
   type ShapeElement,
   type TextElement,
 } from '../../../../surface-block/index.js';
@@ -247,13 +248,13 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
 
   private _updateElementBound = (element: EdgelessCanvasTextElement) => {
     const elementType = this.elementType;
-    if (elementType === 'text') {
+    if (elementType === PhasorElementType.TEXT) {
       // the change of font family will change the bound of the text
       const newBound = normalizeTextBound(
         element as TextElement,
         new Bound(element.x, element.y, element.w, element.h)
       );
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         xywh: newBound.serialize(),
       });
     } else {
@@ -261,25 +262,23 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         element as ShapeElement,
         new Bound(element.x, element.y, element.w, element.h)
       );
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         xywh: newBound.serialize(),
       });
     }
   };
 
   private _setTextColor = (color: CssVariableName) => {
-    const elementType = this.elementType;
     this.elements.forEach(element => {
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         color,
       });
     });
   };
 
   private _setTextAlign = (align: EdgelessCanvasTextElement['textAlign']) => {
-    const elementType = this.elementType;
     this.elements.forEach(element => {
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         textAlign: align,
       });
     });
@@ -288,9 +287,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   private _setFontFamily = (
     fontFamily: EdgelessCanvasTextElement['fontFamily']
   ) => {
-    const elementType = this.elementType;
     this.elements.forEach(element => {
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         fontFamily: fontFamily,
       });
 
@@ -299,9 +297,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   };
 
   private _setFontSize = (fontSize: EdgelessCanvasTextElement['fontSize']) => {
-    const elementType = this.elementType;
     this.elements.forEach(element => {
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         fontSize: fontSize,
       });
 
@@ -310,9 +307,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   };
 
   private _setTextBold = (bold: boolean) => {
-    const elementType = this.elementType;
     this.elements.forEach(element => {
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         bold,
       });
 
@@ -321,9 +317,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   };
 
   private _setTextItalic = (italic: boolean) => {
-    const elementType = this.elementType;
     this.elements.forEach(element => {
-      this.surface.updateElement<typeof elementType>(element.id, {
+      this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
         italic,
       });
 

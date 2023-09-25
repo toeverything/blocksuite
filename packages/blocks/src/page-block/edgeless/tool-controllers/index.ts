@@ -33,7 +33,7 @@ export abstract class EdgelessToolController<
   }
 
   protected get _blocks(): TopLevelBlockModel[] {
-    return this._edgeless.sortedNotes;
+    return this._edgeless.sortedBlocks;
   }
 
   abstract tool: Tool;

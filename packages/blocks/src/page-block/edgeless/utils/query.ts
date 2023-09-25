@@ -2,10 +2,13 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
 import {
+  type Connectable,
   type EdgelessElement,
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import type { FrameBlockModel } from '../../../index.js';
+import type { NoteBlockModel } from '../../../note-block/index.js';
 import {
   Bound,
   clamp,
@@ -13,10 +16,8 @@ import {
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
-  isPointIn as isPointInFromPhasor,
   type PhasorElement,
   type PhasorElementWithText,
-  serializeXYWH,
   ShapeElement,
   type SurfaceViewport,
   TextElement,
@@ -26,9 +27,23 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import type { Selectable } from '../services/tools-manager.js';
 
 export function isTopLevelBlock(
-  selectable: Selectable | BaseBlockModel | null
+  selectable: BaseBlockModel | Selectable | BaseBlockModel | null
 ): selectable is TopLevelBlockModel {
   return !!selectable && 'flavour' in selectable;
+}
+
+export function isNoteBlock(
+  element: BaseBlockModel | EdgelessElement | null
+): element is NoteBlockModel {
+  return !!element && 'flavour' in element && element.flavour === 'affine:note';
+}
+
+export function isFrameBlock(
+  element: BaseBlockModel | EdgelessElement | null
+): element is FrameBlockModel {
+  return (
+    !!element && 'flavour' in element && element.flavour === 'affine:frame'
+  );
 }
 
 export function isPhasorElement(
@@ -43,46 +58,16 @@ export function isPhasorElementWithText(
   return element instanceof TextElement || element instanceof ShapeElement;
 }
 
-function isPointIn(
-  block: { xywh: string },
-  pointX: number,
-  pointY: number
-): boolean {
-  const [x, y, w, h] = deserializeXYWH(block.xywh);
-  return isPointInFromPhasor({ x, y, w, h }, pointX, pointY);
+export function isConnectable(
+  element: EdgelessElement | null
+): element is Connectable {
+  return !!element && element.connectable;
 }
 
-export function pickTopBlock(
-  blocks: TopLevelBlockModel[],
-  modelX: number,
-  modelY: number
-): TopLevelBlockModel | null {
-  for (let i = blocks.length - 1; i >= 0; i--) {
-    const block = blocks[i];
-    if (isPointIn(block, modelX, modelY)) {
-      return block;
-    }
-  }
-  return null;
-}
-
-export function pickBlocksByBound(blocks: TopLevelBlockModel[], bound: Bound) {
-  return blocks.filter(block => {
-    const blockBound = Bound.deserialize(block.xywh);
-    return bound.contains(blockBound) || bound.isIntersectWithBound(blockBound);
-  });
-}
-
-export function getSelectionBoxBound(viewport: SurfaceViewport, xywh: string) {
-  const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
-  const [x, y] = viewport.toViewCoord(modelX, modelY);
-  return new DOMRect(x, y, modelW * viewport.zoom, modelH * viewport.zoom);
-}
-
-export function getXYWH(element: Selectable) {
-  return isTopLevelBlock(element)
-    ? element.xywh
-    : serializeXYWH(element.x, element.y, element.w, element.h);
+export function getSelectionBoxBound(viewport: SurfaceViewport, bound: Bound) {
+  const { w, h } = bound;
+  const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+  return new DOMRect(x, y, w * viewport.zoom, h * viewport.zoom);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
@@ -103,27 +88,6 @@ export function getCursorMode(edgelessTool: EdgelessTool) {
     default:
       return 'default';
   }
-}
-
-export function pickBy(
-  surface: SurfaceBlockComponent,
-  page: Page,
-  x: number,
-  y: number,
-  filter: (element: Selectable) => boolean
-): Selectable | null {
-  const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
-  const selectedShapes = surface.pickByPoint(modelX, modelY).filter(filter);
-
-  return selectedShapes.length
-    ? selectedShapes[selectedShapes.length - 1]
-    : pickTopBlock(
-        (page.root?.children as TopLevelBlockModel[]).filter(
-          child => child.flavour === 'affine:note'
-        ) ?? [],
-        modelX,
-        modelY
-      );
 }
 
 export function pickSurfaceElementById(
@@ -230,10 +194,6 @@ export function getSelectableBounds(selected: Selectable[]): Map<
 export function getEdgelessElement(
   edgeless: EdgelessPageBlockComponent,
   id: string
-): EdgelessElement | null {
-  return (
-    edgeless.surface.pickById(id) ??
-    <TopLevelBlockModel>edgeless.page.getBlockById(id) ??
-    null
-  );
+) {
+  return edgeless.surface.pickById(id) as EdgelessElement | null;
 }

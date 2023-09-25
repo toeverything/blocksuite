@@ -3,12 +3,12 @@
 layout: home
 
 title: BlockSuite
-titleTemplate: Collaborative Editing Toolkit
+titleTemplate: Structral Editing Toolkit
 
 hero:
   name: BlockSuite
   text: Where Diverse Editing Tools Converge
-  tagline: BlockSuite provides the toolkit for building collaborative editors.
+  tagline: BlockSuite provides the toolkit for block-based structral editing.
   actions:
     - theme: brand
       text: Get Started
@@ -18,10 +18,10 @@ hero:
       link: https://blocksuite-toeverything.vercel.app/starter/?init
 
 features:
-  - title: 🎨 Isomorphic Editors
-    details: Build diverse editors with standardized <b><i>blocks</i></b>. One model, multiple views.
+  - title: 🎨 Isomorphic Block-Based Editors
+    details: Build diverse content editing tools with reusable <b><i>blocks</i></b>, including rich text, whiteboard, spreadsheet, and more!
   - title: 🧬 Intrinsically Collaborative
-    details: Conflict resolution and time travel built into the core. Collaboration ready from day one.
+    details: Powered by CRDT, BlockSuite built conflict resolution and time travel into its core. Collaboration ready from day one.
   - title: 🧩 Progressive Suite
-    details: Comprehensive toolkit tailored for extensibility. Battery included. Framework agnostic.
+    details: BlockSuite provides a comprehensive toolkit tailored for extensibility. Battery included. Framework agnostic.
 ---

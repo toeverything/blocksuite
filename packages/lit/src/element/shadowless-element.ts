@@ -8,12 +8,12 @@ export class ShadowlessElement extends LitElement {
     styles?: CSSResultGroup
   ): CSSResultOrNative[] {
     let elementStyles = super.finalizeStyles(styles);
-    const styleRoot = document.head;
     if (this.disableShadowRoot) {
       // XXX: This breaks component encapsulation and applies styles to the document.
       // These styles should be manually scoped.
       elementStyles.forEach((s: CSSResultOrNative) => {
-        if (s instanceof CSSResult) {
+        if (s instanceof CSSResult && typeof document !== 'undefined') {
+          const styleRoot = document.head;
           const style = document.createElement('style');
           style.textContent = s.cssText;
           styleRoot.appendChild(style);

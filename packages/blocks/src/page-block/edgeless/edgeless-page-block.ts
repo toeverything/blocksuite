@@ -12,6 +12,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
@@ -33,6 +34,7 @@ import { listenToThemeChange } from '../../__internal__/theme/utils.js';
 import { toast } from '../../components/toast.js';
 import type {
   EdgelessPageBlockWidgetName,
+  FrameBlockModel,
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
@@ -79,7 +81,7 @@ import {
   FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
-import { getCursorMode } from './utils/query.js';
+import { getCursorMode, isPhasorElement } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 export interface EdgelessSelectionSlots {
@@ -111,6 +113,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
   EdgelessPageBlockWidgetName
 > {
   static override styles = css`
+    .widgets-container {
+      position: absolute;
+      left: 0;
+      top: 0;
+      contain: size layout;
+    }
+
     @media screen and (max-width: 1200px) {
       edgeless-zoom-toolbar {
         display: none;
@@ -181,7 +190,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     cursorUpdated: new Slot<string>(),
     elementSizeUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
-      notes: NoteBlockModel[];
+      blocks: TopLevelBlockModel[];
       shapes: PhasorElement[];
     }>(),
     subpageLinked: new Slot<{ pageId: string }>(),
@@ -208,12 +217,26 @@ export class EdgelessPageBlockComponent extends BlockElement<
   get notes() {
     return this.model.children.filter(
       child => child.flavour === 'affine:note'
-    ) as TopLevelBlockModel[];
+    ) as NoteBlockModel[];
   }
 
   // Gets the sorted notes.
   get sortedNotes() {
     return this.notes.sort(compare);
+  }
+
+  get frames() {
+    return this.surfaceBlockModel.children.filter(
+      child => child.flavour === 'affine:frame'
+    ) as FrameBlockModel[];
+  }
+
+  get sortedFrames() {
+    return this.frames.sort(compare);
+  }
+
+  get sortedBlocks() {
+    return [...this.sortedFrames, ...this.sortedNotes];
   }
 
   get dispatcher() {
@@ -344,11 +367,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     let canCopyAsPng = true;
     _disposables.add(
-      slots.copyAsPng.on(({ notes, shapes }) => {
+      slots.copyAsPng.on(({ blocks, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
         this.clipboard
-          .copyAsPng(notes, shapes)
+          .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
           .finally(() => {
@@ -540,7 +563,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
             start: generateKeyBetween(null, pickedElements[0].index),
             end: null,
           }),
-          () => this.surface.getSortedElementsWithViewportBounds(),
+          () => this.surface.getSortedPhasorElementsWithViewportBounds(),
           bringForward,
           updateIndexes
         );
@@ -552,7 +575,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
             start: null,
             end: pickedElements[pickedElements.length - 1].index,
           }),
-          () => this.surface.getSortedElementsWithViewportBounds(),
+          () => this.surface.getSortedPhasorElementsWithViewportBounds(),
           sendBackward,
           updateIndexes
         );
@@ -896,8 +919,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
   ) {
     const bounds = [];
 
-    this.notes.forEach(note => {
-      bounds.push(Bound.deserialize(note.xywh));
+    this.surface.blocks.forEach(block => {
+      bounds.push(Bound.deserialize(block.xywh));
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
@@ -947,7 +970,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       if (!surface) return;
 
       const el = this.surface.pickById(surface.elements[0]);
-      if (el) {
+      if (isPhasorElement(el)) {
         return true;
       }
 
@@ -980,15 +1003,16 @@ export class EdgelessPageBlockComponent extends BlockElement<
   override render() {
     this.setAttribute(BLOCK_ID_ATTR, this.model.id);
 
-    return html`
-      <affine-surface
-        .edgeless=${this}
-        .root=${this.root}
-        .page=${this.page}
-        .model=${this.surfaceBlockModel}
-      >
-      </affine-surface>
-    `;
+    const widgets = html`${repeat(
+      Object.entries(this.widgets),
+      ([id]) => id,
+      ([_, widget]) => widget
+    )}`;
+
+    return html`${this.renderModel(this.surfaceBlockModel)}
+      <affine-edgeless-block-container .edgeless=${this}>
+      </affine-edgeless-block-container>
+      <div class="widgets-container">${widgets}</div> `;
   }
 }
 

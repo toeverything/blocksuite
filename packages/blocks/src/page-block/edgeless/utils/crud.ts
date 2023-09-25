@@ -3,7 +3,7 @@ import type {
   EdgelessElement,
 } from '../../../__internal__/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
-import { isTopLevelBlock } from './query.js';
+import { isConnectable, isNoteBlock } from './query.js';
 
 export function deleteElements(
   surface: SurfaceBlockComponent,
@@ -11,7 +11,7 @@ export function deleteElements(
 ) {
   const set = new Set(elements);
   elements.forEach(element => {
-    if (isTopLevelBlock(element) || element.connectable) {
+    if (isConnectable(element)) {
       const connectors = surface.connector.getConnecttedConnectors([
         element as Connectable,
       ]);
@@ -20,7 +20,7 @@ export function deleteElements(
   });
 
   set.forEach(element => {
-    if (isTopLevelBlock(element)) {
+    if (isNoteBlock(element)) {
       const children = surface.page.root?.children ?? [];
       // FIXME: should always keep at least 1 note
       if (children.length > 1) {

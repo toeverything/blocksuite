@@ -13,7 +13,8 @@ import {
 import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
-import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
+import type { HitTestOptions } from '../edgeless-element.js';
+import { SurfaceElement } from '../surface-element.js';
 import { ConnectorMode, type IConnector } from './types.js';
 import { getArrowPoints } from './utils.js';
 

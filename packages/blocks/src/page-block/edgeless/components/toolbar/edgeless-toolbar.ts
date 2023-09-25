@@ -36,13 +36,10 @@ import {
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
 } from '../../../../icons/index.js';
-import {
-  Bound,
-  clamp,
-  compare,
-  FrameElement,
-} from '../../../../surface-block/index.js';
+import type { FrameBlockModel } from '../../../../index.js';
+import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { isFrameBlock } from '../../utils/query.js';
 import { getTooltipWithShortcut } from '../utils.js';
 
 @customElement('edgeless-toolbar')
@@ -174,7 +171,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   edgeless: EdgelessPageBlockComponent;
 
   @state()
-  private _frames: FrameElement[] = [];
+  private _frames: FrameBlockModel[] = [];
 
   @state({
     hasChanged() {
@@ -244,7 +241,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const { slots, surface } = edgeless;
+    const { slots, page } = edgeless;
 
     edgeless.bindHotKey(
       {
@@ -272,24 +269,19 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      surface.slots.elementAdded.on(id => {
-        const element = surface.pickById(id);
-        if (element instanceof FrameElement) {
-          this._updateFrames();
-        }
-      })
-    );
-    _disposables.add(
-      surface.slots.elementRemoved.on(({ element }) => {
-        if (element instanceof FrameElement) {
-          this._updateFrames();
-        }
-      })
-    );
-    _disposables.add(
-      surface.slots.elementUpdated.on(({ id, props }) => {
-        const element = surface.pickById(id);
-        if (element instanceof FrameElement && 'index' in props) {
+      page.slots.blockUpdated.on(e => {
+        const model = page.getBlockById(e.id);
+        if (e.type === 'add') {
+          if (isFrameBlock(model)) {
+            requestAnimationFrame(() => {
+              this._updateFrames();
+            });
+          }
+        } else if (e.type === 'update') {
+          if (isFrameBlock(model) && 'index' in e.props) {
+            this._updateFrames();
+          }
+        } else if (e.flavour === 'affine:frame') {
           this._updateFrames();
         }
       })
@@ -494,9 +486,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .iconContainerPadding=${8}
           @click=${() => {
             this._index = this._currentFrameIndex;
-            if (
-              this.edgeless.selectionManager.elements[0] instanceof FrameElement
-            ) {
+            if (isFrameBlock(this.edgeless.selectionManager.elements[0])) {
               this._index = this._frames.findIndex(
                 frame =>
                   frame.id === this.edgeless.selectionManager.elements[0].id
