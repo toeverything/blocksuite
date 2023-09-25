@@ -256,7 +256,7 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
     const data = this.data;
     return html`
       <div style="padding: 15px 20px">
-        ${menuTitle('Filter', () => {
+        ${menuTitle('FILTER', () => {
           this.onBack?.();
         })}
       </div>
