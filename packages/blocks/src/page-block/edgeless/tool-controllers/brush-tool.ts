@@ -3,6 +3,7 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 
 import type { BrushTool, EdgelessTool } from '../../../__internal__/index.js';
 import { LineWidth } from '../../../__internal__/index.js';
+import { PhasorElementType } from '../../../surface-block/index.js';
 import { GET_DEFAULT_LINE_COLOR } from '../components/panel/color-panel.js';
 import { EdgelessToolController } from './index.js';
 
@@ -45,7 +46,7 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     const { color, lineWidth } = this.tool;
     const points = [[modelX, modelY]];
 
-    const id = this._surface.addElement('brush', {
+    const id = this._surface.addElement(PhasorElementType.BRUSH, {
       points,
       color,
       lineWidth,
@@ -72,10 +73,13 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
 
     this._draggingPathPoints = points;
 
-    this._surface.updateElement<'brush'>(this._draggingElementId, {
-      points,
-      lineWidth,
-    });
+    this._surface.updateElement<PhasorElementType.BRUSH>(
+      this._draggingElementId,
+      {
+        points,
+        lineWidth,
+      }
+    );
   }
 
   onContainerDragEnd() {

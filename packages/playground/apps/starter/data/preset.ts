@@ -10,7 +10,6 @@ import {
   Text,
   type Workspace,
 } from '@blocksuite/store';
-import * as Y from 'yjs';
 
 import { type InitFn } from './utils';
 
@@ -81,21 +80,10 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
         },
         false
       ),
-      2: native2Y(
-        {
-          id: '2',
-          index: 'a2',
-          type: 'frame',
-          xywh: '[1000,0,800,640]',
-          batch: 'a0',
-          title: new Y.Text('Frame 1'),
-        },
-        false
-      ),
     },
     false
   );
-  page.addBlock(
+  const surfaceId = page.addBlock(
     'affine:surface',
     {
       elements: new NativeWrapper(yMap),
@@ -108,6 +96,12 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     'affine:note',
     { xywh: serializeXYWH(0, 100, 800, 640) },
     pageBlockId
+  );
+
+  page.addBlock(
+    'affine:frame',
+    { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
+    surfaceId
   );
   // Import preset markdown content inside note block
   const contentParser = new window.ContentParser(page);

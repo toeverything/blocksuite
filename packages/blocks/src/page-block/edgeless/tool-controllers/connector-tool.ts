@@ -6,6 +6,7 @@ import {
   type Connection,
   type ConnectorElement,
   type IVec,
+  PhasorElementType,
   StrokeStyle,
 } from '../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
@@ -46,7 +47,7 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
     this._page.captureSync();
     const { mode, color, strokeWidth } = this.tool;
     const { _surface } = this;
-    const id = _surface.addElement('connector', {
+    const id = _surface.addElement(PhasorElementType.CONNECTOR, {
       stroke: color,
       mode,
       controllers: [],
@@ -67,7 +68,10 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       point,
       this._connector.source.id ? [this._connector.source.id] : []
     ) as Connection;
-    this._surface.updateElement<'connector'>(this._connector.id, { target });
+    this._surface.updateElement<PhasorElementType.CONNECTOR>(
+      this._connector.id,
+      { target }
+    );
   }
 
   onContainerDragEnd() {

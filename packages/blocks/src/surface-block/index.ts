@@ -14,6 +14,7 @@ export {
   type Controller,
 } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
+export * from './elements/edgeless-element.js';
 export * from './elements/index.js';
 export { ShapeMethodsMap } from './elements/shape/shapes/index.js';
 export { type ComputedValue } from './elements/surface-element.js';

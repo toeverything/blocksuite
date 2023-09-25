@@ -23,6 +23,7 @@ import {
   ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
 } from '../../../../icons/index.js';
+import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
   ShapeStyle,
@@ -328,7 +329,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
     const textColor = this._getTextColor(color);
     const filled = !isTransparent(color);
     this.elements.forEach(ele => {
-      this.surface.updateElement<'shape'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
         filled,
         fillColor: color,
         color: textColor,
@@ -338,7 +339,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeColor(color: CssVariableName) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<'shape'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
         strokeColor: color,
       });
     });
@@ -346,7 +347,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<'shape'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
         strokeWidth,
       });
     });
@@ -354,7 +355,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<'shape'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
         strokeStyle,
       });
     });
@@ -384,7 +385,7 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _setShapeStyle(shapeStyle: ShapeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<'shape'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.SHAPE>(ele.id, {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
@@ -414,7 +415,10 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
         this.page.captureSync();
         this.elements.forEach(element => {
-          this.surface.updateElement<'shape'>(element.id, updatedProps);
+          this.surface.updateElement<PhasorElementType.SHAPE>(
+            element.id,
+            updatedProps
+          );
         });
       })
     );

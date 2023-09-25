@@ -16,6 +16,50 @@ export const SelectIcon = html`<svg
   />
 </svg>`;
 
+export const ImageUploadIcon = html`
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M6 3.25C4.48122 3.25 3.25 4.48122 3.25 6V16V18C3.25 19.5188 4.48122 20.75 6 20.75H18C19.5188 20.75 20.75 19.5188 20.75 18V14V6C20.75 4.48122 19.5188 3.25 18 3.25H6ZM4.75 18V16.3107L9.11612 11.9445C9.60427 11.4564 10.3957 11.4564 10.8839 11.9445L13.4697 14.5303L15.4697 16.5303C15.7626 16.8232 16.2374 16.8232 16.5303 16.5303C16.8232 16.2374 16.8232 15.7626 16.5303 15.4697L15.0607 14L16.1161 12.9445C16.6043 12.4564 17.3957 12.4564 17.8839 12.9445L19.25 14.3107V18C19.25 18.6904 18.6904 19.25 18 19.25H6C5.30964 19.25 4.75 18.6904 4.75 18ZM11.9445 10.8839L14 12.9393L15.0555 11.8839C16.1294 10.8099 17.8706 10.8099 18.9445 11.8839L19.25 12.1893V6C19.25 5.30964 18.6904 4.75 18 4.75H6C5.30964 4.75 4.75 5.30964 4.75 6V14.1893L8.05546 10.8839C9.1294 9.80994 10.8706 9.80994 11.9445 10.8839ZM14 9C14.5523 9 15 8.55228 15 8C15 7.44772 14.5523 7 14 7C13.4477 7 13 7.44772 13 8C13 8.55228 13.4477 9 14 9Z"
+      fill="#77757D"
+    />
+  </svg>
+`;
+
+export const ImageGrayIcon = html`
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+  >
+    <circle cx="10" cy="10" r="8" fill="url(#pattern0)" fill-opacity="0.2" />
+    <defs>
+      <pattern
+        id="pattern0"
+        patternContentUnits="objectBoundingBox"
+        width="1"
+        height="1"
+      >
+        <use xlink:href="#image0_8620_86273" transform="scale(0.015625)" />
+      </pattern>
+      <image
+        id="image0_8620_86273"
+        width="64"
+        height="64"
+        xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAAXNSR0IArs4c6QAAAONJREFUeF7t20EOhEAIRFG4/6F7DvEnYeFzryQIv6pBd2behOu9dPvsbog+k+NLgArQAqmJcw9iAAhSgZKB3IJkkAySQTJ4CiE+gA8oBeg0mH3Ai084P89HhqwEqIA209ICsQdjAeaZIgaAYKxBDMCAYy8fXwAIgiAIcoJpJEYGI4VjB3YrbC9gL2AvkCB43cM5PgZgAAZgQFnNZAhdGykQBEEQBEEQDBmgAm2glM/z+QUYisYUGoldO7kY32IEAzCg6RgIRgjFAsw+AgRBMNYgBmCAT2TCYfoPPz/HCqQCX1eBHzHnv7C7WhBSAAAAAElFTkSuQmCC"
+      />
+    </defs>
+  </svg>
+`;
+
 export const RenameIcon = html`
   <svg
     width="24"

@@ -11,7 +11,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
 import { matchFlavours } from '../../../../__internal__/utils/model.js';
-import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
 import { HiddenIcon, NoteIcon } from '../../../../icons/index.js';
 import {
   NOTE_COLORS,
@@ -136,7 +135,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   `;
 
   @property({ attribute: false })
-  notes: TopLevelBlockModel[] = [];
+  notes: NoteBlockModel[] = [];
 
   @property({ attribute: false })
   page!: Page;

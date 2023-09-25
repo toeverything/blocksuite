@@ -1,8 +1,11 @@
 import { DEFAULT_ROUGHNESS, ShapeStyle, StrokeStyle } from '../../consts.js';
-import type { IElementDefaultProps } from '../index.js';
+import {
+  type IElementDefaultProps,
+  PhasorElementType,
+} from '../edgeless-element.js';
 
 export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
-  type: 'shape',
+  type: PhasorElementType.SHAPE,
   xywh: '[0,0,0,0]',
 
   rotate: 0,
