@@ -484,7 +484,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const style = styleMap({
       height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
-    const classes = classMap({ [this.grabStatus]: true });
+    const classes = classMap({
+      'affine-database-column-move': true,
+      [this.grabStatus]: true,
+    });
     return html`
       <div
         style=${style}
@@ -505,13 +508,12 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         </div>
         ${this.readonly
           ? null
-          : html`<div class=${classes}>
-              <div class="affine-database-column-move">
-                <div class="control-h"></div>
-                <div class="control-l"></div>
-                <div class="control-r"></div>
-              </div>
-            </div>`}
+          : html`<button class=${classes}>
+              <div class="hover-trigger"></div>
+              <div class="control-h"></div>
+              <div class="control-l"></div>
+              <div class="control-r"></div>
+            </button>`}
       </div>
       <div
         ${ref(this.widthDragBar)}
