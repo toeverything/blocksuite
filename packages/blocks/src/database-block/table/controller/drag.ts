@@ -2,7 +2,7 @@
 
 import type { ReactiveController } from 'lit';
 
-import type { InsertPosition } from '../../types.js';
+import type { InsertToPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
 import { TableRow } from '../components/row.js';
 import type { DataViewTable } from '../table-view.js';
@@ -19,7 +19,7 @@ export class TableDragController implements ReactiveController {
   ):
     | {
         groupKey: string | undefined;
-        position: InsertPosition;
+        position: InsertToPosition;
         y: number;
         width: number;
         x: number;
@@ -101,7 +101,7 @@ export class TableDragController implements ReactiveController {
       | {
           type: 'self';
           groupKey?: string;
-          position: InsertPosition;
+          position: InsertToPosition;
         }
       | { type: 'out'; callback: () => void },
       PointerEvent

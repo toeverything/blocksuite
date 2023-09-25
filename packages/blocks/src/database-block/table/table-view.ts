@@ -15,7 +15,7 @@ import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { GroupHelper } from '../common/group-by/helper.js';
-import type { InsertPosition } from '../types.js';
+import type { InsertToPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';
 import { TableClipboardController } from './controller/clipboard.js';
@@ -169,13 +169,13 @@ export class DataViewTable extends BaseDataView<
     if (this.readonly) return;
   }
 
-  public override addRow(position: InsertPosition) {
+  public override addRow(position: InsertToPosition) {
     this._addRow(this.view, position);
   }
 
   private _addRow = (
     tableViewManager: DataViewTableManager,
-    position: InsertPosition | number
+    position: InsertToPosition | number
   ) => {
     if (this.readonly) return;
 
