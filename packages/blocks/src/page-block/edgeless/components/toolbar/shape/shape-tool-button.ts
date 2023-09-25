@@ -25,6 +25,7 @@ import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../../component-toolbar/change-shape-button.js';
+import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 
@@ -226,23 +227,29 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   };
 
   override render() {
+    const type = this.edgelessTool?.type;
     return html`
-      <div class="container-clip">
-        <div
-          class="shapes"
-          style=${styleMap({ color: `var(${this._shapeIconColor})` })}
-        >
-          ${repeat(this._shapes, (shape, index) => {
-            return html`<edgeless-shape-element
-              .shape=${shape}
-              .order=${this._data.order[index]}
-              .getContainerRect=${this.getContainerRect}
-              .handleClick=${this.handleClick}
-              .edgeless=${this.edgeless}
-            ></edgeless-shape-element>`;
-          })}
+      <edgeless-toolbar-button
+        .tooltip=${this._shapeMenu ? '' : getTooltipWithShortcut('Shape', 'S')}
+        .active=${type === 'shape'}
+      >
+        <div class="container-clip">
+          <div
+            class="shapes"
+            style=${styleMap({ color: `var(${this._shapeIconColor})` })}
+          >
+            ${repeat(this._shapes, (shape, index) => {
+              return html`<edgeless-shape-element
+                .shape=${shape}
+                .order=${this._data.order[index]}
+                .getContainerRect=${this.getContainerRect}
+                .handleClick=${this.handleClick}
+                .edgeless=${this.edgeless}
+              ></edgeless-shape-element>`;
+            })}
+          </div>
         </div>
-      </div>
+      </edgeless-toolbar-button>
     `;
   }
 }
