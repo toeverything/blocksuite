@@ -1543,12 +1543,12 @@ test('press ArrowUp in the edge of two line', async ({ page }) => {
   await type(
     page,
     // we need more four characters to get our expected result in local
-    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  await assertRichTextVRange(page, 0, 89);
 
   // aaa...
   // |a
