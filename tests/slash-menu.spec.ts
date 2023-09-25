@@ -658,7 +658,7 @@ test.describe('slash menu with customize menu', () => {
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
 
-      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+      const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
       class CustomSlashMenu extends SlashMenuWidget {
         override options = {
           ...SlashMenuWidget.DEFAULT_OPTIONS,
@@ -702,7 +702,7 @@ test.describe('slash menu with customize menu', () => {
 
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
-      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+      const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
 
       class CustomSlashMenu extends SlashMenuWidget {
         override options = {
