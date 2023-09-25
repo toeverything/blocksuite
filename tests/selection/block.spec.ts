@@ -1138,15 +1138,18 @@ test('should not draw rect for sub selected blocks when entering tab key', async
   await initEmptyParagraphState(page);
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
-  const coord = await getIndexCoordinate(page, [1, 2]);
+  const coord = await getIndexCoordinate(page, [1, 3]);
 
   // blur
-  await page.mouse.click(0, 0);
+  await page.mouse.click(20, 20);
+
   await dragBetweenCoords(
     page,
-    { x: coord.x - 26 - 24, y: coord.y - 10 },
-    { x: coord.x + 20, y: coord.y + 50 }
+    { x: coord.x - 60, y: coord.y + 10 },
+    { x: coord.x + 100, y: coord.y + 30 },
+    { steps: 50 }
   );
+
   await pressTab(page);
 
   await assertStoreMatchJSX(
