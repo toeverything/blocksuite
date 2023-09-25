@@ -27,6 +27,9 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   blocks!: BlockSpec[];
 
   @property({ attribute: false })
+  mode!: 'page' | 'edgeless';
+
+  @property({ attribute: false })
   page!: Page;
 
   @property({ attribute: false })

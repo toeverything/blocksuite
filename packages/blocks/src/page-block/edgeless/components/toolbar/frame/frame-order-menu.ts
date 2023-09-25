@@ -4,10 +4,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  type FrameElement,
-  generateKeyBetween,
-} from '../../../../../surface-block/index.js';
+import type { FrameBlockModel } from '../../../../../frame-block/index.js';
+import { generateKeyBetween } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
 @customElement('edgeless-frame-order-menu')
@@ -76,7 +74,7 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  frames!: FrameElement[];
+  frames!: FrameBlockModel[];
 
   @property({ attribute: false })
   updateFrames!: () => void;
@@ -153,10 +151,9 @@ export class EdgelessFrameOrderMenu extends WithDisposable(LitElement) {
           const before = this.frames[newIndex - 1]?.index || null;
           const after = this.frames[newIndex].index || null;
           const frame = this.frames[index];
-          this.edgeless.surface.updateIndexes(
-            [generateKeyBetween(before, after)],
-            [frame]
-          );
+          this.edgeless.surface.updateElement(frame.id, {
+            index: generateKeyBetween(before, after),
+          });
           this.edgeless.page.captureSync();
           this.updateFrames();
           this.requestUpdate();

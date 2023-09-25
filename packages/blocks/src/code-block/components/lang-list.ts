@@ -1,6 +1,6 @@
 import type { Placement } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import {
   BUNDLED_LANGUAGES,
@@ -9,7 +9,7 @@ import {
 } from 'shiki';
 
 import { scrollbarStyle } from '../../components/utils.js';
-import { SearchIcon } from '../../icons/index.js';
+import { DoneIcon, SearchIcon } from '../../icons/index.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';
 
@@ -19,7 +19,8 @@ export class LangList extends LitElement {
   static override get styles() {
     return css`
       :host {
-        height: 100%;
+        max-height: 100%;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         background: var(--affine-background-overlay-panel-color);
@@ -32,6 +33,7 @@ export class LangList extends LitElement {
         box-sizing: border-box;
         display: flex;
         height: 100%;
+        overflow: hidden;
         flex-direction: column;
         box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
@@ -45,25 +47,46 @@ export class LangList extends LitElement {
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
       }
 
       ${scrollbarStyle('.lang-list-button-container')}
 
       .lang-item {
         display: flex;
-        justify-content: flex-start;
-        padding-left: 12px;
-        margin-bottom: 5px;
+        justify-content: space-between;
+        padding: 12px;
+      }
+      .lang-item-active {
+        color: var(--affine-blue-600);
+        background: var(--affine-hover-color-filled);
+      }
+      .lang-item-active svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .divider {
+        height: 1px;
+        background-color: var(--affine-divider-color);
+        margin: 8px 0;
+        flex-shrink: 0;
       }
 
       .input-wrapper {
         display: flex;
-        margin-top: 8px;
         margin-left: 4px;
-        border: 1px solid var(--affine-border-color);
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 4px 10px;
         gap: 4px;
+        border: 1px solid transparent;
+      }
+
+      .input-wrapper:focus-within {
+        border: 1px solid var(--affine-blue-600);
+        box-shadow: var(--affine-active-shadow);
       }
 
       #filter-input {
@@ -191,7 +214,7 @@ export class LangList extends LitElement {
           <input
             id="filter-input"
             type="text"
-            placeholder="Search"
+            placeholder="Search for a language"
             @input="${() => {
               this._filterText = this.filterInput?.value;
               this._currentSelectedIndex = 0;
@@ -199,20 +222,25 @@ export class LangList extends LitElement {
             @keydown="${onLanguageSelect}"
           />
         </div>
+        <div class="divider"></div>
         <div class="lang-list-button-container">
-          ${filteredLanguages.map(
-            (language, index) => html`
+          ${filteredLanguages.map((language, index) => {
+            const isActive = index === this._currentSelectedIndex;
+            return html`
               <icon-button
                 width="100%"
                 height="32px"
                 @click="${() => this._onLanguageClicked(language)}"
-                class="lang-item"
-                ?hover=${index === this._currentSelectedIndex}
+                class=${[
+                  'lang-item',
+                  isActive ? 'lang-item-active' : null,
+                ].join(' ')}
               >
                 ${language.displayName ?? language.id}
+                <slot name="suffix">${isActive ? DoneIcon : nothing}</slot>
               </icon-button>
-            `
-          )}
+            `;
+          })}
         </div>
       </div>
     `;

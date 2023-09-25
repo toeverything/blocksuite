@@ -70,15 +70,17 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    this._disposables.addFromEvent(this, 'click', e => {
+    this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       this.selection.selection = undefined;
     });
+    //FIXME: simulate as a widget
+    this.setAttribute('data-widget-id', 'affine-detail-widget');
   }
 
   @query('.add-property')
@@ -108,29 +110,26 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
   override render() {
     const columns = this.columns;
 
-    //FIXME: simulate as a widget
     return html`
-      <div data-widget-id="affine-detail-widget">
-        ${this.renderHeader()}
-        ${repeat(
-          columns,
-          v => v,
-          column => {
-            return html` <affine-data-view-record-field
-              .view="${this.view}"
-              .column="${column}"
-              .rowId="${this.rowId}"
-              data-column-id="${column.id}"
-            ></affine-data-view-record-field>`;
-          }
-        )}
-        ${!this.readonly
-          ? html`<div class="add-property" @click="${this._clickAddProperty}">
-              <div class="icon">${PlusIcon}</div>
-              Add Property
-            </div>`
-          : nothing}
-      </div>
+      ${this.renderHeader()}
+      ${repeat(
+        columns,
+        v => v,
+        column => {
+          return html` <affine-data-view-record-field
+            .view="${this.view}"
+            .column="${column}"
+            .rowId="${this.rowId}"
+            data-column-id="${column.id}"
+          ></affine-data-view-record-field>`;
+        }
+      )}
+      ${!this.readonly
+        ? html`<div class="add-property" @click="${this._clickAddProperty}">
+            <div class="icon">${PlusIcon}</div>
+            Add Property
+          </div>`
+        : nothing}
     `;
   }
 

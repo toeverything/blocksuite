@@ -149,6 +149,17 @@ export class Bound implements IBound {
       bound.maxX > this.minX - epsilon &&
       bound.maxY > this.minY - epsilon &&
       bound.minX < this.maxX + epsilon &&
+      bound.minY < this.maxY + epsilon &&
+      !this.contains(bound) &&
+      !bound.contains(this)
+    );
+  }
+
+  isOverlapWithBound(bound: Bound, epsilon = EPSILON) {
+    return (
+      bound.maxX > this.minX - epsilon &&
+      bound.maxY > this.minY - epsilon &&
+      bound.minX < this.maxX + epsilon &&
       bound.minY < this.maxY + epsilon
     );
   }

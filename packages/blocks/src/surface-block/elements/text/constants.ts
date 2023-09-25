@@ -1,9 +1,12 @@
 import { Workspace } from '@blocksuite/store';
 
-import type { IElementDefaultProps } from '../index.js';
+import {
+  type IElementDefaultProps,
+  PhasorElementType,
+} from '../edgeless-element.js';
 
 export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
-  type: 'text',
+  type: PhasorElementType.TEXT,
   xywh: '[0,0,0,0]',
 
   rotate: 0,

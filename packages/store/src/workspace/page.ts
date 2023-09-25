@@ -68,8 +68,13 @@ export class Page extends Space<FlatBlockMap> {
     }>(),
     blockUpdated: new Slot<
       | {
-          type: 'add' | 'delete';
+          type: 'add';
           id: string;
+        }
+      | {
+          type: 'delete';
+          id: string;
+          flavour: string;
         }
       | {
           type: 'update';
@@ -79,6 +84,7 @@ export class Page extends Space<FlatBlockMap> {
     >(),
     yBlockUpdated: new Slot<{
       id: string;
+      type: 'add' | 'update' | 'delete';
       props: { [key: string]: { old: unknown; new: unknown } };
     }>(),
     copied: new Slot(),
@@ -367,8 +373,6 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
 
-    this.slots.blockUpdated.emit({ type: 'add', id });
-
     return id;
   }
 
@@ -634,7 +638,11 @@ export class Page extends Space<FlatBlockMap> {
       }
     });
 
-    this.slots.blockUpdated.emit({ type: 'delete', id: model.id });
+    this.slots.blockUpdated.emit({
+      type: 'delete',
+      id: model.id,
+      flavour: model.flavour,
+    });
   }
 
   trySyncFromExistingDoc() {
@@ -757,15 +765,21 @@ export class Page extends Space<FlatBlockMap> {
       parent.children[index] = model;
       parent.childrenUpdated.emit();
     }
+    this.slots.blockUpdated.emit({ type: 'add', id });
   }
 
   private _handleYBlockDelete(id: string) {
     const model = this._blockMap.get(id);
+
     if (model === this._root) {
       this.slots.rootDeleted.emit(id);
     }
 
-    this.slots.blockUpdated.emit({ type: 'delete', id });
+    this.slots.blockUpdated.emit({
+      type: 'delete',
+      id,
+      flavour: model?.flavour ?? '',
+    });
     this._blockMap.delete(id);
   }
 
@@ -811,7 +825,11 @@ export class Page extends Space<FlatBlockMap> {
     if (hasPropsUpdate) {
       Object.assign(model, props);
       model.propsUpdated.emit();
-      this.slots.yBlockUpdated.emit({ id: model.id, props: yProps });
+      this.slots.yBlockUpdated.emit({
+        id: model.id,
+        props: yProps,
+        type: 'update',
+      });
     }
     hasChildrenUpdate && model.childrenUpdated.emit();
   }

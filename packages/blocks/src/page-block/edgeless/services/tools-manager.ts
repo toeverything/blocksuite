@@ -18,6 +18,7 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
 import {
   normalizeWheelDeltaY,
   type PhasorElement,
@@ -34,10 +35,11 @@ import { NoteToolController } from '../tool-controllers/note-tool.js';
 import { PanToolController } from '../tool-controllers/pan-tool.js';
 import { ShapeToolController } from '../tool-controllers/shape-tool.js';
 import { TextToolController } from '../tool-controllers/text-tool.js';
-import { getSelectionBoxBound, getXYWH, pickTopBlock } from '../utils/query.js';
+import { edgelessElementsBound } from '../utils/bound-utils.js';
+import { getSelectionBoxBound } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
-export type Selectable = TopLevelBlockModel | PhasorElement;
+export type Selectable = TopLevelBlockModel | FrameBlockModel | PhasorElement;
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;
@@ -412,21 +414,19 @@ export class EdgelessToolsManager {
       return null;
     }
     const { surface } = this.container;
-    const notes = (this.page.root?.children ?? []).filter(
-      child => child.flavour === 'affine:note'
-    ) as TopLevelBlockModel[];
     const { x, y } = this._lastMousePos;
     const [modelX, modelY] = surface.toModelCoord(x, y);
-    const hovered: Selectable | null =
-      surface.pickTop(modelX, modelY) || pickTopBlock(notes, modelX, modelY);
+    const hovered: Selectable | null = surface.pickTop(modelX, modelY);
 
     if (!hovered || this.selection?.editing) {
       return null;
     }
 
-    const xywh = getXYWH(hovered);
     return {
-      rect: getSelectionBoxBound(surface.viewport, xywh),
+      rect: getSelectionBoxBound(
+        surface.viewport,
+        edgelessElementsBound([hovered])
+      ),
       content: hovered,
     };
   }

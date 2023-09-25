@@ -2,17 +2,17 @@ import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
-  getPointFromBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   pointOnPolygonStoke,
   polygonGetPointTangent,
   polygonNearestPoint,
+  rotatePoints,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
-import type { IVec } from '../../../utils/vec.js';
-import type { HitTestOptions } from '../../surface-element.js';
+import { type IVec } from '../../../utils/vec.js';
+import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 import { drawGeneralShape } from '../utils.js';
@@ -139,14 +139,19 @@ export const RectMethods: ShapeMethods = {
     return linePolygonIntersects(start, end, points);
   },
 
-  getRelativePointLocation(point, element) {
+  getRelativePointLocation(relativePoint, element) {
     const bound = Bound.deserialize(element.xywh);
-    const rotateBound: IBound = { ...bound, rotate: element.rotate };
-    const rotatePoint = getPointFromBoundsWithRotation(
-      rotateBound,
-      bound.getRelativePoint(point)
+    const point = bound.getRelativePoint(relativePoint);
+    const rotatePoint = rotatePoints(
+      [point],
+      bound.center,
+      element.rotate ?? 0
+    )[0];
+    const points = rotatePoints(
+      bound.points,
+      bound.center,
+      element.rotate ?? 0
     );
-    const points = getPointsFromBoundsWithRotation(rotateBound);
     const tangent = polygonGetPointTangent(points, rotatePoint);
     return new PointLocation(rotatePoint, tangent);
   },

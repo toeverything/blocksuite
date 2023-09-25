@@ -5,6 +5,7 @@ import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
 import { hasClassNameInList } from '../../../__internal__/index.js';
 import {
   Bound,
+  PhasorElementType,
   ShapeStyle,
   StrokeStyle,
 } from '../../../surface-block/index.js';
@@ -53,7 +54,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const shapeType = shape === 'roundedRect' ? 'rect' : shape;
 
-    const id = this._surface.addElement('shape', {
+    const id = this._surface.addElement(PhasorElementType.SHAPE, {
       shapeType,
       xywh: bound.serialize(),
       strokeColor,

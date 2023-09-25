@@ -14,7 +14,8 @@ import {
 } from '../../utils/math-utils.js';
 import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
-import { type HitTestOptions, SurfaceElement } from '../surface-element.js';
+import type { HitTestOptions } from '../edgeless-element.js';
+import { SurfaceElement } from '../surface-element.js';
 import type { IBrush } from './types.js';
 
 function getSolidStrokePoints(points: number[][], lineWidth: number) {

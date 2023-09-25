@@ -7,6 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
+import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   Bound,
   SHAPE_TEXT_PADDING,
@@ -58,7 +59,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           leftTopY
         );
 
-        edgeless.surface.updateElement<'shape'>(element.id, {
+        edgeless.surface.updateElement<PhasorElementType.SHAPE>(element.id, {
           xywh: new Bound(
             modelLeftTopX,
             modelLeftTopY,
@@ -78,7 +79,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   mount(element: ShapeElement, edgeless: EdgelessPageBlockComponent) {
     if (!element.text) {
       const text = new Workspace.Y.Text();
-      edgeless.surface.updateElement<'shape'>(element.id, {
+      edgeless.surface.updateElement<PhasorElementType.SHAPE>(element.id, {
         text,
         color: GET_DEFAULT_LINE_COLOR(),
       });
