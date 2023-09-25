@@ -5,14 +5,16 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import {
   Bound,
-  DEFAULT_SHAPE_FILL_COLOR,
-  DEFAULT_SHAPE_STROKE_COLOR,
   PhasorElementType,
   ShapeStyle,
   type ShapeType,
   StrokeStyle,
-} from '../../../../../index.js';
+} from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import {
+  DEFAULT_SHAPE_FILL_COLOR,
+  DEFAULT_SHAPE_STROKE_COLOR,
+} from '../../component-toolbar/change-shape-button.js';
 
 interface Shape {
   name: ShapeType | 'roundedRect';
