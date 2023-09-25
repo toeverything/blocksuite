@@ -59,13 +59,13 @@ export class LangList extends LitElement {
         justify-content: space-between;
         padding: 12px;
       }
+      .lang-item svg {
+        width: 20px;
+        height: 20px;
+      }
       .lang-item-active {
         color: var(--affine-blue-600);
         background: var(--affine-hover-color-filled);
-      }
-      .lang-item-active svg {
-        width: 20px;
-        height: 20px;
       }
 
       .divider {
@@ -237,7 +237,11 @@ export class LangList extends LitElement {
                 ].join(' ')}
               >
                 ${language.displayName ?? language.id}
-                <slot name="suffix">${isActive ? DoneIcon : nothing}</slot>
+                <slot name="suffix"
+                  >${this.currentLanguageId === language.id
+                    ? DoneIcon
+                    : nothing}</slot
+                >
               </icon-button>
             `;
           })}
