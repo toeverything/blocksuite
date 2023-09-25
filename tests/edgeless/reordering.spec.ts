@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import {
+  edgelessCommonSetup,
   getSelectedBound,
   initThreeOverlapFilledShapes,
   initThreeOverlapNotes,
@@ -136,27 +137,23 @@ test.describe('reordering notes', () => {
   }
 
   test('bring to front', async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyEdgelessState(page);
-    await switchEditorMode(page);
+    await edgelessCommonSetup(page);
     await zoomResetByKeyboard(page);
     await initThreeOverlapNotes(page, 130, 190);
     await waitNextFrame(page);
     // click outside to clear selection
-    await page.pause();
     await page.mouse.click(50, 100);
-
     // should be note2
-    await page.mouse.click(180, 190);
+    await page.mouse.click(180, 200);
     const bound = await getSelectedBound(page);
 
     await assertSelectedBound(page, bound);
 
-    await clickView(page, [bound[0] - 15, bound[1]]);
+    await clickView(page, [bound[0] - 15, bound[1] + 10]);
     bound[0] -= 30;
     await assertSelectedBound(page, bound);
 
-    await clickView(page, [bound[0] - 15, bound[1]]);
+    await clickView(page, [bound[0] - 15, bound[1] + 10]);
     bound[0] -= 30;
     await assertSelectedBound(page, bound);
 
@@ -165,7 +162,7 @@ test.describe('reordering notes', () => {
     // clear
     await page.mouse.click(100, 50);
     // should be note0
-    await clickView(page, [bound[0] + 40, bound[1]]);
+    await clickView(page, [bound[0] + 40, bound[1] + 10]);
     await assertSelectedBound(page, bound);
   });
 

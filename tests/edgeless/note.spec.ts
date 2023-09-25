@@ -235,13 +235,13 @@ test('dragging un-selected note', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: noteBox.x + 5, y: noteBox.y + 5 },
-    { x: noteBox.x + 25, y: noteBox.y + 25 },
+    { x: noteBox.x + 5, y: noteBox.y + 25 },
     { steps: 10 }
   );
 
-  await page.mouse.move(noteBox.x + 25, noteBox.y + 25);
+  await page.mouse.move(noteBox.x + 35, noteBox.y + 35);
   await assertEdgelessHoverRect(page, [
-    noteBox.x + 20,
+    noteBox.x,
     noteBox.y + 20,
     noteBox.width,
     noteBox.height,
