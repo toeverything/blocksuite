@@ -2,7 +2,9 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicRectShapeElement,
+  createShapeElement,
   deleteAll,
+  edgelessCommonSetup,
   getEdgelessSelectedRect,
   getZoomLevel,
   locatorEdgelessToolButton,
@@ -27,6 +29,7 @@ import {
   assertDOMRectEqual,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
+  assertEdgelessSelectedRectModel,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -150,19 +153,11 @@ test.describe('zooming', () => {
 });
 
 test('cmd + A should select all elements by default', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
-  const start = { x: 0, y: 0 };
-  const end = { x: 100, y: 100 };
-  await addBasicRectShapeElement(page, start, end);
-  start.x = 100;
-  end.x = 200;
-  await addBasicRectShapeElement(page, start, end);
+  await edgelessCommonSetup(page);
+  await createShapeElement(page, [0, 0], [100, 100]);
+  await createShapeElement(page, [100, 0], [200, 100]);
   await selectAllByKeyboard(page);
-
-  await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
+  await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
 });
 
 test('cmd + A should not fire inside active note', async ({ page }) => {

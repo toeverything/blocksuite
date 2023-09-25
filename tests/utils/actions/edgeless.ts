@@ -3,6 +3,7 @@ import '../declare-test-window.js';
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import type { Bound } from 'utils/asserts.js';
 
 import {
   type CssVariableName,
@@ -10,6 +11,7 @@ import {
   type NoteBlockModel,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists, sleep } from '../../../packages/global/src/utils.js';
+import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
@@ -281,6 +283,15 @@ export async function getEdgelessSelectedRect(page: Page) {
     return selected.getBoundingClientRect();
   });
   return selectedBox;
+}
+
+export async function getEdgelessSelectedRectModel(page: Page): Promise<Bound> {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    const bound = container.selectionManager.selectedBound;
+    return [bound.x, bound.y, bound.w, bound.h];
+  });
 }
 
 export async function decreaseZoomLevel(page: Page) {
@@ -640,6 +651,12 @@ export async function optionMouseDrag(
 export async function shiftClick(page: Page, point: IPoint) {
   await page.keyboard.down(SHIFT_KEY);
   await page.mouse.click(point.x, point.y);
+  await page.keyboard.up(SHIFT_KEY);
+}
+
+export async function shiftClickView(page: Page, point: [number, number]) {
+  await page.keyboard.down(SHIFT_KEY);
+  await clickView(page, point);
   await page.keyboard.up(SHIFT_KEY);
 }
 
@@ -1008,10 +1025,10 @@ export async function initThreeOverlapFilledShapes(page: Page) {
   await changeShapeFillColor(page, '--affine-palette-shape-white');
 }
 
-export async function initThreeOverlapNotes(page: Page) {
-  await addNote(page, 'abc', 30 + 100, 40 + 100);
-  await addNote(page, 'efg', 30 + 130, 40 + 100);
-  await addNote(page, 'hij', 30 + 160, 40 + 100);
+export async function initThreeOverlapNotes(page: Page, x = 130, y = 140) {
+  await addNote(page, 'abc', x, y);
+  await addNote(page, 'efg', x + 30, y);
+  await addNote(page, 'hij', x + 60, y);
 }
 
 export async function initThreeNotes(page: Page) {
@@ -1089,7 +1106,7 @@ export async function createShapeElement(
   page: Page,
   coord1: number[],
   coord2: number[],
-  shape: Shape
+  shape = Shape.Square
 ) {
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);

@@ -1,6 +1,7 @@
 import { type Page } from '@playwright/test';
 
 import {
+  getSelectedBound,
   initThreeOverlapFilledShapes,
   initThreeOverlapNotes,
   switchEditorMode,
@@ -8,11 +9,16 @@ import {
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
+  click,
+  clickView,
   enterPlaygroundRoom,
   initEmptyEdgelessState,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertEdgelessSelectedRect } from '../utils/asserts.js';
+import {
+  assertEdgelessSelectedRect,
+  assertSelectedBound,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('reordering shapes', () => {
@@ -129,36 +135,38 @@ test.describe('reordering notes', () => {
     await page.mouse.click(0, 0);
   }
 
-  test('bring to front', async ({ page }) => {
-    await init(page);
-
+  test.only('bring to front', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyEdgelessState(page);
+    await switchEditorMode(page);
+    await zoomResetByKeyboard(page);
+    await initThreeOverlapNotes(page, 130, 190);
+    await waitNextFrame(page);
     // click outside to clear selection
-    await page.mouse.click(50, 50);
+    await page.pause();
+    await page.mouse.click(50, 100);
 
     // should be note2
-    await page.mouse.click(180, 140);
-    await assertEdgelessSelectedRect(page, [160, 100, 448, 95]);
+    await page.mouse.click(180, 190);
+    const bound = await getSelectedBound(page);
 
-    // click outside to clear selection
-    await page.mouse.click(50, 50);
+    await assertSelectedBound(page, bound);
 
-    // should be note1
-    await page.mouse.click(150, 140);
-    await assertEdgelessSelectedRect(page, [130, 100, 448, 95]);
+    await clickView(page, [bound[0] - 15, bound[1]]);
+    bound[0] -= 30;
+    await assertSelectedBound(page, bound);
 
-    // should be note0
-    await page.mouse.click(120, 140);
-    await assertEdgelessSelectedRect(page, [100, 100, 448, 95]);
+    await clickView(page, [bound[0] - 15, bound[1]]);
+    bound[0] -= 30;
+    await assertSelectedBound(page, bound);
 
     // bring note0 to front
     await triggerComponentToolbarAction(page, 'bringToFront');
-
-    // click outside to clear selection
-    await page.mouse.click(50, 50);
-
+    // clear
+    await page.mouse.click(100, 50);
     // should be note0
-    await page.mouse.click(180, 140);
-    await assertEdgelessSelectedRect(page, [100, 100, 448, 95]);
+    await clickView(page, [bound[0] + 40, bound[1]]);
+    await assertSelectedBound(page, bound);
   });
 
   test('bring forward', async ({ page }) => {
