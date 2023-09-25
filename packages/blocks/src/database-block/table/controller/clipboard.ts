@@ -342,14 +342,14 @@ function getTargetRangeFromSelection(
 function pasteToCells(
   data: DataViewTableManager,
   view: DataViewTable,
-  copyedSelectionData: CopyedSelectionData,
+  copied: CopyedSelectionData,
   groupKey: string | undefined,
   rowStartIndex: number,
   columnStartIndex: number,
   rowLength: number,
   columnLength: number
 ) {
-  const srcColumns = copyedSelectionData;
+  const srcColumns = copied;
   const srcRowLength = srcColumns.length;
   const srcColumnLength = srcColumns[0].length;
 
