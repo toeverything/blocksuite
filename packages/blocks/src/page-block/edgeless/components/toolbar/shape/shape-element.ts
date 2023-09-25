@@ -145,6 +145,7 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
     }
     this.dragging = false;
     if (this.isOutside) {
+      const rect = this.shapeElement.getBoundingClientRect();
       this.backupShapeElement.style.setProperty('transition', 'none');
       this.backupShapeElement.style.setProperty('--y', '100px');
       this.shapeElement.style.setProperty('--offset-x', `${0}px`);
@@ -152,7 +153,11 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
       await sleep(0);
       this.shapeElement.classList.remove('dragging');
       this.backupShapeElement.style.removeProperty('transition');
-      this.addShape(coord);
+      const padding = {
+        x: (coord.x - rect.left) / rect.width,
+        y: (coord.y - rect.top) / rect.height,
+      };
+      this.addShape(coord, padding);
     } else {
       this.shapeElement.classList.remove('dragging');
       this.shapeElement.style.setProperty('--offset-x', `${0}px`);
@@ -198,12 +203,14 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   @state()
   private shapeStyle: ShapeStyle = ShapeStyle.General;
 
-  private addShape = (coord: Coord) => {
+  private addShape = (coord: Coord, padding: Coord) => {
+    const width = 100;
+    const height = 100;
     const [modelX, modelY] = this.edgeless.surface.viewport.toModelCoord(
-      coord.x,
-      coord.y
+      coord.x - width * padding.x,
+      coord.y - height * padding.y
     );
-    const xywh = new Bound(modelX, modelY, 100, 100).serialize();
+    const xywh = new Bound(modelX, modelY, width, height).serialize();
     this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,
