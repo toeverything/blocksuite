@@ -28,6 +28,7 @@ export class LangList extends LitElement {
         color: var(--affine-text-primary-color);
         border-radius: 12px;
         z-index: var(--affine-z-index-popover);
+        pointer-events: auto;
       }
 
       .lang-list-container {
