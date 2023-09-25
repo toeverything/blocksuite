@@ -495,6 +495,14 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         @click="${this._clickColumn}"
         @contextmenu="${this._contextMenu}"
       >
+        ${this.readonly
+          ? null
+          : html`<button class=${classes}>
+              <div class="hover-trigger"></div>
+              <div class="control-h"></div>
+              <div class="control-l"></div>
+              <div class="control-r"></div>
+            </button>`}
         <div class="affine-database-column-text ${column.type}">
           <div
             class="affine-database-column-type-icon dv-hover"
@@ -506,14 +514,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             <div class="affine-database-column-text-input">${column.name}</div>
           </div>
         </div>
-        ${this.readonly
-          ? null
-          : html`<button class=${classes}>
-              <div class="hover-trigger"></div>
-              <div class="control-h"></div>
-              <div class="control-l"></div>
-              <div class="control-r"></div>
-            </button>`}
       </div>
       <div
         ${ref(this.widthDragBar)}
