@@ -1,17 +1,16 @@
 import { assertExists } from '@blocksuite/global/utils';
 
 import type { VirgoLine } from '../components/virgo-line.js';
-import type { TextPoint, VRange } from '../types.js';
-import type { VRangeUpdatedProp } from '../types.js';
+import type { TextPoint, VRange, VRangeUpdatedProp } from '../types.js';
 import type { BaseTextAttributes } from '../utils/base-attributes.js';
 import { findDocumentOrShadowRoot } from '../utils/query.js';
 import {
   domRangeToVirgoRange,
   virgoRangeToDomRange,
 } from '../utils/range-conversion.js';
-import { calculateTextLength } from '../utils/text.js';
+import { calculateTextLength, getTextNodesFromElement } from '../utils/text.js';
 import { isMaybeVRangeEqual } from '../utils/v-range.js';
-import { VEditor } from '../virgo.js';
+import type { VEditor } from '../virgo.js';
 
 export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   private _vRange: VRange | null = null;
@@ -106,7 +105,7 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
 
     let index = 0;
     for (const vLine of vLines) {
-      const texts = VEditor.getTextNodesFromElement(vLine);
+      const texts = getTextNodesFromElement(vLine);
 
       for (const text of texts) {
         if (!text.textContent) {
