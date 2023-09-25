@@ -1132,15 +1132,13 @@ export async function createConnectorElement(
   );
 }
 
-export async function hoverOnNote(
-  page: Page,
-  id: string,
-  point?: { x: number; y: number }
-) {
+export async function hoverOnNote(page: Page, id: string, offset = [0, 0]) {
   const blockRect = await page.locator(`[data-block-id="${id}"]`).boundingBox();
 
   assertExists(blockRect);
 
-  point = { x: blockRect.width / 2, y: blockRect.height / 2 };
-  await page.mouse.move(blockRect.x + point.x, blockRect.y + point.y);
+  await page.mouse.move(
+    blockRect.x + blockRect.width / 2 + offset[0],
+    blockRect.y + blockRect.height / 2 + offset[1]
+  );
 }

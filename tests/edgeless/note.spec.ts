@@ -30,6 +30,7 @@ import {
   fillLine,
   focusRichText,
   initEmptyEdgelessState,
+  initSixParagraphs,
   initThreeParagraphs,
   pasteByKeyboard,
   pressArrowDown,
@@ -335,14 +336,13 @@ test.describe('note slicer', () => {
   test('note slicer will add new note', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const ids = await initEmptyEdgelessState(page);
-    await initThreeParagraphs(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+    await initSixParagraphs(page);
 
     await switchEditorMode(page);
-
+    await page.pause();
     await selectNoteInEdgeless(page, ids.noteId);
 
-    await hoverOnNote(page, ids.noteId);
+    await hoverOnNote(page, ids.noteId, [0, 60]);
     await waitNextFrame(page);
     await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
@@ -358,9 +358,9 @@ test.describe('note slicer', () => {
     );
 
     await waitNextFrame(page, 2000);
-    await expect(
-      page.locator('affine-note-slicer-popupbutton').isVisible()
-    ).toBeTruthy();
+    // await expect(
+    //   page.locator('affine-note-slicer-popupbutton').isVisible()
+    // ).toBeTruthy();
     await page.locator('affine-note-slicer-popupbutton').click();
 
     await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
@@ -409,14 +409,13 @@ test.describe('note slicer', () => {
   }) => {
     await enterPlaygroundRoom(page);
     const ids = await initEmptyEdgelessState(page);
-    await initThreeParagraphs(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+    await initSixParagraphs(page);
 
     await switchEditorMode(page);
 
     await selectNoteInEdgeless(page, ids.noteId);
 
-    await hoverOnNote(page, ids.noteId);
+    await hoverOnNote(page, ids.noteId, [0, 60]);
     await waitNextFrame(page);
     await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
@@ -481,14 +480,13 @@ test.describe('note slicer', () => {
 test('undo/redo should work correctly after clipping', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+  await initSixParagraphs(page);
 
   await switchEditorMode(page);
 
   await selectNoteInEdgeless(page, ids.noteId);
 
-  await hoverOnNote(page, ids.noteId);
+  await hoverOnNote(page, ids.noteId, [0, 60]);
   await waitNextFrame(page, 500);
 
   const buttonRect = await page

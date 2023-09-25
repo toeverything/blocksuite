@@ -48,7 +48,6 @@ import {
   getResizeLabel,
   rotateResizeCursor,
 } from '../utils.js';
-import { FrameBlockModel } from '../../../../index.js';
 
 export type SelectedRect = {
   left: number;

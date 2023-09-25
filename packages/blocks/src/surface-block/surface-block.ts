@@ -27,6 +27,7 @@ import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manag
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import type { Selectable } from '../page-block/edgeless/services/tools-manager.js';
+import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   getEdgelessElement,
   isConnectable,
@@ -75,7 +76,6 @@ import {
   normalizeWheelDeltaY,
 } from './utils/index.js';
 import { serializeXYWH } from './utils/xywh.js';
-import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 
 type id = string;
 export enum EdgelessBlocksFlavour {

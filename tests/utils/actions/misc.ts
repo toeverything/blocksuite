@@ -596,6 +596,22 @@ export async function initThreeParagraphs(page: Page) {
   await resetHistory(page);
 }
 
+export async function initSixParagraphs(page: Page) {
+  await focusRichText(page);
+  await type(page, '1');
+  await pressEnter(page);
+  await type(page, '2');
+  await pressEnter(page);
+  await type(page, '3');
+  await pressEnter(page);
+  await type(page, '4');
+  await pressEnter(page);
+  await type(page, '5');
+  await pressEnter(page);
+  await type(page, '6');
+  await resetHistory(page);
+}
+
 export async function initThreeLists(page: Page) {
   await focusRichText(page);
   await type(page, '-');
