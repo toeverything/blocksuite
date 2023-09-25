@@ -1,9 +1,10 @@
 import type { Y } from '@blocksuite/store';
 
-import type { ISurfaceElement } from '../surface-element.js';
+import type { PhasorElementType } from '../edgeless-element.js';
+import { type ISurfaceElement } from '../surface-element.js';
 
 export interface IText extends ISurfaceElement {
-  type: 'text';
+  type: PhasorElementType.TEXT;
 
   text: Y.Text;
   color: string;

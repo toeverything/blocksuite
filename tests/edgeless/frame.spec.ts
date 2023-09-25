@@ -57,8 +57,8 @@ test.describe('frame', () => {
 
     await dragBetweenViewCoords(page, [100, 50], [200, 50]);
     await selectAllByKeyboard(page);
-    await assertSelectedBound(page, [100, 0, 100, 100]);
-    await assertSelectedBound(page, [200, 0, 100, 100], 1);
+    await assertSelectedBound(page, [100, 0, 100, 100], 1);
+    await assertSelectedBound(page, [200, 0, 100, 100], 2);
   });
 
   test('edit frame title', async ({ page }) => {

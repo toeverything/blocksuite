@@ -151,6 +151,11 @@ export class EdgelessNotesContainer extends WithDisposable(LitElement) {
     return this;
   }
 
+  protected override firstUpdated() {
+    this.style.position = 'absolute';
+    this.style.zIndex = '1';
+  }
+
   override render() {
     const { notes, renderer } = this;
     return html`

@@ -1,10 +1,14 @@
 import { assertExists, groupBy } from '@blocksuite/global/utils';
-import { type Page } from '@blocksuite/store';
+import { type Page, Workspace } from '@blocksuite/store';
 
+import type { FrameBlockModel } from '../../frame-block/index.js';
+import type { NoteBlockModel } from '../../index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
+  isFrameBlock,
+  isNoteBlock,
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
@@ -15,7 +19,6 @@ import {
   type Connection,
   ConnectorElement,
   deserializeXYWH,
-  FrameElement,
   getCommonBound,
   type IBound,
   type PhasorElement,
@@ -31,6 +34,7 @@ import {
 } from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
+import type { FrameBlockService } from '../service/legacy-services/frame-service.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
@@ -54,7 +58,7 @@ export function getCopyElements(
   const set = new Set<EdgelessElement>();
 
   elements.forEach(element => {
-    if (element instanceof FrameElement) {
+    if (isFrameBlock(element)) {
       set.add(element);
       surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
     } else {
@@ -85,8 +89,11 @@ function prepareConnectorClipboardData(
 async function prepareClipboardData(selectedAll: Selectable[]) {
   const selected = await Promise.all(
     selectedAll.map(async selected => {
-      if (isTopLevelBlock(selected)) {
+      if (isNoteBlock(selected)) {
         return (await getBlockClipboardInfo(selected)).json;
+      } else if (isFrameBlock(selected)) {
+        const service = getService(selected.flavour) as FrameBlockService;
+        return { ...service.block2Json(selected) };
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
@@ -221,7 +228,7 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
 
-    this._pasteShapesAndNotes(elementsRawData);
+    this._pasteShapesAndBlocks(elementsRawData);
   };
 
   private async _pasteInTextNote(e: ClipboardEvent) {
@@ -247,10 +254,10 @@ export class EdgelessClipboard implements Clipboard {
 
   private _createPhasorElement(clipboardData: Record<string, unknown>) {
     const id = this.surface.addElement(
-      clipboardData.type as keyof PhasorElementType,
+      clipboardData.type as PhasorElementType,
       clipboardData
     );
-    const element = this.surface.pickById(id);
+    const element = this.surface.pickById(id) as PhasorElement;
     assertExists(element);
     return element;
   }
@@ -298,12 +305,10 @@ export class EdgelessClipboard implements Clipboard {
       notes.map(async ({ id, xywh, children, background }) => {
         assertExists(xywh);
 
-        const [oldX, oldY, oldW, oldH] = deserializeXYWH(xywh);
-        const newXywh = serializeXYWH(oldX, oldY, oldW, oldH);
         const noteId = this._page.addBlock(
           'affine:note',
           {
-            xywh: newXywh,
+            xywh,
             background,
           },
           this._page.root?.id
@@ -319,12 +324,30 @@ export class EdgelessClipboard implements Clipboard {
     return noteIds;
   }
 
+  private async _createFrameBlocks(frames: SerializedBlock[]) {
+    const frameIds = await Promise.all(
+      frames.map(async ({ xywh, title, background }) => {
+        const frameId = this._page.addBlock(
+          'affine:frame',
+          {
+            xywh,
+            background,
+            title: new Workspace.Y.Text(title),
+          },
+          this.surface.model.id
+        );
+        return frameId;
+      })
+    );
+    return frameIds;
+  }
+
   private _getOldCommonBound(
     phasorElements: PhasorElement[],
-    notes: TopLevelBlockModel[]
+    blocks: TopLevelBlockModel[]
   ) {
     const commonBound = getCommonBound(
-      [...phasorElements, ...notes]
+      [...phasorElements, ...blocks]
         .map(({ xywh }) => {
           if (!xywh) {
             return;
@@ -347,12 +370,12 @@ export class EdgelessClipboard implements Clipboard {
 
   private _emitSelectionChangeAfterPaste(
     phasorElementIds: string[],
-    noteIds: string[]
+    blockIds: string[]
   ) {
     const newSelected = [
       ...phasorElementIds,
-      ...noteIds.filter(id => {
-        return this._page.getBlockById(id)?.flavour === 'affine:note';
+      ...blockIds.filter(id => {
+        return isTopLevelBlock(this._page.getBlockById(id));
       }),
     ];
 
@@ -362,12 +385,17 @@ export class EdgelessClipboard implements Clipboard {
     });
   }
 
-  private async _pasteShapesAndNotes(
+  private async _pasteShapesAndBlocks(
     elementsRawData: Record<string, unknown>[]
   ) {
     const groupedByType = groupBy(elementsRawData, data =>
-      isTopLevelBlock(data as unknown as Selectable) ? 'notes' : 'elements'
+      isNoteBlock(data as unknown as Selectable)
+        ? 'notes'
+        : isFrameBlock(data as unknown as Selectable)
+        ? 'frames'
+        : 'elements'
     ) as unknown as {
+      frames: SerializedBlock[];
       notes?: SerializedBlock[];
       elements?: { type: PhasorElement['type'] }[];
     };
@@ -380,10 +408,15 @@ export class EdgelessClipboard implements Clipboard {
       groupedByType.notes || [],
       oldIdToNewIdMap
     );
+    const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
 
     const notes = noteIds.map(id =>
       this._page.getBlockById(id)
-    ) as TopLevelBlockModel[];
+    ) as NoteBlockModel[];
+
+    const frames = frameIds.map(id =>
+      this._page.getBlockById(id)
+    ) as FrameBlockModel[];
 
     const elements = this._createPhasorElements(
       groupedByType.elements || [],
@@ -395,7 +428,10 @@ export class EdgelessClipboard implements Clipboard {
       lastMousePos.x,
       lastMousePos.y
     );
-    const oldCommonBound = this._getOldCommonBound(elements, notes);
+    const oldCommonBound = this._getOldCommonBound(elements, [
+      ...notes,
+      ...frames,
+    ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
 
@@ -416,38 +452,38 @@ export class EdgelessClipboard implements Clipboard {
       }
     });
 
-    notes.forEach(note => {
-      const [x, y, w, h] = deserializeXYWH(note.xywh);
+    [...notes, ...frames].forEach(block => {
+      const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
         pasteY + y - oldCommonBound.y,
         w,
         h
       );
-      this._page.updateBlock(note, {
+      this._page.updateBlock(block, {
         xywh: serializeXYWH(newBound.x, newBound.y, newBound.w, newBound.h),
       });
     });
 
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
-      noteIds
+      [...noteIds, ...frameIds]
     );
   }
 
-  async copyAsPng(notes: TopLevelBlockModel[], shapes: PhasorElement[]) {
-    const notesLen = notes.length;
+  async copyAsPng(blocks: TopLevelBlockModel[], shapes: PhasorElement[]) {
+    const blocksLen = blocks.length;
     const shapesLen = shapes.length;
 
-    if (notesLen + shapesLen === 0) return;
+    if (blocksLen + shapesLen === 0) return;
 
     // sort by `index`
-    notes.sort(compare);
+    blocks.sort(compare);
     shapes.sort(compare);
 
     const bounds: IBound[] = [];
-    notes.forEach(note => {
-      bounds.push(Bound.deserialize(note.xywh));
+    blocks.forEach(block => {
+      bounds.push(Bound.deserialize(block.xywh));
     });
     shapes.forEach(shape => {
       bounds.push(Bound.deserialize(shape.xywh));
@@ -461,7 +497,7 @@ export class EdgelessClipboard implements Clipboard {
     const canvas = await parser.edgelessToCanvas(
       this._edgeless,
       bound,
-      notes,
+      blocks,
       shapes
     );
 

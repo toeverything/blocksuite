@@ -14,6 +14,7 @@ import {
   type IVec,
   normalizeDegAngle,
   Overlay,
+  PhasorElementType,
   rotatePoints,
   type RoughCanvas,
   ShapeElement,
@@ -95,7 +96,7 @@ function nextBound(
   }
 
   function isValidBound(bound: Bound) {
-    return !elements.some(e => bound.isIntersectWithBound(getGridBound(e)));
+    return !elements.some(e => bound.isOverlapWithBound(getGridBound(e)));
   }
 
   let count = 0;
@@ -287,7 +288,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _addConnector(source: Connection, target: Connection) {
     const { surface } = this.edgeless;
-    const id = surface.addElement('connector', {
+    const id = surface.addElement(PhasorElementType.CONNECTOR, {
       mode: ConnectorMode.Orthogonal,
       strokeWidth: 2,
       stroke: this._current.strokeColor,
@@ -298,7 +299,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _createShape() {
-    return this.edgeless.surface.addElement(this._current.type, {
+    return this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
       ...this._current.serialize(),
       text: new Workspace.Y.Text(),
     });
@@ -360,7 +361,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
 
     surface.updateElement(id, { xywh: nextBound.serialize() });
-    surface.updateElement<'connector'>(connector.id, {
+    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
       target: { id, position },
     });
     this.edgeless.selectionManager.setSelection({

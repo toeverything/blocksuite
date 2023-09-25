@@ -1,6 +1,5 @@
 import { Point } from '../../../__internal__/utils/rect.js';
 import type { Alignable } from '../../../__internal__/utils/types.js';
-import { type NoteBlockModel } from '../../../note-block/note-model.js';
 import {
   Bound,
   deserializeXYWH,
@@ -8,7 +7,7 @@ import {
   Overlay,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { isTopLevelBlock } from '../utils/query.js';
+import { isConnectable, isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
   absXDistance: number;
@@ -52,21 +51,22 @@ export class EdgelessSnapManager extends Overlay {
 
   setupAlignables(alignables: Alignable[]): Bound {
     if (alignables.length === 0) return new Bound();
-    const { page, surface } = this.container;
-    const connectors = surface.connector.getConnecttedConnectors(alignables);
+    const { surface } = this.container;
+    const connectors = surface.connector.getConnecttedConnectors(
+      alignables.filter(isConnectable)
+    );
 
     const { viewport } = surface;
     const viewportBounds = Bound.from(viewport.viewportBounds);
     viewport.addOverlay(this);
 
-    const notes = page.getBlockByFlavour('affine:note') as NoteBlockModel[];
     const phasorElements = surface.getElements();
     const excludes = [...alignables, ...connectors];
     this._alignableBounds = [];
-    (<Alignable[]>[...notes, ...phasorElements]).forEach(alignable => {
+    (<Alignable[]>[...surface.blocks, ...phasorElements]).forEach(alignable => {
       const bounds = this._getBoundsWithRotationByAlignable(alignable);
       if (
-        viewportBounds.isIntersectWithBound(bounds) &&
+        viewportBounds.isOverlapWithBound(bounds) &&
         !excludes.includes(alignable)
       ) {
         this._alignableBounds.push(bounds);

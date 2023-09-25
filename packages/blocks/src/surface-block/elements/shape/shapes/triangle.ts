@@ -12,7 +12,7 @@ import {
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
 import { type IVec } from '../../../utils/vec.js';
-import type { HitTestOptions } from '../../surface-element.js';
+import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
 import { drawGeneralShape } from '../utils.js';
