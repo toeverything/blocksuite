@@ -72,20 +72,20 @@ const editLinkStyle = css`
   .affine-confirm-button {
     grid-area: btn;
     user-select: none;
-    fill: var(--affine-primary-color);
-  }
-  .affine-confirm-button[disabled],
-  .affine-confirm-button:disabled {
-    fill: var(--affine-icon-color);
   }
 `;
 
-export const linkPopoverStyle = css`
+export const linkPopupStyle = css`
   :host {
     box-sizing: border-box;
   }
 
-  .popover-container {
+  .mock-selection {
+    position: absolute;
+    background-color: rgba(35, 131, 226, 0.28);
+  }
+
+  .popup-container {
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     font-size: var(--affine-font-base);
     font-style: normal;
@@ -93,6 +93,7 @@ export const linkPopoverStyle = css`
     color: var(--affine-text-primary-color);
     z-index: var(--affine-z-index-popover);
     animation: affine-popover-fade-in 0.2s ease;
+    position: absolute;
   }
 
   @keyframes affine-popover-fade-in {
