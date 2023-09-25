@@ -1,19 +1,17 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
+import { getBlockElementByModel } from '../../__internal__/index.js';
 import type { EdgelessElement } from '../../__internal__/utils/types.js';
-import type { NoteBlockModel } from '../../models.js';
-import {
-  Bound,
-  FrameElement,
-  Overlay,
-  type RoughCanvas,
-} from '../../surface-block/index.js';
+import type { FrameBlockComponent } from '../../frame-block/index.js';
+import type { FrameBlockModel, NoteBlockModel } from '../../models.js';
+import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
+import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { type Selectable } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
-import { isTopLevelBlock } from './utils/query.js';
+import { isFrameBlock, isTopLevelBlock } from './utils/query.js';
 
 const MIN_FRAME_WIDTH = 800;
 const MIN_FRAME_HEIGHT = 640;
@@ -37,12 +35,12 @@ export class EdgelessFrameManager {
   }
 
   get frames() {
-    return this._edgeless.surface.getElementsByType('frame') as FrameElement[];
+    return this._edgeless.frames;
   }
 
   selectFrame(eles: Selectable[]) {
     const frames = this._edgeless.surface.frame.frames;
-    if (!eles.some(ele => ele instanceof FrameElement) && frames.length !== 0) {
+    if (!eles.some(ele => isFrameBlock(ele)) && frames.length !== 0) {
       const bound = edgelessElementsBound(eles);
       for (let i = frames.length - 1; i >= 0; i--) {
         const frame = frames[i];
@@ -54,7 +52,7 @@ export class EdgelessFrameManager {
     return null;
   }
 
-  setHighlight(frame: FrameElement) {
+  setHighlight(frame: FrameBlockModel) {
     const bound = Bound.deserialize(frame.xywh);
     this._frameOverlay.bound = bound;
     this._edgeless.surface.refresh();
@@ -64,12 +62,12 @@ export class EdgelessFrameManager {
     this._frameOverlay.bound = null;
   }
 
-  getElementsInFrame(frame: FrameElement) {
+  getElementsInFrame(frame: FrameBlockModel) {
     const bound = Bound.deserialize(frame.xywh);
     const elements: EdgelessElement[] =
       this._edgeless.surface.viewport.gridManager
         .search(bound, true)
-        .filter(ele => !(ele instanceof FrameElement));
+        .filter(ele => !isFrameBlock(ele));
     elements.push(
       ...(<NoteBlockModel[]>(
         this._edgeless.page.getBlockByFlavour('affine:note')
@@ -78,8 +76,9 @@ export class EdgelessFrameManager {
     return elements;
   }
 
-  calculateFrameColor(frame: FrameElement) {
+  calculateFrameColor(frame: FrameBlockModel) {
     const elements = this.getElementsInFrame(frame);
+    const frameBlock = getBlockElementByModel(frame) as FrameBlockComponent;
     let color = '';
     elements.forEach(element => {
       if (isTopLevelBlock(element)) {
@@ -91,7 +90,7 @@ export class EdgelessFrameManager {
       }
     });
     color = color || NoteColor;
-    frame.color = color;
+    frameBlock.color = color;
     this._edgeless.surface.refresh();
   }
 
@@ -109,16 +108,19 @@ export class EdgelessFrameManager {
       const offset = (MIN_FRAME_HEIGHT - bound.h) / 2;
       bound = bound.expand(0, offset);
     }
-    const id = _edgeless.surface.addElement('frame', {
-      title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
-      batch: 'a0',
-      xywh: bound.serialize(),
-    });
+    const id = surface.addElement(
+      EdgelessBlockType.FRAME,
+      {
+        title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
+        xywh: bound.serialize(),
+      },
+      surface.model
+    );
+    const frameModel = surface.pickById(id);
     _edgeless.page.captureSync();
-    const frame = surface.pickById(id);
-    assertExists(frame);
+    assertExists(frameModel);
     _edgeless.selectionManager.setSelection({
-      elements: [frame.id],
+      elements: [frameModel.id],
       editing: false,
     });
   }

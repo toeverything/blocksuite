@@ -2,13 +2,12 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type {
-  FrameElement,
-  ShapeElement,
-} from '../../../surface-block/index.js';
+import type { FrameBlockModel } from '../../../index.js';
+import type { ShapeElement } from '../../../surface-block/index.js';
 import {
   Bound,
   type IModelCoord,
+  PhasorElementType,
   TextElement,
 } from '../../../surface-block/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
@@ -63,7 +62,7 @@ export function mountShapeEditor(
 }
 
 export function mountFrameEditor(
-  frame: FrameElement,
+  frame: FrameBlockModel,
   edgeless: EdgelessPageBlockComponent
 ) {
   const frameEditor = new EdgelessFrameTitleEditor();
@@ -88,7 +87,7 @@ export function addText(
       event.x,
       event.y
     );
-    const id = edgeless.surface.addElement('text', {
+    const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Workspace.Y.Text(),
       textAlign: 'left',

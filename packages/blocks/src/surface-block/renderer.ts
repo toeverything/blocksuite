@@ -153,11 +153,11 @@ export class Renderer implements SurfaceViewport {
 
   get viewportBounds() {
     const { viewportMinXY, viewportMaxXY } = this;
-    return {
+    return Bound.from({
       ...viewportMinXY,
       w: viewportMaxXY.x - viewportMinXY.x,
       h: viewportMaxXY.y - viewportMinXY.y,
-    };
+    });
   }
 
   get boundingClientRect() {

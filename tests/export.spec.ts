@@ -27,11 +27,10 @@ test('export html title', async ({ page }) => {
   await type(page, 'this is title');
 
   await switchEditorMode(page);
-
-  await addNote(page, 'hello', 30, 140);
   await waitNextFrame(page);
-  await addNote(page, 'world', 80, 340);
+  await addNote(page, 'hello', 30, 40);
   await waitNextFrame(page);
+  await addNote(page, 'world', 80, 40);
 
   const htmlText = await export2Html(page);
   expect(htmlText).toEqual(

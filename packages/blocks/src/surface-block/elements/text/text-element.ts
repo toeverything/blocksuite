@@ -1,14 +1,5 @@
 import type { IModelCoord } from '../../consts.js';
-import { Bound } from '../../utils/bound.js';
-import {
-  getPointFromBoundsWithRotation,
-  getPointsFromBoundsWithRotation,
-  linePolygonIntersects,
-  polygonGetPointTangent,
-  polygonNearestPoint,
-} from '../../utils/math-utils.js';
-import { PointLocation } from '../../utils/point-location.js';
-import { type IVec } from '../../utils/vec.js';
+import { RectElement } from '../rect-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
@@ -20,7 +11,7 @@ import {
   isRTL,
   splitIntoLines,
 } from './utils.js';
-
+@RectElement
 export class TextElement extends SurfaceElement<IText> {
   get text() {
     return this.yMap.get('text') as IText['text'];
@@ -62,10 +53,6 @@ export class TextElement extends SurfaceElement<IText> {
     });
   }
 
-  getNearestPoint(point: IVec): IVec {
-    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
-  }
-
   getCursorByCoord(coord: IModelCoord) {
     const { x, y, fontSize, fontFamily, text } = this;
     const lineHeight = getLineHeight(fontFamily, fontSize);
@@ -85,16 +72,6 @@ export class TextElement extends SurfaceElement<IText> {
       charIndex += 1;
     }
     return index;
-  }
-
-  override containedByBounds(bounds: Bound): boolean {
-    const points = getPointsFromBoundsWithRotation(this);
-    return points.some(point => bounds.containsPoint(point));
-  }
-
-  override intersectWithLine(start: IVec, end: IVec) {
-    const points = getPointsFromBoundsWithRotation(this);
-    return linePolygonIntersects(start, end, points);
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
@@ -163,16 +140,5 @@ export class TextElement extends SurfaceElement<IText> {
         ctx.restore();
       }
     }
-  }
-
-  override getRelativePointLocation(point: IVec): PointLocation {
-    const bound = Bound.deserialize(this.xywh);
-    const rotatePoint = getPointFromBoundsWithRotation(
-      this,
-      bound.getRelativePoint(point)
-    );
-    const points = getPointsFromBoundsWithRotation(this);
-    const tangent = polygonGetPointTangent(points, rotatePoint);
-    return new PointLocation(rotatePoint, tangent);
   }
 }
