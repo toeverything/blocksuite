@@ -81,7 +81,9 @@ export function addText(
   event: PointerEventState,
   color: string = GET_DEFAULT_TEXT_COLOR()
 ) {
-  const selected = edgeless.surface.pickTop(event.x, event.y);
+  const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
+  const selected = edgeless.surface.pickTop(x, y);
+
   if (!selected) {
     const [modelX, modelY] = edgeless.surface.viewport.toModelCoord(
       event.x,
