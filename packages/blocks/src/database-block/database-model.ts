@@ -8,7 +8,7 @@ import { titlePureColumnConfig } from './common/columns/title/define.js';
 import type { DataViewDataType, DataViewTypes } from './common/data-view.js';
 import { viewManager } from './common/data-view.js';
 import type { Column } from './table/types.js';
-import type { Cell, ColumnUpdater, InsertPosition } from './types.js';
+import type { Cell, ColumnUpdater, InsertToPosition } from './types.js';
 import { arrayMove, insertPositionToIndex } from './utils/insert.js';
 
 export type DatabaseBlockProps = {
@@ -133,7 +133,7 @@ export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
     });
     this.applyViewsUpdate();
   }
-  moveViewTo(id: string, position: InsertPosition) {
+  moveViewTo(id: string, position: InsertToPosition) {
     this.page.transact(() => {
       this.views = arrayMove(
         this.views,
@@ -165,7 +165,7 @@ export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
   }
 
   addColumn(
-    position: InsertPosition,
+    position: InsertToPosition,
     column: Omit<Column, 'id'> & {
       id?: string;
     }

@@ -1,13 +1,9 @@
 import type { Disposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/global/utils';
 
-import type {
-  DataSource,
-  DetailSlots,
-} from '../../__internal__/datasource/base.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { TType } from '../logical/typesystem.js';
-import type { ColumnDataUpdater, InsertPosition } from '../types.js';
+import type { ColumnDataUpdater, InsertToPosition } from '../types.js';
 import type { FilterGroup, Variable } from './ast.js';
 import type {
   CellRenderer,
@@ -16,6 +12,7 @@ import type {
 } from './columns/manager.js';
 import { columnManager } from './columns/manager.js';
 import { columnRenderer } from './columns/renderer.js';
+import type { DataSource, DetailSlots } from './datasource/base.js';
 
 export interface DataViewManager {
   get id(): string;
@@ -68,9 +65,9 @@ export interface DataViewManager {
 
   rowDelete(ids: string[]): void;
 
-  rowAdd(insertPosition: InsertPosition): string;
+  rowAdd(insertPosition: InsertToPosition): string;
 
-  columnAdd(toAfterOfColumn: InsertPosition, type?: string): string;
+  columnAdd(toAfterOfColumn: InsertToPosition, type?: string): string;
 
   columnDelete(columnId: string): void;
 
@@ -127,8 +124,8 @@ export interface DataViewManager {
     callback: () => void
   ): Disposable;
 
-  columnMove(columnId: string, position: InsertPosition): void;
-  rowMove(rowId: string, position: InsertPosition): void;
+  columnMove(columnId: string, position: InsertToPosition): void;
+  rowMove(rowId: string, position: InsertToPosition): void;
 
   duplicateView(): void;
   deleteView(): void;
@@ -318,7 +315,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
     this.dataSource.cellChangeValue(rowId, columnId, value);
   }
 
-  public columnAdd(position: InsertPosition, type?: string): string {
+  public columnAdd(position: InsertToPosition, type?: string): string {
     const id = this.dataSource.propertyAdd(position, type);
     this.columnMove(id, position);
     return id;
@@ -409,7 +406,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   public abstract get columnsWithoutFilter(): string[];
 
-  public rowAdd(insertPosition: InsertPosition | number): string {
+  public rowAdd(insertPosition: InsertToPosition | number): string {
     return this.dataSource.rowAdd(insertPosition);
   }
 
@@ -437,7 +434,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
     return columnRenderer.get(type).icon;
   }
 
-  abstract columnMove(columnId: string, position: InsertPosition): void;
+  abstract columnMove(columnId: string, position: InsertToPosition): void;
 
   public abstract deleteView(): void;
 
@@ -472,7 +469,7 @@ export abstract class BaseDataViewManager implements DataViewManager {
     return this._filterVisible ?? this.filter.conditions.length > 0;
   }
 
-  public rowMove(rowId: string, position: InsertPosition): void {
+  public rowMove(rowId: string, position: InsertToPosition): void {
     this.dataSource.rowMove(rowId, position);
   }
 
