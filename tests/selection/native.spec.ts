@@ -635,15 +635,17 @@ test('select text in the same line with dragging rightward and press enter creat
   await initThreeParagraphs(page);
   await assertRichTexts(page, ['123', '456', '789']);
   // blur the editor
-  await page.mouse.click(0, 0);
+  await page.mouse.click(20, 20);
 
   const box123 = await getRichTextBoundingBox(page, '2');
-  const above123 = { x: box123.left - 20, y: box123.top - 20 };
+  const above123 = { x: box123.left + 100, y: box123.top };
 
   const box789 = await getRichTextBoundingBox(page, '4');
   const below789 = { x: box789.right + 30, y: box789.bottom + 50 };
 
   await dragBetweenCoords(page, below789, above123, { steps: 50 });
+  await page.waitForTimeout(300);
+
   await pressEnter(page);
   await pressEnter(page);
   await type(page, 'abc');

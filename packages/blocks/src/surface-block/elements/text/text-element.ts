@@ -1,4 +1,13 @@
 import type { IModelCoord } from '../../consts.js';
+import { Bound } from '../../utils/bound.js';
+import {
+  getPointsFromBoundsWithRotation,
+  linePolygonIntersects,
+  pointInPolygon,
+  polygonNearestPoint,
+  rotatePoints,
+} from '../../utils/math-utils.js';
+import { type IVec } from '../../utils/vec.js';
 import { RectElement } from '../rect-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
@@ -53,13 +62,33 @@ export class TextElement extends SurfaceElement<IText> {
     });
   }
 
+  getTextCursorPosition(coord: IModelCoord) {
+    const leftTop = getPointsFromBoundsWithRotation(this)[0];
+    const mousePos = rotatePoints(
+      [[coord.x, coord.y]],
+      leftTop,
+      -this.rotate
+    )[0];
+
+    return [
+      Math.floor(
+        (mousePos[1] - leftTop[1]) /
+          getLineHeight(this.fontFamily, this.fontSize)
+      ),
+      mousePos[0] - leftTop[0],
+    ];
+  }
+
+  override getNearestPoint(point: IVec): IVec {
+    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
+  }
+
   getCursorByCoord(coord: IModelCoord) {
-    const { x, y, fontSize, fontFamily, text } = this;
-    const lineHeight = getLineHeight(fontFamily, fontSize);
-    const lineIndex = Math.floor((coord.y - y) / lineHeight);
+    const { text } = this;
+    const [lineIndex, offsetX] = this.getTextCursorPosition(coord);
     const lines = splitIntoLines(text.toString());
     const string = lines[lineIndex];
-    const offsetX = coord.x - x;
+
     let index = lines.slice(0, lineIndex).join('').length + lineIndex - 1;
     let currentStringWidth = 0;
     let charIndex = 0;
@@ -72,6 +101,21 @@ export class TextElement extends SurfaceElement<IText> {
       charIndex += 1;
     }
     return index;
+  }
+
+  override containedByBounds(bounds: Bound): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return points.some(point => bounds.containsPoint(point));
+  }
+
+  override intersectWithLine(start: IVec, end: IVec) {
+    const points = getPointsFromBoundsWithRotation(this);
+    return linePolygonIntersects(start, end, points);
+  }
+
+  override hitTest(x: number, y: number): boolean {
+    const points = getPointsFromBoundsWithRotation(this);
+    return pointInPolygon([x, y], points);
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
