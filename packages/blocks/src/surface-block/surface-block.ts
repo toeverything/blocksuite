@@ -2,10 +2,16 @@ import '../page-block/edgeless/edgeless-blocks-container.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import type { BlockProps } from '@blocksuite/store';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 
+import type {
+  EdgelessElement,
+  TopLevelBlockModel,
+} from '../__internal__/index.js';
 import {
   type CssVariableName,
   isCssVariable,
@@ -14,31 +20,42 @@ import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import { getEdgelessElement } from '../page-block/edgeless/utils/query.js';
+import {
+  getEdgelessElement,
+  isConnectable,
+  isFrameBlock,
+  isTopLevelBlock,
+} from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
 import { Batch } from './batch.js';
 import type { IBound } from './consts.js';
+import type { EdgelessBlockType } from './edgeless-types.js';
+import {
+  type EdgelessElementType,
+  type IEdgelessElementCreateProps,
+} from './edgeless-types.js';
+import {
+  type HitTestOptions,
+  type IElementCreateProps,
+  type IElementUpdateProps,
+  type IPhasorElementType,
+  isPhasorElementType,
+} from './elements/edgeless-element.js';
 import {
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
-  FrameElement,
-  type IElementCreateProps,
-  type IElementUpdateProps,
   type IPhasorElementLocalRecord,
-  type IPhasorElementType,
   type PhasorElement,
-  type PhasorElementType,
 } from './elements/index.js';
-import type {
-  HitTestOptions,
-  SurfaceElement,
-} from './elements/surface-element.js';
+import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './grid.js';
+import type { IVec, PhasorElementType } from './index.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
-import { Bound, getCommonBound } from './utils/bound.js';
+import type { Bound } from './utils/bound.js';
+import { getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
   generateKeyBetween,
@@ -47,6 +64,10 @@ import {
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
+export enum EdgelessBlocksFlavour {
+  NOTE = 'affine:note',
+  FRAME = 'affine:frame',
+}
 
 @customElement('affine-surface')
 export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
@@ -126,9 +147,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
   >();
 
-  @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
-
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
@@ -145,8 +163,16 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     elementRemoved: new Slot<{ id: id; element: SurfaceElement }>(),
   };
 
+  get edgeless() {
+    return this.parentBlockElement as EdgelessPageBlockComponent;
+  }
+
   private get _isEdgeless() {
-    return this.edgeless && this.edgeless.editorContainer.mode === 'edgeless';
+    return this.root.mode === 'edgeless';
+  }
+
+  get blocks() {
+    return [...this.edgeless.notes, ...this.edgeless.frames];
   }
 
   @query('.affine-edgeless-surface-block-container')
@@ -157,10 +183,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     super.connectedCallback();
     const { edgeless } = this;
     this._renderer = new Renderer();
-    if (this.model)
-      this._yContainer = this.model.elements.getValue() as Y.Map<
-        Y.Map<unknown>
-      >;
+    this._yContainer = this.model.elements.getValue() as Y.Map<Y.Map<unknown>>;
     this._yContainer.observe(this._onYContainer);
 
     this._initEvents();
@@ -189,6 +212,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   };
 
   private _initEvents() {
+    const { page } = this;
     this._disposables.add(
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
@@ -198,8 +222,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           if (!this.connector.hasRelatedElement(element)) return;
 
           this.connector.updatePath(element);
-        } else if (element instanceof FrameElement) {
-          this.frame.calculateFrameColor(element);
         }
       })
     );
@@ -224,8 +246,22 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._disposables.add(
       this.edgeless.slots.elementSizeUpdated.on(id => {
         const element = getEdgelessElement(this.edgeless, id);
-        if (element) {
+        if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
+        }
+      })
+    );
+
+    this._disposables.add(
+      this.page.slots.blockUpdated.on(e => {
+        if (e.type === 'add') {
+          const model = page.getBlockById(e.id) as TopLevelBlockModel;
+          assertExists(model);
+          if (isFrameBlock(model)) {
+            requestAnimationFrame(() => {
+              this.frame.calculateFrameColor(model);
+            });
+          }
         }
       })
     );
@@ -237,18 +273,28 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       <div class="affine-edgeless-surface-block-container">
         <!-- attach canvas later in Phasor -->
       </div>
-      <affine-edgeless-block-container .edgeless=${this.edgeless}>
-      </affine-edgeless-block-container>
     `;
   }
 
   override firstUpdated() {
     if (!this._isEdgeless) return;
-    this.edgeless.surface.attach(this._surfaceContainer);
+    this.attach(this._surfaceContainer);
   }
 
   init() {
     this._syncFromExistingContainer();
+  }
+
+  // query
+  pickTopBlock(point: IVec) {
+    const models = this.edgeless.sortedBlocks;
+    for (let i = models.length - 1; i >= 0; i--) {
+      const model = models[i];
+      if (model.hitTest(point[0], point[1], {}, this)) {
+        return model;
+      }
+    }
+    return null;
   }
 
   get viewport(): Renderer {
@@ -281,7 +327,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
-        const type = yElement.get('type') as keyof PhasorElementType;
+        const type = yElement.get('type') as PhasorElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
@@ -295,7 +341,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private _createElementFromYMap(yElement: Y.Map<unknown>) {
-    const type = yElement.get('type') as keyof PhasorElementType;
+    const type = yElement.get('type') as PhasorElementType;
     const id = yElement.get('id') as id;
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
@@ -347,7 +393,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   ) => {
     if (type.action === 'add') {
       const yElement = this._yContainer.get(id) as Y.Map<unknown>;
-      const type = yElement.get('type') as keyof PhasorElementType;
+      const type = yElement.get('type') as PhasorElementType;
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
@@ -414,58 +460,85 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return getCommonBound(Array.from(this._elements.values()));
   }
 
-  addElement<T extends keyof IPhasorElementType>(
+  addElement<T extends PhasorElementType>(
     type: T,
     properties: IElementCreateProps<T>
-  ): PhasorElement['id'] {
+  ): id;
+  addElement<K extends EdgelessBlockType>(
+    type: K,
+    properties: Partial<BlockProps & Omit<BlockProps, 'flavour'>>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ): id;
+  addElement<T extends EdgelessElementType>(
+    type: T,
+    properties: IEdgelessElementCreateProps<T>,
+    parent?: BaseBlockModel | string | null,
+    parentIndex?: number
+  ) {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
 
-    const id = generateElementId();
+    if (isPhasorElementType(type)) {
+      const attr = properties as IElementCreateProps<typeof type>;
+      const id = generateElementId();
 
-    const yMap = new Workspace.Y.Map();
+      const yMap = new Workspace.Y.Map();
 
-    const defaultProps = ElementDefaultProps[type];
-    const batch = this.getBatch(properties.batch ?? this._defaultBatch);
-    const props: IElementCreateProps<T> = {
-      ...defaultProps,
-      ...properties,
-      id,
-      index: generateKeyBetween(batch.max, null),
-      seed: randomSeed(),
-    };
+      const defaultProps = ElementDefaultProps[type];
+      const batch = this.getBatch(attr.batch ?? this._defaultBatch);
+      const props: IElementCreateProps<typeof type> = {
+        ...defaultProps,
+        ...properties,
+        id,
+        index: generateKeyBetween(batch.max, null),
+        seed: randomSeed(),
+      };
 
-    this._transact(() => {
-      for (const [key, value] of Object.entries(props)) {
-        if (
-          (key === 'text' || key === 'title') &&
-          !(value instanceof Workspace.Y.Text)
-        ) {
-          yMap.set(key, new Workspace.Y.Text(value));
-        } else {
-          yMap.set(key, value);
+      this._transact(() => {
+        for (const [key, value] of Object.entries(props)) {
+          if (
+            (key === 'text' || key === 'title') &&
+            //@ts-ignore
+            !(value instanceof Workspace.Y.Text)
+          ) {
+            yMap.set(key, new Workspace.Y.Text(value));
+          } else {
+            yMap.set(key, value);
+          }
         }
-      }
-      this._yContainer.set(id, yMap);
-    });
+        this._yContainer.set(id, yMap);
+      });
 
-    return id;
+      return id;
+    } else {
+      return this.page.addBlock(type, properties, parent, parentIndex);
+    }
   }
 
-  updateElement<T extends keyof IPhasorElementType>(
-    id: string,
+  updateElement<T extends PhasorElementType>(
+    id: id,
     properties: IElementUpdateProps<T>
+  ): void;
+  updateElement(id: id, properties: Partial<BlockProps>): void;
+  updateElement<T extends PhasorElementType>(
+    id: id,
+    properties: IElementUpdateProps<T> | Partial<BlockProps>
   ) {
     if (this.page.readonly) {
       throw new Error('Cannot update element in readonly mode');
     }
-
-    this._transact(() => {
-      const element = this._elements.get(id);
-      assertExists(element);
-      element.applyUpdate(properties);
-    });
+    const element = this.pickById(id);
+    if (isTopLevelBlock(element)) {
+      this.page.updateBlock(element, properties);
+    } else {
+      this._transact(() => {
+        const element = this._elements.get(id);
+        assertExists(element);
+        element.applyUpdate(properties);
+      });
+    }
   }
 
   setElementBound(id: string, bound: IBound) {
@@ -482,10 +555,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (this.page.readonly) {
       throw new Error('Cannot remove element in readonly mode');
     }
-
-    this._transact(() => {
-      this._yContainer.delete(id);
-    });
+    const element = this.pickById(id);
+    if (isTopLevelBlock(element)) {
+      this.page.deleteBlock(element);
+    } else {
+      this._transact(() => {
+        this._yContainer.delete(id);
+      });
+    }
   }
 
   hasElement(id: string) {
@@ -500,8 +577,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this._renderer.toViewCoord(modelX, modelY);
   }
 
-  pickById(id: string) {
-    return this._elements.get(id);
+  pickById(id: string): EdgelessElement | null {
+    return (
+      this._elements.get(id) ??
+      (this.page.getBlockById(id) as TopLevelBlockModel)
+    );
   }
 
   pickByPoint(
@@ -528,25 +608,22 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     options?: HitTestOptions
   ): SurfaceElement | null {
     const results = this.pickByPoint(x, y, options);
-    return results[results.length - 1] ?? null;
+    return results[results.length - 1] ?? this.pickTopBlock([x, y]);
   }
 
-  pickByBound(bound: IBound): SurfaceElement[] {
-    const candidates = this._renderer.gridManager.search(bound);
-    const picked = candidates.filter((element: SurfaceElement) => {
-      const b = Bound.from(bound);
-      return (
-        element.containedByBounds(b) ||
-        b.points.some((point, i, points) =>
-          element.intersectWithLine(point, points[(i + 1) % points.length])
-        )
-      );
-    });
+  pickByBound(bound: Bound): EdgelessElement[] {
+    const candidates = [
+      ...this._renderer.gridManager.search(bound),
+      ...this.blocks,
+    ];
+    const picked = candidates.filter(element => element.boxSelect(bound));
     return picked;
   }
 
-  getSortedElementsWithViewportBounds() {
-    return this.pickByBound(this.viewport.viewportBounds).sort(compare);
+  getSortedPhasorElementsWithViewportBounds() {
+    return this.pickByBound(this.viewport.viewportBounds)
+      .filter(e => !isTopLevelBlock(e))
+      .sort(compare);
   }
 
   dispose() {

@@ -1,9 +1,7 @@
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
 
-import {
-  type Connectable,
-  type TopLevelBlockModel,
-} from '../../__internal__/utils/types.js';
+import { type Connectable } from '../../__internal__/utils/types.js';
+import type { PhasorElementType } from '../../surface-block/index.js';
 import {
   almostEqual,
   AStarRunner,
@@ -798,15 +796,13 @@ export class EdgelessConnectorManager {
   }
 
   private _findConnectablesInViewport() {
-    const { surface, page } = this._edgeless;
+    const { surface } = this._edgeless;
     const { viewport } = surface;
-    const surfaceElements = surface
+    return surface
       .pickByBound(Bound.from(viewport.viewportBounds))
-      .filter(ele => ele.connectable);
-    const notes = (<TopLevelBlockModel[]>(
-      page.getBlockByFlavour('affine:note')
-    )).filter(n => viewport.isInViewport(Bound.deserialize(n.xywh)));
-    return [...surfaceElements, ...notes] as Connectable[];
+      .filter(ele => {
+        return ele.connectable;
+      }) as Connectable[];
   }
 
   searchConnection(point: IVec, excludedIds: string[] = []) {
@@ -917,7 +913,7 @@ export class EdgelessConnectorManager {
     const anotherConnection = connection === 'source' ? 'target' : 'source';
     const anotherId = connector[anotherConnection]?.id;
     const result = this.searchConnection(point, anotherId ? [anotherId] : []);
-    surface.updateElement<'connector'>(id, {
+    surface.updateElement<PhasorElementType.CONNECTOR>(id, {
       [connection]: result,
     });
   }
@@ -949,7 +945,7 @@ export class EdgelessConnectorManager {
     if (!target.id && target.position)
       updates.target = { position: Vec.add(target.position, offset) };
     updates.xywh = bound.serialize();
-    surface.updateElement<'connector'>(connector.id, updates);
+    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, updates);
   }
 
   private _generateConnectorPath(connector: ConnectorElement) {
@@ -1213,10 +1209,10 @@ export class EdgelessConnectorManager {
     connector: IConnector,
     type: 'source' | 'target'
   ): Connectable | null {
-    const { surface, page } = this._edgeless;
+    const { surface } = this._edgeless;
     const id = connector[type].id;
     if (id) {
-      return surface.pickById(id) ?? <TopLevelBlockModel>page.getBlockById(id);
+      return surface.pickById(id) as Connectable;
     }
     return null;
   }
@@ -1254,11 +1250,11 @@ export class EdgelessConnectorManager {
       this.getConnecttedConnectors([ele]).forEach(connector => {
         const absolutePath = connector.absolutePath;
         if (connector.source.id === ele.id) {
-          surface.updateElement<'connector'>(connector.id, {
+          surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
             source: { position: absolutePath[0] },
           });
         } else if (connector.target.id === ele.id) {
-          surface.updateElement<'connector'>(connector.id, {
+          surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
             target: { position: absolutePath[absolutePath.length - 1] },
           });
         }

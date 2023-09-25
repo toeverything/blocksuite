@@ -1,7 +1,18 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../__internal__/consts.js';
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
+import type {
+  EdgelessElementUtils,
+  HitTestOptions,
+} from '../surface-block/elements/edgeless-element.js';
+import { RectElement } from '../surface-block/elements/rect-element.js';
+import {
+  Bound,
+  type IVec,
+  type PointLocation,
+  type SerializedXYWH,
+} from '../surface-block/index.js';
 
 export const NOTE_COLORS: CssVariableName[] = [
   '--affine-background-secondary-color',
@@ -39,6 +50,35 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:attachment',
     ],
   },
+  toModel: () => {
+    return new NoteBlockModel();
+  },
 });
 
-export type NoteBlockModel = SchemaToModel<typeof NoteBlockSchema>;
+type Props = {
+  xywh: SerializedXYWH;
+  background: string;
+  index: string;
+  hidden: boolean;
+};
+
+@RectElement
+export class NoteBlockModel
+  extends BaseBlockModel<Props>
+  implements EdgelessElementUtils
+{
+  get connectable() {
+    return true;
+  }
+  rotate?: number | undefined;
+  containedByBounds!: (_: Bound) => boolean;
+  getNearestPoint!: (_: IVec) => IVec;
+  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
+  getRelativePointLocation!: (_: IVec) => PointLocation;
+  boxSelect!: (bound: Bound) => boolean;
+
+  hitTest(x: number, y: number, _: HitTestOptions): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y], 0);
+  }
+}

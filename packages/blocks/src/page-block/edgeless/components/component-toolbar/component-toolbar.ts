@@ -4,6 +4,7 @@ import './change-brush-button.js';
 import './change-connector-button.js';
 import './change-note-button.js';
 import './change-text-button.js';
+import './change-frame-button.js';
 import './add-frame-button.js';
 import './more-button.js';
 import './align-button.js';
@@ -16,26 +17,24 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
-import { RenameIcon } from '../../../../icons/edgeless.js';
+import type { FrameBlockModel } from '../../../../frame-block/index.js';
+import type { NoteBlockModel } from '../../../../index.js';
 import type {
   BrushElement,
   ConnectorElement,
-  FrameElement,
   ShapeElement,
   TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { isTopLevelBlock } from '../../utils/query.js';
-import { mountFrameEditor } from '../../utils/text.js';
+import { isFrameBlock, isNoteBlock } from '../../utils/query.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
   brush: BrushElement[];
-  note: TopLevelBlockModel[];
+  note: NoteBlockModel[];
+  frame: FrameBlockModel[];
   connector: ConnectorElement[];
   text: TextElement[];
-  frame: FrameElement[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -88,8 +87,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _groupSelected(): CategorizedElements {
     const result = groupBy(this.selection.elements, model => {
-      if (isTopLevelBlock(model)) {
+      if (isNoteBlock(model)) {
         return 'note';
+      } else if (isFrameBlock(model)) {
+        return 'frame';
       }
       return model.type;
     });
@@ -134,10 +135,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getNoteButton(blocks?: TopLevelBlockModel[]) {
-    return blocks?.length === 1
+  private _getNoteButton(nots?: NoteBlockModel[]) {
+    return nots?.length === 1
       ? html`<edgeless-change-note-button
-          .notes=${blocks}
+          .notes=${nots}
           .page=${this.page}
           .surface=${this.surface}
           .slots=${this.slots}
@@ -158,16 +159,14 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getFrameButton(frames: FrameElement[]) {
-    return frames?.length === 1
+  private _getFrameButton(frames: FrameBlockModel[]) {
+    return frames?.length
       ? html`
-          <edgeless-tool-icon-button
-            .tooltip=${'Rename'}
-            .tipPosition=${'bottom'}
-            @click=${() => mountFrameEditor(frames[0], this.edgeless)}
+          <edgeless-change-frame-button
+            .surface=${this.surface}
+            .frames=${frames}
           >
-            ${RenameIcon}Rename
-          </edgeless-tool-icon-button>
+          </edgeless-change-frame-button>
         `
       : nothing;
   }

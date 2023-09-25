@@ -12,10 +12,15 @@ import {
   type SerializedXYWH,
   type XYWH,
 } from '../utils/xywh.js';
+import type {
+  EdgelessElementUtils,
+  HitTestOptions,
+  PhasorElementType,
+} from './edgeless-element.js';
 
 export interface ISurfaceElement {
   id: string;
-  type: string;
+  type: PhasorElementType;
   xywh: SerializedXYWH;
   index: string;
   seed: number;
@@ -30,27 +35,33 @@ export interface ISurfaceElementLocalRecord {
   opacity?: number;
 }
 
-export interface HitTestOptions {
-  expand?: number;
-  ignoreTransparent?: boolean;
-  // we will select a shape without fill color by selecting its content area if
-  // we set `pierce` to false, shape element used this options in `hitTest` method
-  pierce?: boolean;
-}
-
 export type ComputedValue = (value: string) => string;
 
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement,
   L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord,
-> {
-  abstract containedByBounds(bounds: Bound): boolean;
-
-  abstract getNearestPoint(point: IVec): IVec;
-
-  abstract intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
-
-  abstract getRelativePointLocation(point: IVec): PointLocation;
+> implements EdgelessElementUtils
+{
+  containedByBounds(_: Bound): boolean {
+    throw new Error('Method not implemented.');
+  }
+  getNearestPoint(_: IVec): IVec {
+    throw new Error('Method not implemented.');
+  }
+  intersectWithLine(_: IVec, _1: IVec): PointLocation[] | null {
+    throw new Error('Method not implemented.');
+  }
+  getRelativePointLocation(_: IVec): PointLocation {
+    throw new Error('Method not implemented.');
+  }
+  boxSelect(bound: Bound): boolean {
+    return (
+      this.containedByBounds(bound) ||
+      bound.points.some((point, i, points) =>
+        this.intersectWithLine(point, points[(i + 1) % points.length])
+      )
+    );
+  }
 
   yMap: Y.Map<unknown>;
 

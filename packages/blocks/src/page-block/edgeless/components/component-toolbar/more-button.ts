@@ -8,10 +8,8 @@ import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import {
-  type ReorderingType,
-  type TopLevelBlockModel,
-} from '../../../../__internal__/index.js';
+import { type ReorderingType } from '../../../../__internal__/index.js';
+import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import {
   BringForwardIcon,
   BringToFrontIcon,
@@ -25,14 +23,12 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../../icons/index.js';
-import {
-  FrameElement,
-  type PhasorElement,
-} from '../../../../surface-block/index.js';
+import type { NoteBlockModel } from '../../../../note-block/index.js';
+import { type PhasorElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
-import { isTopLevelBlock } from '../../utils/query.js';
+import { isFrameBlock, isNoteBlock } from '../../utils/query.js';
 import { createButtonPopper } from '../utils.js';
 
 type Action =
@@ -191,14 +187,23 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
   }
 
   private _splitElements() {
-    const { notes, shapes } = groupBy(this.selection.elements, element => {
-      return isTopLevelBlock(element) ? 'notes' : 'shapes';
-    }) as {
-      notes: TopLevelBlockModel[];
+    const { notes, frames, shapes } = groupBy(
+      this.selection.elements,
+      element => {
+        if (isNoteBlock(element)) {
+          return 'notes';
+        } else if (isFrameBlock(element)) {
+          return 'frames';
+        }
+        return 'shapes';
+      }
+    ) as {
+      notes: NoteBlockModel[];
       shapes: PhasorElement[];
+      frames: FrameBlockModel[];
     };
 
-    return { notes: notes ?? [], shapes: shapes ?? [] };
+    return { notes: notes ?? [], shapes: shapes ?? [], frames: frames ?? [] };
   }
 
   private _delete() {
@@ -227,9 +232,9 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
         break;
       }
       case 'copy-as-png': {
-        const { notes, shapes } = this._splitElements();
+        const { notes, frames, shapes } = this._splitElements();
         this.slots.copyAsPng.emit({
-          notes,
+          blocks: [...notes, ...frames],
           shapes,
         });
         break;
@@ -279,7 +284,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     const selection = this.edgeless.selectionManager;
 
     const actions = Actions(
-      selection.elements.some(ele => ele instanceof FrameElement)
+      selection.elements.some(ele => isFrameBlock(ele))
         ? FRAME_ACTIONS
         : ACTIONS,
       this._runAction

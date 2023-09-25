@@ -1,14 +1,15 @@
 import './components/edgeless-notes-container.js';
+import './components/frame/edgeless-frame-container.js';
 import './components/rects/edgeless-selected-rect.js';
 import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
 import './components/note-slicer/index.js';
+import './components/note-status/index.js';
 
-import { assertExists, noop, throttle } from '@blocksuite/global/utils';
+import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -16,23 +17,13 @@ import {
 } from '../../__internal__/consts.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
 import { almostEqual, Bound } from '../../surface-block/index.js';
-import { EdgelessNoteStatus } from './components/note-status/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid } from './utils/query.js';
 
-noop(EdgelessNoteStatus);
-
 @customElement('affine-edgeless-block-container')
 export class EdgelessBlockContainer extends WithDisposable(LitElement) {
-  static override styles = css`
-    .widgets-container {
-      position: absolute;
-      left: 0;
-      top: 0;
-      contain: size layout;
-    }
-  `;
+  static override styles = css``;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -161,19 +152,15 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
   override render() {
     const { edgeless } = this;
+
     const { sortedNotes, surface, renderModel } = edgeless;
     if (!surface) return nothing;
-
-    const widgets = html`${repeat(
-      Object.entries(edgeless.widgets),
-      ([id]) => id,
-      ([_, widget]) => widget
-    )}`;
-
     const { readonly } = this.edgeless.page;
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
+          <edgeless-frame-container .surface=${surface}>
+          </edgeless-frame-container>
           ${readonly
             ? nothing
             : html`<affine-note-slicer
@@ -192,7 +179,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
       ></edgeless-dragging-area-rect>
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
       <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status>
-      <div class="widgets-container">${widgets}</div>
     `;
   }
 

@@ -1,15 +1,14 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { computePosition, flip, shift } from '@floating-ui/dom';
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 
-import { includeInlineSupportedBlockSelected } from '../../../../common/inline-format-config.js';
+import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
 import {
   ArrowDownIcon,
   HighLightDuotoneIcon,
   TextBackgroundDuotoneIcon,
 } from '../../../../icons/index.js';
-import { formatByTextSelection } from '../../../../page-block/utils/operations/element/inline-level.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
 import { backgroundConfig } from './const.js';
 
@@ -21,22 +20,23 @@ const updateBackground = (
 ) => {
   lastUsedColor = color;
 
-  const textSelection = root.selection.find('text');
-
-  if (!textSelection) {
-    const blockSelections = root.selection.filter('block');
-    for (const blockSelection of blockSelections) {
-      const el = root.view.viewFromPath('block', blockSelection.path);
-      if (el && el.model.text) {
-        el.model.text.format(0, el.model.text.length, {
-          background: color,
-        });
-      }
-    }
-    return;
-  }
-
-  formatByTextSelection(root, textSelection, 'background', color);
+  const payload: {
+    root: BlockSuiteRoot;
+    styles: AffineTextAttributes;
+  } = {
+    root,
+    styles: {
+      background: color,
+    },
+  };
+  root.std.command
+    .pipe()
+    .try(chain => [
+      chain.formatText(payload),
+      chain.formatBlock(payload),
+      chain.formatNative(payload),
+    ])
+    .run();
 };
 
 const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
@@ -67,10 +67,6 @@ const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
 
 export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
   const root = formatBar.pageElement.root;
-
-  if (!includeInlineSupportedBlockSelected(root)) {
-    return nothing;
-  }
 
   const backgroundHighlightPanel = BackgroundPanel(formatBar);
 

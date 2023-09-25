@@ -9,6 +9,7 @@ import { BookmarkBlockService } from './bookmark-service.js';
 import { CodeBlockService } from './code-service.js';
 import { LegacyDatabaseBlockService } from './database-service.js';
 import { DividerBlockService } from './divider-service.js';
+import { FrameBlockService } from './frame-service.js';
 import { ImageBlockService } from './image-service.js';
 import { ListBlockService } from './list-service.js';
 import { NoteBlockService } from './note-service.js';
@@ -24,6 +25,7 @@ export const blockService = {
   'affine:image': ImageBlockService,
   'affine:divider': DividerBlockService,
   'affine:note': NoteBlockService,
+  'affine:frame': FrameBlockService,
   'affine:bookmark': BookmarkBlockService,
   'affine:attachment': AttachmentBlockService,
 } satisfies {

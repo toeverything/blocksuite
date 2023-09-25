@@ -6,6 +6,7 @@ import type { AffineTextAttributes } from '../../components/rich-text/virgo/type
 import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
+import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { type ShapeStyle } from '../../surface-block/consts.js';
 import {
@@ -122,9 +123,9 @@ export type AbstractEditor = {
 export type ExtendedModel = BaseBlockModel & Record<string, any>;
 
 // blocks that would only appear under the edgeless container root
-export type TopLevelBlockModel = NoteBlockModel;
+export type TopLevelBlockModel = NoteBlockModel | FrameBlockModel;
 
-export type EdgelessElement = TopLevelBlockModel | PhasorElement;
+export type EdgelessElement = NoteBlockModel | FrameBlockModel | PhasorElement;
 
 export type Alignable = EdgelessElement;
 

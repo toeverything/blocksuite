@@ -3,12 +3,8 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import { type FrameTool, type IPoint } from '../../../__internal__/index.js';
-import {
-  Bound,
-  type FrameElement,
-  type IVec,
-  Vec,
-} from '../../../surface-block/index.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
+import { Bound, type IVec, Vec } from '../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class FrameToolController extends EdgelessToolController<FrameTool> {
@@ -17,7 +13,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
   };
 
   private _startPoint: IVec | null = null;
-  private _frameElement: FrameElement | null = null;
+  private _frame: FrameBlockModel | null = null;
 
   private _toModelCoord(p: IPoint): IVec {
     return this._surface.viewport.toModelCoord(p.x, p.y);
@@ -32,39 +28,40 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     this._startPoint = this._toModelCoord(point);
   }
   override onContainerDragMove(e: PointerEventState): void {
-    const edgeless = this._edgeless;
     const currentPoint = this._toModelCoord(e.point);
     const surface = this._surface;
     assertExists(this._startPoint);
-    if (Vec.dist(this._startPoint, currentPoint) < 8 && !this._frameElement)
-      return;
-    if (!this._frameElement) {
+    if (Vec.dist(this._startPoint, currentPoint) < 8 && !this._frame) return;
+    if (!this._frame) {
       const frames = surface.frame.frames;
 
-      const id = edgeless.surface.addElement('frame', {
-        title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
-        batch: 'a0',
-        xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
-      });
-      this._frameElement = surface.pickById(id) as FrameElement;
+      const id = surface.page.addBlock(
+        'affine:frame',
+        {
+          title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
+          xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
+        },
+        surface.model
+      );
+      this._frame = surface.pickById(id) as FrameBlockModel;
       return;
     }
-    assertExists(this._frameElement);
+    assertExists(this._frame);
 
-    surface.updateElement(this._frameElement.id, {
+    surface.updateElement(this._frame.id, {
       xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
     });
   }
   override onContainerDragEnd(): void {
-    if (this._frameElement) {
+    if (this._frame) {
       this._edgeless.tools.setEdgelessTool({ type: 'default' });
       this._edgeless.selectionManager.setSelection({
-        elements: [this._frameElement.id],
+        elements: [this._frame.id],
         editing: false,
       });
       this._page.captureSync();
     }
-    this._frameElement = null;
+    this._frame = null;
     this._startPoint = null;
   }
   override onContainerClick(): void {

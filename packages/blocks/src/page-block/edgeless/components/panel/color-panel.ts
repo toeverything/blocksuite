@@ -186,12 +186,12 @@ export class EdgelessColorPanel extends LitElement {
   static override styles = css`
     :host {
       display: flex;
-      width: 200px;
       padding: 10px;
       flex-direction: row;
       flex-wrap: wrap;
       gap: 12px;
       box-sizing: border-box;
+      width: 200px;
       background: var(--affine-popover-background);
     }
 

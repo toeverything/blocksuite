@@ -36,7 +36,6 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         'starter/': resolve(__dirname, 'starter/index.html'),
         'examples/basic': resolve(__dirname, 'examples/basic/index.html'),
-        'examples/canvas': resolve(__dirname, 'examples/canvas/index.html'),
         'examples/virgo': resolve(__dirname, 'examples/virgo/index.html'),
         'examples/store': resolve(__dirname, 'examples/store/index.html'),
       },

@@ -8,14 +8,13 @@ import {
   resetNativeSelection,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
+import type { FrameBlockModel } from '../../../index.js';
+import type { HitTestOptions } from '../../../surface-block/elements/edgeless-element.js';
 import {
   Bound,
   ConnectorElement,
-  FrameElement,
-  type HitTestOptions,
   type IVec,
   type PhasorElement,
-  type PhasorElementType,
   ShapeElement,
   TextElement,
   Vec,
@@ -27,10 +26,9 @@ import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
 import {
+  isFrameBlock,
   isPhasorElement,
   isTopLevelBlock,
-  pickBlocksByBound,
-  pickTopBlock,
 } from '../utils/query.js';
 import {
   addText,
@@ -73,7 +71,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _alignBound = new Bound();
   private _selectedBounds: Bound[] = [];
   private _toBeMoved: Selectable[] = [];
-  private _frames = new Set<FrameElement>();
+  private _frames = new Set<FrameBlockModel>();
   private _autoPanTimer: number | null = null;
   private _dragging = false;
   private _draggingAreaDisposables: DisposableGroup | null = null;
@@ -111,10 +109,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _pick(x: number, y: number, options?: HitTestOptions) {
     const { surface } = this._edgeless;
     const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
-    const selectedShape = surface.pickTop(modelX, modelY, options);
-    return selectedShape
-      ? selectedShape
-      : pickTopBlock(this._blocks, modelX, modelY);
+    return surface.pickTop(modelX, modelY, options);
   }
 
   private _setNoneSelectionState() {
@@ -288,7 +283,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         mountShapeEditor(selected, this._edgeless);
         return;
       }
-      if (selected instanceof FrameElement) {
+      if (isFrameBlock(selected)) {
         mountFrameEditor(selected, this._edgeless);
         return;
       }
@@ -360,7 +355,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       return this._page.getBlockById(id);
     } else {
       const id = surface.addElement(
-        selected.type as keyof PhasorElementType,
+        selected.type,
         selected.serialize() as unknown as Record<string, unknown>
       );
       return surface.pickById(id);
@@ -369,7 +364,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _addFrames() {
     this.selection.elements.forEach(ele => {
-      if (ele instanceof FrameElement) {
+      if (isFrameBlock(ele)) {
         this._frames.add(ele);
       } else {
         const frame = this._edgeless.surface.frame.selectFrame([ele]);
@@ -397,15 +392,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const h = Math.abs(startY - curY);
     const bound = new Bound(x, y, w, h);
 
-    const blocks = pickBlocksByBound(this._blocks, bound);
     const elements = surface.pickByBound(bound);
-    this._setSelectionState(
-      [
-        ...blocks.map(block => block.id),
-        ...elements.map(element => element.id),
-      ],
-      false
-    );
+    this._setSelectionState([...elements.map(element => element.id)], false);
 
     // Record the last model coordinate for dragging area updating
     this._dragLastModelCoord = [curX, curY];
@@ -459,7 +447,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const elements = this.selection.elements;
     const toBeMoved = new Set(elements);
     elements.forEach(element => {
-      if (element instanceof FrameElement) {
+      if (isFrameBlock(element)) {
         this._surface.frame
           .getElementsInFrame(element)
           .forEach(ele => toBeMoved.add(ele));
