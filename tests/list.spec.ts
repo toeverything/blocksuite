@@ -725,7 +725,7 @@ test.describe('toggle list', () => {
     await expect(prefixes).toHaveCount(4);
   });
 
-  test.only('toggle icon should be show when hover', async ({ page }) => {
+  test('toggle icon should be show when hover', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyParagraphState(page);
     await initThreeLists(page);
