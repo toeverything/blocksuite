@@ -13,7 +13,7 @@ export const pageRangeSyncFilter: RangeSyncFilter = {
       const endBlock = endContainer.parentElement?.closest(
         `[${BLOCK_ID_ATTR}]`
       );
-      console.log(startBlock, endBlock, range);
+
       if (startBlock && endBlock) {
         return startBlock.role === 'content' && endBlock.role === 'content';
       }
