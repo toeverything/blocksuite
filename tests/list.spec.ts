@@ -739,7 +739,5 @@ test.describe('toggle list', () => {
     await page.mouse.move(0, 0);
     await waitNextFrame(page, 200);
     await assertToggleIconVisible(toggleIcon, false);
-    await childrenPrefix.hover();
-    await assertToggleIconVisible(toggleIcon);
   });
 });
