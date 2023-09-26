@@ -447,7 +447,7 @@ test.describe('note slicer', () => {
     const firstNoteId = await addNote(page, 'hello\n123\n456\n789', 50, 500);
     const secondNoteId = await addNote(page, 'world\n123\n456\n789', 100, 550);
     const lastNoteId = await addNote(page, 'done\n123\n456\n789', 150, 600);
-
+    await page.pause();
     await exitEditing(page);
     await waitNextFrame(page);
     await selectNoteInEdgeless(page, lastNoteId);
@@ -458,7 +458,7 @@ test.describe('note slicer', () => {
     let styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     let result = zIndexPattern.exec(styleText);
-    expect(zIndexPattern.exec(styleText)?.[1]).toBe('3');
+    expect(result?.[1]).toBe('3');
 
     await selectNoteInEdgeless(page, secondNoteId);
     await hoverOnNote(page, secondNoteId);

@@ -199,7 +199,7 @@ test('should turn attachment to image works', async ({ page }) => {
   await assertStoreMatchJSX(
     page,
     `
-<affine:note
+    <affine:note
   prop:background="--affine-background-secondary-color"
   prop:hidden={false}
   prop:index="a0"
@@ -207,6 +207,8 @@ test('should turn attachment to image works', async ({ page }) => {
   <affine:image
     prop:caption=""
     prop:height={0}
+    prop:index="a0"
+    prop:rotate={0}
     prop:sourceId="${FILE_ID}"
     prop:width={0}
   />

@@ -70,6 +70,7 @@ export class HandleResizeManager {
 
   private _aspectRatio = 1;
   private _locked = false;
+  private _proportion = false;
   private _shiftKey = false;
   private _proportional = false;
   private _rotation = false;
@@ -106,11 +107,13 @@ export class HandleResizeManager {
     rotate: number,
     zoom: number,
     position?: { x: number; y: number },
-    originalRect?: DOMRect
+    originalRect?: DOMRect,
+    proportion = false
   ) {
     this._resizeMode = resizeMode;
     this._rotate = rotate;
     this._zoom = zoom;
+    this._proportion = proportion;
 
     if (position) {
       this._currentRect.x = position.x;
@@ -147,7 +150,7 @@ export class HandleResizeManager {
     this._bounds = bounds;
   }
 
-  private _onResize(shiftKey = false) {
+  private _onResize(proportion: boolean) {
     const {
       _aspectRatio,
       _dragDirection,
@@ -159,7 +162,7 @@ export class HandleResizeManager {
       _originalRect,
       _currentRect,
     } = this;
-
+    proportion ||= this._proportion;
     assertExists(_target);
 
     const isAll = _resizeMode === 'all';
@@ -271,7 +274,7 @@ export class HandleResizeManager {
       }
 
       // force adjustment by aspect ratio
-      shiftKey ||= this._bounds.size > 1;
+      proportion ||= this._bounds.size > 1;
 
       const fp = fixedPoint.matrixTransform(m0);
       let dp = draggingPoint.matrixTransform(m0);
@@ -375,7 +378,7 @@ export class HandleResizeManager {
         _dragDirection === HandleDirection.BottomLeft;
 
       // lock aspect ratio
-      if (shiftKey && isDraggingCorner) {
+      if (proportion && isDraggingCorner) {
         const newAspectRatio = Math.abs(rect.w / rect.h);
         if (_aspectRatio < newAspectRatio) {
           scale.y = Math.abs(scale.x) * flip.y;

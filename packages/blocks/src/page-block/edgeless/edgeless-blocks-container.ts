@@ -1,4 +1,6 @@
+/* eslint-disable lit/binding-positions, lit/no-invalid-html */
 import './components/edgeless-notes-container.js';
+import './components/image/edgeless-image.js';
 import './components/frame/edgeless-frame-container.js';
 import './components/rects/edgeless-selected-rect.js';
 import './components/rects/edgeless-hover-rect.js';
@@ -7,8 +9,10 @@ import './components/note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement, nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import {  LitElement, nothing } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
+import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -16,10 +20,17 @@ import {
 } from '../../__internal__/consts.js';
 import { delayCallback } from '../../__internal__/utils/common.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
+import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import { almostEqual, Bound } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid } from './utils/query.js';
+
+const map = {
+  [EdgelessBlockType.FRAME]: 'edgeless-frame',
+  [EdgelessBlockType.NOTE]: 'edgeless-note',
+  [EdgelessBlockType.IMAGE]: 'edgeless-image',
+};
 
 @customElement('affine-edgeless-block-container')
 export class EdgelessBlockContainer extends WithDisposable(LitElement) {
@@ -106,14 +117,8 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
         resizedNotes.forEach(([domRect, prevDomRect], id) => {
           if (page.readonly) return;
           const model = page.getBlockById(id) as TopLevelBlockModel;
-          const { index, xywh } = model;
+          const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);
-
-          if (index < edgeless.indexes.min) {
-            edgeless.indexes.min = index;
-          } else if (index > edgeless.indexes.max) {
-            edgeless.indexes.max = index;
-          }
 
           // ResizeObserver is not effected by CSS transform, so don't deal with viewport zoom.
           const newModelHeight =
@@ -182,20 +187,38 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
   override render() {
     const { edgeless } = this;
-    const { sortedNotes, surface, renderModel } = edgeless;
 
+    const { surface } = edgeless;
     if (!surface) return nothing;
+    const notes = surface.getblocks(EdgelessBlockType.NOTE);
+    const images = surface.getblocks(EdgelessBlockType.IMAGE);
+    const blocks = [...notes, ...images].sort(surface.compare);
 
+    const { readonly } = this.edgeless.page;
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
           <edgeless-frame-container .surface=${surface}>
           </edgeless-frame-container>
-          <edgeless-notes-container
-            .edgeless=${edgeless}
-            .notes=${sortedNotes}
-            .renderer=${renderModel.bind(this)}
-          ></edgeless-notes-container>
+          ${readonly
+            ? nothing
+            : html`<affine-note-slicer
+                .edgelessPage=${edgeless}
+              ></affine-note-slicer>`}
+          ${repeat(
+            blocks,
+            block => block.id,
+            (block, index) => {
+              const tag = literal`${unsafeStatic(
+                map[block.flavour as EdgelessBlockType]
+              )}`;
+              return html`<${tag}
+                    .index=${index}
+                    .model=${block}
+                    .surface=${surface}
+                  ></${tag}>`;
+            }
+          )}
         </div>
       </div>
       <edgeless-hover-rect .edgeless=${edgeless}></edgeless-hover-rect>

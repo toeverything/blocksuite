@@ -75,7 +75,7 @@ export async function turnIntoEmbedView(model: AttachmentBlockModel) {
   const imageConvertData = model.sourceId
     ? getImageData(model.sourceId)
     : undefined;
-  const imageProp: ImageBlockProps = {
+  const imageProp: Partial<ImageBlockProps> = {
     sourceId,
     caption: model.caption,
     ...imageConvertData,

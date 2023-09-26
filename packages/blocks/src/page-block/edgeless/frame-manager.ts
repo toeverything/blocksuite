@@ -35,7 +35,7 @@ export class EdgelessFrameManager {
   }
 
   get frames() {
-    return this._edgeless.frames;
+    return this._edgeless.surface.getblocks(EdgelessBlockType.FRAME);
   }
 
   selectFrame(eles: Selectable[]) {

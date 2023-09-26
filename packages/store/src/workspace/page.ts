@@ -75,6 +75,7 @@ export class Page extends Space<FlatBlockMap> {
           type: 'delete';
           id: string;
           flavour: string;
+          parent: string;
         }
       | {
           type: 'update';
@@ -614,9 +615,6 @@ export class Page extends Space<FlatBlockMap> {
       }
     }
 
-    this._blockMap.delete(model.id);
-    model.deleted.emit();
-
     this.transact(() => {
       this._yBlocks.delete(model.id);
       model.dispose();
@@ -636,12 +634,6 @@ export class Page extends Space<FlatBlockMap> {
 
         parent.childrenUpdated.emit();
       }
-    });
-
-    this.slots.blockUpdated.emit({
-      type: 'delete',
-      id: model.id,
-      flavour: model.flavour,
     });
   }
 
@@ -774,12 +766,14 @@ export class Page extends Space<FlatBlockMap> {
     if (model === this._root) {
       this.slots.rootDeleted.emit(id);
     }
-
+    assertExists(model);
     this.slots.blockUpdated.emit({
       type: 'delete',
       id,
-      flavour: model?.flavour ?? '',
+      flavour: model.flavour,
+      parent: this.getParent(model)?.id ?? '',
     });
+    model.deleted.emit();
     this._blockMap.delete(id);
   }
 

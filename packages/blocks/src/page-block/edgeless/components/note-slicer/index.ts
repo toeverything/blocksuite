@@ -7,7 +7,6 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../__internal__/consts.js';
 import {
-  type BlockComponentElement,
   getBlockElementByModel,
   getModelByBlockElement,
   getRectByBlockElement,
@@ -15,8 +14,10 @@ import {
 } from '../../../../__internal__/index.js';
 import type {
   EdgelessPageBlockComponent,
+  NoteBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
+import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   deserializeXYWH,
   serializeXYWH,
@@ -126,12 +127,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   private _updateVisibility(e: PointerEventState) {
     const block = this.selection.elements[0];
 
-    if (
-      this._zoom < 0.4 ||
-      this._notHovering ||
-      !block ||
-      !isNoteBlock(block)
-    ) {
+    if (this._zoom < 0.4 || this._notHovering || !isNoteBlock(block)) {
       this._hide();
       return;
     }
@@ -149,7 +145,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   private _getEditingState(e: PointerEventState, block: NoteBlockModel) {
-    const noteBlockElement = getBlockElementByModel(block);
+    const noteBlockElement = getBlockElementByModel(
+      block
+    ) as NoteBlockComponent;
     assertExists(noteBlockElement);
 
     const {
@@ -198,7 +196,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     _event: PointerEventState,
     modelState: {
       note: NoteBlockModel;
-      noteElement: BlockComponentElement;
+      noteElement: NoteBlockComponent;
       upperBlock: BaseBlockModel<object>;
       upperBlockElement: HTMLElement;
       gapRect: DOMRect;
@@ -262,7 +260,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   private _hide() {
     this.style.removeProperty('z-index');
     this.style.removeProperty('display');
-
+    console.log(this._slicerButton);
     this._slicerButton?.reset();
     this._indicatorLine?.reset();
     this._lastPosition = null;
@@ -293,8 +291,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const resetBlocks = children.slice(sliceIndex + 1);
     const { sliceVerticalPos } = this._lastPosition;
     const [x, , width] = deserializeXYWH(xywh);
-    const newNoteId = page.addBlock(
-      'affine:note',
+    const newNoteId = this.edgelessPage.surface.addElement(
+      EdgelessBlockType.NOTE,
       {
         background,
         xywh: serializeXYWH(

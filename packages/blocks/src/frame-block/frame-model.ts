@@ -3,6 +3,8 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
 import type { SurfaceBlockComponent } from '../index.js';
+import { FRAME_BATCH } from '../surface-block/batch.js';
+import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
   EdgelessElementUtils,
   HitTestOptions,
@@ -46,8 +48,18 @@ export class FrameBlockModel
   extends BaseBlockModel<Props>
   implements EdgelessElementUtils
 {
+  override flavour!: EdgelessBlockType.FRAME;
+
   get connectable() {
     return false;
+  }
+
+  get batch() {
+    return FRAME_BATCH;
+  }
+
+  get rotate() {
+    return 0;
   }
 
   containedByBounds(bound: Bound): boolean {

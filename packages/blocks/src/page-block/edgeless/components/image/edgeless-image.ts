@@ -1,0 +1,57 @@
+import { WithDisposable } from '@blocksuite/lit';
+import { LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
+import { html } from 'lit/static-html.js';
+
+import type { ImageBlockModel } from '../../../../image-block/index.js';
+import { Bound } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+
+@customElement('edgeless-image')
+export class EdgelessImage extends WithDisposable(LitElement) {
+  @property({ attribute: false })
+  index!: number;
+
+  @property({ attribute: false })
+  model!: ImageBlockModel;
+
+  @property({ attribute: false })
+  surface!: SurfaceBlockComponent;
+
+  protected override createRenderRoot() {
+    return this;
+  }
+
+  override firstUpdated() {
+    this._disposables.add(
+      this.surface.page.slots.yBlockUpdated.on(e => {
+        if (e.id === this.model.id) {
+          this.requestUpdate();
+        }
+      })
+    );
+  }
+
+  override render() {
+    const { model, surface, index } = this;
+    const bound = Bound.deserialize(model.xywh);
+    const style = {
+      position: 'absolute',
+      zIndex: `${index}`,
+      width: `${bound.w}px`,
+      height: `${bound.h}px`,
+      transform: `translate(${bound.x}px, ${bound.y}px)`,
+    };
+
+    return html`
+      <div style=${styleMap(style)}>${surface.edgeless.renderModel(model)}</div>
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edgeless-image': EdgelessImage;
+  }
+}

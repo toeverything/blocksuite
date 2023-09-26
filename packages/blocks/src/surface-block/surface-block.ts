@@ -8,9 +8,15 @@ import { Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import type {
-  EdgelessElement,
-  TopLevelBlockModel,
+import {
+  bringForward,
+  type EdgelessElement,
+  reorder,
+  type ReorderingAction,
+  type ReorderingRange,
+  reorderTo,
+  sendBackward,
+  type TopLevelBlockModel,
 } from '../__internal__/index.js';
 import {
   type CssVariableName,
@@ -20,18 +26,24 @@ import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
+import type { Selectable } from '../page-block/edgeless/services/tools-manager.js';
 import {
   getEdgelessElement,
   isConnectable,
   isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
   isTopLevelBlock,
 } from '../page-block/edgeless/utils/query.js';
 import { EdgelessSnapManager } from '../page-block/edgeless/utils/snap-manager.js';
-import { Batch } from './batch.js';
+import { Batch, BLOCK_BATCH, FRAME_BATCH } from './batch.js';
 import type { IBound } from './consts.js';
-import type { EdgelessBlockType } from './edgeless-types.js';
 import {
-  type EdgelessElementType,
+  type EdgelessBlockModelMap,
+  EdgelessBlockType,
+} from './edgeless-types.js';
+import {
+  EdgelessElementType,
   type IEdgelessElementCreateProps,
 } from './edgeless-types.js';
 import {
@@ -50,7 +62,7 @@ import {
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './grid.js';
-import type { IVec, PhasorElementType } from './index.js';
+import type { EdgelessElementUtils, IVec, PhasorElementType } from './index.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -59,6 +71,7 @@ import { getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
   generateKeyBetween,
+  generateNKeysBetween,
   normalizeWheelDeltaY,
 } from './utils/index.js';
 import { serializeXYWH } from './utils/xywh.js';
@@ -137,9 +150,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
+  compare = compare;
 
   private _defaultBatch = 'a1';
-  private _batches = new Map<string, Batch<SurfaceElement>>();
+  private _batches = new Map<string, Batch<EdgelessElementUtils>>();
 
   slots = {
     elementUpdated: new Slot<{
@@ -158,8 +172,36 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.root.mode === 'edgeless';
   }
 
+  getblocks<T extends EdgelessBlockType>(flavour: T) {
+    let parent: BaseBlockModel = this.model;
+    if (flavour === EdgelessBlockType.NOTE) {
+      parent = this.edgeless.model;
+    }
+    return parent.children.filter(
+      child => child.flavour === flavour
+    ) as EdgelessBlockModelMap[T][];
+  }
+
+  getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
+    return this.getblocks(flavour).sort(this.compare);
+  }
+
   get blocks() {
-    return [...this.edgeless.notes, ...this.edgeless.frames];
+    return [
+      ...this.getblocks(EdgelessBlockType.FRAME),
+      ...this.getblocks(EdgelessBlockType.NOTE),
+      ...this.getblocks(EdgelessBlockType.IMAGE),
+    ];
+  }
+
+  get sortedBlocks() {
+    return [
+      ...this.getblocks(EdgelessBlockType.FRAME).sort(this.compare),
+      ...[
+        ...this.getblocks(EdgelessBlockType.NOTE),
+        ...this.getblocks(EdgelessBlockType.IMAGE),
+      ].sort(this.compare),
+    ];
   }
 
   @query('.affine-edgeless-surface-block-container')
@@ -199,7 +241,15 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   };
 
   private _initEvents() {
-    const { page } = this;
+    const { page, _disposables, edgeless } = this;
+
+    _disposables.add(
+      edgeless.slots.reorderingBlocksUpdated.on(this._reorderBlocks.bind(this))
+    );
+    _disposables.add(
+      edgeless.slots.reorderingShapesUpdated.on(this._reorderShapes.bind(this))
+    );
+
     this._disposables.add(
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
@@ -252,6 +302,222 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         }
       })
     );
+
+    this._initBlocks();
+  }
+
+  private _initBlocks() {
+    const { page } = this;
+    this.blocks.forEach(block => {
+      this._addToBatch(block);
+    });
+    page.slots.blockUpdated.on(e => {
+      if (e.type === 'add') {
+        const model = this.pickById(e.id) as TopLevelBlockModel;
+        assertExists(model);
+        if (isFrameBlock(model) || isNoteBlock(model)) {
+          this._addToBatch(model);
+        } else if (
+          isImageBlock(model) &&
+          (<Y.Array<string>>this.model.yBlock.get('sys:children'))
+            .toArray()
+            .includes(e.id)
+        ) {
+          this._addToBatch(model);
+        }
+      } else if (e.type === 'delete') {
+        if (
+          e.flavour === EdgelessBlockType.NOTE ||
+          e.flavour === EdgelessBlockType.FRAME
+        ) {
+          const model = this.pickById(e.id) as TopLevelBlockModel;
+          this._removeFromBatch(model);
+        } else if (
+          e.flavour === EdgelessBlockType.IMAGE &&
+          e.parent === this.model.id
+        ) {
+          const model = this.pickById(e.id) as TopLevelBlockModel;
+          this._removeFromBatch(model);
+        }
+      }
+    });
+  }
+
+  private _reorderBlocks({
+    elements,
+    type,
+  }: ReorderingAction<TopLevelBlockModel>) {
+    const batchId = elements[0].batch;
+    const batch = this.getBatch(batchId);
+    const updateIndexes = (keys: string[], elements: Selectable[]) => {
+      this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
+        const min = keys[0];
+        if (min < batch.min) {
+          batch.min = min;
+        }
+        const max = keys[keys.length - 1];
+        if (max > batch.max) {
+          batch.max = max;
+        }
+      });
+    };
+
+    switch (type) {
+      case 'front':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: batch.max,
+            end: null,
+          }),
+          updateIndexes
+        );
+        break;
+      case 'forward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: generateKeyBetween(null, pickedElements[0].index),
+            end: null,
+          }),
+          () => this.edgeless.getSortedElementsWithViewportBounds(elements),
+          bringForward,
+          updateIndexes
+        );
+        break;
+      case 'backward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: null,
+            end: pickedElements[pickedElements.length - 1].index,
+          }),
+          () => this.edgeless.getSortedElementsWithViewportBounds(elements),
+          sendBackward,
+          updateIndexes
+        );
+        break;
+      case 'back':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: null,
+            end: batch.min,
+          }),
+          updateIndexes
+        );
+        break;
+    }
+  }
+
+  private _reorderShapes = ({
+    elements,
+    type,
+  }: ReorderingAction<Selectable>) => {
+    const batch = this.getBatch(this.defaultBatch);
+    const updateIndexes = (keys: string[], elements: Selectable[]) => {
+      this.updateIndexes(keys, elements as PhasorElement[], keys => {
+        const min = keys[0];
+        if (min < batch.min) {
+          batch.min = min;
+        }
+        const max = keys[keys.length - 1];
+        if (max > batch.max) {
+          batch.max = max;
+        }
+      });
+    };
+
+    switch (type) {
+      case 'front':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: batch.max,
+            end: null,
+          }),
+          updateIndexes
+        );
+        break;
+      case 'forward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: generateKeyBetween(null, pickedElements[0].index),
+            end: null,
+          }),
+          () => this.getSortedPhasorElementsWithViewportBounds(),
+          bringForward,
+          updateIndexes
+        );
+        break;
+      case 'backward':
+        this._reorder(
+          elements,
+          (pickedElements: Selectable[]) => ({
+            start: null,
+            end: pickedElements[pickedElements.length - 1].index,
+          }),
+          () => this.getSortedPhasorElementsWithViewportBounds(),
+          sendBackward,
+          updateIndexes
+        );
+        break;
+      case 'back':
+        this._reorderTo(
+          elements,
+          () => ({
+            start: null,
+            end: batch.min,
+          }),
+          updateIndexes
+        );
+        break;
+    }
+  };
+
+  /**
+   * Brings to front or sends to back.
+   */
+  private _reorderTo(
+    elements: Selectable[],
+    getIndexes: (elements: Selectable[]) => {
+      start: string | null;
+      end: string | null;
+    },
+    updateIndexes: (keys: string[], elements: Selectable[]) => void
+  ) {
+    reorderTo(
+      elements,
+      compare,
+      getIndexes,
+      (start, end, len) => generateNKeysBetween(start, end, len),
+      updateIndexes
+    );
+  }
+
+  /**
+   * Brings forward or sends backward layer by layer.
+   */
+  private _reorder(
+    elements: Selectable[],
+    getIndexes: (pickedElements: Selectable[]) => {
+      start: string | null;
+      end: string | null;
+    },
+    pick: () => Selectable[],
+    order: (ranges: ReorderingRange[], pickedElements: Selectable[]) => void,
+    updateIndexes: (keys: string[], elements: Selectable[]) => void
+  ) {
+    reorder(
+      elements,
+      compare,
+      pick,
+      getIndexes,
+      order,
+      (start, end, len) => generateNKeysBetween(start, end, len),
+      updateIndexes
+    );
   }
 
   override render() {
@@ -274,7 +540,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   // query
   pickTopBlock(point: IVec) {
-    const models = this.edgeless.sortedBlocks;
+    const models = this.sortedBlocks;
     for (let i = models.length - 1; i >= 0; i--) {
       const model = models[i];
       if (model.hitTest(point[0], point[1], {}, this)) {
@@ -295,17 +561,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   getBatch(id: string) {
     const batch = this._batches.get(id);
     if (batch) return batch;
-    const newBatch = new Batch<SurfaceElement>(id);
+    const newBatch = new Batch<EdgelessElementUtils>(id);
     this._batches.set(id, newBatch);
     return newBatch;
   }
 
-  private _addToBatch(element: SurfaceElement) {
+  private _addToBatch(element: EdgelessElementUtils) {
     const batch = element.batch ?? this._defaultBatch;
     this.getBatch(batch).addElement(element);
   }
 
-  private _removeFromBatch(element: SurfaceElement) {
+  private _removeFromBatch(element: EdgelessElementUtils) {
     const batch = element.batch ?? this._defaultBatch;
     this.getBatch(batch).deleteElement(element);
   }
@@ -416,23 +682,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   updateIndexes(
     keys: string[],
-    elements: PhasorElement[],
+    elements: EdgelessElement[],
     callback?: (keys: string[]) => void
   ) {
-    this._transact(() => {
-      let newIndex;
-      let i = 0;
-      const len = elements.length;
-      for (; i < len; i++) {
-        newIndex = keys[i];
-        const yElement = this._yContainer.get(elements[i].id) as Y.Map<unknown>;
-        const oldIndex = yElement.get('index') as string;
-        if (oldIndex === newIndex) continue;
-        yElement.set('index', newIndex);
-      }
-
-      callback && callback(keys);
-    });
+    let index, element;
+    for (let i = 0; i < elements.length; i++) {
+      element = elements[i];
+      index = keys[i];
+      if (element.index === index) continue;
+      this.updateElement(element.id, { index });
+    }
+    callback && callback(keys);
   }
 
   attach(container: HTMLElement) {
@@ -500,7 +760,18 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
       return id;
     } else {
-      return this.page.addBlock(type, properties, parent, parentIndex);
+      let batchId = BLOCK_BATCH;
+      if (type === EdgelessElementType.FRAME) {
+        batchId = FRAME_BATCH;
+      }
+      const batch = this.getBatch(batchId);
+      const index = generateKeyBetween(batch.max, null);
+      return this.page.addBlock(
+        type,
+        { ...properties, index },
+        parent,
+        parentIndex
+      );
     }
   }
 

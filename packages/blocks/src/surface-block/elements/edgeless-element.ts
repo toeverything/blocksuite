@@ -27,8 +27,10 @@ export interface HitTestOptions {
 }
 export interface EdgelessElementUtils {
   xywh: SerializedXYWH;
-  rotate?: number;
+  rotate: number;
   connectable: boolean;
+  index: string;
+  batch: string | null;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;

@@ -1,5 +1,15 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
+import { BLOCK_BATCH } from '../surface-block/batch.js';
+import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
+import { RectElement } from '../surface-block/elements/rect-element.js';
+import type { PointLocation } from '../surface-block/index.js';
+import {
+  Bound,
+  type EdgelessElementUtils,
+  type IVec,
+  type SerializedXYWH,
+} from '../surface-block/index.js';
 import { ImageBlockTransformer } from './image-transformer.js';
 
 export type ImageBlockProps = {
@@ -7,6 +17,9 @@ export type ImageBlockProps = {
   sourceId: string;
   width?: number;
   height?: number;
+  index: string;
+  xywh?: SerializedXYWH;
+  rotate: number;
 };
 
 const defaultImageProps: ImageBlockProps = {
@@ -14,6 +27,9 @@ const defaultImageProps: ImageBlockProps = {
   sourceId: '',
   width: 0,
   height: 0,
+  index: 'a0',
+  xywh: '[0,0,0,0]',
+  rotate: 0,
 };
 
 export const ImageBlockSchema = defineBlockSchema({
@@ -24,6 +40,33 @@ export const ImageBlockSchema = defineBlockSchema({
     role: 'content',
   },
   transformer: () => new ImageBlockTransformer(),
+  toModel: () => {
+    return new ImageBlockModel();
+  },
 });
 
-export type ImageBlockModel = SchemaToModel<typeof ImageBlockSchema>;
+@RectElement
+export class ImageBlockModel
+  extends BaseBlockModel<ImageBlockProps>
+  implements EdgelessElementUtils
+{
+  override xywh!: SerializedXYWH;
+  override flavour!: EdgelessBlockType.IMAGE;
+  get batch() {
+    return BLOCK_BATCH;
+  }
+
+  get connectable() {
+    return true;
+  }
+  containedByBounds!: (_: Bound) => boolean;
+  getNearestPoint!: (_: IVec) => IVec;
+  intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;
+  getRelativePointLocation!: (_: IVec) => PointLocation;
+  boxSelect!: (bound: Bound) => boolean;
+
+  hitTest(x: number, y: number): boolean {
+    const bound = Bound.deserialize(this.xywh);
+    return bound.isPointInBound([x, y], 0);
+  }
+}

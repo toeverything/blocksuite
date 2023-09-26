@@ -62,7 +62,7 @@ export class EdgelessSelectionManager {
    */
   get elements() {
     return this.state.elements.reduce((pre, id) => {
-      const element = this.container.getElementModel(id) as Selectable;
+      const element = this.container.surface.pickById(id);
 
       if (element && element.id) pre.push(element);
       return pre;

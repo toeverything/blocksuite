@@ -19,14 +19,9 @@ import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
 import type { EdgelessTool } from '../../__internal__/index.js';
 import {
   asyncFocusRichText,
-  bringForward,
   handleNativeRangeAtPoint,
   Point,
-  reorder,
   type ReorderingAction,
-  type ReorderingRange,
-  reorderTo,
-  sendBackward,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
 import { getService } from '../../__internal__/service/index.js';
@@ -34,23 +29,21 @@ import { listenToThemeChange } from '../../__internal__/theme/utils.js';
 import { toast } from '../../components/toast.js';
 import type {
   EdgelessPageBlockWidgetName,
-  FrameBlockModel,
   ImageBlockModel,
   NoteBlockModel,
   PageBlockModel,
 } from '../../index.js';
+import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
   clamp,
-  compare,
-  generateKeyBetween,
-  generateNKeysBetween,
   getCommonBound,
   type IBound,
   intersects,
   type IVec,
   type PhasorElement,
   serializeXYWH,
+  Vec,
   ZOOM_MAX,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
@@ -82,7 +75,7 @@ import {
   FIT_TO_SCREEN_PADDING,
 } from './utils/consts.js';
 import { xywhArrayToObject } from './utils/convert.js';
-import { getCursorMode, isPhasorElement } from './utils/query.js';
+import { getCursorMode, isFrameBlock, isPhasorElement } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 export interface EdgelessSelectionSlots {
@@ -97,7 +90,7 @@ export interface EdgelessSelectionSlots {
     dragging?: boolean;
   }>;
   edgelessToolUpdated: Slot<EdgelessTool>;
-  reorderingNotesUpdated: Slot<ReorderingAction<Selectable>>;
+  reorderingBlocksUpdated: Slot<ReorderingAction<Selectable>>;
   reorderingShapesUpdated: Slot<ReorderingAction<Selectable>>;
   pressShiftKeyUpdated: Slot<boolean>;
   cursorUpdated: Slot<string>;
@@ -189,7 +182,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     }>(),
     hoverUpdated: new Slot(),
     edgelessToolUpdated: new Slot<EdgelessTool>(),
-    reorderingNotesUpdated: new Slot<ReorderingAction<Selectable>>(),
+    reorderingBlocksUpdated: new Slot<ReorderingAction<TopLevelBlockModel>>(),
     reorderingShapesUpdated: new Slot<ReorderingAction<Selectable>>(),
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
@@ -212,38 +205,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   fontLoader!: FontLoader;
 
-  indexes: { max: string; min: string } = { max: 'a0', min: 'a0' };
-
   getService = getService;
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
-
-  // Gets the top level notes.
-  get notes() {
-    return this.model.children.filter(
-      child => child.flavour === 'affine:note'
-    ) as NoteBlockModel[];
-  }
-
-  // Gets the sorted notes.
-  get sortedNotes() {
-    return this.notes.sort(compare);
-  }
-
-  get frames() {
-    return this.surfaceBlockModel.children.filter(
-      child => child.flavour === 'affine:frame'
-    ) as FrameBlockModel[];
-  }
-
-  get sortedFrames() {
-    return this.frames.sort(compare);
-  }
-
-  get sortedBlocks() {
-    return [...this.sortedFrames, ...this.sortedNotes];
-  }
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -323,8 +288,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(this.selectionManager);
     _disposables.add(this.surface);
 
-    _disposables.add(slots.reorderingNotesUpdated.on(this.reorderNotes));
-    _disposables.add(slots.reorderingShapesUpdated.on(this.reorderShapes));
     _disposables.add(
       slots.zoomUpdated.on(
         (action: ZoomAction) =>
@@ -360,217 +323,21 @@ export class EdgelessPageBlockComponent extends BlockElement<
     );
   }
 
-  /**
-   * Brings to front or sends to back.
-   */
-  private _reorderTo(
-    elements: Selectable[],
-    getIndexes: (elements: Selectable[]) => {
-      start: string | null;
-      end: string | null;
-    },
-    updateIndexes: (keys: string[], elements: Selectable[]) => void
-  ) {
-    reorderTo(
-      elements,
-      compare,
-      getIndexes,
-      (start, end, len) => generateNKeysBetween(start, end, len),
-      updateIndexes
-    );
-  }
-
-  /**
-   * Brings forward or sends backward layer by layer.
-   */
-  private _reorder(
-    elements: Selectable[],
-    getIndexes: (pickedElements: Selectable[]) => {
-      start: string | null;
-      end: string | null;
-    },
-    pick: () => Selectable[],
-    order: (ranges: ReorderingRange[], pickedElements: Selectable[]) => void,
-    updateIndexes: (keys: string[], elements: Selectable[]) => void
-  ) {
-    reorder(
-      elements,
-      compare,
-      pick,
-      getIndexes,
-      order,
-      (start, end, len) => generateNKeysBetween(start, end, len),
-      updateIndexes
-    );
-  }
-
-  updateIndexes(
-    keys: string[],
-    elements: TopLevelBlockModel[],
-    callback: (keys: string[]) => void
-  ) {
-    let index;
-    let i = 0;
-    let element;
-    const len = elements.length;
-    for (; i < len; i++) {
-      index = keys[i];
-      element = elements[i];
-      if (element.index === index) continue;
-      this.page.updateBlock(element, {
-        index,
-      });
-    }
-
-    callback(keys);
-  }
-
-  getElementModel(id: string) {
-    return this.page.getBlockById(id) ?? this.surface.pickById(id) ?? null;
-  }
-
   getSortedElementsWithViewportBounds(elements: Selectable[]) {
-    const bounds = this.surface.viewport.viewportBounds;
-    // TODO: opt filter
-    return this.sortedNotes.filter(element => {
+    const viewportBound = this.surface.viewport.viewportBounds;
+    return this.surface.sortedBlocks.filter(element => {
+      if (isFrameBlock(element)) return false;
       if (elements.includes(element)) return true;
-      return intersects(bounds, xywhArrayToObject(element));
+      return intersects(viewportBound, xywhArrayToObject(element));
     });
   }
 
   getSortedElementsByBound(bound: IBound) {
-    return this.sortedNotes.filter(element => {
+    return this.surface.sortedBlocks.filter(element => {
+      if (isFrameBlock(element)) return false;
       return intersects(bound, xywhArrayToObject(element));
     });
   }
-
-  // Just update `index`, we don't change the order of the notes in the children.
-  reorderNotes = ({ elements, type }: ReorderingAction<Selectable>) => {
-    const updateIndexes = (keys: string[], elements: Selectable[]) => {
-      this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
-        const min = keys[0];
-        if (min < this.indexes.min) {
-          this.indexes.min = min;
-        }
-        const max = keys[keys.length - 1];
-        if (max > this.indexes.max) {
-          this.indexes.max = max;
-        }
-      });
-    };
-
-    switch (type) {
-      case 'front':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: this.indexes.max,
-            end: null,
-          }),
-          updateIndexes
-        );
-        break;
-      case 'forward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: generateKeyBetween(null, pickedElements[0].index),
-            end: null,
-          }),
-          () => this.getSortedElementsWithViewportBounds(elements),
-          bringForward,
-          updateIndexes
-        );
-        break;
-      case 'backward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: null,
-            end: pickedElements[pickedElements.length - 1].index,
-          }),
-          () => this.getSortedElementsWithViewportBounds(elements),
-          sendBackward,
-          updateIndexes
-        );
-        break;
-      case 'back':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: null,
-            end: this.indexes.min,
-          }),
-          updateIndexes
-        );
-        break;
-    }
-  };
-
-  // Just update `index`, we don't change the order of the shapes in the children.
-  reorderShapes = ({ elements, type }: ReorderingAction<Selectable>) => {
-    const { surface } = this;
-    const batch = surface.getBatch(surface.defaultBatch);
-    const updateIndexes = (keys: string[], elements: Selectable[]) => {
-      this.surface.updateIndexes(keys, elements as PhasorElement[], keys => {
-        const min = keys[0];
-        if (min < batch.min) {
-          batch.min = min;
-        }
-        const max = keys[keys.length - 1];
-        if (max > batch.max) {
-          batch.max = max;
-        }
-      });
-    };
-
-    switch (type) {
-      case 'front':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: batch.max,
-            end: null,
-          }),
-          updateIndexes
-        );
-        break;
-      case 'forward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: generateKeyBetween(null, pickedElements[0].index),
-            end: null,
-          }),
-          () => this.surface.getSortedPhasorElementsWithViewportBounds(),
-          bringForward,
-          updateIndexes
-        );
-        break;
-      case 'backward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: null,
-            end: pickedElements[pickedElements.length - 1].index,
-          }),
-          () => this.surface.getSortedPhasorElementsWithViewportBounds(),
-          sendBackward,
-          updateIndexes
-        );
-        break;
-      case 'back':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: null,
-            end: batch.min,
-          }),
-          updateIndexes
-        );
-        break;
-    }
-  };
 
   /**
    * Adds a new note with the given point on the editor-container.
@@ -598,11 +365,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
       noteIndex: noteIndex,
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
-    return this.page.addBlock(
-      'affine:note',
+    return this.surface.addElement(
+      EdgelessBlockType.NOTE,
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
-        index: this.indexes.max,
       },
       parentId,
       noteIndex
@@ -711,27 +477,38 @@ export class EdgelessPageBlockComponent extends BlockElement<
     fileInfos: {
       file: File;
       sourceId: string;
-    }[],
-    point?: Point
+    }[]
   ) {
     const models: Partial<ImageBlockModel>[] = [];
     for (const { file, sourceId } of fileInfos) {
       const size = await readImageSize(file);
       models.push({
-        flavour: 'affine:image',
+        flavour: EdgelessBlockType.IMAGE,
         sourceId,
         ...size,
       });
     }
 
-    const notes = models.map(model => this.addImage(model, point));
-    const { noteId } = notes[notes.length - 1];
+    const center = Vec.toVec(this.surface.viewport.center);
 
-    const note = this.notes.find(note => note.id === noteId);
-    assertExists(note);
+    const ids = models.map(model => {
+      const bound = Bound.fromCenter(
+        center,
+        model.width ?? 0,
+        model.height ?? 0
+      );
+      return this.surface.addElement(
+        EdgelessBlockType.IMAGE,
+        {
+          xywh: bound.serialize(),
+          sourceId: model.sourceId,
+        },
+        this.surface.model
+      );
+    });
 
-    this.tools.switchToDefaultMode({
-      elements: [note.id],
+    this.selectionManager.setSelection({
+      elements: ids.map(id => id),
       editing: false,
     });
   }
@@ -741,7 +518,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.notes.find(b => b.id === noteId);
+    const noteBlock = this.surface
+      .getblocks(EdgelessBlockType.NOTE)
+      .find(b => b.id === noteId);
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
@@ -765,7 +544,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   getElementsBound(): IBound | null {
     const bounds = [];
 
-    this.notes.forEach(note => {
+    this.surface.getblocks(EdgelessBlockType.NOTE).forEach(note => {
       bounds.push(Bound.deserialize(note.xywh));
     });
 

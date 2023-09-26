@@ -29,6 +29,11 @@ export class Bound implements IBound {
     return new Bound(minX, minY, maxX - minX, maxY - minY);
   }
 
+  static fromCenter(center: IVec, width: number, height: number) {
+    const [x, y] = center;
+    return new Bound(x - width / 2, y - height / 2, width, height);
+  }
+
   get points(): IVec[] {
     return [
       [this.x, this.y],

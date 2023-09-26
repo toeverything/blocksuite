@@ -2,6 +2,7 @@ import './image/placeholder/image-not-found.js';
 import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { Text } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
@@ -11,6 +12,8 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
+import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
+import { Bound } from '../surface-block/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
@@ -19,8 +22,144 @@ import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
+  @query('affine-page-image')
+  _pageImage!: ImageBlockPageComponent;
+
+  @query('affine-edgeless-image')
+  _edgelessImage!: ImageBlockEdgelessComponent;
+
+  private get _current() {
+    return this._isInNote ? this._pageImage : this._edgelessImage;
+  }
+
+  private _isInNote = true;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const parent = this.root.view.viewFromPath('block', this.parentPath);
+    assertExists(parent);
+    this._isInNote = parent.model.flavour === EdgelessBlockType.NOTE;
+  }
+
+  get resizeImg() {
+    return this._pageImage.resizeImg;
+  }
+
+  get blob() {
+    return this._current.blob;
+  }
+
+  override render() {
+    if (this._isInNote) {
+      return html`<affine-page-image
+        .model=${this.model}
+        .page=${this.page}
+        .root=${this.root}
+        .widgets=${this.widgets}
+        .content=${this.content}
+      ></affine-page-image>`;
+    } else {
+      return html`<affine-edgeless-image
+        .model=${this.model}
+        .page=${this.page}
+        .root=${this.root}
+        .widgets=${this.widgets}
+        .content=${this.content}
+      ></affine-edgeless-image>`;
+    }
+  }
+}
+
+class ImageBlock extends BlockElement<ImageBlockModel> {
   static maxRetryCount = 3;
 
+  @state()
+  protected _source!: string;
+
+  blob!: Blob;
+
+  @state()
+  protected _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
+    'loading';
+
+  protected _retryCount = 0;
+  protected _lastSourceId: string = '';
+
+  protected _fetchError = (e: unknown) => {
+    // Do have the id but cannot find the blob
+    //  this is probably because the blob is not uploaded yet
+    this._imageState = 'waitUploaded';
+    this._retryCount++;
+    console.warn('Cannot find blob, retrying', this._retryCount);
+    if (this._retryCount < ImageBlock.maxRetryCount) {
+      setTimeout(() => {
+        this._fetchImage();
+        // 1s, 2s, 3s
+      }, 1000 * this._retryCount);
+    } else {
+      console.error(e);
+      this._imageState = 'failed';
+    }
+  };
+
+  protected _fetchImage = () => {
+    if (
+      this._imageState === 'ready' &&
+      this._lastSourceId &&
+      this._lastSourceId === this.model.sourceId
+    ) {
+      return;
+    }
+
+    const storage = this.model.page.blobs;
+    this._imageState = 'loading';
+    storage
+      .get(this.model.sourceId)
+      .then(blob => {
+        if (blob) {
+          this.blob = blob;
+          this._source = URL.createObjectURL(blob);
+          this._lastSourceId = this.model.sourceId;
+          this._imageState = 'ready';
+        } else {
+          this._fetchError(new Error('Cannot find blob'));
+        }
+      })
+      .catch(this._fetchError);
+  };
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._fetchImage();
+    this._disposables.add;
+  }
+
+  override disconnectedCallback() {
+    if (this._source) {
+      URL.revokeObjectURL(this._source);
+    }
+    super.disconnectedCallback();
+  }
+}
+
+@customElement('affine-edgeless-image')
+class ImageBlockEdgelessComponent extends ImageBlock {
+  override render() {
+    const bound = Bound.deserialize(this.model.xywh);
+    return html`<img
+      style=${styleMap({
+        transform: `rotate(${this.model.rotate}deg)`,
+        transfromOrigin: 'center',
+      })}
+      src=${this._source}
+      width="${bound.w}px"
+      height="${bound.h}px"
+    />`;
+  }
+}
+
+@customElement('affine-page-image')
+export class ImageBlockPageComponent extends ImageBlock {
   static override styles = css`
     affine-image {
       display: block;
@@ -98,38 +237,18 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   private _caption!: string;
 
   @state()
-  private _source!: string;
-
-  blob!: Blob;
-
-  @state()
-  private _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
-    'loading';
-
-  @state()
   _focused = false;
 
-  private _retryCount = 0;
-  private _lastSourceId: string = '';
   private _isDragging = false;
 
   override connectedCallback() {
     super.connectedCallback();
-    this._fetchImage();
-    this._disposables.add(this.model.propsUpdated.on(this._fetchImage));
 
     this._bindKeymap();
     this._handleSelection();
 
     this._observeDrag();
     this._registerDragHandleOption();
-  }
-
-  override disconnectedCallback() {
-    if (this._source) {
-      URL.revokeObjectURL(this._source);
-    }
-    super.disconnectedCallback();
   }
 
   override firstUpdated(changedProperties: PropertyValues) {
@@ -198,49 +317,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
       this._input.classList.remove('caption-show');
     }
   }
-
-  private _fetchError = (e: unknown) => {
-    // Do have the id but cannot find the blob
-    //  this is probably because the blob is not uploaded yet
-    this._imageState = 'waitUploaded';
-    this._retryCount++;
-    console.warn('Cannot find blob, retrying', this._retryCount);
-    if (this._retryCount < ImageBlockComponent.maxRetryCount) {
-      setTimeout(() => {
-        this._fetchImage();
-        // 1s, 2s, 3s
-      }, 1000 * this._retryCount);
-    } else {
-      console.error(e);
-      this._imageState = 'failed';
-    }
-  };
-
-  private _fetchImage = () => {
-    if (
-      this._imageState === 'ready' &&
-      this._lastSourceId &&
-      this._lastSourceId === this.model.sourceId
-    ) {
-      return;
-    }
-
-    const storage = this.model.page.blobs;
-    this._imageState = 'loading';
-    storage
-      .get(this.model.sourceId)
-      .then(blob => {
-        if (blob) {
-          this.blob = blob;
-          this._source = URL.createObjectURL(blob);
-          this._lastSourceId = this.model.sourceId;
-          this._imageState = 'ready';
-        } else {
-          this._fetchError(new Error('Cannot find blob'));
-        }
-      })
-      .catch(this._fetchError);
-  };
 
   private _observeDrag() {
     const embedResizeManager = new ImageResizeManager();
@@ -497,5 +573,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 declare global {
   interface HTMLElementTagNameMap {
     'affine-image': ImageBlockComponent;
+    'affine-page-image': ImageBlockPageComponent;
+    'affine-edgeless-image': ImageBlockEdgelessComponent;
   }
 }

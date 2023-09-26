@@ -1284,10 +1284,10 @@ test('click bottom of page and if the last is embed block, editor should insert 
   await page
     .locator('.affine-doc-viewport')
     .click({ position: { x: pageRect.width / 2, y: pageRect.bottom - 10 } });
-
   await assertStoreMatchJSX(
     page,
-    `<affine:page>
+    `
+    <affine:page>
   <affine:note
     prop:background="--affine-background-secondary-color"
     prop:hidden={false}
@@ -1296,6 +1296,8 @@ test('click bottom of page and if the last is embed block, editor should insert 
     <affine:image
       prop:caption=""
       prop:height={0}
+      prop:index="a0"
+      prop:rotate={0}
       prop:sourceId="ejImogf-Tb7AuKY-v94uz1zuOJbClqK-tWBxVr_ksGA="
       prop:width={0}
     />

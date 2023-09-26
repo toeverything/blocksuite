@@ -18,7 +18,7 @@ import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { NoteBlockModel } from '../../../../index.js';
+import type { ImageBlockModel, NoteBlockModel } from '../../../../index.js';
 import type {
   BrushElement,
   ConnectorElement,
@@ -26,15 +26,16 @@ import type {
   TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { isFrameBlock, isNoteBlock } from '../../utils/query.js';
+import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
 
 type CategorizedElements = {
   shape: ShapeElement[];
   brush: BrushElement[];
+  text: TextElement[];
+  connector: ConnectorElement[];
   note: NoteBlockModel[];
   frame: FrameBlockModel[];
-  connector: ConnectorElement[];
-  text: TextElement[];
+  image: ImageBlockModel[];
 };
 
 @customElement('edgeless-component-toolbar')
@@ -91,6 +92,8 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         return 'note';
       } else if (isFrameBlock(model)) {
         return 'frame';
+      } else if (isImageBlock(model)) {
+        return 'image';
       }
       return model.type;
     });

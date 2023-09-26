@@ -11,24 +11,28 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../__internal__/consts.js';
-import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
 import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
 } from '../../../note-block/note-model.js';
 import { deserializeXYWH } from '../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   model!: NoteBlockModel;
 
   protected override createRenderRoot() {
     return this;
+  }
+
+  get edgeless() {
+    return this.surface.edgeless;
   }
 
   protected override firstUpdated() {
@@ -62,8 +66,8 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
   }
 }
 
-@customElement('edgeless-child-note')
-export class EdgelessChildNote extends WithDisposable(LitElement) {
+@customElement('edgeless-note')
+export class EdgelessNote extends WithDisposable(LitElement) {
   @property({ attribute: false })
   index!: number;
 
@@ -71,10 +75,7 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
   model!: NoteBlockModel;
 
   @property({ attribute: false })
-  renderer!: (model: TopLevelBlockModel) => TemplateResult;
-
-  @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
+  surface!: SurfaceBlockComponent;
 
   protected override createRenderRoot() {
     return this;
@@ -94,14 +95,21 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
         this.requestUpdate();
       })
     );
+
+    this._disposables.add(
+      this.surface.page.slots.yBlockUpdated.on(e => {
+        if (e.id === this.model.id) {
+          this.requestUpdate();
+        }
+      })
+    );
   }
 
   override render() {
-    const { model, renderer, index } = this;
+    const { model, surface, index } = this;
     const { xywh, background } = model;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
-
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
@@ -128,9 +136,9 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
         style=${styleMap(style)}
         data-model-height="${modelH}"
       >
-        ${renderer(model)}
+        ${surface.edgeless.renderModel(model)}
         <edgeless-note-mask
-          .edgeless=${this.edgeless}
+          .surface=${surface}
           .model=${this.model}
         ></edgeless-note-mask>
       </div>
@@ -141,13 +149,13 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
 @customElement('edgeless-notes-container')
 export class EdgelessNotesContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
-  notes!: TopLevelBlockModel[];
+  notes!: NoteBlockModel[];
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  renderer!: (model: TopLevelBlockModel) => TemplateResult;
+  renderer!: (model: NoteBlockModel) => TemplateResult;
 
   protected override createRenderRoot() {
     return this;
@@ -185,7 +193,7 @@ export class EdgelessNotesContainer extends WithDisposable(LitElement) {
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-notes-container': EdgelessNotesContainer;
-    'edgeless-child-note': EdgelessChildNote;
+    'edgeless-note': EdgelessNote;
     'edgeless-note-mask': EdgelessNoteMask;
   }
 }
