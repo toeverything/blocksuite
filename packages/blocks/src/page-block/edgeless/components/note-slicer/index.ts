@@ -260,7 +260,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   private _hide() {
     this.style.removeProperty('z-index');
     this.style.removeProperty('display');
-    console.log(this._slicerButton);
+
     this._slicerButton?.reset();
     this._indicatorLine?.reset();
     this._lastPosition = null;
