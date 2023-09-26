@@ -192,7 +192,7 @@ export class LangList extends LitElement {
           (this._currentSelectedIndex + filteredLanguages.length - 1) %
           filteredLanguages.length;
         // TODO scroll to item
-      } else if (e.key === 'Enter') {
+      } else if (e.key === 'Enter' && !e.isComposing) {
         e.preventDefault();
         if (
           this._currentSelectedIndex === -1 ||
