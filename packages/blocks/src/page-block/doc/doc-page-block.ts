@@ -245,7 +245,7 @@ export class DocPageBlockComponent extends BlockElement<
     const hasContent = !this.page.isEmpty;
     const { page, model } = this;
 
-    if (e.key === 'Enter' && hasContent) {
+    if (e.key === 'Enter' && hasContent && !e.isComposing) {
       e.preventDefault();
       assertExists(this._titleVEditor);
       const vRange = this._titleVEditor.getVRange();

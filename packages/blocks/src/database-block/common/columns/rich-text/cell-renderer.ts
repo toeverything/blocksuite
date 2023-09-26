@@ -235,7 +235,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
       this.selectCurrentCell(false);
     }
 
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !event.isComposing) {
       if (event.shiftKey) {
         // soft enter
         this._onSoftEnter();

@@ -731,6 +731,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="hello"
     prop:type="bulleted"
   />
@@ -749,6 +750,7 @@ test('should hotkey work in paragraph', async ({ page }) => {
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="hello"
     prop:type="numbered"
   />

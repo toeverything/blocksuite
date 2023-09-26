@@ -551,6 +551,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
                   MAX_LANG_SELECT_HEIGHT,
                   availableHeight
                 )}px`,
+                pointerEvents: 'none',
                 ...(placement.startsWith('top')
                   ? {
                       display: 'flex',
