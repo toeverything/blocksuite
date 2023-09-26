@@ -6,6 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 
@@ -112,11 +113,17 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                       item.wh[0],
                       item.wh[1]
                     );
-                    const id = edgeless.surface.addElement('frame', {
-                      title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
-                      batch: 'a0',
-                      xywh: bound.serialize(),
-                    });
+                    const id = edgeless.surface.addElement(
+                      EdgelessBlockType.FRAME,
+                      {
+                        title: new Workspace.Y.Text(
+                          `Frame ${frames.length + 1}`
+                        ),
+                        batch: 'a0',
+                        xywh: bound.serialize(),
+                      },
+                      surface.model
+                    );
                     edgeless.page.captureSync();
                     const frame = edgeless.surface.pickById(id);
                     assertExists(frame);

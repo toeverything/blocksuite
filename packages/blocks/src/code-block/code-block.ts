@@ -9,7 +9,7 @@ import {
   type VirgoRootElement,
   type VRangeProvider,
 } from '@blocksuite/virgo';
-import { flip, offset, shift, size } from '@floating-ui/dom';
+import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
@@ -513,6 +513,11 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       this._langListAbortController = undefined;
     });
 
+    const MAX_LANG_SELECT_HEIGHT = 440;
+    const portalPadding = {
+      top: PAGE_HEADER_HEIGHT + 12,
+      bottom: 12,
+    } as const;
     createLitPortal({
       closeOnClickAway: true,
       template: ({ positionSlot }) => {
@@ -533,13 +538,28 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         placement: 'bottom-start',
         middleware: [
           offset(4),
-          flip(),
+          autoPlacement({
+            allowedPlacements: ['top-start', 'bottom-start'],
+            padding: portalPadding,
+          }),
           size({
-            padding: 12,
-            apply({ availableHeight, elements }) {
+            padding: portalPadding,
+            apply({ availableHeight, elements, placement }) {
               Object.assign(elements.floating.style, {
                 height: '100%',
-                maxHeight: `${availableHeight}px`,
+                maxHeight: `${Math.min(
+                  MAX_LANG_SELECT_HEIGHT,
+                  availableHeight
+                )}px`,
+                ...(placement.startsWith('top')
+                  ? {
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                    }
+                  : {
+                      display: null,
+                      alignItems: null,
+                    }),
               });
             },
           }),

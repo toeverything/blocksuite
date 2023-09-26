@@ -22,6 +22,7 @@ import {
   SmallArrowDownIcon,
   StraightLineIcon,
 } from '../../../../icons/index.js';
+import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,
   ConnectorMode,
@@ -128,7 +129,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.mode !== mode) {
-        this.surface.updateElement<'connector'>(element.id, {
+        this.surface.updateElement<PhasorElementType.CONNECTOR>(element.id, {
           mode,
         });
       }
@@ -139,7 +140,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     this.page.captureSync();
     this.elements.forEach(element => {
       if (element.rough !== rough) {
-        this.surface.updateElement<'connector'>(element.id, {
+        this.surface.updateElement<PhasorElementType.CONNECTOR>(element.id, {
           rough,
         });
       }
@@ -153,7 +154,9 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     this.elements.forEach(element => {
       if (element.stroke !== stroke) {
         shouldUpdate = true;
-        this.surface.updateElement<'connector'>(element.id, { stroke });
+        this.surface.updateElement<PhasorElementType.CONNECTOR>(element.id, {
+          stroke,
+        });
       }
     });
     if (shouldUpdate) this.requestUpdate();
@@ -161,7 +164,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
   private _setConnectorStrokeWidth(strokeWidth: number) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<'connector'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
         strokeWidth,
       });
     });
@@ -169,7 +172,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
   private _setConnectorStrokeStyle(strokeStyle: StrokeStyle) {
     this.elements.forEach(ele => {
-      this.surface.updateElement<'connector'>(ele.id, {
+      this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
         strokeStyle,
       });
     });

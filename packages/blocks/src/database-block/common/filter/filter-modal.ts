@@ -81,6 +81,8 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
   setData!: (filter: FilterGroup) => void;
   @property({ attribute: false })
   onDelete!: () => void;
+  @property({ attribute: false })
+  onBack!: () => void;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -111,6 +113,7 @@ export class AdvancedFilterModal extends WithDisposable(ShadowlessElement) {
       <div class="filter-modal-container">
         ${this.isRoot
           ? html` <filter-root-view
+              .onBack=${this.onBack}
               .vars="${this.vars}"
               .data="${this.data}"
               .setData="${this.setData}"
@@ -146,6 +149,7 @@ export const popFilterModal = (
     value: FilterGroup;
     onChange: (value: FilterGroup) => void;
     onDelete: () => void;
+    onBack: () => void;
   }
 ) => {
   const filter = new AdvancedFilterModal();
@@ -154,6 +158,10 @@ export const popFilterModal = (
   filter.isRoot = props.isRoot;
   filter.onDelete = () => {
     props.onDelete();
+    close();
+  };
+  filter.onBack = () => {
+    props.onBack();
     close();
   };
   filter.setData = group => {

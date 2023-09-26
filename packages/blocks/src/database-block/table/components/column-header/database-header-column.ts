@@ -3,6 +3,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -17,7 +18,7 @@ import {
   DeleteIcon,
   TextIcon,
 } from '../../../../icons/index.js';
-import type { InsertPosition } from '../../../types.js';
+import type { InsertToPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';
 import { insertPositionToIndex } from '../../../utils/insert.js';
@@ -29,10 +30,18 @@ import type {
 } from '../../table-view-manager.js';
 import { getTableContainer } from '../../types.js';
 import { DataViewColumnPreview } from './column-renderer.js';
+import {
+  getTableGroupRects,
+  getVerticalIndicator,
+  startDragWidthAdjustmentBar,
+} from './vertical-indicator.js';
 
 @customElement('affine-database-header-column')
 export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   static override styles = css`
+    affine-database-header-column {
+      display: flex;
+    }
     .affine-database-header-column-grabbing * {
       cursor: grabbing;
     }
@@ -42,22 +51,36 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
-
+  private widthDragBar = createRef();
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.tableViewManager.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    this.closest('affine-database-table')?.handleEvent('dragStart', context => {
-      const target = context.get('pointerState').raw.target;
-      if (target instanceof Element && this.contains(target)) {
-        this._drag(context.get('pointerState').raw);
-        return true;
-      }
-      return false;
-    });
+    const table = this.closest('affine-database-table');
+    if (table) {
+      this.disposables.add(
+        table.handleEvent('dragStart', context => {
+          const event = context.get('pointerState').raw;
+          const target = event.target;
+          if (target instanceof Element) {
+            if (this.widthDragBar.value?.contains(target)) {
+              event.preventDefault();
+              this.widthDragStart(event);
+              return true;
+            }
+            if (this.contains(target)) {
+              event.preventDefault();
+              this._drag(event);
+              return true;
+            }
+          }
+          return false;
+        })
+      );
+    }
   }
 
   private _columnsOffset = (header: Element, _scale: number) => {
@@ -78,14 +101,18 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         x: v.offsetLeft + v.offsetWidth / 2,
         ele: v,
       });
-      offsetArr.push(v.offsetLeft);
+      offsetArr.push(
+        v.getBoundingClientRect().left - header.getBoundingClientRect().left
+      );
       if (i === columnsArr.length - 1) {
-        offsetArr.push(v.offsetLeft + v.offsetWidth);
+        offsetArr.push(
+          v.getBoundingClientRect().right - header.getBoundingClientRect().left
+        );
       }
     }
     left.reverse();
     const getInsertPosition = (offset: number, width: number) => {
-      let result: InsertPosition | undefined = undefined;
+      let result: InsertToPosition | undefined = undefined;
       for (let i = 0; i < left.length; i++) {
         const { x, ele } = left[i];
         if (x < offset) {
@@ -117,7 +144,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       return result;
     };
     const fixedColumns = columnsArr.map(v => ({ id: v.column.id }));
-    const getInsertOffset = (insertPosition: InsertPosition) => {
+    const getInsertOffset = (insertPosition: InsertToPosition) => {
       return offsetArr[insertPositionToIndex(insertPosition, fixedColumns)];
     };
     return {
@@ -134,7 +161,9 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
   };
   private _drag = (evt: PointerEvent) => {
     const tableContainer = getTableContainer(this);
+    const headerContainer = this.closest('affine-database-column-header');
     const scrollContainer = tableContainer?.parentElement;
+    assertExists(headerContainer);
     assertExists(tableContainer);
     assertExists(scrollContainer);
     const columnHeaderRect = this.getBoundingClientRect();
@@ -149,7 +178,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       (columnHeaderRect.left - headerContainerRect.left) / scale;
     const max = (headerContainerRect.width - columnHeaderRect.width) / scale;
 
-    const { computeInsertInfo } = this._columnsOffset(tableContainer, scale);
+    const { computeInsertInfo } = this._columnsOffset(headerContainer, scale);
     const column = new DataViewColumnPreview();
     column.tableViewManager = this.tableViewManager;
     column.column = this.column;
@@ -161,10 +190,8 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       startOffset,
       column
     );
-    const dropPreview = createDropPreview(
-      tableContainer,
-      headerContainerRect.height
-    );
+    const rectList = getTableGroupRects(tableContainer);
+    const dropPreview = getVerticalIndicator();
 
     const cancelScroll = startFrameLoop(delta => {
       const offset = delta * 0.4;
@@ -180,7 +207,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     html?.classList.toggle('affine-database-header-column-grabbing', true);
     const drag = startDrag<{
       x: number;
-      insertPosition?: InsertPosition;
+      insertPosition?: InsertToPosition;
     }>(evt, {
       onDrag: evt => ({
         x: evt.x,
@@ -197,9 +224,16 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
           columnHeaderRect.width / scale
         );
         if (insertInfo.insertOffset != null) {
-          dropPreview.display(insertInfo.insertOffset);
+          dropPreview.display(
+            0,
+            headerContainerRect.top,
+            rectList,
+            tableContainer.getBoundingClientRect().left +
+              insertInfo.insertOffset,
+            true
+          );
         } else {
-          dropPreview.hide();
+          dropPreview.remove();
         }
         dragPreview.display(currentOffset);
         return {
@@ -413,7 +447,31 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       },
     });
   };
-
+  private drawWidthDragBarTask = 0;
+  private drawWidthDragBar = () => {
+    const tableContainer = getTableContainer(this);
+    const tableRect = tableContainer.getBoundingClientRect();
+    const rectList = getTableGroupRects(tableContainer);
+    getVerticalIndicator().display(
+      0,
+      tableRect.top,
+      rectList,
+      this.getBoundingClientRect().right
+    );
+    this.drawWidthDragBarTask = requestAnimationFrame(this.drawWidthDragBar);
+  };
+  private _enterWidthDragBar = () => {
+    if (this.drawWidthDragBarTask) {
+      cancelAnimationFrame(this.drawWidthDragBarTask);
+      this.drawWidthDragBarTask = 0;
+    }
+    this.drawWidthDragBar();
+  };
+  private _leaveWidthDragBar = () => {
+    cancelAnimationFrame(this.drawWidthDragBarTask);
+    this.drawWidthDragBarTask = 0;
+    getVerticalIndicator().remove();
+  };
   override render() {
     const column = this.column;
     const style = styleMap({
@@ -443,7 +501,24 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
               ${DatabaseDragIcon}
             </div>`}
       </div>
+      <div
+        ${ref(this.widthDragBar)}
+        @mouseenter=${this._enterWidthDragBar}
+        @mouseleave=${this._leaveWidthDragBar}
+        style="width: 0;position: relative;height: 100%;z-index: 1;cursor: col-resize"
+      >
+        <div style="width: 8px;height: 100%;margin-left: -4px;"></div>
+      </div>
     `;
+  }
+
+  private widthDragStart(event: PointerEvent) {
+    startDragWidthAdjustmentBar(
+      event,
+      getTableContainer(this),
+      this.getBoundingClientRect().width,
+      this.column
+    );
   }
 }
 
@@ -462,10 +537,7 @@ const createDragPreview = (
   const div = document.createElement('div');
   div.append(content);
   // div.style.pointerEvents='none';
-  div.style.backgroundColor = 'var(--affine-background-primary-color)';
-  div.style.opacity = '0.95';
-  div.style.boxShadow =
-    '0px 0px 12px 0px rgba(66, 65, 73, 0.14), 0px 0px 0px 0.5px #e3e3e4 inset';
+  div.style.opacity = '0.8';
   div.style.position = 'absolute';
   div.style.width = `${width}px`;
   div.style.height = `${height}px`;
@@ -476,33 +548,6 @@ const createDragPreview = (
   return {
     display(offset: number) {
       div.style.left = `${Math.round(offset)}px`;
-    },
-    remove() {
-      div.remove();
-    },
-  };
-};
-
-const createDropPreview = (container: Element, height: number) => {
-  const width = 4;
-  const div = document.createElement('div');
-  // div.style.pointerEvents='none';
-  div.className = 'database-move-column-drop-preview';
-  div.style.position = 'absolute';
-  div.style.width = `${width}px`;
-  div.style.height = `${height}px`;
-  div.style.display = 'none';
-  div.style.top = `0px`;
-  div.style.zIndex = '9';
-  div.style.backgroundColor = 'blue';
-  container.append(div);
-  return {
-    display(offset: number) {
-      div.style.display = 'block';
-      div.style.left = `${offset - width / 2}px`;
-    },
-    hide() {
-      div.style.display = 'none';
     },
     remove() {
       div.remove();

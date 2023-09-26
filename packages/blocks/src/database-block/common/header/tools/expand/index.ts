@@ -1,7 +1,7 @@
 import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
-import { Slot } from '@blocksuite/global/utils';
+import { assertExists, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { PropertyValues } from 'lit';
 import { css, html } from 'lit';
@@ -9,7 +9,7 @@ import { customElement, property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../../../../__internal__/index.js';
 import { createModal } from '../../../../../components/menu/index.js';
-import { renderTemplate } from '../../../../../components/uni-component/uni-component.js';
+import { renderTemplate } from '../../../../../components/uni-component/render-template.js';
 import { CrossIcon, ExpandWideIcon } from '../../../../../icons/index.js';
 import type { DataViewNativeConfig } from '../../../../data-view.js';
 import type { DatabaseBlockComponent } from '../../../../database-block.js';
@@ -18,7 +18,9 @@ import { DatabaseSelection } from '../../../selection.js';
 export function showDatabasePreviewModal(database: DatabaseBlockComponent) {
   const viewComponent = new DatabaseBlockModalPreview();
   viewComponent.database = database;
-  const modal = createModal();
+  const root = document.querySelector('block-suite-root');
+  assertExists(root);
+  const modal = createModal(root);
   const close = () => {
     modal.remove();
   };

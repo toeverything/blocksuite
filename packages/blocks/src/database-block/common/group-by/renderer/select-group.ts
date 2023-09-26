@@ -1,5 +1,6 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { popMenu } from '../../../../components/menu/index.js';
@@ -15,9 +16,16 @@ export class SelectGroupView extends BaseGroup<
   string
 > {
   static override styles = css`
+    data-view-group-title-select-view {
+      overflow: hidden;
+    }
     .data-view-group-title-select-view {
       width: 100%;
       cursor: pointer;
+    }
+
+    .data-view-group-title-select-view.readonly {
+      cursor: inherit;
     }
 
     .tag {
@@ -86,15 +94,20 @@ export class SelectGroupView extends BaseGroup<
   protected override render(): unknown {
     const tag = this.tag;
     if (!tag) {
-      return html` <div>Ungroups</div>`;
+      return html` <div
+        style="font-size: 14px;color: var(--affine-text-primary-color);line-height: 22px;"
+      >
+        Ungroups
+      </div>`;
     }
     const style = styleMap({
       backgroundColor: tag.color,
     });
-    return html` <div
-      @click="${this._click}"
-      class="data-view-group-title-select-view"
-    >
+    const classList = classMap({
+      'data-view-group-title-select-view': true,
+      readonly: this.readonly,
+    });
+    return html` <div @click="${this._click}" class="${classList}">
       <div class="tag" style="${style}">${tag.value}</div>
     </div>`;
   }

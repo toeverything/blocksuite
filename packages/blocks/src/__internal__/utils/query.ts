@@ -334,6 +334,8 @@ export function getRichTextByModel(model: BaseBlockModel) {
 
 export async function asyncGetRichTextByModel(model: BaseBlockModel) {
   const blockElement = await asyncGetBlockElementByModel(model);
+  if (!blockElement) return null;
+  await blockElement.updateComplete;
   const richText = blockElement?.querySelector<RichText>('rich-text');
   if (!richText) return null;
   return richText;

@@ -14,15 +14,13 @@ import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
+import type { GroupHelper } from '../common/group-by/helper.js';
 import { KanbanClipboardController } from './controller/clipboard.js';
 import { KanbanDragController } from './controller/drag.js';
 import { KanbanHotkeysController } from './controller/hotkeys.js';
 import { KanbanSelectionController } from './controller/selection.js';
 import { KanbanGroup } from './group.js';
-import type {
-  DataViewKanbanManager,
-  GroupHelper,
-} from './kanban-view-manager.js';
+import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`
   affine-data-view-kanban {
@@ -33,9 +31,45 @@ const styles = css`
   }
 
   .affine-data-view-kanban-groups {
+    position: relative;
+    z-index: 1;
     display: flex;
     gap: 20px;
-    overflow: auto;
+    width: 100%;
+    padding-bottom: 4px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+  }
+
+  .affine-data-view-kanban-groups:hover {
+    padding-bottom: 0px;
+  }
+
+  .affine-data-view-kanban-groups::-webkit-scrollbar {
+    -webkit-appearance: none;
+    display: block;
+  }
+
+  .affine-data-view-kanban-groups::-webkit-scrollbar:horizontal {
+    height: 4px;
+  }
+
+  .affine-data-view-kanban-groups::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background-color: transparent;
+  }
+
+  .affine-data-view-kanban-groups:hover::-webkit-scrollbar:horizontal {
+    height: 8px;
+  }
+
+  .affine-data-view-kanban-groups:hover::-webkit-scrollbar-thumb {
+    border-radius: 16px;
+    background-color: var(--affine-black-30);
+  }
+
+  .affine-data-view-kanban-groups:hover::-webkit-scrollbar-track {
+    background-color: var(--affine-hover-color);
   }
 
   .add-group-icon {

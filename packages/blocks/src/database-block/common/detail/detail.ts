@@ -6,12 +6,12 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DetailSlotProps } from '../../../__internal__/datasource/base.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import { PlusIcon } from '../../../icons/index.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import type { DataViewManager } from '../data-view-manager.js';
+import type { DetailSlotProps } from '../datasource/base.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`
@@ -70,15 +70,17 @@ export class RecordDetail extends WithDisposable(ShadowlessElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    this._disposables.add(
+    this.disposables.add(
       this.view.slots.update.on(() => {
         this.requestUpdate();
       })
     );
-    this._disposables.addFromEvent(this, 'click', e => {
+    this.disposables.addFromEvent(this, 'click', e => {
       e.stopPropagation();
       this.selection.selection = undefined;
     });
+    //FIXME: simulate as a widget
+    this.setAttribute('data-widget-id', 'affine-detail-widget');
   }
 
   @query('.add-property')

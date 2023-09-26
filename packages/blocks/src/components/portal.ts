@@ -255,7 +255,9 @@ export function createLitPortal({
   portalRoot.style.position = 'fixed';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
+  portalRoot.style.zIndex = '1';
   const { referenceElement, ...options } = computePositionOptions;
+  assertExists(referenceElement, 'referenceElement is required');
   const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
   const update = () => {
     if (
@@ -272,7 +274,9 @@ export function createLitPortal({
         // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
         portalRoot.style.left = `${x}px`;
         portalRoot.style.top = `${y}px`;
-        portalRoot.style.display = display;
+        if (portalRoot.style.display === 'none') {
+          portalRoot.style.display = display;
+        }
         positionSlot.emit(positionReturn);
       }
     );

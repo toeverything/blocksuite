@@ -33,31 +33,30 @@ export const selectPureColumnConfig = columnManager.register<
   cellToString: (data, colData) =>
     colData.options.find(v => v.id === data)?.value ?? '',
   cellFromString: (data, colData) => {
+    if (!data) {
+      return { value: null, data: colData };
+    }
     const optionMap = Object.fromEntries(
       colData.options.map(v => [v.value, v])
     );
-    const optionNames = data
+    const name = data
       .split(',')
       .map(v => v.trim())
-      .filter(v => v);
+      .filter(v => v)[0];
 
-    let value = '';
-    optionNames.forEach((name, index) => {
-      if (!optionMap[name]) {
-        const newOption: SelectTag = {
-          id: nanoid('unknown'),
-          value: name,
-          color: getTagColor(),
-        };
-        colData.options.push(newOption);
-
-        if (index === 0) {
-          value = newOption.id;
-        }
-      } else {
-        value = optionMap[name].id;
-      }
-    });
+    let value = null;
+    const option = optionMap[name];
+    if (!option) {
+      const newOption: SelectTag = {
+        id: nanoid('unknown'),
+        value: name,
+        color: getTagColor(),
+      };
+      colData.options.push(newOption);
+      value = newOption.id;
+    } else {
+      value = option.id;
+    }
 
     return {
       value,

@@ -7,6 +7,7 @@ import * as Y from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
 import { DatabaseBlockSchema } from '../../../blocks/src/database-block/database-model.js';
+import { FrameBlockSchema } from '../../../blocks/src/frame-block/frame-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
@@ -33,6 +34,7 @@ schema.register([
   ParagraphBlockSchema,
   ListBlockSchema,
   DatabaseBlockSchema,
+  FrameBlockSchema,
 ]);
 
 describe('workspace migration', () => {
@@ -132,6 +134,34 @@ describe('block migration', () => {
     connector = surfaceElements.get('Gt8_2oZB8h') as Y.Map<unknown>;
 
     assert.notExists(connector);
+  });
+
+  test('frame element to block', async () => {
+    const doc = await loadBinary('frame-element-to-block');
+
+    const blocks = doc.getMap('blocks');
+
+    const page = blocks.get('H4fVFXmGUu') as Y.Map<unknown>;
+
+    // @ts-ignore
+    const surfaceElements = blocks
+      .get('eligOTIQu-')
+      .get('prop:elements')
+      .get('value') as Y.Map<unknown>;
+    assert.exists(surfaceElements.get('2'));
+
+    schema.upgradePage(
+      {
+        'affine:surface': 5,
+      },
+      doc
+    );
+
+    assert.notExists(surfaceElements.get('2'));
+    const pageChildren = page.get('sys:children') as Y.Array<string>;
+    const id = pageChildren.get(pageChildren.length - 1);
+    assert.equal(id, '2');
+    assert.exists(blocks.get(id));
   });
 
   test('update database block title data', async () => {

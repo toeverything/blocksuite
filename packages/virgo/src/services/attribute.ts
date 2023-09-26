@@ -97,7 +97,7 @@ export class VirgoAttributeService<TextAttributes extends BaseTextAttributes> {
     }
     return Object.fromEntries(
       // filter out undefined values
-      Object.entries(attributeResult.data).filter(([_, v]) => v)
+      Object.entries(attributeResult.data).filter(([_, v]) => v || v === null)
     ) as TextAttributes;
   };
 }

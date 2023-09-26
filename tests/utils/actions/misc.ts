@@ -468,18 +468,13 @@ export async function initEmptyDatabaseWithParagraphState(
 
 export async function initDatabaseRow(page: Page) {
   const editor = getEditorLocator(page);
-  const footer = editor.locator('.affine-database-block-footer');
-  const box = await footer.boundingBox();
-  if (!box) throw new Error('Missing database footer rect');
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  const columnAddBtn = editor.locator(
-    '[data-test-id="affine-database-add-row-button"]'
-  );
-  await columnAddBtn.click();
+  const addRow = editor.locator('.data-view-table-group-add-row');
+  await addRow.click();
 }
 
 export async function initDatabaseRowWithData(page: Page, data: string) {
   await initDatabaseRow(page);
+  await waitNextFrame(page, 50);
   await type(page, data);
 }
 
