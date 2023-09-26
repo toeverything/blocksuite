@@ -20,6 +20,7 @@ export class LangList extends LitElement {
     return css`
       :host {
         max-height: 100%;
+        width: 230px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -27,6 +28,7 @@ export class LangList extends LitElement {
         color: var(--affine-text-primary-color);
         border-radius: 12px;
         z-index: var(--affine-z-index-popover);
+        pointer-events: auto;
       }
 
       .lang-list-container {
@@ -37,13 +39,12 @@ export class LangList extends LitElement {
         flex-direction: column;
         box-shadow: var(--affine-menu-shadow);
         border-radius: 8px;
-        padding: 12px 8px;
+        padding: 8px;
       }
 
       .lang-list-button-container {
         flex: 1;
-        overflow: scroll;
-        height: 424px;
+        overflow-y: scroll;
         padding-top: 5px;
         padding-left: 4px;
         padding-right: 4px;
@@ -59,13 +60,13 @@ export class LangList extends LitElement {
         justify-content: space-between;
         padding: 12px;
       }
+      .lang-item svg {
+        width: 20px;
+        height: 20px;
+      }
       .lang-item-active {
         color: var(--affine-blue-600);
         background: var(--affine-hover-color-filled);
-      }
-      .lang-item-active svg {
-        width: 20px;
-        height: 20px;
       }
 
       .divider {
@@ -237,7 +238,11 @@ export class LangList extends LitElement {
                 ].join(' ')}
               >
                 ${language.displayName ?? language.id}
-                <slot name="suffix">${isActive ? DoneIcon : nothing}</slot>
+                <slot name="suffix"
+                  >${this.currentLanguageId === language.id
+                    ? DoneIcon
+                    : nothing}</slot
+                >
               </icon-button>
             `;
           })}

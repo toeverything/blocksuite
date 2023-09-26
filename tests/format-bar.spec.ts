@@ -692,6 +692,7 @@ test('should format quick bar be able to change to heading paragraph type', asyn
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="123"
     prop:type="bulleted"
   />
@@ -1121,16 +1122,19 @@ test('should format quick bar with block selection works when update block type'
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="123"
     prop:type="bulleted"
   />
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="456"
     prop:type="bulleted"
   />
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="789"
     prop:type="bulleted"
   />

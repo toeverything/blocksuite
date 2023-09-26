@@ -585,6 +585,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
               >
                 <input
                   autocomplete="off"
+                  data-1p-ignore
                   ${ref(this.inputRef)}
                   type="text"
                   placeholder="${this.options.input?.placeholder ?? ''}"
