@@ -21,7 +21,7 @@ export class TitleDetailCell extends BaseCellRenderer<string> {
       this,
       'keydown',
       e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
           e.stopPropagation();
           e.preventDefault();
           return;

@@ -164,7 +164,7 @@ export class LinkCellEditing extends BaseCellRenderer<string> {
   };
 
   private _onKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.isComposing) {
       this._setValue();
       setTimeout(() => {
         this.selectCurrentCell(false);
