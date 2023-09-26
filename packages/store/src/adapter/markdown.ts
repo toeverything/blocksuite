@@ -1,5 +1,5 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
-import type { Heading, RootContentMap } from 'mdast';
+import type { Heading, Root, RootContentMap } from 'mdast';
 
 import {
   type BlockSnapshot,
@@ -29,10 +29,9 @@ type MdastUnionType<
   V extends RootContentMap[K],
 > = V;
 
-type MarkdownAST = MdastUnionType<
-  keyof RootContentMap,
-  RootContentMap[keyof RootContentMap]
->;
+type MarkdownAST =
+  | MdastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
+  | Root;
 
 const markdownConvertibleFlavours = [
   'affine:code',
@@ -219,7 +218,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     }
   };
 
-  traverseSnapshot2 = async () => {
+  traverseSnapshot2 = async (snapshot: BlockSnapshot, markdownRoot: Root) => {
     const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
     walker.setONodeTypeGuard(
       (node): node is BlockSnapshot =>
@@ -240,7 +239,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               value: text.delta.map(delta => delta.insert).join(''),
             },
             'children',
-            o.node.children.length
+            'children' in t.node ? t.node.children.length : 0
           );
           break;
         }
@@ -260,8 +259,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   children: this.deltaToMdAST(text.delta),
                 },
                 'children',
-                o.node.children.length
+                'children' in t.node ? t.node.children.length : 0
               );
+              if (o.node.children.length == 0) {
+                context.skip();
+              }
               break;
             }
             case 'text': {
@@ -272,8 +274,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   children: this.deltaToMdAST(text.delta),
                 },
                 'children',
-                o.node.children.length
+                'children' in t.node ? t.node.children.length : 0
               );
+              if (o.node.children.length == 0) {
+                context.skip();
+              }
               break;
             }
             case 'quote': {
@@ -289,8 +294,11 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   ],
                 },
                 'children',
-                o.node.children.length
+                'children' in t.node ? t.node.children.length : 0
               );
+              if (o.node.children.length == 0) {
+                context.skip();
+              }
               break;
             }
           }
@@ -299,7 +307,34 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         case 'affine:list': {
           // check if the list is of the same type
           // if true, add the list item to the list
+          // if false, create a new list
           if (
+            t.node?.type === 'list' &&
+            t.node.ordered === (o.node.props.type === 'numbered') &&
+            t.node.children[0].checked ===
+              (o.node.props.type === 'todo'
+                ? (o.node.props.checked as boolean)
+                : undefined)
+          ) {
+            context.addNode(
+              t.node,
+              {
+                type: 'listItem',
+                checked:
+                  o.node.props.type === 'todo'
+                    ? (o.node.props.checked as boolean)
+                    : undefined,
+                children: [
+                  {
+                    type: 'paragraph',
+                    children: this.deltaToMdAST(text.delta),
+                  },
+                ],
+              },
+              'children',
+              'children' in t.node ? t.node.children.length : 0
+            );
+          } else if (
             t.parent?.type === 'list' &&
             t.parent.ordered === (o.node.props.type === 'numbered') &&
             t.parent.children[0].checked ===
@@ -323,12 +358,48 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 ],
               },
               'children',
-              o.node.children.length
+              t.parent.children.length
+            );
+          } else {
+            context.addNode(
+              t.parent!,
+              {
+                type: 'list',
+                ordered: o.node.props.type === 'numbered',
+                children: [
+                  {
+                    type: 'listItem',
+                    checked:
+                      o.node.props.type === 'todo'
+                        ? (o.node.props.checked as boolean)
+                        : undefined,
+                    children: [
+                      {
+                        type: 'paragraph',
+                        children: this.deltaToMdAST(text.delta),
+                      },
+                    ],
+                  },
+                ],
+              },
+              'children',
+              'children' in t.node ? t.node.children.length : 0
             );
           }
           break;
         }
         case 'affine:divider': {
+          context.addNode(
+            t.node,
+            {
+              type: 'thematicBreak',
+            },
+            'children',
+            'children' in t.node ? t.node.children.length : 0
+          );
+          if (o.node.children.length == 0) {
+            context.skip();
+          }
           break;
         }
         case 'affine:image': {
@@ -339,6 +410,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       }
     });
+    walker.walk(snapshot, markdownRoot);
   };
 
   private writeTextDelta(text: { delta: DeltaInsert[] }) {

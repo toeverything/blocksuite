@@ -144,20 +144,20 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     if (!o.node) return;
 
     if (this._enter) {
+      this._enter(o, t, this.context);
       const should_skip = this._should_skip;
       const addedTNode = this._addedTNode;
       this._resetContext();
-      this._enter(o, t, this.context);
 
       if (addedTNode) {
         if (addedTNode.index !== undefined) {
-          (t.node[addedTNode.prop] as Array<object>).splice(
+          (addedTNode.mountPoint[addedTNode.prop] as Array<object>).splice(
             addedTNode.index,
             0,
             addedTNode.node
           );
         } else {
-          (t.node[addedTNode.prop] as object) = addedTNode.node;
+          (addedTNode.mountPoint[addedTNode.prop] as object) = addedTNode.node;
         }
       }
 
@@ -183,7 +183,9 @@ export class ASTWalker<ONode extends object, TNode extends object> {
                 },
                 {
                   node: this._lastAddedTNode?.node ?? t.node,
-                  parent: this._lastAddedTNode?.node ? t.node : t.parent,
+                  parent: this._lastAddedTNode?.node
+                    ? this._lastAddedTNode.mountPoint
+                    : t.parent,
                   prop: this._lastAddedTNode?.prop ?? null,
                   index: this._lastAddedTNode?.index ?? null,
                 }
@@ -200,7 +202,9 @@ export class ASTWalker<ONode extends object, TNode extends object> {
             },
             {
               node: this._lastAddedTNode?.node ?? t.node,
-              parent: this._lastAddedTNode?.node ? t.node : t.parent,
+              parent: this._lastAddedTNode?.node
+                ? this._lastAddedTNode.mountPoint
+                : t.parent,
               prop: this._lastAddedTNode?.prop ?? null,
               index: this._lastAddedTNode?.index ?? null,
             }
@@ -210,20 +214,20 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     }
 
     if (this._leave) {
+      this._leave(o, t, this.context);
       const should_skip = this._should_skip;
       const addedTNode = this._addedTNode;
       this._resetContext();
-      this._leave(o, t, this.context);
 
       if (addedTNode) {
         if (addedTNode.index !== undefined) {
-          (t.node[addedTNode.prop] as Array<object>).splice(
+          (addedTNode.mountPoint[addedTNode.prop] as Array<object>).splice(
             addedTNode.index,
             0,
             addedTNode.node
           );
         } else {
-          (t.node[addedTNode.prop] as object) = addedTNode.node;
+          (addedTNode.mountPoint[addedTNode.prop] as object) = addedTNode.node;
         }
       }
 
