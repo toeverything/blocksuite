@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { dblclickView } from '../utils/actions/click.js';
 import {
@@ -21,14 +21,14 @@ import {
 import { test } from '../utils/playwright.js';
 
 test.describe('frame', () => {
-  async function init(page) {
+  async function init(page: Page) {
     await edgelessCommonSetup(page);
     await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
     await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
     await selectAllByKeyboard(page);
   }
 
-  async function addFrame(page) {
+  async function addFrame(page: Page) {
     await init(page);
     await triggerComponentToolbarAction(page, 'addFrame');
   }

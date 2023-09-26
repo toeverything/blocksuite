@@ -1,3 +1,4 @@
+import type { TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type {
   VRange,
@@ -14,6 +15,45 @@ export const getVRangeProvider: (
   const selectionManager = root.selection;
   const rangeManager = root.rangeManager;
 
+  assertExists(selectionManager);
+  assertExists(rangeManager);
+
+  const calculateVRange = (
+    range: Range,
+    textSelection: TextSelection
+  ): VRange | null => {
+    const selectedElements = rangeManager.getSelectedBlockElementsByRange(
+      range,
+      {
+        mode: 'flat',
+      }
+    );
+    if (!selectedElements.includes(element)) {
+      return null;
+    }
+
+    const { from, to } = textSelection;
+
+    if (from.path === element.path) {
+      return {
+        index: from.index,
+        length: from.length,
+      };
+    }
+
+    if (to?.path === element.path) {
+      return {
+        index: to.index,
+        length: to.length,
+      };
+    }
+
+    assertExists(element.model.text);
+    return {
+      index: 0,
+      length: element.model.text.length,
+    };
+  };
   const setVRange = (vRange: VRange | null) => {
     if (!vRange) {
       selectionManager.clear(['text']);
@@ -40,42 +80,22 @@ export const getVRangeProvider: (
       return null;
     }
 
-    const { from, to } = textSelection;
-    const selectedElements = rangeManager.getSelectedBlockElementsByRange(
-      range,
-      {
-        mode: 'flat',
-      }
-    );
-    if (!selectedElements.includes(element)) {
-      return null;
-    }
-
-    if (from.path === element.path) {
-      return {
-        index: from.index,
-        length: from.length,
-      };
-    }
-
-    if (to?.path === element.path) {
-      return {
-        index: to.index,
-        length: to.length,
-      };
-    }
-
-    assertExists(element.model.text);
-    return {
-      index: 0,
-      length: element.model.text.length,
-    };
+    return calculateVRange(range, textSelection);
   };
 
   const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
   selectionManager.slots.changed.on(() => {
-    const vRange = getVRange();
-    vRangeUpdatedSlot.emit([vRange, false]);
+    // wait for lit updated
+    requestAnimationFrame(() => {
+      const textSelection = selectionManager.find('text');
+      if (!textSelection) return;
+
+      const range = rangeManager.textSelectionToRange(textSelection);
+      if (!range) return;
+
+      const vRange = calculateVRange(range, textSelection);
+      vRangeUpdatedSlot.emit([vRange, false]);
+    });
   });
 
   return {
