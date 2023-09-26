@@ -24,9 +24,11 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   sign,
+  toRadian,
   Vec,
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
+import { isVecZero } from '../../surface-block/utils/math-utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import type { Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
@@ -118,7 +120,16 @@ function getConnectableRelativePosition(
     const tangent = polygonGetPointTangent(bound.points, point);
     return new PointLocation(point, tangent);
   } else {
-    return connectable.getRelativePointLocation(position);
+    const location = connectable.getRelativePointLocation(position);
+    if (isVecZero(Vec.sub(position, [0, 0.5])))
+      location.tangent = Vec.rot([0, -1], toRadian(connectable.rotate));
+    else if (isVecZero(Vec.sub(position, [1, 0.5])))
+      location.tangent = Vec.rot([0, 1], toRadian(connectable.rotate));
+    else if (isVecZero(Vec.sub(position, [0.5, 0])))
+      location.tangent = Vec.rot([1, 0], toRadian(connectable.rotate));
+    else if (isVecZero(Vec.sub(position, [0.5, 1])))
+      location.tangent = Vec.rot([-1, 0], toRadian(connectable.rotate));
+    return location;
   }
 }
 

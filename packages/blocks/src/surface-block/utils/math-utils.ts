@@ -55,6 +55,10 @@ export function almostEqual(a: number, b: number, epsilon = 0.0001) {
   return Math.abs(a - b) < epsilon;
 }
 
+export function isVecZero(v: IVec) {
+  return v.every(n => isZero(n));
+}
+
 export function isZero(x: number) {
   return x >= -EPSILON && x <= EPSILON;
 }
