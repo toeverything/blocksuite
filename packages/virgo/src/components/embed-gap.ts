@@ -9,7 +9,7 @@ export const EmbedGap = html`<span
   data-virgo-text="true"
   style=${styleMap({
     userSelect: 'text',
-    padding: '0 1px',
+    padding: '0 0.5px',
     outline: 'none',
   })}
   >${ZERO_WIDTH_SPACE}</span

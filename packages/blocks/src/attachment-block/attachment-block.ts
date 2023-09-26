@@ -9,7 +9,7 @@ import { stopPropagation } from '../__internal__/utils/event.js';
 import { humanFileSize } from '../__internal__/utils/math.js';
 import { HoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
-import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import {
   type AttachmentBlockModel,
@@ -137,7 +137,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   private _registerDragHandleOption = () => {
     this._disposables.add(
-      DragHandleWidget.registerOption({
+      AffineDragHandleWidget.registerOption({
         flavour: AttachmentBlockSchema.model.flavour,
         onDragStart: (state, startDragging) => {
           // Check if start dragging from the image block

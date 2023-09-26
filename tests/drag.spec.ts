@@ -146,36 +146,43 @@ test('move to the last block of each level in multi-level nesting', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="A"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="B"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="C"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="D"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="E"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="F"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="G"
           prop:type="bulleted"
         />
@@ -199,36 +206,43 @@ test('move to the last block of each level in multi-level nesting', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="B"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="C"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="D"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="E"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="F"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="G"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="A"
           prop:type="bulleted"
         />
@@ -258,37 +272,44 @@ test('move to the last block of each level in multi-level nesting', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="C"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="D"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="E"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="F"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="G"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="A"
           prop:type="bulleted"
         />
       </affine:list>
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="B"
         prop:type="bulleted"
       />
@@ -318,38 +339,45 @@ test('move to the last block of each level in multi-level nesting', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="C"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="D"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="E"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="F"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="G"
           prop:type="bulleted"
         />
       </affine:list>
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="B"
         prop:type="bulleted"
       />
     </affine:list>
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="A"
       prop:type="bulleted"
     />
@@ -447,36 +475,43 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="A"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="B"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="C"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="D"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="E"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="F"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="G"
           prop:type="bulleted"
         />
@@ -513,36 +548,43 @@ test('should be able to drag & drop multiple blocks to nested block', async ({
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="C"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="D"
         prop:type="bulleted"
       />
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="E"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="F"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="A"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="B"
           prop:type="bulleted"
         />
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="G"
           prop:type="bulleted"
         />

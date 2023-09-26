@@ -6,7 +6,11 @@ export const dataViewCssVariable = () => {
 };
 export const dataViewCommonStyle = (selector: string) => `
   ${selector}{
-      ${dataViewCssVariable()}
+    ${dataViewCssVariable()}
+  }
+  .with-data-view-css-variable{
+    ${dataViewCssVariable()}
+    font-family: var(--affine-font-family)
   }
   .dv-pd-2{
     padding:2px;

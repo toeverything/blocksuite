@@ -162,6 +162,7 @@ const createDragPreview = (row: TableRow, x: number, y: number) => {
   cloneRow.rowIndex = row.rowIndex;
   cloneRow.rowId = row.rowId;
   div.append(cloneRow);
+  div.className = 'with-data-view-css-variable';
   div.style.width = `${row.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   div.style.pointerEvents = 'none';

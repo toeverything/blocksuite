@@ -58,7 +58,7 @@ export class BlockRenderer
       this,
       'keydown',
       e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
+        if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
           e.stopPropagation();
           e.preventDefault();
           return;

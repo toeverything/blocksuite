@@ -36,6 +36,7 @@ import {
   assertBlockCount,
   assertBlockType,
   assertClassName,
+  assertDivider,
   assertPageTitleFocus,
   assertRichTexts,
   assertRichTextVRange,
@@ -1023,4 +1024,75 @@ test.describe('press ArrowDown when cursor is at the last line of a block', () =
       "This is the last block. I'm here.",
     ]);
   });
+});
+
+test('delete empty text paragraph block should keep children blocks when following custom blocks', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '--- ');
+  await assertDivider(page, 1);
+
+  // Click blank area to add a paragraph block after divider
+  await page.mouse.click(100, 200);
+  await page.waitForTimeout(200);
+
+  // Add to paragraph blocks
+  await focusRichText(page);
+  await type(page, '123');
+
+  await pressEnter(page);
+  await type(page, '456');
+  await assertRichTexts(page, ['123', '456']);
+
+  // Indent the second paragraph block
+  await focusRichText(page, 1);
+  await pressTab(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:divider />
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  // Delete the parent paragraph block
+  await focusRichText(page, 0);
+  await pressBackspace(page, 4);
+
+  await assertRichTexts(page, ['456']);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:divider />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
 });

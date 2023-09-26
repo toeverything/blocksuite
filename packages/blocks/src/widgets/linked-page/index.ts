@@ -74,8 +74,10 @@ export function showLinkedPagePopover({
   return linkedPage;
 }
 
-@customElement('affine-linked-page-widget')
-export class LinkedPageWidget extends WidgetElement {
+export const AFFINE_LINKED_PAGE_WIDGET = 'affine-linked-page-widget';
+
+@customElement(AFFINE_LINKED_PAGE_WIDGET)
+export class AffineLinkedPageWidget extends WidgetElement {
   static DEFAULT_OPTIONS: LinkedPageOptions = {
     /**
      * The first item of the trigger keys will be the primary key
@@ -89,7 +91,7 @@ export class LinkedPageWidget extends WidgetElement {
     getMenus,
   };
 
-  options = LinkedPageWidget.DEFAULT_OPTIONS;
+  options = AffineLinkedPageWidget.DEFAULT_OPTIONS;
 
   override connectedCallback() {
     super.connectedCallback();
@@ -168,4 +170,10 @@ export class LinkedPageWidget extends WidgetElement {
       this.showLinkedPage(model, matchedKey);
     });
   };
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [AFFINE_LINKED_PAGE_WIDGET]: AffineLinkedPageWidget;
+  }
 }

@@ -312,7 +312,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           this.close();
           return;
         }
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && !e.isComposing) {
           const selectedItem = this.selectedItem;
           if (selectedItem) {
             selectedItem.select();
@@ -585,6 +585,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
               >
                 <input
                   autocomplete="off"
+                  data-1p-ignore
                   ${ref(this.inputRef)}
                   type="text"
                   placeholder="${this.options.input?.placeholder ?? ''}"

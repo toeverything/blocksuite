@@ -133,8 +133,11 @@ function isBlankArea(e: PointerEventState) {
   return cursor !== 'text';
 }
 
-@customElement('affine-doc-dragging-area-widget')
-export class DocDraggingAreaWidget extends WidgetElement {
+export const AFFINE_DOC_DRAGGING_AREA_WIDGET =
+  'affine-doc-dragging-area-widget';
+
+@customElement(AFFINE_DOC_DRAGGING_AREA_WIDGET)
+export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockComponent> {
   @state()
   rect: Rect | null = null;
 
@@ -166,7 +169,9 @@ export class DocDraggingAreaWidget extends WidgetElement {
         }
         if (
           view.model.role !== 'root' &&
-          !DocDraggingAreaWidget.excludeFlavours.includes(view.model.flavour)
+          !AffineDocDraggingAreaWidget.excludeFlavours.includes(
+            view.model.flavour
+          )
         ) {
           blockElement.push(view);
         }
@@ -193,7 +198,7 @@ export class DocDraggingAreaWidget extends WidgetElement {
   }
 
   private get _viewportElement() {
-    const pageBlock = this.pageElement as DocPageBlockComponent;
+    const pageBlock = this.blockElement;
 
     assertExists(pageBlock);
 
@@ -363,5 +368,11 @@ export class DocDraggingAreaWidget extends WidgetElement {
       </style>
       <div class="affine-page-dragging-area" style=${styleMap(style)}></div>
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    [AFFINE_DOC_DRAGGING_AREA_WIDGET]: AffineDocDraggingAreaWidget;
   }
 }
