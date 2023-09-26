@@ -1447,7 +1447,8 @@ export const roundedSvg = html` <svg
   <rect
     stroke="rgba(0, 0, 0, 0.1)"
     width="100"
-    height="100"
+    y="20"
+    height="80"
     rx="10"
     fill="currentColor"
   />

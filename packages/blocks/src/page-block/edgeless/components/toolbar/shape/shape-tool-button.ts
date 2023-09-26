@@ -27,6 +27,7 @@ import {
 } from '../../component-toolbar/change-shape-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
+import type { Shape, ShapeName } from './shape-element.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
 
 @customElement('edgeless-shape-tool-button')
@@ -54,7 +55,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     }
 
     :host {
-      --width: 92px;
+      --width: 102px;
       --height: 64px;
       position: relative;
       width: var(--width);
@@ -141,6 +142,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   override connectedCallback() {
     super.connectedCallback();
     this._shapeToolLocalState = this._tryLoadShapeLocalState();
+    this.active(this._shapeToolLocalState?.shape ?? 'rect');
 
     this.updateComplete.then(() => {
       this._shapeIconColor =
@@ -184,7 +186,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
-  private _shapes = [
+  private _shapes: Array<Shape> = [
     { name: 'rect', svg: rectSvg },
     { name: 'triangle', svg: triangleSvg },
     { name: 'ellipse', svg: ellipseSvg },
@@ -198,7 +200,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     order: this._shapes.map((_, i) => i + 1),
   };
 
-  active(name: string) {
+  active(name: ShapeName) {
     const { order } = this._data;
     const index = this._shapes.findIndex(({ name: n }) => n === name);
     const prevOrder = order[index];
@@ -245,6 +247,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
                 .getContainerRect=${this.getContainerRect}
                 .handleClick=${this.handleClick}
                 .edgeless=${this.edgeless}
+                .setEdgelessTool=${this.setEdgelessTool}
               ></edgeless-shape-element>`;
             })}
           </div>

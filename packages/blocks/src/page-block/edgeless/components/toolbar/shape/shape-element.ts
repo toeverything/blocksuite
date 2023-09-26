@@ -1,8 +1,15 @@
 import { sleep } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, type PropertyValues } from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import type { EdgelessTool } from '../../../../../__internal__/index.js';
 import {
   Bound,
   PhasorElementType,
@@ -16,9 +23,11 @@ import {
   DEFAULT_SHAPE_STROKE_COLOR,
 } from '../../component-toolbar/change-shape-button.js';
 
-interface Shape {
-  name: ShapeType | 'roundedRect';
-  svg: SVGElement;
+export type ShapeName = ShapeType | 'roundedRect';
+
+export interface Shape {
+  name: ShapeName;
+  svg: TemplateResult<1>;
 }
 
 interface Coord {
@@ -80,6 +89,9 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  @property({ attribute: false })
+  setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
+
   @query('#shape-element')
   private shapeElement!: HTMLElement;
 
@@ -88,8 +100,8 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
 
   private transformMap: TransformMap = {
     z1: { x: 0, y: 5, scale: 1, origin: '50% 100%' },
-    z2: { x: -15, y: -7, scale: 0.75, origin: '20% 20%' },
-    z3: { x: 15, y: -7, scale: 0.75, origin: '80% 20%' },
+    z2: { x: -15, y: 0, scale: 0.75, origin: '20% 20%' },
+    z3: { x: 15, y: 0, scale: 0.75, origin: '80% 20%' },
     hidden: { x: 0, y: 120, scale: 0, origin: '50% 50%' },
   };
 
@@ -103,6 +115,7 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   private isOutside: boolean = false;
 
   private onDragStart = (coord: Coord) => {
+    this.setEdgelessTool({ type: 'default' });
     this.startCoord = { x: coord.x, y: coord.y };
     if (this.order !== 1) {
       return;
