@@ -11,9 +11,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
-import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { Bound } from '../surface-block/index.js';
+import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
