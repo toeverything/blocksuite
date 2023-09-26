@@ -203,6 +203,7 @@ test('block hub card items should appear and disappear properly with correspondi
     '.affine-block-hub-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
+  await page.waitForTimeout(300);
   await expect(blockHubTextContainer).toBeHidden();
 
   await blankMenu.hover();
@@ -445,7 +446,7 @@ test('drag database', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await page.click('.block-hub-menu-container [role="menuitem"]');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(500);
   const databaseMenu = '.block-hub-icon-container:nth-child(5)';
 
   const databaseRect = await getCenterPosition(page, databaseMenu);
@@ -453,7 +454,7 @@ test('drag database', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: databaseRect.x, y: databaseRect.y },
-    { x: targetPos.x, y: targetPos.y + 5 },
+    { x: targetPos.x, y: targetPos.y - 5 },
     { steps: 50 }
   );
 
@@ -477,7 +478,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     const { noteId } = await initEmptyParagraphState(page);
 
     await page.click('.block-hub-menu-container [role="menuitem"]');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
     const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
     const blankMenuRect = await getCenterPosition(page, blankMenu);
@@ -516,7 +517,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     const { noteId } = await initEmptyParagraphState(page);
 
     await page.click('.block-hub-menu-container [role="menuitem"]');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
     const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
     const blankMenuRect = await getCenterPosition(page, blankMenu);

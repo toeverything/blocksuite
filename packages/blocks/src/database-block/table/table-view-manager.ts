@@ -1,4 +1,3 @@
-import type { DataSource } from '../../__internal__/datasource/base.js';
 import type { FilterGroup } from '../common/ast.js';
 import type { CellRenderer } from '../common/columns/manager.js';
 import type { RealDataViewDataTypeMap } from '../common/data-view.js';
@@ -6,13 +5,14 @@ import {
   BaseDataViewColumnManager,
   BaseDataViewManager,
 } from '../common/data-view-manager.js';
+import type { DataSource } from '../common/datasource/base.js';
 import { GroupHelper, sortByManually } from '../common/group-by/helper.js';
 import { groupByMatcher } from '../common/group-by/matcher.js';
 import { defaultGroupBy } from '../common/group-by/util.js';
 import type { SingleViewSource } from '../common/view-source.js';
 import { evalFilter } from '../logical/eval-filter.js';
 import type { TType } from '../logical/typesystem.js';
-import type { InsertPosition } from '../types.js';
+import type { InsertToPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import { headerRenderer } from './components/header-cell.js';
 
@@ -73,7 +73,7 @@ export class DataViewTableManager extends BaseDataViewManager {
 
   public override rowMove(
     rowId: string,
-    position: InsertPosition,
+    position: InsertToPosition,
     fromGroup?: string,
     toGroup?: string
   ) {
@@ -113,7 +113,7 @@ export class DataViewTableManager extends BaseDataViewManager {
     );
   }
 
-  public columnMove(columnId: string, toAfterOfColumn: InsertPosition): void {
+  public columnMove(columnId: string, toAfterOfColumn: InsertToPosition): void {
     this.updateView(view => {
       const columnIndex = view.columns.findIndex(v => v.id === columnId);
       if (columnIndex < 0) {
@@ -155,7 +155,7 @@ export class DataViewTableManager extends BaseDataViewManager {
   }
 
   public override rowAdd(
-    insertPosition: InsertPosition | number,
+    insertPosition: InsertToPosition | number,
     groupKey?: string
   ): string {
     const id = super.rowAdd(insertPosition);
