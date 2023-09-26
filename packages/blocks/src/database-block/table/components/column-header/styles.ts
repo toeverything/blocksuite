@@ -172,8 +172,8 @@ export const styles = css`
   }
 
   .affine-database-column-move {
-    --color: var(--affine-border-color);
-    --active: #aaa;
+    --color: var(--affine-placeholder-color);
+    --active: var(--affine-black-10);
     --bw: 1px;
     --bw2: -1px;
     cursor: grab;
@@ -201,8 +201,8 @@ export const styles = css`
     --delay: 0s;
     --delay-opacity: 0.6s;
     width: 4px;
-    border-radius: 2px;
-    height: 40%;
+    border-radius: 1px;
+    height: 32%;
     background: var(--color);
     right: 6px;
     top: 50%;
@@ -210,11 +210,11 @@ export const styles = css`
     opacity: 0;
   }
   .affine-database-column-move .hover-trigger {
-    width: 8px;
-    height: 100%;
+    width: 12px;
+    height: 80%;
     right: 3px;
-    top: 0;
-    background: transparent;
+    top: 10%;
+    background: transparent
     z-index: 1;
     opacity: 1;
   }
@@ -236,11 +236,10 @@ export const styles = css`
   .affine-database-column-move .control-h::after {
     bottom: var(--bw2);
   }
-  .affine-database-column-move .control-l::before,
-  .affine-database-column-move .control-l::after {
+  .affine-database-column-move .control-l::before{
     --delay: 0s;
     width: var(--bw);
-    height: calc(50% - var(--bw2) * 2);
+    height: 100%;
     opacity: 0;
     background: var(--active);
     left: var(--bw2);
@@ -286,7 +285,6 @@ export const styles = css`
   .grabbing.affine-database-column-move .control-l::before,
   .grabbing.affine-database-column-move .control-l::after {
     --delay: 0.4s;
-    height: calc(50% - var(--bw2) * 2);
     opacity: 1;
   }
 `;
