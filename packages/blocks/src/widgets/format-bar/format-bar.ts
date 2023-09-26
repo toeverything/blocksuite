@@ -24,9 +24,9 @@ type CustomElementCreator = (
   formatBar: AffineFormatBarWidget
 ) => HTMLDivElement;
 
-export const AFFINE_FORMAT_BAR_WIDGET_TAG = 'affine-format-bar-widget';
+export const AFFINE_FORMAT_BAR_WIDGET = 'affine-format-bar-widget';
 
-@customElement(AFFINE_FORMAT_BAR_WIDGET_TAG)
+@customElement(AFFINE_FORMAT_BAR_WIDGET)
 export class AffineFormatBarWidget extends WidgetElement {
   static override styles = formatBarStyle;
   static readonly customElements: Set<CustomElementCreator> =
@@ -35,7 +35,7 @@ export class AffineFormatBarWidget extends WidgetElement {
   @query('.custom-items')
   customItemsContainer!: HTMLElement;
 
-  @query(`.${AFFINE_FORMAT_BAR_WIDGET_TAG}`)
+  @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   private _formatBarElement?: HTMLElement;
 
   private _customElements: HTMLDivElement[] = [];
@@ -84,12 +84,12 @@ export class AffineFormatBarWidget extends WidgetElement {
     super.connectedCallback();
     this._abortController = new AbortController();
 
-    const pageElement = this.pageElement;
+    const pageElement = this.blockElement;
     assertExists(pageElement);
     const widgets = pageElement.widgets;
 
     // check if the host use the format bar widget
-    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET_TAG)) {
+    if (!Object.hasOwn(widgets, AFFINE_FORMAT_BAR_WIDGET)) {
       return;
     }
 
@@ -166,7 +166,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           this._selectedBlockElements = blockSelections
             .map(selection => {
               const path = selection.path;
-              return this.pageElement.root.view.viewFromPath('block', path);
+              return this.blockElement.root.view.viewFromPath('block', path);
             })
             .filter((el): el is BlockElement => !!el);
         } else {
@@ -306,7 +306,7 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
-    const pageElement = this.pageElement;
+    const pageElement = this.blockElement;
     assertExists(pageElement);
 
     if (!isPageComponent(pageElement)) {
@@ -326,7 +326,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     const inlineItems = InlineItems(this);
 
     return html`<div
-      class=${AFFINE_FORMAT_BAR_WIDGET_TAG}
+      class=${AFFINE_FORMAT_BAR_WIDGET}
       @pointerdown=${stopPropagation}
     >
       <div class="custom-items"></div>
@@ -342,6 +342,6 @@ export class AffineFormatBarWidget extends WidgetElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    [AFFINE_FORMAT_BAR_WIDGET_TAG]: AffineFormatBarWidget;
+    [AFFINE_FORMAT_BAR_WIDGET]: AffineFormatBarWidget;
   }
 }

@@ -66,7 +66,7 @@ const BackgroundPanel = (formatBar: AffineFormatBarWidget) => {
 };
 
 export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
-  const root = formatBar.pageElement.root;
+  const root = formatBar.blockElement.root;
 
   const backgroundHighlightPanel = BackgroundPanel(formatBar);
 

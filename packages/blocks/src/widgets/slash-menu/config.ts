@@ -44,7 +44,7 @@ import {
 } from '../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
-import type { LinkedPageWidget } from '../linked-page/index.js';
+import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
   insertContent,
@@ -176,7 +176,8 @@ export const menuGroups: {
         showWhen: model => {
           const pageBlock = getPageBlock(model);
           assertExists(pageBlock);
-          const linkedPageWidgetEle = pageBlock.widgetElements.linkedPage;
+          const linkedPageWidgetEle =
+            pageBlock.widgetElements['affine-linked-page-widget'];
           if (!linkedPageWidgetEle) return false;
           if (!('showLinkedPage' in linkedPageWidgetEle)) {
             console.warn(
@@ -190,10 +191,11 @@ export const menuGroups: {
           const triggerKey = '@';
           insertContent(model, triggerKey);
           const pageBlock = getPageBlock(model);
-          const widgetEle = pageBlock?.widgetElements.linkedPage;
+          const widgetEle =
+            pageBlock?.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);
           // We have checked the existence of showLinkedPage method in the showWhen
-          const linkedPageWidget = widgetEle as LinkedPageWidget;
+          const linkedPageWidget = widgetEle as AffineLinkedPageWidget;
           // Wait for range to be updated
           setTimeout(() => {
             linkedPageWidget.showLinkedPage(model, triggerKey);

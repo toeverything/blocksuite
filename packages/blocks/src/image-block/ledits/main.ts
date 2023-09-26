@@ -32,7 +32,9 @@ export function openLeditsEditor(
 ) {
   const pageElement = getPageElement(root);
   const app = createGradioApp();
-  const modal = (pageElement.widgetElements.modal as AffineModalWidget).open({
+  const modal = (
+    pageElement.widgetElements['affine-modal-widget'] as AffineModalWidget
+  ).open({
     footer: [
       {
         text: 'Cancel',

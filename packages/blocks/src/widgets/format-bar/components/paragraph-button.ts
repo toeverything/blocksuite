@@ -116,7 +116,7 @@ export const ParagraphButton = ({
               type
         )?.icon ?? paragraphConfig[0].icon;
 
-  const pageElement = formatBar.pageElement;
+  const pageElement = formatBar.blockElement;
   if (!isPageComponent(pageElement)) {
     throw new Error('paragraph button host is not a page component');
   }
