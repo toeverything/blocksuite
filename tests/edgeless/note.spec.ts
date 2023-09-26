@@ -609,7 +609,7 @@ test('duplicate note should work correctly', async ({ page }) => {
   const moreActionsContainer = await page.locator('.more-actions-container');
   await expect(moreActionsContainer).toBeHidden();
 
-  const noteLocator = await page.locator('edgeless-child-note');
+  const noteLocator = await page.locator('edgeless-note');
   await expect(noteLocator).toHaveCount(2);
   const [firstNote, secondNote] = await noteLocator.all();
 
