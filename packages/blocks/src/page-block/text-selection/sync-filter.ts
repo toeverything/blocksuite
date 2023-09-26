@@ -1,4 +1,4 @@
-import type { RangeSyncFilter } from '@blocksuite/lit';
+import type { BlockElement, RangeSyncFilter } from '@blocksuite/lit';
 
 import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
 
@@ -7,15 +7,18 @@ export const pageRangeSyncFilter: RangeSyncFilter = {
     if (range) {
       const { startContainer, endContainer } = range;
 
-      const startBlock = startContainer.parentElement?.closest(
+      const startBlock = startContainer.parentElement?.closest<BlockElement>(
         `[${BLOCK_ID_ATTR}]`
       );
-      const endBlock = endContainer.parentElement?.closest(
+      const endBlock = endContainer.parentElement?.closest<BlockElement>(
         `[${BLOCK_ID_ATTR}]`
       );
 
       if (startBlock && endBlock) {
-        return startBlock.role === 'content' && endBlock.role === 'content';
+        return (
+          startBlock.model.role === 'content' &&
+          endBlock.model.role === 'content'
+        );
       }
     }
 
