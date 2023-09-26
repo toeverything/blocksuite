@@ -71,6 +71,7 @@ export class HandleResizeManager {
   private _aspectRatio = 1;
   private _locked = false;
   private _shiftKey = false;
+  private _proportional = false;
   private _rotation = false;
   private _target: HTMLElement | null = null;
 
@@ -587,7 +588,11 @@ export class HandleResizeManager {
     this._rotate += delta;
   }
 
-  onPointerDown = (e: PointerEvent, direction: HandleDirection) => {
+  onPointerDown = (
+    e: PointerEvent,
+    direction: HandleDirection,
+    proportional = false
+  ) => {
     // Prevent selection action from being triggered
     e.stopPropagation();
 
@@ -597,6 +602,7 @@ export class HandleResizeManager {
     this._dragPos.start = { x: e.x, y: e.y };
     this._dragPos.end = { x: e.x, y: e.y };
     this._rotation = this._target.classList.contains('rotate');
+    this._proportional = proportional;
 
     if (this._rotation) {
       const rect = this._target
@@ -619,12 +625,14 @@ export class HandleResizeManager {
       this._shiftKey = shiftKey;
       this._dragPos.end = { x, y };
 
+      const proportional = this._proportional || this._shiftKey;
+
       if (this._rotation) {
-        this._onRotate(this._shiftKey);
+        this._onRotate(proportional);
         return;
       }
 
-      this._onResize(this._shiftKey);
+      this._onResize(proportional);
     };
 
     const _onPointerUp = (_: PointerEvent) => {
@@ -659,11 +667,13 @@ export class HandleResizeManager {
     if (this._shiftKey === pressed) return;
     this._shiftKey = pressed;
 
+    const proportional = this._proportional || this._shiftKey;
+
     if (this._rotation) {
-      this._onRotate(this._shiftKey);
+      this._onRotate(proportional);
       return;
     }
 
-    this._onResize(this._shiftKey);
+    this._onResize(proportional);
   }
 }
