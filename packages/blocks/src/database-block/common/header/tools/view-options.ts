@@ -1,9 +1,10 @@
+import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
-import type { Menu } from '../../../../components/menu/menu.js';
 import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
 import {
+  ArrowRightSmallIcon,
   DeleteIcon,
   DuplicateIcon,
   FilterIcon,
@@ -11,10 +12,13 @@ import {
   InfoIcon,
   MoreHorizontalIcon,
 } from '../../../../icons/index.js';
-import { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
-import { DataViewTableManager } from '../../../table/table-view-manager.js';
+import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { popFilterModal } from '../../filter/filter-modal.js';
-import { groupByMatcher } from '../../group-by/matcher.js';
+import {
+  popGroupSetting,
+  popSelectGroupByProperty,
+} from '../../group-by/setting.js';
 import { popPropertiesSetting } from '../../properties.js';
 import { BaseTool } from './base-tool.js';
 
@@ -48,9 +52,6 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
 > {
   static override styles = styles;
 
-  @query('.more-action')
-  private _moreActionContainer!: HTMLDivElement;
-
   showToolBar(show: boolean) {
     const tools = this.closest('data-view-header-tools');
     if (tools) {
@@ -61,131 +62,9 @@ export class DataViewHeaderToolsViewOptions extends BaseTool<
   private _clickMoreAction = (e: MouseEvent) => {
     e.stopPropagation();
     this.showToolBar(true);
-    popMenu(this._moreActionContainer, {
-      options: {
-        input: {
-          initValue: this.view.name,
-          onComplete: text => {
-            this.view.updateName(text);
-          },
-        },
-        items: [
-          {
-            type: 'action',
-            name: 'Properties',
-            icon: InfoIcon,
-            select: () => {
-              requestAnimationFrame(() => {
-                this.showToolBar(true);
-                popPropertiesSetting(this._moreActionContainer, {
-                  view: this.view,
-                  onClose: () => this.showToolBar(false),
-                });
-              });
-            },
-          },
-          {
-            type: 'action',
-            name: 'Filter',
-            icon: FilterIcon,
-            select: () => {
-              popFilterModal(eventToVRect(e), {
-                vars: this.view.vars,
-                value: this.view.filter,
-                onChange: this.view.updateFilter.bind(this.view),
-                isRoot: true,
-                onDelete: () => {
-                  this.view.updateFilter({
-                    ...this.view.filter,
-                    conditions: [],
-                  });
-                },
-              });
-            },
-          },
-          {
-            type: 'sub-menu',
-            name: 'Group By',
-            icon: GroupingIcon,
-            options: {
-              input: {
-                search: true,
-                placeholder: 'Search',
-              },
-              items: [
-                ...this.view.columnsWithoutFilter
-                  .filter(id => {
-                    if (this.view.columnGet(id).type === 'title') {
-                      return false;
-                    }
-                    return !!groupByMatcher.match(
-                      this.view.columnGet(id).dataType
-                    );
-                  })
-                  .map<Menu>(id => {
-                    const column = this.view.columnGet(id);
-                    return {
-                      type: 'action',
-                      name: column.name,
-                      isSelected: this.view.view.groupBy?.columnId === id,
-                      icon: html` <uni-lit .uni="${column.icon}"></uni-lit>`,
-                      select: () => {
-                        this.view.changeGroup(id);
-                      },
-                    };
-                  }),
-                {
-                  type: 'group',
-                  name: '',
-                  hide: () =>
-                    this.view instanceof DataViewKanbanManager ||
-                    this.view.view.groupBy == null,
-                  children: () => [
-                    {
-                      type: 'action',
-                      icon: DeleteIcon,
-                      class: 'delete-item',
-                      name: 'Remove Grouping',
-                      select: () => {
-                        if (this.view instanceof DataViewTableManager) {
-                          this.view.changeGroup(undefined);
-                        }
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          },
-
-          {
-            type: 'action',
-            name: 'Duplicate',
-            icon: DuplicateIcon,
-            select: () => {
-              this.view.duplicateView();
-            },
-          },
-          {
-            type: 'group',
-            name: '',
-            children: () => [
-              {
-                type: 'action',
-                name: 'Delete View',
-                icon: DeleteIcon,
-                select: () => {
-                  this.view.deleteView();
-                },
-                class: 'delete-item',
-              },
-            ],
-          },
-        ],
-        onClose: () => {
-          this.showToolBar(false);
-        },
-      },
+    const target = eventToVRect(e);
+    popViewOptions(target, this.view, () => {
+      this.showToolBar(false);
     });
   };
 
@@ -207,3 +86,98 @@ declare global {
     'data-view-header-tools-view-options': DataViewHeaderToolsViewOptions;
   }
 }
+export const popViewOptions = (
+  target: ReferenceElement,
+  view: DataViewTableManager | DataViewKanbanManager,
+  onClose?: () => void
+) => {
+  const reopen = () => {
+    popViewOptions(target, view);
+  };
+  popMenu(target, {
+    options: {
+      style: 'min-width:300px',
+      input: {
+        initValue: view.name,
+        onComplete: text => {
+          view.updateName(text);
+        },
+      },
+      items: [
+        {
+          type: 'action',
+          name: 'Properties',
+          icon: InfoIcon,
+          postfix: ArrowRightSmallIcon,
+          select: () => {
+            requestAnimationFrame(() => {
+              popPropertiesSetting(target, {
+                view: view,
+                onBack: reopen,
+              });
+            });
+          },
+        },
+        {
+          type: 'action',
+          name: 'Filter',
+          icon: FilterIcon,
+          postfix: ArrowRightSmallIcon,
+          select: () => {
+            popFilterModal(target, {
+              vars: view.vars,
+              value: view.filter,
+              onChange: view.updateFilter.bind(view),
+              isRoot: true,
+              onBack: reopen,
+              onDelete: () => {
+                view.updateFilter({
+                  ...view.filter,
+                  conditions: [],
+                });
+              },
+            });
+          },
+        },
+        {
+          type: 'action',
+          name: 'Group',
+          icon: GroupingIcon,
+          postfix: ArrowRightSmallIcon,
+          select: () => {
+            const groupBy = view.view.groupBy;
+            if (!groupBy) {
+              popSelectGroupByProperty(target, view);
+            } else {
+              popGroupSetting(target, view, reopen);
+            }
+          },
+        },
+        {
+          type: 'action',
+          name: 'Duplicate',
+          icon: DuplicateIcon,
+          select: () => {
+            view.duplicateView();
+          },
+        },
+        {
+          type: 'group',
+          name: '',
+          children: () => [
+            {
+              type: 'action',
+              name: 'Delete View',
+              icon: DeleteIcon,
+              select: () => {
+                view.deleteView();
+              },
+              class: 'delete-item',
+            },
+          ],
+        },
+      ],
+      onClose: onClose,
+    },
+  });
+};

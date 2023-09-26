@@ -4,23 +4,23 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 
-import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
-import { checkboxColumnConfig } from '../../database-block/common/columns/checkbox/cell-renderer.js';
-import { dateColumnConfig } from '../../database-block/common/columns/date/cell-renderer.js';
-import { imageColumnConfig } from '../../database-block/common/columns/image/cell-renderer.js';
-import { linkColumnConfig } from '../../database-block/common/columns/link/cell-renderer.js';
-import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
-import { columnManager } from '../../database-block/common/columns/manager.js';
-import { multiSelectColumnConfig } from '../../database-block/common/columns/multi-select/cell-renderer.js';
-import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
-import { numberColumnConfig } from '../../database-block/common/columns/number/cell-renderer.js';
-import { progressColumnConfig } from '../../database-block/common/columns/progress/cell-renderer.js';
-import { richTextColumnConfig } from '../../database-block/common/columns/rich-text/cell-renderer.js';
-import { selectColumnConfig } from '../../database-block/common/columns/select/cell-renderer.js';
-import { titleColumnConfig } from '../../database-block/common/columns/title/cell-renderer.js';
-import type { DatabaseBlockModel } from '../../database-block/database-model.js';
-import type { InsertPosition } from '../../database-block/types.js';
-import { insertPositionToIndex } from '../../database-block/utils/insert.js';
+import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
+import type { InsertToPosition } from '../../types.js';
+import { insertPositionToIndex } from '../../utils/insert.js';
+import { checkboxColumnConfig } from '../columns/checkbox/cell-renderer.js';
+import { dateColumnConfig } from '../columns/date/cell-renderer.js';
+import { imageColumnConfig } from '../columns/image/cell-renderer.js';
+import { linkColumnConfig } from '../columns/link/cell-renderer.js';
+import type { ColumnConfig } from '../columns/manager.js';
+import { columnManager } from '../columns/manager.js';
+import { multiSelectColumnConfig } from '../columns/multi-select/cell-renderer.js';
+import { multiSelectPureColumnConfig } from '../columns/multi-select/define.js';
+import { numberColumnConfig } from '../columns/number/cell-renderer.js';
+import { progressColumnConfig } from '../columns/progress/cell-renderer.js';
+import { richTextColumnConfig } from '../columns/rich-text/cell-renderer.js';
+import { selectColumnConfig } from '../columns/select/cell-renderer.js';
+import { titleColumnConfig } from '../columns/title/cell-renderer.js';
 import type { DatabaseBlockDatasourceConfig, DetailSlots } from './base.js';
 import { BaseDataSource } from './base.js';
 import { getIcon } from './block-icons.js';
@@ -152,10 +152,13 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return `Column ${i}`;
   }
 
-  public propertyAdd(insertPosition: InsertPosition, type?: string): string {
+  public propertyAdd(
+    insertToPosition: InsertToPosition,
+    type?: string
+  ): string {
     this.page.captureSync();
     return this._model.addColumn(
-      insertPosition,
+      insertToPosition,
       columnManager
         .getColumn(type ?? multiSelectPureColumnConfig.type)
         .create(this.newColumnName())
@@ -258,7 +261,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     return id;
   }
 
-  public rowAdd(insertPosition: InsertPosition | number): string {
+  public rowAdd(insertPosition: InsertToPosition | number): string {
     this.page.captureSync();
     const index =
       typeof insertPosition === 'number'
@@ -322,7 +325,7 @@ export class DatabaseBlockDatasource extends BaseDataSource {
     };
   }
 
-  public rowMove(rowId: string, position: InsertPosition): void {
+  public rowMove(rowId: string, position: InsertToPosition): void {
     const model = this.page.getBlockById(rowId);
     if (model) {
       const index = insertPositionToIndex(position, this._model.children);

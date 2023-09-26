@@ -6,12 +6,12 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DetailSlotProps } from '../../../__internal__/datasource/base.js';
 import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
 import { renderUniLit } from '../../../components/uni-component/uni-component.js';
 import { PlusIcon } from '../../../icons/index.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import type { DataViewManager } from '../data-view-manager.js';
+import type { DetailSlotProps } from '../datasource/base.js';
 import { DetailSelection } from './selection.js';
 
 const styles = css`

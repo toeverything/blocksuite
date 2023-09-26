@@ -11,6 +11,7 @@ import {
   popFilterableSimpleMenu,
   positionToVRect,
 } from '../../../components/menu/index.js';
+import { menuTitle } from '../../../components/menu/title.js';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,
@@ -163,6 +164,8 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   setData!: (filter: FilterGroup) => void;
+  @property({ attribute: false })
+  onBack!: () => void;
   @state()
   containerClass?: {
     index: number;
@@ -252,7 +255,11 @@ export class FilterRootView extends WithDisposable(ShadowlessElement) {
   override render() {
     const data = this.data;
     return html`
-      <div class="filter-root-title">All filters</div>
+      <div style="padding: 15px 20px">
+        ${menuTitle('FILTER', () => {
+          this.onBack?.();
+        })}
+      </div>
       <div class="filter-root-container">
         ${repeat(data.conditions, (filter, i) => {
           const clickOps = (e: MouseEvent) => {

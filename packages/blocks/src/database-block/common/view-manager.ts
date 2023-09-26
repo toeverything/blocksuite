@@ -2,7 +2,7 @@ import type { DatabaseBlockModel } from '../database-model.js';
 import { tTag } from '../logical/data-type.js';
 import { isTArray } from '../logical/typesystem.js';
 import { DEFAULT_COLUMN_WIDTH } from '../table/consts.js';
-import type { Column, InsertPosition } from '../types.js';
+import type { Column, InsertToPosition } from '../types.js';
 import { insertPositionToIndex } from '../utils/insert.js';
 import type { FilterGroup } from './ast.js';
 import { columnManager } from './columns/manager.js';
@@ -48,7 +48,7 @@ type ViewOperation<Data> = {
     model: DatabaseBlockModel,
     view: Data,
     newColumn: Column,
-    position: InsertPosition
+    position: InsertToPosition
   ): void;
   deleteColumn(model: DatabaseBlockModel, view: Data, id: string): void;
 };

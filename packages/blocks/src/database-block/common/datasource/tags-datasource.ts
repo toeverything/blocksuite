@@ -6,19 +6,19 @@ import { nanoid } from '@blocksuite/store';
 import {
   getTagColor,
   selectOptionColors,
-} from '../../components/tags/colors.js';
-import type { SelectTag } from '../../components/tags/multi-tag-select.js';
-import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
-import { selectPureColumnConfig } from '../../database-block/common/columns/select/define.js';
-import { textPureColumnConfig } from '../../database-block/common/columns/text/define.js';
-import type { InsertPosition } from '../../database-block/index.js';
+} from '../../../components/tags/colors.js';
+import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
+import type { InsertToPosition } from '../../types.js';
+import type { ColumnConfig } from '../columns/manager.js';
+import { selectPureColumnConfig } from '../columns/select/define.js';
+import { textPureColumnConfig } from '../columns/text/define.js';
 import type { TagsDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
 export class TagsDatasource extends BaseDataSource {
   private meta: Workspace['meta'];
 
-  public rowMove(rowId: string, position: InsertPosition): void {
+  public rowMove(rowId: string, position: InsertToPosition): void {
     // not support
     rowId;
     position;
@@ -112,7 +112,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(tag);
   }
 
-  public propertyAdd(_insertPosition: InsertPosition | number): string {
+  public propertyAdd(_insertPosition: InsertToPosition | number): string {
     throw new Error('not support');
   }
 
@@ -151,7 +151,7 @@ export class TagsDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(_insertPosition: InsertPosition | number): string {
+  public rowAdd(_insertPosition: InsertToPosition | number): string {
     const id = nanoid('unknown');
     this.changeTags([
       ...this.tags,

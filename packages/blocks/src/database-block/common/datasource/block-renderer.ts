@@ -3,8 +3,8 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DataViewKanbanManager } from '../../database-block/kanban/kanban-view-manager.js';
-import type { DataViewTableManager } from '../../database-block/table/table-view-manager.js';
+import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
+import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import type { DetailSlotProps } from './base.js';
 
 @customElement('database-datasource-block-renderer')

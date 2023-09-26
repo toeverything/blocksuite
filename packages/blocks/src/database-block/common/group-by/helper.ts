@@ -1,5 +1,5 @@
 import type { TType } from '../../logical/typesystem.js';
-import type { InsertPosition } from '../../types.js';
+import type { InsertToPosition } from '../../types.js';
 import { insertPositionToIndex } from '../../utils/insert.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import type { GroupBy, GroupProperty } from '../types.js';
@@ -146,7 +146,7 @@ export class GroupHelper {
     this.ops.changeGroupSort(keys);
   }
 
-  public moveGroupTo(groupKey: string, position: InsertPosition) {
+  public moveGroupTo(groupKey: string, position: InsertToPosition) {
     const keys = this.groups.map(v => v.key);
     keys.splice(
       keys.findIndex(key => key === groupKey),
@@ -161,7 +161,7 @@ export class GroupHelper {
     rowId: string,
     fromGroupKey: string | undefined,
     toGroupKey: string,
-    position: InsertPosition
+    position: InsertToPosition
   ) {
     if (fromGroupKey !== toGroupKey) {
       const columnId = this.columnId;

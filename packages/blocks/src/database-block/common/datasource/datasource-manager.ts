@@ -1,6 +1,6 @@
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import type { DatabaseBlockModel } from '../../database-block/index.js';
+import type { DatabaseBlockModel } from '../../database-model.js';
 import { AllPageDatasource } from './all-page-datasource.js';
 import type {
   AllPageDatasourceConfig,

@@ -6,7 +6,7 @@ import { property } from 'lit/decorators.js';
 
 import type { DataViewSelection } from '../../__internal__/index.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
-import type { InsertPosition } from '../types.js';
+import type { InsertToPosition } from '../types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';
 
@@ -43,7 +43,7 @@ export abstract class BaseDataView<
   @property({ attribute: false })
   getFlag!: Page['awarenessStore']['getFlag'];
 
-  addRow?(position: InsertPosition): void;
+  addRow?(position: InsertToPosition): void;
 
   abstract focusFirstCell(): void;
   abstract getSelection(): Selection | undefined;
