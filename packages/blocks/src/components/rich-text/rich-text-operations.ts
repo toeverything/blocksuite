@@ -540,7 +540,8 @@ function handleParagraphOrListSibling(
 function handleEmbedDividerCodeSibling(
   page: Page,
   model: ExtendedModel,
-  previousSibling: ExtendedModel
+  previousSibling: ExtendedModel,
+  parent: ExtendedModel
 ) {
   if (
     !matchFlavours(previousSibling, [
@@ -556,7 +557,9 @@ function handleEmbedDividerCodeSibling(
   focusBlockByModel(previousSibling);
   if (!model.text?.length) {
     page.captureSync();
-    page.deleteBlock(model);
+    page.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
   }
   return true;
 }
@@ -605,7 +608,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
-      handleEmbedDividerCodeSibling(page, model, previousSibling) ||
+      handleEmbedDividerCodeSibling(page, model, previousSibling, parent) ||
       handleUnknownBlockBackspace(previousSibling)
     );
   }
