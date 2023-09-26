@@ -85,11 +85,11 @@ export const getVRangeProvider: (
 
   const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
   selectionManager.slots.changed.on(() => {
-    const textSelection = selectionManager.find('text');
-    if (!textSelection) return;
-
     // wait for lit updated
     requestAnimationFrame(() => {
+      const textSelection = selectionManager.find('text');
+      if (!textSelection) return;
+
       const range = rangeManager.textSelectionToRange(textSelection);
       if (!range) return;
 
