@@ -88,11 +88,14 @@ export const getVRangeProvider: (
     const textSelection = selectionManager.find('text');
     if (!textSelection) return;
 
-    const range = rangeManager.textSelectionToRange(textSelection);
-    if (!range) return;
+    // wait for lit updated
+    requestAnimationFrame(() => {
+      const range = rangeManager.textSelectionToRange(textSelection);
+      if (!range) return;
 
-    const vRange = calculateVRange(range, textSelection);
-    vRangeUpdatedSlot.emit([vRange, false]);
+      const vRange = calculateVRange(range, textSelection);
+      vRangeUpdatedSlot.emit([vRange, false]);
+    });
   });
 
   return {
