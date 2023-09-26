@@ -198,7 +198,7 @@ export const styles = css`
       opacity 0.2s ease var(--delay-opacity);
   }
   .affine-database-column-move .control-r {
-    --delay: 0.4s;
+    --delay: 0s;
     --delay-opacity: 0.6s;
     width: 4px;
     border-radius: 2px;
@@ -224,7 +224,8 @@ export const styles = css`
   .affine-database-column-move .control-h::before,
   .affine-database-column-move .control-h::after {
     --delay: 0.2s;
-    width: 0%;
+    width: calc(100% - var(--bw2) * 2);
+    opacity: 0;
     height: var(--bw);
     right: var(--bw2);
     background: var(--active);
@@ -239,7 +240,8 @@ export const styles = css`
   .affine-database-column-move .control-l::after {
     --delay: 0s;
     width: var(--bw);
-    height: 0%;
+    height: calc(50% - var(--bw2) * 2);
+    opacity: 0;
     background: var(--active);
     left: var(--bw2);
   }
@@ -274,6 +276,7 @@ export const styles = css`
   .grabbing.affine-database-column-move .control-h::after {
     --delay: 0.2s;
     width: calc(100% - var(--bw2) * 2);
+    opacity: 1;
   }
 
   .affine-database-column-move:active .control-l::before,
@@ -284,5 +287,6 @@ export const styles = css`
   .grabbing.affine-database-column-move .control-l::after {
     --delay: 0.4s;
     height: calc(50% - var(--bw2) * 2);
+    opacity: 1;
   }
 `;
