@@ -3,8 +3,12 @@ import './components/code-option.js';
 import './components/lang-list.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { BlockElement } from '@blocksuite/lit';
-import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
+import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
+import {
+  VIRGO_ROOT_ATTR,
+  type VirgoRootElement,
+  type VRangeProvider,
+} from '@blocksuite/virgo';
 import { autoPlacement, offset, shift, size } from '@floating-ui/dom';
 import { css, html, nothing, render, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -245,6 +249,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
   }
 
+  private _vRangeProvider: VRangeProvider | null = null;
+
   get vEditor() {
     const vRoot = this.querySelector<VirgoRootElement>(`[${VIRGO_ROOT_ATTR}]`);
     if (!vRoot) {
@@ -461,6 +467,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         return;
       },
     });
+
+    this._vRangeProvider = getVRangeProvider(this);
   }
 
   override disconnectedCallback() {
@@ -610,6 +618,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .undoManager=${this.model.page.history}
           .textSchema=${this.textSchema}
           .readonly=${this.model.page.readonly}
+          .vRangeProvider=${this._vRangeProvider}
         >
         </rich-text>
       </div>

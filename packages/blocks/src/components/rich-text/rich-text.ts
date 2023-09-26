@@ -113,23 +113,24 @@ export class RichText extends WithDisposable(ShadowlessElement) {
             block: 'nearest',
           });
 
-          // make sure the result of moveX is expected
-          this.scrollLeft = 0;
-          const thisRect = this.getBoundingClientRect();
-          const rangeRect = range.getBoundingClientRect();
-          let moveX = 0;
-          if (
-            rangeRect.left + rangeRect.width >
-            thisRect.left + thisRect.width
-          ) {
-            moveX =
-              rangeRect.left +
-              rangeRect.width -
-              (thisRect.left + thisRect.width);
-            moveX = Math.max(this._lastScrollLeft, moveX);
+          if (vRange.index !== 0) {
+            // make sure the result of moveX is expected
+            this.scrollLeft = 0;
+            const thisRect = this.getBoundingClientRect();
+            const rangeRect = range.getBoundingClientRect();
+            let moveX = 0;
+            if (
+              rangeRect.left + rangeRect.width >
+              thisRect.left + thisRect.width
+            ) {
+              moveX =
+                rangeRect.left +
+                rangeRect.width -
+                (thisRect.left + thisRect.width);
+              moveX = Math.max(this._lastScrollLeft, moveX);
+            }
+            this.scrollLeft = moveX;
           }
-
-          this.scrollLeft = moveX;
         });
       })
     );
