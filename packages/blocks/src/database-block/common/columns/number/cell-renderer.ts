@@ -93,7 +93,7 @@ export class NumberCellEditing extends BaseCellRenderer<number> {
   };
 
   private _keydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.isComposing) {
       requestAnimationFrame(() => {
         this.selectCurrentCell(false);
       });

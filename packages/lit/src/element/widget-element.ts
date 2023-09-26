@@ -9,7 +9,9 @@ import { WithDisposable } from '../with-disposable.js';
 import type { BlockElement } from './block-element.js';
 import type { BlockSuiteRoot } from './lit-root.js';
 
-export class WidgetElement extends WithDisposable(LitElement) {
+export class WidgetElement<
+  B extends BlockElement = BlockElement,
+> extends WithDisposable(LitElement) {
   @property({ attribute: false })
   root!: BlockSuiteRoot;
 
@@ -26,17 +28,17 @@ export class WidgetElement extends WithDisposable(LitElement) {
     return this.path.slice(0, -1);
   }
 
-  get pageElement() {
+  get blockElement(): B {
     const parentElement = this.parentElement;
     assertExists(parentElement);
     const nodeView = this.root.view.getNodeView(parentElement);
     assertExists(nodeView);
-    return nodeView.view as BlockElement;
+    return nodeView.view as B;
   }
 
   get flavour(): string {
-    assertExists(this.pageElement);
-    return this.pageElement.model.flavour;
+    assertExists(this.blockElement);
+    return this.blockElement.model.flavour;
   }
 
   get std() {

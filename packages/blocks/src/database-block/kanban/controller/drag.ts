@@ -4,7 +4,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 
 import { Point, Rect } from '../../../__internal__/index.js';
-import type { InsertPosition } from '../../types.js';
+import type { InsertToPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
 import { KanbanCard } from '../card.js';
 import { KanbanGroup } from '../group.js';
@@ -20,7 +20,7 @@ export class KanbanDragController implements ReactiveController {
   getInsertPosition = (
     evt: MouseEvent
   ):
-    | { group: KanbanGroup; card?: KanbanCard; position: InsertPosition }
+    | { group: KanbanGroup; card?: KanbanCard; position: InsertToPosition }
     | undefined => {
     const eles = document.elementsFromPoint(evt.x, evt.y);
     const target = eles.find(v => v instanceof KanbanGroup) as KanbanGroup;
@@ -43,7 +43,7 @@ export class KanbanDragController implements ReactiveController {
   shooIndicator = (
     evt: MouseEvent,
     self: KanbanCard | undefined
-  ): { group: KanbanGroup; position: InsertPosition } | undefined => {
+  ): { group: KanbanGroup; position: InsertToPosition } | undefined => {
     const position = this.getInsertPosition(evt);
     if (position) {
       this.dropPreview.display(position.group, self, position.card);
@@ -87,7 +87,7 @@ export class KanbanDragController implements ReactiveController {
       | {
           type: 'self';
           key: string;
-          position: InsertPosition;
+          position: InsertToPosition;
         }
       | undefined,
       PointerEvent
@@ -154,6 +154,7 @@ const createDragPreview = (card: KanbanCard, x: number, y: number) => {
   kanbanCard.isFocus = true;
   kanbanCard.style.backgroundColor = 'var(--affine-background-primary-color)';
   div.append(kanbanCard);
+  div.className = 'with-data-view-css-variable';
   div.style.width = `${card.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   // div.style.pointerEvents = 'none';

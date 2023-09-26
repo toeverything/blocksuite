@@ -211,16 +211,19 @@ test('nested list blocks', async ({ page }) => {
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="123"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="456"
         prop:type="bulleted"
       >
         <affine:list
           prop:checked={false}
+          prop:collapsed={false}
           prop:text="789"
           prop:type="bulleted"
         />
@@ -244,16 +247,19 @@ test('nested list blocks', async ({ page }) => {
   >
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="123"
       prop:type="bulleted"
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:text="456"
       prop:type="bulleted"
     >
       <affine:list
         prop:checked={false}
+        prop:collapsed={false}
         prop:text="789"
         prop:type="bulleted"
       />
@@ -390,6 +396,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   >
     <affine:list
       prop:checked={true}
+      prop:collapsed={false}
       prop:text="todo item"
       prop:type="todo"
     />
@@ -412,6 +419,7 @@ test('should indent todo block preserve todo status', async ({ page }) => {
   />
   <affine:list
     prop:checked={true}
+    prop:collapsed={false}
     prop:text="todo item"
     prop:type="todo"
   />
@@ -608,7 +616,7 @@ test.describe('toggle list', () => {
 
   test('click toggle icon should collapsed list', async ({ page }) => {
     await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
+    const { noteId } = await initEmptyParagraphState(page);
     await initThreeLists(page);
     const toggleIcon = getToggleIcon(page);
     const prefixes = page.locator('.affine-list-block__prefix');
@@ -620,6 +628,36 @@ test.describe('toggle list', () => {
 
     await toggleIcon.click();
     await expect(prefixes).toHaveCount(2);
+    assertStoreMatchJSX(
+      page,
+      `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:list
+    prop:checked={false}
+    prop:collapsed={false}
+    prop:text="123"
+    prop:type="bulleted"
+  />
+  <affine:list
+    prop:checked={false}
+    prop:collapsed={true}
+    prop:text="456"
+    prop:type="bulleted"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:collapsed={false}
+      prop:text="789"
+      prop:type="bulleted"
+    />
+  </affine:list>
+</affine:note>`,
+      noteId
+    );
 
     // Collapsed toggle icon should be show always
     await page.mouse.move(0, 0);
@@ -627,6 +665,36 @@ test.describe('toggle list', () => {
 
     await toggleIcon.click();
     await expect(prefixes).toHaveCount(3);
+    assertStoreMatchJSX(
+      page,
+      `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:list
+    prop:checked={false}
+    prop:collapsed={false}
+    prop:text="123"
+    prop:type="bulleted"
+  />
+  <affine:list
+    prop:checked={false}
+    prop:collapsed={false}
+    prop:text="456"
+    prop:type="bulleted"
+  >
+    <affine:list
+      prop:checked={false}
+      prop:collapsed={false}
+      prop:text="789"
+      prop:type="bulleted"
+    />
+  </affine:list>
+</affine:note>`,
+      noteId
+    );
 
     await page.mouse.move(0, 0);
     await waitNextFrame(page, 200);

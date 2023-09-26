@@ -13,7 +13,6 @@ import {
   matchFlavours,
 } from '../../__internal__/utils/model.js';
 import {
-  getBlockElementByModel,
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
@@ -24,8 +23,7 @@ import {
   focusTitle,
 } from '../../__internal__/utils/selection.js';
 import type { ExtendedModel } from '../../__internal__/utils/types.js';
-import type { ListBlockComponent } from '../../list-block/list-block.js';
-import type { PageBlockModel } from '../../models.js';
+import type { ListBlockModel, PageBlockModel } from '../../models.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -205,13 +203,10 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
 
   // 5. If parent is collapsed, expand it
   const newParent = previousSibling;
-  if (matchFlavours(newParent, ['affine:list'])) {
-    // page.updateBlock(parent, { showChildren: true });
-    const listEle = getBlockElementByModel(
-      newParent
-    ) as ListBlockComponent | null;
-    assertExists(listEle, 'parent element not found');
-    listEle.showChildren = true;
+  if (matchFlavours(newParent, ['affine:list']) && newParent.collapsed) {
+    page.updateBlock(newParent, {
+      collapsed: false,
+    } as Partial<ListBlockModel>);
   }
 
   asyncSetVRange(model, { index: offset, length: 0 });
@@ -540,7 +535,8 @@ function handleParagraphOrListSibling(
 function handleEmbedDividerCodeSibling(
   page: Page,
   model: ExtendedModel,
-  previousSibling: ExtendedModel
+  previousSibling: ExtendedModel,
+  parent: ExtendedModel
 ) {
   if (
     !matchFlavours(previousSibling, [
@@ -556,7 +552,9 @@ function handleEmbedDividerCodeSibling(
   focusBlockByModel(previousSibling);
   if (!model.text?.length) {
     page.captureSync();
-    page.deleteBlock(model);
+    page.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
   }
   return true;
 }
@@ -605,7 +603,7 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   } else if (matchFlavours(parent, ['affine:note'])) {
     return (
       handleParagraphOrListSibling(page, model, previousSibling, parent) ||
-      handleEmbedDividerCodeSibling(page, model, previousSibling) ||
+      handleEmbedDividerCodeSibling(page, model, previousSibling, parent) ||
       handleUnknownBlockBackspace(previousSibling)
     );
   }

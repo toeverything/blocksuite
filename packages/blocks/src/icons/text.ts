@@ -801,6 +801,21 @@ export const ArrowRightBigIcon = html`<svg
   />
 </svg>`;
 
+export const ArrowLeftBigIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M10.9968 6.4927C11.277 6.79778 11.2568 7.27223 10.9517 7.5524L6.92547 11.25L19 11.25C19.4142 11.25 19.75 11.5858 19.75 12C19.75 12.4142 19.4142 12.75 19 12.75L6.92547 12.75L10.9517 16.4476C11.2568 16.7278 11.277 17.2022 10.9968 17.5073C10.7167 17.8124 10.2422 17.8326 9.93714 17.5524L4.4927 12.5524C4.33803 12.4104 4.25 12.21 4.25 12C4.25 11.79 4.33803 11.5896 4.4927 11.4476L9.93714 6.44761C10.2422 6.16743 10.7167 6.18762 10.9968 6.4927Z"
+    fill="currentColor"
+  />
+</svg> `;
+
 export const ExpandWideIcon = html`<svg
   width="24"
   height="24"

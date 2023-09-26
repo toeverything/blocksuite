@@ -4,15 +4,12 @@ import {
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
-  focusRichTextEnd,
   getBoundingClientRect,
   getCenterPosition,
   getCenterPositionByLocator,
   initEmptyParagraphState,
   initParagraphsByCount,
   initThreeParagraphs,
-  pressEnter,
-  type,
   waitNextFrame,
 } from './utils/actions/index.js';
 import { assertRichTexts, assertStoreMatchJSX } from './utils/asserts.js';
@@ -32,63 +29,63 @@ test('auto-scroll should be activate when adding blank lines or blocks', async (
   # Mozilla Public License Version 2.0
 
   Copyright (c) TOEVERYTHING PTE. LTD. and its affiliates.
-  
+
   1. Definitions
-  
+
   ---
-  
+
   1.1. Contributor
   means each individual or legal entity that creates, contributes to
   the creation of, or owns Covered Software.
-  
+
   1.2. Contributor Version
   means the combination of the Contributions of others (if any) used
   by a Contributor and that particular Contributor's Contribution.
-  
+
   1.3. Contribution
   means Covered Software of a particular Contributor.
-  
+
   1.4. Covered Software
   means Source Code Form to which the initial Contributor has attached
   the notice in Exhibit A, the Executable Form of such Source Code
   Form, and Modifications of such Source Code Form, in each case
   including portions thereof.
-  
+
   1.5. Incompatible With Secondary Licenses
   means
-  
+
       (a) that the initial Contributor has attached the notice described
           in Exhibit B to the Covered Software; or
-  
+
       (b) that the Covered Software was made available under the terms of
           version 1.1 or earlier of the License, but not also under the
           terms of a Secondary License.
-  
+
   1.6. Executable Form
   means any form of the work other than Source Code Form.
-  
+
   1.7. Larger Work
   means a work that combines Covered Software with other material, in
   a separate file or files, that is not Covered Software.
-  
+
   1.8. License
   means this document.
-  
+
   1.9. Licensable
   means having the right to grant, to the maximum extent possible,
   whether at the time of the initial grant or subsequently, any and
   all of the rights conveyed by this License.
-  
+
   1.10. Modifications
   means any of the following:
-  
+
       (a) any file in Source Code Form that results from an addition to,
           deletion from, or modification of the contents of Covered
           Software; or
-  
+
       (b) any new file in Source Code Form that contains any Covered
           Software.
-  
+
   1.11. Patent Claims of a Contributor
   means any patent claim(s), including without limitation, method,
   process, and apparatus claims, in any patent Licensable by such
@@ -203,6 +200,7 @@ test('block hub card items should appear and disappear properly with correspondi
     '.affine-block-hub-container[type="list"]'
   );
   await expect(blockHubListContainer).toBeVisible();
+  await page.waitForTimeout(300);
   await expect(blockHubTextContainer).toBeHidden();
 
   await blankMenu.hover();
@@ -393,6 +391,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
     />
     <affine:list
       prop:checked={false}
+      prop:collapsed={false}
       prop:type="numbered"
     />
     <affine:paragraph
@@ -445,7 +444,7 @@ test('drag database', async ({ page }) => {
   await initEmptyParagraphState(page);
 
   await page.click('.block-hub-menu-container [role="menuitem"]');
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(500);
   const databaseMenu = '.block-hub-icon-container:nth-child(5)';
 
   const databaseRect = await getCenterPosition(page, databaseMenu);
@@ -453,7 +452,7 @@ test('drag database', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: databaseRect.x, y: databaseRect.y },
-    { x: targetPos.x, y: targetPos.y + 5 },
+    { x: targetPos.x, y: targetPos.y - 5 },
     { steps: 50 }
   );
 
@@ -477,7 +476,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     const { noteId } = await initEmptyParagraphState(page);
 
     await page.click('.block-hub-menu-container [role="menuitem"]');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
     const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
     const blankMenuRect = await getCenterPosition(page, blankMenu);
@@ -516,7 +515,7 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
     const { noteId } = await initEmptyParagraphState(page);
 
     await page.click('.block-hub-menu-container [role="menuitem"]');
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(500);
     const blankMenu = '.block-hub-icon-container:nth-child(1)';
 
     const blankMenuRect = await getCenterPosition(page, blankMenu);

@@ -361,6 +361,7 @@ test.describe('slash search', () => {
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:type="todo"
   />
 </affine:note>`,
@@ -658,7 +659,7 @@ test.describe('slash menu with customize menu', () => {
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
 
-      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+      const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
       class CustomSlashMenu extends SlashMenuWidget {
         override options = {
           ...SlashMenuWidget.DEFAULT_OPTIONS,
@@ -673,7 +674,9 @@ test.describe('slash menu with customize menu', () => {
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets.slashMenu = fakeLiteral`affine-custom-slash-menu`;
+      pageBlockSpec.view.widgets[
+        'affine-slash-menu-widget'
+      ] = fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
@@ -702,7 +705,7 @@ test.describe('slash menu with customize menu', () => {
 
       const editor = document.querySelector('editor-container');
       if (!editor) throw new Error("Can't find editor-container");
-      const SlashMenuWidget = window.$blocksuite.blocks.SlashMenuWidget;
+      const SlashMenuWidget = window.$blocksuite.blocks.AffineSlashMenuWidget;
 
       class CustomSlashMenu extends SlashMenuWidget {
         override options = {
@@ -733,7 +736,9 @@ test.describe('slash menu with customize menu', () => {
       const pageBlockSpec = pagePreset.shift();
       if (!pageBlockSpec) throw new Error("Can't find pageBlockSpec");
       // @ts-ignore
-      pageBlockSpec.view.widgets.slashMenu = fakeLiteral`affine-custom-slash-menu`;
+      pageBlockSpec.view.widgets[
+        'affine-slash-menu-widget'
+      ] = fakeLiteral`affine-custom-slash-menu`;
       pagePreset.unshift(pageBlockSpec);
       editor.pagePreset = pagePreset;
     });
@@ -800,6 +805,7 @@ test('delete block by slash menu should remove children', async ({ page }) => {
 >
   <affine:list
     prop:checked={false}
+    prop:collapsed={false}
     prop:text="123"
     prop:type="bulleted"
   />

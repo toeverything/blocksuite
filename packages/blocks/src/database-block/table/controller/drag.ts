@@ -2,7 +2,7 @@
 
 import type { ReactiveController } from 'lit';
 
-import type { InsertPosition } from '../../types.js';
+import type { InsertToPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
 import { TableRow } from '../components/row.js';
 import type { DataViewTable } from '../table-view.js';
@@ -19,7 +19,7 @@ export class TableDragController implements ReactiveController {
   ):
     | {
         groupKey: string | undefined;
-        position: InsertPosition;
+        position: InsertToPosition;
         y: number;
         width: number;
         x: number;
@@ -101,7 +101,7 @@ export class TableDragController implements ReactiveController {
       | {
           type: 'self';
           groupKey?: string;
-          position: InsertPosition;
+          position: InsertToPosition;
         }
       | { type: 'out'; callback: () => void },
       PointerEvent
@@ -162,6 +162,7 @@ const createDragPreview = (row: TableRow, x: number, y: number) => {
   cloneRow.rowIndex = row.rowIndex;
   cloneRow.rowId = row.rowId;
   div.append(cloneRow);
+  div.className = 'with-data-view-css-variable';
   div.style.width = `${row.getBoundingClientRect().width}px`;
   div.style.position = 'fixed';
   div.style.pointerEvents = 'none';

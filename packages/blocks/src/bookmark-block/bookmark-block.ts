@@ -14,7 +14,7 @@ import { stopPropagation } from '../__internal__/utils/event.js';
 import { queryCurrentMode } from '../__internal__/utils/query.js';
 import { HoverController } from '../components/index.js';
 import { WebIcon16 } from '../icons/text.js';
-import { DragHandleWidget } from '../widgets/drag-handle/index.js';
+import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import {
   type BookmarkBlockModel,
@@ -241,7 +241,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   private _registerDragHandleOption = () => {
     this._disposables.add(
-      DragHandleWidget.registerOption({
+      AffineDragHandleWidget.registerOption({
         flavour: BookmarkBlockSchema.model.flavour,
         onDragStart: (state, startDragging) => {
           // Check if start dragging from the image block

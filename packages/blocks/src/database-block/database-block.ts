@@ -16,23 +16,23 @@ import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
 import { copyBlocks } from '../__internal__/clipboard/index.js';
-import type { DataSource } from '../__internal__/datasource/base.js';
-import { DatabaseBlockDatasource } from '../__internal__/datasource/database-block-datasource.js';
 import type { DataViewSelection } from '../__internal__/index.js';
 import { Rect } from '../__internal__/index.js';
 import { DragIndicator } from '../components/index.js';
 import { popMenu } from '../components/menu/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';
 import { CopyIcon, DeleteIcon, MoreHorizontalIcon } from '../icons/index.js';
+import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import {
   captureEventTarget,
   getDropResult,
 } from '../widgets/drag-handle/utils.js';
-import { DragHandleWidget } from '../widgets/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
 import type { DataViewManager } from './common/data-view-manager.js';
+import type { DataSource } from './common/datasource/base.js';
+import { DatabaseBlockDatasource } from './common/datasource/database-block-datasource.js';
 import { renderFilterBar } from './common/filter/filter-bar.js';
 import { renderTools } from './common/header/tools/tools.js';
 import { DatabaseSelection } from './common/selection.js';
@@ -40,7 +40,7 @@ import type { SingleViewSource, ViewSource } from './common/view-source.js';
 import type { DataViewNative, DataViewNativeConfig } from './data-view.js';
 import type { DatabaseBlockModel } from './database-model.js';
 import { DatabaseBlockSchema } from './database-model.js';
-import type { InsertPosition } from './types.js';
+import type { InsertToPosition } from './types.js';
 
 @customElement('affine-database')
 export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
@@ -180,7 +180,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
     });
     let canDrop = false;
     this.disposables.add(
-      DragHandleWidget.registerOption({
+      AffineDragHandleWidget.registerOption({
         flavour: DatabaseBlockSchema.model.flavour,
         onDragMove: state => {
           const target = captureEventTarget(state.raw.target);
@@ -454,7 +454,7 @@ class DatabaseBlockViewSource implements ViewSource {
     this.selectView(newId);
   }
 
-  public moveTo(id: string, position: InsertPosition): void {
+  public moveTo(id: string, position: InsertToPosition): void {
     this.model.moveViewTo(id, position);
   }
 }

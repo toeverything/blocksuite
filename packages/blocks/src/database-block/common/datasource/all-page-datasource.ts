@@ -2,11 +2,11 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { Page, Workspace } from '@blocksuite/store';
 
-import type { ColumnConfig } from '../../database-block/common/columns/manager.js';
-import { multiSelectPureColumnConfig } from '../../database-block/common/columns/multi-select/define.js';
-import { numberPureColumnConfig } from '../../database-block/common/columns/number/define.js';
-import { textPureColumnConfig } from '../../database-block/common/columns/text/define.js';
-import type { InsertPosition } from '../../database-block/index.js';
+import type { InsertToPosition } from '../../types.js';
+import type { ColumnConfig } from '../columns/manager.js';
+import { multiSelectPureColumnConfig } from '../columns/multi-select/define.js';
+import { numberPureColumnConfig } from '../columns/number/define.js';
+import { textPureColumnConfig } from '../columns/text/define.js';
 import type { AllPageDatasourceConfig } from './base.js';
 import { BaseDataSource } from './base.js';
 
@@ -89,7 +89,7 @@ export class AllPageDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId]?.getValue(page);
   }
 
-  public propertyAdd(_insertPosition: InsertPosition | number): string {
+  public propertyAdd(_insertPosition: InsertToPosition | number): string {
     throw new Error('not support');
   }
 
@@ -128,7 +128,7 @@ export class AllPageDatasource extends BaseDataSource {
     return this.propertiesMap[propertyId].type;
   }
 
-  public rowAdd(_insertPosition: InsertPosition | number): string {
+  public rowAdd(_insertPosition: InsertToPosition | number): string {
     return this.workspace.createPage().id;
   }
 
@@ -142,7 +142,7 @@ export class AllPageDatasource extends BaseDataSource {
 
   public allPropertyConfig: ColumnConfig[] = [];
 
-  public rowMove(rowId: string, position: InsertPosition): void {
+  public rowMove(rowId: string, position: InsertToPosition): void {
     // not support
     rowId;
     position;

@@ -5,7 +5,7 @@ import type { Page } from '@blocksuite/store';
 import type { DataViewSelection } from '../../__internal__/index.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { DatabaseBlockModel } from '../database-model.js';
-import type { InsertPosition } from '../types.js';
+import type { InsertToPosition } from '../types.js';
 import type { DataViewManager } from './data-view-manager.js';
 
 export type DataViewHeaderComponentProp<
@@ -34,7 +34,7 @@ export interface DataViewProps<
 }
 
 export interface DataViewExpose {
-  addRow?(position: InsertPosition | number): void;
+  addRow?(position: InsertToPosition | number): void;
 
   getSelection?(): DataViewSelection | undefined;
 

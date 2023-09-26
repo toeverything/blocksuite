@@ -147,7 +147,7 @@ export class BookmarkEditModal extends WithDisposable(LitElement) {
   }
 
   private _modalKeyboardListener = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.isComposing) {
       this._onConfirm();
     }
     if (e.key === 'Escape') {
