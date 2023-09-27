@@ -172,6 +172,7 @@ test('delete at start of list block', async ({ page }) => {
     'affine:paragraph',
     'affine:list',
   ]);
+  await waitNextFrame(page, 200);
   await assertRichTextVRange(page, 1, 0, 0);
 
   await undoByClick(page);
@@ -283,9 +284,11 @@ test('update numbered list block prefix', async ({ page }) => {
   await page.keyboard.press('Shift+Tab');
   await assertListPrefix(page, ['1', '2', '3']);
 
+  await waitNextFrame(page, 200);
   await page.keyboard.press('Enter');
   await assertListPrefix(page, ['1', '2', '3', '4']);
 
+  await waitNextFrame(page, 200);
   await type(page, 'concorde');
   await assertRichTexts(page, ['', 'lunatic', 'concorde', '']);
 
@@ -734,12 +737,14 @@ test.describe('toggle list', () => {
 
     await assertToggleIconVisible(toggleIcon, false);
     await parentPrefix.hover();
+    await waitNextFrame(page, 200);
     await assertToggleIconVisible(toggleIcon);
 
     await page.mouse.move(0, 0);
-    await waitNextFrame(page, 200);
+    await waitNextFrame(page, 300);
     await assertToggleIconVisible(toggleIcon, false);
     await childrenPrefix.hover();
+    await waitNextFrame(page, 300);
     await assertToggleIconVisible(toggleIcon);
   });
 });

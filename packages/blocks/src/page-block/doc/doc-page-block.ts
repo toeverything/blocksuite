@@ -18,6 +18,7 @@ import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
+import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
 
 export interface PageViewport {
   left: number;
@@ -361,6 +362,8 @@ export class DocPageBlockComponent extends BlockElement<
 
   override connectedCallback() {
     super.connectedCallback();
+
+    this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
