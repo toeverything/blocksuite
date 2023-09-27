@@ -1,6 +1,6 @@
 import '../../buttons/toolbar-button.js';
 import './shape-menu.js';
-import './shape-element.js';
+import './shape-tool-element.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
@@ -27,8 +27,8 @@ import {
 } from '../../component-toolbar/change-shape-button.js';
 import { getTooltipWithShortcut } from '../../utils.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';
-import type { Shape, ShapeName } from './shape-element.js';
 import type { EdgelessShapeMenu } from './shape-menu.js';
+import type { Shape, ShapeName } from './shape-tool-element.js';
 
 @customElement('edgeless-shape-tool-button')
 export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
@@ -241,14 +241,14 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
             style=${styleMap({ color: `var(${this._shapeIconColor})` })}
           >
             ${repeat(this._shapes, (shape, index) => {
-              return html`<edgeless-shape-element
+              return html`<edgeless-shape-tool-element
                 .shape=${shape}
                 .order=${this._data.order[index]}
                 .getContainerRect=${this.getContainerRect}
                 .handleClick=${this.handleClick}
                 .edgeless=${this.edgeless}
                 .setEdgelessTool=${this.setEdgelessTool}
-              ></edgeless-shape-element>`;
+              ></edgeless-shape-tool-element>`;
             })}
           </div>
         </div>

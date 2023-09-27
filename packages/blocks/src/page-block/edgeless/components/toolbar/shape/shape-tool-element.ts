@@ -44,8 +44,8 @@ interface TransformMap {
   };
 }
 
-@customElement('edgeless-shape-element')
-export class EdgelessShapeElement extends WithDisposable(LitElement) {
+@customElement('edgeless-shape-tool-element')
+export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   static override styles = css`
     .shape {
       --x: 0px;
@@ -92,13 +92,13 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   @property({ attribute: false })
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
-  @query('#shape-element')
-  private shapeElement!: HTMLElement;
+  @query('#shape-tool-element')
+  private _shapeElement!: HTMLElement;
 
   @query('#backup-shape-element')
-  private backupShapeElement!: HTMLElement;
+  private _backupShapeElement!: HTMLElement;
 
-  private transformMap: TransformMap = {
+  private _transformMap: TransformMap = {
     z1: { x: 0, y: 5, scale: 1.1, origin: '50% 100%' },
     z2: { x: -15, y: 0, scale: 0.75, origin: '20% 20%' },
     z3: { x: 15, y: 0, scale: 0.75, origin: '80% 20%' },
@@ -106,119 +106,125 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   };
 
   @state()
-  private startCoord: Coord = { x: 0, y: 0 };
+  private _startCoord: Coord = { x: 0, y: 0 };
 
   @state()
-  private dragging: boolean = false;
+  private _dragging: boolean = false;
 
   @state()
-  private isOutside: boolean = false;
+  private _isOutside: boolean = false;
 
-  private onDragStart = (coord: Coord) => {
+  private _onDragStart = (coord: Coord) => {
     this.setEdgelessTool({ type: 'default' });
-    this.startCoord = { x: coord.x, y: coord.y };
+    this._startCoord = { x: coord.x, y: coord.y };
     if (this.order !== 1) {
       return;
     }
-    this.dragging = true;
-    this.shapeElement.classList.add('dragging');
+    this._dragging = true;
+    this._shapeElement.classList.add('dragging');
   };
 
-  private onDragMove = (coord: Coord) => {
-    if (!this.dragging) {
+  private _onDragMove = (coord: Coord) => {
+    if (!this._dragging) {
       return;
     }
     const { x, y } = coord;
-    this.shapeElement.style.setProperty(
+    this._shapeElement.style.setProperty(
       '--offset-x',
-      `${x - this.startCoord.x}px`
+      `${x - this._startCoord.x}px`
     );
-    this.shapeElement.style.setProperty(
+    this._shapeElement.style.setProperty(
       '--offset-y',
-      `${y - this.startCoord.y}px`
+      `${y - this._startCoord.y}px`
     );
     const containerRect = this.getContainerRect();
     const isOut =
       y < containerRect.top ||
       x < containerRect.left ||
       x > containerRect.right;
-    if (isOut !== this.isOutside) {
-      this.backupShapeElement.style.setProperty('--y', isOut ? '5px' : '100px');
-      this.backupShapeElement.style.setProperty('--scale', isOut ? '1' : '0.9');
+    if (isOut !== this._isOutside) {
+      this._backupShapeElement.style.setProperty(
+        '--y',
+        isOut ? '5px' : '100px'
+      );
+      this._backupShapeElement.style.setProperty(
+        '--scale',
+        isOut ? '1' : '0.9'
+      );
     }
-    this.isOutside = isOut;
+    this._isOutside = isOut;
   };
 
-  private onDragEnd = async (coord: Coord) => {
-    if (this.startCoord.x === coord.x && this.startCoord.y === coord.y) {
+  private _onDragEnd = async (coord: Coord) => {
+    if (this._startCoord.x === coord.x && this._startCoord.y === coord.y) {
       this.handleClick();
-      this.dragging = false;
+      this._dragging = false;
       return;
     }
-    if (!this.dragging) {
+    if (!this._dragging) {
       return;
     }
-    this.dragging = false;
-    if (this.isOutside) {
-      const rect = this.shapeElement.getBoundingClientRect();
-      this.backupShapeElement.style.setProperty('transition', 'none');
-      this.backupShapeElement.style.setProperty('--y', '100px');
-      this.shapeElement.style.setProperty('--offset-x', `${0}px`);
-      this.shapeElement.style.setProperty('--offset-y', `${0}px`);
+    this._dragging = false;
+    if (this._isOutside) {
+      const rect = this._shapeElement.getBoundingClientRect();
+      this._backupShapeElement.style.setProperty('transition', 'none');
+      this._backupShapeElement.style.setProperty('--y', '100px');
+      this._shapeElement.style.setProperty('--offset-x', `${0}px`);
+      this._shapeElement.style.setProperty('--offset-y', `${0}px`);
       await sleep(0);
-      this.shapeElement.classList.remove('dragging');
-      this.backupShapeElement.style.removeProperty('transition');
+      this._shapeElement.classList.remove('dragging');
+      this._backupShapeElement.style.removeProperty('transition');
       const padding = {
         x: (coord.x - rect.left) / rect.width,
         y: (coord.y - rect.top) / rect.height,
       };
-      this.addShape(coord, padding);
+      this._addShape(coord, padding);
     } else {
-      this.shapeElement.classList.remove('dragging');
-      this.shapeElement.style.setProperty('--offset-x', `${0}px`);
-      this.shapeElement.style.setProperty('--offset-y', `${0}px`);
-      this.backupShapeElement.style.setProperty('--y', '100px');
+      this._shapeElement.classList.remove('dragging');
+      this._shapeElement.style.setProperty('--offset-x', `${0}px`);
+      this._shapeElement.style.setProperty('--offset-y', `${0}px`);
+      this._backupShapeElement.style.setProperty('--y', '100px');
     }
   };
 
-  private onMouseMove = (event: MouseEvent) => {
-    if (!this.dragging) {
+  private _onMouseMove = (event: MouseEvent) => {
+    if (!this._dragging) {
       return;
     }
-    this.onDragMove({ x: event.clientX, y: event.clientY });
+    this._onDragMove({ x: event.clientX, y: event.clientY });
   };
 
-  private touchMove = (event: TouchEvent) => {
-    if (!this.dragging) {
+  private _touchMove = (event: TouchEvent) => {
+    if (!this._dragging) {
       return;
     }
-    this.onDragMove({
+    this._onDragMove({
       x: event.touches[0].clientX,
       y: event.touches[0].clientY,
     });
   };
 
-  private onMouseUp = (event: MouseEvent) => {
-    this.onDragEnd({ x: event.clientX, y: event.clientY });
+  private _onMouseUp = (event: MouseEvent) => {
+    this._onDragEnd({ x: event.clientX, y: event.clientY });
   };
 
-  private onTouchEnd = (event: TouchEvent) => {
-    this.onDragEnd({
+  private _onTouchEnd = (event: TouchEvent) => {
+    this._onDragEnd({
       x: event.touches[0].clientX,
       y: event.touches[0].clientY,
     });
   };
 
   @state()
-  private fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
+  private _fillColor: string = DEFAULT_SHAPE_FILL_COLOR;
 
   @state()
-  private strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
+  private _strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
 
   @state()
   private shapeStyle: ShapeStyle = ShapeStyle.General;
 
-  private addShape = (coord: Coord, padding: Coord) => {
+  private _addShape = (coord: Coord, padding: Coord) => {
     const width = 100;
     const height = 100;
     const [modelX, modelY] = this.edgeless.surface.viewport.toModelCoord(
@@ -229,8 +235,8 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
     this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,
-      strokeColor: this.strokeColor,
-      fillColor: this.fillColor,
+      strokeColor: this._strokeColor,
+      fillColor: this._fillColor,
       filled: true,
       radius: this.shape.name === 'roundedRect' ? 0.1 : 0,
       strokeWidth: 4,
@@ -241,18 +247,18 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('mousemove', this.onMouseMove);
-    window.addEventListener('touchmove', this.touchMove);
-    window.addEventListener('mouseup', this.onMouseUp);
-    window.addEventListener('touchend', this.onTouchEnd);
+    window.addEventListener('mousemove', this._onMouseMove);
+    window.addEventListener('touchmove', this._touchMove);
+    window.addEventListener('mouseup', this._onMouseUp);
+    window.addEventListener('touchend', this._onTouchEnd);
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    window.removeEventListener('mousemove', this.onMouseMove);
-    window.removeEventListener('touchmove', this.touchMove);
-    window.removeEventListener('mouseup', this.onMouseUp);
-    window.removeEventListener('touchend', this.onTouchEnd);
+    window.removeEventListener('mousemove', this._onMouseMove);
+    window.removeEventListener('touchmove', this._touchMove);
+    window.removeEventListener('mouseup', this._onMouseUp);
+    window.removeEventListener('touchend', this._onTouchEnd);
   }
 
   override updated(changedProperties: PropertyValues<this>) {
@@ -260,28 +266,28 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
       return;
     }
     const transform =
-      this.transformMap[this.order <= 3 ? `z${this.order}` : 'hidden'];
-    this.shapeElement.style.setProperty('--x', `${transform.x}px`);
-    this.shapeElement.style.setProperty('--y', `${transform.y}px`);
-    this.shapeElement.style.setProperty(
+      this._transformMap[this.order <= 3 ? `z${this.order}` : 'hidden'];
+    this._shapeElement.style.setProperty('--x', `${transform.x}px`);
+    this._shapeElement.style.setProperty('--y', `${transform.y}px`);
+    this._shapeElement.style.setProperty(
       '--scale',
       String(transform.scale || 1)
     );
-    this.shapeElement.style.zIndex = String(999 - this.order);
-    this.shapeElement.style.transformOrigin = transform.origin;
+    this._shapeElement.style.zIndex = String(999 - this.order);
+    this._shapeElement.style.transformOrigin = transform.origin;
 
-    if (this.backupShapeElement) {
-      this.backupShapeElement.style.setProperty('--y', '100px');
-      this.backupShapeElement.style.setProperty('--scale', '0.9');
-      this.backupShapeElement.style.zIndex = '999';
+    if (this._backupShapeElement) {
+      this._backupShapeElement.style.setProperty('--y', '100px');
+      this._backupShapeElement.style.setProperty('--scale', '0.9');
+      this._backupShapeElement.style.zIndex = '999';
     }
 
     this.edgeless.slots.edgelessToolUpdated.on(newTool => {
       if (newTool.type !== 'shape') {
         return;
       }
-      this.fillColor = newTool.fillColor;
-      this.strokeColor = newTool.strokeColor;
+      this._fillColor = newTool.fillColor;
+      this._strokeColor = newTool.strokeColor;
       this.shapeStyle = newTool.shapeStyle;
     });
   }
@@ -289,13 +295,13 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   override render() {
     return html`
       <div
-        id="shape-element"
+        id="shape-tool-element"
         class="shape"
         @mousedown=${(event: MouseEvent) =>
-          this.onDragStart({ x: event.clientX, y: event.clientY })}
+          this._onDragStart({ x: event.clientX, y: event.clientY })}
         @touchstart=${(event: TouchEvent) => {
           event.preventDefault();
-          this.onDragStart({
+          this._onDragStart({
             x: event.touches[0].clientX,
             y: event.touches[0].clientY,
           });
@@ -314,6 +320,6 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-shape-element': EdgelessShapeElement;
+    'edgeless-shape-tool-element': EdgelessShapeToolElement;
   }
 }
