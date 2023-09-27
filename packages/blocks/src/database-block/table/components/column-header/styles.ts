@@ -208,6 +208,7 @@ export const styles = css`
     top: 50%;
     transform: translateY(-50%);
     opacity: 0;
+    pointer-events: none;
   }
   .affine-database-column-move .hover-trigger {
     width: 12px;
