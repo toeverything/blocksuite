@@ -1,18 +1,15 @@
-export * from './copy-selected-block.js';
-export * from './delete-selected-block.js';
-export * from './delete-selected-text.js';
-export * from './format/index.js';
-export * from './get-block-index.js';
-export * from './get-block-selection-by-side.js';
-export * from './get-next-block.js';
-export * from './get-prev-block.js';
-export * from './get-selected-models.js';
-export * from './get-text-selection.js';
+export * from './block-crud/index.js';
+export * from './model-crud/index.js';
+export * from './selection/index.js';
+export * from './text-crud/index.js';
+export * from './with-root.js';
 
 declare global {
   namespace BlockSuite {
+    // if we use `with` or `inline` to add command data either then use a command we
+    // need to update this interface
     interface CommandData {
-      currentSelectionPath: string[];
+      currentSelectionPath?: string[];
     }
   }
 }

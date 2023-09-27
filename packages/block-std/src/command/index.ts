@@ -1,3 +1,16 @@
+// type A = {};
+// type B = { prop?: string };
+// type C = { prop: string };
+// type TestA = MakeOptionalIfEmpty<A>;  // void | {}
+// type TestB = MakeOptionalIfEmpty<B>;  // void | { prop?: string }
+// type TestC = MakeOptionalIfEmpty<C>;  // { prop: string }
+type IfAllKeysOptional<T, Yes, No> = Partial<T> extends T
+  ? T extends Partial<T>
+    ? Yes
+    : No
+  : No;
+type MakeOptionalIfEmpty<T> = IfAllKeysOptional<T, void | T, T>;
+
 export interface InitCommandCtx {
   std: BlockSuite.Std;
 }
@@ -41,7 +54,9 @@ const cmdSymbol = Symbol('cmds');
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Chain<In extends object = {}> = CommonMethods<In> & {
   [K in keyof BlockSuite.Commands]: (
-    data: Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
+    data: MakeOptionalIfEmpty<
+      Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
+    >
   ) => Chain<In & OutDataOfCommand<BlockSuite.Commands[K]>>;
 };
 

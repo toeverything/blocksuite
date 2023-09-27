@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { Command, TextSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import { clearMarksOnDiscontinuousInput } from '../../../__internal__/utils/virgo.js';
@@ -10,20 +10,19 @@ import { getSelectedContentBlockElements } from '../../utils/selection.js';
 
 // for text selection
 export const formatTextCommand: Command<
-  never,
+  'currentTextSelection' | 'root',
   never,
   {
-    root: BlockSuiteRoot;
+    textSelection?: TextSelection;
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   }
 > = async (ctx, next) => {
-  const root = ctx.root;
-  const styles = ctx.styles;
-  const mode = ctx.mode ?? 'merge';
+  const { root, styles, mode = 'merge' } = ctx;
+  assertExists(root);
 
-  const textSelection = root.selection.find('text');
-  if (!textSelection) return;
+  const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
+  assertExists(textSelection);
 
   const selectedElements = getSelectedContentBlockElements(root, [
     'text',
