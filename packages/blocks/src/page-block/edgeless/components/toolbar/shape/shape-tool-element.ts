@@ -115,7 +115,6 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   private _isOutside: boolean = false;
 
   private _onDragStart = (coord: Coord) => {
-    this.setEdgelessTool({ type: 'default' });
     this._startCoord = { x: coord.x, y: coord.y };
     if (this.order !== 1) {
       return;
@@ -165,6 +164,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       return;
     }
     this._dragging = false;
+    this.setEdgelessTool({ type: 'default' });
     if (this._isOutside) {
       const rect = this._shapeElement.getBoundingClientRect();
       this._backupShapeElement.style.setProperty('transition', 'none');
