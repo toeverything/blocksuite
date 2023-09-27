@@ -3,7 +3,6 @@ import './components/frame/edgeless-frame-container.js';
 import './components/rects/edgeless-selected-rect.js';
 import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
-import './components/note-slicer/index.js';
 import './components/note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
@@ -152,20 +151,15 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
   override render() {
     const { edgeless } = this;
-
     const { sortedNotes, surface, renderModel } = edgeless;
+
     if (!surface) return nothing;
-    const { readonly } = this.edgeless.page;
+
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
           <edgeless-frame-container .surface=${surface}>
           </edgeless-frame-container>
-          ${readonly
-            ? nothing
-            : html`<affine-note-slicer
-                .edgelessPage=${edgeless}
-              ></affine-note-slicer>`}
           <edgeless-notes-container
             .edgeless=${edgeless}
             .notes=${sortedNotes}

@@ -1,3 +1,5 @@
+import '../components/note-slicer/index.js';
+
 import { WithDisposable } from '@blocksuite/lit';
 import type { TemplateResult } from 'lit';
 import { html, LitElement, nothing } from 'lit';
@@ -157,20 +159,26 @@ export class EdgelessNotesContainer extends WithDisposable(LitElement) {
   }
 
   override render() {
-    const { notes, renderer } = this;
-    return html`
-      ${repeat(
-        notes,
-        child => child.id,
-        (child, index) =>
-          html`<edgeless-child-note
-            .index=${index}
-            .model=${child}
-            .renderer=${renderer}
-            .edgeless=${this.edgeless}
-          ></edgeless-child-note>`
-      )}
-    `;
+    const { renderer, edgeless } = this;
+    const readonly = edgeless.page.readonly;
+    const noteSlicer = readonly
+      ? nothing
+      : html`<affine-note-slicer
+          .edgelessPage=${edgeless}
+        ></affine-note-slicer>`;
+    const notes = repeat(
+      this.notes,
+      child => child.id,
+      (child, index) =>
+        html`<edgeless-child-note
+          .index=${index}
+          .model=${child}
+          .renderer=${renderer}
+          .edgeless=${this.edgeless}
+        ></edgeless-child-note>`
+    );
+
+    return html`${noteSlicer}${notes}`;
   }
 }
 

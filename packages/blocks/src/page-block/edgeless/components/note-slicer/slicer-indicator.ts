@@ -16,7 +16,6 @@ export class NoteSlicerIndicator extends WithDisposable(LitElement) {
       z-index: 1;
       width: 0px;
       transition: width 0.1s ease-in-out;
-      transform: scale(1 / var(--affine-zoom));
       transform-origin: left center;
     }
 
