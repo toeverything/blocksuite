@@ -145,7 +145,7 @@ export function handleCommonStyle(
   root.std.command
     .pipe()
     .withRoot()
-    .getTextSelection()
+    .try(chain => [chain.getTextSelection(), chain.getBlockSelections()])
     .try(chain => [
       chain.formatText(payload),
       chain.formatBlock(payload),

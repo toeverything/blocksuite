@@ -18,7 +18,7 @@ export const formatBlockCommand: Command<
   }
 > = (ctx, next) => {
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
-  assertExists(blockSelections);
+  if (!blockSelections) return;
   const root = ctx.root;
   assertExists(root);
 

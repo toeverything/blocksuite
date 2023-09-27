@@ -70,7 +70,7 @@ export class ClipboardController implements ReactiveController {
     return this._std.command
       .pipe()
       .withRoot()
-      .getSelectedModels({})
+      .getSelectedModels()
       .copySelectedModels({ event });
   };
 

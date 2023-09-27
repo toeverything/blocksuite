@@ -22,7 +22,7 @@ export const formatTextCommand: Command<
   assertExists(root);
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
-  assertExists(textSelection);
+  if (!textSelection) return;
 
   const selectedElements = getSelectedContentBlockElements(root, [
     'text',
