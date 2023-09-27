@@ -73,7 +73,7 @@ export class CommandManager {
       [cmdSymbol]: cmds,
       run: () => {
         const ctx = this._getCommandCtx();
-        const runCmds = async (
+        const runCmds = (
           ctx: BlockSuite.CommandData,
           [cmd, ...rest]: Command[]
         ) => {
@@ -84,9 +84,9 @@ export class CommandManager {
         let success = false;
         runCmds(ctx as BlockSuite.CommandData, [
           ...cmds,
-          async (_, next) => {
+          (_, next) => {
             success = true;
-            await next();
+            next();
           },
         ]);
         return success;
@@ -110,7 +110,7 @@ export class CommandManager {
         );
         return this.createChain(methods, [
           ...cmds,
-          async (_, next) => {
+          (_, next) => {
             for (const chain of chains) {
               chain.run();
               if (success) {
