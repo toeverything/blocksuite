@@ -99,7 +99,7 @@ export class EdgelessShapeElement extends WithDisposable(LitElement) {
   private backupShapeElement!: HTMLElement;
 
   private transformMap: TransformMap = {
-    z1: { x: 0, y: 5, scale: 1, origin: '50% 100%' },
+    z1: { x: 0, y: 5, scale: 1.1, origin: '50% 100%' },
     z2: { x: -15, y: 0, scale: 0.75, origin: '20% 20%' },
     z3: { x: 15, y: 0, scale: 0.75, origin: '80% 20%' },
     hidden: { x: 0, y: 120, scale: 0, origin: '50% 50%' },
