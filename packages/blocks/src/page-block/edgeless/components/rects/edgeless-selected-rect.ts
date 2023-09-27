@@ -440,7 +440,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       } else {
         if (element instanceof TextElement) {
           const p = bound.h / element.h;
-          bound.w = element.w * p;
+
           surface.updateElement<PhasorElementType.TEXT>(id, {
             xywh: bound.serialize(),
             fontSize: element.fontSize * p,
@@ -728,7 +728,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       ? ResizeHandles(
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
-            _resizeManager.onPointerDown(e, direction);
+            const proportional = elements.some(el => el instanceof TextElement);
+            _resizeManager.onPointerDown(e, direction, proportional);
           },
           (
             dragging: boolean,

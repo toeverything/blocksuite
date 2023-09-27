@@ -3,13 +3,13 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { ReferenceElement } from '@floating-ui/dom';
 import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { classMap } from 'lit/directives/class-map.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { popMenu, positionToVRect } from '../../../../components/menu/menu.js';
 import {
-  DatabaseDragIcon,
   DatabaseDuplicate,
   DatabaseInsertLeft,
   DatabaseInsertRight,
@@ -51,6 +51,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   column!: DataViewTableColumnManager;
+
+  @property({ attribute: false })
+  grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
+
   private widthDragBar = createRef();
   override connectedCallback() {
     super.connectedCallback();
@@ -209,10 +213,12 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
       x: number;
       insertPosition?: InsertToPosition;
     }>(evt, {
-      onDrag: evt => ({
-        x: evt.x,
-      }),
+      onDrag: evt => {
+        this.grabStatus = 'grabbing';
+        return { x: evt.x };
+      },
       onMove: ({ x }: { x: number }) => {
+        this.grabStatus = 'grabbing';
         const currentOffset = getResultInRange(
           (x - tableContainer.getBoundingClientRect().left - rectOffsetLeft) /
             scale,
@@ -242,6 +248,7 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         };
       },
       onDrop: ({ insertPosition }) => {
+        this.grabStatus = 'grabEnd';
         if (insertPosition) {
           this.tableViewManager.columnMove(this.column.id, insertPosition);
         }
@@ -477,6 +484,10 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
     const style = styleMap({
       height: DEFAULT_COLUMN_TITLE_HEIGHT + 'px',
     });
+    const classes = classMap({
+      'affine-database-column-move': true,
+      [this.grabStatus]: true,
+    });
     return html`
       <div
         style=${style}
@@ -484,6 +495,14 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
         @click="${this._clickColumn}"
         @contextmenu="${this._contextMenu}"
       >
+        ${this.readonly
+          ? null
+          : html`<button class=${classes}>
+              <div class="hover-trigger"></div>
+              <div class="control-h"></div>
+              <div class="control-l"></div>
+              <div class="control-r"></div>
+            </button>`}
         <div class="affine-database-column-text ${column.type}">
           <div
             class="affine-database-column-type-icon dv-hover"
@@ -495,11 +514,6 @@ export class DatabaseHeaderColumn extends WithDisposable(ShadowlessElement) {
             <div class="affine-database-column-text-input">${column.name}</div>
           </div>
         </div>
-        ${this.readonly
-          ? null
-          : html` <div class="affine-database-column-move">
-              ${DatabaseDragIcon}
-            </div>`}
       </div>
       <div
         ${ref(this.widthDragBar)}

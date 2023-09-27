@@ -39,6 +39,7 @@ export const styles = css`
     height: 100%;
     padding: 8px;
     box-sizing: border-box;
+    position: relative;
   }
   .affine-database-column-content:hover,
   .affine-database-column-content.edit {
@@ -56,6 +57,7 @@ export const styles = css`
     overflow: hidden;
     color: var(--affine-text-secondary-color);
     font-size: 14px;
+    position: absolute;
   }
   .affine-database-column-type-icon {
     display: flex;
@@ -167,5 +169,123 @@ export const styles = css`
     width: 100px;
     height: 100px;
     background: var(--affine-text-emphasis-color);
+  }
+
+  .affine-database-column-move {
+    --color: var(--affine-placeholder-color);
+    --active: var(--affine-black-10);
+    --bw: 1px;
+    --bw2: -1px;
+    cursor: grab;
+    background: none;
+    border: none;
+    border-radius: 0;
+    position: absolute;
+    inset: 0;
+  }
+  .affine-database-column-move .control-l::before,
+  .affine-database-column-move .control-h::before,
+  .affine-database-column-move .control-l::after,
+  .affine-database-column-move .control-h::after,
+  .affine-database-column-move .control-r,
+  .affine-database-column-move .hover-trigger {
+    --delay: 0s;
+    --delay-opacity: 0s;
+    content: '';
+    position: absolute;
+    transition:
+      all 0.2s ease var(--delay),
+      opacity 0.2s ease var(--delay-opacity);
+  }
+  .affine-database-column-move .control-r {
+    --delay: 0s;
+    --delay-opacity: 0.6s;
+    width: 4px;
+    border-radius: 1px;
+    height: 32%;
+    background: var(--color);
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .affine-database-column-move .hover-trigger {
+    width: 12px;
+    height: 80%;
+    right: 3px;
+    top: 10%;
+    background: transparent
+    z-index: 1;
+    opacity: 1;
+  }
+  .affine-database-column-move:hover .control-r {
+    opacity: 1;
+  }
+  .affine-database-column-move .control-h::before,
+  .affine-database-column-move .control-h::after {
+    --delay: 0.2s;
+    width: calc(100% - var(--bw2) * 2);
+    opacity: 0;
+    height: var(--bw);
+    right: var(--bw2);
+    background: var(--active);
+  }
+  .affine-database-column-move .control-h::before {
+    top: var(--bw2);
+  }
+  .affine-database-column-move .control-h::after {
+    bottom: var(--bw2);
+  }
+  .affine-database-column-move .control-l::before{
+    --delay: 0s;
+    width: var(--bw);
+    height: 100%;
+    opacity: 0;
+    background: var(--active);
+    left: var(--bw2);
+  }
+  .affine-database-column-move .control-l::before {
+    top: 0;
+  }
+  .affine-database-column-move .control-l::after {
+    bottom: 0;
+  }
+
+  /* handle--active style */
+  .affine-database-column-move:hover .control-r {
+    --delay-opacity: 0s;
+    opacity: 1;
+  }
+  .affine-database-column-move:active .control-r,
+  .hover-trigger:hover ~ .control-r,
+  .grabbing.affine-database-column-move .control-r {
+    opacity: 1;
+    --delay: 0s;
+    --delay-opacity: 0s;
+    right: var(--bw2);
+    width: var(--bw);
+    height: 100%;
+    background: var(--active);
+  }
+  .affine-database-column-move:active .control-h::before,
+  .affine-database-column-move:active .control-h::after,
+  .hover-trigger:hover ~ .control-h::before,
+  .hover-trigger:hover ~ .control-h::after,
+  .grabbing.affine-database-column-move .control-h::before,
+  .grabbing.affine-database-column-move .control-h::after {
+    --delay: 0.2s;
+    width: calc(100% - var(--bw2) * 2);
+    opacity: 1;
+  }
+
+  .affine-database-column-move:active .control-l::before,
+  .affine-database-column-move:active .control-l::after,
+  .hover-trigger:hover ~ .control-l::before,
+  .hover-trigger:hover ~ .control-l::after,
+  .grabbing.affine-database-column-move .control-l::before,
+  .grabbing.affine-database-column-move .control-l::after {
+    --delay: 0.4s;
+    opacity: 1;
   }
 `;

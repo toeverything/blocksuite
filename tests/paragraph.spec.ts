@@ -153,6 +153,7 @@ for (const { initState, desc } of [
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
+    await page.waitForTimeout(300);
     await assertRichTextVRange(page, 0, 0, 0);
 
     await pressBackspace(page);
@@ -246,6 +247,7 @@ test('split paragraph block by enter', async ({ page }) => {
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(300);
   await assertRichTextVRange(page, 0, 2, 0);
 
   await pressEnter(page);
@@ -276,8 +278,10 @@ test('split paragraph block with selected text by enter', async ({ page }) => {
   // select 'll'
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.down('Shift');
+  await page.waitForTimeout(100);
   await page.keyboard.press('ArrowLeft');
   await page.keyboard.press('ArrowLeft');
+  await page.waitForTimeout(300);
   await page.keyboard.up('Shift');
   await assertRichTextVRange(page, 0, 2, 2);
 

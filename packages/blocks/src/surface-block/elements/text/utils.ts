@@ -18,15 +18,21 @@ export const isSafari =
   !isChrome && globalThis.navigator?.userAgent.indexOf('Safari') !== -1;
 
 export function getLineHeight(fontFamily: string, fontSize: number) {
+  // Browser may have minimum font size setting
+  // so we need to multiple the multiplier between the actual size and the expected size
+  const actualFontSize = Math.max(fontSize, 12);
   const span = document.createElement('span');
+
   span.style.fontFamily = fontFamily;
-  span.style.fontSize = fontSize + 'px';
+  span.style.fontSize = actualFontSize + 'px';
   span.style.lineHeight = 'initial';
   span.textContent = 'M';
+
   document.body.appendChild(span);
   const { height } = span.getBoundingClientRect();
+
   span.remove();
-  return height;
+  return height * (fontSize / actualFontSize);
 }
 
 export function getFontString({
