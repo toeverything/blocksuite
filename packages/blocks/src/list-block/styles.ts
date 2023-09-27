@@ -54,9 +54,12 @@ const toggleStyles = css`
     opacity: 1;
   }
 
-  /* .with-drag-handle .toggle-icon {
+  .with-drag-handle .affine-list-rich-text-wrapper .toggle-icon {
     opacity: 1;
-  } */
+  }
+  .with-drag-handle .affine-block-children-container .toggle-icon {
+    opacity: 0;
+  }
 `;
 
 export const styles = css`
