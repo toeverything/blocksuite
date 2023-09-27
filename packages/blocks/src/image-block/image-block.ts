@@ -414,6 +414,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   private _onCaptionKeydown(e: KeyboardEvent) {
+    if (e.isComposing) return;
     if (e.key === 'Enter') {
       e.stopPropagation();
       const model = this.model;
@@ -437,10 +438,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         parent,
         index + 1
       );
-      asyncFocusRichText(model.page, id, {
-        index: nextBlockText.length,
-        length: 0,
-      });
+      asyncFocusRichText(model.page, id);
     }
   }
 
