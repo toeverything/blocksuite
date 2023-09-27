@@ -272,7 +272,7 @@ test('Before and after switching to Edgeless, the previous zoom ratio and positi
   await assertZoomLevel(page, 125);
 });
 
-test.only('should close zoom bar when click blank area', async ({ page }) => {
+test('should close zoom bar when click blank area', async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
   await switchEditorMode(page);
