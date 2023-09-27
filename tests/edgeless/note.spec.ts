@@ -309,10 +309,11 @@ test('drag handle should work across multiple notes', async ({ page }) => {
 
   await setEdgelessTool(page, 'note');
 
-  await page.mouse.click(300, 300);
+  await page.mouse.click(300, 200);
+  await focusRichText(page, 3);
   await waitNextFrame(page);
 
-  // 7
+  // block id 7
   await type(page, '000');
 
   await page.mouse.dblclick(CENTER_X, CENTER_Y);

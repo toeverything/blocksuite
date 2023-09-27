@@ -11,11 +11,24 @@ import { getTextNodesFromElement } from '@blocksuite/virgo';
 import type { BlockElement } from '../element/block-element.js';
 import type { RangeManager } from './range-manager.js';
 
+export interface RangeSyncFilter {
+  rangeToTextSelection?: (range: Range | null) => boolean;
+  textSelectionToRange?: (selection: TextSelection | null) => boolean;
+}
+
 /**
  * Two-way binding between native range and text selection
  */
 export class RangeSynchronizer {
   private _prevSelection: BaseSelection | null = null;
+
+  private _filter: RangeSyncFilter = {};
+  get filter() {
+    return this._filter;
+  }
+  setFilter(filter: RangeSyncFilter) {
+    this._filter = filter;
+  }
 
   private get _selectionManager() {
     return this.root.selection;
@@ -52,10 +65,15 @@ export class RangeSynchronizer {
           return;
         }
         const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+
         if (
-          !this.manager.config.shouldSyncSelection(range) ||
-          this._isComposing
+          this.filter.rangeToTextSelection &&
+          !this.filter.rangeToTextSelection(range)
         ) {
+          return;
+        }
+
+        if (this._isComposing) {
           return;
         }
 
@@ -90,6 +108,14 @@ export class RangeSynchronizer {
         selections.find((selection): selection is TextSelection =>
           selection.is('text')
         ) ?? null;
+
+      if (
+        this.filter.textSelectionToRange &&
+        !this.filter.textSelectionToRange(text)
+      ) {
+        return;
+      }
+
       const eq =
         text && this._prevSelection
           ? text.equals(this._prevSelection)

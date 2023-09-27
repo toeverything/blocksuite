@@ -5,7 +5,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import type { VRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query, state } from 'lit/decorators.js';
+import { customElement, query } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
@@ -20,15 +20,11 @@ import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
 import { getListInfo } from './utils/get-list-info.js';
-import { playCheckAnimation } from './utils/icons.js';
-import { toggleDown, toggleRight } from './utils/icons.js';
+import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 
 @customElement('affine-list')
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
   static override styles = styles;
-
-  @state()
-  showChildren = true;
 
   readonly textSchema: AffineTextSchema = {
     attributesSchema: affineTextAttributes,
@@ -48,7 +44,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     e.stopPropagation();
 
     if (this.model.type === 'toggle') {
-      this.showChildren = !this.showChildren;
+      this._toggleChildren();
       return;
     } else if (this.model.type === 'todo') {
       this.model.page.captureSync();
@@ -87,24 +83,31 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     this._vRangeProvider = getVRangeProvider(this);
   }
 
+  private _toggleChildren() {
+    this.page.captureSync();
+    this.page.updateBlock(this.model, {
+      collapsed: !this.model.collapsed,
+    } as Partial<ListBlockModel>);
+  }
+
   private _toggleTemplate() {
-    const toggleChildren = () => (this.showChildren = !this.showChildren);
     const noChildren = this.model.children.length === 0;
     const toggleDownTemplate = html`<div
       class="toggle-icon"
-      @click=${toggleChildren}
+      @click=${this._toggleChildren}
     >
       ${toggleDown}
     </div>`;
+
     const toggleRightTemplate = html`<div
       class="toggle-icon toggle-icon__collapsed"
-      @click=${toggleChildren}
+      @click=${this._toggleChildren}
     >
       ${toggleRight}
     </div>`;
     const toggleIcon = noChildren
       ? nothing
-      : this.showChildren
+      : !this.model.collapsed
       ? toggleDownTemplate
       : toggleRightTemplate;
     return toggleIcon;
@@ -112,8 +115,14 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
   override render(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
-    const { model, showChildren, _onClickIcon } = this;
-    const listIcon = ListIcon(model, index, deep, showChildren, _onClickIcon);
+    const { model, _onClickIcon } = this;
+    const listIcon = ListIcon(
+      model,
+      index,
+      deep,
+      !this.model.collapsed,
+      _onClickIcon
+    );
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
@@ -142,7 +151,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .vRangeProvider=${this._vRangeProvider}
           ></rich-text>
         </div>
-        ${this.showChildren ? children : nothing}
+        ${!this.model.collapsed ? children : nothing}
         ${when(
           this.selected?.is('block'),
           () => html`<affine-block-selection></affine-block-selection>`

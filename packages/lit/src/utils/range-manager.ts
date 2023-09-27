@@ -19,28 +19,13 @@ type RangeSnapshot = {
   endOffset: number;
 };
 
-type RangeManagerConfig = {
-  shouldSyncSelection: (range: Range | null) => boolean;
-};
-
 /**
  * CRUD for Range and TextSelection
  */
 export class RangeManager {
-  constructor(public root: BlockSuiteRoot) {
-    new RangeSynchronizer(this);
-  }
+  readonly rangeSynchronizer = new RangeSynchronizer(this);
 
-  config: RangeManagerConfig = {
-    shouldSyncSelection: () => true,
-  };
-
-  setConfig = (config: Partial<RangeManagerConfig>) => {
-    this.config = {
-      ...this.config,
-      ...config,
-    };
-  };
+  constructor(public root: BlockSuiteRoot) {}
 
   get value() {
     return this._range;

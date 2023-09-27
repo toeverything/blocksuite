@@ -108,7 +108,7 @@ export class IconButton extends LitElement {
       if (this.disabled) {
         return;
       }
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' && !event.isComposing) {
         this.click();
       }
     });
