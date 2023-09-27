@@ -17,7 +17,7 @@ export const formatNativeCommand: Command<
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   }
-> = async (ctx, next) => {
+> = (ctx, next) => {
   const { root, styles, mode = 'merge' } = ctx;
   assertExists(root);
 
@@ -53,8 +53,9 @@ export const formatNativeCommand: Command<
     });
   });
 
-  await Promise.all(selectedVEditors.map(e => e.waitForUpdate()));
-  next();
+  Promise.all(selectedVEditors.map(e => e.waitForUpdate())).then(() => {
+    next();
+  });
 };
 
 declare global {

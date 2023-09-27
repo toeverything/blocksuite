@@ -16,7 +16,7 @@ export const formatBlockCommand: Command<
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   }
-> = async (ctx, next) => {
+> = (ctx, next) => {
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
   assertExists(blockSelections);
   const root = ctx.root;
@@ -57,8 +57,9 @@ export const formatBlockCommand: Command<
     );
   });
 
-  await Promise.all(selectedElements.map(el => el.updateComplete));
-  next();
+  Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
+    next();
+  });
 };
 
 declare global {

@@ -17,7 +17,7 @@ export const formatTextCommand: Command<
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   }
-> = async (ctx, next) => {
+> = (ctx, next) => {
   const { root, styles, mode = 'merge' } = ctx;
   assertExists(root);
 
@@ -75,11 +75,10 @@ export const formatTextCommand: Command<
     }
   });
 
-  await Promise.all(selectedElements.map(el => el.updateComplete));
-
-  root.rangeManager?.syncTextSelectionToRange(textSelection);
-
-  next();
+  Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
+    root.rangeManager?.syncTextSelectionToRange(textSelection);
+    next();
+  });
 };
 
 declare global {

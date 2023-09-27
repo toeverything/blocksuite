@@ -69,6 +69,7 @@ export class ClipboardController implements ReactiveController {
   private _copySelected = (event: ClipboardEvent) => {
     return this._std.command
       .pipe()
+      .withRoot()
       .getSelectedModels({})
       .copySelectedModels({ event });
   };
