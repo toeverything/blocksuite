@@ -3,10 +3,12 @@ import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { BlockElement } from '@blocksuite/lit';
+import { Text } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
 import { stopPropagation } from '../__internal__/utils/event.js';
 import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
 import { captureEventTarget } from '../widgets/drag-handle/utils.js';
@@ -411,6 +413,37 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
     };
   }
 
+  private _onCaptionKeydown(e: KeyboardEvent) {
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+      const model = this.model;
+      const page = model.page;
+      const target = e.target as HTMLInputElement;
+      const start = target.selectionStart;
+      if (start === null) return;
+
+      const value = target.value;
+      const caption = (this._caption = value.slice(0, start));
+      target.value = caption;
+      page.updateBlock(model, { caption });
+
+      const nextBlockText = value.slice(start);
+      const parent = page.getParent(model);
+      if (!parent) return;
+      const index = parent.children.indexOf(model);
+      const id = page.addBlock(
+        'affine:paragraph',
+        { text: new Text(nextBlockText) },
+        parent,
+        index + 1
+      );
+      asyncFocusRichText(model.page, id, {
+        index: nextBlockText.length,
+        length: 0,
+      });
+    }
+  }
+
   override render() {
     const resizeImgStyle = this._normalizeImageSize();
 
@@ -447,7 +480,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
             @input=${this._onInputChange}
             @blur=${this._onInputBlur}
             @click=${stopPropagation}
-            @keydown=${stopPropagation}
+            @keydown=${this._onCaptionKeydown}
             @keyup=${stopPropagation}
             @pointerdown=${stopPropagation}
             @pointerup=${stopPropagation}
