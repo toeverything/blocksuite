@@ -106,7 +106,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   };
 
   @state()
-  private _startCoord: Coord = { x: 0, y: 0 };
+  private _startCoord: Coord = { x: -1, y: -1 };
 
   @state()
   private _dragging: boolean = false;
