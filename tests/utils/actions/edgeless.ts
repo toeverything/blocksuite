@@ -43,7 +43,7 @@ const rotWith = (A: number[], C: number[], r = 0): number[] => {
 };
 
 const AWAIT_TIMEOUT = 500;
-const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
+export const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
   Square = 'Square',

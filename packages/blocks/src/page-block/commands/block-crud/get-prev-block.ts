@@ -76,14 +76,14 @@ export const getPrevBlockCommand: Command<
   const prevBlock = getPrevBlock(ctx.std, path, ctx.filter);
 
   if (prevBlock) {
-    return next({ prevBlock });
+    next({ prevBlock });
   }
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      prevBlock: BlockElement;
+      prevBlock?: BlockElement;
     }
 
     interface Commands {

@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { Command, TextSelection } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import { clearMarksOnDiscontinuousInput } from '../../../__internal__/utils/virgo.js';
@@ -10,19 +10,18 @@ import { getSelectedContentBlockElements } from '../../utils/selection.js';
 
 // for text selection
 export const formatTextCommand: Command<
-  never,
+  'currentTextSelection' | 'root',
   never,
   {
-    root: BlockSuiteRoot;
+    textSelection?: TextSelection;
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   }
-> = async (ctx, next) => {
-  const root = ctx.root;
-  const styles = ctx.styles;
-  const mode = ctx.mode ?? 'merge';
+> = (ctx, next) => {
+  const { root, styles, mode = 'merge' } = ctx;
+  assertExists(root);
 
-  const textSelection = root.selection.find('text');
+  const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   if (!textSelection) return;
 
   const selectedElements = getSelectedContentBlockElements(root, [
@@ -76,11 +75,10 @@ export const formatTextCommand: Command<
     }
   });
 
-  await Promise.all(selectedElements.map(el => el.updateComplete));
-
-  root.rangeManager?.syncTextSelectionToRange(textSelection);
-
-  next();
+  Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
+    root.rangeManager?.syncTextSelectionToRange(textSelection);
+    next();
+  });
 };
 
 declare global {

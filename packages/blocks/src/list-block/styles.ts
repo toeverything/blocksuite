@@ -47,15 +47,18 @@ const toggleStyles = css`
   .toggle-icon:hover {
     background: var(--affine-hover-color);
   }
-  .affine-list-block-container:hover .toggle-icon {
+  .affine-list-rich-text-wrapper:hover .toggle-icon {
     opacity: 1;
   }
   .toggle-icon__collapsed {
     opacity: 1;
   }
 
-  .with-drag-handle .toggle-icon {
+  .with-drag-handle .affine-list-rich-text-wrapper .toggle-icon {
     opacity: 1;
+  }
+  .with-drag-handle .affine-block-children-container .toggle-icon {
+    opacity: 0;
   }
 `;
 

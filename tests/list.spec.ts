@@ -733,7 +733,6 @@ test.describe('toggle list', () => {
 
     const prefixes = page.locator('.affine-list-block__prefix');
     const parentPrefix = prefixes.nth(1);
-    const childrenPrefix = prefixes.nth(2);
 
     await assertToggleIconVisible(toggleIcon, false);
     await parentPrefix.hover();
@@ -743,8 +742,5 @@ test.describe('toggle list', () => {
     await page.mouse.move(0, 0);
     await waitNextFrame(page, 300);
     await assertToggleIconVisible(toggleIcon, false);
-    await childrenPrefix.hover();
-    await waitNextFrame(page, 300);
-    await assertToggleIconVisible(toggleIcon);
   });
 });
