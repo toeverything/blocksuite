@@ -247,18 +247,10 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
 
   override connectedCallback() {
     super.connectedCallback();
-    window.addEventListener('mousemove', this._onMouseMove);
-    window.addEventListener('touchmove', this._touchMove);
-    window.addEventListener('mouseup', this._onMouseUp);
-    window.addEventListener('touchend', this._onTouchEnd);
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    window.removeEventListener('mousemove', this._onMouseMove);
-    window.removeEventListener('touchmove', this._touchMove);
-    window.removeEventListener('mouseup', this._onMouseUp);
-    window.removeEventListener('touchend', this._onTouchEnd);
+    this._disposables.addFromEvent(window, 'mousemove', this._onMouseMove);
+    this._disposables.addFromEvent(window, 'touchmove', this._touchMove);
+    this._disposables.addFromEvent(window, 'mouseup', this._onMouseUp);
+    this._disposables.addFromEvent(window, 'touchend', this._onTouchEnd);
   }
 
   override firstUpdated() {
