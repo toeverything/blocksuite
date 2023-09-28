@@ -7,8 +7,8 @@ import './components/note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, LitElement, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -22,10 +22,14 @@ import { getBackgroundGrid } from './utils/query.js';
 
 @customElement('affine-edgeless-block-container')
 export class EdgelessBlockContainer extends WithDisposable(LitElement) {
-  static override styles = css``;
-
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @query('.affine-block-children-container.edgeless')
+  container!: HTMLDivElement;
+
+  @query('.affine-edgeless-layer')
+  layer!: HTMLDivElement;
 
   private _noteResizeObserver = new NoteResizeObserver();
 
@@ -104,27 +108,34 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
       })
     );
 
+    let rAqId: number | null = null;
+    const updateLayerTransform = () => {
+      const { zoom, translateX, translateY } = surface.viewport;
+      const { grid, gap } = getBackgroundGrid(zoom, edgeless.showGrid);
+
+      this.container.style.setProperty(
+        'background-position',
+        `${translateX}px ${translateY}px`
+      );
+      this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
+      this.container.style.setProperty(
+        'background-color',
+        'var(--affine-background-primary-color)'
+      );
+      this.container.style.setProperty('background-image', `${grid}`);
+      this.layer.style.setProperty(
+        'transform',
+        `translate(${translateX}px, ${translateY}px) scale(${zoom})`
+      );
+    };
     _disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
-        const prevZoom = this.style.getPropertyValue('--affine-zoom');
-        const newZoom = surface.viewport.zoom;
-        if (!prevZoom || +prevZoom !== newZoom) {
-          this.style.setProperty('--affine-zoom', `${newZoom}`);
+        if (!rAqId) {
+          rAqId = requestAnimationFrame(() => {
+            updateLayerTransform();
+            rAqId = null;
+          });
         }
-        const { showGrid } = edgeless;
-        const { zoom, viewportX, viewportY } = surface.viewport;
-
-        const { grid, gap, translateX, translateY } = getBackgroundGrid(
-          viewportX,
-          viewportY,
-          zoom,
-          showGrid
-        );
-
-        this.style.setProperty('--affine-edgeless-gap', `${gap}px`);
-        this.style.setProperty('--affine-edgeless-grid', grid);
-        this.style.setProperty('--affine-edgeless-x', `${translateX}px`);
-        this.style.setProperty('--affine-edgeless-y', `${translateY}px`);
       })
     );
 

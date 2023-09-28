@@ -135,6 +135,14 @@ export class Renderer implements SurfaceViewport {
     return centerY - height / 2 / zoom;
   }
 
+  get translateX() {
+    return -this.viewportX * this.zoom;
+  }
+
+  get translateY() {
+    return -this.viewportY * this.zoom;
+  }
+
   get viewportMinXY() {
     const { centerX, centerY, width, height, zoom } = this;
     return {

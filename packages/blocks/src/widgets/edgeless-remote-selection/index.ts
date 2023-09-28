@@ -26,10 +26,6 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
       position: absolute;
       left: 0;
       top: 0;
-      transform: translate(
-        calc(var(--affine-edgeless-x)),
-        calc(var(--affine-edgeless-y))
-      );
       transform-origin: left top;
       contain: size layout;
       z-index: 1;
@@ -177,6 +173,15 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     if (this.selection.isSelectedByRemote(id)) this._updateRemoteRects();
   };
 
+  private _updateTransform() {
+    const { translateX, translateY } = this.edgeless.surface.viewport;
+
+    this.style.setProperty(
+      'transform',
+      `translate(${translateX}px, ${translateY}px)`
+    );
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -200,11 +205,19 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     _disposables.add(
       this.selection.slots.remoteCursorUpdated.on(this._updateRemoteCursor)
     );
+    _disposables.add(
+      surface.viewport.slots.viewportUpdated.on(() => {
+        this._updateTransform();
+      })
+    );
+
+    this._updateTransform();
     this._updateRemoteRects();
   }
 
   override render() {
     const { _remoteRects } = this;
+    const { zoom } = this.surface.viewport;
 
     const rects = repeat(
       Object.entries(_remoteRects),
@@ -215,11 +228,13 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
           class="remote-rect"
           style=${styleMap({
             pointerEvents: 'none',
-            width: `calc(var(--affine-zoom) * ${rect.width}px)`,
-            height: `calc(var(--affine-zoom) * ${rect.height}px)`,
+            width: `${zoom * rect.width}px`,
+            height: `${zoom * rect.height}px`,
             borderStyle: rect.borderStyle,
             borderColor: remoteColorManager.get(id),
-            transform: `translate(calc(var(--affine-zoom) * ${rect.left}px), calc(var(--affine-zoom) * ${rect.top}px)) rotate(${rect.rotate}deg)`,
+            transform: `translate(${zoom * rect.left}px, ${
+              zoom * rect.top
+            }px) rotate(${rect.rotate}deg)`,
           })}
         ></div>`
     );
@@ -233,7 +248,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
           class="remote-cursor"
           style=${styleMap({
             pointerEvents: 'none',
-            transform: `translate(calc(var(--affine-zoom) * ${cursor.x}px), calc(var(--affine-zoom) * ${cursor.y}px))`,
+            transform: `translate(${zoom * cursor.x}px, ${zoom * cursor.y}px)`,
             color: remoteColorManager.get(id),
           })}
         >

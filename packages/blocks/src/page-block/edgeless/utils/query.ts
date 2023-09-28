@@ -103,21 +103,12 @@ export function pickSurfaceElementById(
   return element;
 }
 
-export function getBackgroundGrid(
-  viewportX: number,
-  viewportY: number,
-  zoom: number,
-  showGrid: boolean
-) {
+export function getBackgroundGrid(zoom: number, showGrid: boolean) {
   const step = zoom < 0.5 ? 2 : 1 / (Math.floor(zoom) || 1);
   const gap = clamp(20 * step * zoom, GRID_GAP_MIN, GRID_GAP_MAX);
-  const translateX = -viewportX * zoom;
-  const translateY = -viewportY * zoom;
 
   return {
     gap,
-    translateX,
-    translateY,
     grid: showGrid
       ? 'radial-gradient(var(--affine-edgeless-grid-color) 1px, var(--affine-background-primary-color) 1px)'
       : 'unset',

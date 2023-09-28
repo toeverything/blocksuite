@@ -120,7 +120,6 @@ export const VARIABLES = [
 
   '--affine-paragraph-space',
   '--affine-popover-radius',
-  '--affine-zoom',
   '--affine-scale',
   ...SIZE_VARIABLES,
   ...COLOR_VARIABLES,

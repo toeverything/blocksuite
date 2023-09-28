@@ -13,20 +13,20 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-note-status')
 export class EdgelessNoteStatus extends WithDisposable(LitElement) {
+  static STATUS_VERTICAL_OFFSET = -32;
+
   static override styles = css`
     :host {
       position: absolute;
       left: 0;
       top: 0;
       contain: size layout;
-      transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
-        scale(var(--affine-zoom));
     }
 
     .status-label {
       position: absolute;
-      top: calc(-32px / var(--affine-zoom));
-      left: calc(4px / var(--affine-zoom));
+      left: 0;
+      top: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -89,6 +89,18 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
         }
       })
     );
+
+    this._disposables.add(
+      this.edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+        const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
+
+        this.style.setProperty(
+          'transform',
+          `translate(${translateX}px, ${translateY}px)`
+        );
+        this.style.setProperty('--affine-edgeless-zoom', `${zoom}`);
+      })
+    );
   }
 
   override render() {
@@ -120,7 +132,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
             data-note-id=${note.id}
             class="status-label"
             style=${styleMap({
-              transform: `translate(${x}px, ${y}px) scale(calc(1 / var(--affine-zoom)))`,
+              transform: `translate(calc(${x}px * var(--affine-edgeless-zoom)), calc(${y}px * var(--affine-edgeless-zoom) + ${EdgelessNoteStatus.STATUS_VERTICAL_OFFSET}px))`,
             })}
           >
             ${note.hidden

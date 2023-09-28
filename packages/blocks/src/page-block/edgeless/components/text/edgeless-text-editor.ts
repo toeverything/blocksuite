@@ -266,6 +266,12 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       });
     });
 
+    _disposables.add(
+      edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
     edgeless.surface.updateElementLocalRecord(this._element.id, {
       display: false,
     });
@@ -375,6 +381,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   override render() {
     if (!this._element) return nothing;
 
+    const { zoom, translateX, translateY } = this._edgeless.surface.viewport;
     const { fontFamily, fontSize, textAlign } = this._element;
     const transformOrigin = this.getTransformOrigin(textAlign);
     const offset = this.getTransformOffset(textAlign);
@@ -384,10 +391,10 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const hasPlaceholder = placeholder !== nothing;
 
     const transformOperation = [
-      'translate(var(--affine-edgeless-x), var(--affine-edgeless-y))',
-      `translate(calc(${x}px * var(--affine-zoom)), calc(${y}px * var(--affine-zoom)))`,
+      `translate(${translateX}px, ${translateY}px)`,
+      `translate(${x * zoom}px, ${y * zoom}px)`,
       `translate(${offset})`,
-      `scale(var(--affine-zoom))`,
+      `scale(${zoom})`,
       `rotate(${this._element.rotate}deg)`,
       `translate(${paddingOffset})`,
     ];

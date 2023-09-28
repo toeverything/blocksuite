@@ -121,6 +121,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
       contain: size layout;
     }
 
+    .affine-edgeless-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      contain: size layout style;
+    }
+
     @media screen and (max-width: 1200px) {
       edgeless-zoom-toolbar {
         display: none;
