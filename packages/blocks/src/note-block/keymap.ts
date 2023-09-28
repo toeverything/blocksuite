@@ -47,43 +47,47 @@ export const bindHotKey = (blockElement: BlockElement) => {
         .pipe()
         .inline((_, next) => {
           reset();
-          return next();
+          next();
         })
-        .try<'textSelection' | 'blockSelections'>(cmd => [
+        .try(cmd => [
           cmd
             .getTextSelection()
-            .inline<'currentSelectionPath'>(async (ctx, next) => {
-              const textSelection = ctx.textSelection;
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const textSelection = ctx.currentTextSelection;
+              assertExists(textSelection);
               const end = textSelection.to ?? textSelection.from;
-              return next({ currentSelectionPath: end.path });
+              next({ currentSelectionPath: end.path });
             })
             .getNextBlock({
               filter: block => !!block.model.text,
             })
             .inline((ctx, next) => {
+              assertExists(ctx.nextBlock);
               moveCursorToNextBlockElement(ctx.nextBlock);
-              return next();
+              next();
             }),
-
           cmd
             .getBlockSelections()
-            .inline<'currentSelectionPath'>(async (ctx, next) => {
-              const blockSelection = ctx.blockSelections.at(-1);
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const currentBlockSelections = ctx.currentBlockSelections;
+              assertExists(currentBlockSelections);
+              const blockSelection = currentBlockSelections.at(-1);
               if (!blockSelection) {
                 return;
               }
-              return next({ currentSelectionPath: blockSelection.path });
+              next({ currentSelectionPath: blockSelection.path });
             })
-            .getNextBlock({})
+            .getNextBlock()
             .inline((ctx, next) => {
               const { nextBlock } = ctx;
+              assertExists(nextBlock);
 
               if (!ensureBlockInContainer(nextBlock, blockElement)) {
                 return;
               }
 
               setBlockSelection(nextBlock);
-              return next();
+              next();
             }),
         ])
         .run();
@@ -93,27 +97,31 @@ export const bindHotKey = (blockElement: BlockElement) => {
         .pipe()
         .inline((_, next) => {
           reset();
-          return next();
+          next();
         })
-        .try<'textSelection' | 'blockSelections'>(cmd => [
+        .try(cmd => [
           cmd
             .getTextSelection()
-            .inline<'currentSelectionPath'>(async (ctx, next) => {
-              const textSelection = ctx.textSelection;
-              return next({ currentSelectionPath: textSelection.from.path });
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const textSelection = ctx.currentTextSelection;
+              assertExists(textSelection);
+              next({ currentSelectionPath: textSelection.from.path });
             })
             .getPrevBlock({
               filter: block => !!block.model.text,
             })
             .inline((ctx, next) => {
+              assertExists(ctx.prevBlock);
               moveCursorToPrevBlockElement(ctx.prevBlock);
-              return next();
+              next();
             }),
 
           cmd
             .getBlockSelections()
             .inline<'currentSelectionPath'>(async (ctx, next) => {
-              const blockSelection = ctx.blockSelections.at(0);
+              const currentBlockSelections = ctx.currentBlockSelections;
+              assertExists(currentBlockSelections);
+              const blockSelection = currentBlockSelections.at(0);
               if (!blockSelection) {
                 return;
               }
@@ -122,6 +130,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
             .getPrevBlock({})
             .inline((ctx, next) => {
               const { prevBlock } = ctx;
+              assertExists(prevBlock);
 
               if (!ensureBlockInContainer(prevBlock, blockElement)) {
                 return;
@@ -142,14 +151,17 @@ export const bindHotKey = (blockElement: BlockElement) => {
         })
         .getTextSelection()
         .inline<'currentSelectionPath'>(async (ctx, next) => {
-          const textSelection = ctx.textSelection;
+          const textSelection = ctx.currentTextSelection;
+          assertExists(textSelection);
           return next({ currentSelectionPath: textSelection.from.path });
         })
         .getPrevBlock({
           filter: block => !!block.model.text,
         })
         .inline((ctx, next) => {
-          setTextSelectionBySide(ctx.prevBlock, true);
+          const prevBlock = ctx.prevBlock;
+          assertExists(prevBlock);
+          setTextSelectionBySide(prevBlock, true);
           return next();
         })
         .run();
@@ -159,20 +171,23 @@ export const bindHotKey = (blockElement: BlockElement) => {
         .pipe()
         .inline((_, next) => {
           reset();
-          return next();
+          next();
         })
         .getTextSelection()
-        .inline<'currentSelectionPath'>(async (ctx, next) => {
-          const textSelection = ctx.textSelection;
+        .inline<'currentSelectionPath'>((ctx, next) => {
+          const textSelection = ctx.currentTextSelection;
+          assertExists(textSelection);
           const end = textSelection.to ?? textSelection.from;
-          return next({ currentSelectionPath: end.path });
+          next({ currentSelectionPath: end.path });
         })
         .getNextBlock({
           filter: block => !!block.model.text,
         })
         .inline((ctx, next) => {
-          setTextSelectionBySide(ctx.nextBlock, false);
-          return next();
+          const nextBlock = ctx.nextBlock;
+          assertExists(nextBlock);
+          setTextSelectionBySide(nextBlock, false);
+          next();
         })
         .run();
     },
@@ -182,8 +197,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
         .pipe()
         .getBlockSelections()
         .inline<'currentSelectionPath'>((ctx, next) => {
+          const blockSelections = ctx.currentBlockSelections;
+          assertExists(blockSelections);
           if (!anchorSel) {
-            anchorSel = ctx.blockSelections.at(-1) ?? null;
+            anchorSel = blockSelections.at(-1) ?? null;
           }
           if (!anchorSel) {
             return;
@@ -192,12 +209,13 @@ export const bindHotKey = (blockElement: BlockElement) => {
           if (!anchorBlock) {
             return;
           }
-          return next({
+          next({
             currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
           });
         })
         .getNextBlock({})
         .inline((ctx, next) => {
+          assertExists(ctx.nextBlock);
           focusBlock = ctx.nextBlock;
           if (!ensureBlockInContainer(focusBlock, blockElement)) {
             return;
@@ -206,7 +224,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
             return;
           }
           selectBetween(anchorBlock, focusBlock, true);
-          return next();
+          next();
         })
         .run();
     },
@@ -216,8 +234,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
         .pipe()
         .getBlockSelections()
         .inline<'currentSelectionPath'>((ctx, next) => {
+          const blockSelections = ctx.currentBlockSelections;
+          assertExists(blockSelections);
           if (!anchorSel) {
-            anchorSel = ctx.blockSelections.at(0) ?? null;
+            anchorSel = blockSelections.at(0) ?? null;
           }
           if (!anchorSel) {
             return;
@@ -232,6 +252,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
         })
         .getPrevBlock({})
         .inline((ctx, next) => {
+          assertExists(ctx.prevBlock);
           focusBlock = ctx.prevBlock;
           if (!ensureBlockInContainer(focusBlock, blockElement)) {
             return;

@@ -1,22 +1,20 @@
 import type { Command } from '@blocksuite/block-std';
 import type { TextSelection } from '@blocksuite/block-std';
 
-export const getTextSelectionCommand: Command<never, 'textSelection'> = (
+export const getTextSelectionCommand: Command<never, 'currentTextSelection'> = (
   ctx,
   next
 ) => {
-  const textSelection = ctx.std.selection.find('text');
-  if (!textSelection) {
-    return;
-  }
+  const currentTextSelection = ctx.std.selection.find('text');
+  if (!currentTextSelection) return;
 
-  return next({ textSelection });
+  next({ currentTextSelection });
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      textSelection: TextSelection;
+      currentTextSelection?: TextSelection;
     }
 
     interface Commands {

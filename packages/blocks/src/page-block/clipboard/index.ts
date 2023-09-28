@@ -1,5 +1,5 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
-import { DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
@@ -69,8 +69,9 @@ export class ClipboardController implements ReactiveController {
   private _copySelected = (event: ClipboardEvent) => {
     return this._std.command
       .pipe()
-      .getSelectedModels({})
-      .copySelectedBlock({ event });
+      .withRoot()
+      .getSelectedModels()
+      .copySelectedModels({ event });
   };
 
   private _onCopy: UIEventHandler = ctx => {
@@ -85,7 +86,7 @@ export class ClipboardController implements ReactiveController {
     e.preventDefault();
 
     this._copySelected(e)
-      .try(cmd => [cmd.deleteSelectedText(), cmd.deleteSelectedBlock()])
+      .try(cmd => [cmd.deleteText(), cmd.deleteSelectedModels()])
       .run();
   };
 
@@ -97,6 +98,7 @@ export class ClipboardController implements ReactiveController {
       .pipe()
       .getBlockIndex()
       .inline((ctx, next) => {
+        assertExists(ctx.parentBlock);
         this._std.clipboard.paste(
           e,
           this._std.page,

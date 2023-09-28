@@ -1,12 +1,11 @@
 import type { Command } from '@blocksuite/block-std';
-import { assertInstanceOf } from '@blocksuite/global/utils';
-import { BlockSuiteRoot } from '@blocksuite/lit';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { getSelectedContentModels } from '../utils/index.js';
+import { getSelectedContentModels } from '../../utils/index.js';
 
 export const getSelectedModelsCommand: Command<
-  never,
+  'root',
   'selectedModels',
   {
     selectionType?: Extract<
@@ -15,16 +14,13 @@ export const getSelectedModelsCommand: Command<
     >[];
   }
 > = (ctx, next) => {
-  const { root } = ctx.std;
-  try {
-    assertInstanceOf(root, BlockSuiteRoot);
-  } catch {
-    return Promise.resolve();
-  }
+  const { root } = ctx;
+  assertExists(root);
+
   const selectionType = ctx.selectionType ?? ['block', 'text', 'image'];
   const selectedModels = getSelectedContentModels(root, selectionType);
 
-  return next({ selectedModels });
+  next({ selectedModels });
 };
 
 declare global {

@@ -1,3 +1,16 @@
+// type A = {};
+// type B = { prop?: string };
+// type C = { prop: string };
+// type TestA = MakeOptionalIfEmpty<A>;  // void | {}
+// type TestB = MakeOptionalIfEmpty<B>;  // void | { prop?: string }
+// type TestC = MakeOptionalIfEmpty<C>;  // { prop: string }
+type IfAllKeysOptional<T, Yes, No> = Partial<T> extends T
+  ? T extends Partial<T>
+    ? Yes
+    : No
+  : No;
+type MakeOptionalIfEmpty<T> = IfAllKeysOptional<T, void | T, T>;
+
 export interface InitCommandCtx {
   std: BlockSuite.Std;
 }
@@ -41,7 +54,9 @@ const cmdSymbol = Symbol('cmds');
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Chain<In extends object = {}> = CommonMethods<In> & {
   [K in keyof BlockSuite.Commands]: (
-    data: Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
+    data: MakeOptionalIfEmpty<
+      Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
+    >
   ) => Chain<In & OutDataOfCommand<BlockSuite.Commands[K]>>;
 };
 
@@ -101,20 +116,20 @@ export class CommandManager {
         return this.createChain(methods, [...cmds, command]) as never;
       },
       try: fn => {
-        let success = false;
-        const chains = fn(this.createChain(methods, cmds)).map(chain =>
-          chain.inline(async (_, next) => {
-            success = true;
-            next();
-          })
-        );
+        const chains = fn(this.createChain(methods, cmds));
         return this.createChain(methods, [
           ...cmds,
           (_, next) => {
             for (const chain of chains) {
-              chain.run();
+              let tmpCtx = {};
+              const success = chain
+                .inline((ctx, next) => {
+                  tmpCtx = ctx;
+                  next();
+                })
+                .run();
               if (success) {
-                next();
+                next(tmpCtx);
                 break;
               }
             }
