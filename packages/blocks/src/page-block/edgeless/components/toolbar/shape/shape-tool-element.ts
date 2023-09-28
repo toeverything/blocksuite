@@ -222,7 +222,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   private _strokeColor: string = DEFAULT_SHAPE_STROKE_COLOR;
 
   @state()
-  private shapeStyle: ShapeStyle = ShapeStyle.General;
+  private _shapeStyle: ShapeStyle = ShapeStyle.General;
 
   private _addShape = (coord: Coord, padding: Coord) => {
     const width = 100;
@@ -241,7 +241,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       radius: this.shape.name === 'roundedRect' ? 0.1 : 0,
       strokeWidth: 4,
       strokeStyle: StrokeStyle.Solid,
-      shapeStyle: this.shapeStyle,
+      shapeStyle: this._shapeStyle,
     });
   };
 
@@ -259,6 +259,17 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
     window.removeEventListener('touchmove', this._touchMove);
     window.removeEventListener('mouseup', this._onMouseUp);
     window.removeEventListener('touchend', this._onTouchEnd);
+  }
+
+  override firstUpdated() {
+    const key = 'blocksuite:' + this.edgeless.page.id + ':edgelessShape';
+    const shapeData = sessionStorage.getItem(key);
+    if (shapeData) {
+      const shapeToolState = JSON.parse(shapeData);
+      this._fillColor = shapeToolState.fillColor;
+      this._strokeColor = shapeToolState.strokeColor;
+      this._shapeStyle = shapeToolState.shapeStyle;
+    }
   }
 
   override updated(changedProperties: PropertyValues<this>) {
@@ -288,7 +299,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       }
       this._fillColor = newTool.fillColor;
       this._strokeColor = newTool.strokeColor;
-      this.shapeStyle = newTool.shapeStyle;
+      this._shapeStyle = newTool.shapeStyle;
     });
   }
 
