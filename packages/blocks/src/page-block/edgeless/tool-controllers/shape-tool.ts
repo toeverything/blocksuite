@@ -70,7 +70,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    this._clearOverlay();
+    this.clearOverlay();
 
     this._page.captureSync();
 
@@ -106,7 +106,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
-    this._clearOverlay();
+    this.clearOverlay();
 
     this._page.captureSync();
 
@@ -132,6 +132,19 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   onContainerDragEnd() {
     const id = this._draggingElementId;
     assertExists(id);
+
+    if (this._draggingArea) {
+      const width = Math.abs(
+        this._draggingArea?.end.x - this._draggingArea?.start.x
+      );
+      const height = Math.abs(
+        this._draggingArea?.end.y - this._draggingArea?.start.y
+      );
+      if (width < 20 && height < 20) {
+        this._surface.removeElement(id);
+        return;
+      }
+    }
 
     this._draggingElementId = null;
     this._draggingArea = null;
@@ -193,7 +206,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     this._edgeless.surface.refresh();
   }
 
-  private _clearOverlay() {
+  clearOverlay() {
     if (!this._shapeOverlay) return;
 
     this._shapeOverlay.dispose();
@@ -231,7 +244,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   beforeModeSwitch() {
-    this._clearOverlay();
+    this.clearOverlay();
   }
 
   afterModeSwitch(newTool: EdgelessTool) {
