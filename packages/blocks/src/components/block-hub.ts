@@ -192,7 +192,7 @@ export const BLOCKHUB_FILE_ITEMS = [
 const styles = css`
   affine-block-hub {
     position: absolute;
-    z-index: 1;
+    z-index: 3;
     user-select: none;
   }
 
