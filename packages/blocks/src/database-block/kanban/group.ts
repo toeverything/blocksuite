@@ -56,6 +56,7 @@ const styles = css`
     align-items: center;
     height: 28px;
     padding: 4px;
+    color: var(--affine-text-secondary-color);
     border-radius: 4px;
     cursor: pointer;
     font-size: var(--data-view-cell-text-size);
@@ -70,6 +71,7 @@ const styles = css`
 
   .add-card:hover {
     background-color: var(--affine-hover-color);
+    color: var(--affine-text-primary-color);
   }
 
   .sortable-ghost {
