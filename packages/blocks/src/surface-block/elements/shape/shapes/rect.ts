@@ -1,4 +1,9 @@
-import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
+import {
+  DEFAULT_CENTRAL_AREA_RATIO,
+  type IBound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -124,9 +129,12 @@ export const RectMethods: ShapeMethods = {
       if (!options.ignoreTransparent || this.filled) {
         hited = pointInPolygon([x, y], points);
       } else {
-        // If transparent is ignored, and the shape is not filled
+        // If shape is not filled or transparent
         // Check the center area of the shape
-        const centralBounds = getCenterAreaBounds(this, 0.3);
+        const centralBounds = getCenterAreaBounds(
+          this,
+          DEFAULT_CENTRAL_AREA_RATIO
+        );
         const centralPoints = getPointsFromBoundsWithRotation(centralBounds);
         // Check if the point is in the center area
         hited = pointInPolygon([x, y], centralPoints);
