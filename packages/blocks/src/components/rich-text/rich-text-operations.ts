@@ -23,7 +23,7 @@ import {
   focusTitle,
 } from '../../__internal__/utils/selection.js';
 import type { ExtendedModel } from '../../__internal__/utils/types.js';
-import type { ListBlockModel, PageBlockModel } from '../../models.js';
+import { type ListBlockModel, type PageBlockModel } from '../../models.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -408,12 +408,6 @@ function handleCodeBlockForwardDelete(_page: Page, model: ExtendedModel) {
   return true;
 }
 
-function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
-
-  return true;
-}
-
 function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
   if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
 
@@ -593,6 +587,15 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const previousSibling = getPreviousBlock(model);
   if (!previousSibling) {
     return handleNoPreviousSibling(page, model);
+  } else if (
+    matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
+  ) {
+    page.deleteBlock(model);
+    asyncSetVRange(previousSibling, {
+      index: previousSibling.text?.length ?? 0,
+      length: 0,
+    });
+    return true;
   }
 
   // TODO handle in block service
@@ -788,7 +791,6 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     handleListBlockBackspace(page, model) ||
     handleParagraphBlockBackspace(page, model)
   ) {
-    handleDatabaseBlockBackspace(page, model);
     return;
   }
 
