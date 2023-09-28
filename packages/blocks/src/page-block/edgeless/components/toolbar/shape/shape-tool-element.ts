@@ -18,6 +18,7 @@ import {
   StrokeStyle,
 } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { ShapeToolController } from '../../../tool-controllers/shape-tool.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
@@ -126,6 +127,10 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   private _onDragMove = (coord: Coord) => {
     if (!this._dragging) {
       return;
+    }
+    const controller = this.edgeless.tools.currentController;
+    if (controller instanceof ShapeToolController) {
+      controller.clearOverlay();
     }
     const { x, y } = coord;
     this._shapeElement.style.setProperty(

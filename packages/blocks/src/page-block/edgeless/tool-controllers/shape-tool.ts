@@ -70,7 +70,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerClick(e: PointerEventState): void {
-    this._clearOverlay();
+    this.clearOverlay();
 
     this._page.captureSync();
 
@@ -106,7 +106,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   onContainerDragStart(e: PointerEventState) {
-    this._clearOverlay();
+    this.clearOverlay();
 
     this._page.captureSync();
 
@@ -206,7 +206,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
     this._edgeless.surface.refresh();
   }
 
-  private _clearOverlay() {
+  clearOverlay() {
     if (!this._shapeOverlay) return;
 
     this._shapeOverlay.dispose();
@@ -244,7 +244,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
   }
 
   beforeModeSwitch() {
-    this._clearOverlay();
+    this.clearOverlay();
   }
 
   afterModeSwitch(newTool: EdgelessTool) {
