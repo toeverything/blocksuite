@@ -13,6 +13,7 @@ import {
   pickColorAtPoints,
   rotateElementByHandle,
   Shape,
+  toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
@@ -89,8 +90,10 @@ test('elbow connector both side attatched element', async ({ page }) => {
     [100, 50],
     [200, 50],
   ]);
-  // select
-  await dragBetweenViewCoords(page, [280, 20], [350, -10]);
+  // Click to select the shape
+  // because the default shape type change to general style with filled color
+  const [x, y] = await toViewCoord(page, [280, 20]);
+  await page.mouse.click(x, y);
 
   await dragBetweenViewCoords(page, [250, 50], [250, 0]);
   await assertConnectorPath(page, [
