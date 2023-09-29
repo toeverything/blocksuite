@@ -520,10 +520,15 @@ test('inline code should work when pressing Enter followed by Backspace twice', 
 
   await type(page, '`test`');
   await pressSpace(page);
+  await waitNextFrame(page);
   await pressArrowLeft(page);
+  await waitNextFrame(page);
   await pressEnter(page);
+  await waitNextFrame(page);
   await pressBackspace(page);
+  await waitNextFrame(page);
   await pressEnter(page);
+  await waitNextFrame(page);
   await pressBackspace(page);
 
   await assertRichTexts(page, ['test']);

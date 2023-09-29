@@ -6,6 +6,7 @@ import {
   focusRichText,
   initEmptyParagraphState,
   initThreeLists,
+  pressArrowLeft,
   pressArrowUp,
   pressBackspace,
   pressBackspaceWithShortKey,
@@ -505,12 +506,13 @@ test.describe('indent correctly when deleting list item', () => {
     await pressEnter(page);
     await type(page, 'd');
     await pressArrowUp(page);
-    await pressBackspace(page);
+    await pressArrowLeft(page);
     await pressBackspace(page);
     await pressBackspace(page);
 
-    await assertBlockChildrenIds(page, '3', ['4']);
-    await assertBlockChildrenIds(page, '7', ['6']);
+    await assertBlockChildrenIds(page, '3', ['4', '6']);
+    await assertRichTexts(page, ['a', 'bc', 'd']);
+    await assertRichTextVRange(page, 1, 1);
   });
 
   test('merge two lists', async ({ page }) => {
@@ -552,26 +554,52 @@ test.describe('indent correctly when deleting list item', () => {
 });
 
 test('delete list item with nested children items', async ({ page }) => {
-  await enterPlaygroundWithList(page); // 0(1(2,3,4))
+  await enterPlaygroundWithList(page);
 
   await focusRichText(page, 0);
   await type(page, '1');
 
   await focusRichText(page, 1);
+  await pressTab(page);
   await type(page, '2');
 
   await focusRichText(page, 2);
   await pressTab(page);
+  await pressTab(page);
   await type(page, '3');
 
-  await pressEnter(page); // 0(1(2,3,4,5))
-  await type(page, '3');
+  await pressEnter(page);
+  await type(page, '4');
 
   await focusRichText(page, 1);
-  await pressBackspace(page);
-  await pressBackspace(page);
-  await pressBackspace(page); // 0(1(2,4,5))
+  await pressArrowLeft(page);
+  // 1
+  //   |2
+  //     3
+  //     4
 
+  await pressBackspace(page);
+  await waitNextFrame(page);
+  // 1
+  //   |2 (transformed to paragraph)
+  //     3
+  //     4
+
+  await pressBackspace(page);
+  await waitNextFrame(page);
+  // 1
+  // |2
+  //   3
+  //   4
+
+  await pressBackspace(page);
+  await waitNextFrame(page);
+  // 1|2
+  // 3
+  // 4
+
+  await assertRichTextVRange(page, 0, 1);
+  await assertRichTexts(page, ['12', '3', '4']);
   await assertBlockChildrenIds(page, '1', ['2', '4', '5']);
 });
 
