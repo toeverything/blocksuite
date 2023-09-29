@@ -1,18 +1,16 @@
 import type { Command } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Slice } from '@blocksuite/store';
 
-export const copySelectedBlockCommand: Command<
+export const copySelectedModelsCommand: Command<
   'selectedModels',
   never,
   { event: ClipboardEvent }
 > = (ctx, next) => {
-  if (!ctx.selectedModels) {
-    return;
-  }
-  const models: BaseBlockModel[] = ctx.selectedModels.map(model =>
-    model.clone()
-  );
+  const selectedModels = ctx.selectedModels;
+  assertExists(selectedModels);
+  const models: BaseBlockModel[] = selectedModels.map(model => model.clone());
   const traverse = (model: BaseBlockModel) => {
     const children = model.children.filter(child => {
       const idx = models.findIndex(m => m.id === child.id);
@@ -42,7 +40,7 @@ export const copySelectedBlockCommand: Command<
 declare global {
   namespace BlockSuite {
     interface Commands {
-      copySelectedBlock: typeof copySelectedBlockCommand;
+      copySelectedModels: typeof copySelectedModelsCommand;
     }
   }
 }

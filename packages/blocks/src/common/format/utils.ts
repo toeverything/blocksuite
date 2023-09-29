@@ -135,17 +135,17 @@ export function handleCommonStyle(
 ) {
   const active = commonActiveWhen(root, key);
   const payload: {
-    root: BlockSuiteRoot;
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   } = {
-    root,
     styles: {
       [key]: active ? null : true,
     },
   };
   root.std.command
     .pipe()
+    .withRoot()
+    .try(chain => [chain.getTextSelection(), chain.getBlockSelections()])
     .try(chain => [
       chain.formatText(payload),
       chain.formatBlock(payload),

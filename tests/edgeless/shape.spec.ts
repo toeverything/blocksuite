@@ -168,13 +168,13 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
 
   assertExists(shapeToolBox);
 
-  await page.mouse.move(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.mouse.move(shapeToolBox.x + 20, shapeToolBox.y + 20);
   await expect(tooltip).toBeVisible();
 
-  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
   await expect(tooltip).toBeHidden();
 
-  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
   await expect(tooltip).toBeVisible();
 });
 
@@ -225,13 +225,13 @@ test('edgeless toolbar shape menu shows up and close normally', async ({
 
   assertExists(shapeToolBox);
 
-  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
 
   const shapeMenu = page.locator('edgeless-shape-menu');
   await expect(shapeMenu).toBeVisible();
   await page.waitForTimeout(500);
 
-  await page.mouse.click(shapeToolBox.x + 10, shapeToolBox.y + 10);
+  await page.mouse.click(shapeToolBox.x + 20, shapeToolBox.y + 20);
   await page.waitForTimeout(500);
   await expect(shapeMenu).toBeHidden();
 });

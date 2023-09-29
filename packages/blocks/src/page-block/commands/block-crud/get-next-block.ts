@@ -62,14 +62,14 @@ export const getNextBlockCommand: Command<
   const nextBlock = getNextBlock(ctx.std, path, ctx.filter);
 
   if (nextBlock) {
-    return next({ nextBlock });
+    next({ nextBlock });
   }
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      nextBlock: BlockElement;
+      nextBlock?: BlockElement;
     }
 
     interface Commands {

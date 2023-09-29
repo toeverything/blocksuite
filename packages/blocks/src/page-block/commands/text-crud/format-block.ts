@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/block-std';
-import type { BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockSelection, Command } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../common/format/constant.js';
@@ -9,20 +9,23 @@ import { getSelectedContentBlockElements } from '../../utils/selection.js';
 
 // for block selection
 export const formatBlockCommand: Command<
-  never,
+  'currentBlockSelections' | 'root',
   never,
   {
-    root: BlockSuiteRoot;
+    blockSelections?: BlockSelection[];
     styles: AffineTextAttributes;
     mode?: 'replace' | 'merge';
   }
-> = async (ctx, next) => {
+> = (ctx, next) => {
+  const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
+  if (!blockSelections) return;
   const root = ctx.root;
+  assertExists(root);
+
+  if (blockSelections.length === 0) return;
+
   const styles = ctx.styles;
   const mode = ctx.mode ?? 'merge';
-
-  const blockSelections = root.selection.filter('block');
-  if (blockSelections.length === 0) return;
 
   const selectedElements = getSelectedContentBlockElements(root, [
     'block',
@@ -54,8 +57,9 @@ export const formatBlockCommand: Command<
     );
   });
 
-  await Promise.all(selectedElements.map(el => el.updateComplete));
-  next();
+  Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
+    next();
+  });
 };
 
 declare global {

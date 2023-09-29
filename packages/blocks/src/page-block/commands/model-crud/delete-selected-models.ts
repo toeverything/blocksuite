@@ -1,7 +1,7 @@
 import type { Command } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 
-export const deleteSelectedBlockCommand: Command<'selectedModels'> = (
+export const deleteSelectedModelsCommand: Command<'selectedModels'> = (
   ctx,
   next
 ) => {
@@ -22,7 +22,7 @@ export const deleteSelectedBlockCommand: Command<'selectedModels'> = (
 declare global {
   namespace BlockSuite {
     interface Commands {
-      deleteSelectedBlock: typeof deleteSelectedBlockCommand;
+      deleteSelectedModels: typeof deleteSelectedModelsCommand;
     }
   }
 }

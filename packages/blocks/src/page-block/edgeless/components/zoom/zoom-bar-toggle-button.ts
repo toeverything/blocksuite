@@ -13,7 +13,7 @@ interface ZoomBarPopper {
   dispose: () => void;
 }
 
-function createNoteMenuPopper(
+function createZoomMenuPopper(
   reference: HTMLElement,
   edgeless: EdgelessPageBlockComponent
 ): ZoomBarPopper {
@@ -66,13 +66,17 @@ export class ZoomBarToggleButton extends LitElement {
 
   private _zoomBar: ZoomBarPopper | null = null;
 
+  private _closeZoomMenu() {
+    this._zoomBar?.dispose();
+    this._zoomBar = null;
+    this._popperShow = false;
+  }
+
   private _toggleNoteMenu() {
     if (this._zoomBar) {
-      this._zoomBar.dispose();
-      this._zoomBar = null;
-      this._popperShow = false;
+      this._closeZoomMenu();
     } else {
-      this._zoomBar = createNoteMenuPopper(this, this.edgeless);
+      this._zoomBar = createZoomMenuPopper(this, this.edgeless);
       this._zoomBar.element.edgeless = this.edgeless;
       this._zoomBar.element.edgeless = this.edgeless;
       this._popperShow = true;
@@ -82,6 +86,15 @@ export class ZoomBarToggleButton extends LitElement {
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.edgeless.handleEvent('click', () => {
+      if (this._zoomBar && this._popperShow) {
+        this._closeZoomMenu();
+      }
+    });
   }
 
   override disconnectedCallback() {

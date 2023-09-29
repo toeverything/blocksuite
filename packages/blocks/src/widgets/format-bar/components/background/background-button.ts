@@ -21,16 +21,16 @@ const updateBackground = (
   lastUsedColor = color;
 
   const payload: {
-    root: BlockSuiteRoot;
     styles: AffineTextAttributes;
   } = {
-    root,
     styles: {
       background: color,
     },
   };
   root.std.command
     .pipe()
+    .withRoot()
+    .try(chain => [chain.getTextSelection(), chain.getBlockSelections()])
     .try(chain => [
       chain.formatText(payload),
       chain.formatBlock(payload),

@@ -1,19 +1,19 @@
 import type { Command } from '@blocksuite/block-std';
 import type { BlockSelection } from '@blocksuite/block-std';
 
-export const getBlockSelectionsCommand: Command<never, 'blockSelections'> = (
-  ctx,
-  next
-) => {
-  const blockSelections = ctx.std.selection.filter('block');
+export const getBlockSelectionsCommand: Command<
+  never,
+  'currentBlockSelections'
+> = (ctx, next) => {
+  const currentBlockSelections = ctx.std.selection.filter('block');
 
-  return next({ blockSelections });
+  next({ currentBlockSelections });
 };
 
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      blockSelections: BlockSelection[];
+      currentBlockSelections?: BlockSelection[];
     }
 
     interface Commands {
