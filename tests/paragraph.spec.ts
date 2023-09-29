@@ -23,6 +23,7 @@ import {
   redoByClick,
   redoByKeyboard,
   resetHistory,
+  setSelection,
   type,
   undoByClick,
   undoByKeyboard,
@@ -573,9 +574,6 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await waitNextFrame(page);
   await type(page, 'now');
 
-  // TODO FIXME wait for note bounding box update
-  await page.waitForTimeout(20);
-
   await assertStoreMatchJSX(
     page,
     `
@@ -585,11 +583,7 @@ test('should delete paragraph block child can hold cursor in correct position', 
   prop:index="a0"
 >
   <affine:paragraph
-    prop:text="123"
-    prop:type="text"
-  />
-  <affine:paragraph
-    prop:text="now"
+    prop:text="123now"
     prop:type="text"
   >
     <affine:paragraph
@@ -663,45 +657,59 @@ test('delete at start of paragraph immediately following list', async ({
   await pressEnter(page);
   await type(page, 'a');
 
-  await focusRichText(page, 1);
-  await assertBlockType(page, '2', 'text');
-  await updateBlockType(page, 'affine:list', 'bulleted');
-  await assertBlockType(page, '4', 'bulleted');
+  await captureHistory(page);
 
-  await pressBackspace(page);
-  await pressBackspace(page);
+  await assertRichTexts(page, ['hello', 'a']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
+  await assertBlockType(page, '3', 'text');
+
+  // text -> bulleted
+  await focusRichText(page, 1);
+  await updateBlockType(page, 'affine:list', 'bulleted');
+  await assertBlockType(page, '2', 'text');
+  await assertBlockType(page, '4', 'bulleted');
+  await pressBackspace(page, 2);
+  await waitNextFrame(page);
   await assertBlockType(page, '5', 'text');
   await assertBlockChildrenIds(page, '1', ['2', '5']);
-
-  await waitNextFrame(page);
   await pressBackspace(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
+  // reset
   await undoByClick(page);
   await undoByClick(page);
+  await assertRichTexts(page, ['hello', 'a']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
+  await assertBlockType(page, '3', 'text');
+
+  // text -> numbered
   await focusRichText(page, 1);
   await updateBlockType(page, 'affine:list', 'numbered');
   await assertBlockType(page, '2', 'text');
-  await assertBlockType(page, '4', 'numbered');
-
-  await pressBackspace(page);
-  await assertBlockType(page, '6', 'text');
-  await assertBlockChildrenIds(page, '1', ['2', '6']);
-
+  await assertBlockType(page, '6', 'numbered');
+  await pressBackspace(page, 2);
+  await waitNextFrame(page);
+  await assertBlockType(page, '7', 'text');
+  await assertBlockChildrenIds(page, '1', ['2', '7']);
   await pressBackspace(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 
+  // reset
   await undoByClick(page);
   await undoByClick(page);
+  await assertRichTexts(page, ['hello', 'a']);
+  await assertBlockChildrenIds(page, '1', ['2', '3']);
+  await assertBlockType(page, '3', 'text');
+
+  // text -> todo
   await focusRichText(page, 1);
   await updateBlockType(page, 'affine:list', 'todo');
   await assertBlockType(page, '2', 'text');
-  await assertBlockType(page, '4', 'todo');
-
-  await pressBackspace(page);
-  await assertBlockType(page, '7', 'text');
-  await assertBlockChildrenIds(page, '1', ['2', '7']);
-
+  await assertBlockType(page, '8', 'todo');
+  await pressBackspace(page, 2);
+  await waitNextFrame(page);
+  await assertBlockType(page, '9', 'text');
+  await assertBlockChildrenIds(page, '1', ['2', '9']);
   await pressBackspace(page);
   await assertBlockChildrenIds(page, '1', ['2']);
 });
@@ -715,6 +723,8 @@ test('delete at start of paragraph with content', async ({ page }) => {
   await pressEnter(page);
   await type(page, '456');
   await assertRichTexts(page, ['123', '456']);
+
+  await captureHistory(page);
 
   await pressArrowLeft(page, 3);
   await assertRichTextVRange(page, 1, 0, 0);
@@ -1094,6 +1104,175 @@ test('delete empty text paragraph block should keep children blocks when followi
   <affine:divider />
   <affine:paragraph
     prop:text="456"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+});
+
+test('delete first paragraph with children should keep children blocks', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await pressTab(page);
+  await waitNextFrame(page);
+  await type(page, '456');
+  await setSelection(page, 2, 1, 2, 1);
+  await pressBackspace(page, 2);
+  await waitNextFrame(page);
+  await assertTitle(page, '23');
+  await assertRichTexts(page, ['456']);
+});
+
+test('paragraph indent and delete in line start', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'abc');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'efg');
+  await pressEnter(page);
+  await pressTab(page);
+  await type(page, 'hij');
+  await pressEnter(page);
+  await pressShiftTab(page);
+  await type(page, 'klm');
+  await pressEnter(page);
+  await type(page, 'nop');
+  await setSelection(page, 3, 1, 3, 1);
+  // abc
+  //   e|fg
+  //     hij
+  //   klm
+  //   nop
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="abc"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="efg"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="hij"
+        prop:type="text"
+      />
+    </affine:paragraph>
+    <affine:paragraph
+      prop:text="klm"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="nop"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await pressBackspace(page, 2);
+  await setSelection(page, 5, 1, 5, 1);
+  // abcfg
+  //   hij
+  //   k|lm
+  //   nop
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="abcfg"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="hij"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="klm"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="nop"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await pressBackspace(page, 2);
+  await setSelection(page, 6, 1, 6, 1);
+  // abcfg
+  //   hijlm
+  //   n|op
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="abcfg"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="hijlm"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text="nop"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await pressBackspace(page, 2);
+  // abcfg
+  //   hijlm
+  // |op
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="abcfg"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="hijlm"
+      prop:type="text"
+    />
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="op"
     prop:type="text"
   />
 </affine:note>`,

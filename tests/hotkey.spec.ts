@@ -16,9 +16,9 @@ import {
   pressArrowLeft,
   pressArrowRight,
   pressArrowUp,
-  pressBackspace,
   pressEnter,
   pressForwardDelete,
+  pressShiftTab,
   pressTab,
   readClipboardText,
   redoByClick,
@@ -1159,7 +1159,7 @@ test.describe('keyboard operation to move block up or down', () => {
     await pressTab(page);
     await type(page, 'world');
     await pressEnter(page);
-    await pressBackspace(page);
+    await pressShiftTab(page);
     await type(page, 'foo');
     await assertRichTexts(page, ['hello', 'world', 'foo']);
     await assertBlockChildrenIds(page, '2', ['3']);

@@ -1,5 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
+import { type BaseBlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import { supportsChildren } from '../../__internal__/utils/common.js';
@@ -23,7 +24,7 @@ import {
   focusTitle,
 } from '../../__internal__/utils/selection.js';
 import type { ExtendedModel } from '../../__internal__/utils/types.js';
-import type { ListBlockModel, PageBlockModel } from '../../models.js';
+import { type ListBlockModel, type PageBlockModel } from '../../models.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
@@ -408,12 +409,6 @@ function handleCodeBlockForwardDelete(_page: Page, model: ExtendedModel) {
   return true;
 }
 
-function handleDatabaseBlockBackspace(page: Page, model: ExtendedModel) {
-  if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
-
-  return true;
-}
-
 function handleDatabaseBlockForwardDelete(page: Page, model: ExtendedModel) {
   if (!isInsideBlockByFlavour(page, model, 'affine:database')) return false;
 
@@ -578,8 +573,12 @@ function handleNoPreviousSibling(page: Page, model: ExtendedModel) {
   }
 
   // Preserve at least one block to be able to focus on container click
-  if (page.getNextSibling(model)) {
-    page.deleteBlock(model);
+  if (page.getNextSibling(model) || model.children.length > 0) {
+    const parent = page.getParent(model);
+    assertExists(parent);
+    page.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
   } else {
     text?.clear();
   }
@@ -593,6 +592,25 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
   const previousSibling = getPreviousBlock(model);
   if (!previousSibling) {
     return handleNoPreviousSibling(page, model);
+  } else if (
+    matchFlavours(previousSibling, ['affine:paragraph', 'affine:list'])
+  ) {
+    const modelIndex = parent.children.indexOf(model);
+    if (
+      (modelIndex === -1 || modelIndex === parent.children.length - 1) &&
+      parent.role === 'content'
+    )
+      return false;
+    const lengthBeforeJoin = previousSibling.text?.length ?? 0;
+    previousSibling.text?.join(model.text as Text);
+    page.deleteBlock(model, {
+      bringChildrenTo: parent,
+    });
+    asyncSetVRange(previousSibling, {
+      index: lengthBeforeJoin,
+      length: 0,
+    });
+    return true;
   }
 
   // TODO handle in block service
@@ -622,18 +640,28 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
     return true;
   }
 
+  // Before press backspace
+  // - line1
+  //   - line2
+  //   - |aaa
+  //   - line3
+  //
+  // After press backspace
+  // - line1
+  //   - line2|aaa
+  //   - line3
   const isHandled = handleParagraphDeleteActions(page, model);
   if (isHandled) return true;
 
-  // Before
+  // Before press backspace
   // - line1
-  //   - | <- cursor here, press backspace
-  //   - line3
+  //   - line2
+  //   - |aaa
   //
-  // After
+  // After press backspace
   // - line1
-  // - | <- cursor here
-  //   - line3
+  //   - line2
+  // - |aaa
   handleOutdent(page, model);
   return true;
 }
@@ -788,7 +816,6 @@ export function handleLineStartBackspace(page: Page, model: ExtendedModel) {
     handleListBlockBackspace(page, model) ||
     handleParagraphBlockBackspace(page, model)
   ) {
-    handleDatabaseBlockBackspace(page, model);
     return;
   }
 
