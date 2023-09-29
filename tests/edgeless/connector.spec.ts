@@ -13,7 +13,6 @@ import {
   pickColorAtPoints,
   rotateElementByHandle,
   Shape,
-  toViewCoord,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
