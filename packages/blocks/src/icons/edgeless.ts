@@ -1382,6 +1382,78 @@ export const EdgelessGeneralShapeIcon = html`<svg
   </g>
 </svg>`;
 
+export const rectSvg = html` <svg
+  width="100"
+  height="100"
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect
+    stroke="rgba(0, 0, 0, 0.1)"
+    width="100"
+    y="20"
+    height="80"
+    fill="currentColor"
+  />
+</svg>`;
+
+export const ellipseSvg = html` <svg
+  width="100"
+  height="100"
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <circle
+    stroke="rgba(0, 0, 0, 0.1)"
+    cx="50"
+    cy="50"
+    r="50"
+    fill="currentColor"
+  />
+</svg>`;
+
+export const triangleSvg = html` <svg
+  width="100"
+  height="100"
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <polygon
+    stroke="rgba(0, 0, 0, 0.1)"
+    points="50,0 100,100 0,100"
+    fill="currentColor"
+  />
+</svg>`;
+
+export const diamondSvg = html` <svg
+  width="100"
+  height="100"
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <polygon
+    stroke="rgba(0, 0, 0, 0.1)"
+    points="50,0 100,50 50,100 0,50"
+    fill="currentColor"
+  />
+</svg>`;
+
+export const roundedSvg = html` <svg
+  width="100"
+  height="100"
+  viewBox="0 0 100 100"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect
+    stroke="rgba(0, 0, 0, 0.1)"
+    width="100"
+    y="20"
+    height="80"
+    rx="10"
+    fill="currentColor"
+  />
+</svg>`;
+
 export const EdgelessImageIcon = html`<svg
   width="66"
   height="50"

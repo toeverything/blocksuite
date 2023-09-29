@@ -89,8 +89,6 @@ test('elbow connector both side attatched element', async ({ page }) => {
     [100, 50],
     [200, 50],
   ]);
-  // select
-  await dragBetweenViewCoords(page, [250, 50], [350, -10]);
 
   await dragBetweenViewCoords(page, [250, 50], [250, 0]);
   await assertConnectorPath(page, [

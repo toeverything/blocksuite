@@ -532,7 +532,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         class="edgeless-toolbar-container"
         @dblclick=${stopPropagation}
         @mousedown=${stopPropagation}
-        @mouseup=${stopPropagation}
         @pointerdown=${stopPropagation}
       >
         ${Content}

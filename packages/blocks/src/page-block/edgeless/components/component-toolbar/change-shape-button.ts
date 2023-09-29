@@ -141,7 +141,7 @@ const FILL_COLORS: CssVariableName[] = [
   '--affine-palette-shape-white',
   '--affine-palette-transparent',
 ];
-export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[11];
+export const DEFAULT_SHAPE_FILL_COLOR = FILL_COLORS[0];
 
 const STROKE_COLORS: CssVariableName[] = [
   '--affine-palette-line-yellow',
