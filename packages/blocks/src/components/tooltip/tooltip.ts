@@ -56,7 +56,9 @@ const styles = css`
   }
 `;
 
-@customElement('blocksuite-tooltip')
+// TODO migrate to `blocksuite-tooltip`
+// @customElement('blocksuite-tooltip')
+@customElement('tool-tip')
 export class Tooltip extends LitElement {
   static override styles = css`
     :host {
@@ -192,6 +194,6 @@ export class Tooltip extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'blocksuite-tooltip': Tooltip;
+    'tool-tip': Tooltip;
   }
 }
