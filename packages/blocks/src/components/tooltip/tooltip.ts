@@ -327,14 +327,14 @@ export class Tooltip extends LitElement {
     this._hoverController.setReference(parent);
   }
 
-  private _handleSlotchange(e: Event) {
-    // console.warn('Dynamic tooltip is not supported yet!');
-    // TODO update tooltip
-  }
+  // private _handleSlotchange(e: Event) {
+  // console.warn('Dynamic tooltip is not supported yet!');
+  // TODO update tooltip
+  // }
 
   override render() {
     // The actual tooltip render as a portal, so we only need to render the slot
-    return html`<slot @slotchange=${this._handleSlotchange}></slot>`;
+    return html`<slot></slot>`;
   }
 }
 
