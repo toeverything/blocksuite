@@ -154,6 +154,18 @@ export function createSimplePortal({
   return portalRoot;
 }
 
+type ComputePositionOptions = {
+  referenceElement: ReferenceElement;
+  /**
+   * Default `false`.
+   */
+  autoUpdate?: true | AutoUpdateOptions;
+  /**
+   * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
+   */
+  abortWhenRefRemoved?: boolean;
+} & Partial<ComputePositionConfig>;
+
 export type AdvancedPortalOptions = Omit<
   PortalOptions,
   'template' | 'signal'
@@ -168,17 +180,9 @@ export type AdvancedPortalOptions = Omit<
   /**
    * See https://floating-ui.com/docs/computePosition
    */
-  computePosition?: {
-    referenceElement: ReferenceElement;
-    /**
-     * Default `false`.
-     */
-    autoUpdate?: true | AutoUpdateOptions;
-    /**
-     * Default `true`. Only work when `referenceElement` is an `Element`. Check when position update (`autoUpdate` is `true` or first tick)
-     */
-    abortWhenRefRemoved?: boolean;
-  } & Partial<ComputePositionConfig>;
+  computePosition?:
+    | ComputePositionOptions
+    | ((portalRoot: Element) => ComputePositionOptions);
   /**
    * Whether to close the portal when click away(click outside).
    * @default false
@@ -211,17 +215,20 @@ export type AdvancedPortalOptions = Omit<
  * ```
  */
 export function createLitPortal({
-  computePosition: computePositionOptions,
+  computePosition: positionConfigOrFn,
   abortController,
   closeOnClickAway = false,
   ...portalOptions
 }: AdvancedPortalOptions) {
-  const positionSlot = new Slot<ComputePositionReturn>();
+  let positionSlot = new Slot<ComputePositionReturn>();
   const template = portalOptions.template;
   const templateWithPosition =
     template instanceof Function
-      ? ({ updatePortal }: { updatePortal: () => void }) =>
-          template({ updatePortal, positionSlot })
+      ? ({ updatePortal }: { updatePortal: () => void }) => {
+          // We need to create a new slot for each template, otherwise the slot may be used in the old template
+          positionSlot = new Slot<ComputePositionReturn>();
+          return template({ updatePortal, positionSlot });
+        }
       : template;
 
   const portalRoot = createSimplePortal({
@@ -246,18 +253,22 @@ export function createLitPortal({
     );
   }
 
-  if (!computePositionOptions) {
+  if (!positionConfigOrFn) {
     return portalRoot;
   }
 
-  const display = portalRoot.style.display;
-  portalRoot.style.display = 'none';
+  const visibility = portalRoot.style.visibility;
+  portalRoot.style.visibility = 'hidden';
   portalRoot.style.position = 'fixed';
   portalRoot.style.left = '0';
   portalRoot.style.top = '0';
+
+  const computePositionOptions =
+    positionConfigOrFn instanceof Function
+      ? positionConfigOrFn(portalRoot)
+      : positionConfigOrFn;
   const { referenceElement, ...options } = computePositionOptions;
   assertExists(referenceElement, 'referenceElement is required');
-  const maybeAutoUpdateOptions = computePositionOptions.autoUpdate ?? {};
   const update = () => {
     if (
       computePositionOptions.abortWhenRefRemoved !== false &&
@@ -273,18 +284,20 @@ export function createLitPortal({
         // portalRoot.style.transform = `translate(${x}px, ${y}px)`;
         portalRoot.style.left = `${x}px`;
         portalRoot.style.top = `${y}px`;
-        if (portalRoot.style.display === 'none') {
-          portalRoot.style.display = display;
+        if (portalRoot.style.visibility === 'hidden') {
+          portalRoot.style.visibility = visibility;
         }
         positionSlot.emit(positionReturn);
       }
     );
   };
-  if (!maybeAutoUpdateOptions) {
+  if (!computePositionOptions.autoUpdate) {
     update();
   } else {
     const autoUpdateOptions =
-      maybeAutoUpdateOptions === true ? {} : maybeAutoUpdateOptions;
+      computePositionOptions.autoUpdate === true
+        ? {}
+        : computePositionOptions.autoUpdate;
     const cleanup = autoUpdate(
       referenceElement,
       portalRoot,
