@@ -90,6 +90,8 @@ test('elbow connector both side attatched element', async ({ page }) => {
     [200, 50],
   ]);
 
+  // Could drag directly
+  // because the default shape type change to general style with filled color
   await dragBetweenViewCoords(page, [250, 50], [250, 0]);
   await assertConnectorPath(page, [
     [100, 50],

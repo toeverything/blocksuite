@@ -1,4 +1,9 @@
-import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
+import {
+  DEFAULT_CENTRAL_AREA_RATIO,
+  type IBound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
@@ -91,8 +96,16 @@ export const EllipseMethods: ShapeMethods = {
       pointInEllipse(point, center, rx + expand, ry + expand, rad) &&
       !pointInEllipse(point, center, rx - expand, ry - expand, rad);
 
-    if ((!options.ignoreTransparent || this.filled) && !hited) {
-      hited = pointInEllipse(point, center, rx, ry, rad);
+    if (!hited) {
+      if (!options.ignoreTransparent || this.filled) {
+        hited = pointInEllipse(point, center, rx, ry, rad);
+      } else {
+        // If shape is not filled or transparent
+        // Check the center area of the shape
+        const centralRx = rx * DEFAULT_CENTRAL_AREA_RATIO;
+        const centralRy = ry * DEFAULT_CENTRAL_AREA_RATIO;
+        hited = pointInEllipse(point, center, centralRx, centralRy, rad);
+      }
     }
 
     return hited;
