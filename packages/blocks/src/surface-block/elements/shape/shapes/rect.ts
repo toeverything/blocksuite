@@ -1,7 +1,13 @@
-import { type IBound, ShapeStyle, StrokeStyle } from '../../../consts.js';
+import {
+  DEFAULT_CENTRAL_AREA_RATIO,
+  type IBound,
+  ShapeStyle,
+  StrokeStyle,
+} from '../../../consts.js';
 import type { RoughCanvas } from '../../../rough/canvas.js';
 import { Bound } from '../../../utils/bound.js';
 import {
+  getCenterAreaBounds,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   pointInPolygon,
@@ -117,8 +123,22 @@ export const RectMethods: ShapeMethods = {
       (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
     );
 
-    if ((!options.ignoreTransparent || this.filled) && !hited) {
-      hited = pointInPolygon([x, y], points);
+    if (!hited) {
+      // If the point is not on the stroke, check if it is in the shape
+      // When the shape is filled and transparent is not ignored
+      if (!options.ignoreTransparent || this.filled) {
+        hited = pointInPolygon([x, y], points);
+      } else {
+        // If shape is not filled or transparent
+        // Check the center area of the shape
+        const centralBounds = getCenterAreaBounds(
+          this,
+          DEFAULT_CENTRAL_AREA_RATIO
+        );
+        const centralPoints = getPointsFromBoundsWithRotation(centralBounds);
+        // Check if the point is in the center area
+        hited = pointInPolygon([x, y], centralPoints);
+      }
     }
 
     return hited;

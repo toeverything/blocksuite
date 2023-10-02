@@ -62,6 +62,7 @@ const styles = css`
     line-height: var(--data-view-cell-text-line-height);
     visibility: hidden;
     transition: visibility 100ms ease-in-out;
+    color: var(--affine-text-secondary-color);
   }
 
   affine-data-view-kanban-group:hover .add-card {
@@ -70,6 +71,7 @@ const styles = css`
 
   .add-card:hover {
     background-color: var(--affine-hover-color);
+    color: var(--affine-text-primary-color);
   }
 
   .sortable-ghost {
