@@ -259,33 +259,33 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     this.editor.slots.vRangeUpdated.emit([vRange, sync]);
   };
 
-  focusEnd(): void {
+  focusEnd = (): void => {
     this.setVRange({
       index: this.editor.yTextLength,
       length: 0,
     });
-  }
+  };
 
-  focusStart(): void {
+  focusStart = (): void => {
     this.setVRange({
       index: 0,
       length: 0,
     });
-  }
+  };
 
-  selectAll(): void {
+  selectAll = (): void => {
     this.setVRange({
       index: 0,
       length: this.editor.yTextLength,
     });
-  }
+  };
 
-  focusIndex(index: number): void {
+  focusIndex = (index: number): void => {
     this.setVRange({
       index,
       length: 0,
     });
-  }
+  };
 
   /**
    * sync the dom selection from vRange for **this Editor**
