@@ -1113,15 +1113,14 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       >
         ${blockHubMenu}
         <div class=${classes} role="menuitem" style="cursor:pointer;">
-          ${this._expanded ? CrossIcon : BlockHubIcon}
-          <tool-tip
-            class=${this._expanded ? 'invisible' : ''}
-            inert
-            tip-position="left"
-            role="tooltip"
-            arrow
-            >Insert blocks
-          </tool-tip>
+          ${this._expanded
+            ? CrossIcon
+            : [
+                BlockHubIcon,
+                html`<tool-tip tip-position="left" role="tooltip"
+                  >Insert blocks</tool-tip
+                >`,
+              ]}
         </div>
         ${blockHubCards}
       </div>

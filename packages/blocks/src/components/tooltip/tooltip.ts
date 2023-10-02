@@ -25,7 +25,7 @@ import { HoverController } from '../when-hover.js';
 export const tooltipStyle = css``;
 
 const styles = css`
-  .tooltip {
+  .blocksuite-tooltip {
     max-width: 280px;
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
@@ -48,6 +48,7 @@ const styles = css`
 `;
 
 // See http://apps.eky.hk/css-triangle-generator/
+const TRIANGLE_HEIGHT = 6;
 const triangleMap = {
   top: {
     bottom: '-6px',
@@ -125,7 +126,7 @@ export class Tooltip extends LitElement {
    * See https://floating-ui.com/docs/offset
    */
   @property({ attribute: false })
-  offset = 10;
+  offset = 4;
 
   /**
    * Allow the tooltip to be interactive.
@@ -184,7 +185,7 @@ export class Tooltip extends LitElement {
                     }
                   `}
             </style>
-            <div class="tooltip">${slottedChildren}</div>
+            <div class="blocksuite-tooltip">${slottedChildren}</div>
             <div class="arrow" style=${styleMap(arrowStyles)}></div>
           `;
         },
@@ -193,7 +194,7 @@ export class Tooltip extends LitElement {
           placement: this.placement || 'top',
           middleware: [
             this.autoFlip && flip(),
-            offset(this.offset),
+            offset(TRIANGLE_HEIGHT + this.offset),
             arrow({
               element: portalRoot.shadowRoot!.querySelector('.arrow')!,
             }),
