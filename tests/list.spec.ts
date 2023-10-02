@@ -460,7 +460,7 @@ test('enter list block with empty text', async ({ page }) => {
 
   await focusRichText(page, 0);
   await pressEnter(page);
-  await assertBlockChildrenIds(page, '2', ['7', '3', '4']);
+  await assertBlockChildrenIds(page, '7', ['3', '4']);
   await undoByClick(page);
   await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
 });
@@ -486,7 +486,7 @@ test('enter list block with non-empty text', async ({ page }) => {
 
   await focusRichText(page, 0);
   await pressEnter(page);
-  await assertBlockChildrenIds(page, '2', ['6', '3', '4']);
+  await assertBlockChildrenIds(page, '6', ['3', '4']);
   await undoByClick(page);
   await assertBlockChildrenIds(page, '2', ['3', '4']); // 0(1(2,(3,4)))
 });
