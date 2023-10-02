@@ -512,3 +512,18 @@ export function isOverlap(
     )
   );
 }
+
+export function getCenterAreaBounds(bounds: IBound, ratio: number) {
+  const { x, y, w, h, rotate } = bounds;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const nw = w * ratio;
+  const nh = h * ratio;
+  return {
+    x: cx - nw / 2,
+    y: cy - nh / 2,
+    w: nw,
+    h: nh,
+    rotate,
+  };
+}
