@@ -19,7 +19,6 @@ import {
   SHORT_KEY,
   type,
 } from './keyboard.js';
-import { MODIFIER_KEY } from './keyboard.js';
 import {
   enterPlaygroundRoom,
   getEditorLocator,
@@ -582,13 +581,13 @@ export async function zoomByMouseWheel(
 }
 
 export async function zoomFitByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 50 });
-  await waitNextFrame(page);
+  await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 100 });
+  await waitNextFrame(page, 300);
 }
 
 export async function zoomOutByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 50 });
-  await waitNextFrame(page);
+  await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 100 });
+  await waitNextFrame(page, 300);
 }
 
 export async function zoomResetByKeyboard(page: Page) {
