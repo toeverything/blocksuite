@@ -25,11 +25,7 @@ import { HoverController } from '../when-hover.js';
 export const tooltipStyle = css``;
 
 const styles = css`
-  :host {
-    position: absolute;
-    top: 0;
-    left: 0;
-
+  .tooltip {
     max-width: 280px;
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
@@ -37,9 +33,7 @@ const styles = css`
     padding: 6px 12px;
     color: var(--affine-white);
     background: var(--affine-tooltip);
-  }
 
-  .tooltip {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -50,11 +44,54 @@ const styles = css`
 
     width: 0;
     height: 0;
-    border-style: solid;
-    border-width: 5px 0 5px 6px;
-    border-color: transparent transparent transparent var(--affine-tooltip);
   }
 `;
+
+// See http://apps.eky.hk/css-triangle-generator/
+const triangleMap = {
+  top: {
+    bottom: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '6px 5px 0 5px',
+    borderColor: 'var(--affine-tooltip) transparent transparent transparent',
+  },
+  right: {
+    left: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '5px 6px 5px 0',
+    borderColor: 'transparent var(--affine-tooltip) transparent transparent',
+  },
+  bottom: {
+    top: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '0 5px 6px 5px',
+    borderColor: 'transparent transparent var(--affine-tooltip) transparent',
+  },
+  left: {
+    right: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '5px 0 5px 6px',
+    borderColor: 'transparent transparent transparent var(--affine-tooltip)',
+  },
+};
+
+// Ported from https://floating-ui.com/docs/tutorial#arrow-middleware
+const updateArrowStyles = ({
+  placement,
+  middlewareData,
+}: ComputePositionReturn): StyleInfo => {
+  const arrowX = middlewareData.arrow?.x;
+  const arrowY = middlewareData.arrow?.y;
+
+  const triangleStyles =
+    triangleMap[placement.split('-')[0] as keyof typeof triangleMap];
+
+  return {
+    left: arrowX != null ? `${arrowX}px` : '',
+    top: arrowY != null ? `${arrowY}px` : '',
+    ...triangleStyles,
+  };
+};
 
 // TODO migrate to `blocksuite-tooltip`
 // @customElement('blocksuite-tooltip')
@@ -69,82 +106,76 @@ export class Tooltip extends LitElement {
   @property({ attribute: 'tip-position' })
   placement?: Placement;
 
-  @property({ attribute: true, type: Boolean })
-  override hidden = false;
+  /**
+   * changes the placement of the floating element in order to keep it in view,
+   * with the ability to flip to any placement.
+   *
+   * See https://floating-ui.com/docs/flip
+   */
+  @property({ attribute: false, type: Boolean })
+  autoFlip = true;
 
-  // TODO
+  /**
+   * Show a triangle arrow pointing to the reference element.
+   */
   @property({ attribute: false })
-  noArrow = false;
+  arrow = true;
 
+  /**
+   * See https://floating-ui.com/docs/offset
+   */
+  @property({ attribute: false })
+  offset = 10;
+
+  /**
+   * Allow the tooltip to be interactive.
+   * eg. allow the user to select text in the tooltip.
+   */
   @property({ attribute: false })
   allowInteractive = false;
 
   private _hoverController = new HoverController(
     this,
     () => {
+      // const parentElement = this.parentElement;
+      // if (
+      //   parentElement &&
+      //   'disabled' in parentElement &&
+      //   parentElement.disabled
+      // )
+      //   return null;
       if (this.hidden) return null;
-
-      const slot = this.shadowRoot?.querySelector('slot');
-      if (!slot) throw new Error('slot not found in tooltip!');
-      const slottedChildren = slot
-        .assignedNodes()
-        .map(node => node.cloneNode(true));
-
-      // Ported from https://floating-ui.com/docs/tutorial#arrow-middleware
-      const updateArrowPosition = ({
-        placement,
-        middlewareData,
-      }: ComputePositionReturn): StyleInfo => {
-        // See http://apps.eky.hk/css-triangle-generator/
-        const triangleStyles = {
-          top: {
-            bottom: '-6px',
-            borderWidth: '6px 5px 0 5px',
-            borderColor:
-              'var(--affine-tooltip) transparent transparent transparent',
-          },
-          right: {
-            left: '-6px',
-            borderWidth: '5px 6px 5px 0',
-            borderColor:
-              'transparent var(--affine-tooltip) transparent transparent',
-          },
-          bottom: {
-            top: '-6px',
-            borderWidth: '0 5px 6px 5px',
-            borderColor:
-              'transparent transparent var(--affine-tooltip) transparent',
-          },
-          left: {
-            right: '-6px',
-            borderWidth: '5px 0 5px 6px',
-            borderColor:
-              'transparent transparent transparent var(--affine-tooltip)',
-          },
-        }[placement.split('-')[0]];
-
-        const arrowX = middlewareData.arrow?.x;
-        const arrowY = middlewareData.arrow?.y;
-
-        return {
-          left: arrowX != null ? `${arrowX}px` : '',
-          top: arrowY != null ? `${arrowY}px` : '',
-          right: '',
-          bottom: '',
-          ...triangleStyles,
-        };
-      };
-
       let arrowStyles: StyleInfo = {};
       return {
         template: ({ positionSlot, updatePortal }) => {
           positionSlot.on(data => {
-            arrowStyles = updateArrowPosition(data);
+            // The tooltip placement may change,
+            // so we need to update the arrow position
+            if (this.arrow) {
+              arrowStyles = updateArrowStyles(data);
+            } else {
+              arrowStyles = {};
+            }
             updatePortal();
           });
+
+          const slot = this.shadowRoot?.querySelector('slot');
+          if (!slot) throw new Error('slot not found in tooltip!');
+          // slot.addEventListener('slotchange', () => updatePortal, {
+          //   once: true,
+          // });
+          const slottedChildren = slot
+            .assignedNodes()
+            .map(node => node.cloneNode(true));
           return html`
             <style>
               ${styles}
+              .tooltip {
+                ${
+                // All the styles are applied to the tooltip element
+                this.style.cssText
+              }
+              }
               ${this.allowInteractive
                 ? null
                 : css`
@@ -161,8 +192,8 @@ export class Tooltip extends LitElement {
           referenceElement: this.parentElement!,
           placement: this.placement || 'top',
           middleware: [
-            flip(),
-            offset(10),
+            this.autoFlip && flip(),
+            offset(this.offset),
             arrow({
               element: portalRoot.shadowRoot!.querySelector('.arrow')!,
             }),
@@ -181,10 +212,9 @@ export class Tooltip extends LitElement {
     this._hoverController.setReference(parent);
   }
 
-  // private _handleSlotchange(e: Event) {
-  // console.warn('Dynamic tooltip is not supported yet!');
-  // TODO update tooltip
-  // }
+  getPortal() {
+    return this._hoverController.portal;
+  }
 
   override render() {
     // The actual tooltip render as a portal, so we only need to render the slot
