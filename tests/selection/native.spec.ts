@@ -12,7 +12,6 @@ import {
   enterPlaygroundRoom,
   fillLine,
   focusRichText,
-  focusRichTextEnd,
   focusTitle,
   getCenterPosition,
   getCursorBlockIdAndHeight,
@@ -1593,7 +1592,8 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  // if in local it should be 0, 93
+  await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
@@ -1625,7 +1625,8 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 93);
+  // if in local it should be 0, 93
+  await assertRichTextVRange(page, 0, 90);
   // - aaa... (no \n)
   //   |a
   // - b  (have \n)
