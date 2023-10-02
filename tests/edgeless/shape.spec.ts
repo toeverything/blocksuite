@@ -164,7 +164,7 @@ test('the tooltip of shape tool button should be hidden when the shape menu is s
 
   const shapeTool = locatorEdgelessToolButton(page, 'shape');
   const shapeToolBox = await shapeTool.boundingBox();
-  const tooltip = shapeTool.locator('tool-tip');
+  const tooltip = page.locator('.blocksuite-tooltip');
 
   assertExists(shapeToolBox);
 
