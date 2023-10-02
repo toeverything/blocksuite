@@ -109,6 +109,12 @@ export const whenHover = (
 
   const addHoverListener = (element?: Element) => {
     if (!element) return;
+    // see https://stackoverflow.com/questions/14795099/pure-javascript-to-check-if-something-has-hover-without-setting-on-mouseover-ou
+    const alreadyHover = element.matches(':hover');
+    if (alreadyHover && !abortController.signal.aborted) {
+      // When the element is already hovered, we need to trigger the callback manually
+      onHover(new MouseEvent('mouseover'));
+    }
     element.addEventListener('mouseover', onHover, {
       signal: abortController.signal,
     });

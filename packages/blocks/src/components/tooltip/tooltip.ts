@@ -209,7 +209,11 @@ export class Tooltip extends LitElement {
     super.connectedCallback();
     const parent = this.parentElement;
     assertExists(parent, 'Tooltip must have a parent element');
-    this._hoverController.setReference(parent);
+
+    // Wait for render
+    setTimeout(() => {
+      this._hoverController.setReference(parent);
+    }, 0);
   }
 
   getPortal() {
