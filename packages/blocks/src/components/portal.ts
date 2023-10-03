@@ -52,16 +52,16 @@ export class Portal extends LitElement {
 
   override createRenderRoot() {
     const portalRoot = document.createElement('div');
-    if (this.shadowDom) {
-      portalRoot.attachShadow({
-        mode: 'open',
-        ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
-      });
-    }
+    const renderRoot = this.shadowDom
+      ? portalRoot.attachShadow({
+          mode: 'open',
+          ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
+        })
+      : portalRoot;
     portalRoot.classList.add('blocksuite-portal');
     this.container.append(portalRoot);
     this._portalRoot = portalRoot;
-    return portalRoot;
+    return renderRoot;
   }
 
   override render() {
