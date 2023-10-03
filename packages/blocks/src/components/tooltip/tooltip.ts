@@ -26,7 +26,9 @@ export const tooltipStyle = css``;
 
 const styles = css`
   .blocksuite-tooltip {
+    box-sizing: border-box;
     max-width: 280px;
+    min-height: 32px;
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-sm);
     border-radius: 4px;
@@ -194,7 +196,7 @@ export class Tooltip extends LitElement {
           placement: this.placement || 'top',
           middleware: [
             this.autoFlip && flip(),
-            offset(TRIANGLE_HEIGHT + this.offset),
+            offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
             arrow({
               element: portalRoot.shadowRoot!.querySelector('.arrow')!,
             }),
@@ -222,7 +224,8 @@ export class Tooltip extends LitElement {
   }
 
   override render() {
-    // The actual tooltip render as a portal, so we only need to render the slot
+    // The actual tooltip will render as a portal, and all content inside the slot will be treated as a template.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots
     return html`<slot></slot>`;
   }
 }

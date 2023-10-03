@@ -40,6 +40,9 @@ export class Portal extends LitElement {
   @property({ attribute: false })
   public template = html``;
 
+  @property({ attribute: false })
+  public shadowDom: boolean | ShadowRootInit = true;
+
   private _portalRoot: HTMLElement | null = null;
 
   override disconnectedCallback(): void {
@@ -49,6 +52,12 @@ export class Portal extends LitElement {
 
   override createRenderRoot() {
     const portalRoot = document.createElement('div');
+    if (this.shadowDom) {
+      portalRoot.attachShadow({
+        mode: 'open',
+        ...(typeof this.shadowDom !== 'boolean' ? this.shadowDom : {}),
+      });
+    }
     portalRoot.classList.add('blocksuite-portal');
     this.container.append(portalRoot);
     this._portalRoot = portalRoot;
@@ -92,7 +101,7 @@ type PortalOptions = {
   /**
    * Defaults to `true`.
    */
-  shadowDom?: boolean;
+  shadowDom?: boolean | ShadowRootInit;
   renderOptions?: RenderOptions;
   /**
    * Defaults to `true`.
@@ -121,7 +130,10 @@ export function createSimplePortal({
     portalRoot.classList.add('blocksuite-portal');
   }
   if (shadowDom) {
-    portalRoot.attachShadow({ mode: 'open' });
+    portalRoot.attachShadow({
+      mode: 'open',
+      ...(typeof shadowDom !== 'boolean' ? shadowDom : {}),
+    });
   }
   signal.addEventListener('abort', () => {
     portalRoot.remove();
