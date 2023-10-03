@@ -67,6 +67,18 @@ export class LinkPopup extends WithDisposable(LitElement) {
         },
       });
     }
+
+    const parent = this.blockElement.root.page.getParent(
+      this.blockElement.model
+    );
+    assertExists(parent);
+    this.disposables.add(
+      parent.childrenUpdated.on(() => {
+        const children = parent.children;
+        if (children.includes(this.blockElement.model)) return;
+        this.remove();
+      })
+    );
   }
 
   override updated() {
@@ -102,6 +114,14 @@ export class LinkPopup extends WithDisposable(LitElement) {
     });
   }
 
+  get blockElement() {
+    const blockElement = this.vEditor.rootElement.closest<BlockElement>(
+      `[${BLOCK_ID_ATTR}]`
+    );
+    assertExists(blockElement);
+    return blockElement;
+  }
+
   get currentText() {
     return this.vEditor.yTextString.slice(
       this.goalVRange.index,
@@ -113,6 +133,25 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const link = this.vEditor.getFormat(this.goalVRange).link;
     assertExists(link);
     return link;
+  }
+
+  private _isBookmarkAllowed() {
+    const blockElement = this.blockElement;
+    const schema = blockElement.root.page.schema;
+    const parent = blockElement.root.page.getParent(blockElement.model);
+    assertExists(parent);
+    const bookmarkSchema = schema.flavourSchemaMap.get('affine:bookmark');
+    assertExists(bookmarkSchema);
+    const parentSchema = schema.flavourSchemaMap.get(parent.flavour);
+    assertExists(parentSchema);
+
+    try {
+      schema.validateSchema(bookmarkSchema, parentSchema);
+    } catch {
+      return false;
+    }
+
+    return true;
   }
 
   private _onConfirm() {
@@ -146,13 +185,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _linkToBookmark(type: BookmarkProps['type']) {
     if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
 
-    const blockElement = this.vEditor.rootElement.closest<BlockElement>(
-      `[${BLOCK_ID_ATTR}]`
-    );
-    if (!blockElement) {
-      throw new Error('Failed to convert link to bookmark! Block not found!');
-    }
-
+    const blockElement = this.blockElement;
     const props: BookmarkProps = {
       type,
       url: this.currentLink,
@@ -231,19 +264,22 @@ export class LinkPopup extends WithDisposable(LitElement) {
         <tool-tip inert role="tooltip">Click to copy link</tool-tip>
         <span style="overflow: hidden;">${this.currentLink}</span>
       </div>
-      <span class="affine-link-popover-dividing-line"></span>
-      <icon-button
-        class="has-tool-tip"
-        data-testid="unlink"
-        @click=${() => this._linkToBookmark('card')}
-      >
-        ${BookmarkIcon}
-        <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
-      </icon-button>
-      ${allowEmbed(this.currentLink)
+
+      ${this._isBookmarkAllowed()
+        ? html`<span class="affine-link-popover-dividing-line"></span
+            ><icon-button
+              class="has-tool-tip"
+              data-testid="link-to-card"
+              @click=${() => this._linkToBookmark('card')}
+            >
+              ${BookmarkIcon}
+              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+            </icon-button>`
+        : nothing}
+      ${this._isBookmarkAllowed() && allowEmbed(this.currentLink)
         ? html`<icon-button
             class="has-tool-tip"
-            data-testid="unlink"
+            data-testid="link-to-embed"
             @click=${() => this._linkToBookmark('embed')}
           >
             ${EmbedWebIcon}

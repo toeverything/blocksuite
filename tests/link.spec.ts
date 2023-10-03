@@ -12,7 +12,9 @@ import {
   pasteByKeyboard,
   pressEnter,
   pressShiftEnter,
+  pressTab,
   selectAllByKeyboard,
+  setSelection,
   SHORT_KEY,
   switchReadonly,
   type,
@@ -368,4 +370,164 @@ test('create link with paste', async ({ page }) => {
 />`,
     paragraphId
   );
+});
+
+test('convert link to card', async ({ page }) => {
+  const linkText = 'alinkTexta';
+  const link = 'http://example.com';
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await type(page, linkText);
+
+  // Create link
+  await setSelection(page, 3, 1, 3, 9);
+  await pressCreateLinkShortCut(page);
+  await waitNextFrame(page);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).toBeVisible();
+  const linkPopoverInput = page.locator('.affine-link-popover-input');
+  await expect(linkPopoverInput).toBeVisible();
+  await type(page, link);
+  await pressEnter(page);
+  await expect(linkPopoverLocator).not.toBeVisible();
+  await focusRichText(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="aaa"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text={
+        <>
+          <text
+            insert="a"
+          />
+          <text
+            insert="linkText"
+            link="${link}"
+          />
+          <text
+            insert="a"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </affine:note>
+</affine:page>`
+  );
+
+  const linkToCardBtn = page.getByTestId('link-to-card');
+  const linkToEmbedBtn = page.getByTestId('link-to-embed');
+  const linkLocator = page.locator('affine-link a');
+
+  await linkLocator.hover();
+  await waitNextFrame(page);
+  await expect(linkPopoverLocator).toBeVisible();
+  await expect(linkToCardBtn).toBeVisible();
+  await expect(linkToEmbedBtn).not.toBeVisible();
+
+  await page.mouse.move(0, 0);
+  await waitNextFrame(page);
+  await expect(linkPopoverLocator).not.toBeVisible();
+  await focusRichText(page, 1);
+  await pressTab(page);
+
+  await linkLocator.hover();
+  await waitNextFrame(page);
+  await expect(linkPopoverLocator).toBeVisible();
+  await expect(linkToCardBtn).not.toBeVisible();
+  await expect(linkToEmbedBtn).not.toBeVisible();
+});
+
+test('convert link to embed', async ({ page }) => {
+  const linkText = 'alinkTexta';
+  const link = 'https://www.youtube.com/watch?v=U6s2pdxebSo';
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await type(page, linkText);
+
+  // Create link
+  await setSelection(page, 3, 1, 3, 9);
+  await pressCreateLinkShortCut(page);
+  await waitNextFrame(page);
+  const linkPopoverLocator = page.locator('.affine-link-popover');
+  await expect(linkPopoverLocator).toBeVisible();
+  const linkPopoverInput = page.locator('.affine-link-popover-input');
+  await expect(linkPopoverInput).toBeVisible();
+  await type(page, link);
+  await pressEnter(page);
+  await expect(linkPopoverLocator).not.toBeVisible();
+  await focusRichText(page);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:page>
+  <affine:note
+    prop:background="--affine-background-secondary-color"
+    prop:hidden={false}
+    prop:index="a0"
+  >
+    <affine:paragraph
+      prop:text="aaa"
+      prop:type="text"
+    />
+    <affine:paragraph
+      prop:text={
+        <>
+          <text
+            insert="a"
+          />
+          <text
+            insert="linkText"
+            link="${link}"
+          />
+          <text
+            insert="a"
+          />
+        </>
+      }
+      prop:type="text"
+    />
+  </affine:note>
+</affine:page>`
+  );
+
+  const linkToCardBtn = page.getByTestId('link-to-card');
+  const linkToEmbedBtn = page.getByTestId('link-to-embed');
+  const linkLocator = page.locator('affine-link a');
+
+  await linkLocator.hover();
+  await waitNextFrame(page);
+  await expect(linkPopoverLocator).toBeVisible();
+  await expect(linkToCardBtn).toBeVisible();
+  await expect(linkToEmbedBtn).toBeVisible();
+
+  await page.mouse.move(0, 0);
+  await waitNextFrame(page);
+  await expect(linkPopoverLocator).not.toBeVisible();
+  await focusRichText(page, 1);
+  await pressTab(page);
+
+  await linkLocator.hover();
+  await waitNextFrame(page);
+  await expect(linkPopoverLocator).toBeVisible();
+  await expect(linkToCardBtn).not.toBeVisible();
+  await expect(linkToEmbedBtn).not.toBeVisible();
 });
