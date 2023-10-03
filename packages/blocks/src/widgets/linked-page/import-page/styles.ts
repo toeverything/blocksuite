@@ -72,7 +72,7 @@ export const styles = css`
     align-items: center;
   }
 
-  .has-tool-tip {
+  .button-suffix {
     display: flex;
     margin-left: auto;
   }

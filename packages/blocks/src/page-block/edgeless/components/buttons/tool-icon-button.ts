@@ -37,14 +37,6 @@ export class EdgelessToolIconButton extends LitElement {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
     }
-
-    tool-tip {
-      z-index: 12;
-    }
-
-    tool-tip:is([arrow]):is([tip-position='top'])::before {
-      margin-top: -4px;
-    }
   `;
 
   @property({ attribute: false })

@@ -34,10 +34,6 @@ export class EdgelessToolbarButton extends EdgelessToolIconButton {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
     }
-
-    tool-tip {
-      z-index: 12;
-    }
   `;
 
   override render() {

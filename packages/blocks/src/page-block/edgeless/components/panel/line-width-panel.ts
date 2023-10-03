@@ -103,11 +103,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       background-color: var(--affine-icon-color);
       z-index: 1;
     }
-
-    tool-tip {
-      z-index: 12;
-      top: -8px;
-    }
   `;
 
   @property({ attribute: false })

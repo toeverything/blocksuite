@@ -388,10 +388,6 @@ const styles = css`
     background: var(--affine-hover-color);
   }
 
-  [role='menuitem'] tool-tip {
-    font-size: var(--affine-font-sm);
-  }
-
   .block-hub-icons-container {
     width: 100%;
     overflow: hidden;
