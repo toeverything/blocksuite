@@ -85,10 +85,18 @@ export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   // make adding text block by enter a standalone operation
   page.captureSync();
 
-  const id = !model.children.length
-    ? page.addBlock(flavour, blockProps, parent, index + 1)
-    : // If the block has children, insert a new block as the first child
-      page.addBlock(flavour, blockProps, model, 0);
+  // before press enter:
+  // aaa|
+  //   bbb
+  //
+  // after press enter:
+  // aaa
+  // |
+  //   bbb
+  const id = page.addBlock(flavour, blockProps, parent, index + 1);
+  const newModel = page.getBlockById(id);
+  assertExists(newModel);
+  page.moveBlocks(model.children, newModel);
 
   // 4. If the target block is a numbered list, update the prefix of next siblings
   if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {

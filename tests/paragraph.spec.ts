@@ -497,7 +497,6 @@ test('should indent and unindent works with children', async ({ page }) => {
   );
 });
 
-// https://github.com/toeverything/blocksuite/issues/364
 test('paragraph with child block should work at enter', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
@@ -542,11 +541,11 @@ test('paragraph with child block should work at enter', async ({ page }) => {
   <affine:paragraph
     prop:text="123"
     prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
   >
-    <affine:paragraph
-      prop:text="789"
-      prop:type="text"
-    />
     <affine:paragraph
       prop:text="456"
       prop:type="text"
@@ -565,12 +564,31 @@ test('should delete paragraph block child can hold cursor in correct position', 
   await focusRichText(page);
   await type(page, '123');
   await pressEnter(page);
-  await page.keyboard.press('Tab');
+  await pressTab(page);
   await waitNextFrame(page);
-  await type(page, '456');
-  await focusRichText(page, 0);
-  await pressEnter(page);
-  await page.keyboard.press('Backspace');
+  await type(page, '4');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="4"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await pressBackspace(page, 2);
   await waitNextFrame(page);
   await type(page, 'now');
 
@@ -583,14 +601,13 @@ test('should delete paragraph block child can hold cursor in correct position', 
   prop:index="a0"
 >
   <affine:paragraph
-    prop:text="123now"
+    prop:text="123"
     prop:type="text"
-  >
-    <affine:paragraph
-      prop:text="456"
-      prop:type="text"
-    />
-  </affine:paragraph>
+  />
+  <affine:paragraph
+    prop:text="now"
+    prop:type="text"
+  />
 </affine:note>`,
     noteId
   );
