@@ -87,6 +87,10 @@ export const moreMenuStyles = css`
 `;
 
 export const styles = css`
+  :host {
+    z-index: 1;
+  }
+
   .affine-attachment-options {
     display: flex;
     align-items: center;
@@ -95,7 +99,6 @@ export const styles = css`
     border-radius: 8px;
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
-    z-index: var(--affine-z-index-popover);
   }
 
   /* hover guardian */
