@@ -305,7 +305,7 @@ test('drag Heading1 block from text menu into text area and blockHub text cards 
 
   const headingPos = await getCenterPosition(
     page,
-    '.has-tool-tip[affine-flavour="affine:paragraph"][affine-type="h1"]'
+    '.card-container[affine-flavour="affine:paragraph"][affine-type="h1"]'
   );
   const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
   await dragBetweenCoords(
@@ -365,7 +365,7 @@ test('drag numbered list block from list menu into text area and blockHub list c
 
   const numberedListPos = await getCenterPosition(
     page,
-    '.has-tool-tip[affine-flavour="affine:list"][affine-type="numbered"]'
+    '.card-container[affine-flavour="affine:list"][affine-type="numbered"]'
   );
   const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
   await dragBetweenCoords(
@@ -425,7 +425,7 @@ test('should auto hide card list when dragging a card', async ({ page }) => {
 
   const numberedListPos = await getCenterPosition(
     page,
-    '.has-tool-tip[affine-flavour="affine:list"][affine-type="numbered"]'
+    '.card-container[affine-flavour="affine:list"][affine-type="numbered"]'
   );
   const targetPos = await getCenterPosition(page, '[data-block-id="2"]');
   await dragBetweenCoords(

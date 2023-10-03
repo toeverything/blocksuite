@@ -254,7 +254,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _viewTemplate() {
     return html`<div class="affine-link-popover">
       <div
-        class="affine-link-preview has-tool-tip"
+        class="affine-link-preview"
         @click=${() => {
           navigator.clipboard.writeText(this.currentLink);
           toast('Copied link to clipboard');
@@ -268,7 +268,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
       ${this._isBookmarkAllowed()
         ? html`<span class="affine-link-popover-dividing-line"></span
             ><icon-button
-              class="has-tool-tip"
               data-testid="link-to-card"
               @click=${() => this._linkToBookmark('card')}
             >
@@ -278,7 +277,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         : nothing}
       ${this._isBookmarkAllowed() && allowEmbed(this.currentLink)
         ? html`<icon-button
-            class="has-tool-tip"
             data-testid="link-to-embed"
             @click=${() => this._linkToBookmark('embed')}
           >
@@ -288,7 +286,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
         : nothing}
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button
-        class="has-tool-tip"
         data-testid="unlink"
         @click=${() => {
           if (this.vEditor.isVRangeValid(this.goalVRange)) {
@@ -302,7 +299,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
       </icon-button>
 
       <icon-button
-        class="has-tool-tip"
         data-testid="edit"
         @click=${() => {
           this.type = 'edit';

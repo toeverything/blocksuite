@@ -15,7 +15,6 @@ export const ActionItems = (root: BlockSuiteRoot) =>
           >`;
       return html`<icon-button
         size="32px"
-        class="has-tool-tip"
         data-testid=${id}
         ?disabled=${!enabled}
         @click=${() => enabled && action(root)}

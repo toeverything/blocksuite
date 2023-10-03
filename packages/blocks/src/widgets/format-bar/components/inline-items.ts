@@ -18,7 +18,6 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
       ({ id, name, icon, action, activeWhen }) =>
         html`<icon-button
           size="32px"
-          class="has-tool-tip"
           data-testid=${id}
           ?active=${activeWhen(root)}
           @click=${() => {

@@ -454,9 +454,7 @@ function BlockHubCards(
             <div class="card-container-wrapper">
               <div class="card-container-inner">
                 <div
-                  class="card-container has-tool-tip ${isGrabbing
-                    ? 'grabbing'
-                    : ''}"
+                  class="card-container ${isGrabbing ? 'grabbing' : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
                   affine-type=${type ?? ''}
@@ -532,9 +530,7 @@ function BlockHubMenu(
       style="height: ${expanded ? `${height}px` : '0'};"
     >
       <div
-        class="block-hub-icon-container has-tool-tip ${isGrabbing
-          ? 'grabbing'
-          : 'grab'}"
+        class="block-hub-icon-container ${isGrabbing ? 'grabbing' : 'grab'}"
         selected=${visibleCardType === 'blank' ? 'true' : 'false'}
         type="blank"
         draggable="true"
@@ -573,7 +569,7 @@ function BlockHubMenu(
         ${blockHubFileCards} ${EmbedWebIcon}
       </div>
       <div
-        class="block-hub-icon-container has-tool-tip"
+        class="block-hub-icon-container"
         type="database"
         draggable="true"
         affine-flavour="affine:database"
@@ -1095,7 +1091,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const classes = classMap({
       'icon-expanded': this._expanded,
       'new-icon-in-edgeless': this._inEdgelessMode && !this._expanded,
-      'has-tool-tip': true,
       'new-icon': true,
     });
     return html`

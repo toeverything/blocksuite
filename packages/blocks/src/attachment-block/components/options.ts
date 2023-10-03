@@ -60,20 +60,19 @@ export function AttachmentOptionsTemplate({
       class="affine-attachment-options"
       @pointerdown=${stopPropagation}
     >
-      <icon-button class="has-tool-tip" size="24px" ?hidden=${true}>
+      <icon-button size="24px" ?hidden=${true}>
         ${ViewIcon}
         <tool-tip inert tip-position="top" role="tooltip">Preview</tool-tip>
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
-      <icon-button class="has-tool-tip" size="24px" ?hidden=${true || readonly}>
+      <icon-button size="24px" ?hidden=${true || readonly}>
         ${LinkIcon}
         <tool-tip inert tip-position="top" role="tooltip"
           >Turn into Link view</tool-tip
         >
       </icon-button>
       <icon-button
-        class="has-tool-tip"
         size="24px"
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
@@ -89,7 +88,6 @@ export function AttachmentOptionsTemplate({
       <div class="divider"></div>
 
       <icon-button
-        class="has-tool-tip"
         size="24px"
         ?hidden=${readonly}
         @click="${() => {
@@ -115,7 +113,6 @@ export function AttachmentOptionsTemplate({
         <tool-tip inert tip-position="top" role="tooltip">Rename</tool-tip>
       </icon-button>
       <icon-button
-        class="has-tool-tip"
         size="24px"
         ?hidden=${readonly}
         @click=${() => {
@@ -128,7 +125,7 @@ export function AttachmentOptionsTemplate({
       <div class="divider" ?hidden=${readonly}></div>
       <icon-button
         size="24px"
-        class="has-tool-tip more-button"
+        class="more-button"
         @click=${() => {
           if (moreMenuAbortController) {
             moreMenuAbortController.abort();

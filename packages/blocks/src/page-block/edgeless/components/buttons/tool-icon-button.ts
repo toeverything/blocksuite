@@ -81,7 +81,7 @@ export class EdgelessToolIconButton extends LitElement {
 
   override render() {
     const tooltip = this.coming ? '(Coming soon)' : this.tooltip;
-    const classnames = `icon-container has-tool-tip active-mode-${this.activeMode}`;
+    const classnames = `icon-container active-mode-${this.activeMode}`;
     const iconContainerStyles = styleMap({
       '--icon-container-padding': `${this.iconContainerPadding}px`,
     });

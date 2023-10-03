@@ -51,7 +51,6 @@ export function CodeOptionTemplate({
     <div ${ref(containerRef)} class="affine-codeblock-option">
       <icon-button
         size="32px"
-        class="has-tool-tip"
         data-testid="copy-button"
         @click=${() => copyCode(model as CodeBlockModel)}
       >
@@ -62,7 +61,6 @@ export function CodeOptionTemplate({
       </icon-button>
       <icon-button
         size="32px"
-        class="has-tool-tip"
         data-testid="wrap-button"
         ?active=${wrap}
         @click=${onClickWrap}
@@ -77,7 +75,7 @@ export function CodeOptionTemplate({
         : html`<icon-button
             size="32px"
             data-testid="delete-button"
-            class="has-tool-tip delete-code-button"
+            class="delete-code-button"
             @click=${() => {
               if (readonly) return;
               model.page.deleteBlock(model);

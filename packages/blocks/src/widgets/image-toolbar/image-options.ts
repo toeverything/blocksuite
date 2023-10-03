@@ -58,11 +58,11 @@ export function ImageOptionsTemplate({
         background-color: var(--affine-background-overlay-panel-color);
         margin: 0;
       }
-      .has-tool-tip.delete-image-button:hover {
+      .delete-image-button:hover {
         background: var(--affine-background-error-color);
         color: var(--affine-error-color);
       }
-      .has-tool-tip.delete-image-button:hover > svg {
+      .delete-image-button:hover > svg {
         color: var(--affine-error-color);
       }
     </style>
@@ -75,7 +75,6 @@ export function ImageOptionsTemplate({
       <div class="embed-editing-state">
         ${supportAttachment
           ? html`<icon-button
-              class="has-tool-tip"
               size="32px"
               ?hidden=${readonly}
               @click=${() => {
@@ -88,7 +87,6 @@ export function ImageOptionsTemplate({
             </icon-button>`
           : nothing}
         <icon-button
-          class="has-tool-tip"
           size="32px"
           ?hidden=${readonly}
           @click=${() => focusCaption(model)}
@@ -96,28 +94,20 @@ export function ImageOptionsTemplate({
           ${CaptionIcon}
           <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
         </icon-button>
-        <icon-button
-          class="has-tool-tip"
-          size="32px"
-          @click=${() => downloadImage(model)}
-        >
+        <icon-button size="32px" @click=${() => downloadImage(model)}>
           ${DownloadIcon}
           <tool-tip inert tip-position="right" role="tooltip"
             >Download</tool-tip
           >
         </icon-button>
-        <icon-button
-          class="has-tool-tip"
-          size="32px"
-          @click=${() => copyImage(model)}
-        >
+        <icon-button size="32px" @click=${() => copyImage(model)}>
           ${CopyIcon}
           <tool-tip inert tip-position="right" role="tooltip"
             >Copy to clipboard</tool-tip
           >
         </icon-button>
         <icon-button
-          class="has-tool-tip delete-image-button"
+          class="delete-image-button"
           size="32px"
           ?hidden=${readonly}
           @click="${() => {
@@ -129,7 +119,6 @@ export function ImageOptionsTemplate({
           <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
         </icon-button>
         <icon-button
-          class="has-tool-tip"
           size="32px"
           ?hidden=${readonly ||
           !model.page.awarenessStore.getFlag('enable_bultin_ledits')}

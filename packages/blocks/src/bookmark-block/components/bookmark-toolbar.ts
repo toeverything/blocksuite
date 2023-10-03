@@ -87,7 +87,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       ({ type, icon, tooltip, action, divider, disableWhen = () => false }) => {
         return html`<icon-button
             size="24px"
-            class="bookmark-toolbar-button has-tool-tip ${type}"
+            class="bookmark-toolbar-button ${type}"
             ?disabled=${disableWhen(this.model)}
             @click=${() => {
               action(this.model, this.onSelected, this);
@@ -107,7 +107,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
         <div class="more-button-wrapper">
           <icon-button
             size="24px"
-            class="has-tool-tip more-button"
+            class="more-button"
             @click=${() => {
               this._toggleMenu();
             }}

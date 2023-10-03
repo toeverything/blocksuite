@@ -111,7 +111,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   hasTooltip = true;
 
-  @query('.line-width-panel.has-tool-tip')
+  @query('.line-width-panel')
   private _lineWidthPanel!: HTMLElement;
 
   @query('.line-width-overlay')
@@ -314,7 +314,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   override render() {
     return html`<div
-      class="line-width-panel has-tool-tip"
+      class="line-width-panel"
       @mousedown="${(e: Event) => e.preventDefault()}"
     >
       <div class="line-width-button">
