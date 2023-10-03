@@ -37,7 +37,7 @@ export function mountTextEditor(
 
   pageBlockContainer.appendChild(textEditor);
   textEditor.mount(textElement, edgeless);
-  textEditor.vEditor?.focusByIndex(cursorIndex);
+  textEditor.vEditor?.focusIndex(cursorIndex);
 
   edgeless.tools.switchToDefaultMode({
     elements: [textElement.id],
