@@ -161,7 +161,8 @@ export class Tooltip extends LitElement {
           return html`
             <style>
               ${styles}
-              .tooltip {
+              :host {
+                z-index: var(--affine-z-index-popover);
                 ${
                 // All the styles are applied to the tooltip element
                 this.style.cssText
