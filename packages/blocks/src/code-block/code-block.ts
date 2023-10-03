@@ -31,7 +31,6 @@ import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
-import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -174,8 +173,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       background-color: var(--affine-background-overlay-panel-color);
       margin: 0;
     }
-
-    ${tooltipStyle}
   `;
 
   @state()

@@ -1,7 +1,5 @@
 import { css } from 'lit';
 
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-
 const paragraphButtonStyle = css`
   .paragraph-button-icon > svg:nth-child(2) {
     transition-duration: 0.3s;
@@ -77,5 +75,4 @@ export const formatBarStyle = css`
   }
 
   ${paragraphButtonStyle}
-  ${tooltipStyle}
 `;

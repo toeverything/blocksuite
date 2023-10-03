@@ -10,7 +10,6 @@ import { html } from 'lit/static-html.js';
 
 import type { TableViewSelection } from '../../__internal__/index.js';
 import { popMenu } from '../../components/menu/index.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
@@ -126,7 +125,6 @@ const styles = css`
     justify-content: center;
     align-items: flex-start;
   }
-  ${tooltipStyle}
 `;
 
 @customElement('affine-database-table')

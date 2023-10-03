@@ -4,7 +4,6 @@ import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
   BookmarkIcon,
   CaptionIcon,
@@ -66,8 +65,6 @@ export function ImageOptionsTemplate({
       .has-tool-tip.delete-image-button:hover > svg {
         color: var(--affine-error-color);
       }
-
-      ${tooltipStyle}
     </style>
 
     <div

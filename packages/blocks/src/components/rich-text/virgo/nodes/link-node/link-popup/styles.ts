@@ -1,8 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import { tooltipStyle } from '../../../../../tooltip/tooltip.js';
-
 const editLinkStyle = css`
   .affine-link-edit-popover {
     box-sizing: border-box;
@@ -203,5 +201,4 @@ export const linkPopupStyle = css`
   }
 
   ${editLinkStyle}
-  ${tooltipStyle}
 `;

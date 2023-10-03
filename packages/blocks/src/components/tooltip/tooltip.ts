@@ -12,18 +12,6 @@ import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../when-hover.js';
 
-/**
- * @example
- * ```html
- * <icon-button class="has-tool-tip" style="${tooltipStyle}">
- *    Button
- *    <tool-tip inert role="tooltip">Tooltip</tool-tip>
- * </icon-button>
- * ```
- * Reference to https://web.dev/building-a-tooltip-component/
- */
-export const tooltipStyle = css``;
-
 const styles = css`
   .blocksuite-tooltip {
     box-sizing: border-box;
@@ -187,7 +175,9 @@ export class Tooltip extends LitElement {
                     }
                   `}
             </style>
-            <div class="blocksuite-tooltip">${slottedChildren}</div>
+            <div class="blocksuite-tooltip" role="tooltip">
+              ${slottedChildren}
+            </div>
             <div class="arrow" style=${styleMap(arrowStyles)}></div>
           `;
         },

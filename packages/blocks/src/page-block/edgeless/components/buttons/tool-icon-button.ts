@@ -3,8 +3,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
-
 @customElement('edgeless-tool-icon-button')
 export class EdgelessToolIconButton extends LitElement {
   static override styles = css`
@@ -39,8 +37,6 @@ export class EdgelessToolIconButton extends LitElement {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
     }
-
-    ${tooltipStyle}
 
     tool-tip {
       z-index: 12;

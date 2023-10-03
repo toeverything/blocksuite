@@ -9,7 +9,6 @@ import {
   type LineWidth,
 } from '../../../../../__internal__/index.js';
 import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
-import { tooltipStyle } from '../../../../../components/tooltip/tooltip.js';
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
@@ -105,12 +104,6 @@ export class EdgelessConnectorMenu extends LitElement {
       margin: 0 16px;
       background-color: var(--affine-border-color);
       display: inline-block;
-    }
-
-    ${tooltipStyle}
-
-    tool-tip {
-      z-index: 12;
     }
   `;
 

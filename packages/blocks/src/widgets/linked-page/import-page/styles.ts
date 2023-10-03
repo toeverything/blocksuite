@@ -1,8 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import { tooltipStyle } from '../../../components/tooltip/tooltip.js';
-
 export const styles = css`
   .container {
     position: absolute;
@@ -87,6 +85,4 @@ export const styles = css`
     height: 100vh;
     z-index: var(--affine-z-index-popover);
   }
-
-  ${tooltipStyle}
 `;

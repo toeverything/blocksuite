@@ -2,7 +2,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
   CancelWrapIcon,
   CopyIcon,
@@ -47,8 +46,6 @@ export function CodeOptionTemplate({
       .delete-code-button:hover > svg {
         color: var(--affine-error-color);
       }
-
-      ${tooltipStyle}
     </style>
 
     <div ${ref(containerRef)} class="affine-codeblock-option">

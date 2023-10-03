@@ -58,7 +58,6 @@ import { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../page-block/text-selection/utils.js';
 import { type DragIndicator } from './drag-indicator.js';
-import { tooltipStyle } from './tooltip/tooltip.js';
 
 export const BLOCKHUB_TEXT_ITEMS = [
   {
@@ -405,8 +404,6 @@ const styles = css`
     background: var(--affine-border-color);
     margin: 4px 0;
   }
-
-  ${tooltipStyle}
 `;
 
 type BlockHubItem = {

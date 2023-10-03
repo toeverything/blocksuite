@@ -6,7 +6,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { createLitPortal } from '../../components/portal.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { MoreIcon } from '../../icons/index.js';
 import { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 import {
@@ -18,7 +17,6 @@ import {
 @customElement('bookmark-toolbar')
 export class BookmarkToolbar extends WithDisposable(LitElement) {
   static override styles = css`
-    ${tooltipStyle}
     .bookmark-bar {
       box-sizing: border-box;
       display: flex;

@@ -3,7 +3,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { LineWidth } from '../../../../__internal__/utils/types.js';
-import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 
 type DragConfig = {
   stepWidth: number;
@@ -104,8 +103,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       background-color: var(--affine-icon-color);
       z-index: 1;
     }
-
-    ${tooltipStyle}
 
     tool-tip {
       z-index: 12;
