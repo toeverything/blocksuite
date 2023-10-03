@@ -68,8 +68,14 @@ export class LinkPopup extends WithDisposable(LitElement) {
       });
     }
 
+    const parent = this.blockElement.root.page.getParent(
+      this.blockElement.model
+    );
+    assertExists(parent);
     this.disposables.add(
-      this.blockElement.page.slots.blockUpdated.once(() => {
+      parent.childrenUpdated.on(() => {
+        const children = parent.children;
+        if (children.includes(this.blockElement.model)) return;
         this.remove();
       })
     );
