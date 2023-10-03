@@ -33,11 +33,14 @@ export function mountTextEditor(
     ? textElement.getCursorByCoord(focusCoord)
     : textElement.text.length;
   const textEditor = new EdgelessTextEditor();
+  textEditor.edgeless = edgeless;
+  textEditor.element = textElement;
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(textEditor);
-  textEditor.mount(textElement, edgeless);
-  textEditor.vEditor?.focusByIndex(cursorIndex);
+  textEditor.updateComplete.then(() => {
+    textEditor.vEditor?.focusByIndex(cursorIndex);
+  });
 
   edgeless.tools.switchToDefaultMode({
     elements: [textElement.id],
