@@ -6,7 +6,8 @@ import {
   offset,
   type Placement,
 } from '@floating-ui/dom';
-import { css, html, LitElement } from 'lit';
+import type { CSSResult } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -84,6 +85,35 @@ const updateArrowStyles = ({
   };
 };
 
+/**
+ * @example
+ * ```ts
+ * // Simple usage
+ * html`
+ * <blocksuite-tooltip>Content</blocksuite-tooltip>
+ * `
+ * // With placement
+ * html`
+ * <blocksuite-tooltip tip-position="top">
+ *   Content
+ * </blocksuite-tooltip>
+ * `
+ *
+ * // With custom properties
+ * html`
+ * <blocksuite-tooltip
+ *   .zIndex=${0}
+ *   .offset=${4}
+ *   .autoFlip=${true}
+ *   .arrow=${true}
+ *   .tooltipStyle=${css`:host { z-index: 0; --affine-tooltip: #fff; }`}
+ *   .allowInteractive=${false}
+ * >
+ *   Content
+ * </blocksuite-tooltip>
+ * `
+ * ```
+ */
 @customElement('blocksuite-tooltip')
 export class Tooltip extends LitElement {
   static override styles = css`
@@ -93,7 +123,13 @@ export class Tooltip extends LitElement {
   `;
 
   @property({ attribute: 'tip-position' })
-  placement?: Placement;
+  placement: Placement = 'top';
+
+  @property({ attribute: false })
+  zIndex: number | string = 'var(--affine-z-index-popover)';
+
+  @property({ attribute: false })
+  tooltipStyle: CSSResult = css``;
 
   /**
    * changes the placement of the floating element in order to keep it in view,
@@ -101,7 +137,7 @@ export class Tooltip extends LitElement {
    *
    * See https://floating-ui.com/docs/flip
    */
-  @property({ attribute: false, type: Boolean })
+  @property({ attribute: false })
   autoFlip = true;
 
   /**
@@ -158,21 +194,7 @@ export class Tooltip extends LitElement {
             .map(node => node.cloneNode(true));
           return html`
             <style>
-              ${styles}
-              :host {
-                z-index: var(--affine-z-index-popover);
-                ${
-                // All the styles are applied to the tooltip element
-                this.style.cssText
-              }
-              }
-              ${this.allowInteractive
-                ? null
-                : css`
-                    :host {
-                      pointer-events: none;
-                    }
-                  `}
+              ${this._getStyles()}
             </style>
             <div class="blocksuite-tooltip" role="tooltip">
               ${slottedChildren}
@@ -182,7 +204,7 @@ export class Tooltip extends LitElement {
         },
         computePosition: portalRoot => ({
           referenceElement: this.parentElement!,
-          placement: this.placement || 'top',
+          placement: this.placement,
           middleware: [
             this.autoFlip && flip(),
             offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
@@ -210,6 +232,29 @@ export class Tooltip extends LitElement {
 
   getPortal() {
     return this._hoverController.portal;
+  }
+
+  private _getStyles() {
+    return css`
+      ${styles}
+      :host {
+        z-index: ${unsafeCSS(this.zIndex)};
+        ${
+          // All the styles are applied to the portal element
+          unsafeCSS(this.style.cssText)
+        }
+      }
+
+      ${this.allowInteractive
+        ? css``
+        : css`
+            :host {
+              pointer-events: none;
+            }
+          `}
+
+      ${this.tooltipStyle}
+    `;
   }
 
   override render() {
