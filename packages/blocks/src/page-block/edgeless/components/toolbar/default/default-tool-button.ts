@@ -93,6 +93,7 @@ export class EdgelessDefaultToolButton extends WithDisposable(LitElement) {
         .tooltip=${type === 'pan'
           ? getTooltipWithShortcut('Hand', 'H')
           : getTooltipWithShortcut('Select', 'V')}
+        .tooltipOffset=${17}
         .active=${type === 'default' || type === 'pan'}
         .iconContainerPadding=${8}
         @click=${this._changeTool}

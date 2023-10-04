@@ -34,7 +34,7 @@ export function CodeOptionTemplate({
       }
       .affine-codeblock-option {
         box-shadow: var(--affine-shadow-2);
-        padding: 4px;
+        padding: 8px;
         border-radius: 8px;
         z-index: var(--affine-z-index-popover);
         background: var(--affine-background-overlay-panel-color);
@@ -55,7 +55,7 @@ export function CodeOptionTemplate({
         @click=${() => copyCode(model as CodeBlockModel)}
       >
         ${CopyIcon}
-        <blocksuite-tooltip tip-position="right"
+        <blocksuite-tooltip tip-position="right" .offset=${12}
           >Copy to Clipboard</blocksuite-tooltip
         >
       </icon-button>
@@ -66,7 +66,7 @@ export function CodeOptionTemplate({
         @click=${onClickWrap}
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
-        <blocksuite-tooltip tip-position="right"
+        <blocksuite-tooltip tip-position="right" .offset=${12}
           >${wrap ? 'Cancel wrap' : 'Wrap code'}</blocksuite-tooltip
         >
       </icon-button>
@@ -82,7 +82,9 @@ export function CodeOptionTemplate({
             }}
           >
             ${DeleteIcon}
-            <blocksuite-tooltip tip-position="right">Delete</blocksuite-tooltip>
+            <blocksuite-tooltip tip-position="right" .offset=${12}
+              >Delete</blocksuite-tooltip
+            >
           </icon-button>`}
     </div>
   `;

@@ -536,7 +536,7 @@ function BlockHubMenu(
       >
         ${BlockHubRoundedRectangleIcon}
         ${showTooltip
-          ? html`<blocksuite-tooltip tip-position="left"
+          ? html`<blocksuite-tooltip tip-position="left" .offset=${8}
               >Drag to insert blank line
             </blocksuite-tooltip>`
           : null}
@@ -571,7 +571,7 @@ function BlockHubMenu(
       >
         ${DatabaseTableViewIcon}
         ${showTooltip
-          ? html`<blocksuite-tooltip tip-position="left">
+          ? html`<blocksuite-tooltip tip-position="left" .offset=${8}>
               Drag to create a database
             </blocksuite-tooltip>`
           : null}

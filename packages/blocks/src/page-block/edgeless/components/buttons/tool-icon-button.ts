@@ -56,6 +56,9 @@ export class EdgelessToolIconButton extends LitElement {
   arrow = true;
 
   @property({ attribute: false })
+  tooltipOffset = 8;
+
+  @property({ attribute: false })
   active = false;
 
   @property({ attribute: false })
@@ -99,6 +102,7 @@ export class EdgelessToolIconButton extends LitElement {
           ? html`<blocksuite-tooltip
               tip-position=${this.tipPosition}
               .arrow=${this.arrow}
+              .offset=${this.tooltipOffset}
               >${tooltip}</blocksuite-tooltip
             >`
           : nothing}

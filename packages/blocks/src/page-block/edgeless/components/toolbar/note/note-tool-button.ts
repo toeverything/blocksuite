@@ -102,6 +102,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
+        .tooltipOffset=${17}
         .active=${type === 'note'}
         .iconContainerPadding=${8}
         @click=${() => {

@@ -165,8 +165,7 @@ export const linkPopupStyle = css`
   .affine-link-popover {
     display: flex;
     align-items: center;
-    height: 40px;
-    padding: 0 12px;
+    padding: 8px;
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);

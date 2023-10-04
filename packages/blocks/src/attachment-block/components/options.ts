@@ -62,13 +62,15 @@ export function AttachmentOptionsTemplate({
     >
       <icon-button size="24px" ?hidden=${true}>
         ${ViewIcon}
-        <blocksuite-tooltip>Preview</blocksuite-tooltip>
+        <blocksuite-tooltip .offset=${12}>Preview</blocksuite-tooltip>
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
       <icon-button size="24px" ?hidden=${true || readonly}>
         ${LinkIcon}
-        <blocksuite-tooltip>Turn into Link view</blocksuite-tooltip>
+        <blocksuite-tooltip .offset=${12}
+          >Turn into Link view</blocksuite-tooltip
+        >
       </icon-button>
       <icon-button
         size="24px"
@@ -79,7 +81,9 @@ export function AttachmentOptionsTemplate({
         }}"
       >
         ${EmbedWebIcon}
-        <blocksuite-tooltip>Turn into Embed view</blocksuite-tooltip>
+        <blocksuite-tooltip .offset=${12}
+          >Turn into Embed view</blocksuite-tooltip
+        >
       </icon-button>
       <div class="divider"></div>
 
@@ -106,7 +110,7 @@ export function AttachmentOptionsTemplate({
         }}"
       >
         ${EditIcon}
-        <blocksuite-tooltip>Rename</blocksuite-tooltip>
+        <blocksuite-tooltip .offset=${12}>Rename</blocksuite-tooltip>
       </icon-button>
       <icon-button
         size="24px"
@@ -116,7 +120,7 @@ export function AttachmentOptionsTemplate({
         }}
       >
         ${CaptionIcon}
-        <blocksuite-tooltip>Caption</blocksuite-tooltip>
+        <blocksuite-tooltip .offset=${12}>Caption</blocksuite-tooltip>
       </icon-button>
       <div class="divider" ?hidden=${readonly}></div>
       <icon-button
@@ -144,7 +148,7 @@ export function AttachmentOptionsTemplate({
         }}
       >
         ${MoreIcon}
-        <blocksuite-tooltip>More</blocksuite-tooltip>
+        <blocksuite-tooltip .offset=${12}>More</blocksuite-tooltip>
       </icon-button>
     </div>`;
 }

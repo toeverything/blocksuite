@@ -109,6 +109,7 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-toolbar-button
         .tooltip=${this._textMenu ? '' : getTooltipWithShortcut('Text', 'T')}
+        .tooltipOffset=${15}
         .active=${type === 'text'}
         .activeMode=${'background'}
         @click=${() => {
