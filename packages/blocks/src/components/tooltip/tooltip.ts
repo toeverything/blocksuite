@@ -147,6 +147,8 @@ export class Tooltip extends LitElement {
   arrow = true;
 
   /**
+   * Default is `4px`
+   *
    * See https://floating-ui.com/docs/offset
    */
   @property({ attribute: false })
@@ -206,7 +208,7 @@ export class Tooltip extends LitElement {
           referenceElement: this.parentElement!,
           placement: this.placement,
           middleware: [
-            this.autoFlip && flip(),
+            this.autoFlip && flip({ padding: 12 }),
             offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
             arrow({
               element: portalRoot.shadowRoot!.querySelector('.arrow')!,
