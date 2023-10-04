@@ -1,3 +1,4 @@
+import type { Placement } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -49,8 +50,7 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' | 'top-start' =
-    'top';
+  tipPosition: Placement = 'top';
 
   @property({ attribute: false })
   arrow = true;
@@ -96,12 +96,10 @@ export class EdgelessToolIconButton extends LitElement {
       >
         <slot></slot>
         ${tooltip
-          ? html`<tool-tip
-              inert
-              role="tooltip"
+          ? html`<blocksuite-tooltip
               tip-position=${this.tipPosition}
-              ?arrow=${this.arrow}
-              >${tooltip}</tool-tip
+              .arrow=${this.arrow}
+              >${tooltip}</blocksuite-tooltip
             >`
           : nothing}
       </div>

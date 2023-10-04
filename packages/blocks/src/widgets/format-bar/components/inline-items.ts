@@ -26,7 +26,7 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
           }}
         >
           ${icon}
-          <tool-tip inert role="tooltip">${name}</tool-tip>
+          <blocksuite-tooltip>${name}</blocksuite-tooltip>
         </icon-button>`
     )}
     <div class="divider"></div>

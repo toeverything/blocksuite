@@ -84,9 +84,7 @@ const updateArrowStyles = ({
   };
 };
 
-// TODO migrate to `blocksuite-tooltip`
-// @customElement('blocksuite-tooltip')
-@customElement('tool-tip')
+@customElement('blocksuite-tooltip')
 export class Tooltip extends LitElement {
   static override styles = css`
     :host {
@@ -223,6 +221,6 @@ export class Tooltip extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'tool-tip': Tooltip;
+    'blocksuite-tooltip': Tooltip;
   }
 }

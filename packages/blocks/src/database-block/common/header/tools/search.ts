@@ -183,9 +183,9 @@ export class DataViewHeaderToolsSearch extends BaseTool<
         />
         <div class="close-icon" @mousedown="${this._clearSearch}">
           ${DatabaseSearchClose}
-          <tool-tip inert arrow tip-position="top" role="tooltip">
+          <blocksuite-tooltip>
             <span class="code">Esc</span> to clear all
-          </tool-tip>
+          </blocksuite-tooltip>
         </div>
       </label>
     `;

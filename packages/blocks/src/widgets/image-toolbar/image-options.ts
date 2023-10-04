@@ -83,7 +83,7 @@ export function ImageOptionsTemplate({
               }}
             >
               ${BookmarkIcon}
-              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+              <blocksuite-tooltip>Turn into Card view</blocksuite-tooltip>
             </icon-button>`
           : nothing}
         <icon-button
@@ -92,18 +92,16 @@ export function ImageOptionsTemplate({
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
+          <blocksuite-tooltip tip-position="right">Caption</blocksuite-tooltip>
         </icon-button>
         <icon-button size="32px" @click=${() => downloadImage(model)}>
           ${DownloadIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
-            >Download</tool-tip
-          >
+          <blocksuite-tooltip tip-position="right">Download</blocksuite-tooltip>
         </icon-button>
         <icon-button size="32px" @click=${() => copyImage(model)}>
           ${CopyIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
-            >Copy to clipboard</tool-tip
+          <blocksuite-tooltip tip-position="right"
+            >Copy to clipboard</blocksuite-tooltip
           >
         </icon-button>
         <icon-button
@@ -116,7 +114,7 @@ export function ImageOptionsTemplate({
           }}"
         >
           ${DeleteIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
+          <blocksuite-tooltip tip-position="right">Delete</blocksuite-tooltip>
         </icon-button>
         <icon-button
           size="32px"
@@ -128,8 +126,8 @@ export function ImageOptionsTemplate({
           }}"
         >
           ${HighLightDuotoneIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
-            >Edit with LEDITS</tool-tip
+          <blocksuite-tooltip tip-position="right"
+            >Edit with LEDITS</blocksuite-tooltip
           >
         </icon-button>
       </div>

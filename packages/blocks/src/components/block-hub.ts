@@ -464,18 +464,15 @@ function BlockHubCards(
                     <div class="description">${description}</div>
                   </div>
                   <div class="card-icon-container">${icon}</div>
-                  <tool-tip
-                    tip-position=${shouldScroll &&
-                    index === blockHubItems.length - 1
-                      ? 'top'
-                      : 'bottom'}
-                    style="${showTooltip
-                      ? ''
-                      : 'display: none'}; z-index: ${blockHubItems.length -
-                    index}"
-                    arrow
-                    >${tooltip}</tool-tip
-                  >
+                  ${showTooltip
+                    ? html`<blocksuite-tooltip
+                        tip-position=${shouldScroll &&
+                        index === blockHubItems.length - 1
+                          ? 'top'
+                          : 'bottom'}
+                        >${tooltip}</blocksuite-tooltip
+                      >`
+                    : null}
                 </div>
               </div>
             </div>
@@ -538,14 +535,11 @@ function BlockHubMenu(
         affine-type="text"
       >
         ${BlockHubRoundedRectangleIcon}
-        <tool-tip
-          inert
-          role="tooltip"
-          tip-position="left"
-          arrow
-          ?hidden=${!showTooltip}
-          >Drag to insert blank line
-        </tool-tip>
+        ${showTooltip
+          ? html`<blocksuite-tooltip tip-position="left"
+              >Drag to insert blank line
+            </blocksuite-tooltip>`
+          : null}
       </div>
       <div
         class="block-hub-icon-container"
@@ -576,15 +570,11 @@ function BlockHubMenu(
         selected=${visibleCardType === 'database' ? 'true' : 'false'}
       >
         ${DatabaseTableViewIcon}
-        <tool-tip
-          inert
-          role="tooltip"
-          tip-position="left"
-          arrow
-          ?hidden=${!showTooltip}
-        >
-          Drag to create a database
-        </tool-tip>
+        ${showTooltip
+          ? html`<blocksuite-tooltip tip-position="left">
+              Drag to create a database
+            </blocksuite-tooltip>`
+          : null}
       </div>
       <div class="divider"></div>
     </div>
@@ -1105,8 +1095,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
             ? CrossIcon
             : [
                 BlockHubIcon,
-                html`<tool-tip tip-position="left" role="tooltip"
-                  >Insert blocks</tool-tip
+                html`<blocksuite-tooltip tip-position="left"
+                  >Insert blocks</blocksuite-tooltip
                 >`,
               ]}
         </div>

@@ -94,7 +94,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
             }}
           >
             ${icon}
-            <tool-tip inert role="tooltip">${tooltip}</tool-tip>
+            <blocksuite-tooltip>${tooltip}</blocksuite-tooltip>
           </icon-button>
           ${divider ? html`<div class="divider"></div>` : nothing} `;
       }
@@ -113,7 +113,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
             }}
           >
             ${MoreIcon}
-            <tool-tip inert role="tooltip">More</tool-tip>
+            <blocksuite-tooltip>More</blocksuite-tooltip>
           </icon-button>
         </div>
       </div>

@@ -9,10 +9,8 @@ export const ActionItems = (root: BlockSuiteRoot) =>
     .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
       const enabled = enabledWhen(root);
       const toolTip = enabled
-        ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
-        : html`<tool-tip tip-position="top" inert role="tooltip"
-            >${disabledToolTip}</tool-tip
-          >`;
+        ? html`<blocksuite-tooltip>${name}</blocksuite-tooltip>`
+        : html`<blocksuite-tooltip>${disabledToolTip}</blocksuite-tooltip>`;
       return html`<icon-button
         size="32px"
         data-testid=${id}
