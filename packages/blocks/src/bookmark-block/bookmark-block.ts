@@ -201,12 +201,17 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
   private _whenHover = new HoverController(this, ({ abortController }) => {
     this._optionsAbortController = abortController;
     return {
-      template: html`<bookmark-toolbar
-        .model=${this.model}
-        .onSelected=${this._onToolbarSelected}
-        .root=${this}
-        .abortController=${abortController}
-      ></bookmark-toolbar>`,
+      template: html`<style>
+          :host {
+            z-index: 1;
+          }
+        </style>
+        <bookmark-toolbar
+          .model=${this.model}
+          .onSelected=${this._onToolbarSelected}
+          .root=${this}
+          .abortController=${abortController}
+        ></bookmark-toolbar>`,
       computePosition: {
         referenceElement: this,
         placement: 'top-end',
