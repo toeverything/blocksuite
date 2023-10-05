@@ -1,9 +1,11 @@
 import {
+  assertExists,
   DisposableGroup,
   whenHover,
   type WhenHoverOptions,
 } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
+import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import type { AdvancedPortalOptions } from './portal.js';
 import { createLitPortal } from './portal.js';
@@ -18,6 +20,13 @@ type HoverPortalOptions = Omit<AdvancedPortalOptions, 'abortController'>;
 
 type HoverOptions = {
   /**
+   * Transition style when the portal is shown or hidden.
+   */
+  transition: {
+    in: StyleInfo;
+    out: StyleInfo;
+  } | null;
+  /**
    * Set the portal as hover element automatically.
    * @default true
    */
@@ -25,6 +34,16 @@ type HoverOptions = {
 } & WhenHoverOptions;
 
 const DEFAULT_HOVER_OPTIONS: HoverOptions = {
+  transition: {
+    in: {
+      opacity: '1',
+      transition: 'opacity 0.1s ease-in-out',
+    },
+    out: {
+      opacity: '0',
+      transition: 'opacity 0.1s ease-in-out',
+    },
+  },
   setPortalAsFloating: true,
 };
 
@@ -68,7 +87,21 @@ export class HoverController implements ReactiveController {
     // Start a timer when the host is connected
     const { setReference, setFloating, dispose } = whenHover(isHover => {
       if (!isHover) {
-        this._abortController?.abort();
+        const abortController = this._abortController;
+        if (!abortController) return;
+        if (!this._portal || !this._hoverOptions.transition) {
+          abortController.abort();
+          return;
+        }
+        // Transition out
+        Object.assign(this._portal.style, this._hoverOptions.transition.out);
+        this._portal.addEventListener(
+          'transitionend',
+          () => {
+            abortController.abort();
+          },
+          { signal: abortController.signal }
+        );
         return;
       }
       if (this._abortController) return;
@@ -88,6 +121,15 @@ export class HoverController implements ReactiveController {
         ...portalOptions,
         abortController: this._abortController,
       });
+
+      const transition = this._hoverOptions.transition;
+      if (transition) {
+        Object.assign(this._portal.style, transition.out);
+        setTimeout(() => {
+          assertExists(this._portal);
+          Object.assign(this._portal.style, transition.in);
+        });
+      }
 
       if (this._hoverOptions.setPortalAsFloating) {
         setFloating(this._portal);
