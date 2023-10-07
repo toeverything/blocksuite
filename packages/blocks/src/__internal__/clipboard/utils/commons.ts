@@ -1,9 +1,7 @@
 import type { TextSelection } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
 import type { SelectedBlock } from '../../content-parser/types.js';
@@ -11,7 +9,6 @@ import { getService } from '../../service/index.js';
 import { registerAllBlocks } from '../../service/legacy-services/index.js';
 import {
   getCurrentNativeRange,
-  getEdgelessCanvasTextEditor,
   hasNativeSelection,
   resetNativeSelection,
   type SerializedBlock,
@@ -305,32 +302,4 @@ export async function clipboardData2Blocks(
 // https://learn.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format
 export function removeFragmentFromHtmlClipboardString(html: string) {
   return html.replace(/<!--StartFragment-->([^]*)<!--EndFragment-->/g, '$1');
-}
-
-export function copyOnPhasorElementWithText(
-  edgeless: EdgelessPageBlockComponent
-) {
-  const edgelessTextEditor = getEdgelessCanvasTextEditor(edgeless);
-  if (edgelessTextEditor) {
-    const vEditor = edgelessTextEditor.vEditor;
-    assertExists(vEditor);
-    const vRange = vEditor.getVRange();
-    if (vRange) {
-      const text = vEditor.yText
-        .toString()
-        .slice(vRange.index, vRange.index + vRange.length);
-      const clipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, text);
-
-      edgelessTextEditor.setKeeping(true);
-      performNativeCopy([clipboardItem]);
-      edgelessTextEditor.setKeeping(false);
-
-      // `performNativeCopy` will trigger selection change and make virgo
-      // execute `setVRange(null)`, so we need to use `setTimeout` to
-      // make sure `setVRange(vRange)` is executed after `setVRange(null)`.
-      setTimeout(() => {
-        vEditor.setVRange(vRange);
-      });
-    }
-  }
 }

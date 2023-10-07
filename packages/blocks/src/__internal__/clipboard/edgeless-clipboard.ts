@@ -39,7 +39,6 @@ import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
   copyBlocksInPage,
-  copyOnPhasorElementWithText,
   getBlockClipboardInfo,
 } from './utils/commons.js';
 import {
@@ -152,6 +151,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const { state, elements } = this.selection;
     if (state.editing) {
+      if (isPhasorElementWithText(elements[0])) return;
       deleteModelsByTextSelection(this._edgeless.root);
       return;
     }
@@ -176,11 +176,8 @@ export class EdgelessClipboard implements Clipboard {
     const elements = getCopyElements(this.surface, this.selection.elements);
     // when note active, handle copy like page mode
     if (state.editing) {
-      if (isPhasorElementWithText(elements[0])) {
-        copyOnPhasorElementWithText(this._edgeless);
-      } else {
-        await copyBlocksInPage(this._edgeless.root);
-      }
+      if (isPhasorElementWithText(elements[0])) return;
+      await copyBlocksInPage(this._edgeless.root);
       return;
     }
     const data = await prepareClipboardData(elements);

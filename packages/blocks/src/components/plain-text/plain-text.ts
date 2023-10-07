@@ -165,6 +165,59 @@ export class PlainText extends WithDisposable(ShadowlessElement) {
     this.disposables.addFromEvent(this, 'scroll', () => {
       this._lastScrollLeft = this.scrollLeft;
     });
+    this.disposables.addFromEvent(this, 'copy', (e: ClipboardEvent) => {
+      const vEditor = this.vEditor;
+      assertExists(vEditor);
+
+      const vRange = vEditor.getVRange();
+      if (!vRange) return;
+
+      const text = vEditor.yTextString.slice(
+        vRange.index,
+        vRange.index + vRange.length
+      );
+
+      e.clipboardData?.setData('text/plain', text);
+      e.preventDefault();
+    });
+    this.disposables.addFromEvent(this, 'cut', (e: ClipboardEvent) => {
+      const vEditor = this.vEditor;
+      assertExists(vEditor);
+
+      const vRange = vEditor.getVRange();
+      if (!vRange) return;
+
+      const text = vEditor.yTextString.slice(
+        vRange.index,
+        vRange.index + vRange.length
+      );
+      vEditor.deleteText(vRange);
+      vEditor.setVRange({
+        index: vRange.index,
+        length: 0,
+      });
+
+      e.clipboardData?.setData('text/plain', text);
+      e.preventDefault();
+    });
+    this.disposables.addFromEvent(this, 'paste', (e: ClipboardEvent) => {
+      const vEditor = this.vEditor;
+      assertExists(vEditor);
+
+      const vRange = vEditor.getVRange();
+      if (!vRange) return;
+
+      const text = e.clipboardData?.getData('text/plain');
+      if (!text) return;
+
+      vEditor.insertText(vRange, text);
+      vEditor.setVRange({
+        index: vRange.index + text.length,
+        length: 0,
+      });
+
+      e.preventDefault();
+    });
   }
 
   override updated() {
