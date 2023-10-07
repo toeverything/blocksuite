@@ -54,36 +54,35 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     assertExists(dispatcher);
     this.frameBlock.titleHide = true;
 
+    this.disposables.add(
+      dispatcher.add('doubleClick', () => {
+        return true;
+      })
+    );
+    this.disposables.add(
+      dispatcher.add('keyDown', ctx => {
+        const state = ctx.get('keyboardState');
+        if (state.raw.key === 'Enter') {
+          this._unmount();
+          return true;
+        }
+        requestAnimationFrame(() => {
+          this.requestUpdate();
+        });
+        return false;
+      })
+    );
+    this.disposables.add(
+      this.edgeless.slots.viewportUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
     this.updateComplete.then(() => {
       this.vEditor.selectAll();
-
       this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
         this._unmount();
       });
-
-      this.disposables.add(
-        dispatcher.add('doubleClick', () => {
-          return true;
-        })
-      );
-      this.disposables.add(
-        dispatcher.add('keyDown', ctx => {
-          const state = ctx.get('keyboardState');
-          if (state.raw.key === 'Enter') {
-            this._unmount();
-            return true;
-          }
-          requestAnimationFrame(() => {
-            this.requestUpdate();
-          });
-          return false;
-        })
-      );
-      this._disposables.add(
-        this.edgeless.slots.viewportUpdated.on(() => {
-          this.requestUpdate();
-        })
-      );
     });
   }
 
@@ -100,10 +99,9 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override render() {
     const viewport = this.edgeless.surface.viewport;
-    let virgoStyle = styleMap({});
     const bound = Bound.deserialize(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    virgoStyle = styleMap({
+    const virgoStyle = styleMap({
       transformOrigin: 'top left',
       borderRadius: '35px',
       width: 'fit-content',

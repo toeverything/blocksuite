@@ -1,16 +1,19 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../../index.js';
-import type { ShapeElement } from '../../../surface-block/index.js';
+import { ShapeElement } from '../../../surface-block/index.js';
 import {
   Bound,
   type IModelCoord,
   PhasorElementType,
   TextElement,
 } from '../../../surface-block/index.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
+import {
+  GET_DEFAULT_LINE_COLOR,
+  GET_DEFAULT_TEXT_COLOR,
+} from '../components/panel/color-panel.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
@@ -52,12 +55,22 @@ export function mountShapeEditor(
   shapeElement: ShapeElement,
   edgeless: EdgelessPageBlockComponent
 ) {
+  if (!shapeElement.text) {
+    const text = new Workspace.Y.Text();
+    edgeless.surface.updateElement<PhasorElementType.SHAPE>(shapeElement.id, {
+      text,
+      color: GET_DEFAULT_LINE_COLOR(),
+    });
+  }
+  const updatedElement = edgeless.surface.pickById(shapeElement.id);
+  assertInstanceOf(updatedElement, ShapeElement);
+
   const shapeEditor = new EdgelessShapeTextEditor();
+  shapeEditor.element = updatedElement;
+  shapeEditor.edgeless = edgeless;
   const pageBlockContainer = edgeless.pageBlockContainer;
 
   pageBlockContainer.appendChild(shapeEditor);
-  shapeEditor.mount(shapeElement, edgeless);
-  shapeEditor.vEditor?.focusEnd();
   edgeless.tools.switchToDefaultMode({
     elements: [shapeElement.id],
     editing: true,
