@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../consts.js';
 import { matchFlavours } from './model.js';
 import {
   type BlockComponentElement,
@@ -16,7 +17,11 @@ import { type EditingState } from './types.js';
 /**
  * A dropping type.
  */
-export type DroppingType = 'none' | 'before' | 'after' | 'database';
+/**
+ * Question: Shall we add some comments here to describe each dropping type's meaning.
+ * I'd like to add a new type for drop a block into another.
+ */
+export type DroppingType = 'none' | 'before' | 'after' | 'database' | 'in';
 
 export type DropResult = {
   type: DroppingType;
@@ -86,6 +91,16 @@ export function calcDropTarget(
     const before = distanceToTop < distanceToBottom;
     type = before ? 'before' : 'after';
 
+    // Question: I still don't know what is database type for?
+    const hasChild = (element as BlockComponentElement).childBlockElements
+      .length;
+    if (
+      !hasChild &&
+      point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    ) {
+      type = 'in';
+    }
+
     return {
       type,
       rect: Rect.fromLWTH(
@@ -107,6 +122,15 @@ export function calcDropTarget(
   const before = distanceToTop < distanceToBottom;
 
   type = before ? 'before' : 'after';
+  // If drop in target has children, we can use insert before or after children
+  // to achieve the same effect.
+  const hasChild = (element as BlockComponentElement).childBlockElements.length;
+  if (
+    !hasChild &&
+    point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+  ) {
+    type = 'in';
+  }
   let offsetY = 4;
 
   if (type === 'before') {
@@ -163,6 +187,11 @@ export function calcDropTarget(
     top -= offsetY;
   } else {
     top += domRect.height + offsetY;
+  }
+
+  if (type === 'in') {
+    domRect.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
+    domRect.width -= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
   }
 
   return {
