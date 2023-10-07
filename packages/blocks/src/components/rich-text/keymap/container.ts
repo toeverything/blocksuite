@@ -8,10 +8,6 @@ import {
   type VirgoRootElement,
 } from '@blocksuite/virgo';
 
-import {
-  checkFirstLine,
-  checkLastLine,
-} from '../../../__internal__/utils/check-line.js';
 import { matchFlavours } from '../../../__internal__/utils/model.js';
 import { bracketPairs } from '../../../common/bracket-pairs.js';
 import { formatConfig } from '../../../common/format/config.js';
@@ -132,10 +128,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         length: 0,
       });
       assertExists(range);
-      if (
-        !vEditor.yTextString.slice(0, vRange.index).includes('\n') &&
-        checkFirstLine(range)
-      ) {
+      if (vEditor.isFirstLine(vRange)) {
         _preventDefault(ctx);
         return;
       }
@@ -161,10 +154,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         length: 0,
       });
       assertExists(range);
-      if (
-        checkLastLine(range, vEditor.rootElement) &&
-        getNextBlock(blockElement)
-      ) {
+      if (vEditor.isLastLine(vRange) && getNextBlock(blockElement)) {
         _preventDefault(ctx);
         return;
       }

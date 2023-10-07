@@ -135,7 +135,13 @@ export class VEditor<
   getTextPoint = this.rangeService.getTextPoint;
   getLine = this.rangeService.getLine;
   isVRangeValid = this.rangeService.isVRangeValid;
+  isFirstLine = this.rangeService.isFirstLine;
+  isLastLine = this.rangeService.isLastLine;
   setVRange = this.rangeService.setVRange;
+  focusStart = this.rangeService.focusStart;
+  focusEnd = this.rangeService.focusEnd;
+  selectAll = this.rangeService.selectAll;
+  focusIndex = this.rangeService.focusIndex;
   syncVRange = this.rangeService.syncVRange;
 
   // Expose delta service API
@@ -231,30 +237,6 @@ export class VEditor<
 
   get isReadonly() {
     return this._isReadonly;
-  }
-
-  /**
-   * the vRange is synced to the native selection asynchronically
-   */
-  focusEnd(): void {
-    this.rangeService.setVRange({
-      index: this.yText.length,
-      length: 0,
-    });
-  }
-
-  selectAll(): void {
-    this.rangeService.setVRange({
-      index: 0,
-      length: this.yText.length,
-    });
-  }
-
-  focusByIndex(index: number): void {
-    this.rangeService.setVRange({
-      index: index,
-      length: 0,
-    });
   }
 
   deleteText(vRange: VRange): void {

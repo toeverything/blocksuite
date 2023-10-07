@@ -127,7 +127,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
               }
               return next({ currentSelectionPath: blockSelection.path });
             })
-            .getPrevBlock({})
+            .getPrevBlock()
             .inline((ctx, next) => {
               const { prevBlock } = ctx;
               assertExists(prevBlock);

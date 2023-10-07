@@ -283,11 +283,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     .affine-edgeless-selected-rect .handle[aria-label='bottom'] .resize:after {
       bottom: -0.5px;
     }
-
-    edgeless-component-toolbar {
-      /* greater than handle */
-      z-index: 11;
-    }
   `;
 
   @property({ attribute: false })

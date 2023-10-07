@@ -12,7 +12,6 @@ import {
   enterPlaygroundRoom,
   fillLine,
   focusRichText,
-  focusRichTextEnd,
   focusTitle,
   getCenterPosition,
   getCursorBlockIdAndHeight,
@@ -1535,7 +1534,9 @@ test('press ArrowLeft in the start of first paragraph should not focus on title'
   await assertTitle(page, '');
 });
 
-test('press ArrowUp in the edge of two line', async ({ page }) => {
+test('press ArrowUp and ArrowDown in the edge of two line', async ({
+  page,
+}) => {
   await enterPlaygroundRoom(page);
   await initEmptyParagraphState(page);
 
@@ -1546,29 +1547,125 @@ test('press ArrowUp in the edge of two line', async ({ page }) => {
     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
   );
   await waitNextFrame(page);
+  // - aaa... (no \n)
+  //   a|
+  await pressEnter(page);
+  await waitNextFrame(page);
+  await type(page, 'b');
+  await pressShiftEnter(page);
+  await waitNextFrame(page);
+  await pressEnter(page);
+  await assertRichTextVRange(page, 2, 0);
+  // - aaa... (no \n)
+  //   a
+  // - b  (have \n)
+  //
+  // - |
+
+  await pressArrowUp(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 1, 2);
+  // - aaa... (no \n)
+  //   a
+  // - b  (have \n)
+  //   |
+  // -
+
+  await pressArrowUp(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 1, 0);
+  // - aaa... (no \n)
+  //   a
+  // - |b  (have \n)
+  //
+  // -
+
+  await pressArrowRight(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 1, 1);
+  // - aaa... (no \n)
+  //   a
+  // - b|  (have \n)
+  //
+  // -
+
+  await pressArrowUp(page);
   await pressArrowLeft(page);
   await waitNextFrame(page);
+  // if in local it should be 0, 93
   await assertRichTextVRange(page, 0, 90);
+  // - aaa... (no \n)
+  //   |a
+  // - b  (have \n)
+  //
+  // -
 
-  // aaa...
-  // |a
   await pressArrowUp(page);
-  // |aaa...
-  // a
   await waitNextFrame(page);
   await assertRichTextVRange(page, 0, 0);
+  // - |aaa... (no \n)
+  //   a
+  // - b  (have \n)
+  //
+  // -
+
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertTitle(page, '');
   await type(page, 'title');
   await assertTitle(page, 'title');
 
-  await focusRichTextEnd(page, 0);
-  await pressEnter(page);
+  await pressArrowDown(page);
   await waitNextFrame(page);
-  await pressShiftEnter(page);
+  await assertRichTextVRange(page, 0, 0);
+  // - |aaa... (no \n)
+  //   a
+  // - b  (have \n)
+  //
+  // -
+
+  await pressArrowDown(page);
+  await waitNextFrame(page);
+  // if in local it should be 0, 93
+  await assertRichTextVRange(page, 0, 90);
+  // - aaa... (no \n)
+  //   |a
+  // - b  (have \n)
+  //
+  // -
+
+  await pressArrowDown(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 1, 0);
+  // - aaa... (no \n)
+  //   a
+  // - |b  (have \n)
+  //
+  // -
+
+  await pressArrowRight(page);
   await waitNextFrame(page);
   await assertRichTextVRange(page, 1, 1);
-  await pressArrowUp(page);
-  await assertRichTextVRange(page, 1, 0);
+  // - aaa... (no \n)
+  //   a
+  // - b|  (have \n)
+  //
+  // -
+
+  await pressArrowDown(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 1, 2);
+  // - aaa... (no \n)
+  //   a
+  // - b  (have \n)
+  //   |
+  // -
+
+  await pressArrowDown(page);
+  await waitNextFrame(page);
+  await assertRichTextVRange(page, 2, 0);
+  // - aaa... (no \n)
+  //   a
+  // - b  (have \n)
+  //
+  // - |
 });
