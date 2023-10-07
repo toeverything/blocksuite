@@ -75,6 +75,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
         referenceElement: this.bookmarkBarElement,
         placement: 'top-end',
         middleware: [flip(), offset(4)],
+        autoUpdate: true,
       },
       abortController: this._moreMenuAbortController,
     });
