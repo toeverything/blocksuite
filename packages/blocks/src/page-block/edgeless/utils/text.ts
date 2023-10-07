@@ -39,7 +39,7 @@ export function mountTextEditor(
 
   pageBlockContainer.appendChild(textEditor);
   textEditor.updateComplete.then(() => {
-    textEditor.vEditor?.focusByIndex(cursorIndex);
+    textEditor.vEditor?.focusIndex(cursorIndex);
   });
 
   edgeless.tools.switchToDefaultMode({
