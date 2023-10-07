@@ -100,3 +100,4 @@ Example:
 - CatsJuice @catsjuice 2023/08/31
 - mukeshkuiry @mukeshkuiry 2023/09/05
 - yunnian @yunnian 2023/09/11
+- 微扰理论 Qinghao Huang, @wfnuser, 2023/10/07
