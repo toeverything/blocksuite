@@ -511,12 +511,14 @@ export async function focusDatabaseTitle(page: Page) {
   await dbTitle.click();
 
   await page.evaluate(() => {
-    const dbTitle = document.querySelector('affine-database-title');
+    const dbTitle = document.querySelector(
+      'affine-database-title rich-text'
+    ) as RichText | null;
     if (!dbTitle) {
       throw new Error('Cannot find database title');
     }
 
-    dbTitle.titleVInput?.vEditor.focusEnd();
+    dbTitle.vEditor.focusEnd();
   });
   await waitNextFrame(page);
 }

@@ -151,6 +151,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const { state, elements } = this.selection;
     if (state.editing) {
+      // use build-in cut handler in rich-text when cut in surface text element
       if (isPhasorElementWithText(elements[0])) return;
       deleteModelsByTextSelection(this._edgeless.root);
       return;
@@ -176,6 +177,7 @@ export class EdgelessClipboard implements Clipboard {
     const elements = getCopyElements(this.surface, this.selection.elements);
     // when note active, handle copy like page mode
     if (state.editing) {
+      // use build-in copy handler in rich-text when copy in surface text element
       if (isPhasorElementWithText(elements[0])) return;
       await copyBlocksInPage(this._edgeless.root);
       return;
@@ -196,10 +198,9 @@ export class EdgelessClipboard implements Clipboard {
     e.preventDefault();
     const { state, elements } = this.selection;
     if (state.editing) {
-      if (!isPhasorElementWithText(elements[0])) {
-        this._pasteInTextNote(e);
-      }
-      // use build-in paste handler in virgo-input when paste in surface text element
+      // use build-in paste handler in rich-text when paste in surface text element
+      if (isPhasorElementWithText(elements[0])) return;
+      await this._pasteInTextNote(e);
       return;
     }
 
