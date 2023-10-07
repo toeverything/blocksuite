@@ -614,8 +614,8 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         <rich-text
           .yText=${this.model.text.yText}
           .undoManager=${this.model.page.history}
-          .attributeRender=${this.attributesSchema}
-          .attributesSchema=${this.getAttributeRender()}
+          .attributesSchema=${this.attributesSchema}
+          .attributeRender=${this.getAttributeRender()}
           .readonly=${this.model.page.readonly}
           .vRangeProvider=${this._vRangeProvider}
           .enableClipboard=${false}
