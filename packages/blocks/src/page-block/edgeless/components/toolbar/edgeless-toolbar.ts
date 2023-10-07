@@ -40,23 +40,26 @@ import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
 
-function launchIntoFullscreen(element: Element) {
+export function launchIntoFullscreen(element: Element) {
   if (element.requestFullscreen) {
     element.requestFullscreen();
-    // @ts-ignore
-  } else if (element.mozRequestFullScreen) {
+  } else if (
+    'mozRequestFullScreen' in element &&
+    element.mozRequestFullScreen instanceof Function
+  ) {
     // Firefox
-    // @ts-ignore
     element.mozRequestFullScreen();
-    // @ts-ignore
-  } else if (element.webkitRequestFullscreen) {
+  } else if (
+    'webkitRequestFullscreen' in element &&
+    element.webkitRequestFullscreen instanceof Function
+  ) {
     // Chrome, Safari and Opera
-    // @ts-ignore
     element.webkitRequestFullscreen();
-    // @ts-ignore
-  } else if (element.msRequestFullscreen) {
+  } else if (
+    'msRequestFullscreen' in element &&
+    element.msRequestFullscreen instanceof Function
+  ) {
     // IE/Edge
-    // @ts-ignore
     element.msRequestFullscreen();
   }
 }
