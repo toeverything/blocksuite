@@ -1,11 +1,12 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import { html, nothing } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { html } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { z } from 'zod';
 
 import { getBlockElementById } from '../../../../__internal__/index.js';
-import { VirgoInput } from '../../../../components/virgo-input/virgo-input.js';
+import type { RichText } from '../../../../components/rich-text/rich-text.js';
 import type {
   FrameBlockComponent,
   FrameBlockModel,
@@ -17,41 +18,46 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 export class EdgelessFrameTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
-  @query('.virgo-container')
-  private _virgoContainer!: HTMLDivElement;
+  @query('rich-text')
+  richText!: RichText;
 
-  private _vInput: VirgoInput | null = null;
+  @property({ attribute: false })
+  frameModel!: FrameBlockModel;
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
   get vEditor() {
-    assertExists(this._vInput);
-    return this._vInput.vEditor;
+    assertExists(this.richText.vEditor);
+    return this.richText.vEditor;
+  }
+  get vEditorContainer() {
+    return this.vEditor.rootElement;
   }
 
-  private _frame: FrameBlockModel | null = null;
-  private _block: FrameBlockComponent | null = null;
-  private _edgeless: EdgelessPageBlockComponent | null = null;
+  get frameBlock() {
+    const block = getBlockElementById(
+      this.frameModel.id,
+      this.edgeless
+    ) as FrameBlockComponent | null;
+    assertExists(block);
+    return block;
+  }
 
-  mount(frame: FrameBlockModel, edgeless: EdgelessPageBlockComponent) {
-    this._frame = frame;
-    this._block = getBlockElementById(
-      this._frame.id,
-      edgeless
-    ) as FrameBlockComponent;
-    this._block.titleHide = true;
-    this._edgeless = edgeless;
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.richText?.updateComplete;
+    return result;
+  }
 
-    this._vInput = new VirgoInput({
-      yText: this._frame.title.yText,
-    });
+  override firstUpdated(): void {
+    const dispatcher = this.edgeless.dispatcher;
+    assertExists(dispatcher);
+    this.frameBlock.titleHide = true;
 
-    this.requestUpdate();
-    requestAnimationFrame(() => {
-      assertExists(this._vInput);
-      assertExists(this._frame);
-      this._vInput.mount(this._virgoContainer);
-      this._vInput.vEditor.selectAll();
-      const dispatcher = this._edgeless?.dispatcher;
-      assertExists(dispatcher);
-      this.disposables.addFromEvent(this._virgoContainer, 'blur', () => {
+    this.updateComplete.then(() => {
+      this.vEditor.selectAll();
+
+      this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
         this._unmount();
       });
 
@@ -74,7 +80,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
         })
       );
       this._disposables.add(
-        edgeless.slots.viewportUpdated.on(() => {
+        this.edgeless.slots.viewportUpdated.on(() => {
           this.requestUpdate();
         })
       );
@@ -82,49 +88,43 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   private _unmount() {
-    this._block && (this._block.titleHide = false);
-    this._vInput?.unmount();
-    this._disposables.dispose();
-    assertExists(this._frame);
-    this.remove();
-    assertExists(this._edgeless);
-    this._edgeless.selectionManager.setSelection({
+    // dispose in advance to avoid execute `this.remove()` twice
+    this.disposables.dispose();
+    this.frameBlock.titleHide = false;
+    this.edgeless.selectionManager.setSelection({
       elements: [],
       editing: false,
     });
-    this._frame = null;
+    this.remove();
   }
 
   override render() {
-    const viewport = this._edgeless?.surface.viewport;
+    const viewport = this.edgeless.surface.viewport;
     let virgoStyle = styleMap({});
-    if (viewport && this._frame && this._edgeless) {
-      if (!this._block) {
-        console.warn('block not found');
-        return nothing;
-      }
-      const bound = Bound.deserialize(this._frame.xywh);
+    const bound = Bound.deserialize(this.frameModel.xywh);
+    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    virgoStyle = styleMap({
+      transformOrigin: 'top left',
+      borderRadius: '35px',
+      width: 'fit-content',
+      padding: '4px 10px',
+      fontSize: '14px',
+      position: 'absolute',
 
-      const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-      virgoStyle = styleMap({
-        transformOrigin: 'top left',
-        borderRadius: '35px',
-        width: 'fit-content',
-        padding: '4px 10px',
-        fontSize: '14px',
-        position: 'absolute',
-
-        left: x + 'px',
-        top: y - 38 + 'px',
-        minWidth: '8px',
-        fontFamily: 'sans-serif',
-        color: 'white',
-        background: this._block.color,
-        outline: 'none',
-        zIndex: '1',
-      });
-    }
-    return html`<div style=${virgoStyle} class="virgo-container"></div>`;
+      left: x + 'px',
+      top: y - 38 + 'px',
+      minWidth: '8px',
+      fontFamily: 'sans-serif',
+      color: 'white',
+      background: this.frameBlock.color,
+      outline: 'none',
+      zIndex: '1',
+    });
+    return html`<rich-text
+      .yText=${this.frameModel.title.yText}
+      .attributesSchema=${z.object({})}
+      style=${virgoStyle}
+    ></rich-text>`;
   }
 }
 

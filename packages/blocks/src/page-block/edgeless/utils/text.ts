@@ -69,10 +69,10 @@ export function mountFrameEditor(
   edgeless: EdgelessPageBlockComponent
 ) {
   const frameEditor = new EdgelessFrameTitleEditor();
+  frameEditor.frameModel = frame;
+  frameEditor.edgeless = edgeless;
 
   edgeless.pageBlockContainer.appendChild(frameEditor);
-  frameEditor.mount(frame, edgeless);
-  frameEditor.vEditor?.focusEnd();
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
     editing: true,
