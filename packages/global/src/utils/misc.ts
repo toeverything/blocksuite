@@ -1,3 +1,5 @@
+import { sleep } from './function.js';
+
 export type WhenHoverOptions = {
   leaveDelay?: number;
   /**
@@ -11,6 +13,78 @@ export type WhenHoverOptions = {
    * @default true
    */
   alwayRunWhenNoFloating?: boolean;
+};
+
+type HoverMiddleware = (ctx: {
+  event: Event;
+  referenceElement?: Element;
+  floatingElement?: Element;
+}) => boolean | Promise<boolean>;
+
+const dedupe = (keepWhenFloatingNotReady = true): HoverMiddleware => {
+  const SKIP = false;
+  const KEEP = true;
+  let hoverState = false;
+  return ({ event, floatingElement }) => {
+    const curState = hoverState;
+    if (event.type === 'mouseover') {
+      // hover in
+      hoverState = true;
+      if (curState !== hoverState)
+        // state changed, so we should keep the event
+        return KEEP;
+      if (
+        keepWhenFloatingNotReady &&
+        (!floatingElement || !floatingElement.isConnected)
+      ) {
+        // Already hovered
+        // But the floating element is not ready
+        // so we should not skip the event
+        return KEEP;
+      }
+      return SKIP;
+    }
+    if (event.type === 'mouseleave') {
+      // hover out
+      hoverState = false;
+      if (curState !== hoverState) return KEEP;
+      if (keepWhenFloatingNotReady && floatingElement?.isConnected) {
+        // Already hover out
+        // But the floating element is still showing
+        // so we should not skip the event
+        return KEEP;
+      }
+      return SKIP;
+    }
+    console.warn('Unknown event type in hover middleware', event);
+    return KEEP;
+  };
+};
+
+const delayShow = (delay: number): HoverMiddleware => {
+  let abortController = new AbortController();
+  return async ({ event }) => {
+    abortController.abort();
+    const newAbortController = new AbortController();
+    abortController = newAbortController;
+    if (event.type !== 'mouseover') return true;
+    if (delay <= 0) return true;
+    await sleep(delay, newAbortController.signal);
+    return !newAbortController.signal.aborted;
+  };
+};
+
+const delayHide = (delay: number): HoverMiddleware => {
+  let abortController = new AbortController();
+  return async ({ event }) => {
+    abortController.abort();
+    const newAbortController = new AbortController();
+    abortController = newAbortController;
+    if (event.type !== 'mouseleave') return true;
+    if (delay <= 0) return true;
+    await sleep(delay, newAbortController.signal);
+    return !newAbortController.signal.aborted;
+  };
 };
 
 /**
@@ -55,35 +129,35 @@ export const whenHover = (
    * The event listener will be removed when the signal is aborted.
    */
   const abortController = new AbortController();
-  let hoverState = false;
-  let hoverTimeout = 0;
   let referenceElement: Element | undefined;
   let floatingElement: Element | undefined;
 
-  const onHover = (e: Event) => {
-    clearTimeout(hoverTimeout);
-    if (!hoverState) {
-      hoverState = true;
+  const middlewares: HoverMiddleware[] = [
+    dedupe(alwayRunWhenNoFloating),
+    delayShow(0),
+    delayHide(leaveDelay),
+  ];
+
+  const onHoverChange = async (e: Event) => {
+    for (const middleware of middlewares) {
+      const go = await middleware({
+        event: e,
+        floatingElement,
+        referenceElement,
+      });
+      if (!go) {
+        return;
+      }
+    }
+    if (e.type === 'mouseover') {
       whenHoverChange(true, e);
       return;
     }
-    // Already hovered
-    if (
-      alwayRunWhenNoFloating &&
-      (!floatingElement || !floatingElement.isConnected)
-    ) {
-      // But the floating element is not ready
-      // so we need to run the callback still
-      whenHoverChange(true, e);
-    }
-  };
-
-  const onHoverLeave = (e: Event) => {
-    clearTimeout(hoverTimeout);
-    hoverTimeout = window.setTimeout(() => {
-      hoverState = false;
+    if (e.type === 'mouseleave') {
       whenHoverChange(false, e);
-    }, leaveDelay);
+      return;
+    }
+    console.error('Unknown event type in whenHover', e);
   };
 
   const addHoverListener = (element?: Element) => {
@@ -92,19 +166,19 @@ export const whenHover = (
     const alreadyHover = element.matches(':hover');
     if (alreadyHover && !abortController.signal.aborted) {
       // When the element is already hovered, we need to trigger the callback manually
-      onHover(new MouseEvent('mouseover'));
+      onHoverChange(new MouseEvent('mouseover'));
     }
-    element.addEventListener('mouseover', onHover, {
+    element.addEventListener('mouseover', onHoverChange, {
       signal: abortController.signal,
     });
-    element.addEventListener('mouseleave', onHoverLeave, {
+    element.addEventListener('mouseleave', onHoverChange, {
       signal: abortController.signal,
     });
   };
   const removeHoverListener = (element?: Element) => {
     if (!element) return;
-    element.removeEventListener('mouseover', onHover);
-    element.removeEventListener('mouseleave', onHoverLeave);
+    element.removeEventListener('mouseover', onHoverChange);
+    element.removeEventListener('mouseleave', onHoverChange);
   };
 
   const setReference = (element?: Element) => {
