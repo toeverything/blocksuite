@@ -47,12 +47,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   private _updateHeight() {
-    const bcr = this.vEditorContainer.getBoundingClientRect();
-    const containerHeight = this.vEditorContainer.offsetHeight;
+    const bcr = this.richText.getBoundingClientRect();
+    const containerHeight = this.richText.offsetHeight;
 
     if (containerHeight > this.element.h) {
       const [leftTopX, leftTopY] = Vec.rotWith(
-        [this.vEditorContainer.offsetLeft, this.vEditorContainer.offsetTop],
+        [this.richText.offsetLeft, this.richText.offsetTop],
         [bcr.left + bcr.width / 2, bcr.top + bcr.height / 2],
         toRadian(-this.element.rotate)
       );
@@ -73,7 +73,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
           ).serialize(),
         }
       );
-      this.vEditorContainer.style.minHeight = `${containerHeight}px`;
+      this.richText.style.minHeight = `${containerHeight}px`;
     }
     this.edgeless.selectionManager.setSelection({
       elements: [this.element.id],
@@ -110,6 +110,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
     this.updateComplete.then(() => {
       this.vEditor.focusEnd();
+
+      this.disposables.add(
+        this.vEditor.slots.updated.on(() => {
+          this._updateHeight();
+        })
+      );
       this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
         if (this._keeping) return;
         this._unmount();
