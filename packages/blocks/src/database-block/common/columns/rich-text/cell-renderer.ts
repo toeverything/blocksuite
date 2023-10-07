@@ -5,23 +5,12 @@ import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { ClipboardItem } from '../../../../__internal__/clipboard/clipboard-item.js';
-import {
-  CLIPBOARD_MIMETYPE,
-  performNativeCopy,
-} from '../../../../__internal__/clipboard/utils/pure.js';
-import {
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../../../../__internal__/index.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import type { RichText } from '../../../../components/rich-text/rich-text.js';
-import { attributeRenderer } from '../../../../components/rich-text/virgo/attribute-renderer.js';
+import { affineAttributeRenderer } from '../../../../components/rich-text/virgo/attribute-renderer.js';
 import {
   type AffineTextAttributes,
   affineTextAttributes,
-  type AffineTextSchema,
   type AffineVEditor,
 } from '../../../../components/rich-text/virgo/types.js';
 import { BaseCellRenderer } from '../base-cell.js';
@@ -115,10 +104,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  readonly textSchema: AffineTextSchema = {
-    attributesSchema: affineTextAttributes,
-    textRenderer: attributeRenderer,
-  };
+  readonly attributesSchema = affineTextAttributes;
+  readonly attributeRender = affineAttributeRenderer;
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -145,7 +132,8 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   override render() {
     return html`<rich-text
       .yText=${this.value}
-      .textSchema=${this.textSchema}
+      .attributesSchema=${this.attributesSchema}
+      .attributeRender=${this.attributeRender}
       .readonly=${true}
       class="affine-database-rich-text virgo-editor"
     ></rich-text>`;
@@ -184,10 +172,8 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     }
   `;
 
-  readonly textSchema: AffineTextSchema = {
-    attributesSchema: affineTextAttributes,
-    textRenderer: attributeRenderer,
-  };
+  readonly attributesSchema = affineTextAttributes;
+  readonly attributeRender = affineAttributeRenderer;
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -310,49 +296,11 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     }
   };
 
-  override onCopy(_e: ClipboardEvent) {
-    let data = '';
-    const range = this.vEditor?.getVRange();
-    if (range) {
-      const start = range.index;
-      const end = range.index + range.length;
-      const value = this.column.getStringValue(this.rowId);
-      data = value?.slice(start, end) ?? '';
-    }
-    const textClipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, data);
-
-    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-    performNativeCopy([textClipboardItem]);
-    if (savedRange) {
-      resetNativeSelection(savedRange);
-    }
-  }
-
-  override onPaste(e: ClipboardEvent) {
-    const textClipboardData = e.clipboardData?.getData(CLIPBOARD_MIMETYPE.TEXT);
-    if (!textClipboardData) return;
-
-    const range = this.vEditor?.getVRange();
-    const yText = this.vEditor?.yText;
-    if (yText) {
-      const text = new Text(yText);
-      const index = range?.index ?? yText.length;
-      if (range?.length) {
-        text.replace(range.index, range.length, textClipboardData);
-      } else {
-        text.insert(textClipboardData, index);
-      }
-      this.vEditor?.setVRange({
-        index: index + textClipboardData.length,
-        length: 0,
-      });
-    }
-  }
-
   override render() {
     return html`<rich-text
       .yText=${this.value}
-      .textSchema=${this.textSchema}
+      .attributesSchema=${this.attributesSchema}
+      .attributeRender=${this.attributeRender}
       class="affine-database-rich-text virgo-editor"
     ></rich-text>`;
   }

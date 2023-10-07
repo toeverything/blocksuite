@@ -17,7 +17,7 @@ import {
   hasNativeSelection,
   resetNativeSelection,
 } from '../../../__internal__/index.js';
-import { attributeRenderer } from '../../../components/rich-text/virgo/attribute-renderer.js';
+import { affineAttributeRenderer } from '../../../components/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../../../components/rich-text/virgo/types.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
@@ -152,7 +152,7 @@ class BaseTextCell extends BaseCellRenderer<unknown> {
     const vEditor = new VEditor(yText);
     this.vEditor = vEditor;
     vEditor.setAttributeSchema(affineTextAttributes);
-    vEditor.setAttributeRenderer(attributeRenderer());
+    vEditor.setAttributeRenderer(affineAttributeRenderer);
     vEditor.mount(container);
     return vEditor;
   }

@@ -1,13 +1,14 @@
-import '../../../../components/plain-text/plain-text.js';
+import '../../../../components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+import { z } from 'zod';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
-import type { PlainText } from '../../../../components/plain-text/plain-text.js';
+import type { RichText } from '../../../../components/rich-text/rich-text.js';
 import {
   Bound,
   type TextElement,
@@ -62,8 +63,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @query('plain-text')
-  plainText!: PlainText;
+  @query('rich-text')
+  richText!: RichText;
 
   @property({ attribute: false })
   element!: TextElement;
@@ -72,8 +73,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   get vEditor() {
-    assertExists(this.plainText.vEditor);
-    return this.plainText.vEditor;
+    assertExists(this.richText.vEditor);
+    return this.richText.vEditor;
   }
   get vEditorContainer() {
     return this.vEditor.rootElement;
@@ -381,7 +382,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
 
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
-    await this.plainText?.updateComplete;
+    await this.richText?.updateComplete;
     return result;
   }
 
@@ -422,8 +423,9 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       })}
       class="edgeless-text-editor"
     >
-      <plain-text
+      <rich-text
         .yText=${this.element.text}
+        .attributesSchema=${z.object({})}
         style=${hasPlaceholder
           ? styleMap({
               position: 'absolute',
@@ -432,7 +434,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
               left,
             })
           : nothing}
-      ></plain-text>
+      ></rich-text>
       ${placeholder}
     </div>`;
   }

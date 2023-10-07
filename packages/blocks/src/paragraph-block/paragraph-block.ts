@@ -13,11 +13,8 @@ import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js
 import { isPageMode, matchFlavours } from '../__internal__/index.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
-import { attributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
-import {
-  affineTextAttributes,
-  type AffineTextSchema,
-} from '../components/rich-text/virgo/types.js';
+import { affineAttributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../components/rich-text/virgo/types.js';
 import { BlockHubIcon20 } from '../icons/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
@@ -203,10 +200,8 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   @state()
   private _isFocus = false;
 
-  readonly textSchema: AffineTextSchema = {
-    attributesSchema: affineTextAttributes,
-    textRenderer: attributeRenderer,
-  };
+  readonly attributesSchema = affineTextAttributes;
+  readonly attributeRender = affineAttributeRenderer;
 
   private _placeholderDisposables = new DisposableGroup();
 
@@ -327,9 +322,12 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
-            .textSchema=${this.textSchema}
+            .attributesSchema=${this.attributesSchema}
+            .attributeRender=${this.attributeRender}
             .readonly=${this.model.page.readonly}
             .vRangeProvider=${this._vRangeProvider}
+            .enableClipboard=${false}
+            .enableUndoRedo=${false}
             @focusin=${this._onFocusIn}
             @focusout=${this._onFocusOut}
             style=${styleMap({

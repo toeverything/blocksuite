@@ -31,7 +31,6 @@ import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
-import type { AffineTextSchema } from '../components/rich-text/virgo/types.js';
 import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
@@ -196,14 +195,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     return this.model.page.readonly;
   }
 
-  readonly textSchema: AffineTextSchema = {
-    attributesSchema: z.object({}),
-    textRenderer: () =>
-      getCodeLineRenderer(() => ({
-        lang: this.model.language.toLowerCase() as Lang,
-        highlighter: this._highlighter,
-      })),
-  };
+  readonly attributesSchema = z.object({});
+  readonly getAttributeRender = () =>
+    getCodeLineRenderer(() => ({
+      lang: this.model.language.toLowerCase() as Lang,
+      highlighter: this._highlighter,
+    }));
 
   private _richTextResizeObserver: ResizeObserver = new ResizeObserver(() => {
     this._updateLineNumbers();
@@ -617,9 +614,12 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         <rich-text
           .yText=${this.model.text.yText}
           .undoManager=${this.model.page.history}
-          .textSchema=${this.textSchema}
+          .attributeRender=${this.attributesSchema}
+          .attributesSchema=${this.getAttributeRender()}
           .readonly=${this.model.page.readonly}
           .vRangeProvider=${this._vRangeProvider}
+          .enableClipboard=${false}
+          .enableUndoRedo=${false}
         >
         </rich-text>
       </div>
