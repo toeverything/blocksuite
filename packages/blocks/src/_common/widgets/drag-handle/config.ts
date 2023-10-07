@@ -19,6 +19,7 @@ export type DropResult = {
   rect: Rect | null;
   dropBlockId: string;
   dropBefore: boolean;
+  dropIn: boolean;
 };
 
 export type DragHandleOption = {

@@ -80,6 +80,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   draggingElements: BlockElement[] = [];
   dropBlockId = '';
   dropBefore = false;
+  dropIn = false;
   dragging = false;
   dragPreview: DragPreview | null = null;
   dropIndicator: DropIndicator | null = null;
@@ -213,6 +214,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       }
       targetElement = result.modelState.element;
       this.dropBefore = result.type === 'before' ? true : false;
+      this.dropIn = result.type === 'in' ? true : false;
     }
 
     if (targetElement) {
@@ -224,6 +226,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       rect,
       dropBlockId: this.dropBlockId,
       dropBefore: this.dropBefore,
+      dropIn: this.dropIn,
     };
 
     return dropIndicator;
@@ -875,6 +878,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _onDragEnd = () => {
     const targetBlockId = this.dropBlockId;
     const shouldInsertBefore = this.dropBefore;
+    const shouldInsertIn = this.dropIn;
     const draggingElements = this.draggingElements;
 
     this.hide(true);
@@ -894,15 +898,22 @@ export class AffineDragHandleWidget extends WidgetElement<
       .map(element => getModelByBlockElement(element))
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
-    const parent = this.page.getParent(targetBlockId);
+
+    const parent = shouldInsertIn
+      ? targetBlock
+      : this.page.getParent(targetBlockId);
 
     if (targetBlock && parent && selectedBlocks.length > 0) {
-      this.page.moveBlocks(
-        selectedBlocks,
-        parent,
-        targetBlock,
-        shouldInsertBefore
-      );
+      if (!shouldInsertIn) {
+        this.page.moveBlocks(
+          selectedBlocks,
+          parent,
+          targetBlock,
+          shouldInsertBefore
+        );
+      } else {
+        this.page.moveBlocks(selectedBlocks, targetBlock);
+      }
     }
 
     // TODO: need a better way to update selection
