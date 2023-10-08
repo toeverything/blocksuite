@@ -105,7 +105,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
   `;
 
   readonly attributesSchema = affineTextAttributes;
-  readonly attributeRender = affineAttributeRenderer;
+  readonly attributeRenderer = affineAttributeRenderer;
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -133,7 +133,7 @@ export class RichTextCell extends BaseCellRenderer<Y.Text> {
     return html`<rich-text
       .yText=${this.value}
       .attributesSchema=${this.attributesSchema}
-      .attributeRender=${this.attributeRender}
+      .attributeRenderer=${this.attributeRenderer}
       .readonly=${true}
       class="affine-database-rich-text virgo-editor"
     ></rich-text>`;
@@ -173,7 +173,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
   `;
 
   readonly attributesSchema = affineTextAttributes;
-  readonly attributeRender = affineAttributeRenderer;
+  readonly attributeRenderer = affineAttributeRenderer;
 
   @query('rich-text')
   private _richTextElement?: RichText;
@@ -300,7 +300,7 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
     return html`<rich-text
       .yText=${this.value}
       .attributesSchema=${this.attributesSchema}
-      .attributeRender=${this.attributeRender}
+      .attributeRenderer=${this.attributeRenderer}
       class="affine-database-rich-text virgo-editor"
     ></rich-text>`;
   }

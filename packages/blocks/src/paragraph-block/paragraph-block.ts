@@ -201,7 +201,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
   private _isFocus = false;
 
   readonly attributesSchema = affineTextAttributes;
-  readonly attributeRender = affineAttributeRenderer;
+  readonly attributeRenderer = affineAttributeRenderer;
 
   private _placeholderDisposables = new DisposableGroup();
 
@@ -323,7 +323,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
             .attributesSchema=${this.attributesSchema}
-            .attributeRender=${this.attributeRender}
+            .attributeRenderer=${this.attributeRenderer}
             .readonly=${this.model.page.readonly}
             .vRangeProvider=${this._vRangeProvider}
             .enableClipboard=${false}

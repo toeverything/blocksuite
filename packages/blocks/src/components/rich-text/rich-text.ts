@@ -53,7 +53,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   attributesSchema?: z.ZodSchema;
   @property({ attribute: false })
-  attributeRender?: AttributeRenderer;
+  attributeRenderer?: AttributeRenderer;
 
   @property({ attribute: false })
   readonly = false;
@@ -100,8 +100,8 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.attributesSchema) {
       this._vEditor.setAttributeSchema(this.attributesSchema);
     }
-    if (this.attributeRender) {
-      this._vEditor.setAttributeRenderer(this.attributeRender);
+    if (this.attributeRenderer) {
+      this._vEditor.setAttributeRenderer(this.attributeRenderer);
     }
 
     assertExists(this._vEditor);

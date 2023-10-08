@@ -196,7 +196,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
   }
 
   readonly attributesSchema = z.object({});
-  readonly getAttributeRender = () =>
+  readonly getAttributeRenderer = () =>
     getCodeLineRenderer(() => ({
       lang: this.model.language.toLowerCase() as Lang,
       highlighter: this._highlighter,
@@ -615,7 +615,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
           .yText=${this.model.text.yText}
           .undoManager=${this.model.page.history}
           .attributesSchema=${this.attributesSchema}
-          .attributeRender=${this.getAttributeRender()}
+          .attributeRenderer=${this.getAttributeRenderer()}
           .readonly=${this.model.page.readonly}
           .vRangeProvider=${this._vRangeProvider}
           .enableClipboard=${false}

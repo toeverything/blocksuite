@@ -24,7 +24,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   static override styles = styles;
 
   readonly attributesSchema = affineTextAttributes;
-  readonly attributeRender = affineAttributeRenderer;
+  readonly attributeRenderer = affineAttributeRenderer;
 
   private _select() {
     const selection = this.root.selection;
@@ -141,7 +141,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
-            .attributeRender=${this.attributeRender}
+            .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}
             .readonly=${this.model.page.readonly}
             .vRangeProvider=${this._vRangeProvider}
