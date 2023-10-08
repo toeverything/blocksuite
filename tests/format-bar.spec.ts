@@ -38,66 +38,7 @@ import {
   assertStoreMatchJSX,
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
-
-function getFormatBar(page: Page) {
-  const formatBar = page.locator('.affine-format-bar-widget');
-  const boldBtn = formatBar.getByTestId('bold');
-  const italicBtn = formatBar.getByTestId('italic');
-  const underlineBtn = formatBar.getByTestId('underline');
-  const strikeBtn = formatBar.getByTestId('strike');
-  const codeBtn = formatBar.getByTestId('code');
-  const linkBtn = formatBar.getByTestId('link');
-  const copyBtn = formatBar.getByTestId('copy');
-  // highlight
-  const backgroundBtn = formatBar.locator('.background-highlight-icon');
-  const pinkBtn = formatBar.getByTestId('var(--affine-text-highlight-pink)');
-  const defaultColorBtn = formatBar.getByTestId('unset');
-  const highlight = {
-    backgroundBtn,
-    pinkBtn,
-    defaultColorBtn,
-  };
-
-  const paragraphBtn = formatBar.locator(`.paragraph-button`);
-  const openParagraphMenu = async () => {
-    await expect(formatBar).toBeVisible();
-    await paragraphBtn.hover();
-  };
-
-  const textBtn = formatBar.getByTestId('affine:paragraph/text');
-  const h1Btn = formatBar.getByTestId('affine:paragraph/h1');
-  const bulletedBtn = formatBar.getByTestId('affine:list/bulleted');
-  const codeBlockBtn = formatBar.getByTestId('affine:code/');
-
-  const assertBoundingBox = async (x: number, y: number) => {
-    const boundingBox = await formatBar.boundingBox();
-    if (!boundingBox) {
-      throw new Error("formatBar doesn't exist");
-    }
-    assertAlmostEqual(boundingBox.x, x, 6);
-    assertAlmostEqual(boundingBox.y, y, 6);
-  };
-
-  return {
-    formatBar,
-    boldBtn,
-    italicBtn,
-    underlineBtn,
-    strikeBtn,
-    codeBtn,
-    linkBtn,
-    copyBtn,
-    highlight,
-
-    openParagraphMenu,
-    textBtn,
-    h1Btn,
-    bulletedBtn,
-    codeBlockBtn,
-
-    assertBoundingBox,
-  };
-}
+import { getFormatBar } from './utils/query.js';
 
 test('should format quick bar show when select text', async ({ page }) => {
   await enterPlaygroundRoom(page);

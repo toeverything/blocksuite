@@ -801,13 +801,19 @@ export async function setSelection(
         length: 0,
       })!;
 
-      /* eslint-enable @typescript-eslint/no-non-null-assertion */
-      getSelection()?.setBaseAndExtent(
+      const sl = getSelection();
+      if (!sl) throw new Error('Cannot get selection');
+      const range = document.createRange();
+      range.setStart(
         anchorRichTextRange.startContainer,
-        anchorOffset,
-        focusRichTextRange.startContainer,
-        focusOffset
+        anchorRichTextRange.startOffset
       );
+      range.setEnd(
+        focusRichTextRange.startContainer,
+        focusRichTextRange.startOffset
+      );
+      sl.removeAllRanges();
+      sl.addRange(range);
     },
     { anchorBlockId, anchorOffset, focusBlockId, focusOffset }
   );
