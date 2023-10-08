@@ -14,7 +14,7 @@ import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 import { HoverController } from '../when-hover.js';
 
 const styles = css`
-  .blocksuite-tooltip {
+  .affine-tooltip {
     box-sizing: border-box;
     max-width: 280px;
     min-height: 32px;
@@ -90,18 +90,18 @@ const updateArrowStyles = ({
  * ```ts
  * // Simple usage
  * html`
- * <blocksuite-tooltip>Content</blocksuite-tooltip>
+ * <affine-tooltip>Content</affine-tooltip>
  * `
  * // With placement
  * html`
- * <blocksuite-tooltip tip-position="top">
+ * <affine-tooltip tip-position="top">
  *   Content
- * </blocksuite-tooltip>
+ * </affine-tooltip>
  * `
  *
  * // With custom properties
  * html`
- * <blocksuite-tooltip
+ * <affine-tooltip
  *   .zIndex=${0}
  *   .offset=${4}
  *   .autoFlip=${true}
@@ -110,11 +110,11 @@ const updateArrowStyles = ({
  *   .allowInteractive=${false}
  * >
  *   Content
- * </blocksuite-tooltip>
+ * </affine-tooltip>
  * `
  * ```
  */
-@customElement('blocksuite-tooltip')
+@customElement('affine-tooltip')
 export class Tooltip extends LitElement {
   static override styles = css`
     :host {
@@ -198,9 +198,7 @@ export class Tooltip extends LitElement {
             <style>
               ${this._getStyles()}
             </style>
-            <div class="blocksuite-tooltip" role="tooltip">
-              ${slottedChildren}
-            </div>
+            <div class="affine-tooltip" role="tooltip">${slottedChildren}</div>
             <div class="arrow" style=${styleMap(arrowStyles)}></div>
           `;
         },
@@ -268,6 +266,6 @@ export class Tooltip extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'blocksuite-tooltip': Tooltip;
+    'affine-tooltip': Tooltip;
   }
 }

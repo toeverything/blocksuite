@@ -465,12 +465,12 @@ function BlockHubCards(
                   </div>
                   <div class="card-icon-container">${icon}</div>
                   ${showTooltip
-                    ? html`<blocksuite-tooltip
+                    ? html`<affine-tooltip
                         tip-position=${shouldScroll &&
                         index === blockHubItems.length - 1
                           ? 'top'
                           : 'bottom'}
-                        >${tooltip}</blocksuite-tooltip
+                        >${tooltip}</affine-tooltip
                       >`
                     : null}
                 </div>
@@ -536,9 +536,9 @@ function BlockHubMenu(
       >
         ${BlockHubRoundedRectangleIcon}
         ${showTooltip
-          ? html`<blocksuite-tooltip tip-position="left" .offset=${8}
+          ? html`<affine-tooltip tip-position="left" .offset=${8}
               >Drag to insert blank line
-            </blocksuite-tooltip>`
+            </affine-tooltip>`
           : null}
       </div>
       <div
@@ -571,9 +571,9 @@ function BlockHubMenu(
       >
         ${DatabaseTableViewIcon}
         ${showTooltip
-          ? html`<blocksuite-tooltip tip-position="left" .offset=${8}>
+          ? html`<affine-tooltip tip-position="left" .offset=${8}>
               Drag to create a database
-            </blocksuite-tooltip>`
+            </affine-tooltip>`
           : null}
       </div>
       <div class="divider"></div>
@@ -1095,8 +1095,8 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
             ? CrossIcon
             : [
                 BlockHubIcon,
-                html`<blocksuite-tooltip tip-position="left"
-                  >Insert blocks</blocksuite-tooltip
+                html`<affine-tooltip tip-position="left"
+                  >Insert blocks</affine-tooltip
                 >`,
               ]}
         </div>

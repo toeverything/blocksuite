@@ -215,7 +215,7 @@ test('the tooltip of more button should be hidden when the action menu is shown'
   await expect(moreButton).toBeVisible();
 
   const moreButtonBox = await moreButton.boundingBox();
-  const tooltip = page.locator('.blocksuite-tooltip');
+  const tooltip = page.locator('.affine-tooltip');
 
   assertExists(moreButtonBox);
 

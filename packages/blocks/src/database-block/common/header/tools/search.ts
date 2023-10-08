@@ -176,7 +176,7 @@ export class DataViewHeaderToolsSearch extends BaseTool<
         />
         <div class="close-icon" @mousedown="${this._clearSearch}">
           ${DatabaseSearchClose}
-          <blocksuite-tooltip>
+          <affine-tooltip>
             <span
               style=${styleMap({
                 display: 'flex',
@@ -189,7 +189,7 @@ export class DataViewHeaderToolsSearch extends BaseTool<
               >Esc</span
             >
             to clear all
-          </blocksuite-tooltip>
+          </affine-tooltip>
         </div>
       </label>
     `;

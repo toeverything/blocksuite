@@ -99,11 +99,11 @@ export class EdgelessToolIconButton extends LitElement {
       >
         <slot></slot>
         ${tooltip
-          ? html`<blocksuite-tooltip
+          ? html`<affine-tooltip
               tip-position=${this.tipPosition}
               .arrow=${this.arrow}
               .offset=${this.tooltipOffset}
-              >${tooltip}</blocksuite-tooltip
+              >${tooltip}</affine-tooltip
             >`
           : nothing}
       </div>

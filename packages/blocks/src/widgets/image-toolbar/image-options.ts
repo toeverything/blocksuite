@@ -83,7 +83,7 @@ export function ImageOptionsTemplate({
               }}
             >
               ${BookmarkIcon}
-              <blocksuite-tooltip>Turn into Card view</blocksuite-tooltip>
+              <affine-tooltip>Turn into Card view</affine-tooltip>
             </icon-button>`
           : nothing}
         <icon-button
@@ -92,16 +92,16 @@ export function ImageOptionsTemplate({
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
-          <blocksuite-tooltip tip-position="right">Caption</blocksuite-tooltip>
+          <affine-tooltip tip-position="right">Caption</affine-tooltip>
         </icon-button>
         <icon-button size="32px" @click=${() => downloadImage(model)}>
           ${DownloadIcon}
-          <blocksuite-tooltip tip-position="right">Download</blocksuite-tooltip>
+          <affine-tooltip tip-position="right">Download</affine-tooltip>
         </icon-button>
         <icon-button size="32px" @click=${() => copyImage(model)}>
           ${CopyIcon}
-          <blocksuite-tooltip tip-position="right"
-            >Copy to clipboard</blocksuite-tooltip
+          <affine-tooltip tip-position="right"
+            >Copy to clipboard</affine-tooltip
           >
         </icon-button>
         <icon-button
@@ -114,7 +114,7 @@ export function ImageOptionsTemplate({
           }}"
         >
           ${DeleteIcon}
-          <blocksuite-tooltip tip-position="right">Delete</blocksuite-tooltip>
+          <affine-tooltip tip-position="right">Delete</affine-tooltip>
         </icon-button>
         <icon-button
           size="32px"
@@ -126,9 +126,7 @@ export function ImageOptionsTemplate({
           }}"
         >
           ${HighLightDuotoneIcon}
-          <blocksuite-tooltip tip-position="right"
-            >Edit with LEDITS</blocksuite-tooltip
-          >
+          <affine-tooltip tip-position="right">Edit with LEDITS</affine-tooltip>
         </icon-button>
       </div>
     </div>

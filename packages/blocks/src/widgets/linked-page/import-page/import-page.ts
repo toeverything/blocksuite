@@ -711,9 +711,9 @@ export class ImportPage extends WithDisposable(LitElement) {
               @click="${this._openLearnImportLink}"
             >
               ${HelpIcon}
-              <blocksuite-tooltip>
+              <affine-tooltip>
                 Learn how to Import your Notion pages into AFFiNE.
-              </blocksuite-tooltip>
+              </affine-tooltip>
             </div>
           </icon-button>
           <icon-button class="button-item" text="Coming soon..." disabled>

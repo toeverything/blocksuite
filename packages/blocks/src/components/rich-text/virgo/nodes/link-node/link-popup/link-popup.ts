@@ -261,9 +261,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
           this.remove();
         }}
       >
-        <blocksuite-tooltip .offset=${12}
-          >Click to copy link</blocksuite-tooltip
-        >
+        <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
         <span style="overflow: hidden;">${this.currentLink}</span>
       </div>
 
@@ -274,9 +272,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
               @click=${() => this._linkToBookmark('card')}
             >
               ${BookmarkIcon}
-              <blocksuite-tooltip .offset=${12}
-                >Turn into Card view</blocksuite-tooltip
-              >
+              <affine-tooltip .offset=${12}>Turn into Card view</affine-tooltip>
             </icon-button>`
         : nothing}
       ${this._isBookmarkAllowed() && allowEmbed(this.currentLink)
@@ -285,9 +281,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
             @click=${() => this._linkToBookmark('embed')}
           >
             ${EmbedWebIcon}
-            <blocksuite-tooltip .offset=${12}
-              >Turn into Embed view</blocksuite-tooltip
-            >
+            <affine-tooltip .offset=${12}>Turn into Embed view</affine-tooltip>
           </icon-button>`
         : nothing}
       <span class="affine-link-popover-dividing-line"></span>
@@ -301,7 +295,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         }}
       >
         ${UnlinkIcon}
-        <blocksuite-tooltip .offset=${12}>Remove</blocksuite-tooltip>
+        <affine-tooltip .offset=${12}>Remove</affine-tooltip>
       </icon-button>
 
       <icon-button
@@ -311,7 +305,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         }}
       >
         ${EditIcon}
-        <blocksuite-tooltip .offset=${12}>Edit</blocksuite-tooltip>
+        <affine-tooltip .offset=${12}>Edit</affine-tooltip>
       </icon-button>
     </div>`;
   }

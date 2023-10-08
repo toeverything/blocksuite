@@ -55,8 +55,8 @@ export function CodeOptionTemplate({
         @click=${() => copyCode(model as CodeBlockModel)}
       >
         ${CopyIcon}
-        <blocksuite-tooltip tip-position="right" .offset=${12}
-          >Copy to Clipboard</blocksuite-tooltip
+        <affine-tooltip tip-position="right" .offset=${12}
+          >Copy to Clipboard</affine-tooltip
         >
       </icon-button>
       <icon-button
@@ -66,8 +66,8 @@ export function CodeOptionTemplate({
         @click=${onClickWrap}
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
-        <blocksuite-tooltip tip-position="right" .offset=${12}
-          >${wrap ? 'Cancel wrap' : 'Wrap code'}</blocksuite-tooltip
+        <affine-tooltip tip-position="right" .offset=${12}
+          >${wrap ? 'Cancel wrap' : 'Wrap code'}</affine-tooltip
         >
       </icon-button>
       ${readonly
@@ -82,8 +82,8 @@ export function CodeOptionTemplate({
             }}
           >
             ${DeleteIcon}
-            <blocksuite-tooltip tip-position="right" .offset=${12}
-              >Delete</blocksuite-tooltip
+            <affine-tooltip tip-position="right" .offset=${12}
+              >Delete</affine-tooltip
             >
           </icon-button>`}
     </div>
