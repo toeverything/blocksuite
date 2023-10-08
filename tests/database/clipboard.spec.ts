@@ -50,9 +50,9 @@ test.describe('copy&paste when editing', () => {
     const bgValue = await getElementStyle(page, '.database-focus', 'boxShadow');
     expect(bgValue).not.toBe('unset');
 
-    await focusRichText(page);
+    await focusRichText(page, 1);
     await pasteByKeyboard(page);
-    await assertRichTexts(page, ['c123']);
+    await assertRichTexts(page, ['Database 1', 'c123']);
   });
 });
 

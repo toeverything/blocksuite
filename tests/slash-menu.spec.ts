@@ -23,6 +23,7 @@ import {
 } from './utils/actions/misc.js';
 import {
   assertAlmostEqual,
+  assertBlockCount,
   assertRichTexts,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
@@ -613,12 +614,12 @@ test('should insert database', async ({ page }) => {
   await initEmptyParagraphState(page);
   await focusRichText(page);
 
+  await assertBlockCount(page, 'paragraph', 1);
   await type(page, '/');
   const tableBlock = page.getByTestId('Table View');
   await tableBlock.click();
-
-  // Should remove empty paragraph
-  assertRichTexts(page, []);
+  await assertBlockCount(page, 'paragraph', 0);
+  await assertBlockCount(page, 'database', 1);
 
   const database = page.locator('affine-database');
   expect(database).toBeVisible();

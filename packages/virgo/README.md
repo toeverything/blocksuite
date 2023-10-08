@@ -2,62 +2,17 @@
 
 ## Introduction
 
-Virgo is a minimized rich-text editing kernel that synchronizes the state between DOM and [Y.Text](https://docs.yjs.dev/api/shared-types/y.text), which differs from other rich-text editing frameworks in that its data model are _natively_ CRDT. For example, to support collaborative editing in Slate.js, you may need to use a plugin like slate-yjs, a wrapper around [Yjs](https://github.com/yjs/yjs). In these plugins, all text operations should be converted between Yjs and Slate.js operations. This may result in undo/redo properly and hard to maintain the code. However, with Virgo, we can directly synchronize the DOM state between Yjs and DOM, which means that the state in Yjs is the single source of truth. It signify that to update, can just calling the `Y.Text` API to manipulate the DOM state, which could significantly reduces the complexity of the editor.
+Virgo is a streamlined rich-text editing core that seamlessly synchronizes the state between DOM and [Y.Text](https://docs.yjs.dev/api/shared-types/y.text). What sets it apart from other rich-text editing frameworks is its natively CRDT data model. For comparison, if you want collaborative editing in Slate.js, you'd typically use a plugin like slate-yjs, which acts as a bridge between [Yjs](https://github.com/yjs/yjs) and Slate.js. Within these plugins, all text operations must be translated between Yjs and Slate.js operations, potentially complicating undo/redo functionalities and code maintenance. With Virgo, the synchronization between Yjs and DOM is direct. This means Yjs's state is the singular source of truth, allowing for direct manipulation of the DOM state via the `Y.Text` API, which considerably reduces the editor's complexity.
 
-Initially in BlockSuite, we use [Quill](https://github.com/quilljs/quill) for in-block rich-text editing, which only utilizes a small subset of its APIs. Every paragraph in BlockSuite is managed in a standalone Quill instance, which is attached to a `Y.Text` instance for collaborative editing. Virgo makes this further simpler, since what it needs to do is the same as how we use the Quill subset. It just needs to provide a flat rich-text synchronization mechanism, since the block-tree-level state management is handled by the data store in BlockSuite.
+In BlockSuite, we initially employed Quill for in-block rich-text editing, leveraging only a limited subset of its APIs. Each paragraph in BlockSuite was managed by an individual Quill instance, linked to a `Y.Text` instance for collaborative purposes. Virgo further simplifies this, performing the same function as our usage of the Quill subset. It essentially offers a straightforward rich-text synchronization process, with block-tree-level state management being taken care of by BlockSuite's data store.
 
-A virgo editor state corresponds to `Y.Text`, it's easy to convert between them. Virgo also provides a `Delta` format to represent the editor state, which is also supported by Yjs. So we can use Yjs to manipulate all the states of the text including format.
-
-```ts
-const yText = new Y.Text();
-
-// Bind Y.Text to virgo editor, then type 'aaa\nbbb'
-// ...
-console.log(yText.toString()); // 'aaa\nbbb'
-
-console.log(yText.toDelta());
-/*
-[
-  {
-    insert: 'aaa\nbbb',
-  },
-];
-*/
-```
-
-If you format from the first character to the second character, the string representation in `Y.Text` will still be `aaa\nbbb`. But if we covert it to Delta, you will see the difference:
-
-```ts
-// Continue the example before, format 'aa' to bold
-// ...
-console.log(yText.toString()); // 'aaa\nbbb'
-
-console.log(yText.toDelta());
-/*
-[
-  {
-    insert: 'aa',
-    attributes: {
-      bold: true,
-    },
-  },
-  {
-    insert: 'a\nbbb',
-  },
-];
-*/
-```
-
-You will see that there is a `type` attribute in the Delta format, which is used to represent the type of text segments, like base text (bold, italic, line-break, inline-code, link, etc.). This format makes it easy implementing customized inline elements.
+The Virgo editor's state is compatible with `Y.Text`, simplifying the conversion between them. Virgo uses the Delta format, similar to Yjs, allowing Yjs to manage all text states, including formatting.
 
 ## Usage
 
 To use Virgo in your project, all you need to do is to create a `Y.Text` instance from `Y.Doc`, bind it to the virgo editor, then mount it to the DOM:
 
 ```ts
-import * as Y from 'yjs';
-import { VEditor } from '@blocksuite/virgo';
-
 const doc = new Y.Doc();
 const yText = doc.getText('text');
 const vEditor = new VEditor(yText);
@@ -69,4 +24,92 @@ vEditor.mount(editorContainer);
 You can go to [virgo playground](https://blocksuite-toeverything.vercel.app/examples/virgo/)
 for online testing and check out the code in its [repository](https://github.com/toeverything/blocksuite/tree/master/packages/playground/examples/virgo).
 
-> 🚧 The documentation about customizing inline elements and detailed APIs are still in progress. Stay tuned!
+### Attributes
+
+Attributes is a property of a delta structure, which is used to store formatting information.
+A delta expressing a bold text node would look like this:
+
+```json
+{
+  "insert": "Hello World",
+  "attributes": {
+    "bold": true
+  }
+}
+```
+
+Virgo use zod to validate attributes, you can use `setAttributesSchema` to set the schema:
+
+```ts
+// you don't have to extend baseTextAttributes
+const customSchema = baseTextAttributes.extend({
+  reference: z
+    .object({
+      type: z.enum(['Subpage', 'LinkedPage']),
+      pageId: z.string(),
+    })
+    .optional()
+    .nullable()
+    .catch(undefined),
+  background: z.string().optional().nullable().catch(undefined),
+});
+
+const doc = new Y.Doc();
+const yText = doc.getText('text');
+const vEditor = new VEditor(yText);
+vEditor.setAttributesSchema(customSchema);
+
+const editorContainer = document.getElementById('editor');
+vEditor.mount(editorContainer);
+```
+
+Virgo has default attributes schema, so you can skip this step if you think it is enough.
+
+```ts
+// default attributes schema
+const baseTextAttributes = z.object({
+  bold: z.literal(true).optional().nullable().catch(undefined),
+  italic: z.literal(true).optional().nullable().catch(undefined),
+  underline: z.literal(true).optional().nullable().catch(undefined),
+  strike: z.literal(true).optional().nullable().catch(undefined),
+  code: z.literal(true).optional().nullable().catch(undefined),
+  link: z.string().optional().nullable().catch(undefined),
+});
+```
+
+### Attributes Renderer
+
+Attributes Renderer is a function that takes a delta and returns `TemplateResult<1>`, which is a valid [lit-html](https://github.com/lit/lit/tree/main/packages/lit-html) template result.
+Virgo use this function to render text with custom format and it is also the way to customize the text render.
+
+```ts
+type AffineTextAttributes = {
+  // your custom attributes
+};
+
+const attributeRenderer: AttributeRenderer<AffineTextAttributes> = (
+  delta,
+  // you can use `selected` to check if the text node is selected
+  selected
+) => {
+  // generate style from delta
+  return html`<span style=${style}
+    ><v-text .str=${delta.insert}></v-text
+  ></span>`;
+};
+
+const doc = new Y.Doc();
+const yText = doc.getText('text');
+const vEditor = new VEditor(yText);
+vEditor.setAttributeRenderer(attributeRenderer);
+
+const editorContainer = document.getElementById('editor');
+vEditor.mount(editorContainer);
+```
+
+You will see there is a `v-text` in the template, it is a custom element that render text node.
+Virgo use them to calculate range so you have to use them to render text content from delta.
+
+### Rich Text
+
+If you find Virgo's features too limited or difficult to use, you can refer to or directly use the [rich-text](https://github.com/toeverything/blocksuite/blob/f71df00ce18e3f300caad914aaedf63267158885/packages/blocks/src/components/rich-text/rich-text.ts) encapsulated in the blocks package. It contains basic editing features like copy/cut/paste, undo/redo (including range restore).
