@@ -39,7 +39,7 @@ import {
 } from './utils/asserts.js';
 import { test } from './utils/playwright.js';
 
-function getFormatBar(page: Page) {
+export function getFormatBar(page: Page) {
   const formatBar = page.locator('.affine-format-bar-widget');
   const boldBtn = formatBar.getByTestId('bold');
   const italicBtn = formatBar.getByTestId('italic');
