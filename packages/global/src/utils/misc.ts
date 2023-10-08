@@ -138,7 +138,10 @@ export const whenHover = (
     delayHide(leaveDelay),
   ];
 
+  let id = 0;
+  let resId = 0;
   const onHoverChange = async (e: Event) => {
+    const curId = id++;
     for (const middleware of middlewares) {
       const go = await middleware({
         event: e,
@@ -149,6 +152,10 @@ export const whenHover = (
         return;
       }
     }
+    if (curId < resId)
+      // ignore expired event
+      return;
+    resId = curId;
     if (e.type === 'mouseover') {
       whenHoverChange(true, e);
       return;
