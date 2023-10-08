@@ -1,7 +1,6 @@
 import './utils/declare-test-window.js';
 
 import { expect } from '@playwright/test';
-import { getFormatBar } from 'format-bar.spec.js';
 
 import {
   addNoteByClick,
@@ -48,6 +47,7 @@ import {
   defaultStore,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
+import { getFormatBar } from './utils/query.js';
 
 test(scoped`basic input`, async ({ page }) => {
   await enterPlaygroundRoom(page);
