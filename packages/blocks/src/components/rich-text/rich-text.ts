@@ -78,9 +78,9 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   enableAutoScrollHorizontally = true;
   @property({ attribute: false })
-  enableMarkdownShortcuts = true;
+  enableMarkdownShortcut = true;
 
-  // `enableMarkdownShortcuts` will be overwritten to false and
+  // `enableMarkdownShortcut` will be overwritten to false and
   // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
   @property({ attribute: false })
   enableFormat = true;
@@ -98,7 +98,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
 
     if (!this.enableFormat) {
-      this.enableMarkdownShortcuts = false;
+      this.enableMarkdownShortcut = false;
       this.attributesSchema = z.object({});
     }
 
@@ -119,7 +119,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     }
     const vEditor = this._vEditor;
 
-    if (this.enableMarkdownShortcuts) {
+    if (this.enableMarkdownShortcut) {
       const keyDownHandler = createVirgoKeyDownHandler(vEditor, {
         inputRule: {
           key: ' ',
