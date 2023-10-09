@@ -248,8 +248,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     }
     const last = buttons.at(-1);
     if (
-      typeof last === 'symbol' ||
-      !last?.strings[0].includes('component-toolbar-menu-divider')
+      buttons.length > 0 &&
+      (typeof last === 'symbol' ||
+        !last?.strings[0].includes('component-toolbar-menu-divider'))
     ) {
       buttons.push(
         html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
