@@ -11,7 +11,7 @@ import {
 } from '@blocksuite/virgo';
 import { css, html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { tryFormatInlineStyle } from './markdown/inline.js';
 import { onVBeforeinput, onVCompositionEnd } from './virgo/hooks.js';
@@ -44,6 +44,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   @query('.affine-rich-text')
   private _virgoContainer!: HTMLDivElement;
   get virgoContainer() {
+    assertExists(this._virgoContainer);
     return this._virgoContainer;
   }
 
@@ -76,6 +77,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
   enableAutoScrollVertically = true;
   @property({ attribute: false })
   enableAutoScrollHorizontally = true;
+  @property({ attribute: false })
+  enableMarkdownShortcuts = true;
+
+  // `enableMarkdownShortcuts` will be overwritten to false and
+  // `attributesSchema` will be overwritten to `z.object({})` if `enableFormat` is false.
+  @property({ attribute: false })
+  enableFormat = true;
 
   private _vEditor: AffineVEditor | null = null;
   get vEditor() {
@@ -89,6 +97,12 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       throw new Error('vEditor already exists.');
     }
 
+    if (!this.enableFormat) {
+      this.enableMarkdownShortcuts = false;
+      this.attributesSchema = z.object({});
+    }
+
+    // init vEditor
     this._vEditor = new VEditor<AffineTextAttributes>(this.yText, {
       isEmbed: delta => !!delta.attributes?.reference,
       hooks: {
@@ -103,23 +117,24 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.attributeRenderer) {
       this._vEditor.setAttributeRenderer(this.attributeRenderer);
     }
-
-    assertExists(this._vEditor);
     const vEditor = this._vEditor;
-    const keyDownHandler = createVirgoKeyDownHandler(this._vEditor, {
-      inputRule: {
-        key: ' ',
-        handler: context => tryFormatInlineStyle(context, this.undoManager),
-      },
-    });
 
-    assertExists(this.virgoContainer);
-    vEditor.disposables.addFromEvent(
-      this.virgoContainer,
-      'keydown',
-      keyDownHandler
-    );
+    if (this.enableMarkdownShortcuts) {
+      const keyDownHandler = createVirgoKeyDownHandler(vEditor, {
+        inputRule: {
+          key: ' ',
+          handler: context => tryFormatInlineStyle(context, this.undoManager),
+        },
+      });
 
+      vEditor.disposables.addFromEvent(
+        this.virgoContainer,
+        'keydown',
+        keyDownHandler
+      );
+    }
+
+    // init auto scroll
     vEditor.disposables.add(
       vEditor.slots.vRangeUpdated.on(([vRange]) => {
         if (!vRange) return;
