@@ -3,6 +3,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Slice } from '@blocksuite/store';
 
+import { matchFlavours } from '../../../__internal__/index.js';
+
 export const copySelectedModelsCommand: Command<
   'selectedModels',
   never,
@@ -12,13 +14,16 @@ export const copySelectedModelsCommand: Command<
   assertExists(selectedModels);
   const models: BaseBlockModel[] = selectedModels.map(model => model.clone());
   const traverse = (model: BaseBlockModel) => {
-    const children = model.children.filter(child => {
-      const idx = models.findIndex(m => m.id === child.id);
-      if (idx < 0) {
-        model.childMap.delete(child.id);
-      }
-      return idx >= 0;
-    });
+    const isDatabase = matchFlavours(model, ['affine:database']);
+    const children = isDatabase
+      ? model.children
+      : model.children.filter(child => {
+          const idx = models.findIndex(m => m.id === child.id);
+          if (idx < 0) {
+            model.childMap.delete(child.id);
+          }
+          return idx >= 0;
+        });
 
     children.forEach(child => {
       const idx = models.findIndex(m => m.id === child.id);
