@@ -96,6 +96,23 @@ export class ClipboardController implements ReactiveController {
 
     this._std.command
       .pipe()
+      .try(cmd => [
+        cmd.getTextSelection().inline<'currentSelectionPath'>((ctx, next) => {
+          const textSelection = ctx.currentTextSelection;
+          assertExists(textSelection);
+          const end = textSelection.to ?? textSelection.from;
+          next({ currentSelectionPath: end.path });
+        }),
+        cmd.getBlockSelections().inline<'currentSelectionPath'>((ctx, next) => {
+          const currentBlockSelections = ctx.currentBlockSelections;
+          assertExists(currentBlockSelections);
+          const blockSelection = currentBlockSelections.at(-1);
+          if (!blockSelection) {
+            return;
+          }
+          next({ currentSelectionPath: blockSelection.path });
+        }),
+      ])
       .getBlockIndex()
       .inline((ctx, next) => {
         assertExists(ctx.parentBlock);
