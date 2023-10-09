@@ -14,6 +14,7 @@ import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
+import { delayCallback } from '../../__internal__/utils/common.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
 import { almostEqual, Bound } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -30,6 +31,8 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
+
+  private _cancelRestoreWillchange: (() => void) | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
 
@@ -52,9 +55,43 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
     );
   }
 
+  aboutToChangeViewport() {
+    if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
+    if (!this.layer.style.willChange)
+      this.layer.style.setProperty('will-change', 'transform');
+
+    this._cancelRestoreWillchange = delayCallback(() => {
+      this.layer.style.removeProperty('will-change');
+      this._cancelRestoreWillchange = null;
+    }, 150);
+  }
+
+  refreshLayerViewport = () => {
+    if (!this.isConnected || !this.edgeless || !this.edgeless.surface) return;
+
+    const { surface } = this.edgeless;
+    const { zoom, translateX, translateY } = surface.viewport;
+    const { grid, gap } = getBackgroundGrid(zoom, this.edgeless.showGrid);
+
+    this.container.style.setProperty(
+      'background-position',
+      `${translateX}px ${translateY}px`
+    );
+    this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
+    this.container.style.setProperty(
+      'background-color',
+      'var(--affine-background-primary-color)'
+    );
+    this.container.style.setProperty('background-image', `${grid}`);
+    this.layer.style.setProperty(
+      'transform',
+      `translate(${translateX}px, ${translateY}px) scale(${zoom})`
+    );
+  };
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const { surface, page } = edgeless;
+    const { page } = edgeless;
 
     this._initNoteHeightUpdate();
 
@@ -109,33 +146,16 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
     );
 
     let rAqId: number | null = null;
-    const updateLayerTransform = () => {
-      const { zoom, translateX, translateY } = surface.viewport;
-      const { grid, gap } = getBackgroundGrid(zoom, edgeless.showGrid);
-
-      this.container.style.setProperty(
-        'background-position',
-        `${translateX}px ${translateY}px`
-      );
-      this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
-      this.container.style.setProperty(
-        'background-color',
-        'var(--affine-background-primary-color)'
-      );
-      this.container.style.setProperty('background-image', `${grid}`);
-      this.layer.style.setProperty(
-        'transform',
-        `translate(${translateX}px, ${translateY}px) scale(${zoom})`
-      );
-    };
     _disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
-        if (!rAqId) {
-          rAqId = requestAnimationFrame(() => {
-            updateLayerTransform();
-            rAqId = null;
-          });
-        }
+        this.aboutToChangeViewport();
+
+        if (rAqId) return;
+
+        rAqId = requestAnimationFrame(() => {
+          this.refreshLayerViewport();
+          rAqId = null;
+        });
       })
     );
 

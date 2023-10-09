@@ -133,3 +133,9 @@ export function once<
 
   return dispose;
 }
+
+export function delayCallback(callback: () => void, delay: number = 0) {
+  const timeoutId = setTimeout(callback, delay);
+
+  return () => clearTimeout(timeoutId);
+}
