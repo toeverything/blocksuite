@@ -4,7 +4,6 @@ import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
-import { z } from 'zod';
 
 import type { RichText } from '../../../components/rich-text/rich-text.js';
 
@@ -148,7 +147,7 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
     return html`<div class="affine-database-title">
       <rich-text
         .yText=${this.titleText.yText}
-        .attributesSchema=${z.object({})}
+        .enableFormat=${false}
         .readonly=${this.readonly}
         class="${classList}"
         data-block-is-database-title="true"

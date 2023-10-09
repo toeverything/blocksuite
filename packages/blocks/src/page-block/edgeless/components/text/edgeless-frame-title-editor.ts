@@ -3,7 +3,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { z } from 'zod';
 
 import { getBlockElementById } from '../../../../__internal__/index.js';
 import type { RichText } from '../../../../components/rich-text/rich-text.js';
@@ -120,7 +119,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     });
     return html`<rich-text
       .yText=${this.frameModel.title.yText}
-      .attributesSchema=${z.object({})}
+      .enableFormat=${false}
       style=${virgoStyle}
     ></rich-text>`;
   }

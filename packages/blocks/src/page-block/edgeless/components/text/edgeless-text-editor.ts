@@ -5,7 +5,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { z } from 'zod';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { RichText } from '../../../../components/rich-text/rich-text.js';
@@ -425,7 +424,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     >
       <rich-text
         .yText=${this.element.text}
-        .attributesSchema=${z.object({})}
+        .enableFormat=${false}
         style=${hasPlaceholder
           ? styleMap({
               position: 'absolute',
