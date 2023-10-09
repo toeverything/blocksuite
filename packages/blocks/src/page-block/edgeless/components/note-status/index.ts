@@ -59,6 +59,8 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  _updateViewportId: number | null = null;
+
   get selection() {
     return this.edgeless.selectionManager;
   }
@@ -92,15 +94,24 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
 
     this._disposables.add(
       this.edgeless.surface.viewport.slots.viewportUpdated.on(() => {
-        const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
-
-        this.style.setProperty(
-          'transform',
-          `translate(${translateX}px, ${translateY}px)`
-        );
-        this.style.setProperty('--affine-edgeless-zoom', `${zoom}`);
+        this.updateViewport();
       })
     );
+  }
+
+  updateViewport() {
+    if (this._updateViewportId) return;
+
+    this._updateViewportId = requestAnimationFrame(() => {
+      const { translateX, translateY, zoom } = this.edgeless.surface.viewport;
+
+      this.style.setProperty(
+        'transform',
+        `translate(${translateX}px, ${translateY}px)`
+      );
+      this.style.setProperty('--affine-edgeless-zoom', `${zoom}`);
+      this._updateViewportId = null;
+    });
   }
 
   override render() {
@@ -123,7 +134,6 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
         note => note.id,
         note => {
           if (!note.hidden) idx++;
-
           if (currentSelected == note.id) return nothing;
 
           const [x, y] = deserializeXYWH(note.xywh);
