@@ -3,18 +3,18 @@ import './components/frame/edgeless-frame-container.js';
 import './components/rects/edgeless-selected-rect.js';
 import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
-import './components/note-slicer/index.js';
 import './components/note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { html, LitElement, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../__internal__/consts.js';
+import { delayCallback } from '../../__internal__/utils/common.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
 import { almostEqual, Bound } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -23,10 +23,16 @@ import { getBackgroundGrid } from './utils/query.js';
 
 @customElement('affine-edgeless-block-container')
 export class EdgelessBlockContainer extends WithDisposable(LitElement) {
-  static override styles = css``;
-
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @query('.affine-block-children-container.edgeless')
+  container!: HTMLDivElement;
+
+  @query('.affine-edgeless-layer')
+  layer!: HTMLDivElement;
+
+  private _cancelRestoreWillchange: (() => void) | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
 
@@ -49,9 +55,43 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
     );
   }
 
+  aboutToChangeViewport() {
+    if (this._cancelRestoreWillchange) this._cancelRestoreWillchange();
+    if (!this.layer.style.willChange)
+      this.layer.style.setProperty('will-change', 'transform');
+
+    this._cancelRestoreWillchange = delayCallback(() => {
+      this.layer.style.removeProperty('will-change');
+      this._cancelRestoreWillchange = null;
+    }, 150);
+  }
+
+  refreshLayerViewport = () => {
+    if (!this.isConnected || !this.edgeless || !this.edgeless.surface) return;
+
+    const { surface } = this.edgeless;
+    const { zoom, translateX, translateY } = surface.viewport;
+    const { grid, gap } = getBackgroundGrid(zoom, this.edgeless.showGrid);
+
+    this.container.style.setProperty(
+      'background-position',
+      `${translateX}px ${translateY}px`
+    );
+    this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
+    this.container.style.setProperty(
+      'background-color',
+      'var(--affine-background-primary-color)'
+    );
+    this.container.style.setProperty('background-image', `${grid}`);
+    this.layer.style.setProperty(
+      'transform',
+      `translate(${translateX}px, ${translateY}px) scale(${zoom})`
+    );
+  };
+
   override firstUpdated() {
     const { _disposables, edgeless } = this;
-    const { surface, page } = edgeless;
+    const { page } = edgeless;
 
     this._initNoteHeightUpdate();
 
@@ -105,27 +145,17 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
       })
     );
 
+    let rAqId: number | null = null;
     _disposables.add(
       edgeless.slots.viewportUpdated.on(() => {
-        const prevZoom = this.style.getPropertyValue('--affine-zoom');
-        const newZoom = surface.viewport.zoom;
-        if (!prevZoom || +prevZoom !== newZoom) {
-          this.style.setProperty('--affine-zoom', `${newZoom}`);
-        }
-        const { showGrid } = edgeless;
-        const { zoom, viewportX, viewportY } = surface.viewport;
+        this.aboutToChangeViewport();
 
-        const { grid, gap, translateX, translateY } = getBackgroundGrid(
-          viewportX,
-          viewportY,
-          zoom,
-          showGrid
-        );
+        if (rAqId) return;
 
-        this.style.setProperty('--affine-edgeless-gap', `${gap}px`);
-        this.style.setProperty('--affine-edgeless-grid', grid);
-        this.style.setProperty('--affine-edgeless-x', `${translateX}px`);
-        this.style.setProperty('--affine-edgeless-y', `${translateY}px`);
+        rAqId = requestAnimationFrame(() => {
+          this.refreshLayerViewport();
+          rAqId = null;
+        });
       })
     );
 
@@ -152,20 +182,15 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
   override render() {
     const { edgeless } = this;
-
     const { sortedNotes, surface, renderModel } = edgeless;
+
     if (!surface) return nothing;
-    const { readonly } = this.edgeless.page;
+
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
           <edgeless-frame-container .surface=${surface}>
           </edgeless-frame-container>
-          ${readonly
-            ? nothing
-            : html`<affine-note-slicer
-                .edgelessPage=${edgeless}
-              ></affine-note-slicer>`}
           <edgeless-notes-container
             .edgeless=${edgeless}
             .notes=${sortedNotes}

@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { almostEqual, assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
 import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../__internal__/consts.js';
@@ -317,6 +317,8 @@ export class NoteSlicer extends WithDisposable(LitElement) {
   }
 
   override render() {
+    if (!this._lastPosition) return nothing;
+
     return html`<div class="affine-note-slicer-container">
       <note-slicer-indicator
         .offset=${EDGELESS_BLOCK_CHILD_PADDING}

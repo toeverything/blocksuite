@@ -335,6 +335,11 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
           if (id === element.id) this.requestUpdate();
         })
       );
+      this.disposables.add(
+        edgeless.surface.viewport.slots.viewportUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
       this.disposables.add(dispatcher.add('click', () => true));
       this.disposables.add(dispatcher.add('doubleClick', () => true));
       this.disposables.add(() => {
@@ -386,7 +391,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    const { fontFamily, fontSize, textAlign } = this.element;
+    const { zoom, translateX, translateY } = this.edgeless.surface.viewport;
+    const { fontFamily, fontSize, bold, textAlign, rotate } = this.element;
     const transformOrigin = this.getTransformOrigin(textAlign);
     const offset = this.getTransformOffset(textAlign);
     const paddingOffset = this.getPaddingOffset(textAlign);
@@ -395,11 +401,11 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const hasPlaceholder = placeholder !== nothing;
 
     const transformOperation = [
-      'translate(var(--affine-edgeless-x), var(--affine-edgeless-y))',
-      `translate(calc(${x}px * var(--affine-zoom)), calc(${y}px * var(--affine-zoom)))`,
+      `translate(${translateX}px, ${translateY}px)`,
+      `translate(${x * zoom}px, ${y * zoom}px)`,
       `translate(${offset})`,
-      `scale(var(--affine-zoom))`,
-      `rotate(${this.element.rotate}deg)`,
+      `scale(${zoom})`,
+      `rotate(${rotate}deg)`,
       `translate(${paddingOffset})`,
     ];
     const left =
@@ -414,6 +420,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
         textAlign,
         fontFamily,
         fontSize: `${fontSize}px`,
+        fontWeight: bold ? 'bold' : 'normal',
         transform: transformOperation.join(' '),
         transformOrigin,
         color: isCssVariable(this.element.color)

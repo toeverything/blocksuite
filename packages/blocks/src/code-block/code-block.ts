@@ -148,9 +148,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
 
     .affine-code-block-container.wrap #line-numbers > div {
-      margin-top: calc(
-        var(--top, 0) / var(--affine-zoom, 1) - var(--affine-line-height)
-      );
+      margin-top: calc(var(--top, 0) / 1 - var(--affine-line-height));
     }
 
     .affine-code-block-container.wrap v-line > div {
