@@ -115,7 +115,7 @@ export class AffineLink extends ShadowlessElement {
     new Promise<void>(resolve => {
       setTimeout(() => {
         resolve();
-      }, 1000);
+      }, 500);
     }).then(() => {
       if (!this._isLinkPopupHover) {
         if (this._popup) {

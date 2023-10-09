@@ -1,10 +1,11 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 
-import { VirgoInput } from '../../../components/virgo-input/virgo-input.js';
+import type { RichText } from '../../../components/rich-text/rich-text.js';
 
 @customElement('affine-database-title')
 export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
@@ -36,22 +37,14 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       overflow: hidden;
     }
 
-    .database-title:focus {
-      outline: none;
-    }
-
-    .database-title:disabled {
-      background-color: transparent;
-    }
-
-    .database-title-empty::before {
+    .database-title-empty [data-virgo-root='true']::before {
       content: 'Untitled';
       position: absolute;
       pointer-events: none;
       color: var(--affine-text-primary-color);
     }
 
-    .database-title-empty:focus::before {
+    .database-title-empty [data-virgo-root='true']:focus::before {
       color: var(--affine-placeholder-color);
     }
   `;
@@ -64,48 +57,66 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   onPressEnterKey?: () => void;
+
   @state()
-  compositionInput = false;
-  @query('.database-title')
-  private _titleContainer!: HTMLDivElement;
+  isComposing = false;
 
-  titleVInput: VirgoInput | null = null;
-
-  override firstUpdated() {
-    this._initTitleVEditor();
-    const disposables = this._disposables;
-
-    disposables.addFromEvent(this._titleContainer, 'focus', this._onTitleFocus);
-    disposables.addFromEvent(this._titleContainer, 'blur', this._onTitleBlur);
-    disposables.addFromEvent(this._titleContainer, 'compositionstart', () => {
-      this.compositionInput = true;
-    });
-    disposables.addFromEvent(this._titleContainer, 'compositionend', () => {
-      this.compositionInput = false;
-    });
+  @query('rich-text')
+  private richText!: RichText;
+  get vEditor() {
+    assertExists(this.richText.vEditor);
+    return this.richText.vEditor;
+  }
+  get vEditorContainer() {
+    return this.vEditor.rootElement;
   }
 
-  private _initTitleVEditor() {
-    this.titleVInput = new VirgoInput({
-      yText: this.titleText.yText,
-    });
-
-    this.titleVInput.vEditor.disposables.addFromEvent(
-      this._titleContainer,
-      'keydown',
-      this._handleKeyDown
-    );
-
+  override firstUpdated() {
     // for title placeholder
     this.titleText.yText.observe(() => {
       this.requestUpdate();
     });
 
-    this.titleVInput.mount(this._titleContainer);
-    this.titleVInput.vEditor.setReadonly(this.readonly);
+    this.updateComplete.then(() => {
+      this.disposables.addFromEvent(
+        this.vEditorContainer,
+        'focus',
+        this._onTitleFocus
+      );
+      this.disposables.addFromEvent(
+        this.vEditorContainer,
+        'blur',
+        this._onTitleBlur
+      );
+      this.disposables.addFromEvent(
+        this.vEditorContainer,
+        'compositionstart',
+        () => {
+          this.isComposing = true;
+        }
+      );
+      this.disposables.addFromEvent(
+        this.vEditorContainer,
+        'compositionend',
+        () => {
+          this.isComposing = false;
+        }
+      );
+      this.disposables.addFromEvent(
+        this.vEditorContainer,
+        'keydown',
+        this._onKeyDown
+      );
+    });
   }
 
-  private _handleKeyDown = (event: KeyboardEvent) => {
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    await this.richText?.updateComplete;
+    return result;
+  }
+
+  private _onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.isComposing) {
       // prevent insert v-line
       event.preventDefault();
@@ -114,32 +125,34 @@ export class DatabaseTitle extends WithDisposable(ShadowlessElement) {
       return;
     }
   };
+
   @state()
   private isActive = false;
   private _onTitleFocus = () => {
     this.isActive = true;
-    this.titleVInput?.setActive(true);
   };
-
   private _onTitleBlur = () => {
     this.isActive = false;
-    this.titleVInput?.setActive(false);
   };
 
   override render() {
     const isEmpty =
-      (!this.titleText || !this.titleText.length) && !this.compositionInput;
+      (!this.titleText || !this.titleText.length) && !this.isComposing;
+
     const classList = classMap({
       'database-title': true,
       'database-title-empty': isEmpty,
       ellipsis: !this.isActive,
     });
     return html`<div class="affine-database-title">
-      <div
+      <rich-text
+        .yText=${this.titleText.yText}
+        .enableFormat=${false}
+        .readonly=${this.readonly}
         class="${classList}"
         data-block-is-database-title="true"
         title="${this.titleText.toString()}"
-      ></div>
+      ></rich-text>
       <div class="database-title" style="float:left;height: 0;">Untitled</div>
     </div>`;
   }

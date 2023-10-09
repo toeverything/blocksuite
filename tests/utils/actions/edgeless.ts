@@ -19,7 +19,6 @@ import {
   SHORT_KEY,
   type,
 } from './keyboard.js';
-import { MODIFIER_KEY } from './keyboard.js';
 import {
   enterPlaygroundRoom,
   getEditorLocator,
@@ -43,7 +42,7 @@ const rotWith = (A: number[], C: number[], r = 0): number[] => {
 };
 
 const AWAIT_TIMEOUT = 500;
-const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
+export const ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH = 1200;
 export type Point = { x: number; y: number };
 export enum Shape {
   Square = 'Square',
@@ -582,24 +581,24 @@ export async function zoomByMouseWheel(
 }
 
 export async function zoomFitByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 50 });
-  await waitNextFrame(page);
+  await page.keyboard.press(`${SHORT_KEY}+1`, { delay: 100 });
+  await waitNextFrame(page, 300);
 }
 
 export async function zoomOutByKeyboard(page: Page) {
-  await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 50 });
-  await waitNextFrame(page);
+  await page.keyboard.press(`${SHORT_KEY}+-`, { delay: 100 });
+  await waitNextFrame(page, 300);
 }
 
 export async function zoomResetByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+0`, { delay: 50 });
   // Wait for animation
-  await waitNextFrame(page, 200);
+  await waitNextFrame(page, 300);
 }
 
 export async function zoomInByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+=`, { delay: 50 });
-  await waitNextFrame(page);
+  await waitNextFrame(page, 300);
 }
 
 export async function getZoomLevel(page: Page) {

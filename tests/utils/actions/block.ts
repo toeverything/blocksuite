@@ -1,10 +1,7 @@
 import type { Page } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import type {
-  Flavour,
-  PageBlockComponent,
-} from '../../../packages/blocks/src/index.js';
+import type { Flavour } from '../../../packages/blocks/src/index.js';
 import { waitNextFrame } from './misc.js';
 
 export async function updateBlockType(
@@ -30,5 +27,5 @@ export async function updateBlockType(
     },
     [flavour, type] as [Flavour, string?]
   );
-  await waitNextFrame(page);
+  await waitNextFrame(page, 400);
 }

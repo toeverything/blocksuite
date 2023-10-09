@@ -11,11 +11,8 @@ import { when } from 'lit/directives/when.js';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
-import { attributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
-import {
-  affineTextAttributes,
-  type AffineTextSchema,
-} from '../components/rich-text/virgo/types.js';
+import { affineAttributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../components/rich-text/virgo/types.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -26,10 +23,8 @@ import { playCheckAnimation, toggleDown, toggleRight } from './utils/icons.js';
 export class ListBlockComponent extends BlockElement<ListBlockModel> {
   static override styles = styles;
 
-  readonly textSchema: AffineTextSchema = {
-    attributesSchema: affineTextAttributes,
-    textRenderer: attributeRenderer,
-  };
+  readonly attributesSchema = affineTextAttributes;
+  readonly attributeRenderer = affineAttributeRenderer;
 
   private _select() {
     const selection = this.root.selection;
@@ -146,9 +141,12 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
-            .textSchema=${this.textSchema}
+            .attributeRenderer=${this.attributeRenderer}
+            .attributesSchema=${this.attributesSchema}
             .readonly=${this.model.page.readonly}
             .vRangeProvider=${this._vRangeProvider}
+            .enableClipboard=${false}
+            .enableUndoRedo=${false}
           ></rich-text>
         </div>
         ${!this.model.collapsed ? children : nothing}

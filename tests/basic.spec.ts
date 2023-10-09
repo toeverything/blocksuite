@@ -24,6 +24,7 @@ import {
   pressShiftEnter,
   redoByClick,
   redoByKeyboard,
+  setSelection,
   SHORT_KEY,
   switchEditorMode,
   switchReadonly,
@@ -38,6 +39,7 @@ import {
   assertBlockChildrenIds,
   assertEmpty,
   assertRichTexts,
+  assertRichTextVirgoDeltas,
   assertStore,
   assertStoreMatchJSX,
   assertText,
@@ -45,6 +47,7 @@ import {
   defaultStore,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
+import { getFormatBar } from './utils/query.js';
 
 test(scoped`basic input`, async ({ page }) => {
   await enterPlaygroundRoom(page);
@@ -539,4 +542,139 @@ test('ctrl+delete to delete one word forward', async ({ page }) => {
   await pressArrowLeft(page, 8);
   await pressForwardDeleteWord(page);
   await assertText(page, 'aaa ccc');
+});
+
+test('extended inline format', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'aaabbbaaa');
+
+  const { boldBtn, italicBtn, underlineBtn, strikeBtn, codeBtn } =
+    getFormatBar(page);
+  await setSelection(page, 0, 3, 0, 6);
+  await boldBtn.click();
+  await italicBtn.click();
+  await underlineBtn.click();
+  await strikeBtn.click();
+  await codeBtn.click();
+  await assertRichTextVirgoDeltas(page, [
+    {
+      insert: 'aaa',
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strike: true,
+        code: true,
+      },
+    },
+    {
+      insert: 'aaa',
+    },
+  ]);
+
+  // aaa|bbbccc
+  await setSelection(page, 2, 3, 2, 3);
+  await captureHistory(page);
+  await type(page, 'c');
+  await assertRichTextVirgoDeltas(page, [
+    {
+      insert: 'aaac',
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strike: true,
+        code: true,
+      },
+    },
+    {
+      insert: 'aaa',
+    },
+  ]);
+  await undoByKeyboard(page);
+
+  // aaab|bbccc
+  await setSelection(page, 2, 4, 2, 4);
+  await type(page, 'c');
+  await assertRichTextVirgoDeltas(page, [
+    {
+      insert: 'aaa',
+    },
+    {
+      insert: 'bcbb',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strike: true,
+        code: true,
+      },
+    },
+    {
+      insert: 'aaa',
+    },
+  ]);
+  await undoByKeyboard(page);
+
+  // aaab|b|bccc
+  await setSelection(page, 2, 4, 2, 5);
+  await type(page, 'c');
+  await assertRichTextVirgoDeltas(page, [
+    {
+      insert: 'aaa',
+    },
+    {
+      insert: 'bcb',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strike: true,
+        code: true,
+      },
+    },
+    {
+      insert: 'aaa',
+    },
+  ]);
+  await undoByKeyboard(page);
+
+  // aaabbb|ccc
+  await setSelection(page, 2, 6, 2, 6);
+  await type(page, 'c');
+  await assertRichTextVirgoDeltas(page, [
+    {
+      insert: 'aaa',
+    },
+    {
+      insert: 'bbb',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strike: true,
+        code: true,
+      },
+    },
+    {
+      insert: 'c',
+      attributes: {
+        bold: true,
+        italic: true,
+        underline: true,
+        strike: true,
+      },
+    },
+    {
+      insert: 'aaa',
+    },
+  ]);
 });

@@ -155,6 +155,94 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
   };
 
   /**
+   * There are two cases to have the second line:
+   * 1. long text auto wrap in span element
+   * 2. soft break
+   */
+  isFirstLine = (vRange: VRange | null): boolean => {
+    if (!vRange) return false;
+
+    if (vRange.length > 0) {
+      throw new Error('vRange should be collapsed');
+    }
+
+    const range = this.toDomRange(vRange);
+    if (!range) {
+      throw new Error('failed to convert vRange to domRange');
+    }
+
+    // check case 1:
+    const beforeText = this.editor.yTextString.slice(0, vRange.index);
+    if (beforeText.includes('\n')) {
+      return false;
+    }
+
+    // check case 2:
+    // If there is a wrapped text, there are two possible positions for
+    // cursor: (in first line and in second line)
+    // aaaaaaaa| or aaaaaaaa
+    // bb           |bb
+    // We have no way to distinguish them and we just assume that the cursor
+    // can not in the first line because if we apply the vRange manually the
+    // cursor will jump to the second line.
+    const container = range.commonAncestorContainer.parentElement;
+    assertExists(container);
+    const containerRect = container.getBoundingClientRect();
+    // There will be two rects if the cursor is at the edge of the line:
+    // aaaaaaaa| or aaaaaaaa
+    // bb           |bb
+    const rangeRects = range.getClientRects();
+    // We use last rect here to make sure we get the second rect.
+    // (Based on the assumption that the cursor can not in the first line)
+    const rangeRect = rangeRects[rangeRects.length - 1];
+    return rangeRect.top === containerRect.top;
+  };
+
+  /**
+   * There are two cases to have the second line:
+   * 1. long text auto wrap in span element
+   * 2. soft break
+   */
+  isLastLine = (vRange: VRange | null): boolean => {
+    if (!vRange) return false;
+
+    if (vRange.length > 0) {
+      throw new Error('vRange should be collapsed');
+    }
+
+    // check case 1:
+    const afterText = this.editor.yTextString.slice(vRange.index);
+    if (afterText.includes('\n')) {
+      return false;
+    }
+
+    const range = this.toDomRange(vRange);
+    if (!range) {
+      throw new Error('failed to convert vRange to domRange');
+    }
+
+    // check case 2:
+    // If there is a wrapped text, there are two possible positions for
+    // cursor: (in first line and in second line)
+    // aaaaaaaa| or aaaaaaaa
+    // bb           |bb
+    // We have no way to distinguish them and we just assume that the cursor
+    // can not in the first line because if we apply the vRange manually the
+    // cursor will jump to the second line.
+    const container = range.commonAncestorContainer.parentElement;
+    assertExists(container);
+    const containerRect = container.getBoundingClientRect();
+    // There will be two rects if the cursor is at the edge of the line:
+    // aaaaaaaa| or aaaaaaaa
+    // bb           |bb
+    const rangeRects = range.getClientRects();
+    // We use last rect here to make sure we get the second rect.
+    // (Based on the assumption that the cursor can not in the first line)
+    const rangeRect = rangeRects[rangeRects.length - 1];
+    return rangeRect.bottom === containerRect.bottom;
+  };
+
+  /**
    * the vRange is synced to the native selection asynchronically
    * if sync is true, the native selection will be synced immediately
    */
@@ -169,6 +257,34 @@ export class VirgoRangeService<TextAttributes extends BaseTextAttributes> {
     }
 
     this.editor.slots.vRangeUpdated.emit([vRange, sync]);
+  };
+
+  focusEnd = (): void => {
+    this.setVRange({
+      index: this.editor.yTextLength,
+      length: 0,
+    });
+  };
+
+  focusStart = (): void => {
+    this.setVRange({
+      index: 0,
+      length: 0,
+    });
+  };
+
+  selectAll = (): void => {
+    this.setVRange({
+      index: 0,
+      length: this.editor.yTextLength,
+    });
+  };
+
+  focusIndex = (index: number): void => {
+    this.setVRange({
+      index,
+      length: 0,
+    });
   };
 
   /**

@@ -30,6 +30,9 @@ export function CodeOptionTemplate({
 
   return html`
     <style>
+      :host {
+        z-index: 1;
+      }
       .affine-codeblock-option {
         box-shadow: var(--affine-shadow-2);
         padding: 4px;

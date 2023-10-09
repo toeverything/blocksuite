@@ -43,9 +43,11 @@ export function ImageOptionsTemplate({
 
   return html`
     <style>
+      :host {
+        z-index: 1;
+      }
       .affine-embed-editing-state-container > div {
         display: block;
-        z-index: var(--affine-z-index-popover);
       }
 
       .embed-editing-state {

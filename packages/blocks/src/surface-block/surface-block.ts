@@ -166,8 +166,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _surfaceContainer!: HTMLElement;
 
   override connectedCallback() {
-    if (!this._isEdgeless) return;
     super.connectedCallback();
+    if (!this._isEdgeless) return;
     const { edgeless } = this;
     this._renderer = new Renderer();
     this._yContainer = this.model.elements.getValue() as Y.Map<Y.Map<unknown>>;

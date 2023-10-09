@@ -101,7 +101,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
               shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
             strokeColor:
               shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
-            shapeStyle: shapeToolLocalState?.shapeStyle ?? ShapeStyle.Scribbled,
+            shapeStyle: shapeToolLocalState?.shapeStyle ?? ShapeStyle.General,
           });
         },
         f: () => {
