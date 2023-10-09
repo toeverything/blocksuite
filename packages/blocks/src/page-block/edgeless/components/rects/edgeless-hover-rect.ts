@@ -44,7 +44,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
     const hoverState = this.edgeless.tools.getHoverState();
 
-    if (!hoverState || !isNoteBlock(hoverState.content)) {
+    if (!hoverState) {
       this.rAfId = requestAnimationFrame(() => {
         this.rect.style.removeProperty('visibility');
       });
@@ -54,14 +54,17 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
     const { zoom } = this.edgeless.surface.viewport;
     const { rect } = hoverState;
+    const isNote = isNoteBlock(hoverState.content);
 
     this.rAfId = requestAnimationFrame(() => {
+      this.rect.style.visibility = 'visible';
       this.rect.style.transform = `translate(${rect.x}px, ${rect.y}px)`;
       this.rect.style.width = `${rect.width}px`;
       this.rect.style.height = `${rect.height}px`;
-      this.rect.style.borderRadius = `${8 * zoom}px`;
-      this.rect.style.backgroundColor = 'var(--affine-hover-color)';
-      this.rect.style.visibility = 'visible';
+      this.rect.style.borderRadius = isNote ? `${8 * zoom}px` : '';
+      this.rect.style.backgroundColor = isNote
+        ? 'var(--affine-hover-color)'
+        : '';
       this.rAfId = null;
     });
   };
