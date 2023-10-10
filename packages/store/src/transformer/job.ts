@@ -196,7 +196,7 @@ export class Job {
       index
     );
 
-    for (const child of children) {
+    for (const [index, child] of children.entries()) {
       await this._snapshotToBlock(child, page, id, index);
     }
 
