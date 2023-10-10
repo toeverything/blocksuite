@@ -100,12 +100,8 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
 
   private _shapeMenu: MenuPopper<EdgelessShapeMenu> | null = null;
 
-  private _toggleShapeMenu() {
-    if (this._shapeMenu) {
-      this._shapeMenu.dispose();
-      this._shapeMenu = null;
-      this.setEdgelessTool({ type: 'default' });
-    } else {
+  private _openShapeMenu() {
+    if (!this._shapeMenu) {
       this._shapeMenu = createPopper('edgeless-shape-menu', this, {
         x: -240,
         y: -40,
@@ -115,11 +111,17 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     }
   }
 
+  private _closeShapeMenu() {
+    if (this._shapeMenu) {
+      this._shapeMenu.dispose();
+      this._shapeMenu = null;
+    }
+  }
+
   override updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('edgelessTool')) {
       if (this.edgelessTool.type !== 'shape') {
-        this._shapeMenu?.dispose();
-        this._shapeMenu = null;
+        this._closeShapeMenu();
       }
       if (this._shapeMenu) {
         this._shapeMenu.element.edgelessTool = this.edgelessTool;
@@ -152,8 +154,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type !== 'shape') {
-          this._shapeMenu?.dispose();
-          this._shapeMenu = null;
+          this._closeShapeMenu();
           return;
         }
 
@@ -175,14 +176,16 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
         this._shapeIconColor = newTool.strokeColor;
         //
         this.active(newTool.shape);
+
+        // open secondary menu
+        this._openShapeMenu();
       })
     );
   }
 
   override disconnectedCallback() {
     this._disposables.dispose();
-    this._shapeMenu?.dispose();
-    this._shapeMenu = null;
+    this._closeShapeMenu();
     super.disconnectedCallback();
   }
 
@@ -216,16 +219,21 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
   };
 
   handleClick = () => {
-    this.setEdgelessTool({
-      type: 'shape',
-      shape: this._shapeToolLocalState?.shape ?? 'rect',
-      fillColor:
-        this._shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
-      strokeColor:
-        this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
-      shapeStyle: this._shapeToolLocalState?.shapeStyle ?? ShapeStyle.General,
-    });
-    this._toggleShapeMenu();
+    if (this.edgelessTool.type !== 'shape') {
+      this.setEdgelessTool({
+        type: 'shape',
+        shape: this._shapeToolLocalState?.shape ?? 'rect',
+        fillColor:
+          this._shapeToolLocalState?.fillColor ?? DEFAULT_SHAPE_FILL_COLOR,
+        strokeColor:
+          this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
+        shapeStyle: this._shapeToolLocalState?.shapeStyle ?? ShapeStyle.General,
+      });
+    }
+    if (this.edgelessTool.type === 'shape') {
+      this._closeShapeMenu();
+      this.setEdgelessTool({ type: 'default' });
+    }
   };
 
   override render() {
