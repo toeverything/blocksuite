@@ -19,11 +19,6 @@ interface ParagraphPanelProps {
   selectedBlockElements: BlockElement[];
 }
 
-interface ParagraphButtonProps {
-  formatBar: AffineFormatBarWidget;
-  selectedBlockElements: BlockElement[];
-}
-
 const updateParagraphType = (
   selectedBlockElements: BlockElement[],
   flavour: Flavour,
@@ -102,10 +97,17 @@ const ParagraphPanel = ({
   </div>`;
 };
 
-export const ParagraphButton = ({
-  formatBar,
-  selectedBlockElements,
-}: ParagraphButtonProps) => {
+export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
+  if (formatBar.displayType !== 'text' && formatBar.displayType !== 'block') {
+    return null;
+  }
+
+  const selectedBlockElements = formatBar.selectedBlockElements;
+  // only support model with text
+  if (selectedBlockElements.some(el => !el.model.text)) {
+    return null;
+  }
+
   const paragraphIcon =
     selectedBlockElements.length < 1
       ? paragraphConfig[0].icon
