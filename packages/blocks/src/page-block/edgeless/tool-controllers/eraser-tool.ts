@@ -110,7 +110,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._erasables.forEach(erasable => {
       if (this._eraseTargets.has(erasable)) return;
       if (isTopLevelBlock(erasable)) {
-        const bound = Bound.deserialize(erasable.xywh);
+        const bound = Bound.fromXYWH(erasable.xywh);
         if (
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {

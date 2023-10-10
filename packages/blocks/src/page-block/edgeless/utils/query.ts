@@ -12,7 +12,6 @@ import type { NoteBlockModel } from '../../../note-block/index.js';
 import {
   Bound,
   clamp,
-  deserializeXYWH,
   getQuadBoundsWithRotation,
   GRID_GAP_MAX,
   GRID_GAP_MIN,
@@ -121,13 +120,13 @@ export function getSelectedRect(selected: Selectable[]): DOMRect {
   }
 
   if (selected.length === 1) {
-    const [x, y, w, h] = deserializeXYWH(selected[0].xywh);
+    const [x, y, w, h] = selected[0].xywh;
     return new DOMRect(x, y, w, h);
   }
 
   return selected.reduce((bounds, selectable, index) => {
     const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
-    const [x, y, w, h] = deserializeXYWH(selectable.xywh);
+    const [x, y, w, h] = selectable.xywh;
     let { left, top, right, bottom } = getQuadBoundsWithRotation({
       x,
       y,
@@ -167,7 +166,7 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     }
   >();
   for (const s of selected) {
-    const bound = Bound.deserialize(s.xywh);
+    const bound = Bound.fromXYWH(s.xywh);
     let rotate = 0;
 
     if (!isTopLevelBlock(s)) {

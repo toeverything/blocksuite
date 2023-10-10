@@ -20,7 +20,7 @@ import { getArrowPoints } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
   private _path: PointLocation[] = [];
-  private _xywh: SerializedXYWH = `[0, 0, 0, 0]`;
+  private _xywh: SerializedXYWH = [0, 0, 0, 0];
   protected override _connectable = false;
 
   // relative to it's xywh
@@ -225,8 +225,6 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   }
 
   override getRelativePointLocation(point: IVec): PointLocation {
-    return new PointLocation(
-      Bound.deserialize(this.xywh).getRelativePoint(point)
-    );
+    return new PointLocation(Bound.fromXYWH(this.xywh).getRelativePoint(point));
   }
 }

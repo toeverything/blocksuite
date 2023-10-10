@@ -7,6 +7,7 @@ import type { DataViewDataType } from '../../database-block/common/data-view.js'
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
+import type { XYWH } from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { type ShapeStyle } from '../../surface-block/consts.js';
 import {
@@ -257,7 +258,7 @@ export type SerializedBlock = {
     views?: DataViewDataType[];
   };
   // note block
-  xywh?: string;
+  xywh?: XYWH;
   // bookmark block
   title?: string;
   description?: string;

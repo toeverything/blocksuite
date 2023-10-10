@@ -2,7 +2,6 @@ import { Point } from '../../../__internal__/utils/rect.js';
 import type { Alignable } from '../../../__internal__/utils/types.js';
 import {
   Bound,
-  deserializeXYWH,
   getBoundsWithRotation,
   Overlay,
 } from '../../../surface-block/index.js';
@@ -45,7 +44,7 @@ export class EdgelessSnapManager extends Overlay {
 
   private _getBoundsWithRotationByAlignable(alignable: Alignable) {
     const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
-    const [x, y, w, h] = deserializeXYWH(alignable.xywh);
+    const [x, y, w, h] = alignable.xywh;
     return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
   }
 
@@ -76,7 +75,7 @@ export class EdgelessSnapManager extends Overlay {
     return alignables.reduce((prev, element) => {
       const bounds = this._getBoundsWithRotationByAlignable(element);
       return prev.unite(bounds);
-    }, Bound.deserialize(alignables[0].xywh));
+    }, Bound.fromXYWH(alignables[0].xywh));
   }
 
   cleanupAlignables() {

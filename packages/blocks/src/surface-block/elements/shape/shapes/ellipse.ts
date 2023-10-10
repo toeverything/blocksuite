@@ -126,7 +126,7 @@ export const EllipseMethods: ShapeMethods = {
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
     const rad = (element.rotate * Math.PI) / 180;
-    const bound = Bound.deserialize(element.xywh);
+    const bound = Bound.fromXYWH(element.xywh);
     return lineEllipseIntersects(
       start,
       end,
@@ -138,7 +138,7 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   getRelativePointLocation(position, element) {
-    const bound = Bound.deserialize(element.xywh);
+    const bound = Bound.fromXYWH(element.xywh);
     const point = bound.getRelativePoint(position);
     // TODO: calculate the tangent of point on ellipse
     return new PointLocation(point);

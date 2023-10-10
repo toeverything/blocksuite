@@ -44,7 +44,7 @@ export class EdgelessFrameManager {
       const bound = edgelessElementsBound(eles);
       for (let i = frames.length - 1; i >= 0; i--) {
         const frame = frames[i];
-        if (Bound.deserialize(frame.xywh).contains(bound)) {
+        if (Bound.fromXYWH(frame.xywh).contains(bound)) {
           return frame;
         }
       }
@@ -53,7 +53,7 @@ export class EdgelessFrameManager {
   }
 
   setHighlight(frame: FrameBlockModel) {
-    const bound = Bound.deserialize(frame.xywh);
+    const bound = Bound.fromXYWH(frame.xywh);
     this._frameOverlay.bound = bound;
     this._edgeless.surface.refresh();
   }
@@ -63,7 +63,7 @@ export class EdgelessFrameManager {
   }
 
   getElementsInFrame(frame: FrameBlockModel) {
-    const bound = Bound.deserialize(frame.xywh);
+    const bound = Bound.fromXYWH(frame.xywh);
     const elements: EdgelessElement[] =
       this._edgeless.surface.viewport.gridManager
         .search(bound, true)
@@ -71,7 +71,7 @@ export class EdgelessFrameManager {
     elements.push(
       ...(<NoteBlockModel[]>(
         this._edgeless.page.getBlockByFlavour('affine:note')
-      )).filter(ele => bound.contains(Bound.deserialize(ele.xywh)))
+      )).filter(ele => bound.contains(Bound.fromXYWH(ele.xywh)))
     );
     return elements;
   }

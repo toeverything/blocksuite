@@ -65,7 +65,7 @@ function nextBound(
   curShape: ShapeElement,
   elements: ShapeElement[]
 ) {
-  const bound = Bound.deserialize(curShape.xywh);
+  const bound = Bound.fromXYWH(curShape.xywh);
   const { x, y, w, h } = bound;
   let nextBound: Bound;
   let angle = 0;
@@ -334,7 +334,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _generateShapeOnDrag(_type: Direction, connector: ConnectorElement) {
     const { surface } = this.edgeless;
-    const bound = Bound.deserialize(this._current.xywh);
+    const bound = Bound.fromXYWH(this._current.xywh);
     const { w, h } = bound;
     const point = connector.target.position;
     assertExists(point);

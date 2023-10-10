@@ -60,7 +60,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   override render() {
     const { model, titleHide, _surface } = this;
-    const bound = Bound.deserialize(model.xywh);
+    const bound = Bound.fromXYWH(model.xywh);
     const { zoom } = _surface.viewport;
     const text = model.title.toString();
     return html`

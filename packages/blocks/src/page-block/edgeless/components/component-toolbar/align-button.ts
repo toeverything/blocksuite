@@ -61,7 +61,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
 
     elements.forEach((ele, index) => {
       const gridBound = bounds[index];
-      const bound = Bound.deserialize(ele.xywh);
+      const bound = Bound.fromXYWH(ele.xywh);
       const offset = bound.minX - gridBound.minX;
       bound.x = left + offset;
       this._updateXYWH(ele, bound);
@@ -75,7 +75,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
 
     elements.forEach((ele, index) => {
       const gridBound = bounds[index];
-      const bound = Bound.deserialize(ele.xywh);
+      const bound = Bound.fromXYWH(ele.xywh);
       const offset = bound.maxX - gridBound.maxX;
       bound.x = right - bound.w + offset;
       this._updateXYWH(ele, bound);
@@ -90,7 +90,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     const centerX = (left + right) / 2;
 
     elements.forEach(ele => {
-      const bound = Bound.deserialize(ele.xywh);
+      const bound = Bound.fromXYWH(ele.xywh);
       bound.x = centerX - bound.w / 2;
       this._updateXYWH(ele, bound);
     });
@@ -111,7 +111,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     const gap = totalGap / (elements.length - 1);
     let next = bounds[0].maxX + gap;
     for (let i = 1; i < elements.length - 1; i++) {
-      const bound = Bound.deserialize(elements[i].xywh);
+      const bound = Bound.fromXYWH(elements[i].xywh);
       bound.x = next + bounds[i].w / 2 - bound.w / 2;
       next += gap + bounds[i].w;
       this._updateXYWH(elements[i], bound);
@@ -125,7 +125,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
 
     elements.forEach((ele, index) => {
       const gridBound = bounds[index];
-      const bound = Bound.deserialize(ele.xywh);
+      const bound = Bound.fromXYWH(ele.xywh);
       const offset = bound.minY - gridBound.minY;
       bound.y = top + offset;
       this._updateXYWH(ele, bound);
@@ -139,7 +139,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
 
     elements.forEach((ele, index) => {
       const gridBound = bounds[index];
-      const bound = Bound.deserialize(ele.xywh);
+      const bound = Bound.fromXYWH(ele.xywh);
       const offset = bound.maxY - gridBound.maxY;
       bound.y = bottom - bound.h + offset;
       this._updateXYWH(ele, bound);
@@ -154,7 +154,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     const centerY = (top + bottom) / 2;
 
     elements.forEach(ele => {
-      const bound = Bound.deserialize(ele.xywh);
+      const bound = Bound.fromXYWH(ele.xywh);
       bound.y = centerY - bound.h / 2;
       this._updateXYWH(ele, bound);
     });
@@ -175,7 +175,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
     const gap = totalGap / (elements.length - 1);
     let next = bounds[0].maxY + gap;
     for (let i = 1; i < elements.length - 1; i++) {
-      const bound = Bound.deserialize(elements[i].xywh);
+      const bound = Bound.fromXYWH(elements[i].xywh);
       bound.y = next + bounds[i].h / 2 - bound.h / 2;
       next += gap + bounds[i].h;
       this._updateXYWH(elements[i], bound);

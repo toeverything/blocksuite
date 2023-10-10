@@ -16,7 +16,6 @@ import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
 } from '../../../note-block/note-model.js';
-import { deserializeXYWH } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 @customElement('edgeless-note-mask')
@@ -99,7 +98,7 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
   override render() {
     const { model, renderer, index } = this;
     const { xywh, background } = model;
-    const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
+    const [modelX, modelY, modelW, modelH] = xywh;
     const isHiddenNote = model.hidden;
 
     const style = {

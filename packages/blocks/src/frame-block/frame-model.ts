@@ -21,7 +21,7 @@ export const FrameBlockSchema = defineBlockSchema({
   props: internal => ({
     title: internal.Text(),
     background: '--affine-palette-transparent',
-    xywh: `[0,0,100,100]`,
+    xywh: [0, 0, 100, 100],
     index: 'a0',
   }),
   metadata: {
@@ -51,17 +51,13 @@ export class FrameBlockModel
   }
 
   containedByBounds(bound: Bound): boolean {
-    return bound.contains(Bound.deserialize(this.xywh));
+    return bound.contains(Bound.fromXYWH(this.xywh));
   }
   getNearestPoint(_: IVec): IVec {
     throw new Error('Function not implemented.');
   }
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    return linePolygonIntersects(
-      start,
-      end,
-      Bound.deserialize(this.xywh).points
-    );
+    return linePolygonIntersects(start, end, Bound.fromXYWH(this.xywh).points);
   }
   getRelativePointLocation(_: IVec): PointLocation {
     throw new Error('Function not implemented.');
@@ -80,6 +76,6 @@ export class FrameBlockModel
     return titleBound.isPointInBound([x, y], 0);
   }
   boxSelect(bound: Bound): boolean {
-    return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
+    return Bound.fromXYWH(this.xywh).isIntersectWithBound(bound);
   }
 }

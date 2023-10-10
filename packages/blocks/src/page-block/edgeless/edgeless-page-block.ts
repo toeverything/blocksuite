@@ -766,7 +766,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const bounds = [];
 
     this.notes.forEach(note => {
-      bounds.push(Bound.deserialize(note.xywh));
+      bounds.push(Bound.fromXYWH(note.xywh));
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
@@ -899,7 +899,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const bounds = [];
 
     this.surface.blocks.forEach(block => {
-      bounds.push(Bound.deserialize(block.xywh));
+      bounds.push(Bound.fromXYWH(block.xywh));
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();

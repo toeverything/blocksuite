@@ -4,22 +4,23 @@ import {
   PhasorElementType,
 } from '../edgeless-element.js';
 
-export const ShapeElementDefaultProps: IElementDefaultProps<'shape'> = {
-  type: PhasorElementType.SHAPE,
-  xywh: '[0,0,0,0]',
+export const ShapeElementDefaultProps: () => IElementDefaultProps<'shape'> =
+  () => ({
+    type: PhasorElementType.SHAPE,
+    xywh: [0, 0, 0, 0],
 
-  rotate: 0,
+    rotate: 0,
 
-  shapeType: 'rect',
-  shapeStyle: ShapeStyle.Scribbled,
-  radius: 0,
-  filled: false,
-  fillColor: '#ffffff',
-  strokeWidth: 4,
-  strokeColor: '#000000',
-  strokeStyle: StrokeStyle.Solid,
-  roughness: DEFAULT_ROUGHNESS,
-};
+    shapeType: 'rect',
+    shapeStyle: ShapeStyle.Scribbled,
+    radius: 0,
+    filled: false,
+    fillColor: '#ffffff',
+    strokeWidth: 4,
+    strokeColor: '#000000',
+    strokeStyle: StrokeStyle.Solid,
+    roughness: DEFAULT_ROUGHNESS,
+  });
 
 export enum SHAPE_TEXT_FONT_SIZE {
   SMALL = 12,

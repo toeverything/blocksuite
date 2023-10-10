@@ -28,7 +28,7 @@ export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: () => ({
-    xywh: `[0,0,${NOTE_WIDTH},95]`,
+    xywh: [0, 0, NOTE_WIDTH, 95],
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
@@ -78,7 +78,7 @@ export class NoteBlockModel
   boxSelect!: (bound: Bound) => boolean;
 
   hitTest(x: number, y: number, _: HitTestOptions): boolean {
-    const bound = Bound.deserialize(this.xywh);
+    const bound = Bound.fromXYWH(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
 }

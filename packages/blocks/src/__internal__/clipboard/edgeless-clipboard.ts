@@ -451,7 +451,7 @@ export class EdgelessClipboard implements Clipboard {
     });
 
     [...notes, ...frames].forEach(block => {
-      const [x, y, w, h] = deserializeXYWH(block.xywh);
+      const [x, y, w, h] = block.xywh;
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
         pasteY + y - oldCommonBound.y,
@@ -481,10 +481,10 @@ export class EdgelessClipboard implements Clipboard {
 
     const bounds: IBound[] = [];
     blocks.forEach(block => {
-      bounds.push(Bound.deserialize(block.xywh));
+      bounds.push(Bound.fromXYWH(block.xywh));
     });
     shapes.forEach(shape => {
-      bounds.push(Bound.deserialize(shape.xywh));
+      bounds.push(Bound.fromXYWH(shape.xywh));
     });
     const bound = getCommonBound(bounds);
     if (!bound) {

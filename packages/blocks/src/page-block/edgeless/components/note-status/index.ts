@@ -8,7 +8,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { matchFlavours } from '../../../../__internal__/index.js';
 import { HiddenIcon } from '../../../../icons/index.js';
 import { type NoteBlockModel } from '../../../../note-block/note-model.js';
-import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-note-status')
@@ -136,7 +135,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
           if (!note.hidden) idx++;
           if (currentSelected == note.id) return nothing;
 
-          const [x, y] = deserializeXYWH(note.xywh);
+          const [x, y] = note.xywh;
 
           return html`<div
             data-note-id=${note.id}

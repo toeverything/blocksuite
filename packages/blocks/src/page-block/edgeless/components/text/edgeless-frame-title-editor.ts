@@ -98,7 +98,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override render() {
     const viewport = this.edgeless.surface.viewport;
-    const bound = Bound.deserialize(this.frameModel.xywh);
+    const bound = Bound.fromXYWH(this.frameModel.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const virgoStyle = styleMap({
       transformOrigin: 'top left',

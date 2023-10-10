@@ -160,7 +160,7 @@ export const RectMethods: ShapeMethods = {
   },
 
   getRelativePointLocation(relativePoint, element) {
-    const bound = Bound.deserialize(element.xywh);
+    const bound = Bound.fromXYWH(element.xywh);
     const point = bound.getRelativePoint(relativePoint);
     const rotatePoint = rotatePoints(
       [point],

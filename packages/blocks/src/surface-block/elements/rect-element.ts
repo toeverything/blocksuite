@@ -18,7 +18,7 @@ export const RectElement = <
 ) =>
   class extends originalClass {
     override containedByBounds(bounds: Bound): boolean {
-      const bound = Bound.deserialize(this.xywh);
+      const bound = Bound.fromXYWH(this.xywh);
       const points = getPointsFromBoundsWithRotation({
         x: bound.x,
         y: bound.y,
@@ -30,7 +30,7 @@ export const RectElement = <
     }
 
     override getNearestPoint(point: IVec): IVec {
-      const bound = Bound.deserialize(this.xywh);
+      const bound = Bound.fromXYWH(this.xywh);
       return polygonNearestPoint(
         rotatePoints(bound.points, bound.center, this.rotate ?? 0),
         point
@@ -38,7 +38,7 @@ export const RectElement = <
     }
 
     override intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-      const bound = Bound.deserialize(this.xywh);
+      const bound = Bound.fromXYWH(this.xywh);
       return linePolygonIntersects(
         start,
         end,
@@ -47,7 +47,7 @@ export const RectElement = <
     }
 
     override getRelativePointLocation(relativePoint: IVec): PointLocation {
-      const bound = Bound.deserialize(this.xywh);
+      const bound = Bound.fromXYWH(this.xywh);
       const point = bound.getRelativePoint(relativePoint);
       const rotatePoint = rotatePoints(
         [point],

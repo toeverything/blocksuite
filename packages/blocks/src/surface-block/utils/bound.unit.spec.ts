@@ -12,7 +12,7 @@ describe('bound utils', () => {
     const bound = new Bound(1, 1, 2, 2);
     const serialized = bound.serialize();
     expect(serialized).toBe('[1,1,2,2]');
-    expect(Bound.deserialize(serialized)).toMatchObject(bound);
+    expect(Bound.fromXYWH(serialized)).toMatchObject(bound);
     expect(bound.center).toMatchObject([2, 2]);
     expect(bound.minX).toBe(1);
     expect(bound.minY).toBe(1);

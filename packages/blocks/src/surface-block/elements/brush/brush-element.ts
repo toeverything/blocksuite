@@ -115,7 +115,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
     }
 
     if (xywh) {
-      const bound = Bound.deserialize(xywh);
+      const bound = Bound.fromXYWH(xywh);
       const { lineWidth } = this;
       const transformed = transformPointsToNewBound(
         this.points.map(([x, y]) => ({ x, y })),
@@ -130,7 +130,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
     }
 
     if (props.lineWidth && props.lineWidth !== this.lineWidth) {
-      const bound = updates.xywh ? Bound.deserialize(updates.xywh) : this;
+      const bound = updates.xywh ? Bound.fromXYWH(updates.xywh) : this;
       const points = updates.points ?? this.points;
       const transformed = transformPointsToNewBound(
         points.map(([x, y]) => ({ x, y })),
@@ -191,7 +191,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
   }
 
   override getRelativePointLocation(position: IVec): PointLocation {
-    const point = Bound.deserialize(this.xywh).getRelativePoint(position);
+    const point = Bound.fromXYWH(this.xywh).getRelativePoint(position);
     return new PointLocation(point);
   }
 }

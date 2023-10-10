@@ -67,10 +67,10 @@ export const ElementDefaultProps: Record<
   keyof IPhasorElementType,
   IElementDefaultProps<keyof IPhasorElementType>
 > = {
-  brush: BrushElementDefaultProps,
-  shape: ShapeElementDefaultProps,
-  connector: ConnectorElementDefaultProps,
-  text: TextElementDefaultProps,
+  brush: BrushElementDefaultProps(),
+  shape: ShapeElementDefaultProps(),
+  connector: ConnectorElementDefaultProps(),
+  text: TextElementDefaultProps(),
 } as const;
 
 export type PhasorElementWithText = ShapeElement | TextElement;

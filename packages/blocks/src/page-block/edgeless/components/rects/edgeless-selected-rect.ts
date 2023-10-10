@@ -14,7 +14,6 @@ import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type Bound,
   ConnectorElement,
-  deserializeXYWH,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -416,7 +415,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (!element) return;
 
       if (isNoteBlock(element)) {
-        let height = deserializeXYWH(element.xywh)[3];
+        let height = element.xywh[3];
         // // Limit the width of the selected note
         // if (noteW < NOTE_MIN_WIDTH) {
         //   noteW = NOTE_MIN_WIDTH;

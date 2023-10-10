@@ -14,7 +14,6 @@ import {
   caretFromPoint,
 } from '../page-block/text-selection/utils.js';
 import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
-import { deserializeXYWH } from '../surface-block/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 
 const getSelection = (blockComponent: BlockElement) =>
@@ -386,7 +385,7 @@ export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
     }
 
     const bound = noteElement.getBoundingClientRect();
-    const [x, y, w, h] = deserializeXYWH(noteElement.model.xywh);
+    const [x, y, w, h] = noteElement.model.xywh;
     const newModelHeight =
       bound.height / zoom +
       EDGELESS_BLOCK_CHILD_PADDING * 2 +

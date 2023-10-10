@@ -41,7 +41,7 @@ export type OrthogonalConnectorInput = {
 };
 
 function rBound(ele: Connectable, anti = false): IBound {
-  const bound = Bound.deserialize(ele.xywh);
+  const bound = Bound.fromXYWH(ele.xywh);
   if (isTopLevelBlock(ele)) {
     return { ...bound, rotate: 0 };
   }
@@ -75,7 +75,7 @@ export function isConnectorAndBindingsAllSelected(
 }
 
 export function getAnchors(ele: Connectable) {
-  const bound = Bound.deserialize(ele.xywh);
+  const bound = Bound.fromXYWH(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
   const rotate = isTopLevelBlock(ele) ? 0 : ele.rotate;
@@ -103,7 +103,7 @@ export function connectableIntersectLine(ele: Connectable, line: IVec[]) {
     return linePolygonIntersects(
       line[0],
       line[1],
-      Bound.deserialize(ele.xywh).points
+      Bound.fromXYWH(ele.xywh).points
     );
   } else {
     return ele.intersectWithLine(line[0], line[1]);
@@ -115,7 +115,7 @@ function getConnectableRelativePosition(
   position: IVec
 ) {
   if (isTopLevelBlock(connectable)) {
-    const bound = Bound.deserialize(connectable.xywh);
+    const bound = Bound.fromXYWH(connectable.xywh);
     const point = bound.getRelativePoint(position);
     const tangent = polygonGetPointTangent(bound.points, point);
     return new PointLocation(point, tangent);
@@ -135,7 +135,7 @@ function getConnectableRelativePosition(
 
 function connectableHitTest(connectable: Connectable, point: IVec) {
   if (isTopLevelBlock(connectable)) {
-    return Bound.deserialize(connectable.xywh).isPointInBound(point);
+    return Bound.fromXYWH(connectable.xywh).isPointInBound(point);
   } else {
     return connectable.hitTest(point[0], point[1], {
       ignoreTransparent: false,
@@ -829,7 +829,7 @@ export class EdgelessConnectorManager {
       if (excludedIds.includes(connectable.id)) continue;
 
       // then check if in expanded bound
-      const bound = Bound.deserialize(connectable.xywh);
+      const bound = Bound.fromXYWH(connectable.xywh);
       const rotateBound = Bound.from(
         getBoundsWithRotation(rBound(connectable))
       );
@@ -906,7 +906,7 @@ export class EdgelessConnectorManager {
   private _getConnectableNearestPoint(connectable: Connectable, point: IVec) {
     if (isTopLevelBlock(connectable)) {
       return polygonNearestPoint(
-        Bound.deserialize(connectable.xywh).points,
+        Bound.fromXYWH(connectable.xywh).points,
         point
       );
     } else {
@@ -946,7 +946,7 @@ export class EdgelessConnectorManager {
   updateXYWH(connector: ConnectorElement, bound: Bound) {
     const { surface } = this._edgeless;
 
-    const oldBound = Bound.deserialize(connector.xywh);
+    const oldBound = Bound.fromXYWH(connector.xywh);
     const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
     const updates: Partial<IConnector> = {};
 
@@ -999,8 +999,8 @@ export class EdgelessConnectorManager {
         connector,
         'target'
       ) as Connectable;
-      const sb = Bound.deserialize(start.xywh);
-      const eb = Bound.deserialize(end.xywh);
+      const sb = Bound.fromXYWH(start.xywh);
+      const eb = Bound.fromXYWH(end.xywh);
       const startPoint = getNearestConnectableAnchor(start, eb.center);
       const endPoint = getNearestConnectableAnchor(end, sb.center);
       return [startPoint, endPoint];
@@ -1026,8 +1026,8 @@ export class EdgelessConnectorManager {
           connector,
           'target'
         ) as Connectable;
-        const sb = Bound.deserialize(start.xywh);
-        const eb = Bound.deserialize(end.xywh);
+        const sb = Bound.fromXYWH(start.xywh);
+        const eb = Bound.fromXYWH(end.xywh);
         startPoint = getNearestConnectableAnchor(start, eb.center);
         endPoint = getNearestConnectableAnchor(end, sb.center);
       } else {

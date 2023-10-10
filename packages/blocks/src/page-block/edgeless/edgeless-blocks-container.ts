@@ -16,7 +16,7 @@ import {
 } from '../../__internal__/consts.js';
 import { delayCallback } from '../../__internal__/utils/common.js';
 import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
-import { almostEqual, Bound } from '../../surface-block/index.js';
+import { almostEqual } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid } from './utils/query.js';
@@ -107,7 +107,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
           if (page.readonly) return;
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const { index, xywh } = model;
-          const { x, y, w, h } = Bound.deserialize(xywh);
+          const [x, y, w, h] = xywh;
 
           if (index < edgeless.indexes.min) {
             edgeless.indexes.min = index;

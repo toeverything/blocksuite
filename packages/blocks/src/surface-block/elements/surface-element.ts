@@ -7,11 +7,7 @@ import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
 import { type PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
-import {
-  deserializeXYWH,
-  type SerializedXYWH,
-  type XYWH,
-} from '../utils/xywh.js';
+import { type SerializedXYWH, type XYWH } from '../utils/xywh.js';
 import type {
   EdgelessElementUtils,
   HitTestOptions,
@@ -126,7 +122,7 @@ export abstract class SurfaceElement<
     if (this.rotate) {
       return Bound.from(getBoundsWithRotation(this));
     }
-    return Bound.deserialize(this.xywh);
+    return Bound.fromXYWH(this.xywh);
   }
 
   get x() {
@@ -168,7 +164,7 @@ export abstract class SurfaceElement<
   }
 
   deserializeXYWH(): XYWH {
-    return deserializeXYWH(this.xywh);
+    return this.xywh;
   }
 
   serialize(): T {

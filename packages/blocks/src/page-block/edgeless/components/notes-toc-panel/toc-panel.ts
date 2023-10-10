@@ -430,7 +430,7 @@ export class TOCNotesPanel extends WithDisposable(LitElement) {
     if (!edgeless) return;
 
     const { block } = e.detail;
-    const bound = Bound.deserialize(block.xywh);
+    const bound = Bound.fromXYWH(block.xywh);
 
     edgeless.surface.viewport.setViewportByBound(
       bound,

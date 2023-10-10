@@ -36,7 +36,7 @@ class EdgelessFrame extends WithDisposable(LitElement) {
   protected override render() {
     const { frame, index } = this;
     const { xywh } = frame;
-    const bound = Bound.deserialize(xywh);
+    const bound = Bound.fromXYWH(xywh);
     const style = styleMap({
       width: `${bound.w}px`,
       position: 'absolute',

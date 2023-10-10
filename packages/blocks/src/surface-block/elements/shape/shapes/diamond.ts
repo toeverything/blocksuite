@@ -151,7 +151,7 @@ export const DiamondMethods: ShapeMethods = {
   },
 
   getRelativePointLocation(position, element) {
-    const bound = Bound.deserialize(element.xywh);
+    const bound = Bound.fromXYWH(element.xywh);
     const point = bound.getRelativePoint(position);
     let points = DiamondMethods.points(bound);
     points.push(point);

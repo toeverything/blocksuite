@@ -273,7 +273,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     const { surface } = edgeless;
     const { elements } = edgeless.selectionManager;
     elements.forEach(element => {
-      const bound = Bound.deserialize(element.xywh).clone();
+      const bound = Bound.fromXYWH(element.xywh).clone();
 
       switch (key) {
         case 'ArrowUp':

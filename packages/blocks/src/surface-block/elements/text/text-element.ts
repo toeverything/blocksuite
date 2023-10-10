@@ -80,7 +80,7 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override getNearestPoint(point: IVec): IVec {
-    return polygonNearestPoint(Bound.deserialize(this.xywh).points, point);
+    return polygonNearestPoint(Bound.fromXYWH(this.xywh).points, point);
   }
 
   getCursorByCoord(coord: IModelCoord) {
