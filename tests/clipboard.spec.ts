@@ -13,8 +13,10 @@ import {
   copyByKeyboard,
   cutByKeyboard,
   dragBetweenCoords,
+  dragOverTitle,
   enterPlaygroundRoom,
   focusRichText,
+  focusTitle,
   getAllNoteIds,
   getCopyClipItemsInPage,
   getEditorLocator,
@@ -67,6 +69,7 @@ import {
   assertStoreMatchJSX,
   assertText,
   assertTextFormats,
+  assertTitle,
   assertZoomLevel,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
@@ -83,6 +86,20 @@ test(scoped`clipboard copy paste`, async ({ page }) => {
   await focusRichText(page);
   await page.keyboard.press(`${SHORT_KEY}+v`);
   await assertText(page, 'testtes');
+});
+
+test(scoped`clipboard copy paste title`, async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusTitle(page);
+
+  await type(page, 'test');
+  await dragOverTitle(page);
+  await waitNextFrame(page);
+  await copyByKeyboard(page);
+  await focusTitle(page);
+  await page.keyboard.press(`${SHORT_KEY}+v`);
+  await assertTitle(page, 'testtest');
 });
 
 test(scoped`clipboard paste html`, async ({ page }) => {
