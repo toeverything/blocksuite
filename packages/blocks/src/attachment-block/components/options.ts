@@ -60,20 +60,17 @@ export function AttachmentOptionsTemplate({
       class="affine-attachment-options"
       @pointerdown=${stopPropagation}
     >
-      <icon-button class="has-tool-tip" size="24px" ?hidden=${true}>
+      <icon-button size="24px" ?hidden=${true}>
         ${ViewIcon}
-        <tool-tip inert tip-position="top" role="tooltip">Preview</tool-tip>
+        <affine-tooltip .offset=${12}>Preview</affine-tooltip>
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
-      <icon-button class="has-tool-tip" size="24px" ?hidden=${true || readonly}>
+      <icon-button size="24px" ?hidden=${true || readonly}>
         ${LinkIcon}
-        <tool-tip inert tip-position="top" role="tooltip"
-          >Turn into Link view</tool-tip
-        >
+        <affine-tooltip .offset=${12}>Turn into Link view</affine-tooltip>
       </icon-button>
       <icon-button
-        class="has-tool-tip"
         size="24px"
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
@@ -82,14 +79,11 @@ export function AttachmentOptionsTemplate({
         }}"
       >
         ${EmbedWebIcon}
-        <tool-tip inert tip-position="top" role="tooltip"
-          >Turn into Embed view</tool-tip
-        >
+        <affine-tooltip .offset=${12}>Turn into Embed view</affine-tooltip>
       </icon-button>
       <div class="divider"></div>
 
       <icon-button
-        class="has-tool-tip"
         size="24px"
         ?hidden=${readonly}
         @click="${() => {
@@ -112,10 +106,9 @@ export function AttachmentOptionsTemplate({
         }}"
       >
         ${EditIcon}
-        <tool-tip inert tip-position="top" role="tooltip">Rename</tool-tip>
+        <affine-tooltip .offset=${12}>Rename</affine-tooltip>
       </icon-button>
       <icon-button
-        class="has-tool-tip"
         size="24px"
         ?hidden=${readonly}
         @click=${() => {
@@ -123,12 +116,12 @@ export function AttachmentOptionsTemplate({
         }}
       >
         ${CaptionIcon}
-        <tool-tip inert tip-position="top" role="tooltip">Caption</tool-tip>
+        <affine-tooltip .offset=${12}>Caption</affine-tooltip>
       </icon-button>
       <div class="divider" ?hidden=${readonly}></div>
       <icon-button
         size="24px"
-        class="has-tool-tip more-button"
+        class="more-button"
         @click=${() => {
           if (moreMenuAbortController) {
             moreMenuAbortController.abort();
@@ -151,7 +144,7 @@ export function AttachmentOptionsTemplate({
         }}
       >
         ${MoreIcon}
-        <tool-tip inert role="tooltip">More</tool-tip>
+        <affine-tooltip .offset=${12}>More</affine-tooltip>
       </icon-button>
     </div>`;
 }

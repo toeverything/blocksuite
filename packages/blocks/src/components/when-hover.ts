@@ -98,6 +98,7 @@ export class HoverController implements ReactiveController {
   }
 
   hostDisconnected() {
+    this._abortController?.abort();
     this._disposables.dispose();
   }
 }

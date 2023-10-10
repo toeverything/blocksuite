@@ -23,18 +23,10 @@ const styles = css`
     cursor: grab;
   }
 
-  .new-record > tool-tip {
-    max-width: 280px;
-  }
-
   .new-record svg {
     width: 16px;
     height: 16px;
     fill: var(--affine-icon-color);
-  }
-
-  .edgeless .new-record > tool-tip {
-    display: none;
   }
 `;
 
@@ -164,7 +156,7 @@ export class DataViewHeaderToolsAddRow extends BaseTool {
       return;
     }
     return html` <div
-      class="has-tool-tip affine-database-toolbar-item new-record"
+      class="affine-database-toolbar-item new-record"
       draggable="true"
       @click="${this._onAddNewRecord}"
     >

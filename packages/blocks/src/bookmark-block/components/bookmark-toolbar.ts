@@ -6,7 +6,6 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { createLitPortal } from '../../components/portal.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import { MoreIcon } from '../../icons/index.js';
 import { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 import {
@@ -18,7 +17,6 @@ import {
 @customElement('bookmark-toolbar')
 export class BookmarkToolbar extends WithDisposable(LitElement) {
   static override styles = css`
-    ${tooltipStyle}
     .bookmark-bar {
       box-sizing: border-box;
       display: flex;
@@ -89,14 +87,14 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
       ({ type, icon, tooltip, action, divider, disableWhen = () => false }) => {
         return html`<icon-button
             size="24px"
-            class="bookmark-toolbar-button has-tool-tip ${type}"
+            class="bookmark-toolbar-button ${type}"
             ?disabled=${disableWhen(this.model)}
             @click=${() => {
               action(this.model, this.onSelected, this);
             }}
           >
             ${icon}
-            <tool-tip inert role="tooltip">${tooltip}</tool-tip>
+            <affine-tooltip .offset=${12}>${tooltip}</affine-tooltip>
           </icon-button>
           ${divider ? html`<div class="divider"></div>` : nothing} `;
       }
@@ -109,13 +107,13 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
         <div class="more-button-wrapper">
           <icon-button
             size="24px"
-            class="has-tool-tip more-button"
+            class="more-button"
             @click=${() => {
               this._toggleMenu();
             }}
           >
             ${MoreIcon}
-            <tool-tip inert role="tooltip">More</tool-tip>
+            <affine-tooltip .offset=${12}>More</affine-tooltip>
           </icon-button>
         </div>
       </div>

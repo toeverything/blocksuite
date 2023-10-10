@@ -233,6 +233,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-toolbar-button
         .tooltip=${this._shapeMenu ? '' : getTooltipWithShortcut('Shape', 'S')}
+        .tooltipOffset=${5}
         .active=${type === 'shape'}
       >
         <div class="container-clip">

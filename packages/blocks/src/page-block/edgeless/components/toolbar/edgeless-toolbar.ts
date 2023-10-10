@@ -422,6 +422,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         ></edgeless-brush-tool-button>
         <edgeless-toolbar-button
           .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
+          .tooltipOffset=${4}
           .active=${type === 'eraser'}
           @click=${() => this.setEdgelessTool({ type: 'eraser' })}
         >
@@ -449,6 +450,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .disabled=${this._imageLoading}
           .activeMode=${'background'}
           .tooltip=${'Image'}
+          .tooltipOffset=${12}
           @click=${() => this._addImages()}
         >
           ${EdgelessImageIcon}
@@ -483,6 +485,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
 
         <edgeless-tool-icon-button
           .tooltip=${'Presentation'}
+          .tooltipOffset=${17}
           .iconContainerPadding=${8}
           @click=${() => {
             this._index = this._currentFrameIndex;

@@ -1,165 +1,271 @@
-import { baseTheme } from '@toeverything/theme';
-import { css, unsafeCSS } from 'lit';
+import { assertExists } from '@blocksuite/global/utils';
+import {
+  arrow,
+  type ComputePositionReturn,
+  flip,
+  offset,
+  type Placement,
+} from '@floating-ui/dom';
+import type { CSSResult } from 'lit';
+import { css, html, LitElement, unsafeCSS } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
+
+import { HoverController } from '../when-hover.js';
+
+const styles = css`
+  .affine-tooltip {
+    box-sizing: border-box;
+    max-width: 280px;
+    min-height: 32px;
+    font-family: var(--affine-font-family);
+    font-size: var(--affine-font-sm);
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: var(--affine-white);
+    background: var(--affine-tooltip);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .arrow {
+    position: absolute;
+
+    width: 0;
+    height: 0;
+  }
+`;
+
+// See http://apps.eky.hk/css-triangle-generator/
+const TRIANGLE_HEIGHT = 6;
+const triangleMap = {
+  top: {
+    bottom: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '6px 5px 0 5px',
+    borderColor: 'var(--affine-tooltip) transparent transparent transparent',
+  },
+  right: {
+    left: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '5px 6px 5px 0',
+    borderColor: 'transparent var(--affine-tooltip) transparent transparent',
+  },
+  bottom: {
+    top: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '0 5px 6px 5px',
+    borderColor: 'transparent transparent var(--affine-tooltip) transparent',
+  },
+  left: {
+    right: '-6px',
+    borderStyle: 'solid',
+    borderWidth: '5px 0 5px 6px',
+    borderColor: 'transparent transparent transparent var(--affine-tooltip)',
+  },
+};
+
+// Ported from https://floating-ui.com/docs/tutorial#arrow-middleware
+const updateArrowStyles = ({
+  placement,
+  middlewareData,
+}: ComputePositionReturn): StyleInfo => {
+  const arrowX = middlewareData.arrow?.x;
+  const arrowY = middlewareData.arrow?.y;
+
+  const triangleStyles =
+    triangleMap[placement.split('-')[0] as keyof typeof triangleMap];
+
+  return {
+    left: arrowX != null ? `${arrowX}px` : '',
+    top: arrowY != null ? `${arrowY}px` : '',
+    ...triangleStyles,
+  };
+};
 
 /**
  * @example
- * ```html
- * <icon-button class="has-tool-tip" style="${tooltipStyle}">
- *    Button
- *    <tool-tip inert role="tooltip">Tooltip</tool-tip>
- * </icon-button>
+ * ```ts
+ * // Simple usage
+ * html`
+ * <affine-tooltip>Content</affine-tooltip>
+ * `
+ * // With placement
+ * html`
+ * <affine-tooltip tip-position="top">
+ *   Content
+ * </affine-tooltip>
+ * `
+ *
+ * // With custom properties
+ * html`
+ * <affine-tooltip
+ *   .zIndex=${0}
+ *   .offset=${4}
+ *   .autoFlip=${true}
+ *   .arrow=${true}
+ *   .tooltipStyle=${css`:host { z-index: 0; --affine-tooltip: #fff; }`}
+ *   .allowInteractive=${false}
+ * >
+ *   Content
+ * </affine-tooltip>
+ * `
  * ```
- * Reference to https://web.dev/building-a-tooltip-component/
  */
-export const tooltipStyle = css`
-  tool-tip {
-    --affine-tooltip-offset: 8px;
-    --affine-tooltip-round: 4px;
-    font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
-    position: absolute;
-    inline-size: max-content;
-    text-align: center;
-    font-size: var(--affine-font-sm);
-    padding: 5px 12px;
-    color: var(--affine-white);
-    background: var(--affine-tooltip);
-    opacity: 0;
-    transition:
-      opacity 0.2s ease,
-      transform 0.2s ease;
-    pointer-events: none;
-    user-select: none;
+@customElement('affine-tooltip')
+export class Tooltip extends LitElement {
+  static override styles = css`
+    :host {
+      display: none;
+    }
+  `;
 
-    /* Default is top-start */
-    left: 0;
-    top: 0;
-    border-radius: var(--affine-tooltip-round);
-    transform: translate(0, calc(-100% - var(--affine-tooltip-offset)));
-  }
-  tool-tip:is([tip-position='top']) {
-    left: 50%;
-    border-radius: var(--affine-tooltip-round);
-    transform: translate(-50%, calc(-100% - var(--affine-tooltip-offset)));
-  }
-  tool-tip:is([tip-position='right']) {
-    left: unset;
-    right: 0;
-    transform: translateX(calc(100% + var(--affine-tooltip-offset)));
-  }
-  tool-tip:is([tip-position='right']):not(:is([arrow])) {
-    border-top-left-radius: 0;
-  }
-  tool-tip:is([tip-position='left']) {
-    left: 0;
-    top: 50%;
-    transform: translate(calc(-100% - var(--affine-tooltip-offset)), -50%);
-  }
-  tool-tip:is([tip-position='bottom']) {
-    top: unset;
-    left: 50%;
-    bottom: 0;
-    transform: translate(-50%, calc(100% + var(--affine-tooltip-offset)));
+  @property({ attribute: 'tip-position' })
+  placement: Placement = 'top';
+
+  @property({ attribute: false })
+  zIndex: number | string = 'var(--affine-z-index-popover)';
+
+  @property({ attribute: false })
+  tooltipStyle: CSSResult = css``;
+
+  /**
+   * changes the placement of the floating element in order to keep it in view,
+   * with the ability to flip to any placement.
+   *
+   * See https://floating-ui.com/docs/flip
+   */
+  @property({ attribute: false })
+  autoFlip = true;
+
+  /**
+   * Show a triangle arrow pointing to the reference element.
+   */
+  @property({ attribute: false })
+  arrow = true;
+
+  /**
+   * Default is `4px`
+   *
+   * See https://floating-ui.com/docs/offset
+   */
+  @property({ attribute: false })
+  offset = 4;
+
+  /**
+   * Allow the tooltip to be interactive.
+   * eg. allow the user to select text in the tooltip.
+   */
+  @property({ attribute: false })
+  allowInteractive = false;
+
+  private _hoverController = new HoverController(
+    this,
+    () => {
+      // const parentElement = this.parentElement;
+      // if (
+      //   parentElement &&
+      //   'disabled' in parentElement &&
+      //   parentElement.disabled
+      // )
+      //   return null;
+      if (this.hidden) return null;
+      let arrowStyles: StyleInfo = {};
+      return {
+        template: ({ positionSlot, updatePortal }) => {
+          positionSlot.on(data => {
+            // The tooltip placement may change,
+            // so we need to update the arrow position
+            if (this.arrow) {
+              arrowStyles = updateArrowStyles(data);
+            } else {
+              arrowStyles = {};
+            }
+            updatePortal();
+          });
+
+          const slot = this.shadowRoot?.querySelector('slot');
+          if (!slot) throw new Error('slot not found in tooltip!');
+          // slot.addEventListener('slotchange', () => updatePortal, {
+          //   once: true,
+          // });
+          const slottedChildren = slot
+            .assignedNodes()
+            .map(node => node.cloneNode(true));
+          return html`
+            <style>
+              ${this._getStyles()}
+            </style>
+            <div class="affine-tooltip" role="tooltip">${slottedChildren}</div>
+            <div class="arrow" style=${styleMap(arrowStyles)}></div>
+          `;
+        },
+        computePosition: portalRoot => ({
+          referenceElement: this.parentElement!,
+          placement: this.placement,
+          middleware: [
+            this.autoFlip && flip({ padding: 12 }),
+            offset((this.arrow ? TRIANGLE_HEIGHT : 0) + this.offset),
+            arrow({
+              element: portalRoot.shadowRoot!.querySelector('.arrow')!,
+            }),
+          ],
+          autoUpdate: true,
+        }),
+      };
+    },
+    { leaveDelay: 0 }
+  );
+
+  override connectedCallback() {
+    super.connectedCallback();
+    const parent = this.parentElement;
+    assertExists(parent, 'Tooltip must have a parent element');
+
+    // Wait for render
+    setTimeout(() => {
+      this._hoverController.setReference(parent);
+    }, 0);
   }
 
-  /** basic triangle style */
-  tool-tip:is([arrow])::before {
-    position: absolute;
-    content: '';
-    background: var(--affine-tooltip);
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
+  getPortal() {
+    return this._hoverController.portal;
   }
 
-  /* work for tip-position='top' */
-  tool-tip:is([arrow]):is([tip-position='top']) {
-    transform: translate(-50%, calc(-100% - var(--affine-tooltip-offset) * 2));
-  }
-  tool-tip:is([arrow]):is([tip-position='top'])::before {
-    left: 50%;
-    bottom: 0;
-    transform: translate(-50%, 40%) scaleX(0.8) rotate(135deg);
+  private _getStyles() {
+    return css`
+      ${styles}
+      :host {
+        z-index: ${unsafeCSS(this.zIndex)};
+        ${
+          // All the styles are applied to the portal element
+          unsafeCSS(this.style.cssText)
+        }
+      }
+
+      ${this.allowInteractive
+        ? css``
+        : css`
+            :host {
+              pointer-events: none;
+            }
+          `}
+
+      ${this.tooltipStyle}
+    `;
   }
 
-  /* work for tip-position='right' */
-  tool-tip:is([arrow]):is([tip-position='right']) {
-    transform: translateX(calc(100% + var(--affine-tooltip-offset) * 2));
+  override render() {
+    // The actual tooltip will render as a portal, and all content inside the slot will be treated as a template.
+    // See https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots
+    return html`<slot></slot>`;
   }
-  tool-tip:is([arrow]):is([tip-position='right'])::before {
-    left: 0;
-    bottom: 50%;
-    transform: translate(-40%, 50%) scaleY(0.8) rotate(-135deg);
-  }
+}
 
-  /* work for tip-position='left' */
-  tool-tip:is([arrow]):is([tip-position='left']) {
-    transform: translate(calc(-100% - var(--affine-tooltip-offset) * 2), -50%);
+declare global {
+  interface HTMLElementTagNameMap {
+    'affine-tooltip': Tooltip;
   }
-  tool-tip:is([arrow]):is([tip-position='left'])::before {
-    right: 0;
-    bottom: 50%;
-    transform: translate(40%, 50%) scaleY(0.8) rotate(45deg);
-  }
-
-  /* work for tip-position='bottom' */
-  tool-tip:is([arrow]):is([tip-position='bottom']) {
-    transform: translate(-50%, calc(100% + var(--affine-tooltip-offset) * 2));
-  }
-  tool-tip:is([arrow]):is([tip-position='bottom'])::before {
-    left: 50%;
-    bottom: 100%;
-    transform: translate(-50%, 60%) scaleX(0.8) rotate(-45deg);
-  }
-
-  /* work for tip-position='top-end' */
-  tool-tip:is([arrow]):is([tip-position='top-end']) {
-    transform: translate(-15%, calc(-100% - var(--affine-tooltip-offset) * 2));
-  }
-  tool-tip:is([arrow]):is([tip-position='top-end'])::before {
-    left: 30%;
-    bottom: 0;
-    transform: translate(-50%, 40%) scaleX(0.8) rotate(135deg);
-  }
-  /* work for tip-position='top-start' */
-  tool-tip:is([arrow]):is([tip-position='top-start']) {
-    transform: translate(-75%, calc(-100% - var(--affine-tooltip-offset) * 2));
-  }
-  tool-tip:is([arrow]):is([tip-position='top-start'])::before {
-    right: 5%;
-    bottom: 0;
-    transform: translate(-50%, 40%) scaleX(0.8) rotate(135deg);
-  }
-  .has-tool-tip {
-    position: relative;
-  }
-  .has-tool-tip:is(:hover, :focus-visible, :active) > tool-tip {
-    opacity: 1;
-    transition-delay: 200ms;
-  }
-  /** style for shortcut tooltip */
-  .tooltip-with-shortcut {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 10px;
-  }
-  .tooltip__shortcut {
-    font-size: 12px;
-    position: relative;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 16px;
-    min-width: 16px;
-  }
-  .tooltip__shortcut::before {
-    content: '';
-    border-radius: 4px;
-    position: absolute;
-    inset: 0;
-    background: currentColor;
-    opacity: 0.2;
-  }
-`;
+}

@@ -1,7 +1,6 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 import { EdgelessToolIconButton } from './tool-icon-button.js';
 
 @customElement('edgeless-toolbar-button')
@@ -34,12 +33,6 @@ export class EdgelessToolbarButton extends EdgelessToolIconButton {
     .icon-container[coming] {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
-    }
-
-    ${tooltipStyle}
-
-    tool-tip {
-      z-index: 12;
     }
   `;
 

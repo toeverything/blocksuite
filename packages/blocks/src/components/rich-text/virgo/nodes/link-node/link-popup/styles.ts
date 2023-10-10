@@ -1,8 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import { tooltipStyle } from '../../../../../tooltip/tooltip.js';
-
 const editLinkStyle = css`
   .affine-link-edit-popover {
     box-sizing: border-box;
@@ -167,8 +165,7 @@ export const linkPopupStyle = css`
   .affine-link-popover {
     display: flex;
     align-items: center;
-    height: 40px;
-    padding: 0 12px;
+    padding: 8px;
 
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
@@ -203,5 +200,4 @@ export const linkPopupStyle = css`
   }
 
   ${editLinkStyle}
-  ${tooltipStyle}
 `;

@@ -707,13 +707,13 @@ export class ImportPage extends WithDisposable(LitElement) {
             ${NotionIcon}
             <div
               slot="suffix"
-              class="has-tool-tip"
+              class="button-suffix"
               @click="${this._openLearnImportLink}"
             >
               ${HelpIcon}
-              <tool-tip inert arrow tip-position="top" role="tooltip">
+              <affine-tooltip>
                 Learn how to Import your Notion pages into AFFiNE.
-              </tool-tip>
+              </affine-tooltip>
             </div>
           </icon-button>
           <icon-button class="button-item" text="Coming soon..." disabled>

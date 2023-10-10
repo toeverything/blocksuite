@@ -90,6 +90,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
+        .tooltipOffset=${17}
         .active=${type === 'frame'}
         .iconContainerPadding=${8}
         @click=${() => {

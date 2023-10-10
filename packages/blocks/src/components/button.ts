@@ -12,7 +12,7 @@ import { customElement, property } from 'lit/decorators.js';
  *
  * @example
  * ```ts
- * html`<icon-button class="has-tool-tip" @click=${this.onUnlink}>
+ * html`<icon-button @click=${this.onUnlink}>
  *   ${UnlinkIcon}
  * </icon-button>`
  *

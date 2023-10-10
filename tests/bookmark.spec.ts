@@ -78,7 +78,7 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
   );
   await expect(blockHubListContainer).toBeVisible();
   await page.click(
-    '.has-tool-tip[affine-flavour="affine:bookmark"][affine-type="bookmark"]'
+    '.card-container[affine-flavour="affine:bookmark"][affine-type="bookmark"]'
   );
   await page.waitForTimeout(200);
   await type(page, inputUrl);

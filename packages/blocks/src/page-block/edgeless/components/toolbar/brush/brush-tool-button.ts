@@ -131,6 +131,7 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-toolbar-button
         .tooltip=${this._brushMenu ? '' : getTooltipWithShortcut('Pen', 'P')}
+        .tooltipOffset=${4}
         .active=${type === 'brush'}
         @click=${() => {
           this.setEdgelessTool({

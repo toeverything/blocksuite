@@ -18,7 +18,6 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
       ({ id, name, icon, action, activeWhen }) =>
         html`<icon-button
           size="32px"
-          class="has-tool-tip"
           data-testid=${id}
           ?active=${activeWhen(root)}
           @click=${() => {
@@ -27,7 +26,7 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
           }}
         >
           ${icon}
-          <tool-tip inert role="tooltip">${name}</tool-tip>
+          <affine-tooltip>${name}</affine-tooltip>
         </icon-button>`
     )}
     <div class="divider"></div>

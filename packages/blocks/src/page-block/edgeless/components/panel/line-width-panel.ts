@@ -3,7 +3,6 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
 import { LineWidth } from '../../../../__internal__/utils/types.js';
-import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 
 type DragConfig = {
   stepWidth: number;
@@ -104,13 +103,6 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       background-color: var(--affine-icon-color);
       z-index: 1;
     }
-
-    ${tooltipStyle}
-
-    tool-tip {
-      z-index: 12;
-      top: -8px;
-    }
   `;
 
   @property({ attribute: false })
@@ -119,7 +111,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   @property({ attribute: false })
   hasTooltip = true;
 
-  @query('.line-width-panel.has-tool-tip')
+  @query('.line-width-panel')
   private _lineWidthPanel!: HTMLElement;
 
   @query('.line-width-overlay')
@@ -322,7 +314,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
 
   override render() {
     return html`<div
-      class="line-width-panel has-tool-tip"
+      class="line-width-panel"
       @mousedown="${(e: Event) => e.preventDefault()}"
     >
       <div class="line-width-button">
@@ -347,9 +339,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       <div class="bottom-line"></div>
       <div class="line-width-overlay"></div>
       ${this.hasTooltip
-        ? html`<tool-tip inert role="tooltip" tip-position="top" arrow>
-            Thickness
-          </tool-tip>`
+        ? html`<affine-tooltip>Thickness</affine-tooltip>`
         : nothing}
     </div>`;
   }
