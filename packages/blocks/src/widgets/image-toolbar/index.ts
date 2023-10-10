@@ -3,7 +3,7 @@ import { offset, shift } from '@floating-ui/dom';
 import { customElement } from 'lit/decorators.js';
 
 import { PAGE_HEADER_HEIGHT } from '../../__internal__/consts.js';
-import { HoverController } from '../../components/when-hover.js';
+import { HoverController } from '../../components/hover-controller.js';
 import type { ImageBlockComponent } from '../../image-block/image-block.js';
 import { ImageOptionsTemplate } from './image-options.js';
 
