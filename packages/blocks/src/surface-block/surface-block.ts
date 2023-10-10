@@ -62,7 +62,7 @@ import {
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './grid.js';
-import type { EdgelessElementUtils, IVec, PhasorElementType } from './index.js';
+import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -153,7 +153,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   compare = compare;
 
   private _defaultBatch = 'a1';
-  private _batches = new Map<string, Batch<EdgelessElementUtils>>();
+  private _batches = new Map<string, Batch<IEdgelessElement>>();
 
   slots = {
     elementUpdated: new Slot<{
@@ -561,17 +561,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   getBatch(id: string) {
     const batch = this._batches.get(id);
     if (batch) return batch;
-    const newBatch = new Batch<EdgelessElementUtils>(id);
+    const newBatch = new Batch<IEdgelessElement>(id);
     this._batches.set(id, newBatch);
     return newBatch;
   }
 
-  private _addToBatch(element: EdgelessElementUtils) {
+  private _addToBatch(element: IEdgelessElement) {
     const batch = element.batch ?? this._defaultBatch;
     this.getBatch(batch).addElement(element);
   }
 
-  private _removeFromBatch(element: EdgelessElementUtils) {
+  private _removeFromBatch(element: IEdgelessElement) {
     const batch = element.batch ?? this._defaultBatch;
     this.getBatch(batch).deleteElement(element);
   }
@@ -722,7 +722,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     properties: IEdgelessElementCreateProps<T>,
     parent?: BaseBlockModel | string | null,
     parentIndex?: number
-  ) {
+  ): id {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }

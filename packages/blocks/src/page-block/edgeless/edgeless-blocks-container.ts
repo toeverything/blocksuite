@@ -9,8 +9,8 @@ import './components/note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import {  LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { LitElement, nothing } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 

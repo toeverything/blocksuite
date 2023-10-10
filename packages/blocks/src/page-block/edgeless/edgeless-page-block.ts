@@ -16,11 +16,10 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
-import type { EdgelessTool } from '../../__internal__/index.js';
+import type { EdgelessTool, Point } from '../../__internal__/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  Point,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../__internal__/index.js';
@@ -416,61 +415,22 @@ export class EdgelessPageBlockComponent extends BlockElement<
     };
   }
 
-  addImage(
-    model: Partial<ImageBlockModel>,
-    point?: Point
-  ): { noteId: string; ids: string[] } {
+  addImage(model: Partial<ImageBlockModel>, point: IVec) {
     const options = {
       width: model.width ?? 0,
       height: model.height ?? 0,
     };
-    // force update size of image
     {
       delete model.width;
       delete model.height;
     }
-
-    const rect = this.pageBlockContainer.getBoundingClientRect();
-    const { width, height } = rect;
-
-    if (options.width && options.height) {
-      const w = width > 100 ? width - 100 : width;
-      const h = height > 100 ? height - 100 : height;
-      const s = w / h;
-      const p = options.width / options.height;
-      if (s >= 1) {
-        options.height = Math.min(options.height, h);
-        options.width = options.height * p;
-      } else {
-        options.width = Math.min(options.width, w);
-        options.height = options.width / p;
-      }
-    }
-
-    const { zoom } = this.surface.viewport;
-
-    if (!point) point = new Point(0, 0);
-
-    if (point.x === 0 && point.y === 0) {
-      const { centerX, centerY } = this.surface.viewport;
-      const [cx, cy] = this.surface.toViewCoord(centerX, centerY);
-      point.x = cx;
-      point.y = cy;
-    }
-    const cx = point.x;
-    const cy = point.y;
-
-    let x = 0;
-    let y = 0;
-    if (zoom > 1) {
-      x = cx - options.width / 2;
-      y = cy - options.height / 2;
-    } else {
-      x = cx - (options.width * zoom) / 2;
-      y = cy - (options.height * zoom) / 2;
-    }
-
-    return this.addNewNote([model], new Point(x, y), options);
+    point = this.surface.toModelCoord(point[0], point[1]);
+    const bound = new Bound(point[0], point[1], options.width, options.height);
+    return this.surface.addElement(
+      EdgelessBlockType.IMAGE,
+      { ...model, xywh: bound.serialize() },
+      this.surface.model
+    );
   }
 
   async addImages(

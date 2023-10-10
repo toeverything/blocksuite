@@ -5,10 +5,10 @@ import type { CssVariableName } from '../__internal__/theme/css-variables.js';
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
-  EdgelessElementUtils,
   HitTestOptions,
+  IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
-import { RectElement } from '../surface-block/elements/rect-element.js';
+import { RectLikeUtils } from '../surface-block/elements/rect-element.js';
 import {
   Bound,
   type IVec,
@@ -64,10 +64,10 @@ type Props = {
   hidden: boolean;
 };
 
-@RectElement
+@RectLikeUtils
 export class NoteBlockModel
   extends BaseBlockModel<Props>
-  implements EdgelessElementUtils
+  implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;
 

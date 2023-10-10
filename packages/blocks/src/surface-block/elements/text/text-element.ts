@@ -8,7 +8,7 @@ import {
   rotatePoints,
 } from '../../utils/math-utils.js';
 import { type IVec } from '../../utils/vec.js';
-import { RectElement } from '../rect-element.js';
+import { RectLikeUtils } from '../rect-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import type { IText, ITextDelta } from './types.js';
 import {
@@ -20,7 +20,7 @@ import {
   isRTL,
   splitIntoLines,
 } from './utils.js';
-@RectElement
+@RectLikeUtils
 export class TextElement extends SurfaceElement<IText> {
   get text() {
     return this.yMap.get('text') as IText['text'];

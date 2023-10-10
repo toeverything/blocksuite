@@ -2,11 +2,11 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import { RectElement } from '../surface-block/elements/rect-element.js';
+import { RectLikeUtils } from '../surface-block/elements/rect-element.js';
 import type { PointLocation } from '../surface-block/index.js';
 import {
   Bound,
-  type EdgelessElementUtils,
+  type IEdgelessElement,
   type IVec,
   type SerializedXYWH,
 } from '../surface-block/index.js';
@@ -45,10 +45,10 @@ export const ImageBlockSchema = defineBlockSchema({
   },
 });
 
-@RectElement
+@RectLikeUtils
 export class ImageBlockModel
   extends BaseBlockModel<ImageBlockProps>
-  implements EdgelessElementUtils
+  implements IEdgelessElement
 {
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;

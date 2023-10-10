@@ -6,8 +6,8 @@ import type { SurfaceBlockComponent } from '../index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
-  EdgelessElementUtils,
   HitTestOptions,
+  IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
 import {
   Bound,
@@ -46,7 +46,7 @@ type Props = {
 
 export class FrameBlockModel
   extends BaseBlockModel<Props>
-  implements EdgelessElementUtils
+  implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.FRAME;
 

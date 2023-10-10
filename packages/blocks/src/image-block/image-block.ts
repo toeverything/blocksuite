@@ -20,6 +20,8 @@ import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import { shouldResizeImage } from './image/utils.js';
 import { type ImageBlockModel, ImageBlockSchema } from './image-model.js';
 
+const MAX_RETRY_COUNT = 3;
+
 @customElement('affine-image')
 export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   @query('affine-page-image')
@@ -71,8 +73,6 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 }
 
 class ImageBlock extends BlockElement<ImageBlockModel> {
-  static maxRetryCount = 3;
-
   @state()
   protected _source!: string;
 
@@ -91,7 +91,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
     this._imageState = 'waitUploaded';
     this._retryCount++;
     console.warn('Cannot find blob, retrying', this._retryCount);
-    if (this._retryCount < ImageBlock.maxRetryCount) {
+    if (this._retryCount < MAX_RETRY_COUNT) {
       setTimeout(() => {
         this._fetchImage();
         // 1s, 2s, 3s
@@ -131,7 +131,6 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     this._fetchImage();
-    this._disposables.add;
   }
 
   override disconnectedCallback() {
