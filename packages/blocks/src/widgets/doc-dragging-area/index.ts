@@ -1,11 +1,12 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { WidgetElement } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';
 
@@ -128,9 +129,11 @@ function getSelectingBlockPaths(blockInfos: BlockInfo[], userRect: Rect) {
   return blockPaths;
 }
 
-function isBlankArea(e: PointerEventState) {
-  const { cursor } = window.getComputedStyle(e.raw.target as Element);
-  return cursor !== 'text';
+function isRootArea(e: PointerEventState) {
+  const el = e.raw.target;
+  assertInstanceOf(el, Element);
+  const block = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+  return block && block.model.role === 'root';
 }
 
 export const AFFINE_DOC_DRAGGING_AREA_WIDGET =
@@ -265,7 +268,7 @@ export class AffineDocDraggingAreaWidget extends WidgetElement<DocPageBlockCompo
         const { button } = state.raw;
         if (button !== 0) return;
 
-        if (isBlankArea(state)) {
+        if (isRootArea(state)) {
           this._dragging = true;
           const viewportElement = this._viewportElement;
           this._offset = {
