@@ -311,36 +311,38 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.blocks.forEach(block => {
       this._addToBatch(block);
     });
-    page.slots.blockUpdated.on(e => {
-      if (e.type === 'add') {
-        const model = this.pickById(e.id) as TopLevelBlockModel;
-        assertExists(model);
-        if (isFrameBlock(model) || isNoteBlock(model)) {
-          this._addToBatch(model);
-        } else if (
-          isImageBlock(model) &&
-          (<Y.Array<string>>this.model.yBlock.get('sys:children'))
-            .toArray()
-            .includes(e.id)
-        ) {
-          this._addToBatch(model);
-        }
-      } else if (e.type === 'delete') {
-        if (
-          e.flavour === EdgelessBlockType.NOTE ||
-          e.flavour === EdgelessBlockType.FRAME
-        ) {
+    this._disposables.add(
+      page.slots.blockUpdated.on(e => {
+        if (e.type === 'add') {
           const model = this.pickById(e.id) as TopLevelBlockModel;
-          this._removeFromBatch(model);
-        } else if (
-          e.flavour === EdgelessBlockType.IMAGE &&
-          e.parent === this.model.id
-        ) {
-          const model = this.pickById(e.id) as TopLevelBlockModel;
-          this._removeFromBatch(model);
+          assertExists(model);
+          if (isFrameBlock(model) || isNoteBlock(model)) {
+            this._addToBatch(model);
+          } else if (
+            isImageBlock(model) &&
+            (<Y.Array<string>>this.model.yBlock.get('sys:children'))
+              .toArray()
+              .includes(e.id)
+          ) {
+            this._addToBatch(model);
+          }
+        } else if (e.type === 'delete') {
+          if (
+            e.flavour === EdgelessBlockType.NOTE ||
+            e.flavour === EdgelessBlockType.FRAME
+          ) {
+            const model = this.pickById(e.id) as TopLevelBlockModel;
+            this._removeFromBatch(model);
+          } else if (
+            e.flavour === EdgelessBlockType.IMAGE &&
+            e.parent === this.model.id
+          ) {
+            const model = this.pickById(e.id) as TopLevelBlockModel;
+            this._removeFromBatch(model);
+          }
         }
-      }
-    });
+      })
+    );
   }
 
   private _reorderBlocks({

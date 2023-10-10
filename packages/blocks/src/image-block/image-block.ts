@@ -82,10 +82,10 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
   protected _imageState: 'waitUploaded' | 'loading' | 'ready' | 'failed' =
     'loading';
 
-  protected _retryCount = 0;
-  protected _lastSourceId: string = '';
+  private _retryCount = 0;
+  private _lastSourceId: string = '';
 
-  protected _fetchError = (e: unknown) => {
+  private _fetchError = (e: unknown) => {
     // Do have the id but cannot find the blob
     //  this is probably because the blob is not uploaded yet
     this._imageState = 'waitUploaded';
@@ -102,7 +102,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
     }
   };
 
-  protected _fetchImage = () => {
+  private _fetchImage = () => {
     if (
       this._imageState === 'ready' &&
       this._lastSourceId &&
