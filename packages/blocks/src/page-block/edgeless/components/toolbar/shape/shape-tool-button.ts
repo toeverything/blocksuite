@@ -229,8 +229,7 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
           this._shapeToolLocalState?.strokeColor ?? DEFAULT_SHAPE_STROKE_COLOR,
         shapeStyle: this._shapeToolLocalState?.shapeStyle ?? ShapeStyle.General,
       });
-    }
-    if (this.edgelessTool.type === 'shape') {
+    } else {
       this._closeShapeMenu();
       this.setEdgelessTool({ type: 'default' });
     }
