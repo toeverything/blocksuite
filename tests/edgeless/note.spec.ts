@@ -339,7 +339,6 @@ test.describe('note slicer', () => {
     await initSixParagraphs(page);
 
     await switchEditorMode(page);
-    await page.pause();
     await selectNoteInEdgeless(page, ids.noteId);
 
     await hoverOnNote(page, ids.noteId, [0, 60]);
@@ -358,9 +357,9 @@ test.describe('note slicer', () => {
     );
 
     await waitNextFrame(page, 2000);
-    // await expect(
-    //   page.locator('affine-note-slicer-popupbutton').isVisible()
-    // ).toBeTruthy();
+    await expect(
+      page.locator('affine-note-slicer-popupbutton').isVisible()
+    ).toBeTruthy();
     await page.locator('affine-note-slicer-popupbutton').click();
 
     await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
@@ -693,7 +692,6 @@ test('continuous undo and redo (note block add operation) should work', async ({
   await focusRichText(page);
   await type(page, 'hello');
   await switchEditorMode(page);
-  await page.pause();
   await click(page, { x: 60, y: 450 });
   await copyByKeyboard(page);
 
