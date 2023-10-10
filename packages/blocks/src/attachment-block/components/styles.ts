@@ -1,8 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, unsafeCSS } from 'lit';
 
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
-
 export const renameStyles = css`
   .affine-attachment-rename-container {
     position: relative;
@@ -132,6 +130,4 @@ export const styles = css`
   icon-button[hidden] {
     display: none;
   }
-
-  ${tooltipStyle}
 `;

@@ -2,7 +2,6 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
   CancelWrapIcon,
   CopyIcon,
@@ -35,7 +34,7 @@ export function CodeOptionTemplate({
       }
       .affine-codeblock-option {
         box-shadow: var(--affine-shadow-2);
-        padding: 4px;
+        padding: 8px;
         border-radius: 8px;
         z-index: var(--affine-z-index-popover);
         background: var(--affine-background-overlay-panel-color);
@@ -47,32 +46,28 @@ export function CodeOptionTemplate({
       .delete-code-button:hover > svg {
         color: var(--affine-error-color);
       }
-
-      ${tooltipStyle}
     </style>
 
     <div ${ref(containerRef)} class="affine-codeblock-option">
       <icon-button
         size="32px"
-        class="has-tool-tip"
         data-testid="copy-button"
         @click=${() => copyCode(model as CodeBlockModel)}
       >
         ${CopyIcon}
-        <tool-tip inert tip-position="right" role="tooltip"
-          >Copy to Clipboard</tool-tip
+        <affine-tooltip tip-position="right" .offset=${12}
+          >Copy to Clipboard</affine-tooltip
         >
       </icon-button>
       <icon-button
         size="32px"
-        class="has-tool-tip"
         data-testid="wrap-button"
         ?active=${wrap}
         @click=${onClickWrap}
       >
         ${wrap ? CancelWrapIcon : WrapIcon}
-        <tool-tip inert tip-position="right" role="tooltip"
-          >${wrap ? 'Cancel wrap' : 'Wrap code'}</tool-tip
+        <affine-tooltip tip-position="right" .offset=${12}
+          >${wrap ? 'Cancel wrap' : 'Wrap code'}</affine-tooltip
         >
       </icon-button>
       ${readonly
@@ -80,15 +75,15 @@ export function CodeOptionTemplate({
         : html`<icon-button
             size="32px"
             data-testid="delete-button"
-            class="has-tool-tip delete-code-button"
+            class="delete-code-button"
             @click=${() => {
               if (readonly) return;
               model.page.deleteBlock(model);
             }}
           >
             ${DeleteIcon}
-            <tool-tip inert tip-position="right" role="tooltip"
-              >Delete</tool-tip
+            <affine-tooltip tip-position="right" .offset=${12}
+              >Delete</affine-tooltip
             >
           </icon-button>`}
     </div>

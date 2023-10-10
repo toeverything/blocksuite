@@ -3,7 +3,6 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { z } from 'zod';
 
 import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
 import type { RichText } from '../../../../components/rich-text/rich-text.js';
@@ -192,7 +191,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
 
     return html`<rich-text
       .yText=${this.element.text}
-      .attributesSchema=${z.object({})}
+      .enableFormat=${false}
       style=${virgoStyle}
     ></rich-text>`;
   }

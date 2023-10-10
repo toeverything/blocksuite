@@ -121,6 +121,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
       contain: size layout;
     }
 
+    .affine-edgeless-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      contain: size layout style;
+    }
+
     @media screen and (max-width: 1200px) {
       edgeless-zoom-toolbar {
         display: none;
@@ -167,8 +174,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
-
-  private _edgelessLayerWillChange = false;
 
   clipboard = new EdgelessClipboard(this.page, this);
 
@@ -299,33 +304,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(({ zoom, center }) => {
         this.slots.viewportUpdated.emit({ zoom, center });
-      })
-    );
-
-    let resetWillChange: ReturnType<typeof setTimeout> | null = null;
-    _disposables.add(
-      slots.viewportUpdated.on(() => {
-        if (!this._edgelessLayerWillChange) {
-          this._edgelessLayerWillChange = true;
-          requestAnimationFrame(() => {
-            if (!this.edgelessLayer) return;
-
-            if (this.edgelessLayer.style.willChange !== 'transform') {
-              this.edgelessLayer.style.willChange = 'transform';
-            }
-          });
-        }
-
-        if (resetWillChange) clearTimeout(resetWillChange);
-        resetWillChange = setTimeout(() => {
-          this._edgelessLayerWillChange = false;
-          resetWillChange = null;
-          requestAnimationFrame(() => {
-            if (!this.edgelessLayer) return;
-
-            this.edgelessLayer.style.removeProperty('will-change');
-          });
-        }, 150);
       })
     );
 

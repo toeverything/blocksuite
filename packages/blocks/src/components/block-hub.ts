@@ -58,7 +58,6 @@ import { DocPageBlockComponent } from '../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../page-block/text-selection/utils.js';
 import { type DragIndicator } from './drag-indicator.js';
-import { tooltipStyle } from './tooltip/tooltip.js';
 
 export const BLOCKHUB_TEXT_ITEMS = [
   {
@@ -389,10 +388,6 @@ const styles = css`
     background: var(--affine-hover-color);
   }
 
-  [role='menuitem'] tool-tip {
-    font-size: var(--affine-font-sm);
-  }
-
   .block-hub-icons-container {
     width: 100%;
     overflow: hidden;
@@ -405,8 +400,6 @@ const styles = css`
     background: var(--affine-border-color);
     margin: 4px 0;
   }
-
-  ${tooltipStyle}
 `;
 
 type BlockHubItem = {
@@ -461,9 +454,7 @@ function BlockHubCards(
             <div class="card-container-wrapper">
               <div class="card-container-inner">
                 <div
-                  class="card-container has-tool-tip ${isGrabbing
-                    ? 'grabbing'
-                    : ''}"
+                  class="card-container ${isGrabbing ? 'grabbing' : ''}"
                   draggable="true"
                   affine-flavour=${flavour}
                   affine-type=${type ?? ''}
@@ -473,18 +464,15 @@ function BlockHubCards(
                     <div class="description">${description}</div>
                   </div>
                   <div class="card-icon-container">${icon}</div>
-                  <tool-tip
-                    tip-position=${shouldScroll &&
-                    index === blockHubItems.length - 1
-                      ? 'top'
-                      : 'bottom'}
-                    style="${showTooltip
-                      ? ''
-                      : 'display: none'}; z-index: ${blockHubItems.length -
-                    index}"
-                    arrow
-                    >${tooltip}</tool-tip
-                  >
+                  ${showTooltip
+                    ? html`<affine-tooltip
+                        tip-position=${shouldScroll &&
+                        index === blockHubItems.length - 1
+                          ? 'top'
+                          : 'bottom'}
+                        >${tooltip}</affine-tooltip
+                      >`
+                    : null}
                 </div>
               </div>
             </div>
@@ -539,9 +527,7 @@ function BlockHubMenu(
       style="height: ${expanded ? `${height}px` : '0'};"
     >
       <div
-        class="block-hub-icon-container has-tool-tip ${isGrabbing
-          ? 'grabbing'
-          : 'grab'}"
+        class="block-hub-icon-container ${isGrabbing ? 'grabbing' : 'grab'}"
         selected=${visibleCardType === 'blank' ? 'true' : 'false'}
         type="blank"
         draggable="true"
@@ -549,14 +535,11 @@ function BlockHubMenu(
         affine-type="text"
       >
         ${BlockHubRoundedRectangleIcon}
-        <tool-tip
-          inert
-          role="tooltip"
-          tip-position="left"
-          arrow
-          ?hidden=${!showTooltip}
-          >Drag to insert blank line
-        </tool-tip>
+        ${showTooltip
+          ? html`<affine-tooltip tip-position="left" .offset=${8}
+              >Drag to insert blank line
+            </affine-tooltip>`
+          : null}
       </div>
       <div
         class="block-hub-icon-container"
@@ -580,22 +563,18 @@ function BlockHubMenu(
         ${blockHubFileCards} ${EmbedWebIcon}
       </div>
       <div
-        class="block-hub-icon-container has-tool-tip"
+        class="block-hub-icon-container"
         type="database"
         draggable="true"
         affine-flavour="affine:database"
         selected=${visibleCardType === 'database' ? 'true' : 'false'}
       >
         ${DatabaseTableViewIcon}
-        <tool-tip
-          inert
-          role="tooltip"
-          tip-position="left"
-          arrow
-          ?hidden=${!showTooltip}
-        >
-          Drag to create a database
-        </tool-tip>
+        ${showTooltip
+          ? html`<affine-tooltip tip-position="left" .offset=${8}>
+              Drag to create a database
+            </affine-tooltip>`
+          : null}
       </div>
       <div class="divider"></div>
     </div>
@@ -1102,7 +1081,6 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     const classes = classMap({
       'icon-expanded': this._expanded,
       'new-icon-in-edgeless': this._inEdgelessMode && !this._expanded,
-      'has-tool-tip': true,
       'new-icon': true,
     });
     return html`
@@ -1113,15 +1091,14 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       >
         ${blockHubMenu}
         <div class=${classes} role="menuitem" style="cursor:pointer;">
-          ${this._expanded ? CrossIcon : BlockHubIcon}
-          <tool-tip
-            class=${this._expanded ? 'invisible' : ''}
-            inert
-            tip-position="left"
-            role="tooltip"
-            arrow
-            >Insert blocks
-          </tool-tip>
+          ${this._expanded
+            ? CrossIcon
+            : [
+                BlockHubIcon,
+                html`<affine-tooltip tip-position="left"
+                  >Insert blocks</affine-tooltip
+                >`,
+              ]}
         </div>
         ${blockHubCards}
       </div>

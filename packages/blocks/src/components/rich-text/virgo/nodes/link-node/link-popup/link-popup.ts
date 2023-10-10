@@ -254,41 +254,38 @@ export class LinkPopup extends WithDisposable(LitElement) {
   private _viewTemplate() {
     return html`<div class="affine-link-popover">
       <div
-        class="affine-link-preview has-tool-tip"
+        class="affine-link-preview"
         @click=${() => {
           navigator.clipboard.writeText(this.currentLink);
           toast('Copied link to clipboard');
           this.remove();
         }}
       >
-        <tool-tip inert role="tooltip">Click to copy link</tool-tip>
+        <affine-tooltip .offset=${12}>Click to copy link</affine-tooltip>
         <span style="overflow: hidden;">${this.currentLink}</span>
       </div>
 
       ${this._isBookmarkAllowed()
         ? html`<span class="affine-link-popover-dividing-line"></span
             ><icon-button
-              class="has-tool-tip"
               data-testid="link-to-card"
               @click=${() => this._linkToBookmark('card')}
             >
               ${BookmarkIcon}
-              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+              <affine-tooltip .offset=${12}>Turn into Card view</affine-tooltip>
             </icon-button>`
         : nothing}
       ${this._isBookmarkAllowed() && allowEmbed(this.currentLink)
         ? html`<icon-button
-            class="has-tool-tip"
             data-testid="link-to-embed"
             @click=${() => this._linkToBookmark('embed')}
           >
             ${EmbedWebIcon}
-            <tool-tip inert role="tooltip">Turn into Embed view</tool-tip>
+            <affine-tooltip .offset=${12}>Turn into Embed view</affine-tooltip>
           </icon-button>`
         : nothing}
       <span class="affine-link-popover-dividing-line"></span>
       <icon-button
-        class="has-tool-tip"
         data-testid="unlink"
         @click=${() => {
           if (this.vEditor.isVRangeValid(this.goalVRange)) {
@@ -298,18 +295,17 @@ export class LinkPopup extends WithDisposable(LitElement) {
         }}
       >
         ${UnlinkIcon}
-        <tool-tip inert role="tooltip">Remove</tool-tip>
+        <affine-tooltip .offset=${12}>Remove</affine-tooltip>
       </icon-button>
 
       <icon-button
-        class="has-tool-tip"
         data-testid="edit"
         @click=${() => {
           this.type = 'edit';
         }}
       >
         ${EditIcon}
-        <tool-tip inert role="tooltip">Edit</tool-tip>
+        <affine-tooltip .offset=${12}>Edit</affine-tooltip>
       </icon-button>
     </div>`;
   }

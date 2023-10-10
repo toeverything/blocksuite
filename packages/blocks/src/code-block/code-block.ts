@@ -31,7 +31,6 @@ import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
-import { tooltipStyle } from '../components/tooltip/tooltip.js';
 import { ArrowDownIcon } from '../icons/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -148,9 +147,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     }
 
     .affine-code-block-container.wrap #line-numbers > div {
-      margin-top: calc(
-        var(--top, 0) / var(--affine-zoom, 1) - var(--affine-line-height)
-      );
+      margin-top: calc(var(--top, 0) / 1 - var(--affine-line-height));
     }
 
     .affine-code-block-container.wrap v-line > div {
@@ -174,8 +171,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       background-color: var(--affine-background-overlay-panel-color);
       margin: 0;
     }
-
-    ${tooltipStyle}
   `;
 
   @state()

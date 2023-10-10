@@ -1,6 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { CutIcon } from '../../../../icons/index.js';
 
@@ -26,7 +27,6 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
     css`
       .slicer-button {
         transform-origin: center center;
-        transform: translate3d(-50%, 0, 0) scale(calc(1 / var(--affine-zoom)));
         transition: transform 0.1s ease-out;
       }
     `,
@@ -39,6 +39,10 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
   private _button!: HTMLButtonElement;
 
   private _externalButton: PopupNoteSlicerButton | null = null;
+
+  private get _defaultTransform() {
+    return `translate3d(-50%, 0, 0) scale(${1 / this.zoom})`;
+  }
 
   private _createExternalButton() {
     if (this._externalButton) return this._externalButton;
@@ -88,7 +92,7 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
     requestAnimationFrame(() => {
       button.style.transform = `translate3d(-${
         (0.5 + 1 / this.zoom) * 100
-      }%, 0, 0) scale(calc(1 / var(--affine-zoom)))`;
+      }%, 0, 0) scale(calc(1 / ${this.zoom}))`;
     });
 
     button.addEventListener('transitionend', this._popupExternalButton, {
@@ -124,12 +128,18 @@ export class NoteSlicerButton extends WithDisposable(LitElement) {
       this._popupExternalButton
     );
     this._button.style.removeProperty('visibility');
-    this._button.style.removeProperty('transform');
+    this._button.style.transform = this._defaultTransform;
     this._externalButton?.reset();
   }
 
   override render() {
-    return html`<button class="slicer-button" @mouseenter=${this._popup}>
+    return html`<button
+      class="slicer-button"
+      style=${styleMap({
+        transform: this._defaultTransform,
+      })}
+      @mouseenter=${this._popup}
+    >
       ${CutIcon}
     </button>`;
   }

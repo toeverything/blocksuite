@@ -111,21 +111,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
        * https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action
        */
       touch-action: none;
-
-      background-size: var(--affine-edgeless-gap) var(--affine-edgeless-gap);
-      background-position: var(--affine-edgeless-x) var(--affine-edgeless-y);
       background-color: var(--affine-background-primary-color);
-      background-image: var(--affine-edgeless-grid);
       z-index: 0;
-    }
-
-    .affine-edgeless-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      contain: layout style size;
-      transform: translate(var(--affine-edgeless-x), var(--affine-edgeless-y))
-        scale(var(--affine-zoom));
     }
 
     .affine-edgeless-block-child {

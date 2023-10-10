@@ -1,9 +1,8 @@
+import type { Placement } from '@floating-ui/dom';
 import type { TemplateResult } from 'lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import { tooltipStyle } from '../../../../components/tooltip/tooltip.js';
 
 @customElement('edgeless-tool-icon-button')
 export class EdgelessToolIconButton extends LitElement {
@@ -39,16 +38,6 @@ export class EdgelessToolIconButton extends LitElement {
       cursor: not-allowed;
       color: var(--affine-text-disable-color);
     }
-
-    ${tooltipStyle}
-
-    tool-tip {
-      z-index: 12;
-    }
-
-    tool-tip:is([arrow]):is([tip-position='top'])::before {
-      margin-top: -4px;
-    }
   `;
 
   @property({ attribute: false })
@@ -61,11 +50,13 @@ export class EdgelessToolIconButton extends LitElement {
   tooltip!: string | TemplateResult<1>;
 
   @property({ attribute: false })
-  tipPosition: 'top' | 'bottom' | 'left' | 'right' | 'top-end' | 'top-start' =
-    'top';
+  tipPosition: Placement = 'top';
 
   @property({ attribute: false })
   arrow = true;
+
+  @property({ attribute: false })
+  tooltipOffset = 8;
 
   @property({ attribute: false })
   active = false;
@@ -93,7 +84,7 @@ export class EdgelessToolIconButton extends LitElement {
 
   override render() {
     const tooltip = this.coming ? '(Coming soon)' : this.tooltip;
-    const classnames = `icon-container has-tool-tip active-mode-${this.activeMode}`;
+    const classnames = `icon-container active-mode-${this.activeMode}`;
     const iconContainerStyles = styleMap({
       '--icon-container-padding': `${this.iconContainerPadding}px`,
     });
@@ -108,12 +99,11 @@ export class EdgelessToolIconButton extends LitElement {
       >
         <slot></slot>
         ${tooltip
-          ? html`<tool-tip
-              inert
-              role="tooltip"
+          ? html`<affine-tooltip
               tip-position=${this.tipPosition}
-              ?arrow=${this.arrow}
-              >${tooltip}</tool-tip
+              .arrow=${this.arrow}
+              .offset=${this.tooltipOffset}
+              >${tooltip}</affine-tooltip
             >`
           : nothing}
       </div>

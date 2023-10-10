@@ -14,13 +14,10 @@ export const ActionItems = (formatBar: AffineFormatBarWidget) => {
     .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
       const enabled = enabledWhen(root);
       const toolTip = enabled
-        ? html`<tool-tip inert role="tooltip">${name}</tool-tip>`
-        : html`<tool-tip tip-position="top" inert role="tooltip"
-            >${disabledToolTip}</tool-tip
-          >`;
+        ? html`<affine-tooltip>${name}</affine-tooltip>`
+        : html`<affine-tooltip>${disabledToolTip}</affine-tooltip>`;
       return html`<icon-button
         size="32px"
-        class="has-tool-tip"
         data-testid=${id}
         ?disabled=${!enabled}
         @click=${() => enabled && action(root)}

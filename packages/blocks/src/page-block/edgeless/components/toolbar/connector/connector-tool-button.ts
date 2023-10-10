@@ -97,6 +97,7 @@ export class EdgelessConnectorToolButton extends WithDisposable(LitElement) {
     return html`
       <edgeless-tool-icon-button
         .tooltip=${this._connectorMenu ? '' : 'Connector'}
+        .tooltipOffset=${17}
         .active=${type === 'connector'}
         .iconContainerPadding=${8}
         class="edgeless-connector-button"

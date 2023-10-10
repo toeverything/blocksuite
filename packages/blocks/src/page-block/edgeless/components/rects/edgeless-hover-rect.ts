@@ -1,9 +1,7 @@
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
+import { css, html, LitElement } from 'lit';
+import { customElement, property, query } from 'lit/decorators.js';
 
-import { matchFlavours } from '../../../../__internal__/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 
@@ -22,52 +20,71 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
       position: absolute;
       top: 0;
       left: 0;
+      width: 1px;
+      height: 1px;
       pointer-events: none;
       box-sizing: border-box;
       z-index: 1;
       border: var(--affine-border-width) solid var(--affine-blue);
+      visibility: hidden;
+      transform-origin: top left;
     }
   `;
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  @query('.affine-edgeless-hover-rect')
+  rect!: HTMLDivElement;
+
+  rAfId: number | null = null;
+
+  refreshHoverRect = () => {
+    if (this.rAfId) cancelAnimationFrame(this.rAfId);
+
+    const hoverState = this.edgeless.tools.getHoverState();
+
+    if (!hoverState) {
+      this.rAfId = requestAnimationFrame(() => {
+        this.rect.style.removeProperty('visibility');
+      });
+
+      return;
+    }
+
+    const { zoom } = this.edgeless.surface.viewport;
+    const { rect } = hoverState;
+    const isNote = isNoteBlock(hoverState.content);
+
+    this.rAfId = requestAnimationFrame(() => {
+      this.rect.style.visibility = 'visible';
+      this.rect.style.transform = `translate(${rect.x}px, ${rect.y}px)`;
+      this.rect.style.width = `${rect.width}px`;
+      this.rect.style.height = `${rect.height}px`;
+      this.rect.style.borderRadius = isNote ? `${8 * zoom}px` : '';
+      this.rect.style.backgroundColor = isNote
+        ? 'var(--affine-hover-color)'
+        : '';
+      this.rAfId = null;
+    });
+  };
+
   protected override firstUpdated() {
     this._disposables.add(
-      this.edgeless.slots.hoverUpdated.on(() => this.requestUpdate())
+      this.edgeless.slots.hoverUpdated.on(() => this.refreshHoverRect())
     );
     this._disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
+      this.edgeless.slots.viewportUpdated.on(() => this.refreshHoverRect())
     );
     this._disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() =>
-        this.requestUpdate()
+        this.refreshHoverRect()
       )
     );
   }
 
   protected override render() {
-    const { edgeless } = this;
-    const zoom = this.edgeless.surface.viewport.zoom;
-    const hoverState = edgeless.tools.getHoverState();
-    if (!hoverState || edgeless.selectionManager.state.editing) return nothing;
-    const rect = hoverState.rect;
-    const isNote =
-      isNoteBlock(hoverState.content) &&
-      matchFlavours(hoverState.content, ['affine:note']);
-
-    const style = {
-      left: rect.x + 'px',
-      top: rect.y + 'px',
-      width: rect.width + 'px',
-      height: rect.height + 'px',
-      borderRadius: isNote ? 8 * zoom + 'px' : '',
-      backgroundColor: isNote ? 'var(--affine-hover-color)' : '',
-    };
-
-    return html`
-      <div class="affine-edgeless-hover-rect" style=${styleMap(style)}></div>
-    `;
+    return html` <div class="affine-edgeless-hover-rect"></div> `;
   }
 }
 

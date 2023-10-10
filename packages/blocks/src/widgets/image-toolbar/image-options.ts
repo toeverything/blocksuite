@@ -4,7 +4,6 @@ import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
-import { tooltipStyle } from '../../components/tooltip/tooltip.js';
 import {
   BookmarkIcon,
   CaptionIcon,
@@ -59,15 +58,13 @@ export function ImageOptionsTemplate({
         background-color: var(--affine-background-overlay-panel-color);
         margin: 0;
       }
-      .has-tool-tip.delete-image-button:hover {
+      .delete-image-button:hover {
         background: var(--affine-background-error-color);
         color: var(--affine-error-color);
       }
-      .has-tool-tip.delete-image-button:hover > svg {
+      .delete-image-button:hover > svg {
         color: var(--affine-error-color);
       }
-
-      ${tooltipStyle}
     </style>
 
     <div
@@ -78,7 +75,6 @@ export function ImageOptionsTemplate({
       <div class="embed-editing-state">
         ${supportAttachment
           ? html`<icon-button
-              class="has-tool-tip"
               size="32px"
               ?hidden=${readonly}
               @click=${() => {
@@ -87,40 +83,29 @@ export function ImageOptionsTemplate({
               }}
             >
               ${BookmarkIcon}
-              <tool-tip inert role="tooltip">Turn into Card view</tool-tip>
+              <affine-tooltip>Turn into Card view</affine-tooltip>
             </icon-button>`
           : nothing}
         <icon-button
-          class="has-tool-tip"
           size="32px"
           ?hidden=${readonly}
           @click=${() => focusCaption(model)}
         >
           ${CaptionIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Caption</tool-tip>
+          <affine-tooltip tip-position="right">Caption</affine-tooltip>
         </icon-button>
-        <icon-button
-          class="has-tool-tip"
-          size="32px"
-          @click=${() => downloadImage(model)}
-        >
+        <icon-button size="32px" @click=${() => downloadImage(model)}>
           ${DownloadIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
-            >Download</tool-tip
-          >
+          <affine-tooltip tip-position="right">Download</affine-tooltip>
         </icon-button>
-        <icon-button
-          class="has-tool-tip"
-          size="32px"
-          @click=${() => copyImage(model)}
-        >
+        <icon-button size="32px" @click=${() => copyImage(model)}>
           ${CopyIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
-            >Copy to clipboard</tool-tip
+          <affine-tooltip tip-position="right"
+            >Copy to clipboard</affine-tooltip
           >
         </icon-button>
         <icon-button
-          class="has-tool-tip delete-image-button"
+          class="delete-image-button"
           size="32px"
           ?hidden=${readonly}
           @click="${() => {
@@ -129,10 +114,9 @@ export function ImageOptionsTemplate({
           }}"
         >
           ${DeleteIcon}
-          <tool-tip inert tip-position="right" role="tooltip">Delete</tool-tip>
+          <affine-tooltip tip-position="right">Delete</affine-tooltip>
         </icon-button>
         <icon-button
-          class="has-tool-tip"
           size="32px"
           ?hidden=${readonly ||
           !model.page.awarenessStore.getFlag('enable_bultin_ledits')}
@@ -142,9 +126,7 @@ export function ImageOptionsTemplate({
           }}"
         >
           ${HighLightDuotoneIcon}
-          <tool-tip inert tip-position="right" role="tooltip"
-            >Edit with LEDITS</tool-tip
-          >
+          <affine-tooltip tip-position="right">Edit with LEDITS</affine-tooltip>
         </icon-button>
       </div>
     </div>

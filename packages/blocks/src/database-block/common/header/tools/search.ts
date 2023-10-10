@@ -4,6 +4,7 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import {
@@ -49,14 +50,6 @@ const styles = css`
     padding-right: 8px;
     height: 100%;
     cursor: pointer;
-  }
-
-  .close-icon .code {
-    width: 31px;
-    height: 18px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: var(--affine-white-10);
   }
 
   .affine-database-search-input-icon {
@@ -181,11 +174,22 @@ export class DataViewHeaderToolsSearch extends BaseTool<
           @pointerdown="${stopPropagation}"
           @blur="${this._onSearchBlur}"
         />
-        <div class="has-tool-tip close-icon" @mousedown="${this._clearSearch}">
+        <div class="close-icon" @mousedown="${this._clearSearch}">
           ${DatabaseSearchClose}
-          <tool-tip inert arrow tip-position="top" role="tooltip">
-            <span class="code">Esc</span> to clear all
-          </tool-tip>
+          <affine-tooltip>
+            <span
+              style=${styleMap({
+                display: 'flex',
+                alignItems: 'center',
+                boxSizing: 'border-box',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                background: 'var(--affine-white-10)',
+              })}
+              >Esc</span
+            >
+            to clear all
+          </affine-tooltip>
         </div>
       </label>
     `;

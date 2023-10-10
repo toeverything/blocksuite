@@ -103,7 +103,10 @@ export class BookmarkCreateModal extends WithDisposable(LitElement) {
           </div>
         </div>
       </div>`;
-    return html`<blocksuite-portal .template=${modal}></blocksuite-portal>`;
+    return html`<blocksuite-portal
+      .template=${modal}
+      .shadowDom=${false}
+    ></blocksuite-portal>`;
   }
 }
 
