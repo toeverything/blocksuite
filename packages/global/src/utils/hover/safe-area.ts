@@ -268,10 +268,10 @@ export const safeBridge = ({
         case 'top': {
           rectRect = new DOMRect(
             Math.max(rect.left, refRect.left),
-            rect.top,
+            rect.bottom,
             Math.min(rect.right, refRect.right) -
               Math.max(rect.left, refRect.left),
-            refRect.top - rect.top
+            refRect.top - rect.bottom
           );
           break;
         }
@@ -281,7 +281,7 @@ export const safeBridge = ({
             refRect.bottom,
             Math.min(rect.right, refRect.right) -
               Math.max(rect.left, refRect.left),
-            rect.bottom - refRect.bottom
+            rect.top - refRect.bottom
           );
           break;
         }
