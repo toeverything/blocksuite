@@ -21,7 +21,8 @@ type ResizeMoveHandler = (
     {
       bound: Bound;
     }
-  >
+  >,
+  direction: HandleDirection
 ) => void;
 
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
@@ -538,7 +539,7 @@ export class HandleResizeManager {
     }
 
     this._bounds.forEach(process);
-    this._onResizeMove(newBounds);
+    this._onResizeMove(newBounds, this._dragDirection);
   }
 
   private _onRotate(shiftKey = false) {

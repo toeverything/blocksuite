@@ -16,6 +16,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { deleteElements } from '../../utils/crud.js';
+import { getSelectedRect } from '../../utils/query.js';
 
 @customElement('edgeless-text-editor')
 export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
@@ -396,6 +397,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const transformOrigin = this.getTransformOrigin(textAlign);
     const offset = this.getTransformOffset(textAlign);
     const paddingOffset = this.getPaddingOffset(textAlign);
+    const rect = getSelectedRect([this.element]);
+    const maxWidth = this.element.maxWidth;
     const [x, y] = this.getVisualPosition(this.element);
     const placeholder = this._renderPlaceholder();
     const hasPlaceholder = placeholder !== nothing;
@@ -419,6 +422,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       style=${styleMap({
         textAlign,
         fontFamily,
+        minWidth: `${rect.width}px`,
+        maxWidth: maxWidth ? `${maxWidth}px` : 'none',
         fontSize: `${fontSize}px`,
         fontWeight: bold ? 'bold' : 'normal',
         transform: transformOperation.join(' '),
