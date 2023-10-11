@@ -1,10 +1,10 @@
 import type { EdgelessElement } from '../../../__internal__/index.js';
 import { Bound } from '../../../surface-block/index.js';
-import type { Selectable } from '../services/tools-manager.js';
+import { getXYWH, type Selectable } from '../services/tools-manager.js';
 import { isTopLevelBlock } from './query.js';
 
 export function getGridBound(ele: Selectable) {
-  return isTopLevelBlock(ele) ? Bound.fromXYWH(ele.xywh) : ele.gridBound;
+  return isTopLevelBlock(ele) ? Bound.fromXYWH(getXYWH(ele)) : ele.gridBound;
 }
 
 export function edgelessElementsBound(elements: EdgelessElement[]) {

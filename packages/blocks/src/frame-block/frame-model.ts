@@ -1,4 +1,8 @@
-import type { Text } from '@blocksuite/store';
+import {
+  type MigrationRunner,
+  NativeWrapper,
+  type Text,
+} from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
@@ -9,6 +13,7 @@ import type {
 } from '../surface-block/elements/edgeless-element.js';
 import {
   Bound,
+  deserializeXYWH,
   type IVec,
   linePolygonIntersects,
   type PointLocation,
@@ -16,19 +21,40 @@ import {
 } from '../surface-block/index.js';
 import type { FrameBlockComponent } from './frame-block.js';
 
+const migration = {
+  toV2: data => {
+    const { xywh } = data;
+
+    if (typeof xywh === 'string') {
+      data.xywh = new NativeWrapper(deserializeXYWH(xywh));
+    }
+  },
+} satisfies Record<string, MigrationRunner<typeof FrameBlockSchema>>;
+
 export const FrameBlockSchema = defineBlockSchema({
   flavour: 'affine:frame',
-  props: internal => ({
-    title: internal.Text(),
-    background: '--affine-palette-transparent',
-    xywh: [0, 0, 100, 100],
-    index: 'a0',
-  }),
+  props: internal =>
+    ({
+      title: internal.Text(),
+      background: '--affine-palette-transparent',
+      xywh: new NativeWrapper([0, 0, 100, 100]),
+      index: 'a0',
+    }) as {
+      title: Text;
+      background: string;
+      xywh: NativeWrapper<SerializedXYWH>;
+      index: string;
+    },
   metadata: {
-    version: 1,
+    version: 2,
     role: 'content',
     parent: ['affine:surface'],
     children: [],
+  },
+  onUpgrade: (data, oldVersion, version) => {
+    if (oldVersion < 2 && version >= 2) {
+      migration.toV2(data);
+    }
   },
   toModel: () => {
     return new FrameBlockModel();
@@ -38,7 +64,7 @@ export const FrameBlockSchema = defineBlockSchema({
 type Props = {
   title: Text;
   background: string;
-  xywh: SerializedXYWH;
+  xywh: NativeWrapper<SerializedXYWH>;
   index: string;
 };
 
@@ -51,13 +77,17 @@ export class FrameBlockModel
   }
 
   containedByBounds(bound: Bound): boolean {
-    return bound.contains(Bound.fromXYWH(this.xywh));
+    return bound.contains(Bound.fromXYWH(this.xywh.getValue()));
   }
   getNearestPoint(_: IVec): IVec {
     throw new Error('Function not implemented.');
   }
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null {
-    return linePolygonIntersects(start, end, Bound.fromXYWH(this.xywh).points);
+    return linePolygonIntersects(
+      start,
+      end,
+      Bound.fromXYWH(this.xywh.getValue()).points
+    );
   }
   getRelativePointLocation(_: IVec): PointLocation {
     throw new Error('Function not implemented.');
@@ -76,6 +106,6 @@ export class FrameBlockModel
     return titleBound.isPointInBound([x, y], 0);
   }
   boxSelect(bound: Bound): boolean {
-    return Bound.fromXYWH(this.xywh).isIntersectWithBound(bound);
+    return Bound.fromXYWH(this.xywh.getValue()).isIntersectWithBound(bound);
   }
 }

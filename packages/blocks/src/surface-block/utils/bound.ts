@@ -1,3 +1,5 @@
+import { NativeWrapper } from '@blocksuite/store';
+
 import type { IBound } from '../consts.js';
 import { EPSILON, getBoundsFromPoints, lineIntersects } from './math-utils.js';
 import type { IVec } from './vec.js';
@@ -25,7 +27,11 @@ export class Bound implements IBound {
     return new Bound(arg1.x, arg1.y, arg1.w, arg1.h);
   }
 
-  static fromXYWH(xywh: XYWH) {
+  static fromXYWH(xywh: XYWH | NativeWrapper<XYWH>) {
+    if (xywh instanceof NativeWrapper) {
+      xywh = xywh.getValue();
+    }
+
     return new Bound(xywh[0], xywh[1], xywh[2], xywh[3]);
   }
 

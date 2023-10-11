@@ -18,6 +18,7 @@ import {
   linePolygonIntersects,
   Overlay,
 } from '../../../surface-block/index.js';
+import { getXYWH } from '../services/tools-manager.js';
 import { deleteElements } from '../utils/crud.js';
 import { isTopLevelBlock } from '../utils/query.js';
 import { EdgelessToolController } from './index.js';
@@ -110,7 +111,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._erasables.forEach(erasable => {
       if (this._eraseTargets.has(erasable)) return;
       if (isTopLevelBlock(erasable)) {
-        const bound = Bound.fromXYWH(erasable.xywh);
+        const bound = Bound.fromXYWH(getXYWH(erasable));
         if (
           linePolygonIntersects(this._prevPoint, currentPoint, bound.points)
         ) {

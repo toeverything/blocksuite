@@ -1,4 +1,9 @@
-import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
+import { NativeWrapper } from '@blocksuite/store';
+import {
+  BaseBlockModel,
+  defineBlockSchema,
+  type MigrationRunner,
+} from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../__internal__/consts.js';
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
@@ -9,6 +14,7 @@ import type {
 import { RectElement } from '../surface-block/elements/rect-element.js';
 import {
   Bound,
+  deserializeXYWH,
   type IVec,
   type PointLocation,
   type SerializedXYWH,
@@ -25,16 +31,32 @@ export const NOTE_COLORS: CssVariableName[] = [
 
 export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 
+const migration = {
+  toV2: data => {
+    const { xywh } = data;
+
+    if (typeof xywh === 'string') {
+      data.xywh = new NativeWrapper(deserializeXYWH(xywh));
+    }
+  },
+} satisfies Record<string, MigrationRunner<typeof NoteBlockSchema>>;
+
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
-  props: () => ({
-    xywh: [0, 0, NOTE_WIDTH, 95],
-    background: DEFAULT_NOTE_COLOR,
-    index: 'a0',
-    hidden: false,
-  }),
+  props: () =>
+    ({
+      xywh: new NativeWrapper([0, 0, NOTE_WIDTH, 95]),
+      background: DEFAULT_NOTE_COLOR,
+      index: 'a0',
+      hidden: false,
+    }) as {
+      xywh: NativeWrapper<SerializedXYWH>;
+      background: string;
+      index: string;
+      hidden: boolean;
+    },
   metadata: {
-    version: 1,
+    version: 2,
     role: 'hub',
     parent: ['affine:page'],
     children: [
@@ -50,13 +72,18 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:attachment',
     ],
   },
+  onUpgrade(data, oldVersion, version) {
+    if (oldVersion < 2 && version >= 2) {
+      migration.toV2(data);
+    }
+  },
   toModel: () => {
     return new NoteBlockModel();
   },
 });
 
 type Props = {
-  xywh: SerializedXYWH;
+  xywh: NativeWrapper<SerializedXYWH>;
   background: string;
   index: string;
   hidden: boolean;
@@ -78,7 +105,7 @@ export class NoteBlockModel
   boxSelect!: (bound: Bound) => boolean;
 
   hitTest(x: number, y: number, _: HitTestOptions): boolean {
-    const bound = Bound.fromXYWH(this.xywh);
+    const bound = Bound.fromXYWH(this.xywh.getValue());
     return bound.isPointInBound([x, y], 0);
   }
 }

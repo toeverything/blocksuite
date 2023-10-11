@@ -27,7 +27,7 @@ export async function duplicate(
   const newElements = await Promise.all(
     getCopyElements(surface, elements).map(async element => {
       const bound = isFrameBlock(element)
-        ? Bound.fromXYWH(element.xywh)
+        ? Bound.fromXYWH(element.xywh.getValue())
         : getGridBound(element);
       bound.x += totalBound.w + offset;
       if (isNoteBlock(element)) {

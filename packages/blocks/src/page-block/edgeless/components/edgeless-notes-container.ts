@@ -98,7 +98,7 @@ export class EdgelessChildNote extends WithDisposable(LitElement) {
   override render() {
     const { model, renderer, index } = this;
     const { xywh, background } = model;
-    const [modelX, modelY, modelW, modelH] = xywh;
+    const [modelX, modelY, modelW, modelH] = xywh.getValue();
     const isHiddenNote = model.hidden;
 
     const style = {

@@ -41,6 +41,9 @@ import type { EdgelessSelectionState } from './selection-manager.js';
 
 export type Selectable = TopLevelBlockModel | FrameBlockModel | PhasorElement;
 
+export const getXYWH = (value: Selectable) =>
+  Array.isArray(value.xywh) ? value.xywh : value.xywh.getValue();
+
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;
   if (!target || !(target instanceof HTMLElement)) {

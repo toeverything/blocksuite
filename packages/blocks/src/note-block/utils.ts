@@ -385,7 +385,7 @@ export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
     }
 
     const bound = noteElement.getBoundingClientRect();
-    const [x, y, w, h] = noteElement.model.xywh;
+    const [x, y, w, h] = noteElement.model.xywh.getValue();
     const newModelHeight =
       bound.height / zoom +
       EDGELESS_BLOCK_CHILD_PADDING * 2 +

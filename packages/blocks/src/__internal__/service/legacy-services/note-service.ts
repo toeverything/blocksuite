@@ -29,7 +29,7 @@ export class NoteBlockService extends BaseService<NoteBlockModel> {
       id: block.id,
       flavour: block.flavour,
       text: delta,
-      xywh: block.xywh,
+      xywh: block.xywh.getValue(),
       background: block.background,
       children,
     };

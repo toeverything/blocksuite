@@ -7,6 +7,7 @@ import {
   Workspace,
 } from '@blocksuite/store';
 
+import { deserializeXYWH } from './index.js';
 import { SurfaceBlockTransformer } from './surface-transformer.js';
 
 export type SurfaceBlockProps = {
@@ -14,6 +15,20 @@ export type SurfaceBlockProps = {
 };
 
 const migration = {
+  toV6: data => {
+    const { elements } = data;
+    const value = elements.getValue();
+
+    if (!value) {
+      return;
+    }
+
+    for (const element of value.values()) {
+      if (typeof element.get('xywh') === 'string') {
+        element.set('xywh', deserializeXYWH(element.get('xywh')));
+      }
+    }
+  },
   toV5: data => {
     const { elements } = data;
     if (isPureObject(elements)) {
@@ -77,7 +92,7 @@ export const SurfaceBlockSchema = defineBlockSchema({
     elements: internalPrimitives.Native(new Workspace.Y.Map()),
   }),
   metadata: {
-    version: 5,
+    version: 6,
     role: 'hub',
     parent: ['affine:page'],
     children: ['affine:frame'],
@@ -88,6 +103,9 @@ export const SurfaceBlockSchema = defineBlockSchema({
     }
     if (previousVersion < 4 && version >= 4) {
       migration.toV4(data);
+    }
+    if (previousVersion < 6 && version >= 6) {
+      migration.toV6(data);
     }
   },
   transformer: () => new SurfaceBlockTransformer(),

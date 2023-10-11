@@ -107,7 +107,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
           if (page.readonly) return;
           const model = page.getBlockById(id) as TopLevelBlockModel;
           const { index, xywh } = model;
-          const [x, y, w, h] = xywh;
+          const [x, y, w, h] = xywh.getValue();
 
           if (index < edgeless.indexes.min) {
             edgeless.indexes.min = index;

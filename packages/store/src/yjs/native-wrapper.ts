@@ -36,6 +36,6 @@ export class NativeWrapper<T = unknown> {
   }
 
   getValue() {
-    return this._map.get('value');
+    return this._map.get('value') as T;
   }
 }

@@ -23,7 +23,7 @@ import {
 } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { Selectable } from '../services/tools-manager.js';
+import { getXYWH, type Selectable } from '../services/tools-manager.js';
 
 export function isTopLevelBlock(
   selectable: BaseBlockModel | Selectable | BaseBlockModel | null
@@ -120,13 +120,13 @@ export function getSelectedRect(selected: Selectable[]): DOMRect {
   }
 
   if (selected.length === 1) {
-    const [x, y, w, h] = selected[0].xywh;
+    const [x, y, w, h] = getXYWH(selected[0]);
     return new DOMRect(x, y, w, h);
   }
 
   return selected.reduce((bounds, selectable, index) => {
     const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
-    const [x, y, w, h] = selectable.xywh;
+    const [x, y, w, h] = getXYWH(selectable);
     let { left, top, right, bottom } = getQuadBoundsWithRotation({
       x,
       y,
@@ -166,7 +166,7 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     }
   >();
   for (const s of selected) {
-    const bound = Bound.fromXYWH(s.xywh);
+    const bound = Bound.fromXYWH(getXYWH(s));
     let rotate = 0;
 
     if (!isTopLevelBlock(s)) {

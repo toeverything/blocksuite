@@ -212,7 +212,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     const shouldTransition = note === this._noteModel;
     const noteContainer = noteElement.parentElement;
     const noteContainerRect = noteContainer.getBoundingClientRect();
-    const [baseX, baseY, noteWidth] = note.xywh;
+    const [baseX, baseY, noteWidth] = note.xywh.getValue();
     const transformX = baseX;
     const transformY =
       baseY +
@@ -289,7 +289,7 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     );
     const resetBlocks = children.slice(sliceIndex + 1);
     const { sliceVerticalPos } = this._lastPosition;
-    const [x, , width] = xywh;
+    const [x, , width] = xywh.getValue();
     const newNoteId = page.addBlock(
       'affine:note',
       {

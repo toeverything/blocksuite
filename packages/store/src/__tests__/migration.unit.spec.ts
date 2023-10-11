@@ -210,4 +210,84 @@ describe('block migration', () => {
       }
     }
   });
+
+  test('change xywh type to plain array', async () => {
+    const doc = await loadBinary('xywh-to-plain-array');
+    const topLevelFlavours = ['affine:note', 'affine:frame'];
+    let topBlocks: unknown[] = [];
+    let surfaceBlocks: unknown[] = [];
+
+    doc.getMap('blocks').forEach(block => {
+      const flavour = (block as Y.Map<unknown>).get('sys:flavour') as string;
+      if (topLevelFlavours.includes(flavour)) {
+        topBlocks.push(block);
+      }
+
+      if (flavour === 'affine:surface') {
+        surfaceBlocks.push(block);
+      }
+    });
+
+    expect(topBlocks.length).not.toBe(0);
+    expect(surfaceBlocks).not.toBe(0);
+
+    for (const block of topBlocks) {
+      const xywh = (block as Y.Map<unknown>).get('prop:xywh') as unknown;
+      expect(xywh).toBeTypeOf('string');
+    }
+
+    for (const block of surfaceBlocks) {
+      // @ts-ignore
+      const elements = block.get('prop:elements').get('value');
+
+      elements.forEach(element => {
+        if (element.get('type') === 'connector') return;
+
+        const xywh = element.get('xywh');
+        expect(xywh).toBeTypeOf('string');
+      });
+    }
+
+    schema.upgradePage(
+      {
+        'affine:frame': 1,
+        'affine:note': 1,
+        'affine:surface': 5,
+      },
+      doc
+    );
+
+    topBlocks = [];
+    surfaceBlocks = [];
+
+    doc.getMap('blocks').forEach(block => {
+      const flavour = (block as Y.Map<unknown>).get('sys:flavour') as string;
+      if (topLevelFlavours.includes(flavour)) {
+        topBlocks.push(block);
+      }
+
+      if (flavour === 'affine:surface') {
+        surfaceBlocks.push(block);
+      }
+    });
+
+    for (const block of topBlocks) {
+      // @ts-ignore
+      const xywh = (block as Y.Map<unknown>).get('prop:xywh').get('value');
+
+      expect(xywh).toBeInstanceOf(Array);
+    }
+
+    for (const block of surfaceBlocks) {
+      // @ts-ignore
+      const elements = block.get('prop:elements').get('value');
+
+      elements.forEach(element => {
+        if (element.get('type') === 'connector') return;
+        const xywh = element.get('xywh');
+
+        expect(xywh).toBeInstanceOf(Array);
+      });
+    }
+  });
 });

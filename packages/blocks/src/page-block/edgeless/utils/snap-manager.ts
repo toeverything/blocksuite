@@ -6,6 +6,7 @@ import {
   Overlay,
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { getXYWH } from '../services/tools-manager.js';
 import { isConnectable, isTopLevelBlock } from '../utils/query.js';
 
 interface Distance {
@@ -44,7 +45,7 @@ export class EdgelessSnapManager extends Overlay {
 
   private _getBoundsWithRotationByAlignable(alignable: Alignable) {
     const rotate = isTopLevelBlock(alignable) ? 0 : alignable.rotate;
-    const [x, y, w, h] = alignable.xywh;
+    const [x, y, w, h] = getXYWH(alignable);
     return Bound.from(getBoundsWithRotation({ x, y, w, h, rotate }));
   }
 

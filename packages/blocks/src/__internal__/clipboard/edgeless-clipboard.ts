@@ -18,7 +18,6 @@ import {
   compare,
   type Connection,
   ConnectorElement,
-  deserializeXYWH,
   getCommonBound,
   type IBound,
   type PhasorElement,
@@ -350,8 +349,8 @@ export class EdgelessClipboard implements Clipboard {
           if (!xywh) {
             return;
           }
-          const [x, y, w, h] =
-            typeof xywh === 'string' ? deserializeXYWH(xywh) : xywh;
+
+          const [x, y, w, h] = Array.isArray(xywh) ? xywh : xywh.getValue();
 
           return {
             x,
@@ -451,7 +450,7 @@ export class EdgelessClipboard implements Clipboard {
     });
 
     [...notes, ...frames].forEach(block => {
-      const [x, y, w, h] = block.xywh;
+      const [x, y, w, h] = block.xywh.getValue();
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
         pasteY + y - oldCommonBound.y,
@@ -481,7 +480,7 @@ export class EdgelessClipboard implements Clipboard {
 
     const bounds: IBound[] = [];
     blocks.forEach(block => {
-      bounds.push(Bound.fromXYWH(block.xywh));
+      bounds.push(Bound.fromXYWH(block.xywh.getValue()));
     });
     shapes.forEach(shape => {
       bounds.push(Bound.fromXYWH(shape.xywh));

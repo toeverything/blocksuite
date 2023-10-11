@@ -135,7 +135,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
           if (!note.hidden) idx++;
           if (currentSelected == note.id) return nothing;
 
-          const [x, y] = note.xywh;
+          const [x, y] = note.xywh.getValue();
 
           return html`<div
             data-note-id=${note.id}

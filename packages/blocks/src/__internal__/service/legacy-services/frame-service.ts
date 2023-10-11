@@ -5,7 +5,7 @@ export class FrameBlockService extends BaseService<FrameBlockModel> {
   override block2Json(model: FrameBlockModel) {
     return {
       flavour: model.flavour,
-      xywh: model.xywh,
+      xywh: model.xywh.getValue(),
       title: model.title.toString(),
       background: model.background,
       children: [],

@@ -30,7 +30,7 @@ import {
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { isVecZero } from '../../surface-block/utils/math-utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import type { Selectable } from './services/tools-manager.js';
+import { getXYWH, type Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
 
 export type OrthogonalConnectorInput = {
@@ -41,7 +41,7 @@ export type OrthogonalConnectorInput = {
 };
 
 function rBound(ele: Connectable, anti = false): IBound {
-  const bound = Bound.fromXYWH(ele.xywh);
+  const bound = Bound.fromXYWH(getXYWH(ele));
   if (isTopLevelBlock(ele)) {
     return { ...bound, rotate: 0 };
   }
@@ -75,7 +75,7 @@ export function isConnectorAndBindingsAllSelected(
 }
 
 export function getAnchors(ele: Connectable) {
-  const bound = Bound.fromXYWH(ele.xywh);
+  const bound = Bound.fromXYWH(getXYWH(ele));
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
   const rotate = isTopLevelBlock(ele) ? 0 : ele.rotate;
@@ -103,7 +103,7 @@ export function connectableIntersectLine(ele: Connectable, line: IVec[]) {
     return linePolygonIntersects(
       line[0],
       line[1],
-      Bound.fromXYWH(ele.xywh).points
+      Bound.fromXYWH(getXYWH(ele)).points
     );
   } else {
     return ele.intersectWithLine(line[0], line[1]);
@@ -115,7 +115,7 @@ function getConnectableRelativePosition(
   position: IVec
 ) {
   if (isTopLevelBlock(connectable)) {
-    const bound = Bound.fromXYWH(connectable.xywh);
+    const bound = Bound.fromXYWH(getXYWH(connectable));
     const point = bound.getRelativePoint(position);
     const tangent = polygonGetPointTangent(bound.points, point);
     return new PointLocation(point, tangent);
@@ -135,7 +135,7 @@ function getConnectableRelativePosition(
 
 function connectableHitTest(connectable: Connectable, point: IVec) {
   if (isTopLevelBlock(connectable)) {
-    return Bound.fromXYWH(connectable.xywh).isPointInBound(point);
+    return Bound.fromXYWH(getXYWH(connectable)).isPointInBound(point);
   } else {
     return connectable.hitTest(point[0], point[1], {
       ignoreTransparent: false,
@@ -829,7 +829,7 @@ export class EdgelessConnectorManager {
       if (excludedIds.includes(connectable.id)) continue;
 
       // then check if in expanded bound
-      const bound = Bound.fromXYWH(connectable.xywh);
+      const bound = Bound.fromXYWH(getXYWH(connectable));
       const rotateBound = Bound.from(
         getBoundsWithRotation(rBound(connectable))
       );
@@ -906,7 +906,7 @@ export class EdgelessConnectorManager {
   private _getConnectableNearestPoint(connectable: Connectable, point: IVec) {
     if (isTopLevelBlock(connectable)) {
       return polygonNearestPoint(
-        Bound.fromXYWH(connectable.xywh).points,
+        Bound.fromXYWH(getXYWH(connectable)).points,
         point
       );
     } else {
@@ -999,8 +999,8 @@ export class EdgelessConnectorManager {
         connector,
         'target'
       ) as Connectable;
-      const sb = Bound.fromXYWH(start.xywh);
-      const eb = Bound.fromXYWH(end.xywh);
+      const sb = Bound.fromXYWH(getXYWH(start));
+      const eb = Bound.fromXYWH(getXYWH(end));
       const startPoint = getNearestConnectableAnchor(start, eb.center);
       const endPoint = getNearestConnectableAnchor(end, sb.center);
       return [startPoint, endPoint];
@@ -1026,8 +1026,8 @@ export class EdgelessConnectorManager {
           connector,
           'target'
         ) as Connectable;
-        const sb = Bound.fromXYWH(start.xywh);
-        const eb = Bound.fromXYWH(end.xywh);
+        const sb = Bound.fromXYWH(getXYWH(start));
+        const eb = Bound.fromXYWH(getXYWH(end));
         startPoint = getNearestConnectableAnchor(start, eb.center);
         endPoint = getNearestConnectableAnchor(end, sb.center);
       } else {

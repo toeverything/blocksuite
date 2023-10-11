@@ -13,7 +13,11 @@ import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { PAGE_VERSION, WORKSPACE_VERSION } from '../consts';
+import {
+  NATIVE_UNIQ_IDENTIFIER,
+  PAGE_VERSION,
+  WORKSPACE_VERSION,
+} from '../consts';
 import type { BaseBlockModel, Page, PassiveDocProvider } from '../index.js';
 import { Generator, Schema, Workspace } from '../index.js';
 import type { PageMeta } from '../workspace/index.js';
@@ -102,7 +106,7 @@ describe('basic', () => {
         blockVersions: {
           'affine:divider': 1,
           'affine:list': 1,
-          'affine:note': 1,
+          'affine:note': 2,
           'affine:page': 2,
           'affine:paragraph': 1,
         },
@@ -279,7 +283,10 @@ describe('addBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
+        'prop:xywh': {
+          type: NATIVE_UNIQ_IDENTIFIER,
+          value: [0, 0, NOTE_WIDTH, 95],
+        },
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -474,7 +481,10 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
+        'prop:xywh': {
+          type: NATIVE_UNIQ_IDENTIFIER,
+          value: [0, 0, NOTE_WIDTH, 95],
+        },
         'prop:index': 'a0',
         'prop:hidden': false,
       },
@@ -502,7 +512,10 @@ describe('deleteBlock', () => {
         'sys:flavour': 'affine:note',
         'sys:id': '1',
         'prop:background': '--affine-background-secondary-color',
-        'prop:xywh': `[0,0,${NOTE_WIDTH},95]`,
+        'prop:xywh': {
+          type: NATIVE_UNIQ_IDENTIFIER,
+          value: [0, 0, NOTE_WIDTH, 95],
+        },
         'prop:index': 'a0',
         'prop:hidden': false,
       },
