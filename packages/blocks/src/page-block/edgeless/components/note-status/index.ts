@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { matchFlavours } from '../../../../__internal__/index.js';
 import { HiddenIcon } from '../../../../icons/index.js';
 import { type NoteBlockModel } from '../../../../note-block/note-model.js';
+import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { deserializeXYWH } from '../../../../surface-block/utils/xywh.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
@@ -70,7 +71,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
   }
 
   get notes() {
-    return this.edgeless.notes;
+    return this.edgeless.surface.getblocks(EdgelessBlockType.NOTE);
   }
 
   override connectedCallback() {

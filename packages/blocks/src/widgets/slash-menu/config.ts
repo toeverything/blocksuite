@@ -228,7 +228,7 @@ export const menuGroups: {
           const props = fileData.map(
             ({
               sourceId,
-            }): ImageBlockProps & {
+            }): Partial<ImageBlockProps> & {
               flavour: 'affine:image';
             } => ({
               flavour: 'affine:image',

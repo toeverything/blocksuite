@@ -68,6 +68,8 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
       height: block.height,
       caption: block.caption,
       flavour: block.flavour,
+      xywh: block.xywh,
+      rotate: block.rotate,
       children,
     };
   }

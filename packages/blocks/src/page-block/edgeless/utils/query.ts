@@ -7,8 +7,10 @@ import {
   type EdgelessTool,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../index.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
+import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
+import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
   clamp,
@@ -35,14 +37,30 @@ export function isTopLevelBlock(
 export function isNoteBlock(
   element: BaseBlockModel | EdgelessElement | null
 ): element is NoteBlockModel {
-  return !!element && 'flavour' in element && element.flavour === 'affine:note';
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === EdgelessBlockType.NOTE
+  );
 }
 
 export function isFrameBlock(
   element: BaseBlockModel | EdgelessElement | null
 ): element is FrameBlockModel {
   return (
-    !!element && 'flavour' in element && element.flavour === 'affine:frame'
+    !!element &&
+    'flavour' in element &&
+    element.flavour === EdgelessBlockType.FRAME
+  );
+}
+
+export function isImageBlock(
+  element: BaseBlockModel | EdgelessElement | null
+): element is ImageBlockModel {
+  return (
+    !!element &&
+    'flavour' in element &&
+    element.flavour === EdgelessBlockType.IMAGE
   );
 }
 

@@ -2,11 +2,13 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { NOTE_WIDTH } from '../__internal__/consts.js';
 import type { CssVariableName } from '../__internal__/theme/css-variables.js';
+import { BLOCK_BATCH } from '../surface-block/batch.js';
+import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
-  EdgelessElementUtils,
   HitTestOptions,
+  IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
-import { RectElement } from '../surface-block/elements/rect-element.js';
+import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import {
   Bound,
   type IVec,
@@ -62,15 +64,24 @@ type Props = {
   hidden: boolean;
 };
 
-@RectElement
+@EdgelessSelectableMixin
 export class NoteBlockModel
   extends BaseBlockModel<Props>
-  implements EdgelessElementUtils
+  implements IEdgelessElement
 {
+  override flavour!: EdgelessBlockType.NOTE;
+
   get connectable() {
     return true;
   }
-  rotate?: number | undefined;
+
+  get batch() {
+    return BLOCK_BATCH;
+  }
+
+  get rotate() {
+    return 0;
+  }
   containedByBounds!: (_: Bound) => boolean;
   getNearestPoint!: (_: IVec) => IVec;
   intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;

@@ -112,7 +112,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
   }
 
   private _updateRemoteRects = () => {
-    const { selection } = this;
+    const { selection, surface } = this;
     const remoteSelection = selection.remoteSelection;
     const remoteRects: EdgelessRemoteSelectionWidget['_remoteRects'] = {};
 
@@ -120,7 +120,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
       if (selection.elements.length === 0) return;
 
       const elements = selection.elements
-        .map(id => this.edgeless.getElementModel(id))
+        .map(id => surface.pickById(id))
         .filter(element => element) as Selectable[];
       const rect = getSelectedRect(elements);
 

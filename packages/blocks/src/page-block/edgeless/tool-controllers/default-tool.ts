@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
+import { Workspace } from '@blocksuite/store';
 
 import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import {
@@ -9,6 +10,7 @@ import {
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../index.js';
+import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../surface-block/elements/edgeless-element.js';
 import {
   Bound,
@@ -19,7 +21,6 @@ import {
   TextElement,
   Vec,
 } from '../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
 import type { Selectable } from '../services/tools-manager.js';
@@ -27,8 +28,9 @@ import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
 import {
   isFrameBlock,
+  isImageBlock,
+  isNoteBlock,
   isPhasorElement,
-  isTopLevelBlock,
 } from '../utils/query.js';
 import {
   addText,
@@ -137,7 +139,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     // handle single note block click
-    if (!e.keys.shift && elements.length === 1 && isTopLevelBlock(element)) {
+    if (!e.keys.shift && elements.length === 1 && isNoteBlock(element)) {
       if (
         (elements[0] === element.id && !editing) ||
         (editing && elements[0] !== element.id)
@@ -323,10 +325,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private async _cloneContent() {
     this._lock = true;
-    const { surface } = this._edgeless;
     const elements = (await Promise.all(
       this._toBeMoved.map(async selected => {
-        return await this._cloneSelected(selected, surface);
+        return await this._cloneSelected(selected);
       })
     )) as Selectable[];
     this._toBeMoved = elements;
@@ -336,29 +337,44 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     );
   }
 
-  private async _cloneSelected(
-    selected: Selectable,
-    surface: SurfaceBlockComponent
-  ) {
-    if (isTopLevelBlock(selected)) {
-      const noteService = this._edgeless.getService('affine:note');
-      const id = this._page.addBlock(
-        'affine:note',
+  private async _cloneSelected(selected: Selectable) {
+    const { _edgeless, _surface } = this;
+    if (isNoteBlock(selected)) {
+      const noteService = _edgeless.getService(EdgelessBlockType.NOTE);
+      const id = _surface.addElement(
+        EdgelessBlockType.NOTE,
         { xywh: selected.xywh },
         this._page.root?.id
       );
       const note = this._page.getBlockById(id);
-
       assertExists(note);
       const serializedBlock = (await getBlockClipboardInfo(selected)).json;
       await noteService.json2Block(note, serializedBlock.children);
-      return this._page.getBlockById(id);
+      return _surface.pickById(id);
+    } else if (isFrameBlock(selected)) {
+      const frameService = _edgeless.getService(EdgelessBlockType.FRAME);
+      const json = frameService.block2Json(selected);
+      const id = this._surface.addElement(EdgelessBlockType.FRAME, {
+        xywh: json.xywh,
+        title: new Workspace.Y.Text(json.title),
+        background: json.background,
+      });
+      return _surface.pickById(id);
+    } else if (isImageBlock(selected)) {
+      const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
+      const json = imageService.block2Json(selected, []);
+      const id = this._surface.addElement(EdgelessBlockType.IMAGE, {
+        xywh: json.xywh,
+        sourceId: json.sourceId,
+        rotate: json.rotate,
+      });
+      return _surface.pickById(id);
     } else {
-      const id = surface.addElement(
+      const id = _surface.addElement(
         selected.type,
         selected.serialize() as unknown as Record<string, unknown>
       );
-      return surface.pickById(id);
+      return _surface.pickById(id);
     }
   }
 

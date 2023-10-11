@@ -4,12 +4,12 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { Bound, compare } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { FrameBlockModel } from '../../../../../frame-block/index.js';
+import { Bound, compare } from '../../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
-@customElement('edgeless-frame')
-class EdgelessFrame extends WithDisposable(LitElement) {
+@customElement('edgeless-block-portal-frame')
+class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
   @property({ attribute: false })
   frame!: FrameBlockModel;
 
@@ -50,8 +50,8 @@ class EdgelessFrame extends WithDisposable(LitElement) {
   }
 }
 
-@customElement('edgeless-frame-container')
-export class EdgelessFrameContainer extends WithDisposable(LitElement) {
+@customElement('edgeless-frames-container')
+export class EdgelessFramesContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -83,12 +83,12 @@ export class EdgelessFrameContainer extends WithDisposable(LitElement) {
         _sortedFrames,
         frame => frame.id,
         (frame, index) =>
-          html`<edgeless-frame
+          html`<edgeless-block-portal-frame
             .frame=${frame}
             .index=${index}
             .surface=${this.surface}
           >
-          </edgeless-frame> `
+          </edgeless-block-portal-frame> `
       )}
     `;
   }
@@ -96,7 +96,7 @@ export class EdgelessFrameContainer extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-frame-container': EdgelessFrameContainer;
-    'edgeless-frame': EdgelessFrame;
+    'edgeless-frames-container': EdgelessFramesContainer;
+    'edgeless-block-portal-frame': EdgelessBlockPortalFrame;
   }
 }

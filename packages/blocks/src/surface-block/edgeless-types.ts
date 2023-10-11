@@ -1,5 +1,8 @@
 import type { BlockProps } from '@blocksuite/store';
 
+import type { FrameBlockModel } from '../frame-block/index.js';
+import type { ImageBlockModel } from '../image-block/image-model.js';
+import type { NoteBlockModel } from '../note-block/note-model.js';
 import type {
   IElementCreateProps,
   PhasorElementType,
@@ -8,7 +11,14 @@ import type {
 export enum EdgelessBlockType {
   FRAME = 'affine:frame',
   NOTE = 'affine:note',
+  IMAGE = 'affine:image',
 }
+
+export type EdgelessBlockModelMap = {
+  [EdgelessBlockType.FRAME]: FrameBlockModel;
+  [EdgelessBlockType.NOTE]: NoteBlockModel;
+  [EdgelessBlockType.IMAGE]: ImageBlockModel;
+};
 
 export enum EdgelessElementType {
   FRAME = 'affine:frame',

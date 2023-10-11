@@ -10,9 +10,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
-import type { PhasorElementType } from '../../../../surface-block/index.js';
+import { PhasorElementType } from '../../../../surface-block/index.js';
 import {
-  type Bound,
+  Bound,
   ConnectorElement,
   deserializeXYWH,
   type IVec,
@@ -31,9 +31,10 @@ import {
   getSelectableBounds,
   getSelectedRect,
   isFrameBlock,
+  isImageBlock,
   isNoteBlock,
+  isPhasorElement,
   isPhasorElementWithText,
-  isTopLevelBlock,
 } from '../../utils/query.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import type { HandleDirection } from '../resize/resize-handles.js';
@@ -371,6 +372,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         hasNote = true;
       } else if (isFrameBlock(element)) {
         isAllConnector = false;
+      } else if (isImageBlock(element)) {
+        isAllConnector = false;
+        isAllShapes = false;
+        hasNote = false;
       } else {
         if (element.type !== 'connector') isAllConnector = false;
         if (element.type !== 'shape') isAllShapes = false;
@@ -460,12 +465,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       .translateSelf(-center.x, -center.y);
 
     const elements = selection.elements.filter(
-      element => !isTopLevelBlock(element) && element.type !== 'connector'
+      element =>
+        isImageBlock(element) ||
+        (isPhasorElement(element) &&
+          element.type !== PhasorElementType.CONNECTOR)
     ) as PhasorElement[];
 
     elements.forEach(element => {
       const { id, rotate } = element;
-      const [x, y, w, h] = element.deserializeXYWH();
+      const { x, y, w, h } = Bound.deserialize(element.xywh);
       const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
 
       surface.updateElement(id, {
@@ -584,10 +592,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     let rotate = 0;
     if (elements.length === 1) {
-      const element = elements[0];
-      if (!isTopLevelBlock(element)) {
-        rotate = element.rotate ?? 0;
-      }
+      rotate = elements[0].rotate;
     }
 
     const isSingleNote = elements.length === 1 && isNoteBlock(elements[0]);
@@ -619,7 +624,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const rect = getSelectedRect(elements);
-
+    const proportion = elements.some(ele => isImageBlock(ele));
     // if there are more than one element, we need to refresh the state of resize manager
     if (elements.length > 1) refresh = true;
 
@@ -628,7 +633,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       _selectedRect.rotate,
       zoom,
       refresh ? undefined : rect,
-      refresh ? rect : undefined
+      refresh ? rect : undefined,
+      proportion
     );
     _resizeManager.updateBounds(getSelectableBounds(elements));
   };

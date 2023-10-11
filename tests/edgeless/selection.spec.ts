@@ -173,10 +173,11 @@ test('copy to clipboard as PNG', async ({ page, context }) => {
   await waitNextFrame(page);
 
   await assertBlockCount(page, 'note', 0);
+  await assertBlockCount(page, 'image', 0);
   await pasteByKeyboard(page);
   await waitNextFrame(page);
-  await page.pause();
-  await assertBlockCount(page, 'note', 1);
+  await assertBlockCount(page, 'note', 0);
+  await assertBlockCount(page, 'image', 1);
 });
 
 test('should auto panning when selection rectangle reaches viewport edges', async ({

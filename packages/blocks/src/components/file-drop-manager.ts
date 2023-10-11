@@ -12,11 +12,12 @@ import {
   matchFlavours,
   Point,
 } from '../__internal__/index.js';
+import type { ImageBlockModel } from '../image-block/index.js';
 import type {
   DocPageBlockComponent,
   EdgelessPageBlockComponent,
-  ImageBlockModel,
-} from '../index.js';
+} from '../page-block/index.js';
+import { Vec } from '../surface-block/index.js';
 import type { DragIndicator } from './index.js';
 
 export type GetPageInfo = () => {
@@ -147,7 +148,7 @@ export class FileDropManager {
       type = 'after';
     }
 
-    let noteId: string | undefined;
+    let selectedId: string | undefined;
     let focusId: string | undefined;
 
     page.captureSync();
@@ -172,21 +173,15 @@ export class FileDropManager {
     for (; i < len; i++) {
       const model = models[i];
       if (model.flavour === 'affine:image') {
-        const note = (edgelessBlockEle as EdgelessPageBlockComponent).addImage(
+        selectedId = (edgelessBlockEle as EdgelessPageBlockComponent).addImage(
           model as ImageBlockModel,
-          point
+          Vec.toVec(point)
         );
-        noteId = note.noteId;
       }
     }
-    if (!noteId || !focusId) return;
+    if (!selectedId || !focusId) return;
 
-    (edgelessBlockEle as EdgelessPageBlockComponent).setSelection(
-      noteId,
-      true,
-      focusId,
-      point
-    );
+    edgelessBlockEle.setSelection(selectedId, true, focusId, point);
   }
 
   findFileHandler(file: File): ImportHandler | undefined {
