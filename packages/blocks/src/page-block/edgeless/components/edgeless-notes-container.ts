@@ -66,8 +66,8 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
   }
 }
 
-@customElement('edgeless-note')
-export class EdgelessNote extends WithDisposable(LitElement) {
+@customElement('edgeless-block-portal-note')
+export class EdgelessBlockPortalNote extends WithDisposable(LitElement) {
   @property({ attribute: false })
   index!: number;
 
@@ -193,7 +193,7 @@ export class EdgelessNotesContainer extends WithDisposable(LitElement) {
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-notes-container': EdgelessNotesContainer;
-    'edgeless-note': EdgelessNote;
+    'edgeless-block-portal-note': EdgelessBlockPortalNote;
     'edgeless-note-mask': EdgelessNoteMask;
   }
 }

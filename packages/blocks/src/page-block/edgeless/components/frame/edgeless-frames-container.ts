@@ -50,10 +50,8 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
   }
 }
 
-@customElement('edgeless-block-portal-frame-container')
-export class EdgelessBlockPortalFrameContainer extends WithDisposable(
-  LitElement
-) {
+@customElement('edgeless-frames-container')
+export class EdgelessFramesContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -98,7 +96,7 @@ export class EdgelessBlockPortalFrameContainer extends WithDisposable(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-block-portal-frame-container': EdgelessBlockPortalFrameContainer;
+    'edgeless-frames-container': EdgelessFramesContainer;
     'edgeless-block-portal-frame': EdgelessBlockPortalFrame;
   }
 }

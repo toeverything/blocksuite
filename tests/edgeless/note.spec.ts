@@ -606,23 +606,23 @@ test('duplicate note should work correctly', async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   await triggerComponentToolbarAction(page, 'duplicate');
-  const moreActionsContainer = await page.locator('.more-actions-container');
+  const moreActionsContainer = page.locator('.more-actions-container');
   await expect(moreActionsContainer).toBeHidden();
 
-  const noteLocator = await page.locator('edgeless-note');
+  const noteLocator = page.locator('edgeless-block-portal-note');
   await expect(noteLocator).toHaveCount(2);
   const [firstNote, secondNote] = await noteLocator.all();
 
   // content should be same
-  await expect(
+  expect(
     (await firstNote.innerText()) === (await secondNote.innerText())
   ).toBeTruthy();
 
   // size should be same
   const firstNoteBox = await firstNote.boundingBox();
   const secondNoteBox = await secondNote.boundingBox();
-  await expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
-  await expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
+  expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
+  expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
 });
 
 test('double click toolbar zoom button, should not add text', async ({

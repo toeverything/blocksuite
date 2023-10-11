@@ -1,7 +1,7 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
 import './components/edgeless-notes-container.js';
 import './components/image/edgeless-image.js';
-import './components/frame/edgeless-frame-container.js';
+import './components/frame/edgeless-frames-container.js';
 import './components/rects/edgeless-selected-rect.js';
 import './components/rects/edgeless-hover-rect.js';
 import './components/rects/edgeless-dragging-area-rect.js';
@@ -28,7 +28,7 @@ import { getBackgroundGrid } from './utils/query.js';
 
 const portalMap = {
   [EdgelessBlockType.FRAME]: 'edgeless-block-portal-frame',
-  [EdgelessBlockType.NOTE]: 'edgeless-note',
+  [EdgelessBlockType.NOTE]: 'edgeless-block-portal-note',
   [EdgelessBlockType.IMAGE]: 'edgeless-image',
 };
 
@@ -198,8 +198,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
-          <edgeless-block-portal-frame-container .surface=${surface}>
-          </edgeless-block-portal-frame-container>
+          <edgeless-frames-container .surface=${surface}>
+          </edgeless-frames-container>
           ${readonly
             ? nothing
             : html`<affine-note-slicer
