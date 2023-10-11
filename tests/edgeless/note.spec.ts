@@ -218,7 +218,7 @@ test('dragging un-selected note', async ({ page }) => {
   await switchEditorMode(page);
 
   const noteBox = await page
-    .locator('.affine-edgeless-child-note')
+    .locator('.edgeless-block-portal-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -258,7 +258,7 @@ test('drag handle should be shown when a note is actived in default mode or hidd
 
   await switchEditorMode(page);
   const noteBox = await page
-    .locator('.affine-edgeless-child-note')
+    .locator('.edgeless-block-portal-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -363,7 +363,7 @@ test.describe('note slicer', () => {
     ).toBeTruthy();
     await page.locator('affine-note-slicer-popupbutton').click();
 
-    await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+    await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
   });
 
   test('note slicer button should appears at right position', async ({
@@ -504,10 +504,10 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
+  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(1);
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
 });
 
 test('undo/redo should work correctly after resizing', async ({ page }) => {

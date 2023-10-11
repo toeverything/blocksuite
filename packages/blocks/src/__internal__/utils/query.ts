@@ -480,7 +480,7 @@ function isDatabase({ tagName }: Element) {
  * Returns `true` if element is edgeless child note.
  */
 export function isEdgelessChildNote({ classList }: Element) {
-  return classList.contains('affine-edgeless-child-note');
+  return classList.contains('edgeless-block-portal-note');
 }
 
 /**

@@ -129,7 +129,7 @@ export class EdgelessBlockPortalNote extends WithDisposable(LitElement) {
 
     return html`
       <div
-        class="affine-edgeless-child-note"
+        class="edgeless-block-portal-note"
         style=${styleMap(style)}
         data-model-height="${modelH}"
       >
