@@ -2,7 +2,7 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import { RectLikeUtils } from '../surface-block/elements/rect-element.js';
+import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import type { PointLocation } from '../surface-block/index.js';
 import {
   Bound,
@@ -45,7 +45,7 @@ export const ImageBlockSchema = defineBlockSchema({
   },
 });
 
-@RectLikeUtils
+@EdgelessSelectableMixin
 export class ImageBlockModel
   extends BaseBlockModel<ImageBlockProps>
   implements IEdgelessElement

@@ -8,7 +8,7 @@ import type {
   HitTestOptions,
   IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
-import { RectLikeUtils } from '../surface-block/elements/rect-element.js';
+import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import {
   Bound,
   type IVec,
@@ -64,7 +64,7 @@ type Props = {
   hidden: boolean;
 };
 
-@RectLikeUtils
+@EdgelessSelectableMixin
 export class NoteBlockModel
   extends BaseBlockModel<Props>
   implements IEdgelessElement

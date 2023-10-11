@@ -10,7 +10,7 @@ import { PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
 import type { IEdgelessElement } from './edgeless-element.js';
 
-export const RectLikeUtils = <
+export const EdgelessSelectableMixin = <
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   T extends new (...args: any[]) => IEdgelessElement,
 >(
