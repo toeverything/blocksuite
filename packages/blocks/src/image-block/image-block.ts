@@ -213,17 +213,6 @@ export class ImageBlockPageComponent extends ImageBlock {
     .resizable-img img {
       width: 100%;
     }
-
-    /* hover area */
-    .resizable-img::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50px;
-      height: 100%;
-      transform: translateX(100%);
-    }
   `;
 
   @query('input')
