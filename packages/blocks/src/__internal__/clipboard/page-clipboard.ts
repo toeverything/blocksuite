@@ -110,6 +110,7 @@ export class PageClipboard implements Clipboard {
       return;
     }
     const blockSelections = this._ele.selection.filter('block');
+    this._ele.selection.clear();
     e.preventDefault();
     await this._onCopy(ctx);
     blockSelections.forEach(block => {
