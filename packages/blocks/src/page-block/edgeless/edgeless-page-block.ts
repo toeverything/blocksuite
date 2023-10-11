@@ -161,7 +161,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     type: localStorage.defaultTool ?? 'default',
   };
 
-  @query('affine-edgeless-block-portal-container')
+  @query('edgeless-block-portal-container')
   pageBlockContainer!: EdgelessBlockPortalContainer;
 
   @query('.affine-edgeless-layer')
@@ -730,8 +730,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     )}`;
 
     return html`${this.renderModel(this.surfaceBlockModel)}
-      <affine-edgeless-block-portal-container .edgeless=${this}>
-      </affine-edgeless-block-portal-container>
+      <edgeless-block-portal-container .edgeless=${this}>
+      </edgeless-block-portal-container>
       <div class="widgets-container">${widgets}</div> `;
   }
 }

@@ -32,7 +32,7 @@ const portalMap = {
   [EdgelessBlockType.IMAGE]: 'edgeless-block-portal-image',
 };
 
-@customElement('affine-edgeless-block-portal-container')
+@customElement('edgeless-block-portal-container')
 export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
@@ -237,6 +237,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-edgeless-block-portal-container': EdgelessBlockPortalContainer;
+    'edgeless-block-portal-container': EdgelessBlockPortalContainer;
   }
 }
