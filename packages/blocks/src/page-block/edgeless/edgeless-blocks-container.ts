@@ -29,7 +29,7 @@ import { getBackgroundGrid } from './utils/query.js';
 const portalMap = {
   [EdgelessBlockType.FRAME]: 'edgeless-block-portal-frame',
   [EdgelessBlockType.NOTE]: 'edgeless-block-portal-note',
-  [EdgelessBlockType.IMAGE]: 'edgeless-image',
+  [EdgelessBlockType.IMAGE]: 'edgeless-block-portal-image',
 };
 
 @customElement('affine-edgeless-block-portal-container')

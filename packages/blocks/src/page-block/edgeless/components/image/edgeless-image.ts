@@ -8,8 +8,8 @@ import type { ImageBlockModel } from '../../../../image-block/index.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
-@customElement('edgeless-image')
-export class EdgelessImage extends WithDisposable(LitElement) {
+@customElement('edgeless-block-portal-image')
+export class EdgelessBlockPortalImage extends WithDisposable(LitElement) {
   @property({ attribute: false })
   index!: number;
 
@@ -52,6 +52,6 @@ export class EdgelessImage extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-image': EdgelessImage;
+    'edgeless-block-portal-image': EdgelessBlockPortalImage;
   }
 }
