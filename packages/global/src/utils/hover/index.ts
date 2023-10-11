@@ -133,3 +133,5 @@ export const whenHover = (
     },
   };
 };
+
+export type { WhenHoverOptions };
