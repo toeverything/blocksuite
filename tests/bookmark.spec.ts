@@ -13,7 +13,7 @@ import {
   pressArrowRight,
   pressEnter,
   selectAllByKeyboard,
-  setVirgoSelection,
+  setVRangeInSelectedRichText,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -144,7 +144,7 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'https://google.com');
-  await setVirgoSelection(page, 0, 18);
+  await setVRangeInSelectedRichText(page, 0, 18);
   await copyByKeyboard(page);
   await focusRichText(page);
   await type(page, '/bookmark');

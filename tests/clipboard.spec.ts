@@ -44,7 +44,7 @@ import {
   selectAllByKeyboard,
   selectNoteInEdgeless,
   setSelection,
-  setVirgoSelection,
+  setVRangeInSelectedRichText,
   SHORT_KEY,
   switchEditorMode,
   triggerComponentToolbarAction,
@@ -80,7 +80,7 @@ test(scoped`clipboard copy paste`, async ({ page }) => {
   await focusRichText(page);
 
   await type(page, 'test');
-  await setVirgoSelection(page, 0, 3);
+  await setVRangeInSelectedRichText(page, 0, 3);
   await waitNextFrame(page);
   await copyByKeyboard(page);
   await focusRichText(page);
@@ -325,7 +325,7 @@ test(scoped`split block when paste`, async ({ page }) => {
   await type(page, 'abc');
   await captureHistory(page);
 
-  await setVirgoSelection(page, 1, 1);
+  await setVRangeInSelectedRichText(page, 1, 1);
   await pasteContent(page, clipData);
   await waitNextFrame(page);
 
@@ -404,12 +404,12 @@ test(scoped`copy partially selected text`, async ({ page }) => {
   await type(page, '123 456 789');
 
   // select 456
-  await setVirgoSelection(page, 4, 3);
+  await setVRangeInSelectedRichText(page, 4, 3);
   await copyByKeyboard(page);
   await assertClipItems(page, 'text/plain', '456');
 
   // move to line end
-  await setVirgoSelection(page, 11, 0);
+  await setVRangeInSelectedRichText(page, 11, 0);
   await pressEnter(page);
   await pasteByKeyboard(page);
   await waitNextFrame(page);
@@ -817,7 +817,7 @@ test(
     await initEmptyParagraphState(page);
     await focusRichText(page);
     await type(page, 'test');
-    await setVirgoSelection(page, 0, 4);
+    await setVRangeInSelectedRichText(page, 0, 4);
     await copyByKeyboard(page);
     await type(page, '- ');
     await page.keyboard.press(`${SHORT_KEY}+v`);
@@ -1064,7 +1064,7 @@ test(scoped`copy when text note active in edgeless`, async ({ page }) => {
 
   await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
-  await setVirgoSelection(page, 0, 4);
+  await setVRangeInSelectedRichText(page, 0, 4);
   await copyByKeyboard(page);
   await pressArrowRight(page);
   await type(page, '555');
@@ -1316,7 +1316,7 @@ test(scoped`paste parent block`, async ({ page }) => {
   await page.keyboard.press('Enter');
   await page.keyboard.press('Tab');
   await type(page, 'This is child 2');
-  await setVirgoSelection(page, 0, 3);
+  await setVRangeInSelectedRichText(page, 0, 3);
   await copyByKeyboard(page);
   await focusRichText(page, 2);
   await page.keyboard.press(`${SHORT_KEY}+v`);
