@@ -1,23 +1,20 @@
-import '../components/note-slicer/index.js';
+import '../note-slicer/index.js';
 
 import { WithDisposable } from '@blocksuite/lit';
-import type { TemplateResult } from 'lit';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../../__internal__/consts.js';
+} from '../../../../__internal__/consts.js';
 import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
-} from '../../../note-block/note-model.js';
-import { deserializeXYWH } from '../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+} from '../../../../note-block/note-model.js';
+import { deserializeXYWH } from '../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(LitElement) {
@@ -146,53 +143,8 @@ export class EdgelessBlockPortalNote extends WithDisposable(LitElement) {
   }
 }
 
-@customElement('edgeless-notes-container')
-export class EdgelessNotesContainer extends WithDisposable(LitElement) {
-  @property({ attribute: false })
-  notes!: NoteBlockModel[];
-
-  @property({ attribute: false })
-  edgeless!: EdgelessPageBlockComponent;
-
-  @property({ attribute: false })
-  renderer!: (model: NoteBlockModel) => TemplateResult;
-
-  protected override createRenderRoot() {
-    return this;
-  }
-
-  protected override firstUpdated() {
-    this.style.position = 'absolute';
-    this.style.zIndex = '1';
-  }
-
-  override render() {
-    const { renderer, edgeless } = this;
-    const readonly = edgeless.page.readonly;
-    const noteSlicer = readonly
-      ? nothing
-      : html`<affine-note-slicer
-          .edgelessPage=${edgeless}
-        ></affine-note-slicer>`;
-    const notes = repeat(
-      this.notes,
-      child => child.id,
-      (child, index) =>
-        html`<edgeless-child-note
-          .index=${index}
-          .model=${child}
-          .renderer=${renderer}
-          .edgeless=${this.edgeless}
-        ></edgeless-child-note>`
-    );
-
-    return html`${noteSlicer}${notes}`;
-  }
-}
-
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-notes-container': EdgelessNotesContainer;
     'edgeless-block-portal-note': EdgelessBlockPortalNote;
     'edgeless-note-mask': EdgelessNoteMask;
   }

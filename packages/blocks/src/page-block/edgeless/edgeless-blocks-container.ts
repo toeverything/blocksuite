@@ -1,5 +1,5 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-import './components/edgeless-notes-container.js';
+import './components/note/edgeless-block-portal-note.js';
 import './components/image/edgeless-image.js';
 import './components/frame/edgeless-frames-container.js';
 import './components/rects/edgeless-selected-rect.js';
