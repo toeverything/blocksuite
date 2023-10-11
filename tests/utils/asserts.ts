@@ -135,6 +135,20 @@ export async function assertTitle(page: Page, text: string) {
   expect(vText).toBe(text);
 }
 
+export async function assertVEditorDeltas(
+  page: Page,
+  deltas: unknown[],
+  i = 0
+) {
+  const actual = await page.evaluate(i => {
+    const vRoot = document.querySelectorAll<VirgoRootElement>(
+      '[data-virgo-root="true"]'
+    )[i];
+    return vRoot.virgoEditor.yTextDeltas;
+  }, i);
+  expect(actual).toEqual(deltas);
+}
+
 export async function assertRichTextVirgoDeltas(
   page: Page,
   deltas: unknown[],

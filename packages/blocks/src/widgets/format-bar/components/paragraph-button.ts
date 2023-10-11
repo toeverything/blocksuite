@@ -1,26 +1,18 @@
-import { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import { type Page } from '@blocksuite/store';
+import type { Page } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import { getBlockElementByModel } from '../../../__internal__/utils/query.js';
 import { paragraphConfig } from '../../../common/paragraph-config.js';
 import { ArrowDownIcon } from '../../../icons/index.js';
 import type { Flavour, ParagraphBlockModel } from '../../../models.js';
-import { onModelElementUpdated } from '../../../page-block/utils/callback.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
   page: Page;
-  selectedBlockElements: BlockElement[];
-}
-
-interface ParagraphButtonProps {
-  formatBar: AffineFormatBarWidget;
   selectedBlockElements: BlockElement[];
 }
 
@@ -45,36 +37,7 @@ const updateParagraphType = (
   )
     ? defaultType
     : type;
-  const newModels = updateBlockElementType(
-    selectedBlockElements,
-    targetFlavour,
-    targetType
-  );
-
-  // Reset selection if the target is code block
-  if (targetFlavour === 'affine:code') {
-    if (newModels.length !== 1) {
-      throw new Error(
-        "Failed to reset selection! New model length isn't 1 when convert to code block"
-      );
-    }
-    const codeModel = newModels[0];
-    onModelElementUpdated(codeModel, () => {
-      const codeElement = getBlockElementByModel(codeModel);
-      assertExists(codeElement);
-      const selectionManager = codeElement.root.selection;
-      selectionManager.set([
-        new TextSelection({
-          from: {
-            path: codeElement.path,
-            index: 0,
-            length: codeModel.text?.length ?? 0,
-          },
-          to: null,
-        }),
-      ]);
-    });
-  }
+  updateBlockElementType(selectedBlockElements, targetFlavour, targetType);
 };
 
 const ParagraphPanel = ({
@@ -102,10 +65,17 @@ const ParagraphPanel = ({
   </div>`;
 };
 
-export const ParagraphButton = ({
-  formatBar,
-  selectedBlockElements,
-}: ParagraphButtonProps) => {
+export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
+  if (formatBar.displayType !== 'text' && formatBar.displayType !== 'block') {
+    return null;
+  }
+
+  const selectedBlockElements = formatBar.selectedBlockElements;
+  // only support model with text
+  if (selectedBlockElements.some(el => !el.model.text)) {
+    return null;
+  }
+
   const paragraphIcon =
     selectedBlockElements.length < 1
       ? paragraphConfig[0].icon

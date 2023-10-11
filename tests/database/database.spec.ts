@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { getFormatBar } from 'utils/query.js';
 
 import {
   dragBetweenCoords,
@@ -18,12 +19,17 @@ import {
   pressShiftEnter,
   redoByKeyboard,
   selectAllByKeyboard,
+  setVRangeInVEditor,
   type,
   undoByClick,
   undoByKeyboard,
   waitNextFrame,
 } from '../utils/actions/index.js';
-import { assertBlockProps, assertRowCount } from '../utils/asserts.js';
+import {
+  assertBlockProps,
+  assertRowCount,
+  assertVEditorDeltas,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 import {
   assertColumnWidth,
@@ -515,4 +521,93 @@ test('should title column support quick changing of column type', async ({
   await clickColumnType(page, 'Select');
   const cell = getFirstColumnCell(page, 'select-selected');
   expect(await cell.count()).toBe(1);
+});
+
+test('database format-bar in header and text column', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyDatabaseState(page);
+
+  await initDatabaseColumn(page);
+  await switchColumnType(page, 'Text');
+  await initDatabaseDynamicRowWithData(page, 'column', true);
+  await pressArrowLeft(page);
+  await pressEnter(page);
+  await type(page, 'header');
+  // Title  | Column1
+  // ----------------
+  // header | column
+
+  const formatBar = getFormatBar(page);
+  await setVRangeInVEditor(page, { index: 1, length: 4 }, 2);
+  expect(await formatBar.formatBar.isVisible()).toBe(true);
+  // Title    | Column1
+  // ----------------
+  // h|eade|r | column
+
+  await assertVEditorDeltas(
+    page,
+    [
+      {
+        insert: 'header',
+      },
+    ],
+    2
+  );
+  await formatBar.boldBtn.click();
+  await assertVEditorDeltas(
+    page,
+    [
+      {
+        insert: 'h',
+      },
+      {
+        insert: 'eade',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        insert: 'r',
+      },
+    ],
+    2
+  );
+
+  await pressEscape(page);
+  await pressArrowRight(page);
+  await pressEnter(page);
+  await setVRangeInVEditor(page, { index: 2, length: 2 }, 3);
+  expect(await formatBar.formatBar.isVisible()).toBe(true);
+  // Title  | Column1
+  // ----------------
+  // header | co|lu|mn
+
+  await assertVEditorDeltas(
+    page,
+    [
+      {
+        insert: 'column',
+      },
+    ],
+    3
+  );
+  await formatBar.boldBtn.click();
+  await assertVEditorDeltas(
+    page,
+    [
+      {
+        insert: 'co',
+      },
+      {
+        insert: 'lu',
+        attributes: {
+          bold: true,
+        },
+      },
+      {
+        insert: 'mn',
+      },
+    ],
+    3
+  );
 });

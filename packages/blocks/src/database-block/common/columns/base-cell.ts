@@ -75,11 +75,6 @@ export abstract class BaseCellRenderer<
         e.stopPropagation();
       }
     });
-    this._disposables.addFromEvent(this, 'pointerdown', e => {
-      if (this.isEditing) {
-        e.stopPropagation();
-      }
-    });
     const type = this.column.type;
     this._disposables.add(
       this.column.onCellUpdate(this.rowId, () => {

@@ -1,10 +1,15 @@
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html } from 'lit';
 
 import { actionConfig } from '../../../common/actions/action-config.js';
+import type { AffineFormatBarWidget } from '../format-bar.js';
 
-export const ActionItems = (root: BlockSuiteRoot) =>
-  actionConfig
+export const ActionItems = (formatBar: AffineFormatBarWidget) => {
+  if (formatBar.displayType !== 'text' && formatBar.displayType !== 'block') {
+    return null;
+  }
+
+  const root = formatBar.root;
+  return actionConfig
     .filter(({ showWhen }) => showWhen(root))
     .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
       const enabled = enabledWhen(root);
@@ -20,3 +25,4 @@ export const ActionItems = (root: BlockSuiteRoot) =>
         ${icon}${toolTip}
       </icon-button>`;
     });
+};
