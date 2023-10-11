@@ -55,23 +55,17 @@ export const whenHover = (
 
   const middlewares: HoverMiddleware[] = [
     dedupe(alwayRunWhenNoFloating),
-    ...(triangleOptions
-      ? [
-          safeTriangle(
-            typeof triangleOptions === 'boolean' ? undefined : triangleOptions
-          ),
-        ]
-      : []),
-    ...(bridgeOptions
-      ? [
-          safeBridge(
-            typeof bridgeOptions === 'boolean' ? undefined : bridgeOptions
-          ),
-        ]
-      : []),
+    triangleOptions &&
+      safeTriangle(
+        typeof triangleOptions === 'boolean' ? undefined : triangleOptions
+      ),
+    bridgeOptions &&
+      safeBridge(
+        typeof bridgeOptions === 'boolean' ? undefined : bridgeOptions
+      ),
     delayShow(enterDelay),
     delayHide(leaveDelay),
-  ];
+  ].filter(v => typeof v !== 'boolean') as HoverMiddleware[];
 
   let id = 0;
   let resId = 0;
