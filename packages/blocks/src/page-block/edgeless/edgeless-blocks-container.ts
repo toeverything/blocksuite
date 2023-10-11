@@ -26,14 +26,14 @@ import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { NoteResizeObserver } from './utils/note-resize-observer.js';
 import { getBackgroundGrid } from './utils/query.js';
 
-const map = {
-  [EdgelessBlockType.FRAME]: 'edgeless-frame',
+const portalMap = {
+  [EdgelessBlockType.FRAME]: 'edgeless-block-portal-frame',
   [EdgelessBlockType.NOTE]: 'edgeless-note',
   [EdgelessBlockType.IMAGE]: 'edgeless-image',
 };
 
-@customElement('affine-edgeless-block-container')
-export class EdgelessBlockContainer extends WithDisposable(LitElement) {
+@customElement('affine-edgeless-block-portal-container')
+export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -198,8 +198,8 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
     return html`
       <div class="affine-block-children-container edgeless">
         <div class="affine-edgeless-layer">
-          <edgeless-frame-container .surface=${surface}>
-          </edgeless-frame-container>
+          <edgeless-block-portal-frame-container .surface=${surface}>
+          </edgeless-block-portal-frame-container>
           ${readonly
             ? nothing
             : html`<affine-note-slicer
@@ -210,7 +210,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
             block => block.id,
             (block, index) => {
               const tag = literal`${unsafeStatic(
-                map[block.flavour as EdgelessBlockType]
+                portalMap[block.flavour as EdgelessBlockType]
               )}`;
               return html`<${tag}
                     .index=${index}
@@ -237,6 +237,6 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-edgeless-block-container': EdgelessBlockContainer;
+    'affine-edgeless-block-portal-container': EdgelessBlockPortalContainer;
   }
 }

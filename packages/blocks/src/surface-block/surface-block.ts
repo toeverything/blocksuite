@@ -99,7 +99,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       pointer-events: none;
     }
 
-    affine-edgeless-block-container {
+    affine-edgeless-block-portal-container {
       position: relative;
       box-sizing: border-box;
       overflow: hidden;

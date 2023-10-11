@@ -58,7 +58,7 @@ import {
   EdgelessZoomToolbar,
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
-import type { EdgelessBlockContainer } from './edgeless-blocks-container.js';
+import type { EdgelessBlockPortalContainer } from './edgeless-blocks-container.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -161,8 +161,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     type: localStorage.defaultTool ?? 'default',
   };
 
-  @query('affine-edgeless-block-container')
-  pageBlockContainer!: EdgelessBlockContainer;
+  @query('affine-edgeless-block-portal-container')
+  pageBlockContainer!: EdgelessBlockPortalContainer;
 
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
@@ -730,8 +730,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
     )}`;
 
     return html`${this.renderModel(this.surfaceBlockModel)}
-      <affine-edgeless-block-container .edgeless=${this}>
-      </affine-edgeless-block-container>
+      <affine-edgeless-block-portal-container .edgeless=${this}>
+      </affine-edgeless-block-portal-container>
       <div class="widgets-container">${widgets}</div> `;
   }
 }
