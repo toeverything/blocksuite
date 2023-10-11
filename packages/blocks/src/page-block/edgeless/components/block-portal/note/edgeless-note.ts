@@ -1,4 +1,4 @@
-import '../note-slicer/index.js';
+import '../../note-slicer/index.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement, nothing } from 'lit';
@@ -8,13 +8,13 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../../../__internal__/consts.js';
+} from '../../../../../__internal__/consts.js';
 import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,
-} from '../../../../note-block/note-model.js';
-import { deserializeXYWH } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+} from '../../../../../note-block/note-model.js';
+import { deserializeXYWH } from '../../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(LitElement) {

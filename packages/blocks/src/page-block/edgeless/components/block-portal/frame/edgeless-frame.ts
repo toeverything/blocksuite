@@ -4,9 +4,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { Bound, compare } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { FrameBlockModel } from '../../../../../frame-block/index.js';
+import { Bound, compare } from '../../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-block-portal-frame')
 class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {

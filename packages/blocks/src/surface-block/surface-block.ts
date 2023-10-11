@@ -1,4 +1,4 @@
-import '../page-block/edgeless/edgeless-blocks-container.js';
+import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';

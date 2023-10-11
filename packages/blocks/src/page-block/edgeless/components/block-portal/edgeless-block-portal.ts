@@ -1,11 +1,11 @@
 /* eslint-disable lit/binding-positions, lit/no-invalid-html */
-import './components/note/edgeless-block-portal-note.js';
-import './components/image/edgeless-image.js';
-import './components/frame/edgeless-frames-container.js';
-import './components/rects/edgeless-selected-rect.js';
-import './components/rects/edgeless-hover-rect.js';
-import './components/rects/edgeless-dragging-area-rect.js';
-import './components/note-status/index.js';
+import './note/edgeless-note.js';
+import './image/edgeless-image.js';
+import './frame/edgeless-frame.js';
+import '../rects/edgeless-selected-rect.js';
+import '../rects/edgeless-hover-rect.js';
+import '../rects/edgeless-dragging-area-rect.js';
+import '../note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
@@ -17,14 +17,14 @@ import { html, literal, unsafeStatic } from 'lit/static-html.js';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../__internal__/consts.js';
-import { delayCallback } from '../../__internal__/utils/common.js';
-import type { TopLevelBlockModel } from '../../__internal__/utils/types.js';
-import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import { almostEqual, Bound } from '../../surface-block/index.js';
-import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { NoteResizeObserver } from './utils/note-resize-observer.js';
-import { getBackgroundGrid } from './utils/query.js';
+} from '../../../../__internal__/consts.js';
+import { delayCallback } from '../../../../__internal__/utils/common.js';
+import type { TopLevelBlockModel } from '../../../../__internal__/utils/types.js';
+import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
+import { almostEqual, Bound } from '../../../../surface-block/index.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
+import { getBackgroundGrid } from '../../utils/query.js';
 
 const portalMap = {
   [EdgelessBlockType.FRAME]: 'edgeless-block-portal-frame',

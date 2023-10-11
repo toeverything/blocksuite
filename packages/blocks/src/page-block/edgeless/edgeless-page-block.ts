@@ -51,6 +51,7 @@ import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { FontLoader } from '../font-loader/index.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
+import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
 import { ZoomBarToggleButton } from './components/zoom/zoom-bar-toggle-button.js';
@@ -58,7 +59,6 @@ import {
   EdgelessZoomToolbar,
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
-import type { EdgelessBlockPortalContainer } from './edgeless-blocks-container.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';

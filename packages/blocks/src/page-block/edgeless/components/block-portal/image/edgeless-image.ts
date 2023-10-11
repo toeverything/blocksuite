@@ -4,9 +4,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { ImageBlockModel } from '../../../../image-block/index.js';
-import { Bound } from '../../../../surface-block/index.js';
-import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { ImageBlockModel } from '../../../../../image-block/index.js';
+import { Bound } from '../../../../../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-block-portal-image')
 export class EdgelessBlockPortalImage extends WithDisposable(LitElement) {
