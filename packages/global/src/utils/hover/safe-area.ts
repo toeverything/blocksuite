@@ -31,6 +31,19 @@ function hasIntersection(
   }
 }
 
+function isInside(
+  { x, y }: { x: number; y: number },
+  rect: DOMRect,
+  buffer = 0
+) {
+  return (
+    x >= rect.left - buffer &&
+    x <= rect.right + buffer &&
+    y >= rect.top - buffer &&
+    y <= rect.bottom - buffer
+  );
+}
+
 const getNearestSide = (
   point: { x: number; y: number },
   rect: DOMRect
@@ -95,11 +108,7 @@ export const safeTriangle = ({
 
     // If the mouse leaves from inside the referenceElement element,
     // we should ignore the event.
-    const leaveFromInside =
-      mouseX > refRect.x &&
-      mouseY > refRect.y &&
-      mouseX < refRect.x + refRect.width &&
-      mouseY < refRect.y + refRect.height;
+    const leaveFromInside = isInside({ x: mouseX, y: mouseY }, refRect);
     if (leaveFromInside) return true;
 
     // what side is the floating element on
@@ -177,9 +186,11 @@ export const safeTriangle = ({
     svg.append(path);
     document.body.append(svg);
     abortController.signal.addEventListener('abort', () => svg.remove());
-    let idleId = 0;
-    idleId = window.setTimeout(() => newAbortController.abort(), idleTimeout);
     let frameId = 0;
+    let idleId = window.setTimeout(
+      () => newAbortController.abort(),
+      idleTimeout
+    );
     svg.addEventListener(
       'mousemove',
       e => {
@@ -205,6 +216,146 @@ export const safeTriangle = ({
       });
     });
 
+    return true;
+  };
+};
+
+export type SafeBridgeOptions = { debug: boolean; idleTimeout: number };
+
+/**
+ * Create a virtual rectangular bridge between the reference element and the floating element.
+ *
+ * Part of the code is ported from https://github.com/floating-ui/floating-ui/blob/master/packages/react/src/safePolygon.ts
+ * Licensed under MIT.
+ */
+export const safeBridge = ({
+  debug = false,
+  idleTimeout = 500,
+}: Partial<SafeBridgeOptions> = {}): HoverMiddleware => {
+  let abortController = new AbortController();
+  return async ({ event, referenceElement, floatingElement }) => {
+    abortController.abort();
+    const newAbortController = new AbortController();
+    abortController = newAbortController;
+
+    const isLeave = event.type === 'mouseleave';
+    if (!isLeave || event.target !== referenceElement) return true;
+    if (!(event instanceof MouseEvent)) {
+      console.warn('Unknown event type in hover middleware', event);
+      return true;
+    }
+    if (!floatingElement) return true;
+    const checkInside = (mouseX: number, mouseY: number) => {
+      if (newAbortController.signal.aborted) return false;
+      const point = { x: mouseX, y: mouseY };
+      const refRect = referenceElement.getBoundingClientRect();
+      const rect = floatingElement.getBoundingClientRect();
+      // what side is the floating element on
+      const floatingData = getNearestSide(point, rect);
+      if (!floatingData) return false;
+      const floatingSide = floatingData[0];
+      // If the pointer is leaving from the other side, no need to show the bridge.
+      // A constant of 1 handles floating point rounding errors.
+      if (
+        (floatingSide === 'top' && mouseY > refRect.top + 1) ||
+        (floatingSide === 'bottom' && mouseY < refRect.bottom - 1) ||
+        (floatingSide === 'left' && mouseX > refRect.left + 1) ||
+        (floatingSide === 'right' && mouseX < refRect.right - 1)
+      )
+        return false;
+      let rectRect: DOMRect;
+      switch (floatingSide) {
+        case 'top': {
+          rectRect = new DOMRect(
+            Math.max(rect.left, refRect.left),
+            rect.top,
+            Math.min(rect.right, refRect.right) -
+              Math.max(rect.left, refRect.left),
+            refRect.top - rect.top
+          );
+          break;
+        }
+        case 'bottom': {
+          rectRect = new DOMRect(
+            Math.max(rect.left, refRect.left),
+            refRect.bottom,
+            Math.min(rect.right, refRect.right) -
+              Math.max(rect.left, refRect.left),
+            rect.bottom - refRect.bottom
+          );
+          break;
+        }
+        case 'left': {
+          rectRect = new DOMRect(
+            rect.right,
+            Math.max(rect.top, refRect.top),
+            refRect.left - rect.right,
+            Math.min(rect.bottom, refRect.bottom) -
+              Math.max(rect.top, refRect.top)
+          );
+          break;
+        }
+        case 'right': {
+          rectRect = new DOMRect(
+            refRect.right,
+            Math.max(rect.top, refRect.top),
+            rect.left - refRect.right,
+            Math.min(rect.bottom, refRect.bottom) -
+              Math.max(rect.top, refRect.top)
+          );
+          break;
+        }
+        default:
+          throw new Error('Unreachable');
+      }
+
+      const inside = isInside(point, rectRect, 1);
+      if (inside && debug) {
+        const debugId = 'debug-rectangle-bridge-rect';
+        const rectDom =
+          document.querySelector<HTMLDivElement>(`#${debugId}`) ??
+          document.createElement('div');
+        rectDom.id = debugId;
+        Object.assign(rectDom.style, {
+          position: 'fixed',
+          pointerEvents: 'none',
+          background: 'aqua',
+          opacity: '0.3',
+          top: rectRect.top + 'px',
+          left: rectRect.left + 'px',
+          width: rectRect.width + 'px',
+          height: rectRect.height + 'px',
+        });
+        document.body.append(rectDom);
+        newAbortController.signal.addEventListener('abort', () =>
+          rectDom.remove()
+        );
+      }
+      return inside;
+    };
+    if (!checkInside(event.x, event.y)) return true;
+    await new Promise<void>(res => {
+      if (newAbortController.signal.aborted) res();
+      newAbortController.signal.addEventListener('abort', () => res());
+      let idleId = window.setTimeout(
+        () => newAbortController.abort(),
+        idleTimeout
+      );
+      document.addEventListener(
+        'mousemove',
+        e => {
+          clearTimeout(idleId);
+          idleId = window.setTimeout(
+            () => newAbortController.abort(),
+            idleTimeout
+          );
+          if (!checkInside(e.clientX, e.clientY)) newAbortController.abort();
+        },
+        {
+          signal: newAbortController.signal,
+        }
+      );
+    });
     return true;
   };
 };

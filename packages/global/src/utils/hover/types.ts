@@ -1,4 +1,4 @@
-import type { SafeTriangleOptions } from './safe-area.js';
+import type { SafeBridgeOptions, SafeTriangleOptions } from './safe-area.js';
 
 export type WhenHoverOptions = {
   enterDelay?: number;
@@ -14,7 +14,11 @@ export type WhenHoverOptions = {
    * @default true
    */
   alwayRunWhenNoFloating?: boolean;
-  safeArea?: boolean | SafeTriangleOptions;
+  safeTriangle?: boolean | SafeTriangleOptions;
+  /**
+   * Create a virtual rectangular bridge between the reference element and the floating element.
+   */
+  safeBridge?: boolean | SafeBridgeOptions;
 };
 
 export type HoverMiddleware = (ctx: {

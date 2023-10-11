@@ -1,5 +1,5 @@
 import { dedupe, delayHide, delayShow } from './middlewares.js';
-import { safeTriangle } from './safe-area.js';
+import { safeBridge, safeTriangle } from './safe-area.js';
 import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 
 /**
@@ -42,7 +42,8 @@ export const whenHover = (
     enterDelay = 0,
     leaveDelay = 300,
     alwayRunWhenNoFloating = true,
-    safeArea = false,
+    safeTriangle: triangleOptions = false,
+    safeBridge: bridgeOptions = true,
   }: WhenHoverOptions = {}
 ) => {
   /**
@@ -54,8 +55,19 @@ export const whenHover = (
 
   const middlewares: HoverMiddleware[] = [
     dedupe(alwayRunWhenNoFloating),
-    ...(safeArea
-      ? [safeTriangle(typeof safeArea === 'boolean' ? undefined : safeArea)]
+    ...(triangleOptions
+      ? [
+          safeTriangle(
+            typeof triangleOptions === 'boolean' ? undefined : triangleOptions
+          ),
+        ]
+      : []),
+    ...(bridgeOptions
+      ? [
+          safeBridge(
+            typeof bridgeOptions === 'boolean' ? undefined : bridgeOptions
+          ),
+        ]
       : []),
     delayShow(enterDelay),
     delayHide(leaveDelay),
