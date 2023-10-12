@@ -25,10 +25,12 @@ export interface HitTestOptions {
   // we set `pierce` to false, shape element used this options in `hitTest` method
   pierce?: boolean;
 }
-export interface EdgelessElementUtils {
+export interface IEdgelessElement {
   xywh: SerializedXYWH;
-  rotate?: number;
+  rotate: number;
   connectable: boolean;
+  index: string;
+  batch: string | null;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;

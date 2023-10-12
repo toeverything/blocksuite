@@ -7,6 +7,8 @@ import {
 } from '../../../__internal__/clipboard/index.js';
 import type { EdgelessElement } from '../../../__internal__/index.js';
 import type { FrameBlockService } from '../../../__internal__/service/legacy-services/frame-service.js';
+import type { ImageBlockService } from '../../../__internal__/service/legacy-services/image-service.js';
+import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import {
   Bound,
   ConnectorElement,
@@ -14,7 +16,7 @@ import {
 } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
-import { isFrameBlock, isNoteBlock } from './query.js';
+import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
 
 const offset = 10;
 export async function duplicate(
@@ -31,7 +33,7 @@ export async function duplicate(
         : getGridBound(element);
       bound.x += totalBound.w + offset;
       if (isNoteBlock(element)) {
-        const id = page.addBlock(
+        const id = surface.addElement(
           element.flavour,
           { xywh: bound.serialize() },
           page.root?.id
@@ -50,8 +52,8 @@ export async function duplicate(
           element.flavour
         ) as FrameBlockService;
         const json = service.block2Json(element);
-        const id = page.addBlock(
-          element.flavour,
+        return surface.addElement(
+          EdgelessBlockType.FRAME,
           {
             xywh: bound.serialize(),
             title: new Workspace.Y.Text(json.title),
@@ -59,8 +61,19 @@ export async function duplicate(
           },
           surface.model.id
         );
-
-        return id;
+      } else if (isImageBlock(element)) {
+        const service = edgeless.getService(
+          element.flavour
+        ) as ImageBlockService;
+        const json = service.block2Json(element, []);
+        return surface.addElement(
+          EdgelessBlockType.IMAGE,
+          {
+            xywh: bound.serialize(),
+            sourceId: json.sourceId,
+          },
+          surface.model.id
+        );
       } else {
         const id = surface.addElement(element.type, {
           ...element.serialize(),

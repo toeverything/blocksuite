@@ -181,7 +181,7 @@ export class EditorContainer
       matcher: file => file.type.startsWith('image'),
       handler: async (
         file: File
-      ): Promise<ImageBlockProps & { flavour: 'affine:image' }> => {
+      ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
         const storage = this.page.blobs;
         const { saveAttachmentData } = withTempBlobData();
         const sourceId = await storage.set(

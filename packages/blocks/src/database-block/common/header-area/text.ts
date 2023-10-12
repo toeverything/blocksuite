@@ -38,6 +38,7 @@ const styles = css`
   data-view-header-area-text-editing {
     width: 100%;
     display: flex;
+    cursor: text;
   }
 
   .data-view-header-area-rich-text {

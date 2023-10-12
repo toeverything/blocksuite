@@ -1,4 +1,4 @@
-import { html, nothing } from 'lit';
+import { html } from 'lit';
 
 import { formatConfig } from '../../../common/format/config.js';
 import { isFormatSupported } from '../../../common/format/utils.js';
@@ -9,7 +9,7 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
   const root = formatBar.root;
 
   if (!isFormatSupported(root)) {
-    return nothing;
+    return null;
   }
 
   const backgroundButton = BackgroundButton(formatBar);
@@ -30,6 +30,5 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
         </icon-button>`
     )}
     <div class="divider"></div>
-    ${backgroundButton}
-    <div class="divider"></div>`;
+    ${backgroundButton}`;
 };

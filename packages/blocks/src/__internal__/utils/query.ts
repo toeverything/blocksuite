@@ -110,31 +110,26 @@ export function getPreviousBlock(
   }
   const previousBlock = page.getPreviousSibling(model);
   if (!previousBlock) {
-    if (
-      matchFlavours(parentBlock, [
-        'affine:note',
-        'affine:page',
-        'affine:database',
-      ])
-    ) {
-      return getPreviousBlock(parentBlock);
+    if (parentBlock.role === 'content') {
+      return parentBlock;
     }
-    return parentBlock;
-  }
-  if (previousBlock.children.length) {
-    let lastChild = previousBlock.children[previousBlock.children.length - 1];
-    while (lastChild.children.length) {
-      lastChild = lastChild.children[lastChild.children.length - 1];
+    return getPreviousBlock(parentBlock);
+  } else {
+    if (previousBlock.role === 'content') {
+      if (previousBlock.children.length > 0) {
+        let lastChild =
+          previousBlock.children[previousBlock.children.length - 1];
+        while (lastChild.children.length) {
+          lastChild = lastChild.children[lastChild.children.length - 1];
+        }
+        // Assume children is not possible to be `affine:note` or `affine:page`
+        return lastChild;
+      }
+      return previousBlock;
+    } else {
+      return getPreviousBlock(previousBlock);
     }
-    // Assume children is not possible to be `affine:note` or `affine:page`
-    return lastChild;
   }
-
-  if (matchFlavours(previousBlock, ['affine:surface'])) {
-    return getPreviousBlock(previousBlock);
-  }
-
-  return previousBlock;
 }
 
 /**
@@ -480,7 +475,7 @@ function isDatabase({ tagName }: Element) {
  * Returns `true` if element is edgeless child note.
  */
 export function isEdgelessChildNote({ classList }: Element) {
-  return classList.contains('affine-edgeless-child-note');
+  return classList.contains('edgeless-block-portal-note');
 }
 
 /**

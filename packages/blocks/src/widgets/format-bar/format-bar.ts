@@ -9,7 +9,7 @@ import {
   type Placement,
   shift,
 } from '@floating-ui/dom';
-import { html, nothing } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../__internal__/utils/event.js';
@@ -45,17 +45,27 @@ export class AffineFormatBarWidget extends WidgetElement {
   }
 
   private _dragging = false;
-  private _displayType: 'text' | 'block' | 'none' = 'none';
+
+  private _displayType: 'text' | 'block' | 'native' | 'none' = 'none';
+  get displayType() {
+    return this._displayType;
+  }
 
   private _selectedBlockElements: BlockElement[] = [];
+  get selectedBlockElements() {
+    return this._selectedBlockElements;
+  }
+
+  get nativeRange() {
+    const sl = document.getSelection();
+    if (!sl || sl.rangeCount === 0) return null;
+    const range = sl.getRangeAt(0);
+    return range;
+  }
 
   private _abortController = new AbortController();
 
   private _placement: Placement = 'top';
-
-  private get _rangeManager() {
-    return this.root.rangeManager;
-  }
 
   private _reset() {
     this._displayType = 'none';
@@ -68,16 +78,7 @@ export class AffineFormatBarWidget extends WidgetElement {
     if (layout) return false;
 
     const readonly = this.page.awarenessStore.isReadonly(this.page);
-    const includeTextBlock = this._selectedBlockElements.some(
-      el => 'text' in el.model
-    );
-
-    return (
-      !readonly &&
-      this._displayType !== 'none' &&
-      includeTextBlock &&
-      !this._dragging
-    );
+    return !readonly && this.displayType !== 'none' && !this._dragging;
   }
 
   override connectedCallback() {
@@ -100,35 +101,34 @@ export class AffineFormatBarWidget extends WidgetElement {
       );
     }
 
-    this._disposables.add(
+    this.disposables.add(
       this.root.event.add('dragStart', () => {
         this._dragging = true;
         this.requestUpdate();
       })
     );
 
-    this._disposables.add(
+    this.disposables.add(
       this.root.event.add('dragEnd', () => {
         this._dragging = false;
         this.requestUpdate();
       })
     );
 
-    this._disposables.add(
+    // calculate placement
+    this.disposables.add(
       this.root.event.add('pointerUp', ctx => {
-        if (this._displayType === 'text') {
-          if (this._rangeManager) {
-            const e = ctx.get('pointerState');
-            const range = this._rangeManager.value;
-            assertExists(range);
-            const rangeRect = range.getBoundingClientRect();
-            if (e.y < rangeRect.top + rangeRect.height / 2) {
-              this._placement = 'top';
-            } else {
-              this._placement = 'bottom';
-            }
+        if (this.displayType === 'text' || this.displayType === 'native') {
+          const range = this.nativeRange;
+          assertExists(range);
+          const e = ctx.get('pointerState');
+          const rangeRect = range.getBoundingClientRect();
+          if (e.y < rangeRect.top + rangeRect.height / 2) {
+            this._placement = 'top';
+          } else {
+            this._placement = 'bottom';
           }
-        } else if (this._displayType === 'block') {
+        } else if (this.displayType === 'block') {
           const e = ctx.get('pointerState');
           const blockElement = this._selectedBlockElements[0];
           if (!blockElement) {
@@ -144,7 +144,8 @@ export class AffineFormatBarWidget extends WidgetElement {
       })
     );
 
-    this._disposables.add(
+    // listen to selection change
+    this.disposables.add(
       this._selectionManager.slots.changed.on(async () => {
         await this.updateComplete;
         const textSelection = pageElement.selection.find('text');
@@ -176,6 +177,32 @@ export class AffineFormatBarWidget extends WidgetElement {
         this.requestUpdate();
       })
     );
+    this.disposables.addFromEvent(document, 'selectionchange', () => {
+      const databaseSelection = this.root.selection.find('database');
+      const reset = () => {
+        this._reset();
+        this.requestUpdate();
+      };
+      if (databaseSelection) {
+        const viewSelection = databaseSelection.viewSelection;
+        // check table selection
+        if (viewSelection.type === 'table' && !viewSelection.isEditing)
+          return reset();
+        // check kanban selection
+        if (
+          (viewSelection.type === 'kanban' &&
+            viewSelection.selectionType !== 'cell') ||
+          !viewSelection.isEditing
+        )
+          return reset();
+
+        const range = this.nativeRange;
+
+        if (!range || range.collapsed) return reset();
+        this._displayType = 'native';
+        this.requestUpdate();
+      }
+    });
   }
 
   private _floatDisposables: DisposableGroup | null = null;
@@ -207,9 +234,8 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     const formatQuickBarElement = this._formatBarElement;
     assertExists(formatQuickBarElement, 'format quick bar should exist');
-    if (this._displayType === 'text') {
-      assertExists(this._rangeManager, 'range controller should exist');
-      const range = this._rangeManager.value;
+    if (this.displayType === 'text' || this.displayType === 'native') {
+      const range = this.nativeRange;
       assertExists(range);
       const visualElement = {
         getBoundingClientRect: () => range.getBoundingClientRect(),
@@ -242,7 +268,7 @@ export class AffineFormatBarWidget extends WidgetElement {
           }
         )
       );
-    } else if (this._displayType === 'block') {
+    } else if (this.displayType === 'block') {
       const firstBlockElement = this._selectedBlockElements[0];
       let rect = firstBlockElement.getBoundingClientRect();
       this._selectedBlockElements.forEach(el => {
@@ -306,36 +332,33 @@ export class AffineFormatBarWidget extends WidgetElement {
       return nothing;
     }
 
-    const pageElement = this.blockElement;
-    assertExists(pageElement);
-
-    if (!isPageComponent(pageElement)) {
-      throw new Error('format bar should be hosted by page component');
-    }
-
-    const selectedBlockElements = this._selectedBlockElements;
-    const root = this.root;
-
-    //TODO: format bar in database
-
-    const paragraphButton = ParagraphButton({
-      formatBar: this,
-      selectedBlockElements,
-    });
-    const actionItems = ActionItems(root);
+    const paragraphButton = ParagraphButton(this);
     const inlineItems = InlineItems(this);
+    const actionItems = ActionItems(this);
+
+    const renderList = [
+      AffineFormatBarWidget.customElements.size > 0
+        ? html`<div class="custom-items"></div>`
+        : null,
+      paragraphButton,
+      inlineItems,
+      actionItems,
+    ].filter(el => !!el) as (TemplateResult<1> | TemplateResult<1>[])[];
+    const renderListWithDivider = renderList.reduce<
+      (TemplateResult<1> | TemplateResult<1>[])[]
+    >(
+      (acc, el, i) =>
+        i === renderList.length - 1
+          ? [...acc, el]
+          : [...acc, el, html`<div class="divider"></div>`],
+      []
+    );
 
     return html`<div
       class=${AFFINE_FORMAT_BAR_WIDGET}
       @pointerdown=${stopPropagation}
     >
-      <div class="custom-items"></div>
-      ${this._customElements.length > 0
-        ? html`<div class="divider"></div>`
-        : nothing}
-      ${paragraphButton}
-      <div class="divider"></div>
-      ${inlineItems} ${actionItems}
+      ${renderListWithDivider}
     </div>`;
   }
 }

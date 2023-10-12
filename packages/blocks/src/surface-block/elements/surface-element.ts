@@ -13,8 +13,8 @@ import {
   type XYWH,
 } from '../utils/xywh.js';
 import type {
-  EdgelessElementUtils,
   HitTestOptions,
+  IEdgelessElement,
   PhasorElementType,
 } from './edgeless-element.js';
 
@@ -40,7 +40,7 @@ export type ComputedValue = (value: string) => string;
 export abstract class SurfaceElement<
   T extends ISurfaceElement = ISurfaceElement,
   L extends ISurfaceElementLocalRecord = ISurfaceElementLocalRecord,
-> implements EdgelessElementUtils
+> implements IEdgelessElement
 {
   containedByBounds(_: Bound): boolean {
     throw new Error('Method not implemented.');

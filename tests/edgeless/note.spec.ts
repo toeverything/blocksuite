@@ -218,7 +218,7 @@ test('dragging un-selected note', async ({ page }) => {
   await switchEditorMode(page);
 
   const noteBox = await page
-    .locator('.affine-edgeless-child-note')
+    .locator('.edgeless-block-portal-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -258,7 +258,7 @@ test('drag handle should be shown when a note is actived in default mode or hidd
 
   await switchEditorMode(page);
   const noteBox = await page
-    .locator('.affine-edgeless-child-note')
+    .locator('.edgeless-block-portal-note')
     .boundingBox();
   if (!noteBox) {
     throw new Error('Missing edgeless affine-note');
@@ -363,7 +363,7 @@ test.describe('note slicer', () => {
     ).toBeTruthy();
     await page.locator('affine-note-slicer-popupbutton').click();
 
-    await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+    await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
   });
 
   test('note slicer button should appears at right position', async ({
@@ -447,7 +447,7 @@ test.describe('note slicer', () => {
     const firstNoteId = await addNote(page, 'hello\n123\n456\n789', 50, 500);
     const secondNoteId = await addNote(page, 'world\n123\n456\n789', 100, 550);
     const lastNoteId = await addNote(page, 'done\n123\n456\n789', 150, 600);
-
+    await page.pause();
     await exitEditing(page);
     await waitNextFrame(page);
     await selectNoteInEdgeless(page, lastNoteId);
@@ -458,7 +458,7 @@ test.describe('note slicer', () => {
     let styleText =
       (await page.locator('affine-note-slicer').getAttribute('style')) ?? '';
     let result = zIndexPattern.exec(styleText);
-    expect(zIndexPattern.exec(styleText)?.[1]).toBe('3');
+    expect(result?.[1]).toBe('3');
 
     await selectNoteInEdgeless(page, secondNoteId);
     await hoverOnNote(page, secondNoteId);
@@ -504,10 +504,10 @@ test('undo/redo should work correctly after clipping', async ({ page }) => {
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(1);
+  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(1);
   await redoByKeyboard(page);
   await waitNextFrame(page);
-  await expect(page.locator('.affine-edgeless-child-note')).toHaveCount(2);
+  await expect(page.locator('.edgeless-block-portal-note')).toHaveCount(2);
 });
 
 test('undo/redo should work correctly after resizing', async ({ page }) => {
@@ -606,23 +606,23 @@ test('duplicate note should work correctly', async ({ page }) => {
   await selectNoteInEdgeless(page, ids.noteId);
 
   await triggerComponentToolbarAction(page, 'duplicate');
-  const moreActionsContainer = await page.locator('.more-actions-container');
+  const moreActionsContainer = page.locator('.more-actions-container');
   await expect(moreActionsContainer).toBeHidden();
 
-  const noteLocator = await page.locator('edgeless-child-note');
+  const noteLocator = page.locator('edgeless-block-portal-note');
   await expect(noteLocator).toHaveCount(2);
   const [firstNote, secondNote] = await noteLocator.all();
 
   // content should be same
-  await expect(
+  expect(
     (await firstNote.innerText()) === (await secondNote.innerText())
   ).toBeTruthy();
 
   // size should be same
   const firstNoteBox = await firstNote.boundingBox();
   const secondNoteBox = await secondNote.boundingBox();
-  await expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
-  await expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
+  expect(firstNoteBox?.width === secondNoteBox?.width).toBeTruthy();
+  expect(firstNoteBox?.height === secondNoteBox?.height).toBeTruthy();
 });
 
 test('double click toolbar zoom button, should not add text', async ({

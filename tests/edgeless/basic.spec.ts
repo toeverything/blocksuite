@@ -59,7 +59,7 @@ test('switch to edgeless mode', async ({ page }) => {
   await assertRichTextVRange(page, 0, 5, 0);
 
   await switchEditorMode(page);
-  const locator = page.locator('affine-edgeless-block-container');
+  const locator = page.locator('edgeless-block-portal-container');
   await expect(locator).toHaveCount(1);
   await assertRichTexts(page, ['hello']);
   await waitNextFrame(page);

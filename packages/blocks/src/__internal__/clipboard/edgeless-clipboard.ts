@@ -2,17 +2,20 @@ import { assertExists, groupBy } from '@blocksuite/global/utils';
 import { type Page, Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
-import type { NoteBlockModel } from '../../index.js';
+import type { ImageBlockModel } from '../../image-block/index.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
   isFrameBlock,
+  isImageBlock,
   isNoteBlock,
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
+import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
   compare,
@@ -35,6 +38,7 @@ import {
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import type { FrameBlockService } from '../service/legacy-services/frame-service.js';
+import type { ImageBlockService } from '../service/legacy-services/image-service.js';
 import type { Clipboard } from './type.js';
 import {
   clipboardData2Blocks,
@@ -93,6 +97,9 @@ async function prepareClipboardData(selectedAll: Selectable[]) {
       } else if (isFrameBlock(selected)) {
         const service = getService(selected.flavour) as FrameBlockService;
         return { ...service.block2Json(selected) };
+      } else if (isImageBlock(selected)) {
+        const service = getService(selected.flavour) as ImageBlockService;
+        return { ...service.block2Json(selected, []) };
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
@@ -299,19 +306,20 @@ export class EdgelessClipboard implements Clipboard {
     notes: SerializedBlock[],
     oldToNewIdMap: Map<string, string>
   ) {
+    const { surface } = this;
     const noteIds = await Promise.all(
       notes.map(async ({ id, xywh, children, background }) => {
         assertExists(xywh);
 
-        const noteId = this._page.addBlock(
-          'affine:note',
+        const noteId = this.surface.addElement(
+          EdgelessBlockType.NOTE,
           {
             xywh,
             background,
           },
           this._page.root?.id
         );
-        const note = this._page.getBlockById(noteId);
+        const note = surface.pickById(noteId) as NoteBlockModel;
         if (id) oldToNewIdMap.set(id, noteId);
         assertExists(note);
 
@@ -325,8 +333,8 @@ export class EdgelessClipboard implements Clipboard {
   private async _createFrameBlocks(frames: SerializedBlock[]) {
     const frameIds = await Promise.all(
       frames.map(async ({ xywh, title, background }) => {
-        const frameId = this._page.addBlock(
-          'affine:frame',
+        const frameId = this.surface.addElement(
+          EdgelessBlockType.FRAME,
           {
             xywh,
             background,
@@ -338,6 +346,24 @@ export class EdgelessClipboard implements Clipboard {
       })
     );
     return frameIds;
+  }
+
+  private async _createImageBlocks(images: SerializedBlock[]) {
+    const imageIds = await Promise.all(
+      images.map(async ({ xywh, sourceId, rotate }) => {
+        const imageId = this.surface.addElement(
+          EdgelessBlockType.IMAGE,
+          {
+            xywh,
+            sourceId,
+            rotate,
+          },
+          this.surface.model.id
+        );
+        return imageId;
+      })
+    );
+    return imageIds;
   }
 
   private _getOldCommonBound(
@@ -391,10 +417,13 @@ export class EdgelessClipboard implements Clipboard {
         ? 'notes'
         : isFrameBlock(data as unknown as Selectable)
         ? 'frames'
+        : isImageBlock(data as unknown as Selectable)
+        ? 'images'
         : 'elements'
     ) as unknown as {
       frames: SerializedBlock[];
       notes?: SerializedBlock[];
+      images?: SerializedBlock[];
       elements?: { type: PhasorElement['type'] }[];
     };
 
@@ -407,6 +436,7 @@ export class EdgelessClipboard implements Clipboard {
       oldIdToNewIdMap
     );
     const frameIds = await this._createFrameBlocks(groupedByType.frames ?? []);
+    const imageIds = await this._createImageBlocks(groupedByType.images ?? []);
 
     const notes = noteIds.map(id =>
       this._page.getBlockById(id)
@@ -415,6 +445,10 @@ export class EdgelessClipboard implements Clipboard {
     const frames = frameIds.map(id =>
       this._page.getBlockById(id)
     ) as FrameBlockModel[];
+
+    const images = imageIds.map(id =>
+      this.surface.pickById(id)
+    ) as ImageBlockModel[];
 
     const elements = this._createPhasorElements(
       groupedByType.elements || [],
@@ -429,6 +463,7 @@ export class EdgelessClipboard implements Clipboard {
     const oldCommonBound = this._getOldCommonBound(elements, [
       ...notes,
       ...frames,
+      ...images,
     ]);
     const pasteX = modelX - oldCommonBound.w / 2;
     const pasteY = modelY - oldCommonBound.h / 2;
@@ -450,7 +485,7 @@ export class EdgelessClipboard implements Clipboard {
       }
     });
 
-    [...notes, ...frames].forEach(block => {
+    [...notes, ...frames, ...images].forEach(block => {
       const [x, y, w, h] = deserializeXYWH(block.xywh);
       const newBound = new Bound(
         pasteX + x - oldCommonBound.x,
@@ -458,14 +493,14 @@ export class EdgelessClipboard implements Clipboard {
         w,
         h
       );
-      this._page.updateBlock(block, {
+      this.surface.updateElement(block.id, {
         xywh: serializeXYWH(newBound.x, newBound.y, newBound.w, newBound.h),
       });
     });
 
     this._emitSelectionChangeAfterPaste(
       elements.map(ele => ele.id),
-      [...noteIds, ...frameIds]
+      [...noteIds, ...frameIds, ...imageIds]
     );
   }
 

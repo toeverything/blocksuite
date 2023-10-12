@@ -1,3 +1,7 @@
+import { generateKeyBetween } from 'fractional-indexing';
+
+export const BLOCK_BATCH = 'a0';
+export const FRAME_BATCH = generateKeyBetween(null, BLOCK_BATCH);
 export class Batch<T extends { index: string }> {
   private _elements = new Set<T>();
   private _min = 'a0';

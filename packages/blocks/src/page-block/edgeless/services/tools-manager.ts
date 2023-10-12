@@ -18,7 +18,6 @@ import {
   Point,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../frame-block/index.js';
 import {
   normalizeWheelDeltaY,
   type PhasorElement,
@@ -39,7 +38,7 @@ import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getSelectionBoxBound } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
 
-export type Selectable = TopLevelBlockModel | FrameBlockModel | PhasorElement;
+export type Selectable = TopLevelBlockModel | PhasorElement;
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;

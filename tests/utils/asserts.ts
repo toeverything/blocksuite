@@ -135,6 +135,20 @@ export async function assertTitle(page: Page, text: string) {
   expect(vText).toBe(text);
 }
 
+export async function assertVEditorDeltas(
+  page: Page,
+  deltas: unknown[],
+  i = 0
+) {
+  const actual = await page.evaluate(i => {
+    const vRoot = document.querySelectorAll<VirgoRootElement>(
+      '[data-virgo-root="true"]'
+    )[i];
+    return vRoot.virgoEditor.yTextDeltas;
+  }, i);
+  expect(actual).toEqual(deltas);
+}
+
 export async function assertRichTextVirgoDeltas(
   page: Page,
   deltas: unknown[],
@@ -808,7 +822,7 @@ export async function assertEdgelessNoteBackground(
     .locator(`affine-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
       const noteWrapper = ele.closest<HTMLDivElement>(
-        '.affine-edgeless-child-note'
+        '.edgeless-block-portal-note'
       );
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);

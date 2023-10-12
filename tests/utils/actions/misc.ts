@@ -4,6 +4,7 @@ import '../declare-test-window.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
+import type { ClipboardItem } from '../../../packages/blocks/src/__internal__/clipboard/clipboard-item.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,
@@ -15,6 +16,10 @@ import { assertExists } from '../../../packages/global/src/utils.js';
 import type { DebugMenu } from '../../../packages/playground/apps/starter/components/debug-menu.js';
 import type { RichText } from '../../../packages/playground/examples/virgo/test-page.js';
 import type { BaseBlockModel } from '../../../packages/store/src/index.js';
+import {
+  type VirgoRootElement,
+  type VRange,
+} from '../../../packages/virgo/src/index.js';
 import { currentEditorIndex, multiEditor } from '../multiple-editor.js';
 import {
   pressEnter,
@@ -697,7 +702,7 @@ export async function getSelectedText(page: Page) {
   });
 }
 
-export async function setVirgoSelection(
+export async function setVRangeInSelectedRichText(
   page: Page,
   index: number,
   length: number
@@ -715,6 +720,22 @@ export async function setVirgoSelection(
       });
     },
     { index, length }
+  );
+  await waitNextFrame(page);
+}
+
+export async function setVRangeInVEditor(page: Page, vRange: VRange, i = 0) {
+  await page.evaluate(
+    ({ i, vRange }) => {
+      const vEditor = document.querySelectorAll<VirgoRootElement>(
+        '[data-virgo-root="true"]'
+      )[i]?.virgoEditor;
+      if (!vEditor) {
+        throw new Error('Cannot find vEditor');
+      }
+      vEditor.setVRange(vRange);
+    },
+    { i, vRange }
   );
   await waitNextFrame(page);
 }
@@ -1124,7 +1145,7 @@ export async function export2markdown(page: Page) {
 }
 
 export async function getCopyClipItemsInPage(page: Page) {
-  const clipItems = await page.evaluate(() => {
+  const clipItems: ClipboardItem[] = await page.evaluate(() => {
     return document
       .getElementsByTagName('affine-doc-page')[0]
       .clipboard['_copyBlocksInPage']();

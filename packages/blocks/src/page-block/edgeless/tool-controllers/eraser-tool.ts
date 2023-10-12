@@ -1,11 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import type {
-  Erasable,
-  IPoint,
-  TopLevelBlockModel,
-} from '../../../__internal__/utils/index.js';
+import type { Erasable, IPoint } from '../../../__internal__/utils/index.js';
 import {
   type EraserTool,
   getBlockElementById,
@@ -98,7 +94,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
     this._prevPoint = [x, y];
     this._erasables = new Set([
       ...this._surface.getElements(),
-      ...(<TopLevelBlockModel[]>this._page.getBlockByFlavour('affine:note')),
+      ...this._surface.blocks,
     ]);
     this._loop();
     this._edgeless.surface.viewport.addOverlay(this._overlay);
