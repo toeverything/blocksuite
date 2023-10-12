@@ -65,6 +65,7 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
 
     return html`
       <edgeless-toolbar-button
+        class="edgeless-eraser-button"
         .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
         .tooltipOffset=${4}
         .active=${type === 'eraser'}
