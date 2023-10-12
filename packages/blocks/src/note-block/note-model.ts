@@ -105,7 +105,7 @@ export class NoteBlockModel
   boxSelect!: (bound: Bound) => boolean;
 
   hitTest(x: number, y: number, _: HitTestOptions): boolean {
-    const bound = Bound.fromXYWH(this.xywh.getValue());
+    const bound = Bound.fromXYWH(this.xywh);
     return bound.isPointInBound([x, y], 0);
   }
 }

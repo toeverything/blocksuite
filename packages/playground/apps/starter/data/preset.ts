@@ -1,7 +1,6 @@
 import {
   DEFAULT_ROUGHNESS,
   DEFAULT_SHAPE_STROKE_COLOR,
-  serializeXYWH,
   StrokeStyle,
 } from '@blocksuite/blocks';
 import {
@@ -46,7 +45,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           id: '0',
           index: 'a0',
           type: 'shape',
-          xywh: '[0,0,100,100]',
+          xywh: [0, 0, 100, 100],
           seed: Math.floor(Math.random() * 2 ** 31),
           shapeType: 'rect',
 
@@ -65,7 +64,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
           id: '1',
           index: 'a1',
           type: 'shape',
-          xywh: '[200,0,100,100]',
+          xywh: [200, 0, 100, 100],
           seed: Math.floor(Math.random() * 2 ** 31),
 
           shapeType: 'rect',
@@ -94,13 +93,16 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   // Add note block inside page block
   const noteId = page.addBlock(
     'affine:note',
-    { xywh: serializeXYWH(0, 100, 800, 640) },
+    { xywh: new NativeWrapper([0, 100, 800, 640]) },
     pageBlockId
   );
 
   page.addBlock(
     'affine:frame',
-    { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
+    {
+      xywh: new NativeWrapper([-40, -40, 880, 817]),
+      title: new Text('Frame 1'),
+    },
     surfaceId
   );
   // Import preset markdown content inside note block

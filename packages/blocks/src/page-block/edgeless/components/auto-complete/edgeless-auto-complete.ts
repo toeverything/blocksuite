@@ -309,7 +309,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const { surface } = this.edgeless;
     const bound = this._computeNextShape(type);
     const id = this._createShape();
-    surface.updateElement(id, { xywh: bound.serialize() });
+    surface.updateElement(id, { xywh: bound.toXYWH() });
 
     const { startPosition, endPosition } = getPosition(type);
     this._addConnector(
@@ -360,7 +360,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       position = [0, 0.5];
     }
 
-    surface.updateElement(id, { xywh: nextBound.serialize() });
+    surface.updateElement(id, { xywh: nextBound.toXYWH() });
     surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
       target: { id, position },
     });
@@ -404,7 +404,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     const startBound = getGridBound(this._current);
     const { startPosition, endPosition } = getPosition(type);
     const nextShape = {
-      xywh: nextBound.serialize(),
+      xywh: nextBound.toXYWH(),
       rotate: curShape.rotate,
       shapeType: curShape.shapeType,
     };

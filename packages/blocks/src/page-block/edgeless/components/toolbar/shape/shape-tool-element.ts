@@ -236,7 +236,7 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
       coord.x - width * padding.x,
       coord.y - height * padding.y
     );
-    const xywh = new Bound(modelX, modelY, width, height).serialize();
+    const xywh = new Bound(modelX, modelY, width, height).toXYWH();
     this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
       shapeType: this.shape.name === 'roundedRect' ? 'rect' : this.shape.name,
       xywh: xywh,

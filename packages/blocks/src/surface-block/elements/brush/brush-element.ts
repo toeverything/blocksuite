@@ -111,7 +111,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
       });
       updates.points = relativePoints;
 
-      updates.xywh = boundWidthLineWidth.serialize();
+      updates.xywh = boundWidthLineWidth.toXYWH();
     }
 
     if (xywh) {
@@ -126,7 +126,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
       );
 
       updates.points = transformed.points.map(p => [p.x, p.y]);
-      updates.xywh = transformed.bound.serialize();
+      updates.xywh = transformed.bound.toXYWH();
     }
 
     if (props.lineWidth && props.lineWidth !== this.lineWidth) {
@@ -141,7 +141,7 @@ export class BrushElement extends SurfaceElement<IBrush> {
       );
 
       updates.points = transformed.points.map(p => [p.x, p.y]);
-      updates.xywh = transformed.bound.serialize();
+      updates.xywh = transformed.bound.toXYWH();
     }
 
     for (const key in updates) {

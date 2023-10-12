@@ -939,7 +939,7 @@ export class EdgelessConnectorManager {
       return p;
     });
     connector.path = relativePoints;
-    connector.xywh = bound.serialize();
+    connector.xywh = bound.toXYWH();
     surface.refresh();
   }
 
@@ -955,7 +955,7 @@ export class EdgelessConnectorManager {
       updates.source = { position: Vec.add(source.position, offset) };
     if (!target.id && target.position)
       updates.target = { position: Vec.add(target.position, offset) };
-    updates.xywh = bound.serialize();
+    updates.xywh = bound.toXYWH();
     surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, updates);
   }
 

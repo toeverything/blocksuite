@@ -69,7 +69,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
             modelLeftTopY,
             this.element.w,
             containerHeight
-          ).serialize(),
+          ).toXYWH(),
         }
       );
       this.richText.style.minHeight = `${containerHeight}px`;

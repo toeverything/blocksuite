@@ -255,7 +255,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         new Bound(element.x, element.y, element.w, element.h)
       );
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
-        xywh: newBound.serialize(),
+        xywh: newBound.toXYWH(),
       });
     } else {
       const newBound = normalizeShapeBound(
@@ -263,7 +263,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         new Bound(element.x, element.y, element.w, element.h)
       );
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
-        xywh: newBound.serialize(),
+        xywh: newBound.toXYWH(),
       });
     }
   };

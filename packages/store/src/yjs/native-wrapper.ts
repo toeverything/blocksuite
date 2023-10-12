@@ -31,6 +31,14 @@ export class NativeWrapper<T = unknown> {
     return this._map;
   }
 
+  set(value: T) {
+    console.log(value);
+
+    this._map.set('value', value);
+
+    return this;
+  }
+
   setValue(value: T) {
     return this._map.set('value', value);
   }

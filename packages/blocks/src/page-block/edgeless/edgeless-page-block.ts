@@ -9,7 +9,7 @@ import {
   throttle,
 } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import { type BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel, NativeWrapper } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -50,7 +50,6 @@ import {
   intersects,
   type IVec,
   type PhasorElement,
-  serializeXYWH,
   ZOOM_MAX,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
@@ -601,7 +600,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return this.page.addBlock(
       'affine:note',
       {
-        xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
+        xywh: new NativeWrapper([x - offsetX, y - offsetY, width, height]),
         index: this.indexes.max,
       },
       parentId,

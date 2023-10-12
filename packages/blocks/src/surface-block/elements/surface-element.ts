@@ -7,7 +7,7 @@ import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
 import { type PointLocation } from '../utils/point-location.js';
 import type { IVec } from '../utils/vec.js';
-import { type SerializedXYWH, type XYWH } from '../utils/xywh.js';
+import { type XYWH } from '../utils/xywh.js';
 import type {
   EdgelessElementUtils,
   HitTestOptions,
@@ -17,7 +17,7 @@ import type {
 export interface ISurfaceElement {
   id: string;
   type: PhasorElementType;
-  xywh: SerializedXYWH;
+  xywh: XYWH;
   index: string;
   seed: number;
 

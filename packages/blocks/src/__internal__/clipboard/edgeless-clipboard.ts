@@ -1,5 +1,5 @@
 import { assertExists, groupBy } from '@blocksuite/global/utils';
-import { type Page, Workspace } from '@blocksuite/store';
+import { NativeWrapper, type Page, Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { NoteBlockModel } from '../../index.js';
@@ -22,7 +22,6 @@ import {
   type IBound,
   type PhasorElement,
   type PhasorElementType,
-  serializeXYWH,
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
@@ -305,7 +304,7 @@ export class EdgelessClipboard implements Clipboard {
         const noteId = this._page.addBlock(
           'affine:note',
           {
-            xywh,
+            xywh: new NativeWrapper(xywh),
             background,
           },
           this._page.root?.id
@@ -327,7 +326,7 @@ export class EdgelessClipboard implements Clipboard {
         const frameId = this._page.addBlock(
           'affine:frame',
           {
-            xywh,
+            xywh: xywh ? new NativeWrapper(xywh) : undefined,
             background,
             title: new Workspace.Y.Text(title),
           },
@@ -444,7 +443,7 @@ export class EdgelessClipboard implements Clipboard {
         this.surface.connector.updateXYWH(ele, newBound);
       } else {
         this.surface.updateElement(ele.id, {
-          xywh: newBound.serialize(),
+          xywh: newBound.toXYWH(),
         });
       }
     });
@@ -458,7 +457,7 @@ export class EdgelessClipboard implements Clipboard {
         h
       );
       this._page.updateBlock(block, {
-        xywh: serializeXYWH(newBound.x, newBound.y, newBound.w, newBound.h),
+        xywh: block.xywh.set([newBound.x, newBound.y, newBound.w, newBound.h]),
       });
     });
 

@@ -106,7 +106,7 @@ export function addText(
       event.y
     );
     const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
-      xywh: new Bound(modelX, modelY, 32, 32).serialize(),
+      xywh: new Bound(modelX, modelY, 32, 32).toXYWH(),
       text: new Workspace.Y.Text(),
       textAlign: 'left',
       fontSize: 24,

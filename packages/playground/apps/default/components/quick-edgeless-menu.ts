@@ -23,12 +23,19 @@ import {
   SIZE_VARIABLES,
   Transformer,
   VARIABLES,
+  type XYWH,
 } from '@blocksuite/blocks';
 import { NOTE_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
-import { Job, MarkdownAdapter, Utils, type Workspace } from '@blocksuite/store';
+import {
+  Job,
+  MarkdownAdapter,
+  NativeWrapper,
+  Utils,
+  type Workspace,
+} from '@blocksuite/store';
 import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
@@ -317,9 +324,13 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     this.page.captureSync();
 
     const count = root.children.length;
-    const xywh = `[0,${count * 60},${NOTE_WIDTH},95]`;
+    const xywh = [0, count * 60, NOTE_WIDTH, 95] as XYWH;
 
-    const noteId = this.page.addBlock('affine:note', { xywh }, pageId);
+    const noteId = this.page.addBlock(
+      'affine:note',
+      { xywh: new NativeWrapper(xywh) },
+      pageId
+    );
     this.page.addBlock('affine:paragraph', {}, noteId);
   }
 

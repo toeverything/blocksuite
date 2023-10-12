@@ -7,6 +7,7 @@ import './components/note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { NativeWrapper } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
@@ -124,7 +125,7 @@ export class EdgelessBlockContainer extends WithDisposable(LitElement) {
           if (!almostEqual(newModelHeight, h)) {
             const updateBlock = () => {
               page.updateBlock(model, {
-                xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+                xywh: new NativeWrapper([x, y, w, Math.round(newModelHeight)]),
               });
             };
 

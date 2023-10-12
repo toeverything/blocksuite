@@ -56,7 +56,7 @@ export class ShapeToolController extends EdgelessToolController<ShapeTool> {
 
     const id = this._surface.addElement(PhasorElementType.SHAPE, {
       shapeType,
-      xywh: bound.serialize(),
+      xywh: bound.toXYWH(),
       strokeColor,
       fillColor,
       filled: !isTransparent(fillColor),

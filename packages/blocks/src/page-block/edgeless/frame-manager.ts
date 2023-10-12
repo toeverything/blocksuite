@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { NativeWrapper, Workspace } from '@blocksuite/store';
 
 import { getBlockElementByModel } from '../../__internal__/index.js';
 import type { EdgelessElement } from '../../__internal__/utils/types.js';
@@ -112,7 +112,7 @@ export class EdgelessFrameManager {
       EdgelessBlockType.FRAME,
       {
         title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
-        xywh: bound.serialize(),
+        xywh: new NativeWrapper(bound.toXYWH()),
       },
       surface.model
     );

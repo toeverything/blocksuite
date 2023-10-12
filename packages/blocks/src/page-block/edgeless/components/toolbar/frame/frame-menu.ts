@@ -1,6 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
+import { NativeWrapper, Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -120,7 +120,7 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                           `Frame ${frames.length + 1}`
                         ),
                         batch: 'a0',
-                        xywh: bound.serialize(),
+                        xywh: new NativeWrapper(bound.toXYWH()),
                       },
                       surface.model
                     );

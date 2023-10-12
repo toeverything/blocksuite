@@ -1,6 +1,5 @@
-import { serializeXYWH } from '@blocksuite/blocks';
 import type { Workspace } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import { NativeWrapper, Text } from '@blocksuite/store';
 
 import { type InitFn } from './utils';
 
@@ -35,7 +34,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   // Add note block inside page block
   const noteId = page.addBlock(
     'affine:note',
-    { xywh: serializeXYWH(0, 100, 800, 640) },
+    { xywh: new NativeWrapper([0, 100, 800, 640]) },
     pageBlockId
   );
 

@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { almostEqual, assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel, NativeWrapper } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
@@ -17,7 +17,6 @@ import type {
   EdgelessPageBlockComponent,
   NoteBlockModel,
 } from '../../../../index.js';
-import { serializeXYWH } from '../../../../surface-block/index.js';
 import {
   DefaultModeDragType,
   type DefaultToolController,
@@ -294,12 +293,12 @@ export class NoteSlicer extends WithDisposable(LitElement) {
       'affine:note',
       {
         background,
-        xywh: serializeXYWH(
+        xywh: new NativeWrapper([
           x,
           sliceVerticalPos + EDGELESS_BLOCK_CHILD_PADDING + 30,
           width,
-          DEFAULT_NOTE_HEIGHT
-        ),
+          DEFAULT_NOTE_HEIGHT,
+        ]),
         index: originIndex + 1,
       },
       page.root?.id

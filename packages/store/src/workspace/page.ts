@@ -13,7 +13,7 @@ import {
   valueToProps,
 } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
-import type { BlockSuiteDoc } from '../yjs/index.js';
+import type { BlockSuiteDoc, NativeWrapper } from '../yjs/index.js';
 import { Text } from '../yjs/text-adapter.js';
 import type { PageMeta } from './meta.js';
 import { Space } from './space.js';
@@ -29,6 +29,8 @@ export type BlockSysProps = {
   children?: BaseBlockModel[];
 };
 export type BlockProps = BlockSysProps & {
+  xywh?: NativeWrapper<[number, number, number, number]>;
+} & {
   [index: string]: unknown;
 };
 

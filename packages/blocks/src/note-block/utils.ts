@@ -2,6 +2,7 @@ import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import { almostEqual } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
+import { NativeWrapper } from '@blocksuite/store';
 import { getTextNodesFromElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import {
@@ -392,7 +393,7 @@ export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
       EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
     if (!almostEqual(newModelHeight, h)) {
       page.updateBlock(noteElement.model, {
-        xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+        xywh: new NativeWrapper([x, y, w, Math.round(newModelHeight)]),
       });
     }
   });

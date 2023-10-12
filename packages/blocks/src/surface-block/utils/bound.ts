@@ -207,6 +207,10 @@ export class Bound implements IBound {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
+  toXYWH(): XYWH {
+    return [this.x, this.y, this.w, this.h];
+  }
+
   clone(): Bound {
     return new Bound(this.x, this.y, this.w, this.h);
   }

@@ -4,7 +4,7 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { Workspace, type Y } from '@blocksuite/store';
+import { NativeWrapper, Workspace, type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
@@ -61,7 +61,6 @@ import {
   generateKeyBetween,
   normalizeWheelDeltaY,
 } from './utils/index.js';
-import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
 export enum EdgelessBlocksFlavour {
@@ -518,19 +517,28 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.updateBlock(element, properties);
+      if (properties.xywh && Array.isArray(properties.xywh)) {
+        properties.xywh = new NativeWrapper(properties.xywh);
+      }
+
+      this.page.updateBlock(element, properties as Partial<BlockProps>);
     } else {
       this._transact(() => {
         const element = this._elements.get(id);
         assertExists(element);
-        element.applyUpdate(properties);
+
+        if (properties.xywh && properties.xywh instanceof NativeWrapper) {
+          properties.xywh = properties.xywh.getValue();
+        }
+
+        element.applyUpdate(properties as IElementUpdateProps<T>);
       });
     }
   }
 
   setElementBound(id: string, bound: IBound) {
     this.updateElement(id, {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+      xywh: [bound.x, bound.y, bound.w, bound.h],
     });
   }
 

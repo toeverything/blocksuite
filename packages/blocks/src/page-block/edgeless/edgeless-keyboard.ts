@@ -1,3 +1,5 @@
+import { NativeWrapper } from '@blocksuite/store';
+
 import {
   type EdgelessTool,
   LineWidth,
@@ -296,7 +298,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         }
         surface.setElementBound(element.id, bound);
       } else {
-        this.pageElement.page.updateBlock(element, { xywh: bound.serialize() });
+        this.pageElement.page.updateBlock(element, {
+          xywh: new NativeWrapper(bound.toXYWH()),
+        });
       }
       this.pageElement.slots.hoverUpdated.emit();
     });

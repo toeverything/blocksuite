@@ -1,5 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
+import { NativeWrapper } from '@blocksuite/store';
 
 import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import {
@@ -200,7 +201,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._page.updateBlock(block, { xywh: bound.serialize() });
+    this._page.updateBlock(block, {
+      xywh: new NativeWrapper(bound.toXYWH()),
+    });
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {

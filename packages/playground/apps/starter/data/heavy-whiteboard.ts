@@ -4,7 +4,6 @@ import {
 } from '@blocksuite/blocks';
 import {
   DEFAULT_ROUGHNESS,
-  serializeXYWH,
   type ShapeType,
   StrokeStyle,
 } from '@blocksuite/blocks';
@@ -86,7 +85,7 @@ export const heavyWhiteboard: InitFn = async (
     const noteId = page.addBlock(
       'affine:note',
       {
-        xywh: serializeXYWH(x, y, 100, 50),
+        xywh: new NativeWrapper([x, y, 100, 50]),
       },
       pageBlockId
     );

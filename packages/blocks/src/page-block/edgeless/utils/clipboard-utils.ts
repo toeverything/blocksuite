@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { NativeWrapper, Workspace } from '@blocksuite/store';
 
 import {
   getBlockClipboardInfo,
@@ -33,7 +33,7 @@ export async function duplicate(
       if (isNoteBlock(element)) {
         const id = page.addBlock(
           element.flavour,
-          { xywh: bound.serialize() },
+          { xywh: new NativeWrapper(bound.toXYWH()) },
           page.root?.id
         );
         const block = page.getBlockById(id);
@@ -53,7 +53,7 @@ export async function duplicate(
         const id = page.addBlock(
           element.flavour,
           {
-            xywh: bound.serialize(),
+            xywh: new NativeWrapper(bound.toXYWH()),
             title: new Workspace.Y.Text(json.title),
             background: json.background,
           },
@@ -64,7 +64,7 @@ export async function duplicate(
       } else {
         const id = surface.addElement(element.type, {
           ...element.serialize(),
-          xywh: bound.serialize(),
+          xywh: bound.toXYWH(),
         } as unknown as Record<string, unknown>);
         const newElement = surface.pickById(id);
         assertExists(newElement);

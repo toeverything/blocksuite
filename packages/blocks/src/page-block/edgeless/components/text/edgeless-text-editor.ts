@@ -230,7 +230,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     }
 
     edgeless.surface.updateElement(element.id, {
-      xywh: bound.serialize(),
+      xywh: bound.toXYWH(),
     });
   }
 

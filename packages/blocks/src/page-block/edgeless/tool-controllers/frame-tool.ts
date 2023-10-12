@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { NativeWrapper, Workspace } from '@blocksuite/store';
 
 import { type FrameTool, type IPoint } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -39,7 +39,9 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
         'affine:frame',
         {
           title: new Workspace.Y.Text(`Frame ${frames.length + 1}`),
-          xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
+          xywh: new NativeWrapper(
+            Bound.fromPoints([this._startPoint, currentPoint]).toXYWH()
+          ),
         },
         surface.model
       );
@@ -49,7 +51,7 @@ export class FrameToolController extends EdgelessToolController<FrameTool> {
     assertExists(this._frame);
 
     surface.updateElement(this._frame.id, {
-      xywh: Bound.fromPoints([this._startPoint, currentPoint]).serialize(),
+      xywh: Bound.fromPoints([this._startPoint, currentPoint]).toXYWH(),
     });
   }
   override onContainerDragEnd(): void {

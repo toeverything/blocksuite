@@ -4,6 +4,7 @@ import '../auto-complete/edgeless-auto-complete.js';
 
 import { pick } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
+import { NativeWrapper } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -18,7 +19,6 @@ import {
   normalizeDegAngle,
   normalizeShapeBound,
   type PhasorElement,
-  serializeXYWH,
   ShapeElement,
   TextElement,
 } from '../../../../surface-block/index.js';
@@ -425,18 +425,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           height = NOTE_MIN_HEIGHT;
         }
         page.updateBlock(element, {
-          xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
+          xywh: new NativeWrapper([bound.x, bound.y, bound.w, height]),
         });
       } else if (isFrameBlock(element)) {
         page.updateBlock(element, {
-          xywh: bound.serialize(),
+          xywh: new NativeWrapper([bound.x, bound.y, bound.w, bound.h]),
         });
       } else {
         if (element instanceof TextElement) {
           const p = bound.h / element.h;
 
           surface.updateElement<PhasorElementType.TEXT>(id, {
-            xywh: bound.serialize(),
+            xywh: bound.toXYWH(),
             fontSize: element.fontSize * p,
           });
         } else {
@@ -444,7 +444,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeShapeBound(element, bound);
           }
           surface.updateElement(id, {
-            xywh: bound.serialize(),
+            xywh: bound.toXYWH(),
           });
         }
       }
@@ -468,7 +468,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
 
       surface.updateElement(id, {
-        xywh: serializeXYWH(center.x - w / 2, center.y - h / 2, w, h),
+        xywh: [center.x - w / 2, center.y - h / 2, w, h],
         rotate: normalizeDegAngle(rotate + delta),
       });
     });

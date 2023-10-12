@@ -2,6 +2,7 @@ import '../buttons/menu-button.js';
 import '../../../../components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
+import { NativeWrapper } from '@blocksuite/store';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -43,13 +44,13 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
   private _updateXYWH(ele: EdgelessElement, bound: Bound) {
     if (isTopLevelBlock(ele)) {
       this.edgeless.page.updateBlock(ele, {
-        xywh: bound.serialize(),
+        xywh: new NativeWrapper(bound.toXYWH()),
       });
     } else if (ele instanceof ConnectorElement) {
       this.edgeless.surface.connector.updateXYWH(ele, bound);
     } else {
       this.edgeless.surface.updateElement(ele.id, {
-        xywh: bound.serialize(),
+        xywh: new NativeWrapper(bound.toXYWH()),
       });
     }
   }
