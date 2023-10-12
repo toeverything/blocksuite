@@ -92,26 +92,22 @@ type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
 
 type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
-type ToolType = EdgelessTool | ZoomToolType;
 type ComponentToolType = 'shape' | 'thin' | 'thick' | 'brush' | 'more';
 
 export function locatorEdgelessToolButton(
   page: Page,
-  type: ToolType,
+  type: EdgelessTool,
   innerContainer = true
 ) {
-  const text = {
-    default: /Select|Hand/,
-    pan: /Select|Hand/,
-    shape: 'Shape',
-    brush: 'Pen',
-    eraser: 'Eraser',
-    text: 'Text',
-    connector: 'Connector',
-    note: 'Note',
-    zoomIn: 'Zoom in',
-    zoomOut: 'Zoom out',
-    fitToScreen: 'Fit to screen',
+  const selector = {
+    default: '.edgeless-default-button',
+    pan: '.edgeless-default-button',
+    shape: '.edgeless-shape-button',
+    brush: '.edgeless-brush-button',
+    eraser: '.edgeless-eraser-button',
+    text: '.edgeless-text-button',
+    connector: '.edgeless-connector-button',
+    note: '.edgeless-note-button',
   }[type];
 
   let buttonType;
@@ -125,9 +121,7 @@ export function locatorEdgelessToolButton(
     default:
       buttonType = 'edgeless-tool-icon-button';
   }
-  const button = page.locator(`edgeless-toolbar ${buttonType}`).filter({
-    hasText: text,
-  });
+  const button = page.locator(`edgeless-toolbar ${buttonType}${selector}`);
 
   return innerContainer ? button.locator('.icon-container') : button;
 }
