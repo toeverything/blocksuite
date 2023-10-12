@@ -5,20 +5,7 @@ type PageProps = {
   title: Text;
 };
 
-export class PageBlockModel extends BaseBlockModel<PageProps> {
-  constructor() {
-    super();
-    this.created.on(() => {
-      this.page.slots.blockUpdated.on(({ type }) => {
-        if (type === 'add') {
-          this.page.workspace.setPageMeta(this.page.id, {
-            title: this.title.toString(),
-          });
-        }
-      });
-    });
-  }
-}
+export class PageBlockModel extends BaseBlockModel<PageProps> {}
 
 export const PageBlockSchema = defineBlockSchema({
   flavour: 'affine:page',
