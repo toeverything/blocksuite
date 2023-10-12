@@ -390,7 +390,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     if (hasNote) return 'edge';
     if (areAllConnectors) return 'none';
-    if (areAllShapes || areAllTexts) return 'all';
+    if (areAllShapes) return 'all';
+    if (areAllTexts) return 'edgeAndCorner';
 
     return 'corner';
   }

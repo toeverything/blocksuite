@@ -339,14 +339,12 @@ export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
 export function normalizeTextBound(
   text: TextElement,
   bound: Bound,
-  dragging: boolean = false,
-  newFontsize?: number
+  dragging: boolean = false
 ): Bound {
   if (!text.text) return bound;
 
   const yText = text.text;
-  const { fontFamily } = text;
-  const fontSize = newFontsize ?? text.fontSize;
+  const { fontFamily, fontSize } = text;
   const lineHeightPx = getLineHeight(fontFamily, fontSize);
   const font = getFontString({
     fontSize: fontSize,
