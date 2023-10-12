@@ -100,14 +100,14 @@ export function locatorEdgelessToolButton(
   innerContainer = true
 ) {
   const selector = {
-    default: '.edgeless-default-button.default',
-    pan: '.edgeless-default-button.pan',
+    default: '.edgeless-default-button',
+    pan: '.edgeless-default-button',
     shape: '.edgeless-shape-button',
     brush: '.edgeless-brush-button',
     eraser: '.edgeless-eraser-button',
     text: '.edgeless-text-button',
     connector: '.edgeless-connector-button',
-    note: '.edgeless-text-button',
+    note: '.edgeless-note-button',
   }[type];
 
   let buttonType;
