@@ -126,11 +126,16 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
   }
 
   override firstUpdated() {
-    this._disposables.addFromEvent(document, 'keydown', event => {
-      if (event.key === 'Escape' && this.edgelessTool.type === 'brush') {
-        this.setEdgelessTool({ type: 'default' });
-      }
-    });
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'brush') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
   }
 
   override render() {

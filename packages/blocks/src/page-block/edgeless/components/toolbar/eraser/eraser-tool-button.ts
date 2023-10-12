@@ -48,11 +48,16 @@ export class EdgelessEraserToolButton extends WithDisposable(LitElement) {
   setEdgelessTool!: (edgelessTool: EdgelessTool) => void;
 
   override firstUpdated() {
-    this._disposables.addFromEvent(document, 'keydown', event => {
-      if (event.key === 'Escape' && this.edgelessTool.type === 'eraser') {
-        this.setEdgelessTool({ type: 'default' });
-      }
-    });
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'eraser') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
   }
 
   override render() {
