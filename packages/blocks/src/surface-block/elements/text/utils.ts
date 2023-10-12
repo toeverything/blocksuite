@@ -358,25 +358,23 @@ export function normalizeTextBound(
 
   let lines: ITextDelta[][] = [];
   const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+  const widestCharWidth =
+    [...yText.toString()]
+      .map(char => getTextWidth(char, font))
+      .sort((a, b) => a - b)
+      .pop() ?? getTextWidth('W', font);
 
-  if (dragging) {
-    const widestCharWidth =
-      [...yText.toString()]
-        .map(char => getTextWidth(char, font))
-        .sort((a, b) => a - b)
-        .pop() ?? getTextWidth('W', font);
+  if (bound.w < widestCharWidth) {
+    bound.w = widestCharWidth;
+  }
 
-    if (bound.w < widestCharWidth) {
-      bound.w = widestCharWidth;
-    }
-
-    const width = bound.w;
-    const insertDeltas = deltas.flatMap(delta => ({
-      insert: wrapText(delta.insert, font, width),
-      attributes: delta.attributes,
-    })) as ITextDelta[];
-    lines = deltaInsertsToChunks(insertDeltas);
-  } else {
+  const width = bound.w;
+  const insertDeltas = deltas.flatMap(delta => ({
+    insert: wrapText(delta.insert, font, width),
+    attributes: delta.attributes,
+  })) as ITextDelta[];
+  lines = deltaInsertsToChunks(insertDeltas);
+  if (!dragging && !text.hasMaxWidth) {
     lines = deltaInsertsToChunks(deltas);
     const widestLineWidth = Math.max(
       ...yText
@@ -384,7 +382,6 @@ export function normalizeTextBound(
         .split('\n')
         .map(text => getTextWidth(text, font))
     );
-
     bound.w = widestLineWidth;
   }
   bound.h = lineHeightPx * lines.length;
