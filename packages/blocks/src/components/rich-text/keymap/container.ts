@@ -29,6 +29,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   const selection = blockElement.root.selection;
   const model = blockElement.model;
   const root = blockElement.root;
+  const leftBrackets = bracketPairs.map(pair => pair.left);
 
   const _selectBlock = () => {
     selection.update(selList => {
@@ -365,6 +366,26 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
       if (!onBackspace(model, state.raw, vEditor)) {
         _preventDefault(ctx);
       }
+
+      // Auto delete bracket right
+      if (matchFlavours(blockElement.model, ['affine:code'])) {
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+        const left = vEditor.yText.toString()[vRange.index - 1];
+        const right = vEditor.yText.toString()[vRange.index];
+        if (bracketPairs[leftBrackets.indexOf(left)]?.right === right) {
+          const index = vRange.index - 1;
+          vEditor.deleteText({
+            index: index,
+            length: 2,
+          });
+          vEditor.setVRange({
+            index: index,
+            length: 0,
+          });
+          _preventDefault(ctx);
+        }
+      }
       return true;
     },
     Delete: ctx => {
@@ -428,6 +449,28 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         });
 
         return true;
+      },
+    });
+  });
+
+  // Skip redundant right bracket
+  bracketPairs.forEach(pair => {
+    blockElement.bindHotKey({
+      [pair.right]: ctx => {
+        if (matchFlavours(blockElement.model, ['affine:code'])) {
+          const vEditor = _getVirgo();
+          const vRange = vEditor.getVRange();
+          assertExists(vRange);
+          const left = vEditor.yText.toString()[vRange.index - 1];
+          const right = vEditor.yText.toString()[vRange.index];
+          if (pair.left === left && pair.right === right) {
+            vEditor.setVRange({
+              index: vRange.index + 1,
+              length: 0,
+            });
+            _preventDefault(ctx);
+          }
+        }
       },
     });
   });

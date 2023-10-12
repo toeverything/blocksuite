@@ -101,6 +101,7 @@ export class EdgelessNoteToolButton extends WithDisposable(LitElement) {
     const arrowColor = type === 'note' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
+        class="edgeless-note-button"
         .tooltip=${this._noteMenu ? '' : getTooltipWithShortcut('Note', 'N')}
         .tooltipOffset=${17}
         .active=${type === 'note'}

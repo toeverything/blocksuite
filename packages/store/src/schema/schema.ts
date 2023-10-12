@@ -175,9 +175,11 @@ export class Schema {
     if (!blockVersions) {
       return;
     }
-    blockVersions.forEach((origin, flavour) => {
+    blockVersions.forEach((version, flavour) => {
       const currentSchema = this.flavourSchemaMap.get(flavour);
-      blockVersions.set(flavour, currentSchema?.version ?? origin);
+      if (currentSchema && version !== currentSchema.version) {
+        blockVersions.set(flavour, currentSchema.version);
+      }
     });
   };
 
