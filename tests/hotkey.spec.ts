@@ -7,6 +7,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  initEmptyCodeBlockState,
   initEmptyParagraphState,
   initThreeParagraphs,
   inlineCode,
@@ -997,6 +998,32 @@ test.describe('bracket auto complete', () => {
 />`,
       paragraphId
     );
+  });
+
+  test('auto delete bracket right', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyCodeBlockState(page);
+    await focusRichText(page);
+    await type(page, '(');
+    await assertRichTexts(page, ['()']);
+    await type(page, '(');
+    await assertRichTexts(page, ['(())']);
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['()']);
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['']);
+  });
+
+  test('skip redundant right bracket', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyCodeBlockState(page);
+    await focusRichText(page);
+    await type(page, '(');
+    await assertRichTexts(page, ['()']);
+    await type(page, ')');
+    await assertRichTexts(page, ['()']);
+    await type(page, ')');
+    await assertRichTexts(page, ['())']);
   });
 });
 
