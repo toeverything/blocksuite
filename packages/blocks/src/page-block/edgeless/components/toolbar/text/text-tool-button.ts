@@ -103,6 +103,14 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    this._disposables.addFromEvent(document, 'keydown', event => {
+      if (event.key === 'Escape' && this.edgelessTool.type === 'text') {
+        this.setEdgelessTool({ type: 'default' });
+      }
+    });
+  }
+
   override render() {
     const type = this.edgelessTool?.type;
 
