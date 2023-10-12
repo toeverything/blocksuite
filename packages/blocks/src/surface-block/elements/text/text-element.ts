@@ -52,8 +52,8 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('italic') as IText['italic'];
   }
 
-  get maxWidth() {
-    return this.yMap.get('maxWidth') as IText['maxWidth'];
+  get hasMaxWidth() {
+    return this.yMap.get('hasMaxWidth') as IText['hasMaxWidth'];
   }
 
   get font() {

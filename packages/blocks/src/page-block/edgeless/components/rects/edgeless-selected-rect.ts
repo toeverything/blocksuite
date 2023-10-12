@@ -452,12 +452,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             direction === HandleDirection.Right
           ) {
             bound = normalizeTextBound(element, bound, true);
-            // If the width if the text element has been changed by dragging,
-            // We need to set maxWidth for it to wrap the text
+            // If the width of the text element has been changed by dragging,
+            // We need to set hasMaxWidth to true for wrapping the text
             surface.updateElement(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
-              maxWidth: bound.w,
+              hasMaxWidth: true,
             });
           } else {
             p = bound.h / element.h;

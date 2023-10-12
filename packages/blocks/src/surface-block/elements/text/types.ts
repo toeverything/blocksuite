@@ -13,7 +13,7 @@ export interface IText extends ISurfaceElement {
   textAlign: 'left' | 'center' | 'right';
   bold: boolean;
   italic: boolean;
-  maxWidth?: number;
+  hasMaxWidth?: boolean;
 }
 
 export interface ITextDelta {
