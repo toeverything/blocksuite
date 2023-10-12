@@ -17,7 +17,7 @@ import {
   deserializeXYWH,
   type IVec,
   type PointLocation,
-  type SerializedXYWH,
+  type XYWH,
 } from '../surface-block/index.js';
 
 export const NOTE_COLORS: CssVariableName[] = [
@@ -50,7 +50,7 @@ export const NoteBlockSchema = defineBlockSchema({
       index: 'a0',
       hidden: false,
     }) as {
-      xywh: NativeWrapper<SerializedXYWH>;
+      xywh: NativeWrapper<XYWH>;
       background: string;
       index: string;
       hidden: boolean;
@@ -83,7 +83,7 @@ export const NoteBlockSchema = defineBlockSchema({
 });
 
 type Props = {
-  xywh: NativeWrapper<SerializedXYWH>;
+  xywh: NativeWrapper<XYWH>;
   background: string;
   index: string;
   hidden: boolean;

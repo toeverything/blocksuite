@@ -1,12 +1,6 @@
 import type { NativeWrapper } from '@blocksuite/store';
 
-import type {
-  Bound,
-  IVec,
-  PointLocation,
-  SerializedXYWH,
-  XYWH,
-} from '../index.js';
+import type { Bound, IVec, PointLocation, XYWH } from '../index.js';
 import type { SurfaceBlockComponent } from '../surface-block.js';
 import type { IBrush } from './brush/types.js';
 import type { IConnector } from './connector/types.js';
@@ -34,7 +28,7 @@ export interface HitTestOptions {
   pierce?: boolean;
 }
 export interface EdgelessElementUtils {
-  xywh: NativeWrapper<SerializedXYWH> | XYWH;
+  xywh: NativeWrapper<XYWH> | XYWH;
   rotate?: number;
   connectable: boolean;
   containedByBounds(bounds: Bound): boolean;

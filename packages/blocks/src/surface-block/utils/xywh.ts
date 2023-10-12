@@ -2,15 +2,13 @@ import type { IBound } from '../consts.js';
 
 export type XYWH = [number, number, number, number];
 
-export type SerializedXYWH = XYWH;
-
 export function serializeXYWH(
   x: number,
   y: number,
   w: number,
   h: number
-): SerializedXYWH {
-  return [x, y, w, h];
+): string {
+  return JSON.stringify([x, y, w, h]);
 }
 
 export function deserializeXYWH(xywh: string): XYWH {

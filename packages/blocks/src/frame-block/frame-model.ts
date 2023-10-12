@@ -17,7 +17,7 @@ import {
   type IVec,
   linePolygonIntersects,
   type PointLocation,
-  type SerializedXYWH,
+  type XYWH,
 } from '../surface-block/index.js';
 import type { FrameBlockComponent } from './frame-block.js';
 
@@ -42,7 +42,7 @@ export const FrameBlockSchema = defineBlockSchema({
     }) as {
       title: Text;
       background: string;
-      xywh: NativeWrapper<SerializedXYWH>;
+      xywh: NativeWrapper<XYWH>;
       index: string;
     },
   metadata: {
@@ -64,7 +64,7 @@ export const FrameBlockSchema = defineBlockSchema({
 type Props = {
   title: Text;
   background: string;
-  xywh: NativeWrapper<SerializedXYWH>;
+  xywh: NativeWrapper<XYWH>;
   index: string;
 };
 

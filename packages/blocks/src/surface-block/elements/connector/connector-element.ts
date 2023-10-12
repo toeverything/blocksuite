@@ -12,7 +12,7 @@ import {
 } from '../../utils/math-utils.js';
 import { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
-import type { SerializedXYWH } from '../../utils/xywh.js';
+import type { XYWH } from '../../utils/xywh.js';
 import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import { ConnectorMode, type IConnector } from './types.js';
@@ -20,7 +20,7 @@ import { getArrowPoints } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
   private _path: PointLocation[] = [];
-  private _xywh: SerializedXYWH = [0, 0, 0, 0];
+  private _xywh: XYWH = [0, 0, 0, 0];
   protected override _connectable = false;
 
   // relative to it's xywh
@@ -36,7 +36,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this._xywh;
   }
 
-  override set xywh(xywh: SerializedXYWH) {
+  override set xywh(xywh: XYWH) {
     this._xywh = xywh;
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);

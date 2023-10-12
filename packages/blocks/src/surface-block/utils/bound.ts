@@ -3,12 +3,7 @@ import { NativeWrapper } from '@blocksuite/store';
 import type { IBound } from '../consts.js';
 import { EPSILON, getBoundsFromPoints, lineIntersects } from './math-utils.js';
 import type { IVec } from './vec.js';
-import {
-  deserializeXYWH,
-  type SerializedXYWH,
-  serializeXYWH,
-  type XYWH,
-} from './xywh.js';
+import { deserializeXYWH, serializeXYWH, type XYWH } from './xywh.js';
 
 export class Bound implements IBound {
   x: number;
@@ -203,7 +198,7 @@ export class Bound implements IBound {
     return [(x - this.x) / this.w, (y - this.y) / this.h];
   }
 
-  serialize(): SerializedXYWH {
+  serialize(): string {
     return serializeXYWH(this.x, this.y, this.w, this.h);
   }
 
