@@ -1,7 +1,8 @@
+import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
-import { html, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -23,14 +24,30 @@ import { getSurfaceBlock } from './utils.js';
 
 @customElement('affine-surface-sync')
 export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockModel> {
+  static override styles = css`
+    .affine-surface-sync {
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+    }
+
+    .surface-canvas-container {
+      flex-grow: 0;
+      flex-shrink: 0;
+    }
+  `;
   @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
+
+  @state()
+  private _focused: boolean = false;
+
   private _referenceModel: FrameBlockModel | null = null;
   private _renderer = new Renderer();
   private _elements = new Map<string, SurfaceElement>();
   private _disposeReferenceWatcher: Disposable | null = null;
 
-  @query('.affine-surface-sync-container')
+  @query('.surface-canvas-container')
   container!: HTMLDivElement;
 
   override connectedCallback() {
@@ -60,6 +77,15 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
       });
     });
 
+    const selection = this.root.selection;
+    this._disposables.add(
+      selection.slots.changed.on(selList => {
+        this._focused = selList.some(
+          sel => PathFinder.equals(sel.path, this.path) && sel.is('block')
+        );
+      })
+    );
+
     this._disposables.add(() => {
       this._disposeReferenceWatcher?.dispose();
     });
@@ -67,6 +93,38 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
 
   override firstUpdated() {
     this.initRenderer();
+  }
+
+  initKeyBinding() {
+    const addParagraph = () => {
+      const parent = this.page.getParent(this.model);
+      if (!parent) return;
+      const index = parent.children.indexOf(this.model);
+      this.page.addBlock('affine:paragraph', {}, parent, index + 1);
+    };
+
+    this.bindHotKey({
+      Delete: () => {
+        if (!this._focused) return;
+
+        addParagraph();
+        this.page.deleteBlock(this.model);
+        return true;
+      },
+      Backspace: () => {
+        if (!this._focused) return;
+
+        addParagraph();
+        this.page.deleteBlock(this.model);
+        return true;
+      },
+      Enter: () => {
+        if (!this._focused) return;
+
+        addParagraph();
+        return true;
+      },
+    });
   }
 
   initRenderer() {
@@ -247,7 +305,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
     return this.page.getBlockById(id) ?? this._elements.get(id);
   }
 
-  focusOnReference() {
+  enterEdgeless() {
     if (!this._referenceModel) return;
 
     const xywh = deserializeXYWH(this._referenceModel.xywh);
@@ -258,7 +316,9 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
 
     if (!editorContainer) return;
 
-    editorContainer.mode = 'edgeless';
+    if (editorContainer.mode !== 'edgeless') {
+      editorContainer.mode = 'edgeless';
+    }
 
     setTimeout(() => {
       const edgeless = doc.querySelector('affine-edgeless-page');
@@ -269,6 +329,16 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
         false
       );
     }, 50);
+
+    this.selection.update(selections => {
+      return selections.filter(sel => !PathFinder.equals(sel.path, this.path));
+    });
+  }
+
+  focusBlock() {
+    this.selection.update(() => {
+      return [this.selection.getInstance('block', { path: this.path })];
+    });
   }
 
   override render() {
@@ -279,14 +349,22 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
 
     const [, , w, h] = deserializeXYWH(model.xywh);
 
-    return html`<div
-      class="affine-surface-sync-container"
-      @dblclick=${this.focusOnReference}
-      style=${styleMap({
-        aspectRatio: `${w} / ${h}`,
-      })}
-    >
-      <!-- Sync Surface Block -->
+    return html`<div class="affine-surface-sync">
+      <div
+        class="surface-canvas-container"
+        @dblclick=${this.enterEdgeless}
+        @click=${this.focusBlock}
+        style=${styleMap({
+          maxWidth: '100%',
+          width: `${w}px`,
+          aspectRatio: `${w} / ${h}`,
+          outline: this._focused
+            ? '2px solid var(--affine-primary-color)'
+            : undefined,
+        })}
+      >
+        <!-- attach canvas here -->
+      </div>
     </div>`;
   }
 }
