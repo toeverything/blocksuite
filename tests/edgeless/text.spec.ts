@@ -201,6 +201,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
 
   // select text element
   await page.mouse.click(150, 140);
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 140, 94, 38]);
 
   // move cursor to the right edge and drag it to resize the width of text element
@@ -212,6 +213,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   await page.mouse.up();
 
   // the text should be wrapped, so check the height of text element
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 140, 60, 76]);
   await page.mouse.dblclick(140, 160);
   await waitForVirgoStateUpdated(page);
@@ -223,6 +225,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
 
   // select text element
   await page.mouse.click(150, 140);
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 140, 60, 76]);
 
   // move cursor to the left edge and drag it to resize the width of text element
@@ -234,6 +237,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   await page.mouse.up();
 
   // the text should be unwrapped, check the height of text element
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [96, 140, 94, 38]);
   await page.mouse.dblclick(100, 160);
   await waitForVirgoStateUpdated(page);
@@ -264,6 +268,7 @@ test('text element should have maxWidth after adjusting width by dragging left o
 
   // select text element
   await page.mouse.click(150, 140);
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 140, 94, 38]);
 
   // move cursor to the right edge and drag it to resize the width of text element
@@ -275,6 +280,7 @@ test('text element should have maxWidth after adjusting width by dragging left o
   await page.mouse.up();
 
   // the text should be wrapped, so check the height of text element
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 140, 60, 76]);
 
   // enter edit mode
@@ -290,5 +296,6 @@ test('text element should have maxWidth after adjusting width by dragging left o
   // select text element
   await page.mouse.click(150, 140);
   // the width of the text element should be the same as before, but the height should be changed
+  await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 140, 60, 114]);
 });
