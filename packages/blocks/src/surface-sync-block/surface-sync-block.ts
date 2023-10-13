@@ -6,19 +6,19 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import {
-  type AbstractEditor,
-  Bound,
   type CssVariableName,
-  deserializeXYWH,
-  ElementCtors,
   isCssVariable,
-  type PhasorElementType,
-} from '../index.js';
+} from '../__internal__/theme/css-variables.js';
+import { getThemePropertyValue } from '../__internal__/theme/utils.js';
+import { type AbstractEditor } from '../__internal__/utils/types.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
+import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
+import { ElementCtors } from '../surface-block/index.js';
 import { Renderer } from '../surface-block/renderer.js';
+import { Bound } from '../surface-block/utils/bound.js';
+import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceSyncBlockModel } from './surface-sync-model.js';
 import { getSurfaceBlock } from './utils.js';
 
