@@ -17,10 +17,13 @@ export async function onModelTextUpdated(
   await richText.updateComplete;
   const vEditor = richText.vEditor;
   assertExists(vEditor, 'VEditor is not ready yet.');
-  vEditor.slots.updated.once(() => {
-    if (callback) {
-      callback(richText);
-    }
+  await new Promise<void>(resolve => {
+    vEditor.slots.updated.once(() => {
+      if (callback) {
+        callback(richText);
+        resolve();
+      }
+    });
   });
 }
 
