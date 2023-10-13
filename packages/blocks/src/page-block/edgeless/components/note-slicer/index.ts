@@ -1,5 +1,5 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { almostEqual, assertExists, noop } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
@@ -12,6 +12,7 @@ import {
   getRectByBlockElement,
   Point,
 } from '../../../../__internal__/index.js';
+import { almostEqual } from '../../../../__internal__/utils/math.js';
 import type {
   EdgelessPageBlockComponent,
   NoteBlockComponent,

@@ -1,4 +1,4 @@
-import { clamp } from '@blocksuite/global/utils';
+import { clamp } from '../../__internal__/utils/math.js';
 
 type CollisionBox = {
   /**
