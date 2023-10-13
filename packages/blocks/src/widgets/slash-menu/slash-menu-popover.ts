@@ -324,9 +324,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
             width="100%"
             height="32px"
             style="padding-left: 12px; justify-content: flex-start; gap: 8px;"
-            ?hover=${!disabled &&
+            hover=${!disabled &&
             !this._leftPanelActivated &&
-            this._activatedItemIndex === index}
+            this._activatedItemIndex === index
+              ? 'true'
+              : 'false'}
             text="${name}"
             data-testid="${name}"
             @mousemove=${() => {
