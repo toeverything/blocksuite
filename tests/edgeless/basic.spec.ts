@@ -8,15 +8,17 @@ import {
   createShapeElement,
   decreaseZoomLevel,
   deleteAll,
+  edgelessCommonSetup,
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
+  getEdgelessSelectedRectModel,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
   setEdgelessTool,
   Shape,
-  shiftClick,
+  shiftClickView,
   switchEditorMode,
   ZOOM_BAR_RESPONSIVE_SCREEN_WIDTH,
   zoomByMouseWheel,
@@ -26,6 +28,7 @@ import {
   addBasicBrushElement,
   addBasicRectShapeElement,
   click,
+  clickView,
   dragBetweenCoords,
   enterPlaygroundRoom,
   focusRichText,
@@ -38,7 +41,7 @@ import {
 } from '../utils/actions/index.js';
 import {
   assertEdgelessHoverRect,
-  assertEdgelessSelectedRect,
+  assertEdgelessSelectedRectModel,
   assertNoteXYWH,
   assertRichTexts,
   assertRichTextVRange,
@@ -230,27 +233,25 @@ test('the tooltip of more button should be hidden when the action menu is shown'
 });
 
 test('shift click multi select and de-select', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
+  await edgelessCommonSetup(page);
+  const start = [0, 0];
+  const end = [100, 100];
+  await createShapeElement(page, start, end, Shape.Square);
+  start[0] = 100;
+  end[0] = 200;
+  await createShapeElement(page, start, end, Shape.Square);
 
-  const start = { x: 0, y: 0 };
-  const end = { x: 100, y: 100 };
-  await addBasicRectShapeElement(page, start, end);
-  start.x = 100;
-  end.x = 200;
-  await addBasicRectShapeElement(page, start, end);
+  await clickView(page, [50, 0]);
+  await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
 
-  await click(page, { x: 90, y: 90 });
-  await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
-
-  await shiftClick(page, { x: 190, y: 90 });
-  await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
+  await shiftClickView(page, [150, 0]);
+  await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
 
   // we will try to write text on a shape element when we dbclick it
+
   await waitNextFrame(page, 500);
-  await shiftClick(page, { x: 190, y: 90 });
-  await assertEdgelessSelectedRect(page, [0, 0, 100, 100]);
+  await shiftClickView(page, [150, 95]);
+  await assertEdgelessSelectedRectModel(page, [0, 0, 100, 100]);
 });
 
 test('Before and after switching to Edgeless, the previous zoom ratio and position when Edgeless was opened should be remembered', async ({

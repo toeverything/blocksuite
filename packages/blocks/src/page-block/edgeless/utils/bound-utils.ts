@@ -8,6 +8,7 @@ export function getGridBound(ele: Selectable) {
 }
 
 export function edgelessElementsBound(elements: EdgelessElement[]) {
+  if (elements.length === 0) return new Bound();
   return elements.reduce((prev, element) => {
     return prev.unite(getGridBound(element));
   }, getGridBound(elements[0]));

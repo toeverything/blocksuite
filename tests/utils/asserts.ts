@@ -36,6 +36,7 @@ import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getConnectorPath,
+  getEdgelessSelectedRectModel,
   getSelectedBound,
   getZoomLevel,
 } from './actions/edgeless.js';
@@ -122,7 +123,7 @@ export const defaultStore: SerializedStore = {
   },
 };
 
-type Bound = [x: number, y: number, w: number, h: number];
+export type Bound = [x: number, y: number, w: number, h: number];
 
 export async function assertEmpty(page: Page) {
   await assertRichTexts(page, ['']);
@@ -785,6 +786,19 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.y).toBeCloseTo(y, 0);
   expect(box.width).toBeCloseTo(w, 0);
   expect(box.height).toBeCloseTo(h, 0);
+}
+
+export async function assertEdgelessSelectedRectModel(
+  page: Page,
+  xywh: number[]
+) {
+  const [x, y, w, h] = xywh;
+  const box = await getEdgelessSelectedRectModel(page);
+
+  expect(box[0]).toBeCloseTo(x, 0);
+  expect(box[1]).toBeCloseTo(y, 0);
+  expect(box[2]).toBeCloseTo(w, 0);
+  expect(box[3]).toBeCloseTo(h, 0);
 }
 
 export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {

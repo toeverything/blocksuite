@@ -208,6 +208,21 @@ export const AutoCompleteArrowIcon = html`
   </svg>
 `;
 
+export const NoteAutoCompleteIcon = html`
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 25"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M12 17.4883C11.7239 17.4883 11.5 17.2644 11.5 16.9883V13.4883H8C7.72386 13.4883 7.5 13.2644 7.5 12.9883C7.5 12.7121 7.72386 12.4883 8 12.4883H11.5V8.98828C11.5 8.71214 11.7239 8.48828 12 8.48828C12.2761 8.48828 12.5 8.71214 12.5 8.98828V12.4883H16C16.2761 12.4883 16.5 12.7121 16.5 12.9883C16.5 13.2644 16.2761 13.4883 16 13.4883H12.5V16.9883C12.5 17.2644 12.2761 17.4883 12 17.4883Z"
+    />
+  </svg>
+`;
+
 const ImageSVG = svg`<path
   fill-rule="evenodd"
   clip-rule="evenodd"

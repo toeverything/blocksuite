@@ -3,6 +3,7 @@ import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { edgelessElementsBound } from '../utils/bound-utils.js';
 import type { Selectable } from './tools-manager.js';
 
 export interface EdgelessSelectionState {
@@ -67,6 +68,10 @@ export class EdgelessSelectionManager {
       if (element && element.id) pre.push(element);
       return pre;
     }, [] as Selectable[]);
+  }
+
+  get selectedBound() {
+    return edgelessElementsBound(this.elements);
   }
 
   private get _selection() {

@@ -30,6 +30,7 @@ import {
   fillLine,
   focusRichText,
   initEmptyEdgelessState,
+  initSixParagraphs,
   initThreeParagraphs,
   pasteByKeyboard,
   pressArrowDown,
@@ -234,13 +235,13 @@ test('dragging un-selected note', async ({ page }) => {
   await dragBetweenCoords(
     page,
     { x: noteBox.x + 5, y: noteBox.y + 5 },
-    { x: noteBox.x + 25, y: noteBox.y + 25 },
+    { x: noteBox.x + 5, y: noteBox.y + 25 },
     { steps: 10 }
   );
 
-  await page.mouse.move(noteBox.x + 25, noteBox.y + 25);
+  await page.mouse.move(noteBox.x + 35, noteBox.y + 35);
   await assertEdgelessHoverRect(page, [
-    noteBox.x + 20,
+    noteBox.x,
     noteBox.y + 20,
     noteBox.width,
     noteBox.height,
@@ -335,14 +336,12 @@ test.describe('note slicer', () => {
   test('note slicer will add new note', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const ids = await initEmptyEdgelessState(page);
-    await initThreeParagraphs(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+    await initSixParagraphs(page);
 
     await switchEditorMode(page);
-
     await selectNoteInEdgeless(page, ids.noteId);
 
-    await hoverOnNote(page, ids.noteId);
+    await hoverOnNote(page, ids.noteId, [0, 60]);
     await waitNextFrame(page);
     await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
@@ -409,14 +408,13 @@ test.describe('note slicer', () => {
   }) => {
     await enterPlaygroundRoom(page);
     const ids = await initEmptyEdgelessState(page);
-    await initThreeParagraphs(page);
-    await assertRichTexts(page, ['123', '456', '789']);
+    await initSixParagraphs(page);
 
     await switchEditorMode(page);
 
     await selectNoteInEdgeless(page, ids.noteId);
 
-    await hoverOnNote(page, ids.noteId);
+    await hoverOnNote(page, ids.noteId, [0, 60]);
     await waitNextFrame(page);
     await expect(page.locator('affine-note-slicer').isVisible()).toBeTruthy();
 
@@ -481,14 +479,13 @@ test.describe('note slicer', () => {
 test('undo/redo should work correctly after clipping', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const ids = await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+  await initSixParagraphs(page);
 
   await switchEditorMode(page);
 
   await selectNoteInEdgeless(page, ids.noteId);
 
-  await hoverOnNote(page, ids.noteId);
+  await hoverOnNote(page, ids.noteId, [0, 60]);
   await waitNextFrame(page, 500);
 
   const buttonRect = await page
@@ -695,7 +692,6 @@ test('continuous undo and redo (note block add operation) should work', async ({
   await focusRichText(page);
   await type(page, 'hello');
   await switchEditorMode(page);
-  await page.pause();
   await click(page, { x: 60, y: 450 });
   await copyByKeyboard(page);
 
