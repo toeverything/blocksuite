@@ -8,6 +8,7 @@ export class FrameBlockService extends BaseService<FrameBlockModel> {
       xywh: model.xywh,
       title: model.title.toString(),
       background: model.background,
+      gradient: model.gradient,
       children: [],
     };
   }

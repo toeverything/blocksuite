@@ -2,7 +2,7 @@ import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
-import type { SurfaceBlockComponent } from '../index.js';
+import { isCssVariable } from '../__internal__/theme/css-variables.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
@@ -16,6 +16,7 @@ import {
   type PointLocation,
   type SerializedXYWH,
 } from '../surface-block/index.js';
+import type { SurfaceBlockComponent } from '../surface-block/surface-block.js';
 import type { FrameBlockComponent } from './frame-block.js';
 
 export const FrameBlockSchema = defineBlockSchema({
@@ -23,6 +24,7 @@ export const FrameBlockSchema = defineBlockSchema({
   props: internal => ({
     title: internal.Text(),
     background: '--affine-palette-transparent',
+    gradient: '',
     xywh: `[0,0,100,100]`,
     index: 'a0',
   }),
@@ -42,6 +44,8 @@ type Props = {
   background: string;
   xywh: SerializedXYWH;
   index: string;
+  gradient: string;
+  source?: string;
 };
 
 export class FrameBlockModel
@@ -49,6 +53,15 @@ export class FrameBlockModel
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.FRAME;
+  override source?: string;
+
+  get cssBackground() {
+    return isCssVariable(this.background)
+      ? `var(${this.background})`
+      : this.gradient
+      ? `${this.gradient}, url(${this.source})`
+      : `url(${this.source})`;
+  }
 
   get connectable() {
     return false;

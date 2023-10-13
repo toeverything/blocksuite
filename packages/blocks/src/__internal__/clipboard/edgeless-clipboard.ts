@@ -332,13 +332,14 @@ export class EdgelessClipboard implements Clipboard {
 
   private async _createFrameBlocks(frames: SerializedBlock[]) {
     const frameIds = await Promise.all(
-      frames.map(async ({ xywh, title, background }) => {
+      frames.map(async ({ xywh, title, background, gradient }) => {
         const frameId = this.surface.addElement(
           EdgelessBlockType.FRAME,
           {
             xywh,
             background,
             title: new Workspace.Y.Text(title),
+            gradient,
           },
           this.surface.model.id
         );

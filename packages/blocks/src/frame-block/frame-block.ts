@@ -20,6 +20,10 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   @state()
   titleHide = false;
 
+  @state()
+  private _source?: string;
+  private _lastSourceId?: string;
+
   @query('.affine-frame-title')
   private _titleElement?: HTMLElement;
 
@@ -54,15 +58,56 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     );
   }
 
+  override disconnectedCallback() {
+    if (this._source) {
+      URL.revokeObjectURL(this._source);
+    }
+    super.disconnectedCallback();
+  }
+
   override createRenderRoot() {
     return this;
   }
+
+  private _fetchImage = () => {
+    if (this._lastSourceId && this._lastSourceId === this.model.background) {
+      return;
+    }
+
+    const storage = this.model.page.blobs;
+    storage
+      .get(this.model.background)
+      .then(blob => {
+        if (blob) {
+          this._source = URL.createObjectURL(blob);
+          this._lastSourceId = this.model.background;
+        }
+      })
+      .catch(() => {});
+  };
 
   override render() {
     const { model, titleHide, _surface } = this;
     const bound = Bound.deserialize(model.xywh);
     const { zoom } = _surface.viewport;
     const text = model.title.toString();
+    const containerStyle: Record<string, string> = {
+      width: bound.w + 'px',
+      height: bound.h + 'px',
+      borderRadius: '8px',
+      border: `2px solid ${this.color}`,
+    };
+    if (isCssVariable(model.background)) {
+      containerStyle.background = model.cssBackground;
+    } else {
+      this._fetchImage();
+      model.source = this._source;
+      containerStyle.backgroundImage = model.cssBackground;
+      containerStyle.backgroundSize = 'cover';
+      containerStyle.backgroundPosition = 'center';
+      containerStyle.backgroundRepeat = 'no-repeat';
+    }
+
     return html`
       ${!titleHide
         ? html` <div
@@ -90,15 +135,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
         : nothing}
       <div
         class="affine-frame-container"
-        style=${styleMap({
-          width: bound.w + 'px',
-          height: bound.h + 'px',
-          backgroundColor: isCssVariable(model.background)
-            ? `var(${model.background})`
-            : '',
-          borderRadius: '8px',
-          border: `2px solid ${this.color}`,
-        })}
+        style=${styleMap(containerStyle)}
       ></div>
     `;
   }
