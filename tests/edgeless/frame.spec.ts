@@ -6,6 +6,8 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
+  getSelectedBound,
+  setEdgelessTool,
   Shape,
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
@@ -48,6 +50,17 @@ test.describe('frame', () => {
       await init(page);
       await triggerComponentToolbarAction(page, 'createFrameOnMoreOption');
       await assertSelectedBound(page, [-300, -270, 800, 640]);
+    });
+
+    test('add frame by edgeless toolbar', async ({ page }) => {
+      await init(page);
+      await autoFit(page);
+      await setEdgelessTool(page, 'frame');
+      const frameMenu = page.locator('edgeless-frame-menu');
+      await expect(frameMenu).toBeVisible();
+      const button = await page.locator('.frame-add-button:nth-of-type(2)');
+      await button.click();
+      await assertSelectedBound(page, [-500, -550, 1200, 1200]);
     });
   });
 

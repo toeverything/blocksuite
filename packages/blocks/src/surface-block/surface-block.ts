@@ -531,7 +531,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         if (type === 'add') {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           assertExists(model);
-          if (isNoteBlock(model)) {
+          if (
+            isNoteBlock(model) ||
+            isFrameBlock(model) ||
+            isImageBlock(model)
+          ) {
             requestAnimationFrame(() => {
               this.fitElementToViewport(model);
             });

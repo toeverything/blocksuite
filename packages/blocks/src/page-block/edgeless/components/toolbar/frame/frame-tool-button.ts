@@ -89,6 +89,7 @@ export class EdgelessFrameToolButton extends WithDisposable(LitElement) {
     const arrowColor = type === 'frame' ? 'currentColor' : '#77757D';
     return html`
       <edgeless-tool-icon-button
+        class="edgeless-frame-button"
         .tooltip=${this._frameMenu ? '' : getTooltipWithShortcut('Frame', 'F')}
         .tooltipOffset=${17}
         .active=${type === 'frame'}
