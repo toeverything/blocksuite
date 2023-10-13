@@ -7,9 +7,10 @@ import {
   type DefaultTool,
   handleNativeRangeAtPoint,
   resetNativeSelection,
+  type Selectable,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../index.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../surface-block/elements/edgeless-element.js';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../../surface-block/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
-import type { Selectable } from '../services/tools-manager.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { calPanDelta } from '../utils/panning-utils.js';
 import {
