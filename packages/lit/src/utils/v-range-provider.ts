@@ -18,17 +18,25 @@ export const getVRangeProvider: (
   assertExists(selectionManager);
   assertExists(rangeManager);
 
+  const isElementSelected = (range: Range): boolean => {
+    // Most cases, the range is collapsed, so we no need to use `intersectsNode`
+    // because its performance is not good enough.
+    if (range.collapsed) {
+      const blockElement = range.startContainer.parentElement?.closest(
+        `[${root.blockIdAttr}]`
+      );
+      if (!blockElement || blockElement !== element) return false;
+    } else {
+      if (!range.intersectsNode(element)) return false;
+    }
+    return true;
+  };
+
   const calculateVRange = (
     range: Range,
     textSelection: TextSelection
   ): VRange | null => {
-    const selectedElements = rangeManager.getSelectedBlockElementsByRange(
-      range,
-      {
-        mode: 'flat',
-      }
-    );
-    if (!selectedElements.includes(element)) {
+    if (!isElementSelected(range)) {
       return null;
     }
 
@@ -85,14 +93,14 @@ export const getVRangeProvider: (
 
   const vRangeUpdatedSlot = new Slot<VRangeUpdatedProp>();
   selectionManager.slots.changed.on(() => {
+    const textSelection = selectionManager.find('text');
+    if (!textSelection) return;
+
+    const range = rangeManager.value;
+    if (!range || !isElementSelected(range)) return;
+
     // wait for lit updated
     requestAnimationFrame(() => {
-      const textSelection = selectionManager.find('text');
-      if (!textSelection) return;
-
-      const range = rangeManager.textSelectionToRange(textSelection);
-      if (!range) return;
-
       const vRange = calculateVRange(range, textSelection);
       vRangeUpdatedSlot.emit([vRange, false]);
     });
