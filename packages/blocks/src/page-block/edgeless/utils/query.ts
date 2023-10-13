@@ -5,6 +5,7 @@ import {
   type Connectable,
   type EdgelessElement,
   type EdgelessTool,
+  type Selectable,
   type TopLevelBlockModel,
 } from '../../../__internal__/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -26,7 +27,6 @@ import {
 } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { Selectable } from '../services/tools-manager.js';
 
 export function isTopLevelBlock(
   selectable: BaseBlockModel | Selectable | BaseBlockModel | null

@@ -2,13 +2,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import { getBlockElementByModel } from '../../__internal__/index.js';
-import type { EdgelessElement } from '../../__internal__/utils/types.js';
+import type {
+  EdgelessElement,
+  Selectable,
+} from '../../__internal__/utils/types.js';
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { FrameBlockModel, NoteBlockModel } from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { type Selectable } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
 import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
 import { isFrameBlock, isTopLevelBlock } from './utils/query.js';

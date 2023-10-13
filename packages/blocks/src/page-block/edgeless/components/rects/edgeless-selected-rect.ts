@@ -9,7 +9,10 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import type { IPoint } from '../../../../__internal__/utils/types.js';
+import type {
+  IPoint,
+  Selectable,
+} from '../../../../__internal__/utils/types.js';
 import {
   normalizeTextBound,
   PhasorElementType,
@@ -27,7 +30,6 @@ import {
   TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { Selectable } from '../../services/tools-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {

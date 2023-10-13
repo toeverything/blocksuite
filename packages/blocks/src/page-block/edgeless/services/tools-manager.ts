@@ -16,12 +16,9 @@ import {
   isMiddleButtonPressed,
   isPinchEvent,
   Point,
-  type TopLevelBlockModel,
+  type Selectable,
 } from '../../../__internal__/index.js';
-import {
-  normalizeWheelDeltaY,
-  type PhasorElement,
-} from '../../../surface-block/index.js';
+import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { BrushToolController } from '../tool-controllers/brush-tool.js';
 import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
@@ -37,8 +34,6 @@ import { TextToolController } from '../tool-controllers/text-tool.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getSelectionBoxBound } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';
-
-export type Selectable = TopLevelBlockModel | PhasorElement;
 
 function shouldFilterMouseEvent(event: Event): boolean {
   const target = event.target;

@@ -5,7 +5,6 @@ import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
   isFrameBlock,
@@ -32,6 +31,7 @@ import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js
 import { ContentParser } from '../content-parser/index.js';
 import {
   type EdgelessElement,
+  type Selectable,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
