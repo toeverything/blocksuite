@@ -1,4 +1,4 @@
-import { assertExists, clamp } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
@@ -15,8 +15,8 @@ import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
-import type { Rect } from './rect.js';
-import { type Point } from './rect.js';
+import { clamp } from './math.js';
+import type { Point, Rect } from './rect.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
