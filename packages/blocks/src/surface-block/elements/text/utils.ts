@@ -336,7 +336,11 @@ export function deltaInsertsToChunks(delta: ITextDelta[]): ITextDelta[][] {
   return Array.from(chunksGenerator(transformedDelta));
 }
 
-export function normalizeTextBound(text: TextElement, bound: Bound): Bound {
+export function normalizeTextBound(
+  text: TextElement,
+  bound: Bound,
+  dragging: boolean = false
+): Bound {
   if (!text.text) return bound;
 
   const yText = text.text;
@@ -350,16 +354,34 @@ export function normalizeTextBound(text: TextElement, bound: Bound): Bound {
     italic: text.italic,
   });
 
+  let lines: ITextDelta[][] = [];
   const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
-  const lines = deltaInsertsToChunks(deltas);
-  const widestLineWidth = Math.max(
-    ...yText
-      .toString()
-      .split('\n')
-      .map(text => getTextWidth(text, font))
-  );
+  const widestCharWidth =
+    [...yText.toString()]
+      .map(char => getTextWidth(char, font))
+      .sort((a, b) => a - b)
+      .pop() ?? getTextWidth('W', font);
 
-  bound.w = widestLineWidth;
+  if (bound.w < widestCharWidth) {
+    bound.w = widestCharWidth;
+  }
+
+  const width = bound.w;
+  const insertDeltas = deltas.flatMap(delta => ({
+    insert: wrapText(delta.insert, font, width),
+    attributes: delta.attributes,
+  })) as ITextDelta[];
+  lines = deltaInsertsToChunks(insertDeltas);
+  if (!dragging && !text.hasMaxWidth) {
+    lines = deltaInsertsToChunks(deltas);
+    const widestLineWidth = Math.max(
+      ...yText
+        .toString()
+        .split('\n')
+        .map(text => getTextWidth(text, font))
+    );
+    bound.w = widestLineWidth;
+  }
   bound.h = lineHeightPx * lines.length;
 
   return bound;

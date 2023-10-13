@@ -10,7 +10,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../__internal__/utils/event.js';
 import type { IPoint } from '../../../../__internal__/utils/types.js';
-import { PhasorElementType } from '../../../../surface-block/index.js';
+import {
+  normalizeTextBound,
+  PhasorElementType,
+} from '../../../../surface-block/index.js';
 import {
   Bound,
   ConnectorElement,
@@ -37,7 +40,7 @@ import {
   isPhasorElementWithText,
 } from '../../utils/query.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
-import type { HandleDirection } from '../resize/resize-handles.js';
+import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
 import {
@@ -363,28 +366,32 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   get resizeMode(): ResizeMode {
     const elements = this.selection.elements;
 
-    let isAllConnector = true;
-    let isAllShapes = true;
+    let areAllConnectors = true;
+    let areAllShapes = true;
+    let areAllTexts = true;
     let hasNote = false;
 
     for (const element of elements) {
       if (isNoteBlock(element)) {
         hasNote = true;
       } else if (isFrameBlock(element)) {
-        isAllConnector = false;
+        areAllConnectors = false;
       } else if (isImageBlock(element)) {
-        isAllConnector = false;
-        isAllShapes = false;
+        areAllConnectors = false;
+        areAllShapes = false;
+        areAllTexts = false;
         hasNote = false;
       } else {
-        if (element.type !== 'connector') isAllConnector = false;
-        if (element.type !== 'shape') isAllShapes = false;
+        if (element.type !== 'connector') areAllConnectors = false;
+        if (element.type !== 'shape') areAllShapes = false;
+        if (element.type !== 'text') areAllTexts = false;
       }
     }
 
     if (hasNote) return 'edge';
-    if (isAllConnector) return 'none';
-    if (isAllShapes) return 'all';
+    if (areAllConnectors) return 'none';
+    if (areAllShapes) return 'all';
+    if (areAllTexts) return 'edgeAndCorner';
 
     return 'corner';
   }
@@ -409,7 +416,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       {
         bound: Bound;
       }
-    >
+    >,
+    direction: HandleDirection
   ) => {
     const { page, selection, surface } = this;
     const selectedMap = new Map<string, Selectable>(
@@ -439,12 +447,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         });
       } else {
         if (element instanceof TextElement) {
-          const p = bound.h / element.h;
-
-          surface.updateElement<PhasorElementType.TEXT>(id, {
-            xywh: bound.serialize(),
-            fontSize: element.fontSize * p,
-          });
+          let p = 1;
+          if (
+            direction === HandleDirection.Left ||
+            direction === HandleDirection.Right
+          ) {
+            bound = normalizeTextBound(element, bound, true);
+            // If the width of the text element has been changed by dragging,
+            // We need to set hasMaxWidth to true for wrapping the text
+            surface.updateElement(id, {
+              xywh: bound.serialize(),
+              fontSize: element.fontSize * p,
+              hasMaxWidth: true,
+            });
+          } else {
+            p = bound.h / element.h;
+            // const newFontsize = element.fontSize * p;
+            // bound = normalizeTextBound(element, bound, false, newFontsize);
+            surface.updateElement(id, {
+              xywh: bound.serialize(),
+              fontSize: element.fontSize * p,
+            });
+          }
         } else {
           if (element instanceof ShapeElement) {
             bound = normalizeShapeBound(element, bound);

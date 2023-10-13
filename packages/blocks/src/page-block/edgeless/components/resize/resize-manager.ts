@@ -21,7 +21,8 @@ type ResizeMoveHandler = (
     {
       bound: Bound;
     }
-  >
+  >,
+  direction: HandleDirection
 ) => void;
 
 type RotateMoveHandler = (point: IPoint, rotate: number) => void;
@@ -167,6 +168,7 @@ export class HandleResizeManager {
 
     const isAll = _resizeMode === 'all';
     const isCorner = _resizeMode === 'corner';
+    const isEdgeAndCorner = _resizeMode === 'edgeAndCorner';
 
     const {
       start: { x: startX, y: startY },
@@ -195,7 +197,7 @@ export class HandleResizeManager {
       .rotateSelf(_rotate)
       .translateSelf(-original.cx, -original.cy);
 
-    if (isCorner || isAll) {
+    if (isCorner || isAll || isEdgeAndCorner) {
       switch (_dragDirection) {
         case HandleDirection.TopLeft: {
           direction.x = -1;
@@ -445,7 +447,7 @@ export class HandleResizeManager {
 
     let process: (value: { bound: Bound; rotate: number }, key: string) => void;
 
-    if (isCorner || isAll) {
+    if (isCorner || isAll || isEdgeAndCorner) {
       if (this._bounds.size === 1) {
         process = (_, id) => {
           newBounds.set(id, {
@@ -538,7 +540,7 @@ export class HandleResizeManager {
     }
 
     this._bounds.forEach(process);
-    this._onResizeMove(newBounds);
+    this._onResizeMove(newBounds, this._dragDirection);
   }
 
   private _onRotate(shiftKey = false) {
