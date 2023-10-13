@@ -62,28 +62,6 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       margin-bottom: 24px;
     }
 
-    /* hover area */
-    .affine-code-block-container::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50px;
-      height: 100%;
-      transform: translateX(100%);
-    }
-
-    /* hover area */
-    .affine-code-block-container::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50px;
-      height: 100%;
-      transform: translateX(100%);
-    }
-
     .affine-code-block-container .virgo-editor {
       font-family: var(--affine-font-code-family);
       font-variant-ligatures: none;
