@@ -1,5 +1,5 @@
-import { dedupe, delayHide, delayShow } from './middlewares.js';
-import { safeBridge, safeTriangle } from './safe-area.js';
+import { dedupe, delayHide, delayShow } from './middlewares/basic.js';
+import { safeBridge, safeTriangle } from './middlewares/safe-area.js';
 import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 
 /**

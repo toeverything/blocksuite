@@ -1,4 +1,7 @@
-import type { SafeBridgeOptions, SafeTriangleOptions } from './safe-area.js';
+import type {
+  SafeBridgeOptions,
+  SafeTriangleOptions,
+} from './middlewares/safe-area.js';
 
 export type WhenHoverOptions = {
   enterDelay?: number;

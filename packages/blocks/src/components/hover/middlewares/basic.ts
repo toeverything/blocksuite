@@ -1,5 +1,6 @@
-import { sleep } from '../function.js';
-import type { HoverMiddleware } from './types.js';
+import { sleep } from '@blocksuite/global/utils';
+
+import type { HoverMiddleware } from '../types.js';
 
 /**
  * When the mouse is hovering in, the `mouseover` event will be fired multiple times.

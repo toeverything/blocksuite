@@ -1,4 +1,4 @@
-import type { HoverMiddleware } from './types.js';
+import type { HoverMiddleware } from '../types.js';
 
 export type SafeTriangleOptions = {
   zIndex: number;
@@ -229,7 +229,7 @@ export type SafeBridgeOptions = { debug: boolean; idleTimeout: number };
  * Licensed under MIT.
  */
 export const safeBridge = ({
-  debug = false,
+  debug = true,
   idleTimeout = 500,
 }: Partial<SafeBridgeOptions> = {}): HoverMiddleware => {
   let abortController = new AbortController();
