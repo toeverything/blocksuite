@@ -202,9 +202,6 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
 
   // select text element
   await page.mouse.click(150, 140);
-  // await assertEdgelessSelectedRect(page, [130, 140, 94, 38]);
-  // the width in local environment is 94, but in CI is 95
-  // so we change a way to check whether the width is changed
   // should exit selected rect and record last width and height, then compare them
   let selectedRect = await getEdgelessSelectedRect(page);
   let lastWidth = selectedRect.width;
@@ -218,11 +215,11 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   });
   await page.mouse.up();
 
-  // await assertEdgelessSelectedRect(page, [130, 140, 60, 76]);
-  // the text should be wrapped, so check the height of text element
+  // the text should be wrapped, so check the width and height of text element
   selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBeLessThan(lastWidth);
   expect(selectedRect.height).toBeGreaterThan(lastHeight);
+
   await page.mouse.dblclick(140, 160);
   await waitForVirgoStateUpdated(page);
   await waitNextFrame(page);
@@ -245,11 +242,11 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   });
   await page.mouse.up();
 
-  // the text should be unwrapped, check the height of text element
+  // the text should be unwrapped, check the width and height of text element
   selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBeGreaterThan(lastWidth);
   expect(selectedRect.height).toBeLessThan(lastHeight);
-  // await assertEdgelessSelectedRect(page, [96, 140, 94, 38]);
+
   await page.mouse.dblclick(100, 160);
   await waitForVirgoStateUpdated(page);
   await waitNextFrame(page);
@@ -279,7 +276,6 @@ test('text element should have maxWidth after adjusting width by dragging left o
 
   // select text element
   await page.mouse.click(150, 140);
-  // await assertEdgelessSelectedRect(page, [130, 140, 94, 38]);
   let selectedRect = await getEdgelessSelectedRect(page);
   let lastWidth = selectedRect.width;
   let lastHeight = selectedRect.height;
@@ -293,7 +289,6 @@ test('text element should have maxWidth after adjusting width by dragging left o
   await page.mouse.up();
 
   // the text should be wrapped, so check the width and height of text element
-  // await assertEdgelessSelectedRect(page, [130, 140, 60, 76]);
   selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBeLessThan(lastWidth);
   expect(selectedRect.height).toBeGreaterThan(lastHeight);
@@ -312,8 +307,7 @@ test('text element should have maxWidth after adjusting width by dragging left o
 
   // select text element
   await page.mouse.click(150, 140);
-  // the width of the text element should be the same as before, but the height should be changed
-  // await assertEdgelessSelectedRect(page, [130, 140, 60, 114]);
+  // after input, the width of the text element should be the same as before, but the height should be changed
   selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBe(lastWidth);
   expect(selectedRect.height).toBeGreaterThan(lastHeight);
