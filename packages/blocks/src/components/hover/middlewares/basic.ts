@@ -46,6 +46,9 @@ export const dedupe = (keepWhenFloatingNotReady = true): HoverMiddleware => {
   };
 };
 
+/**
+ * Wait some time before emitting the `mouseover` event.
+ */
 export const delayShow = (delay: number): HoverMiddleware => {
   let abortController = new AbortController();
   return async ({ event }) => {
@@ -59,6 +62,9 @@ export const delayShow = (delay: number): HoverMiddleware => {
   };
 };
 
+/**
+ * Wait some time before emitting the `mouseleave` event.
+ */
 export const delayHide = (delay: number): HoverMiddleware => {
   let abortController = new AbortController();
   return async ({ event }) => {
