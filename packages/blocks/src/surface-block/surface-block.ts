@@ -55,6 +55,7 @@ import {
   isPhasorElementType,
 } from './elements/edgeless-element.js';
 import {
+  BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
@@ -531,7 +532,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         if (type === 'add') {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           assertExists(model);
-          if (isNoteBlock(model)) {
+          if (
+            isNoteBlock(model) ||
+            isFrameBlock(model) ||
+            isImageBlock(model)
+          ) {
             requestAnimationFrame(() => {
               this.fitElementToViewport(model);
             });
@@ -551,6 +556,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
+        if (element instanceof BrushElement) return;
         this.fitElementToViewport(element);
       })
     );

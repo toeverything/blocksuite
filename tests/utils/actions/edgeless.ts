@@ -90,7 +90,13 @@ export async function switchEditorEmbedMode(page: Page) {
 }
 
 type BasicEdgelessTool = 'default' | 'pan' | 'note';
-type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
+type SpecialEdgelessTool =
+  | 'shape'
+  | 'brush'
+  | 'eraser'
+  | 'text'
+  | 'connector'
+  | 'frame';
 
 type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
@@ -110,6 +116,7 @@ export function locatorEdgelessToolButton(
     text: '.edgeless-text-button',
     connector: '.edgeless-connector-button',
     note: '.edgeless-note-button',
+    frame: '.edgeless-frame-button',
   }[type];
 
   let buttonType;
@@ -223,6 +230,7 @@ export async function setEdgelessTool(
     case 'text':
     case 'note':
     case 'eraser':
+    case 'frame':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
