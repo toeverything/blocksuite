@@ -125,6 +125,19 @@ export class EdgelessBrushToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'brush') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
+  }
+
   override render() {
     const type = this.edgelessTool?.type;
 

@@ -103,6 +103,19 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'text') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
+  }
+
   override render() {
     const type = this.edgelessTool?.type;
 

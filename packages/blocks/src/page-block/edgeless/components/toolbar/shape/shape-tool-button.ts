@@ -189,6 +189,19 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     super.disconnectedCallback();
   }
 
+  override firstUpdated() {
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'shape') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
+  }
+
   private _shapes: Array<Shape> = [
     { name: 'rect', svg: rectSvg },
     { name: 'triangle', svg: triangleSvg },
