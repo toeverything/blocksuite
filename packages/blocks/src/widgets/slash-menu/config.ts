@@ -29,6 +29,7 @@ import {
   DeleteIcon,
   DualLinkIcon,
   DuplicateIcon,
+  FrameIcon,
   ImageIcon20,
   NewPageIcon,
   NowIcon,
@@ -37,6 +38,7 @@ import {
   YesterdayIcon,
 } from '../../icons/index.js';
 import type { ImageBlockProps } from '../../image-block/image-model.js';
+import type { FrameBlockModel } from '../../models.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
 import {
   getSelectedContentBlockElements,
@@ -50,13 +52,11 @@ import {
   insertContent,
   insideDatabase,
   type SlashItem,
+  type SlashMenuOptions,
   withRemoveEmptyLine,
 } from './utils.js';
 
-export const menuGroups: {
-  name: string;
-  items: SlashItem[];
-}[] = [
+export const menuGroups: SlashMenuOptions['menus'] = [
   {
     name: 'Text',
     items: [
@@ -406,6 +406,30 @@ export const menuGroups: {
     ],
   },
   {
+    name: 'Frames',
+    items: options => {
+      const frameModels = options.pageElement.page.getBlockByFlavour(
+        'affine:frame'
+      ) as FrameBlockModel[];
+
+      return frameModels.map(frameModel => {
+        return {
+          name: 'Frame: ' + frameModel.title,
+          icon: FrameIcon,
+          action: async ({ pageElement, model }) => {
+            pageElement.page.addBlock(
+              'affine:surface-sync',
+              {
+                reference: frameModel.id,
+              },
+              pageElement.page.getParent(model)?.id
+            );
+          },
+        };
+      });
+    },
+  },
+  {
     name: 'Actions',
     items: [
       {
@@ -492,7 +516,4 @@ export const menuGroups: {
       },
     ],
   },
-] satisfies {
-  name: string;
-  items: SlashItem[];
-}[];
+];

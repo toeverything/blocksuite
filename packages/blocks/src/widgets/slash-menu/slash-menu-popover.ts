@@ -204,7 +204,11 @@ export class SlashMenu extends WithDisposable(LitElement) {
     const searchStr = this._searchString.toLowerCase();
     let allMenus = this.options.menus
       .map(group =>
-        group.items.map(item => ({ ...item, groupName: group.name }))
+        typeof group.items === 'function'
+          ? group
+              .items({ pageElement: this.pageElement, model: this.model })
+              .map(item => ({ ...item, groupName: group.name }))
+          : group.items.map(item => ({ ...item, groupName: group.name }))
       )
       .flat();
 

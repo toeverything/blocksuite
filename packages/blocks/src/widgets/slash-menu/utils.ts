@@ -15,7 +15,12 @@ export type SlashMenuOptions = {
   isTriggerKey: (e: KeyboardEvent) => false | string;
   menus: {
     name: string;
-    items: SlashItem[];
+    items:
+      | ((options: {
+          pageElement: PageBlockComponent;
+          model: BaseBlockModel;
+        }) => SlashItem[])
+      | SlashItem[];
   }[];
 };
 

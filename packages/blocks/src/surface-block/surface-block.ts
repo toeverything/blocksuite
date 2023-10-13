@@ -600,7 +600,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const id = yElement.get('id') as id;
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
-    const element = new ElementCtor(yElement, this);
+    const element = new ElementCtor(yElement, {
+      getLocalRecord: id => {
+        return this.getElementLocalRecord(id);
+      },
+      onElementUpdated: update => {
+        this.slots.elementUpdated.emit(update);
+      },
+    });
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
@@ -652,7 +659,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
-      const element = new ElementCtor(yElement, this);
+      const element = new ElementCtor(yElement, {
+        getLocalRecord: id => {
+          return this.getElementLocalRecord(id);
+        },
+        onElementUpdated: update => {
+          this.slots.elementUpdated.emit(update);
+        },
+      });
       element.computedValue = this.getCSSPropertyValue;
       element.mount(this._renderer);
       this._elements.set(element.id, element);

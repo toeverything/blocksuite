@@ -98,7 +98,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
     pageBlockId
   );
 
-  page.addBlock(
+  const frameId = page.addBlock(
     'affine:frame',
     { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
     surfaceId

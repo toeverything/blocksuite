@@ -22,6 +22,7 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { SurfaceSyncBlockSchema } from '../surface-sync-block/index.js';
 import { AFFINE_DOC_DRAGGING_AREA_WIDGET } from '../widgets/doc-dragging-area/index.js';
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../widgets/doc-remote-selection/doc-remote-selection.js';
 import { AFFINE_DRAG_HANDLE_WIDGET } from '../widgets/drag-handle/index.js';
@@ -162,6 +163,12 @@ export const pagePreset: BlockSpec[] = [
       component: literal`affine-attachment`,
     },
   },
+  {
+    schema: SurfaceSyncBlockSchema,
+    view: {
+      component: literal`affine-surface-sync`,
+    },
+  },
 ];
 
 export const edgelessPreset: BlockSpec[] = [
@@ -241,6 +248,12 @@ export const edgelessPreset: BlockSpec[] = [
     schema: AttachmentBlockSchema,
     view: {
       component: literal`affine-attachment`,
+    },
+  },
+  {
+    schema: SurfaceSyncBlockSchema,
+    view: {
+      component: literal`affine-surface-sync`,
     },
   },
 ];

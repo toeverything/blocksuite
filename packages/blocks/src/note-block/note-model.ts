@@ -50,6 +50,7 @@ export const NoteBlockSchema = defineBlockSchema({
       'affine:note-block-*',
       'affine:bookmark',
       'affine:attachment',
+      'affine:surface-sync',
     ],
   },
   toModel: () => {
