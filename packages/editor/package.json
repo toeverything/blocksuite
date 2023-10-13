@@ -25,7 +25,7 @@
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.16"
+    "@toeverything/theme": "^0.7.20"
   },
   "exports": {
     ".": "./src/index.ts",

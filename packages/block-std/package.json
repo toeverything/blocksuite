@@ -18,7 +18,7 @@
     "@blocksuite/global": "workspace:*",
     "lz-string": "^1.5.0",
     "w3c-keyname": "^2.2.8",
-    "zod": "^3.22.2"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@blocksuite/store": "workspace:*"

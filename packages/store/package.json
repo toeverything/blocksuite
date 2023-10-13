@@ -17,22 +17,22 @@
   "dependencies": {
     "@blocksuite/global": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
-    "@types/flexsearch": "^0.7.3",
+    "@types/flexsearch": "^0.7.4",
     "buffer": "^6.0.3",
     "flexsearch": "0.7.21",
     "idb-keyval": "^6.2.1",
     "jszip": "^3.10.1",
-    "lib0": "^0.2.83",
+    "lib0": "^0.2.87",
     "merge": "^2.1.1",
     "minimatch": "^9.0.3",
     "nanoid": "^4.0.2",
-    "y-protocols": "^1.0.5",
-    "zod": "^3.22.2"
+    "y-protocols": "^1.0.6",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "async-call-rpc": "^6.3.1",
     "lit": "^2.8.0",
-    "yjs": "^13.6.7"
+    "yjs": "^13.6.8"
   },
   "peerDependencies": {
     "async-call-rpc": "^6",
