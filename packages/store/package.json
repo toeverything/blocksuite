@@ -19,19 +19,19 @@
     "@blocksuite/virgo": "workspace:*",
     "@types/flexsearch": "^0.7.4",
     "buffer": "^6.0.3",
-    "flexsearch": "0.7.21",
+    "flexsearch": "0.7.31",
     "idb-keyval": "^6.2.1",
     "jszip": "^3.10.1",
     "lib0": "^0.2.87",
     "merge": "^2.1.1",
     "minimatch": "^9.0.3",
-    "nanoid": "^4.0.2",
+    "nanoid": "^5.0.1",
     "y-protocols": "^1.0.6",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "async-call-rpc": "^6.3.1",
-    "lit": "^2.8.0",
+    "lit": "^3.0.0",
     "yjs": "^13.6.8"
   },
   "peerDependencies": {

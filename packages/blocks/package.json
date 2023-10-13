@@ -28,12 +28,12 @@
     "@types/webfontloader": "^1.6.35",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
-    "file-type": "^16.5.4",
+    "file-type": "^18.5.0",
     "fractional-indexing": "^3.2.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",
-    "lit": "^2.8.0",
-    "marked": "^4.3.0",
+    "lit": "^3.0.0",
+    "marked": "^9.1.2",
     "pdf-lib": "^1.17.1",
     "shiki": "^0.14.5",
     "sortablejs": "^1.15.0",
@@ -79,7 +79,7 @@
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@toeverything/theme": "^0.7.20",
-    "@types/marked": "^4.3.2",
+    "@types/marked": "^6.0.0",
     "@types/sortablejs": "^1.15.3"
   }
 }
