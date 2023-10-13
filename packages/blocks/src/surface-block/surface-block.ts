@@ -55,6 +55,7 @@ import {
   isPhasorElementType,
 } from './elements/edgeless-element.js';
 import {
+  BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
@@ -555,6 +556,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
+        if (element instanceof BrushElement) return;
         this.fitElementToViewport(element);
       })
     );
