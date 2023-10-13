@@ -524,7 +524,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
-  private initViewportEffects() {
+  private _initEffects() {
     const { _disposables, page, edgeless } = this;
     _disposables.add(
       page.slots.blockUpdated.on(({ id, type }) => {
@@ -572,7 +572,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   init() {
     this._syncFromExistingContainer();
-    this.initViewportEffects();
+    this._initEffects();
   }
 
   // query
