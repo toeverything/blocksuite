@@ -4,7 +4,7 @@ import { type BlockService } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { VEditor } from '@blocksuite/virgo';
-import { css, html, nothing } from 'lit';
+import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
@@ -13,7 +13,6 @@ import { PAGE_BLOCK_CHILD_PADDING } from '../../__internal__/consts.js';
 import type { EditingState } from '../../__internal__/index.js';
 import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
-import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from '../../widgets/doc-remote-selection/doc-remote-selection.js';
 import { ClipboardController } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
@@ -592,9 +591,7 @@ export class DocPageBlockComponent extends BlockElement<
     const widgets = html`${repeat(
       Object.entries(this.widgets),
       ([id]) => id,
-      ([id, widget]) =>
-        // render remote-selection before blocks to avoid being unable to select text by mouse click.
-        id === AFFINE_DOC_REMOTE_SELECTION_WIDGET ? nothing : widget
+      ([_, widget]) => widget
     )}`;
 
     const meta = html`
@@ -607,7 +604,6 @@ export class DocPageBlockComponent extends BlockElement<
     return html`
       <div class="affine-doc-viewport">
         <div class="affine-doc-page-block-container">
-          ${this.widgets[AFFINE_DOC_REMOTE_SELECTION_WIDGET]}
           <div class="affine-doc-page-block-title-container">
             ${title} ${meta}
           </div>
