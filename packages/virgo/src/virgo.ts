@@ -355,8 +355,6 @@ export class VEditor<
     }
 
     Promise.resolve().then(() => {
-      assertExists(this._rootElement);
-
       this.deltaService.render();
     });
   };
