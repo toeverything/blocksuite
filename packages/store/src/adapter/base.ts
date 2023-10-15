@@ -4,6 +4,7 @@ import type {
   SliceSnapshot,
 } from '../transformer/type.js';
 import type { AdapterAssetsManager } from './assets.js';
+import { ASTWalkerContext } from './context.js';
 
 export type FromPageSnapshotPayload = {
   snapshot: PageSnapshot;
@@ -53,21 +54,8 @@ export abstract class BaseAdapter<AdapterTarget = unknown> {
 
 type Keyof<T> = T extends unknown ? keyof T : never;
 
-export type ASTWalkerContext<TNode> = {
-  skip: () => void;
-  addNode: (
-    mountPoint: TNode,
-    node: TNode,
-    prop: Keyof<TNode>,
-    index?: number
-  ) => void;
-  set: (key: string, value: unknown) => void;
-  get: (key: string) => unknown;
-};
-
 type WalkerFn<ONode extends object, TNode extends object> = (
   o: NodeProps<ONode>,
-  t: NodeProps<TNode>,
   context: ASTWalkerContext<TNode>
 ) => void;
 
@@ -87,39 +75,15 @@ type AddTNodeProps<TNode extends object> = {
 
 // Ported from https://github.com/Rich-Harris/estree-walker MIT License
 export class ASTWalker<ONode extends object, TNode extends object> {
-  private _should_skip = false;
-
-  private _addedTNode: AddTNodeProps<TNode> = null;
-
-  private _lastAddedTNode: AddTNodeProps<TNode> = null;
-
   private _enter: WalkerFn<ONode, TNode> | undefined;
   private _leave: WalkerFn<ONode, TNode> | undefined;
   private _isONode!: (node: unknown) => node is ONode;
 
   private context: ASTWalkerContext<TNode>;
-  private contextMap: Map<string, unknown> = new Map();
 
   constructor() {
-    this.context = {
-      skip: () => (this._should_skip = true),
-      addNode: (
-        mountPoint: TNode,
-        node: TNode,
-        prop: Keyof<TNode>,
-        index?: number
-      ) =>
-        (this._lastAddedTNode = this._addedTNode =
-          { mountPoint, node, prop, index }),
-      set: (key: string, value: unknown) => this.contextMap.set(key, value),
-      get: (key: string) => this.contextMap.get(key),
-    };
+    this.context = new ASTWalkerContext<TNode>();
   }
-
-  private _resetContext = () => {
-    this._should_skip = false;
-    this._addedTNode = null;
-  };
 
   setEnter = (fn: WalkerFn<ONode, TNode>) => {
     this._enter = fn;
@@ -134,36 +98,16 @@ export class ASTWalker<ONode extends object, TNode extends object> {
   };
 
   walk = (oNode: ONode, tNode: TNode) => {
-    this._visit(
-      { node: oNode, parent: null, prop: null, index: null },
-      { node: tNode, parent: null, prop: null, index: null }
-    );
+    this.context.openNode(tNode);
+    this._visit({ node: oNode, parent: null, prop: null, index: null });
+    return this.context.currentNode();
   };
 
-  private _visit = (o: NodeProps<ONode>, t: NodeProps<TNode>) => {
+  private _visit = (o: NodeProps<ONode>) => {
     if (!o.node) return;
 
     if (this._enter) {
-      this._enter(o, t, this.context);
-      const should_skip = this._should_skip;
-      const addedTNode = this._addedTNode;
-      this._resetContext();
-
-      if (addedTNode) {
-        if (addedTNode.index !== undefined) {
-          (addedTNode.mountPoint[addedTNode.prop] as Array<object>).splice(
-            addedTNode.index,
-            0,
-            addedTNode.node
-          );
-        } else {
-          (addedTNode.mountPoint[addedTNode.prop] as object) = addedTNode.node;
-        }
-      }
-
-      if (should_skip) {
-        return;
-      }
+      this._enter(o, this.context);
     }
 
     for (const key in o.node) {
@@ -174,66 +118,27 @@ export class ASTWalker<ONode extends object, TNode extends object> {
           for (let i = 0; i < value.length; i += 1) {
             const item = value[i];
             if (item !== null && this._isONode(item)) {
-              this._visit(
-                {
-                  node: item,
-                  parent: o.node,
-                  prop: key as unknown as Keyof<ONode>,
-                  index: i,
-                },
-                {
-                  node: this._lastAddedTNode?.node ?? t.node,
-                  parent: this._lastAddedTNode?.node
-                    ? this._lastAddedTNode.mountPoint
-                    : t.parent,
-                  prop: this._lastAddedTNode?.prop ?? null,
-                  index: this._lastAddedTNode?.index ?? null,
-                }
-              );
+              this._visit({
+                node: item,
+                parent: o.node,
+                prop: key as unknown as Keyof<ONode>,
+                index: i,
+              });
             }
           }
         } else if (this._isONode(value)) {
-          this._visit(
-            {
-              node: value,
-              parent: o.node,
-              prop: key as unknown as Keyof<ONode>,
-              index: null,
-            },
-            {
-              node: this._lastAddedTNode?.node ?? t.node,
-              parent: this._lastAddedTNode?.node
-                ? this._lastAddedTNode.mountPoint
-                : t.parent,
-              prop: this._lastAddedTNode?.prop ?? null,
-              index: this._lastAddedTNode?.index ?? null,
-            }
-          );
+          this._visit({
+            node: value,
+            parent: o.node,
+            prop: key as unknown as Keyof<ONode>,
+            index: null,
+          });
         }
       }
     }
 
     if (this._leave) {
-      this._leave(o, t, this.context);
-      const should_skip = this._should_skip;
-      const addedTNode = this._addedTNode;
-      this._resetContext();
-
-      if (addedTNode) {
-        if (addedTNode.index !== undefined) {
-          (addedTNode.mountPoint[addedTNode.prop] as Array<object>).splice(
-            addedTNode.index,
-            0,
-            addedTNode.node
-          );
-        } else {
-          (addedTNode.mountPoint[addedTNode.prop] as object) = addedTNode.node;
-        }
-      }
-
-      if (should_skip) {
-        return;
-      }
+      this._leave(o, this.context);
     }
   };
 }
