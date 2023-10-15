@@ -66,13 +66,6 @@ type NodeProps<Node extends object> = {
   index: number | null;
 };
 
-type AddTNodeProps<TNode extends object> = {
-  mountPoint: TNode;
-  node: TNode;
-  prop: Keyof<TNode>;
-  index?: number;
-} | null;
-
 // Ported from https://github.com/Rich-Harris/estree-walker MIT License
 export class ASTWalker<ONode extends object, TNode extends object> {
   private _enter: WalkerFn<ONode, TNode> | undefined;
