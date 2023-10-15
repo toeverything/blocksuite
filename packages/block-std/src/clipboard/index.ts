@@ -84,48 +84,22 @@ export class Clipboard {
     if (!data) {
       return;
     }
-    const items: Record<string, string> = {
-      'text/plain': '',
-      'text/html': '',
-      'image/png': '',
-    };
-    await Promise.all(
-      Array.from(this._adapterMap.keys()).map(async type => {
-        const item = await this._getClipboardItem(slice, type);
-        if (typeof item === 'string') {
-          items[type] = item;
-        }
-      })
-    );
-    const text = items['text/plain'];
-    const innerHTML = items['text/html'];
-    const png = items['image/png'];
 
-    delete items['text/plain'];
-    delete items['text/html'];
-    delete items['image/png'];
+    const adapterKeys = Array.from(this._adapterMap.keys());
 
-    const snapshot = lz.compressToEncodedURIComponent(JSON.stringify(items));
-    const html = `<div data-blocksuite-snapshot=${snapshot}>${innerHTML}</div>`;
-    const htmlBlob = new Blob([html], {
-      type: 'text/html',
+    await this.writeToClipboard(async _items => {
+      const items = { ..._items };
+
+      await Promise.all(
+        adapterKeys.map(async type => {
+          const item = await this._getClipboardItem(slice, type);
+          if (typeof item === 'string') {
+            items[type] = item;
+          }
+        })
+      );
+      return items;
     });
-    const clipboardItems: Record<string, Blob> = {
-      'text/html': htmlBlob,
-    };
-    if (text.length > 0) {
-      const textBlob = new Blob([text], {
-        type: 'text/plain',
-      });
-      clipboardItems['text/plain'] = textBlob;
-    }
-    if (png.length > 0) {
-      const pngBlob = new Blob([png], {
-        type: 'image/png',
-      });
-      clipboardItems['image/png'] = pngBlob;
-    }
-    await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
   };
 
   paste = async (
@@ -135,22 +109,10 @@ export class Clipboard {
     index?: number
   ) => {
     const data = event.clipboardData;
-    if (!data) {
-      return;
-    }
-    const items = data.getData('text/html');
+    if (!data) return;
+
     try {
-      const domParser = new DOMParser();
-      const doc = domParser.parseFromString(items, 'text/html');
-      const dom = doc.querySelector<HTMLDivElement>(
-        '[data-blocksuite-snapshot]'
-      );
-      assertExists(dom);
-      const json = JSON.parse(
-        lz.decompressFromEncodedURIComponent(
-          dom.dataset.blocksuiteSnapshot as string
-        )
-      );
+      const json = this.readFromClipboard(data);
       const slice = await this._getSnapshotByPriority(
         type => json[type],
         page,
@@ -170,4 +132,62 @@ export class Clipboard {
       return slice;
     }
   };
+
+  async writeToClipboard(
+    updateItems: (
+      items: Record<string, unknown>
+    ) => Promise<Record<string, unknown>>
+  ) {
+    const _items = {
+      'text/plain': '',
+      'text/html': '',
+      'image/png': '',
+    };
+
+    const items = await updateItems(_items);
+
+    const text = items['text/plain'] as string;
+    const innerHTML = items['text/html'] as string;
+    const png = items['image/png'] as string | Blob;
+
+    delete items['text/plain'];
+    delete items['text/html'];
+    delete items['image/png'];
+
+    const snapshot = lz.compressToEncodedURIComponent(JSON.stringify(items));
+    const html = `<div data-blocksuite-snapshot=${snapshot}>${innerHTML}</div>`;
+    const htmlBlob = new Blob([html], {
+      type: 'text/html',
+    });
+    const clipboardItems: Record<string, Blob> = {
+      'text/html': htmlBlob,
+    };
+    if (text.length > 0) {
+      const textBlob = new Blob([text], {
+        type: 'text/plain',
+      });
+      clipboardItems['text/plain'] = textBlob;
+    }
+    if (!(png instanceof Blob) && png.length > 0) {
+      const pngBlob = new Blob([png], {
+        type: 'image/png',
+      });
+      clipboardItems['image/png'] = pngBlob;
+    }
+    await navigator.clipboard.write([new ClipboardItem(clipboardItems)]);
+  }
+
+  readFromClipboard(clipboardData: DataTransfer) {
+    const items = clipboardData.getData('text/html');
+    const domParser = new DOMParser();
+    const doc = domParser.parseFromString(items, 'text/html');
+    const dom = doc.querySelector<HTMLDivElement>('[data-blocksuite-snapshot]');
+    assertExists(dom);
+    const json = JSON.parse(
+      lz.decompressFromEncodedURIComponent(
+        dom.dataset.blocksuiteSnapshot as string
+      )
+    );
+    return json;
+  }
 }

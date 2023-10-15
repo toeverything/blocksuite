@@ -17,8 +17,8 @@ import {
   type ShapeType,
   StrokeStyle,
 } from '../../../../../surface-block/index.js';
+import { ShapeToolController } from '../../../controllers/tool/shape-tool.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { ShapeToolController } from '../../../tool-controllers/shape-tool.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

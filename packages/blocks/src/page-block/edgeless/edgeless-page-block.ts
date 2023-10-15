@@ -61,6 +61,7 @@ import {
   EdgelessZoomToolbar,
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
+import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -167,6 +168,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
   edgelessLayer!: HTMLDivElement;
 
   clipboard = new EdgelessClipboard(this.page, this);
+
+  clipboardController = new EdgelessClipboardController(this);
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -310,7 +313,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
       slots.copyAsPng.on(({ blocks, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard
+
+        (this.clipboardController._enabled
+          ? this.clipboardController
+          : this.clipboard
+        )
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))

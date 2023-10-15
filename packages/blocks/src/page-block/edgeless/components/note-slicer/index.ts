@@ -26,7 +26,7 @@ import {
 import {
   DefaultModeDragType,
   type DefaultToolController,
-} from '../../tool-controllers/default-tool.js';
+} from '../../controllers/tool/default-tool.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { NoteSlicerButton } from './slicer-button.js';
