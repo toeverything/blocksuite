@@ -15,22 +15,27 @@ import { addSerializedBlocks } from '../../../__internal__/service/json2block.js
 import type { FrameBlockService } from '../../../__internal__/service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../../../__internal__/service/legacy-services/image-service.js';
 import { getService } from '../../../__internal__/service/singleton.js';
-import { ContentParser } from '../../../content-parser.js';
-import type {
-  EdgelessElement,
-  FrameBlockModel,
-  IBound,
-  ImageBlockModel,
-  NoteBlockModel,
-  Selectable,
-  SerializedBlock,
-  TopLevelBlockModel,
+import {
+  getBlockElementById,
+  getEditorContainer,
+  isPageMode,
+} from '../../../__internal__/utils/query.js';
+import {
+  type EdgelessElement,
+  type FrameBlockModel,
+  type IBound,
+  type ImageBlockModel,
+  type NoteBlockModel,
+  type Selectable,
+  type SerializedBlock,
+  type TopLevelBlockModel,
 } from '../../../index.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
 import type { PhasorElement } from '../../../surface-block/elements/index.js';
+import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
 import { compare } from '../../../surface-block/grid.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
@@ -40,6 +45,7 @@ import {
 } from '../../../surface-block/utils/xywh.js';
 import type { ClipboardController } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
+import { xywhArrayToObject } from '../utils/convert.js';
 import { deleteElements } from '../utils/crud.js';
 import {
   isFrameBlock,
@@ -478,9 +484,7 @@ export class EdgelessClipboardController implements ReactiveController {
       return;
     }
 
-    // TODO: remove ContentParser
-    const parser = new ContentParser(this.page);
-    const canvas = await parser.edgelessToCanvas(
+    const canvas = await this._edgelessToCanvas(
       this.host,
       bound,
       blocks,
@@ -510,6 +514,159 @@ export class EdgelessClipboardController implements ReactiveController {
           [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
         };
       });
+    }
+  }
+
+  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+    const richList = Array.from(element.querySelectorAll('.affine-rich-text'));
+    await Promise.all(
+      richList.map(async rich => {
+        const svgEle = await this._elementToSvgElement(
+          rich.cloneNode(true) as HTMLElement,
+          rich.clientWidth,
+          rich.clientHeight + 1
+        );
+        rich.parentElement?.appendChild(svgEle);
+        rich.parentElement?.removeChild(rich);
+      })
+    );
+  }
+
+  private async _elementToSvgElement(
+    node: HTMLElement,
+    width: number,
+    height: number
+  ) {
+    const xmlns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(xmlns, 'svg');
+    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
+
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+    foreignObject.setAttribute('width', '100%');
+    foreignObject.setAttribute('height', '100%');
+    foreignObject.setAttribute('x', '0');
+    foreignObject.setAttribute('y', '0');
+    foreignObject.setAttribute('externalResourcesRequired', 'true');
+
+    svg.appendChild(foreignObject);
+    foreignObject.appendChild(node);
+    return svg;
+  }
+
+  private async _edgelessToCanvas(
+    edgeless: EdgelessPageBlockComponent,
+    bound: IBound,
+    nodes?: TopLevelBlockModel[],
+    surfaces?: SurfaceElement[]
+  ): Promise<HTMLCanvasElement | undefined> {
+    const root = this.page.root;
+    if (!root) return;
+
+    const html2canvas = (await import('html2canvas')).default;
+    if (!(html2canvas instanceof Function)) return;
+
+    const pathname = location.pathname;
+    const pageMode = isPageMode(this.page);
+
+    const editorContainer = getEditorContainer(this.page);
+    const container = document.querySelector(
+      '.affine-block-children-container'
+    );
+    if (!container) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const canvas = document.createElement('canvas');
+    canvas.width = (bound.w + 100) * dpr;
+    canvas.height = (bound.h + 100) * dpr;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const replaceRichTextWithSvgElementFunc =
+      this._replaceRichTextWithSvgElement.bind(this);
+
+    let _imageProxyEndpoint: string | undefined;
+    if (
+      !_imageProxyEndpoint &&
+      location.protocol === 'https:' &&
+      location.hostname.split('.').includes('affine')
+    ) {
+      _imageProxyEndpoint =
+        'https://workers.toeverything.workers.dev/proxy/image';
+    }
+
+    const html2canvasOption = {
+      ignoreElements: function (element: Element) {
+        if (
+          element.tagName === 'AFFINE-BLOCK-HUB' ||
+          element.tagName === 'EDGELESS-TOOLBAR' ||
+          element.classList.contains('dg')
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      },
+      onclone: async function (documentClone: Document, element: HTMLElement) {
+        // html2canvas can't support transform feature
+        element.style.setProperty('transform', 'none');
+        const layer = documentClone.querySelector('.affine-edgeless-layer');
+        if (layer && layer instanceof HTMLElement) {
+          layer.style.setProperty('transform', 'none');
+        }
+
+        const boxShadowEles = documentClone.querySelectorAll(
+          "[style*='box-shadow']"
+        );
+        boxShadowEles.forEach(function (element) {
+          if (element instanceof HTMLElement) {
+            element.style.setProperty('box-shadow', 'none');
+          }
+        });
+
+        await replaceRichTextWithSvgElementFunc(element);
+      },
+      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
+      useCORS: _imageProxyEndpoint ? false : true,
+      proxy: _imageProxyEndpoint,
+    };
+
+    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
+    for (const nodeElement of nodeElements) {
+      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
+      const blockBound = xywhArrayToObject(nodeElement);
+      const canvasData = await html2canvas(
+        blockElement as HTMLElement,
+        html2canvasOption
+      );
+      ctx.drawImage(
+        canvasData,
+        blockBound.x - bound.x + 50,
+        blockBound.y - bound.y + 50,
+        blockBound.w,
+        blockBound.h
+      );
+      this._checkCanContinueToCanvas(pathname, pageMode);
+    }
+
+    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
+      bound,
+      surfaces
+    );
+    ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
+
+    return canvas;
+  }
+
+  private _checkCanContinueToCanvas(pathName: string, pageMode: boolean) {
+    if (location.pathname !== pathName || isPageMode(this.page) !== pageMode) {
+      throw new Error('Unable to export content to canvas');
     }
   }
 }
