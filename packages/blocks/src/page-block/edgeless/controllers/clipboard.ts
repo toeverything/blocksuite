@@ -18,16 +18,16 @@ import {
   getEditorContainer,
   isPageMode,
 } from '../../../__internal__/utils/query.js';
-import {
-  type EdgelessElement,
-  type FrameBlockModel,
-  type IBound,
-  type ImageBlockModel,
-  type NoteBlockModel,
-  type Selectable,
-  type SerializedBlock,
-  type TopLevelBlockModel,
-} from '../../../index.js';
+import type {
+  EdgelessElement,
+  Selectable,
+  SerializedBlock,
+  TopLevelBlockModel,
+} from '../../../__internal__/utils/types.js';
+import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
+import type { ImageBlockModel } from '../../../image-block/image-model.js';
+import type { NoteBlockModel } from '../../../note-block/note-model.js';
+import type { IBound } from '../../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
