@@ -1,9 +1,13 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
+import type { Heading, Root, RootContentMap } from 'mdast';
+import remarkStringify from 'remark-stringify';
+import { unified } from 'unified';
 
-import type {
-  BlockSnapshot,
-  PageSnapshot,
-  SliceSnapshot,
+import {
+  type BlockSnapshot,
+  BlockSnapshotSchema,
+  type PageSnapshot,
+  type SliceSnapshot,
 } from '../transformer/type.js';
 import type { AdapterAssetsManager } from './assets.js';
 import type {
@@ -13,6 +17,7 @@ import type {
   ToSliceSnapshotPayload,
 } from './base.js';
 import {
+  ASTWalker,
   BaseAdapter,
   type FromBlockSnapshotPayload,
   type FromPageSnapshotPayload,
@@ -20,6 +25,15 @@ import {
 import { StringBuilder } from './string-builder.js';
 
 export type Markdown = string;
+
+type MdastUnionType<
+  K extends keyof RootContentMap,
+  V extends RootContentMap[K],
+> = V;
+
+type MarkdownAST =
+  | MdastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
+  | Root;
 
 const markdownConvertibleFlavours = [
   'affine:code',
@@ -206,6 +220,228 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     }
   };
 
+  traverseSnapshot2 = async (snapshot: BlockSnapshot, markdownRoot: Root) => {
+    const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
+    walker.setONodeTypeGuard(
+      (node): node is BlockSnapshot =>
+        BlockSnapshotSchema.safeParse(node).success
+    );
+    walker.setEnter((o, context) => {
+      const text = (o.node.props.text ?? { delta: [] }) as {
+        delta: DeltaInsert[];
+      };
+      const currentTNode = context.currentNode();
+      switch (o.node.flavour) {
+        case 'affine:code': {
+          context
+            .openNode(
+              {
+                type: 'code',
+                lang: (o.node.props.language as string) ?? null,
+                meta: null,
+                value: text.delta.map(delta => delta.insert).join(''),
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'affine:paragraph': {
+          switch (o.node.props.type) {
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6': {
+              context.openNode(
+                {
+                  type: 'heading',
+                  depth: parseInt(o.node.props.type[1]) as Heading['depth'],
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children'
+              );
+              break;
+            }
+            case 'text': {
+              context.openNode(
+                {
+                  type: 'paragraph',
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children'
+              );
+              break;
+            }
+            case 'quote': {
+              context
+                .openNode(
+                  {
+                    type: 'blockquote',
+                    children: [],
+                  },
+                  'children'
+                )
+                .openNode(
+                  {
+                    type: 'paragraph',
+                    children: this.deltaToMdAST(text.delta),
+                  },
+                  'children'
+                );
+              break;
+            }
+          }
+          break;
+        }
+        case 'affine:list': {
+          // check if the list is of the same type
+          // if true, add the list item to the list
+          // if false, create a new list
+          if (
+            context.getContext('affine:list:parent') === o.parent &&
+            currentTNode.type === 'list' &&
+            currentTNode.ordered === (o.node.props.type === 'numbered') &&
+            currentTNode.children[0].checked ===
+              (o.node.props.type === 'todo'
+                ? (o.node.props.checked as boolean)
+                : undefined)
+          ) {
+            context
+              .openNode(
+                {
+                  type: 'listItem',
+                  checked:
+                    o.node.props.type === 'todo'
+                      ? (o.node.props.checked as boolean)
+                      : undefined,
+                  children: [],
+                },
+                'children'
+              )
+              .openNode(
+                {
+                  type: 'paragraph',
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children'
+              )
+              .closeNode();
+          } else {
+            context
+              .openNode(
+                {
+                  type: 'list',
+                  ordered: o.node.props.type === 'numbered',
+                  children: [],
+                },
+                'children'
+              )
+              .setContext('affine:list:parent', o.parent)
+              .openNode(
+                {
+                  type: 'listItem',
+                  checked:
+                    o.node.props.type === 'todo'
+                      ? (o.node.props.checked as boolean)
+                      : undefined,
+                  children: [],
+                },
+                'children'
+              )
+              .openNode(
+                {
+                  type: 'paragraph',
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children'
+              )
+              .closeNode();
+          }
+          break;
+        }
+        case 'affine:divider': {
+          context
+            .openNode(
+              {
+                type: 'thematicBreak',
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'affine:image': {
+          break;
+        }
+        case 'affine:database': {
+          break;
+        }
+      }
+    });
+    walker.setLeave((o, context) => {
+      const currentTNode = context.currentNode();
+      switch (o.node.flavour) {
+        case 'affine:code': {
+          break;
+        }
+        case 'affine:paragraph': {
+          switch (o.node.props.type) {
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6': {
+              context.closeNode();
+              break;
+            }
+            case 'text': {
+              context.closeNode();
+              break;
+            }
+            case 'quote': {
+              context.closeNode().closeNode();
+              break;
+            }
+          }
+          break;
+        }
+        case 'affine:list': {
+          if (
+            context.getContext('affine:list:parent') === o.parent &&
+            currentTNode.type === 'list' &&
+            currentTNode.ordered === (o.node.props.type === 'numbered') &&
+            currentTNode.children[0].checked ===
+              (o.node.props.type === 'todo'
+                ? (o.node.props.checked as boolean)
+                : undefined)
+          ) {
+            context.closeNode();
+          } else {
+            context.closeNode().closeNode();
+          }
+          break;
+        }
+        case 'affine:divider': {
+          break;
+        }
+        case 'affine:image': {
+          break;
+        }
+        case 'affine:database': {
+          break;
+        }
+      }
+    });
+    return walker.walk(snapshot, markdownRoot) as Root;
+  };
+
+  astToMardown(ast: Root) {
+    return unified().use(remarkStringify).stringify(ast);
+  }
+
   private writeTextDelta(text: { delta: DeltaInsert[] }) {
     if (
       Array.isArray(text?.delta) &&
@@ -248,6 +484,49 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       buffer.write(markdownText);
     }
     return buffer.toString();
+  }
+
+  deltaToMdAST(deltas: DeltaInsert[]) {
+    return deltas.map(delta => {
+      let mdast: MarkdownAST = {
+        type: 'text',
+        value: delta.attributes?.underline
+          ? `<u>${delta.insert}</u>`
+          : delta.insert,
+      };
+      if (delta.attributes?.code) {
+        mdast = {
+          type: 'inlineCode',
+          value: delta.insert,
+        };
+      }
+      if (delta.attributes?.bold) {
+        mdast = {
+          type: 'strong',
+          children: [mdast],
+        };
+      }
+      if (delta.attributes?.italic) {
+        mdast = {
+          type: 'emphasis',
+          children: [mdast],
+        };
+      }
+      if (delta.attributes?.strike) {
+        mdast = {
+          type: 'delete',
+          children: [mdast],
+        };
+      }
+      if (delta.attributes?.link) {
+        mdast = {
+          type: 'link',
+          url: delta.attributes.link,
+          children: [mdast],
+        };
+      }
+      return mdast;
+    });
   }
 }
 
