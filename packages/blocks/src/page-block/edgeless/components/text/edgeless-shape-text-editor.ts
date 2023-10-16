@@ -158,7 +158,6 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
       toRadian(rotate)
     );
     const [x, y] = this.edgeless.surface.toViewCoord(leftTopX, leftTopY);
-    console.log('x y width height', x, y, rect.width, rect.height);
 
     const virgoStyle = styleMap({
       position: 'absolute',
