@@ -436,6 +436,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       <rich-text
         .yText=${this.element.text}
         .enableFormat=${false}
+        .enableAutoScrollHorizontally=${false}
+        .enableAutoScrollVertically=${false}
         style=${hasPlaceholder
           ? styleMap({
               position: 'absolute',
