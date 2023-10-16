@@ -254,28 +254,24 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             case 'h4':
             case 'h5':
             case 'h6': {
-              context
-                .openNode(
-                  {
-                    type: 'heading',
-                    depth: parseInt(o.node.props.type[1]) as Heading['depth'],
-                    children: this.deltaToMdAST(text.delta),
-                  },
-                  'children'
-                )
-                .closeNode();
+              context.openNode(
+                {
+                  type: 'heading',
+                  depth: parseInt(o.node.props.type[1]) as Heading['depth'],
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children'
+              );
               break;
             }
             case 'text': {
-              context
-                .openNode(
-                  {
-                    type: 'paragraph',
-                    children: this.deltaToMdAST(text.delta),
-                  },
-                  'children'
-                )
-                .closeNode();
+              context.openNode(
+                {
+                  type: 'paragraph',
+                  children: this.deltaToMdAST(text.delta),
+                },
+                'children'
+              );
               break;
             }
             case 'quote': {
@@ -293,9 +289,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                     children: this.deltaToMdAST(text.delta),
                   },
                   'children'
-                )
-                .closeNode()
-                .closeNode();
+                );
               break;
             }
           }
@@ -306,6 +300,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           // if true, add the list item to the list
           // if false, create a new list
           if (
+            context.getContext('affine:list:parent') === o.parent &&
             currentTNode.type === 'list' &&
             currentTNode.ordered === (o.node.props.type === 'numbered') &&
             currentTNode.children[0].checked ===
@@ -332,23 +327,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 },
                 'children'
               )
-              .closeNode()
               .closeNode();
-            if (
-              o.parent &&
-              o.prop &&
-              o.parent[o.prop] instanceof Array &&
-              (o.parent[o.prop] as Array<object>).length > (o.index ?? 0) + 1
-            ) {
-              const nextONode = (o.parent[o.prop] as Array<BlockSnapshot>)[
-                (o.index ?? 0) + 1
-              ];
-              nextONode.flavour === 'affine:list' ||
-                nextONode.props.type === o.node.props.type ||
-                (nextONode.props.checked === undefined) ===
-                  (o.node.props.checked === undefined) ||
-                context.closeNode();
-            }
           } else {
             context
               .openNode(
@@ -359,6 +338,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 },
                 'children'
               )
+              .setContext('affine:list:parent', o.parent)
               .openNode(
                 {
                   type: 'listItem',
@@ -377,7 +357,6 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 },
                 'children'
               )
-              .closeNode()
               .closeNode();
           }
           break;
@@ -391,6 +370,61 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               'children'
             )
             .closeNode();
+          break;
+        }
+        case 'affine:image': {
+          break;
+        }
+        case 'affine:database': {
+          break;
+        }
+      }
+    });
+    walker.setLeave((o, context) => {
+      const currentTNode = context.currentNode();
+      switch (o.node.flavour) {
+        case 'affine:code': {
+          break;
+        }
+        case 'affine:paragraph': {
+          switch (o.node.props.type) {
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6': {
+              context.closeNode();
+              break;
+            }
+            case 'text': {
+              context.closeNode();
+              break;
+            }
+            case 'quote': {
+              context.closeNode().closeNode();
+              break;
+            }
+          }
+          break;
+        }
+        case 'affine:list': {
+          if (
+            context.getContext('affine:list:parent') === o.parent &&
+            currentTNode.type === 'list' &&
+            currentTNode.ordered === (o.node.props.type === 'numbered') &&
+            currentTNode.children[0].checked ===
+              (o.node.props.type === 'todo'
+                ? (o.node.props.checked as boolean)
+                : undefined)
+          ) {
+            context.closeNode();
+          } else {
+            context.closeNode().closeNode();
+          }
+          break;
+        }
+        case 'affine:divider': {
           break;
         }
         case 'affine:image': {
@@ -460,6 +494,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           ? `<u>${delta.insert}</u>`
           : delta.insert,
       };
+      if (delta.attributes?.code) {
+        mdast = {
+          type: 'inlineCode',
+          value: delta.insert,
+        };
+      }
       if (delta.attributes?.bold) {
         mdast = {
           type: 'strong',
