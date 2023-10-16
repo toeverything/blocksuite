@@ -1,9 +1,10 @@
 import type {
+  BlockStdProvider,
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import { assertExists, groupBy } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
 import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
@@ -12,9 +13,6 @@ import {
   isPureFileInClipboard,
 } from '../../../__internal__/clipboard/utils/pure.js';
 import { addSerializedBlocks } from '../../../__internal__/service/json2block.js';
-import type { FrameBlockService } from '../../../__internal__/service/legacy-services/frame-service.js';
-import type { ImageBlockService } from '../../../__internal__/service/legacy-services/image-service.js';
-import { getService } from '../../../__internal__/service/singleton.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -138,7 +136,7 @@ export class EdgelessClipboardController implements ReactiveController {
     }
 
     this.std.clipboard.writeToClipboard(async _items => {
-      const data = await prepareClipboardData(elements);
+      const data = await prepareClipboardData(elements, this.std);
       return {
         ..._items,
         [CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE]: JSON.stringify(data),
@@ -184,9 +182,10 @@ export class EdgelessClipboardController implements ReactiveController {
       return;
     }
 
-    const stringifyData = await this.std.clipboard.readFromClipboard(data);
-    const elementsRawData =
-      JSON.parse(stringifyData)[CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE];
+    const json = await this.std.clipboard.readFromClipboard(data);
+    const elementsRawData = JSON.parse(
+      json[CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE]
+    );
     this._pasteShapesAndBlocks(elementsRawData);
   };
 
@@ -706,17 +705,24 @@ function prepareConnectorClipboardData(
   return serialized;
 }
 
-async function prepareClipboardData(selectedAll: Selectable[]) {
+async function prepareClipboardData(
+  selectedAll: Selectable[],
+  std: BlockStdProvider
+) {
   const selected = await Promise.all(
     selectedAll.map(async selected => {
+      const job = new Job({
+        workspace: std.workspace,
+      });
+
       if (isNoteBlock(selected)) {
         return (await getBlockClipboardInfo(selected)).json;
       } else if (isFrameBlock(selected)) {
-        const service = getService(selected.flavour) as FrameBlockService;
-        return { ...service.block2Json(selected) };
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
       } else if (isImageBlock(selected)) {
-        const service = getService(selected.flavour) as ImageBlockService;
-        return { ...service.block2Json(selected, []) };
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
       } else if (selected instanceof ConnectorElement) {
         return prepareConnectorClipboardData(selected, selectedAll);
       } else {
