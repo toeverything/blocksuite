@@ -6,12 +6,7 @@ import { assertExists, groupBy } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
-import {
-  clipboardData2Blocks,
-  copyBlocksInPage,
-  getBlockClipboardInfo,
-} from '../../../__internal__/clipboard/index.js';
-import { deleteModelsByTextSelection } from '../../../__internal__/clipboard/utils/operation.js';
+import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import {
   CLIPBOARD_MIMETYPE,
   isPureFileInClipboard,
@@ -22,29 +17,28 @@ import type { ImageBlockService } from '../../../__internal__/service/legacy-ser
 import { getService } from '../../../__internal__/service/singleton.js';
 import { ContentParser } from '../../../content-parser.js';
 import type {
-  Connection,
   EdgelessElement,
   FrameBlockModel,
   IBound,
   ImageBlockModel,
   NoteBlockModel,
-  PhasorElement,
-  PhasorElementType,
   Selectable,
   SerializedBlock,
-  SurfaceBlockComponent,
   TopLevelBlockModel,
 } from '../../../index.js';
-import {
-  Bound,
-  compare,
-  ConnectorElement,
-  deserializeXYWH,
-  getCommonBound,
-  getSelectedContentModels,
-  serializeXYWH,
-} from '../../../index.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
+import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
+import type { Connection } from '../../../surface-block/elements/connector/types.js';
+import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
+import type { PhasorElement } from '../../../surface-block/elements/index.js';
+import { compare } from '../../../surface-block/grid.js';
+import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
+import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+} from '../../../surface-block/utils/xywh.js';
+import type { ClipboardController } from '../../clipboard/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { deleteElements } from '../utils/crud.js';
 import {
@@ -56,7 +50,10 @@ import {
 } from '../utils/query.js';
 
 export class EdgelessClipboardController implements ReactiveController {
-  constructor(public host: EdgelessPageBlockComponent) {
+  constructor(
+    public host: EdgelessPageBlockComponent,
+    public pageClipboardController: ClipboardController
+  ) {
     host.addController(this);
   }
 
@@ -70,10 +67,6 @@ export class EdgelessClipboardController implements ReactiveController {
 
   private get page() {
     return this.host.page;
-  }
-
-  private get root() {
-    return this.host.root;
   }
 
   private get surface() {
@@ -123,7 +116,7 @@ export class EdgelessClipboardController implements ReactiveController {
     _context: UIEventStateContext,
     surfaceSelection: SurfaceSelection
   ) => {
-    const event = _context.get('clipboardState').event;
+    const event = _context.get('clipboardState').raw;
     event.preventDefault();
 
     const elements = getCopyElements(
@@ -134,7 +127,7 @@ export class EdgelessClipboardController implements ReactiveController {
     if (surfaceSelection.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
       if (isPhasorElementWithText(elements[0])) return;
-      await copyBlocksInPage(this.root);
+      this.pageClipboardController.onPageCopy(_context);
       return;
     }
 
@@ -161,7 +154,7 @@ export class EdgelessClipboardController implements ReactiveController {
     if (state.editing) {
       // use build-in paste handler in rich-text when paste in surface text element
       if (isPhasorElementWithText(elements[0])) return;
-      await this._pasteInTextNote(event);
+      this.pageClipboardController.onPagePaste(_context);
       return;
     }
 
@@ -202,7 +195,7 @@ export class EdgelessClipboardController implements ReactiveController {
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isPhasorElementWithText(elements[0])) return;
-      deleteModelsByTextSelection(this.host.root);
+      this.pageClipboardController.onPageCut(_context);
       return;
     }
 
@@ -215,25 +208,6 @@ export class EdgelessClipboardController implements ReactiveController {
       elements: [],
     });
   };
-
-  private async _pasteInTextNote(e: ClipboardEvent) {
-    const blocks = await clipboardData2Blocks(this.page, e.clipboardData);
-    if (!blocks.length) {
-      return;
-    }
-    this.page.captureSync();
-
-    deleteModelsByTextSelection(this.host.root);
-
-    const textSelection = this.textSelection;
-    assertExists(textSelection);
-    const selectedModels = getSelectedContentModels(this.host.root, ['text']);
-
-    const focusedBlockModel = selectedModels[0];
-    assertExists(focusedBlockModel);
-    const service = getService(focusedBlockModel.flavour);
-    await service.json2Block(focusedBlockModel, blocks, textSelection.from);
-  }
 
   private _createPhasorElement(clipboardData: Record<string, unknown>) {
     const id = this.surface.addElement(

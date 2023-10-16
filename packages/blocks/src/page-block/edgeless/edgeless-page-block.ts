@@ -48,6 +48,7 @@ import {
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import { FontLoader } from '../font-loader/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
@@ -169,7 +170,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   clipboard = new EdgelessClipboard(this.page, this);
 
-  clipboardController = new EdgelessClipboardController(this);
+  pageClipboardController = new PageClipboardController(this);
+  clipboardController = new EdgelessClipboardController(
+    this,
+    this.pageClipboardController
+  );
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),

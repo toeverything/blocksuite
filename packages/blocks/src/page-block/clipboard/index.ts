@@ -41,9 +41,9 @@ export class ClipboardController implements ReactiveController {
   }
 
   private _init = () => {
-    this.host.handleEvent('copy', this._onCopy);
-    this.host.handleEvent('paste', this._onPaste);
-    this.host.handleEvent('cut', this._onCut);
+    this.host.handleEvent('copy', this.onPageCopy);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this.host.handleEvent('cut', this.onPageCut);
 
     this._std.clipboard.registerAdapter(
       ClipboardAdapter.MIME,
@@ -74,14 +74,14 @@ export class ClipboardController implements ReactiveController {
       .copySelectedModels({ event });
   };
 
-  private _onCopy: UIEventHandler = ctx => {
+  public onPageCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
     this._copySelected(e).run();
   };
 
-  private _onCut: UIEventHandler = ctx => {
+  public onPageCut: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
@@ -90,7 +90,7 @@ export class ClipboardController implements ReactiveController {
       .run();
   };
 
-  private _onPaste: UIEventHandler = ctx => {
+  public onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
