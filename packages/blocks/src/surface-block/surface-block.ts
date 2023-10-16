@@ -548,6 +548,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       edgeless.slots.elementSizeUpdated.on(id => {
         const element = getEdgelessElement(edgeless, id);
         assertExists(element);
+        if (element instanceof BrushElement) return;
         this.fitElementToViewport(element);
       })
     );
