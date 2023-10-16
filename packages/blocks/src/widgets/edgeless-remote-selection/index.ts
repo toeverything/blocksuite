@@ -208,6 +208,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
         this._updateTransform();
+        this.requestUpdate();
       })
     );
 
