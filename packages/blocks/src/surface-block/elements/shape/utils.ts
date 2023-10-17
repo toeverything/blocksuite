@@ -1,5 +1,5 @@
-import { StrokeStyle } from '../../consts.js';
-import type { Bound } from '../../utils/bound.js';
+import { type IBound, StrokeStyle } from '../../consts.js';
+import { Bound } from '../../utils/bound.js';
 import type { ITextDelta } from '../text/types.js';
 import {
   deltaInsertsToChunks,
@@ -45,6 +45,32 @@ export function normalizeShapeBound(shape: ShapeElement, bound: Bound): Bound {
   }
 
   return bound;
+}
+
+export function getShapeTextIBound(shape: ShapeElement): IBound | null {
+  const { x, y, text, fontSize, fontFamily, font, horizontalOffset, rotate } =
+    shape;
+  if (!text) return null;
+
+  const lineHeight = getLineHeight(fontFamily, fontSize);
+  const lines = deltaInsertsToChunks(shape.wrapTextDeltas);
+  const widestLineWidth = Math.max(
+    ...text
+      .toString()
+      .split('\n')
+      .map(text => getTextWidth(text, font))
+  );
+  const height = lineHeight * lines.length;
+  const verticalOffset = shape.verticalOffset(lines, lineHeight);
+  const iBound = new Bound(
+    x + horizontalOffset - 2,
+    y + verticalOffset - 1.5,
+    widestLineWidth,
+    height
+  ) as IBound;
+
+  if (rotate) iBound.rotate = rotate;
+  return iBound;
 }
 
 function drawRect(

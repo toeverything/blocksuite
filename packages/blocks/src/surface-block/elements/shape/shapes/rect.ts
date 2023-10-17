@@ -21,7 +21,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShape } from '../utils.js';
+import { drawGeneralShape, getShapeTextIBound } from '../utils.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -117,31 +117,43 @@ export const RectMethods: ShapeMethods = {
   hitTest(this: ShapeElement, x: number, y: number, options: HitTestOptions) {
     const points = getPointsFromBoundsWithRotation(this);
 
-    let hited = pointOnPolygonStoke(
+    let hit = pointOnPolygonStoke(
       [x, y],
       points,
       (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
     );
 
-    if (!hited) {
+    if (!hit) {
       // If the point is not on the stroke, check if it is in the shape
       // When the shape is filled and transparent is not ignored
       if (!options.ignoreTransparent || this.filled) {
-        hited = pointInPolygon([x, y], points);
+        hit = pointInPolygon([x, y], points);
       } else {
         // If shape is not filled or transparent
-        // Check the center area of the shape
-        const centralBounds = getCenterAreaBounds(
-          this,
-          DEFAULT_CENTRAL_AREA_RATIO
-        );
-        const centralPoints = getPointsFromBoundsWithRotation(centralBounds);
-        // Check if the point is in the center area
-        hited = pointInPolygon([x, y], centralPoints);
+        // Check if hit the text area
+        const text = this.text;
+        if (!text || !text.length) {
+          // if not, check the default center area of the shape
+          const centralBounds = getCenterAreaBounds(
+            this,
+            DEFAULT_CENTRAL_AREA_RATIO
+          );
+          const centralPoints = getPointsFromBoundsWithRotation(centralBounds);
+          // Check if the point is in the center area
+          hit = pointInPolygon([x, y], centralPoints);
+        } else {
+          // calculate the text area
+          const shapeTextIBound = getShapeTextIBound(this);
+          if (!shapeTextIBound) return false;
+          // Check if the point is in the text area
+          const textAreaPoints =
+            getPointsFromBoundsWithRotation(shapeTextIBound);
+          hit = pointInPolygon([x, y], textAreaPoints);
+        }
       }
     }
 
-    return hited;
+    return hit;
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {
