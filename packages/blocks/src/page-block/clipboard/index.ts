@@ -1,6 +1,7 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
+import type { BlockSnapshot, Page } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { replaceIdMiddleware } from '../../api/transformer/utils.js';
@@ -122,6 +123,22 @@ export class ClipboardController implements ReactiveController {
           ctx.parentBlock.model.id,
           ctx.blockIndex ? ctx.blockIndex + 1 : undefined
         );
+
+        return next();
+      })
+      .run();
+  };
+
+  public onBlockSnapshotPaste = (
+    snapshot: BlockSnapshot,
+    page: Page,
+    parent?: string,
+    index?: number
+  ) => {
+    this._std.command
+      .pipe()
+      .inline((_ctx, next) => {
+        this._std.clipboard.pasteBlockSnapshot(snapshot, page, parent, index);
 
         return next();
       })

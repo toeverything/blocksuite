@@ -11,7 +11,6 @@ import {
   CLIPBOARD_MIMETYPE,
   isPureFileInClipboard,
 } from '../../../__internal__/clipboard/utils/pure.js';
-import { addSerializedBlocks } from '../../../__internal__/service/json2block.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -279,7 +278,14 @@ export class EdgelessClipboardController implements ReactiveController {
         if (id) oldToNewIdMap.set(id, noteId);
         assertExists(note);
 
-        await addSerializedBlocks(this.page, children, note, 0);
+        children.forEach(child => {
+          this.pageClipboardController.onBlockSnapshotPaste(
+            child,
+            this.page,
+            note.id,
+            0
+          );
+        });
         return noteId;
       })
     );

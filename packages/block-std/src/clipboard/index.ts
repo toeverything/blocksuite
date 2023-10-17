@@ -1,6 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type {
   BaseAdapter,
+  BlockSnapshot,
   JobMiddleware,
   Page,
   Slice,
@@ -190,4 +191,14 @@ export class Clipboard {
     );
     return json;
   }
+
+  pasteBlockSnapshot = async (
+    snapshot: BlockSnapshot,
+    page: Page,
+    parent?: string,
+    index?: number
+  ) => {
+    const job = this._getJob();
+    return job.snapshotToBlock(snapshot, page, parent, index);
+  };
 }
