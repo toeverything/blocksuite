@@ -4,10 +4,9 @@ import type {
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import { assertExists, groupBy } from '@blocksuite/global/utils';
-import { Job, Workspace } from '@blocksuite/store';
+import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
-import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import {
   CLIPBOARD_MIMETYPE,
   isPureFileInClipboard,
@@ -21,7 +20,6 @@ import {
 import type {
   EdgelessElement,
   Selectable,
-  SerializedBlock,
   TopLevelBlockModel,
 } from '../../../__internal__/utils/types.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
@@ -260,12 +258,13 @@ export class EdgelessClipboardController implements ReactiveController {
   }
 
   private async _createNoteBlocks(
-    notes: SerializedBlock[],
+    notes: BlockSnapshot[],
     oldToNewIdMap: Map<string, string>
   ) {
     const { surface } = this;
     const noteIds = await Promise.all(
-      notes.map(async ({ id, xywh, children, background }) => {
+      notes.map(async ({ id, props, children }) => {
+        const { xywh, background } = props;
         assertExists(xywh);
 
         const noteId = this.surface.addElement(
@@ -287,15 +286,16 @@ export class EdgelessClipboardController implements ReactiveController {
     return noteIds;
   }
 
-  private async _createFrameBlocks(frames: SerializedBlock[]) {
+  private async _createFrameBlocks(frames: BlockSnapshot[]) {
     const frameIds = await Promise.all(
-      frames.map(async ({ xywh, title, background }) => {
+      frames.map(async ({ props }) => {
+        const { xywh, title, background } = props;
         const frameId = this.surface.addElement(
           EdgelessBlockType.FRAME,
           {
             xywh,
             background,
-            title: new Workspace.Y.Text(title),
+            title: fromJSON(title),
           },
           this.surface.model.id
         );
@@ -305,9 +305,10 @@ export class EdgelessClipboardController implements ReactiveController {
     return frameIds;
   }
 
-  private async _createImageBlocks(images: SerializedBlock[]) {
+  private async _createImageBlocks(images: BlockSnapshot[]) {
     const imageIds = await Promise.all(
-      images.map(async ({ xywh, sourceId, rotate }) => {
+      images.map(async ({ props }) => {
+        const { xywh, sourceId, rotate } = props;
         const imageId = this.surface.addElement(
           EdgelessBlockType.IMAGE,
           {
@@ -378,9 +379,9 @@ export class EdgelessClipboardController implements ReactiveController {
         ? 'images'
         : 'elements'
     ) as unknown as {
-      frames: SerializedBlock[];
-      notes?: SerializedBlock[];
-      images?: SerializedBlock[];
+      frames: BlockSnapshot[];
+      notes?: BlockSnapshot[];
+      images?: BlockSnapshot[];
       elements?: { type: PhasorElement['type'] }[];
     };
 
@@ -716,7 +717,8 @@ async function prepareClipboardData(
       });
 
       if (isNoteBlock(selected)) {
-        return (await getBlockClipboardInfo(selected)).json;
+        const snapshot = await job.blockToSnapshot(selected);
+        return { ...snapshot };
       } else if (isFrameBlock(selected)) {
         const snapshot = await job.blockToSnapshot(selected);
         return { ...snapshot };
