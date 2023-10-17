@@ -209,7 +209,9 @@ export class VEditor<
 
     this._mounted = true;
     this.slots.mounted.emit();
-    this._deltaService.render();
+    this._deltaService.render().catch(e => {
+      console.error(e);
+    });
   }
 
   unmount() {
@@ -222,7 +224,9 @@ export class VEditor<
   }
 
   requestUpdate(syncVRange = true): void {
-    this._deltaService.render(syncVRange);
+    this._deltaService.render(syncVRange).catch(e => {
+      console.error(e);
+    });
   }
 
   async waitForUpdate() {
@@ -344,7 +348,9 @@ export class VEditor<
 
   rerenderWholeEditor() {
     render(nothing, this.rootElement);
-    this._deltaService.render();
+    this._deltaService.render().catch(e => {
+      console.error(e);
+    });
   }
 
   private _onYTextChange = () => {

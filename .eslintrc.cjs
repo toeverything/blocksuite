@@ -70,13 +70,31 @@ module.exports = {
     {
       plugins: ['@typescript-eslint'],
       files: ['*.ts'],
+      parserOptions: {
+        project: `tsconfig.eslint.json`,
+      },
       rules: {
         '@typescript-eslint/ban-ts-comment': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
+        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'error',
+        '@typescript-eslint/no-misused-promises': 'error',
         '@typescript-eslint/no-namespace': [
           'error',
           { allowDeclarations: true },
         ],
+      },
+    },
+    {
+      plugins: ['@typescript-eslint'],
+      files: ['*.spec.ts', 'tests/**/*.ts'],
+      parserOptions: {
+        project: `tsconfig.eslint.json`,
+      },
+      rules: {
+        '@typescript-eslint/no-floating-promises': 'off',
+        '@typescript-eslint/no-non-null-asserted-nullish-coalescing': 'off',
+        '@typescript-eslint/no-misused-promises': 'off',
       },
     },
     ...allPackages.map(pkg => ({
