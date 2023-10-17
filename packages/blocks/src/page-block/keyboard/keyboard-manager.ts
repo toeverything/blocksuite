@@ -50,22 +50,24 @@ export class PageKeyboardManager {
     }
 
     this._page.transact(() => {
-      const { path } = this._replaceBlocksBySelection(
+      const selection = this._replaceBlocksBySelection(
         blockSelections,
         'affine:paragraph',
         {}
       );
 
-      this._selection.set([
-        this._selection.getInstance('text', {
-          from: {
-            index: 0,
-            length: 0,
-            path,
-          },
-          to: null,
-        }),
-      ]);
+      if (selection) {
+        this._selection.set([
+          this._selection.getInstance('text', {
+            from: {
+              index: 0,
+              length: 0,
+              path: selection.path,
+            },
+            to: null,
+          }),
+        ]);
+      }
     });
   };
 
@@ -102,6 +104,13 @@ export class PageKeyboardManager {
     const index = parent?.children.indexOf(first);
 
     this._deleteBlocksBySelection(selections);
+
+    try {
+      this._page.schema.validate(flavour, parent?.flavour);
+    } catch {
+      return null;
+    }
+
     const blockId = this._page.addBlock(flavour, props, parent, index);
 
     return {
