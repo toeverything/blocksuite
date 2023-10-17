@@ -7,10 +7,7 @@ import { assertExists, groupBy } from '@blocksuite/global/utils';
 import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
-import {
-  CLIPBOARD_MIMETYPE,
-  isPureFileInClipboard,
-} from '../../../__internal__/clipboard/utils/pure.js';
+import { CLIPBOARD_MIMETYPE } from '../../../__internal__/clipboard/utils/pure.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -739,4 +736,14 @@ async function prepareClipboardData(
     })
   );
   return selected.filter(d => !!d);
+}
+
+function isPureFileInClipboard(clipboardData: DataTransfer) {
+  const types = clipboardData.types;
+  return (
+    (types.length === 1 && types[0] === 'Files') ||
+    (types.length === 2 &&
+      (types.includes('text/plain') || types.includes('text/html')) &&
+      types.includes('Files'))
+  );
 }
