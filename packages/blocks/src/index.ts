@@ -10,7 +10,7 @@ import './code-block/affine-code-line.js';
 import './image-block/index.js';
 import './surface-block/index.js';
 import './database-block/index.js';
-import './surface-sync-block/index.js';
+import './surface-ref-block/index.js';
 
 export * from './__internal__/consts.js';
 export { getServiceOrRegister } from './__internal__/service/index.js';
@@ -42,7 +42,7 @@ export * from './preset/index.js';
 export * from './surface-block/index.js';
 export * from './surface-block/surface-block.js';
 export * from './surface-block/surface-model.js';
-export * from './surface-sync-block/index.js';
+export * from './surface-ref-block/index.js';
 export * from './test-utils/test-utils.js';
 export * from './widgets/index.js';
 const env: Record<string, unknown> =

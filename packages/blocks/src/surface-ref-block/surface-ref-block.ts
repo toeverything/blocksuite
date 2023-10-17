@@ -19,13 +19,13 @@ import { ElementCtors } from '../surface-block/index.js';
 import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
-import type { SurfaceSyncBlockModel } from './surface-sync-model.js';
+import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import { getSurfaceBlock } from './utils.js';
 
-@customElement('affine-surface-sync')
-export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockModel> {
+@customElement('affine-surface-ref')
+export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel> {
   static override styles = css`
-    .affine-surface-sync {
+    .affine-surface-ref {
       display: flex;
       justify-content: center;
       padding: 10px;
@@ -349,7 +349,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
 
     const [, , w, h] = deserializeXYWH(model.xywh);
 
-    return html`<div class="affine-surface-sync">
+    return html`<div class="affine-surface-ref">
       <div
         class="surface-canvas-container"
         @dblclick=${this.enterEdgeless}
@@ -371,6 +371,6 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceSyncBlockMode
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-surface-sync': SurfaceSyncBlockComponent;
+    'affine-surface-ref': SurfaceSyncBlockComponent;
   }
 }

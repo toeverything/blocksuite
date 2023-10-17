@@ -7,6 +7,7 @@ import {
   getCurrentNativeRange,
   getPageBlock,
   getVirgoByModel,
+  matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
   uploadImageFromLocal,
@@ -38,14 +39,22 @@ import {
   YesterdayIcon,
 } from '../../icons/index.js';
 import type { ImageBlockProps } from '../../image-block/image-model.js';
-import type { FrameBlockModel } from '../../models.js';
+import {
+  deserializeXYWH,
+  EDGELESS_BLOCK_CHILD_PADDING,
+  serializeXYWH,
+  type SurfaceRefBlockModel,
+} from '../../index.js';
+import type { FrameBlockModel, NoteBlockModel } from '../../models.js';
 import { copyBlock } from '../../page-block/doc/utils.js';
+import { DEFAULT_NOTE_HEIGHT } from '../../page-block/edgeless/utils/consts.js';
 import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
 } from '../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
+import { getHeightOfNoteChildern } from '../../surface-ref-block/utils.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -417,13 +426,53 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           name: 'Frame: ' + frameModel.title,
           icon: FrameIcon,
           action: async ({ pageElement, model }) => {
-            pageElement.page.addBlock(
-              'affine:surface-sync',
-              {
-                reference: frameModel.id,
-              },
-              pageElement.page.getParent(model)?.id
+            const { page } = pageElement;
+            const noteModel = page.getParent(model) as NoteBlockModel;
+            const [x, y, w] = deserializeXYWH(noteModel.xywh);
+            const sliceIdx = noteModel.children.indexOf(model);
+            const slicedBlocks = noteModel.children.slice(sliceIdx + 1);
+            const insertAtMiddle = sliceIdx !== 0 && slicedBlocks.length > 0;
+
+            const surfaceRefProps = {
+              flavour: 'affine:surface-ref',
+              reference: frameModel.id,
+            };
+            const [surfaceRefBlockId] = page.addSiblingBlocks(
+              noteModel,
+              [surfaceRefProps],
+              sliceIdx === 0 ? 'before' : 'after'
             );
+
+            if (insertAtMiddle) {
+              const slicedNoteProps = {
+                flavour: 'affine:note',
+                background: noteModel.background,
+                xywh: serializeXYWH(
+                  x,
+                  y +
+                    getHeightOfNoteChildern(noteModel, 0, sliceIdx) +
+                    EDGELESS_BLOCK_CHILD_PADDING,
+                  w,
+                  DEFAULT_NOTE_HEIGHT
+                ),
+              };
+
+              const [slicedNoteId] = page.addSiblingBlocks(
+                page.getBlockById(surfaceRefBlockId) as SurfaceRefBlockModel,
+                [slicedNoteProps]
+              );
+              page.moveBlocks(
+                slicedBlocks,
+                page.getBlockById(slicedNoteId) as NoteBlockModel
+              );
+            }
+
+            if (
+              matchFlavours(model, ['affine:paragraph']) &&
+              model.text.length === 0
+            ) {
+              page.deleteBlock(model);
+            }
           },
         };
       });
