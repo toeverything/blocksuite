@@ -8,12 +8,7 @@ import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { FrameBlockModel, NoteBlockModel } from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { Renderer } from '../../surface-block/index.js';
-import {
-  Bound,
-  deserializeXYWH,
-  Overlay,
-  type RoughCanvas,
-} from '../../surface-block/index.js';
+import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { type Selectable } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
