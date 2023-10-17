@@ -1,9 +1,12 @@
+import './portal/note.js';
+
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
+import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -12,7 +15,12 @@ import {
 } from '../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import { type AbstractEditor } from '../__internal__/utils/types.js';
-import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
+import type {
+  FrameBlockModel,
+  NoteBlockModel,
+  SurfaceBlockModel,
+} from '../models.js';
+import { getNotesInFrame } from '../page-block/edgeless/frame-manager.js';
 import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { ElementCtors } from '../surface-block/index.js';
@@ -21,19 +29,31 @@ import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import { getSurfaceBlock } from './utils.js';
-
 @customElement('affine-surface-ref')
 export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel> {
   static override styles = css`
     .affine-surface-ref {
-      display: flex;
-      justify-content: center;
       padding: 10px;
+      position: relative;
+    }
+
+    .surface-viewport {
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .surface-block-portal {
+      pointer-events: none;
+      position: absolute;
+      left: 0;
+      top: 0;
     }
 
     .surface-canvas-container {
-      flex-grow: 0;
-      flex-shrink: 0;
+      height: 100%;
+      width: 100%;
+      position: relative;
     }
   `;
   @state()
@@ -43,7 +63,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   private _focused: boolean = false;
 
   private _referenceModel: FrameBlockModel | null = null;
-  private _renderer = new Renderer();
+  private _surfaceRenderer = new Renderer();
   private _elements = new Map<string, SurfaceElement>();
   private _disposeReferenceWatcher: Disposable | null = null;
 
@@ -54,6 +74,81 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     super.connectedCallback();
     this.initSurfaceModel();
     this.initReferenceModel();
+    this.initSelection();
+  }
+
+  override firstUpdated() {
+    this.initSurfaceRenderer();
+  }
+
+  initSurfaceRenderer() {
+    this._surfaceRenderer.attach(this.container);
+
+    const resizeObserver = new ResizeObserver(() => {
+      this._rerender();
+    });
+    resizeObserver.observe(this.container);
+    this._disposables.add(() => resizeObserver.disconnect());
+    this._disposables.add(
+      this._surfaceRenderer.slots.viewportUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    this._rerender();
+  }
+
+  initReferenceModel() {
+    const init = () => {
+      const referenceModel = this.getModel(
+        this.model.reference
+      ) as FrameBlockModel;
+
+      if (!referenceModel || !referenceModel.xywh) return;
+
+      this._referenceModel = referenceModel;
+      this._disposeReferenceWatcher?.dispose();
+      this._disposeReferenceWatcher = referenceModel.propsUpdated.on(() => {
+        this.requestUpdate();
+        this.updateComplete.then(() => {
+          this._rerender();
+        });
+      });
+    };
+
+    init();
+
+    this._disposables.add(() => {
+      this.model.propsUpdated.on(() => {
+        if (this.model.reference !== this._referenceModel?.id) {
+          init();
+        }
+      });
+    });
+    this._disposables.add(() => {
+      this._disposeReferenceWatcher?.dispose();
+    });
+  }
+
+  initSurfaceModel() {
+    const init = () => {
+      this._surfaceModel = getSurfaceBlock(this.page);
+
+      if (!this._surfaceModel) return;
+
+      const elementsMap = this._surfaceModel.elements.getValue() as Y.Map<
+        Y.Map<unknown>
+      >;
+      const onElementsChange = (event: Y.YMapEvent<Y.Map<unknown>>) => {
+        this._onElementsChange(event, elementsMap);
+      };
+      elementsMap.observe(onElementsChange);
+      this._disposables.add(() => elementsMap.unobserve(onElementsChange));
+
+      this._syncFromExistingContainer(elementsMap);
+    };
+
+    init();
 
     if (!this._surfaceModel) {
       this._disposables.add(
@@ -63,20 +158,14 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
             !this._surfaceModel &&
             getSurfaceBlock(this.page)
           ) {
-            this.initSurfaceModel();
+            init();
           }
         })
       );
     }
+  }
 
-    this._disposables.add(() => {
-      this.model.propsUpdated.on(() => {
-        if (this.model.reference !== this._referenceModel?.id) {
-          this.initReferenceModel();
-        }
-      });
-    });
-
+  initSelection() {
     const selection = this.root.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
@@ -85,90 +174,6 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
         );
       })
     );
-
-    this._disposables.add(() => {
-      this._disposeReferenceWatcher?.dispose();
-    });
-  }
-
-  override firstUpdated() {
-    this.initRenderer();
-  }
-
-  initKeyBinding() {
-    const addParagraph = () => {
-      const parent = this.page.getParent(this.model);
-      if (!parent) return;
-      const index = parent.children.indexOf(this.model);
-      this.page.addBlock('affine:paragraph', {}, parent, index + 1);
-    };
-
-    this.bindHotKey({
-      Delete: () => {
-        if (!this._focused) return;
-
-        addParagraph();
-        this.page.deleteBlock(this.model);
-        return true;
-      },
-      Backspace: () => {
-        if (!this._focused) return;
-
-        addParagraph();
-        this.page.deleteBlock(this.model);
-        return true;
-      },
-      Enter: () => {
-        if (!this._focused) return;
-
-        addParagraph();
-        return true;
-      },
-    });
-  }
-
-  initRenderer() {
-    this._renderer.attach(this.container);
-
-    const resizeObserver = new ResizeObserver(() => {
-      this._rerender();
-    });
-    resizeObserver.observe(this.container);
-    this._disposables.add(() => resizeObserver.disconnect());
-  }
-
-  initReferenceModel() {
-    const referenceModel = this.getModel(
-      this.model.reference
-    ) as FrameBlockModel;
-
-    if (!referenceModel || !referenceModel.xywh) return;
-
-    this._referenceModel = referenceModel;
-    this._disposeReferenceWatcher?.dispose();
-    this._disposeReferenceWatcher = referenceModel.propsUpdated.on(() => {
-      this.requestUpdate();
-      this.updateComplete.then(() => {
-        this._rerender();
-      });
-    });
-  }
-
-  initSurfaceModel() {
-    this._surfaceModel = getSurfaceBlock(this.page);
-
-    if (!this._surfaceModel) return;
-
-    const elementsMap = this._surfaceModel.elements.getValue() as Y.Map<
-      Y.Map<unknown>
-    >;
-    const onElementsChange = (event: Y.YMapEvent<Y.Map<unknown>>) => {
-      this._onElementsChange(event, elementsMap);
-    };
-    elementsMap.observe(onElementsChange);
-    this._disposables.add(() => elementsMap.unobserve(onElementsChange));
-
-    this._syncFromExistingContainer(elementsMap);
   }
 
   private _rerender() {
@@ -176,8 +181,8 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       return;
     }
 
-    this._renderer.onResize();
-    this._renderer.setViewportByBound(
+    this._surfaceRenderer.onResize();
+    this._surfaceRenderer.setViewportByBound(
       Bound.fromXYWH(deserializeXYWH(this._referenceModel.xywh))
     );
   }
@@ -207,8 +212,8 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       getLocalRecord: () => undefined,
       onElementUpdated: () => {},
     });
-    element.computedValue = this.getCSSPropertyValue;
-    element.mount(this._renderer);
+    element.computedValue = this._getCSSPropertyValue;
+    element.mount(this._surfaceRenderer);
     this._elements.set(element.id, element);
   }
 
@@ -266,8 +271,8 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
         onElementUpdated() {},
         getLocalRecord: () => undefined,
       });
-      element.computedValue = this.getCSSPropertyValue;
-      element.mount(this._renderer);
+      element.computedValue = this._getCSSPropertyValue;
+      element.mount(this._surfaceRenderer);
       this._elements.set(element.id, element);
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
@@ -280,11 +285,11 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       }
     }
 
-    this._renderer.refresh();
+    this._surfaceRenderer.refresh();
     this.requestUpdate();
   };
 
-  private getCSSPropertyValue = (value: string) => {
+  private _getCSSPropertyValue = (value: string) => {
     const root = this.root;
     if (isCssVariable(value)) {
       const cssValue = getThemePropertyValue(root, value as CssVariableName);
@@ -305,7 +310,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     return this.page.getBlockById(id) ?? this._elements.get(id);
   }
 
-  enterEdgeless() {
+  viewInEdgeless() {
     if (!this._referenceModel) return;
 
     const xywh = deserializeXYWH(this._referenceModel.xywh);
@@ -341,19 +346,34 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     });
   }
 
+  private _renderEdgelessNotes(notes: NoteBlockModel[]) {
+    return repeat(
+      notes,
+      model => model.id,
+      (model, index) => {
+        return html`<surface-ref-note-portal
+          .index=${index}
+          .model=${model}
+          .renderModel=${this.renderModel}
+        ></surface-ref-note-portal>`;
+      }
+    );
+  }
+
   override render() {
+    this.renderModel;
     const { reference } = this.model;
     const model = this.getModel(reference) as FrameBlockModel;
 
     if (!this._surfaceModel || !model || !model.xywh) return nothing;
 
     const [, , w, h] = deserializeXYWH(model.xywh);
+    const notes = getNotesInFrame(this.page, model, false);
+    const { zoom, translateX, translateY } = this._surfaceRenderer;
 
     return html`<div class="affine-surface-ref">
       <div
-        class="surface-canvas-container"
-        @dblclick=${this.enterEdgeless}
-        @click=${this.focusBlock}
+        class="surface-viewport"
         style=${styleMap({
           maxWidth: '100%',
           width: `${w}px`,
@@ -363,7 +383,21 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
             : undefined,
         })}
       >
-        <!-- attach canvas here -->
+        <div
+          class="surface-block-portal"
+          style=${styleMap({
+            transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
+          })}
+        >
+          ${this._renderEdgelessNotes(notes)}
+        </div>
+        <div
+          class="surface-canvas-container"
+          @dblclick=${this.viewInEdgeless}
+          @click=${this.focusBlock}
+        >
+          <!-- attach canvas here -->
+        </div>
       </div>
     </div>`;
   }

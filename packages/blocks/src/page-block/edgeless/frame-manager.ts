@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
 import { getBlockElementByModel } from '../../__internal__/index.js';
@@ -6,7 +7,13 @@ import type { EdgelessElement } from '../../__internal__/utils/types.js';
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { FrameBlockModel, NoteBlockModel } from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
+import type { Renderer } from '../../surface-block/index.js';
+import {
+  Bound,
+  deserializeXYWH,
+  Overlay,
+  type RoughCanvas,
+} from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { type Selectable } from './services/tools-manager.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
@@ -63,17 +70,11 @@ export class EdgelessFrameManager {
   }
 
   getElementsInFrame(frame: FrameBlockModel) {
-    const bound = Bound.deserialize(frame.xywh);
-    const elements: EdgelessElement[] =
-      this._edgeless.surface.viewport.gridManager
-        .search(bound, true)
-        .filter(ele => !isFrameBlock(ele));
-    elements.push(
-      ...(<NoteBlockModel[]>(
-        this._edgeless.page.getBlockByFlavour('affine:note')
-      )).filter(ele => bound.contains(Bound.deserialize(ele.xywh)))
+    return getElementsInFrame(
+      this._edgeless.page,
+      this._edgeless.surface.viewport,
+      frame
     );
-    return elements;
   }
 
   calculateFrameColor(frame: FrameBlockModel) {
@@ -124,4 +125,36 @@ export class EdgelessFrameManager {
       editing: false,
     });
   }
+}
+
+export function getElementsInFrame(
+  page: Page,
+  surfaceRenderer: Renderer,
+  frame: FrameBlockModel
+) {
+  const bound = Bound.deserialize(frame.xywh);
+
+  return (
+    surfaceRenderer.gridManager
+      .search(bound, true)
+      .filter(ele => !isFrameBlock(ele)) as EdgelessElement[]
+  ).concat(getNotesInFrame(page, frame));
+}
+
+export function getNotesInFrame(
+  page: Page,
+  frame: FrameBlockModel,
+  fullyContained: boolean = true
+) {
+  const bound = Bound.deserialize(frame.xywh);
+
+  return (page.getBlockByFlavour('affine:note') as NoteBlockModel[]).filter(
+    ele => {
+      const xywh = Bound.deserialize(ele.xywh);
+
+      return fullyContained
+        ? bound.contains(xywh)
+        : bound.isPointInBound([xywh.x, xywh.y]);
+    }
+  ) as NoteBlockModel[];
 }
