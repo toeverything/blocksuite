@@ -7,7 +7,6 @@ import { assertExists, groupBy } from '@blocksuite/global/utils';
 import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
-import { CLIPBOARD_MIMETYPE } from '../../../__internal__/clipboard/utils/pure.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -46,6 +45,9 @@ import {
   isPhasorElementWithText,
   isTopLevelBlock,
 } from '../utils/query.js';
+
+const BLOCKSUITE_SURFACE = 'blocksuite/surface';
+const IMAGE_PNG = 'image/png';
 
 export class EdgelessClipboardController implements ReactiveController {
   constructor(
@@ -133,7 +135,7 @@ export class EdgelessClipboardController implements ReactiveController {
       const data = await prepareClipboardData(elements, this.std);
       return {
         ..._items,
-        [CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE]: JSON.stringify(data),
+        [BLOCKSUITE_SURFACE]: JSON.stringify(data),
       };
     });
   };
@@ -177,9 +179,7 @@ export class EdgelessClipboardController implements ReactiveController {
     }
 
     const json = await this.std.clipboard.readFromClipboard(data);
-    const elementsRawData = JSON.parse(
-      json[CLIPBOARD_MIMETYPE.BLOCKSUITE_SURFACE]
-    );
+    const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
     this._pasteShapesAndBlocks(elementsRawData);
   };
 
@@ -500,13 +500,13 @@ export class EdgelessClipboardController implements ReactiveController {
     if (window.apis?.clipboard?.copyAsImageFromString) {
       // @ts-ignore
       await window.apis.clipboard?.copyAsImageFromString(
-        canvas.toDataURL(CLIPBOARD_MIMETYPE.IMAGE_PNG)
+        canvas.toDataURL(IMAGE_PNG)
       );
     } else {
       const blob: Blob = await new Promise((resolve, reject) =>
         canvas.toBlob(
           blob => (blob ? resolve(blob) : reject('Canvas can not export blob')),
-          CLIPBOARD_MIMETYPE.IMAGE_PNG
+          IMAGE_PNG
         )
       );
       assertExists(blob);
@@ -514,7 +514,7 @@ export class EdgelessClipboardController implements ReactiveController {
       this.std.clipboard.writeToClipboard(async _items => {
         return {
           ..._items,
-          [CLIPBOARD_MIMETYPE.IMAGE_PNG]: blob,
+          [IMAGE_PNG]: blob,
         };
       });
     }
