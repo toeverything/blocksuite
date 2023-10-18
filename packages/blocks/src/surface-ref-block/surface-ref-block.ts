@@ -65,7 +65,6 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   private _referenceModel: FrameBlockModel | null = null;
   private _surfaceRenderer = new Renderer();
   private _elements = new Map<string, SurfaceElement>();
-  private _disposeReferenceWatcher: Disposable | null = null;
 
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
@@ -83,10 +82,9 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
 
   initSurfaceRenderer() {
     this._surfaceRenderer.attach(this.container);
-    this._rerender();
 
     const resizeObserver = new ResizeObserver(() => {
-      this._rerender();
+      this.refreshViewport();
     });
     resizeObserver.observe(this.container);
     this._disposables.add(() => resizeObserver.disconnect());
@@ -98,21 +96,24 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   }
 
   initReferenceModel() {
+    let referenceWathcer: Disposable | null = null;
     const init = () => {
       const referenceModel = this.getModel(
         this.model.reference
       ) as FrameBlockModel;
 
-      if (!referenceModel || !referenceModel.xywh) return;
+      this._referenceModel = 'xywh' in referenceModel ? referenceModel : null;
 
-      this._referenceModel = referenceModel;
-      this._disposeReferenceWatcher?.dispose();
-      this._disposeReferenceWatcher = referenceModel.propsUpdated.on(() => {
+      if (!this._referenceModel) return;
+
+      referenceWathcer = referenceModel.propsUpdated.on(() => {
         this.requestUpdate();
         this.updateComplete.then(() => {
-          this._rerender();
+          this.refreshViewport();
         });
       });
+
+      this.refreshViewport();
     };
 
     init();
@@ -125,7 +126,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       });
     });
     this._disposables.add(() => {
-      this._disposeReferenceWatcher?.dispose();
+      referenceWathcer?.dispose();
     });
   }
 
@@ -175,7 +176,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     );
   }
 
-  private _rerender() {
+  private refreshViewport() {
     if (!this._referenceModel) {
       return;
     }
@@ -306,7 +307,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   };
 
   private getModel(id: string) {
-    return this.page.getBlockById(id) ?? this._elements.get(id);
+    return this.page.getBlockById(id) ?? this._elements.get(id) ?? null;
   }
 
   viewInEdgeless() {
@@ -360,7 +361,6 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   }
 
   override render() {
-    this.renderModel;
     const { reference } = this.model;
     const model = this.getModel(reference) as FrameBlockModel;
 
