@@ -11,7 +11,7 @@ const Index = FlexSearch.Index;
 
 export type QueryContent = string | Partial<DocumentSearchOptions<boolean>>;
 
-type SearchResult = { id: string; doc: { space: string } };
+type SearchResult = { id: string; doc: { space: string; content: string } };
 type SearchResults = { field: string; result: SearchResult[] };
 
 function tokenize(locale: string) {
@@ -70,7 +70,7 @@ export class SearchIndexer {
         id: 'id',
         index: ['content', 'reference', 'space'],
         tag: 'tags',
-        store: ['space'],
+        store: ['space', 'content'],
       },
       encode: tokenize(locale),
       tokenize: 'forward',
@@ -91,7 +91,7 @@ export class SearchIndexer {
   search(query: QueryContent) {
     return new Map(
       this._search(query).flatMap(({ result }) =>
-        result.map(r => [r.id, r.doc.space])
+        result.map(r => [r.id, { space: r.doc.space, content: r.doc.content }])
       )
     );
   }
