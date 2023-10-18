@@ -260,7 +260,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDblClick(e: PointerEventState) {
     const selected = this._pick(e.x, e.y, {
-      pierce: true,
+      pierce: false,
       expand: 10,
     });
     if (!selected) {
