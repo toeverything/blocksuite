@@ -39,12 +39,9 @@ describe('workspace.search works', () => {
       title: new page.Text(''),
     });
     const noteId = page.addBlock('affine:note', {}, pageId);
-    const text1 = new page.Text(
-      '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
-    );
-    const text2 = new page.Text(
-      '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
-    );
+    const text1 =
+      '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz';
+    const text2 = '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台';
     const expected1 = new Map([
       [
         '2',
@@ -66,7 +63,7 @@ describe('workspace.search works', () => {
     page.addBlock(
       'affine:paragraph',
       {
-        text: text1,
+        text: new page.Text(text1),
       },
       noteId
     );
@@ -74,7 +71,7 @@ describe('workspace.search works', () => {
     page.addBlock(
       'affine:paragraph',
       {
-        text: text2,
+        text: new page.Text(text2),
       },
       noteId
     );
