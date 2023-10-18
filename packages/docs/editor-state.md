@@ -36,6 +36,9 @@ type BlockModel = {
 };
 ```
 
+When document is updated, the corresponding slot events will be triggered.
+And the blocks should update the UI components accordingly.
+
 ## Awareness
 
 Awareness contains the information of each user in the editor.
@@ -48,6 +51,9 @@ For example:
 - Username: We want to show the username of each collaborator in the editor.
 - Selection: We want to show the cursor of each collaborator in the editor.
   But we don't want to let them influence our editing.
+
+When collaborating with other users, the local editor will receive the awareness information of other users.
+The information should be displayed in the UI. But it should not affect the local editing.
 
 ## 🚧 Context
 
