@@ -38,6 +38,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     }
 
     .surface-viewport {
+      max-width: 100%;
       margin: 0 auto;
       position: relative;
       overflow: hidden;
@@ -69,30 +70,38 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
 
+  @query('.surface-block-portal')
+  blocksPortal!: HTMLDivElement;
+
   override connectedCallback() {
     super.connectedCallback();
     this.initSurfaceModel();
     this.initReferenceModel();
     this.initSelection();
-  }
-
-  override firstUpdated() {
     this.initSurfaceRenderer();
   }
 
-  initSurfaceRenderer() {
-    this._surfaceRenderer.attach(this.container);
+  override updated() {
+    this.attachRenderer();
+  }
 
-    const resizeObserver = new ResizeObserver(() => {
-      this.refreshViewport();
+  attachRenderer() {
+    if (this._surfaceRenderer.canvas.isConnected || !this.container) return;
+
+    this._surfaceRenderer.attach(this.container);
+  }
+
+  initSurfaceRenderer() {
+    let lastWidth = 0;
+    const observer = new ResizeObserver(entries => {
+      if (entries[0].contentRect.width !== lastWidth) {
+        lastWidth = entries[0].contentRect.width;
+        this._refreshViewport();
+      }
     });
-    resizeObserver.observe(this.container);
-    this._disposables.add(() => resizeObserver.disconnect());
-    this._disposables.add(
-      this._surfaceRenderer.slots.viewportUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
+    observer.observe(this);
+
+    this._disposables.add(() => observer.disconnect());
   }
 
   initReferenceModel() {
@@ -109,11 +118,11 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       referenceWathcer = referenceModel.propsUpdated.on(() => {
         this.requestUpdate();
         this.updateComplete.then(() => {
-          this.refreshViewport();
+          this._refreshViewport();
         });
       });
 
-      this.refreshViewport();
+      this._refreshViewport();
     };
 
     init();
@@ -176,15 +185,25 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     );
   }
 
-  private refreshViewport() {
+  private _refreshViewport() {
     if (!this._referenceModel) {
       return;
     }
 
-    this._surfaceRenderer.onResize();
-    this._surfaceRenderer.setViewportByBound(
-      Bound.fromXYWH(deserializeXYWH(this._referenceModel.xywh))
-    );
+    const referenceModel = this._referenceModel;
+
+    // trigger an rerender to update element's size
+    // and set viewport after element's size has been updated
+    this.requestUpdate();
+    this.updateComplete.then(() => {
+      this._surfaceRenderer.onResize();
+      this._surfaceRenderer.setViewportByBound(
+        Bound.fromXYWH(deserializeXYWH(referenceModel.xywh))
+      );
+
+      // trigger an rerender to update portal transform
+      this.requestUpdate();
+    });
   }
 
   private _syncFromExistingContainer(elementsMap: Y.Map<Y.Map<unknown>>) {
@@ -374,7 +393,6 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       <div
         class="surface-viewport"
         style=${styleMap({
-          maxWidth: '100%',
           width: `${w}px`,
           aspectRatio: `${w} / ${h}`,
           outline: this._focused
