@@ -5,6 +5,205 @@ import { MarkdownAdapter } from '../../adapter/index';
 import type { BlockSnapshot } from '../../transformer/type';
 
 describe('markdown adapter', () => {
+  test('paragraph', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Bdn8Yvqcny',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'aaa',
+                    },
+                  ],
+                },
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:72SMa5mdLy',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'bbb',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+                {
+                  type: 'block',
+                  id: 'block:f-Z6nRrGK_',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ccc',
+                        },
+                      ],
+                    },
+                  },
+                  children: [
+                    {
+                      type: 'block',
+                      id: 'block:sP3bU52el7',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        type: 'text',
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'ddd',
+                            },
+                          ],
+                        },
+                      },
+                      children: [],
+                    },
+                    {
+                      type: 'block',
+                      id: 'block:X_HMxP4wxC',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        type: 'text',
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'eee',
+                            },
+                          ],
+                        },
+                      },
+                      children: [],
+                    },
+                    {
+                      type: 'block',
+                      id: 'block:iA34Rb-RvV',
+                      flavour: 'affine:paragraph',
+                      props: {
+                        text: {
+                          '$blocksuite:internal:text$': true,
+                          delta: [
+                            {
+                              insert: 'fff',
+                            },
+                          ],
+                        },
+                        type: 'text',
+                      },
+                      children: [],
+                    },
+                  ],
+                },
+                {
+                  type: 'block',
+                  id: 'block:I0Fmz5Nv02',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ggg',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: 'block',
+              id: 'block:12lDwMD7ec',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'hhh',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+    const markdown = `aaa
+
+&#x20;   bbb
+
+&#x20;   ccc
+
+&#x20;       ddd
+
+&#x20;       eee
+
+&#x20;       fff
+
+&#x20;   ggg
+
+hhh
+`;
+    const mdAdapter = new MarkdownAdapter();
+    const root: Root = {
+      type: 'root',
+      children: [],
+    };
+    const ast = await mdAdapter.traverseSnapshot2(blockSnapshot, root);
+    expect(mdAdapter.astToMardown(ast)).toBe(markdown);
+  });
+
   test('list', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
