@@ -83,6 +83,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
 
   initSurfaceRenderer() {
     this._surfaceRenderer.attach(this.container);
+    this._rerender();
 
     const resizeObserver = new ResizeObserver(() => {
       this._rerender();
@@ -94,8 +95,6 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
         this.requestUpdate();
       })
     );
-
-    this._rerender();
   }
 
   initReferenceModel() {
