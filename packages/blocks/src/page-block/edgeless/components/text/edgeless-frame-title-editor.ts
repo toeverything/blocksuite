@@ -62,7 +62,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       dispatcher.add('keyDown', ctx => {
         const state = ctx.get('keyboardState');
         if (state.raw.key === 'Enter') {
-          this._unmount();
+          setTimeout(() => this._unmount());
           return true;
         }
         requestAnimationFrame(() => {
