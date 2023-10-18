@@ -3,12 +3,12 @@
 layout: home
 
 title: BlockSuite
-titleTemplate: Structral Editing Toolkit
+titleTemplate: Block-Based Collaborative Editing
 
 hero:
   name: BlockSuite
-  text: Where Diverse Editing Tools Converge
-  tagline: BlockSuite provides the toolkit for block-based structral editing.
+  text: Block-Based Collaborative Editing
+  tagline: BlockSuite is the open-source collaborative editing project behind AFFiNE.
   actions:
     - theme: brand
       text: Get Started
@@ -18,10 +18,10 @@ hero:
       link: https://blocksuite-toeverything.vercel.app/starter/?init
 
 features:
-  - title: 🎨 Isomorphic Block-Based Editors
-    details: Build diverse content editing tools with reusable <b><i>blocks</i></b>, including rich text, whiteboard, spreadsheet, and more!
+  - title: 🎨 Interoperable Block-Based Editors
+    details: BlockSuite provides multiple block-based editors with shared schema and infra, including rich text, whiteboard and more!
   - title: 🧬 Intrinsically Collaborative
     details: Powered by CRDT, BlockSuite built conflict resolution and time travel into its core. Collaboration ready from day one.
-  - title: 🧩 Progressive Suite
-    details: BlockSuite provides a comprehensive toolkit tailored for extensibility. Battery included. Framework agnostic.
+  - title: 🚧 Extensible Suite
+    details: Experience extensibility through comprehensive API and reusable packages. Battery included. Framework agnostic.
 ---

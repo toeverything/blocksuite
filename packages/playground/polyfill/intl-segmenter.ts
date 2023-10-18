@@ -1,5 +1,5 @@
 if (Intl.Segmenter === undefined) {
-  import('intl-segmenter-polyfill-rs').then(({ Segmenter }) => {
+  void import('intl-segmenter-polyfill-rs').then(({ Segmenter }) => {
     Object.defineProperty(Intl, 'Segmenter', {
       value: Segmenter,
       configurable: true,
