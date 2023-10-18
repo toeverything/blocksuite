@@ -1,7 +1,10 @@
 import { type IBound, StrokeStyle } from '../../consts.js';
-import { getPointsFromBoundsWithRotation, type IVec } from '../../index.js';
 import { Bound } from '../../utils/bound.js';
-import { pointInPolygon } from '../../utils/math-utils.js';
+import {
+  getPointsFromBoundsWithRotation,
+  pointInPolygon,
+} from '../../utils/math-utils.js';
+import { type IVec } from '../../utils/vec.js';
 import type { ITextDelta } from '../text/types.js';
 import {
   deltaInsertsToChunks,
