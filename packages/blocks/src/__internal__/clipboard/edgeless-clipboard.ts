@@ -121,9 +121,9 @@ export class EdgelessClipboard implements Clipboard {
 
   init(page: Page = this._page) {
     this._page = page;
-    document.body.addEventListener('cut', this._onCut);
-    document.body.addEventListener('copy', this._onCopy);
-    document.body.addEventListener('paste', this._onPaste);
+    document.body.addEventListener('cut', e => void this._onCut(e));
+    document.body.addEventListener('copy', e => void this._onCopy(e));
+    document.body.addEventListener('paste', e => void this._onPaste(e));
   }
 
   get toolMgr() {
@@ -147,14 +147,14 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   public dispose() {
-    document.body.removeEventListener('cut', this._onCut);
-    document.body.removeEventListener('copy', this._onCopy);
-    document.body.removeEventListener('paste', this._onPaste);
+    document.body.removeEventListener('cut', e => void this._onCut(e));
+    document.body.removeEventListener('copy', e => void this._onCopy(e));
+    document.body.removeEventListener('paste', e => void this._onPaste(e));
   }
 
-  private _onCut = (e: ClipboardEvent) => {
+  private _onCut = async (e: ClipboardEvent) => {
     e.preventDefault();
-    this._onCopy(e);
+    await this._onCopy(e);
 
     const { state, elements } = this.selection;
     if (state.editing) {
@@ -233,7 +233,7 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
 
-    this._pasteShapesAndBlocks(elementsRawData);
+    await this._pasteShapesAndBlocks(elementsRawData);
   };
 
   private async _pasteInTextNote(e: ClipboardEvent) {

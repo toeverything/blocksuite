@@ -109,7 +109,7 @@ export class ContentParser {
       blobMap
     );
 
-    FileExporter.exportHtml(
+    await FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
       root.id,
       htmlContent,
@@ -128,7 +128,7 @@ export class ContentParser {
       blobMap
     );
 
-    FileExporter.exportHtmlAsMarkdown(
+    await FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       root.id,
       markdownContent,
