@@ -1,27 +1,30 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { EdgelessTool, ShapeTool } from '../../../__internal__/index.js';
-import { hasClassNameInList } from '../../../__internal__/index.js';
+import type {
+  EdgelessTool,
+  ShapeTool,
+} from '../../../../__internal__/index.js';
+import { hasClassNameInList } from '../../../../__internal__/index.js';
 import {
   Bound,
   PhasorElementType,
   ShapeStyle,
   StrokeStyle,
-} from '../../../surface-block/index.js';
+} from '../../../../surface-block/index.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,
-} from '../components/component-toolbar/change-shape-button.js';
-import { isTransparent } from '../components/panel/color-panel.js';
-import type { SelectionArea } from '../services/tools-manager.js';
+} from '../../components/component-toolbar/change-shape-button.js';
+import { isTransparent } from '../../components/panel/color-panel.js';
+import type { SelectionArea } from '../../services/tools-manager.js';
 import {
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_OPTIONS,
   SHAPE_OVERLAY_WIDTH,
-} from '../utils/consts.js';
-import { ShapeOverlay } from '../utils/tool-overlay.js';
+} from '../../utils/consts.js';
+import { ShapeOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
 export class ShapeToolController extends EdgelessToolController<ShapeTool> {

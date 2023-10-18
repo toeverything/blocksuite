@@ -39,8 +39,16 @@ export class DateCell extends BaseCellRenderer<number> {
   `;
 
   override render() {
-    const value = this.value ? format(new Date(this.value), 'yyyy/MM/dd') : '';
-    return html` <div class="affine-database-date date">${value}</div>`;
+    const value = this.value ? format(new Date(this.value), 'yyyy-MM-dd') : '';
+    if (!value) {
+      return '';
+    }
+    return html` <input
+      type="date"
+      disabled
+      value="${value}"
+      class="affine-database-date date"
+    />`;
   }
 }
 

@@ -229,7 +229,7 @@ export type SafeBridgeOptions = { debug: boolean; idleTimeout: number };
  * Licensed under MIT.
  */
 export const safeBridge = ({
-  debug = true,
+  debug = false,
   idleTimeout = 500,
 }: Partial<SafeBridgeOptions> = {}): HoverMiddleware => {
   let abortController = new AbortController();

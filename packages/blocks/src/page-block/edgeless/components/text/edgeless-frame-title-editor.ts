@@ -61,7 +61,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     this.disposables.add(
       dispatcher.add('keyDown', ctx => {
         const state = ctx.get('keyboardState');
-        if (state.raw.key === 'Enter') {
+        if (state.raw.key === 'Enter' && !state.raw.isComposing) {
           this._unmount();
           return true;
         }
