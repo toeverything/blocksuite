@@ -143,22 +143,10 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       mode === ConnectorMode.Curve
     );
 
-    const last = points[points.length - 1];
-    const secondToLast = points[points.length - 2];
-    const clone = last.clone();
-    if (mode !== ConnectorMode.Curve) {
-      clone.tangent = Vec.tangent(last, secondToLast);
-    } else {
-      clone.tangent = getBezierTangent(this.bezierParameters, 1) ?? [];
-    }
-    const { sides } = getArrowPoints(clone, 15);
-    this._renderPoints(
-      ctx,
-      rc,
-      [PointLocation.fromVec(sides[0]), last, PointLocation.fromVec(sides[1])],
-      false,
-      false
-    );
+    // render start points
+    this._renderEndPoints(points, ctx, rc, mode, 'Start', 'None');
+    // render end points
+    this._renderEndPoints(points, ctx, rc, mode, 'End', 'Arrow');
   }
 
   private _renderPoints(
@@ -221,6 +209,105 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ctx.stroke();
       ctx.closePath();
       ctx.restore();
+    }
+  }
+
+  private _renderArrow(
+    points: PointLocation[],
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    mode: ConnectorMode,
+    end: 'Start' | 'End'
+  ) {
+    if (end === 'End') {
+      const last = points[points.length - 1];
+      const secondToLast = points[points.length - 2];
+      const clone = last.clone();
+      if (mode !== ConnectorMode.Curve) {
+        clone.tangent = Vec.tangent(last, secondToLast);
+      } else {
+        clone.tangent = getBezierTangent(this.bezierParameters, 1) ?? [];
+      }
+      const { sides } = getArrowPoints(clone, 15);
+      this._renderPoints(
+        ctx,
+        rc,
+        [
+          PointLocation.fromVec(sides[0]),
+          last,
+          PointLocation.fromVec(sides[1]),
+        ],
+        false,
+        false
+      );
+    } else {
+      console.log('render start arrow');
+    }
+  }
+
+  private _renderTriangle(
+    points: PointLocation[],
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    mode: ConnectorMode,
+    end: 'Start' | 'End'
+  ) {
+    if (end === 'End') {
+      console.log('render end triangle');
+    } else {
+      console.log('render start triangle');
+    }
+  }
+
+  private _renderCircle(
+    points: PointLocation[],
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    mode: ConnectorMode,
+    end: 'Start' | 'End'
+  ) {
+    if (end === 'End') {
+      console.log('render end circle');
+    } else {
+      console.log('render start circle');
+    }
+  }
+
+  private _renderDiamond(
+    points: PointLocation[],
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    mode: ConnectorMode,
+    end: 'Start' | 'End'
+  ) {
+    if (end === 'End') {
+      console.log('render end diamond');
+    } else {
+      console.log('render start diamond');
+    }
+  }
+
+  private _renderEndPoints(
+    points: PointLocation[],
+    ctx: CanvasRenderingContext2D,
+    rc: RoughCanvas,
+    mode: ConnectorMode,
+    end: 'Start' | 'End',
+    style: 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond'
+  ) {
+    switch (style) {
+      case 'Arrow':
+        this._renderArrow(points, ctx, rc, mode, end);
+        break;
+      case 'Triangle':
+        this._renderTriangle(points, ctx, rc, mode, end);
+        break;
+      case 'Circle':
+        this._renderCircle(points, ctx, rc, mode, end);
+        break;
+      case 'Diamond':
+        this._renderDiamond(points, ctx, rc, mode, end);
+        break;
     }
   }
 
