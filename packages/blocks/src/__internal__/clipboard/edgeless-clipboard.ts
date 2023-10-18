@@ -119,11 +119,15 @@ export class EdgelessClipboard implements Clipboard {
     this._edgeless = edgeless;
   }
 
+  private onCutEventHandler = (e: ClipboardEvent) => void this._onCut(e);
+  private onCopyEventHandler = (e: ClipboardEvent) => void this._onCopy(e);
+  private onPasteEventHandler = (e: ClipboardEvent) => void this._onPaste(e);
+
   init(page: Page = this._page) {
     this._page = page;
-    document.body.addEventListener('cut', e => void this._onCut(e));
-    document.body.addEventListener('copy', e => void this._onCopy(e));
-    document.body.addEventListener('paste', e => void this._onPaste(e));
+    document.body.addEventListener('cut', this.onCutEventHandler);
+    document.body.addEventListener('copy', this.onCopyEventHandler);
+    document.body.addEventListener('paste', this.onPasteEventHandler);
   }
 
   get toolMgr() {
@@ -147,9 +151,9 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   public dispose() {
-    document.body.removeEventListener('cut', e => void this._onCut(e));
-    document.body.removeEventListener('copy', e => void this._onCopy(e));
-    document.body.removeEventListener('paste', e => void this._onPaste(e));
+    document.body.removeEventListener('cut', this.onCutEventHandler);
+    document.body.removeEventListener('copy', this.onCopyEventHandler);
+    document.body.removeEventListener('paste', this.onPasteEventHandler);
   }
 
   private _onCut = async (e: ClipboardEvent) => {
