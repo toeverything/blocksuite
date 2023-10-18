@@ -19,17 +19,17 @@ import {
   type Selectable,
 } from '../../../__internal__/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
-import { BrushToolController } from '../controllers/tool/brush-tool.js';
-import { ConnectorToolController } from '../controllers/tool/connector-tool.js';
-import { DefaultToolController } from '../controllers/tool/default-tool.js';
-import { EraserToolController } from '../controllers/tool/eraser-tool.js';
-import { PresentToolController } from '../controllers/tool/frame-navigator-tool.js';
-import { FrameToolController } from '../controllers/tool/frame-tool.js';
-import type { EdgelessToolController } from '../controllers/tool/index.js';
-import { NoteToolController } from '../controllers/tool/note-tool.js';
-import { PanToolController } from '../controllers/tool/pan-tool.js';
-import { ShapeToolController } from '../controllers/tool/shape-tool.js';
-import { TextToolController } from '../controllers/tool/text-tool.js';
+import { BrushToolController } from '../controllers/tools/brush-tool.js';
+import { ConnectorToolController } from '../controllers/tools/connector-tool.js';
+import { DefaultToolController } from '../controllers/tools/default-tool.js';
+import { EraserToolController } from '../controllers/tools/eraser-tool.js';
+import { PresentToolController } from '../controllers/tools/frame-navigator-tool.js';
+import { FrameToolController } from '../controllers/tools/frame-tool.js';
+import type { EdgelessToolController } from '../controllers/tools/index.js';
+import { NoteToolController } from '../controllers/tools/note-tool.js';
+import { PanToolController } from '../controllers/tools/pan-tool.js';
+import { ShapeToolController } from '../controllers/tools/shape-tool.js';
+import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getSelectionBoxBound } from '../utils/query.js';
