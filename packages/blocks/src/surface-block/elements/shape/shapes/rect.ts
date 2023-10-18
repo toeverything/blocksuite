@@ -21,7 +21,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShape, getShapeTextIBound } from '../utils.js';
+import { drawGeneralShape, hitTestOnShapeText } from '../utils.js';
 
 /* "magic number" for bezier approximations of arcs (http://itc.ktu.lt/itc354/Riskus354.pdf) */
 const kRect = 1 - 0.5522847498;
@@ -142,13 +142,7 @@ export const RectMethods: ShapeMethods = {
           // Check if the point is in the center area
           hit = pointInPolygon([x, y], centralPoints);
         } else {
-          // calculate the text area
-          const shapeTextIBound = getShapeTextIBound(this);
-          if (!shapeTextIBound) return false;
-          // Check if the point is in the text area
-          const textAreaPoints =
-            getPointsFromBoundsWithRotation(shapeTextIBound);
-          hit = pointInPolygon([x, y], textAreaPoints);
+          hit = hitTestOnShapeText([x, y], this);
         }
       }
     }

@@ -1,5 +1,7 @@
 import { type IBound, StrokeStyle } from '../../consts.js';
+import { getPointsFromBoundsWithRotation, type IVec } from '../../index.js';
 import { Bound } from '../../utils/bound.js';
+import { pointInPolygon } from '../../utils/math-utils.js';
 import type { ITextDelta } from '../text/types.js';
 import {
   deltaInsertsToChunks,
@@ -47,9 +49,27 @@ export function normalizeShapeBound(shape: ShapeElement, bound: Bound): Bound {
   return bound;
 }
 
+export function hitTestOnShapeText(point: IVec, shape: ShapeElement): boolean {
+  // calculate the text area
+  const shapeTextIBound = getShapeTextIBound(shape);
+  if (!shapeTextIBound) return false;
+  // Check if the point is in the text area
+  const textAreaPoints = getPointsFromBoundsWithRotation(shapeTextIBound);
+  return pointInPolygon(point, textAreaPoints);
+}
+
 export function getShapeTextIBound(shape: ShapeElement): IBound | null {
-  const { x, y, text, fontSize, fontFamily, font, horizontalOffset, rotate } =
-    shape;
+  const {
+    x,
+    y,
+    text,
+    fontSize,
+    fontFamily,
+    font,
+    horizontalOffset,
+    rotate,
+    textAlign,
+  } = shape;
   if (!text) return null;
 
   const lineHeight = getLineHeight(fontFamily, fontSize);
@@ -62,8 +82,15 @@ export function getShapeTextIBound(shape: ShapeElement): IBound | null {
   );
   const height = lineHeight * lines.length;
   const verticalOffset = shape.verticalOffset(lines, lineHeight);
+  const offsetX =
+    textAlign === 'center'
+      ? horizontalOffset - widestLineWidth / 2
+      : textAlign === 'right'
+      ? horizontalOffset - widestLineWidth
+      : SHAPE_TEXT_PADDING;
+
   const iBound = new Bound(
-    x + horizontalOffset - 2,
+    x + offsetX - 2,
     y + verticalOffset - 1.5,
     widestLineWidth,
     height
