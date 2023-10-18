@@ -1,15 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import {
-  getBlockClipboardInfo,
-  getCopyElements,
-} from '../../../__internal__/clipboard/index.js';
+import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
 import type { EdgelessElement } from '../../../__internal__/index.js';
 import type { FrameBlockService } from '../../../__internal__/service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../../../__internal__/service/legacy-services/image-service.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { Bound, ConnectorElement } from '../../../surface-block/index.js';
+import { getCopyElements } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
