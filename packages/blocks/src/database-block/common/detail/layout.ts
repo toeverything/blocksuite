@@ -93,7 +93,9 @@ export const popSideDetail = (ops: {
   onClose?: () => void;
 }) => {
   //FIXME: to make widget path work
-  const page = document.querySelector('affine-doc-page');
+  const page =
+    document.querySelector('affine-doc-page') ??
+    document.querySelector('affine-edgeless-page');
   assertExists(page);
   const modal = createModal(page);
   // fit to the size of the page element

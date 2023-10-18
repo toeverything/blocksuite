@@ -11,7 +11,7 @@ import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
-import { HoverController } from '../hover-controller.js';
+import { HoverController } from '../hover/index.js';
 
 const styles = css`
   .affine-tooltip {
@@ -216,7 +216,11 @@ export class Tooltip extends LitElement {
         }),
       };
     },
-    { leaveDelay: 0 }
+    {
+      leaveDelay: 0,
+      // The tooltip is not interactive by default
+      safeBridge: false,
+    }
   );
 
   override connectedCallback() {

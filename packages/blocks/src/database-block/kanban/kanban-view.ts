@@ -183,6 +183,9 @@ export class DataViewKanban extends BaseDataView<
     </div>`;
   };
   onWheel = (event: WheelEvent) => {
+    if (event.metaKey || event.ctrlKey) {
+      return;
+    }
     const ele = event.currentTarget;
     if (ele instanceof HTMLElement) {
       if (ele.scrollWidth === ele.clientWidth) {

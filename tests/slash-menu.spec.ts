@@ -172,7 +172,7 @@ test.describe('slash menu should show and hide correctly', () => {
     const slashItems = slashMenu.locator('icon-button');
     const maybeActivatedItem = slashItems.nth(1);
     await expect(maybeActivatedItem).toHaveText(['Heading 1']);
-    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await expect(maybeActivatedItem).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
 
     await page.keyboard.press('ArrowDown');
@@ -182,7 +182,7 @@ test.describe('slash menu should show and hide correctly', () => {
 
     const maybeActivatedItem2 = slashItems.nth(2);
     await expect(maybeActivatedItem2).toHaveText(['Heading 2']);
-    await expect(maybeActivatedItem2).toHaveAttribute('hover', '');
+    await expect(maybeActivatedItem2).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
   });
 
@@ -201,7 +201,7 @@ test.describe('slash menu should show and hide correctly', () => {
     const slashItems = slashMenu.locator('icon-button');
     const maybeActivatedItem = slashItems.nth(1);
     await expect(maybeActivatedItem).toHaveText(['Heading 1']);
-    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await expect(maybeActivatedItem).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
 
     page.keyboard.press(`${SHORT_KEY}+P`);
@@ -209,7 +209,7 @@ test.describe('slash menu should show and hide correctly', () => {
 
     const maybeActivatedItem2 = slashItems.nth(0);
     await expect(maybeActivatedItem2).toHaveText(['Text']);
-    await expect(maybeActivatedItem2).toHaveAttribute('hover', '');
+    await expect(maybeActivatedItem2).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
   });
 
@@ -257,7 +257,7 @@ test.describe('slash menu should show and hide correctly', () => {
     const slashItems = slashMenu.locator('icon-button');
     const maybeActivatedItem = slashItems.nth(-5);
     await expect(maybeActivatedItem).toHaveText(['Move Up']);
-    await expect(maybeActivatedItem).toHaveAttribute('hover', '');
+    await expect(maybeActivatedItem).toHaveAttribute('hover', 'true');
     await assertRichTexts(page, ['/']);
   });
 
@@ -274,14 +274,14 @@ test.describe('slash menu should show and hide correctly', () => {
     const slashItems = slashMenu.locator('icon-button');
     const slashItem0 = slashItems.nth(0);
     const slashItem1 = slashItems.nth(1);
-    await expect(slashItem0).not.toHaveAttribute('hover', '');
-    await expect(slashItem1).toHaveAttribute('hover', '');
+    await expect(slashItem0).toHaveAttribute('hover', 'false');
+    await expect(slashItem1).toHaveAttribute('hover', 'true');
 
     await assertRichTexts(page, ['/']);
     await withPressKey(page, 'Shift', () => page.keyboard.press('Tab'));
     await expect(slashMenu).toBeVisible();
-    await expect(slashItem0).toHaveAttribute('hover', '');
-    await expect(slashItem1).not.toHaveAttribute('hover', '');
+    await expect(slashItem0).toHaveAttribute('hover', 'true');
+    await expect(slashItem1).toHaveAttribute('hover', 'false');
   });
 
   test('can input search input after click menu', async ({ page }) => {
@@ -372,18 +372,18 @@ test.describe('slash search', () => {
     await type(page, '/');
     await expect(slashMenu).toBeVisible();
     // first item should be selected by default
-    await expect(slashItems.first()).toHaveAttribute('hover', '');
+    await expect(slashItems.first()).toHaveAttribute('hover', 'true');
 
     // assert keyboard navigation works
     await page.keyboard.press('ArrowDown');
-    await expect(slashItems.first()).not.toHaveAttribute('hover', '');
-    await expect(slashItems.nth(1)).toHaveAttribute('hover', '');
+    await expect(slashItems.first()).toHaveAttribute('hover', 'false');
+    await expect(slashItems.nth(1)).toHaveAttribute('hover', 'true');
 
     // search should reset the active item
     await type(page, 'co');
     await expect(slashItems).toHaveCount(2);
     await expect(slashItems).toHaveText(['Code Block', 'Copy']);
-    await expect(slashItems.first()).toHaveAttribute('hover', '');
+    await expect(slashItems.first()).toHaveAttribute('hover', 'true');
     await type(page, 'p');
     await expect(slashItems).toHaveCount(1);
     // assert backspace works

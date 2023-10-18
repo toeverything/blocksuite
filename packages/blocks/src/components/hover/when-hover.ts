@@ -1,38 +1,6 @@
-export function launchIntoFullscreen(element: Element) {
-  if (element.requestFullscreen) {
-    element.requestFullscreen();
-    // @ts-ignore
-  } else if (element.mozRequestFullScreen) {
-    // Firefox
-    // @ts-ignore
-    element.mozRequestFullScreen();
-    // @ts-ignore
-  } else if (element.webkitRequestFullscreen) {
-    // Chrome, Safari and Opera
-    // @ts-ignore
-    element.webkitRequestFullscreen();
-    // @ts-ignore
-  } else if (element.msRequestFullscreen) {
-    // IE/Edge
-    // @ts-ignore
-    element.msRequestFullscreen();
-  }
-}
-
-export type WhenHoverOptions = {
-  leaveDelay?: number;
-  /**
-   * When already hovered to the reference element,
-   * but the floating element is not ready,
-   * the callback will still be executed if the `alwayRunWhenNoFloating` is true.
-   *
-   * It is useful when the floating element is removed just before by a user's action,
-   * and the user's mouse is still hovering over the reference element.
-   *
-   * @default true
-   */
-  alwayRunWhenNoFloating?: boolean;
-};
+import { dedupe, delayHide, delayShow } from './middlewares/basic.js';
+import { safeBridge, safeTriangle } from './middlewares/safe-area.js';
+import type { HoverMiddleware, WhenHoverOptions } from './types.js';
 
 /**
  * Call the `whenHoverChange` callback when the element is hovered.
@@ -70,41 +38,62 @@ export type WhenHoverOptions = {
  */
 export const whenHover = (
   whenHoverChange: (isHover: boolean, event?: Event) => void,
-  { leaveDelay = 300, alwayRunWhenNoFloating = true }: WhenHoverOptions = {}
+  {
+    enterDelay = 0,
+    leaveDelay = 300,
+    alwayRunWhenNoFloating = true,
+    safeTriangle: triangleOptions = false,
+    safeBridge: bridgeOptions = true,
+  }: WhenHoverOptions = {}
 ) => {
   /**
    * The event listener will be removed when the signal is aborted.
    */
   const abortController = new AbortController();
-  let hoverState = false;
-  let hoverTimeout = 0;
   let referenceElement: Element | undefined;
   let floatingElement: Element | undefined;
 
-  const onHover = (e: Event) => {
-    clearTimeout(hoverTimeout);
-    if (!hoverState) {
-      hoverState = true;
+  const middlewares: HoverMiddleware[] = [
+    dedupe(alwayRunWhenNoFloating),
+    triangleOptions &&
+      safeTriangle(
+        typeof triangleOptions === 'boolean' ? undefined : triangleOptions
+      ),
+    bridgeOptions &&
+      safeBridge(
+        typeof bridgeOptions === 'boolean' ? undefined : bridgeOptions
+      ),
+    delayShow(enterDelay),
+    delayHide(leaveDelay),
+  ].filter(v => typeof v !== 'boolean') as HoverMiddleware[];
+
+  let id = 0;
+  let resId = 0;
+  const onHoverChange = async (e: Event) => {
+    const curId = id++;
+    for (const middleware of middlewares) {
+      const go = await middleware({
+        event: e,
+        floatingElement,
+        referenceElement,
+      });
+      if (!go) {
+        return;
+      }
+    }
+    if (curId < resId)
+      // ignore expired event
+      return;
+    resId = curId;
+    if (e.type === 'mouseover') {
       whenHoverChange(true, e);
       return;
     }
-    // Already hovered
-    if (
-      alwayRunWhenNoFloating &&
-      (!floatingElement || !floatingElement.isConnected)
-    ) {
-      // But the floating element is not ready
-      // so we need to run the callback still
-      whenHoverChange(true, e);
-    }
-  };
-
-  const onHoverLeave = (e: Event) => {
-    clearTimeout(hoverTimeout);
-    hoverTimeout = window.setTimeout(() => {
-      hoverState = false;
+    if (e.type === 'mouseleave') {
       whenHoverChange(false, e);
-    }, leaveDelay);
+      return;
+    }
+    console.error('Unknown event type in whenHover', e);
   };
 
   const addHoverListener = (element?: Element) => {
@@ -113,19 +102,19 @@ export const whenHover = (
     const alreadyHover = element.matches(':hover');
     if (alreadyHover && !abortController.signal.aborted) {
       // When the element is already hovered, we need to trigger the callback manually
-      onHover(new MouseEvent('mouseover'));
+      onHoverChange(new MouseEvent('mouseover'));
     }
-    element.addEventListener('mouseover', onHover, {
+    element.addEventListener('mouseover', onHoverChange, {
       signal: abortController.signal,
     });
-    element.addEventListener('mouseleave', onHoverLeave, {
+    element.addEventListener('mouseleave', onHoverChange, {
       signal: abortController.signal,
     });
   };
   const removeHoverListener = (element?: Element) => {
     if (!element) return;
-    element.removeEventListener('mouseover', onHover);
-    element.removeEventListener('mouseleave', onHoverLeave);
+    element.removeEventListener('mouseover', onHoverChange);
+    element.removeEventListener('mouseleave', onHoverChange);
   };
 
   const setReference = (element?: Element) => {
@@ -150,3 +139,5 @@ export const whenHover = (
     },
   };
 };
+
+export type { WhenHoverOptions };

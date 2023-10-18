@@ -1,14 +1,10 @@
-import {
-  assertExists,
-  DisposableGroup,
-  whenHover,
-  type WhenHoverOptions,
-} from '@blocksuite/global/utils';
+import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
-import type { AdvancedPortalOptions } from './portal.js';
-import { createLitPortal } from './portal.js';
+import type { AdvancedPortalOptions } from '../portal.js';
+import { createLitPortal } from '../portal.js';
+import { whenHover, type WhenHoverOptions } from './when-hover.js';
 
 type OptionsParams = Omit<
   ReturnType<typeof whenHover>,

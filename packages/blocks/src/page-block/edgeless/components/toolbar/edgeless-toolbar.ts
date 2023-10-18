@@ -10,7 +10,6 @@ import './default/default-tool-button.js';
 import './text/text-tool-button.js';
 import './eraser/eraser-tool-button.js';
 
-import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import {
@@ -40,6 +39,30 @@ import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
+
+export function launchIntoFullscreen(element: Element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (
+    'mozRequestFullScreen' in element &&
+    element.mozRequestFullScreen instanceof Function
+  ) {
+    // Firefox
+    element.mozRequestFullScreen();
+  } else if (
+    'webkitRequestFullscreen' in element &&
+    element.webkitRequestFullscreen instanceof Function
+  ) {
+    // Chrome, Safari and Opera
+    element.webkitRequestFullscreen();
+  } else if (
+    'msRequestFullscreen' in element &&
+    element.msRequestFullscreen instanceof Function
+  ) {
+    // IE/Edge
+    element.msRequestFullscreen();
+  }
+}
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {

@@ -18,7 +18,7 @@ import {
   getLineHeight,
   getTextWidth,
   isRTL,
-  splitIntoLines,
+  wrapText,
 } from './utils.js';
 
 @EdgelessSelectableMixin
@@ -51,6 +51,10 @@ export class TextElement extends SurfaceElement<IText> {
     return this.yMap.get('italic') as IText['italic'];
   }
 
+  get hasMaxWidth() {
+    return this.yMap.get('hasMaxWidth') as IText['hasMaxWidth'];
+  }
+
   get font() {
     const { bold, italic, fontSize, fontFamily } = this;
     const lineHeight = getLineHeight(fontFamily, fontSize);
@@ -61,6 +65,19 @@ export class TextElement extends SurfaceElement<IText> {
       lineHeight: `${lineHeight}px`,
       fontFamily: fontFamily,
     });
+  }
+
+  get wrapTextDeltas() {
+    const { text, font, w } = this;
+
+    const deltas: ITextDelta[] = (text.toDelta() as ITextDelta[]).flatMap(
+      delta => ({
+        insert: wrapText(delta.insert, font, w),
+        attributes: delta.attributes,
+      })
+    ) as ITextDelta[];
+
+    return deltas;
   }
 
   getTextCursorPosition(coord: IModelCoord) {
@@ -85,12 +102,15 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   getCursorByCoord(coord: IModelCoord) {
-    const { text } = this;
     const [lineIndex, offsetX] = this.getTextCursorPosition(coord);
-    const lines = splitIntoLines(text.toString());
+
+    const deltas = this.wrapTextDeltas;
+    const lines = deltaInsertsToChunks(deltas).map(line =>
+      line.map(iTextDelta => iTextDelta.insert).join('')
+    );
     const string = lines[lineIndex];
 
-    let index = lines.slice(0, lineIndex).join('').length + lineIndex - 1;
+    let index = lines.slice(0, lineIndex).join('').length - 1;
     let currentStringWidth = 0;
     let charIndex = 0;
     while (currentStringWidth < offsetX) {
@@ -120,15 +140,8 @@ export class TextElement extends SurfaceElement<IText> {
   }
 
   override render(ctx: CanvasRenderingContext2D, matrix: DOMMatrix) {
-    const {
-      text,
-      color,
-      fontSize,
-      fontFamily,
-      textAlign,
-      rotate,
-      computedValue,
-    } = this;
+    const { color, fontSize, fontFamily, textAlign, rotate, computedValue } =
+      this;
     const [, , w, h] = this.deserializeXYWH();
     const cx = w / 2;
     const cy = h / 2;
@@ -137,12 +150,13 @@ export class TextElement extends SurfaceElement<IText> {
       matrix.translateSelf(cx, cy).rotateSelf(rotate).translateSelf(-cx, -cy)
     );
 
-    const yText = text;
-    const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+    // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+    const font = this.font;
+    // const deltas: ITextDelta[] = yText.toDelta() as ITextDelta[];
+    const deltas = this.wrapTextDeltas;
     const lines = deltaInsertsToChunks(deltas);
 
     const lineHeightPx = getLineHeight(fontFamily, fontSize);
-    const font = this.font;
     const horizontalOffset =
       textAlign === 'center' ? w / 2 : textAlign === 'right' ? w : 0;
 

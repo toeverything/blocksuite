@@ -1,6 +1,5 @@
-import { clamp } from '@blocksuite/global/utils';
-
 import type { IPoint } from '../index.js';
+import { clamp } from './math.js';
 
 export class Point {
   public x: number;
