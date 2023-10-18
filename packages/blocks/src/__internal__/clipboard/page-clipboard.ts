@@ -26,15 +26,15 @@ export class PageClipboard implements Clipboard {
       return;
     }
     this._ele.handleEvent('cut', ctx => {
-      this._onCut(ctx);
+      void this._onCut(ctx);
     });
     this._ele.handleEvent('copy', ctx => {
-      this._onCopy(ctx);
+      void this._onCopy(ctx);
     });
     this._ele.handleEvent(
       'paste',
       ctx => {
-        this._onPaste(ctx);
+        void this._onPaste(ctx);
       },
       {
         global: true,
