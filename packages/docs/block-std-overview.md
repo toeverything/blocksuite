@@ -1,7 +1,7 @@
-# Block Standard Library
+# Block Std Overview
 
 To help you get started with building blocks,
-we've created a standard library of blocks that you can use to build your own blocks.
+we've created a standard library of blocks that you can use to build your own blocks called `block-std`.
 You can install it as `@blocksuite/block-std`.
 
 ![block std data flow](./images/block-std-data-flow.png)
