@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { MarkdownAdapter } from '../../adapter/index';
 import type { BlockSnapshot } from '../../transformer/type';
 
-describe('markdown adapter', () => {
+describe('snapshot to markdown', () => {
   test('paragraph', async () => {
     const blockSnapshot: BlockSnapshot = {
       type: 'block',
@@ -200,7 +200,7 @@ hhh
       type: 'root',
       children: [],
     };
-    const ast = await mdAdapter.traverseSnapshot2(blockSnapshot, root);
+    const ast = await mdAdapter.traverseSnapshot(blockSnapshot, root);
     expect(mdAdapter.astToMardown(ast)).toBe(markdown);
   });
 
@@ -352,7 +352,7 @@ hhh
       type: 'root',
       children: [],
     };
-    const ast = await mdAdapter.traverseSnapshot2(blockSnapshot, root);
+    const ast = await mdAdapter.traverseSnapshot(blockSnapshot, root);
     expect(mdAdapter.astToMardown(ast)).toBe(markdown);
   });
 
@@ -424,7 +424,7 @@ hhh
       type: 'root',
       children: [],
     };
-    const ast = await mdAdapter.traverseSnapshot2(blockSnapshot, root);
+    const ast = await mdAdapter.traverseSnapshot(blockSnapshot, root);
     expect(mdAdapter.astToMardown(ast)).toBe(markdown);
   });
 
@@ -496,7 +496,40 @@ hhh
       type: 'root',
       children: [],
     };
-    const ast = await mdAdapter.traverseSnapshot2(blockSnapshot, root);
+    const ast = await mdAdapter.traverseSnapshot(blockSnapshot, root);
     expect(mdAdapter.astToMardown(ast)).toBe(markdown);
   });
 });
+
+describe('markdown to snapshot', () => {
+  test.todo('paragraph', async () => {
+    const markdown = `aaa
+
+&#x20;   bbb
+
+&#x20;   ccc
+
+&#x20;       ddd
+
+&#x20;       eee
+
+&#x20;       fff
+
+&#x20;   ggg
+
+hhh
+`;
+    nanoidReplacement('');
+  });
+});
+
+function nanoidReplacement(snapshotString: string) {
+  const matches = snapshotString.matchAll(/"id" : "block:[A-Za-z0-9-_]{10}"/g);
+  const matchesReplaceMap = new Map();
+  Array.from(matches).map((match, index) =>
+    matchesReplaceMap.set(match[0], `"id": "matchesReplaceMap[${index}]"`)
+  );
+  return snapshotString.replace(/"id": "block:[A-Za-z0-9-_]{10}"/g, match =>
+    matchesReplaceMap.get(match)
+  );
+}

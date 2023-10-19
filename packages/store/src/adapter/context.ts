@@ -11,6 +11,8 @@ export class ASTWalkerContext<TNode extends object> {
 
   private _defautltProp: Keyof<TNode> = 'children' as unknown as Keyof<TNode>;
 
+  _skip = false;
+
   setDefaultProp = (parentProp: Keyof<TNode>) => {
     this._defautltProp = parentProp;
   };
@@ -67,5 +69,9 @@ export class ASTWalkerContext<TNode extends object> {
     }
     this._stack.push(parent);
     return this;
+  }
+
+  skip() {
+    this._skip = true;
   }
 }

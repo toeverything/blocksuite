@@ -57,7 +57,7 @@ type Keyof<T> = T extends unknown ? keyof T : never;
 type WalkerFn<ONode extends object, TNode extends object> = (
   o: NodeProps<ONode>,
   context: ASTWalkerContext<TNode>
-) => void;
+) => Promise<void>;
 
 type NodeProps<Node extends object> = {
   node: Node;
@@ -90,17 +90,22 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     this._isONode = fn;
   };
 
-  walk = (oNode: ONode, tNode: TNode) => {
+  walk = async (oNode: ONode, tNode: TNode) => {
     this.context.openNode(tNode);
-    this._visit({ node: oNode, parent: null, prop: null, index: null });
+    await this._visit({ node: oNode, parent: null, prop: null, index: null });
     return this.context.currentNode();
   };
 
-  private _visit = (o: NodeProps<ONode>) => {
+  private _visit = async (o: NodeProps<ONode>) => {
     if (!o.node) return;
 
     if (this._enter) {
-      this._enter(o, this.context);
+      await this._enter(o, this.context);
+    }
+
+    if (this.context._skip) {
+      this.context._skip = false;
+      return;
     }
 
     for (const key in o.node) {
@@ -111,7 +116,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
           for (let i = 0; i < value.length; i += 1) {
             const item = value[i];
             if (item !== null && this._isONode(item)) {
-              this._visit({
+              await this._visit({
                 node: item,
                 parent: o.node,
                 prop: key as unknown as Keyof<ONode>,
@@ -120,7 +125,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
             }
           }
         } else if (this._isONode(value)) {
-          this._visit({
+          await this._visit({
             node: value,
             parent: o.node,
             prop: key as unknown as Keyof<ONode>,
@@ -131,7 +136,7 @@ export class ASTWalker<ONode extends object, TNode extends object> {
     }
 
     if (this._leave) {
-      this._leave(o, this.context);
+      await this._leave(o, this.context);
     }
   };
 }
