@@ -12,7 +12,9 @@ pnpm i \
 
 If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](https://github.com/toeverything/blocksuite/blob/master/packages/playground/examples/basic/index.html)):
 
-```ts
+::: sandbox {template=vanilla-ts coderHeight=180 previewHeight=580}
+
+```ts /index.ts
 import { SimpleAffineEditor } from '@blocksuite/editor';
 import '@blocksuite/editor/themes/affine.css';
 
@@ -20,22 +22,7 @@ const editor = new SimpleAffineEditor();
 document.body.appendChild(editor);
 ```
 
-<div id="editor-example" style="height: 250px; border: 1px solid grey; padding: 50px;"></div>
-
-<script>
-import '@blocksuite/editor/themes/affine.css';
-
-async function main() {
-  const { SimpleAffineEditor } = await import('@blocksuite/editor');
-  const container = document.getElementById('editor-example');
-  const editor = new SimpleAffineEditor();
-  container.appendChild(editor);
-}
-
-if (typeof window !== 'undefined') {
-  main();
-}
-</script>
+:::
 
 Or equivalently, you can also use the declarative style:
 

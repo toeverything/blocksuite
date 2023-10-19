@@ -7,9 +7,10 @@
   "author": "toeverything",
   "repository": "toeverything/blocksuite",
   "license": "MPL-2.0",
+  "type": "module",
   "devDependencies": {
     "vite-plugin-wasm": "^3.2.2",
-    "vitepress": "1.0.0-alpha.74",
+    "vitepress": "1.0.0-rc.22",
     "vue": "^3.3.4"
   },
   "scripts": {
@@ -20,6 +21,8 @@
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
     "@blocksuite/editor": "workspace:*",
-    "@blocksuite/store": "workspace:*"
+    "@blocksuite/store": "workspace:*",
+    "markdown-it-container": "^3.0.0",
+    "vitepress-plugin-sandpack": "^1.1.3"
   }
 }
