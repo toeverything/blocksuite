@@ -134,6 +134,23 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       );
     }
 
+    // User can clicks more than one button at the same time.
+    // See https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
+    let mouseDown = 0;
+    let needScroll = false;
+    this.disposables.addFromEvent(window, 'mousedown', () => {
+      mouseDown++;
+    });
+    this.disposables.addFromEvent(window, 'mouseup', () => {
+      mouseDown--;
+      if (!mouseDown && needScroll) {
+        needScroll = false;
+        this.scrollIntoView({
+          block: 'nearest',
+        });
+      }
+    });
+
     // init auto scroll
     vEditor.disposables.add(
       vEditor.slots.vRangeUpdated.on(([vRange]) => {
@@ -146,9 +163,15 @@ export class RichText extends WithDisposable(ShadowlessElement) {
           if (!range) return;
 
           if (this.enableAutoScrollVertically) {
-            this.scrollIntoView({
-              block: 'nearest',
-            });
+            if (mouseDown) {
+              // We should not scroll when mouse is down
+              // See https://github.com/toeverything/blocksuite/issues/5034
+              needScroll = true;
+            } else {
+              this.scrollIntoView({
+                block: 'nearest',
+              });
+            }
           }
 
           if (this.enableAutoScrollHorizontally) {

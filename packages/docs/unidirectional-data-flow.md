@@ -62,6 +62,25 @@ In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated
 
 But the real power lies in the fact that if this block tree is being concurrently edited by multiple people, when user B performs a similar operation, the corresponding update will be encoded by Yjs and distributed by the provider. When User A receives and applies the update from User B, the same state update pipeline as local editing will be triggered. **This makes it unnecessary for the application to make any additional modifications or adaptations for collaboration scenarios, inherently gaining real-time collaboration capabilities**.
 
+## Not only Blocks
+
+When we talk about unidirectional data flow in blocksuite. We are not only talking about the block tree structure, but also the entire editor state.
+In fact, the block tree structure is just a part of the editor state. In addition, the editor state also includes:
+
+- Selection state
+- History stack
+- User information
+- 🚧 Local state (not synchronized with other users)
+
+These states are also stored in the CRDT model, and the corresponding events will be triggered when they are updated.
+The blocks can subscribe to these events to update the UI components accordingly.
+
+![state-event-view](./images/state-event-view.png)
+
+For example, we store the selection state for every user.
+When a collaborator tries to move the cursor, the selection state will be updated.
+Then, we can render the cursor of the collaborator in the UI.
+
 ## Summary
 
 In summary, by utilizing the CRDT model as the single source of truth, the application layer code can remain agnostic to whether updates originate from local or remote sources. This simplifies synchronization and reduces complexity. This approach enables applications to acquire real-time collaboration capabilities without necessitating intrusive modifications or adaptations, which is a key reason why the BlockSuite editor has been inherently _collaborative_ from day one.

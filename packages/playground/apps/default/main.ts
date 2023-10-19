@@ -95,7 +95,10 @@ const syncProviders = async (
   }
 
   const oldMeta = localStorage.getItem('meta');
-  const oldVersions = oldMeta ? { ...JSON.parse(oldMeta).blockVersions } : {};
+  const oldPageVersion = oldMeta ? JSON.parse(oldMeta).pageVersion : 0;
+  const oldBlockVersions = oldMeta
+    ? { ...JSON.parse(oldMeta).blockVersions }
+    : {};
 
   let run = true;
   const runWorkspaceMigration = () => {
@@ -114,7 +117,11 @@ const syncProviders = async (
         e instanceof Error && e.message.includes('outdated');
       if (isValidateError) {
         page.spaceDoc.once('update', () => {
-          workspace.schema.upgradePage(oldVersions, page.spaceDoc);
+          workspace.schema.upgradePage(
+            oldPageVersion,
+            oldBlockVersions,
+            page.spaceDoc
+          );
           workspace.meta.updateVersion(workspace);
           page.trySyncFromExistingDoc();
         });

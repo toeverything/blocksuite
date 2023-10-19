@@ -1,4 +1,3 @@
-import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 import {
@@ -19,6 +18,8 @@ import {
   pressArrowUp,
   pressEnter,
   registerFormatBarCustomElements,
+  scrollToBottom,
+  scrollToTop,
   selectAllByKeyboard,
   setSelection,
   switchReadonly,
@@ -726,46 +727,6 @@ test('should format quick bar not show at readonly mode', async ({ page }) => {
   await page.dblclick('.affine-rich-text', { position: { x: 10, y: 10 } });
   await expect(formatBar).not.toBeVisible();
 });
-
-async function scrollToTop(page: Page) {
-  await page.mouse.wheel(0, -1000);
-
-  await page.waitForFunction(() => {
-    const scrollContainer = document.querySelector('.affine-doc-viewport');
-    if (!scrollContainer) {
-      throw new Error("Can't find scroll container");
-    }
-    return scrollContainer.scrollTop < 10;
-  });
-}
-
-async function scrollToBottom(page: Page) {
-  // await page.mouse.wheel(0, 1000);
-
-  await page
-    .locator('.affine-doc-viewport')
-    .evaluate(node =>
-      node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
-    );
-  // TODO switch to `scrollend`
-  // See https://developer.chrome.com/en/blog/scrollend-a-new-javascript-event/
-  await page.waitForFunction(() => {
-    const scrollContainer = document.querySelector('.affine-doc-viewport');
-    if (!scrollContainer) {
-      throw new Error("Can't find scroll container");
-    }
-
-    return (
-      // Wait for scrolled to the bottom
-      // Refer to https://stackoverflow.com/questions/3898130/check-if-a-user-has-scrolled-to-the-bottom-not-just-the-window-but-any-element
-      Math.abs(
-        scrollContainer.scrollHeight -
-          scrollContainer.scrollTop -
-          scrollContainer.clientHeight
-      ) < 10
-    );
-  });
-}
 
 test('should format bar follow scroll', async ({ page }) => {
   await enterPlaygroundRoom(page);

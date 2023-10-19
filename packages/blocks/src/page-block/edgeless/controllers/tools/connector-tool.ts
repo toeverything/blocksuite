@@ -1,14 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { ConnectorTool } from '../../../__internal__/index.js';
+import type { ConnectorTool } from '../../../../__internal__/index.js';
 import {
   type Connection,
   type ConnectorElement,
   type IVec,
   PhasorElementType,
   StrokeStyle,
-} from '../../../surface-block/index.js';
+} from '../../../../surface-block/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class ConnectorToolController extends EdgelessToolController<ConnectorTool> {

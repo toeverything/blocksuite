@@ -48,6 +48,7 @@ import {
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import { FontLoader } from '../font-loader/index.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
@@ -61,6 +62,7 @@ import {
   EdgelessZoomToolbar,
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
+import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
@@ -167,6 +169,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
   edgelessLayer!: HTMLDivElement;
 
   clipboard = new EdgelessClipboard(this.page, this);
+
+  pageClipboardController = new PageClipboardController(this);
+  clipboardController = new EdgelessClipboardController(
+    this,
+    this.pageClipboardController
+  );
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -310,7 +318,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
       slots.copyAsPng.on(({ blocks, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard
+
+        (this.clipboardController._enabled
+          ? this.clipboardController
+          : this.clipboard
+        )
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
@@ -603,7 +615,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
-    this.clipboard.init(this.page);
+    if (!this.clipboardController._enabled) {
+      this.clipboard.init(this.page);
+    }
 
     requestAnimationFrame(() => {
       if (!this._tryLoadViewportLocalRecord()) {
