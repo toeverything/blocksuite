@@ -615,7 +615,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
-    this.clipboard.init(this.page);
+    if (!this.clipboardController._enabled) {
+      this.clipboard.init(this.page);
+    }
 
     requestAnimationFrame(() => {
       if (!this._tryLoadViewportLocalRecord()) {
