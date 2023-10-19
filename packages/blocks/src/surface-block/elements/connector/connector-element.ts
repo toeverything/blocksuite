@@ -15,7 +15,13 @@ import { type IVec, Vec } from '../../utils/vec.js';
 import type { SerializedXYWH } from '../../utils/xywh.js';
 import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
-import { ConnectorMode, type IConnector } from './types.js';
+import {
+  ConnectorEnd,
+  ConnectorMode,
+  DEFAULT_END_POINT_STYLE,
+  DEFAULT_START_POINT_STYLE,
+  type IConnector,
+} from './types.js';
 import { getArrowPoints } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
@@ -81,6 +87,20 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('controllers') as IConnector['controllers'];
   }
 
+  get startPointStyle() {
+    return (
+      (this.yMap.get('startPointStyle') as IConnector['startPointStyle']) ??
+      DEFAULT_START_POINT_STYLE
+    );
+  }
+
+  get endPointStyle() {
+    return (
+      (this.yMap.get('endPointStyle') as IConnector['endPointStyle']) ??
+      DEFAULT_END_POINT_STYLE
+    );
+  }
+
   get absolutePath() {
     const { x, y } = this;
     return this.path.map(p => p.clone().setVec([p[0] + x, p[1] + y]));
@@ -122,7 +142,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     matrix: DOMMatrix,
     rc: RoughCanvas
   ) {
-    const { absolutePath: points, mode } = this;
+    const { absolutePath: points, mode, startPointStyle, endPointStyle } = this;
 
     // points might not be build yet in some senarios
     // eg. undo/redo, copy/paste
@@ -144,9 +164,23 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
 
     // render start points
-    this._renderEndPoints(points, ctx, rc, mode, 'Start', 'None');
+    this._renderEndPoints(
+      points,
+      ctx,
+      rc,
+      mode,
+      ConnectorEnd.Start,
+      startPointStyle
+    );
     // render end points
-    this._renderEndPoints(points, ctx, rc, mode, 'End', 'Arrow');
+    this._renderEndPoints(
+      points,
+      ctx,
+      rc,
+      mode,
+      ConnectorEnd.End,
+      endPointStyle
+    );
   }
 
   private _renderPoints(
@@ -217,32 +251,35 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: 'Start' | 'End'
+    end: ConnectorEnd
   ) {
-    if (end === 'End') {
-      const last = points[points.length - 1];
-      const secondToLast = points[points.length - 2];
-      const clone = last.clone();
-      if (mode !== ConnectorMode.Curve) {
-        clone.tangent = Vec.tangent(last, secondToLast);
-      } else {
-        clone.tangent = getBezierTangent(this.bezierParameters, 1) ?? [];
-      }
-      const { sides } = getArrowPoints(clone, 15);
-      this._renderPoints(
-        ctx,
-        rc,
-        [
-          PointLocation.fromVec(sides[0]),
-          last,
-          PointLocation.fromVec(sides[1]),
-        ],
-        false,
-        false
-      );
-    } else {
-      console.log('render start arrow');
-    }
+    const anchorIndex = end === ConnectorEnd.End ? points.length - 1 : 0;
+    const pointToAnchorIndex =
+      end === ConnectorEnd.End ? anchorIndex - 1 : anchorIndex + 1;
+    const anchorPoint = points[anchorIndex];
+    const pointToAnchor = points[pointToAnchorIndex];
+
+    const clone = anchorPoint.clone();
+    clone.tangent =
+      mode !== ConnectorMode.Curve
+        ? end === ConnectorEnd.End
+          ? Vec.tangent(anchorPoint, pointToAnchor)
+          : Vec.tangent(pointToAnchor, anchorPoint)
+        : getBezierTangent(this.bezierParameters, 1) ?? [];
+
+    const { sides } = getArrowPoints(clone, 15, end);
+
+    this._renderPoints(
+      ctx,
+      rc,
+      [
+        PointLocation.fromVec(sides[0]),
+        anchorPoint,
+        PointLocation.fromVec(sides[1]),
+      ],
+      false,
+      false
+    );
   }
 
   private _renderTriangle(
@@ -292,7 +329,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: 'Start' | 'End',
+    end: ConnectorEnd,
     style: 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond'
   ) {
     switch (style) {
