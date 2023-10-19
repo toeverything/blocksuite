@@ -21,7 +21,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShape } from '../utils.js';
+import { drawGeneralShape, hitTestOnShapeText } from '../utils.js';
 
 export const TriangleMethods: ShapeMethods = {
   points({ x, y, w, h }: IBound) {
@@ -100,31 +100,36 @@ export const TriangleMethods: ShapeMethods = {
       TriangleMethods.points
     );
 
-    let hited = pointOnPolygonStoke(
+    let hit = pointOnPolygonStoke(
       [x, y],
       points,
       (options?.expand ?? 1) / (this.renderer?.zoom ?? 1)
     );
 
-    if (!hited) {
+    if (!hit) {
       if (!options.ignoreTransparent || this.filled) {
-        hited = pointInPolygon([x, y], points);
+        hit = pointInPolygon([x, y], points);
       } else {
         // If shape is not filled or transparent
-        // Check the center area of the shape
-        const centralBounds = getCenterAreaBounds(
-          this,
-          DEFAULT_CENTRAL_AREA_RATIO
-        );
-        const centralPoints = getPointsFromBoundsWithRotation(
-          centralBounds,
-          TriangleMethods.points
-        );
-        hited = pointInPolygon([x, y], centralPoints);
+        const text = this.text;
+        if (!text || !text.length) {
+          // Check the center area of the shape
+          const centralBounds = getCenterAreaBounds(
+            this,
+            DEFAULT_CENTRAL_AREA_RATIO
+          );
+          const centralPoints = getPointsFromBoundsWithRotation(
+            centralBounds,
+            TriangleMethods.points
+          );
+          hit = pointInPolygon([x, y], centralPoints);
+        } else {
+          hit = hitTestOnShapeText([x, y], this);
+        }
       }
     }
 
-    return hited;
+    return hit;
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {

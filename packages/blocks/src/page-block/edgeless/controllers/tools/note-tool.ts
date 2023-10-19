@@ -6,13 +6,13 @@ import {
   hasClassNameInList,
   type NoteTool,
   queryCurrentMode,
-} from '../../../__internal__/index.js';
+} from '../../../../__internal__/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
-} from '../utils/consts.js';
-import { addNote, type NoteOptions } from '../utils/note.js';
-import { NoteOverlay } from '../utils/tool-overlay.js';
+} from '../../utils/consts.js';
+import { addNote, type NoteOptions } from '../../utils/note.js';
+import { NoteOverlay } from '../../utils/tool-overlay.js';
 import { EdgelessToolController } from './index.js';
 
 export class NoteToolController extends EdgelessToolController<NoteTool> {

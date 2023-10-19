@@ -123,26 +123,32 @@ export class Schema {
     });
   };
 
-  upgradePage = (oldVersions: Record<string, number>, pageData: Y.Doc) => {
+  upgradePage = (
+    oldPageVersion: number,
+    oldBlockVersions: Record<string, number>,
+    pageData: Y.Doc
+  ) => {
+    // block migrations
     const blocks = pageData.getMap('blocks');
     Array.from(blocks.values()).forEach(block => {
       const flavour = block.get('sys:flavour') as string;
-      const currentVersion = oldVersions[flavour] ?? 0;
+      const currentVersion = oldBlockVersions[flavour] ?? 0;
       assertExists(
         currentVersion,
         `previous version for flavour ${flavour} not found`
       );
       this.upgradeBlock(flavour, currentVersion, block);
     });
-    const versions = this.versions;
+
+    // page migrations
     pageMigrations.forEach(migration => {
       try {
-        if (migration.condition(pageData, oldVersions, versions)) {
-          migration.migrate(pageData, oldVersions, versions);
+        if (migration.condition(oldPageVersion, pageData)) {
+          migration.migrate(oldPageVersion, pageData);
         }
       } catch (err) {
-        console.error(err);
-        throw new MigrationError(migration.desc);
+        throw new MigrationError(`${migration.desc}
+            ${err}`);
       }
     });
   };
@@ -164,8 +170,8 @@ export class Schema {
 
       return onUpgrade(data, oldVersion, version);
     } catch (err) {
-      console.error(err);
-      throw new MigrationError(`upgrade block ${flavour} failed`);
+      throw new MigrationError(`upgrade block ${flavour} failed.
+          ${err}`);
     }
   };
 

@@ -121,9 +121,9 @@ export class EdgelessClipboard implements Clipboard {
 
   init(page: Page = this._page) {
     this._page = page;
-    document.body.addEventListener('cut', e => void this._onCut(e));
-    document.body.addEventListener('copy', e => void this._onCopy(e));
-    document.body.addEventListener('paste', e => void this._onPaste(e));
+    document.body.addEventListener('cut', this._onCut);
+    document.body.addEventListener('copy', this._onCopy);
+    document.body.addEventListener('paste', this._onPaste);
   }
 
   get toolMgr() {
@@ -147,12 +147,12 @@ export class EdgelessClipboard implements Clipboard {
   }
 
   public dispose() {
-    document.body.removeEventListener('cut', e => void this._onCut(e));
-    document.body.removeEventListener('copy', e => void this._onCopy(e));
-    document.body.removeEventListener('paste', e => void this._onPaste(e));
+    document.body.removeEventListener('cut', this._onCut);
+    document.body.removeEventListener('copy', this._onCopy);
+    document.body.removeEventListener('paste', this._onPaste);
   }
 
-  private _onCut = async (e: ClipboardEvent) => {
+  private _onCut: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     e.preventDefault();
     await this._onCopy(e);
 
@@ -174,7 +174,7 @@ export class EdgelessClipboard implements Clipboard {
     });
   };
 
-  private _onCopy = async (e: ClipboardEvent) => {
+  private _onCopy: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     e.preventDefault();
     await this.copy();
   };
@@ -195,7 +195,7 @@ export class EdgelessClipboard implements Clipboard {
     performNativeCopy(clipboardItems);
   }
 
-  private _onPaste = async (e: ClipboardEvent) => {
+  private _onPaste: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     if (
       document.activeElement instanceof HTMLInputElement ||
       document.activeElement instanceof HTMLTextAreaElement
