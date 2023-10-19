@@ -54,6 +54,7 @@ export default defineConfig({
             link: '/unidirectional-data-flow',
           },
           { text: 'Editor State', link: '/editor-state' },
+          { text: 'Block Standard Library', link: '/block-standard-library' },
         ],
       },
       {
