@@ -53,7 +53,7 @@ export class TableClipboardController implements ReactiveController {
 
     // cells
     // For database paste inside.
-    const copyedValues = getCopyedValuesFromSelection(
+    const copiedValues = getCopiedValuesFromSelection(
       tableSelection,
       data,
       view
@@ -67,7 +67,7 @@ export class TableClipboardController implements ReactiveController {
       return {
         ...items,
         [TEXT]: formatValue,
-        [BLOCKSUITE_DATABASE]: JSON.stringify(copyedValues),
+        [BLOCKSUITE_DATABASE]: JSON.stringify(copiedValues),
       };
     });
 
@@ -85,10 +85,10 @@ export class TableClipboardController implements ReactiveController {
     const tableSelection = this.host.selectionController.selection;
     if (tableSelection) {
       const json = await this.std.clipboard.readFromClipboard(clipboardData);
-      const copyedValues = json[BLOCKSUITE_DATABASE];
-      if (!copyedValues) return;
+      const copiedValues = json[BLOCKSUITE_DATABASE];
+      if (!copiedValues) return;
       const copyedSelectionData = JSON.parse(
-        copyedValues
+        copiedValues
       ) as CopyedSelectionData;
 
       // paste cells
@@ -183,7 +183,7 @@ function copyCellsValue(
 
 type CopyedColumn = { type: string; value: string };
 type CopyedSelectionData = CopyedColumn[][];
-function getCopyedValuesFromSelection(
+function getCopiedValuesFromSelection(
   selection: TableViewSelection,
   data: DataViewTableManager,
   view: DataViewTable
