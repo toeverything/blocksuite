@@ -1,3 +1,4 @@
+import type { BlockStdProvider } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/global/utils';
 
@@ -133,6 +134,8 @@ export interface DataViewManager {
   get isDeleted(): boolean;
 
   get detailSlots(): DetailSlots;
+
+  get std(): BlockStdProvider;
 }
 
 export interface DataViewColumnManager<
@@ -195,6 +198,8 @@ export interface DataViewColumnManager<
    * @deprecated
    */
   captureSync(): void;
+
+  get std(): BlockStdProvider;
 }
 
 export abstract class BaseDataViewManager implements DataViewManager {
@@ -207,6 +212,10 @@ export abstract class BaseDataViewManager implements DataViewManager {
 
   protected constructor(protected dataSource: DataSource) {
     this.dataSource.slots.update.pipe(this.slots.update);
+  }
+
+  get std(): BlockStdProvider {
+    return this.std;
   }
 
   setSearch(str: string): void {
@@ -483,6 +492,10 @@ export abstract class BaseDataViewColumnManager
     protected propertyId: string,
     public dataViewManager: DataViewManager
   ) {}
+
+  get std(): BlockStdProvider {
+    return this.std;
+  }
 
   get index(): number {
     return this.dataViewManager.columnGetIndex(this.id);
