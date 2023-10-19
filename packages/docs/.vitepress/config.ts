@@ -47,12 +47,18 @@ export default defineConfig({
         ],
       },
       {
-        text: 'AFFiNE Editor Overview',
+        text: 'BlockSuite Foundation',
         items: [
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
           },
+          { text: 'Editor State', link: '/editor-state' },
+        ],
+      },
+      {
+        text: 'AFFiNE Editor Overview',
+        items: [
           {
             text: 'Editor UI Architecture',
             link: '/editor-ui-architecture',

@@ -178,7 +178,7 @@ export class EdgelessClipboardController implements ReactiveController {
       return;
     }
 
-    const json = await this.std.clipboard.readFromClipboard(data);
+    const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
     this._pasteShapesAndBlocks(elementsRawData);
   };
