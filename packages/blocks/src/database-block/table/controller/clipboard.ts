@@ -2,20 +2,13 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 
-import { ClipboardItem } from '../../../__internal__/clipboard/clipboard-item.js';
-import {
-  CLIPBOARD_MIMETYPE,
-  performNativeCopy,
-} from '../../../__internal__/clipboard/utils/pure.js';
-import {
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../../../__internal__/utils/index.js';
 import type { TableViewSelection } from '../../../__internal__/utils/types.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
+
+const BLOCKSUITE_DATABASE = 'blocksuite/database';
+const TEXT = 'text/plain';
 
 export class TableClipboardController implements ReactiveController {
   constructor(public host: DataViewTable) {
@@ -24,6 +17,10 @@ export class TableClipboardController implements ReactiveController {
 
   private get readonly() {
     return this.host.view.readonly;
+  }
+
+  private get std() {
+    return this.host.std;
   }
 
   hostConnected() {
@@ -61,54 +58,40 @@ export class TableClipboardController implements ReactiveController {
       data,
       view
     );
-    const stringifiesData = JSON.stringify(copyedValues);
-    const tableHtmlSelection = setHTMLStringForSelection(
-      stringifiesData,
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
-    );
-    const tableClipboardItem = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE,
-      tableHtmlSelection
-    );
 
     // For database paste outside(raw text).
     const cellsValue = copyCellsValue(tableSelection, data, view);
     const formatValue = cellsValue.map(value => value.join('\t')).join('\n');
-    const textClipboardItem = new ClipboardItem(
-      CLIPBOARD_MIMETYPE.TEXT,
-      formatValue
-    );
 
-    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-    performNativeCopy([textClipboardItem, tableClipboardItem]);
-    if (savedRange) {
-      resetNativeSelection(savedRange);
-    }
+    this.std.clipboard.writeToClipboard(async items => {
+      return {
+        ...items,
+        [TEXT]: formatValue,
+        [BLOCKSUITE_DATABASE]: JSON.stringify(copyedValues),
+      };
+    });
 
     return true;
   };
 
-  private _onPaste = (_context: UIEventStateContext) => {
+  private _onPaste = async (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
     const view = this.host;
     const data = this.host.view;
 
+    const clipboardData = event.clipboardData;
+    if (!clipboardData) return;
+
     const tableSelection = this.host.selectionController.selection;
     if (tableSelection) {
-      const htmlClipboardData = event.clipboardData?.getData(
-        CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE
-      );
-      if (!htmlClipboardData) return true;
-      const clipboardData = getSelectionFromHTMLString(
-        CLIPBOARD_MIMETYPE.BLOCKSUITE_DATABASE,
-        htmlClipboardData
-      );
-      if (!clipboardData) return true;
+      const json = await this.std.clipboard.readFromClipboard(clipboardData);
+      const copyedValues = json[BLOCKSUITE_DATABASE];
+      if (!copyedValues) return;
+      const copyedSelectionData = JSON.parse(
+        copyedValues
+      ) as CopyedSelectionData;
 
       // paste cells
-      const copyedSelectionData = JSON.parse(
-        clipboardData
-      ) as CopyedSelectionData;
       const targetRange = getTargetRangeFromSelection(tableSelection, data);
       let rowStartIndex = targetRange.row.start;
       let columnStartIndex = targetRange.column.start;
@@ -142,19 +125,6 @@ function getColumnValue(container: DatabaseCellContainer | undefined) {
   const rowId = container?.dataset.rowId;
   assertExists(rowId);
   return container?.column.getStringValue(rowId) ?? '';
-}
-
-function setHTMLStringForSelection(data: string, type: CLIPBOARD_MIMETYPE) {
-  return `<database style="display: none" data-type="${type}" data-clipboard="${data.replace(
-    /"/g,
-    '&quot;'
-  )}"></database>`;
-}
-
-function getSelectionFromHTMLString(type: CLIPBOARD_MIMETYPE, html: string) {
-  const dom = new DOMParser().parseFromString(html, 'text/html');
-  const ele = dom.querySelector(`database[data-type="${type}"]`);
-  return ele?.getAttribute('data-clipboard');
 }
 
 function copyCellsValue(

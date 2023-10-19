@@ -1,4 +1,8 @@
-import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import type {
+  BlockStdProvider,
+  EventName,
+  UIEventHandler,
+} from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
@@ -18,7 +22,11 @@ export abstract class BaseDataView<
   implements DataViewProps<T, Selection>, DataViewExpose
 {
   @property({ attribute: false })
+  std!: BlockStdProvider;
+
+  @property({ attribute: false })
   header!: UniComponent<{ viewMethods: DataViewExpose; view: T }>;
+
   @property({ attribute: false })
   view!: T;
 

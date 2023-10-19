@@ -1,4 +1,8 @@
-import type { EventName, UIEventHandler } from '@blocksuite/block-std';
+import type {
+  BlockStdProvider,
+  EventName,
+  UIEventHandler,
+} from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
@@ -31,6 +35,8 @@ export interface DataViewProps<
   onDrag?: (evt: MouseEvent, id: string) => () => void;
 
   getFlag?: Page['awarenessStore']['getFlag'];
+
+  std: BlockStdProvider;
 }
 
 export interface DataViewExpose {

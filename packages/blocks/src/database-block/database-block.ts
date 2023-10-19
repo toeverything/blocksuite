@@ -339,6 +339,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       viewSource: this.viewSource,
       headerComponent: this.headerComponent,
       onDrag: this.onDrag,
+      std: this.std,
     };
     return html`
       <div style="position: relative">
