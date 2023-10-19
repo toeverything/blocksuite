@@ -4,7 +4,6 @@ import { Bound } from '../../utils/bound.js';
 import {
   type BezierCurveParameters,
   getBezierNearestPoint,
-  getBezierTangent,
 } from '../../utils/curve.js';
 import {
   linePolylineIntersects,
@@ -17,12 +16,14 @@ import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import {
   ConnectorEnd,
+  ConnectorEndPointStyle,
   ConnectorMode,
+  DEFAULT_ARROW_SIZE,
   DEFAULT_END_POINT_STYLE,
   DEFAULT_START_POINT_STYLE,
   type IConnector,
 } from './types.js';
-import { getArrowPoints } from './utils.js';
+import { getArrowPoints, getPointWithTangent } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
   private _path: PointLocation[] = [];
@@ -246,6 +247,29 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     }
   }
 
+  private _getArrowPoints(
+    points: PointLocation[],
+    mode: ConnectorMode,
+    end: ConnectorEnd,
+    angleRatio = 0.25
+  ) {
+    const anchorPoint = getPointWithTangent(
+      points,
+      mode,
+      end,
+      this.bezierParameters
+    );
+
+    const { points: arrowPoints } = getArrowPoints(
+      anchorPoint,
+      DEFAULT_ARROW_SIZE,
+      end,
+      angleRatio
+    );
+
+    return arrowPoints;
+  }
+
   private _renderArrow(
     points: PointLocation[],
     ctx: CanvasRenderingContext2D,
@@ -253,29 +277,15 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     mode: ConnectorMode,
     end: ConnectorEnd
   ) {
-    const anchorIndex = end === ConnectorEnd.End ? points.length - 1 : 0;
-    const pointToAnchorIndex =
-      end === ConnectorEnd.End ? anchorIndex - 1 : anchorIndex + 1;
-    const anchorPoint = points[anchorIndex];
-    const pointToAnchor = points[pointToAnchorIndex];
-
-    const clone = anchorPoint.clone();
-    clone.tangent =
-      mode !== ConnectorMode.Curve
-        ? end === ConnectorEnd.End
-          ? Vec.tangent(anchorPoint, pointToAnchor)
-          : Vec.tangent(pointToAnchor, anchorPoint)
-        : getBezierTangent(this.bezierParameters, 1) ?? [];
-
-    const { sides } = getArrowPoints(clone, 15, end);
+    const arrowPoints = this._getArrowPoints(points, mode, end);
 
     this._renderPoints(
       ctx,
       rc,
       [
-        PointLocation.fromVec(sides[0]),
-        anchorPoint,
-        PointLocation.fromVec(sides[1]),
+        PointLocation.fromVec(arrowPoints[0]),
+        PointLocation.fromVec(arrowPoints[1]),
+        PointLocation.fromVec(arrowPoints[2]),
       ],
       false,
       false
@@ -287,13 +297,24 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: 'Start' | 'End'
+    end: ConnectorEnd
   ) {
-    if (end === 'End') {
-      console.log('render end triangle');
-    } else {
-      console.log('render start triangle');
-    }
+    const trianglePoints = this._getArrowPoints(points, mode, end, 0.1);
+
+    const { stroke, strokeWidth } = this;
+    const realStrokeColor = this.computedValue(stroke);
+    ctx.fillStyle = realStrokeColor;
+    ctx.strokeStyle = realStrokeColor;
+    ctx.lineWidth = strokeWidth;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(trianglePoints[0][0], trianglePoints[0][1]);
+    ctx.lineTo(trianglePoints[1][0], trianglePoints[1][1]);
+    ctx.lineTo(trianglePoints[2][0], trianglePoints[2][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
   }
 
   private _renderCircle(
@@ -301,13 +322,35 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: 'Start' | 'End'
+    end: ConnectorEnd
   ) {
+    const radius = DEFAULT_ARROW_SIZE / 2;
+    const anchorPoint = getPointWithTangent(
+      points,
+      mode,
+      end,
+      this.bezierParameters
+    );
+    let cx = anchorPoint[0];
+    let cy = anchorPoint[1];
     if (end === 'End') {
-      console.log('render end circle');
+      // need to calculate the center point according to the tangent
+      cx -= anchorPoint.tangent[0] * radius;
+      cy -= anchorPoint.tangent[1] * radius;
     } else {
-      console.log('render start circle');
+      cx += anchorPoint.tangent[0] * radius;
+      cy += anchorPoint.tangent[1] * radius;
     }
+    const { stroke, strokeWidth } = this;
+    const realStrokeColor = this.computedValue(stroke);
+    ctx.fillStyle = realStrokeColor;
+    ctx.strokeStyle = realStrokeColor;
+    ctx.lineWidth = strokeWidth;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, radius, radius, 0, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
 
   private _renderDiamond(
@@ -330,19 +373,19 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     rc: RoughCanvas,
     mode: ConnectorMode,
     end: ConnectorEnd,
-    style: 'None' | 'Arrow' | 'Triangle' | 'Circle' | 'Diamond'
+    style: ConnectorEndPointStyle
   ) {
     switch (style) {
-      case 'Arrow':
+      case ConnectorEndPointStyle.Arrow:
         this._renderArrow(points, ctx, rc, mode, end);
         break;
-      case 'Triangle':
+      case ConnectorEndPointStyle.Triangle:
         this._renderTriangle(points, ctx, rc, mode, end);
         break;
-      case 'Circle':
+      case ConnectorEndPointStyle.Circle:
         this._renderCircle(points, ctx, rc, mode, end);
         break;
-      case 'Diamond':
+      case ConnectorEndPointStyle.Diamond:
         this._renderDiamond(points, ctx, rc, mode, end);
         break;
     }

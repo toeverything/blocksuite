@@ -24,7 +24,7 @@ export enum ConnectorEndPointStyle {
 
 export const DEFAULT_START_POINT_STYLE = ConnectorEndPointStyle.None;
 export const DEFAULT_END_POINT_STYLE = ConnectorEndPointStyle.Arrow;
-
+export const DEFAULT_ARROW_SIZE = 15;
 // at least one of id and position is not null
 // both exists means the position is relative to the element
 export type Connection = {
