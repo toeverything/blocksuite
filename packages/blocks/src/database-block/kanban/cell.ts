@@ -130,6 +130,7 @@ export class KanbanCell extends WithDisposable(ShadowlessElement) {
       rowId: this.cardId,
       isEditing: this.editing,
       selectCurrentCell: this.selectCurrentCell,
+      std: this.view.std,
     };
     const { view, edit } = this.column.renderer;
     this.style.border = this.isFocus
