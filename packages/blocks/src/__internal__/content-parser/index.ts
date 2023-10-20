@@ -7,8 +7,10 @@ import type { AttachmentProps } from '../../attachment-block/attachment-model.js
 import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import { getTagColor } from '../../components/tags/colors.js';
 import { toast } from '../../components/toast.js';
+import { Bound } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
+import { getNotesInFrame } from '../../page-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
@@ -239,10 +241,11 @@ export class ContentParser {
       proxy: this._imageProxyEndpoint,
     };
 
-    const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
-    for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
-      const blockBound = xywhArrayToObject(nodeElement);
+    // TODO: refactor of this part
+    const blocks = nodes ?? edgeless.getSortedElementsByBound(bound);
+    for (const block of blocks) {
+      const blockElement = getBlockElementById(block.id)?.parentElement;
+      const blockBound = xywhArrayToObject(block);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
         html2canvasOption
@@ -254,6 +257,35 @@ export class ContentParser {
         blockBound.w,
         blockBound.h
       );
+
+      if (block.flavour === 'affine:frame') {
+        const blocksInsideFrame = getNotesInFrame(edgeless.page, block, false);
+        const frameBound = Bound.deserialize(block.xywh);
+
+        for (let i = 0; i < blocksInsideFrame.length; i++) {
+          const element = blocksInsideFrame[i];
+          const htmlElement = getBlockElementById(element.id)?.parentElement;
+          const blockBound = xywhArrayToObject(element);
+
+          const canvasData = await html2canvas(
+            htmlElement as HTMLElement,
+            html2canvasOption
+          );
+
+          ctx.drawImage(
+            canvasData,
+            blockBound.x - bound.x + 50,
+            blockBound.y - bound.y + 50,
+            blockBound.w,
+            blockBound.h
+          );
+        }
+        const surfaceCanvas =
+          edgeless.surface.viewport.getCanvasByBound(frameBound);
+
+        ctx.drawImage(surfaceCanvas, 50, 50, frameBound.w, frameBound.h);
+      }
+
       this._checkCanContinueToCanvas(pathname, pageMode);
     }
 
