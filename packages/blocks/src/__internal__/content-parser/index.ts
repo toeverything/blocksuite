@@ -10,7 +10,7 @@ import { toast } from '../../components/toast.js';
 import { Bound } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import { getNotesInFrame } from '../../page-block/edgeless/frame-manager.js';
+import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
@@ -259,7 +259,7 @@ export class ContentParser {
       );
 
       if (block.flavour === 'affine:frame') {
-        const blocksInsideFrame = getNotesInFrame(edgeless.page, block, false);
+        const blocksInsideFrame = getBlocksInFrame(edgeless.page, block);
         const frameBound = Bound.deserialize(block.xywh);
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
