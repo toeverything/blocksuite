@@ -37,6 +37,7 @@ export function registerAllBlocks() {
     registerService(flavour, Constructor);
   });
 }
+registerAllBlocks();
 
 export type BlockService = typeof blockService;
 export type ServiceFlavour = keyof BlockService;
