@@ -6,14 +6,10 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
-  getEdgelessSelectedRect,
   getEdgelessSelectedRectModel,
   Shape,
 } from '../utils/actions/edgeless.js';
-import {
-  assertEdgelessSelectedRect,
-  assertSelectedBound,
-} from '../utils/asserts.js';
+import { assertSelectedBound } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 test.describe('auto-complete', () => {
