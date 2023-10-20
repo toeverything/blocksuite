@@ -606,9 +606,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     surface.snap.cleanupAlignables();
     surface.frame.clearHighlight();
     this._addFrames();
-    this._frames.forEach(frame => {
-      surface.frame.calculateFrameColor(frame);
-    });
     this._frames.clear();
     this._toBeMoved = [];
     this._forceUpdateSelection(this.dragType);
