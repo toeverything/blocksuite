@@ -38,7 +38,6 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
     const { xywh } = frame;
     const bound = Bound.deserialize(xywh);
     const style = styleMap({
-      // width: `${bound.w}px`,
       position: 'absolute',
       zIndex: `${index}`,
       transform: `translate(${bound.x}px, ${bound.y}px)`,
