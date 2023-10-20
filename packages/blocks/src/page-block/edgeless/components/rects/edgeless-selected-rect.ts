@@ -397,11 +397,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _shouldRenderSelection(elements?: Selectable[]) {
     elements = elements ?? this.selection.elements;
-
-    return (
-      elements.length > 0 &&
-      (!this.selection.editing || !isPhasorElementWithText(elements[0]))
-    );
+    return elements.length > 0 && !this.selection.editing;
   }
 
   private _onDragStart = () => {
