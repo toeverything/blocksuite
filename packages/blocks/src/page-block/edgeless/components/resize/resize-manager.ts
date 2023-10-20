@@ -103,6 +103,10 @@ export class HandleResizeManager {
     return this._originalRect;
   }
 
+  get bounds() {
+    return this._bounds;
+  }
+
   updateState(
     resizeMode: ResizeMode,
     rotate: number,

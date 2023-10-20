@@ -36,6 +36,8 @@ import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getConnectorPath,
   getEdgelessSelectedRectModel,
+  getGroupChildrenIds,
+  getGroupIds,
   getSelectedBound,
   getZoomLevel,
 } from './actions/edgeless.js';
@@ -910,6 +912,20 @@ export async function assertSelectedBound(
 ) {
   const bound = await getSelectedBound(page, index);
   assertBound(bound, expected);
+}
+
+export async function assertGroupIds(page: Page, expected: string[]) {
+  const ids = await getGroupIds(page);
+  expect(ids).toEqual(expected);
+}
+
+export async function assertGroupChildrenIds(
+  page: Page,
+  expected: string[],
+  index = 0
+) {
+  const ids = await getGroupChildrenIds(page, index);
+  expect(ids).toEqual(expected);
 }
 
 export function assertBound(received: Bound, expected: Bound) {

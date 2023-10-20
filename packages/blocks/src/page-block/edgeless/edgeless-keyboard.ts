@@ -7,8 +7,10 @@ import {
   Bound,
   ConnectorElement,
   ConnectorMode,
+  GroupElement,
   ShapeStyle,
 } from '../../surface-block/index.js';
+import { getRootElements } from '../../surface-block/manager/group-manager.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -114,6 +116,23 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
         },
+        'Mod-g': () => {
+          if (
+            this.pageElement.selectionManager.elements.length > 1 &&
+            !this.pageElement.selectionManager.editing
+          ) {
+            pageElement.surface.group.createGroupOnSelected();
+          }
+        },
+        'Shift-Mod-g': () => {
+          const { selectionManager, surface } = this.pageElement;
+          if (
+            selectionManager.elements.length === 1 &&
+            selectionManager.firstElement instanceof GroupElement
+          ) {
+            surface.group.unGroup(selectionManager.firstElement);
+          }
+        },
         'Mod-a': ctx => {
           if (this.pageElement.selectionManager.editing) {
             return;
@@ -122,8 +141,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           ctx.get('defaultState').event.preventDefault();
           this.pageElement.selectionManager.setSelection({
             elements: [
-              ...this.pageElement.surface.blocks.map(block => block.id),
-              ...this.pageElement.surface.getElements().map(el => el.id),
+              ...getRootElements(this.pageElement.surface.blocks).map(
+                block => block.id
+              ),
+              ...getRootElements(this.pageElement.surface.getElements()).map(
+                el => el.id
+              ),
             ],
             editing: false,
           });

@@ -17,6 +17,7 @@ import type {
   IEdgelessElement,
   PhasorElementType,
 } from './edgeless-element.js';
+import { groupRootId } from './group/contants.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -71,6 +72,15 @@ export abstract class SurfaceElement<
 
   computedValue: ComputedValue = v => v;
 
+  protected _group = groupRootId;
+  get group() {
+    return this._group;
+  }
+
+  set group(value) {
+    this._group = value;
+  }
+
   constructor(
     yMap: Y.Map<unknown>,
     surface: SurfaceBlockComponent,
@@ -87,6 +97,8 @@ export abstract class SurfaceElement<
 
     this.surface = surface;
   }
+
+  init() {}
 
   get id() {
     const id = this.yMap.get('id') as T['id'];

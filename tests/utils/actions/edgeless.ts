@@ -701,6 +701,9 @@ type Action =
   | 'changeConnectorStrokeColor'
   | 'changeConnectorStrokeStyles'
   | 'addFrame'
+  | 'addGroup'
+  | 'unGroup'
+  | 'releaseFromGroup'
   | 'createFrameOnMoreOption'
   | 'duplicate';
 
@@ -845,6 +848,27 @@ export async function triggerComponentToolbarAction(
     case 'addFrame': {
       const button = locatorComponentToolbar(page).locator(
         'edgeless-add-frame-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'addGroup': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-add-group-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'unGroup': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-ungroup-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'releaseFromGroup': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-release-from-group-button'
       );
       await button.click();
       break;
@@ -1095,6 +1119,33 @@ export async function getSelectedBound(page: Page, index = 0) {
     },
     [index]
   );
+}
+
+export async function getGroupIds(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElements().map(g => g.group);
+  });
+}
+
+export async function getGroupChildrenIds(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      return container.surface.getElementsByType('group')[index].children;
+    },
+    [index]
+  );
+}
+
+export async function getIds(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElements().map(g => g.id);
+  });
 }
 
 export async function edgelessCommonSetup(page: Page) {

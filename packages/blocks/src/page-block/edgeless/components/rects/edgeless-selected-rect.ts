@@ -9,8 +9,9 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pick } from '../../../../_common/utils/iterable.js';
-import type { IPoint, Selectable } from '../../../../_common/utils/types.js';
+import type { EdgelessElement, IPoint, Selectable } from '../../../../_common/utils/types.js';
 import {
+  GroupElement,
   normalizeTextBound,
   PhasorElementType,
 } from '../../../../surface-block/index.js';
@@ -21,11 +22,11 @@ import {
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
-  type PhasorElement,
   serializeXYWH,
   ShapeElement,
   TextElement,
 } from '../../../../surface-block/index.js';
+import { getElementsWithoutGroup } from '../../../../surface-block/manager/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
@@ -373,9 +374,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         areAllTexts = false;
         hasNote = false;
       } else {
-        if (element.type !== 'connector') areAllConnectors = false;
-        if (element.type !== 'shape') areAllShapes = false;
-        if (element.type !== 'text') areAllTexts = false;
+        if (element.type !== PhasorElementType.CONNECTOR)
+          areAllConnectors = false;
+        if (
+          element.type !== PhasorElementType.SHAPE &&
+          element.type !== PhasorElementType.GROUP
+        )
+          areAllShapes = false;
+        if (element.type !== PhasorElementType.TEXT) areAllTexts = false;
       }
     }
 
@@ -406,13 +412,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
-    const { page, selection, surface } = this;
-    const selectedMap = new Map<string, Selectable>(
-      selection.elements.map(element => [element.id, element])
-    );
+    const { page, surface } = this;
 
     newBounds.forEach(({ bound }, id) => {
-      const element = selectedMap.get(id);
+      const element = surface.pickById(id);
       if (!element) return;
 
       if (isNoteBlock(element)) {
@@ -480,9 +483,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         isImageBlock(element) ||
         (isPhasorElement(element) &&
           element.type !== PhasorElementType.CONNECTOR)
-    ) as PhasorElement[];
+    ) as EdgelessElement[];
 
-    elements.forEach(element => {
+    getElementsWithoutGroup(elements).forEach(element => {
       const { id, rotate } = element;
       const { x, y, w, h } = Bound.deserialize(element.xywh);
       const center = new DOMPoint(x + w / 2, y + h / 2).matrixTransform(m);
@@ -673,7 +676,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
     const id = typeof element === 'string' ? element : element.id;
 
-    if (this.selection.isSelected(id)) this._updateSelectedRect();
+    if (this._resizeManager.bounds.has(id) || this.selection.isSelected(id))
+      this._updateSelectedRect();
   };
 
   override firstUpdated() {
@@ -773,6 +777,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           ></edgeless-connector-handle>`
         : nothing;
 
+    const isSingleGroup =
+      elements.length === 1 && elements[0] instanceof GroupElement;
+    _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
     return html`
       ${!page.readonly && this._canAutoComplete()
         ? html`<edgeless-auto-complete

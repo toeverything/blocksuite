@@ -16,6 +16,7 @@ import {
   type Connection,
   type ConnectorElement,
   ConnectorMode,
+  GroupElement,
   type IVec,
   normalizeDegAngle,
   Overlay,
@@ -304,8 +305,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private async _createEdgelessElement() {
+    let id;
+    const { surface } = this.edgeless;
     if (this._isShape(this.current)) {
-      return this.edgeless.surface.addElement(this.current.type, {
+      id = this.edgeless.surface.addElement(this.current.type, {
         ...this.current.serialize(),
         text: new Workspace.Y.Text(),
       });
@@ -323,6 +326,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       await noteService.json2Block(note, serializedBlock.children);
       return id;
     }
+    const group = surface.pickById(this.current.group);
+    if (group instanceof GroupElement) {
+      group.addChild(id);
+    }
+    return id;
   }
 
   private async _generateElementOnClick(type: Direction) {

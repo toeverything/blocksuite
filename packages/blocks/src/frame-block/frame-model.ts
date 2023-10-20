@@ -9,6 +9,7 @@ import type {
   HitTestOptions,
   IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
+import { groupRootId } from '../surface-block/elements/group/contants.js';
 import {
   Bound,
   type IVec,
@@ -49,7 +50,14 @@ export class FrameBlockModel
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.FRAME;
+  private _group = groupRootId;
+  get group() {
+    return this._group;
+  }
 
+  set group(value) {
+    this._group = value;
+  }
   get connectable() {
     return false;
   }
@@ -60,6 +68,10 @@ export class FrameBlockModel
 
   get rotate() {
     return 0;
+  }
+
+  get gridBound() {
+    return Bound.deserialize(this.xywh);
   }
 
   containedByBounds(bound: Bound): boolean {

@@ -8,6 +8,7 @@ import type {
   HitTestOptions,
   IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
+import { groupRootId } from '../surface-block/elements/group/contants.js';
 import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import {
   Bound,
@@ -70,6 +71,15 @@ export class NoteBlockModel
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;
+  gridBound!: Bound;
+  private _group = groupRootId;
+  get group() {
+    return this._group;
+  }
+
+  set group(value) {
+    this._group = value;
+  }
 
   get connectable() {
     return true;
@@ -82,6 +92,7 @@ export class NoteBlockModel
   get rotate() {
     return 0;
   }
+
   containedByBounds!: (_: Bound) => boolean;
   getNearestPoint!: (_: IVec) => IVec;
   intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;

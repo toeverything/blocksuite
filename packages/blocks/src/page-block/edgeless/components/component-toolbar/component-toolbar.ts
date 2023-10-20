@@ -6,6 +6,9 @@ import './change-note-button.js';
 import './change-text-button.js';
 import './change-frame-button.js';
 import './add-frame-button.js';
+import './add-group-button.js';
+import './ungroup-button.js';
+import './release-from-group-button.js';
 import './more-button.js';
 import './align-button.js';
 
@@ -22,12 +25,15 @@ import {
   pickValues,
 } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import type { ImageBlockModel, NoteBlockModel } from '../../../../index.js';
-import type {
-  BrushElement,
-  ConnectorElement,
-  ShapeElement,
-  TextElement,
+import type { ImageBlockModel } from '../../../../image-block/index.js';
+import type { NoteBlockModel } from '../../../../note-block/index.js';
+import { groupRootId } from '../../../../surface-block/elements/group/contants.js';
+import {
+  type BrushElement,
+  type ConnectorElement,
+  GroupElement,
+  type ShapeElement,
+  type TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
@@ -36,6 +42,7 @@ type CategorizedElements = {
   shape: ShapeElement[];
   brush: BrushElement[];
   text: TextElement[];
+  group: GroupElement[];
   connector: ConnectorElement[];
   note: NoteBlockModel[];
   frame: FrameBlockModel[];
@@ -206,10 +213,28 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     );
   }
 
+  private _getCreateGroupButton() {
+    return html`<edgeless-add-group-button
+      .edgeless=${this.edgeless}
+    ></edgeless-add-group-button> `;
+  }
+
   private _getCreateFrameButton() {
     return html`<edgeless-add-frame-button
       .edgeless=${this.edgeless}
     ></edgeless-add-frame-button>`;
+  }
+
+  private _getReleaseFromGroupButton() {
+    return html`<edgeless-release-from-group-button
+      .surface=${this.surface}
+    ></edgeless-release-from-group-button>`;
+  }
+
+  private _getUnGroupButton() {
+    return html`<edgeless-ungroup-button
+      .surface=${this.surface}
+    ></edgeless-ungroup-button>`;
   }
 
   private _getAlignButton() {
@@ -220,9 +245,9 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   override render() {
     const groupedSelected = this._groupSelected();
-    const { edgeless } = this;
+    const { edgeless, selection } = this;
     const { shape, brush, connector, note, text, frame } = groupedSelected;
-
+    const { elements } = this.selection;
     const selectedAtLeastTwoTypes = atLeastNMatches(
       Object.values(groupedSelected),
       e => !!e.length,
@@ -240,7 +265,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           this._getFrameButton(frame),
         ].filter(b => !!b && b !== nothing);
 
-    if (this.selection.state.elements.length > 1) {
+    if (elements.length > 1) {
       buttons.unshift(
         html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       );
@@ -248,8 +273,28 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       buttons.unshift(
         html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
       );
+      buttons.unshift(this._getCreateGroupButton());
+      buttons.unshift(
+        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+      );
       buttons.unshift(this._getCreateFrameButton());
     }
+    if (elements.length === 1) {
+      if (selection.firstElement instanceof GroupElement) {
+        buttons.unshift(
+          html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+        );
+        buttons.unshift(this._getUnGroupButton());
+      }
+
+      if (selection.firstElement.group != groupRootId) {
+        buttons.unshift(
+          html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
+        );
+        buttons.unshift(this._getReleaseFromGroupButton());
+      }
+    }
+
     const last = buttons.at(-1);
     if (
       buttons.length > 0 &&
@@ -273,7 +318,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     </div>`;
   }
 }
-
 declare global {
   interface HTMLElementTagNameMap {
     'edgeless-component-toolbar': EdgelessComponentToolbar;
