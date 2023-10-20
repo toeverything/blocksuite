@@ -7,7 +7,6 @@ import type { AttachmentProps } from '../../attachment-block/attachment-model.js
 import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import { getTagColor } from '../../components/tags/colors.js';
 import { toast } from '../../components/toast.js';
-import { Bound } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
@@ -15,6 +14,7 @@ import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import type { IBound } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
+import { Bound } from '../../surface-block/utils/bound.js';
 import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,
