@@ -13,6 +13,7 @@ import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgel
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import type { IBound } from '../../surface-block/consts.js';
+import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
 import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
@@ -258,7 +259,7 @@ export class ContentParser {
         blockBound.h
       );
 
-      if (block.flavour === 'affine:frame') {
+      if (block.flavour === EdgelessBlockType.FRAME) {
         const blocksInsideFrame = getBlocksInFrame(edgeless.page, block);
         const frameBound = Bound.deserialize(block.xywh);
 
