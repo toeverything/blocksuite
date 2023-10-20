@@ -1,9 +1,10 @@
 import { PathFinder, type TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
-import type {
-  VRange,
-  VRangeProvider,
-  VRangeUpdatedProp,
+import {
+  VIRGO_ROOT_ATTR,
+  type VRange,
+  type VRangeProvider,
+  type VRangeUpdatedProp,
 } from '@blocksuite/virgo';
 
 import type { BlockElement } from '../element/block-element.js';
@@ -22,9 +23,14 @@ export const getVRangeProvider: (
     // Most cases, the range is collapsed, so we no need to use `intersectsNode`
     // because its performance is not good enough.
     if (range.collapsed) {
-      const blockElement = range.startContainer.parentElement?.closest(
-        `[${root.blockIdAttr}]`
-      );
+      const startElement =
+        range.startContainer instanceof Element
+          ? range.startContainer
+          : range.startContainer.parentElement;
+      const vRoot = startElement?.closest(`[${VIRGO_ROOT_ATTR}]`);
+      if (!vRoot) return false;
+
+      const blockElement = startElement?.closest(`[${root.blockIdAttr}]`);
       if (!blockElement || blockElement !== element) return false;
     } else {
       if (!range.intersectsNode(element)) return false;
@@ -78,7 +84,11 @@ export const getVRangeProvider: (
     }
   };
   const getVRange = (): VRange | null => {
-    const range = rangeManager?.value;
+    const sl = document.getSelection();
+    if (!sl || sl.rangeCount === 0) {
+      return null;
+    }
+    const range = sl.getRangeAt(0);
     if (!range) {
       return null;
     }

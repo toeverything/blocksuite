@@ -416,8 +416,7 @@ export class Page extends Space<FlatBlockMap> {
     childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
     targetParentChildren: Y.Array<string>,
     targetSibling: BaseBlockModel | null,
-    shouldInsertBeforeSibling: boolean,
-    insertionOffset: number
+    shouldInsertBeforeSibling: boolean
   ) {
     for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
       const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
@@ -440,18 +439,17 @@ export class Page extends Space<FlatBlockMap> {
         insertIndex = targetParentChildren
           .toArray()
           .findIndex(id => id === targetSibling.id);
-      }
-
-      // Insert the blocks at the correct position under their new parent
-      if (shouldInsertBeforeSibling) {
-        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
+        const targetIndex = targetParentChildren
+          .toArray()
+          .findIndex(id => id === targetSibling.id);
+        if (targetIndex === -1) {
+          throw new Error('Target sibling not found');
+        }
+        insertIndex = shouldInsertBeforeSibling ? targetIndex : targetIndex + 1;
       } else {
-        targetParentChildren.insert(
-          insertIndex + insertionOffset,
-          idsOfBlocksToMove
-        );
-        insertionOffset += idsOfBlocksToMove.length;
+        insertIndex = targetParentChildren.length;
       }
+      targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
     }
   }
 
@@ -487,16 +485,12 @@ export class Page extends Space<FlatBlockMap> {
         'sys:children'
       ) as Y.Array<string>;
 
-      // To be used for insertion after the target sibling
-      const insertionOffset = 1;
-
       // Reposition blocks under their new parent
       this._repositionBlocks(
         childBlocksPerParent,
         targetParentChildren,
         targetSibling,
-        shouldInsertBeforeSibling,
-        insertionOffset
+        shouldInsertBeforeSibling
       );
     });
 
