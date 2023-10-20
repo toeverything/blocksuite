@@ -15,18 +15,19 @@ import type { SerializedXYWH } from '../../utils/xywh.js';
 import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import {
-  ConnectorEnd,
+  ConnectorEndPoint,
   ConnectorEndPointStyle,
   ConnectorMode,
-  DEFAULT_ARROW_SIZE,
-  DEFAULT_END_POINT_STYLE,
-  DEFAULT_START_POINT_STYLE,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
   type IConnector,
 } from './types.js';
 import {
+  type ArrowOptions,
   getArrowPoints,
-  getDiamondPoints,
-  getPointWithTangent,
+  renderCircle,
+  renderDiamond,
+  renderTriangle,
 } from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
@@ -92,17 +93,18 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('controllers') as IConnector['controllers'];
   }
 
-  get startPointStyle() {
+  get frontEndPointStyle() {
     return (
-      (this.yMap.get('startPointStyle') as IConnector['startPointStyle']) ??
-      DEFAULT_START_POINT_STYLE
+      (this.yMap.get(
+        'frontEndPointStyle'
+      ) as IConnector['frontEndPointStyle']) ?? DEFAULT_FRONT_END_POINT_STYLE
     );
   }
 
-  get endPointStyle() {
+  get rearEndPointStyle() {
     return (
-      (this.yMap.get('endPointStyle') as IConnector['endPointStyle']) ??
-      DEFAULT_END_POINT_STYLE
+      (this.yMap.get('rearEndPointStyle') as IConnector['rearEndPointStyle']) ??
+      DEFAULT_REAR_END_POINT_STYLE
     );
   }
 
@@ -147,7 +149,12 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     matrix: DOMMatrix,
     rc: RoughCanvas
   ) {
-    const { absolutePath: points, mode, startPointStyle, endPointStyle } = this;
+    const {
+      absolutePath: points,
+      mode,
+      frontEndPointStyle,
+      rearEndPointStyle,
+    } = this;
 
     // points might not be build yet in some senarios
     // eg. undo/redo, copy/paste
@@ -174,8 +181,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ctx,
       rc,
       mode,
-      ConnectorEnd.Start,
-      startPointStyle
+      ConnectorEndPoint.Front,
+      frontEndPointStyle
     );
     // render end points
     this._renderEndPoints(
@@ -183,8 +190,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ctx,
       rc,
       mode,
-      ConnectorEnd.End,
-      endPointStyle
+      ConnectorEndPoint.Rear,
+      rearEndPointStyle
     );
   }
 
@@ -251,60 +258,20 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     }
   }
 
-  private _renderShape(ctx: CanvasRenderingContext2D, points: IVec[]) {
-    const { stroke, strokeWidth } = this;
-    const realStrokeColor = this.computedValue(stroke);
-    ctx.fillStyle = realStrokeColor;
-    ctx.strokeStyle = realStrokeColor;
-    ctx.lineWidth = strokeWidth;
-    ctx.save();
-    ctx.beginPath();
-    points.forEach((point, index) => {
-      if (index === 0) {
-        ctx.moveTo(point[0], point[1]);
-      } else {
-        ctx.lineTo(point[0], point[1]);
-      }
-    });
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  private _getArrowPoints(
-    points: PointLocation[],
-    mode: ConnectorMode,
-    end: ConnectorEnd,
-    angleRatio = 0.25
-  ) {
-    const anchorPoint = getPointWithTangent(
-      points,
-      mode,
-      end,
-      this.bezierParameters
-    );
-
-    const { points: arrowPoints } = getArrowPoints(
-      anchorPoint,
-      DEFAULT_ARROW_SIZE,
-      end,
-      angleRatio
-    );
-
-    return arrowPoints;
-  }
-
-  private _getRcOptions() {
-    const { stroke, strokeWidth, roughness, seed } = this;
+  private _getArrowOptions(end: ConnectorEndPoint): ArrowOptions {
+    const { stroke } = this;
     const realStrokeColor = this.computedValue(stroke);
     return {
-      seed,
-      roughness,
-      stroke: realStrokeColor,
-      strokeWidth,
-      fill: realStrokeColor,
+      end,
+      seed: this.seed,
+      mode: this.mode,
+      rough: this.rough,
+      roughness: this.roughness,
+      strokeColor: realStrokeColor,
+      strokeWidth: this.strokeWidth,
+      fillColor: realStrokeColor,
       fillStyle: 'solid',
+      bezierParameters: this.bezierParameters,
     };
   }
 
@@ -313,9 +280,17 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: ConnectorEnd
+    end: ConnectorEndPoint
   ) {
-    const arrowPoints = this._getArrowPoints(points, mode, end);
+    const radians = Math.PI / 4;
+    const { points: arrowPoints } = getArrowPoints(
+      points,
+      15,
+      mode,
+      this.bezierParameters,
+      end,
+      radians
+    );
 
     this._renderPoints(
       ctx,
@@ -330,122 +305,27 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
   }
 
-  private _renderTriangle(
-    points: PointLocation[],
-    ctx: CanvasRenderingContext2D,
-    rc: RoughCanvas,
-    mode: ConnectorMode,
-    end: ConnectorEnd
-  ) {
-    const trianglePoints = this._getArrowPoints(points, mode, end, 0.1);
-
-    const { rough } = this;
-    if (rough) {
-      rc.polygon(
-        [
-          [trianglePoints[0][0], trianglePoints[0][1]],
-          [trianglePoints[1][0], trianglePoints[1][1]],
-          [trianglePoints[2][0], trianglePoints[2][1]],
-        ],
-        this._getRcOptions()
-      );
-    } else {
-      this._renderShape(ctx, trianglePoints);
-    }
-  }
-
-  private _renderCircle(
-    points: PointLocation[],
-    ctx: CanvasRenderingContext2D,
-    rc: RoughCanvas,
-    mode: ConnectorMode,
-    end: ConnectorEnd
-  ) {
-    const radius = 6;
-    const anchorPoint = getPointWithTangent(
-      points,
-      mode,
-      end,
-      this.bezierParameters
-    );
-    let cx = anchorPoint[0];
-    let cy = anchorPoint[1];
-    if (end === 'End') {
-      // need to calculate the center point according to the tangent
-      cx -= anchorPoint.tangent[0] * radius;
-      cy -= anchorPoint.tangent[1] * radius;
-    } else {
-      cx += anchorPoint.tangent[0] * radius;
-      cy += anchorPoint.tangent[1] * radius;
-    }
-
-    const { stroke, strokeWidth, rough } = this;
-    const realStrokeColor = this.computedValue(stroke);
-    if (rough) {
-      rc.ellipse(cx, cy, radius, radius, this._getRcOptions());
-    } else {
-      ctx.fillStyle = realStrokeColor;
-      ctx.strokeStyle = realStrokeColor;
-      ctx.lineWidth = strokeWidth;
-      ctx.beginPath();
-      ctx.ellipse(cx, cy, radius, radius, 0, 0, 2 * Math.PI);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-    }
-  }
-
-  private _renderDiamond(
-    points: PointLocation[],
-    ctx: CanvasRenderingContext2D,
-    rc: RoughCanvas,
-    mode: ConnectorMode,
-    end: ConnectorEnd
-  ) {
-    const anchorPoint = getPointWithTangent(
-      points,
-      mode,
-      end,
-      this.bezierParameters
-    );
-    const { points: diamondPoints } = getDiamondPoints(anchorPoint, 10, end);
-
-    const { rough } = this;
-    if (rough) {
-      rc.polygon(
-        [
-          [diamondPoints[0][0], diamondPoints[0][1]],
-          [diamondPoints[1][0], diamondPoints[1][1]],
-          [diamondPoints[2][0], diamondPoints[2][1]],
-          [diamondPoints[3][0], diamondPoints[3][1]],
-        ],
-        this._getRcOptions()
-      );
-    } else {
-      this._renderShape(ctx, diamondPoints);
-    }
-  }
-
   private _renderEndPoints(
     points: PointLocation[],
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: ConnectorEnd,
+    end: ConnectorEndPoint,
     style: ConnectorEndPointStyle
   ) {
+    const arrowOptions = this._getArrowOptions(end);
     switch (style) {
       case ConnectorEndPointStyle.Arrow:
         this._renderArrow(points, ctx, rc, mode, end);
         break;
       case ConnectorEndPointStyle.Triangle:
-        this._renderTriangle(points, ctx, rc, mode, end);
+        renderTriangle(points, ctx, rc, arrowOptions);
         break;
       case ConnectorEndPointStyle.Circle:
-        this._renderCircle(points, ctx, rc, mode, end);
+        renderCircle(points, ctx, rc, arrowOptions);
         break;
       case ConnectorEndPointStyle.Diamond:
-        this._renderDiamond(points, ctx, rc, mode, end);
+        renderDiamond(points, ctx, rc, arrowOptions);
         break;
     }
   }

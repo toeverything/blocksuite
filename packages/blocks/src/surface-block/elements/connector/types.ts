@@ -9,9 +9,9 @@ export enum ConnectorMode {
   Curve,
 }
 
-export enum ConnectorEnd {
-  Start = 'Start',
-  End = 'End',
+export enum ConnectorEndPoint {
+  Front = 'Front',
+  Rear = 'Rear',
 }
 
 export enum ConnectorEndPointStyle {
@@ -22,8 +22,8 @@ export enum ConnectorEndPointStyle {
   Diamond = 'Diamond',
 }
 
-export const DEFAULT_START_POINT_STYLE = ConnectorEndPointStyle.None;
-export const DEFAULT_END_POINT_STYLE = ConnectorEndPointStyle.Arrow;
+export const DEFAULT_FRONT_END_POINT_STYLE = ConnectorEndPointStyle.None;
+export const DEFAULT_REAR_END_POINT_STYLE = ConnectorEndPointStyle.Arrow;
 export const DEFAULT_ARROW_SIZE = 15;
 // at least one of id and position is not null
 // both exists means the position is relative to the element
@@ -58,6 +58,6 @@ export interface IConnector extends ISurfaceElement {
   path: IVec[];
   absolutePath: IVec[];
 
-  startPointStyle?: ConnectorEndPointStyle;
-  endPointStyle?: ConnectorEndPointStyle;
+  frontEndPointStyle?: ConnectorEndPointStyle;
+  rearEndPointStyle?: ConnectorEndPointStyle;
 }
