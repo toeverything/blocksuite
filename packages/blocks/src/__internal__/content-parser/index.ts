@@ -15,7 +15,6 @@ import type { IBound } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
 import { Bound } from '../../surface-block/utils/bound.js';
-import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -70,7 +69,6 @@ export class ContentParser {
       tableTitleColumnHandler?: TableTitleColumnHandler;
     } = {}
   ) {
-    registerAllBlocks();
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
     // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
