@@ -23,7 +23,11 @@ import {
   DEFAULT_START_POINT_STYLE,
   type IConnector,
 } from './types.js';
-import { getArrowPoints, getPointWithTangent } from './utils.js';
+import {
+  getArrowPoints,
+  getDiamondPoints,
+  getPointWithTangent,
+} from './utils.js';
 
 export class ConnectorElement extends SurfaceElement<IConnector> {
   private _path: PointLocation[] = [];
@@ -247,6 +251,27 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     }
   }
 
+  private _renderShape(ctx: CanvasRenderingContext2D, points: IVec[]) {
+    const { stroke, strokeWidth } = this;
+    const realStrokeColor = this.computedValue(stroke);
+    ctx.fillStyle = realStrokeColor;
+    ctx.strokeStyle = realStrokeColor;
+    ctx.lineWidth = strokeWidth;
+    ctx.save();
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point[0], point[1]);
+      } else {
+        ctx.lineTo(point[0], point[1]);
+      }
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
   private _getArrowPoints(
     points: PointLocation[],
     mode: ConnectorMode,
@@ -268,6 +293,19 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
 
     return arrowPoints;
+  }
+
+  private _getRcOptions() {
+    const { stroke, strokeWidth, roughness, seed } = this;
+    const realStrokeColor = this.computedValue(stroke);
+    return {
+      seed,
+      roughness,
+      stroke: realStrokeColor,
+      strokeWidth,
+      fill: realStrokeColor,
+      fillStyle: 'solid',
+    };
   }
 
   private _renderArrow(
@@ -301,20 +339,19 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   ) {
     const trianglePoints = this._getArrowPoints(points, mode, end, 0.1);
 
-    const { stroke, strokeWidth } = this;
-    const realStrokeColor = this.computedValue(stroke);
-    ctx.fillStyle = realStrokeColor;
-    ctx.strokeStyle = realStrokeColor;
-    ctx.lineWidth = strokeWidth;
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(trianglePoints[0][0], trianglePoints[0][1]);
-    ctx.lineTo(trianglePoints[1][0], trianglePoints[1][1]);
-    ctx.lineTo(trianglePoints[2][0], trianglePoints[2][1]);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
+    const { rough } = this;
+    if (rough) {
+      rc.polygon(
+        [
+          [trianglePoints[0][0], trianglePoints[0][1]],
+          [trianglePoints[1][0], trianglePoints[1][1]],
+          [trianglePoints[2][0], trianglePoints[2][1]],
+        ],
+        this._getRcOptions()
+      );
+    } else {
+      this._renderShape(ctx, trianglePoints);
+    }
   }
 
   private _renderCircle(
@@ -324,7 +361,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     mode: ConnectorMode,
     end: ConnectorEnd
   ) {
-    const radius = DEFAULT_ARROW_SIZE / 2;
+    const radius = 6;
     const anchorPoint = getPointWithTangent(
       points,
       mode,
@@ -341,16 +378,21 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       cx += anchorPoint.tangent[0] * radius;
       cy += anchorPoint.tangent[1] * radius;
     }
-    const { stroke, strokeWidth } = this;
+
+    const { stroke, strokeWidth, rough } = this;
     const realStrokeColor = this.computedValue(stroke);
-    ctx.fillStyle = realStrokeColor;
-    ctx.strokeStyle = realStrokeColor;
-    ctx.lineWidth = strokeWidth;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy, radius, radius, 0, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    if (rough) {
+      rc.ellipse(cx, cy, radius, radius, this._getRcOptions());
+    } else {
+      ctx.fillStyle = realStrokeColor;
+      ctx.strokeStyle = realStrokeColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, radius, radius, 0, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
   }
 
   private _renderDiamond(
@@ -358,12 +400,29 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: 'Start' | 'End'
+    end: ConnectorEnd
   ) {
-    if (end === 'End') {
-      console.log('render end diamond');
+    const anchorPoint = getPointWithTangent(
+      points,
+      mode,
+      end,
+      this.bezierParameters
+    );
+    const { points: diamondPoints } = getDiamondPoints(anchorPoint, 10, end);
+
+    const { rough } = this;
+    if (rough) {
+      rc.polygon(
+        [
+          [diamondPoints[0][0], diamondPoints[0][1]],
+          [diamondPoints[1][0], diamondPoints[1][1]],
+          [diamondPoints[2][0], diamondPoints[2][1]],
+          [diamondPoints[3][0], diamondPoints[3][1]],
+        ],
+        this._getRcOptions()
+      );
     } else {
-      console.log('render start diamond');
+      this._renderShape(ctx, diamondPoints);
     }
   }
 

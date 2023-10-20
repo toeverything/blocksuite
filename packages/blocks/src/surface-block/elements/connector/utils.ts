@@ -52,3 +52,23 @@ export function getPointWithTangent(
 
   return clone;
 }
+
+export function getDiamondPoints(
+  point: PointLocation,
+  size = 10,
+  end: ConnectorEnd = ConnectorEnd.End
+) {
+  const unit = Vec.mul(point.tangent, -1);
+  const angle = end === ConnectorEnd.Start ? Math.PI : 0;
+
+  const diamondPoints = [
+    Vec.add(Vec.mul(Vec.rot(unit, angle + Math.PI * 0.25), size), point),
+    point,
+    Vec.add(Vec.mul(Vec.rot(unit, angle - Math.PI * 0.25), size), point),
+    Vec.add(Vec.mul(Vec.rot(unit, angle), size * Math.sqrt(2)), point),
+  ];
+
+  return {
+    points: diamondPoints,
+  };
+}
