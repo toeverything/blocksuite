@@ -1,4 +1,4 @@
-import type { TextSelection } from '@blocksuite/block-std';
+import { PathFinder, type TextSelection } from '@blocksuite/block-std';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import type {
   VRange,
@@ -42,14 +42,14 @@ export const getVRangeProvider: (
 
     const { from, to } = textSelection;
 
-    if (from.path === element.path) {
+    if (PathFinder.equals(from.path, element.path)) {
       return {
         index: from.index,
         length: from.length,
       };
     }
 
-    if (to?.path === element.path) {
+    if (to && PathFinder.equals(to.path, element.path)) {
       return {
         index: to.index,
         length: to.length,

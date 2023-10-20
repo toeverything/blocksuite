@@ -78,6 +78,7 @@ export async function importPages(workspace: Workspace, imported: Blob) {
     slots.afterImport.on(payload => {
       if (payload.type === 'page') {
         workspace.schema.upgradePage(
+          info?.pageVersion ?? 0,
           info?.blockVersions ?? {},
           payload.page.spaceDoc
         );

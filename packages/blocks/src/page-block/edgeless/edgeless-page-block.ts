@@ -16,7 +16,11 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
 import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
-import type { EdgelessTool, Point } from '../../__internal__/index.js';
+import type {
+  EdgelessTool,
+  Point,
+  Selectable,
+} from '../../__internal__/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
@@ -26,12 +30,8 @@ import {
 import { getService } from '../../__internal__/service/index.js';
 import { listenToThemeChange } from '../../__internal__/theme/utils.js';
 import { toast } from '../../components/toast.js';
-import type {
-  EdgelessPageBlockWidgetName,
-  ImageBlockModel,
-  NoteBlockModel,
-  PageBlockModel,
-} from '../../index.js';
+import type { ImageBlockModel } from '../../image-block/index.js';
+import type { NoteBlockModel } from '../../note-block/index.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
@@ -48,9 +48,12 @@ import {
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
+import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
 import { FontLoader } from '../font-loader/index.js';
+import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
+import type { EdgelessPageBlockWidgetName } from '../types.js';
 import type { EdgelessBlockPortalContainer } from './components/block-portal/edgeless-block-portal.js';
 import { EdgelessToolbar } from './components/toolbar/edgeless-toolbar.js';
 import { readImageSize } from './components/utils.js';
@@ -59,13 +62,11 @@ import {
   EdgelessZoomToolbar,
   type ZoomAction,
 } from './components/zoom/zoom-tool-bar.js';
+import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
-import {
-  EdgelessToolsManager,
-  type Selectable,
-} from './services/tools-manager.js';
+import { EdgelessToolsManager } from './services/tools-manager.js';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_OFFSET_X,
@@ -168,6 +169,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
   edgelessLayer!: HTMLDivElement;
 
   clipboard = new EdgelessClipboard(this.page, this);
+
+  pageClipboardController = new PageClipboardController(this);
+  clipboardController = new EdgelessClipboardController(
+    this,
+    this.pageClipboardController
+  );
 
   slots = {
     viewportUpdated: new Slot<{ zoom: number; center: IVec }>(),
@@ -311,7 +318,11 @@ export class EdgelessPageBlockComponent extends BlockElement<
       slots.copyAsPng.on(({ blocks, shapes }) => {
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
-        this.clipboard
+
+        (this.clipboardController._enabled
+          ? this.clipboardController
+          : this.clipboard
+        )
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
@@ -604,7 +615,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
-    this.clipboard.init(this.page);
+    if (!this.clipboardController._enabled) {
+      this.clipboard.init(this.page);
+    }
 
     requestAnimationFrame(() => {
       if (!this._tryLoadViewportLocalRecord()) {

@@ -6,7 +6,7 @@ import {
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import { type UserInfo } from '@blocksuite/store';
-import { html, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -26,6 +26,13 @@ export const AFFINE_DOC_REMOTE_SELECTION_WIDGET =
 
 @customElement(AFFINE_DOC_REMOTE_SELECTION_WIDGET)
 export class AffineDocRemoteSelectionWidget extends WidgetElement {
+  // avoid being unable to select text by mouse click or drag
+  static override styles = css`
+    :host {
+      pointer-events: none;
+    }
+  `;
+
   private _remoteSelections: Array<{
     id: number;
     selections: BaseSelection[];

@@ -1,6 +1,9 @@
 import { assertEquals, assertExists } from '@blocksuite/global/utils';
 
-import { type Connectable } from '../../__internal__/utils/types.js';
+import {
+  type Connectable,
+  type Selectable,
+} from '../../__internal__/utils/types.js';
 import type { PhasorElementType } from '../../surface-block/index.js';
 import {
   almostEqual,
@@ -30,7 +33,6 @@ import {
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { isVecZero } from '../../surface-block/utils/math-utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import type { Selectable } from './services/tools-manager.js';
 import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
 
 export type OrthogonalConnectorInput = {

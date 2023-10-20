@@ -15,6 +15,7 @@ import {
   type ReorderingAction,
   type ReorderingRange,
   reorderTo,
+  type Selectable,
   sendBackward,
   type TopLevelBlockModel,
 } from '../__internal__/index.js';
@@ -26,7 +27,6 @@ import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import type { Selectable } from '../page-block/edgeless/services/tools-manager.js';
 import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   getEdgelessElement,
@@ -55,6 +55,7 @@ import {
   isPhasorElementType,
 } from './elements/edgeless-element.js';
 import {
+  BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
@@ -531,7 +532,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         if (type === 'add') {
           const model = page.getBlockById(id) as TopLevelBlockModel;
           assertExists(model);
-          if (isNoteBlock(model)) {
+          if (
+            isNoteBlock(model) ||
+            isFrameBlock(model) ||
+            isImageBlock(model)
+          ) {
             requestAnimationFrame(() => {
               this.fitElementToViewport(model);
             });
@@ -543,6 +548,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       edgeless.slots.elementSizeUpdated.on(id => {
         const element = getEdgelessElement(edgeless, id);
         assertExists(element);
+        if (element instanceof BrushElement) return;
         this.fitElementToViewport(element);
       })
     );
@@ -551,6 +557,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
+        if (element instanceof BrushElement) return;
         this.fitElementToViewport(element);
       })
     );

@@ -12,7 +12,6 @@ import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgel
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
 import type { IBound } from '../../surface-block/consts.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
-import { registerAllBlocks } from '../service/legacy-services/index.js';
 import {
   getBlockElementById,
   getEditorContainer,
@@ -67,7 +66,6 @@ export class ContentParser {
       tableTitleColumnHandler?: TableTitleColumnHandler;
     } = {}
   ) {
-    registerAllBlocks();
     this._page = page;
     this._imageProxyEndpoint = options?.imageProxyEndpoint;
     // FIXME: this hard-coded config should be removed, see https://github.com/toeverything/blocksuite/issues/3506
@@ -109,7 +107,7 @@ export class ContentParser {
       blobMap
     );
 
-    FileExporter.exportHtml(
+    await FileExporter.exportHtml(
       (root as PageBlockModel).title.toString(),
       root.id,
       htmlContent,
@@ -128,7 +126,7 @@ export class ContentParser {
       blobMap
     );
 
-    FileExporter.exportHtmlAsMarkdown(
+    await FileExporter.exportHtmlAsMarkdown(
       (root as PageBlockModel).title.toString(),
       root.id,
       markdownContent,

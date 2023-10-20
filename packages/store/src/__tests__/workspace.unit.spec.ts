@@ -633,7 +633,10 @@ describe('workspace search', () => {
     const result = workspace.search('test');
     expect(result).toMatchInlineSnapshot(`
       Map {
-        "0" => "page:home",
+        "0" => {
+          "content": "test123",
+          "space": "page:home",
+        },
       }
     `);
   });

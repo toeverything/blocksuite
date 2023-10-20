@@ -60,6 +60,9 @@ export class IconButton extends LitElement {
     :host([hover]) {
       background: var(--affine-hover-color);
     }
+    :host([hover='false']) {
+      background: transparent;
+    }
 
     :host(:active[active]) {
       background: transparent;

@@ -2,16 +2,17 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockClipboardInfo } from '../../../__internal__/clipboard/index.js';
+import { getBlockClipboardInfo } from '../../../../__internal__/clipboard/index.js';
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
   resetNativeSelection,
+  type Selectable,
   type TopLevelBlockModel,
-} from '../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../index.js';
-import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
-import type { HitTestOptions } from '../../../surface-block/elements/edgeless-element.js';
+} from '../../../../__internal__/index.js';
+import type { FrameBlockModel } from '../../../../frame-block/index.js';
+import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
+import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
 import {
   Bound,
   ConnectorElement,
@@ -20,24 +21,23 @@ import {
   ShapeElement,
   TextElement,
   Vec,
-} from '../../../surface-block/index.js';
-import { GET_DEFAULT_TEXT_COLOR } from '../components/panel/color-panel.js';
-import { isConnectorAndBindingsAllSelected } from '../connector-manager.js';
-import type { Selectable } from '../services/tools-manager.js';
-import { edgelessElementsBound } from '../utils/bound-utils.js';
-import { calPanDelta } from '../utils/panning-utils.js';
+} from '../../../../surface-block/index.js';
+import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
+import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
+import { edgelessElementsBound } from '../../utils/bound-utils.js';
+import { calPanDelta } from '../../utils/panning-utils.js';
 import {
   isFrameBlock,
   isImageBlock,
   isNoteBlock,
   isPhasorElement,
-} from '../utils/query.js';
+} from '../../utils/query.js';
 import {
   addText,
   mountFrameEditor,
   mountShapeEditor,
   mountTextEditor,
-} from '../utils/text.js';
+} from '../../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
 export enum DefaultModeDragType {
@@ -260,7 +260,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   onContainerDblClick(e: PointerEventState) {
     const selected = this._pick(e.x, e.y, {
-      pierce: false,
+      pierce: true,
       expand: 10,
     });
     if (!selected) {

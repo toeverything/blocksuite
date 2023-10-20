@@ -6,9 +6,9 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { Selectable } from '../../__internal__/utils/index.js';
 import { RemoteCursor } from '../../icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import {
   getSelectedRect,
   isTopLevelBlock,
@@ -208,6 +208,7 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
         this._updateTransform();
+        this.requestUpdate();
       })
     );
 

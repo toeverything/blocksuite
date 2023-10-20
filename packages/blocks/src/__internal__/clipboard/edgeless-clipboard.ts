@@ -5,7 +5,6 @@ import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import type { Selectable } from '../../page-block/edgeless/services/tools-manager.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
 import {
   isFrameBlock,
@@ -32,6 +31,7 @@ import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js
 import { ContentParser } from '../content-parser/index.js';
 import {
   type EdgelessElement,
+  type Selectable,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../index.js';
@@ -152,9 +152,9 @@ export class EdgelessClipboard implements Clipboard {
     document.body.removeEventListener('paste', this._onPaste);
   }
 
-  private _onCut = (e: ClipboardEvent) => {
+  private _onCut: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     e.preventDefault();
-    this._onCopy(e);
+    await this._onCopy(e);
 
     const { state, elements } = this.selection;
     if (state.editing) {
@@ -174,7 +174,7 @@ export class EdgelessClipboard implements Clipboard {
     });
   };
 
-  private _onCopy = async (e: ClipboardEvent) => {
+  private _onCopy: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     e.preventDefault();
     await this.copy();
   };
@@ -195,7 +195,7 @@ export class EdgelessClipboard implements Clipboard {
     performNativeCopy(clipboardItems);
   }
 
-  private _onPaste = async (e: ClipboardEvent) => {
+  private _onPaste: (e: ClipboardEvent) => void = async (e: ClipboardEvent) => {
     if (
       document.activeElement instanceof HTMLInputElement ||
       document.activeElement instanceof HTMLTextAreaElement
@@ -233,7 +233,7 @@ export class EdgelessClipboard implements Clipboard {
       return;
     }
 
-    this._pasteShapesAndBlocks(elementsRawData);
+    await this._pasteShapesAndBlocks(elementsRawData);
   };
 
   private async _pasteInTextNote(e: ClipboardEvent) {

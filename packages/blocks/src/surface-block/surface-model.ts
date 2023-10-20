@@ -1,7 +1,6 @@
 import type { MigrationRunner, Y } from '@blocksuite/store';
 import {
   defineBlockSchema,
-  isPureObject,
   NativeWrapper,
   type SchemaToModel,
   Workspace,
@@ -14,9 +13,83 @@ export type SurfaceBlockProps = {
 };
 
 const migration = {
+  toV4: data => {
+    const { elements } = data;
+    if ((elements as object | NativeWrapper) instanceof NativeWrapper) {
+      const value = elements.getValue();
+      if (!value) {
+        return;
+      }
+      for (const [key, element] of value.entries()) {
+        const type = element.get('type') as string;
+        if (type === 'shape' || type === 'text') {
+          const isBold = element.get('isBold');
+          const isItalic = element.get('isItalic');
+          element.delete('isBold');
+          element.delete('isItalic');
+          if (isBold) {
+            element.set('bold', true);
+          }
+          if (isItalic) {
+            element.set('italic', true);
+          }
+        }
+        if (type === 'connector') {
+          const source = element.get('source');
+          const target = element.get('target');
+          const sourceId = source['id'];
+          const targetId = target['id'];
+          if (!source['position'] && (!sourceId || !value.get(sourceId))) {
+            value.delete(key);
+            return;
+          }
+          if (!target['position'] && (!targetId || !value.get(targetId))) {
+            value.delete(key);
+            return;
+          }
+        }
+      }
+    } else {
+      for (const key of Object.keys(elements)) {
+        // @ts-expect-error
+        const element = elements[key];
+        const type = element['type'] as string;
+        if (type === 'shape' || type === 'text') {
+          const isBold = element['isBold'];
+          const isItalic = element['isItalic'];
+          delete element['isBold'];
+          delete element['isItalic'];
+          if (isBold) {
+            element['bold'] = true;
+          }
+          if (isItalic) {
+            element['italic'] = true;
+          }
+        }
+        if (type === 'connector') {
+          const source = element['source'];
+          const target = element['target'];
+          const sourceId = source['id'];
+          const targetId = target['id'];
+          // @ts-expect-error
+          if (!source['position'] && (!sourceId || !elements[sourceId])) {
+            // @ts-expect-error
+            delete elements[key];
+            return;
+          }
+          // @ts-expect-error
+          if (!target['position'] && (!targetId || !elements[targetId])) {
+            // @ts-expect-error
+            delete elements[key];
+            return;
+          }
+        }
+      }
+    }
+  },
   toV5: data => {
     const { elements } = data;
-    if (isPureObject(elements)) {
+    if (!((elements as object | NativeWrapper) instanceof NativeWrapper)) {
       const yMap = new Workspace.Y.Map();
 
       Object.entries(elements).forEach(([key, value]) => {
@@ -33,42 +106,6 @@ const migration = {
       data.elements = wrapper;
     }
   },
-  toV4: data => {
-    const { elements } = data;
-    const value = elements.getValue();
-    if (!value) {
-      return;
-    }
-    for (const [key, element] of value.entries()) {
-      const type = element.get('type') as string;
-      if (type === 'shape' || type === 'text') {
-        const isBold = element.get('isBold');
-        const isItalic = element.get('isItalic');
-        element.delete('isBold');
-        element.delete('isItalic');
-        if (isBold) {
-          element.set('bold', true);
-        }
-        if (isItalic) {
-          element.set('italic', true);
-        }
-      }
-      if (type === 'connector') {
-        const source = element.get('source');
-        const target = element.get('target');
-        const sourceId = source['id'];
-        const targetId = target['id'];
-        if (!source['position'] && (!sourceId || !value.get(sourceId))) {
-          value.delete(key);
-          return;
-        }
-        if (!target['position'] && (!targetId || !value.get(targetId))) {
-          value.delete(key);
-          return;
-        }
-      }
-    }
-  },
 } satisfies Record<string, MigrationRunner<typeof SurfaceBlockSchema>>;
 
 export const SurfaceBlockSchema = defineBlockSchema({
@@ -83,11 +120,11 @@ export const SurfaceBlockSchema = defineBlockSchema({
     children: ['affine:frame', 'affine:image'],
   },
   onUpgrade: (data, previousVersion, version) => {
-    if (previousVersion < 5 && version >= 5) {
-      migration.toV5(data);
-    }
     if (previousVersion < 4 && version >= 4) {
       migration.toV4(data);
+    }
+    if (previousVersion < 5 && version >= 5) {
+      migration.toV5(data);
     }
   },
   transformer: () => new SurfaceBlockTransformer(),

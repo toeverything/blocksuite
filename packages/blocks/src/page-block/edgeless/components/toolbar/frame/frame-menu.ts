@@ -119,7 +119,6 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                         title: new Workspace.Y.Text(
                           `Frame ${frames.length + 1}`
                         ),
-                        batch: 'a0',
                         xywh: bound.serialize(),
                       },
                       surface.model

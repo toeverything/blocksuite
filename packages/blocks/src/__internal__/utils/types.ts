@@ -133,6 +133,8 @@ export type EdgelessElement = TopLevelBlockModel | PhasorElement;
 
 export type Alignable = EdgelessElement;
 
+export type Selectable = EdgelessElement;
+
 export type Erasable = EdgelessElement;
 
 export type Connectable =

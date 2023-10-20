@@ -68,7 +68,7 @@ describe('block migration', () => {
 
     assert.equal(text.get('isBold'), true);
     assert.equal(text.get('isItalic'), true);
-    assert.equal(text.get('text').toJSON(), 'aaa');
+    assert.equal((text.get('text') as Y.Text).toJSON(), 'aaa');
     assert.isUndefined(text.get('bold'));
     assert.isUndefined(text.get('italic'));
 
@@ -78,6 +78,7 @@ describe('block migration', () => {
     assert.isUndefined(shape.get('italic'));
 
     schema.upgradePage(
+      0,
       {
         'affine:page': 1,
         'affine:note': 1,
@@ -100,7 +101,7 @@ describe('block migration', () => {
     assert.isUndefined(text.get('isItalic'));
     assert.equal(text.get('bold'), true);
     assert.equal(text.get('italic'), true);
-    assert.equal(text.get('text').toJSON(), 'aaa');
+    assert.equal((text.get('text') as Y.Text).toJSON(), 'aaa');
 
     assert.isUndefined(shape.get('isBold'));
     assert.isUndefined(shape.get('isItalic'));
@@ -121,6 +122,7 @@ describe('block migration', () => {
     assert.exists(connector);
 
     schema.upgradePage(
+      0,
       {
         'affine:list': 1,
         'affine:page': 1,
@@ -151,6 +153,7 @@ describe('block migration', () => {
     assert.exists(surfaceElements.get('2'));
 
     schema.upgradePage(
+      0,
       {
         'affine:surface': 5,
       },
@@ -178,10 +181,9 @@ describe('block migration', () => {
       )
     ).toBeUndefined();
     expect(databaseBlock['prop:views'].length).toBe(2);
-    // migratePageBlock(doc, {
-    //   'affine:database': 2,
-    // });
+
     schema.upgradePage(
+      0,
       {
         'affine:page': 1,
         'affine:surface': 4,

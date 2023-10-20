@@ -1,6 +1,7 @@
 import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
+import type { BlockSnapshot, Page } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { replaceIdMiddleware } from '../../api/transformer/utils.js';
@@ -41,9 +42,9 @@ export class ClipboardController implements ReactiveController {
   }
 
   private _init = () => {
-    this.host.handleEvent('copy', this._onCopy);
-    this.host.handleEvent('paste', this._onPaste);
-    this.host.handleEvent('cut', this._onCut);
+    this.host.handleEvent('copy', this.onPageCopy);
+    this.host.handleEvent('paste', this.onPagePaste);
+    this.host.handleEvent('cut', this.onPageCut);
 
     this._std.clipboard.registerAdapter(
       ClipboardAdapter.MIME,
@@ -74,14 +75,14 @@ export class ClipboardController implements ReactiveController {
       .copySelectedModels({ event });
   };
 
-  private _onCopy: UIEventHandler = ctx => {
+  public onPageCopy: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
     this._copySelected(e).run();
   };
 
-  private _onCut: UIEventHandler = ctx => {
+  public onPageCut: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
@@ -90,7 +91,7 @@ export class ClipboardController implements ReactiveController {
       .run();
   };
 
-  private _onPaste: UIEventHandler = ctx => {
+  public onPagePaste: UIEventHandler = ctx => {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
@@ -122,6 +123,22 @@ export class ClipboardController implements ReactiveController {
           ctx.parentBlock.model.id,
           ctx.blockIndex ? ctx.blockIndex + 1 : undefined
         );
+
+        return next();
+      })
+      .run();
+  };
+
+  public onBlockSnapshotPaste = (
+    snapshot: BlockSnapshot,
+    page: Page,
+    parent?: string,
+    index?: number
+  ) => {
+    this._std.command
+      .pipe()
+      .inline((_ctx, next) => {
+        this._std.clipboard.pasteBlockSnapshot(snapshot, page, parent, index);
 
         return next();
       })
