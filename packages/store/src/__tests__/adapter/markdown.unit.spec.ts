@@ -502,7 +502,7 @@ hhh
 });
 
 describe('markdown to snapshot', () => {
-  test.todo('paragraph', async () => {
+  test('paragraph', async () => {
     const markdown = `aaa
 
 &#x20;   bbb
@@ -519,17 +519,182 @@ describe('markdown to snapshot', () => {
 
 hhh
 `;
-    nanoidReplacement('');
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {},
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'aaa',
+                },
+              ],
+            },
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[2]',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'bbb',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[3]',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ccc',
+                    },
+                  ],
+                },
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'matchesReplaceMap[4]',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'ddd',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+                {
+                  type: 'block',
+                  id: 'matchesReplaceMap[5]',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'eee',
+                        },
+                      ],
+                    },
+                  },
+                  children: [],
+                },
+                {
+                  type: 'block',
+                  id: 'matchesReplaceMap[6]',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [
+                        {
+                          insert: 'fff',
+                        },
+                      ],
+                    },
+                    type: 'text',
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[7]',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert: 'ggg',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[8]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'hhh',
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+    const mdAdapter = new MarkdownAdapter();
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: 'block:WfnS5ZDCJT',
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    const ast = mdAdapter.markdownToAst(markdown);
+    const rawBlockSnapshot = await mdAdapter.tranverseMarkdown(
+      ast,
+      blockSnapshotRoot as BlockSnapshot
+    );
+    expect(nanoidReplacement(rawBlockSnapshot)).toBe(blockSnapshot);
   });
 });
 
-function nanoidReplacement(snapshotString: string) {
-  const matches = snapshotString.matchAll(/"id" : "block:[A-Za-z0-9-_]{10}"/g);
+function nanoidReplacement(snapshot: BlockSnapshot) {
+  console.log(JSON.stringify(snapshot));
+  return JSON.parse(nanoidReplacementString(JSON.stringify(snapshot)));
+}
+
+function nanoidReplacementString(snapshotString: string) {
+  const matches = snapshotString.matchAll(/"id":"block:[A-Za-z0-9-_]{10}"/g);
   const matchesReplaceMap = new Map();
   Array.from(matches).map((match, index) =>
     matchesReplaceMap.set(match[0], `"id": "matchesReplaceMap[${index}]"`)
   );
-  return snapshotString.replace(/"id": "block:[A-Za-z0-9-_]{10}"/g, match =>
+  return snapshotString.replace(/"id":"block:[A-Za-z0-9-_]{10}"/g, match =>
     matchesReplaceMap.get(match)
   );
 }

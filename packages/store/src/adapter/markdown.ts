@@ -1,5 +1,6 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
+import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
@@ -345,7 +346,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'text',
-                  delta: this.mdastToDelta(o.node),
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this.mdastToDelta(o.node),
+                  },
                 },
                 children: [],
               },
@@ -363,7 +367,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 flavour: 'affine:paragraph',
                 props: {
                   type: `h${o.node.depth}`,
-                  delta: this.mdastToDelta(o.node),
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this.mdastToDelta(o.node),
+                  },
                 },
                 children: [],
               },
@@ -381,7 +388,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 flavour: 'affine:paragraph',
                 props: {
                   type: 'quote',
-                  delta: o.node.children.map(child => this.mdastToDelta(child)),
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: o.node.children.map(child =>
+                      this.mdastToDelta(child)
+                    ),
+                  },
                 },
                 children: [],
               },
@@ -417,11 +429,15 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       }
     });
-    walker.walk(markdown, snapshot);
+    return walker.walk(markdown, snapshot);
   };
 
   astToMardown(ast: Root) {
     return unified().use(remarkStringify).stringify(ast);
+  }
+
+  markdownToAst(markdown: Markdown) {
+    return unified().use(remarkParse).parse(markdown);
   }
 
   deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
@@ -479,19 +495,41 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         return [{ insert: ast.value, attributes: { code: true } }];
       }
       case 'strong': {
-        return ast.children.flatMap(child => this.mdastToDelta(child));
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, bold: true };
+            return delta;
+          })
+        );
       }
       case 'emphasis': {
-        return ast.children.flatMap(child => this.mdastToDelta(child));
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, italic: true };
+            return delta;
+          })
+        );
       }
       case 'delete': {
-        return ast.children.flatMap(child => this.mdastToDelta(child));
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, strike: true };
+            return delta;
+          })
+        );
       }
       case 'link': {
-        return ast.children.flatMap(child => this.mdastToDelta(child));
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, link: ast.url };
+            return delta;
+          })
+        );
       }
     }
-    return [];
+    return 'children' in ast
+      ? ast.children.flatMap(child => this.mdastToDelta(child))
+      : [];
   }
 }
 
