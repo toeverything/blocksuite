@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { matchFlavours } from '../../../../__internal__/index.js';
+import { matchFlavours } from '../../../../_legacy/index.js';
 import { HiddenIcon } from '../../../../icons/index.js';
 import { type NoteBlockModel } from '../../../../note-block/note-model.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';

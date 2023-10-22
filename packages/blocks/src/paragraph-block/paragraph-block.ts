@@ -9,8 +9,8 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
-import { isPageMode, matchFlavours } from '../__internal__/index.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_legacy/consts.js';
+import { isPageMode, matchFlavours } from '../_legacy/index.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';

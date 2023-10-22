@@ -6,7 +6,7 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { on, once, queryCurrentMode } from '../../../../__internal__/index.js';
+import { on, once, queryCurrentMode } from '../../../../_legacy/index.js';
 import { ArrowIcon, HiddenIcon } from '../../../../icons/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';

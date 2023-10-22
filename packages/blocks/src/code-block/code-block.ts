@@ -23,10 +23,10 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
-import { queryCurrentMode } from '../__internal__/index.js';
-import { getService } from '../__internal__/service/index.js';
-import { listenToThemeChange } from '../__internal__/theme/utils.js';
+import { PAGE_HEADER_HEIGHT } from '../_legacy/consts.js';
+import { queryCurrentMode } from '../_legacy/index.js';
+import { getService } from '../_legacy/service/index.js';
+import { listenToThemeChange } from '../_legacy/theme/utils.js';
 import { HoverController } from '../components/index.js';
 import { createLitPortal } from '../components/portal.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';

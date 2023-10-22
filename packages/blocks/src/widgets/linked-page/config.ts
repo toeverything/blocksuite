@@ -3,8 +3,8 @@ import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { createPage } from '../../__internal__/utils/common-operations.js';
-import { getVirgoByModel } from '../../__internal__/utils/query.js';
+import { createPage } from '../../_legacy/utils/common-operations.js';
+import { getVirgoByModel } from '../../_legacy/utils/query.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { ImportIcon, NewPageIcon, PageIcon } from '../../icons/index.js';

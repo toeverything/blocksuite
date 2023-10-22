@@ -6,8 +6,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
-import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
+import type { EdgelessTool } from '../../../../../_legacy/index.js';
+import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import { ArrowUpIcon, NoteIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';

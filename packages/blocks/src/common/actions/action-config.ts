@@ -4,8 +4,8 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
-import { copyBlocksInPage } from '../../__internal__/clipboard/utils/commons.js';
-import { matchFlavours } from '../../__internal__/utils/model.js';
+import { copyBlocksInPage } from '../../_legacy/clipboard/utils/commons.js';
+import { matchFlavours } from '../../_legacy/utils/model.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';

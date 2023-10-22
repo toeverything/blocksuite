@@ -3,7 +3,7 @@ import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 import { createRef, ref, type RefOrCallback } from 'lit/directives/ref.js';
 
-import { stopPropagation } from '../../__internal__/utils/event.js';
+import { stopPropagation } from '../../_legacy/utils/event.js';
 import { createLitPortal } from '../../components/portal.js';
 import {
   CaptionIcon,

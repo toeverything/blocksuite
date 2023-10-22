@@ -9,8 +9,8 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { matchFlavours } from '../../../../__internal__/utils/model.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import { matchFlavours } from '../../../../_legacy/utils/model.js';
 import { HiddenIcon, NoteIcon } from '../../../../icons/index.js';
 import {
   NOTE_COLORS,

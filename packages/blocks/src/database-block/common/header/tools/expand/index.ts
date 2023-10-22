@@ -7,7 +7,7 @@ import type { PropertyValues } from 'lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DataViewSelection } from '../../../../../__internal__/index.js';
+import type { DataViewSelection } from '../../../../../_legacy/index.js';
 import { createModal } from '../../../../../components/menu/index.js';
 import { renderTemplate } from '../../../../../components/uni-component/render-template.js';
 import { CrossIcon, ExpandWideIcon } from '../../../../../icons/index.js';

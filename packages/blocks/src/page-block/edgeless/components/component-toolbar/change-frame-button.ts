@@ -5,7 +5,7 @@ import { css, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { RenameIcon } from '../../../../icons/edgeless.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';

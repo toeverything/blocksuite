@@ -8,7 +8,7 @@ import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type ReorderingType } from '../../../../__internal__/index.js';
+import { type ReorderingType } from '../../../../_legacy/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import {
   BringForwardIcon,

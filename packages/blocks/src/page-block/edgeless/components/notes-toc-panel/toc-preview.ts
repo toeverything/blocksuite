@@ -4,7 +4,7 @@ import { Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { BlockModels } from '../../../../__internal__/utils/model.js';
+import type { BlockModels } from '../../../../_legacy/utils/model.js';
 import {
   AttachmentIcon,
   BookmarkIcon,

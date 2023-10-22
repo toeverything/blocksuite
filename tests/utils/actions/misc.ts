@@ -4,7 +4,7 @@ import '../declare-test-window.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { ClipboardItem } from '../../../packages/blocks/src/__internal__/clipboard/clipboard-item.js';
+import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,

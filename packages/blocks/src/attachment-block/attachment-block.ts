@@ -4,9 +4,9 @@ import { html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import { ThemeObserver } from '../__internal__/theme/theme-observer.js';
-import { stopPropagation } from '../__internal__/utils/event.js';
-import { humanFileSize } from '../__internal__/utils/math.js';
+import { ThemeObserver } from '../_legacy/theme/theme-observer.js';
+import { stopPropagation } from '../_legacy/utils/event.js';
+import { humanFileSize } from '../_legacy/utils/math.js';
 import { HoverController } from '../components/index.js';
 import { AttachmentIcon16 } from '../icons/index.js';
 import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';

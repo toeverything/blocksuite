@@ -11,7 +11,7 @@ import {
   convertToList,
   convertToParagraph,
   matchFlavours,
-} from '../../../__internal__/utils/index.js';
+} from '../../../_legacy/utils/index.js';
 import { getStandardLanguage } from '../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';

@@ -12,7 +12,7 @@ import {
 import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../__internal__/utils/event.js';
+import { stopPropagation } from '../../_legacy/utils/event.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import { getSelectedContentBlockElements } from '../../page-block/utils/selection.js';
 import { ActionItems } from './components/action-items.js';

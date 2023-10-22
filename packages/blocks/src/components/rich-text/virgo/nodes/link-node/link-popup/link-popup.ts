@@ -6,11 +6,11 @@ import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { BLOCK_ID_ATTR } from '../../../../../../__internal__/consts.js';
+import { BLOCK_ID_ATTR } from '../../../../../../_legacy/consts.js';
 import {
   isValidUrl,
   normalizeUrl,
-} from '../../../../../../__internal__/utils/url.js';
+} from '../../../../../../_legacy/utils/url.js';
 import type { BookmarkProps } from '../../../../../../bookmark-block/bookmark-model.js';
 import { allowEmbed } from '../../../../../../bookmark-block/embed.js';
 import { BookmarkIcon } from '../../../../../../icons/edgeless.js';

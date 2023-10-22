@@ -1,8 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { isInsideBlockByFlavour } from '../../__internal__/index.js';
-import { getVirgoByModel } from '../../__internal__/utils/query.js';
+import { isInsideBlockByFlavour } from '../../_legacy/index.js';
+import { getVirgoByModel } from '../../_legacy/utils/query.js';
 import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 

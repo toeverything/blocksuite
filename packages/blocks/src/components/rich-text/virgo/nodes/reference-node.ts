@@ -14,7 +14,7 @@ import {
   getBlockElementById,
   getClosestBlockElementByElement,
   getModelByElement,
-} from '../../../../__internal__/utils/index.js';
+} from '../../../../_legacy/utils/index.js';
 import { FontLinkedPageIcon, FontPageIcon } from '../../../../icons/index.js';
 import type { DocPageBlockComponent } from '../../../../page-block/doc/doc-page-block.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';

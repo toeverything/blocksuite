@@ -15,9 +15,9 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
-import { copyBlocks } from '../__internal__/clipboard/index.js';
-import type { DataViewSelection } from '../__internal__/index.js';
-import { Rect } from '../__internal__/index.js';
+import { copyBlocks } from '../_legacy/clipboard/index.js';
+import type { DataViewSelection } from '../_legacy/index.js';
+import { Rect } from '../_legacy/index.js';
 import { DragIndicator } from '../components/index.js';
 import { popMenu } from '../components/menu/index.js';
 import { defineUniComponent } from '../components/uni-component/uni-component.js';

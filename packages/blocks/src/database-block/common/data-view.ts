@@ -2,7 +2,7 @@ import type { EventName, UIEventHandler } from '@blocksuite/block-std';
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
-import type { DataViewSelection } from '../../__internal__/index.js';
+import type { DataViewSelection } from '../../_legacy/index.js';
 import type { UniComponent } from '../../components/uni-component/uni-component.js';
 import type { DatabaseBlockModel } from '../database-model.js';
 import type { InsertToPosition } from '../types.js';

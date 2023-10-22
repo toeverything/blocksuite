@@ -16,7 +16,7 @@ import {
   matchFlavours,
   Point,
   Rect,
-} from '../../__internal__/index.js';
+} from '../../_legacy/index.js';
 import type { BlockComponentElement } from '../../index.js';
 import type { ParagraphBlockModel } from '../../paragraph-block/index.js';
 import {

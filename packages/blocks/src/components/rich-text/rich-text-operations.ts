@@ -3,27 +3,27 @@ import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import { supportsChildren } from '../../__internal__/utils/common.js';
+import { supportsChildren } from '../../_legacy/utils/common.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
-} from '../../__internal__/utils/common-operations.js';
-import type { BlockModelProps } from '../../__internal__/utils/model.js';
+} from '../../_legacy/utils/common-operations.js';
+import type { BlockModelProps } from '../../_legacy/utils/model.js';
 import {
   isInsideBlockByFlavour,
   matchFlavours,
-} from '../../__internal__/utils/model.js';
+} from '../../_legacy/utils/model.js';
 import {
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
   getVirgoByModel,
-} from '../../__internal__/utils/query.js';
+} from '../../_legacy/utils/query.js';
 import {
   focusBlockByModel,
   focusTitle,
-} from '../../__internal__/utils/selection.js';
-import type { ExtendedModel } from '../../__internal__/utils/types.js';
+} from '../../_legacy/utils/selection.js';
+import type { ExtendedModel } from '../../_legacy/utils/types.js';
 import { type ListBlockModel, type PageBlockModel } from '../../models.js';
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {

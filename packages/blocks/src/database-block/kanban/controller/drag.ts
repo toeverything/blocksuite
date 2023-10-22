@@ -3,7 +3,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 
-import { Point, Rect } from '../../../__internal__/index.js';
+import { Point, Rect } from '../../../_legacy/index.js';
 import type { InsertToPosition } from '../../types.js';
 import { startDrag } from '../../utils/drag.js';
 import { KanbanCard } from '../card.js';

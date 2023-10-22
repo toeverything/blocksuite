@@ -2,7 +2,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
-import { stopPropagation } from '../../__internal__/utils/event.js';
+import { stopPropagation } from '../../_legacy/utils/event.js';
 import { turnImageIntoCardView } from '../../attachment-block/utils.js';
 import {
   BookmarkIcon,

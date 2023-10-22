@@ -6,7 +6,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { type EdgelessTool } from '../../../../../_legacy/index.js';
 import { EdgelessTextIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';

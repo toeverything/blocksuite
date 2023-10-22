@@ -2,12 +2,12 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockElementByModel } from '../../__internal__/index.js';
+import { getBlockElementByModel } from '../../_legacy/index.js';
 import type {
   EdgelessElement,
   Selectable,
   TopLevelBlockModel,
-} from '../../__internal__/utils/types.js';
+} from '../../_legacy/utils/types.js';
 import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { FrameBlockModel } from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';

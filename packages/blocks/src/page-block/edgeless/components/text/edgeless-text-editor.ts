@@ -6,7 +6,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
+import { isCssVariable } from '../../../../_legacy/theme/css-variables.js';
 import type { RichText } from '../../../../components/rich-text/rich-text.js';
 import {
   Bound,

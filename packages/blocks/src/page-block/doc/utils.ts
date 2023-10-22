@@ -1,7 +1,7 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { copyBlocks } from '../../__internal__/clipboard/index.js';
-import { type SerializedBlock } from '../../__internal__/index.js';
+import { copyBlocks } from '../../_legacy/clipboard/index.js';
+import { type SerializedBlock } from '../../_legacy/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 import { toast } from '../../components/toast.js';
 

@@ -1,1 +1,1 @@
-export { ContentParser } from './__internal__/content-parser/index.js';
+export { ContentParser } from './_legacy/content-parser/index.js';

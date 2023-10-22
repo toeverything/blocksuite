@@ -6,7 +6,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
+import { stopPropagation } from '../../../../_legacy/utils/event.js';
 import {
   DatabaseSearchClose,
   DatabaseSearchIcon,

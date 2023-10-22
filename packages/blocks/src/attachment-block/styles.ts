@@ -1,6 +1,6 @@
 import { css, html } from 'lit';
 
-import { queryCurrentMode } from '../__internal__/utils/query.js';
+import { queryCurrentMode } from '../_legacy/utils/query.js';
 
 export const styles = css`
   .affine-attachment-container {

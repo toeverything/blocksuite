@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   BLOCK_ID_ATTR,
   BLOCK_SERVICE_LOADING_ATTR,
-} from '../__internal__/consts.js';
+} from '../_legacy/consts.js';
 
 @customElement('loader-element')
 export class Loader extends LitElement {
