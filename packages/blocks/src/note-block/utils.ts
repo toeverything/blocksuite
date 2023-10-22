@@ -6,9 +6,9 @@ import { getTextNodesFromElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../_legacy/consts.js';
-import { almostEqual } from '../_legacy/utils/math.js';
-import { isEdgelessPage } from '../_legacy/utils/query.js';
+} from '../_common/consts.js';
+import { almostEqual } from '../_common/utils/math.js';
+import { isEdgelessPage } from '../_common/utils/query.js';
 import {
   autoScroll,
   caretFromPoint,

@@ -23,7 +23,7 @@ import {
   matchFlavours,
   Point,
   Rect,
-} from '../../../_legacy/index.js';
+} from '../../../_common/utils/index.js';
 import { DocPageBlockComponent } from '../../../page-block/doc/doc-page-block.js';
 import { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';

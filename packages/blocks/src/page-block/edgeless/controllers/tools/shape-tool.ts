@@ -1,8 +1,11 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { EdgelessTool, ShapeTool } from '../../../../_legacy/index.js';
-import { hasClassNameInList } from '../../../../_legacy/index.js';
+import type {
+  EdgelessTool,
+  ShapeTool,
+} from '../../../../_common/utils/index.js';
+import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import {
   Bound,
   PhasorElementType,

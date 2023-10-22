@@ -3,8 +3,8 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
 import { toast } from '../../_common/components/toast.js';
-import { downloadBlob } from '../../_legacy/utils/filesys.js';
-import { getBlockElementByModel } from '../../_legacy/utils/query.js';
+import { downloadBlob } from '../../_common/utils/filesys.js';
+import { getBlockElementByModel } from '../../_common/utils/query.js';
 import type { ImageBlockModel } from '../image-model.js';
 
 async function getImageBlob(model: ImageBlockModel) {

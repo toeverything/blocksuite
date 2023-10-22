@@ -16,7 +16,7 @@ import { renderUniLit } from '../_common/components/uni-component/uni-component.
 import type {
   DataViewSelection,
   DataViewSelectionState,
-} from '../_legacy/index.js';
+} from '../_common/utils/index.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type {

@@ -4,7 +4,7 @@ import { Buffer } from 'buffer';
 import type { TemplateResult } from 'lit';
 import type { TemplateResultType } from 'lit/directive-helpers.js';
 
-import type { BlockTransformContext, SerializedBlock } from '../utils/index.js';
+import type { BlockTransformContext, SerializedBlock } from '../../index.js';
 import { json2block } from './json2block.js';
 
 // Breaking change introduced in lit@2.8.0

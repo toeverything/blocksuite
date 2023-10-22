@@ -17,7 +17,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { ArrowRightSmallIcon, DoneIcon } from '../../../_common/icons/index.js';
-import { regularizationNumberInRange } from '../../../_legacy/utils/math.js';
+import { rangeWrap } from '../../../_common/utils/math.js';
 import {
   checkboxChecked,
   checkboxUnchecked,
@@ -273,7 +273,7 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
       this._selectedIndex = index;
       return;
     }
-    const newIndex = regularizationNumberInRange(
+    const newIndex = rangeWrap(
       index ?? this.minIndex,
       this.minIndex,
       this.selectableItems.length

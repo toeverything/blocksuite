@@ -1,12 +1,13 @@
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { type VirgoLine } from '@blocksuite/virgo';
+import { type VirgoLine, type VRange } from '@blocksuite/virgo';
 
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import { SCROLL_THRESHOLD } from '../consts.js';
 import { matchFlavours } from './model.js';
 import {
+  asyncGetRichTextByModel,
   getBlockElementByModel,
   getDocPage,
   getDocPageByElement,
@@ -28,10 +29,30 @@ declare global {
   }
 }
 
-export function caretRangeFromPoint(
-  clientX: number,
-  clientY: number
-): Range | null {
+export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
+  const richText = await asyncGetRichTextByModel(model);
+  if (!richText) {
+    return;
+  }
+
+  await richText.updateComplete;
+  const vEditor = richText.vEditor;
+  assertExists(vEditor);
+  vEditor.setVRange(vRange);
+}
+
+export function asyncFocusRichText(
+  page: Page,
+  id: string,
+  vRange: VRange = { index: 0, length: 0 }
+) {
+  const model = page.getBlockById(id);
+  assertExists(model);
+  if (matchFlavours(model, ['affine:divider'])) return;
+  return asyncSetVRange(model, vRange);
+}
+
+function caretRangeFromPoint(clientX: number, clientY: number): Range | null {
   if (IS_FIREFOX) {
     const caret = document.caretPositionFromPoint(clientX, clientY);
     // TODO handle caret is covered by popup

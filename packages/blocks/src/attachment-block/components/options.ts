@@ -12,7 +12,7 @@ import {
   MoreIcon,
   ViewIcon,
 } from '../../_common/icons/index.js';
-import { stopPropagation } from '../../_legacy/utils/event.js';
+import { stopPropagation } from '../../_common/utils/event.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { turnIntoEmbedView } from '../utils.js';
 import { MoreMenu } from './more-menu.js';

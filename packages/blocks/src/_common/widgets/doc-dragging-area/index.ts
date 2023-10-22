@@ -6,10 +6,10 @@ import { html, nothing } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { BLOCK_ID_ATTR } from '../../../_legacy/consts.js';
-import { matchFlavours } from '../../../_legacy/utils/model.js';
+import { matchFlavours } from '../../../_common/utils/model.js';
 import type { DocPageBlockComponent } from '../../../page-block/index.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';
+import { BLOCK_ID_ATTR } from '../../consts.js';
 
 type Rect = {
   left: number;

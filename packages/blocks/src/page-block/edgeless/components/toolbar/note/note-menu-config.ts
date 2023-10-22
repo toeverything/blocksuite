@@ -4,7 +4,7 @@ import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
 } from '../../../../../_common/components/block-hub.js';
-import type { NoteChildrenFlavour } from '../../../../../_legacy/index.js';
+import type { NoteChildrenFlavour } from '../../../../../_common/utils/index.js';
 
 export const BUTTON_GROUP_LENGTH = 10;
 

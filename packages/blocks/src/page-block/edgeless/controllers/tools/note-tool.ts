@@ -3,10 +3,10 @@ import { noop } from '@blocksuite/global/utils';
 
 import {
   type EdgelessTool,
+  getThemeMode,
   hasClassNameInList,
   type NoteTool,
-  queryCurrentMode,
-} from '../../../../_legacy/index.js';
+} from '../../../../_common/utils/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
@@ -161,7 +161,7 @@ export class NoteToolController extends EdgelessToolController<NoteTool> {
 
     this._noteOverlay = new NoteOverlay(this._edgeless);
     this._noteOverlay.text = newTool.tip;
-    this._noteOverlay.themeMode = queryCurrentMode();
+    this._noteOverlay.themeMode = getThemeMode();
     this._edgeless.surface.viewport.addOverlay(this._noteOverlay);
   }
 }

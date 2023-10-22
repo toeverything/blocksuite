@@ -1,7 +1,10 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { noop } from '@blocksuite/global/utils';
 
-import type { EdgelessTool, TextTool } from '../../../../_legacy/index.js';
+import type {
+  EdgelessTool,
+  TextTool,
+} from '../../../../_common/utils/index.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
 import { addText } from '../../utils/text.js';
 import { EdgelessToolController } from './index.js';

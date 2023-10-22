@@ -13,9 +13,9 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import { BlockHubIcon20 } from '../_common/icons/index.js';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_legacy/consts.js';
-import { isPageMode, matchFlavours } from '../_legacy/index.js';
+import { isPageMode, matchFlavours } from '../_common/utils/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {

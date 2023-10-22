@@ -10,7 +10,7 @@ import { css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getModelByElement } from '../../../../../../_legacy/utils/query.js';
+import { getModelByElement } from '../../../../../../_common/utils/query.js';
 import type { AffineTextAttributes } from '../../types.js';
 import { affineTextStyles } from '../affine-text.js';
 import type { LinkPopup } from './link-popup/link-popup.js';

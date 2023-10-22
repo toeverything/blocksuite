@@ -5,12 +5,12 @@ import { Text } from '@blocksuite/store';
 import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../../_common/components/rich-text/rich-text-operations.js';
+import type { BlockModels } from '../../_common/utils/model.js';
 import {
   asyncGetVirgoByModel,
   getPageBlock,
   type SerializedBlock,
-} from '../utils/index.js';
-import type { BlockModels } from '../utils/model.js';
+} from '../../index.js';
 import { getService } from './singleton.js';
 
 export async function json2block(

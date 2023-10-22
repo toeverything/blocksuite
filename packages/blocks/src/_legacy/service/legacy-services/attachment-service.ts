@@ -1,6 +1,6 @@
 import type { AttachmentBlockModel } from '../../../attachment-block/attachment-model.js';
 import { cloneAttachmentProperties } from '../../../attachment-block/utils.js';
-import type { SerializedBlock } from '../../index.js';
+import type { SerializedBlock } from '../../../index.js';
 import { BaseService } from '../service.js';
 
 export class AttachmentBlockService extends BaseService<AttachmentBlockModel> {

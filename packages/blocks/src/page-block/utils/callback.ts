@@ -6,7 +6,7 @@ import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import {
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
-} from '../../_legacy/utils/query.js';
+} from '../../_common/utils/query.js';
 
 export async function onModelTextUpdated(
   model: BaseBlockModel,

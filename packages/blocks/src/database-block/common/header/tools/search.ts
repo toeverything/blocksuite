@@ -10,7 +10,7 @@ import {
   DatabaseSearchClose,
   DatabaseSearchIcon,
 } from '../../../../_common/icons/index.js';
-import { stopPropagation } from '../../../../_legacy/utils/event.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
 import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { BaseTool } from './base-tool.js';

@@ -10,7 +10,7 @@ import {
   MoreHorizontalIcon,
   NewEditIcon,
 } from '../../../_common/icons/index.js';
-import type { TableViewSelection } from '../../../_legacy/index.js';
+import type { TableViewSelection } from '../../../_common/utils/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import { openDetail, popRowMenu } from './menu.js';

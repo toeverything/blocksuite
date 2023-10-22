@@ -1,8 +1,5 @@
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
-import type {
-  BlockTransformContext,
-  SerializedBlock,
-} from '../../utils/index.js';
+import type { BlockTransformContext, SerializedBlock } from '../../../index.js';
 import { BaseService } from '../service.js';
 export class ImageBlockService extends BaseService<ImageBlockModel> {
   override async block2html(

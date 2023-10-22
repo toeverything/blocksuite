@@ -10,7 +10,10 @@ import {
   ArrowUpIcon,
   ConnectorIcon,
 } from '../../../../../_common/icons/index.js';
-import { type EdgelessTool, LineWidth } from '../../../../../_legacy/index.js';
+import {
+  type EdgelessTool,
+  LineWidth,
+} from '../../../../../_common/utils/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';

@@ -21,7 +21,7 @@ import {
   SendBackwardIcon,
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
-import { type ReorderingType } from '../../../../_legacy/index.js';
+import { type ReorderingType } from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';

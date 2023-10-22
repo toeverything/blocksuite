@@ -12,7 +12,7 @@ import { bindContainerHotkey } from '../_common/components/rich-text/keymap/inde
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_legacy/consts.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';

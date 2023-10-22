@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { AbstractEditor } from '../../_legacy/index.js';
+import type { AbstractEditor } from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   calcDropTarget,
@@ -11,7 +11,7 @@ import {
   getModelByBlockElement,
   matchFlavours,
   Point,
-} from '../../_legacy/index.js';
+} from '../../_common/utils/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type {
   DocPageBlockComponent,

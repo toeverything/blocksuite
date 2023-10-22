@@ -4,6 +4,7 @@ import { type BaseBlockModel, type Page } from '@blocksuite/store';
 import type { RefNodeSlots } from '../../_common/components/rich-text/virgo/nodes/reference-node.js';
 import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
 import type { CssVariableName } from '../../_common/theme/css-variables.js';
+import type { ServiceFlavour } from '../../_legacy/service/legacy-services/index.js';
 import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
@@ -18,7 +19,6 @@ import {
   type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
-import type { ServiceFlavour } from '../service/legacy-services/index.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 
@@ -230,6 +230,7 @@ export type EdgelessTool =
   | FrameTool
   | FrameNavigatorTool;
 
+/** @deprecated */
 export type SerializedBlock = {
   id?: string;
   flavour: string;
@@ -279,32 +280,3 @@ export type SerializedBlock = {
 export type EmbedBlockDoubleClickData = {
   blockId: string;
 };
-
-declare global {
-  interface WindowEventMap {
-    'affine.embed-block-db-click': CustomEvent<EmbedBlockDoubleClickData>;
-    'affine.switch-mouse-mode': CustomEvent<EdgelessTool>;
-    'affine:switch-edgeless-display-mode': CustomEvent<boolean>;
-  }
-}
-
-type WindowEventDetail<T extends keyof WindowEventMap> =
-  WindowEventMap[T] extends {
-    detail: unknown;
-  }
-    ? WindowEventMap[T]['detail']
-    : unknown;
-
-type HTMLElementEventDetail<T extends keyof HTMLElementEventMap> =
-  HTMLElementEventMap[T] extends {
-    detail: unknown;
-  }
-    ? HTMLElementEventMap[T]['detail']
-    : unknown;
-
-export type Detail<T extends keyof WindowEventMap | keyof HTMLElementEventMap> =
-  T extends keyof WindowEventMap
-    ? WindowEventDetail<T>
-    : T extends keyof HTMLElementEventMap
-    ? HTMLElementEventDetail<T>
-    : never;

@@ -2,7 +2,7 @@ import type { CursorSelection } from '@blocksuite/block-std';
 import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
-import type { Selectable } from '../../../_legacy/index.js';
+import type { Selectable } from '../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 

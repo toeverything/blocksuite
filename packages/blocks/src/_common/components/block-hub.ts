@@ -42,7 +42,7 @@ import type {
   AbstractEditor,
   EditingState,
   Rect,
-} from '../../_legacy/index.js';
+} from '../../_common/utils/index.js';
 import {
   calcDropTarget,
   type DroppingType,
@@ -53,7 +53,7 @@ import {
   getModelByBlockElement,
   isPageMode,
   Point,
-} from '../../_legacy/index.js';
+} from '../../_common/utils/index.js';
 import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';

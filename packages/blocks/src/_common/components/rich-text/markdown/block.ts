@@ -7,15 +7,17 @@ import {
 
 import {
   asyncSetVRange,
-  convertToDivider,
-  convertToList,
-  convertToParagraph,
   matchFlavours,
-} from '../../../../_legacy/utils/index.js';
+} from '../../../../_common/utils/index.js';
 import { getStandardLanguage } from '../../../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../../../code-block/utils/consts.js';
 import type { ParagraphBlockModel } from '../../../../paragraph-block/index.js';
 import type { AffineVEditor } from '../virgo/types.js';
+import {
+  convertToDivider,
+  convertToList,
+  convertToParagraph,
+} from './utils.js';
 
 export function tryConvertBlock(
   element: BlockElement,

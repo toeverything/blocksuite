@@ -2,6 +2,7 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
+import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import type {
   CodeBlockModel,
   HighlightOptionsGetter,
@@ -12,12 +13,12 @@ import {
   FALLBACK_LANG,
   LIGHT_THEME,
 } from '../../../code-block/utils/consts.js';
-import { BLOCK_ID_ATTR } from '../../consts.js';
-import type {
-  BlockTransformContext,
-  SerializedBlock,
-} from '../../utils/index.js';
-import { getVirgoByModel, queryCurrentMode } from '../../utils/index.js';
+import {
+  type BlockTransformContext,
+  getThemeMode,
+  getVirgoByModel,
+  type SerializedBlock,
+} from '../../../index.js';
 import { BaseService } from '../service.js';
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {
@@ -67,7 +68,7 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     if (highlighter) {
       const codeHtml = highlighter.codeToHtml(codeElement.innerHTML, {
         lang,
-        theme: queryCurrentMode() === 'dark' ? DARK_THEME : LIGHT_THEME,
+        theme: getThemeMode() === 'dark' ? DARK_THEME : LIGHT_THEME,
       });
       return codeHtml ?? preElement.outerHTML;
     } else {

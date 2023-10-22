@@ -1,8 +1,7 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 
+import type { BlockTransformContext, SerializedBlock } from '../../../index.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/paragraph-model.js';
-import type { SerializedBlock } from '../../index.js';
-import type { BlockTransformContext } from '../../index.js';
 import { json2block } from '../json2block.js';
 import { BaseService } from '../service.js';
 

@@ -1,6 +1,6 @@
 import type { BlockElement, RangeSyncFilter } from '@blocksuite/lit';
 
-import { BLOCK_ID_ATTR } from '../../_legacy/consts.js';
+import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 
 export const pageRangeSyncFilter: RangeSyncFilter = {
   rangeToTextSelection: range => {

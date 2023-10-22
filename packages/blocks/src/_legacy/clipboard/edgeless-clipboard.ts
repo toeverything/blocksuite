@@ -3,6 +3,12 @@ import { type Page, Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
+import type {
+  EdgelessElement,
+  Selectable,
+  SerializedBlock,
+  TopLevelBlockModel,
+} from '../../index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { deleteElements } from '../../page-block/edgeless/utils/crud.js';
@@ -29,12 +35,6 @@ import {
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
-import {
-  type EdgelessElement,
-  type Selectable,
-  type SerializedBlock,
-  type TopLevelBlockModel,
-} from '../index.js';
 import { getService } from '../service/index.js';
 import { addSerializedBlocks } from '../service/json2block.js';
 import type { FrameBlockService } from '../service/legacy-services/frame-service.js';
