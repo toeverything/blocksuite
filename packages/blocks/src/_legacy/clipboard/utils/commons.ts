@@ -6,8 +6,8 @@ import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
+  type SerializedBlock,
 } from '../../../_common/utils/index.js';
-import { type SerializedBlock } from '../../../index.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { ContentParser } from '../../content-parser/index.js';
 import type { SelectedBlock } from '../../content-parser/types.js';

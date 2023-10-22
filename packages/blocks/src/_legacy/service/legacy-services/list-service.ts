@@ -1,7 +1,10 @@
 import type { TextRangePoint } from '@blocksuite/block-std';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { BlockTransformContext, SerializedBlock } from '../../../index.js';
+import type {
+  BlockTransformContext,
+  SerializedBlock,
+} from '../../../_common/utils/types.js';
 import type { ListBlockModel } from '../../../list-block/list-model.js';
 import { json2block } from '../json2block.js';
 import { BaseService } from '../service.js';

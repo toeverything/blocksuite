@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 
-import { getVirgoByModel } from '../../../index.js';
+import { getVirgoByModel } from '../../../_common/utils/query.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 
 export function deleteModelsByTextSelection(

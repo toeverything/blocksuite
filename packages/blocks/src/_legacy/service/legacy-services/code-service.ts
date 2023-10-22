@@ -3,6 +3,11 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
+import { getThemeMode, getVirgoByModel } from '../../../_common/utils/index.js';
+import type {
+  BlockTransformContext,
+  SerializedBlock,
+} from '../../../_common/utils/types.js';
 import type {
   CodeBlockModel,
   HighlightOptionsGetter,
@@ -13,12 +18,6 @@ import {
   FALLBACK_LANG,
   LIGHT_THEME,
 } from '../../../code-block/utils/consts.js';
-import {
-  type BlockTransformContext,
-  getThemeMode,
-  getVirgoByModel,
-  type SerializedBlock,
-} from '../../../index.js';
 import { BaseService } from '../service.js';
 
 export class CodeBlockService extends BaseService<CodeBlockModel> {

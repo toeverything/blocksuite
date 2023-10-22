@@ -3,7 +3,10 @@ import type { BaseBlockModel } from '@blocksuite/store';
 
 import { DEFAULT_PAGE_NAME } from '../../../_common/components/rich-text/consts.js';
 import { TagsIcon } from '../../../_common/icons/tags.js';
-import type { BlockTransformContext, SerializedBlock } from '../../../index.js';
+import type {
+  BlockTransformContext,
+  SerializedBlock,
+} from '../../../_common/utils/types.js';
 import type { PageBlockModel } from '../../../page-block/page-model.js';
 import { BaseService } from '../service.js';
 import { getService } from '../singleton.js';

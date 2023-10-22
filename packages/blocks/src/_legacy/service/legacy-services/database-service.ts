@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 
 import type { BlockModels } from '../../../_common/utils/model.js';
+import type { SerializedBlock } from '../../../_common/utils/types.js';
 import type {
   DataViewDataType,
   DataViewTypes,
@@ -11,7 +12,6 @@ import type {
   Column,
   DatabaseBlockModel,
 } from '../../../database-block/index.js';
-import type { SerializedBlock } from '../../../index.js';
 import { BaseService } from '../service.js';
 
 export class LegacyDatabaseBlockService extends BaseService<DatabaseBlockModel> {

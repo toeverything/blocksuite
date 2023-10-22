@@ -4,12 +4,12 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
 import { handleBlockSplit } from '../../_common/components/rich-text/rich-text-operations.js';
-import type { BlockModels } from '../../_common/utils/model.js';
 import {
   asyncGetBlockElementByModel,
   asyncSetVRange,
   type SerializedBlock,
-} from '../../index.js';
+} from '../../_common/utils/index.js';
+import type { BlockModels } from '../../_common/utils/model.js';
 import { getService } from './singleton.js';
 
 export async function json2block(

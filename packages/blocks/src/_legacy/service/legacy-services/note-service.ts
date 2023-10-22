@@ -1,6 +1,6 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import type { SerializedBlock } from '../../../index.js';
+import type { SerializedBlock } from '../../../_common/utils/types.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
 import { addSerializedBlocks } from '../json2block.js';
 import { BaseService } from '../service.js';
