@@ -3,6 +3,7 @@ import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
 import type { RefNodeSlots } from '../../_common/components/rich-text/virgo/nodes/reference-node.js';
 import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
+import type { CssVariableName } from '../../_common/theme/css-variables.js';
 import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';
@@ -18,7 +19,6 @@ import {
   type ShapeType,
 } from '../../surface-block/elements/index.js';
 import type { ServiceFlavour } from '../service/legacy-services/index.js';
-import type { CssVariableName } from '../theme/css-variables.js';
 import type { BlockComponentElement } from './query.js';
 import type { Point } from './rect.js';
 

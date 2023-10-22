@@ -9,8 +9,8 @@ import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import type { EdgelessTool } from '../../../../../_legacy/index.js';
-import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import {
   ShapeStyle,
   type ShapeType,

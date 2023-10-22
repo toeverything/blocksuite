@@ -7,7 +7,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { isCssVariable } from '../../../../_legacy/theme/css-variables.js';
+import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import {
   Bound,
   type TextElement,

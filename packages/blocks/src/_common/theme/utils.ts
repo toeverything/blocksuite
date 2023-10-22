@@ -1,24 +1,7 @@
-import {
-  assertExists,
-  capitalize,
-  uncapitalize,
-} from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 
 import type { CssVariableName, CssVariablesMap } from './css-variables.js';
 import type { ThemeObserver } from './theme-observer.js';
-
-/**
- * Usage:
- * cssNameToJsName('--affine-theme-mode');  // affineThemeMode
- */
-export function cssNameToJsName(cssName: string) {
-  const upper = cssName
-    .split('-')
-    .filter(s => !!s)
-    .map(s => capitalize(s))
-    .join('');
-  return uncapitalize(upper);
-}
 
 function getClosestEditorContainer(element: Element) {
   const container = element.closest(
