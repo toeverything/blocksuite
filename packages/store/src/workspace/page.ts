@@ -200,9 +200,12 @@ export class Page extends Space<FlatBlockMap> {
     return this._blockMap.get(id) ?? null;
   }
 
-  getBlockByFlavour(blockFlavour: string) {
-    return Array.from(this._blockMap.values()).filter(
-      ({ flavour }) => flavour === blockFlavour
+  getBlockByFlavour(blockFlavour: string | string[]) {
+    const flavours =
+      typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
+
+    return Array.from(this._blockMap.values()).filter(({ flavour }) =>
+      flavours.includes(flavour)
     );
   }
 
