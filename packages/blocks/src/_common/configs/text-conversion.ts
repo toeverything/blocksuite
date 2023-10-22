@@ -18,10 +18,10 @@ import {
 } from '../icons/index.js';
 
 /**
- * Text editing entries used in slash menu and format bar,
+ * Text primitive entries used in slash menu and format bar,
  * which are also used for registering hotkeys for converting block flavours.
  */
-interface TextEditingConfig {
+interface TextConversionConfig {
   flavour: keyof BlockSchemas;
   type?: string;
   name: string;
@@ -29,7 +29,7 @@ interface TextEditingConfig {
   icon: TemplateResult<1>;
 }
 
-export const textEditingConfigs: TextEditingConfig[] = [
+export const textConversionConfigs: TextConversionConfig[] = [
   {
     flavour: 'affine:paragraph',
     type: 'text',

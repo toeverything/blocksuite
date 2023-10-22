@@ -12,7 +12,7 @@ import { matchFlavours } from '../../../../_legacy/utils/model.js';
 import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
-import { formatConfigs } from '../../../configs/format/format.js';
+import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
@@ -399,7 +399,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
   });
 
-  formatConfigs.forEach(config => {
+  textFormatConfigs.forEach(config => {
     if (!config.hotkey) return;
 
     blockElement.bindHotKey({

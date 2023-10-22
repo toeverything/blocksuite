@@ -5,7 +5,7 @@ import type { BlockElement } from '@blocksuite/lit';
 
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
-import { textEditingConfigs } from '../_common/configs/text-editing.js';
+import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { getBlockElementByModel } from '../_legacy/utils/query.js';
 import {
   getSelectedContentBlockElements,
@@ -351,7 +351,7 @@ export function bindHotKey(blockElement: BlockElement) {
     });
   });
 
-  textEditingConfigs.forEach(item => {
+  textConversionConfigs.forEach(item => {
     if (!item.hotkey) return;
 
     item.hotkey.forEach(key => {
