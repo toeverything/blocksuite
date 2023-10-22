@@ -18,9 +18,9 @@ import {
   handleIndent,
   handleMultiBlockIndent,
   handleMultiBlockOutdent,
-  handleOutdent,
   handleRemoveAllIndent,
   handleRemoveAllIndentForMultiBlocks,
+  handleUnindent,
 } from '../rich-text-operations.js';
 import { bracketPairs } from './bracket-pairs.js';
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
@@ -349,7 +349,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const vEditor = _getVirgo();
         const vRange = vEditor.getVRange();
         assertExists(vRange);
-        handleOutdent(model.page, model, vRange.index);
+        handleUnindent(model.page, model, vRange.index);
         _preventDefault(ctx);
 
         return true;

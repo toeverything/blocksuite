@@ -12,7 +12,7 @@ import {
   handleBlockSplit,
   handleLineEndForwardDelete,
   handleLineStartBackspace,
-  handleOutdent,
+  handleUnindent,
 } from '../rich-text-operations.js';
 import type { AffineVEditor } from '../virgo/types.js';
 
@@ -81,7 +81,7 @@ export function hardEnter(
     // After
     // - line1
     // - | <-- will unindent the block
-    handleOutdent(page, model, range.index);
+    handleUnindent(page, model, range.index);
     return VKEYBOARD_PREVENT_DEFAULT;
   }
 
