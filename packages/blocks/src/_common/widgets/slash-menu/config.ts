@@ -19,7 +19,6 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '../../../_common/icons/index.js';
-import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,
@@ -28,8 +27,9 @@ import {
   openFileOrFiles,
   resetNativeSelection,
   uploadImageFromLocal,
-} from '../../../_legacy/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_legacy/utils/virgo.js';
+} from '../../../_common/utils/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
+import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';

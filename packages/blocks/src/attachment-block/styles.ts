@@ -1,6 +1,6 @@
 import { css, html } from 'lit';
 
-import { queryCurrentMode } from '../_legacy/utils/query.js';
+import { getThemeMode } from '../_common/utils/query.js';
 
 export const styles = css`
   .affine-attachment-container {
@@ -265,7 +265,7 @@ const AttachmentBannerDark = html`<svg
 </svg>`;
 
 export const AttachmentBanner = () => {
-  const mode = queryCurrentMode();
+  const mode = getThemeMode();
   const isDarkMode = mode === 'dark';
   return isDarkMode ? AttachmentBannerDark : AttachmentBannerLight;
 };
@@ -381,7 +381,7 @@ const ErrorBannerDark = html`<svg
 </svg>`;
 
 export const ErrorBanner = () => {
-  const mode = queryCurrentMode();
+  const mode = getThemeMode();
   const isDarkMode = mode === 'dark';
   return isDarkMode ? ErrorBannerDark : ErrorBannerLight;
 };

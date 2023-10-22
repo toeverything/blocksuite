@@ -5,13 +5,13 @@ import {
   type VRange,
 } from '@blocksuite/virgo';
 
-import { BLOCK_ID_ATTR } from '../../../_legacy/consts.js';
 import type { Flavour } from '../../../models.js';
 import { getSelectedContentBlockElements } from '../../../page-block/utils/selection.js';
 import type {
   AffineTextAttributes,
   AffineVEditor,
 } from '../../components/rich-text/virgo/types.js';
+import { BLOCK_ID_ATTR } from '../../consts.js';
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,

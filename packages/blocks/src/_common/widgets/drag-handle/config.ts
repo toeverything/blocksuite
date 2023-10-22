@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-import type { Rect } from '../../../_legacy/index.js';
+import type { Rect } from '../../../_common/utils/index.js';
 
 export const DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT = 24;
 export const DRAG_HANDLE_OFFSET_LEFT = 2;

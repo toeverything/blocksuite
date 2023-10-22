@@ -5,7 +5,7 @@ import type { Page } from '@blocksuite/store';
 import { property } from 'lit/decorators.js';
 
 import type { UniComponent } from '../../_common/components/uni-component/uni-component.js';
-import type { DataViewSelection } from '../../_legacy/index.js';
+import type { DataViewSelection } from '../../_common/utils/index.js';
 import type { InsertToPosition } from '../types.js';
 import type { DataViewExpose, DataViewProps } from './data-view.js';
 import type { DataViewManager } from './data-view-manager.js';

@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getRichTextByModel,
   isControlledKeyboardEvent,
-} from '../../../_legacy/utils/index.js';
+} from '../../../_common/utils/index.js';
 import type { PageBlockComponent } from '../../../page-block/types.js';
 import {
   cleanSpecifiedTail,

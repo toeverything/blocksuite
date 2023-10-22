@@ -14,7 +14,7 @@ import {
   MoreHorizontalIcon,
   PlusIcon,
 } from '../../../_common/icons/index.js';
-import { regularizationNumberInRange } from '../../../_legacy/utils/math.js';
+import { rangeWrap } from '../../../_common/utils/math.js';
 import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
@@ -162,11 +162,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
   };
 
   private setSelectedOption(index: number) {
-    this.selectedIndex = regularizationNumberInRange(
-      index,
-      0,
-      this.filteredOptions.length
-    );
+    this.selectedIndex = rangeWrap(index, 0, this.filteredOptions.length);
   }
 
   private _onSelect = (id: string) => {

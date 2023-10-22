@@ -9,16 +9,16 @@ import { html } from 'lit/static-html.js';
 
 import { affineAttributeRenderer } from '../../../_common/components/rich-text/virgo/attribute-renderer.js';
 import { affineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../../_common/utils/index.js';
 import { ClipboardItem } from '../../../_legacy/clipboard/clipboard-item.js';
 import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
 } from '../../../_legacy/clipboard/utils/pure.js';
-import {
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../../../_legacy/index.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';

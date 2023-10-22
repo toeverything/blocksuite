@@ -11,8 +11,8 @@ import {
 import {
   type EdgelessTool,
   stopPropagation,
-} from '../../../../_legacy/index.js';
-import { clamp } from '../../../../_legacy/utils/math.js';
+} from '../../../../_common/utils/index.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import {
   ZOOM_MAX,
   ZOOM_MIN,

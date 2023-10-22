@@ -21,7 +21,7 @@ import {
   StraightLineIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { LineWidth } from '../../../../_legacy/utils/types.js';
+import { LineWidth } from '../../../../_common/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,

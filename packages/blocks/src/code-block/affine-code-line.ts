@@ -6,7 +6,7 @@ import { customElement, property } from 'lit/decorators.js';
 import type { IThemedToken } from 'shiki';
 
 import type { AffineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
-import { queryCurrentMode } from '../_legacy/utils/query.js';
+import { getThemeMode } from '../_common/utils/query.js';
 import type { HighlightOptionsGetter } from './code-model.js';
 import { DARK_THEME, LIGHT_THEME } from './utils/consts.js';
 import {
@@ -42,7 +42,7 @@ export class AffineCodeLine extends ShadowlessElement {
       ></span>`;
     }
 
-    const mode = queryCurrentMode();
+    const mode = getThemeMode();
     const cacheKey: highlightCacheKey = `${this.delta.insert}-${lang}-${mode}`;
     const cache = highlightCache.get(cacheKey);
 

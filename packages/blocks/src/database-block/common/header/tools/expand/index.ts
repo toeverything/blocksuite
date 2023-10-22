@@ -13,7 +13,7 @@ import {
   CrossIcon,
   ExpandWideIcon,
 } from '../../../../../_common/icons/index.js';
-import type { DataViewSelection } from '../../../../../_legacy/index.js';
+import type { DataViewSelection } from '../../../../../_common/utils/index.js';
 import type { DataViewNativeConfig } from '../../../../data-view.js';
 import type { DatabaseBlockComponent } from '../../../../database-block.js';
 import { DatabaseSelection } from '../../../selection.js';

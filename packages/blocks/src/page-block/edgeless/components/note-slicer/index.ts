@@ -5,14 +5,14 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_legacy/consts.js';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
 import {
   getBlockElementByModel,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
-} from '../../../../_legacy/index.js';
-import { almostEqual } from '../../../../_legacy/utils/math.js';
+} from '../../../../_common/utils/index.js';
+import { almostEqual } from '../../../../_common/utils/math.js';
 import type {
   EdgelessPageBlockComponent,
   NoteBlockComponent,

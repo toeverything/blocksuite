@@ -5,8 +5,8 @@ import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
-import { matchFlavours } from '../../_legacy/utils/model.js';
-import { getVirgoByModel } from '../../_legacy/utils/query.js';
+import { matchFlavours } from '../../_common/utils/model.js';
+import { getVirgoByModel } from '../../_common/utils/query.js';
 
 export function getSelectedContentModels(
   root: BlockSuiteRoot,

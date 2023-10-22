@@ -7,7 +7,7 @@ import { html } from 'lit/static-html.js';
 
 import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import { PenIcon } from '../../../../_common/icons/index.js';
-import { isValidUrl, normalizeUrl } from '../../../../_legacy/utils/url.js';
+import { isValidUrl, normalizeUrl } from '../../../../_common/utils/url.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { linkPureColumnConfig } from './define.js';

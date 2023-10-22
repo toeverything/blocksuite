@@ -19,7 +19,7 @@ import {
   ShapeArrowDownSmallIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { LineWidth, type ShapeTool } from '../../../../_legacy/utils/types.js';
+import { LineWidth, type ShapeTool } from '../../../../_common/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,

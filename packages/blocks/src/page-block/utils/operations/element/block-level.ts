@@ -1,11 +1,11 @@
 import type { BlockElement } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
+import { assertFlavours } from '../../../../_common/utils/model.js';
 import {
   asyncFocusRichText,
   asyncSetVRange,
-} from '../../../../_legacy/utils/common-operations.js';
-import { assertFlavours } from '../../../../_legacy/utils/model.js';
+} from '../../../../_common/utils/selection.js';
 import type { Flavour } from '../../../../models.js';
 import { onModelTextUpdated } from '../../callback.js';
 import { mergeToCodeModel, transformModel } from '../model.js';

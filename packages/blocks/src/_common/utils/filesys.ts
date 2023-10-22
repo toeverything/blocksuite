@@ -13,6 +13,7 @@ interface OpenFilePickerOptions {
   excludeAcceptAllOption?: boolean | undefined;
   multiple?: boolean | undefined;
 }
+
 declare global {
   interface Window {
     // Window API: showOpenFilePicker
@@ -209,7 +210,7 @@ export async function openFileOrFiles({
   });
 }
 
-export const uploadImageFromLocal = async (storage: BlobManager) => {
+export async function uploadImageFromLocal(storage: BlobManager) {
   const imageFiles = await openFileOrFiles({
     acceptType: 'Images',
     multiple: true,
@@ -226,7 +227,7 @@ export const uploadImageFromLocal = async (storage: BlobManager) => {
     saveAttachmentData(sourceId, { name: file.name });
   });
   return res;
-};
+}
 
 export function downloadBlob(blob: Blob, name: string) {
   const dataURL = URL.createObjectURL(blob);

@@ -10,7 +10,7 @@ import {
   DownloadIcon,
   HighLightDuotoneIcon,
 } from '../../../_common/icons/index.js';
-import { stopPropagation } from '../../../_legacy/utils/event.js';
+import { stopPropagation } from '../../../_common/utils/event.js';
 import { turnImageIntoCardView } from '../../../attachment-block/utils.js';
 import {
   copyImage,

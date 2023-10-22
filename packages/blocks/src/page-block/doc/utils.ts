@@ -1,8 +1,8 @@
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { toast } from '../../_common/components/toast.js';
+import { type SerializedBlock } from '../../_common/utils/index.js';
 import { copyBlocks } from '../../_legacy/clipboard/index.js';
-import { type SerializedBlock } from '../../_legacy/index.js';
 import type { CodeBlockModel } from '../../code-block/index.js';
 
 function getTextDelta(model: BaseBlockModel) {

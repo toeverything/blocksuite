@@ -2,9 +2,9 @@ import { WidgetElement } from '@blocksuite/lit';
 import { offset, shift } from '@floating-ui/dom';
 import { customElement } from 'lit/decorators.js';
 
-import { PAGE_HEADER_HEIGHT } from '../../../_legacy/consts.js';
 import type { ImageBlockComponent } from '../../../image-block/image-block.js';
 import { HoverController } from '../../components/index.js';
+import { PAGE_HEADER_HEIGHT } from '../../consts.js';
 import { ImageOptionsTemplate } from './image-options.js';
 
 export const AFFINE_IMAGE_TOOLBAR_WIDGET = 'affine-image-toolbar-widget';

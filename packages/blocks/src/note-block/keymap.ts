@@ -6,7 +6,7 @@ import type { BlockElement } from '@blocksuite/lit';
 import { moveBlockConfigs } from '../_common/configs/move-block.js';
 import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
-import { getBlockElementByModel } from '../_legacy/utils/query.js';
+import { getBlockElementByModel } from '../_common/utils/query.js';
 import {
   getSelectedContentBlockElements,
   onModelElementUpdated,

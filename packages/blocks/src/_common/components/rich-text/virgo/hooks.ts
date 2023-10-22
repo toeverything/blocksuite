@@ -4,7 +4,7 @@ import type {
   VHookContext,
 } from '@blocksuite/virgo';
 
-import { isStrictUrl } from '../../../../_legacy/utils/url.js';
+import { isStrictUrl } from '../../../../_common/utils/url.js';
 import type { AffineTextAttributes } from './types.js';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'reference'] as const;

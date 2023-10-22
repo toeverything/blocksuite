@@ -11,7 +11,7 @@ import {
   DualLinkIcon,
   HiddenCardIcon,
 } from '../../../../_common/icons/index.js';
-import { matchFlavours } from '../../../../_legacy/index.js';
+import { matchFlavours } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound } from '../../../../surface-block/index.js';
 import {

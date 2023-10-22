@@ -10,7 +10,7 @@ import {
   ScribbledStyleIcon,
 } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
-import type { EdgelessTool } from '../../../../../_legacy/index.js';
+import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import {
   ShapeStyle,
   type ShapeType,

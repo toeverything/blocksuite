@@ -15,12 +15,12 @@ import {
   NewIcon,
   NotionIcon,
 } from '../../../../_common/icons/index.js';
-import { ContentParser } from '../../../../_legacy/content-parser/index.js';
-import type { SerializedBlock } from '../../../../_legacy/utils/index.js';
+import type { SerializedBlock } from '../../../../_common/utils/index.js';
 import {
   createPage,
   openFileOrFiles,
-} from '../../../../_legacy/utils/index.js';
+} from '../../../../_common/utils/index.js';
+import { ContentParser } from '../../../../_legacy/content-parser/index.js';
 import { columnManager } from '../../../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../../../index.js';

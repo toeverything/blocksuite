@@ -16,7 +16,7 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
-import { stopPropagation } from '../../../../_legacy/utils/event.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel, NoteBlockModel } from '../../../../index.js';
 import type {

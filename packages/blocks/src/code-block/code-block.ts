@@ -27,10 +27,10 @@ import { HoverController } from '../_common/components/index.js';
 import { createLitPortal } from '../_common/components/portal.js';
 import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
 import type { RichText } from '../_common/components/rich-text/rich-text.js';
+import { PAGE_HEADER_HEIGHT } from '../_common/consts.js';
 import { ArrowDownIcon } from '../_common/icons/index.js';
 import { listenToThemeChange } from '../_common/theme/utils.js';
-import { PAGE_HEADER_HEIGHT } from '../_legacy/consts.js';
-import { queryCurrentMode } from '../_legacy/index.js';
+import { getThemeMode } from '../_common/utils/index.js';
 import { getService } from '../_legacy/service/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
@@ -195,7 +195,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
       }
       return;
     }
-    const mode = queryCurrentMode();
+    const mode = getThemeMode();
     this._highlighter = await getHighlighter({
       theme: mode === 'dark' ? DARK_THEME : LIGHT_THEME,
       themes: [LIGHT_THEME, DARK_THEME],
