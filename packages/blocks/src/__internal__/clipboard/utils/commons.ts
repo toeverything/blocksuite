@@ -6,7 +6,6 @@ import { getSelectedContentModels } from '../../../page-block/utils/selection.js
 import { ContentParser } from '../../content-parser/index.js';
 import type { SelectedBlock } from '../../content-parser/types.js';
 import { getService } from '../../service/index.js';
-import { registerAllBlocks } from '../../service/legacy-services/index.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
@@ -26,7 +25,6 @@ import {
 export async function getBlockClipboardInfo(
   block: SelectedBlock | BaseBlockModel
 ): Promise<{ html: string; text: string; json: SerializedBlock }> {
-  registerAllBlocks();
   if (block instanceof BaseBlockModel) {
     const selectBlockInfo = blockModel2selectBlocksInfo(block);
     return await generateClipboardInfo(selectBlockInfo);
@@ -154,7 +152,6 @@ async function createPageClipboardItems(
     textSelection
   );
 
-  registerAllBlocks();
   const clipGroups = await Promise.all(
     blocks.map(async block => {
       return await getBlockClipboardInfo(block);
