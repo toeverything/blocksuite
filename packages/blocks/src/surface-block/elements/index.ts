@@ -1,21 +1,21 @@
 import { BrushElement } from './brush/brush-element.js';
-import { BrushElementDefaultProps } from './brush/constants.js';
+import { BrushElementDefaultProps } from './brush/consts.js';
 import type { IBrush } from './brush/types.js';
 import { ConnectorElement } from './connector/connector-element.js';
-import { ConnectorElementDefaultProps } from './connector/constants.js';
+import { ConnectorElementDefaultProps } from './connector/consts.js';
 import { type IConnector } from './connector/types.js';
 import type {
   IElementDefaultProps,
   IPhasorElementType,
 } from './edgeless-element.js';
-import { ShapeElementDefaultProps } from './shape/constants.js';
+import { ShapeElementDefaultProps } from './shape/consts.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape, IShapeLocalRecord } from './shape/types.js';
 import type {
   ISurfaceElementLocalRecord,
   SurfaceElement,
 } from './surface-element.js';
-import { TextElementDefaultProps } from './text/constants.js';
+import { TextElementDefaultProps } from './text/consts.js';
 import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
 
@@ -28,7 +28,7 @@ export type { ShapeType } from './shape/types.js';
 export { TextElement } from './text/text-element.js';
 
 export { normalizeShapeBound } from './shape/utils.js';
-export { SHAPE_TEXT_PADDING } from './shape/constants.js';
+export { SHAPE_TEXT_PADDING } from './shape/consts.js';
 export {
   normalizeTextBound,
   getFontString,

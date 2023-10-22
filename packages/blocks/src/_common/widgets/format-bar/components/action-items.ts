@@ -1,6 +1,6 @@
 import { html } from 'lit';
 
-import { actionConfig } from '../../../common/actions/action-config.js';
+import { quickActionConfig } from '../../../configs/quick-action/config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 export const ActionItems = (formatBar: AffineFormatBarWidget) => {
@@ -9,7 +9,7 @@ export const ActionItems = (formatBar: AffineFormatBarWidget) => {
   }
 
   const root = formatBar.root;
-  return actionConfig
+  return quickActionConfig
     .filter(({ showWhen }) => showWhen(root))
     .map(({ id, name, icon, action, enabledWhen, disabledToolTip }) => {
       const enabled = enabledWhen(root);

@@ -5,18 +5,18 @@ import {
   type VRange,
 } from '@blocksuite/virgo';
 
-import type {
-  AffineTextAttributes,
-  AffineVEditor,
-} from '../../../_common/components/rich-text/virgo/types.js';
 import { BLOCK_ID_ATTR } from '../../../_legacy/consts.js';
 import type { Flavour } from '../../../models.js';
 import { getSelectedContentBlockElements } from '../../../page-block/utils/selection.js';
+import type {
+  AffineTextAttributes,
+  AffineVEditor,
+} from '../../components/rich-text/virgo/types.js';
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,
   FORMAT_TEXT_SUPPORT_FLAVOURS,
-} from './constant.js';
+} from './consts.js';
 
 function getCombinedFormatFromVEditors(
   vEditors: [AffineVEditor, VRange | null][]

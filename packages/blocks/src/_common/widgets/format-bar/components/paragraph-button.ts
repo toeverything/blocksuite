@@ -8,7 +8,7 @@ import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { Flavour, ParagraphBlockModel } from '../../../../models.js';
 import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../../page-block/utils/operations/element/block-level.js';
-import { paragraphConfig } from '../../../common/paragraph-config.js';
+import { textEditingConfigs } from '../../../configs/text-editing.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
@@ -24,7 +24,7 @@ const updateParagraphType = (
   if (selectedBlockElements.length === 0) {
     throw new Error('No models to update!');
   }
-  const { flavour: defaultFlavour, type: defaultType } = paragraphConfig[0];
+  const { flavour: defaultFlavour, type: defaultType } = textEditingConfigs[0];
   const targetFlavour = selectedBlockElements.every(
     el =>
       el.flavour === flavour && (el.model as ParagraphBlockModel).type === type
@@ -45,7 +45,7 @@ const ParagraphPanel = ({
   selectedBlockElements,
 }: ParagraphPanelProps) => {
   return html`<div class="paragraph-panel">
-    ${paragraphConfig
+    ${textEditingConfigs
       .filter(({ flavour }) => flavour !== 'affine:divider')
       .filter(({ flavour }) => page.schema.flavourSchemaMap.has(flavour))
       .map(
@@ -78,13 +78,13 @@ export const ParagraphButton = (formatBar: AffineFormatBarWidget) => {
 
   const paragraphIcon =
     selectedBlockElements.length < 1
-      ? paragraphConfig[0].icon
-      : paragraphConfig.find(
+      ? textEditingConfigs[0].icon
+      : textEditingConfigs.find(
           ({ flavour, type }) =>
             selectedBlockElements[0].flavour === flavour &&
             (selectedBlockElements[0].model as ParagraphBlockModel).type ===
               type
-        )?.icon ?? paragraphConfig[0].icon;
+        )?.icon ?? textEditingConfigs[0].icon;
 
   const pageElement = formatBar.blockElement;
   if (!isPageComponent(pageElement)) {
