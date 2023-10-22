@@ -3,9 +3,13 @@ import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
+import {
+  ImportIcon,
+  NewPageIcon,
+  PageIcon,
+} from '../../../_common/icons/index.js';
 import { createPage } from '../../../_legacy/utils/common-operations.js';
 import { getVirgoByModel } from '../../../_legacy/utils/query.js';
-import { ImportIcon, NewPageIcon, PageIcon } from '../../../icons/index.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { showImportModal } from './import-page/index.js';

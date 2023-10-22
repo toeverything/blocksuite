@@ -2,7 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { DEFAULT_PAGE_NAME } from '../../../_common/components/rich-text/consts.js';
-import { TagsIcon } from '../../../icons/tags.js';
+import { TagsIcon } from '../../../_common/icons/tags.js';
 import type { PageBlockModel } from '../../../page-block/page-model.js';
 import type {
   BlockTransformContext,

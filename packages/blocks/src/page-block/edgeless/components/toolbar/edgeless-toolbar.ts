@@ -23,9 +23,6 @@ import {
 import { customElement, state } from 'lit/decorators.js';
 
 import { toast } from '../../../../_common/components/toast.js';
-import { stopPropagation } from '../../../../_legacy/utils/event.js';
-import { uploadImageFromLocal } from '../../../../_legacy/utils/filesys.js';
-import type { EdgelessTool } from '../../../../_legacy/utils/types.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
@@ -34,7 +31,10 @@ import {
   FrameNavigatorPrevIcon,
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import { stopPropagation } from '../../../../_legacy/utils/event.js';
+import { uploadImageFromLocal } from '../../../../_legacy/utils/filesys.js';
+import type { EdgelessTool } from '../../../../_legacy/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

@@ -7,13 +7,13 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { Selectable } from '../../../_legacy/utils/index.js';
-import { RemoteCursor } from '../../../icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import {
   getSelectedRect,
   isTopLevelBlock,
 } from '../../../page-block/edgeless/utils/query.js';
 import { remoteColorManager } from '../../../page-block/remote-color-manager/index.js';
+import { RemoteCursor } from '../../icons/index.js';
 
 export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';

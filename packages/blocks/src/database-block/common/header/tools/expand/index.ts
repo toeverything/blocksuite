@@ -9,8 +9,11 @@ import { customElement, property } from 'lit/decorators.js';
 
 import { createModal } from '../../../../../_common/components/menu/index.js';
 import { renderTemplate } from '../../../../../_common/components/uni-component/render-template.js';
+import {
+  CrossIcon,
+  ExpandWideIcon,
+} from '../../../../../_common/icons/index.js';
 import type { DataViewSelection } from '../../../../../_legacy/index.js';
-import { CrossIcon, ExpandWideIcon } from '../../../../../icons/index.js';
 import type { DataViewNativeConfig } from '../../../../data-view.js';
 import type { DatabaseBlockComponent } from '../../../../database-block.js';
 import { DatabaseSelection } from '../../../selection.js';

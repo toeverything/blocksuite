@@ -8,7 +8,7 @@ import {
   popFilterableSimpleMenu,
 } from '../../../_common/components/menu/menu.js';
 import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
-import { AddCursorIcon } from '../../../icons/index.js';
+import { AddCursorIcon } from '../../../_common/icons/index.js';
 import type { Filter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, firstFilterInGroup } from '../ast.js';
 

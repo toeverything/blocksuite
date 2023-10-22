@@ -6,8 +6,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { positionToVRect } from '../../../_common/components/menu/index.js';
+import {
+  MoreHorizontalIcon,
+  NewEditIcon,
+} from '../../../_common/icons/index.js';
 import type { TableViewSelection } from '../../../_legacy/index.js';
-import { MoreHorizontalIcon, NewEditIcon } from '../../../icons/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';
 import { openDetail, popRowMenu } from './menu.js';

@@ -4,7 +4,7 @@ import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import { eventToVRect } from '../../../../_common/components/menu/index.js';
-import { FilterIcon } from '../../../../icons/index.js';
+import { FilterIcon } from '../../../../_common/icons/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { popCreateFilter } from '../../../common/ref/ref.js';
 import { BaseTool } from './base-tool.js';

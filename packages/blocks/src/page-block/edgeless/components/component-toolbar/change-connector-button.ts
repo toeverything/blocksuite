@@ -9,8 +9,6 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
-import { LineWidth } from '../../../../_legacy/utils/types.js';
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
@@ -21,7 +19,9 @@ import {
   ScribbledStyleIcon,
   SmallArrowDownIcon,
   StraightLineIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import { LineWidth } from '../../../../_legacy/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,

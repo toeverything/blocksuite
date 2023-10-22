@@ -16,7 +16,7 @@ import {
   DualLinkIcon16,
   PlusIcon,
   TagsIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import type { PageBlockComponent } from '../../types.js';
 import type { BacklinkData } from './backlink/backlink.js';
 import { DEFAULT_PAGE_NAME, listenBacklinkList } from './backlink/backlink.js';

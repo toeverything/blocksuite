@@ -8,7 +8,7 @@ import {
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '../../icons/index.js';
+} from '../../_common/icons/index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type { KanbanSelectionController } from './controller/selection.js';
 

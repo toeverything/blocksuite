@@ -1,4 +1,4 @@
-import type { Flavour } from '../../models.js';
+import type { Flavour } from '../../../models.js';
 
 // corresponding to `formatText` command
 export const FORMAT_TEXT_SUPPORT_FLAVOURS: Flavour[] = [

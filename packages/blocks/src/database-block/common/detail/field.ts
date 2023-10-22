@@ -13,7 +13,7 @@ import {
   DatabaseMoveRight,
   DeleteIcon,
   TextIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,

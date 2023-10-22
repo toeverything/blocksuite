@@ -5,12 +5,12 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../_legacy/index.js';
-import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
-} from '../../../../../icons/index.js';
+} from '../../../../../_common/icons/index.js';
+import type { EdgelessTool } from '../../../../../_legacy/index.js';
+import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import {
   ShapeStyle,
   type ShapeType,

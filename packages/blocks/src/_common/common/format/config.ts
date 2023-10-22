@@ -3,8 +3,8 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 import type { TemplateResult } from 'lit';
 
-import { toggleLinkPopup } from '../../_common/components/rich-text/virgo/nodes/link-node/link-popup/toggle-link-popup.js';
-import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
+import { toggleLinkPopup } from '../../../_common/components/rich-text/virgo/nodes/link-node/link-popup/toggle-link-popup.js';
+import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
 import {
   BoldIcon,
   CodeIcon,
@@ -12,7 +12,7 @@ import {
   LinkIcon,
   StrikethroughIcon,
   UnderlineIcon,
-} from '../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import { commonActiveWhen, handleCommonStyle } from './utils.js';
 
 export interface FormatConfig {

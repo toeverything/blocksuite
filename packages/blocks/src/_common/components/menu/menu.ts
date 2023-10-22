@@ -16,8 +16,8 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { ArrowRightSmallIcon, DoneIcon } from '../../../_common/icons/index.js';
 import { regularizationNumberInRange } from '../../../_legacy/utils/math.js';
-import { ArrowRightSmallIcon, DoneIcon } from '../../../icons/index.js';
 import {
   checkboxChecked,
   checkboxUnchecked,

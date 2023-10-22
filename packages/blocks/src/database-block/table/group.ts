@@ -5,7 +5,7 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js';
-import { PlusIcon } from '../../icons/index.js';
+import { PlusIcon } from '../../_common/icons/index.js';
 import type { GroupData } from '../common/group-by/helper.js';
 import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';
 import { LEFT_TOOL_BAR_WIDTH } from './consts.js';

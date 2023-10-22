@@ -7,7 +7,7 @@ import { baseTheme } from '@toeverything/theme';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { CloseIcon } from '../../icons/index.js';
+import { CloseIcon } from '../../_common/icons/index.js';
 import type { BookmarkBlockModel } from '../bookmark-model.js';
 
 export const bookmarkModalStyles = html`

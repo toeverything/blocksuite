@@ -14,22 +14,6 @@ import {
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  AbstractEditor,
-  EditingState,
-  Rect,
-} from '../../_legacy/index.js';
-import {
-  calcDropTarget,
-  type DroppingType,
-  getBlockElementByModel,
-  getClosestBlockElementByPoint,
-  getDocPage,
-  getEdgelessPage,
-  getModelByBlockElement,
-  isPageMode,
-  Point,
-} from '../../_legacy/index.js';
 import {
   BlockHubIcon,
   BlockHubRoundedRectangleIcon,
@@ -53,7 +37,23 @@ import {
   QuoteIcon,
   TextIcon,
   TextIconLarge,
-} from '../../icons/index.js';
+} from '../../_common/icons/index.js';
+import type {
+  AbstractEditor,
+  EditingState,
+  Rect,
+} from '../../_legacy/index.js';
+import {
+  calcDropTarget,
+  type DroppingType,
+  getBlockElementByModel,
+  getClosestBlockElementByPoint,
+  getDocPage,
+  getEdgelessPage,
+  getModelByBlockElement,
+  isPageMode,
+  Point,
+} from '../../_legacy/index.js';
 import { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../page-block/text-selection/utils.js';

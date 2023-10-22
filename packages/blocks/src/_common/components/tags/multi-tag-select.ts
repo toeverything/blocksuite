@@ -8,13 +8,13 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { regularizationNumberInRange } from '../../../_legacy/utils/math.js';
 import {
   DatabaseSearchClose,
   DeleteIcon,
   MoreHorizontalIcon,
   PlusIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
+import { regularizationNumberInRange } from '../../../_legacy/utils/math.js';
 import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';

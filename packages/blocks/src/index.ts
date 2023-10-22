@@ -13,7 +13,7 @@ import './database-block/index.js';
 
 export * from './_common/components/index.js';
 export * from './_common/test-utils/test-utils.js';
-export * from './_common/transformer/zip.js';
+export * from './_common/transformers/index.js';
 export * from './_common/widgets/index.js';
 export * from './_legacy/consts.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';

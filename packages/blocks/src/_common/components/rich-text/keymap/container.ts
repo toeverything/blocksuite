@@ -9,11 +9,11 @@ import {
 } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../../../_legacy/utils/model.js';
-import { bracketPairs } from '../../../../common/bracket-pairs.js';
-import { formatConfig } from '../../../../common/format/config.js';
 import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
+import { bracketPairs } from '../../../common/bracket-pairs.js';
+import { formatConfig } from '../../../common/format/config.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,

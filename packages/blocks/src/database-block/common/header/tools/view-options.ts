@@ -14,7 +14,7 @@ import {
   GroupingIcon,
   InfoIcon,
   MoreHorizontalIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { popFilterModal } from '../../filter/filter-modal.js';

@@ -8,17 +8,17 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  EdgelessTool,
-  ShapeToolState,
-} from '../../../../../_legacy/index.js';
 import {
   diamondSvg,
   ellipseSvg,
   rectSvg,
   roundedSvg,
   triangleSvg,
-} from '../../../../../icons/index.js';
+} from '../../../../../_common/icons/index.js';
+import type {
+  EdgelessTool,
+  ShapeToolState,
+} from '../../../../../_legacy/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {

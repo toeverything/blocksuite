@@ -1,7 +1,7 @@
+import { WebIcon16 } from '../../../_common/icons/text.js';
 import type { BookmarkBlockModel } from '../../../bookmark-block/bookmark-model.js';
 import { DefaultBanner } from '../../../bookmark-block/images/banners.js';
 import { cloneBookmarkProperties } from '../../../bookmark-block/utils.js';
-import { WebIcon16 } from '../../../icons/text.js';
 import type { SerializedBlock } from '../../index.js';
 import { BaseService } from '../service.js';
 

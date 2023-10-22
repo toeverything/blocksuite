@@ -8,10 +8,10 @@ import {
 import type {
   AffineTextAttributes,
   AffineVEditor,
-} from '../../_common/components/rich-text/virgo/types.js';
-import { BLOCK_ID_ATTR } from '../../_legacy/consts.js';
-import type { Flavour } from '../../models.js';
-import { getSelectedContentBlockElements } from '../../page-block/utils/selection.js';
+} from '../../../_common/components/rich-text/virgo/types.js';
+import { BLOCK_ID_ATTR } from '../../../_legacy/consts.js';
+import type { Flavour } from '../../../models.js';
+import { getSelectedContentBlockElements } from '../../../page-block/utils/selection.js';
 import {
   FORMAT_BLOCK_SUPPORT_FLAVOURS,
   FORMAT_NATIVE_SUPPORT_FLAVOURS,

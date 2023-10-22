@@ -3,10 +3,10 @@ import { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
+import { actionConfig } from '../_common/common/actions/action-config.js';
+import { moveBlockConfig } from '../_common/common/move-block-config.js';
+import { paragraphConfig } from '../_common/common/paragraph-config.js';
 import { getBlockElementByModel } from '../_legacy/utils/query.js';
-import { actionConfig } from '../common/actions/action-config.js';
-import { moveBlockConfig } from '../common/move-block-config.js';
-import { paragraphConfig } from '../common/paragraph-config.js';
 import {
   getSelectedContentBlockElements,
   onModelElementUpdated,

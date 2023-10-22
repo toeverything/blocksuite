@@ -2,8 +2,6 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
-import { stopPropagation } from '../../../_legacy/utils/event.js';
-import { turnImageIntoCardView } from '../../../attachment-block/utils.js';
 import {
   BookmarkIcon,
   CaptionIcon,
@@ -11,7 +9,9 @@ import {
   DeleteIcon,
   DownloadIcon,
   HighLightDuotoneIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
+import { stopPropagation } from '../../../_legacy/utils/event.js';
+import { turnImageIntoCardView } from '../../../attachment-block/utils.js';
 import {
   copyImage,
   downloadImage,

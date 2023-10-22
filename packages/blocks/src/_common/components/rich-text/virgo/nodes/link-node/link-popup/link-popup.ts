@@ -13,13 +13,13 @@ import {
 } from '../../../../../../../_legacy/utils/url.js';
 import type { BookmarkProps } from '../../../../../../../bookmark-block/bookmark-model.js';
 import { allowEmbed } from '../../../../../../../bookmark-block/embed.js';
-import { BookmarkIcon } from '../../../../../../../icons/edgeless.js';
+import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
 import {
   ConfirmIcon,
   EditIcon,
   EmbedWebIcon,
   UnlinkIcon,
-} from '../../../../../../../icons/text.js';
+} from '../../../../../../icons/text.js';
 import type { IconButton } from '../../../../../button.js';
 import { toast } from '../../../../../toast.js';
 import type { AffineVEditor } from '../../../types.js';

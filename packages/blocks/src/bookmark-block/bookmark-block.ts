@@ -11,11 +11,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
 import { HoverController } from '../_common/components/index.js';
+import { WebIcon16 } from '../_common/icons/text.js';
 import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
 import { stopPropagation } from '../_legacy/utils/event.js';
 import { queryCurrentMode } from '../_legacy/utils/query.js';
-import { WebIcon16 } from '../icons/text.js';
 import {
   type BookmarkBlockModel,
   BookmarkBlockSchema,

@@ -13,7 +13,10 @@ import type {
 import { popMenu } from '../../../_common/components/menu/index.js';
 import { menuTitleItem } from '../../../_common/components/menu/title.js';
 import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
-import { ArrowRightSmallIcon, DeleteIcon } from '../../../icons/index.js';
+import {
+  ArrowRightSmallIcon,
+  DeleteIcon,
+} from '../../../_common/icons/index.js';
 import { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { DataViewTableManager } from '../../table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';

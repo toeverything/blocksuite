@@ -7,7 +7,6 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
 import {
   BoldIcon,
   FontFamilyIcon,
@@ -16,7 +15,8 @@ import {
   TextAlignCenterIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
 import {
   Bound,
   normalizeShapeBound,
@@ -43,7 +43,7 @@ import {
   TEXT_FONT_SIZE,
 } from '../text/types.js';
 import { createButtonPopper } from '../utils.js';
-import { ShapeArrowDownSmallIcon } from './../../../../icons/index.js';
+import { ShapeArrowDownSmallIcon } from './../../../../_common/icons/index.js';
 
 @customElement('edgeless-change-text-menu')
 export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {

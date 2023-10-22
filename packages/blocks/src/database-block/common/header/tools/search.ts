@@ -6,11 +6,11 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../../_legacy/utils/event.js';
 import {
   DatabaseSearchClose,
   DatabaseSearchIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import { stopPropagation } from '../../../../_legacy/utils/event.js';
 import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { BaseTool } from './base-tool.js';

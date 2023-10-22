@@ -20,7 +20,7 @@ import {
   DatabaseMoveRight,
   DeleteIcon,
   TextIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 import type { InsertToPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';

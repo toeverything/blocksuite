@@ -4,14 +4,14 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { DataViewTypes } from '../../database-block/common/data-view.js';
-import type { DatabaseBlockModel } from '../../database-block/database-model.js';
+import type { DataViewTypes } from '../../../database-block/common/data-view.js';
+import type { DatabaseBlockModel } from '../../../database-block/database-model.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { DatabaseSearchClose } from '../../icons/database.js';
 import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,
 } from '../../icons/text.js';
-import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 
 interface DatabaseView {
   type: DataViewTypes;

@@ -4,12 +4,15 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { html, type TemplateResult } from 'lit';
 
-import { createSimplePortal } from '../../_common/components/portal.js';
-import { toast } from '../../_common/components/toast.js';
-import { copyBlocksInPage } from '../../_legacy/clipboard/utils/commons.js';
-import { matchFlavours } from '../../_legacy/utils/model.js';
-import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';
-import { getSelectedContentModels } from '../../page-block/utils/selection.js';
+import { createSimplePortal } from '../../../_common/components/portal.js';
+import { toast } from '../../../_common/components/toast.js';
+import {
+  CopyIcon,
+  DatabaseTableViewIcon20,
+} from '../../../_common/icons/index.js';
+import { copyBlocksInPage } from '../../../_legacy/clipboard/utils/commons.js';
+import { matchFlavours } from '../../../_legacy/utils/model.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface ActionConfig {

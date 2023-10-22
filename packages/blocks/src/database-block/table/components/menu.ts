@@ -7,7 +7,7 @@ import {
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
 

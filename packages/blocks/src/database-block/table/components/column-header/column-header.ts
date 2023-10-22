@@ -10,7 +10,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { renderTemplate } from '../../../../_common/components/uni-component/render-template.js';
-import { AddCursorIcon } from '../../../../icons/index.js';
+import { AddCursorIcon } from '../../../../_common/icons/index.js';
 import type { DataViewTableManager } from '../../table-view-manager.js';
 import { styles } from './styles.js';
 

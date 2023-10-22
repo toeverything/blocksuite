@@ -19,7 +19,7 @@ import {
   DuplicateIcon,
   MoreHorizontalIcon,
   PlusIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import { firstFilter } from '../ast.js';
 import { popAddNewFilter } from './condition.js';

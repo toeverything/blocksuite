@@ -10,8 +10,8 @@ import { html } from 'lit/static-html.js';
 
 import { popMenu } from '../../_common/components/menu/index.js';
 import { renderUniLit } from '../../_common/components/uni-component/uni-component.js';
+import { AddCursorIcon } from '../../_common/icons/index.js';
 import type { TableViewSelection } from '../../_legacy/index.js';
-import { AddCursorIcon } from '../../icons/index.js';
 import { BaseDataView } from '../common/base-data-view.js';
 import type { GroupHelper } from '../common/group-by/helper.js';
 import type { InsertToPosition } from '../types.js';

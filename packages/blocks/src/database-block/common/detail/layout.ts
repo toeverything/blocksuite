@@ -5,7 +5,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import { createModal } from '../../../_common/components/menu/index.js';
-import { CrossIcon } from '../../../icons/index.js';
+import { CrossIcon } from '../../../_common/icons/index.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { RecordDetail } from './detail.js';
 

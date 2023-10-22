@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
 import { createPopup } from '../../_common/components/menu/index.js';
-import { ArrowLeftBigIcon } from '../../icons/index.js';
+import { ArrowLeftBigIcon } from '../../_common/icons/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,

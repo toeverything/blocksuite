@@ -5,12 +5,12 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
 import { HoverController } from '../_common/components/index.js';
+import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
 import { ThemeObserver } from '../_legacy/theme/theme-observer.js';
 import { stopPropagation } from '../_legacy/utils/event.js';
 import { humanFileSize } from '../_legacy/utils/math.js';
-import { AttachmentIcon16 } from '../icons/index.js';
 import {
   type AttachmentBlockModel,
   AttachmentBlockSchema,

@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 
-import { ArrowLeftBigIcon } from '../../../icons/index.js';
+import { ArrowLeftBigIcon } from '../../../_common/icons/index.js';
 import type { Menu } from './menu.js';
 
 export const menuTitleItem = (

@@ -1,6 +1,6 @@
 import { html } from 'lit';
 
-import { actionConfig } from '../../../../common/actions/action-config.js';
+import { actionConfig } from '../../../common/actions/action-config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 export const ActionItems = (formatBar: AffineFormatBarWidget) => {

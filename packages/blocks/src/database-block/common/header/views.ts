@@ -15,7 +15,7 @@ import {
   DuplicateIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import { viewManager, viewRendererManager } from '../data-view.js';
 import type { ViewSource } from '../view-source.js';
 

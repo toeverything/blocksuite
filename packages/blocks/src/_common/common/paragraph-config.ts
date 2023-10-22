@@ -1,5 +1,6 @@
 import type { TemplateResult } from 'lit';
 
+import type { BlockSchemas } from '../../models.js';
 import {
   BulletedListIcon,
   CheckBoxIcon,
@@ -15,7 +16,6 @@ import {
   QuoteIcon,
   TextIcon,
 } from '../icons/index.js';
-import type { BlockSchemas } from '../models.js';
 
 interface BlockConfig {
   flavour: keyof BlockSchemas;

@@ -4,7 +4,6 @@ import { html } from 'lit';
 import { createRef, ref, type RefOrCallback } from 'lit/directives/ref.js';
 
 import { createLitPortal } from '../../_common/components/portal.js';
-import { stopPropagation } from '../../_legacy/utils/event.js';
 import {
   CaptionIcon,
   EditIcon,
@@ -12,7 +11,8 @@ import {
   LinkIcon,
   MoreIcon,
   ViewIcon,
-} from '../../icons/index.js';
+} from '../../_common/icons/index.js';
+import { stopPropagation } from '../../_legacy/utils/event.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { turnIntoEmbedView } from '../utils.js';
 import { MoreMenu } from './more-menu.js';

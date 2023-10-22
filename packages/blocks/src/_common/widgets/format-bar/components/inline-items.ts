@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
-import { formatConfig } from '../../../../common/format/config.js';
-import { isFormatSupported } from '../../../../common/format/utils.js';
+import { formatConfig } from '../../../common/format/config.js';
+import { isFormatSupported } from '../../../common/format/utils.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 import { BackgroundButton } from './background/background-button.js';
 

@@ -4,7 +4,7 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   GeneralStyleIcon,
   ScribbledStyleIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 import { ShapeStyle } from '../../../../surface-block/index.js';
 
 @customElement('edgeless-shape-style-panel')

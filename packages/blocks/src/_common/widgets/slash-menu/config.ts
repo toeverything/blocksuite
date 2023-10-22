@@ -1,21 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 
-import { getServiceOrRegister } from '../../../_legacy/service/index.js';
-import {
-  createPage,
-  getCurrentNativeRange,
-  getPageBlock,
-  getVirgoByModel,
-  openFileOrFiles,
-  resetNativeSelection,
-  uploadImageFromLocal,
-} from '../../../_legacy/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_legacy/utils/virgo.js';
-import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
-import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
-import { formatConfig } from '../../../common/format/config.js';
-import { paragraphConfig } from '../../../common/paragraph-config.js';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -33,7 +18,20 @@ import {
   TodayIcon,
   TomorrowIcon,
   YesterdayIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
+import { getServiceOrRegister } from '../../../_legacy/service/index.js';
+import {
+  createPage,
+  getCurrentNativeRange,
+  getPageBlock,
+  getVirgoByModel,
+  openFileOrFiles,
+  resetNativeSelection,
+  uploadImageFromLocal,
+} from '../../../_legacy/utils/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../../_legacy/utils/virgo.js';
+import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
+import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
 import {
@@ -42,6 +40,8 @@ import {
 } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import { formatConfig } from '../../common/format/config.js';
+import { paragraphConfig } from '../../common/paragraph-config.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';

@@ -8,7 +8,11 @@ import {
   eventToVRect,
 } from '../../../_common/components/menu/index.js';
 import { renderTemplate } from '../../../_common/components/uni-component/render-template.js';
-import { AddCursorIcon, CrossIcon, FilterIcon } from '../../../icons/index.js';
+import {
+  AddCursorIcon,
+  CrossIcon,
+  FilterIcon,
+} from '../../../_common/icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { popCreateFilter } from '../ref/ref.js';

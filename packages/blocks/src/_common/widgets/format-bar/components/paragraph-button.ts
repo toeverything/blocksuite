@@ -4,11 +4,11 @@ import type { Page } from '@blocksuite/store';
 import { computePosition, flip, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import { paragraphConfig } from '../../../../common/paragraph-config.js';
-import { ArrowDownIcon } from '../../../../icons/index.js';
+import { ArrowDownIcon } from '../../../../_common/icons/index.js';
 import type { Flavour, ParagraphBlockModel } from '../../../../models.js';
 import { isPageComponent } from '../../../../page-block/utils/guard.js';
 import { updateBlockElementType } from '../../../../page-block/utils/operations/element/block-level.js';
+import { paragraphConfig } from '../../../common/paragraph-config.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 
 interface ParagraphPanelProps {
