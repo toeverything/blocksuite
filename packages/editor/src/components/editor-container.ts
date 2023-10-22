@@ -13,7 +13,6 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { withTempBlobData } from '@blocksuite/blocks';
-import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
 import {
@@ -131,15 +130,6 @@ export class EditorContainer
       throw new Error('Missing page for EditorContainer!');
     }
 
-    // connect mouse mode event changes
-    // this._disposables.addFromEvent(
-    //   window,
-    //   'affine.switch-mouse-mode',
-    //   ({ detail }) => {
-    //     this.edgelessTool = detail;
-    //   }
-    // );
-
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
@@ -156,7 +146,7 @@ export class EditorContainer
     );
     this._disposables.addFromEvent(this, 'drop', this.fileDropManager.onDrop);
 
-    this.themeObserver.observer(document.documentElement);
+    this.themeObserver.observe(document.documentElement);
     this._disposables.add(this.themeObserver);
   }
 
@@ -266,10 +256,6 @@ export class EditorContainer
     }
   }
 
-  createContentParser() {
-    return new ContentParser(this.page);
-  }
-
   override render() {
     if (!this.model) return null;
 
@@ -278,7 +264,7 @@ export class EditorContainer
       html`<block-suite-root
         ${ref(this.root)}
         .page=${this.page}
-        .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
+        .preset=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
         .mode=${this.mode}
       ></block-suite-root>`
     );

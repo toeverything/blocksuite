@@ -32,7 +32,7 @@ export class ThemeObserver extends Slot<CssVariablesMap> {
     return this._cssVariables;
   }
 
-  observer(element: Element) {
+  observe(element: Element) {
     this._observer?.disconnect();
     this._cssVariables = extractCssVariables(element);
     this._observer = new MutationObserver(() => {

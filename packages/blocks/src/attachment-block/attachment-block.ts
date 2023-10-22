@@ -74,7 +74,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     this._registerDragHandleOption();
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
-    this._themeObserver.observer(document.documentElement);
+    this._themeObserver.observe(document.documentElement);
     this._themeObserver.on(() => this.requestUpdate());
     this.disposables.add(() => this._themeObserver.dispose());
   }
