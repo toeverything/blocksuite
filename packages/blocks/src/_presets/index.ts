@@ -31,7 +31,7 @@ import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
 
-const pageBlockSpec: BlockSpec<DocPageBlockWidgetName> = {
+const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: DocPageService,
   view: {
@@ -60,7 +60,7 @@ const pageBlockSpec: BlockSpec<DocPageBlockWidgetName> = {
   },
 };
 
-const edgelessBlockSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
+const EdgelessPageSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
   schema: PageBlockSchema,
   service: EdgelessPageService,
   view: {
@@ -90,7 +90,7 @@ const edgelessBlockSpec: BlockSpec<EdgelessPageBlockWidgetName> = {
 };
 
 export const PagePreset: BlockSpec[] = [
-  pageBlockSpec,
+  DocPageSpec,
   {
     schema: SurfaceBlockSchema,
     view: {
@@ -165,7 +165,7 @@ export const PagePreset: BlockSpec[] = [
 ];
 
 export const EdgelessPreset: BlockSpec[] = [
-  edgelessBlockSpec,
+  EdgelessPageSpec,
   {
     schema: SurfaceBlockSchema,
     view: {

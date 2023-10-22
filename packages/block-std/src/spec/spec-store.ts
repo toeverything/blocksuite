@@ -15,7 +15,7 @@ export class SpecStore {
     this._services.clear();
   }
 
-  applySpecs(specs: Array<BlockSpec>) {
+  applySpecs(specs: BlockSpec[]) {
     const oldSpecs = this._specs;
     const newSpecs = this._buildSpecMap(specs);
     this._diffServices(oldSpecs, newSpecs);
