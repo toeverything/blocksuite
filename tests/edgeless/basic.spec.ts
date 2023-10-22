@@ -2,7 +2,7 @@
 
 import { expect } from '@playwright/test';
 
-import { NOTE_WIDTH } from '../../packages/blocks/src/_legacy/consts.js';
+import { NOTE_WIDTH } from '../../packages/blocks/src/_common/consts.js';
 import { assertExists } from '../../packages/global/src/utils.js';
 import {
   createShapeElement,
