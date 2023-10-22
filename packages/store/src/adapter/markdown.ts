@@ -92,13 +92,44 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toPageSnapshot(
     _payload: ToPageSnapshotPayload<Markdown>
   ): Promise<PageSnapshot> {
-    throw new Error('Method not implemented.');
+    const markdownAst = this.markdownToAst(_payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return {
+      type: 'page',
+      meta: {
+        id: nanoid('page'),
+        title: 'Untitled',
+        createDate: +new Date(),
+        tags: [],
+      },
+      blocks: await this.tranverseMarkdown(
+        markdownAst,
+        blockSnapshotRoot as BlockSnapshot
+      ),
+    };
   }
 
   async toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<Markdown>
   ): Promise<BlockSnapshot> {
-    throw new Error('Method not implemented.');
+    const markdownAst = this.markdownToAst(_payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return this.tranverseMarkdown(
+      markdownAst,
+      blockSnapshotRoot as BlockSnapshot
+    );
   }
 
   async toSliceSnapshot(
@@ -107,7 +138,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     throw new Error('Method not implemented.');
   }
 
-  traverseSnapshot = async (
+  private traverseSnapshot = async (
     snapshot: BlockSnapshot,
     markdown: MarkdownAST,
     assets?: AdapterAssetsManager
@@ -330,7 +361,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return (await walker.walk(snapshot, markdown)) as Root;
   };
 
-  tranverseMarkdown = (markdown: MarkdownAST, snapshot: BlockSnapshot) => {
+  private tranverseMarkdown = (
+    markdown: MarkdownAST,
+    snapshot: BlockSnapshot
+  ) => {
     const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
     walker.setONodeTypeGuard(
       (node): node is MarkdownAST =>
@@ -479,48 +513,94 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'table': {
-          // TODO: add table support
-          const columns = o.node.children[0].children.map(() => {
+          const viewsColumns = o.node.children[0].children.map(() => {
             return {
               id: nanoid('block'),
               hide: false,
               width: 180,
             };
           });
-          context
-            .openNode(
-              {
-                type: 'block',
-                id: nanoid('block'),
-                flavour: 'affine:database',
-                props: {
-                  views: [
-                    {
-                      id: nanoid('block'),
-                      name: 'Table View',
-                      mode: 'table',
-                      columns: columns,
-                      filter: {
-                        type: 'group',
-                        op: 'and',
-                        conditions: [],
-                      },
-                      header: {
-                        titleColumn: columns[0].id,
-                        iconColumn: 'type',
-                      },
+          const cells = Object.create(null);
+          o.node.children.slice(1).forEach(row => {
+            const rowId = nanoid('block');
+            cells[rowId] = Object.create(null);
+            row.children.slice(1).forEach((cell, index) => {
+              cells[rowId][viewsColumns[index + 1].id] = {
+                columnId: viewsColumns[index + 1].id,
+                value: cell.children
+                  .map(child => ('value' in child ? child.value : ''))
+                  .join(''),
+              };
+            });
+          });
+          const columns = o.node.children[0].children.map((_child, index) => {
+            return {
+              type: index === 0 ? 'title' : 'rich-text',
+              name: _child.children
+                .map(child => ('value' in child ? child.value : ''))
+                .join(''),
+              data: {},
+              id: viewsColumns[index].id,
+            };
+          });
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid('block'),
+              flavour: 'affine:database',
+              props: {
+                views: [
+                  {
+                    id: nanoid('block'),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: viewsColumns,
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
                     },
-                  ],
-                  title: {
-                    '$blocksuite:internal:text$': true,
-                    delta: [],
+                    header: {
+                      titleColumn: viewsColumns[0]?.id,
+                      iconColumn: 'type',
+                    },
                   },
+                ],
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
                 },
-                children: [],
+                cells,
+                columns,
               },
-              'children'
-            )
+              children: [],
+            },
+            'children'
+          );
+          context.setNodeContext('affine:table:rowid', Object.keys(cells));
+          context.skipChildren(1);
+          break;
+        }
+        case 'tableRow': {
+          context
+            .openNode({
+              type: 'block',
+              id:
+                (
+                  context.getNodeContext('affine:table:rowid') as Array<string>
+                ).shift() ?? nanoid('block'),
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: this.mdastToDelta(o.node.children[0]),
+                },
+                type: 'text',
+              },
+              children: [],
+            })
             .closeNode();
+          context.skipAllChildren();
           break;
         }
       }
@@ -531,20 +611,24 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context.closeNode();
           break;
         }
+        case 'table': {
+          context.closeNode();
+          break;
+        }
       }
     });
     return walker.walk(markdown, snapshot);
   };
 
-  astToMardown(ast: Root) {
+  private astToMardown(ast: Root) {
     return unified().use(remarkGfm).use(remarkStringify).stringify(ast);
   }
 
-  markdownToAst(markdown: Markdown) {
+  private markdownToAst(markdown: Markdown) {
     return unified().use(remarkParse).use(remarkGfm).parse(markdown);
   }
 
-  deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
+  private deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
     if (depth > 0) {
       deltas.unshift({ insert: ' '.repeat(4).repeat(depth) });
     }
@@ -590,7 +674,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     });
   }
 
-  mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
+  private mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
     switch (ast.type) {
       case 'text': {
         return [{ insert: ast.value }];

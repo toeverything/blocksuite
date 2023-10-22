@@ -129,7 +129,6 @@ export class ASTWalker<ONode extends object, TNode extends object> {
               });
             }
           }
-          this.context._skipChildrenNum = 0;
         } else if (
           this.context._skipChildrenNum === 0 &&
           this._isONode(value)
