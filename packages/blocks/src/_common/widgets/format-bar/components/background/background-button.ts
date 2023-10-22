@@ -10,7 +10,7 @@ import {
 } from '../../../../../_common/icons/index.js';
 import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
 import type { AffineFormatBarWidget } from '../../format-bar.js';
-import { backgroundConfig } from './const.js';
+import { backgroundConfig } from './consts.js';
 
 let lastUsedColor: string | null = null;
 

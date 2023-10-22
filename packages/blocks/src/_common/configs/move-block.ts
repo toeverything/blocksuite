@@ -13,7 +13,7 @@ interface MoveBlockConfig {
   action: (blockElement: BlockElement) => void;
 }
 
-export const moveBlockConfig: MoveBlockConfig[] = [
+export const moveBlockConfigs: MoveBlockConfig[] = [
   {
     name: 'Move Up',
     hotkey: ['Mod-Alt-ArrowUp', 'Mod-Shift-ArrowUp'],

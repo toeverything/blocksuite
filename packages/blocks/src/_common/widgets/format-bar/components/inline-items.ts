@@ -1,7 +1,7 @@
 import { html } from 'lit';
 
-import { formatConfig } from '../../../common/format/config.js';
-import { isFormatSupported } from '../../../common/format/utils.js';
+import { formatConfigs } from '../../../configs/format/format.js';
+import { isFormatSupported } from '../../../configs/format/utils.js';
 import type { AffineFormatBarWidget } from '../format-bar.js';
 import { BackgroundButton } from './background/background-button.js';
 
@@ -14,7 +14,7 @@ export const InlineItems = (formatBar: AffineFormatBarWidget) => {
 
   const backgroundButton = BackgroundButton(formatBar);
 
-  return html`${formatConfig.map(
+  return html`${formatConfigs.map(
       ({ id, name, icon, action, activeWhen }) =>
         html`<icon-button
           size="32px"

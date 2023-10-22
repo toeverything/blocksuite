@@ -12,8 +12,7 @@ import { matchFlavours } from '../../../../_legacy/utils/model.js';
 import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
-import { bracketPairs } from '../../../common/bracket-pairs.js';
-import { formatConfig } from '../../../common/format/config.js';
+import { formatConfigs } from '../../../configs/format/format.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
@@ -23,6 +22,7 @@ import {
   handleRemoveAllIndent,
   handleRemoveAllIndentForMultiBlocks,
 } from '../rich-text-operations.js';
+import { bracketPairs } from './bracket-pairs.js';
 import { hardEnter, onBackspace, onForwardDelete } from './legacy.js';
 
 export const bindContainerHotkey = (blockElement: BlockElement) => {
@@ -399,7 +399,7 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     },
   });
 
-  formatConfig.forEach(config => {
+  formatConfigs.forEach(config => {
     if (!config.hotkey) return;
 
     blockElement.bindHotKey({

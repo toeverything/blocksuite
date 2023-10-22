@@ -40,10 +40,10 @@ import {
 } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import { formatConfig } from '../../common/format/config.js';
-import { paragraphConfig } from '../../common/paragraph-config.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
+import { formatConfigs } from '../../configs/format/format.js';
+import { textEditingConfigs } from '../../configs/text-editing.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -60,7 +60,7 @@ export const menuGroups: {
   {
     name: 'Text',
     items: [
-      ...paragraphConfig
+      ...textEditingConfigs
         .filter(i => i.flavour !== 'affine:list')
         .map<Omit<SlashItem, 'groupName'>>(({ name, icon, flavour, type }) => ({
           name,
@@ -105,7 +105,7 @@ export const menuGroups: {
   },
   {
     name: 'Style',
-    items: formatConfig
+    items: formatConfigs
       .filter(i => !['Link', 'Code'].includes(i.name))
       .map(({ name, icon, id }) => ({
         name,
@@ -132,7 +132,7 @@ export const menuGroups: {
   },
   {
     name: 'List',
-    items: paragraphConfig
+    items: textEditingConfigs
       .filter(i => i.flavour === 'affine:list')
       .map(({ name, icon, flavour, type }) => ({
         name,

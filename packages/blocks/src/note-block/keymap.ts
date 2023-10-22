@@ -3,9 +3,9 @@ import { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-import { actionConfig } from '../_common/common/actions/action-config.js';
-import { moveBlockConfig } from '../_common/common/move-block-config.js';
-import { paragraphConfig } from '../_common/common/paragraph-config.js';
+import { moveBlockConfigs } from '../_common/configs/move-block.js';
+import { quickActionConfig } from '../_common/configs/quick-action/config.js';
+import { textEditingConfigs } from '../_common/configs/text-editing.js';
 import { getBlockElementByModel } from '../_legacy/utils/query.js';
 import {
   getSelectedContentBlockElements,
@@ -23,7 +23,7 @@ import {
   setTextSelectionBySide,
 } from './utils.js';
 
-export const bindHotKey = (blockElement: BlockElement) => {
+export function bindHotKey(blockElement: BlockElement) {
   const root = blockElement.root;
   const selectionManager = blockElement.root.selection;
 
@@ -339,7 +339,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
     },
   });
 
-  actionConfig.forEach(config => {
+  quickActionConfig.forEach(config => {
     if (!config.hotkey) return;
     blockElement.bindHotKey({
       [config.hotkey]: ctx => {
@@ -351,12 +351,10 @@ export const bindHotKey = (blockElement: BlockElement) => {
     });
   });
 
-  paragraphConfig.forEach(config => {
-    if (!config.hotkey) {
-      return;
-    }
+  textEditingConfigs.forEach(item => {
+    if (!item.hotkey) return;
 
-    config.hotkey.forEach(key => {
+    item.hotkey.forEach(key => {
       blockElement.bindHotKey({
         [key]: ctx => {
           ctx.get('defaultState').event.preventDefault();
@@ -368,11 +366,11 @@ export const bindHotKey = (blockElement: BlockElement) => {
 
           const newModels = updateBlockElementType(
             selected,
-            config.flavour,
-            config.type
+            item.flavour,
+            item.type
           );
 
-          if (config.flavour !== 'affine:code') {
+          if (item.flavour !== 'affine:code') {
             return;
           }
 
@@ -398,7 +396,7 @@ export const bindHotKey = (blockElement: BlockElement) => {
     });
   });
 
-  moveBlockConfig.forEach(config => {
+  moveBlockConfigs.forEach(config => {
     config.hotkey.forEach(key => {
       blockElement.bindHotKey({
         [key]: context => {
@@ -408,4 +406,4 @@ export const bindHotKey = (blockElement: BlockElement) => {
       });
     });
   });
-};
+}
