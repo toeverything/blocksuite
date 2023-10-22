@@ -1,5 +1,6 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
+import remarkGfm from 'remark-gfm';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
@@ -337,6 +338,31 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     );
     walker.setEnter(async (o, context) => {
       switch (o.node.type) {
+        case 'code': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:code',
+                props: {
+                  language: o.node.lang,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: o.node.value,
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
         case 'paragraph': {
           context
             .openNode(
@@ -400,7 +426,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               'children'
             )
             .closeNode();
-          context.skip();
+          context.skipAllChildren();
           break;
         }
         case 'list': {
@@ -408,17 +434,87 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'listItem': {
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid('block'),
+              flavour: 'affine:list',
+              props: {
+                type: context.getNodeContext('mdast:list:ordered')
+                  ? 'numbered'
+                  : 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta:
+                    o.node.children[0] &&
+                    o.node.children[0].type === 'paragraph'
+                      ? this.mdastToDelta(o.node.children[0])
+                      : [],
+                },
+                checked: o.node.checked ?? false,
+                collapsed: false,
+              },
+              children: [],
+            },
+            'children'
+          );
+          if (o.node.children[0] && o.node.children[0].type === 'paragraph') {
+            context.skipChildren(1);
+          }
+          break;
+        }
+        case 'thematicBreak': {
           context
             .openNode(
               {
                 type: 'block',
                 id: nanoid('block'),
-                flavour: 'affine:list',
+                flavour: 'affine:divider',
+                props: {},
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'table': {
+          // TODO: add table support
+          const columns = o.node.children[0].children.map(() => {
+            return {
+              id: nanoid('block'),
+              hide: false,
+              width: 180,
+            };
+          });
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:database',
                 props: {
-                  type: context.getNodeContext('mdast:list:ordered')
-                    ? 'numbered'
-                    : 'bulleted',
-                  checked: o.node.checked,
+                  views: [
+                    {
+                      id: nanoid('block'),
+                      name: 'Table View',
+                      mode: 'table',
+                      columns: columns,
+                      filter: {
+                        type: 'group',
+                        op: 'and',
+                        conditions: [],
+                      },
+                      header: {
+                        titleColumn: columns[0].id,
+                        iconColumn: 'type',
+                      },
+                    },
+                  ],
+                  title: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [],
+                  },
                 },
                 children: [],
               },
@@ -429,15 +525,23 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       }
     });
+    walker.setLeave(async (o, context) => {
+      switch (o.node.type) {
+        case 'listItem': {
+          context.closeNode();
+          break;
+        }
+      }
+    });
     return walker.walk(markdown, snapshot);
   };
 
   astToMardown(ast: Root) {
-    return unified().use(remarkStringify).stringify(ast);
+    return unified().use(remarkGfm).use(remarkStringify).stringify(ast);
   }
 
   markdownToAst(markdown: Markdown) {
-    return unified().use(remarkParse).parse(markdown);
+    return unified().use(remarkParse).use(remarkGfm).parse(markdown);
   }
 
   deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
@@ -525,6 +629,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             return delta;
           })
         );
+      }
+      case 'list': {
+        return [];
       }
     }
     return 'children' in ast

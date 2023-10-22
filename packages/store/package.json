@@ -27,6 +27,7 @@
     "merge": "^2.1.1",
     "minimatch": "^9.0.3",
     "nanoid": "^4.0.2",
+    "remark-gfm": "^4.0.0",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",
     "unified": "^11.0.3",

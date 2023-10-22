@@ -98,13 +98,14 @@ export class ASTWalker<ONode extends object, TNode extends object> {
 
   private _visit = async (o: NodeProps<ONode>) => {
     if (!o.node) return;
+    this.context._skipChildrenNum = 0;
+    this.context._skip = false;
 
     if (this._enter) {
       await this._enter(o, this.context);
     }
 
     if (this.context._skip) {
-      this.context._skip = false;
       return;
     }
 
@@ -113,7 +114,11 @@ export class ASTWalker<ONode extends object, TNode extends object> {
 
       if (value && typeof value === 'object') {
         if (Array.isArray(value)) {
-          for (let i = 0; i < value.length; i += 1) {
+          for (
+            let i = this.context._skipChildrenNum;
+            i < value.length;
+            i += 1
+          ) {
             const item = value[i];
             if (item !== null && this._isONode(item)) {
               await this._visit({
@@ -124,7 +129,11 @@ export class ASTWalker<ONode extends object, TNode extends object> {
               });
             }
           }
-        } else if (this._isONode(value)) {
+          this.context._skipChildrenNum = 0;
+        } else if (
+          this.context._skipChildrenNum === 0 &&
+          this._isONode(value)
+        ) {
           await this._visit({
             node: value,
             parent: o.node,
