@@ -13,6 +13,7 @@ import {
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { withTempBlobData } from '@blocksuite/blocks';
+import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { noop, Slot } from '@blocksuite/global/utils';
 import {
@@ -254,6 +255,11 @@ export class EditorContainer
         JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
       );
     }
+  }
+
+  /** @deprecated for testing only */
+  createContentParser() {
+    return new ContentParser(this.page);
   }
 
   override render() {
