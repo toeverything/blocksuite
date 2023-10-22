@@ -1,5 +1,5 @@
 /// <reference types="@blocksuite/global" />
-import * as std from './__internal__/utils/index.js';
+import * as std from './_legacy/utils/index.js';
 
-export * from './__internal__/utils/index.js';
+export * from './_legacy/utils/index.js';
 export default std;

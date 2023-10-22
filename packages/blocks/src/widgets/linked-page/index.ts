@@ -8,13 +8,13 @@ import { WidgetElement } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { customElement } from 'lit/decorators.js';
 
-import { matchFlavours } from '../../__internal__/index.js';
-import { isControlledKeyboardEvent } from '../../__internal__/utils/common.js';
+import { matchFlavours } from '../../_legacy/index.js';
+import { isControlledKeyboardEvent } from '../../_legacy/utils/common.js';
 import {
   getViewportElement,
   getVirgoByModel,
-} from '../../__internal__/utils/query.js';
-import { getCurrentNativeRange } from '../../__internal__/utils/selection.js';
+} from '../../_legacy/utils/query.js';
+import { getCurrentNativeRange } from '../../_legacy/utils/selection.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';
 import { getMenus, type LinkedPageOptions } from './config.js';
 import { LinkedPagePopover } from './linked-page-popover.js';

@@ -5,10 +5,7 @@ import { css, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import {
-  isValidUrl,
-  normalizeUrl,
-} from '../../../../__internal__/utils/url.js';
+import { isValidUrl, normalizeUrl } from '../../../../_legacy/utils/url.js';
 import { createIcon } from '../../../../components/icon/uni-icon.js';
 import { PenIcon } from '../../../../icons/index.js';
 import { BaseCellRenderer } from '../base-cell.js';

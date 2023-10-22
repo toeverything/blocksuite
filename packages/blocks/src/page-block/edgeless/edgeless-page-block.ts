@@ -14,21 +14,17 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
-import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
-import type {
-  EdgelessTool,
-  Point,
-  Selectable,
-} from '../../__internal__/index.js';
+import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
+import { BLOCK_ID_ATTR } from '../../_legacy/consts.js';
+import type { EdgelessTool, Point, Selectable } from '../../_legacy/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   type ReorderingAction,
   type TopLevelBlockModel,
-} from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service/index.js';
-import { listenToThemeChange } from '../../__internal__/theme/utils.js';
+} from '../../_legacy/index.js';
+import { getService } from '../../_legacy/service/index.js';
+import { listenToThemeChange } from '../../_legacy/theme/utils.js';
 import { toast } from '../../components/toast.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';

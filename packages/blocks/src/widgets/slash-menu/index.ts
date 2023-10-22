@@ -13,7 +13,7 @@ import {
   getVirgoByModel,
   isControlledKeyboardEvent,
   matchFlavours,
-} from '../../__internal__/utils/index.js';
+} from '../../_legacy/utils/index.js';
 import type { PageBlockComponent } from '../../page-block/types.js';
 import { isPageComponent } from '../../page-block/utils/guard.js';
 import { getPopperPosition } from '../../page-block/utils/position.js';

@@ -11,12 +11,12 @@ import {
   getBlockElementById,
   getEditorContainer,
   isPageMode,
-} from '../../../__internal__/utils/query.js';
+} from '../../../_legacy/utils/query.js';
 import type {
   EdgelessElement,
   Selectable,
   TopLevelBlockModel,
-} from '../../../__internal__/utils/types.js';
+} from '../../../_legacy/utils/types.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';

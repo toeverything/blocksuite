@@ -3,7 +3,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { type EdgelessTool } from '../../../../../_legacy/index.js';
 import {
   ArrowUpIcon,
   HandIcon,

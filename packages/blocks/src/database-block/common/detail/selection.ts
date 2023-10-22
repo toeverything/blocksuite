@@ -1,4 +1,4 @@
-import type { KanbanCardSelection } from '../../../__internal__/index.js';
+import type { KanbanCardSelection } from '../../../_legacy/index.js';
 import type { KanbanCard } from '../../kanban/card.js';
 import { KanbanCell } from '../../kanban/cell.js';
 import type { RecordDetail } from './detail.js';

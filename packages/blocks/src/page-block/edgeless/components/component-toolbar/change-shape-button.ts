@@ -11,11 +11,8 @@ import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import {
-  LineWidth,
-  type ShapeTool,
-} from '../../../../__internal__/utils/types.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import { LineWidth, type ShapeTool } from '../../../../_legacy/utils/types.js';
 import {
   ChangeShapeIcon,
   GeneralStyleIcon,

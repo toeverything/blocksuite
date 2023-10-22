@@ -18,12 +18,12 @@ import {
   type Selectable,
   sendBackward,
   type TopLevelBlockModel,
-} from '../__internal__/index.js';
+} from '../_legacy/index.js';
 import {
   type CssVariableName,
   isCssVariable,
-} from '../__internal__/theme/css-variables.js';
-import { getThemePropertyValue } from '../__internal__/theme/utils.js';
+} from '../_legacy/theme/css-variables.js';
+import { getThemePropertyValue } from '../_legacy/theme/utils.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';

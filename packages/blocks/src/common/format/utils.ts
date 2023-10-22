@@ -5,7 +5,7 @@ import {
   type VRange,
 } from '@blocksuite/virgo';
 
-import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
+import { BLOCK_ID_ATTR } from '../../_legacy/consts.js';
 import type {
   AffineTextAttributes,
   AffineVEditor,

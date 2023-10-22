@@ -6,7 +6,7 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { matchFlavours } from '../../../../__internal__/index.js';
+import { matchFlavours } from '../../../../_legacy/index.js';
 import {
   CardIcon,
   DualLinkIcon,

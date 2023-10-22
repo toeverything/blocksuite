@@ -6,7 +6,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { Selectable } from '../../__internal__/utils/index.js';
+import type { Selectable } from '../../_legacy/utils/index.js';
 import { RemoteCursor } from '../../icons/edgeless.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import {

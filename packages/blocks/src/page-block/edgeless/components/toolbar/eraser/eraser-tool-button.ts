@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { type EdgelessTool } from '../../../../../_legacy/index.js';
 import { EdgelessEraserIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { getTooltipWithShortcut } from '../../utils.js';

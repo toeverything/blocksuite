@@ -8,7 +8,7 @@ import { html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_legacy/consts.js';
 import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
 import type { RichText } from '../components/rich-text/rich-text.js';
 import { affineAttributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';

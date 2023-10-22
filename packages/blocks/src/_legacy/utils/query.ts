@@ -3,8 +3,8 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
-import { matchFlavours } from '../../__internal__/utils/model.js';
-import { type AbstractEditor } from '../../__internal__/utils/types.js';
+import { matchFlavours } from '../../_legacy/utils/model.js';
+import { type AbstractEditor } from '../../_legacy/utils/types.js';
 import type { Loader } from '../../components/loader.js';
 import type { RichText } from '../../components/rich-text/rich-text.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';

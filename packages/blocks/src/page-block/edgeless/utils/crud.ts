@@ -1,7 +1,4 @@
-import type {
-  Connectable,
-  EdgelessElement,
-} from '../../../__internal__/index.js';
+import type { Connectable, EdgelessElement } from '../../../_legacy/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectable, isNoteBlock } from './query.js';
 

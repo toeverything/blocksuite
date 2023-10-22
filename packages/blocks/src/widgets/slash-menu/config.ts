@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 
-import { getServiceOrRegister } from '../../__internal__/service/index.js';
+import { getServiceOrRegister } from '../../_legacy/service/index.js';
 import {
   createPage,
   getCurrentNativeRange,
@@ -10,8 +10,8 @@ import {
   openFileOrFiles,
   resetNativeSelection,
   uploadImageFromLocal,
-} from '../../__internal__/utils/index.js';
-import { clearMarksOnDiscontinuousInput } from '../../__internal__/utils/virgo.js';
+} from '../../_legacy/utils/index.js';
+import { clearMarksOnDiscontinuousInput } from '../../_legacy/utils/virgo.js';
 import { appendAttachmentBlock } from '../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../bookmark-block/components/bookmark-create-modal.js';
 import { formatConfig } from '../../common/format/config.js';

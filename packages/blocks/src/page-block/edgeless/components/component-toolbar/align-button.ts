@@ -6,7 +6,7 @@ import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessElement } from '../../../../__internal__/index.js';
+import type { EdgelessElement } from '../../../../_legacy/index.js';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,

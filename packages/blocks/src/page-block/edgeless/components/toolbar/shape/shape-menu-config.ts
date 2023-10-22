@@ -1,6 +1,6 @@
 import type { TemplateResult } from 'lit';
 
-import type { ShapeTool } from '../../../../../__internal__/index.js';
+import type { ShapeTool } from '../../../../../_legacy/index.js';
 import {
   DiamondIcon,
   EllipseIcon,

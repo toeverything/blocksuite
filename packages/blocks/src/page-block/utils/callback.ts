@@ -5,7 +5,7 @@ import { type BaseBlockModel } from '@blocksuite/store';
 import {
   asyncGetBlockElementByModel,
   asyncGetRichTextByModel,
-} from '../../__internal__/utils/query.js';
+} from '../../_legacy/utils/query.js';
 import type { RichText } from '../../components/rich-text/rich-text.js';
 
 export async function onModelTextUpdated(

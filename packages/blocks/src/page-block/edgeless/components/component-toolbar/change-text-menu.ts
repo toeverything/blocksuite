@@ -7,7 +7,7 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
 import {
   BoldIcon,
   FontFamilyIcon,

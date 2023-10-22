@@ -11,7 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import type {
   EdgelessTool,
   ShapeToolState,
-} from '../../../../../__internal__/index.js';
+} from '../../../../../_legacy/index.js';
 import {
   diamondSvg,
   ellipseSvg,

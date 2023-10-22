@@ -15,7 +15,7 @@ import { html } from 'lit/static-html.js';
 import type {
   DataViewSelection,
   DataViewSelectionState,
-} from '../__internal__/index.js';
+} from '../_legacy/index.js';
 import { renderUniLit } from '../components/uni-component/uni-component.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCommonStyle } from './common/css-variable.js';

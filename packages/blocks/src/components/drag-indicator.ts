@@ -2,7 +2,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type Rect } from '../__internal__/index.js';
+import { type Rect } from '../_legacy/index.js';
 
 @customElement('affine-drag-indicator')
 export class DragIndicator extends LitElement {

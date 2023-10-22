@@ -7,12 +7,9 @@ import JSZip from 'jszip';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 
-import { ContentParser } from '../../../__internal__/content-parser/index.js';
-import type { SerializedBlock } from '../../../__internal__/utils/index.js';
-import {
-  createPage,
-  openFileOrFiles,
-} from '../../../__internal__/utils/index.js';
+import { ContentParser } from '../../../_legacy/content-parser/index.js';
+import type { SerializedBlock } from '../../../_legacy/utils/index.js';
+import { createPage, openFileOrFiles } from '../../../_legacy/utils/index.js';
 import { REFERENCE_NODE } from '../../../components/rich-text/consts.js';
 import { columnManager } from '../../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../../database-block/common/columns/rich-text/define.js';

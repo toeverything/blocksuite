@@ -1,7 +1,7 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type { ConnectorTool } from '../../../../__internal__/index.js';
+import type { ConnectorTool } from '../../../../_legacy/index.js';
 import {
   type Connection,
   type ConnectorElement,

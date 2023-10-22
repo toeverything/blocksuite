@@ -9,7 +9,7 @@ import {
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../../_legacy/index.js';
 import {
   Bound,
   PhasorElementType,

@@ -9,8 +9,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { LineWidth } from '../../../../__internal__/utils/types.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import { LineWidth } from '../../../../_legacy/utils/types.js';
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,

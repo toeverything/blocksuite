@@ -6,8 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   type EdgelessTool,
   stopPropagation,
-} from '../../../../__internal__/index.js';
-import { clamp } from '../../../../__internal__/utils/math.js';
+} from '../../../../_legacy/index.js';
+import { clamp } from '../../../../_legacy/utils/math.js';
 import { MinusIcon, PlusIcon, ViewBarIcon } from '../../../../icons/index.js';
 import {
   ZOOM_MAX,

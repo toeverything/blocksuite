@@ -14,11 +14,7 @@ import {
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  AbstractEditor,
-  EditingState,
-  Rect,
-} from '../__internal__/index.js';
+import type { AbstractEditor, EditingState, Rect } from '../_legacy/index.js';
 import {
   calcDropTarget,
   type DroppingType,
@@ -29,7 +25,7 @@ import {
   getModelByBlockElement,
   isPageMode,
   Point,
-} from '../__internal__/index.js';
+} from '../_legacy/index.js';
 import {
   BlockHubIcon,
   BlockHubRoundedRectangleIcon,

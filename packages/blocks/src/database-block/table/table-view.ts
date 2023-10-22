@@ -8,7 +8,7 @@ import { css } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { TableViewSelection } from '../../__internal__/index.js';
+import type { TableViewSelection } from '../../_legacy/index.js';
 import { popMenu } from '../../components/menu/index.js';
 import { renderUniLit } from '../../components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../icons/index.js';

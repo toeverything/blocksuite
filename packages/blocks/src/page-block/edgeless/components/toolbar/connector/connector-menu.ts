@@ -7,8 +7,8 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   type EdgelessTool,
   type LineWidth,
-} from '../../../../../__internal__/index.js';
-import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
+} from '../../../../../_legacy/index.js';
+import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,

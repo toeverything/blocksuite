@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   getRichTextByModel,
   isControlledKeyboardEvent,
-} from '../../__internal__/utils/index.js';
+} from '../../_legacy/utils/index.js';
 import {
   cleanSpecifiedTail,
   createKeydownObserver,

@@ -6,7 +6,7 @@ import {
   hasClassNameInList,
   type NoteTool,
   queryCurrentMode,
-} from '../../../../__internal__/index.js';
+} from '../../../../_legacy/index.js';
 import {
   DEFAULT_NOTE_WIDTH,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
