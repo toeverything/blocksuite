@@ -1,7 +1,7 @@
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { BLOCK_ID_ATTR } from '../__internal__/consts.js';
+import { BLOCK_ID_ATTR } from '../_legacy/consts.js';
 import type { SurfaceBlockComponent } from '../index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';

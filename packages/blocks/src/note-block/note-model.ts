@@ -1,7 +1,7 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { NOTE_WIDTH } from '../__internal__/consts.js';
-import type { CssVariableName } from '../__internal__/theme/css-variables.js';
+import type { CssVariableName } from '../_common/theme/css-variables.js';
+import { NOTE_WIDTH } from '../_legacy/consts.js';
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {

@@ -1,4 +1,4 @@
-import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import { createUniComponentFromWebComponent } from '../../../_common/components/uni-component/uni-component.js';
 import { tNumber, tString, tTag } from '../../logical/data-type.js';
 import { isTArray, tArray } from '../../logical/typesystem.js';
 import { groupByMatcher } from './matcher.js';

@@ -6,12 +6,12 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { matchFlavours } from '../../../../__internal__/index.js';
 import {
   CardIcon,
   DualLinkIcon,
   HiddenCardIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import { matchFlavours } from '../../../../_legacy/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { Bound } from '../../../../surface-block/index.js';
 import {

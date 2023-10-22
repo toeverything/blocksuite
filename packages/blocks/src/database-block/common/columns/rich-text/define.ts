@@ -1,8 +1,8 @@
 import type { Text } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 
-import { getTagColor } from '../../../../components/tags/colors.js';
-import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
+import { getTagColor } from '../../../../_common/components/tags/colors.js';
+import type { SelectTag } from '../../../../_common/components/tags/multi-tag-select.js';
 import { tRichText } from '../../../logical/data-type.js';
 import { columnManager } from '../manager.js';
 import { multiSelectColumnTypeName } from '../multi-select/define.js';

@@ -3,8 +3,8 @@ import { computePosition } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/index.js';
-import { MoreIcon } from '../../../../icons/index.js';
+import { MoreIcon } from '../../../../_common/icons/index.js';
+import { stopPropagation } from '../../../../_legacy/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { EdgelessZoomToolbar } from './zoom-tool-bar.js';
 

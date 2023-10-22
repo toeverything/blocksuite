@@ -5,15 +5,15 @@ import { classMap } from 'lit/directives/class-map.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../../components/menu/index.js';
-import { renderUniLit } from '../../../components/uni-component/uni-component.js';
+import { popMenu } from '../../../_common/components/menu/index.js';
+import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
 import {
   DatabaseDuplicate,
   DatabaseMoveLeft,
   DatabaseMoveRight,
   DeleteIcon,
   TextIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,

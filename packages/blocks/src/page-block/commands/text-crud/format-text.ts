@@ -2,9 +2,9 @@ import type { Command, TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
-import { clearMarksOnDiscontinuousInput } from '../../../__internal__/utils/virgo.js';
-import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../common/format/constant.js';
-import type { AffineTextAttributes } from '../../../components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
+import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
+import { clearMarksOnDiscontinuousInput } from '../../../_legacy/utils/virgo.js';
 import type { Flavour } from '../../../models.js';
 import { getSelectedContentBlockElements } from '../../utils/selection.js';
 

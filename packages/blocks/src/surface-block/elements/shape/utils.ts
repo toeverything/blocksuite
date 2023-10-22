@@ -13,7 +13,7 @@ import {
   getTextWidth,
   wrapText,
 } from '../text/utils.js';
-import { type GeneralShapeOptions, SHAPE_TEXT_PADDING } from './constants.js';
+import { type GeneralShapeOptions, SHAPE_TEXT_PADDING } from './consts.js';
 import type { ShapeElement } from './shape-element.js';
 import type { ShapeType } from './types.js';
 

@@ -2,7 +2,7 @@ import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { numberPureColumnConfig } from './define.js';

@@ -2,7 +2,7 @@
 
 import { expect } from '@playwright/test';
 
-import { NOTE_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../packages/blocks/src/_legacy/consts.js';
 import { assertExists } from '../../packages/global/src/utils.js';
 import {
   createShapeElement,
@@ -12,7 +12,6 @@ import {
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
-  getEdgelessSelectedRectModel,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
@@ -27,7 +26,6 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
-  click,
   clickView,
   dragBetweenCoords,
   enterPlaygroundRoom,

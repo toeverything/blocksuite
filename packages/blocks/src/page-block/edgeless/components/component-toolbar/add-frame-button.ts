@@ -4,7 +4,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AddFrameButtonIcon } from '../../../../icons/index.js';
+import { AddFrameButtonIcon } from '../../../../_common/icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-add-frame-button')

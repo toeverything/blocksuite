@@ -1,6 +1,6 @@
 import { assertExists, Slot } from '@blocksuite/global/utils';
 
-import type { IPoint } from '../../../../__internal__/utils/types.js';
+import type { IPoint } from '../../../../_legacy/utils/types.js';
 import {
   Bound,
   getQuadBoundsWithRotation,

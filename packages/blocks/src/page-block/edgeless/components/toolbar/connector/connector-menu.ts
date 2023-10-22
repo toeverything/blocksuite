@@ -5,15 +5,15 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
-  type EdgelessTool,
-  type LineWidth,
-} from '../../../../../__internal__/index.js';
-import type { CssVariableName } from '../../../../../__internal__/theme/css-variables.js';
-import {
   ConnectorCWithArrowIcon,
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
-} from '../../../../../icons/index.js';
+} from '../../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
+import {
+  type EdgelessTool,
+  type LineWidth,
+} from '../../../../../_legacy/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';

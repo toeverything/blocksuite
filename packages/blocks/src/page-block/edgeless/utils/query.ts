@@ -7,7 +7,7 @@ import {
   type EdgelessTool,
   type Selectable,
   type TopLevelBlockModel,
-} from '../../../__internal__/index.js';
+} from '../../../_legacy/index.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';

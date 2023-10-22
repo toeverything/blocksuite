@@ -1,11 +1,8 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 
-import type {
-  BrushTool,
-  EdgelessTool,
-} from '../../../../__internal__/index.js';
-import { LineWidth } from '../../../../__internal__/index.js';
+import type { BrushTool, EdgelessTool } from '../../../../_legacy/index.js';
+import { LineWidth } from '../../../../_legacy/index.js';
 import {
   type IVec,
   PhasorElementType,

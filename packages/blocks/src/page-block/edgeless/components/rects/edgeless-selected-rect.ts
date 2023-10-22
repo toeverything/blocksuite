@@ -8,11 +8,8 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import type {
-  IPoint,
-  Selectable,
-} from '../../../../__internal__/utils/types.js';
+import { stopPropagation } from '../../../../_legacy/utils/event.js';
+import type { IPoint, Selectable } from '../../../../_legacy/utils/types.js';
 import {
   normalizeTextBound,
   PhasorElementType,

@@ -8,7 +8,7 @@ import {
   type NoteChildrenFlavour,
   Point,
   type TopLevelBlockModel,
-} from '../../../__internal__/index.js';
+} from '../../../_legacy/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { DEFAULT_NOTE_WIDTH } from './consts.js';
 

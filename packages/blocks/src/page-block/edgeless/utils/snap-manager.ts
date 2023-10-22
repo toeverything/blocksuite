@@ -1,5 +1,5 @@
-import { Point } from '../../../__internal__/utils/rect.js';
-import type { Alignable } from '../../../__internal__/utils/types.js';
+import { Point } from '../../../_legacy/utils/rect.js';
+import type { Alignable } from '../../../_legacy/utils/types.js';
 import {
   Bound,
   deserializeXYWH,
