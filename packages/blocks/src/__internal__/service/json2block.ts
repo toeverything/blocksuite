@@ -2,12 +2,11 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
 
 import { handleBlockSplit } from '../../components/rich-text/rich-text-operations.js';
 import {
-  asyncGetVirgoByModel,
-  getPageBlock,
+  asyncGetBlockElementByModel,
+  asyncSetVRange,
   type SerializedBlock,
 } from '../utils/index.js';
 import type { BlockModels } from '../utils/model.js';
@@ -160,7 +159,7 @@ export async function json2block(
     !shouldMergeFirstBlock &&
     (!isSinglePastedBlock || firstBlock.children.length > 0)
   ) {
-    setRange(focusedBlockModel, {
+    asyncSetVRange(focusedBlockModel, {
       index: textRangePoint.index,
       length: 0,
     });
@@ -175,7 +174,7 @@ export async function json2block(
       firstBlock?.text?.reduce((sum, data) => {
         return sum + (data.insert?.length || 0);
       }, 0) ?? 0;
-    setRange(focusedBlockModel, {
+    asyncSetVRange(focusedBlockModel, {
       index: (textRangePoint.index ?? 0) + textLength,
       length: 0,
     });
@@ -183,43 +182,27 @@ export async function json2block(
   }
 
   if (lastMergedModel?.text) {
-    requestAnimationFrame(() => {
-      lastMergedModel &&
-        setRange(lastMergedModel, {
-          index: lastMergedModelRangeIndex || 0,
-          length: 0,
-        });
+    asyncSetVRange(lastMergedModel, {
+      index: lastMergedModelRangeIndex ?? 0,
+      length: 0,
     });
   } else {
-    requestAnimationFrame(() => {
-      if (lastMergedModel) {
-        const lastMergedBlock = getPageBlock(lastMergedModel);
-        if (!lastMergedBlock) {
-          return;
+    if (lastMergedModel) {
+      asyncGetBlockElementByModel(lastMergedModel).then(element => {
+        if (element) {
+          const selectionManager = element.root.selection;
+          const blockSelection = selectionManager?.getInstance('block', {
+            path: element.path ?? [],
+          });
+          selectionManager.set([blockSelection]);
         }
-        const selectionManager = lastMergedBlock.root.selection;
-        const blockSelection = selectionManager?.getInstance('block', {
-          path: lastMergedBlock.path ?? [],
-        });
-        selectionManager.set([blockSelection]);
-      }
-    });
+      });
+    }
   }
 
   if (isFocusedBlockEmpty && !shouldMergeFirstBlock) {
     page.deleteBlock(focusedBlockModel);
   }
-}
-
-async function setRange(model: BaseBlockModel, vRange: VRange) {
-  const vEditor = await asyncGetVirgoByModel(model);
-  if (!vEditor) {
-    return;
-  }
-
-  vEditor.setVRange(vRange);
-  // mount new dom range in this trick
-  vEditor.syncVRange();
 }
 
 export async function addSerializedBlocks(

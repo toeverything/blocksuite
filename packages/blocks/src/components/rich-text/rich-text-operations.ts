@@ -174,14 +174,25 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     // Bottom, can not indent, do nothing
     return;
   }
+  const nextSiblings = page.getNextSiblings(model);
 
   page.captureSync();
   page.moveBlocks([model], previousSibling);
 
+  // update list prefix
   if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
     page.updateBlock(model, {});
   }
+  nextSiblings
+    .filter(
+      sibling =>
+        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
+    )
+    .forEach(sibling => {
+      page.updateBlock(sibling, {});
+    });
 
+  // update collapsed state
   if (
     matchFlavours(previousSibling, ['affine:list']) &&
     previousSibling.collapsed
@@ -254,9 +265,11 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
   page.captureSync();
 
   const nextSiblings = page.getNextSiblings(model);
+  const parentNextSiblings = page.getNextSiblings(parent);
   page.moveBlocks(nextSiblings, model);
   page.moveBlocks([model], grandParent, parent, false);
 
+  // update list prefix
   if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
     page.updateBlock(model, {});
   }
@@ -265,6 +278,14 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
       page.updateBlock(child, {});
     }
   });
+  parentNextSiblings
+    .filter(
+      sibling =>
+        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
+    )
+    .forEach(sibling => {
+      page.updateBlock(sibling, {});
+    });
 
   asyncSetVRange(model, { index: offset, length: 0 });
 }
