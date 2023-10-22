@@ -9,7 +9,7 @@ import { fineTuneHmr } from './fine-tune';
 
 const customLitPath = path.resolve(
   __dirname,
-  '../../../blocks/src/__internal__/index.js'
+  '../../../blocks/src/_legacy/index.js'
 );
 
 const include = ['../blocks/src/**/*'];

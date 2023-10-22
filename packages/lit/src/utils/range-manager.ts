@@ -133,7 +133,11 @@ export class RangeManager {
       return [];
     }
 
-    const firstElement = range.startContainer.parentElement?.closest(
+    const rangeStartElement =
+      range.startContainer instanceof Element
+        ? range.startContainer
+        : range.startContainer.parentElement;
+    const firstElement = rangeStartElement?.closest(
       `[${this.root.blockIdAttr}]`
     );
     assertExists(firstElement);

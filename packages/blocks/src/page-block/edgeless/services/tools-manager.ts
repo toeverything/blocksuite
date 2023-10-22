@@ -17,7 +17,7 @@ import {
   isPinchEvent,
   Point,
   type Selectable,
-} from '../../../__internal__/index.js';
+} from '../../../_common/utils/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
 import { BrushToolController } from '../controllers/tools/brush-tool.js';
 import { ConnectorToolController } from '../controllers/tools/connector-tool.js';

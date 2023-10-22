@@ -5,9 +5,9 @@ import { css, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
+import { RenameIcon } from '../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
-import { RenameIcon } from '../../../../icons/edgeless.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import { mountFrameEditor } from '../../utils/text.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';

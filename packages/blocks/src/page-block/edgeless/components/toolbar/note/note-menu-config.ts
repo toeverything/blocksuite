@@ -1,10 +1,10 @@
 import type { TemplateResult } from 'lit';
 
-import type { NoteChildrenFlavour } from '../../../../../__internal__/index.js';
 import {
   BLOCKHUB_LIST_ITEMS,
   BLOCKHUB_TEXT_ITEMS,
-} from '../../../../../components/block-hub.js';
+} from '../../../../../_common/components/block-hub.js';
+import type { NoteChildrenFlavour } from '../../../../../_common/utils/index.js';
 
 export const BUTTON_GROUP_LENGTH = 10;
 

@@ -1,4 +1,4 @@
-import { map } from '../../../components/uni-component/operation.js';
+import { map } from '../../../_common/components/uni-component/operation.js';
 import type { CellRenderProps } from '../../common/columns/manager.js';
 import { createFromBaseCellRenderer } from '../../common/columns/renderer.js';
 import {

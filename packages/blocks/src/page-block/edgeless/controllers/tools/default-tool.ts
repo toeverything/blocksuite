@@ -2,14 +2,14 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockClipboardInfo } from '../../../../__internal__/clipboard/index.js';
 import {
   type DefaultTool,
   handleNativeRangeAtPoint,
   resetNativeSelection,
   type Selectable,
   type TopLevelBlockModel,
-} from '../../../../__internal__/index.js';
+} from '../../../../_common/utils/index.js';
+import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';

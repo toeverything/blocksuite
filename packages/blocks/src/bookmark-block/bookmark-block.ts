@@ -10,12 +10,12 @@ import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
-import { stopPropagation } from '../__internal__/utils/event.js';
-import { queryCurrentMode } from '../__internal__/utils/query.js';
-import { HoverController } from '../components/index.js';
-import { WebIcon16 } from '../icons/text.js';
-import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
-import { captureEventTarget } from '../widgets/drag-handle/utils.js';
+import { HoverController } from '../_common/components/index.js';
+import { WebIcon16 } from '../_common/icons/text.js';
+import { stopPropagation } from '../_common/utils/event.js';
+import { getThemeMode } from '../_common/utils/query.js';
+import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
+import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
 import {
   type BookmarkBlockModel,
   BookmarkBlockSchema,
@@ -379,7 +379,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
 
   override render() {
     const { url } = this.model;
-    const mode = queryCurrentMode();
+    const mode = getThemeMode();
 
     const createModal = this._showCreateModal
       ? html`<bookmark-create-modal

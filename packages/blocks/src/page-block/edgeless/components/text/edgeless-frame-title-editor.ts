@@ -4,8 +4,8 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { getBlockElementById } from '../../../../__internal__/index.js';
-import type { RichText } from '../../../../components/rich-text/rich-text.js';
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import { getBlockElementById } from '../../../../_common/utils/index.js';
 import type {
   FrameBlockComponent,
   FrameBlockModel,

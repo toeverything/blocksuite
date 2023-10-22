@@ -3,7 +3,7 @@ import { assertEquals, assertExists } from '@blocksuite/global/utils';
 import {
   type Connectable,
   type Selectable,
-} from '../../__internal__/utils/types.js';
+} from '../../_common/utils/types.js';
 import type { PhasorElementType } from '../../surface-block/index.js';
 import {
   almostEqual,

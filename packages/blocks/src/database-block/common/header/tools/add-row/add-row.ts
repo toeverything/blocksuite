@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { PlusIcon } from '../../../../../icons/index.js';
+import { PlusIcon } from '../../../../../_common/icons/index.js';
 import type { InsertToPosition } from '../../../../types.js';
 import { startDrag } from '../../../../utils/drag.js';
 import { BaseTool } from '../base-tool.js';
