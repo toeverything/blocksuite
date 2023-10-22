@@ -175,67 +175,51 @@ export function handleBlockSplit(
 }
 
 /**
- * Move down
  * @example
- * ```
- * [ ]
- *  └─ [ ]
- * [x]     <- tab
- *  └─ [ ]
+ * before unindent:
+ * - aaa
+ *   - bbb
+ * - ccc|
+ *   - ddd
+ *   - eee
  *
- * ↓
- *
- * [ ]
- *  ├─ [ ]
- *  ├─ [x] <-
- *  └─ [ ]
- * ```
+ * after unindent:
+ * - aaa
+ *   - bbb
+ *   - ccc|
+ *     - ddd
+ *     - eee
  */
 export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
   const previousSibling = page.getPreviousSibling(model);
-  const nextSibling = page.getNextSibling(model);
   if (!previousSibling || !supportsChildren(previousSibling)) {
     // Bottom, can not indent, do nothing
     return;
   }
+  const nextSiblings = page.getNextSiblings(model);
 
-  const parent = page.getParent(model);
-  if (!parent) return;
   page.captureSync();
+  page.moveBlocks([model], previousSibling);
 
-  // 1. backup target block children and remove them from target block
-  const children = model.children;
-  page.updateBlock(model, {
-    children: [],
-  });
-
-  // 2. remove target block from parent block
-  page.updateBlock(parent, {
-    children: parent.children.filter(child => child.id !== model.id),
-  });
-
-  // 3. append target block and children to previous sibling block
-  page.updateBlock(previousSibling, {
-    children: [...previousSibling.children, model, ...children],
-  });
-
-  // 4. If the target block is a numbered list, update the prefix of next siblings
+  // update list prefix
   if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-    let next = nextSibling;
-    while (
-      next &&
-      matchFlavours(next, ['affine:list']) &&
-      model.type === 'numbered'
-    ) {
-      page.updateBlock(next, {});
-      next = page.getNextSibling(next);
-    }
+    page.updateBlock(model, {});
   }
+  nextSiblings
+    .filter(
+      sibling =>
+        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
+    )
+    .forEach(sibling => {
+      page.updateBlock(sibling, {});
+    });
 
-  // 5. If parent is collapsed, expand it
-  const newParent = previousSibling;
-  if (matchFlavours(newParent, ['affine:list']) && newParent.collapsed) {
-    page.updateBlock(newParent, {
+  // update collapsed state
+  if (
+    matchFlavours(previousSibling, ['affine:list']) &&
+    previousSibling.collapsed
+  ) {
+    page.updateBlock(previousSibling, {
       collapsed: false,
     } as Partial<ListBlockModel>);
   }
@@ -270,116 +254,68 @@ export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
     // When parent is in the `indentModels`, it means the parent has been indented
     // And the model should be indented with its parent
     if (!indentModels.includes(parent)) {
-      previousSibling = page.getPreviousSibling(model);
-      // If previous sibling is not found or does not support children
-      // Handle next model
-      if (!previousSibling || !supportsChildren(previousSibling)) {
-        return;
-      }
-      // If previous sibling is found and supports children, indent the model by following steps
-      // 1. Remove model from parent
-      const remainingChildren = parent.children.filter(
-        child => child.id !== model.id
-      );
-      page.updateBlock(parent, {
-        children: remainingChildren,
-      });
-      // 2. Add model to previous sibling
-      page.updateBlock(previousSibling as BaseBlockModel, {
-        children: [...(previousSibling as BaseBlockModel).children, model],
-      });
-
-      asyncSetVRange(model, { index: 0, length: 0 });
+      handleIndent(page, model);
     }
   });
 }
 
 /**
- * Move up
  * @example
- * ```
- * [ ]
- *  ├─ [ ]
- *  ├─ [x] <- shift + tab
- *  └─ [ ]
+ * before unindent:
+ * - aaa
+ *   - bbb
+ *   - ccc|
+ *     - ddd
+ *   - eee
  *
- * ↓
- *
- * [ ]
- *  └─ [ ]
- * [x]     <-
- *  └─ [ ]
- * ```
- * Refer to https://github.com/toeverything/AFFiNE/blob/b59b010decb9c5decd9e3090f1a417696ce86f54/libs/components/editor-blocks/src/utils/indent.ts#L23-L122
+ * after unindent:
+ * - aaa
+ *   - bbb
+ * - ccc|
+ *   - ddd
+ *   - eee
  */
-export function handleOutdent(
-  page: Page,
-  model: ExtendedModel,
-  offset = 0,
-  capture = true
-) {
+export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
   const parent = page.getParent(model);
-  if (!parent || matchFlavours(parent, ['affine:note'])) {
-    // Topmost, do nothing
+  if (!parent || parent.role !== 'content') {
+    // Top most, can not unindent, do nothing
     return;
   }
 
   const grandParent = page.getParent(parent);
   if (!grandParent) return;
-  // TODO: need better solution
-  if (capture) {
-    page.captureSync();
-  }
+  page.captureSync();
 
-  // 1. save child blocks of the parent block
-  const previousSiblings = page.getPreviousSiblings(model);
   const nextSiblings = page.getNextSiblings(model);
+  const parentNextSiblings = page.getNextSiblings(parent);
+  page.moveBlocks(nextSiblings, model);
+  page.moveBlocks([model], grandParent, parent, false);
 
-  // 2. remove all child blocks after the target block from the parent block
-  page.updateBlock(parent, {
-    children: previousSiblings,
-  });
-
-  // 3. insert target block to the grand block
-  const index = grandParent.children.indexOf(parent);
-  page.updateBlock(grandParent, {
-    children: [
-      ...grandParent.children.slice(0, index + 1),
-      model,
-      ...grandParent.children.slice(index + 1),
-    ],
-  });
-
-  // 4. append child blocks after the target block to the target block
-  page.updateBlock(model, {
-    children: [...model.children, ...nextSiblings],
-  });
-
-  // 5. If the target block is a numbered list, update the prefix of next siblings
-  const nextSibling = page.getNextSibling(model);
+  // update list prefix
   if (matchFlavours(model, ['affine:list']) && model.type === 'numbered') {
-    let next = nextSibling;
-    while (
-      next &&
-      matchFlavours(next, ['affine:list']) &&
-      model.type === 'numbered'
-    ) {
-      page.updateBlock(next, {});
-      next = page.getNextSibling(next);
-    }
+    page.updateBlock(model, {});
   }
+  model.children.forEach(child => {
+    if (matchFlavours(child, ['affine:list']) && child.type === 'numbered') {
+      page.updateBlock(child, {});
+    }
+  });
+  parentNextSiblings
+    .filter(
+      sibling =>
+        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
+    )
+    .forEach(sibling => {
+      page.updateBlock(sibling, {});
+    });
 
-  // FIXME: wait a microtask is a workaround. Prevent query legacy DOM before the DOM is updated
-  // Fix https://github.com/toeverything/blocksuite/pull/3770
-  Promise.resolve().then(() =>
-    asyncSetVRange(model, { index: offset, length: 0 })
-  );
+  asyncSetVRange(model, { index: offset, length: 0 });
 }
 
 export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
   if (!models.length) return;
 
-  // Find the first model that can be outdented
+  // Find the first model that can be unindented
   let firstOutdentIndex = -1;
   let firstParent: BaseBlockModel | null;
   for (let i = 0; i < models.length; i++) {
@@ -390,18 +326,18 @@ export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
     }
   }
 
-  // Find all the models that can be outdented
+  // Find all the models that can be unindented
   const outdentModels = models.slice(firstOutdentIndex);
   // Form bottom to top
   // Only outdent the models which parent is not in the outdentModels
   // When parent is in the outdentModels
-  // It means that children will be outdented with their parent
+  // It means that children will be unindented with their parent
   for (let i = outdentModels.length - 1; i >= 0; i--) {
     const model = outdentModels[i];
     const parent = page.getParent(model);
     assertExists(parent);
     if (!outdentModels.includes(parent)) {
-      handleOutdent(page, model);
+      handleUnindent(page, model);
     }
   }
 }
@@ -413,7 +349,7 @@ export function handleRemoveAllIndent(
 ) {
   let parent = page.getParent(model);
   while (parent && !matchFlavours(parent, ['affine:note'])) {
-    handleOutdent(page, model, offset);
+    handleUnindent(page, model, offset);
     parent = page.getParent(model);
   }
 }
@@ -692,7 +628,7 @@ function handleParagraphBlockBackspace(page: Page, model: ExtendedModel) {
   // - line1
   //   - line2
   // - |aaa
-  handleOutdent(page, model);
+  handleUnindent(page, model);
   return true;
 }
 

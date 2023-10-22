@@ -247,59 +247,22 @@ export function getBlockElementByModel(
   );
 }
 
-export function asyncGetBlockElementByModel(
+export async function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
   const pageElement = getPageBlock(model);
-  if (!pageElement) return Promise.resolve(null);
+  if (!pageElement) return null;
+  await pageElement.updateComplete;
 
   if (model.id === model.page.root.id) {
-    return Promise.resolve(pageElement);
+    return pageElement;
   }
 
-  let resolved = false;
-  return new Promise<BlockComponentElement>((resolve, reject) => {
-    const onSuccess = (element: BlockComponentElement) => {
-      resolved = true;
-      observer.disconnect();
-      resolve(element);
-    };
-
-    const onFail = () => {
-      observer.disconnect();
-      reject(
-        new Error(
-          `Cannot find block element by model: ${model.flavour} id: ${model.id}`
-        )
-      );
-    };
-
-    const observer = new MutationObserver(() => {
-      const blockElement = pageElement.querySelector<BlockComponentElement>(
-        `[${ATTR}="${model.id}"]`
-      );
-      if (blockElement) {
-        onSuccess(blockElement);
-      }
-    });
-
-    observer.observe(pageElement, {
-      childList: true,
-      subtree: true,
-    });
-
-    requestAnimationFrame(() => {
-      if (!resolved) {
-        const blockElement = getBlockElementByModel(model);
-        if (blockElement) {
-          onSuccess(blockElement);
-        } else {
-          onFail();
-        }
-      }
-    });
-  });
+  const blockElement = pageElement.querySelector<BlockComponentElement>(
+    `[${ATTR}="${model.id}"]`
+  );
+  return blockElement;
 }
 
 /**
