@@ -128,13 +128,12 @@ async function initEmptyEditor({
           return editor;
         };
         const editor = createEditor();
-        if (multiEditor) {
-          createEditor();
-        }
+        if (multiEditor) createEditor();
+
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
-        debugMenu.contentParser = editor.createContentParser();
+        debugMenu.contentParser = new window.ContentParser(page);
         document.body.appendChild(debugMenu);
         window.debugMenu = debugMenu;
         window.editor = editor;
