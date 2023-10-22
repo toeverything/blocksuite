@@ -10,7 +10,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { HiddenIcon, NoteIcon } from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { matchFlavours } from '../../../../_legacy/utils/model.js';
 import {
   NOTE_COLORS,

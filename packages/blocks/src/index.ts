@@ -13,14 +13,14 @@ import './database-block/index.js';
 
 export * from './_common/components/index.js';
 export * from './_common/test-utils/test-utils.js';
+export type { CssVariableName } from './_common/theme/css-variables.js';
+export * from './_common/theme/css-variables.js';
+export * from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
 export * from './_common/widgets/index.js';
 export * from './_legacy/consts.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';
 export type { BaseService } from './_legacy/service/service.js';
-export type { CssVariableName } from './_legacy/theme/css-variables.js';
-export * from './_legacy/theme/css-variables.js';
-export * from './_legacy/theme/theme-observer.js';
 export * from './_legacy/utils/common-operations.js';
 export * from './_legacy/utils/filesys.js';
 export * from './_legacy/utils/query.js';

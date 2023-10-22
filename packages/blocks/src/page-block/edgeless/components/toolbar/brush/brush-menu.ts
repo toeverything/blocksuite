@@ -6,8 +6,8 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
+import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import type { EdgelessTool, LineWidth } from '../../../../../_legacy/index.js';
-import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
 import type { LineWidthEvent } from '../../panel/line-width-panel.js';

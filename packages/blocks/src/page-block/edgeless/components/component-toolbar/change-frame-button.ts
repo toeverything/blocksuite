@@ -6,7 +6,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
 import { RenameIcon } from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import { mountFrameEditor } from '../../utils/text.js';

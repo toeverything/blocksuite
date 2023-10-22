@@ -4,7 +4,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { TransparentIcon } from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { queryCurrentMode } from '../../../../_legacy/utils/query.js';
 
 export class ColorEvent extends Event {

@@ -18,7 +18,7 @@ import {
   ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
 } from '../../../../_common/icons/index.js';
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { LineWidth, type ShapeTool } from '../../../../_legacy/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {

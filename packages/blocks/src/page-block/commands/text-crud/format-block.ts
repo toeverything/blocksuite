@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
-import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/format/consts.js';
+import { FORMAT_BLOCK_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import type { Flavour } from '../../../models.js';
 import { getSelectedContentBlockElements } from '../../utils/selection.js';
 

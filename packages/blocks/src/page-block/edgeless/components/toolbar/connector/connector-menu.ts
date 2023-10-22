@@ -9,11 +9,11 @@ import {
   ConnectorLWithArrowIcon,
   ConnectorXWithArrowIcon,
 } from '../../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
 import {
   type EdgelessTool,
   type LineWidth,
 } from '../../../../../_legacy/index.js';
-import type { CssVariableName } from '../../../../../_legacy/theme/css-variables.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { ColorEvent } from '../../panel/color-panel.js';
