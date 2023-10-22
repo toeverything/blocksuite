@@ -5,14 +5,14 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../__internal__/consts.js';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_legacy/consts.js';
 import {
   getBlockElementByModel,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
-} from '../../../../__internal__/index.js';
-import { almostEqual } from '../../../../__internal__/utils/math.js';
+} from '../../../../_legacy/index.js';
+import { almostEqual } from '../../../../_legacy/utils/math.js';
 import type {
   EdgelessPageBlockComponent,
   NoteBlockComponent,
@@ -26,7 +26,7 @@ import {
 import {
   DefaultModeDragType,
   type DefaultToolController,
-} from '../../tool-controllers/default-tool.js';
+} from '../../controllers/tools/default-tool.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { NoteSlicerButton } from './slicer-button.js';

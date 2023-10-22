@@ -1,4 +1,4 @@
-import '../components/rich-text/rich-text.js';
+import '../_common/components/rich-text/rich-text.js';
 import './components/code-option.js';
 import './components/lang-list.js';
 
@@ -23,15 +23,15 @@ import {
 } from 'shiki';
 import { z } from 'zod';
 
-import { PAGE_HEADER_HEIGHT } from '../__internal__/consts.js';
-import { queryCurrentMode } from '../__internal__/index.js';
-import { getService } from '../__internal__/service/index.js';
-import { listenToThemeChange } from '../__internal__/theme/utils.js';
-import { HoverController } from '../components/index.js';
-import { createLitPortal } from '../components/portal.js';
-import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
-import type { RichText } from '../components/rich-text/rich-text.js';
-import { ArrowDownIcon } from '../icons/index.js';
+import { HoverController } from '../_common/components/index.js';
+import { createLitPortal } from '../_common/components/portal.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
+import type { RichText } from '../_common/components/rich-text/rich-text.js';
+import { ArrowDownIcon } from '../_common/icons/index.js';
+import { listenToThemeChange } from '../_common/theme/utils.js';
+import { PAGE_HEADER_HEIGHT } from '../_legacy/consts.js';
+import { queryCurrentMode } from '../_legacy/index.js';
+import { getService } from '../_legacy/service/index.js';
 import type { CodeBlockModel } from './code-model.js';
 import { CodeOptionTemplate } from './components/code-option.js';
 import { LangList } from './components/lang-list.js';

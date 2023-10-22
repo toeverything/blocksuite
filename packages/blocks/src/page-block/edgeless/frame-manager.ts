@@ -1,13 +1,15 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockElementByModel } from '../../__internal__/index.js';
+import { getBlockElementByModel } from '../../_legacy/index.js';
 import type {
   EdgelessElement,
   Selectable,
-} from '../../__internal__/utils/types.js';
+  TopLevelBlockModel,
+} from '../../_legacy/utils/types.js';
 import type { FrameBlockComponent } from '../../frame-block/index.js';
-import type { FrameBlockModel, NoteBlockModel } from '../../models.js';
+import type { FrameBlockModel } from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
@@ -70,12 +72,8 @@ export class EdgelessFrameManager {
       this._edgeless.surface.viewport.gridManager
         .search(bound, true)
         .filter(ele => !isFrameBlock(ele));
-    elements.push(
-      ...(<NoteBlockModel[]>(
-        this._edgeless.page.getBlockByFlavour('affine:note')
-      )).filter(ele => bound.contains(Bound.deserialize(ele.xywh)))
-    );
-    return elements;
+
+    return elements.concat(getBlocksInFrame(this._edgeless.page, frame));
   }
 
   calculateFrameColor(frame: FrameBlockModel) {
@@ -126,4 +124,25 @@ export class EdgelessFrameManager {
       editing: false,
     });
   }
+}
+
+export function getBlocksInFrame(
+  page: Page,
+  model: FrameBlockModel,
+  fullyContained: boolean = true
+) {
+  const bound = Bound.deserialize(model.xywh);
+
+  return (
+    page.getBlockByFlavour([
+      'affine:note',
+      'affine:image',
+    ]) as TopLevelBlockModel[]
+  ).filter(ele => {
+    const blockBound = Bound.deserialize(ele.xywh);
+
+    return fullyContained
+      ? bound.contains(blockBound)
+      : bound.containsPoint([blockBound.x, blockBound.y]);
+  });
 }

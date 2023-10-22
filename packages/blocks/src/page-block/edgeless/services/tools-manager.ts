@@ -17,20 +17,20 @@ import {
   isPinchEvent,
   Point,
   type Selectable,
-} from '../../../__internal__/index.js';
+} from '../../../_legacy/index.js';
 import { normalizeWheelDeltaY } from '../../../surface-block/index.js';
+import { BrushToolController } from '../controllers/tools/brush-tool.js';
+import { ConnectorToolController } from '../controllers/tools/connector-tool.js';
+import { DefaultToolController } from '../controllers/tools/default-tool.js';
+import { EraserToolController } from '../controllers/tools/eraser-tool.js';
+import { PresentToolController } from '../controllers/tools/frame-navigator-tool.js';
+import { FrameToolController } from '../controllers/tools/frame-tool.js';
+import type { EdgelessToolController } from '../controllers/tools/index.js';
+import { NoteToolController } from '../controllers/tools/note-tool.js';
+import { PanToolController } from '../controllers/tools/pan-tool.js';
+import { ShapeToolController } from '../controllers/tools/shape-tool.js';
+import { TextToolController } from '../controllers/tools/text-tool.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import { BrushToolController } from '../tool-controllers/brush-tool.js';
-import { ConnectorToolController } from '../tool-controllers/connector-tool.js';
-import { DefaultToolController } from '../tool-controllers/default-tool.js';
-import { EraserToolController } from '../tool-controllers/eraser-tool.js';
-import { PresentToolController } from '../tool-controllers/frame-navigator-tool.js';
-import { FrameToolController } from '../tool-controllers/frame-tool.js';
-import type { EdgelessToolController } from '../tool-controllers/index.js';
-import { NoteToolController } from '../tool-controllers/note-tool.js';
-import { PanToolController } from '../tool-controllers/pan-tool.js';
-import { ShapeToolController } from '../tool-controllers/shape-tool.js';
-import { TextToolController } from '../tool-controllers/text-tool.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 import { getSelectionBoxBound } from '../utils/query.js';
 import type { EdgelessSelectionState } from './selection-manager.js';

@@ -1,3 +1,4 @@
+/** Legacy entry used for AFFiNE ESM module compat */
 /// <reference types="@blocksuite/global" />
 // Import models only, the bundled file should not include anything else.
 import type { BlockSchema } from '@blocksuite/store';

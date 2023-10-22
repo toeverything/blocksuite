@@ -247,6 +247,9 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'affine:paragraph': {
+          const paragraphDepth = (context.getGlobalContext(
+            'affine:paragraph:depth'
+          ) ?? 0) as number;
           switch (o.node.props.type) {
             case 'h1':
             case 'h2':
@@ -254,24 +257,28 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
             case 'h4':
             case 'h5':
             case 'h6': {
-              context.openNode(
-                {
-                  type: 'heading',
-                  depth: parseInt(o.node.props.type[1]) as Heading['depth'],
-                  children: this.deltaToMdAST(text.delta),
-                },
-                'children'
-              );
+              context
+                .openNode(
+                  {
+                    type: 'heading',
+                    depth: parseInt(o.node.props.type[1]) as Heading['depth'],
+                    children: this.deltaToMdAST(text.delta, paragraphDepth),
+                  },
+                  'children'
+                )
+                .closeNode();
               break;
             }
             case 'text': {
-              context.openNode(
-                {
-                  type: 'paragraph',
-                  children: this.deltaToMdAST(text.delta),
-                },
-                'children'
-              );
+              context
+                .openNode(
+                  {
+                    type: 'paragraph',
+                    children: this.deltaToMdAST(text.delta, paragraphDepth),
+                  },
+                  'children'
+                )
+                .closeNode();
               break;
             }
             case 'quote': {
@@ -289,10 +296,16 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                     children: this.deltaToMdAST(text.delta),
                   },
                   'children'
-                );
+                )
+                .closeNode()
+                .closeNode();
               break;
             }
           }
+          context.setGlobalContext(
+            'affine:paragraph:depth',
+            paragraphDepth + 1
+          );
           break;
         }
         case 'affine:list': {
@@ -300,7 +313,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           // if true, add the list item to the list
           // if false, create a new list
           if (
-            context.getContext('affine:list:parent') === o.parent &&
+            context.getNodeContext('affine:list:parent') === o.parent &&
             currentTNode.type === 'list' &&
             currentTNode.ordered === (o.node.props.type === 'numbered') &&
             currentTNode.children[0].checked ===
@@ -338,7 +351,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 },
                 'children'
               )
-              .setContext('affine:list:parent', o.parent)
+              .setNodeContext('affine:list:parent', o.parent)
               .openNode(
                 {
                   type: 'listItem',
@@ -387,30 +400,15 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'affine:paragraph': {
-          switch (o.node.props.type) {
-            case 'h1':
-            case 'h2':
-            case 'h3':
-            case 'h4':
-            case 'h5':
-            case 'h6': {
-              context.closeNode();
-              break;
-            }
-            case 'text': {
-              context.closeNode();
-              break;
-            }
-            case 'quote': {
-              context.closeNode().closeNode();
-              break;
-            }
-          }
+          context.setGlobalContext(
+            'affine:paragraph:depth',
+            (context.getGlobalContext('affine:paragraph:depth') as number) - 1
+          );
           break;
         }
         case 'affine:list': {
           if (
-            context.getContext('affine:list:parent') === o.parent &&
+            context.getNodeContext('affine:list:parent') === o.parent &&
             currentTNode.type === 'list' &&
             currentTNode.ordered === (o.node.props.type === 'numbered') &&
             currentTNode.children[0].checked ===
@@ -486,7 +484,10 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return buffer.toString();
   }
 
-  deltaToMdAST(deltas: DeltaInsert[]) {
+  deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
+    if (depth > 0) {
+      deltas.unshift({ insert: ' '.repeat(4).repeat(depth) });
+    }
     return deltas.map(delta => {
       let mdast: MarkdownAST = {
         type: 'text',

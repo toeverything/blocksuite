@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { ImageColumnTypeName, imagePureColumnConfig } from './define.js';

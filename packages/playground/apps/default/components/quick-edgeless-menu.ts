@@ -21,8 +21,8 @@ import {
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   SIZE_VARIABLES,
-  Transformer,
   VARIABLES,
+  ZipTransformer,
 } from '@blocksuite/blocks';
 import { NOTE_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -360,7 +360,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await Transformer.Zip.exportPages(this.workspace, [this.page]);
+    const file = await ZipTransformer.exportPages(this.workspace, [this.page]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -381,7 +381,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        await Transformer.Zip.importPages(this.workspace, file);
+        await ZipTransformer.importPages(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');

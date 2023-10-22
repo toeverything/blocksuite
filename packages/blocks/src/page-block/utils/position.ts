@@ -1,4 +1,4 @@
-import { clamp } from '../../__internal__/utils/math.js';
+import { clamp } from '../../_legacy/utils/math.js';
 
 type CollisionBox = {
   /**

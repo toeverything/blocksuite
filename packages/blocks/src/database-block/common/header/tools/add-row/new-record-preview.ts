@@ -2,7 +2,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { PlusIcon } from '../../../../../icons/index.js';
+import { PlusIcon } from '../../../../../_common/icons/index.js';
 
 @customElement('affine-database-new-record-preview')
 export class NewRecordPreview extends ShadowlessElement {

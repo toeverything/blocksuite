@@ -9,6 +9,11 @@ import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import {
+  type CssVariableName,
+  isCssVariable,
+} from '../_common/theme/css-variables.js';
+import { getThemePropertyValue } from '../_common/theme/utils.js';
+import {
   bringForward,
   type EdgelessElement,
   reorder,
@@ -18,12 +23,7 @@ import {
   type Selectable,
   sendBackward,
   type TopLevelBlockModel,
-} from '../__internal__/index.js';
-import {
-  type CssVariableName,
-  isCssVariable,
-} from '../__internal__/theme/css-variables.js';
-import { getThemePropertyValue } from '../__internal__/theme/utils.js';
+} from '../_legacy/index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';

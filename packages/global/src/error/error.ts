@@ -17,7 +17,8 @@ export class MigrationError extends BlockSuiteError {
   constructor(description: string) {
     super(
       ErrorCode.MIGRATION_ERROR,
-      `Migration ${description} error. Please report to https://github.com/toeverything/blocksuite/issues`
+      `Migration failed. Please report to https://github.com/toeverything/blocksuite/issues
+          ${description}`
     );
   }
 }

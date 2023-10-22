@@ -39,6 +39,7 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
+  scrollToTop,
   selectAllByKeyboard,
   SHORT_KEY,
   switchEditorMode,
@@ -1685,4 +1686,42 @@ test('press ArrowUp and ArrowDown in the edge of two line', async ({
   // - b  (have \n)
   //
   // - |
+});
+
+test('should not scroll page when mouse is click down', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/5034',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  for (let i = 0; i < 10; i++) {
+    await pressEnter(page);
+  }
+  for (let i = 0; i < 20; i++) {
+    await type(page, String(i));
+    await pressShiftEnter(page);
+  }
+  await assertRichTexts(page, [
+    ...' '.repeat(9).split(' '), // 10 empty paragraph
+    '0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n',
+  ]);
+
+  await scrollToTop(page);
+  await focusRichText(page, 0);
+
+  const longText = page.locator('rich-text').nth(10);
+  const rect = await longText.boundingBox();
+  if (!rect) throw new Error();
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  await assertRichTextVRange(page, 0, 0);
+
+  await page.mouse.down();
+  await assertRichTextVRange(page, 10, 22);
+  // simulate user click down and wait for 500ms
+  await waitNextFrame(page, 500);
+  await page.mouse.up();
+  await assertRichTextVRange(page, 10, 22);
 });

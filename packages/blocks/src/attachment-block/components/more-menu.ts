@@ -1,7 +1,11 @@
 import { html } from 'lit';
 import { type Ref, ref } from 'lit/directives/ref.js';
 
-import { DeleteIcon, DownloadIcon, DuplicateIcon } from '../../icons/index.js';
+import {
+  DeleteIcon,
+  DownloadIcon,
+  DuplicateIcon,
+} from '../../_common/icons/index.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { cloneAttachmentProperties, downloadAttachment } from '../utils.js';
 import { moreMenuStyles } from './styles.js';

@@ -4,9 +4,9 @@ import format from 'date-fns/format/index.js';
 import { css, html, unsafeCSS } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { DatePicker } from '../../../../components/date-picker/date-picker.js';
-import { createIcon } from '../../../../components/icon/uni-icon.js';
-import { createLitPortal } from '../../../../components/portal.js';
+import { DatePicker } from '../../../../_common/components/date-picker/date-picker.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
+import { createLitPortal } from '../../../../_common/components/portal.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { datePureColumnConfig } from './define.js';

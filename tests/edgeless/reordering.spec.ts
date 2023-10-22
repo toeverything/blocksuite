@@ -10,7 +10,6 @@ import {
   zoomResetByKeyboard,
 } from '../utils/actions/edgeless.js';
 import {
-  click,
   clickView,
   enterPlaygroundRoom,
   initEmptyEdgelessState,

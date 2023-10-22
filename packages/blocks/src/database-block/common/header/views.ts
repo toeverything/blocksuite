@@ -7,15 +7,15 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   popFilterableSimpleMenu,
   popMenu,
-} from '../../../components/menu/index.js';
-import { renderUniLit } from '../../../components/uni-component/uni-component.js';
+} from '../../../_common/components/menu/index.js';
+import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
 import {
   AddCursorIcon,
   DeleteIcon,
   DuplicateIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import { viewManager, viewRendererManager } from '../data-view.js';
 import type { ViewSource } from '../view-source.js';
 

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type {
   DataViewSelection,
   GetDataViewSelection,
-} from '../../__internal__/index.js';
+} from '../../_legacy/index.js';
 
 const TableViewSelectionSchema = z.object({
   viewId: z.string(),

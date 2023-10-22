@@ -2,8 +2,8 @@ import type { Disposable } from '@blocksuite/global/utils';
 import type { PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import type { AffineTextAttributes } from '../../../../components/rich-text/virgo/types.js';
-import { LinkedPageIcon, PageIcon } from '../../../../icons/index.js';
+import type { AffineTextAttributes } from '../../../../_common/components/rich-text/virgo/types.js';
+import { LinkedPageIcon, PageIcon } from '../../../../_common/icons/index.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 
 export type BackLink = {

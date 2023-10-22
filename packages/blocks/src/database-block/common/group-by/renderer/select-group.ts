@@ -3,9 +3,9 @@ import { customElement } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { popMenu } from '../../../../components/menu/index.js';
-import { selectOptionColors } from '../../../../components/tags/colors.js';
-import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
+import { popMenu } from '../../../../_common/components/menu/index.js';
+import { selectOptionColors } from '../../../../_common/components/tags/colors.js';
+import type { SelectTag } from '../../../../_common/components/tags/multi-tag-select.js';
 import { BaseGroup } from './base.js';
 
 @customElement('data-view-group-title-select-view')

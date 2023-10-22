@@ -7,10 +7,10 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  type EdgelessTool,
-  LineWidth,
-} from '../../../../../__internal__/index.js';
-import { ArrowUpIcon, ConnectorIcon } from '../../../../../icons/index.js';
+  ArrowUpIcon,
+  ConnectorIcon,
+} from '../../../../../_common/icons/index.js';
+import { type EdgelessTool, LineWidth } from '../../../../../_legacy/index.js';
 import { ConnectorMode } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_LINE_COLOR } from '../../panel/color-panel.js';

@@ -4,7 +4,7 @@ import { html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isCssVariable } from '../__internal__/theme/css-variables.js';
+import { isCssVariable } from '../_common/theme/css-variables.js';
 import { BlendColor } from '../page-block/edgeless/utils/consts.js';
 import type { EdgelessPageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/index.js';

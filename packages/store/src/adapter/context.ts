@@ -7,6 +7,8 @@ export class ASTWalkerContext<TNode extends object> {
     context: Record<string, unknown>;
   }[] = [];
 
+  private _globalContext: Record<string, unknown> = Object.create(null);
+
   private _defautltProp: Keyof<TNode> = 'children' as unknown as Keyof<TNode>;
 
   setDefaultProp = (parentProp: Keyof<TNode>) => {
@@ -34,13 +36,22 @@ export class ASTWalkerContext<TNode extends object> {
     return this;
   }
 
-  setContext(key: string, value: unknown) {
+  setNodeContext(key: string, value: unknown) {
     this._stack[this._stack.length - 1].context[key] = value;
     return this;
   }
 
-  getContext(key: string) {
+  getNodeContext(key: string) {
     return this.current().context[key];
+  }
+
+  getGlobalContext(key: string) {
+    return this._globalContext[key];
+  }
+
+  setGlobalContext(key: string, value: unknown) {
+    this._globalContext[key] = value;
+    return this;
   }
 
   closeNode() {

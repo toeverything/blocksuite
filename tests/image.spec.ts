@@ -20,6 +20,7 @@ import {
   pressArrowLeft,
   pressEnter,
   redoByKeyboard,
+  scrollToTop,
   type,
   undoByKeyboard,
   waitNextFrame,
@@ -179,15 +180,7 @@ test('popup menu should follow position of image when scrolling', async ({
   await pressEnter(page);
   await insertThreeLevelLists(page, 6);
 
-  await page.evaluate(async () => {
-    const viewport = document.querySelector('.affine-doc-viewport');
-    if (!viewport) {
-      throw new Error();
-    }
-    viewport.scrollTo(0, 0);
-  });
-
-  await page.waitForTimeout(150);
+  await scrollToTop(page);
 
   const rect = await page.locator('.affine-image-wrapper img').boundingBox();
   if (!rect) throw new Error('image not found');

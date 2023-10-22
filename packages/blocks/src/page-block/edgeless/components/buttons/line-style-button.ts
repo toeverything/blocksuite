@@ -6,7 +6,7 @@ import {
   BanIcon,
   DashLineIcon,
   StraightLineIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 
 export const lineStyleButtonStyles = [
   css`

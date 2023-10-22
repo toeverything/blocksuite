@@ -3,12 +3,12 @@ import {
   type AttachmentProps,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
-  edgelessPreset,
+  EdgelessPreset,
   FileDropManager,
   getServiceOrRegister,
   type ImageBlockProps,
   type PageBlockModel,
-  pagePreset,
+  PagePreset,
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
@@ -57,10 +57,10 @@ export class EditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pagePreset = pagePreset;
+  pagePreset = PagePreset;
 
   @property({ attribute: false })
-  edgelessPreset = edgelessPreset;
+  edgelessPreset = EdgelessPreset;
 
   @property({ attribute: false })
   override autofocus = false;

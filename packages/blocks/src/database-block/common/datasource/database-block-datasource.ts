@@ -4,7 +4,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Text, type Y } from '@blocksuite/store';
 
-import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import { createUniComponentFromWebComponent } from '../../../_common/components/uni-component/uni-component.js';
 import type { DatabaseBlockModel } from '../../database-model.js';
 import type { InsertToPosition } from '../../types.js';
 import { insertPositionToIndex } from '../../utils/insert.js';

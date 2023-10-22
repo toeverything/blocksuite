@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { NOTE_WIDTH } from '../../packages/blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../packages/blocks/src/_legacy/consts.js';
 import {
   activeNoteInEdgeless,
   addNote,
