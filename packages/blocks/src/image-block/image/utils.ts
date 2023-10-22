@@ -2,9 +2,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Buffer } from 'buffer';
 
+import { toast } from '../../_common/components/toast.js';
 import { downloadBlob } from '../../_legacy/utils/filesys.js';
 import { getBlockElementByModel } from '../../_legacy/utils/query.js';
-import { toast } from '../../components/toast.js';
 import type { ImageBlockModel } from '../image-model.js';
 
 async function getImageBlob(model: ImageBlockModel) {

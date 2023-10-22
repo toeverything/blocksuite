@@ -15,18 +15,22 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { when } from 'lit/directives/when.js';
 import { html } from 'lit/static-html.js';
 
-import { copyBlocks } from '../_legacy/clipboard/index.js';
-import type { DataViewSelection } from '../_legacy/index.js';
-import { Rect } from '../_legacy/index.js';
-import { DragIndicator } from '../components/index.js';
-import { popMenu } from '../components/menu/index.js';
-import { defineUniComponent } from '../components/uni-component/uni-component.js';
-import { CopyIcon, DeleteIcon, MoreHorizontalIcon } from '../icons/index.js';
-import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
+import { DragIndicator } from '../_common/components/index.js';
+import { popMenu } from '../_common/components/menu/index.js';
+import { defineUniComponent } from '../_common/components/uni-component/uni-component.js';
+import {
+  CopyIcon,
+  DeleteIcon,
+  MoreHorizontalIcon,
+} from '../_common/icons/index.js';
+import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import {
   captureEventTarget,
   getDropResult,
-} from '../widgets/drag-handle/utils.js';
+} from '../_common/widgets/drag-handle/utils.js';
+import { copyBlocks } from '../_legacy/clipboard/index.js';
+import type { DataViewSelection } from '../_legacy/index.js';
+import { Rect } from '../_legacy/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';

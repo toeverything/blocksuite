@@ -3,9 +3,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { TransparentIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
 import { queryCurrentMode } from '../../../../_legacy/utils/query.js';
-import { TransparentIcon } from '../../../../icons/index.js';
 
 export class ColorEvent extends Event {
   detail: CssVariableName;

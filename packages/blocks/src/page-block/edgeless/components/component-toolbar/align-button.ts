@@ -1,12 +1,11 @@
 import '../buttons/menu-button.js';
-import '../../../../components/menu-divider.js';
+import '../../../../_common/components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessElement } from '../../../../_legacy/index.js';
 import {
   AlignBottomIcon,
   AlignDistributeHorizontallyIcon,
@@ -17,7 +16,8 @@ import {
   AlignTopIcon,
   AlignVerticallyIcon,
   SmallArrowDownIcon,
-} from '../../../../icons/edgeless.js';
+} from '../../../../_common/icons/index.js';
+import type { EdgelessElement } from '../../../../_legacy/index.js';
 import { Bound, ConnectorElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';

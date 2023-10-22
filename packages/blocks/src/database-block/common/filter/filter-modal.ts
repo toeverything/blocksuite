@@ -6,7 +6,7 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { createPopup } from '../../../components/menu/index.js';
+import { createPopup } from '../../../_common/components/menu/index.js';
 import type { FilterGroup, Variable } from '../ast.js';
 
 @customElement('advanced-filter-modal')

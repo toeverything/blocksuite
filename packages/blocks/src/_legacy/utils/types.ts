@@ -1,8 +1,8 @@
 import { type Slot } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type Page } from '@blocksuite/store';
 
-import type { RefNodeSlots } from '../../components/rich-text/virgo/nodes/reference-node.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import type { RefNodeSlots } from '../../_common/components/rich-text/virgo/nodes/reference-node.js';
+import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
 import type { DataViewDataType } from '../../database-block/common/data-view.js';
 import type { Cell } from '../../database-block/index.js';
 import type { Column } from '../../database-block/table/types.js';

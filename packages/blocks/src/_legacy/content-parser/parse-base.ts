@@ -1,9 +1,9 @@
 import { type DeltaOperation, nanoid, type Page } from '@blocksuite/store';
 import { lightCssVariables } from '@toeverything/theme';
 
+import { getTagColor } from '../../_common/components/tags/colors.js';
 import { getStandardLanguage } from '../../code-block/utils/code-languages.js';
 import { FALLBACK_LANG } from '../../code-block/utils/consts.js';
-import { getTagColor } from '../../components/tags/colors.js';
 import { columnManager } from '../../database-block/common/columns/manager.js';
 import { richTextPureColumnConfig } from '../../database-block/common/columns/rich-text/define.js';
 import type { Cell, Column } from '../../index.js';

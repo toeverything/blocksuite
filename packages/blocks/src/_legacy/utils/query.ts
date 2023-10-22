@@ -3,10 +3,10 @@ import type { BlockElement } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
+import type { Loader } from '../../_common/components/loader.js';
+import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import { matchFlavours } from '../../_legacy/utils/model.js';
 import { type AbstractEditor } from '../../_legacy/utils/types.js';
-import type { Loader } from '../../components/loader.js';
-import type { RichText } from '../../components/rich-text/rich-text.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';

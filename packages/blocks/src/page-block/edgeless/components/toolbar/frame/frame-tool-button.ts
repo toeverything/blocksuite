@@ -6,8 +6,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import {
+  ArrowUpIcon,
+  LargeFrameIcon,
+} from '../../../../../_common/icons/index.js';
 import type { EdgelessTool } from '../../../../../_legacy/index.js';
-import { ArrowUpIcon, LargeFrameIcon } from '../../../../../icons/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';

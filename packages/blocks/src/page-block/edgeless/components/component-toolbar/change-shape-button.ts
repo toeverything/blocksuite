@@ -11,15 +11,15 @@ import type { Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
-import { LineWidth, type ShapeTool } from '../../../../_legacy/utils/types.js';
 import {
   ChangeShapeIcon,
   GeneralStyleIcon,
   LineStyleIcon,
   ScribbledStyleIcon,
   ShapeArrowDownSmallIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../_legacy/theme/css-variables.js';
+import { LineWidth, type ShapeTool } from '../../../../_legacy/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,

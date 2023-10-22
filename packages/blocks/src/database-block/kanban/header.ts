@@ -5,7 +5,7 @@ import { css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu } from '../../components/menu/index.js';
+import { popMenu } from '../../_common/components/menu/index.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';
 
 const styles = css`

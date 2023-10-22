@@ -1,13 +1,13 @@
 import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
+import { popFilterableSimpleMenu } from '../../../_common/components/menu/index.js';
 import {
   DeleteIcon,
   ExpandFullIcon,
   MoveLeftIcon,
   MoveRightIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import { popSideDetail } from '../../common/detail/layout.js';
 import type { TableSelectionController } from '../controller/selection.js';
 

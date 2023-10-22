@@ -12,7 +12,6 @@ import {
   getEdgelessBlockChild,
   getEdgelessHoverRect,
   getEdgelessSelectedRect,
-  getEdgelessSelectedRectModel,
   increaseZoomLevel,
   locatorEdgelessComponentToolButton,
   optionMouseDrag,
@@ -27,7 +26,6 @@ import {
 import {
   addBasicBrushElement,
   addBasicRectShapeElement,
-  click,
   clickView,
   dragBetweenCoords,
   enterPlaygroundRoom,
