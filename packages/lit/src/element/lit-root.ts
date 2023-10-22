@@ -57,7 +57,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   }
 
   override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('blocks')) {
+    if (changedProperties.has('preset')) {
       this.std.spec.applySpecs(this.preset);
     }
     super.willUpdate(changedProperties);
