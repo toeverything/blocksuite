@@ -3,7 +3,7 @@ import '../../../common/filter/filter-group.js';
 import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { eventToVRect } from '../../../../components/menu/index.js';
+import { eventToVRect } from '../../../../_common/components/menu/index.js';
 import { FilterIcon } from '../../../../icons/index.js';
 import type { FilterGroup } from '../../../common/ast.js';
 import { popCreateFilter } from '../../../common/ref/ref.js';

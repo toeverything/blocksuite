@@ -1,4 +1,4 @@
-import '../../../../../components/button.js';
+import '../../../../../_common/components/button.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property } from 'lit/decorators.js';

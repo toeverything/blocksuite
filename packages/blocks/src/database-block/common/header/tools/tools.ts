@@ -9,7 +9,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { renderUniLit } from '../../../../components/uni-component/uni-component.js';
+import { renderUniLit } from '../../../../_common/components/uni-component/uni-component.js';
 import { type DataViewExpose, viewRendererManager } from '../../data-view.js';
 import type { DataViewManager } from '../../data-view-manager.js';
 

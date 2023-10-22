@@ -1,7 +1,7 @@
 import { nanoid, Text } from '@blocksuite/store';
 
-import { getTagColor } from '../../../../components/tags/colors.js';
-import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
+import { getTagColor } from '../../../../_common/components/tags/colors.js';
+import type { SelectTag } from '../../../../_common/components/tags/multi-tag-select.js';
 import { tTag } from '../../../logical/data-type.js';
 import { tArray } from '../../../logical/typesystem.js';
 import { columnManager } from '../manager.js';

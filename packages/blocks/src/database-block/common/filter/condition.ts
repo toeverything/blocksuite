@@ -7,7 +7,7 @@ import { css, html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { popFilterableSimpleMenu } from '../../../components/menu/menu.js';
+import { popFilterableSimpleMenu } from '../../../_common/components/menu/menu.js';
 import { CrossIcon } from '../../../icons/index.js';
 import { tBoolean } from '../../logical/data-type.js';
 import { typesystem } from '../../logical/typesystem.js';

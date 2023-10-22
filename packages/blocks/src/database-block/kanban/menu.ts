@@ -1,7 +1,7 @@
 import type { ReferenceElement } from '@floating-ui/dom';
 import { html } from 'lit';
 
-import { popFilterableSimpleMenu } from '../../components/menu/index.js';
+import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js';
 import {
   ArrowRightBigIcon,
   DeleteIcon,

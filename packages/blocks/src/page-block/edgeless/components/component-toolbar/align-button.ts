@@ -1,5 +1,5 @@
 import '../buttons/menu-button.js';
-import '../../../../components/menu-divider.js';
+import '../../../../_common/components/menu-divider.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';

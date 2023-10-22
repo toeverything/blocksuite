@@ -4,8 +4,8 @@ import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_legacy/theme/css-variables.js';
-import type { RichText } from '../../../../components/rich-text/rich-text.js';
 import type {
   PhasorElementType,
   ShapeElement,

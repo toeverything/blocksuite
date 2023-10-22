@@ -1,5 +1,5 @@
-import '../../components/button.js';
-import '../../components/button.js';
+import '../../_common/components/button.js';
+import '../../_common/components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';

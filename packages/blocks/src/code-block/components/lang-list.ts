@@ -8,7 +8,7 @@ import {
   type Lang,
 } from 'shiki';
 
-import { scrollbarStyle } from '../../components/utils.js';
+import { scrollbarStyle } from '../../_common/components/utils.js';
 import { DoneIcon, SearchIcon } from '../../icons/index.js';
 import { getLanguagePriority } from '../utils/code-languages.js';
 import { PLAIN_TEXT_REGISTRATION } from '../utils/consts.js';

@@ -2,7 +2,7 @@ import type { BaseBlockModel } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
-import { toast } from '../..//components/toast.js';
+import { toast } from '../../_common/components/toast.js';
 import { copyBlocks } from '../../_legacy/clipboard/utils/commons.js';
 import { getBlockElementByModel } from '../../_legacy/index.js';
 import {

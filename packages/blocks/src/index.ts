@@ -11,6 +11,10 @@ import './image-block/index.js';
 import './surface-block/index.js';
 import './database-block/index.js';
 
+export * from './_common/components/index.js';
+export * from './_common/test-utils/test-utils.js';
+export * from './_common/transformer/zip.js';
+export * from './_common/widgets/index.js';
 export * from './_legacy/consts.js';
 export { getServiceOrRegister } from './_legacy/service/index.js';
 export type { BaseService } from './_legacy/service/service.js';
@@ -22,11 +26,10 @@ export * from './_legacy/utils/filesys.js';
 export * from './_legacy/utils/query.js';
 export * from './_legacy/utils/rect.js';
 export * from './_legacy/utils/types.js';
-export * from './api/index.js';
+export * from './_presets/index.js';
 export * from './attachment-block/index.js';
 export * from './bookmark-block/index.js';
 export * from './code-block/index.js';
-export * from './components/index.js';
 export * from './data-view-block/index.js';
 export * from './database-block/index.js';
 export * from './divider-block/index.js';
@@ -37,12 +40,9 @@ export * from './models.js';
 export * from './note-block/index.js';
 export * from './page-block/index.js';
 export * from './paragraph-block/index.js';
-export * from './preset/index.js';
 export * from './surface-block/index.js';
 export * from './surface-block/surface-block.js';
 export * from './surface-block/surface-model.js';
-export * from './test-utils/test-utils.js';
-export * from './widgets/index.js';
 const env: Record<string, unknown> =
   typeof globalThis !== 'undefined'
     ? globalThis

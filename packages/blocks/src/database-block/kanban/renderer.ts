@@ -1,5 +1,5 @@
-import { createIcon } from '../../components/icon/uni-icon.js';
-import { createUniComponentFromWebComponent } from '../../components/uni-component/uni-component.js';
+import { createIcon } from '../../_common/components/icon/uni-icon.js';
+import { createUniComponentFromWebComponent } from '../../_common/components/uni-component/uni-component.js';
 import { viewRendererManager } from '../common/data-view.js';
 import { ExpandDatabaseBlockModal } from '../common/header/tools/expand/index.js';
 import { DataViewHeaderToolsFilter } from '../common/header/tools/filter.js';

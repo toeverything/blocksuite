@@ -1,9 +1,9 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
 
+import { toast } from '../_common/components/toast.js';
 import { downloadBlob, withTempBlobData } from '../_legacy/utils/filesys.js';
 import { humanFileSize } from '../_legacy/utils/math.js';
-import { toast } from '../components/toast.js';
 import type {
   ImageBlockModel,
   ImageBlockProps,

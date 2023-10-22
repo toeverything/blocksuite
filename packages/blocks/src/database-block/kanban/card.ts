@@ -7,7 +7,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { positionToVRect } from '../../components/menu/index.js';
+import { positionToVRect } from '../../_common/components/menu/index.js';
 import { MoreHorizontalIcon, NewEditIcon } from '../../icons/index.js';
 import { popSideDetail } from '../common/detail/layout.js';
 import type {

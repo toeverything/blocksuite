@@ -8,7 +8,10 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu, positionToVRect } from '../../../../components/menu/menu.js';
+import {
+  popMenu,
+  positionToVRect,
+} from '../../../../_common/components/menu/menu.js';
 import {
   DatabaseDuplicate,
   DatabaseInsertLeft,

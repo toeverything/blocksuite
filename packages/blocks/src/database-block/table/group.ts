@@ -4,7 +4,7 @@ import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { popFilterableSimpleMenu } from '../../components/menu/index.js';
+import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js';
 import { PlusIcon } from '../../icons/index.js';
 import type { GroupData } from '../common/group-by/helper.js';
 import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';

@@ -22,10 +22,10 @@ import {
 } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
+import { toast } from '../../../../_common/components/toast.js';
 import { stopPropagation } from '../../../../_legacy/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_legacy/utils/filesys.js';
 import type { EdgelessTool } from '../../../../_legacy/utils/types.js';
-import { toast } from '../../../../components/toast.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,

@@ -1,11 +1,11 @@
-import '../../components/button.js';
-import '../../components/button.js';
+import '../../_common/components/button.js';
+import '../../_common/components/button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { toast } from '../../components/toast.js';
+import { toast } from '../../_common/components/toast.js';
 import { CloseIcon } from '../../icons/index.js';
 import { bookmarkModalStyles } from './bookmark-edit-modal.js';
 

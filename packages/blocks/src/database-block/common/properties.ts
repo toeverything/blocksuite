@@ -6,7 +6,7 @@ import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import { createPopup } from '../../components/menu/index.js';
+import { createPopup } from '../../_common/components/menu/index.js';
 import { ArrowLeftBigIcon } from '../../icons/index.js';
 import type {
   DataViewColumnManager,

@@ -1,5 +1,5 @@
-import '../../../components/tags/multi-tag-select.js';
-import '../../../components/tags/multi-tag-view.js';
+import '../../../_common/components/tags/multi-tag-select.js';
+import '../../../_common/components/tags/multi-tag-view.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
@@ -9,8 +9,8 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
-import { popTagSelect } from '../../../components/tags/multi-tag-select.js';
+import type { SelectTag } from '../../../_common/components/tags/multi-tag-select.js';
+import { popTagSelect } from '../../../_common/components/tags/multi-tag-select.js';
 import {
   ArrowDownSmallIcon,
   DualLinkIcon16,

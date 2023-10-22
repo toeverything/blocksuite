@@ -2,7 +2,10 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
+import {
+  eventToVRect,
+  popMenu,
+} from '../../../../_common/components/menu/menu.js';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,

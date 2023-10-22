@@ -5,8 +5,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { positionToVRect } from '../../../_common/components/menu/index.js';
 import type { TableViewSelection } from '../../../_legacy/index.js';
-import { positionToVRect } from '../../../components/menu/index.js';
 import { MoreHorizontalIcon, NewEditIcon } from '../../../icons/index.js';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../consts.js';
 import type { DataViewTableManager } from '../table-view-manager.js';

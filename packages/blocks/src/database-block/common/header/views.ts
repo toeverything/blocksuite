@@ -7,8 +7,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   popFilterableSimpleMenu,
   popMenu,
-} from '../../../components/menu/index.js';
-import { renderUniLit } from '../../../components/uni-component/uni-component.js';
+} from '../../../_common/components/menu/index.js';
+import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
 import {
   AddCursorIcon,
   DeleteIcon,

@@ -11,7 +11,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   eventToVRect,
   popFilterableSimpleMenu,
-} from '../../../components/menu/menu.js';
+} from '../../../_common/components/menu/menu.js';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,

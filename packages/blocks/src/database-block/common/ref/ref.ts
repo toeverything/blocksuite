@@ -6,8 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 import {
   eventToVRect,
   popFilterableSimpleMenu,
-} from '../../../components/menu/menu.js';
-import { renderUniLit } from '../../../components/uni-component/uni-component.js';
+} from '../../../_common/components/menu/menu.js';
+import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
 import { AddCursorIcon } from '../../../icons/index.js';
 import type { Filter, Variable, VariableOrProperty } from '../ast.js';
 import { firstFilterByRef, firstFilterInGroup } from '../ast.js';

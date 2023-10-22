@@ -3,10 +3,10 @@ import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import { marked } from 'marked';
 
+import { getTagColor } from '../../_common/components/tags/colors.js';
+import { toast } from '../../_common/components/toast.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
 import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
-import { getTagColor } from '../../components/tags/colors.js';
-import { toast } from '../../components/toast.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';

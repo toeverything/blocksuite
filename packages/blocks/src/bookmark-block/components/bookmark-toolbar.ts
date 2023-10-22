@@ -5,7 +5,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { createLitPortal } from '../../components/portal.js';
+import { createLitPortal } from '../../_common/components/portal.js';
 import { MoreIcon } from '../../icons/index.js';
 import { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 import {

@@ -6,8 +6,8 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { popFilterableSimpleMenu } from '../../../components/menu/index.js';
-import { renderUniLit } from '../../../components/uni-component/uni-component.js';
+import { popFilterableSimpleMenu } from '../../../_common/components/menu/index.js';
+import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
 import { PlusIcon } from '../../../icons/index.js';
 import { dataViewCommonStyle } from '../css-variable.js';
 import type { DataViewManager } from '../data-view-manager.js';
