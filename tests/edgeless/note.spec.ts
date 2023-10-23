@@ -9,7 +9,6 @@ import {
   changeEdgelessNoteBackground,
   countBlock,
   exitEditing,
-  getEdgelessSelectedRect,
   getNoteRect,
   hoverOnNote,
   initThreeNotes,
