@@ -86,21 +86,7 @@ export class Clipboard {
       return;
     }
 
-    const adapterKeys = Array.from(this._adapterMap.keys());
-
-    await this.writeToClipboard(async _items => {
-      const items = { ..._items };
-
-      await Promise.all(
-        adapterKeys.map(async type => {
-          const item = await this._getClipboardItem(slice, type);
-          if (typeof item === 'string') {
-            items[type] = item;
-          }
-        })
-      );
-      return items;
-    });
+    this.copySlice(slice);
   };
 
   paste = async (
@@ -203,5 +189,23 @@ export class Clipboard {
   ) => {
     const job = this._getJob();
     return job.snapshotToBlock(snapshot, page, parent, index);
+  };
+
+  copySlice = async (slice: Slice) => {
+    const adapterKeys = Array.from(this._adapterMap.keys());
+
+    await this.writeToClipboard(async _items => {
+      const items = { ..._items };
+
+      await Promise.all(
+        adapterKeys.map(async type => {
+          const item = await this._getClipboardItem(slice, type);
+          if (typeof item === 'string') {
+            items[type] = item;
+          }
+        })
+      );
+      return items;
+    });
   };
 }

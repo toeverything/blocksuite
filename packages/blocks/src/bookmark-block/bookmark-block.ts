@@ -211,6 +211,7 @@ export class BookmarkBlockComponent extends BlockElement<BookmarkBlockModel> {
           .onSelected=${this._onToolbarSelected}
           .root=${this}
           .abortController=${abortController}
+          .std=${this.std}
         ></bookmark-toolbar>`,
       computePosition: {
         referenceElement: this,
