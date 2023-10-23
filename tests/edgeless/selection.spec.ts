@@ -166,7 +166,6 @@ test('copy to clipboard as PNG', async ({ page, context }) => {
 
   await selectAllByKeyboard(page);
 
-  await page.pause();
   await triggerComponentToolbarAction(page, 'copyAsPng');
 
   await waitNextFrame(page);

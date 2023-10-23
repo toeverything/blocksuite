@@ -20,7 +20,6 @@ test.describe('auto-complete', () => {
       await assertSelectedBound(page, [0, 0, 100, 100]);
       await clickView(page, [120, 50]);
       await assertSelectedBound(page, [200, 0, 100, 100]);
-      await page.pause();
     });
     test('click on bottom auto-complete button', async ({ page }) => {
       await edgelessCommonSetup(page);

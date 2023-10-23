@@ -145,7 +145,6 @@ test('add empty Note', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
   await setEdgelessTool(page, 'note');
-  await page.pause();
   // add note at 300,300
   await page.mouse.click(300, 300);
   await waitForVirgoStateUpdated(page);
@@ -446,7 +445,6 @@ test.describe('note slicer', () => {
     const firstNoteId = await addNote(page, 'hello\n123\n456\n789', 50, 500);
     const secondNoteId = await addNote(page, 'world\n123\n456\n789', 100, 550);
     const lastNoteId = await addNote(page, 'done\n123\n456\n789', 150, 600);
-    await page.pause();
     await exitEditing(page);
     await waitNextFrame(page);
     await selectNoteInEdgeless(page, lastNoteId);
