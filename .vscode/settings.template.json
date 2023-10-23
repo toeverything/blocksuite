@@ -1,9 +1,8 @@
 {
   "typescript.tsdk": "./node_modules/typescript/lib",
-  "editor.codeActionsOnSave": [
-    // "source.organizeImports",
-    "source.fixAll.eslint"
-  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
@@ -20,6 +19,6 @@
   "cSpell.words": ["backlink", "blocksuite"],
   "vitest.include": [
     // ignore playwrite tests
-    "**/packages/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+    "**/packages/**/*.unit.spec.ts"
   ]
 }
