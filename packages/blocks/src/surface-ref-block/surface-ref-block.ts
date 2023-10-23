@@ -21,6 +21,7 @@ import type {
   SurfaceBlockModel,
 } from '../models.js';
 import { getNotesInFrame } from '../page-block/edgeless/frame-manager.js';
+import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { ElementCtors } from '../surface-block/index.js';
@@ -42,6 +43,11 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       margin: 0 auto;
       position: relative;
       overflow: hidden;
+      background-color: var(--affine-background-primary-color);
+      background-image: radial-gradient(
+        var(--affine-edgeless-grid-color) 1px,
+        var(--affine-background-primary-color) 1px
+      );
     }
 
     .surface-block-portal {
@@ -401,6 +407,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     const [, , w, h] = deserializeXYWH(model.xywh);
     const notes = getNotesInFrame(this.page, model, false);
     const { zoom, translateX, translateY } = this._surfaceRenderer;
+    const { gap } = getBackgroundGrid(zoom, true);
 
     return html`<div class="affine-surface-ref">
       <div
@@ -411,6 +418,8 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
           outline: this._focused
             ? '2px solid var(--affine-primary-color)'
             : undefined,
+          backgroundPosition: `${translateX}px ${translateY}px`,
+          backgroundSize: `${gap}px ${gap}px`,
         })}
       >
         <div

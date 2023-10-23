@@ -125,6 +125,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
        */
       touch-action: none;
       background-color: var(--affine-background-primary-color);
+      background-image: radial-gradient(
+        var(--affine-edgeless-grid-color) 1px,
+        var(--affine-background-primary-color) 1px
+      );
       z-index: 0;
     }
 
