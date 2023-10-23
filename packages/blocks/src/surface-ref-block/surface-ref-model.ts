@@ -1,17 +1,16 @@
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
-import type { XYWH } from '../index.js';
-
 export type SurfaceRefProps = {
   reference: string;
-  viewport?: XYWH;
+  refFlavour?: string;
 };
 
 export const SurfaceRefBlockSchema = defineBlockSchema({
   flavour: 'affine:surface-ref',
-  props: () => ({
-    reference: '',
-  }),
+  props: () =>
+    ({
+      reference: '',
+    }) as SurfaceRefProps,
   metadata: {
     version: 1,
     role: 'hub',

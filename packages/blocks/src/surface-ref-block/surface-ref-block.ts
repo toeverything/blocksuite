@@ -111,12 +111,18 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
         this.model.reference
       ) as FrameBlockModel;
 
+      referenceWathcer?.dispose();
       this._referenceModel = 'xywh' in referenceModel ? referenceModel : null;
 
       if (!this._referenceModel) return;
 
       referenceWathcer = referenceModel.propsUpdated.on(() => {
-        this.requestUpdate();
+        if (referenceModel.flavour !== this.model.refFlavour) {
+          this.page.updateBlock(this.model, {
+            refFlavour: referenceModel.flavour,
+          });
+        }
+
         this.updateComplete.then(() => {
           this._refreshViewport();
         });
@@ -127,6 +133,13 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
 
     init();
 
+    this._disposables.add(() => {
+      this.page.slots.blockUpdated.on(({ type, id }) => {
+        if (type === 'delete' && id === this.model.reference) {
+          init();
+        }
+      });
+    });
     this._disposables.add(() => {
       this.model.propsUpdated.on(() => {
         if (this.model.reference !== this._referenceModel?.id) {
