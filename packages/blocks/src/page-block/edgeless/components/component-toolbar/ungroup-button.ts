@@ -4,7 +4,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { UnGroupButtonIcon } from '../../../../icons/index.js';
+import { UnGroupButtonIcon } from '../../../../_common/icons/index.js';
 import { GroupElement } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 

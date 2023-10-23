@@ -4,7 +4,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { AddGroupButtonIcon } from '../../../../icons/index.js';
+import { AddGroupButtonIcon } from '../../../../_common/icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
 @customElement('edgeless-add-group-button')

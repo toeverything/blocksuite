@@ -8,6 +8,7 @@ import type {
   IElementDefaultProps,
   IPhasorElementType,
 } from './edgeless-element.js';
+import { GroupElementDefaultProps } from './group/contants.js';
 import { GroupElement } from './group/group-element.js';
 import { ShapeElementDefaultProps } from './shape/consts.js';
 import { ShapeElement } from './shape/shape-element.js';
@@ -21,13 +22,12 @@ import { TextElement } from './text/text-element.js';
 import type { IText } from './text/types.js';
 
 // eslint-disable-next-line simple-import-sort/exports
-export {
-  GroupElement,
-  BrushElement,
-  ShapeElement,
-  TextElement,
-  ConnectorElement,
-};
+export { BrushElement } from './brush/brush-element.js';
+export { ConnectorElement } from './connector/connector-element.js';
+export { ShapeElement } from './shape/shape-element.js';
+export { TextElement } from './text/text-element.js';
+export { GroupElement } from './group/group-element.js';
+
 export { ConnectorMode } from './connector/types.js';
 export { SHAPE_TEXT_PADDING } from './shape/consts.js';
 export type { ShapeType } from './shape/types.js';

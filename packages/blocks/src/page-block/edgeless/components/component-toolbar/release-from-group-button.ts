@@ -4,7 +4,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { ReleaseFromGroupButtonIcon } from '../../../../icons/index.js';
+import { ReleaseFromGroupButtonIcon } from '../../../../_common/icons/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-release-from-group-button')

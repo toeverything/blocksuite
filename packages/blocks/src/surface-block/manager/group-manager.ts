@@ -1,7 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type { EdgelessElement } from '../../__internal__/index.js';
+import type { EdgelessElement } from '../../_common/utils/index.js';
 import { PhasorElementType } from '../elements/edgeless-element.js';
 import { groupRootId } from '../elements/group/contants.js';
 import { GroupElement } from '../elements/group/group-element.js';
