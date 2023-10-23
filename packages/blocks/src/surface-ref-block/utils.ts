@@ -1,6 +1,7 @@
 import type { Page } from '@blocksuite/store';
 import { html, svg } from 'lit';
 
+import { EdgelessGeneralShapeIcon, FrameIcon } from '../icons/edgeless.js';
 import { getBlockElementByModel } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { DEFAULT_NOTE_HEIGHT } from '../page-block/edgeless/utils/consts.js';

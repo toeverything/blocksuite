@@ -15,7 +15,11 @@ import {
 } from '../__internal__/theme/css-variables.js';
 import { getThemePropertyValue } from '../__internal__/theme/utils.js';
 import { type AbstractEditor } from '../__internal__/utils/types.js';
-import { MoreDeleteIcon } from '../icons/edgeless.js';
+import {
+  EdgelessModeIcon,
+  FrameIcon,
+  MoreDeleteIcon,
+} from '../icons/edgeless.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
 import { getNotesInFrame } from '../page-block/edgeless/frame-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -27,6 +31,11 @@ import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
 import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
+
+export const REF_LABEL_ICON = {
+  'affine:frame': FrameIcon,
+  DEFAULT_NOTE_HEIGHT: EdgelessModeIcon,
+};
 
 const NO_CONTENT_TITLE = {
   'affine:frame': 'Frame',
@@ -117,10 +126,10 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       position: relative;
       overflow: hidden;
       background-color: var(--affine-background-primary-color);
-      background-image: radial-gradient(
+      background: radial-gradient(
         var(--affine-edgeless-grid-color) 1px,
         var(--affine-background-primary-color) 1px
-      );
+      ) lightgray;
     }
 
     .surface-block-portal {
@@ -134,6 +143,59 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       height: 100%;
       width: 100%;
       position: relative;
+    }
+
+    .surface-ref-mask {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .surface-ref-mask:hover {
+      background-color: rgba(211, 211, 211, 0.1);
+    }
+
+    .surface-ref-mask:hover .ref-label {
+      display: flex;
+    }
+
+    .ref-label {
+      display: none;
+    }
+
+    .ref-label {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+
+      gap: 14px;
+
+      font-size: 12px;
+    }
+
+    .ref-label .title {
+      font-weight: 600;
+      font-family: var(--affine-font-family);
+      line-height: 20px;
+
+      display: flex;
+      gap: 4px;
+
+      color: var(--affine-text-secondary-color)
+    }
+
+    .ref-label .title > svg {
+      color: var(--affine-icon-secondary)
+      display: block;
+      width: 20px;
+      height: 20px;
+    }
+
+    .ref-label .suffix {
+      font-weight: 400;
+      color: var(--affine-text-disable-color);
     }
   `;
   @state()
@@ -482,6 +544,20 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     );
   }
 
+  private _renderMask(referenceModel: FrameBlockModel) {
+    return html`
+      <div class="surface-ref-mask">
+        <div class="ref-label">
+          <div class="title">
+            ${REF_LABEL_ICON[referenceModel.flavour ?? 'DEFAULT']}
+            <span>${referenceModel.title}</span>
+          </div>
+          <div class="suffix">from edgeless mode</div>
+        </div>
+      </div>
+    `;
+  }
+
   private _renderEmptyPlaceholder(model: SurfaceRefBlockModel) {
     return html`<div class="surface-empty-placeholder">
       <div class="placeholder-image">${noContentPlaceholder}</div>
@@ -536,6 +612,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
       >
         <!-- attach canvas here -->
       </div>
+      ${this._renderMask(referenceModel)}
     </div>`;
   }
 
