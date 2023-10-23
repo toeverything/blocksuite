@@ -13,6 +13,7 @@ import {
   triggerComponentToolbarAction,
 } from '../utils/actions/edgeless.js';
 import {
+  pressBackspace,
   redoByKeyboard,
   selectAllByKeyboard,
   SHORT_KEY,
@@ -22,6 +23,7 @@ import {
   assertEdgelessNonSelectedRect,
   assertGroupChildrenIds,
   assertGroupIds,
+  assertPhasorElementsCount,
   assertSelectedBound,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
@@ -266,6 +268,78 @@ test.describe('group', () => {
       ]);
       await assertGroupChildrenIds(page, [ids[2]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+    });
+  });
+
+  test.describe('delete', () => {
+    test.beforeEach(async ({ page }) => {
+      await init(page);
+    });
+
+    test('delete root group', async ({ page }) => {
+      await selectAllByKeyboard(page);
+      await triggerComponentToolbarAction(page, 'addGroup');
+      const ids = await getIds(page);
+      await captureHistory(page);
+      await pressBackspace(page);
+      await assertPhasorElementsCount(page, 0);
+
+      await undoByKeyboard(page);
+      await assertPhasorElementsCount(page, 3);
+      await assertGroupIds(page, [ids[2], ids[2], groupRootId]);
+      await assertGroupChildrenIds(page, [ids[0], ids[1]]);
+
+      await redoByKeyboard(page);
+      await assertPhasorElementsCount(page, 0);
+    });
+
+    test('delete sub-element in group', async ({ page }) => {
+      await selectAllByKeyboard(page);
+      await triggerComponentToolbarAction(page, 'addGroup');
+      const ids = await getIds(page);
+      await captureHistory(page);
+      await clickView(page, [50, 50]);
+      await pressBackspace(page);
+      await assertPhasorElementsCount(page, 2);
+      await assertGroupIds(page, [ids[2], groupRootId]);
+      await assertGroupChildrenIds(page, [ids[1]]);
+
+      await undoByKeyboard(page);
+      await assertPhasorElementsCount(page, 3);
+      await assertGroupIds(page, [ids[2], groupRootId, ids[2]]);
+      await assertGroupChildrenIds(page, [ids[0], ids[1]]);
+
+      await redoByKeyboard(page);
+      await assertPhasorElementsCount(page, 2);
+      await assertGroupIds(page, [ids[2], groupRootId]);
+      await assertGroupChildrenIds(page, [ids[1]]);
+    });
+
+    test('delete group in group', async ({ page }) => {
+      await createShapeElement(page, [200, 0], [300, 100], Shape.Square);
+      await selectAllByKeyboard(page);
+      await triggerComponentToolbarAction(page, 'addGroup');
+      await clickView(page, [50, 50]);
+      await shiftClickView(page, [150, 50]);
+      await triggerComponentToolbarAction(page, 'addGroup');
+      await captureHistory(page);
+
+      const ids = await getIds(page);
+      await pressBackspace(page);
+      await assertPhasorElementsCount(page, 2);
+      await assertGroupIds(page, [ids[3], groupRootId]);
+      await assertGroupChildrenIds(page, [ids[2]]);
+
+      await undoByKeyboard(page);
+      await assertPhasorElementsCount(page, 5);
+      await assertGroupIds(page, [ids[3], groupRootId, ids[4], ids[4], ids[3]]);
+      await assertGroupChildrenIds(page, [ids[2], ids[4]]);
+      await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
+
+      await redoByKeyboard(page);
+      await assertPhasorElementsCount(page, 2);
+      await assertGroupIds(page, [ids[3], groupRootId]);
+      await assertGroupChildrenIds(page, [ids[2]]);
     });
   });
 

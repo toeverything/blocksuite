@@ -3,9 +3,9 @@ import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Selectable } from '../../../_common/utils/index.js';
+import { GroupElement } from '../../../surface-block/elements/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
-import { GroupElement } from '../../../surface-block/elements/index.js';
 
 export interface EdgelessSelectionState {
   /**
@@ -202,6 +202,7 @@ export class EdgelessSelectionManager {
   }
 
   setSelection(selection: SurfaceSelection | EdgelessSelectionState) {
+    const { surface } = this.container;
     const instance = this._selection.getInstance(
       'surface',
       selection.elements,
@@ -221,7 +222,7 @@ export class EdgelessSelectionManager {
     } else {
       if (
         this.elements.some(ele => {
-          ele.group !== this._activeGroup?.id;
+          surface.getGroup(ele) !== this._activeGroup?.id;
         }) ||
         this.elements.length === 0
       ) {
@@ -229,7 +230,7 @@ export class EdgelessSelectionManager {
       }
     }
 
-    this.container.surface.refresh();
+    surface.refresh();
   }
 
   setCursor(cursor: CursorSelection | CursorSelectionState) {

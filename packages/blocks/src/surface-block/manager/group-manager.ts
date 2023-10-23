@@ -32,11 +32,6 @@ export function getElementsWithoutGroup(elements: EdgelessElement[]) {
   });
   return Array.from(set);
 }
-
-export function getRootElements(elements: EdgelessElement[]) {
-  return elements.filter(ele => ele.group === groupRootId);
-}
-
 export class GroupManager {
   constructor(private surface: SurfaceBlockComponent) {}
 
@@ -50,13 +45,16 @@ export class GroupManager {
     let isValid = true;
     selectionManager.elements.forEach(ele => {
       map.set(ele.id, true);
-      if (ele.group !== selectionManager.firstElement.group) {
+      if (
+        surface.getGroup(ele) !==
+        surface.getGroup(selectionManager.firstElement)
+      ) {
         isValid = false;
       }
     });
     if (!isValid) return;
 
-    const parentGroup = selectionManager.firstElement.group;
+    const parentGroup = surface.getGroup(selectionManager.firstElement);
     const parent = surface.pickById(parentGroup) as GroupElement;
     if (parent) {
       selectionManager.elements.forEach(ele => {
@@ -77,24 +75,29 @@ export class GroupManager {
     });
   }
 
-  isGroupAncestor(self: EdgelessElement, group: GroupElement) {
-    if (self.group === group.id) return true;
-    while (self.group !== groupRootId) {
-      self = this.surface.pickById(self.group)!;
-      assertExists(self);
-      if (self.group === group.id) return true;
+  isGroupAncestor(ele: EdgelessElement, group: GroupElement) {
+    const { surface } = this;
+    if (surface.getGroup(ele) === group.id) return true;
+    while (surface.getGroup(ele) !== groupRootId) {
+      ele = this.surface.pickById(surface.getGroup(ele))!;
+      assertExists(ele);
+      if (surface.getGroup(ele) === group.id) return true;
     }
     return false;
   }
 
   releaseFromGroup(element: EdgelessElement) {
-    if (element.group === groupRootId) return;
+    if (this.surface.getGroup(element) === groupRootId) return;
 
-    const group = this.surface.pickById(element.group) as GroupElement;
+    const group = this.surface.pickById(
+      this.surface.getGroup(element)
+    ) as GroupElement;
 
     group.removeChild(element.id);
 
-    const parent = this.surface.pickById(group.group) as GroupElement;
+    const parent = this.surface.pickById(
+      this.surface.getGroup(group)
+    ) as GroupElement;
     if (parent) {
       parent.addChild(element.id);
     }
@@ -105,7 +108,7 @@ export class GroupManager {
     const { edgeless } = surface;
     const { selectionManager } = edgeless;
     const elements = group.childrenElements;
-    const parent = surface.pickById(group.group) as GroupElement;
+    const parent = surface.pickById(surface.getGroup(group)) as GroupElement;
     if (parent) {
       parent.removeChild(group.id);
     }
@@ -119,5 +122,9 @@ export class GroupManager {
       editing: false,
       elements: elements.map(ele => ele.id),
     });
+  }
+
+  getRootElements(elements: EdgelessElement[]) {
+    return elements.filter(ele => this.surface.getGroup(ele) === groupRootId);
   }
 }

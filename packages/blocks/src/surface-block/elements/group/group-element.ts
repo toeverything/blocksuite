@@ -23,9 +23,10 @@ export class GroupElement extends SurfaceElement<IGroup> {
 
   override init(): void {
     super.init();
+    const { surface } = this;
     this._cacheId = this.id;
     this.childrenElements.forEach(ele => {
-      ele.group = this.id;
+      surface.setGroup(ele, this.id);
     });
     this._cacheChildren = this.children;
     const children = this.yMap.get('children') as IGroup['children'];
@@ -33,12 +34,12 @@ export class GroupElement extends SurfaceElement<IGroup> {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
         if (action === 'delete') {
           const child = this.surface.pickById(key);
-          assertExists(child);
-          if (child.group === this.id) child.group = this.group;
+          if (child && surface.getGroup(child) === this.id)
+            surface.setGroup(child, surface.getGroup(this));
         } else if (action === 'add') {
           const child = this.surface.pickById(key);
           assertExists(child);
-          child.group = this.id;
+          surface.setGroup(child, this.id);
         } else {
           console.log('unexpected', key);
         }
@@ -100,9 +101,11 @@ export class GroupElement extends SurfaceElement<IGroup> {
   }
 
   override unmount(): void {
+    const { surface } = this;
     this._cacheChildren.forEach(id => {
-      const ele = this.surface.pickById(id);
-      if (ele && ele.group === this._cacheId) ele.group = this.group;
+      const ele = surface.pickById(id);
+      if (ele && surface.getGroup(ele) === this._cacheId)
+        surface.setGroup(ele, surface.getGroup(this));
     });
     super.unmount();
   }

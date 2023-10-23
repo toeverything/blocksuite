@@ -33,7 +33,6 @@ export interface IEdgelessElement {
   connectable: boolean;
   index: string;
   batch: string | null;
-  group: string;
   gridBound: Bound;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;

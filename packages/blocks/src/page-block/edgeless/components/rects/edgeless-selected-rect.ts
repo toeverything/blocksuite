@@ -9,7 +9,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pick } from '../../../../_common/utils/iterable.js';
-import type { EdgelessElement, IPoint, Selectable } from '../../../../_common/utils/types.js';
+import type {
+  EdgelessElement,
+  IPoint,
+  Selectable,
+} from '../../../../_common/utils/types.js';
 import {
   GroupElement,
   normalizeTextBound,

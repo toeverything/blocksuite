@@ -287,7 +287,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         buttons.unshift(this._getUngroupButton());
       }
 
-      if (selection.firstElement.group != groupRootId) {
+      if (this.surface.getGroup(selection.firstElement) != groupRootId) {
         buttons.unshift(
           html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
         );

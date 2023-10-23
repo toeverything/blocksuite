@@ -2,7 +2,6 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
 import { BLOCK_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
-import { groupRootId } from '../surface-block/elements/group/contants.js';
 import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import type { PointLocation } from '../surface-block/index.js';
 import {
@@ -54,15 +53,6 @@ export class ImageBlockModel
   gridBound!: Bound;
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;
-
-  private _group = groupRootId;
-  get group() {
-    return this._group;
-  }
-
-  set group(value) {
-    this._group = value;
-  }
 
   get batch() {
     return BLOCK_BATCH;

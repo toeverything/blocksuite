@@ -1125,7 +1125,9 @@ export async function getGroupIds(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.getElements().map(g => g.group);
+    return container.surface
+      .getElements()
+      .map(g => container.surface.getGroup(g));
   });
 }
 
@@ -1138,6 +1140,14 @@ export async function getGroupChildrenIds(page: Page, index = 0) {
     },
     [index]
   );
+}
+
+export async function getPhasorElementsCount(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElements().length;
+  });
 }
 
 export async function getIds(page: Page) {

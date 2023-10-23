@@ -10,7 +10,6 @@ import {
   GroupElement,
   ShapeStyle,
 } from '../../surface-block/index.js';
-import { getRootElements } from '../../surface-block/manager/group-manager.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
@@ -139,14 +138,15 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           }
 
           ctx.get('defaultState').event.preventDefault();
+          const { surface } = this.pageElement;
           this.pageElement.selectionManager.setSelection({
             elements: [
-              ...getRootElements(this.pageElement.surface.blocks).map(
-                block => block.id
-              ),
-              ...getRootElements(this.pageElement.surface.getElements()).map(
-                el => el.id
-              ),
+              ...surface.group
+                .getRootElements(this.pageElement.surface.blocks)
+                .map(block => block.id),
+              ...surface.group
+                .getRootElements(this.pageElement.surface.getElements())
+                .map(el => el.id),
             ],
             editing: false,
           });

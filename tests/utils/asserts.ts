@@ -38,6 +38,7 @@ import {
   getEdgelessSelectedRectModel,
   getGroupChildrenIds,
   getGroupIds,
+  getPhasorElementsCount,
   getSelectedBound,
   getZoomLevel,
 } from './actions/edgeless.js';
@@ -926,6 +927,11 @@ export async function assertGroupChildrenIds(
 ) {
   const ids = await getGroupChildrenIds(page, index);
   expect(ids).toEqual(expected);
+}
+
+export async function assertPhasorElementsCount(page: Page, expected: number) {
+  const number = await getPhasorElementsCount(page);
+  expect(number).toEqual(expected);
 }
 
 export function assertBound(received: Bound, expected: Bound) {

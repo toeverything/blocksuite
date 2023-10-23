@@ -150,6 +150,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     id,
     IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
   >();
+  private _groupMap = new Map<string, string>(); // { blockId: groupId }
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
@@ -191,6 +192,20 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
     return this.getblocks(flavour).sort(this.compare);
+  }
+
+  getGroup(value: id | EdgelessElement) {
+    const id = typeof value === 'string' ? value : value.id;
+    return this._groupMap.get(id) ?? groupRootId;
+  }
+
+  setGroup(key: id | EdgelessElement, groupId: string) {
+    const id = typeof key === 'string' ? key : key.id;
+    if (groupId === groupRootId) {
+      this._groupMap.delete(id);
+      return;
+    }
+    this._groupMap.set(id, groupId);
   }
 
   get blocks() {
@@ -698,6 +713,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     } else if (type.action === 'delete') {
       const element = this._elements.get(id);
       assertExists(element);
+      const group = this.pickById(this.getGroup(id));
+      if (group) {
+        (<GroupElement>group).removeChild(id);
+      }
       element.unmount();
       this._elements.delete(id);
       this.deleteElementLocalRecord(id);
@@ -934,7 +953,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
     } else if (picked) {
       let index = results.length - 1;
-      while (picked.group !== groupRootId) {
+      while (this.getGroup(picked.id) !== groupRootId) {
         if (--index < 0) {
           picked = null;
           break;
@@ -952,7 +971,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       ...this.blocks,
     ];
     const picked = candidates.filter(
-      element => element.boxSelect(bound) && element.group === groupRootId
+      element =>
+        element.boxSelect(bound) && this.getGroup(element.id) === groupRootId
     );
     return picked;
   }
