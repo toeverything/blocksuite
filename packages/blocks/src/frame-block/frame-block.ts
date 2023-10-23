@@ -27,7 +27,10 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     if (!this._titleElement) return new Bound();
     const { viewport } = this._surface;
     const { zoom } = viewport;
+    const rect = viewport.boundingClientRect;
     const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
+    bound.x -= rect.x;
+    bound.y -= rect.y;
     bound.h += FrameBlockComponent.offset;
     bound.h /= zoom;
     bound.w /= zoom;
