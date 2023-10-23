@@ -594,6 +594,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
           : undefined,
         backgroundSize: `${gap}px ${gap}px`,
       })}
+      @click=${this.focusBlock}
     >
       ${this._referenceModel?.flavour === 'affine:frame'
         ? html`<div
@@ -605,11 +606,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
             ${this._renderTopLevelBlocks()}
           </div>`
         : nothing}
-      <div
-        class="surface-canvas-container"
-        @dblclick=${this.viewInEdgeless}
-        @click=${this.focusBlock}
-      >
+      <div class="surface-canvas-container" @dblclick=${this.viewInEdgeless}>
         <!-- attach canvas here -->
       </div>
       ${this._renderMask(referenceModel)}

@@ -131,7 +131,8 @@ export const getClosestBlockByPoint = (
   point: Point
 ) => {
   const closestNoteBlock = getClosestNoteBlock(page, pageBlock, point);
-  if (!closestNoteBlock) return null;
+  if (!closestNoteBlock || closestNoteBlock.closest('.affine-surface-ref'))
+    return null;
   const noteRect = Rect.fromDOM(closestNoteBlock);
   const blockElement = getClosestBlockElementByPoint(point, {
     container: closestNoteBlock,
