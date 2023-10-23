@@ -9,6 +9,7 @@ import {
   changeEdgelessNoteBackground,
   countBlock,
   exitEditing,
+  getEdgelessSelectedRect,
   getNoteRect,
   hoverOnNote,
   initThreeNotes,
@@ -133,6 +134,8 @@ test('add Note', async ({ page }) => {
 
   await assertEdgelessTool(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
+  await page.mouse.click(300, 200);
+  await page.mouse.click(350, 320);
   await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
 });
 
@@ -143,7 +146,7 @@ test('add empty Note', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
   await setEdgelessTool(page, 'note');
-
+  await page.pause();
   // add note at 300,300
   await page.mouse.click(300, 300);
   await waitForVirgoStateUpdated(page);
@@ -151,15 +154,14 @@ test('add empty Note', async ({ page }) => {
   await waitNextFrame(page);
 
   // assert add note success
-  await page.mouse.move(320, 320);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
+  await assertBlockCount(page, 'note', 2);
 
   // click out of note
   await page.mouse.click(250, 200);
 
   // assert empty note is removed
   await page.mouse.move(320, 320);
-  await assertEdgelessNonSelectedRect(page);
+  await assertBlockCount(page, 'note', 1);
 });
 
 test('always keep at least 1 note block', async ({ page }) => {

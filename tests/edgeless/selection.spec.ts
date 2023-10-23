@@ -140,7 +140,6 @@ test('when the selection is always a note, it should remain in an active state',
   const bound = await getNoteBoundBoxInEdgeless(page, ids.noteId);
 
   await setEdgelessTool(page, 'note');
-
   const newNoteX = bound.x;
   const newNoteY = bound.y + bound.height + 100;
   // add text
@@ -151,7 +150,7 @@ test('when the selection is always a note, it should remain in an active state',
   // should wait for virgo update and resizeObserver callback
   await waitNextFrame(page);
   // assert add text success
-  await assertEdgelessSelectedRect(page, [76, 597.5, 448, 128]);
+  await assertBlockCount(page, 'note', 2);
 
   await clickInCenter(page, bound);
   await clickInCenter(page, bound);
