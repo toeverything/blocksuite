@@ -153,13 +153,18 @@ export const createAsyncCallRPCProviderCreator = (
       const handler: SubdocsHandler = event => {
         event.added.forEach(doc => docMap.set(doc.guid, doc));
         event.added.forEach(doc => {
-          rpc.queryDocState(doc.guid).then(update => {
-            if (!update) {
-              return;
-            }
-            Y.applyUpdate(doc, update, channel);
-            doc.emit('load', []);
-          });
+          rpc
+            .queryDocState(doc.guid)
+            .then(update => {
+              if (!update) {
+                return;
+              }
+              Y.applyUpdate(doc, update, channel);
+              doc.emit('load', []);
+            })
+            .catch(e => {
+              console.error(e);
+            });
           doc.on('update', createOrGetUpdateHandler(doc));
         });
 
@@ -217,7 +222,11 @@ export const createAsyncCallRPCProviderCreator = (
       if (update !== false) {
         Y.applyUpdate(doc, update, channel);
       }
-      doc.subdocs.forEach(initDoc);
+      doc.subdocs.forEach(doc => {
+        initDoc(doc).catch(e => {
+          console.error(e);
+        });
+      });
     }
 
     function unregisterDoc(doc: Doc) {
@@ -245,7 +254,10 @@ export const createAsyncCallRPCProviderCreator = (
         initDoc(doc).catch(console.error);
         rpc
           .queryAwareness()
-          .then(update => applyAwarenessUpdate(awareness, update, channel));
+          .then(update => applyAwarenessUpdate(awareness, update, channel))
+          .catch(e => {
+            console.error(e);
+          });
         awareness.on('update', awarenessUpdateHandler);
       },
       disconnect() {

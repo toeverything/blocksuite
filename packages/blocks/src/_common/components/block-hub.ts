@@ -821,7 +821,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
     if (affineType) {
       data.type = affineType;
     }
-    this._onClickCardCallback(data);
+    this._onClickCardCallback(data).catch(e => {
+      console.error(e);
+    });
   };
 
   public toggleMenu() {
@@ -1017,7 +1019,9 @@ export class BlockHub extends WithDisposable(ShadowlessElement) {
       this._indicator?.rect?.min ?? new Point(e.clientX, e.clientY),
       this._lastDroppingTarget,
       this._lastDroppingType
-    );
+    ).catch(e => {
+      console.error(e);
+    });
   };
 
   private _onCardMouseDown = (_: Event) => {

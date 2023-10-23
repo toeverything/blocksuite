@@ -360,8 +360,10 @@ export class VEditor<
       );
     }
 
-    Promise.resolve().then(() => {
-      this.deltaService.render();
+    queueMicrotask(() => {
+      this.deltaService.render().catch(e => {
+        console.error(e);
+      });
     });
   };
 

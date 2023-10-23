@@ -203,8 +203,13 @@ export const createEditor = (page: Page, element: HTMLElement) => {
 
   element.append(editor);
 
-  editor.createBlockHub().then(blockHub => {
-    document.body.appendChild(blockHub);
-  });
+  editor
+    .createBlockHub()
+    .then(blockHub => {
+      document.body.appendChild(blockHub);
+    })
+    .catch(e => {
+      console.error(e);
+    });
   return editor;
 };

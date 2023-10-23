@@ -224,7 +224,9 @@ export function handleIndent(page: Page, model: ExtendedModel, offset = 0) {
     } as Partial<ListBlockModel>);
   }
 
-  asyncSetVRange(model, { index: offset, length: 0 });
+  asyncSetVRange(model, { index: offset, length: 0 }).catch(e => {
+    console.error(e);
+  });
 }
 
 export function handleMultiBlockIndent(page: Page, models: BaseBlockModel[]) {
@@ -309,7 +311,9 @@ export function handleUnindent(page: Page, model: ExtendedModel, offset = 0) {
       page.updateBlock(sibling, {});
     });
 
-  asyncSetVRange(model, { index: offset, length: 0 });
+  asyncSetVRange(model, { index: offset, length: 0 }).catch(e => {
+    console.error(e);
+  });
 }
 
 export function handleMultiBlockOutdent(page: Page, models: BaseBlockModel[]) {
@@ -575,6 +579,8 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
     asyncSetVRange(previousSibling, {
       index: lengthBeforeJoin,
       length: 0,
+    }).catch(e => {
+      console.error(e);
     });
     return true;
   }

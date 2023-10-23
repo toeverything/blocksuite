@@ -109,7 +109,9 @@ export const createKeydownObserver = ({
       (!isControlledKeyboardEvent(e) && e.key.length === 1) ||
       e.isComposing
     ) {
-      updateQuery();
+      updateQuery().catch(e => {
+        console.error(e);
+      });
       return;
     }
 
@@ -122,7 +124,9 @@ export const createKeydownObserver = ({
         if (!query.length) {
           abortController.abort();
         }
-        updateQuery();
+        updateQuery().catch(e => {
+          console.error(e);
+        });
         return;
       }
       case 'Enter': {
@@ -183,6 +187,7 @@ export const createKeydownObserver = ({
   );
 
   // Fix composition input
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   target.addEventListener('input', updateQuery, {
     signal: abortController.signal,
   });

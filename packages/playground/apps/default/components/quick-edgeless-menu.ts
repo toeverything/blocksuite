@@ -321,42 +321,58 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf();
+    this.contentParser.exportPdf().catch(e => {
+      console.error(e);
+    });
   }
 
   private _exportHtml() {
-    this.contentParser.exportHtml();
+    this.contentParser.exportHtml().catch(e => {
+      console.error(e);
+    });
   }
 
   private _exportMarkDown() {
-    this.contentParser.exportMarkdown();
+    this.contentParser.exportMarkdown().catch(e => {
+      console.error(e);
+    });
   }
 
   private _exportMarkDownExperimentalAdapter() {
     const job = new Job({ workspace: this.workspace });
-    job.pageToSnapshot(window.page).then(snapshot => {
-      new MarkdownAdapter()
-        .fromPageSnapshot({
-          snapshot,
-          assets: job.assetsManager,
-        })
-        .then(markdown => {
-          const blob = new Blob([markdown], { type: 'plain/text' });
-          const fileURL = URL.createObjectURL(blob);
-          const element = document.createElement('a');
-          element.setAttribute('href', fileURL);
-          element.setAttribute('download', 'export.md');
-          element.style.display = 'none';
-          document.body.appendChild(element);
-          element.click();
-          document.body.removeChild(element);
-          URL.revokeObjectURL(fileURL);
-        });
-    });
+    job
+      .pageToSnapshot(window.page)
+      .then(snapshot => {
+        new MarkdownAdapter()
+          .fromPageSnapshot({
+            snapshot,
+            assets: job.assetsManager,
+          })
+          .then(markdown => {
+            const blob = new Blob([markdown], { type: 'plain/text' });
+            const fileURL = URL.createObjectURL(blob);
+            const element = document.createElement('a');
+            element.setAttribute('href', fileURL);
+            element.setAttribute('download', 'export.md');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            URL.revokeObjectURL(fileURL);
+          })
+          .catch(e => {
+            console.error(e);
+          });
+      })
+      .catch(e => {
+        console.error(e);
+      });
   }
 
   private _exportPng() {
-    this.contentParser.exportPng();
+    this.contentParser.exportPng().catch(e => {
+      console.error(e);
+    });
   }
 
   private async _exportSnapshot() {

@@ -144,4 +144,6 @@ async function main() {
   document.body.prepend(exampleList);
 }
 
-main();
+main().catch(e => {
+  console.error(e);
+});

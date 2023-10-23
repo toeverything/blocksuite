@@ -30,7 +30,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
             let found = false;
             let count = 0;
             return new Promise(res => {
-              this._storages.forEach(storage =>
+              this._storages.forEach(storage => {
                 storage.crud
                   .get(id)
                   .then(result => {
@@ -47,8 +47,8 @@ export const blob = addOnFactory<keyof BlobAddon>(
                     if (++count === this._storages.length && !found) {
                       res(null);
                     }
-                  })
-              );
+                  });
+              });
             });
           },
           set: async (value, key) => {

@@ -145,6 +145,7 @@ export class EditorContainer
       'dragover',
       this.fileDropManager.onDragOver
     );
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     this._disposables.addFromEvent(this, 'drop', this.fileDropManager.onDrop);
 
     this.themeObserver.observe(document.documentElement);
@@ -157,7 +158,7 @@ export class EditorContainer
 
   override firstUpdated() {
     // todo: refactor to a better solution
-    getServiceOrRegister('affine:code');
+    void getServiceOrRegister('affine:code');
     if (this.mode === 'page') {
       setTimeout(() => {
         if (this.autofocus) {

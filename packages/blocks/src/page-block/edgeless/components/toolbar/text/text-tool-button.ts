@@ -81,9 +81,13 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.updateComplete.then(() => {
-      this._tryLoadTextStateLocalColor();
-    });
+    this.updateComplete
+      .then(() => {
+        this._tryLoadTextStateLocalColor();
+      })
+      .catch(e => {
+        console.error(e);
+      });
     this._disposables.add(
       this.edgeless.slots.edgelessToolUpdated.on(newTool => {
         if (newTool.type === 'text') {

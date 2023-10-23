@@ -48,6 +48,7 @@ export class VirgoEventService<TextAttributes extends BaseTextAttributes> {
     this.editor.disposables.addFromEvent(
       rootElement,
       'compositionend',
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       this._onCompositionEnd
     );
     this.editor.disposables.addFromEvent(

@@ -1,19 +1,10 @@
 import { IS_FIREFOX } from '@blocksuite/global/config';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { type VirgoLine, type VRange } from '@blocksuite/virgo';
+import { type VRange } from '@blocksuite/virgo';
 
-import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
-import { SCROLL_THRESHOLD } from '../consts.js';
 import { matchFlavours } from './model.js';
-import {
-  asyncGetRichTextByModel,
-  getBlockElementByModel,
-  getDocPage,
-  getDocPageByElement,
-  getPageBlock,
-} from './query.js';
-import { Rect } from './rect.js';
+import { asyncGetRichTextByModel, getDocPage } from './query.js';
 import type { SelectionPosition } from './types.js';
 
 declare global {
@@ -29,7 +20,10 @@ declare global {
   }
 }
 
-export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
+export async function asyncSetVRange(
+  model: BaseBlockModel,
+  vRange: VRange
+): Promise<void> {
   const richText = await asyncGetRichTextByModel(model);
   if (!richText) {
     return;
@@ -49,7 +43,9 @@ export function asyncFocusRichText(
   const model = page.getBlockById(id);
   assertExists(model);
   if (matchFlavours(model, ['affine:divider'])) return;
-  return asyncSetVRange(model, vRange);
+  asyncSetVRange(model, vRange).catch(e => {
+    console.error(e);
+  });
 }
 
 function caretRangeFromPoint(clientX: number, clientY: number): Range | null {
@@ -85,70 +81,6 @@ function caretRangeFromPoint(clientX: number, clientY: number): Range | null {
   return range;
 }
 
-function setStartRange(editableContainer: Element) {
-  const newRange = document.createRange();
-  let firstNode = editableContainer.firstChild;
-  while (firstNode?.firstChild) {
-    firstNode = firstNode.firstChild;
-  }
-  if (firstNode) {
-    newRange.setStart(firstNode, 0);
-    newRange.setEnd(firstNode, 0);
-  }
-  return newRange;
-}
-
-function setEndRange(editableContainer: Element) {
-  const newRange = document.createRange();
-  let lastNode = editableContainer.lastChild;
-  while (lastNode?.lastChild) {
-    lastNode = lastNode.lastChild;
-  }
-  if (lastNode) {
-    newRange.setStart(lastNode, lastNode.textContent?.length || 0);
-    newRange.setEnd(lastNode, lastNode.textContent?.length || 0);
-  }
-  return newRange;
-}
-
-async function setNewTop(y: number, editableContainer: Element, zoom = 1) {
-  const scrollContainer = editableContainer.closest('.affine-doc-viewport');
-  const { top, bottom } = Rect.fromDOM(editableContainer);
-  const { clientHeight } = document.documentElement;
-  const lineHeight =
-    (Number(
-      window.getComputedStyle(editableContainer).lineHeight.replace(/\D+$/, '')
-    ) || 16) * zoom;
-
-  const compare = bottom < y;
-  switch (compare) {
-    case true: {
-      let finalBottom = bottom;
-      if (bottom < SCROLL_THRESHOLD && scrollContainer) {
-        scrollContainer.scrollTop =
-          scrollContainer.scrollTop - SCROLL_THRESHOLD + bottom;
-        // set scroll may have an animation, wait for over
-        requestAnimationFrame(() => {
-          finalBottom = editableContainer.getBoundingClientRect().bottom;
-        });
-      }
-      return finalBottom - lineHeight / 2;
-    }
-    case false: {
-      let finalTop = top;
-      if (scrollContainer && top > clientHeight - SCROLL_THRESHOLD) {
-        scrollContainer.scrollTop =
-          scrollContainer.scrollTop + (top + SCROLL_THRESHOLD - clientHeight);
-        // set scroll may has a animation, wait for over
-        requestAnimationFrame(() => {
-          finalTop = editableContainer.getBoundingClientRect().top;
-        });
-      }
-      return finalTop + lineHeight / 2;
-    }
-  }
-}
-
 /**
  * As the title is a text area, this function does not yet have support for `SelectionPosition`.
  */
@@ -167,67 +99,24 @@ export function focusTitle(page: Page, index = Infinity, len = 0) {
   pageComponent.titleVEditor.setVRange({ index, length: len });
 }
 
-export async function focusRichText(
-  editableContainer: Element,
-  position: SelectionPosition = 'end',
-  zoom = 1
-) {
-  const isDocPage = !!getDocPageByElement(editableContainer);
-  if (isDocPage) {
-    editableContainer
-      .querySelector<VirgoLine>('v-line')
-      ?.scrollIntoView({ block: 'nearest' });
-  }
-
-  // TODO optimize how get scroll container
-  const { left, right } = Rect.fromDOM(editableContainer);
-
-  let range: Range | null = null;
-  switch (position) {
-    case 'start':
-      range = setStartRange(editableContainer);
-      break;
-    case 'end':
-      range = setEndRange(editableContainer);
-      break;
-    default: {
-      const { x, y } = position;
-      let newLeft = x;
-      const newTop = await setNewTop(y, editableContainer, zoom);
-      if (x <= left) {
-        newLeft = left + 1;
-      }
-      if (x >= right) {
-        newLeft = right - 1;
-      }
-      range = caretRangeFromPoint(newLeft, newTop);
-      break;
-    }
-  }
-  resetNativeSelection(range);
-}
-
-/**
- * @deprecated Use `selectionManager.set` instead.
- */
 export function focusBlockByModel(
   model: BaseBlockModel,
-  position: SelectionPosition = 'end',
-  zoom = 1
+  position: SelectionPosition = 'end'
 ) {
   if (matchFlavours(model, ['affine:note', 'affine:page'])) {
     throw new Error("Can't focus note or page!");
   }
 
-  const pageBlock = getPageBlock(model) as DocPageBlockComponent;
-  assertExists(pageBlock);
-
-  const element = getBlockElementByModel(model);
-  assertExists(element);
-  const editableContainer = element?.querySelector('[contenteditable]');
-  if (editableContainer) {
-    focusRichText(editableContainer, position, zoom);
-  }
+  asyncFocusRichText(
+    model.page,
+    model.id,
+    position === 'start'
+      ? { index: 0, length: 0 }
+      : {
+          index: model.text?.length ?? 0,
+          length: 0,
+        }
+  );
 }
 
 export function resetNativeSelection(range: Range | null) {

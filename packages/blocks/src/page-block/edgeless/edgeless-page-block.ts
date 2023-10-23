@@ -500,15 +500,19 @@ export class EdgelessPageBlockComponent extends BlockElement<
         editing: false,
       });
       // Waiting dom updated, `note mask` is removed
-      this.updateComplete.then(() => {
-        if (blockId) {
-          asyncFocusRichText(this.page, blockId);
-        } else if (point) {
-          // Cannot reuse `handleNativeRangeClick` directly here,
-          // since `retargetClick` will re-target to pervious editor
-          handleNativeRangeAtPoint(point.x, point.y);
-        }
-      });
+      this.updateComplete
+        .then(() => {
+          if (blockId) {
+            asyncFocusRichText(this.page, blockId);
+          } else if (point) {
+            // Cannot reuse `handleNativeRangeClick` directly here,
+            // since `retargetClick` will re-target to pervious editor
+            handleNativeRangeAtPoint(point.x, point.y);
+          }
+        })
+        .catch(e => {
+          console.error(e);
+        });
     });
   }
 

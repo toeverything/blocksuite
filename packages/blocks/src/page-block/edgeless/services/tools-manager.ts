@@ -159,7 +159,9 @@ export class EdgelessToolsManager {
       frameNavigator: new PresentToolController(this.container),
     };
 
-    this._initMouseAndWheelEvents();
+    this._initMouseAndWheelEvents().catch(e => {
+      console.error(e);
+    });
   }
 
   private _updateLastMousePos(e: PointerEventState) {

@@ -39,7 +39,11 @@ export function updateBlockElementType(
     if (!model) {
       throw new Error('Failed to get model after merge code block!');
     }
-    asyncSetVRange(model, { index: model.text?.length ?? 0, length: 0 });
+    asyncSetVRange(model, { index: model.text?.length ?? 0, length: 0 }).catch(
+      e => {
+        console.error(e);
+      }
+    );
     return [model];
   }
   if (flavour === 'affine:divider') {
@@ -106,9 +110,13 @@ export function updateBlockElementType(
         : null,
     });
 
-    Promise.all(allTextUpdated).then(() => {
-      selectionManager.setGroup('note', [newTextSelection]);
-    });
+    Promise.all(allTextUpdated)
+      .then(() => {
+        selectionManager.setGroup('note', [newTextSelection]);
+      })
+      .catch(e => {
+        console.error(e);
+      });
     return newModels;
   }
 

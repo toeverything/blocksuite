@@ -97,12 +97,16 @@ export class EdgelessClipboardController implements ReactiveController {
       const elements = surfaceSelection.elements;
       if (elements.length === 0) return false;
 
-      this._onCopy(ctx, surfaceSelection);
+      this._onCopy(ctx, surfaceSelection).catch(e => {
+        console.error(e);
+      });
       return true;
     });
 
     this.host.handleEvent('paste', ctx => {
-      this._onPaste(ctx);
+      this._onPaste(ctx).catch(e => {
+        console.error(e);
+      });
       return true;
     });
 
@@ -131,13 +135,17 @@ export class EdgelessClipboardController implements ReactiveController {
       return;
     }
 
-    this.std.clipboard.writeToClipboard(async _items => {
-      const data = await prepareClipboardData(elements, this.std);
-      return {
-        ..._items,
-        [BLOCKSUITE_SURFACE]: JSON.stringify(data),
-      };
-    });
+    this.std.clipboard
+      .writeToClipboard(async _items => {
+        const data = await prepareClipboardData(elements, this.std);
+        return {
+          ..._items,
+          [BLOCKSUITE_SURFACE]: JSON.stringify(data),
+        };
+      })
+      .catch(e => {
+        console.error(e);
+      });
   };
 
   private _onPaste = async (_context: UIEventStateContext) => {
@@ -180,7 +188,9 @@ export class EdgelessClipboardController implements ReactiveController {
 
     const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
-    this._pasteShapesAndBlocks(elementsRawData);
+    this._pasteShapesAndBlocks(elementsRawData).catch(e => {
+      console.error(e);
+    });
   };
 
   private _onCut = (_context: UIEventStateContext) => {
@@ -190,7 +200,9 @@ export class EdgelessClipboardController implements ReactiveController {
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, state);
+    this._onCopy(_context, state).catch(e => {
+      console.error(e);
+    });
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isPhasorElementWithText(elements[0])) return;
@@ -511,12 +523,16 @@ export class EdgelessClipboardController implements ReactiveController {
       );
       assertExists(blob);
 
-      this.std.clipboard.writeToClipboard(async _items => {
-        return {
-          ..._items,
-          [IMAGE_PNG]: blob,
-        };
-      });
+      this.std.clipboard
+        .writeToClipboard(async _items => {
+          return {
+            ..._items,
+            [IMAGE_PNG]: blob,
+          };
+        })
+        .catch(e => {
+          console.error(e);
+        });
     }
   }
 

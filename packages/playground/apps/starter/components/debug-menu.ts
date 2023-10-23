@@ -220,14 +220,18 @@ export class DebugMenu extends ShadowlessElement {
     _type: string
   ) {
     e.preventDefault();
-    this.blockTypeDropdown.hide();
+    this.blockTypeDropdown.hide().catch(e => {
+      console.error(e);
+    });
 
     // FIXME: fix this
   }
 
   private _addCodeBlock(e: PointerEvent) {
     e.preventDefault();
-    this.blockTypeDropdown.hide();
+    this.blockTypeDropdown.hide().catch(e => {
+      console.error(e);
+    });
 
     // FIXME: fix this
     // const blockRange = getCurrentBlockRange(this.page);
