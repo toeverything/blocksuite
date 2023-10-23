@@ -77,7 +77,7 @@ export function normalizeUrl(url: string) {
  *
  * For more detail see https://www.ietf.org/rfc/rfc1738.txt
  */
-export const isValidUrl = (str: string) => {
+export function isValidUrl(str: string) {
   if (!str) {
     return false;
   }
@@ -92,7 +92,7 @@ export const isValidUrl = (str: string) => {
     return true;
   }
   return URL_REGEX.test(url);
-};
+}
 
 // https://en.wikipedia.org/wiki/Top-level_domain
 const COMMON_TLDS = [
@@ -118,18 +118,18 @@ const COMMON_TLDS = [
   'pro',
 ];
 
-const isCommonTLD = (url: URL) => {
+function isCommonTLD(url: URL) {
   const tld = url.hostname.split('.').pop();
   if (!tld) {
     return false;
   }
   return COMMON_TLDS.includes(tld);
-};
+}
 
 /**
  * Assuming the user will input anything, we need to check rigorously.
  */
-export const isStrictUrl = (str: string) => {
+export function isStrictUrl(str: string) {
   if (!isValidUrl(str)) {
     return false;
   }
@@ -138,4 +138,4 @@ export const isStrictUrl = (str: string) => {
     return true;
   }
   return false;
-};
+}

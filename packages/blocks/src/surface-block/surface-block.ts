@@ -23,7 +23,7 @@ import {
   type Selectable,
   sendBackward,
   type TopLevelBlockModel,
-} from '../_legacy/index.js';
+} from '../_common/utils/index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';

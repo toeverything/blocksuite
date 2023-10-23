@@ -18,7 +18,7 @@ import {
 import type {
   EdgelessTool,
   ShapeToolState,
-} from '../../../../../_legacy/index.js';
+} from '../../../../../_common/utils/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {

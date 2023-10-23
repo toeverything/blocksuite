@@ -5,8 +5,6 @@ import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import type { Loader } from '../../_common/components/loader.js';
 import type { RichText } from '../../_common/components/rich-text/rich-text.js';
-import { matchFlavours } from '../../_legacy/utils/model.js';
-import { type AbstractEditor } from '../../_legacy/utils/types.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -16,7 +14,9 @@ import {
   BLOCK_ID_ATTR as ATTR,
 } from '../consts.js';
 import { clamp } from './math.js';
+import { matchFlavours } from './model.js';
 import type { Point, Rect } from './rect.js';
+import { type AbstractEditor } from './types.js';
 
 const ATTR_SELECTOR = `[${ATTR}]`;
 
@@ -188,30 +188,15 @@ export function getEditorContainer(page: Page): AbstractEditor {
   return editorContainer as AbstractEditor;
 }
 
-export const getClosestEditorContainer = (ele: Element) => {
+function getClosestEditorContainer(ele: Element) {
   const editorContainer = ele.closest('editor-container');
   assertExists(editorContainer);
   return editorContainer as AbstractEditor;
-};
-
-export function getEditorContainerByElement(ele: Element) {
-  // EditorContainer
-  const editorContainer = ele.closest('editor-container');
-  assertExists(editorContainer);
-  return editorContainer;
 }
 
 export function isPageMode(page: Page) {
   const editor = getEditorContainer(page);
   if (!('mode' in editor)) {
-    throw new Error('Failed to check page mode! Editor mode is not exists!');
-  }
-  return editor.mode === 'page';
-}
-
-export function checkIsPageModeByDom(ele: Element) {
-  const editor = ele?.closest('editor-container');
-  if (!editor || !('mode' in editor)) {
     throw new Error('Failed to check page mode! Editor mode is not exists!');
   }
   return editor.mode === 'page';
@@ -356,7 +341,7 @@ export function isDatabaseInput(element: unknown): boolean {
  * Returns `16` if node is contained in the parent.
  * Otherwise return `0`.
  */
-export function contains(parent: Element, node: Element) {
+function contains(parent: Element, node: Element) {
   return (
     parent.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_CONTAINED_BY
   );
@@ -372,7 +357,7 @@ function hasBlockId(element: Element): element is BlockComponentElement {
 /**
  * Returns `true` if element is doc page.
  */
-export function isDocPage({ tagName }: Element) {
+function isDocPage({ tagName }: Element) {
   return tagName === 'AFFINE-DOC-PAGE';
 }
 
@@ -399,45 +384,27 @@ function isPageOrNoteOrSurface(element: Element) {
   );
 }
 
-/**
- * Returns `true` if element is not page or note.
- */
 function isBlock(element: BlockComponentElement) {
   return !isPageOrNoteOrSurface(element);
 }
 
-/**
- * Returns `true` if element is image.
- */
-export function isImage({ tagName }: Element) {
+function isImage({ tagName }: Element) {
   return tagName === 'AFFINE-IMAGE';
 }
 
-/**
- * Returns `true` if element is note.
- */
 function isNote({ tagName }: Element) {
   return tagName === 'AFFINE-NOTE';
 }
 
-/**
- * Returns `true` if element is surface.
- */
 function isSurface({ tagName }: Element) {
   return tagName === 'AFFINE-SURFACE';
 }
 
-/**
- * Returns `true` if element is database.
- */
 function isDatabase({ tagName }: Element) {
   return tagName === 'AFFINE-DATABASE-TABLE' || tagName === 'AFFINE-DATABASE';
 }
 
-/**
- * Returns `true` if element is edgeless child note.
- */
-export function isEdgelessChildNote({ classList }: Element) {
+function isEdgelessChildNote({ classList }: Element) {
   return classList.contains('edgeless-block-portal-note');
 }
 
@@ -653,17 +620,6 @@ export function getModelByBlockElement(element: Element) {
 }
 
 /**
- * Returns all block elements in an element.
- */
-export function getBlockElementsByElement(
-  element: BlockComponentElement | Document | Element = document
-) {
-  return Array.from(
-    element.querySelectorAll<BlockComponentElement>(ATTR_SELECTOR)
-  ).filter(isBlock);
-}
-
-/**
  * Returns the block element by id with the parent.
  */
 export function getBlockElementById(
@@ -745,10 +701,7 @@ function findBlockElement(elements: Element[], parent?: Element) {
   return null;
 }
 
-/**
- * query current mode whether is light or dark
- */
-export function queryCurrentMode(): 'light' | 'dark' {
+export function getThemeMode(): 'light' | 'dark' {
   const mode = getComputedStyle(document.documentElement).getPropertyValue(
     '--affine-theme-mode'
   );
@@ -773,21 +726,21 @@ export function getHoveringNote(point: Point) {
 /**
  * Gets the table of the database.
  */
-export function getDatabaseBlockTableElement(element: Element) {
+function getDatabaseBlockTableElement(element: Element) {
   return element.querySelector('.affine-database-block-table');
 }
 
 /**
  * Gets the column header of the database.
  */
-export function getDatabaseBlockColumnHeaderElement(element: Element) {
+function getDatabaseBlockColumnHeaderElement(element: Element) {
   return element.querySelector('.affine-database-column-header');
 }
 
 /**
  * Gets the rows of the database.
  */
-export function getDatabaseBlockRowsElement(element: Element) {
+function getDatabaseBlockRowsElement(element: Element) {
   return element.querySelector('.affine-database-block-rows');
 }
 

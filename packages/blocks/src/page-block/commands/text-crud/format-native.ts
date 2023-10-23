@@ -5,7 +5,7 @@ import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
 import { FORMAT_NATIVE_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
-import { BLOCK_ID_ATTR } from '../../../_legacy/consts.js';
+import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
 import type { Flavour } from '../../../models.js';
 
 // for native range

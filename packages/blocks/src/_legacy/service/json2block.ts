@@ -8,8 +8,8 @@ import {
   asyncGetBlockElementByModel,
   asyncSetVRange,
   type SerializedBlock,
-} from '../utils/index.js';
-import type { BlockModels } from '../utils/model.js';
+} from '../../_common/utils/index.js';
+import type { BlockModels } from '../../_common/utils/model.js';
 import { getService } from './singleton.js';
 
 export async function json2block(

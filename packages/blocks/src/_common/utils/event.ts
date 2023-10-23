@@ -1,49 +1,30 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import { IS_IOS, IS_MAC } from '@blocksuite/global/config';
 
-import { matchFlavours } from './model.js';
-import type { Detail } from './types.js';
-
-/**
- * Whether the block supports rendering its children.
- */
-export function supportsChildren(model: BaseBlockModel): boolean {
-  if (
-    matchFlavours(model, [
-      // 'affine:database',
-      'affine:image',
-      'affine:divider',
-      'affine:code',
-    ])
-  ) {
-    return false;
+export function isPinchEvent(e: WheelEvent) {
+  // two finger pinches on touch pad, ctrlKey is always true.
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=397027
+  if (IS_IOS || IS_MAC) {
+    return e.ctrlKey || e.metaKey;
   }
-  if (
-    matchFlavours(model, ['affine:paragraph']) &&
-    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'quote'].includes(model.type ?? '')
-  ) {
-    return false;
-  }
-  return true;
+  return e.ctrlKey;
 }
 
-export function isEmpty(model: BaseBlockModel): boolean {
-  if (model.flavour === 'affine:database') return model.children.length === 0;
-  if (model.children.length !== 0) {
-    const found = model.children.find(c => !isEmpty(c));
-    return !found;
-  }
-  return (
-    !model.text?.length &&
-    !(model as BaseBlockModel & { sourceId: string }).sourceId &&
-    model.flavour !== 'affine:code' &&
-    model.flavour !== 'affine:bookmark'
-  );
+// See https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
+export enum MOUSE_BUTTONS {
+  NO_BUTTON = 0,
+  PRIMARY = 1,
+  SECONDARY = 2,
+  AUXILIARY = 4,
+  FORTH = 8,
+  FIFTH = 16,
 }
 
-export function createEvent<
-  T extends keyof WindowEventMap | keyof HTMLElementEventMap,
->(type: T, detail: Detail<T>) {
-  return new CustomEvent<Detail<T>>(type, { detail });
+export function isMiddleButtonPressed(e: MouseEvent) {
+  return (MOUSE_BUTTONS.AUXILIARY & e.buttons) === MOUSE_BUTTONS.AUXILIARY;
+}
+
+export function stopPropagation(event: Event) {
+  event.stopPropagation();
 }
 
 export function isControlledKeyboardEvent(e: KeyboardEvent) {

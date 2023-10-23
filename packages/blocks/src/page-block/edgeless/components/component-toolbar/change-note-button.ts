@@ -11,7 +11,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { HiddenIcon, NoteIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { matchFlavours } from '../../../../_legacy/utils/model.js';
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import {
   NOTE_COLORS,
   type NoteBlockModel,

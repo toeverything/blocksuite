@@ -12,7 +12,7 @@ import {
   SquareIcon,
   TriangleIcon,
 } from '../../../../../_common/icons/index.js';
-import type { ShapeTool } from '../../../../../_legacy/index.js';
+import type { ShapeTool } from '../../../../../_common/utils/index.js';
 
 type Config = {
   name: ShapeTool['shape'];

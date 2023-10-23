@@ -1,14 +1,14 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type Page } from '@blocksuite/store';
 
 import {
   handleNativeRangeAtPoint,
-  isEmpty,
   type NoteChildrenFlavour,
   Point,
   type TopLevelBlockModel,
-} from '../../../_legacy/index.js';
+} from '../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { DEFAULT_NOTE_WIDTH } from './consts.js';
 
@@ -16,6 +16,20 @@ export type NoteOptions = {
   childFlavour: NoteChildrenFlavour;
   childType: string | null;
 };
+
+function isEmpty(model: BaseBlockModel): boolean {
+  if (model.flavour === 'affine:database') return model.children.length === 0;
+  if (model.children.length !== 0) {
+    const found = model.children.find(c => !isEmpty(c));
+    return !found;
+  }
+  return (
+    !model.text?.length &&
+    !(model as BaseBlockModel & { sourceId: string }).sourceId &&
+    model.flavour !== 'affine:code' &&
+    model.flavour !== 'affine:bookmark'
+  );
+}
 
 export function addNote(
   edgeless: EdgelessPageBlockComponent,

@@ -15,16 +15,20 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { toast } from '../../_common/components/toast.js';
+import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
-import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
-import { BLOCK_ID_ATTR } from '../../_legacy/consts.js';
-import type { EdgelessTool, Point, Selectable } from '../../_legacy/index.js';
+import type {
+  EdgelessTool,
+  Point,
+  Selectable,
+} from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   type ReorderingAction,
   type TopLevelBlockModel,
-} from '../../_legacy/index.js';
+} from '../../_common/utils/index.js';
+import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';

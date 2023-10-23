@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { ArrowUpIcon, NoteIcon } from '../../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../../_common/theme/css-variables.js';
-import type { EdgelessTool } from '../../../../../_legacy/index.js';
+import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import { getTooltipWithShortcut } from '../../../components/utils.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { createPopper, type MenuPopper } from '../common/create-popper.js';

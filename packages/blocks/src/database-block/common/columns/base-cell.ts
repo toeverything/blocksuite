@@ -1,16 +1,16 @@
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../../_common/utils/index.js';
 import { ClipboardItem } from '../../../_legacy/clipboard/clipboard-item.js';
 import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
 } from '../../../_legacy/clipboard/utils/pure.js';
-import {
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../../../_legacy/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,

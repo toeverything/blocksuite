@@ -3,28 +3,50 @@ import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { Text } from '@blocksuite/store';
 
-import { supportsChildren } from '../../../_legacy/utils/common.js';
-import {
-  asyncFocusRichText,
-  asyncSetVRange,
-} from '../../../_legacy/utils/common-operations.js';
-import type { BlockModelProps } from '../../../_legacy/utils/model.js';
+import type { BlockModelProps } from '../../../_common/utils/model.js';
 import {
   isInsideBlockByFlavour,
   matchFlavours,
-} from '../../../_legacy/utils/model.js';
+} from '../../../_common/utils/model.js';
 import {
   getModelByElement,
   getNextBlock,
   getPreviousBlock,
   getVirgoByModel,
-} from '../../../_legacy/utils/query.js';
+} from '../../../_common/utils/query.js';
+import {
+  asyncFocusRichText,
+  asyncSetVRange,
+} from '../../../_common/utils/selection.js';
 import {
   focusBlockByModel,
   focusTitle,
-} from '../../../_legacy/utils/selection.js';
-import type { ExtendedModel } from '../../../_legacy/utils/types.js';
+} from '../../../_common/utils/selection.js';
+import type { ExtendedModel } from '../../../_common/utils/types.js';
 import { type ListBlockModel, type PageBlockModel } from '../../../models.js';
+
+/**
+ * Whether the block supports rendering its children.
+ */
+function supportsChildren(model: BaseBlockModel): boolean {
+  if (
+    matchFlavours(model, [
+      // 'affine:database',
+      'affine:image',
+      'affine:divider',
+      'affine:code',
+    ])
+  ) {
+    return false;
+  }
+  if (
+    matchFlavours(model, ['affine:paragraph']) &&
+    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'quote'].includes(model.type ?? '')
+  ) {
+    return false;
+  }
+  return true;
+}
 
 export function handleBlockEndEnter(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);

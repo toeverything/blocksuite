@@ -14,8 +14,8 @@ import {
   LinkIcon,
   RefreshIcon,
 } from '../../_common/icons/index.js';
+import { getBlockElementByModel } from '../../_common/utils/index.js';
 import { copyBlocks } from '../../_legacy/clipboard/utils/commons.js';
-import { getBlockElementByModel } from '../../_legacy/index.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel, BookmarkProps } from '../bookmark-model.js';
 import { allowEmbed } from '../embed.js';

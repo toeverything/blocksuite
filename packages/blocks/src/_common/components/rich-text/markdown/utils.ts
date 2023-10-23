@@ -1,36 +1,11 @@
-import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
-import type { Page } from '@blocksuite/store';
-import type { BaseBlockModel } from '@blocksuite/store';
-import type { Workspace } from '@blocksuite/store';
-import type { VRange } from '@blocksuite/virgo';
 
-import type { ListType } from '../../list-block/index.js';
-import { matchFlavours } from './model.js';
-import { asyncGetRichTextByModel, getVirgoByModel } from './query.js';
-
-export async function asyncSetVRange(model: BaseBlockModel, vRange: VRange) {
-  const richText = await asyncGetRichTextByModel(model);
-  if (!richText) {
-    return;
-  }
-
-  await richText.updateComplete;
-  const vEditor = richText.vEditor;
-  assertExists(vEditor);
-  vEditor.setVRange(vRange);
-}
-
-export function asyncFocusRichText(
-  page: Page,
-  id: string,
-  vRange: VRange = { index: 0, length: 0 }
-) {
-  const model = page.getBlockById(id);
-  assertExists(model);
-  if (matchFlavours(model, ['affine:divider'])) return;
-  return asyncSetVRange(model, vRange);
-}
+import {
+  asyncFocusRichText,
+  getVirgoByModel,
+  matchFlavours,
+} from '../../../../_common/utils/index.js';
+import type { ListType } from '../../../../list-block/index.js';
 
 function addSpace(element: BlockElement, index: number) {
   element.model.text?.insert(' ', index);
@@ -161,23 +136,4 @@ export function convertToDivider(
     }
   }
   return true;
-}
-
-export async function createPage(
-  workspace: Workspace,
-  options: { id?: string; title?: string } = {}
-) {
-  const page = workspace.createPage({ id: options.id });
-  await page.waitForLoaded();
-
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new page.Text(options.title ?? ''),
-  });
-  page.addBlock('affine:surface', {}, pageBlockId);
-  const noteId = page.addBlock('affine:note', {}, pageBlockId);
-  page.addBlock('affine:paragraph', {}, noteId);
-  // To make sure the content of new page would not be clear
-  // By undo operation for the first time
-  page.resetHistory();
-  return page;
 }

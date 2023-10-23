@@ -7,10 +7,10 @@ import { ref } from 'lit/directives/ref.js';
 import { HoverController } from '../_common/components/index.js';
 import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
+import { stopPropagation } from '../_common/utils/event.js';
+import { humanFileSize } from '../_common/utils/math.js';
 import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
-import { stopPropagation } from '../_legacy/utils/event.js';
-import { humanFileSize } from '../_legacy/utils/math.js';
 import {
   type AttachmentBlockModel,
   AttachmentBlockSchema,
@@ -74,7 +74,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     this._registerDragHandleOption();
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
-    this._themeObserver.observer(document.documentElement);
+    this._themeObserver.observe(document.documentElement);
     this._themeObserver.on(() => this.requestUpdate());
     this.disposables.add(() => this._themeObserver.dispose());
   }

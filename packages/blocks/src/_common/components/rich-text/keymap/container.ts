@@ -8,7 +8,7 @@ import {
   type VirgoRootElement,
 } from '@blocksuite/virgo';
 
-import { matchFlavours } from '../../../../_legacy/utils/model.js';
+import { matchFlavours } from '../../../../_common/utils/model.js';
 import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';

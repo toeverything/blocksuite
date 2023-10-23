@@ -1,4 +1,4 @@
-import type { IPoint } from '../index.js';
+import type { IPoint } from './index.js';
 import { clamp } from './math.js';
 
 export class Point {

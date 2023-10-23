@@ -10,7 +10,7 @@ import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
-import { LineWidth } from '../../../../_legacy/utils/types.js';
+import { LineWidth } from '../../../../_common/utils/types.js';
 import type {
   BrushElement,
   PhasorElementType,

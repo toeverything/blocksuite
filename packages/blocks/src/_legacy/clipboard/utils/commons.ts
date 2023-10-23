@@ -2,16 +2,16 @@ import type { TextSelection } from '@blocksuite/block-std';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { BaseBlockModel, type Page } from '@blocksuite/store';
 
-import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
-import { ContentParser } from '../../content-parser/index.js';
-import type { SelectedBlock } from '../../content-parser/types.js';
-import { getService } from '../../service/index.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
   type SerializedBlock,
-} from '../../utils/index.js';
+} from '../../../_common/utils/index.js';
+import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
+import { ContentParser } from '../../content-parser/index.js';
+import type { SelectedBlock } from '../../content-parser/types.js';
+import { getService } from '../../service/index.js';
 import { ClipboardItem } from '../clipboard-item.js';
 import markdownUtils from './markdown.js';
 import {

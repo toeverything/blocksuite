@@ -1,7 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../../../_legacy/utils/event.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
 import { TEXT_FONT_SIZE } from '../text/types.js';
 
 const MIN_FONT_SIZE = 1;

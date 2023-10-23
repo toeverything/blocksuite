@@ -32,9 +32,9 @@ import {
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
 } from '../../../../_common/icons/index.js';
-import { stopPropagation } from '../../../../_legacy/utils/event.js';
-import { uploadImageFromLocal } from '../../../../_legacy/utils/filesys.js';
-import type { EdgelessTool } from '../../../../_legacy/utils/types.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
+import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
+import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

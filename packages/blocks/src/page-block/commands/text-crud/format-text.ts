@@ -4,7 +4,7 @@ import { VIRGO_ROOT_ATTR, type VirgoRootElement } from '@blocksuite/virgo';
 
 import type { AffineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
-import { clearMarksOnDiscontinuousInput } from '../../../_legacy/utils/virgo.js';
+import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import type { Flavour } from '../../../models.js';
 import { getSelectedContentBlockElements } from '../../utils/selection.js';
 

@@ -2,7 +2,7 @@ import {
   type EdgelessTool,
   LineWidth,
   type ShapeToolState,
-} from '../../_legacy/utils/types.js';
+} from '../../_common/utils/types.js';
 import {
   Bound,
   ConnectorElement,

@@ -5,6 +5,15 @@ import { marked } from 'marked';
 
 import { getTagColor } from '../../_common/components/tags/colors.js';
 import { toast } from '../../_common/components/toast.js';
+import {
+  getBlockElementById,
+  getEditorContainer,
+  getPageBlock,
+  isPageMode,
+  type SerializedBlock,
+  type TopLevelBlockModel,
+} from '../../_common/utils/index.js';
+import { humanFileSize } from '../../_common/utils/math.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
 import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import type { PageBlockModel } from '../../models.js';
@@ -15,15 +24,6 @@ import type { IBound } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
 import { Bound } from '../../surface-block/utils/bound.js';
-import {
-  getBlockElementById,
-  getEditorContainer,
-  getPageBlock,
-  isPageMode,
-  type SerializedBlock,
-  type TopLevelBlockModel,
-} from '../utils/index.js';
-import { humanFileSize } from '../utils/math.js';
 import { FileExporter } from './file-exporter/file-exporter.js';
 import type {
   FetchFileHandler,

@@ -8,10 +8,10 @@ import {
   NewPageIcon,
   PageIcon,
 } from '../../../_common/icons/index.js';
-import { createPage } from '../../../_legacy/utils/common-operations.js';
-import { getVirgoByModel } from '../../../_legacy/utils/query.js';
+import { getVirgoByModel } from '../../../_common/utils/query.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
+import { createPage } from '../../utils/init.js';
 import { showImportModal } from './import-page/index.js';
 
 export type LinkedPageOptions = {

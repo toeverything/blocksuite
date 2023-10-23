@@ -17,7 +17,7 @@ import {
   NumberedListIcon,
   QuoteIcon,
 } from '../../../../_common/icons/index.js';
-import type { BlockModels } from '../../../../_legacy/utils/model.js';
+import type { BlockModels } from '../../../../_common/utils/model.js';
 import type { DividerBlockModel } from '../../../../models.js';
 import {
   type AttachmentBlockModel,

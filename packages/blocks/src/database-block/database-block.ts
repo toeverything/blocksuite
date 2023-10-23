@@ -23,14 +23,14 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '../_common/icons/index.js';
+import type { DataViewSelection } from '../_common/utils/index.js';
+import { Rect } from '../_common/utils/index.js';
 import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import {
   captureEventTarget,
   getDropResult,
 } from '../_common/widgets/drag-handle/utils.js';
 import { copyBlocks } from '../_legacy/clipboard/index.js';
-import type { DataViewSelection } from '../_legacy/index.js';
-import { Rect } from '../_legacy/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';

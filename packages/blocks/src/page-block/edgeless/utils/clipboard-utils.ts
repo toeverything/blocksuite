@@ -1,8 +1,8 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
+import type { EdgelessElement } from '../../../_common/utils/index.js';
 import { getBlockClipboardInfo } from '../../../_legacy/clipboard/index.js';
-import type { EdgelessElement } from '../../../_legacy/index.js';
 import type { FrameBlockService } from '../../../_legacy/service/legacy-services/frame-service.js';
 import type { ImageBlockService } from '../../../_legacy/service/legacy-services/image-service.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';

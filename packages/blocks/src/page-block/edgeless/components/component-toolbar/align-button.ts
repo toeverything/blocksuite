@@ -17,7 +17,7 @@ import {
   AlignVerticallyIcon,
   SmallArrowDownIcon,
 } from '../../../../_common/icons/index.js';
-import type { EdgelessElement } from '../../../../_legacy/index.js';
+import type { EdgelessElement } from '../../../../_common/utils/index.js';
 import { Bound, ConnectorElement } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';

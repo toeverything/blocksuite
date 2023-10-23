@@ -2,9 +2,9 @@ import { assertExists, sleep } from '@blocksuite/global/utils';
 import { BaseBlockModel } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 
-import { isControlledKeyboardEvent } from '../../_legacy/utils/common.js';
-import { getVirgoByModel } from '../../_legacy/utils/query.js';
-import { getCurrentNativeRange } from '../../_legacy/utils/selection.js';
+import { isControlledKeyboardEvent } from '../../_common/utils/event.js';
+import { getVirgoByModel } from '../../_common/utils/query.js';
+import { getCurrentNativeRange } from '../../_common/utils/selection.js';
 import type { RichText } from './rich-text/rich-text.js';
 import type { AffineVEditor } from './rich-text/virgo/types.js';
 

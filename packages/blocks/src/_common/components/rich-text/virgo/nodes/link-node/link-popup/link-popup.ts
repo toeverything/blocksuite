@@ -6,13 +6,13 @@ import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { html, LitElement, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 
-import { BLOCK_ID_ATTR } from '../../../../../../../_legacy/consts.js';
 import {
   isValidUrl,
   normalizeUrl,
-} from '../../../../../../../_legacy/utils/url.js';
+} from '../../../../../../../_common/utils/url.js';
 import type { BookmarkProps } from '../../../../../../../bookmark-block/bookmark-model.js';
 import { allowEmbed } from '../../../../../../../bookmark-block/embed.js';
+import { BLOCK_ID_ATTR } from '../../../../../../consts.js';
 import { BookmarkIcon } from '../../../../../../icons/edgeless.js';
 import {
   ConfirmIcon,
@@ -32,9 +32,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   @property()
   type: 'create' | 'edit' | 'view' = 'create';
 
-  @property()
+  @property({ attribute: false })
   vEditor!: AffineVEditor;
-  @property()
+  @property({ attribute: false })
   goalVRange!: VRange;
 
   @query('#text-input')

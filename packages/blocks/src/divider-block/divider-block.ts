@@ -3,7 +3,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_legacy/consts.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { DividerBlockModel } from './divider-model.js';
 
 @customElement('affine-divider')

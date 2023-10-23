@@ -14,7 +14,7 @@ import {
 import {
   BLOCK_ID_ATTR,
   NOTE_WIDTH,
-} from '../../packages/blocks/src/_legacy/consts.js';
+} from '../../packages/blocks/src/_common/consts.js';
 import type {
   CssVariableName,
   NoteBlockModel,

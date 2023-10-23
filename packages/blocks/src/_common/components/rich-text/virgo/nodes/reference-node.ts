@@ -18,7 +18,7 @@ import {
   getBlockElementById,
   getClosestBlockElementByElement,
   getModelByElement,
-} from '../../../../../_legacy/utils/index.js';
+} from '../../../../../_common/utils/index.js';
 import type { DocPageBlockComponent } from '../../../../../page-block/doc/doc-page-block.js';
 import { DEFAULT_PAGE_NAME, REFERENCE_NODE } from '../../consts.js';
 import type { AffineTextAttributes } from '../types.js';

@@ -2,17 +2,17 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../../_common/utils/index.js';
+import type { TableViewSelection } from '../../../_common/utils/types.js';
 import { ClipboardItem } from '../../../_legacy/clipboard/clipboard-item.js';
 import {
   CLIPBOARD_MIMETYPE,
   performNativeCopy,
 } from '../../../_legacy/clipboard/utils/pure.js';
-import {
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../../../_legacy/utils/index.js';
-import type { TableViewSelection } from '../../../_legacy/utils/types.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { DataViewTableManager } from '../table-view-manager.js';

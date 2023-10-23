@@ -4,7 +4,7 @@ import { Slot } from '@blocksuite/global/utils';
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import type { ShapeTool } from '../../../../_legacy/index.js';
+import type { ShapeTool } from '../../../../_common/utils/index.js';
 import { ShapeStyle } from '../../../../surface-block/index.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 

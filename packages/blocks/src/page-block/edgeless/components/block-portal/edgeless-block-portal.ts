@@ -17,9 +17,9 @@ import { html, literal, unsafeStatic } from 'lit/static-html.js';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../../../_legacy/consts.js';
-import { delayCallback } from '../../../../_legacy/utils/common.js';
-import type { TopLevelBlockModel } from '../../../../_legacy/utils/types.js';
+} from '../../../../_common/consts.js';
+import { delayCallback } from '../../../../_common/utils/event.js';
+import type { TopLevelBlockModel } from '../../../../_common/utils/types.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { almostEqual, Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
