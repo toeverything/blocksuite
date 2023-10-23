@@ -1,8 +1,12 @@
+import { expect } from '@playwright/test';
+
 import { clickView } from '../utils/actions/click.js';
 import {
+  addNote,
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
+  getEdgelessSelectedRectModel,
   Shape,
 } from '../utils/actions/edgeless.js';
 import { assertSelectedBound } from '../utils/asserts.js';
@@ -38,6 +42,21 @@ test.describe('auto-complete', () => {
       await assertSelectedBound(page, [0, 0, 100, 100]);
       await clickView(page, [50, -20]);
       await assertSelectedBound(page, [0, -200, 100, 100]);
+    });
+
+    test('click on note auto-complete button', async ({ page }) => {
+      await edgelessCommonSetup(page);
+      await addNote(page, 'note', 100, 100);
+      await page.mouse.click(200, 100);
+      await page.mouse.click(150, 120);
+      const rect = await getEdgelessSelectedRectModel(page);
+      await clickView(page, [rect[0] + rect[2] / 2, rect[1] + rect[3] + 10]);
+
+      const newRect = await getEdgelessSelectedRectModel(page);
+      expect(rect[0]).toEqual(newRect[0]);
+      expect(rect[1]).not.toEqual(newRect[1]);
+      expect(rect[2]).toEqual(newRect[2]);
+      expect(rect[3]).toEqual(newRect[3]);
     });
   });
 

@@ -4,9 +4,9 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
-import { matchFlavours } from '../../__internal__/utils/model.js';
-import { getVirgoByModel } from '../../__internal__/utils/query.js';
-import type { AffineTextAttributes } from '../../components/rich-text/virgo/types.js';
+import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
+import { matchFlavours } from '../../_common/utils/model.js';
+import { getVirgoByModel } from '../../_common/utils/query.js';
 
 export function getSelectedContentModels(
   root: BlockSuiteRoot,

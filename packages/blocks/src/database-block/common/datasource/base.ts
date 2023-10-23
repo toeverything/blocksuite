@@ -1,6 +1,6 @@
 import type { Disposable, Slot } from '@blocksuite/global/utils';
 
-import type { UniComponent } from '../../../components/uni-component/uni-component.js';
+import type { UniComponent } from '../../../_common/components/uni-component/uni-component.js';
 import { DEFAULT_COLUMN_WIDTH } from '../../table/consts.js';
 import type { InsertToPosition } from '../../types.js';
 import {

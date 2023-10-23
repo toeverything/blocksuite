@@ -2,7 +2,7 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import { startDrag } from '../../../utils/drag.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';

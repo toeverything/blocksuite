@@ -6,11 +6,11 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { EdgelessPenIcon } from '../../../../../_common/icons/index.js';
 import {
   type EdgelessTool,
   LineWidth,
-} from '../../../../../__internal__/index.js';
-import { EdgelessPenIcon } from '../../../../../icons/index.js';
+} from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { DEFAULT_BRUSH_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';

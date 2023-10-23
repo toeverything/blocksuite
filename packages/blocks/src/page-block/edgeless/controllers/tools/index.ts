@@ -3,7 +3,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import type {
   EdgelessTool as EdgelessTool,
   TopLevelBlockModel,
-} from '../../../../__internal__/index.js';
+} from '../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import type { SelectionArea } from '../../services/tools-manager.js';
 

@@ -107,8 +107,10 @@ export async function selectAllByKeyboard(page: Page) {
   });
 }
 
-export async function pressTab(page: Page) {
-  await page.keyboard.press('Tab', { delay: 50 });
+export async function pressTab(page: Page, count = 1) {
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press('Tab', { delay: 50 });
+  }
 }
 
 export async function pressShiftTab(page: Page) {

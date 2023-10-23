@@ -4,8 +4,8 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 import type {
   EdgelessTool,
   ShapeTool,
-} from '../../../../__internal__/index.js';
-import { hasClassNameInList } from '../../../../__internal__/index.js';
+} from '../../../../_common/utils/index.js';
+import { hasClassNameInList } from '../../../../_common/utils/index.js';
 import {
   Bound,
   PhasorElementType,

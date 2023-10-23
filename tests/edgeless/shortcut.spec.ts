@@ -3,7 +3,6 @@ import { expect } from '@playwright/test';
 import {
   addBasicRectShapeElement,
   createShapeElement,
-  deleteAll,
   edgelessCommonSetup,
   getEdgelessSelectedRect,
   getZoomLevel,

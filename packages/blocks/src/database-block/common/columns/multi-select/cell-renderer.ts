@@ -1,12 +1,12 @@
-import '../../../../components/tags/multi-tag-select.js';
-import '../../../../components/tags/multi-tag-view.js';
+import '../../../../_common/components/tags/multi-tag-select.js';
+import '../../../../_common/components/tags/multi-tag-view.js';
 
 import { customElement } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
-import type { SelectTag } from '../../../../components/tags/multi-tag-select.js';
-import { popTagSelect } from '../../../../components/tags/multi-tag-select.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
+import type { SelectTag } from '../../../../_common/components/tags/multi-tag-select.js';
+import { popTagSelect } from '../../../../_common/components/tags/multi-tag-select.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import type { SelectColumnData } from '../types.js';

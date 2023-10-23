@@ -14,7 +14,7 @@ import {
   isRTL,
   wrapText,
 } from '../text/utils.js';
-import { SHAPE_TEXT_FONT_SIZE, SHAPE_TEXT_PADDING } from './constants.js';
+import { SHAPE_TEXT_FONT_SIZE, SHAPE_TEXT_PADDING } from './consts.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape, IShapeLocalRecord } from './types.js';
 

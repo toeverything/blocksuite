@@ -1,4 +1,4 @@
-import '../../../../components/rich-text/rich-text.js';
+import '../../../../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -6,8 +6,8 @@ import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { isCssVariable } from '../../../../__internal__/theme/css-variables.js';
-import type { RichText } from '../../../../components/rich-text/rich-text.js';
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import { isCssVariable } from '../../../../_common/theme/css-variables.js';
 import {
   Bound,
   type TextElement,
