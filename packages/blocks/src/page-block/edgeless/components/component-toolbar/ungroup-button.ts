@@ -4,12 +4,12 @@ import { WithDisposable } from '@blocksuite/lit';
 import { html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { UnGroupButtonIcon } from '../../../../_common/icons/index.js';
+import { UngroupButtonIcon } from '../../../../_common/icons/index.js';
 import { GroupElement } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-ungroup-button')
-export class EdgelessUnGroupButton extends WithDisposable(LitElement) {
+export class EdgelessUngroupButton extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -23,16 +23,16 @@ export class EdgelessUnGroupButton extends WithDisposable(LitElement) {
           this.surface.group.unGroup(selectionManager.firstElement);
         }
       }}
-      .tooltip=${'UnGroup'}
+      .tooltip=${'Ungroup'}
       .tipPosition=${'bottom'}
     >
-      ${UnGroupButtonIcon}
+      ${UngroupButtonIcon}
     </edgeless-tool-icon-button> `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-ungroup-button': EdgelessUnGroupButton;
+    'edgeless-ungroup-button': EdgelessUngroupButton;
   }
 }

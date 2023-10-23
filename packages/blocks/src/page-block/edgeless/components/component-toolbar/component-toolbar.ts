@@ -231,7 +231,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ></edgeless-release-from-group-button>`;
   }
 
-  private _getUnGroupButton() {
+  private _getUngroupButton() {
     return html`<edgeless-ungroup-button
       .surface=${this.surface}
     ></edgeless-ungroup-button>`;
@@ -284,7 +284,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
         buttons.unshift(
           html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
         );
-        buttons.unshift(this._getUnGroupButton());
+        buttons.unshift(this._getUngroupButton());
       }
 
       if (selection.firstElement.group != groupRootId) {

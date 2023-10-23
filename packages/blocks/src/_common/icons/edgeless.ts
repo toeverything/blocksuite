@@ -157,7 +157,7 @@ export const ReleaseFromGroupButtonIcon = html`
   </svg>
 `;
 
-export const UnGroupButtonIcon = html`
+export const UngroupButtonIcon = html`
   <svg
     width="79"
     height="25"
