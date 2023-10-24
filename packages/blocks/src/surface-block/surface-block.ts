@@ -66,7 +66,7 @@ import {
 import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './grid.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
-import { GroupManager } from './manager/group-manager.js';
+import { EdgelessGroupManager } from './manager/group-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -155,7 +155,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
-  group!: GroupManager;
+  group!: EdgelessGroupManager;
   compare = compare;
 
   private _defaultBatch = 'a1';
@@ -241,7 +241,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.connector = new EdgelessConnectorManager(edgeless);
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
-    this.group = new GroupManager(this);
+    this.group = new EdgelessGroupManager(this);
 
     this.init();
   }

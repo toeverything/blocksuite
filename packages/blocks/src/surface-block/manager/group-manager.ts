@@ -32,7 +32,7 @@ export function getElementsWithoutGroup(elements: EdgelessElement[]) {
   });
   return Array.from(set);
 }
-export class GroupManager {
+export class EdgelessGroupManager {
   constructor(private surface: SurfaceBlockComponent) {}
 
   createGroupOnSelected() {
