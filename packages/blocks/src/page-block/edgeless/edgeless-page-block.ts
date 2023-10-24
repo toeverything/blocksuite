@@ -515,8 +515,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
   getElementsBound(): IBound | null {
     const bounds = [];
 
-    this.surface.getblocks(EdgelessBlockType.NOTE).forEach(note => {
-      bounds.push(Bound.deserialize(note.xywh));
+    Object.values(EdgelessBlockType).forEach(edgelessBlock => {
+      this.surface.getblocks(edgelessBlock).forEach(block => {
+        bounds.push(Bound.deserialize(block.xywh));
+      });
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
