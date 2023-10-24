@@ -939,9 +939,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   pickTopWithGroup(point: IVec, options?: HitTestOptions) {
     const selectionManager = this.edgeless.selectionManager;
-    const results = this.pickByPoint(point[0], point[1], options);
+    const results: EdgelessElement[] = this.pickByPoint(
+      point[0],
+      point[1],
+      options
+    );
+    const block = this.pickTopBlock(point);
+    if (block) {
+      results.unshift(block);
+    }
     let picked: null | EdgelessElement = results[results.length - 1];
-
+    const first = picked;
     if (selectionManager.activeGroup) {
       let index = results.length - 1;
       while (
@@ -962,7 +970,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
     }
 
-    return picked ?? this.pickTopBlock(point);
+    return picked ?? first;
   }
 
   pickByBound(bound: Bound): EdgelessElement[] {

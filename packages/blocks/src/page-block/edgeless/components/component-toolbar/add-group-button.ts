@@ -13,11 +13,13 @@ export class EdgelessAddGroupButton extends WithDisposable(LitElement) {
   edgeless!: EdgelessPageBlockComponent;
 
   protected override render() {
-    return html`<edgeless-tool-icon-button
+    return html` <edgeless-tool-icon-button
       .iconContainerPadding=${2}
       @click=${() => {
         this.edgeless.surface.group.createGroupOnSelected();
       }}
+      .tooltip=${'Group'}
+      .tipPosition=${'bottom'}
     >
       ${AddGroupButtonIcon}
     </edgeless-tool-icon-button>`;

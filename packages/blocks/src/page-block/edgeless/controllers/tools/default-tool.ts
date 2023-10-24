@@ -37,6 +37,7 @@ import {
 import {
   addText,
   mountFrameEditor,
+  mountGroupEditor,
   mountShapeEditor,
   mountTextEditor,
 } from '../../utils/text.js';
@@ -288,6 +289,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       }
       if (isFrameBlock(selected)) {
         mountFrameEditor(selected, this._edgeless);
+        return;
+      }
+      if (selected instanceof GroupElement) {
+        mountGroupEditor(selected, this._edgeless);
         return;
       }
     }

@@ -705,7 +705,8 @@ type Action =
   | 'unGroup'
   | 'releaseFromGroup'
   | 'createFrameOnMoreOption'
-  | 'duplicate';
+  | 'duplicate'
+  | 'renameGroup';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -860,9 +861,16 @@ export async function triggerComponentToolbarAction(
       break;
     }
     case 'unGroup': {
-      const button = locatorComponentToolbar(page).locator(
-        'edgeless-ungroup-button'
-      );
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-group-button')
+        .locator('.edgeless-component-toolbar-ungroup-button');
+      await button.click();
+      break;
+    }
+    case 'renameGroup': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-group-button')
+        .locator('.edgeless-component-toolbar-group-rename-button');
       await button.click();
       break;
     }

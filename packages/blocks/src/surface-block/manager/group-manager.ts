@@ -61,8 +61,10 @@ export class GroupManager {
         parent.removeChild(ele.id);
       });
     }
+    const groups = surface.getElementsByType(PhasorElementType.GROUP);
     const groupId = surface.addElement(PhasorElementType.GROUP, {
       children: map,
+      title: new Workspace.Y.Text(`Group ${groups.length + 1}`),
     });
 
     if (parent) {

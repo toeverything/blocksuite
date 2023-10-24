@@ -10,6 +10,7 @@ import type {
 } from './edgeless-element.js';
 import { GroupElementDefaultProps } from './group/contants.js';
 import { GroupElement } from './group/group-element.js';
+import type { IGroupLocalRecord } from './group/types.js';
 import { ShapeElementDefaultProps } from './shape/consts.js';
 import { ShapeElement } from './shape/shape-element.js';
 import type { IShape, IShapeLocalRecord } from './shape/types.js';
@@ -59,7 +60,7 @@ export type IPhasorElementLocalRecord = {
   brush: ISurfaceElementLocalRecord;
   connector: ISurfaceElementLocalRecord;
   text: ISurfaceElementLocalRecord;
-  group: ISurfaceElementLocalRecord;
+  group: IGroupLocalRecord;
 };
 
 export const ElementCtors = {

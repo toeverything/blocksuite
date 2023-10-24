@@ -314,7 +314,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       });
     } else {
       const { page } = this.edgeless;
-      const id = page.addBlock(
+      id = page.addBlock(
         'affine:note',
         { background: this.current.background },
         this.edgeless.model.id
@@ -324,7 +324,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       assertExists(note);
       const serializedBlock = (await getBlockClipboardInfo(this.current)).json;
       await noteService.json2Block(note, serializedBlock.children);
-      return id;
     }
     const group = surface.pickById(surface.getGroup(this.current));
     if (group instanceof GroupElement) {

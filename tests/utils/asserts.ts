@@ -193,7 +193,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
     const editor = document.querySelector(
-      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor'
+      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor,edgeless-group-title-editor'
     );
     if (!editor) {
       throw new Error('editor not found');
