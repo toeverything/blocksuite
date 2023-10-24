@@ -16,8 +16,8 @@ import {
 import type { IGroup, IGroupLocalRecord } from './types.js';
 
 export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
-  private _cacheChildren: string[] = [];
-  private _cacheId: string = '';
+  private _cachedChildren: string[] = [];
+  private _cachedId: string = '';
   private _titleHeight = getLineHeight("'Kalam', cursive", 16);
   private _titleWidth = 0;
   private _padding = [0, 0];
@@ -35,11 +35,11 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   override init(): void {
     super.init();
     const { surface } = this;
-    this._cacheId = this.id;
+    this._cachedId = this.id;
     this.childrenElements.forEach(ele => {
       surface.setGroup(ele, this.id);
     });
-    this._cacheChildren = this.children;
+    this._cachedChildren = this.children;
     const children = this.yMap.get('children') as IGroup['children'];
     children.observe(event => {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
@@ -110,7 +110,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     this.surface.transact(() => {
       children.set(id, true);
     });
-    this._cacheChildren = this.children;
+    this._cachedChildren = this.children;
   }
 
   removeChild(id: string) {
@@ -118,7 +118,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     this.surface.transact(() => {
       children.delete(id);
     });
-    this._cacheChildren = this.children;
+    this._cachedChildren = this.children;
   }
 
   override render(
@@ -207,9 +207,9 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
   override unmount(): void {
     const { surface } = this;
-    this._cacheChildren.forEach(id => {
+    this._cachedChildren.forEach(id => {
       const ele = surface.pickById(id);
-      if (ele && surface.getGroup(ele) === this._cacheId)
+      if (ele && surface.getGroup(ele) === this._cachedId)
         surface.setGroup(ele, surface.getGroup(this));
     });
     super.unmount();
