@@ -54,6 +54,12 @@ export class EdgelessFramesContainer extends WithDisposable(LitElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.style.position = 'absolute';
+    this.style.zIndex = '0';
+  }
+
   protected override firstUpdated() {
     this._disposables.add(
       this.surface.page.slots.historyUpdated.on(() => this.requestUpdate())
