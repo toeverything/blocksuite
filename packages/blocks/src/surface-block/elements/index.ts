@@ -8,7 +8,7 @@ import type {
   IElementDefaultProps,
   IPhasorElementType,
 } from './edgeless-element.js';
-import { GroupElementDefaultProps } from './group/contants.js';
+import { GroupElementDefaultProps } from './group/consts.js';
 import { GroupElement } from './group/group-element.js';
 import type { IGroupLocalRecord } from './group/types.js';
 import { ShapeElementDefaultProps } from './shape/consts.js';

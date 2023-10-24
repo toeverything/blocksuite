@@ -1,10 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 import { captureHistory } from 'utils/actions/misc.js';
-import { groupRootId } from 'utils/constants.js';
 
 import { clickView, dblclickView } from '../utils/actions/click.js';
 import {
-  autoFit,
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
@@ -32,6 +30,8 @@ import {
   assertSelectedBound,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
+
+const GROUP_ROOT_ID = 'GROUP_ROOT';
 
 test.describe('group', () => {
   async function init(page: Page) {
@@ -173,16 +173,28 @@ test.describe('group', () => {
       await triggerComponentToolbarAction(page, 'addGroup');
       await assertSelectedBound(page, [0, 0, 200, 100]);
       const ids = await getIds(page);
-      await assertGroupIds(page, [ids[4], ids[4], ids[3], groupRootId, ids[3]]);
+      await assertGroupIds(page, [
+        ids[4],
+        ids[4],
+        ids[3],
+        GROUP_ROOT_ID,
+        ids[3],
+      ]);
       await assertGroupChildrenIds(page, [ids[2], ids[4]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
       await undoByKeyboard(page);
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], groupRootId]);
+      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
 
       await redoByKeyboard(page);
-      await assertGroupIds(page, [ids[4], ids[4], ids[3], groupRootId, ids[3]]);
+      await assertGroupIds(page, [
+        ids[4],
+        ids[4],
+        ids[3],
+        GROUP_ROOT_ID,
+        ids[3],
+      ]);
       await assertGroupChildrenIds(page, [ids[2], ids[4]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
     });
@@ -194,16 +206,22 @@ test.describe('group', () => {
       await captureHistory(page);
       const ids = await getIds(page);
       await triggerComponentToolbarAction(page, 'unGroup');
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], groupRootId]);
+      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
 
       await undoByKeyboard(page);
-      await assertGroupIds(page, [ids[4], ids[4], ids[3], groupRootId, ids[3]]);
+      await assertGroupIds(page, [
+        ids[4],
+        ids[4],
+        ids[3],
+        GROUP_ROOT_ID,
+        ids[3],
+      ]);
       await assertGroupChildrenIds(page, [ids[2], ids[4]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
       await redoByKeyboard(page);
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], groupRootId]);
+      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
     });
   });
@@ -221,17 +239,27 @@ test.describe('group', () => {
       await captureHistory(page);
       await triggerComponentToolbarAction(page, 'releaseFromGroup');
       const ids = await getIds(page);
-      await assertGroupIds(page, [groupRootId, ids[3], ids[3], groupRootId]);
+      await assertGroupIds(page, [
+        GROUP_ROOT_ID,
+        ids[3],
+        ids[3],
+        GROUP_ROOT_ID,
+      ]);
       await assertGroupChildrenIds(page, [ids[1], ids[2]]);
       await assertSelectedBound(page, [0, 0, 100, 100]);
 
       await undoByKeyboard(page);
-      await assertGroupIds(page, [ids[3], ids[3], ids[3], groupRootId]);
+      await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
       await assertSelectedBound(page, [0, 0, 100, 100]);
 
       await redoByKeyboard(page);
-      await assertGroupIds(page, [groupRootId, ids[3], ids[3], groupRootId]);
+      await assertGroupIds(page, [
+        GROUP_ROOT_ID,
+        ids[3],
+        ids[3],
+        GROUP_ROOT_ID,
+      ]);
       await assertGroupChildrenIds(page, [ids[1], ids[2]]);
       await assertSelectedBound(page, [0, 0, 100, 100]);
     });
@@ -243,7 +271,13 @@ test.describe('group', () => {
       await captureHistory(page);
 
       const ids = await getIds(page);
-      await assertGroupIds(page, [ids[4], ids[4], ids[3], groupRootId, ids[3]]);
+      await assertGroupIds(page, [
+        ids[4],
+        ids[4],
+        ids[3],
+        GROUP_ROOT_ID,
+        ids[3],
+      ]);
       await assertGroupChildrenIds(page, [ids[2], ids[4]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
@@ -252,14 +286,20 @@ test.describe('group', () => {
         ids[4],
         ids[4],
         ids[3],
-        groupRootId,
-        groupRootId,
+        GROUP_ROOT_ID,
+        GROUP_ROOT_ID,
       ]);
       await assertGroupChildrenIds(page, [ids[2]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
       await undoByKeyboard(page);
-      await assertGroupIds(page, [ids[4], ids[4], ids[3], groupRootId, ids[3]]);
+      await assertGroupIds(page, [
+        ids[4],
+        ids[4],
+        ids[3],
+        GROUP_ROOT_ID,
+        ids[3],
+      ]);
       await assertGroupChildrenIds(page, [ids[2], ids[4]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
@@ -268,8 +308,8 @@ test.describe('group', () => {
         ids[4],
         ids[4],
         ids[3],
-        groupRootId,
-        groupRootId,
+        GROUP_ROOT_ID,
+        GROUP_ROOT_ID,
       ]);
       await assertGroupChildrenIds(page, [ids[2]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
@@ -291,7 +331,7 @@ test.describe('group', () => {
 
       await undoByKeyboard(page);
       await assertPhasorElementsCount(page, 3);
-      await assertGroupIds(page, [ids[2], ids[2], groupRootId]);
+      await assertGroupIds(page, [ids[2], ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]]);
 
       await redoByKeyboard(page);
@@ -306,17 +346,17 @@ test.describe('group', () => {
       await clickView(page, [50, 50]);
       await pressBackspace(page);
       await assertPhasorElementsCount(page, 2);
-      await assertGroupIds(page, [ids[2], groupRootId]);
+      await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[1]]);
 
       await undoByKeyboard(page);
       await assertPhasorElementsCount(page, 3);
-      await assertGroupIds(page, [ids[2], groupRootId, ids[2]]);
+      await assertGroupIds(page, [ids[2], GROUP_ROOT_ID, ids[2]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]]);
 
       await redoByKeyboard(page);
       await assertPhasorElementsCount(page, 2);
-      await assertGroupIds(page, [ids[2], groupRootId]);
+      await assertGroupIds(page, [ids[2], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[1]]);
     });
 
@@ -332,18 +372,24 @@ test.describe('group', () => {
       const ids = await getIds(page);
       await pressBackspace(page);
       await assertPhasorElementsCount(page, 2);
-      await assertGroupIds(page, [ids[3], groupRootId]);
+      await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[2]]);
 
       await undoByKeyboard(page);
       await assertPhasorElementsCount(page, 5);
-      await assertGroupIds(page, [ids[3], groupRootId, ids[4], ids[4], ids[3]]);
+      await assertGroupIds(page, [
+        ids[3],
+        GROUP_ROOT_ID,
+        ids[4],
+        ids[4],
+        ids[3],
+      ]);
       await assertGroupChildrenIds(page, [ids[2], ids[4]]);
       await assertGroupChildrenIds(page, [ids[0], ids[1]], 1);
 
       await redoByKeyboard(page);
       await assertPhasorElementsCount(page, 2);
-      await assertGroupIds(page, [ids[3], groupRootId]);
+      await assertGroupIds(page, [ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[2]]);
     });
   });

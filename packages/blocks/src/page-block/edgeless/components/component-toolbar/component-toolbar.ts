@@ -27,7 +27,7 @@ import {
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../image-block/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
-import { groupRootId } from '../../../../surface-block/elements/group/contants.js';
+import { GROUP_ROOT_ID } from '../../../../surface-block/elements/group/consts.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
 import {
   type BrushElement,
@@ -286,7 +286,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       buttons.unshift(this._getCreateFrameButton());
     }
     if (elements.length === 1) {
-      if (this.surface.getGroup(selection.firstElement) != groupRootId) {
+      if (this.surface.getGroup(selection.firstElement) !== GROUP_ROOT_ID) {
         buttons.unshift(
           html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
         );

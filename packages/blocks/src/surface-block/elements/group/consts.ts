@@ -5,7 +5,7 @@ import {
   PhasorElementType,
 } from '../edgeless-element.js';
 
-export const groupRootId = 'group-root';
+export const GROUP_ROOT_ID = 'GROUP_ROOT';
 
 export const GroupElementDefaultProps: IElementDefaultProps<'group'> = {
   type: PhasorElementType.GROUP,

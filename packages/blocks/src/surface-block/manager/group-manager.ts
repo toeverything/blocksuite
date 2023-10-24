@@ -3,7 +3,7 @@ import { Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../_common/utils/index.js';
 import { PhasorElementType } from '../elements/edgeless-element.js';
-import { groupRootId } from '../elements/group/contants.js';
+import { GROUP_ROOT_ID } from '../elements/group/consts.js';
 import { GroupElement } from '../elements/group/group-element.js';
 import type { SurfaceBlockComponent } from '../surface-block.js';
 
@@ -80,7 +80,7 @@ export class GroupManager {
   isGroupAncestor(ele: EdgelessElement, group: GroupElement) {
     const { surface } = this;
     if (surface.getGroup(ele) === group.id) return true;
-    while (surface.getGroup(ele) !== groupRootId) {
+    while (surface.getGroup(ele) !== GROUP_ROOT_ID) {
       ele = this.surface.pickById(surface.getGroup(ele))!;
       assertExists(ele);
       if (surface.getGroup(ele) === group.id) return true;
@@ -89,7 +89,7 @@ export class GroupManager {
   }
 
   releaseFromGroup(element: EdgelessElement) {
-    if (this.surface.getGroup(element) === groupRootId) return;
+    if (this.surface.getGroup(element) === GROUP_ROOT_ID) return;
 
     const group = this.surface.pickById(
       this.surface.getGroup(element)
@@ -127,6 +127,6 @@ export class GroupManager {
   }
 
   getRootElements(elements: EdgelessElement[]) {
-    return elements.filter(ele => this.surface.getGroup(ele) === groupRootId);
+    return elements.filter(ele => this.surface.getGroup(ele) === GROUP_ROOT_ID);
   }
 }

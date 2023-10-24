@@ -53,7 +53,7 @@ import {
   type IPhasorElementType,
   isPhasorElementType,
 } from './elements/edgeless-element.js';
-import { groupRootId } from './elements/group/contants.js';
+import { GROUP_ROOT_ID } from './elements/group/consts.js';
 import {
   BrushElement,
   ConnectorElement,
@@ -196,12 +196,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   getGroup(value: id | EdgelessElement) {
     const id = typeof value === 'string' ? value : value.id;
-    return this._groupMap.get(id) ?? groupRootId;
+    return this._groupMap.get(id) ?? GROUP_ROOT_ID;
   }
 
   setGroup(key: id | EdgelessElement, groupId: string) {
     const id = typeof key === 'string' ? key : key.id;
-    if (groupId === groupRootId) {
+    if (groupId === GROUP_ROOT_ID) {
       this._groupMap.delete(id);
       return;
     }
@@ -961,7 +961,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
     } else if (picked) {
       let index = results.length - 1;
-      while (this.getGroup(picked.id) !== groupRootId) {
+      while (this.getGroup(picked.id) !== GROUP_ROOT_ID) {
         if (--index < 0) {
           picked = null;
           break;
@@ -980,7 +980,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     ];
     const picked = candidates.filter(
       element =>
-        element.boxSelect(bound) && this.getGroup(element.id) === groupRootId
+        element.boxSelect(bound) && this.getGroup(element.id) === GROUP_ROOT_ID
     );
     return picked;
   }
