@@ -204,7 +204,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   @state()
   private _focused: boolean = false;
 
-  private _referenceModel: FrameBlockModel | null = null;
+  private _referencedModel: FrameBlockModel | null = null;
   private _surfaceRenderer = new Renderer();
   private _elements = new Map<string, SurfaceElement>();
 
@@ -216,23 +216,23 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
 
   override connectedCallback() {
     super.connectedCallback();
-    this.initSurfaceModel();
-    this.initReferenceModel();
-    this.initSelection();
-    this.initSurfaceRenderer();
+    this._initSurfaceModel();
+    this._initReferencedModel();
+    this._initSelection();
+    this._initSurfaceRenderer();
   }
 
   override updated() {
-    this.attachRenderer();
+    this._attachRenderer();
   }
 
-  attachRenderer() {
+  private _attachRenderer() {
     if (this._surfaceRenderer.canvas.isConnected || !this.container) return;
 
     this._surfaceRenderer.attach(this.container);
   }
 
-  initSurfaceRenderer() {
+  private _initSurfaceRenderer() {
     let lastWidth = 0;
     const observer = new ResizeObserver(entries => {
       if (entries[0].contentRect.width !== lastWidth) {
@@ -245,23 +245,23 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     this._disposables.add(() => observer.disconnect());
   }
 
-  initReferenceModel() {
-    let referenceWathcer: Disposable | null = null;
+  private _initReferencedModel() {
+    let refWathcer: Disposable | null = null;
     const init = () => {
-      referenceWathcer?.dispose();
+      refWathcer?.dispose();
 
-      const referenceModel = this.getModel(
+      const referencedModel = this.getModel(
         this.model.reference
       ) as FrameBlockModel;
-      this._referenceModel =
-        referenceModel && 'xywh' in referenceModel ? referenceModel : null;
+      this._referencedModel =
+        referencedModel && 'xywh' in referencedModel ? referencedModel : null;
 
-      if (!this._referenceModel) return;
+      if (!this._referencedModel) return;
 
-      referenceWathcer = referenceModel.propsUpdated.on(() => {
-        if (referenceModel.flavour !== this.model.refFlavour) {
+      refWathcer = referencedModel.propsUpdated.on(() => {
+        if (referencedModel.flavour !== this.model.refFlavour) {
           this.page.updateBlock(this.model, {
-            refFlavour: referenceModel.flavour,
+            refFlavour: referencedModel.flavour,
           });
         }
 
@@ -284,17 +284,17 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     });
     this._disposables.add(() => {
       this.model.propsUpdated.on(() => {
-        if (this.model.reference !== this._referenceModel?.id) {
+        if (this.model.reference !== this._referencedModel?.id) {
           init();
         }
       });
     });
     this._disposables.add(() => {
-      referenceWathcer?.dispose();
+      refWathcer?.dispose();
     });
   }
 
-  initSurfaceModel() {
+  private _initSurfaceModel() {
     const init = () => {
       this._surfaceModel = getSurfaceBlock(this.page);
 
@@ -329,7 +329,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     }
   }
 
-  initSelection() {
+  private _initSelection() {
     const selection = this.root.selection;
     this._disposables.add(
       selection.slots.changed.on(selList => {
@@ -341,11 +341,11 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   }
 
   private _refreshViewport() {
-    if (!this._referenceModel) {
+    if (!this._referencedModel) {
       return;
     }
 
-    const referenceModel = this._referenceModel;
+    const referencedModel = this._referencedModel;
 
     // trigger an rerender to update element's size
     // and set viewport after element's size has been updated
@@ -353,7 +353,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     this.updateComplete.then(() => {
       this._surfaceRenderer.onResize();
       this._surfaceRenderer.setViewportByBound(
-        Bound.fromXYWH(deserializeXYWH(referenceModel.xywh))
+        Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
       );
 
       // trigger an rerender to update portal transform
@@ -484,14 +484,14 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     return this.page.getBlockById(id) ?? this._elements.get(id) ?? null;
   }
 
-  deleteThis() {
+  private _deleteThis() {
     this.page.deleteBlock(this.model);
   }
 
-  viewInEdgeless() {
-    if (!this._referenceModel) return;
+  private _viewInEdgeless() {
+    if (!this._referencedModel) return;
 
-    const xywh = deserializeXYWH(this._referenceModel.xywh);
+    const xywh = deserializeXYWH(this._referencedModel.xywh);
     const doc = this.ownerDocument;
     const editorContainer = doc.querySelector(
       'editor-container'
@@ -518,7 +518,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     });
   }
 
-  focusBlock() {
+  private _focusBlock() {
     this.selection.update(() => {
       return [this.selection.getInstance('block', { path: this.path })];
     });
@@ -527,7 +527,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   private _renderTopLevelBlocks() {
     const notes = getNotesInFrame(
       this.page,
-      this._referenceModel as FrameBlockModel,
+      this._referencedModel as FrameBlockModel,
       false
     );
 
@@ -544,13 +544,13 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     );
   }
 
-  private _renderMask(referenceModel: FrameBlockModel) {
+  private _renderMask(referencedModel: FrameBlockModel) {
     return html`
       <div class="surface-ref-mask">
         <div class="ref-label">
           <div class="title">
-            ${REF_LABEL_ICON[referenceModel.flavour ?? 'DEFAULT']}
-            <span>${referenceModel.title}</span>
+            ${REF_LABEL_ICON[referencedModel.flavour ?? 'DEFAULT']}
+            <span>${referencedModel.title}</span>
           </div>
           <div class="suffix">from edgeless mode</div>
         </div>
@@ -565,7 +565,7 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
         No Such ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT']}
       </div>
       <div class="placeholder-action">
-        <button class="delete-button" type="button" @click=${this.deleteThis}>
+        <button class="delete-button" type="button" @click=${this._deleteThis}>
           <span class="icon">${MoreDeleteIcon}</span
           ><span>Delete this block</span>
         </button>
@@ -577,10 +577,10 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
   }
 
   private _renderSurfaceContent(
-    referenceModel: FrameBlockModel,
+    referencedModel: FrameBlockModel,
     renderer: Renderer
   ) {
-    const [, , w, h] = deserializeXYWH(referenceModel.xywh);
+    const [, , w, h] = deserializeXYWH(referencedModel.xywh);
     const { zoom, translateX, translateY } = renderer;
     const { gap } = getBackgroundGrid(zoom, true);
 
@@ -594,9 +594,9 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
           : undefined,
         backgroundSize: `${gap}px ${gap}px`,
       })}
-      @click=${this.focusBlock}
+      @click=${this._focusBlock}
     >
-      ${this._referenceModel?.flavour === 'affine:frame'
+      ${this._referencedModel?.flavour === 'affine:frame'
         ? html`<div
             class="surface-block-portal"
             style=${styleMap({
@@ -606,22 +606,22 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
             ${this._renderTopLevelBlocks()}
           </div>`
         : nothing}
-      <div class="surface-canvas-container" @dblclick=${this.viewInEdgeless}>
+      <div class="surface-canvas-container" @dblclick=${this._viewInEdgeless}>
         <!-- attach canvas here -->
       </div>
-      ${this._renderMask(referenceModel)}
+      ${this._renderMask(referencedModel)}
     </div>`;
   }
 
   override render() {
-    const { _surfaceModel, _referenceModel, _surfaceRenderer, model } = this;
+    const { _surfaceModel, _referencedModel, _surfaceRenderer, model } = this;
     const noContent =
-      !_surfaceModel || !_referenceModel || !_referenceModel.xywh;
+      !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
 
     return html`<div class="affine-surface-ref">
       ${noContent
         ? this._renderEmptyPlaceholder(model)
-        : this._renderSurfaceContent(_referenceModel, _surfaceRenderer)}
+        : this._renderSurfaceContent(_referencedModel, _surfaceRenderer)}
     </div>`;
   }
 }
