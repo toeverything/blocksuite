@@ -32,9 +32,9 @@ export class LinkPopup extends WithDisposable(LitElement) {
   @property()
   type: 'create' | 'edit' | 'view' = 'create';
 
-  @property()
+  @property({ attribute: false })
   vEditor!: AffineVEditor;
-  @property()
+  @property({ attribute: false })
   goalVRange!: VRange;
 
   @query('#text-input')

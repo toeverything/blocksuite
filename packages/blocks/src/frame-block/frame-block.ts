@@ -5,7 +5,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { isCssVariable } from '../_common/theme/css-variables.js';
-import { BlendColor } from '../page-block/edgeless/utils/consts.js';
 import type { EdgelessPageBlockComponent } from '../page-block/index.js';
 import { Bound } from '../surface-block/index.js';
 import type { FrameBlockModel } from './frame-model.js';
@@ -13,9 +12,6 @@ import type { FrameBlockModel } from './frame-model.js';
 @customElement('affine-frame')
 export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   static offset = 12;
-
-  @state()
-  color = BlendColor;
 
   @state()
   titleHide = false;
@@ -27,7 +23,10 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     if (!this._titleElement) return new Bound();
     const { viewport } = this._surface;
     const { zoom } = viewport;
+    const rect = viewport.boundingClientRect;
     const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
+    bound.x -= rect.x;
+    bound.y -= rect.y;
     bound.h += FrameBlockComponent.offset;
     bound.h /= zoom;
     bound.w /= zoom;
@@ -63,6 +62,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     const bound = Bound.deserialize(model.xywh);
     const { zoom } = _surface.viewport;
     const text = model.title.toString();
+
     return html`
       ${!titleHide
         ? html` <div
@@ -75,7 +75,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
               padding: '4px 10px',
               fontSize: '14px',
               position: 'absolute',
-              background: this.color,
+              background: 'var(--affine-text-primary-color)',
               color: 'var(--affine-white)',
               cursor: 'default',
               whiteSpace: 'nowrap',
@@ -97,7 +97,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
             ? `var(${model.background})`
             : '',
           borderRadius: '8px',
-          border: `2px solid ${this.color}`,
+          border: `2px solid var(--affine-black-30)`,
         })}
       ></div>
     `;

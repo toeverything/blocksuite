@@ -2,20 +2,17 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockElementByModel } from '../../_common/utils/index.js';
 import type {
   EdgelessElement,
   Selectable,
   TopLevelBlockModel,
 } from '../../_common/utils/types.js';
-import type { FrameBlockComponent } from '../../frame-block/index.js';
 import type { FrameBlockModel } from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
-import { BlendColor, NoteColor, SurfaceColor } from './utils/consts.js';
-import { isFrameBlock, isTopLevelBlock } from './utils/query.js';
+import { isFrameBlock } from './utils/query.js';
 
 const MIN_FRAME_WIDTH = 800;
 const MIN_FRAME_HEIGHT = 640;
@@ -74,24 +71,6 @@ export class EdgelessFrameManager {
         .filter(ele => !isFrameBlock(ele));
 
     return elements.concat(getBlocksInFrame(this._edgeless.page, frame));
-  }
-
-  calculateFrameColor(frame: FrameBlockModel) {
-    const elements = this.getElementsInFrame(frame);
-    const frameBlock = getBlockElementByModel(frame) as FrameBlockComponent;
-    let color = '';
-    elements.forEach(element => {
-      if (isTopLevelBlock(element)) {
-        if (!color) color = NoteColor;
-        if (color === SurfaceColor) color = BlendColor;
-      } else {
-        if (!color) color = SurfaceColor;
-        if (color == NoteColor) color = BlendColor;
-      }
-    });
-    color = color || NoteColor;
-    frameBlock.color = color;
-    this._edgeless.surface.refresh();
   }
 
   createFrameOnSelected() {
