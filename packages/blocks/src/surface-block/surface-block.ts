@@ -29,7 +29,6 @@ import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
 import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
-  getEdgelessElement,
   isConnectable,
   isFrameBlock,
   isImageBlock,
@@ -285,7 +284,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
     this._disposables.add(
       this.edgeless.slots.elementSizeUpdated.on(id => {
-        const element = getEdgelessElement(this.edgeless, id);
+        const element = this.pickById(id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
         }
@@ -532,7 +531,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
     _disposables.add(
       edgeless.slots.elementSizeUpdated.on(id => {
-        const element = getEdgelessElement(edgeless, id);
+        const element = this.pickById(id);
         assertExists(element);
         if (element instanceof BrushElement) return;
         this.fitElementToViewport(element);

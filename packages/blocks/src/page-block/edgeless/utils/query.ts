@@ -26,7 +26,6 @@ import {
   TextElement,
 } from '../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
-import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 
 export function isTopLevelBlock(
   selectable: BaseBlockModel | Selectable | BaseBlockModel | null
@@ -198,11 +197,4 @@ export function getSelectableBounds(selected: Selectable[]): Map<
     });
   }
   return bounds;
-}
-
-export function getEdgelessElement(
-  edgeless: EdgelessPageBlockComponent,
-  id: string
-) {
-  return edgeless.surface.pickById(id) as EdgelessElement | null;
 }
