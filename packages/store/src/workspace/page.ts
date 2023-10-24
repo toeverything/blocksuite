@@ -1,4 +1,3 @@
-import { debug } from '@blocksuite/global/debug';
 import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
@@ -300,7 +299,6 @@ export class Page extends Space<FlatBlockMap> {
     return schema.model.props?.(internalPrimitives) ?? {};
   }
 
-  @debug('CRUD')
   addBlocks(
     blocks: Array<{
       flavour: string;
@@ -324,7 +322,6 @@ export class Page extends Space<FlatBlockMap> {
     return ids;
   }
 
-  @debug('CRUD')
   addBlock(
     flavour: string,
     blockProps: Partial<BlockProps & Omit<BlockProps, 'flavour'>> = {},
@@ -380,7 +377,6 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
-  @debug('CRUD')
   moveBlocks(
     blocksToMove: BaseBlockModel[],
     newParent: BaseBlockModel,
@@ -480,7 +476,6 @@ export class Page extends Space<FlatBlockMap> {
     newParent.childrenUpdated.emit();
   }
 
-  @debug('CRUD')
   updateBlock<T extends Partial<BlockProps>>(model: BaseBlockModel, props: T) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
@@ -556,7 +551,6 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  @debug('CRUD')
   deleteBlock(
     model: BaseBlockModel,
     options: {

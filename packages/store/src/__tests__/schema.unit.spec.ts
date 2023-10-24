@@ -9,9 +9,9 @@ import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
 import { PageBlockSchema } from '../../../blocks/src/page-block/page-model.js';
 import { ParagraphBlockSchema } from '../../../blocks/src/paragraph-block/paragraph-model.js';
-import { SchemaValidateError } from '../../../global/src/error/index.js';
 import { Schema } from '../schema';
 import { defineBlockSchema } from '../schema/base';
+import { SchemaValidateError } from '../schema/error.js';
 import { Workspace } from '../workspace';
 import { Generator } from '../workspace/store';
 

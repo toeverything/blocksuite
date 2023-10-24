@@ -1,7 +1,6 @@
 import '../panel/font-family-panel.js';
 import '../panel/font-size-panel.js';
 
-import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
@@ -17,6 +16,7 @@ import {
   TextAlignRightIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import {
   Bound,
   normalizeShapeBound,

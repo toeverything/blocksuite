@@ -1,11 +1,6 @@
-import {
-  atLeastNMatches,
-  countBy,
-  groupBy,
-  isFuzzyMatch,
-  maxBy,
-} from '@blocksuite/global/utils';
 import { describe, expect, it } from 'vitest';
+
+import { atLeastNMatches, countBy, groupBy, maxBy } from './iterable.js';
 
 describe('countBy', () => {
   it('basic', () => {
@@ -83,25 +78,5 @@ describe('groupBy', () => {
     const emptyArray: string[] = [];
     const groupedEmptyArray = groupBy(emptyArray, item => item);
     expect(Object.keys(groupedEmptyArray).length).toBe(0);
-  });
-});
-
-describe('fuzzyMatch', () => {
-  it('basic case', () => {
-    expect(isFuzzyMatch('John Smith', 'j')).toEqual(true);
-    expect(isFuzzyMatch('John Smith', 'js')).toEqual(true);
-    expect(isFuzzyMatch('John Smith', 'jsa')).toEqual(false);
-  });
-
-  it('should works with CJK', () => {
-    expect(isFuzzyMatch('中', '中')).toEqual(true);
-    expect(isFuzzyMatch('中文', '中')).toEqual(true);
-    expect(isFuzzyMatch('中文字符', '中字')).toEqual(true);
-    expect(isFuzzyMatch('中文字符', '字中')).toEqual(false);
-  });
-
-  it('should works with IME', () => {
-    // IME will generate a space between 'da' and 't'
-    expect(isFuzzyMatch('database', 'da t')).toEqual(true);
   });
 });

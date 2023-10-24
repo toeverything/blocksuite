@@ -1,7 +1,7 @@
-import { lastN } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
 import { on, once } from '../../../../../_common/utils/index.js';
+import { lastN } from '../../../../../_common/utils/iterable.js';
 import type { NoteBlockModel } from '../../../../../models.js';
 import { TOCNoteCard } from '../toc-card.js';
 import type { TOCNotesPanel } from '../toc-panel.js';

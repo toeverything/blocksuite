@@ -1,4 +1,4 @@
-import { diffArray, DisposableGroup, Slot } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/virgo';
 import { Text } from 'yjs';
 
@@ -29,6 +29,40 @@ export type IndexUpdatedEvent =
       pageId: PageId;
       blockId: BlockId;
     };
+
+/**
+ * Returns an object with four arrays: add, remove and unchanged.
+ *
+ * add: elements in after that are not in before
+ * remove: elements in before that are not in after
+ * unchanged: elements in both before and after
+ */
+function diffArray<T>(
+  before: T[],
+  after: T[],
+  compare = (a: T, b: T) => a === b
+) {
+  const add: T[] = [];
+  const remove: T[] = [];
+  const unchanged: T[] = [];
+
+  // Find elements in before that are not in after
+  for (const elem of before) {
+    if (!after.some(afterElem => compare(afterElem, elem))) {
+      remove.push(elem);
+    } else {
+      unchanged.push(elem);
+    }
+  }
+  // Find elements in after that are not in before
+  for (const elem of after) {
+    if (!before.some(beforeElem => compare(beforeElem, elem))) {
+      add.push(elem);
+    }
+  }
+
+  return { changed: add.length || remove.length, add, remove, unchanged };
+}
 
 export class BacklinkIndexer {
   private _linkIndexMap: Record<PageId, Record<BlockId, LinkedNode[]>> = {};

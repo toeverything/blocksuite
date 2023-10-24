@@ -1,4 +1,7 @@
-import { ErrorCode } from './code.js';
+enum ErrorCode {
+  MIGRATION_ERROR = 100,
+  SCHEMA_VALIDATE_ERROR,
+}
 
 export const kInternalError = Symbol('internal_error');
 
