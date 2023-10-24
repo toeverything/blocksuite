@@ -206,7 +206,10 @@ export class EdgelessSelectionManager {
     this._selection.setGroup('edgeless', [this.state, instance]);
   }
 
-  clear() {
+  clear(force = false) {
+    // if force is true, clear all selections, including all groups and types
+    if (force) this._selection.clear();
+
     this.setSelection({
       blockId: '',
       elements: [],
