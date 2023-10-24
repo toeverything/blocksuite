@@ -176,10 +176,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
       })
     );
 
-    assertExists(page.root);
-
     _disposables.add(
-      page.root.childrenUpdated.on(() => {
+      edgeless.surface.model.childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );
