@@ -43,7 +43,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     this.updateComplete.then(() => {
       this.vEditor.selectAll();
 
-      surface.updateElementLocalRecord(this.group.id, { titleHide: true });
+      surface.updateElementLocalRecord(this.group.id, { showTitle: false });
 
       this.vEditor.slots.updated.on(() => {
         this.requestUpdate();
@@ -80,7 +80,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
     this.edgeless.surface.updateElementLocalRecord(this.group.id, {
-      titleHide: false,
+      showTitle: true,
     });
     this.edgeless.selectionManager.setSelection({
       elements: [this.group.id],

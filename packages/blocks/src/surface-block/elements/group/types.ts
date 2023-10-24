@@ -11,5 +11,5 @@ export interface IGroup extends ISurfaceElement {
 }
 
 export interface IGroupLocalRecord extends ISurfaceElementLocalRecord {
-  titleHide: boolean;
+  showTitle: boolean;
 }

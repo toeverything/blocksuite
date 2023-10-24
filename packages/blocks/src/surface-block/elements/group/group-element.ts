@@ -171,7 +171,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     this._padding = padding;
     this._radius = radius;
 
-    if (this.getLocalRecord()?.titleHide) return;
+    if (!this.getLocalRecord()?.showTitle) return;
     ctx.beginPath();
     ctx.roundRect(
       0,
