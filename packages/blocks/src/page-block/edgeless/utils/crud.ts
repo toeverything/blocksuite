@@ -1,7 +1,7 @@
 import type {
   Connectable,
   EdgelessElement,
-} from '../../../__internal__/index.js';
+} from '../../../_common/utils/index.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectable, isNoteBlock } from './query.js';
 

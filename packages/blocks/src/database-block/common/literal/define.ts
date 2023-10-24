@@ -1,8 +1,11 @@
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { createPopup, popMenu } from '../../../components/menu/index.js';
-import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import {
+  createPopup,
+  popMenu,
+} from '../../../_common/components/menu/index.js';
+import { createUniComponentFromWebComponent } from '../../../_common/components/uni-component/uni-component.js';
 import {
   tBoolean,
   tDate,

@@ -6,8 +6,8 @@ import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { on, once, queryCurrentMode } from '../../../../__internal__/index.js';
-import { ArrowIcon, HiddenIcon } from '../../../../icons/index.js';
+import { ArrowIcon, HiddenIcon } from '../../../../_common/icons/index.js';
+import { getThemeMode, on, once } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';
 
@@ -398,7 +398,7 @@ export class TOCNoteCard extends WithDisposable(LitElement) {
   override render() {
     if (this.note.isEmpty()) return nothing;
 
-    const mode = queryCurrentMode();
+    const mode = getThemeMode();
     const { pos, stackOrder, width } = this;
     const { children } = this.note;
     const showEllipsis = children.length > 4;

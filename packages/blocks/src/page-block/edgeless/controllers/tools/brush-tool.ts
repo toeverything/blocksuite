@@ -4,8 +4,8 @@ import { assertExists, noop } from '@blocksuite/global/utils';
 import type {
   BrushTool,
   EdgelessTool,
-} from '../../../../__internal__/index.js';
-import { LineWidth } from '../../../../__internal__/index.js';
+} from '../../../../_common/utils/index.js';
+import { LineWidth } from '../../../../_common/utils/index.js';
 import {
   type IVec,
   PhasorElementType,

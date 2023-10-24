@@ -1,6 +1,5 @@
 import type { TemplateResult } from 'lit';
 
-import type { ShapeTool } from '../../../../../__internal__/index.js';
 import {
   DiamondIcon,
   EllipseIcon,
@@ -12,7 +11,8 @@ import {
   ScribbledTriangleIcon,
   SquareIcon,
   TriangleIcon,
-} from '../../../../../icons/index.js';
+} from '../../../../../_common/icons/index.js';
+import type { ShapeTool } from '../../../../../_common/utils/index.js';
 
 type Config = {
   name: ShapeTool['shape'];

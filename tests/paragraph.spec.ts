@@ -423,16 +423,14 @@ test('should indent and unindent works with children', async ({ page }) => {
   await initThreeParagraphs(page);
   await pressEnter(page);
   await type(page, '012');
+  await pressEnter(page);
+  await type(page, '345');
+  // 123
+  // 456
+  // 789
+  // 012
+  // 345
 
-  // Focus 789
-  await focusRichText(page, 2);
-  await page.keyboard.press('Tab');
-  // Focus 456
-  await focusRichText(page, 1);
-  await page.keyboard.press('Tab');
-  // Focus 012
-  await focusRichText(page, 3);
-  await page.keyboard.press('Tab');
   await assertStoreMatchJSX(
     page,
     `
@@ -444,11 +442,96 @@ test('should indent and unindent works with children', async ({ page }) => {
   <affine:paragraph
     prop:text="123"
     prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="012"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="345"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  //-- test indent --//
+
+  // Focus 789
+  await focusRichText(page, 2);
+  await pressTab(page);
+  // 123
+  // 456
+  //   789|
+  // 012
+  // 345
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
   >
     <affine:paragraph
-      prop:text="456"
+      prop:text="789"
       prop:type="text"
     />
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="012"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="345"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  // Focus 012
+  await focusRichText(page, 3);
+  await pressTab(page);
+  // 123
+  // 456
+  //   789
+  //   012|
+  // 345
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  >
     <affine:paragraph
       prop:text="789"
       prop:type="text"
@@ -458,13 +541,22 @@ test('should indent and unindent works with children', async ({ page }) => {
       prop:type="text"
     />
   </affine:paragraph>
+  <affine:paragraph
+    prop:text="345"
+    prop:type="text"
+  />
 </affine:note>`,
     noteId
   );
 
-  // unindent
-  await focusRichText(page, 2);
-  await pressShiftTab(page);
+  // Focus 456
+  await focusRichText(page, 1);
+  await pressTab(page);
+  // 123
+  //   456|
+  //     789
+  //     012
+  // 345
 
   await assertStoreMatchJSX(
     page,
@@ -481,17 +573,203 @@ test('should indent and unindent works with children', async ({ page }) => {
     <affine:paragraph
       prop:text="456"
       prop:type="text"
-    />
+    >
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="012"
+        prop:type="text"
+      />
+    </affine:paragraph>
   </affine:paragraph>
   <affine:paragraph
-    prop:text="789"
+    prop:text="345"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  // Focus 345
+  await focusRichText(page, 4);
+  await pressTab(page, 3);
+  // 123
+  //   456
+  //     789
+  //     012
+  //       345|
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
     prop:type="text"
   >
     <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+      <affine:paragraph
+        prop:text="012"
+        prop:type="text"
+      >
+        <affine:paragraph
+          prop:text="345"
+          prop:type="text"
+        />
+      </affine:paragraph>
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  //-- test unindent --//
+
+  // Focus 456
+  await focusRichText(page, 1);
+  await pressShiftTab(page);
+  // 123
+  // 456|
+  //   789
+  //   012
+  //     345
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="789"
+      prop:type="text"
+    />
+    <affine:paragraph
       prop:text="012"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="345"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  // Focus 012
+  await focusRichText(page, 3);
+  await pressShiftTab(page);
+  // 123
+  // 456
+  //   789
+  // 012|
+  //   345
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="789"
       prop:type="text"
     />
   </affine:paragraph>
+  <affine:paragraph
+    prop:text="012"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="345"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  // Focus 789
+  await focusRichText(page, 2);
+  await pressShiftTab(page);
+  // 123
+  // 456
+  // 789|
+  // 012
+  //   345
+
+  // Focus 345
+  await focusRichText(page, 4);
+  await pressShiftTab(page);
+  // 123
+  // 456
+  // 789
+  // 012
+  // 345|
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="456"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="789"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="012"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="345"
+    prop:type="text"
+  />
 </affine:note>`,
     noteId
   );

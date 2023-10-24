@@ -1033,7 +1033,6 @@ test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
     bound[0] + bound[2] / 2,
     bound[1] + bound[3] / 2 + 200,
   ]);
-  await page.pause();
   await page.mouse.move(coord[0], coord[1]);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);

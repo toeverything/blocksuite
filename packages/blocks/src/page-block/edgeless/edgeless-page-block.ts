@@ -14,22 +14,22 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { EdgelessClipboard } from '../../__internal__/clipboard/index.js';
-import { BLOCK_ID_ATTR } from '../../__internal__/consts.js';
+import { toast } from '../../_common/components/toast.js';
+import { BLOCK_ID_ATTR } from '../../_common/consts.js';
+import { listenToThemeChange } from '../../_common/theme/utils.js';
 import type {
   EdgelessTool,
   Point,
   Selectable,
-} from '../../__internal__/index.js';
+} from '../../_common/utils/index.js';
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
   type ReorderingAction,
   type TopLevelBlockModel,
-} from '../../__internal__/index.js';
-import { getService } from '../../__internal__/service/index.js';
-import { listenToThemeChange } from '../../__internal__/theme/utils.js';
-import { toast } from '../../components/toast.js';
+} from '../../_common/utils/index.js';
+import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
+import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
@@ -515,8 +515,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
   getElementsBound(): IBound | null {
     const bounds = [];
 
-    this.surface.getblocks(EdgelessBlockType.NOTE).forEach(note => {
-      bounds.push(Bound.deserialize(note.xywh));
+    Object.values(EdgelessBlockType).forEach(edgelessBlock => {
+      this.surface.getblocks(edgelessBlock).forEach(block => {
+        bounds.push(Bound.deserialize(block.xywh));
+      });
     });
 
     const surfaceElementsBound = this.surface.getElementsBound();
@@ -615,7 +617,9 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
-    this.clipboard.init(this.page);
+    if (!this.clipboardController._enabled) {
+      this.clipboard.init(this.page);
+    }
 
     requestAnimationFrame(() => {
       if (!this._tryLoadViewportLocalRecord()) {

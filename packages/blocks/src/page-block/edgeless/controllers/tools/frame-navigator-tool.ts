@@ -1,6 +1,6 @@
 import { noop } from '@blocksuite/global/utils';
 
-import { type FrameNavigatorTool } from '../../../../__internal__/index.js';
+import { type FrameNavigatorTool } from '../../../../_common/utils/index.js';
 import { EdgelessToolController } from './index.js';
 
 export class PresentToolController extends EdgelessToolController<FrameNavigatorTool> {

@@ -8,11 +8,8 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import type {
-  IPoint,
-  Selectable,
-} from '../../../../__internal__/utils/types.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
+import type { IPoint, Selectable } from '../../../../_common/utils/types.js';
 import {
   normalizeTextBound,
   PhasorElementType,
@@ -39,7 +36,6 @@ import {
   isImageBlock,
   isNoteBlock,
   isPhasorElement,
-  isPhasorElementWithText,
 } from '../../utils/query.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import { HandleDirection } from '../resize/resize-handles.js';
@@ -336,13 +332,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
-    this._disposables.add(
-      this._resizeManager.slots.resizeEnd.on(() => {
-        this.selection.elements.forEach(ele => {
-          isFrameBlock(ele) && this.surface.frame.calculateFrameColor(ele);
-        });
-      })
-    );
   }
 
   get selection() {
@@ -400,11 +389,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _shouldRenderSelection(elements?: Selectable[]) {
     elements = elements ?? this.selection.elements;
-
-    return (
-      elements.length > 0 &&
-      (!this.selection.editing || !isPhasorElementWithText(elements[0]))
-    );
+    return elements.length > 0 && !this.selection.editing;
   }
 
   private _onDragStart = () => {

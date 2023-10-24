@@ -15,6 +15,7 @@ import {
   pressSpace,
   pressTab,
   redoByClick,
+  switchReadonly,
   type,
   undoByClick,
   undoByKeyboard,
@@ -770,5 +771,30 @@ test.describe('toggle list', () => {
     await page.mouse.move(0, 0);
     await waitNextFrame(page, 300);
     await assertToggleIconVisible(toggleIcon, false);
+  });
+
+  test('can expand toggle in readonly mode', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyParagraphState(page);
+    await initThreeLists(page);
+    const toggleIcon = getToggleIcon(page);
+    const prefixes = page.locator('.affine-list-block__prefix');
+    const parentPrefix = prefixes.nth(1);
+    await expect(prefixes).toHaveCount(3);
+
+    await parentPrefix.hover();
+    await assertToggleIconVisible(toggleIcon);
+
+    await toggleIcon.click();
+    await expect(prefixes).toHaveCount(2);
+
+    await switchReadonly(page);
+    await assertToggleIconVisible(toggleIcon);
+
+    await toggleIcon.click();
+    await expect(prefixes).toHaveCount(3);
+
+    await toggleIcon.click();
+    await expect(prefixes).toHaveCount(2);
   });
 });

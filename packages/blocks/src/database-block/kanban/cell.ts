@@ -6,7 +6,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { renderUniLit } from '../../components/uni-component/uni-component.js';
+import { renderUniLit } from '../../_common/components/uni-component/uni-component.js';
 import type {
   CellRenderProps,
   DataViewCellLifeCycle,

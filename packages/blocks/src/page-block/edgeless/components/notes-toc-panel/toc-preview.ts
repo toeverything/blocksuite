@@ -4,7 +4,6 @@ import { Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
-import type { BlockModels } from '../../../../__internal__/utils/model.js';
 import {
   AttachmentIcon,
   BookmarkIcon,
@@ -17,7 +16,8 @@ import {
   ImageIcon,
   NumberedListIcon,
   QuoteIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import type { BlockModels } from '../../../../_common/utils/model.js';
 import type { DividerBlockModel } from '../../../../models.js';
 import {
   type AttachmentBlockModel,

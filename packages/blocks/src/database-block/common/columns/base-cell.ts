@@ -6,7 +6,12 @@ import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
-} from '../../../__internal__/index.js';
+} from '../../../_common/utils/index.js';
+import { ClipboardItem } from '../../../_legacy/clipboard/clipboard-item.js';
+import {
+  CLIPBOARD_MIMETYPE,
+  performNativeCopy,
+} from '../../../_legacy/clipboard/utils/pure.js';
 import type {
   DataViewColumnManager,
   DataViewManager,

@@ -4,7 +4,7 @@ import '../declare-test-window.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { ClipboardItem } from '../../../packages/blocks/src/__internal__/clipboard/clipboard-item.js';
+import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,
@@ -128,9 +128,8 @@ async function initEmptyEditor({
           return editor;
         };
         const editor = createEditor();
-        if (multiEditor) {
-          createEditor();
-        }
+        if (multiEditor) createEditor();
+
         const debugMenu: DebugMenu = document.createElement('debug-menu');
         debugMenu.workspace = workspace;
         debugMenu.editor = editor;
@@ -920,6 +919,9 @@ export const getCenterPositionByLocator: (
   };
 };
 
+/**
+ * @deprecated Use `page.locator(selector).boundingBox()` instead
+ */
 export const getBoundingClientRect: (
   page: Page,
   selector: string
@@ -1167,4 +1169,44 @@ export async function getCopyClipItemsInPage(page: Page) {
       .clipboard['_copyBlocksInPage']();
   });
   return clipItems;
+}
+
+export async function scrollToTop(page: Page) {
+  await page.mouse.wheel(0, -1000);
+
+  await page.waitForFunction(() => {
+    const scrollContainer = document.querySelector('.affine-doc-viewport');
+    if (!scrollContainer) {
+      throw new Error("Can't find scroll container");
+    }
+    return scrollContainer.scrollTop < 10;
+  });
+}
+
+export async function scrollToBottom(page: Page) {
+  // await page.mouse.wheel(0, 1000);
+
+  await page
+    .locator('.affine-doc-viewport')
+    .evaluate(node =>
+      node.scrollTo({ left: 0, top: 1000, behavior: 'smooth' })
+    );
+  // TODO switch to `scrollend`
+  // See https://developer.chrome.com/en/blog/scrollend-a-new-javascript-event/
+  await page.waitForFunction(() => {
+    const scrollContainer = document.querySelector('.affine-doc-viewport');
+    if (!scrollContainer) {
+      throw new Error("Can't find scroll container");
+    }
+
+    return (
+      // Wait for scrolled to the bottom
+      // Refer to https://stackoverflow.com/questions/3898130/check-if-a-user-has-scrolled-to-the-bottom-not-just-the-window-but-any-element
+      Math.abs(
+        scrollContainer.scrollHeight -
+          scrollContainer.scrollTop -
+          scrollContainer.clientHeight
+      ) < 10
+    );
+  });
 }

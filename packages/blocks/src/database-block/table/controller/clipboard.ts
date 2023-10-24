@@ -2,7 +2,7 @@ import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { ReactiveController } from 'lit';
 
-import type { TableViewSelection } from '../../../__internal__/utils/types.js';
+import type { TableViewSelection } from '../../../_common/utils/types.js';
 import type { DatabaseCellContainer } from '../components/cell-container.js';
 import type { DataViewTable } from '../table-view.js';
 import type { DataViewTableManager } from '../table-view-manager.js';

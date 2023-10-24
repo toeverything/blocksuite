@@ -7,13 +7,13 @@ import { css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
+import { affineAttributeRenderer } from '../../../_common/components/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../../../_common/components/rich-text/virgo/types.js';
 import {
   getCurrentNativeRange,
   hasNativeSelection,
   resetNativeSelection,
-} from '../../../__internal__/index.js';
-import { affineAttributeRenderer } from '../../../components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../../../components/rich-text/virgo/types.js';
+} from '../../../_common/utils/index.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';

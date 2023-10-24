@@ -1,4 +1,4 @@
-import type { TopLevelBlockModel } from '../../../__internal__/utils/types.js';
+import type { TopLevelBlockModel } from '../../../_common/utils/types.js';
 import { deserializeXYWH } from '../../../surface-block/index.js';
 
 export function xywhArrayToObject(element: TopLevelBlockModel) {

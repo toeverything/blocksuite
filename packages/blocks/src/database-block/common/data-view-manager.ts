@@ -2,7 +2,7 @@ import type { BlockStdProvider } from '@blocksuite/block-std';
 import type { Disposable } from '@blocksuite/global/utils';
 import { Slot } from '@blocksuite/global/utils';
 
-import type { UniComponent } from '../../components/uni-component/uni-component.js';
+import type { UniComponent } from '../../_common/components/uni-component/uni-component.js';
 import type { TType } from '../logical/typesystem.js';
 import type { ColumnDataUpdater, InsertToPosition } from '../types.js';
 import type { FilterGroup, Variable } from './ast.js';

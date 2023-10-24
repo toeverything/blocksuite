@@ -13,11 +13,11 @@ import { keyed } from 'lit/directives/keyed.js';
 import { createRef } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
+import { renderUniLit } from '../_common/components/uni-component/uni-component.js';
 import type {
   DataViewSelection,
   DataViewSelectionState,
-} from '../__internal__/index.js';
-import { renderUniLit } from '../components/uni-component/uni-component.js';
+} from '../_common/utils/index.js';
 import type { BaseDataView } from './common/base-data-view.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type {

@@ -16,7 +16,7 @@ import { type IVec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
-import { drawGeneralShape } from '../utils.js';
+import { drawGeneralShape, hitTestOnShapeText } from '../utils.js';
 
 export const EllipseMethods: ShapeMethods = {
   points({ x, y, w, h }: IBound) {
@@ -92,23 +92,28 @@ export const EllipseMethods: ShapeMethods = {
     const center = [this.x + rx, this.y + ry];
     const rad = (this.rotate * Math.PI) / 180;
 
-    let hited =
+    let hit =
       pointInEllipse(point, center, rx + expand, ry + expand, rad) &&
       !pointInEllipse(point, center, rx - expand, ry - expand, rad);
 
-    if (!hited) {
+    if (!hit) {
       if (!options.ignoreTransparent || this.filled) {
-        hited = pointInEllipse(point, center, rx, ry, rad);
+        hit = pointInEllipse(point, center, rx, ry, rad);
       } else {
         // If shape is not filled or transparent
-        // Check the center area of the shape
-        const centralRx = rx * DEFAULT_CENTRAL_AREA_RATIO;
-        const centralRy = ry * DEFAULT_CENTRAL_AREA_RATIO;
-        hited = pointInEllipse(point, center, centralRx, centralRy, rad);
+        const text = this.text;
+        if (!text || !text.length) {
+          // Check the center area of the shape
+          const centralRx = rx * DEFAULT_CENTRAL_AREA_RATIO;
+          const centralRy = ry * DEFAULT_CENTRAL_AREA_RATIO;
+          hit = pointInEllipse(point, center, centralRx, centralRy, rad);
+        } else {
+          hit = hitTestOnShapeText([x, y], this);
+        }
       }
     }
 
-    return hited;
+    return hit;
   },
 
   containedByBounds(bounds: Bound, element: ShapeElement): boolean {

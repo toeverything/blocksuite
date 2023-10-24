@@ -9,6 +9,11 @@ import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import {
+  type CssVariableName,
+  isCssVariable,
+} from '../_common/theme/css-variables.js';
+import { getThemePropertyValue } from '../_common/theme/utils.js';
+import {
   bringForward,
   type EdgelessElement,
   reorder,
@@ -18,12 +23,7 @@ import {
   type Selectable,
   sendBackward,
   type TopLevelBlockModel,
-} from '../__internal__/index.js';
-import {
-  type CssVariableName,
-  isCssVariable,
-} from '../__internal__/theme/css-variables.js';
-import { getThemePropertyValue } from '../__internal__/theme/utils.js';
+} from '../_common/utils/index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
@@ -245,7 +245,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   };
 
   private _initEvents() {
-    const { page, _disposables, edgeless } = this;
+    const { _disposables, edgeless } = this;
 
     _disposables.add(
       edgeless.slots.reorderingBlocksUpdated.on(this._reorderBlocks.bind(this))
@@ -288,20 +288,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         const element = getEdgelessElement(this.edgeless, id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
-        }
-      })
-    );
-
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(e => {
-        if (e.type === 'add') {
-          const model = page.getBlockById(e.id) as TopLevelBlockModel;
-          assertExists(model);
-          if (isFrameBlock(model)) {
-            requestAnimationFrame(() => {
-              this.frame.calculateFrameColor(model);
-            });
-          }
         }
       })
     );
