@@ -24,7 +24,7 @@ import {
 } from './types.js';
 import {
   type ArrowOptions,
-  getArrowPoints,
+  renderArrow,
   renderCircle,
   renderDiamond,
   renderTriangle,
@@ -179,7 +179,6 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       points,
       ctx,
       rc,
-      mode,
       ConnectorEndpoint.Front,
       frontEndpointStyle
     );
@@ -188,7 +187,6 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       points,
       ctx,
       rc,
-      mode,
       ConnectorEndpoint.Rear,
       rearEndpointStyle
     );
@@ -274,48 +272,17 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     };
   }
 
-  private _renderArrow(
-    points: PointLocation[],
-    ctx: CanvasRenderingContext2D,
-    rc: RoughCanvas,
-    mode: ConnectorMode,
-    end: ConnectorEndpoint
-  ) {
-    const radians = Math.PI / 4;
-    const { points: arrowPoints } = getArrowPoints(
-      points,
-      15,
-      mode,
-      this.bezierParameters,
-      end,
-      radians
-    );
-
-    this._renderPoints(
-      ctx,
-      rc,
-      [
-        PointLocation.fromVec(arrowPoints[0]),
-        PointLocation.fromVec(arrowPoints[1]),
-        PointLocation.fromVec(arrowPoints[2]),
-      ],
-      false,
-      false
-    );
-  }
-
   private _renderEndpoint(
     location: PointLocation[],
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
-    mode: ConnectorMode,
     end: ConnectorEndpoint,
     style: ConnectorEndpointStyle
   ) {
     const arrowOptions = this._getArrowOptions(end);
     switch (style) {
       case ConnectorEndpointStyle.Arrow:
-        this._renderArrow(location, ctx, rc, mode, end);
+        renderArrow(location, ctx, rc, arrowOptions);
         break;
       case ConnectorEndpointStyle.Triangle:
         renderTriangle(location, ctx, rc, arrowOptions);

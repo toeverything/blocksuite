@@ -5,7 +5,11 @@ import {
 } from '../../utils/curve.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
-import { ConnectorEndpoint, ConnectorMode } from './types.js';
+import {
+  ConnectorEndpoint,
+  ConnectorMode,
+  DEFAULT_ARROW_SIZE,
+} from './types.js';
 
 export function getArrowPoints(
   points: PointLocation[],
@@ -102,28 +106,62 @@ export function getRcOptions(options: ArrowOptions) {
   };
 }
 
-export function renderArrowShape(
+export function renderRoundedPolygon(
   ctx: CanvasRenderingContext2D,
   points: IVec[],
   color: string,
-  strokeWidth: number
+  strokeWidth: number,
+  fill: boolean = true
 ) {
   ctx.fillStyle = color;
   ctx.strokeStyle = color;
   ctx.lineWidth = strokeWidth;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
   ctx.save();
   ctx.beginPath();
-  points.forEach((point, index) => {
-    if (index === 0) {
-      ctx.moveTo(point[0], point[1]);
+
+  for (let i = 0; i < points.length; i++) {
+    if (i === 0) {
+      ctx.moveTo(points[i][0], points[i][1]);
     } else {
-      ctx.lineTo(point[0], point[1]);
+      ctx.lineTo(points[i][0], points[i][1]);
     }
-  });
-  ctx.closePath();
-  ctx.fill();
+  }
+
+  if (fill) {
+    ctx.closePath();
+    ctx.fill();
+  }
+
   ctx.stroke();
   ctx.restore();
+}
+
+export function renderArrow(
+  points: PointLocation[],
+  ctx: CanvasRenderingContext2D,
+  rc: RoughCanvas,
+  options: ArrowOptions
+) {
+  const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
+    options;
+  const radians = Math.PI / 4;
+  const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
+  const { points: arrowPoints } = getArrowPoints(
+    points,
+    size,
+    mode,
+    bezierParameters,
+    end,
+    radians
+  );
+
+  if (rough) {
+    rc.linearPath(arrowPoints as [number, number][], getRcOptions(options));
+  } else {
+    renderRoundedPolygon(ctx, arrowPoints, strokeColor, strokeWidth, false);
+  }
 }
 
 export function renderTriangle(
@@ -135,9 +173,10 @@ export function renderTriangle(
   const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
     options;
   const radians = Math.PI / 10;
+  const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
   const { points: trianglePoints } = getArrowPoints(
     points,
-    15,
+    size,
     mode,
     bezierParameters,
     end,
@@ -154,7 +193,7 @@ export function renderTriangle(
       getRcOptions(options)
     );
   } else {
-    renderArrowShape(ctx, trianglePoints, strokeColor, strokeWidth);
+    renderRoundedPolygon(ctx, trianglePoints, strokeColor, strokeWidth);
   }
 }
 
@@ -167,7 +206,8 @@ export function renderDiamond(
   const { mode, end, rough, bezierParameters, strokeColor, strokeWidth } =
     options;
   const anchorPoint = getPointWithTangent(points, mode, end, bezierParameters);
-  const { points: diamondPoints } = getDiamondPoints(anchorPoint, 10, end);
+  const size = 10 * (strokeWidth / 2);
+  const { points: diamondPoints } = getDiamondPoints(anchorPoint, size, end);
 
   if (rough) {
     rc.polygon(
@@ -180,7 +220,7 @@ export function renderDiamond(
       getRcOptions(options)
     );
   } else {
-    renderArrowShape(ctx, diamondPoints, strokeColor, strokeWidth);
+    renderRoundedPolygon(ctx, diamondPoints, strokeColor, strokeWidth);
   }
 }
 
@@ -190,7 +230,6 @@ export function renderCircle(
   rc: RoughCanvas,
   options: ArrowOptions
 ) {
-  const radius = 5;
   const {
     bezierParameters,
     mode,
@@ -200,6 +239,7 @@ export function renderCircle(
     strokeWidth,
     rough,
   } = options;
+  const radius = 5 * (strokeWidth / 2);
   const anchorPoint = getPointWithTangent(points, mode, end, bezierParameters);
   let cx = anchorPoint[0];
   let cy = anchorPoint[1];
