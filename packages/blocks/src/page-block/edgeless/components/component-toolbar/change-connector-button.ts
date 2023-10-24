@@ -14,19 +14,19 @@ import {
   CurveLineIcon,
   DashLineIcon,
   ElbowedLineIcon,
-  EndpointArrowIcon,
-  EndpointCircleIcon,
-  EndpointDiamondIcon,
-  EndpointTriangleIcon,
   FlipDirectionIcon,
+  FrontEndpointArrowIcon,
+  FrontEndpointCircleIcon,
+  FrontEndpointDiamondIcon,
+  FrontEndpointTriangleIcon,
   GeneralStyleIcon,
   LineStyleIcon,
+  RearEndpointArrowIcon,
+  RearEndpointCircleIcon,
+  RearEndpointDiamondIcon,
+  RearEndpointTriangleIcon,
   ScribbledStyleIcon,
   SmallArrowDownIcon,
-  StartPointArrowIcon,
-  StartPointCircleIcon,
-  StartPointDiamondIcon,
-  StartPointTriangleIcon,
   StraightLineIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
@@ -252,23 +252,23 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       }
       case ConnectorEndpointStyle.Arrow: {
         return end === ConnectorEndpoint.Front
-          ? StartPointArrowIcon
-          : EndpointArrowIcon;
+          ? FrontEndpointArrowIcon
+          : RearEndpointArrowIcon;
       }
       case ConnectorEndpointStyle.Triangle: {
         return end === ConnectorEndpoint.Front
-          ? StartPointTriangleIcon
-          : EndpointTriangleIcon;
+          ? FrontEndpointTriangleIcon
+          : RearEndpointTriangleIcon;
       }
       case ConnectorEndpointStyle.Circle: {
         return end === ConnectorEndpoint.Front
-          ? StartPointCircleIcon
-          : EndpointCircleIcon;
+          ? FrontEndpointCircleIcon
+          : RearEndpointCircleIcon;
       }
       case ConnectorEndpointStyle.Diamond: {
         return end === ConnectorEndpoint.Front
-          ? StartPointDiamondIcon
-          : EndpointDiamondIcon;
+          ? FrontEndpointDiamondIcon
+          : RearEndpointDiamondIcon;
       }
     }
   }
@@ -421,7 +421,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Arrow
                 )}
             >
-              ${StartPointArrowIcon}
+              ${FrontEndpointArrowIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Triangle'}
@@ -435,7 +435,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Triangle
                 )}
             >
-              ${StartPointTriangleIcon}
+              ${FrontEndpointArrowIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Circle'}
@@ -449,7 +449,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Circle
                 )}
             >
-              ${StartPointCircleIcon}
+              ${FrontEndpointArrowIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Diamond'}
@@ -463,7 +463,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Diamond
                 )}
             >
-              ${StartPointDiamondIcon}
+              ${FrontEndpointArrowIcon}
             </edgeless-tool-icon-button>
           `}
         >
@@ -505,7 +505,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Diamond
                 )}
             >
-              ${EndpointDiamondIcon}
+              ${RearEndpointDiamondIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Circle'}
@@ -518,7 +518,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Circle
                 )}
             >
-              ${EndpointCircleIcon}
+              ${RearEndpointDiamondIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Triangle'}
@@ -532,7 +532,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Triangle
                 )}
             >
-              ${EndpointTriangleIcon}
+              ${RearEndpointDiamondIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Arrow'}
@@ -545,7 +545,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Arrow
                 )}
             >
-              ${EndpointArrowIcon}
+              ${RearEndpointDiamondIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'None'}

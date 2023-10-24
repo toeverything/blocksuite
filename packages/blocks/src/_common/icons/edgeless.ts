@@ -690,7 +690,7 @@ export const ConnectorEndpointNoneIcon = html`<svg
   />
 </svg>`;
 
-export const StartPointArrowIcon = html`<svg
+export const FrontEndpointArrowIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -704,7 +704,7 @@ export const StartPointArrowIcon = html`<svg
   />
 </svg>`;
 
-export const StartPointTriangleIcon = html`<svg
+export const FrontEndpointTriangleIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -716,7 +716,7 @@ export const StartPointTriangleIcon = html`<svg
   />
 </svg>`;
 
-export const StartPointCircleIcon = html`<svg
+export const FrontEndpointCircleIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -728,7 +728,7 @@ export const StartPointCircleIcon = html`<svg
   />
 </svg>`;
 
-export const StartPointDiamondIcon = html`<svg
+export const FrontEndpointDiamondIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -740,7 +740,7 @@ export const StartPointDiamondIcon = html`<svg
   />
 </svg>`;
 
-export const EndpointArrowIcon = html`<svg
+export const RearEndpointArrowIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -754,7 +754,7 @@ export const EndpointArrowIcon = html`<svg
   />
 </svg>`;
 
-export const EndpointTriangleIcon = html`<svg
+export const RearEndpointTriangleIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -766,7 +766,7 @@ export const EndpointTriangleIcon = html`<svg
   />
 </svg>`;
 
-export const EndpointCircleIcon = html`<svg
+export const RearEndpointCircleIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
@@ -778,7 +778,7 @@ export const EndpointCircleIcon = html`<svg
   />
 </svg>`;
 
-export const EndpointDiamondIcon = html`<svg
+export const RearEndpointDiamondIcon = html`<svg
   width="20"
   height="20"
   viewBox="0 0 20 20"
