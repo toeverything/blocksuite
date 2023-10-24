@@ -11,7 +11,7 @@ import {
 } from '../../../../_common/icons/index.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { mountGroupEditor } from '../../utils/text.js';
+import { mountGroupTitleEditor } from '../../utils/text.js';
 
 @customElement('edgeless-change-group-button')
 export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
@@ -27,7 +27,8 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       ${groups.length === 1
         ? html` <edgeless-tool-icon-button
               class=${'edgeless-component-toolbar-group-rename-button'}
-              @click=${() => mountGroupEditor(groups[0], this.surface.edgeless)}
+              @click=${() =>
+                mountGroupTitleEditor(groups[0], this.surface.edgeless)}
               .tooltip=${'Rename'}
               .tipPosition=${'bottom'}
             >

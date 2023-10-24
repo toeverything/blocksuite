@@ -36,8 +36,8 @@ import {
 } from '../../utils/query.js';
 import {
   addText,
-  mountFrameEditor,
-  mountGroupEditor,
+  mountFrameTitleEditor,
+  mountGroupTitleEditor,
   mountShapeEditor,
   mountTextEditor,
 } from '../../utils/text.js';
@@ -288,11 +288,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         return;
       }
       if (isFrameBlock(selected)) {
-        mountFrameEditor(selected, this._edgeless);
+        mountFrameTitleEditor(selected, this._edgeless);
         return;
       }
       if (selected instanceof GroupElement) {
-        mountGroupEditor(selected, this._edgeless);
+        mountGroupTitleEditor(selected, this._edgeless);
         return;
       }
     }

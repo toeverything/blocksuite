@@ -82,7 +82,7 @@ export function mountShapeEditor(
   });
 }
 
-export function mountFrameEditor(
+export function mountFrameTitleEditor(
   frame: FrameBlockModel,
   edgeless: EdgelessPageBlockComponent
 ) {
@@ -97,7 +97,7 @@ export function mountFrameEditor(
   });
 }
 
-export function mountGroupEditor(
+export function mountGroupTitleEditor(
   group: GroupElement,
   edgeless: EdgelessPageBlockComponent
 ) {
