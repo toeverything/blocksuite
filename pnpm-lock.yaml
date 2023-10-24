@@ -282,9 +282,6 @@ importers:
 
   packages/global:
     dependencies:
-      ansi-colors:
-        specifier: ^4.1.3
-        version: 4.1.3
       zod:
         specifier: ^3.22.2
         version: 3.22.4
@@ -2643,11 +2640,6 @@ packages:
 
   /anser@2.1.1:
     resolution: {integrity: sha512-nqLm4HxOTpeLOxcmB3QWmV5TcDFhW9y/fyQ+hivtDFcK4OQ+pQ5fzPnXHM1Mfcm0VkLtvVi1TCPr++Qy0Q/3EQ==}
-    dev: false
-
-  /ansi-colors@4.1.3:
-    resolution: {integrity: sha512-/6w/C21Pm1A7aZitlI5Ni/2J6FFQN8i1Cvz3kHABAAbw93v/NlvKdVOqz7CCWz/3iv/JplRSEEZ83XION15ovw==}
-    engines: {node: '>=6'}
     dev: false
 
   /ansi-escapes@5.0.0:
