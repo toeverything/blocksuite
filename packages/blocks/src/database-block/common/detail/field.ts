@@ -248,7 +248,6 @@ export class RecordField extends WithDisposable(ShadowlessElement) {
       rowId: this.rowId,
       isEditing: this.editing,
       selectCurrentCell: this.changeEditing,
-      std: this.view.std,
     };
     const { view, edit } = this.column.renderer;
     const contentClass = classMap({

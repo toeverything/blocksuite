@@ -107,7 +107,6 @@ export class DatabaseCellContainer extends WithDisposable(ShadowlessElement) {
       rowId: this.rowId,
       isEditing: this.isEditing,
       selectCurrentCell: this.selectCurrentCell,
-      std: this.table.std,
     };
     return renderUniLit(uni, props, {
       ref: this._cell,

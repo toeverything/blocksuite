@@ -1,5 +1,3 @@
-import type { BlockStdProvider } from '@blocksuite/block-std';
-
 import type { UniComponent } from '../../../_common/components/uni-component/uni-component.js';
 import type { TType } from '../../logical/typesystem.js';
 import type {
@@ -26,7 +24,6 @@ export interface CellRenderProps<
   rowId: string;
   isEditing: boolean;
   selectCurrentCell: (editing: boolean) => void;
-  std: BlockStdProvider;
 }
 
 export interface DataViewCellLifeCycle {
