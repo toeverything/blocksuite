@@ -702,7 +702,7 @@ type Action =
   | 'changeConnectorStrokeStyles'
   | 'addFrame'
   | 'addGroup'
-  | 'unGroup'
+  | 'ungroup'
   | 'releaseFromGroup'
   | 'createFrameOnMoreOption'
   | 'duplicate'
@@ -860,7 +860,7 @@ export async function triggerComponentToolbarAction(
       await button.click();
       break;
     }
-    case 'unGroup': {
+    case 'ungroup': {
       const button = locatorComponentToolbar(page)
         .locator('edgeless-change-group-button')
         .locator('.edgeless-component-toolbar-ungroup-button');
