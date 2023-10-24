@@ -15,8 +15,8 @@ import type { SerializedXYWH } from '../../utils/xywh.js';
 import type { HitTestOptions } from '../edgeless-element.js';
 import { SurfaceElement } from '../surface-element.js';
 import {
-  ConnectorEndPoint,
-  ConnectorEndPointStyle,
+  ConnectorEndpoint,
+  ConnectorEndpointStyle,
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
@@ -93,17 +93,17 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     return this.yMap.get('controllers') as IConnector['controllers'];
   }
 
-  get frontEndPointStyle() {
+  get frontEndpointStyle() {
     return (
       (this.yMap.get(
-        'frontEndPointStyle'
-      ) as IConnector['frontEndPointStyle']) ?? DEFAULT_FRONT_END_POINT_STYLE
+        'frontEndpointStyle'
+      ) as IConnector['frontEndpointStyle']) ?? DEFAULT_FRONT_END_POINT_STYLE
     );
   }
 
-  get rearEndPointStyle() {
+  get rearEndpointStyle() {
     return (
-      (this.yMap.get('rearEndPointStyle') as IConnector['rearEndPointStyle']) ??
+      (this.yMap.get('rearEndpointStyle') as IConnector['rearEndpointStyle']) ??
       DEFAULT_REAR_END_POINT_STYLE
     );
   }
@@ -152,8 +152,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     const {
       absolutePath: points,
       mode,
-      frontEndPointStyle,
-      rearEndPointStyle,
+      frontEndpointStyle: frontEndpointStyle,
+      rearEndpointStyle: rearEndpointStyle,
     } = this;
 
     // points might not be build yet in some senarios
@@ -181,8 +181,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ctx,
       rc,
       mode,
-      ConnectorEndPoint.Front,
-      frontEndPointStyle
+      ConnectorEndpoint.Front,
+      frontEndpointStyle
     );
     // render end points
     this._renderEndPoints(
@@ -190,8 +190,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ctx,
       rc,
       mode,
-      ConnectorEndPoint.Rear,
-      rearEndPointStyle
+      ConnectorEndpoint.Rear,
+      rearEndpointStyle
     );
   }
 
@@ -258,7 +258,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     }
   }
 
-  private _getArrowOptions(end: ConnectorEndPoint): ArrowOptions {
+  private _getArrowOptions(end: ConnectorEndpoint): ArrowOptions {
     const { stroke } = this;
     const realStrokeColor = this.computedValue(stroke);
     return {
@@ -280,7 +280,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: ConnectorEndPoint
+    end: ConnectorEndpoint
   ) {
     const radians = Math.PI / 4;
     const { points: arrowPoints } = getArrowPoints(
@@ -310,21 +310,21 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
-    end: ConnectorEndPoint,
-    style: ConnectorEndPointStyle
+    end: ConnectorEndpoint,
+    style: ConnectorEndpointStyle
   ) {
     const arrowOptions = this._getArrowOptions(end);
     switch (style) {
-      case ConnectorEndPointStyle.Arrow:
+      case ConnectorEndpointStyle.Arrow:
         this._renderArrow(points, ctx, rc, mode, end);
         break;
-      case ConnectorEndPointStyle.Triangle:
+      case ConnectorEndpointStyle.Triangle:
         renderTriangle(points, ctx, rc, arrowOptions);
         break;
-      case ConnectorEndPointStyle.Circle:
+      case ConnectorEndpointStyle.Circle:
         renderCircle(points, ctx, rc, arrowOptions);
         break;
-      case ConnectorEndPointStyle.Diamond:
+      case ConnectorEndpointStyle.Diamond:
         renderDiamond(points, ctx, rc, arrowOptions);
         break;
     }

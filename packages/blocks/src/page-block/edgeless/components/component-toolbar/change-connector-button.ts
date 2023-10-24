@@ -10,14 +10,14 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  ConnectorEndPointNoneIcon,
+  ConnectorEndpointNoneIcon,
   CurveLineIcon,
   DashLineIcon,
   ElbowedLineIcon,
-  EndPointArrowIcon,
-  EndPointCircleIcon,
-  EndPointDiamondIcon,
-  EndPointTriangleIcon,
+  EndpointArrowIcon,
+  EndpointCircleIcon,
+  EndpointDiamondIcon,
+  EndpointTriangleIcon,
   FlipDirectionIcon,
   GeneralStyleIcon,
   LineStyleIcon,
@@ -34,8 +34,8 @@ import { LineWidth } from '../../../../_common/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,
-  ConnectorEndPoint,
-  ConnectorEndPointStyle,
+  ConnectorEndpoint,
+  ConnectorEndpointStyle,
   ConnectorMode,
   DEFAULT_FRONT_END_POINT_STYLE,
   DEFAULT_REAR_END_POINT_STYLE,
@@ -107,17 +107,17 @@ function getMostCommonRough(elements: ConnectorElement[]): boolean {
   return trueCount > falseCount;
 }
 
-function getMostCommonEndPointStyle(
+function getMostCommonEndpointStyle(
   elements: ConnectorElement[],
-  end: ConnectorEndPoint
-): ConnectorEndPointStyle | null {
+  end: ConnectorEndpoint
+): ConnectorEndpointStyle | null {
   const modes = countBy(elements, (ele: ConnectorElement) =>
-    end === ConnectorEndPoint.Front
-      ? ele.frontEndPointStyle
-      : ele.rearEndPointStyle
+    end === ConnectorEndpoint.Front
+      ? ele.frontEndpointStyle
+      : ele.rearEndpointStyle
   );
   const max = maxBy(Object.entries(modes), ([_k, count]) => count);
-  return max ? (max[0] as ConnectorEndPointStyle) : null;
+  return max ? (max[0] as ConnectorEndpointStyle) : null;
 }
 
 @customElement('edgeless-change-connector-button')
@@ -211,64 +211,64 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     });
   }
 
-  private _setConnectorEndPointStyle(
-    end: ConnectorEndPoint,
-    style: ConnectorEndPointStyle
+  private _setConnectorEndpointStyle(
+    end: ConnectorEndpoint,
+    style: ConnectorEndpointStyle
   ) {
     this.elements.forEach(ele => {
-      if (end === ConnectorEndPoint.Front) {
+      if (end === ConnectorEndpoint.Front) {
         this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
-          frontEndPointStyle: style,
+          frontEndpointStyle: style,
         });
       } else {
         this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
-          rearEndPointStyle: style,
+          rearEndpointStyle: style,
         });
       }
     });
   }
 
-  private _flipEndPointStyle(
-    frontEndPointStyle: ConnectorEndPointStyle,
-    rearEndPointStyle: ConnectorEndPointStyle
+  private _flipEndpointStyle(
+    frontEndpointStyle: ConnectorEndpointStyle,
+    rearEndpointStyle: ConnectorEndpointStyle
   ) {
-    if (frontEndPointStyle === rearEndPointStyle) return;
+    if (frontEndpointStyle === rearEndpointStyle) return;
 
     this.elements.forEach(ele => {
       this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
-        frontEndPointStyle: rearEndPointStyle,
-        rearEndPointStyle: frontEndPointStyle,
+        frontEndpointStyle: rearEndpointStyle,
+        rearEndpointStyle: frontEndpointStyle,
       });
     });
   }
 
-  private _getEndPointIcon(
-    end: ConnectorEndPoint,
-    style: ConnectorEndPointStyle
+  private _getEndpointIcon(
+    end: ConnectorEndpoint,
+    style: ConnectorEndpointStyle
   ) {
     switch (style) {
-      case ConnectorEndPointStyle.None: {
-        return ConnectorEndPointNoneIcon;
+      case ConnectorEndpointStyle.None: {
+        return ConnectorEndpointNoneIcon;
       }
-      case ConnectorEndPointStyle.Arrow: {
-        return end === ConnectorEndPoint.Front
+      case ConnectorEndpointStyle.Arrow: {
+        return end === ConnectorEndpoint.Front
           ? StartPointArrowIcon
-          : EndPointArrowIcon;
+          : EndpointArrowIcon;
       }
-      case ConnectorEndPointStyle.Triangle: {
-        return end === ConnectorEndPoint.Front
+      case ConnectorEndpointStyle.Triangle: {
+        return end === ConnectorEndpoint.Front
           ? StartPointTriangleIcon
-          : EndPointTriangleIcon;
+          : EndpointTriangleIcon;
       }
-      case ConnectorEndPointStyle.Circle: {
-        return end === ConnectorEndPoint.Front
+      case ConnectorEndpointStyle.Circle: {
+        return end === ConnectorEndpoint.Front
           ? StartPointCircleIcon
-          : EndPointCircleIcon;
+          : EndpointCircleIcon;
       }
-      case ConnectorEndPointStyle.Diamond: {
-        return end === ConnectorEndPoint.Front
+      case ConnectorEndpointStyle.Diamond: {
+        return end === ConnectorEndpoint.Front
           ? StartPointDiamondIcon
-          : EndPointDiamondIcon;
+          : EndpointDiamondIcon;
       }
     }
   }
@@ -281,10 +281,10 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     const selectedRough = getMostCommonRough(this.elements);
     const selectedLineStyle = getMostCommonLineStyle(this.elements);
     const selectedStartPointStyle =
-      getMostCommonEndPointStyle(this.elements, ConnectorEndPoint.Front) ??
+      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Front) ??
       DEFAULT_FRONT_END_POINT_STYLE;
     const selectedEndPointStyle =
-      getMostCommonEndPointStyle(this.elements, ConnectorEndPoint.Rear) ??
+      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Rear) ??
       DEFAULT_REAR_END_POINT_STYLE;
 
     return html`
@@ -389,8 +389,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
           .padding=${8}
           .gap=${8}
           .iconInfo=${{
-            icon: html`${this._getEndPointIcon(
-              ConnectorEndPoint.Front,
+            icon: html`${this._getEndpointIcon(
+              ConnectorEndpoint.Front,
               selectedStartPointStyle
             )}${SmallArrowDownIcon}`,
             tooltip: 'Start Point Style',
@@ -399,26 +399,26 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
             <edgeless-tool-icon-button
               .tooltip=${'None'}
               .iconContainerPadding=${2}
-              .active=${selectedStartPointStyle === ConnectorEndPointStyle.None}
+              .active=${selectedStartPointStyle === ConnectorEndpointStyle.None}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Front,
-                  ConnectorEndPointStyle.None
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.None
                 )}
             >
-              ${ConnectorEndPointNoneIcon}
+              ${ConnectorEndpointNoneIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Arrow'}
               .iconContainerPadding=${2}
               .active=${selectedStartPointStyle ===
-              ConnectorEndPointStyle.Arrow}
+              ConnectorEndpointStyle.Arrow}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Front,
-                  ConnectorEndPointStyle.Arrow
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Arrow
                 )}
             >
               ${StartPointArrowIcon}
@@ -427,12 +427,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               .tooltip=${'Triangle'}
               .iconContainerPadding=${2}
               .active=${selectedStartPointStyle ===
-              ConnectorEndPointStyle.Triangle}
+              ConnectorEndpointStyle.Triangle}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Front,
-                  ConnectorEndPointStyle.Triangle
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Triangle
                 )}
             >
               ${StartPointTriangleIcon}
@@ -441,12 +441,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               .tooltip=${'Circle'}
               .iconContainerPadding=${2}
               .active=${selectedStartPointStyle ===
-              ConnectorEndPointStyle.Circle}
+              ConnectorEndpointStyle.Circle}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Front,
-                  ConnectorEndPointStyle.Circle
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Circle
                 )}
             >
               ${StartPointCircleIcon}
@@ -455,12 +455,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               .tooltip=${'Diamond'}
               .iconContainerPadding=${2}
               .active=${selectedStartPointStyle ===
-              ConnectorEndPointStyle.Diamond}
+              ConnectorEndpointStyle.Diamond}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Front,
-                  ConnectorEndPointStyle.Diamond
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Diamond
                 )}
             >
               ${StartPointDiamondIcon}
@@ -474,7 +474,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
           .iconContainerPadding=${2}
           .disabled=${false}
           @click=${() =>
-            this._flipEndPointStyle(
+            this._flipEndpointStyle(
               selectedStartPointStyle,
               selectedEndPointStyle
             )}
@@ -486,8 +486,8 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
           .padding=${8}
           .gap=${8}
           .iconInfo=${{
-            icon: html`${this._getEndPointIcon(
-              ConnectorEndPoint.Rear,
+            icon: html`${this._getEndpointIcon(
+              ConnectorEndpoint.Rear,
               selectedEndPointStyle
             )}${SmallArrowDownIcon}`,
             tooltip: 'End Point Style',
@@ -497,68 +497,68 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
               .tooltip=${'Diamond'}
               .iconContainerPadding=${2}
               .active=${selectedEndPointStyle ===
-              ConnectorEndPointStyle.Diamond}
+              ConnectorEndpointStyle.Diamond}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Rear,
-                  ConnectorEndPointStyle.Diamond
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Diamond
                 )}
             >
-              ${EndPointDiamondIcon}
+              ${EndpointDiamondIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Circle'}
               .iconContainerPadding=${2}
-              .active=${selectedEndPointStyle === ConnectorEndPointStyle.Circle}
+              .active=${selectedEndPointStyle === ConnectorEndpointStyle.Circle}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Rear,
-                  ConnectorEndPointStyle.Circle
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Circle
                 )}
             >
-              ${EndPointCircleIcon}
+              ${EndpointCircleIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Triangle'}
               .iconContainerPadding=${2}
               .active=${selectedEndPointStyle ===
-              ConnectorEndPointStyle.Triangle}
+              ConnectorEndpointStyle.Triangle}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Rear,
-                  ConnectorEndPointStyle.Triangle
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Triangle
                 )}
             >
-              ${EndPointTriangleIcon}
+              ${EndpointTriangleIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Arrow'}
               .iconContainerPadding=${2}
-              .active=${selectedEndPointStyle === ConnectorEndPointStyle.Arrow}
+              .active=${selectedEndPointStyle === ConnectorEndpointStyle.Arrow}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Rear,
-                  ConnectorEndPointStyle.Arrow
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Arrow
                 )}
             >
-              ${EndPointArrowIcon}
+              ${EndpointArrowIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'None'}
               .iconContainerPadding=${2}
-              .active=${selectedEndPointStyle === ConnectorEndPointStyle.None}
+              .active=${selectedEndPointStyle === ConnectorEndpointStyle.None}
               .activeMode=${'background'}
               @click=${() =>
-                this._setConnectorEndPointStyle(
-                  ConnectorEndPoint.Rear,
-                  ConnectorEndPointStyle.None
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.None
                 )}
             >
-              ${ConnectorEndPointNoneIcon}
+              ${ConnectorEndpointNoneIcon}
             </edgeless-tool-icon-button>
           `}
         >

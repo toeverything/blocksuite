@@ -5,14 +5,14 @@ import {
 } from '../../utils/curve.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import { type IVec, Vec } from '../../utils/vec.js';
-import { ConnectorEndPoint, ConnectorMode } from './types.js';
+import { ConnectorEndpoint, ConnectorMode } from './types.js';
 
 export function getArrowPoints(
   points: PointLocation[],
   size = 10,
   mode: ConnectorMode,
   bezierParameters: BezierCurveParameters,
-  endPoint: ConnectorEndPoint = ConnectorEndPoint.Rear,
+  endPoint: ConnectorEndpoint = ConnectorEndpoint.Rear,
   radians: number = Math.PI / 4
 ) {
   const anchorPoint = getPointWithTangent(
@@ -22,7 +22,7 @@ export function getArrowPoints(
     bezierParameters
   );
   const unit = Vec.mul(anchorPoint.tangent, -1);
-  const angle = endPoint === ConnectorEndPoint.Front ? Math.PI : 0;
+  const angle = endPoint === ConnectorEndpoint.Front ? Math.PI : 0;
 
   return {
     points: [
@@ -36,20 +36,20 @@ export function getArrowPoints(
 export function getPointWithTangent(
   points: PointLocation[],
   mode: ConnectorMode,
-  endPoint: ConnectorEndPoint,
+  endPoint: ConnectorEndpoint,
   bezierParameters: BezierCurveParameters
 ) {
   const anchorIndex =
-    endPoint === ConnectorEndPoint.Rear ? points.length - 1 : 0;
+    endPoint === ConnectorEndpoint.Rear ? points.length - 1 : 0;
   const pointToAnchorIndex =
-    endPoint === ConnectorEndPoint.Rear ? anchorIndex - 1 : anchorIndex + 1;
+    endPoint === ConnectorEndpoint.Rear ? anchorIndex - 1 : anchorIndex + 1;
   const anchorPoint = points[anchorIndex];
   const pointToAnchor = points[pointToAnchorIndex];
 
   const clone = anchorPoint.clone();
   clone.tangent =
     mode !== ConnectorMode.Curve
-      ? endPoint === ConnectorEndPoint.Rear
+      ? endPoint === ConnectorEndpoint.Rear
         ? Vec.tangent(anchorPoint, pointToAnchor)
         : Vec.tangent(pointToAnchor, anchorPoint)
       : getBezierTangent(bezierParameters, 1) ?? [];
@@ -60,10 +60,10 @@ export function getPointWithTangent(
 export function getDiamondPoints(
   point: PointLocation,
   size = 10,
-  endPoint: ConnectorEndPoint = ConnectorEndPoint.Rear
+  endPoint: ConnectorEndpoint = ConnectorEndpoint.Rear
 ) {
   const unit = Vec.mul(point.tangent, -1);
-  const angle = endPoint === ConnectorEndPoint.Front ? Math.PI : 0;
+  const angle = endPoint === ConnectorEndpoint.Front ? Math.PI : 0;
 
   const diamondPoints = [
     Vec.add(Vec.mul(Vec.rot(unit, angle + Math.PI * 0.25), size), point),
@@ -78,7 +78,7 @@ export function getDiamondPoints(
 }
 
 export type ArrowOptions = {
-  end: ConnectorEndPoint;
+  end: ConnectorEndpoint;
   seed: number;
   mode: ConnectorMode;
   rough: boolean;
@@ -203,7 +203,7 @@ export function renderCircle(
   const anchorPoint = getPointWithTangent(points, mode, end, bezierParameters);
   let cx = anchorPoint[0];
   let cy = anchorPoint[1];
-  if (end === ConnectorEndPoint.Rear) {
+  if (end === ConnectorEndpoint.Rear) {
     // need to calculate the center point according to the tangent
     cx -= anchorPoint.tangent[0] * radius;
     cy -= anchorPoint.tangent[1] * radius;

@@ -10,8 +10,8 @@ export {
 export { DEFAULT_ROUGHNESS, GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export {
   type Connection,
-  ConnectorEndPoint,
-  ConnectorEndPointStyle,
+  ConnectorEndpoint,
+  ConnectorEndpointStyle,
   ConnectorMode,
   type Controller,
   DEFAULT_FRONT_END_POINT_STYLE,
