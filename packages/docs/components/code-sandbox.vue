@@ -15,7 +15,7 @@
       ...props, // do not forget it
       deps: {
         yjs: 'latest',
-        '@toeverything/theme': 'latest',
+        '@toeverything/theme': 'nightly',
         '@blocksuite/block-std': 'latest',
         '@blocksuite/blocks': 'latest',
         '@blocksuite/editor': 'latest',
