@@ -223,8 +223,11 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
       if (tr && payload.type === 'slice') {
         tr.pasted();
       }
-      if (tr && payload.type === 'block') {
-        tr.focusPasted(payload.snapshot.id, payload.model);
+      if (payload.type === 'block') {
+        // TODO: replace with a better way to wait for the block to be rendered
+        requestAnimationFrame(() => {
+          tr?.focusPasted(payload.snapshot.id, payload.model);
+        });
       }
     });
   };
