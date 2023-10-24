@@ -25,6 +25,7 @@ import type {
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
+  matchFlavours,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -78,6 +79,9 @@ import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isFrameBlock, isPhasorElement } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
+
+const { NOTE, IMAGE } = EdgelessBlockType;
+
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot<{ zoom: number; center: IVec }>;
@@ -265,13 +269,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
       page.slots.yBlockUpdated.on(({ id, props }) => {
         const block = page.getBlockById(id);
         if (
-          block &&
-          (block.flavour === EdgelessBlockType.NOTE ||
-            block.flavour === EdgelessBlockType.IMAGE)
+          matchFlavours(block, [NOTE, IMAGE]) &&
+          ('prop:xywh' in props || 'prop:rotate' in props)
         ) {
-          if ('prop:xywh' in props || 'prop:rotate' in props) {
-            this.slots.elementSizeUpdated.emit(id);
-          }
+          this.slots.elementSizeUpdated.emit(id);
         }
       })
     );
@@ -380,7 +381,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.surface.addElement(
-      EdgelessBlockType.NOTE,
+      NOTE,
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
       },
@@ -442,7 +443,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     point = this.surface.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
     return this.surface.addElement(
-      EdgelessBlockType.IMAGE,
+      IMAGE,
       { ...model, xywh: bound.serialize() },
       this.surface.model
     );
@@ -458,7 +459,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     for (const { file, sourceId } of fileInfos) {
       const size = await readImageSize(file);
       models.push({
-        flavour: EdgelessBlockType.IMAGE,
+        flavour: IMAGE,
         sourceId,
         ...size,
       });
@@ -473,7 +474,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         model.height ?? 0
       );
       return this.surface.addElement(
-        EdgelessBlockType.IMAGE,
+        IMAGE,
         {
           xywh: bound.serialize(),
           sourceId: model.sourceId,
@@ -493,9 +494,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.surface
-      .getblocks(EdgelessBlockType.NOTE)
-      .find(b => b.id === noteId);
+    const noteBlock = this.surface.getblocks(NOTE).find(b => b.id === noteId);
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
