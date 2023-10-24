@@ -115,7 +115,11 @@ export function getPreviousBlock(
     }
     return getPreviousBlock(parentBlock);
   } else {
-    if (previousBlock.role === 'content') {
+    if (
+      previousBlock.role === 'content' ||
+      (previousBlock.role === 'hub' &&
+        previousBlock.flavour !== 'affine:surface')
+    ) {
       if (previousBlock.children.length > 0) {
         let lastChild =
           previousBlock.children[previousBlock.children.length - 1];
