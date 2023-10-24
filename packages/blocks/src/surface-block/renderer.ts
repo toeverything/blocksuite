@@ -23,7 +23,7 @@ export interface SurfaceViewport {
   readonly viewportY: number;
   readonly viewportMinXY: IPoint;
   readonly viewportMaxXY: IPoint;
-  readonly viewportBounds: IBound;
+  readonly viewportBounds: Bound;
   readonly boundingClientRect: DOMRect;
 
   toModelCoord(viewX: number, viewY: number): [number, number];

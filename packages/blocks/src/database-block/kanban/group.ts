@@ -6,8 +6,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import { popFilterableSimpleMenu } from '../../components/menu/index.js';
-import { AddCursorIcon } from '../../icons/index.js';
+import { popFilterableSimpleMenu } from '../../_common/components/menu/index.js';
+import { AddCursorIcon } from '../../_common/icons/index.js';
 import type { GroupData } from '../common/group-by/helper.js';
 import { renderGroupTitle } from '../common/group-by/renderGroupTitle.js';
 import type { DataViewKanbanManager } from './kanban-view-manager.js';

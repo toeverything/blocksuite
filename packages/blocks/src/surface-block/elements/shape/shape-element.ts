@@ -14,7 +14,7 @@ import {
   isRTL,
   wrapText,
 } from '../text/utils.js';
-import { SHAPE_TEXT_FONT_SIZE, SHAPE_TEXT_PADDING } from './constants.js';
+import { SHAPE_TEXT_FONT_SIZE, SHAPE_TEXT_PADDING } from './consts.js';
 import { ShapeMethodsMap } from './shapes/index.js';
 import type { IShape, IShapeLocalRecord } from './types.js';
 
@@ -127,6 +127,50 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return isTextItalic;
   }
 
+  get wrapTextDeltas() {
+    const { text, font, w } = this;
+    if (!text) return [];
+
+    const deltas: ITextDelta[] = (text.toDelta() as ITextDelta[]).flatMap(
+      delta => ({
+        insert: wrapText(delta.insert, font, w - SHAPE_TEXT_PADDING * 2),
+        attributes: delta.attributes,
+      })
+    ) as ITextDelta[];
+
+    return deltas;
+  }
+
+  get font() {
+    const { bold, italic, fontSize, fontFamily } = this;
+    const lineHeight = getLineHeight(fontFamily, fontSize);
+    return getFontString({
+      bold,
+      italic,
+      fontSize,
+      lineHeight: `${lineHeight}px`,
+      fontFamily: fontFamily,
+    });
+  }
+
+  get horizontalOffset() {
+    const { textAlign, w } = this;
+    return textAlign === 'center'
+      ? w / 2
+      : textAlign === 'right'
+      ? w - SHAPE_TEXT_PADDING
+      : SHAPE_TEXT_PADDING;
+  }
+
+  verticalOffset(lines: ITextDelta[][], lineHeight: number) {
+    const { textVerticalAlign, h } = this;
+    return textVerticalAlign === 'center'
+      ? (h - lineHeight * lines.length) / 2
+      : textVerticalAlign === 'top'
+      ? SHAPE_TEXT_PADDING
+      : h - lineHeight * lines.length - SHAPE_TEXT_PADDING;
+  }
+
   override hitTest(x: number, y: number, options: HitTestOptions) {
     const pierce = options.pierce ?? true;
     if (!pierce) {
@@ -171,49 +215,14 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
   }
 
   private _renderText(ctx: CanvasRenderingContext2D) {
-    const {
-      w,
-      text,
-      color,
-      fontSize,
-      fontFamily,
-      textVerticalAlign,
-      textAlign,
-      bold,
-      italic,
-    } = this;
+    const { text, color, fontSize, fontFamily, textAlign } = this;
     if (!text) return;
 
     const lineHeight = getLineHeight(fontFamily, fontSize);
-    const font = getFontString({
-      fontSize: fontSize,
-      lineHeight: `${lineHeight}px`,
-      fontFamily: fontFamily,
-      bold,
-      italic,
-    });
-
-    const yText = text;
-    const deltas: ITextDelta[] = (yText.toDelta() as ITextDelta[]).flatMap(
-      delta => ({
-        insert: wrapText(delta.insert, font, w - SHAPE_TEXT_PADDING * 2),
-        attributes: delta.attributes,
-      })
-    ) as ITextDelta[];
-    const lines = deltaInsertsToChunks(deltas);
-
-    const horizontalOffset =
-      textAlign === 'center'
-        ? w / 2
-        : textAlign === 'right'
-        ? w - SHAPE_TEXT_PADDING
-        : SHAPE_TEXT_PADDING;
-    const verticalOffset =
-      textVerticalAlign === 'center'
-        ? (this.h - lineHeight * lines.length) / 2
-        : textVerticalAlign === 'top'
-        ? SHAPE_TEXT_PADDING
-        : this.h - lineHeight * lines.length - SHAPE_TEXT_PADDING;
+    const font = this.font;
+    const lines = deltaInsertsToChunks(this.wrapTextDeltas);
+    const horizontalOffset = this.horizontalOffset;
+    const verticalOffset = this.verticalOffset(lines, lineHeight);
 
     for (const [lineIndex, line] of lines.entries()) {
       for (const delta of line) {

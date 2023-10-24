@@ -8,7 +8,10 @@ import { createRef, ref } from 'lit/directives/ref.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import { popMenu, positionToVRect } from '../../../../components/menu/menu.js';
+import {
+  popMenu,
+  positionToVRect,
+} from '../../../../_common/components/menu/menu.js';
 import {
   DatabaseDuplicate,
   DatabaseInsertLeft,
@@ -17,7 +20,7 @@ import {
   DatabaseMoveRight,
   DeleteIcon,
   TextIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 import type { InsertToPosition } from '../../../types.js';
 import { startDrag } from '../../../utils/drag.js';
 import { startFrameLoop } from '../../../utils/frame-loop.js';

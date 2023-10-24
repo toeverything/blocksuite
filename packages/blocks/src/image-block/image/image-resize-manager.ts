@@ -6,7 +6,7 @@ import {
   getClosestBlockElementByElement,
   getModelByElement,
   isEdgelessPage,
-} from '../../__internal__/utils/query.js';
+} from '../../_common/utils/query.js';
 import { getClosestPageBlockComponent } from '../../page-block/utils/query.js';
 
 export class ImageResizeManager {

@@ -32,9 +32,13 @@ export function mountTextEditor(
   edgeless: EdgelessPageBlockComponent,
   focusCoord?: IModelCoord
 ) {
-  const cursorIndex = focusCoord
-    ? textElement.getCursorByCoord(focusCoord)
-    : textElement.text.length;
+  let cursorIndex = textElement.text.length;
+  if (focusCoord) {
+    cursorIndex = Math.min(
+      textElement.getCursorByCoord(focusCoord),
+      cursorIndex
+    );
+  }
   const textEditor = new EdgelessTextEditor();
   textEditor.edgeless = edgeless;
   textEditor.element = textElement;

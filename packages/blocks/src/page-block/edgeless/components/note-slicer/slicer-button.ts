@@ -3,7 +3,7 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { CutIcon } from '../../../../icons/index.js';
+import { CutIcon } from '../../../../_common/icons/index.js';
 
 const buttonStyle = css`
   .slicer-button {

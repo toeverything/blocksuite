@@ -24,7 +24,7 @@ import type { WidgetElement } from './widget-element.js';
 @customElement('block-suite-root')
 export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
-  blocks!: BlockSpec[];
+  preset!: BlockSpec[];
 
   @property({ attribute: false })
   mode!: 'page' | 'edgeless';
@@ -57,8 +57,8 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
   }
 
   override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('blocks')) {
-      this.std.spec.applySpecs(this.blocks);
+    if (changedProperties.has('preset')) {
+      this.std.spec.applySpecs(this.preset);
     }
     super.willUpdate(changedProperties);
   }
@@ -74,7 +74,7 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
     this._registerView();
 
     this.std.mount();
-    this.std.spec.applySpecs(this.blocks);
+    this.std.spec.applySpecs(this.preset);
     this.rangeManager = new RangeManager(this);
   }
 

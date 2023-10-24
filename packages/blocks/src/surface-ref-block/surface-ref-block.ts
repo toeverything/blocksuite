@@ -10,16 +10,16 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  type CssVariableName,
-  isCssVariable,
-} from '../__internal__/theme/css-variables.js';
-import { getThemePropertyValue } from '../__internal__/theme/utils.js';
-import { type AbstractEditor } from '../__internal__/utils/types.js';
-import {
   EdgelessModeIcon,
   FrameIcon,
   MoreDeleteIcon,
-} from '../icons/edgeless.js';
+} from '../_common/icons/index.js';
+import {
+  type CssVariableName,
+  isCssVariable,
+} from '../_common/theme/css-variables.js';
+import { getThemePropertyValue } from '../_common/theme/utils.js';
+import type { AbstractEditor } from '../_common/utils/types.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
 import { getNotesInFrame } from '../page-block/edgeless/frame-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';

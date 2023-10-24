@@ -7,6 +7,7 @@ import {
   enterPlaygroundRoom,
   focusRichText,
   focusTitle,
+  initEmptyCodeBlockState,
   initEmptyParagraphState,
   initThreeParagraphs,
   inlineCode,
@@ -998,6 +999,32 @@ test.describe('bracket auto complete', () => {
       paragraphId
     );
   });
+
+  test('auto delete bracket right', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyCodeBlockState(page);
+    await focusRichText(page);
+    await type(page, '(');
+    await assertRichTexts(page, ['()']);
+    await type(page, '(');
+    await assertRichTexts(page, ['(())']);
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['()']);
+    await page.keyboard.press('Backspace');
+    await assertRichTexts(page, ['']);
+  });
+
+  test('skip redundant right bracket', async ({ page }) => {
+    await enterPlaygroundRoom(page);
+    await initEmptyCodeBlockState(page);
+    await focusRichText(page);
+    await type(page, '(');
+    await assertRichTexts(page, ['()']);
+    await type(page, ')');
+    await assertRichTexts(page, ['()']);
+    await type(page, ')');
+    await assertRichTexts(page, ['())']);
+  });
 });
 
 // FIXME: getCurrentBlockRange need to handle comment node
@@ -1189,4 +1216,39 @@ test.describe('keyboard operation to move block up or down', () => {
     await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+ArrowDown`);
     await assertRichTextVRange(page, 2, 3);
   });
+});
+
+test('Enter key should as expected after setting heading by shortkey', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/4987',
+  });
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+  await focusRichText(page);
+  await type(page, 'hello');
+  await page.keyboard.press(`${SHORT_KEY}+${MODIFIER_KEY}+1`);
+  await pressEnter(page);
+  await type(page, 'world');
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="hello"
+    prop:type="h1"
+  />
+  <affine:paragraph
+    prop:text="world"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
 });

@@ -8,8 +8,6 @@ import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type ReorderingType } from '../../../../__internal__/index.js';
-import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import {
   BringForwardIcon,
   BringToFrontIcon,
@@ -22,7 +20,9 @@ import {
   MoreVerticalIcon,
   SendBackwardIcon,
   SendToBackIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import { type ReorderingType } from '../../../../_common/utils/index.js';
+import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { type PhasorElement } from '../../../../surface-block/index.js';

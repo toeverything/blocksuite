@@ -3,6 +3,7 @@ import { expect, type Page } from '@playwright/test';
 import {
   assertEdgelessTool,
   enterPlaygroundRoom,
+  getEdgelessSelectedRect,
   initEmptyEdgelessState,
   pressArrowLeft,
   setEdgelessTool,
@@ -11,6 +12,7 @@ import {
   type,
   waitForVirgoStateUpdated,
   waitNextFrame,
+  zoomResetByKeyboard,
 } from '../utils/actions/index.js';
 import {
   assertEdgelessCanvasText,
@@ -177,4 +179,136 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await scribbledTextFont.click();
   await waitNextFrame(page);
   await assertEdgelessSelectedRect(page, [130, 200, 111.7, 167.6]);
+});
+
+test('auto wrap text by dragging left and right edge', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
+  await setEdgelessTool(page, 'default');
+
+  await page.mouse.dblclick(130, 140);
+  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
+
+  await type(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hellohello');
+  await assertEdgelessTool(page, 'default');
+
+  // quit edit mode
+  await page.mouse.click(120, 140);
+
+  // select text element
+  await page.mouse.click(150, 140);
+  // should exit selected rect and record last width and height, then compare them
+  let selectedRect = await getEdgelessSelectedRect(page);
+  let lastWidth = selectedRect.width;
+  let lastHeight = selectedRect.height;
+
+  // move cursor to the right edge and drag it to resize the width of text element
+  await page.mouse.move(224, 160);
+  await page.mouse.down();
+  await page.mouse.move(190, 160, {
+    steps: 10,
+  });
+  await page.mouse.up();
+
+  // the text should be wrapped, so check the width and height of text element
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeLessThan(lastWidth);
+  expect(selectedRect.height).toBeGreaterThan(lastHeight);
+
+  await page.mouse.dblclick(140, 160);
+  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
+  await assertEdgelessCanvasText(page, 'hellohello');
+
+  // quit edit mode
+  await page.mouse.click(120, 140);
+
+  // select text element
+  await page.mouse.click(150, 140);
+  // check selected rect and record the last width and height
+  selectedRect = await getEdgelessSelectedRect(page);
+  lastWidth = selectedRect.width;
+  lastHeight = selectedRect.height;
+  // move cursor to the left edge and drag it to resize the width of text element
+  await page.mouse.move(130, 160);
+  await page.mouse.down();
+  await page.mouse.move(96, 160, {
+    steps: 10,
+  });
+  await page.mouse.up();
+
+  // the text should be unwrapped, check the width and height of text element
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeGreaterThan(lastWidth);
+  expect(selectedRect.height).toBeLessThan(lastHeight);
+
+  await page.mouse.dblclick(100, 160);
+  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
+  await assertEdgelessCanvasText(page, 'hellohello');
+});
+
+test('text element should have maxWidth after adjusting width by dragging left or right edge', async ({
+  page,
+}) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyEdgelessState(page);
+  await switchEditorMode(page);
+  await zoomResetByKeyboard(page);
+
+  await setEdgelessTool(page, 'default');
+
+  await page.mouse.dblclick(130, 140);
+  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
+
+  await type(page, 'hellohello');
+  await assertEdgelessCanvasText(page, 'hellohello');
+  await assertEdgelessTool(page, 'default');
+
+  // quit edit mode
+  await page.mouse.click(120, 140);
+
+  // select text element
+  await page.mouse.click(150, 140);
+  let selectedRect = await getEdgelessSelectedRect(page);
+  let lastWidth = selectedRect.width;
+  let lastHeight = selectedRect.height;
+
+  // move cursor to the right edge and drag it to resize the width of text element
+  await page.mouse.move(224, 160);
+  await page.mouse.down();
+  await page.mouse.move(190, 160, {
+    steps: 10,
+  });
+  await page.mouse.up();
+
+  // the text should be wrapped, so check the width and height of text element
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeLessThan(lastWidth);
+  expect(selectedRect.height).toBeGreaterThan(lastHeight);
+  lastWidth = selectedRect.width;
+  lastHeight = selectedRect.height;
+
+  // enter edit mode
+  await page.mouse.dblclick(185, 200);
+  await waitForVirgoStateUpdated(page);
+  await waitNextFrame(page);
+  await type(page, 'hello');
+  await assertEdgelessCanvasText(page, 'hellohellohello');
+
+  // quit edit mode
+  await page.mouse.click(120, 140);
+
+  // select text element
+  await page.mouse.click(150, 140);
+  // after input, the width of the text element should be the same as before, but the height should be changed
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBe(lastWidth);
+  expect(selectedRect.height).toBeGreaterThan(lastHeight);
 });

@@ -1,13 +1,18 @@
-import { clamp } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
+  MinusIcon,
+  PlusIcon,
+  ViewBarIcon,
+} from '../../../../_common/icons/index.js';
+import {
   type EdgelessTool,
   stopPropagation,
-} from '../../../../__internal__/index.js';
-import { MinusIcon, PlusIcon, ViewBarIcon } from '../../../../icons/index.js';
+} from '../../../../_common/utils/index.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import {
   ZOOM_MAX,
   ZOOM_MIN,
@@ -74,6 +79,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       text-align: center;
       cursor: pointer;
       color: var(--affine-icon-color);
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
 
     .zoom-percent:hover {

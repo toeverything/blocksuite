@@ -2,8 +2,9 @@ import type { CursorSelection } from '@blocksuite/block-std';
 import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
+import type { Selectable } from '../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type { Selectable } from './tools-manager.js';
+import { edgelessElementsBound } from '../utils/bound-utils.js';
 
 export interface EdgelessSelectionState {
   /**
@@ -67,6 +68,10 @@ export class EdgelessSelectionManager {
       if (element && element.id) pre.push(element);
       return pre;
     }, [] as Selectable[]);
+  }
+
+  get selectedBound() {
+    return edgelessElementsBound(this.elements);
   }
 
   private get _selection() {

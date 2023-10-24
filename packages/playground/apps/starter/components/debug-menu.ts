@@ -21,8 +21,8 @@ import {
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   SIZE_VARIABLES,
-  Transformer,
   VARIABLES,
+  ZipTransformer,
 } from '@blocksuite/blocks';
 import { NOTE_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
@@ -35,8 +35,9 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
+// @ts-ignore
 import { registerFormatBarCustomElement } from './custom-format-bar';
-import type { CustomNavigationPanel } from './custom-navigation-panel';
+import type { CustomNavigationPanel } from './custom-navigation-panel.js';
 
 const cssVariablesMap = extractCssVariables(document.documentElement);
 const plate: Record<string, string> = {};
@@ -279,23 +280,23 @@ export class DebugMenu extends ShadowlessElement {
   }
 
   private _exportPdf() {
-    this.contentParser.exportPdf();
+    void this.contentParser.exportPdf();
   }
 
   private _exportHtml() {
-    this.contentParser.exportHtml();
+    void this.contentParser.exportHtml();
   }
 
   private _exportMarkDown() {
-    this.contentParser.exportMarkdown();
+    void this.contentParser.exportMarkdown();
   }
 
   private _exportPng() {
-    this.contentParser.exportPng();
+    void this.contentParser.exportPng();
   }
 
   private async _exportSnapshot() {
-    const file = await Transformer.Zip.exportPages(this.workspace, [this.page]);
+    const file = await ZipTransformer.exportPages(this.workspace, [this.page]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -316,7 +317,7 @@ export class DebugMenu extends ShadowlessElement {
         return;
       }
       try {
-        await Transformer.Zip.importPages(this.workspace, file);
+        await ZipTransformer.importPages(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');

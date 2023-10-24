@@ -1,7 +1,7 @@
 import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 
-import { getBlockElementByModel } from '../index.js';
+import { getBlockElementByModel } from '../_common/utils/index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { DEFAULT_NOTE_HEIGHT } from '../page-block/edgeless/utils/consts.js';
 

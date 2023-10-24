@@ -1,14 +1,14 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
-import { almostEqual } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import { getTextNodesFromElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../__internal__/consts.js';
-import { isEdgelessPage } from '../__internal__/utils/query.js';
+} from '../_common/consts.js';
+import { almostEqual } from '../_common/utils/math.js';
+import { isEdgelessPage } from '../_common/utils/query.js';
 import {
   autoScroll,
   caretFromPoint,

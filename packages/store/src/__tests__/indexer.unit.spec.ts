@@ -39,13 +39,31 @@ describe('workspace.search works', () => {
       title: new page.Text(''),
     });
     const noteId = page.addBlock('affine:note', {}, pageId);
-
+    const text1 =
+      '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz';
+    const text2 = '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台';
+    const expected1 = new Map([
+      [
+        '2',
+        {
+          content: text1,
+          space: page.id,
+        },
+      ],
+    ]);
+    const expected2 = new Map([
+      [
+        '3',
+        {
+          content: text2,
+          space: page.id,
+        },
+      ],
+    ]);
     page.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text(
-          '英特尔第13代酷睿i7-1370P移动处理器现身Geekbench，14核心和5GHz'
-        ),
+        text: new page.Text(text1),
       },
       noteId
     );
@@ -53,9 +71,7 @@ describe('workspace.search works', () => {
     page.addBlock(
       'affine:paragraph',
       {
-        text: new page.Text(
-          '索尼考虑移植《GT赛车7》，又一PlayStation独占IP登陆PC平台'
-        ),
+        text: new page.Text(text2),
       },
       noteId
     );
@@ -63,10 +79,8 @@ describe('workspace.search works', () => {
     const id = page.id;
 
     queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(
-        new Map([['2', `${id}`]])
-      );
-      expect(workspace.search('索尼')).toStrictEqual(new Map([['3', `${id}`]]));
+      expect(workspace.search('处理器')).toStrictEqual(expected1);
+      expect(workspace.search('索尼')).toStrictEqual(expected2);
     });
 
     const update = encodeStateAsUpdate(page.spaceDoc);
@@ -81,12 +95,8 @@ describe('workspace.search works', () => {
     applyUpdate(page2.spaceDoc, update);
     expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
     queueMicrotask(() => {
-      expect(workspace2.search('处理器')).toStrictEqual(
-        new Map([['2', `${id}`]])
-      );
-      expect(workspace2.search('索尼')).toStrictEqual(
-        new Map([['3', `${id}`]])
-      );
+      expect(workspace2.search('处理器')).toStrictEqual(expected1);
+      expect(workspace2.search('索尼')).toStrictEqual(expected2);
     });
   });
 });

@@ -2,7 +2,10 @@ import type { ReferenceElement } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { eventToVRect, popMenu } from '../../../../components/menu/menu.js';
+import {
+  eventToVRect,
+  popMenu,
+} from '../../../../_common/components/menu/menu.js';
 import {
   ArrowRightSmallIcon,
   DeleteIcon,
@@ -11,7 +14,7 @@ import {
   GroupingIcon,
   InfoIcon,
   MoreHorizontalIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 import type { DataViewKanbanManager } from '../../../kanban/kanban-view-manager.js';
 import type { DataViewTableManager } from '../../../table/table-view-manager.js';
 import { popFilterModal } from '../../filter/filter-modal.js';

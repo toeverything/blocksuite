@@ -1,5 +1,5 @@
-import type { UniComponent } from '../../../components/uni-component/uni-component.js';
-import { createUniComponentFromWebComponent } from '../../../components/uni-component/uni-component.js';
+import type { UniComponent } from '../../../_common/components/uni-component/uni-component.js';
+import { createUniComponentFromWebComponent } from '../../../_common/components/uni-component/uni-component.js';
 import type { BaseCellRenderer } from './base-cell.js';
 import type { CellRenderer, DataViewCellComponent } from './manager.js';
 

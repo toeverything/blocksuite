@@ -6,8 +6,8 @@ import { nanoid } from '@blocksuite/store';
 import {
   getTagColor,
   selectOptionColors,
-} from '../../../components/tags/colors.js';
-import type { SelectTag } from '../../../components/tags/multi-tag-select.js';
+} from '../../../_common/components/tags/colors.js';
+import type { SelectTag } from '../../../_common/components/tags/multi-tag-select.js';
 import type { InsertToPosition } from '../../types.js';
 import type { ColumnConfig } from '../columns/manager.js';
 import { selectPureColumnConfig } from '../columns/select/define.js';

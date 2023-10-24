@@ -82,8 +82,9 @@ function ResizeHandle(
  * - all: The selected elements can be resize both dragging edge or corner, usually when all elements are `shape`
  * - none: The selected elements can't be resized, usually when all elements are `connector`
  * - corner: The selected elements can only be resize dragging corner, this is by default mode
+ * - edgeAndCorner: The selected elements can be resize both dragging left right edge or corner, usually when all elements are 'text'
  */
-export type ResizeMode = 'edge' | 'all' | 'none' | 'corner';
+export type ResizeMode = 'edge' | 'all' | 'none' | 'corner' | 'edgeAndCorner';
 
 export function ResizeHandles(
   resizeMode: ResizeMode,
@@ -196,6 +197,20 @@ export function ResizeHandles(
         ${handleBottom}
         ${handleBottomLeft}
         ${handleLeft}
+      `;
+    }
+    case 'edgeAndCorner': {
+      const {
+        handleTopLeft,
+        handleTopRight,
+        handleBottomLeft,
+        handleBottomRight,
+      } = getCornerHandles();
+      const { handleLeft, handleRight } = getEdgeHandles(true);
+
+      return html`
+        ${handleTopLeft} ${handleTopRight} ${handleRight} ${handleBottomRight}
+        ${handleBottomLeft} ${handleLeft}
       `;
     }
     case 'none': {

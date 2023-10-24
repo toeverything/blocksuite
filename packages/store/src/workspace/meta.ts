@@ -206,14 +206,37 @@ export class WorkspaceMeta {
    * @internal Only for page initialization
    */
   validateVersion(workspace: Workspace) {
-    const versions = { ...this._proxy.blockVersions };
-    if (!versions) {
+    const workspaceVersion = this._proxy.workspaceVersion;
+    if (!workspaceVersion) {
+      throw new Error(
+        'Invalid workspace data, workspace version is missing. Please make sure the data is valid.'
+      );
+    }
+    if (workspaceVersion < WORKSPACE_VERSION) {
+      throw new Error(
+        `Workspace version ${workspaceVersion} is outdated. Please upgrade the editor.`
+      );
+    }
+
+    const pageVersion = this._proxy.pageVersion;
+    if (!pageVersion) {
+      throw new Error(
+        'Invalid workspace data, page version is missing. Please make sure the data is valid.'
+      );
+    }
+    if (pageVersion < PAGE_VERSION) {
+      throw new Error(
+        `Page version ${pageVersion} is outdated. Please upgrade the editor.`
+      );
+    }
+
+    const blockVersions = { ...this._proxy.blockVersions };
+    if (!blockVersions) {
       throw new Error(
         'Invalid workspace data, versions data is missing. Please make sure the data is valid'
       );
     }
-    const dataFlavours = Object.keys(versions);
-    // TODO: emit data validation error slots
+    const dataFlavours = Object.keys(blockVersions);
     if (dataFlavours.length === 0) {
       throw new Error(
         'Invalid workspace data, missing versions field. Please make sure the data is valid.'
@@ -221,7 +244,7 @@ export class WorkspaceMeta {
     }
 
     dataFlavours.forEach(dataFlavour => {
-      const dataVersion = versions[dataFlavour] as number;
+      const dataVersion = blockVersions[dataFlavour] as number;
       const editorVersion =
         workspace.schema.flavourSchemaMap.get(dataFlavour)?.version;
       if (!editorVersion) {

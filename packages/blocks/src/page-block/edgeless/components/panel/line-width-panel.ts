@@ -2,7 +2,7 @@ import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, queryAll } from 'lit/decorators.js';
 
-import { LineWidth } from '../../../../__internal__/utils/types.js';
+import { LineWidth } from '../../../../_common/utils/types.js';
 
 type DragConfig = {
   stepWidth: number;

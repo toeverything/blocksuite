@@ -5,7 +5,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 const DEFAULT_MENU_WIDTH = 468;
 const MENU_HEIGHT = 40;
-import { ArrowRightSmallIcon } from '../../../../../icons/index.js';
+import { ArrowRightSmallIcon } from '../../../../../_common/icons/index.js';
 
 @customElement('edgeless-slide-menu')
 export class EdgelessSlideMenu extends WithDisposable(LitElement) {

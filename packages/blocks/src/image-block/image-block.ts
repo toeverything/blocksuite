@@ -9,12 +9,12 @@ import { css, html, type PropertyValues } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { asyncFocusRichText } from '../__internal__/utils/common-operations.js';
-import { stopPropagation } from '../__internal__/utils/event.js';
+import { stopPropagation } from '../_common/utils/event.js';
+import { asyncFocusRichText } from '../_common/utils/selection.js';
+import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
+import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
 import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { Bound } from '../surface-block/index.js';
-import { AffineDragHandleWidget } from '../widgets/drag-handle/index.js';
-import { captureEventTarget } from '../widgets/drag-handle/utils.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
 import { shouldResizeImage } from './image/utils.js';
@@ -212,17 +212,6 @@ export class ImageBlockPageComponent extends ImageBlock {
 
     .resizable-img img {
       width: 100%;
-    }
-
-    /* hover area */
-    .resizable-img::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50px;
-      height: 100%;
-      transform: translateX(100%);
     }
   `;
 

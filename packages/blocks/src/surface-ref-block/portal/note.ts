@@ -7,7 +7,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '../../__internal__/consts.js';
+} from '../../_common/consts.js';
 import {
   DEFAULT_NOTE_COLOR,
   type NoteBlockModel,

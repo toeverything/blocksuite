@@ -6,8 +6,8 @@ import { css, html, LitElement } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { type EdgelessTool } from '../../../../../__internal__/index.js';
-import { EdgelessTextIcon } from '../../../../../icons/index.js';
+import { EdgelessTextIcon } from '../../../../../_common/icons/index.js';
+import { type EdgelessTool } from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../panel/color-panel.js';
 import { getTooltipWithShortcut } from '../../utils.js';
@@ -101,6 +101,19 @@ export class EdgelessTextToolButton extends WithDisposable(LitElement) {
     this._textMenu?.dispose();
     this._textMenu = null;
     super.disconnectedCallback();
+  }
+
+  override firstUpdated() {
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'text') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
   }
 
   override render() {

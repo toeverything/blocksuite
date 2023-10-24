@@ -3,8 +3,7 @@ import { flip, offset } from '@floating-ui/dom';
 import { html } from 'lit';
 import { createRef, ref, type RefOrCallback } from 'lit/directives/ref.js';
 
-import { stopPropagation } from '../../__internal__/utils/event.js';
-import { createLitPortal } from '../../components/portal.js';
+import { createLitPortal } from '../../_common/components/portal.js';
 import {
   CaptionIcon,
   EditIcon,
@@ -12,7 +11,8 @@ import {
   LinkIcon,
   MoreIcon,
   ViewIcon,
-} from '../../icons/index.js';
+} from '../../_common/icons/index.js';
+import { stopPropagation } from '../../_common/utils/event.js';
 import type { AttachmentBlockModel } from '../attachment-model.js';
 import { turnIntoEmbedView } from '../utils.js';
 import { MoreMenu } from './more-menu.js';

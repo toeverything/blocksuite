@@ -1,4 +1,4 @@
-import '../components/rich-text/rich-text.js';
+import '../_common/components/rich-text/rich-text.js';
 
 import { DisposableGroup } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
@@ -9,13 +9,13 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
-import { isPageMode, matchFlavours } from '../__internal__/index.js';
-import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
-import type { RichText } from '../components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../components/rich-text/virgo/types.js';
-import { BlockHubIcon20 } from '../icons/index.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
+import type { RichText } from '../_common/components/rich-text/rich-text.js';
+import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
+import { BlockHubIcon20 } from '../_common/icons/index.js';
+import { isPageMode, matchFlavours } from '../_common/utils/index.js';
 import type { ParagraphBlockModel, ParagraphType } from './paragraph-model.js';
 
 function tipsPlaceholderPreventDefault(event: Event) {

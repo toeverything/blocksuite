@@ -3,14 +3,13 @@ import './utils/declare-test-window.js';
 import { expect } from '@playwright/test';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { NOTE_WIDTH } from '../packages/blocks/src/__internal__/consts.js';
 import { initDatabaseColumn } from './database/actions.js';
 import {
   activeNoteInEdgeless,
-  addBasicRectShapeElement,
   captureHistory,
   changeEdgelessNoteBackground,
   copyByKeyboard,
+  createShapeElement,
   cutByKeyboard,
   dragBetweenCoords,
   dragOverTitle,
@@ -19,6 +18,7 @@ import {
   focusTitle,
   getAllNoteIds,
   getCopyClipItemsInPage,
+  getEdgelessSelectedRectModel,
   getEditorLocator,
   getRichTextBoundingBox,
   getVirgoSelectionIndex,
@@ -47,6 +47,7 @@ import {
   setVRangeInSelectedRichText,
   SHORT_KEY,
   switchEditorMode,
+  toViewCoord,
   triggerComponentToolbarAction,
   type,
   undoByClick,
@@ -60,7 +61,7 @@ import {
   assertClipData,
   assertClipItems,
   assertEdgelessNoteBackground,
-  assertEdgelessSelectedRect,
+  assertEdgelessSelectedRectModel,
   assertExists,
   assertRichImage,
   assertRichTextModelType,
@@ -70,7 +71,6 @@ import {
   assertText,
   assertTextFormats,
   assertTitle,
-  assertZoomLevel,
 } from './utils/asserts.js';
 import { scoped, test } from './utils/playwright.js';
 
@@ -1023,35 +1023,21 @@ test(scoped`should copy and paste of database work`, async ({ page }) => {
 test(`copy phasor element and text note in edgeless mode`, async ({ page }) => {
   await enterPlaygroundRoom(page);
   await initEmptyEdgelessState(page);
-  await initThreeParagraphs(page);
   await switchEditorMode(page);
-  await addBasicRectShapeElement(
-    page,
-    {
-      x: 100,
-      y: 100,
-    },
-    {
-      x: 200,
-      y: 200,
-    }
-  );
-
-  await dragBetweenCoords(
-    page,
-    { x: 50, y: 90 },
-    { x: 800, y: 800 },
-    { steps: 10 }
-  );
-  const zoom = 1.075;
-  await assertZoomLevel(page, zoom * 100);
-  await assertEdgelessSelectedRect(page, [50, 100, NOTE_WIDTH * zoom, 472]);
-
+  await initThreeParagraphs(page);
+  await createShapeElement(page, [0, 0], [100, 100]);
+  await selectAllByKeyboard(page);
+  const bound = await getEdgelessSelectedRectModel(page);
   await copyByKeyboard(page);
-  await page.mouse.move(800, 400);
+  const coord = await toViewCoord(page, [
+    bound[0] + bound[2] / 2,
+    bound[1] + bound[3] / 2 + 200,
+  ]);
+  await page.mouse.move(coord[0], coord[1]);
   await page.waitForTimeout(300);
   await pasteByKeyboard(page, false);
-  await assertEdgelessSelectedRect(page, [370, 163.99, NOTE_WIDTH * zoom, 472]);
+  bound[1] = bound[1] + 200;
+  await assertEdgelessSelectedRectModel(page, bound);
 });
 
 test(scoped`copy when text note active in edgeless`, async ({ page }) => {
