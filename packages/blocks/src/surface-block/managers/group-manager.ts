@@ -9,7 +9,7 @@ import type { SurfaceBlockComponent } from '../surface-block.js';
 
 export function getElementsFromGroup(group: GroupElement) {
   const elements: EdgelessElement[] = [];
-  group.childrenElements.forEach(child => {
+  group.childElements.forEach(child => {
     if (child instanceof GroupElement) {
       elements.push(...getElementsFromGroup(child));
     } else {
@@ -109,7 +109,7 @@ export class EdgelessGroupManager {
     const { surface } = this;
     const { edgeless } = surface;
     const { selectionManager } = edgeless;
-    const elements = group.childrenElements;
+    const elements = group.childElements;
     const parent = surface.pickById(surface.getGroup(group)) as GroupElement;
     if (parent) {
       parent.removeChild(group.id);

@@ -36,7 +36,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     super.init();
     const { surface } = this;
     this._cachedId = this.id;
-    this.childrenElements.forEach(ele => {
+    this.childElements.forEach(ele => {
       surface.setGroup(ele, this.id);
     });
     this._cachedChildren = this.children;
@@ -78,7 +78,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     return Array.from((<IGroup['children']>this.yMap.get('children')).keys());
   }
 
-  get childrenElements() {
+  get childElements() {
     return this.children.map(id => this.surface.pickById(id)!);
   }
 
@@ -131,7 +131,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     _ctx.setTransform(_matrix);
     if (elements.includes(this)) {
       this._renderTitle(_ctx);
-    } else if (this.childrenElements.some(child => elements.includes(child))) {
+    } else if (this.childElements.some(child => elements.includes(child))) {
       const bound = Bound.deserialize(xywh);
       _ctx.setLineDash([2, 2]);
       _ctx.strokeStyle = this.computedValue('--affine-blue');
