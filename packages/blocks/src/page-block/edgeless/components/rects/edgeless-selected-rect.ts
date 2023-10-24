@@ -36,7 +36,6 @@ import {
   isImageBlock,
   isNoteBlock,
   isPhasorElement,
-  isPhasorElementWithText,
 } from '../../utils/query.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import { HandleDirection } from '../resize/resize-handles.js';
@@ -333,13 +332,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
-    this._disposables.add(
-      this._resizeManager.slots.resizeEnd.on(() => {
-        this.selection.elements.forEach(ele => {
-          isFrameBlock(ele) && this.surface.frame.calculateFrameColor(ele);
-        });
-      })
-    );
   }
 
   get selection() {
@@ -397,11 +389,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _shouldRenderSelection(elements?: Selectable[]) {
     elements = elements ?? this.selection.elements;
-
-    return (
-      elements.length > 0 &&
-      (!this.selection.editing || !isPhasorElementWithText(elements[0]))
-    );
+    return elements.length > 0 && !this.selection.editing;
   }
 
   private _onDragStart = () => {

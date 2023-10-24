@@ -245,7 +245,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   };
 
   private _initEvents() {
-    const { page, _disposables, edgeless } = this;
+    const { _disposables, edgeless } = this;
 
     _disposables.add(
       edgeless.slots.reorderingBlocksUpdated.on(this._reorderBlocks.bind(this))
@@ -288,20 +288,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         const element = getEdgelessElement(this.edgeless, id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
-        }
-      })
-    );
-
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(e => {
-        if (e.type === 'add') {
-          const model = page.getBlockById(e.id) as TopLevelBlockModel;
-          assertExists(model);
-          if (isFrameBlock(model)) {
-            requestAnimationFrame(() => {
-              this.frame.calculateFrameColor(model);
-            });
-          }
         }
       })
     );
