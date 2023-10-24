@@ -129,7 +129,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             selectionManager.elements.length === 1 &&
             selectionManager.firstElement instanceof GroupElement
           ) {
-            surface.group.unGroup(selectionManager.firstElement);
+            surface.group.ungroup(selectionManager.firstElement);
           }
         },
         'Mod-a': ctx => {

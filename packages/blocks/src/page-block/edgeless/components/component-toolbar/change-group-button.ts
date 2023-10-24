@@ -43,7 +43,7 @@ export class EdgelessChangeGroupButton extends WithDisposable(LitElement) {
       <edgeless-tool-icon-button
         class=${'edgeless-component-toolbar-ungroup-button'}
         @click=${() => {
-          groups.forEach(group => this.surface.group.unGroup(group));
+          groups.forEach(group => this.surface.group.ungroup(group));
         }}
         .tooltip=${'Ungroup'}
         .tipPosition=${'bottom'}

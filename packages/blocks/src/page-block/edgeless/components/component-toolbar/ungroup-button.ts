@@ -20,7 +20,7 @@ export class EdgelessUngroupButton extends WithDisposable(LitElement) {
       @click=${() => {
         const { selectionManager } = this.surface.edgeless;
         if (selectionManager.firstElement instanceof GroupElement) {
-          this.surface.group.unGroup(selectionManager.firstElement);
+          this.surface.group.ungroup(selectionManager.firstElement);
         }
       }}
       .tooltip=${'Ungroup'}

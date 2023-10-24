@@ -105,7 +105,7 @@ export class EdgelessGroupManager {
     }
   }
 
-  unGroup(group: GroupElement) {
+  ungroup(group: GroupElement) {
     const { surface } = this;
     const { edgeless } = surface;
     const { selectionManager } = edgeless;

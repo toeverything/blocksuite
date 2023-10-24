@@ -91,7 +91,7 @@ test.describe('group', () => {
       await selectAllByKeyboard(page);
       await triggerComponentToolbarAction(page, 'addGroup');
       await assertSelectedBound(page, [0, 0, 200, 100]);
-      await triggerComponentToolbarAction(page, 'unGroup');
+      await triggerComponentToolbarAction(page, 'ungroup');
       await assertEdgelessNonSelectedRect(page);
     });
 
@@ -205,7 +205,7 @@ test.describe('group', () => {
       await triggerComponentToolbarAction(page, 'addGroup');
       await captureHistory(page);
       const ids = await getIds(page);
-      await triggerComponentToolbarAction(page, 'unGroup');
+      await triggerComponentToolbarAction(page, 'ungroup');
       await assertGroupIds(page, [ids[3], ids[3], ids[3], GROUP_ROOT_ID]);
       await assertGroupChildrenIds(page, [ids[0], ids[1], ids[2]]);
 
