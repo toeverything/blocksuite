@@ -175,8 +175,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       mode === ConnectorMode.Curve
     );
 
-    // render start points
-    this._renderEndPoints(
+    this._renderEndpoint(
       points,
       ctx,
       rc,
@@ -184,8 +183,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ConnectorEndpoint.Front,
       frontEndpointStyle
     );
-    // render end points
-    this._renderEndPoints(
+
+    this._renderEndpoint(
       points,
       ctx,
       rc,
@@ -305,8 +304,8 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     );
   }
 
-  private _renderEndPoints(
-    points: PointLocation[],
+  private _renderEndpoint(
+    location: PointLocation[],
     ctx: CanvasRenderingContext2D,
     rc: RoughCanvas,
     mode: ConnectorMode,
@@ -316,16 +315,16 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
     const arrowOptions = this._getArrowOptions(end);
     switch (style) {
       case ConnectorEndpointStyle.Arrow:
-        this._renderArrow(points, ctx, rc, mode, end);
+        this._renderArrow(location, ctx, rc, mode, end);
         break;
       case ConnectorEndpointStyle.Triangle:
-        renderTriangle(points, ctx, rc, arrowOptions);
+        renderTriangle(location, ctx, rc, arrowOptions);
         break;
       case ConnectorEndpointStyle.Circle:
-        renderCircle(points, ctx, rc, arrowOptions);
+        renderCircle(location, ctx, rc, arrowOptions);
         break;
       case ConnectorEndpointStyle.Diamond:
-        renderDiamond(points, ctx, rc, arrowOptions);
+        renderDiamond(location, ctx, rc, arrowOptions);
         break;
     }
   }
