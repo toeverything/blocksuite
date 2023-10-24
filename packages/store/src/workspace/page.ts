@@ -200,9 +200,12 @@ export class Page extends Space<FlatBlockMap> {
     return this._blockMap.get(id) ?? null;
   }
 
-  getBlockByFlavour(blockFlavour: string) {
-    return Array.from(this._blockMap.values()).filter(
-      ({ flavour }) => flavour === blockFlavour
+  getBlockByFlavour(blockFlavour: string | string[]) {
+    const flavours =
+      typeof blockFlavour === 'string' ? [blockFlavour] : blockFlavour;
+
+    return Array.from(this._blockMap.values()).filter(({ flavour }) =>
+      flavours.includes(flavour)
     );
   }
 
@@ -377,11 +380,24 @@ export class Page extends Space<FlatBlockMap> {
     return id;
   }
 
-  private _populateParentChildrenMap(
+  @debug('CRUD')
+  moveBlocks(
     blocksToMove: BaseBlockModel[],
-    childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
-    newParent: BaseBlockModel
+    newParent: BaseBlockModel,
+    targetSibling: BaseBlockModel | null = null,
+    shouldInsertBeforeSibling = true
   ) {
+    if (this.readonly) {
+      console.error('Cannot modify data in read-only mode');
+      return;
+    }
+
+    if (!newParent) {
+      throw new Error("Can't find new parent block");
+    }
+
+    // A map to store parent block and their respective child blocks
+    const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
     blocksToMove.forEach(block => {
       const parentBlock = this.getParent(block);
 
@@ -410,94 +426,50 @@ export class Page extends Space<FlatBlockMap> {
         childBlocksPerParent.set(parentBlock, [block]);
       }
     });
-  }
-
-  private _repositionBlocks(
-    childBlocksPerParent: Map<BaseBlockModel, BaseBlockModel[]>,
-    targetParentChildren: Y.Array<string>,
-    targetSibling: BaseBlockModel | null,
-    shouldInsertBeforeSibling: boolean,
-    insertionOffset: number
-  ) {
-    for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
-      const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
-      const sourceParentChildren = sourceParentBlock.get(
-        'sys:children'
-      ) as Y.Array<string>;
-
-      // Get the IDs of blocks to move
-      const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
-
-      // Remove the blocks from their current parent
-      const startIndex = sourceParentChildren
-        .toArray()
-        .findIndex(id => id === idsOfBlocksToMove[0]);
-      sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
-
-      // Determine the index at which to insert blocks in the new parent
-      let insertIndex = 0;
-      if (targetSibling) {
-        insertIndex = targetParentChildren
-          .toArray()
-          .findIndex(id => id === targetSibling.id);
-      }
-
-      // Insert the blocks at the correct position under their new parent
-      if (shouldInsertBeforeSibling) {
-        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
-      } else {
-        targetParentChildren.insert(
-          insertIndex + insertionOffset,
-          idsOfBlocksToMove
-        );
-        insertionOffset += idsOfBlocksToMove.length;
-      }
-    }
-  }
-
-  // Moves blocks to a new parent. Optionally inserts blocks before a given sibling.
-  @debug('CRUD')
-  moveBlocks(
-    blocksToMove: BaseBlockModel[],
-    newParent: BaseBlockModel,
-    targetSibling: BaseBlockModel | null = null,
-    shouldInsertBeforeSibling = true
-  ) {
-    if (this.readonly) {
-      console.error('Cannot modify data in read-only mode');
-      return;
-    }
-
-    if (!newParent) {
-      throw new Error("Can't find new parent block");
-    }
-
-    // A map to store parent block and their respective child blocks
-    const childBlocksPerParent = new Map<BaseBlockModel, BaseBlockModel[]>();
-
-    this._populateParentChildrenMap(
-      blocksToMove,
-      childBlocksPerParent,
-      newParent
-    );
 
     this.transact(() => {
-      const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
-      const targetParentChildren = targetParentBlock.get(
-        'sys:children'
-      ) as Y.Array<string>;
+      let insertIndex = 0;
+      let first = true;
+      for (const [parentBlock, blocksToMove] of childBlocksPerParent) {
+        const targetParentBlock = this._yBlocks.get(newParent.id) as YBlock;
+        const targetParentChildren = targetParentBlock.get(
+          'sys:children'
+        ) as Y.Array<string>;
+        const sourceParentBlock = this._yBlocks.get(parentBlock.id) as YBlock;
+        const sourceParentChildren = sourceParentBlock.get(
+          'sys:children'
+        ) as Y.Array<string>;
 
-      // To be used for insertion after the target sibling
-      const insertionOffset = 1;
+        // Get the IDs of blocks to move
+        const idsOfBlocksToMove = blocksToMove.map(({ id }) => id);
 
-      // Reposition blocks under their new parent
-      this._repositionBlocks(
-        childBlocksPerParent,
-        targetParentChildren,
-        targetSibling,
-        shouldInsertBeforeSibling,
-        insertionOffset
-      );
+        // Remove the blocks from their current parent
+        const startIndex = sourceParentChildren
+          .toArray()
+          .findIndex(id => id === idsOfBlocksToMove[0]);
+        sourceParentChildren.delete(startIndex, idsOfBlocksToMove.length);
+
+        if (first) {
+          if (targetSibling) {
+            const targetIndex = targetParentChildren
+              .toArray()
+              .findIndex(id => id === targetSibling.id);
+            if (targetIndex === -1) {
+              throw new Error('Target sibling not found');
+            }
+            insertIndex = shouldInsertBeforeSibling
+              ? targetIndex
+              : targetIndex + 1;
+          } else {
+            insertIndex = targetParentChildren.length;
+          }
+          first = false;
+        } else {
+          insertIndex++;
+        }
+
+        targetParentChildren.insert(insertIndex, idsOfBlocksToMove);
+      }
     });
 
     // Emit event to indicate that the children of these blocks have been updated
@@ -751,12 +723,6 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    const parent = this.getParent(model);
-    const index = parent?.childMap.get(model.id);
-    if (parent && index !== undefined) {
-      parent.children[index] = model;
-      parent.childrenUpdated.emit();
-    }
     this.slots.blockUpdated.emit({ type: 'add', id });
   }
 

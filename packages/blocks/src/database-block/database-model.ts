@@ -1,7 +1,7 @@
 import type { MigrationRunner, Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
-import { getTagColor } from '../components/tags/colors.js';
+import { getTagColor } from '../_common/components/tags/colors.js';
 import { multiSelectPureColumnConfig } from './common/columns/multi-select/define.js';
 import { selectPureColumnConfig } from './common/columns/select/define.js';
 import { titlePureColumnConfig } from './common/columns/title/define.js';

@@ -169,7 +169,10 @@ export class Clipboard {
       });
       clipboardItems['text/plain'] = textBlob;
     }
-    if (!(png instanceof Blob) && png.length > 0) {
+
+    if (png instanceof Blob) {
+      clipboardItems['image/png'] = png;
+    } else if (png.length > 0) {
       const pngBlob = new Blob([png], {
         type: 'image/png',
       });

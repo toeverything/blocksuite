@@ -10,7 +10,7 @@ import type {
   ISurfaceElement,
   ISurfaceElementLocalRecord,
 } from '../surface-element.js';
-import type { SHAPE_TEXT_FONT_SIZE } from './constants.js';
+import type { SHAPE_TEXT_FONT_SIZE } from './consts.js';
 import type { ShapeElement } from './shape-element.js';
 
 export type ShapeType = 'rect' | 'triangle' | 'ellipse' | 'diamond';

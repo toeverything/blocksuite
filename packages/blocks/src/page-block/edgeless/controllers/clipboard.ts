@@ -11,12 +11,12 @@ import {
   getBlockElementById,
   getEditorContainer,
   isPageMode,
-} from '../../../__internal__/utils/query.js';
+} from '../../../_common/utils/query.js';
 import type {
   EdgelessElement,
   Selectable,
   TopLevelBlockModel,
-} from '../../../__internal__/utils/types.js';
+} from '../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../frame-block/frame-model.js';
 import type { ImageBlockModel } from '../../../image-block/image-model.js';
 import type { NoteBlockModel } from '../../../note-block/note-model.js';
@@ -178,7 +178,7 @@ export class EdgelessClipboardController implements ReactiveController {
       return;
     }
 
-    const json = await this.std.clipboard.readFromClipboard(data);
+    const json = this.std.clipboard.readFromClipboard(data);
     const elementsRawData = JSON.parse(json[BLOCKSUITE_SURFACE]);
     this._pasteShapesAndBlocks(elementsRawData);
   };

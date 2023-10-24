@@ -1,7 +1,7 @@
 import {
   type BlockComponentElement,
   type Point,
-} from '../../../../__internal__/index.js';
+} from '../../../../_common/utils/index.js';
 
 /**
  * Find the most close block on the given position

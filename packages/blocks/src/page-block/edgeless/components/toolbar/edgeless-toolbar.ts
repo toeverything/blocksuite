@@ -22,10 +22,7 @@ import {
 } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
-import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
-import { toast } from '../../../../components/toast.js';
+import { toast } from '../../../../_common/components/toast.js';
 import {
   EdgelessImageIcon,
   EdgelessTextIcon,
@@ -34,7 +31,10 @@ import {
   FrameNavigatorPrevIcon,
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
+import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
+import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
@@ -328,7 +328,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       const frame = this._frames[current];
       if (frame) {
         const bound = Bound.deserialize(frame.xywh);
-        viewport.setViewportByBound(bound, [40, 60, 40, 60], true);
+        viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
       }
     }
   }

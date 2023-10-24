@@ -2,7 +2,10 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, noop } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import { type FrameTool, type IPoint } from '../../../../__internal__/index.js';
+import {
+  type FrameTool,
+  type IPoint,
+} from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';

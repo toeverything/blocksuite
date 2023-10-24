@@ -7,7 +7,7 @@ import {
   CopyIcon,
   DeleteIcon,
   WrapIcon,
-} from '../../icons/index.js';
+} from '../../_common/icons/index.js';
 import { copyCode } from '../../page-block/doc/utils.js';
 import type { CodeBlockModel } from '../code-model.js';
 

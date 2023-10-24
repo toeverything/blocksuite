@@ -3,7 +3,7 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { Slice } from '@blocksuite/store';
 
-import { matchFlavours } from '../../../__internal__/index.js';
+import { matchFlavours } from '../../../_common/utils/index.js';
 
 export const copySelectedModelsCommand: Command<
   'selectedModels',

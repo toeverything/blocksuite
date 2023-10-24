@@ -3,9 +3,9 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { CssVariableName } from '../../../../__internal__/theme/css-variables.js';
-import { queryCurrentMode } from '../../../../__internal__/utils/query.js';
-import { TransparentIcon } from '../../../../icons/index.js';
+import { TransparentIcon } from '../../../../_common/icons/index.js';
+import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { getThemeMode } from '../../../../_common/utils/query.js';
 
 export class ColorEvent extends Event {
   detail: CssVariableName;
@@ -39,7 +39,7 @@ export const LINE_COLORS: CssVariableName[] = [
 ];
 
 export const GET_DEFAULT_LINE_COLOR = () =>
-  queryCurrentMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
+  getThemeMode() === 'dark' ? LINE_COLORS[11] : LINE_COLORS[9];
 
 export const GET_DEFAULT_TEXT_COLOR = () => LINE_COLORS[7];
 

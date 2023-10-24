@@ -38,7 +38,6 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
     const { xywh } = frame;
     const bound = Bound.deserialize(xywh);
     const style = styleMap({
-      width: `${bound.w}px`,
       position: 'absolute',
       zIndex: `${index}`,
       transform: `translate(${bound.x}px, ${bound.y}px)`,
@@ -59,6 +58,15 @@ export class EdgelessFramesContainer extends WithDisposable(LitElement) {
     this._disposables.add(
       this.surface.page.slots.historyUpdated.on(() => this.requestUpdate())
     );
+
+    this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
+      if (tool.type === 'frameNavigator') {
+        this.style.display = 'none';
+      } else {
+        this.style.display = 'block';
+        this.requestUpdate();
+      }
+    });
   }
 
   protected override createRenderRoot() {

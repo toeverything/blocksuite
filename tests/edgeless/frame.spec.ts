@@ -6,7 +6,6 @@ import {
   createShapeElement,
   dragBetweenViewCoords,
   edgelessCommonSetup,
-  getSelectedBound,
   setEdgelessTool,
   Shape,
   triggerComponentToolbarAction,

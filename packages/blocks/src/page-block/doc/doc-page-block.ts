@@ -8,10 +8,13 @@ import { css, html } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { PageClipboard } from '../../__internal__/clipboard/index.js';
-import { PAGE_BLOCK_CHILD_PADDING } from '../../__internal__/consts.js';
-import type { EditingState } from '../../__internal__/index.js';
-import { asyncFocusRichText, matchFlavours } from '../../__internal__/index.js';
+import { PAGE_BLOCK_CHILD_PADDING } from '../../_common/consts.js';
+import type { EditingState } from '../../_common/utils/index.js';
+import {
+  asyncFocusRichText,
+  matchFlavours,
+} from '../../_common/utils/index.js';
+import { PageClipboard } from '../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ClipboardController } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';

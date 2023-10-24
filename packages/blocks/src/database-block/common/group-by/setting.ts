@@ -6,11 +6,17 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import Sortable from 'sortablejs';
 
-import type { Menu, MenuOptions } from '../../../components/menu/index.js';
-import { popMenu } from '../../../components/menu/index.js';
-import { menuTitleItem } from '../../../components/menu/title.js';
-import { renderUniLit } from '../../../components/uni-component/uni-component.js';
-import { ArrowRightSmallIcon, DeleteIcon } from '../../../icons/index.js';
+import type {
+  Menu,
+  MenuOptions,
+} from '../../../_common/components/menu/index.js';
+import { popMenu } from '../../../_common/components/menu/index.js';
+import { menuTitleItem } from '../../../_common/components/menu/title.js';
+import { renderUniLit } from '../../../_common/components/uni-component/uni-component.js';
+import {
+  ArrowRightSmallIcon,
+  DeleteIcon,
+} from '../../../_common/icons/index.js';
 import { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { DataViewTableManager } from '../../table/table-view-manager.js';
 import { dataViewCssVariable } from '../css-variable.js';

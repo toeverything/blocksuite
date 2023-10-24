@@ -1,4 +1,4 @@
-import type { EdgelessElement } from '../../../__internal__/index.js';
+import type { EdgelessElement } from '../../../_common/utils/index.js';
 import { Bound } from '../../../surface-block/index.js';
 import { isTopLevelBlock } from './query.js';
 

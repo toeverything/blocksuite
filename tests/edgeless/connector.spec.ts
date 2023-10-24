@@ -313,7 +313,6 @@ test('connector connects rotated Square shape', async ({ page }) => {
   await commonSetup(page);
   await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
   await createConnectorElement(page, [50, 0], [50, -100]);
-  await page.pause();
   await dragBetweenViewCoords(page, [-10, 50], [60, 60]);
   await rotateElementByHandle(page, 30, 'top-left');
   await assertConnectorPath(page, [
@@ -340,7 +339,6 @@ test('change connector line width', async ({ page }) => {
   await addBasicConnectorElement(page, start, end);
 
   await page.mouse.click(start.x + 5, start.y);
-  await page.pause();
   await triggerComponentToolbarAction(page, 'changeConnectorStrokeColor');
   await changeConnectorStrokeColor(page, '--affine-palette-line-navy');
 

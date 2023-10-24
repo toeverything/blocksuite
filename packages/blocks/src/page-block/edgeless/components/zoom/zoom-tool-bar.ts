@@ -4,11 +4,15 @@ import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
 import {
+  MinusIcon,
+  PlusIcon,
+  ViewBarIcon,
+} from '../../../../_common/icons/index.js';
+import {
   type EdgelessTool,
   stopPropagation,
-} from '../../../../__internal__/index.js';
-import { clamp } from '../../../../__internal__/utils/math.js';
-import { MinusIcon, PlusIcon, ViewBarIcon } from '../../../../icons/index.js';
+} from '../../../../_common/utils/index.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import {
   ZOOM_MAX,
   ZOOM_MIN,
