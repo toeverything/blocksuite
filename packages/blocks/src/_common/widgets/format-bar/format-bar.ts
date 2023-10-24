@@ -77,6 +77,13 @@ export class AffineFormatBarWidget extends WidgetElement {
     const layout = document.querySelector('side-layout-modal');
     if (layout) return false;
 
+    if (
+      this.displayType === 'block' &&
+      this._selectedBlockElements[0].flavour === 'affine:surface-ref'
+    ) {
+      return false;
+    }
+
     const readonly = this.page.awarenessStore.isReadonly(this.page);
     return !readonly && this.displayType !== 'none' && !this._dragging;
   }
