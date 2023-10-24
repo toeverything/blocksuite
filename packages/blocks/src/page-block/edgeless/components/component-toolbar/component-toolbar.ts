@@ -9,7 +9,6 @@ import './add-frame-button.js';
 import './more-button.js';
 import './align-button.js';
 
-import { atLeastNMatches, groupBy, pickValues } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
@@ -17,6 +16,11 @@ import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
+import {
+  atLeastNMatches,
+  groupBy,
+  pickValues,
+} from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel, NoteBlockModel } from '../../../../index.js';
 import type {

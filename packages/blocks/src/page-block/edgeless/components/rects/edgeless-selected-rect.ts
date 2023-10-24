@@ -2,13 +2,13 @@ import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
-import { pick } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
+import { pick } from '../../../../_common/utils/iterable.js';
 import type { IPoint, Selectable } from '../../../../_common/utils/types.js';
 import {
   normalizeTextBound,

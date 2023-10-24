@@ -1,4 +1,4 @@
-import { IS_FIREFOX } from '@blocksuite/global/config';
+import { IS_FIREFOX } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { type VirgoLine, type VRange } from '@blocksuite/virgo';
