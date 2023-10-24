@@ -69,7 +69,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
             style=${styleMap({
               transformOrigin: 'top left',
               transform: `scale(${1 / zoom})`,
-              borderRadius: '35px',
+              borderRadius: '4px',
               width: 'fit-content',
               maxWidth: bound.w * zoom + 'px',
               padding: '4px 10px',
