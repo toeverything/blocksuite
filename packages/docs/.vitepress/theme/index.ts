@@ -4,7 +4,7 @@ import Theme from 'vitepress/theme';
 // @ts-ignore
 import Logo from './logo.vue';
 // @ts-ignore
-import MySandbox from '../../components/MySandbox.vue';
+import CodeSandbox from '../../components/code-sandbox.vue';
 import 'vitepress-plugin-sandpack/dist/style.css';
 import './style.css';
 
@@ -17,7 +17,7 @@ export default {
     });
   },
   enhanceApp({ app, router, siteData }) {
-    app.component('Sandbox', MySandbox);
+    app.component('CodeSandbox', CodeSandbox);
     // ...
   },
 };

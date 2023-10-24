@@ -136,9 +136,9 @@ export default defineConfig({
   ],
   markdown: {
     config(md) {
-      md.use(container, 'sandbox', {
+      md.use(container, 'code-sandbox', {
         render(tokens, idx) {
-          return renderSandbox(tokens, idx, 'sandbox');
+          return renderSandbox(tokens, idx, 'code-sandbox');
         },
       });
     },

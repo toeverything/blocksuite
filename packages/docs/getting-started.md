@@ -12,7 +12,7 @@ pnpm i \
 
 If you want to easily reuse most of the rich-text editing features, you can use the `SimpleAffineEditor` web component directly ([code example here](https://github.com/toeverything/blocksuite/blob/master/packages/playground/examples/basic/index.html)):
 
-::: sandbox {template=vanilla-ts coderHeight=180 previewHeight=580}
+::: code-sandbox {template=vanilla-ts coderHeight=180 previewHeight=500}
 
 ```ts /index.ts
 import { SimpleAffineEditor } from '@blocksuite/editor';
@@ -36,17 +36,4 @@ Or equivalently, you can also use the declarative style:
 </body>
 ```
 
-However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of lines](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts) that doesn't enable the opt-in collaboration and [data persistence](./data-persistence) features. If you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this will involve the use of these three following core packages:
-
-- The [`@blocksuite/store`](https://github.com/toeverything/blocksuite/tree/master/packages/store) package is a data store built for general-purpose state management.
-- The [`@blocksuite/blocks`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks) package holds the default BlockSuite editable blocks.
-- The [`@blocksuite/editor`](https://github.com/toeverything/blocksuite/tree/master/packages/editor) package ships a complete BlockSuite-based editor.
-
-```sh
-pnpm i \
-  @blocksuite/store@nightly \
-  @blocksuite/blocks@nightly \
-  @blocksuite/editor@nightly
-```
-
-In the following chapters, we will continue to demonstrate their usage and the core concepts involved.
+However, the `SimpleAffineEditor` here is just a [thin wrapper with dozens of lines](https://github.com/toeverything/blocksuite/blob/master/packages/editor/src/components/simple-affine-editor.ts) that doesn't enable the opt-in collaboration and [data persistence](./data-persistence) features. If you are going to support more complicated real-world use cases (e.g., with customized block models and configured data sources), this would involve the use of more packages. In the following chapters, we will continue to demonstrate their usage and the core concepts involved.

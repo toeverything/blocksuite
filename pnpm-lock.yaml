@@ -245,8 +245,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       vitepress-plugin-sandpack:
-        specifier: ^1.1.2
-        version: 1.1.2(@lezer/common@1.1.0)(vite@4.5.0)(vitepress@1.0.0-rc.22)(vue@3.3.4)
+        specifier: ^1.1.3
+        version: 1.1.4(@lezer/common@1.1.0)(vite@4.5.0)(vitepress@1.0.0-rc.22)(vue@3.3.4)
     devDependencies:
       vite-plugin-wasm:
         specifier: ^3.2.2
@@ -7615,8 +7615,8 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
 
-  /vitepress-plugin-sandpack@1.1.2(@lezer/common@1.1.0)(vite@4.5.0)(vitepress@1.0.0-rc.22)(vue@3.3.4):
-    resolution: {integrity: sha512-cPJe5cU2ORjd3iWPhug+CuAkaCo4qId2QtBb0FCyaWm5gZzh+SxwWCAwaIihB3VeM0xgjf450dGqXEySAifT1w==}
+  /vitepress-plugin-sandpack@1.1.4(@lezer/common@1.1.0)(vite@4.5.0)(vitepress@1.0.0-rc.22)(vue@3.3.4):
+    resolution: {integrity: sha512-8ZAQLpg9VDY1o8wCjEQeKgfTnmxaV/1thElx5mhA6QbKpzo7Jo8WSYcWYA7yTCvBfTY+Blt8ngwXRnwbNbw5ig==}
     engines: {node: '>=16'}
     peerDependencies:
       vite: '>=4.0.0'

@@ -1,4 +1,3 @@
-<!-- MySandbox.vue -->
 <template>
   <!-- 'code-options' is a build-in prop, do not edit it -->
   <Sandbox
@@ -8,6 +7,8 @@
     :dark-theme="darkTheme"
     :options="{
       ...props, // do not forget it
+      coderHeight: Number(props.coderHeight),
+      previewHeight: Number(props.previewHeight),
       showLineNumbers: true,
     }"
     :custom-setup="{
@@ -33,5 +34,9 @@
 <script setup lang="ts">
 import { Sandbox, sandboxProps } from 'vitepress-plugin-sandpack';
 
-const props = defineProps(sandboxProps);
+const props = defineProps({
+  ...sandboxProps,
+  coderHeight: String,
+  previewHeight: String,
+});
 </script>
