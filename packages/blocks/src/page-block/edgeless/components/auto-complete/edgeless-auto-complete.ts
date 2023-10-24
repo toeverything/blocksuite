@@ -30,7 +30,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
-import { mountShapeEditor } from '../../utils/text.js';
+import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 enum Direction {
@@ -350,7 +350,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         }
       );
 
-      mountShapeEditor(surface.pickById(id) as ShapeElement, this.edgeless);
+      mountShapeTextEditor(surface.pickById(id) as ShapeElement, this.edgeless);
     } else {
       const model = page.getBlockById(id);
       assertExists(model);

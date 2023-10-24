@@ -28,7 +28,7 @@ export type CANVAS_TEXT_FONT =
   | typeof GENERAL_CANVAS_FONT_FAMILY
   | typeof SCRIBBLED_CANVAS_FONT_FAMILY;
 
-export function mountTextEditor(
+export function mountTextElementEditor(
   textElement: TextElement,
   edgeless: EdgelessPageBlockComponent,
   focusCoord?: IModelCoord
@@ -56,7 +56,7 @@ export function mountTextEditor(
   });
 }
 
-export function mountShapeEditor(
+export function mountShapeTextEditor(
   shapeElement: ShapeElement,
   edgeless: EdgelessPageBlockComponent
 ) {
@@ -138,7 +138,7 @@ export function addText(
     const textElement = edgeless.surface.pickById(id);
     assertExists(textElement);
     if (textElement instanceof TextElement) {
-      mountTextEditor(textElement, edgeless);
+      mountTextElementEditor(textElement, edgeless);
     }
   }
 }

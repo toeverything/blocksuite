@@ -38,8 +38,8 @@ import {
   addText,
   mountFrameTitleEditor,
   mountGroupTitleEditor,
-  mountShapeEditor,
-  mountTextEditor,
+  mountShapeTextEditor,
+  mountTextElementEditor,
 } from '../../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
@@ -280,11 +280,14 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           e.x,
           e.y
         );
-        mountTextEditor(selected, this._edgeless, { x: modelX, y: modelY });
+        mountTextElementEditor(selected, this._edgeless, {
+          x: modelX,
+          y: modelY,
+        });
         return;
       }
       if (selected instanceof ShapeElement) {
-        mountShapeEditor(selected, this._edgeless);
+        mountShapeTextEditor(selected, this._edgeless);
         return;
       }
       if (isFrameBlock(selected)) {
