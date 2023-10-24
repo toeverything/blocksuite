@@ -1,4 +1,4 @@
-import type { BlockStdProvider } from '@blocksuite/block-std';
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
@@ -32,8 +32,6 @@ export abstract class BaseCellRenderer<
   isEditing!: boolean;
   @property({ attribute: false })
   selectCurrentCell!: (editing: boolean) => void;
-  @property({ attribute: false })
-  std!: BlockStdProvider;
 
   get readonly(): boolean {
     return this.column.readonly;
@@ -106,7 +104,10 @@ export abstract class BaseCellRenderer<
 
     const data = this.column.getStringValue(this.rowId);
 
-    this.std.clipboard.writeToClipboard(async items => {
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
       return {
         ...items,
         [TEXT]: data,

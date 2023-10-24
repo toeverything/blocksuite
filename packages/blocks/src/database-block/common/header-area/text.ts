@@ -283,7 +283,10 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       data = value?.slice(start, end) ?? '';
     }
 
-    this.std.clipboard.writeToClipboard(async items => {
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
       return {
         ...items,
         [TEXT]: data,
