@@ -723,12 +723,6 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    const parent = this.getParent(model);
-    const index = parent?.childMap.get(model.id);
-    if (parent && index !== undefined) {
-      parent.children[index] = model;
-      parent.childrenUpdated.emit();
-    }
     this.slots.blockUpdated.emit({ type: 'add', id });
   }
 
