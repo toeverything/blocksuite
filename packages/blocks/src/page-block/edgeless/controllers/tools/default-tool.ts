@@ -117,7 +117,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private _setNoneSelectionState() {
     if (this.selection.empty) return;
 
-    this.selection.clear(true);
+    this.selection.clear();
     resetNativeSelection(null);
   }
 
