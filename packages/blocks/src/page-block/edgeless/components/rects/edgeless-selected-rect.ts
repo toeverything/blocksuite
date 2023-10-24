@@ -30,7 +30,7 @@ import {
   ShapeElement,
   TextElement,
 } from '../../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../../surface-block/manager/group-manager.js';
+import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';

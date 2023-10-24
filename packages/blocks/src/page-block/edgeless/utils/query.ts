@@ -25,7 +25,7 @@ import {
   type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
-import { getElementsWithoutGroup } from '../../../surface-block/manager/group-manager.js';
+import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 
 export function isTopLevelBlock(

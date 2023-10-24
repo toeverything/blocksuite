@@ -66,7 +66,7 @@ import {
 import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './grid.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
-import { EdgelessGroupManager } from './manager/group-manager.js';
+import { EdgelessGroupManager } from './managers/group-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';

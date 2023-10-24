@@ -23,7 +23,7 @@ import {
   TextElement,
   Vec,
 } from '../../../../surface-block/index.js';
-import { getElementsFromGroup } from '../../../../surface-block/manager/group-manager.js';
+import { getElementsFromGroup } from '../../../../surface-block/managers/group-manager.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
