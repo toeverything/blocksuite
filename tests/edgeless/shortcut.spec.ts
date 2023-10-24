@@ -25,6 +25,7 @@ import {
   type,
 } from '../utils/actions/index.js';
 import {
+  assertBlockCount,
   assertDOMRectEqual,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
@@ -192,13 +193,10 @@ test.describe('delete', () => {
     await switchEditorMode(page);
     await selectNoteInEdgeless(page, noteId);
     const box1 = await getEdgelessSelectedRect(page);
-    await selectNoteInEdgeless(page, noteId);
+    await page.mouse.click(box1.x + 10, box1.y + 10);
     await pressBackspace(page);
-    const box2 = await getEdgelessSelectedRect(page);
-    assertDOMRectEqual(box1, box2);
-
+    await assertBlockCount(page, 'note', 1);
     await pressForwardDelete(page);
-    const box3 = await getEdgelessSelectedRect(page);
-    assertDOMRectEqual(box1, box3);
+    await assertBlockCount(page, 'note', 1);
   });
 });
