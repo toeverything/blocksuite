@@ -349,7 +349,7 @@ export function isPointOnLineSegment(point: IVec, line: IVec[]) {
   const [sp, ep] = line;
   const v1 = Vec.sub(point, sp);
   const v2 = Vec.sub(point, ep);
-  return almostEqual(Vec.cpr(v1, v2), 0) && Vec.dpr(v1, v2) <= 0;
+  return almostEqual(Vec.cpr(v1, v2), 0, 0.01) && Vec.dpr(v1, v2) <= 0;
 }
 
 export function linePolylineIntersects(

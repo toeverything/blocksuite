@@ -264,8 +264,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     _disposables.add(
       page.slots.yBlockUpdated.on(({ id, props }) => {
         const block = page.getBlockById(id);
-        if (block && block.flavour === 'affine:note') {
-          if ('prop:xywh' in props) {
+        if (
+          block &&
+          (block.flavour === EdgelessBlockType.NOTE ||
+            block.flavour === EdgelessBlockType.IMAGE)
+        ) {
+          if ('prop:xywh' in props || 'prop:rotate' in props) {
             this.slots.elementSizeUpdated.emit(id);
           }
         }
