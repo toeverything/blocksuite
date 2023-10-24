@@ -435,7 +435,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Triangle
                 )}
             >
-              ${FrontEndpointArrowIcon}
+              ${FrontEndpointTriangleIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Circle'}
@@ -449,7 +449,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Circle
                 )}
             >
-              ${FrontEndpointArrowIcon}
+              ${FrontEndpointCircleIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Diamond'}
@@ -463,7 +463,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Diamond
                 )}
             >
-              ${FrontEndpointArrowIcon}
+              ${FrontEndpointDiamondIcon}
             </edgeless-tool-icon-button>
           `}
         >
@@ -518,7 +518,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Circle
                 )}
             >
-              ${RearEndpointDiamondIcon}
+              ${RearEndpointCircleIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Triangle'}
@@ -532,7 +532,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Triangle
                 )}
             >
-              ${RearEndpointDiamondIcon}
+              ${RearEndpointTriangleIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Arrow'}
@@ -545,7 +545,7 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
                   ConnectorEndpointStyle.Arrow
                 )}
             >
-              ${RearEndpointDiamondIcon}
+              ${RearEndpointArrowIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'None'}
