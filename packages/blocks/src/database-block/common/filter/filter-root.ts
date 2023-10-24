@@ -10,8 +10,8 @@ import { repeat } from 'lit/directives/repeat.js';
 import {
   popFilterableSimpleMenu,
   positionToVRect,
-} from '../../../components/menu/index.js';
-import { menuTitle } from '../../../components/menu/title.js';
+} from '../../../_common/components/menu/index.js';
+import { menuTitle } from '../../../_common/components/menu/title.js';
 import {
   ArrowDownSmallIcon,
   ConvertIcon,
@@ -19,7 +19,7 @@ import {
   DuplicateIcon,
   MoreHorizontalIcon,
   PlusIcon,
-} from '../../../icons/index.js';
+} from '../../../_common/icons/index.js';
 import type { Filter, FilterGroup, Variable } from '../ast.js';
 import { popAddNewFilter } from './condition.js';
 import type { FilterGroupView } from './filter-group.js';

@@ -21,18 +21,18 @@ import {
   extractCssVariables,
   FONT_FAMILY_VARIABLES,
   SIZE_VARIABLES,
-  Transformer,
   VARIABLES,
+  ZipTransformer,
 } from '@blocksuite/blocks';
 import { NOTE_WIDTH } from '@blocksuite/blocks';
 import type { ContentParser } from '@blocksuite/blocks/content-parser';
 import type { EditorContainer } from '@blocksuite/editor';
 import { ShadowlessElement } from '@blocksuite/lit';
 import { Job, MarkdownAdapter, Utils, type Workspace } from '@blocksuite/store';
-import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
+import type { SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
 import {
@@ -231,9 +231,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   @property({ attribute: false })
   readonly = false;
 
-  @query('#test-operations-dropdown')
-  testOperationsDropdown!: SlDropdown;
-
   private _styleMenu!: Pane;
   private _showStyleDebugMenu = false;
 
@@ -363,7 +360,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
   }
 
   private async _exportSnapshot() {
-    const file = await Transformer.Zip.exportPages(this.workspace, [this.page]);
+    const file = await ZipTransformer.exportPages(this.workspace, [this.page]);
     const url = URL.createObjectURL(file);
     const a = document.createElement('a');
     a.setAttribute('href', url);
@@ -384,7 +381,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
         return;
       }
       try {
-        await Transformer.Zip.importPages(this.workspace, file);
+        await ZipTransformer.importPages(this.workspace, file);
         this.requestUpdate();
       } catch (e) {
         console.error('Invalid snapshot.');
@@ -582,60 +579,50 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                 ></sl-icon>
               </sl-button>
               <sl-menu>
-                <sl-menu-item
-                  @mouseenter=${() => this.testOperationsDropdown.show()}
-                  @mouseleave=${() => this.testOperationsDropdown.hide()}
-                >
+                <sl-menu-item>
                   <sl-icon
                     slot="prefix"
                     name="terminal"
                     label="Test operations"
                   ></sl-icon>
-                  <sl-dropdown
-                    id="test-operations-dropdown"
-                    placement="right-start"
-                    .distance=${40.5}
-                    hoist
-                  >
-                    <span slot="trigger">Test operations</span>
-                    <sl-menu>
-                      <sl-menu-item @click=${this._toggleConnection}>
-                        ${this._connected ? 'Disconnect' : 'Connect'}
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._addNote}>
-                        Add Note</sl-menu-item
-                      >
-                      <sl-menu-item @click=${this._exportMarkDown}>
-                        Export Markdown
-                      </sl-menu-item>
-                      <sl-menu-item
-                        @click=${this._exportMarkDownExperimentalAdapter}
-                      >
-                        Export Markdown (Experimental Adapter)
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._exportHtml}>
-                        Export HTML
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._exportPdf}>
-                        Export PDF
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._exportPng}>
-                        Export PNG
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._exportSnapshot}>
-                        Export Snapshot
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._importSnapshot}>
-                        Import Snapshot
-                      </sl-menu-item>
-                      <sl-menu-item @click=${this._shareUrl}>
-                        Share URL</sl-menu-item
-                      >
-                      <sl-menu-item @click=${this._toggleStyleDebugMenu}>
-                        Toggle CSS Debug Menu
-                      </sl-menu-item>
-                    </sl-menu>
-                  </sl-dropdown>
+                  <span>Test operations</span>
+                  <sl-menu slot="submenu">
+                    <sl-menu-item @click=${this._toggleConnection}>
+                      ${this._connected ? 'Disconnect' : 'Connect'}
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._addNote}>
+                      Add Note</sl-menu-item
+                    >
+                    <sl-menu-item @click=${this._exportMarkDown}>
+                      Export Markdown
+                    </sl-menu-item>
+                    <sl-menu-item
+                      @click=${this._exportMarkDownExperimentalAdapter}
+                    >
+                      Export Markdown (Experimental Adapter)
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._exportHtml}>
+                      Export HTML
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._exportPdf}>
+                      Export PDF
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._exportPng}>
+                      Export PNG
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._exportSnapshot}>
+                      Export Snapshot
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._importSnapshot}>
+                      Import Snapshot
+                    </sl-menu-item>
+                    <sl-menu-item @click=${this._shareUrl}>
+                      Share URL</sl-menu-item
+                    >
+                    <sl-menu-item @click=${this._toggleStyleDebugMenu}>
+                      Toggle CSS Debug Menu
+                    </sl-menu-item>
+                  </sl-menu>
                 </sl-menu-item>
                 <sl-menu-item @click=${this._toggleDarkMode}>
                   Toggle Dark Mode

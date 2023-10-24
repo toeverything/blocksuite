@@ -2,7 +2,7 @@ import { ShadowlessElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { isValidUrl } from '../../../../../__internal__/utils/url.js';
+import { isValidUrl } from '../../../../../_common/utils/url.js';
 
 @customElement('affine-database-link-node')
 export class LinkNode extends ShadowlessElement {

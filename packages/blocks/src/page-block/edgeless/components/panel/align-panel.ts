@@ -5,7 +5,7 @@ import {
   TextAlignCenterIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
 
 @customElement('edgeless-align-panel')
 export class EdgelessAlignPanel extends LitElement {

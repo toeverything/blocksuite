@@ -1,19 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import {
-  getBlockClipboardInfo,
-  getCopyElements,
-} from '../../../__internal__/clipboard/index.js';
-import type { EdgelessElement } from '../../../__internal__/index.js';
-import type { FrameBlockService } from '../../../__internal__/service/legacy-services/frame-service.js';
-import type { ImageBlockService } from '../../../__internal__/service/legacy-services/image-service.js';
+import type { EdgelessElement } from '../../../_common/utils/index.js';
+import { getBlockClipboardInfo } from '../../../_legacy/clipboard/index.js';
+import type { FrameBlockService } from '../../../_legacy/service/legacy-services/frame-service.js';
+import type { ImageBlockService } from '../../../_legacy/service/legacy-services/image-service.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
-import {
-  Bound,
-  ConnectorElement,
-  inflateBound,
-} from '../../../surface-block/index.js';
+import { Bound, ConnectorElement } from '../../../surface-block/index.js';
+import { getCopyElements } from '../controllers/clipboard.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound, getGridBound } from './bound-utils.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from './query.js';
@@ -88,7 +82,6 @@ export async function duplicate(
       }
     })
   );
-  handleZoom(newElements, edgeless);
 
   if (select) {
     edgeless.selectionManager.setSelection({
@@ -96,21 +89,4 @@ export async function duplicate(
       editing: false,
     });
   }
-}
-
-function handleZoom(
-  newElementIds: string[],
-  edgeless: EdgelessPageBlockComponent
-) {
-  const { surface, page } = edgeless;
-  const { viewport } = surface;
-  const newElements = Array.from(
-    newElementIds,
-    id => surface.pickById(id) ?? page.getBlockById(id)
-  );
-  let totalBound = edgelessElementsBound(newElements as EdgelessElement[]);
-  totalBound = inflateBound(totalBound, 30);
-  let currentViewBound = Bound.from(viewport.viewportBounds);
-  currentViewBound = currentViewBound.unite(totalBound);
-  viewport.setViewportByBound(currentViewBound, [0, 0, 0, 0], true);
 }

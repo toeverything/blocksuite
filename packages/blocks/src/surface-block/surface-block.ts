@@ -9,24 +9,25 @@ import { css, html, nothing } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
 import {
+  type CssVariableName,
+  isCssVariable,
+} from '../_common/theme/css-variables.js';
+import { getThemePropertyValue } from '../_common/theme/utils.js';
+import {
   bringForward,
   type EdgelessElement,
   reorder,
   type ReorderingAction,
   type ReorderingRange,
   reorderTo,
+  type Selectable,
   sendBackward,
   type TopLevelBlockModel,
-} from '../__internal__/index.js';
-import {
-  type CssVariableName,
-  isCssVariable,
-} from '../__internal__/theme/css-variables.js';
-import { getThemePropertyValue } from '../__internal__/theme/utils.js';
+} from '../_common/utils/index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import type { Selectable } from '../page-block/edgeless/services/tools-manager.js';
+import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   getEdgelessElement,
   isConnectable,
@@ -54,6 +55,7 @@ import {
   isPhasorElementType,
 } from './elements/edgeless-element.js';
 import {
+  BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
@@ -66,7 +68,7 @@ import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
-import type { Bound } from './utils/bound.js';
+import { Bound } from './utils/bound.js';
 import { getCommonBound } from './utils/bound.js';
 import {
   generateElementId,
@@ -158,6 +160,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   private _defaultBatch = 'a1';
   private _batches = new Map<string, Batch<IEdgelessElement>>();
+  private _lastTime = 0;
+  private _cachedViewport = new Bound();
 
   slots = {
     elementUpdated: new Slot<{
@@ -245,7 +249,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   };
 
   private _initEvents() {
-    const { page, _disposables, edgeless } = this;
+    const { _disposables, edgeless } = this;
 
     _disposables.add(
       edgeless.slots.reorderingBlocksUpdated.on(this._reorderBlocks.bind(this))
@@ -261,7 +265,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         if (element instanceof ConnectorElement) {
           // FIXME waiting for refactor
           if (!this.connector.hasRelatedElement(element)) return;
-
           this.connector.updatePath(element);
         }
       })
@@ -289,20 +292,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         const element = getEdgelessElement(this.edgeless, id);
         if (isConnectable(element)) {
           this.connector.syncConnectorPos([element]);
-        }
-      })
-    );
-
-    this._disposables.add(
-      this.page.slots.blockUpdated.on(e => {
-        if (e.type === 'add') {
-          const model = page.getBlockById(e.id) as TopLevelBlockModel;
-          assertExists(model);
-          if (isFrameBlock(model)) {
-            requestAnimationFrame(() => {
-              this.frame.calculateFrameColor(model);
-            });
-          }
         }
       })
     );
@@ -526,6 +515,44 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
+  private _initEffects() {
+    const { _disposables, page, edgeless } = this;
+    _disposables.add(
+      page.slots.blockUpdated.on(({ id, type }) => {
+        if (type === 'add') {
+          const model = page.getBlockById(id) as TopLevelBlockModel;
+          assertExists(model);
+          if (
+            isNoteBlock(model) ||
+            isFrameBlock(model) ||
+            isImageBlock(model)
+          ) {
+            requestAnimationFrame(() => {
+              this.fitElementToViewport(model);
+            });
+          }
+        }
+      })
+    );
+    _disposables.add(
+      edgeless.slots.elementSizeUpdated.on(id => {
+        const element = getEdgelessElement(edgeless, id);
+        assertExists(element);
+        if (element instanceof BrushElement) return;
+        this.fitElementToViewport(element);
+      })
+    );
+
+    _disposables.add(
+      this.slots.elementAdded.on(id => {
+        const element = this.pickById(id);
+        assertExists(element);
+        if (element instanceof BrushElement) return;
+        this.fitElementToViewport(element);
+      })
+    );
+  }
+
   override render() {
     if (!this._isEdgeless) return nothing;
     return html`
@@ -542,6 +569,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   init() {
     this._syncFromExistingContainer();
+    this._initEffects();
   }
 
   // query
@@ -841,6 +869,20 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         this._yContainer.delete(id);
       });
     }
+  }
+
+  fitElementToViewport(ele: EdgelessElement) {
+    const { viewport } = this;
+    let bound = getGridBound(ele);
+    bound = bound.expand(30);
+    if (Date.now() - this._lastTime > 200)
+      this._cachedViewport = viewport.viewportBounds;
+    this._lastTime = Date.now();
+
+    if (this._cachedViewport.contains(bound)) return;
+
+    this._cachedViewport = this._cachedViewport.unite(bound);
+    viewport.setViewportByBound(this._cachedViewport, [0, 0, 0, 0], true);
   }
 
   hasElement(id: string) {

@@ -8,17 +8,17 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type {
-  EdgelessTool,
-  ShapeToolState,
-} from '../../../../../__internal__/index.js';
 import {
   diamondSvg,
   ellipseSvg,
   rectSvg,
   roundedSvg,
   triangleSvg,
-} from '../../../../../icons/index.js';
+} from '../../../../../_common/icons/index.js';
+import type {
+  EdgelessTool,
+  ShapeToolState,
+} from '../../../../../_common/utils/index.js';
 import { ShapeStyle } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import {
@@ -187,6 +187,19 @@ export class EdgelessShapeToolButton extends WithDisposable(LitElement) {
     this._disposables.dispose();
     this._closeShapeMenu();
     super.disconnectedCallback();
+  }
+
+  override firstUpdated() {
+    this.edgeless.bindHotKey(
+      {
+        Escape: () => {
+          if (this.edgelessTool.type === 'shape') {
+            this.setEdgelessTool({ type: 'default' });
+          }
+        },
+      },
+      { global: true }
+    );
   }
 
   private _shapes: Array<Shape> = [

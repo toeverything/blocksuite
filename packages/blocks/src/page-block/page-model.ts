@@ -9,11 +9,16 @@ export class PageBlockModel extends BaseBlockModel<PageProps> {
   constructor() {
     super();
     this.created.on(() => {
-      this.page.slots.blockUpdated.on(({ type }) => {
-        if (type === 'add') {
-          this.page.workspace.setPageMeta(this.page.id, {
-            title: this.title.toString(),
-          });
+      this.page.slots.rootAdded.on(model => {
+        if (model instanceof PageBlockModel) {
+          const newPageMeta = this.page.workspace.meta.getPageMeta(
+            model.page.id
+          );
+          if (!newPageMeta || newPageMeta.title !== model.title.toString()) {
+            this.page.workspace.setPageMeta(model.page.id, {
+              title: model.title.toString(),
+            });
+          }
         }
       });
     });

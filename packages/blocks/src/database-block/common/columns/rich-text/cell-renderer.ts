@@ -5,14 +5,14 @@ import { css } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
-import type { RichText } from '../../../../components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../../../../components/rich-text/virgo/attribute-renderer.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
+import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
+import { affineAttributeRenderer } from '../../../../_common/components/rich-text/virgo/attribute-renderer.js';
 import {
   type AffineTextAttributes,
   affineTextAttributes,
   type AffineVEditor,
-} from '../../../../components/rich-text/virgo/types.js';
+} from '../../../../_common/components/rich-text/virgo/types.js';
 import { BaseCellRenderer } from '../base-cell.js';
 import { columnRenderer, createFromBaseCellRenderer } from '../renderer.js';
 import { richTextColumnTypeName, richTextPureColumnConfig } from './define.js';

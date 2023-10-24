@@ -3,12 +3,12 @@ import {
   type AttachmentProps,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
-  edgelessPreset,
+  EdgelessPreset,
   FileDropManager,
   getServiceOrRegister,
   type ImageBlockProps,
   type PageBlockModel,
-  pagePreset,
+  PagePreset,
   readImageSize,
   ThemeObserver,
 } from '@blocksuite/blocks';
@@ -57,10 +57,10 @@ export class EditorContainer
   mode: 'page' | 'edgeless' = 'page';
 
   @property({ attribute: false })
-  pagePreset = pagePreset;
+  pagePreset = PagePreset;
 
   @property({ attribute: false })
-  edgelessPreset = edgelessPreset;
+  edgelessPreset = EdgelessPreset;
 
   @property({ attribute: false })
   override autofocus = false;
@@ -131,15 +131,6 @@ export class EditorContainer
       throw new Error('Missing page for EditorContainer!');
     }
 
-    // connect mouse mode event changes
-    // this._disposables.addFromEvent(
-    //   window,
-    //   'affine.switch-mouse-mode',
-    //   ({ detail }) => {
-    //     this.edgelessTool = detail;
-    //   }
-    // );
-
     // subscribe store
     this._disposables.add(
       this.page.slots.rootAdded.on(() => {
@@ -156,7 +147,7 @@ export class EditorContainer
     );
     this._disposables.addFromEvent(this, 'drop', this.fileDropManager.onDrop);
 
-    this.themeObserver.observer(document.documentElement);
+    this.themeObserver.observe(document.documentElement);
     this._disposables.add(this.themeObserver);
   }
 
@@ -266,6 +257,7 @@ export class EditorContainer
     }
   }
 
+  /** @deprecated for testing only */
   createContentParser() {
     return new ContentParser(this.page);
   }
@@ -278,7 +270,7 @@ export class EditorContainer
       html`<block-suite-root
         ${ref(this.root)}
         .page=${this.page}
-        .blocks=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
+        .preset=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
         .mode=${this.mode}
       ></block-suite-root>`
     );

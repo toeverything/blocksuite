@@ -9,7 +9,7 @@ import {
 } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import type { EdgelessTool } from '../../../../../__internal__/index.js';
+import type { EdgelessTool } from '../../../../../_common/utils/index.js';
 import {
   Bound,
   PhasorElementType,
@@ -17,8 +17,8 @@ import {
   type ShapeType,
   StrokeStyle,
 } from '../../../../../surface-block/index.js';
+import { ShapeToolController } from '../../../controllers/tools/shape-tool.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import { ShapeToolController } from '../../../tool-controllers/shape-tool.js';
 import {
   DEFAULT_SHAPE_FILL_COLOR,
   DEFAULT_SHAPE_STROKE_COLOR,

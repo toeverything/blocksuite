@@ -7,7 +7,7 @@ import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
-import { NOTE_WIDTH } from '../../../blocks/src/__internal__/consts.js';
+import { NOTE_WIDTH } from '../../../blocks/src/_common/consts.js';
 import { DividerBlockSchema } from '../../../blocks/src/divider-block/divider-model.js';
 import { ListBlockSchema } from '../../../blocks/src/list-block/list-model.js';
 import { NoteBlockSchema } from '../../../blocks/src/note-block/note-model.js';
@@ -633,7 +633,10 @@ describe('workspace search', () => {
     const result = workspace.search('test');
     expect(result).toMatchInlineSnapshot(`
       Map {
-        "0" => "page:home",
+        "0" => {
+          "content": "test123",
+          "space": "page:home",
+        },
       }
     `);
   });

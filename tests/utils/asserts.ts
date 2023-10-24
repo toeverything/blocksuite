@@ -14,14 +14,13 @@ import {
 import {
   BLOCK_ID_ATTR,
   NOTE_WIDTH,
-} from '../../packages/blocks/src/__internal__/consts.js';
+} from '../../packages/blocks/src/_common/consts.js';
 import type {
   CssVariableName,
   NoteBlockModel,
   PageBlockModel,
 } from '../../packages/blocks/src/index.js';
 import { assertExists } from '../../packages/global/src/utils.js';
-import { toHex } from '../../packages/global/src/utils.js';
 import type { BlockElement } from '../../packages/lit/src/index.js';
 import type { RichText } from '../../packages/playground/examples/virgo/test-page.js';
 import {
@@ -36,6 +35,7 @@ import type { JSXElement } from '../../packages/store/src/utils/jsx.js';
 import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getConnectorPath,
+  getEdgelessSelectedRectModel,
   getSelectedBound,
   getZoomLevel,
 } from './actions/edgeless.js';
@@ -122,7 +122,7 @@ export const defaultStore: SerializedStore = {
   },
 };
 
-type Bound = [x: number, y: number, w: number, h: number];
+export type Bound = [x: number, y: number, w: number, h: number];
 
 export async function assertEmpty(page: Page) {
   await assertRichTexts(page, ['']);
@@ -787,6 +787,19 @@ export async function assertEdgelessSelectedRect(page: Page, xywh: number[]) {
   expect(box.height).toBeCloseTo(h, 0);
 }
 
+export async function assertEdgelessSelectedRectModel(
+  page: Page,
+  xywh: number[]
+) {
+  const [x, y, w, h] = xywh;
+  const box = await getEdgelessSelectedRectModel(page);
+
+  expect(box[0]).toBeCloseTo(x, 0);
+  expect(box[1]).toBeCloseTo(y, 0);
+  expect(box[2]).toBeCloseTo(w, 0);
+  expect(box[3]).toBeCloseTo(h, 0);
+}
+
 export async function assertEdgelessSelectedRectRotation(page: Page, deg = 0) {
   const editor = getEditorLocator(page);
   const selectedRect = editor
@@ -831,6 +844,31 @@ export async function assertEdgelessNoteBackground(
     });
 
   expect(backgroundColor).toEqual(`var(${color})`);
+}
+
+function toHex(color: string) {
+  let r, g, b;
+
+  if (color.startsWith('#')) {
+    color = color.substr(1);
+    if (color.length === 3) {
+      color = color.replace(/./g, '$&$&');
+    }
+    [r, g, b] = color.match(/.{2}/g)?.map(hex => parseInt(hex, 16)) ?? [];
+  } else if (color.startsWith('rgba')) {
+    [r, g, b] = color.match(/\d+/g)?.map(Number) ?? [];
+  } else if (color.startsWith('rgb')) {
+    [r, g, b] = color.match(/\d+/g)?.map(Number) ?? [];
+  } else {
+    throw new Error('Invalid color format');
+  }
+
+  if (r === undefined || g === undefined || b === undefined) {
+    throw new Error('Invalid color format');
+  }
+
+  const hex = ((r << 16) | (g << 8) | b).toString(16);
+  return '#' + '0'.repeat(6 - hex.length) + hex;
 }
 
 export async function assertEdgelessColorSameWithHexColor(

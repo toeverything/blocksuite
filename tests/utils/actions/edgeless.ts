@@ -3,6 +3,7 @@ import '../declare-test-window.js';
 
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
+import type { Bound } from 'utils/asserts.js';
 
 import {
   type CssVariableName,
@@ -10,6 +11,7 @@ import {
   type NoteBlockModel,
 } from '../../../packages/blocks/src/index.js';
 import { assertExists, sleep } from '../../../packages/global/src/utils.js';
+import { clickView } from './click.js';
 import { dragBetweenCoords } from './drag.js';
 import {
   pressBackspace,
@@ -88,7 +90,13 @@ export async function switchEditorEmbedMode(page: Page) {
 }
 
 type BasicEdgelessTool = 'default' | 'pan' | 'note';
-type SpecialEdgelessTool = 'shape' | 'brush' | 'eraser' | 'text' | 'connector';
+type SpecialEdgelessTool =
+  | 'shape'
+  | 'brush'
+  | 'eraser'
+  | 'text'
+  | 'connector'
+  | 'frame';
 
 type EdgelessTool = BasicEdgelessTool | SpecialEdgelessTool;
 type ZoomToolType = 'zoomIn' | 'zoomOut' | 'fitToScreen';
@@ -108,6 +116,7 @@ export function locatorEdgelessToolButton(
     text: '.edgeless-text-button',
     connector: '.edgeless-connector-button',
     note: '.edgeless-note-button',
+    frame: '.edgeless-frame-button',
   }[type];
 
   let buttonType;
@@ -221,6 +230,7 @@ export async function setEdgelessTool(
     case 'text':
     case 'note':
     case 'eraser':
+    case 'frame':
     case 'connector': {
       const button = locatorEdgelessToolButton(page, mode, false);
       await button.click();
@@ -275,6 +285,15 @@ export async function getEdgelessSelectedRect(page: Page) {
     return selected.getBoundingClientRect();
   });
   return selectedBox;
+}
+
+export async function getEdgelessSelectedRectModel(page: Page): Promise<Bound> {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    const bound = container.selectionManager.selectedBound;
+    return [bound.x, bound.y, bound.w, bound.h];
+  });
 }
 
 export async function decreaseZoomLevel(page: Page) {
@@ -634,6 +653,12 @@ export async function optionMouseDrag(
 export async function shiftClick(page: Page, point: IPoint) {
   await page.keyboard.down(SHIFT_KEY);
   await page.mouse.click(point.x, point.y);
+  await page.keyboard.up(SHIFT_KEY);
+}
+
+export async function shiftClickView(page: Page, point: [number, number]) {
+  await page.keyboard.down(SHIFT_KEY);
+  await clickView(page, point);
   await page.keyboard.up(SHIFT_KEY);
 }
 
@@ -1002,10 +1027,10 @@ export async function initThreeOverlapFilledShapes(page: Page) {
   await changeShapeFillColor(page, '--affine-palette-shape-white');
 }
 
-export async function initThreeOverlapNotes(page: Page) {
-  await addNote(page, 'abc', 30 + 100, 40 + 100);
-  await addNote(page, 'efg', 30 + 130, 40 + 100);
-  await addNote(page, 'hij', 30 + 160, 40 + 100);
+export async function initThreeOverlapNotes(page: Page, x = 130, y = 140) {
+  await addNote(page, 'abc', x, y);
+  await addNote(page, 'efg', x + 30, y);
+  await addNote(page, 'hij', x + 60, y);
 }
 
 export async function initThreeNotes(page: Page) {
@@ -1083,7 +1108,7 @@ export async function createShapeElement(
   page: Page,
   coord1: number[],
   coord2: number[],
-  shape: Shape
+  shape = Shape.Square
 ) {
   const start = await toViewCoord(page, coord1);
   const end = await toViewCoord(page, coord2);
@@ -1109,15 +1134,13 @@ export async function createConnectorElement(
   );
 }
 
-export async function hoverOnNote(
-  page: Page,
-  id: string,
-  point?: { x: number; y: number }
-) {
+export async function hoverOnNote(page: Page, id: string, offset = [0, 0]) {
   const blockRect = await page.locator(`[data-block-id="${id}"]`).boundingBox();
 
   assertExists(blockRect);
 
-  point = { x: blockRect.width / 2, y: blockRect.height / 2 };
-  await page.mouse.move(blockRect.x + point.x, blockRect.y + point.y);
+  await page.mouse.move(
+    blockRect.x + blockRect.width / 2 + offset[0],
+    blockRect.y + blockRect.height / 2 + offset[1]
+  );
 }

@@ -8,9 +8,12 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import type { IPoint } from '../../../../__internal__/utils/types.js';
-import { PhasorElementType } from '../../../../surface-block/index.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
+import type { IPoint, Selectable } from '../../../../_common/utils/types.js';
+import {
+  normalizeTextBound,
+  PhasorElementType,
+} from '../../../../surface-block/index.js';
 import {
   Bound,
   ConnectorElement,
@@ -24,7 +27,6 @@ import {
   TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import type { Selectable } from '../../services/tools-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
@@ -34,10 +36,9 @@ import {
   isImageBlock,
   isNoteBlock,
   isPhasorElement,
-  isPhasorElementWithText,
 } from '../../utils/query.js';
 import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
-import type { HandleDirection } from '../resize/resize-handles.js';
+import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
 import {
@@ -331,13 +332,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       this._onDragEnd
     );
     this.addEventListener('pointerdown', stopPropagation);
-    this._disposables.add(
-      this._resizeManager.slots.resizeEnd.on(() => {
-        this.selection.elements.forEach(ele => {
-          isFrameBlock(ele) && this.surface.frame.calculateFrameColor(ele);
-        });
-      })
-    );
   }
 
   get selection() {
@@ -363,39 +357,39 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   get resizeMode(): ResizeMode {
     const elements = this.selection.elements;
 
-    let isAllConnector = true;
-    let isAllShapes = true;
+    let areAllConnectors = true;
+    let areAllShapes = true;
+    let areAllTexts = true;
     let hasNote = false;
 
     for (const element of elements) {
       if (isNoteBlock(element)) {
         hasNote = true;
       } else if (isFrameBlock(element)) {
-        isAllConnector = false;
+        areAllConnectors = false;
       } else if (isImageBlock(element)) {
-        isAllConnector = false;
-        isAllShapes = false;
+        areAllConnectors = false;
+        areAllShapes = false;
+        areAllTexts = false;
         hasNote = false;
       } else {
-        if (element.type !== 'connector') isAllConnector = false;
-        if (element.type !== 'shape') isAllShapes = false;
+        if (element.type !== 'connector') areAllConnectors = false;
+        if (element.type !== 'shape') areAllShapes = false;
+        if (element.type !== 'text') areAllTexts = false;
       }
     }
 
     if (hasNote) return 'edge';
-    if (isAllConnector) return 'none';
-    if (isAllShapes) return 'all';
+    if (areAllConnectors) return 'none';
+    if (areAllShapes) return 'all';
+    if (areAllTexts) return 'edgeAndCorner';
 
     return 'corner';
   }
 
   private _shouldRenderSelection(elements?: Selectable[]) {
     elements = elements ?? this.selection.elements;
-
-    return (
-      elements.length > 0 &&
-      (!this.selection.editing || !isPhasorElementWithText(elements[0]))
-    );
+    return elements.length > 0 && !this.selection.editing;
   }
 
   private _onDragStart = () => {
@@ -409,7 +403,8 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       {
         bound: Bound;
       }
-    >
+    >,
+    direction: HandleDirection
   ) => {
     const { page, selection, surface } = this;
     const selectedMap = new Map<string, Selectable>(
@@ -439,12 +434,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         });
       } else {
         if (element instanceof TextElement) {
-          const p = bound.h / element.h;
-
-          surface.updateElement<PhasorElementType.TEXT>(id, {
-            xywh: bound.serialize(),
-            fontSize: element.fontSize * p,
-          });
+          let p = 1;
+          if (
+            direction === HandleDirection.Left ||
+            direction === HandleDirection.Right
+          ) {
+            bound = normalizeTextBound(element, bound, true);
+            // If the width of the text element has been changed by dragging,
+            // We need to set hasMaxWidth to true for wrapping the text
+            surface.updateElement(id, {
+              xywh: bound.serialize(),
+              fontSize: element.fontSize * p,
+              hasMaxWidth: true,
+            });
+          } else {
+            p = bound.h / element.h;
+            // const newFontsize = element.fontSize * p;
+            // bound = normalizeTextBound(element, bound, false, newFontsize);
+            surface.updateElement(id, {
+              xywh: bound.serialize(),
+              fontSize: element.fontSize * p,
+            });
+          }
         } else {
           if (element instanceof ShapeElement) {
             bound = normalizeShapeBound(element, bound);
@@ -708,6 +719,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
   }
 
+  private _canAutoComplete() {
+    return (
+      this.selection.elements.length === 1 &&
+      (this.selection.elements[0] instanceof ShapeElement ||
+        isNoteBlock(this.selection.elements[0]))
+    );
+  }
+
   override render() {
     const { selection } = this;
     const elements = selection.elements;
@@ -755,13 +774,14 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         : nothing;
 
     return html`
-      ${page.readonly
-        ? nothing
-        : html`<edgeless-auto-complete
+      ${!page.readonly && this._canAutoComplete()
+        ? html`<edgeless-auto-complete
+            .current=${this.selection.elements[0]}
             .edgeless=${edgeless}
             .selectedRect=${_selectedRect}
           >
-          </edgeless-auto-complete>`}
+          </edgeless-auto-complete>`
+        : nothing}
       <div
         class="affine-edgeless-selected-rect"
         style=${styleMap({

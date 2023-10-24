@@ -1,17 +1,18 @@
 import type { PointerEventState } from '@blocksuite/block-std';
-import { almostEqual, assertExists, noop } from '@blocksuite/global/utils';
+import { assertExists, noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../__internal__/consts.js';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../../../_common/consts.js';
 import {
   getBlockElementByModel,
   getModelByBlockElement,
   getRectByBlockElement,
   Point,
-} from '../../../../__internal__/index.js';
+} from '../../../../_common/utils/index.js';
+import { almostEqual } from '../../../../_common/utils/math.js';
 import type {
   EdgelessPageBlockComponent,
   NoteBlockComponent,
@@ -25,7 +26,7 @@ import {
 import {
   DefaultModeDragType,
   type DefaultToolController,
-} from '../../tool-controllers/default-tool.js';
+} from '../../controllers/tools/default-tool.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { isNoteBlock } from '../../utils/query.js';
 import { NoteSlicerButton } from './slicer-button.js';

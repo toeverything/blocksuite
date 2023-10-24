@@ -6,8 +6,8 @@ import { computePosition, offset } from '@floating-ui/dom';
 import { html, LitElement } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 
+import { FrameOrderAdjustmentIcon } from '../../../../../_common/icons/index.js';
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
-import { FrameOrderAdjustmentIcon } from '../../../../../icons/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
 import type { EdgelessFrameOrderMenu } from './frame-order-menu.js';
 

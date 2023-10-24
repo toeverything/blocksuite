@@ -1,7 +1,7 @@
 import { css, html } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-import { createIcon } from '../../../../components/icon/uni-icon.js';
+import { createIcon } from '../../../../_common/components/icon/uni-icon.js';
 import {
   checkboxChecked,
   checkboxUnchecked,

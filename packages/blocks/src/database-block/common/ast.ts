@@ -1,4 +1,4 @@
-import type { UniComponent } from '../../components/uni-component/uni-component.js';
+import type { UniComponent } from '../../_common/components/uni-component/uni-component.js';
 import { propertyMatcher } from '../logical/property-matcher.js';
 import type { TType } from '../logical/typesystem.js';
 import { filterMatcher } from './filter/matcher/matcher.js';

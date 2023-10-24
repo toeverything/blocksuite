@@ -3,25 +3,17 @@ import * as Y from 'yjs';
 
 interface IPageMigration {
   desc: string;
-  condition: (
-    pageDoc: Y.Doc,
-    oldVersions: Record<string, number>,
-    versions: Record<string, number>
-  ) => boolean;
-  migrate: (
-    pageDoc: Y.Doc,
-    oldVersions: Record<string, number>,
-    versions: Record<string, number>
-  ) => void;
+  condition: (oldPageVersion: number, pageDoc: Y.Doc) => boolean;
+  migrate: (oldPageVersion: number, pageDoc: Y.Doc) => void;
 }
 
 export const pageMigrations: IPageMigration[] = [
   {
-    desc: 'frame element --> frame block',
-    condition: (_pageDoc, oldVersions) => {
-      return !oldVersions['affine:frame'];
+    desc: 'frame element --> frame block (page v1 --> v2)',
+    condition: oldPageVersion => {
+      return oldPageVersion < 2;
     },
-    migrate: (pageDoc, _oldVersions, _versions) => {
+    migrate: (_, pageDoc) => {
       const blocks = pageDoc.getMap('blocks') as Y.Map<Y.Map<unknown>>;
       let page!: Y.Map<unknown>, surface!: Y.Map<unknown>;
       blocks.forEach(block => {

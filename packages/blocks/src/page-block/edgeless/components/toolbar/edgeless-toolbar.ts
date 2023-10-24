@@ -8,8 +8,8 @@ import './frame/frame-order-button.js';
 import './frame/frame-tool-button.js';
 import './default/default-tool-button.js';
 import './text/text-tool-button.js';
+import './eraser/eraser-tool-button.js';
 
-import { launchIntoFullscreen } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import {
@@ -22,12 +22,8 @@ import {
 } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 
-import { stopPropagation } from '../../../../__internal__/utils/event.js';
-import { uploadImageFromLocal } from '../../../../__internal__/utils/filesys.js';
-import type { EdgelessTool } from '../../../../__internal__/utils/types.js';
-import { toast } from '../../../../components/toast.js';
+import { toast } from '../../../../_common/components/toast.js';
 import {
-  EdgelessEraserIcon,
   EdgelessImageIcon,
   EdgelessTextIcon,
   FrameNavigatorIcon,
@@ -35,12 +31,38 @@ import {
   FrameNavigatorPrevIcon,
   PresentationExitFullScreenIcon,
   PresentationFullScreenIcon,
-} from '../../../../icons/index.js';
+} from '../../../../_common/icons/index.js';
+import { stopPropagation } from '../../../../_common/utils/event.js';
+import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
+import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
 import { Bound, clamp, compare } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
-import { getTooltipWithShortcut } from '../utils.js';
+
+export function launchIntoFullscreen(element: Element) {
+  if (element.requestFullscreen) {
+    element.requestFullscreen();
+  } else if (
+    'mozRequestFullScreen' in element &&
+    element.mozRequestFullScreen instanceof Function
+  ) {
+    // Firefox
+    element.mozRequestFullScreen();
+  } else if (
+    'webkitRequestFullscreen' in element &&
+    element.webkitRequestFullscreen instanceof Function
+  ) {
+    // Chrome, Safari and Opera
+    element.webkitRequestFullscreen();
+  } else if (
+    'msRequestFullscreen' in element &&
+    element.msRequestFullscreen instanceof Function
+  ) {
+    // IE/Edge
+    element.msRequestFullscreen();
+  }
+}
 
 @customElement('edgeless-toolbar')
 export class EdgelessToolbar extends WithDisposable(LitElement) {
@@ -96,32 +118,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     .brush-and-eraser {
       display: flex;
       margin-left: 8px;
-    }
-    .eraser-button {
-      position: relative;
-      height: 66px;
-      width: 60px;
-      overflow-y: hidden;
-    }
-    .eraser-button .active-mode {
-      position: absolute;
-      top: 8px;
-      left: 6px;
-      width: 48px;
-      height: 66px;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      background: var(--affine-hover-color);
-    }
-    #edgeless-eraser-icon {
-      position: absolute;
-      top: 4px;
-      left: 50%;
-      transform: translateX(-50%);
-      transition: top 0.3s ease-in-out;
-    }
-    #edgeless-eraser-icon:hover {
-      top: 0px;
     }
     .edgeless-toolbar-right-part {
       display: flex;
@@ -332,7 +328,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       const frame = this._frames[current];
       if (frame) {
         const bound = Bound.deserialize(frame.xywh);
-        viewport.setViewportByBound(bound, [40, 60, 40, 60], true);
+        viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
       }
     }
   }
@@ -410,8 +406,6 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _renderTools() {
-    const { type } = this.edgelessTool;
-
     return html`
       <div class="full-divider"></div>
       <div class="brush-and-eraser">
@@ -420,18 +414,11 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
           .edgeless=${this.edgeless}
           .setEdgelessTool=${this.setEdgelessTool}
         ></edgeless-brush-tool-button>
-        <edgeless-toolbar-button
-          class="edgeless-eraser-button"
-          .tooltip=${getTooltipWithShortcut('Eraser', 'E')}
-          .tooltipOffset=${4}
-          .active=${type === 'eraser'}
-          @click=${() => this.setEdgelessTool({ type: 'eraser' })}
-        >
-          <div class="eraser-button">
-            <div class=${type === 'eraser' ? 'active-mode' : ''}></div>
-            ${EdgelessEraserIcon}
-          </div>
-        </edgeless-toolbar-button>
+        <edgeless-eraser-tool-button
+          .edgelessTool=${this.edgelessTool}
+          .edgeless=${this.edgeless}
+          .setEdgelessTool=${this.setEdgelessTool}
+        ></edgeless-eraser-tool-button>
       </div>
       <div class="edgeless-toolbar-right-part">
         <edgeless-shape-tool-button

@@ -5,7 +5,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { type EdgelessTool } from '../../../../../__internal__/index.js';
+import { type EdgelessTool } from '../../../../../_common/utils/index.js';
 import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
@@ -119,7 +119,6 @@ export class EdgelessFrameMenu extends WithDisposable(LitElement) {
                         title: new Workspace.Y.Text(
                           `Frame ${frames.length + 1}`
                         ),
-                        batch: 'a0',
                         xywh: bound.serialize(),
                       },
                       surface.model

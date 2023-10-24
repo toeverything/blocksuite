@@ -1,18 +1,18 @@
 /// <reference types="vite/client" />
-import '../components/rich-text/rich-text.js';
+import '../_common/components/rich-text/rich-text.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement, getVRangeProvider } from '@blocksuite/lit';
 import type { VRangeProvider } from '@blocksuite/virgo';
 import { html, nothing, type TemplateResult } from 'lit';
-import { customElement, query } from 'lit/decorators.js';
+import { customElement, query, state } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../__internal__/consts.js';
-import { bindContainerHotkey } from '../components/rich-text/keymap/index.js';
-import type { RichText } from '../components/rich-text/rich-text.js';
-import { affineAttributeRenderer } from '../components/rich-text/virgo/attribute-renderer.js';
-import { affineTextAttributes } from '../components/rich-text/virgo/types.js';
+import { bindContainerHotkey } from '../_common/components/rich-text/keymap/index.js';
+import type { RichText } from '../_common/components/rich-text/rich-text.js';
+import { affineAttributeRenderer } from '../_common/components/rich-text/virgo/attribute-renderer.js';
+import { affineTextAttributes } from '../_common/components/rich-text/virgo/types.js';
+import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../_common/consts.js';
 import type { ListBlockModel } from './list-model.js';
 import { styles } from './styles.js';
 import { ListIcon } from './utils/get-list-icon.js';
@@ -25,6 +25,9 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
 
   readonly attributesSchema = affineTextAttributes;
   readonly attributeRenderer = affineAttributeRenderer;
+
+  @state()
+  private _isCollapsedWhenReadOnly = !!this.model?.collapsed ?? false;
 
   private _select() {
     const selection = this.root.selection;
@@ -79,14 +82,22 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
   }
 
   private _toggleChildren() {
+    if (this.page.readonly) {
+      this._isCollapsedWhenReadOnly = !this._isCollapsedWhenReadOnly;
+      return;
+    }
+    const newCollapsedState = !this.model.collapsed;
+    this._isCollapsedWhenReadOnly = newCollapsedState;
     this.page.captureSync();
     this.page.updateBlock(this.model, {
-      collapsed: !this.model.collapsed,
+      collapsed: newCollapsedState,
     } as Partial<ListBlockModel>);
   }
 
-  private _toggleTemplate() {
+  private _toggleTemplate(isCollapsed: boolean) {
     const noChildren = this.model.children.length === 0;
+    if (noChildren) return nothing;
+
     const toggleDownTemplate = html`<div
       class="toggle-icon"
       @click=${this._toggleChildren}
@@ -100,24 +111,17 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     >
       ${toggleRight}
     </div>`;
-    const toggleIcon = noChildren
-      ? nothing
-      : !this.model.collapsed
-      ? toggleDownTemplate
-      : toggleRightTemplate;
-    return toggleIcon;
+
+    return isCollapsed ? toggleRightTemplate : toggleDownTemplate;
   }
 
   override render(): TemplateResult<1> {
     const { deep, index } = getListInfo(this.model);
     const { model, _onClickIcon } = this;
-    const listIcon = ListIcon(
-      model,
-      index,
-      deep,
-      !this.model.collapsed,
-      _onClickIcon
-    );
+    const collapsed = this.page.readonly
+      ? this._isCollapsedWhenReadOnly
+      : !!model.collapsed;
+    const listIcon = ListIcon(model, index, deep, !collapsed, _onClickIcon);
 
     // For the first list item, we need to add a margin-top to make it align with the text
     const shouldAddMarginTop = index === 0 && deep === 0;
@@ -137,7 +141,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
     return html`
       <div class=${`affine-list-block-container ${top}`}>
         <div class=${`affine-list-rich-text-wrapper ${checked}`}>
-          ${this._toggleTemplate()} ${listIcon}
+          ${this._toggleTemplate(collapsed)} ${listIcon}
           <rich-text
             .yText=${this.model.text.yText}
             .undoManager=${this.model.page.history}
@@ -149,7 +153,7 @@ export class ListBlockComponent extends BlockElement<ListBlockModel> {
             .enableUndoRedo=${false}
           ></rich-text>
         </div>
-        ${!this.model.collapsed ? children : nothing}
+        ${collapsed ? nothing : children}
         ${when(
           this.selected?.is('block'),
           () => html`<affine-block-selection></affine-block-selection>`

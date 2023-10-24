@@ -4,8 +4,8 @@ import { autoUpdate, computePosition, size } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import { createModal } from '../../../components/menu/index.js';
-import { CrossIcon } from '../../../icons/index.js';
+import { createModal } from '../../../_common/components/menu/index.js';
+import { CrossIcon } from '../../../_common/icons/index.js';
 import type { DataViewManager } from '../data-view-manager.js';
 import { RecordDetail } from './detail.js';
 
@@ -93,7 +93,9 @@ export const popSideDetail = (ops: {
   onClose?: () => void;
 }) => {
   //FIXME: to make widget path work
-  const page = document.querySelector('affine-doc-page');
+  const page =
+    document.querySelector('affine-doc-page') ??
+    document.querySelector('affine-edgeless-page');
   assertExists(page);
   const modal = createModal(page);
   // fit to the size of the page element

@@ -1,4 +1,4 @@
-import '../../../../../components/button.js';
+import '../../../../../_common/components/button.js';
 
 import { BlockElement } from '@blocksuite/lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -7,7 +7,7 @@ import { html } from 'lit/static-html.js';
 import {
   DatabaseTableViewClose,
   DatabaseTableViewIcon,
-} from '../../../../../icons/index.js';
+} from '../../../../../_common/icons/index.js';
 import type { DatabaseBlockModel } from '../../../../database-model.js';
 import { fullScreenStyles } from './styles.js';
 

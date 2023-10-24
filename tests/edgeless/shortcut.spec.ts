@@ -2,7 +2,8 @@ import { expect } from '@playwright/test';
 
 import {
   addBasicRectShapeElement,
-  deleteAll,
+  createShapeElement,
+  edgelessCommonSetup,
   getEdgelessSelectedRect,
   getZoomLevel,
   locatorEdgelessToolButton,
@@ -24,9 +25,11 @@ import {
   type,
 } from '../utils/actions/index.js';
 import {
+  assertBlockCount,
   assertDOMRectEqual,
   assertEdgelessNonSelectedRect,
   assertEdgelessSelectedRect,
+  assertEdgelessSelectedRectModel,
 } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
@@ -150,19 +153,11 @@ test.describe('zooming', () => {
 });
 
 test('cmd + A should select all elements by default', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await deleteAll(page);
-  const start = { x: 0, y: 0 };
-  const end = { x: 100, y: 100 };
-  await addBasicRectShapeElement(page, start, end);
-  start.x = 100;
-  end.x = 200;
-  await addBasicRectShapeElement(page, start, end);
+  await edgelessCommonSetup(page);
+  await createShapeElement(page, [0, 0], [100, 100]);
+  await createShapeElement(page, [100, 0], [200, 100]);
   await selectAllByKeyboard(page);
-
-  await assertEdgelessSelectedRect(page, [0, 0, 200, 100]);
+  await assertEdgelessSelectedRectModel(page, [0, 0, 200, 100]);
 });
 
 test('cmd + A should not fire inside active note', async ({ page }) => {
@@ -198,13 +193,10 @@ test.describe('delete', () => {
     await switchEditorMode(page);
     await selectNoteInEdgeless(page, noteId);
     const box1 = await getEdgelessSelectedRect(page);
-    await selectNoteInEdgeless(page, noteId);
+    await page.mouse.click(box1.x + 10, box1.y + 10);
     await pressBackspace(page);
-    const box2 = await getEdgelessSelectedRect(page);
-    assertDOMRectEqual(box1, box2);
-
+    await assertBlockCount(page, 'note', 1);
     await pressForwardDelete(page);
-    const box3 = await getEdgelessSelectedRect(page);
-    assertDOMRectEqual(box1, box3);
+    await assertBlockCount(page, 'note', 1);
   });
 });
