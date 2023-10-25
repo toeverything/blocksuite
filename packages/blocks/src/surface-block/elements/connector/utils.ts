@@ -172,7 +172,7 @@ export function renderTriangle(
 ) {
   const { mode, end, bezierParameters, rough, strokeColor, strokeWidth } =
     options;
-  const radians = Math.PI / 10;
+  const radians = Math.PI / 6;
   const size = DEFAULT_ARROW_SIZE * (strokeWidth / 2);
   const { points: trianglePoints } = getArrowPoints(
     points,
