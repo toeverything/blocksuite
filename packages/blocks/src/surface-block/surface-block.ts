@@ -194,13 +194,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.getblocks(flavour).sort(this.compare);
   }
 
-  getGroup(value: id | EdgelessElement) {
-    const id = typeof value === 'string' ? value : value.id;
+  getGroupParent(element: id | EdgelessElement) {
+    const id = typeof element === 'string' ? element : element.id;
     return this._groupMap.get(id) ?? GROUP_ROOT_ID;
   }
 
-  setGroup(key: id | EdgelessElement, groupId: string) {
-    const id = typeof key === 'string' ? key : key.id;
+  setGroupParent(element: id | EdgelessElement, groupId: string) {
+    const id = typeof element === 'string' ? element : element.id;
     if (groupId === GROUP_ROOT_ID) {
       this._groupMap.delete(id);
       return;
@@ -713,7 +713,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     } else if (type.action === 'delete') {
       const element = this._elements.get(id);
       assertExists(element);
-      const group = this.pickById(this.getGroup(id));
+      const group = this.pickById(this.getGroupParent(id));
       if (group) {
         this.group.removeChild(<GroupElement>group, id);
       }
@@ -961,7 +961,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
     } else if (picked) {
       let index = results.length - 1;
-      while (this.getGroup(picked.id) !== GROUP_ROOT_ID) {
+      while (this.getGroupParent(picked.id) !== GROUP_ROOT_ID) {
         if (--index < 0) {
           picked = null;
           break;
@@ -980,7 +980,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     ];
     const picked = candidates.filter(
       element =>
-        element.boxSelect(bound) && this.getGroup(element.id) === GROUP_ROOT_ID
+        element.boxSelect(bound) &&
+        this.getGroupParent(element.id) === GROUP_ROOT_ID
     );
     return picked;
   }

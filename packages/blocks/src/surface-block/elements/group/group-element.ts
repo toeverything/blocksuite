@@ -43,7 +43,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const { surface } = this;
     this._cachedId = this.id;
     this.childElements.forEach(ele => {
-      surface.setGroup(ele, this.id);
+      surface.setGroupParent(ele, this.id);
     });
     this._cachedChildren = this._children;
 
@@ -52,12 +52,12 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
         if (action === 'delete') {
           const child = this.surface.pickById(key);
-          if (child && surface.getGroup(child) === this.id)
-            surface.setGroup(child, surface.getGroup(this));
+          if (child && surface.getGroupParent(child) === this.id)
+            surface.setGroupParent(child, surface.getGroupParent(this));
         } else if (action === 'add') {
           const child = this.surface.pickById(key);
           assertExists(child);
-          surface.setGroup(child, this.id);
+          surface.setGroupParent(child, this.id);
         } else {
           console.log('unexpected', key);
         }
@@ -206,8 +206,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const { surface } = this;
     this._cachedChildren.forEach(id => {
       const ele = surface.pickById(id);
-      if (ele && surface.getGroup(ele) === this._cachedId)
-        surface.setGroup(ele, surface.getGroup(this));
+      if (ele && surface.getGroupParent(ele) === this._cachedId)
+        surface.setGroupParent(ele, surface.getGroupParent(this));
     });
     super.unmount();
   }

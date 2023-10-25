@@ -325,7 +325,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       const serializedBlock = (await getBlockClipboardInfo(this.current)).json;
       await noteService.json2Block(note, serializedBlock.children);
     }
-    const group = surface.pickById(surface.getGroup(this.current));
+    const group = surface.pickById(surface.getGroupParent(this.current));
     if (group instanceof GroupElement) {
       surface.group.addChild(group, id);
     }
