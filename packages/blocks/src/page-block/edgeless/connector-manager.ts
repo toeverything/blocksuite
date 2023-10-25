@@ -659,7 +659,7 @@ function getNextPoint(
   return result;
 }
 
-function computeNextStartEndPoint(
+function computeNextStartEndpoint(
   startPoint: PointLocation,
   endPoint: PointLocation,
   startBound: Bound | null,
@@ -928,7 +928,7 @@ export class EdgelessConnectorManager {
       const start = this._getConnectorEndElement(connector, 'source');
       const end = this._getConnectorEndElement(connector, 'target');
 
-      const [startPoint, endPoint] = this._computeStartEndPoint(connector);
+      const [startPoint, endPoint] = this._computeStartEndpoint(connector);
 
       const startBound = start
         ? Bound.from(getBoundsWithRotation(rBound(start)))
@@ -1053,7 +1053,7 @@ export class EdgelessConnectorManager {
     const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 
     const [startOffset, endOffset] = computeOffset(startBound, endBound);
-    const [nextStartPoint, lastEndPoint] = computeNextStartEndPoint(
+    const [nextStartPoint, lastEndPoint] = computeNextStartEndpoint(
       startPoint,
       endPoint,
       startBound,
@@ -1085,7 +1085,7 @@ export class EdgelessConnectorManager {
     ];
   }
 
-  private _computeStartEndPoint(connector: ConnectorElement) {
+  private _computeStartEndpoint(connector: ConnectorElement) {
     const { source, target } = connector;
     const start = this._getConnectorEndElement(connector, 'source');
     const end = this._getConnectorEndElement(connector, 'target');
