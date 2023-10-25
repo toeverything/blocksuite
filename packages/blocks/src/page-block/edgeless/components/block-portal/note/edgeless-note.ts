@@ -120,7 +120,7 @@ export class EdgelessBlockPortalNote extends WithDisposable(LitElement) {
       boxSizing: 'border-box',
       background: isHiddenNote
         ? 'transparent'
-        : `var(${background ?? DEFAULT_NOTE_COLOR})`,
+        : ( background.startsWith("rgba")  ? background : `var(${background ?? DEFAULT_NOTE_COLOR})`),
       boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
       pointerEvents: 'all',
       overflow: 'hidden',
