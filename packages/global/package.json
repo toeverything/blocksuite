@@ -14,23 +14,15 @@
   "exports": {
     ".": "./index.d.ts",
     "./utils": "./src/utils.ts",
-    "./debug": "./src/debug.ts",
-    "./config": "./src/config/index.ts",
-    "./error": "./src/error/index.ts"
+    "./env": "./src/env/index.ts"
   },
   "typesVersions": {
     "*": {
       "utils": [
         "dist/utils.d.ts"
       ],
-      "debug": [
-        "dist/debug.d.ts"
-      ],
-      "config": [
-        "dist/config/index.d.ts"
-      ],
-      "error": [
-        "dist/error/index.d.ts"
+      "env": [
+        "dist/env/index.d.ts"
       ]
     }
   },
@@ -41,9 +33,7 @@
     "exports": {
       ".": "./index.d.ts",
       "./utils": "./dist/utils.js",
-      "./debug": "./dist/debug.js",
-      "./error": "./dist/error/index.js",
-      "./config": "./dist/config/index.js"
+      "./env": "./dist/env/index.js"
     }
   },
   "files": [
@@ -51,7 +41,6 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "ansi-colors": "^4.1.3",
     "zod": "^3.22.2"
   }
 }

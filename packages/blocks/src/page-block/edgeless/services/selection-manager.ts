@@ -207,6 +207,8 @@ export class EdgelessSelectionManager {
   }
 
   clear() {
+    this._selection.clear();
+
     this.setSelection({
       blockId: '',
       elements: [],

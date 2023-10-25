@@ -474,6 +474,7 @@ test('paste a non-nested list to a non-nested list', async ({ page }) => {
   await page.keyboard.press('Control+ArrowLeft');
 
   // paste on start
+  await waitNextFrame(page);
   await pasteContent(page, clipData);
   await assertRichTexts(page, ['a123']);
   // - a|123
@@ -488,9 +489,12 @@ test('paste a non-nested list to a non-nested list', async ({ page }) => {
   await page.keyboard.press('Control+ArrowRight');
 
   // paste on end
+  await waitNextFrame(page);
   await pasteContent(page, clipData);
+  await waitNextFrame(page);
   await assertRichTexts(page, ['aa123a']);
   // aa123a|
+  await waitNextFrame(page);
   expect(await getVirgoSelectionIndex(page)).toBe(6);
 
   await assertBlockTypes(page, ['bulleted']);

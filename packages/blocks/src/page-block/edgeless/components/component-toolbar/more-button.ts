@@ -1,7 +1,6 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 
-import { groupBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, type TemplateResult, unsafeCSS } from 'lit';
@@ -22,6 +21,7 @@ import {
   SendToBackIcon,
 } from '../../../../_common/icons/index.js';
 import { type ReorderingType } from '../../../../_common/utils/index.js';
+import { groupBy } from '../../../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';

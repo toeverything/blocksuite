@@ -104,7 +104,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const virgoStyle = styleMap({
       transformOrigin: 'top left',
-      borderRadius: '35px',
+      borderRadius: '4px',
       width: 'fit-content',
       padding: '4px 10px',
       fontSize: '14px',

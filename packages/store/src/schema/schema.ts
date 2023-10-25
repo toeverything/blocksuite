@@ -1,4 +1,3 @@
-import { MigrationError, SchemaValidateError } from '@blocksuite/global/error';
 import { assertExists } from '@blocksuite/global/utils';
 import { minimatch } from 'minimatch';
 import type * as Y from 'yjs';
@@ -8,6 +7,7 @@ import { pageMigrations, workspaceMigrations } from '../migration/index.js';
 import { ProxyManager } from '../yjs/index.js';
 import type { BlockSchemaType } from './base.js';
 import { BlockSchema } from './base.js';
+import { MigrationError, SchemaValidateError } from './error.js';
 import { toBlockMigrationData } from './utils.js';
 
 export class Schema {

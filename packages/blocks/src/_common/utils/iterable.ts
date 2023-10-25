@@ -164,37 +164,3 @@ export function pickValues<T, K extends Partial<keyof T>>(
 export function lastN<T>(target: Array<T>, n: number) {
   return target.slice(target.length - n, target.length);
 }
-
-/**
- * Returns an object with four arrays: add, remove and unchanged.
- *
- * add: elements in after that are not in before
- * remove: elements in before that are not in after
- * unchanged: elements in both before and after
- */
-export function diffArray<T>(
-  before: T[],
-  after: T[],
-  compare = (a: T, b: T) => a === b
-) {
-  const add: T[] = [];
-  const remove: T[] = [];
-  const unchanged: T[] = [];
-
-  // Find elements in before that are not in after
-  for (const elem of before) {
-    if (!after.some(afterElem => compare(afterElem, elem))) {
-      remove.push(elem);
-    } else {
-      unchanged.push(elem);
-    }
-  }
-  // Find elements in after that are not in before
-  for (const elem of after) {
-    if (!before.some(beforeElem => compare(beforeElem, elem))) {
-      add.push(elem);
-    }
-  }
-
-  return { changed: add.length || remove.length, add, remove, unchanged };
-}
