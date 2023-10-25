@@ -1,14 +1,17 @@
 import { WidgetElement } from '@blocksuite/lit';
 import { offset, shift } from '@floating-ui/dom';
-import { css, html } from 'lit';
+import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
 import {
+  downloadBlob,
+  type EdgelessElement,
   HoverController,
   PAGE_HEADER_HEIGHT,
   type SurfaceRefBlockComponent,
   type SurfaceRefBlockModel,
 } from '../../../index.js';
+import { toast } from '../../components/toast.js';
 import { EdgelessModeIcon } from '../../icons/edgeless.js';
 import {
   CaptionIcon,
@@ -16,6 +19,7 @@ import {
   DeleteIcon,
   DownloadIcon,
 } from '../../icons/text.js';
+import { edgelessToBlob, writeImageBlobToClipboard } from './utils.js';
 
 export const AFFINE_SURFACE_REF_TOOLBAR = 'affine-surface-ref-toolbar';
 
@@ -123,11 +127,50 @@ function SurfaceRefToolbarOptions(options: {
           ${CaptionIcon}
           <affine-tooltip tip-position="top">Caption</affine-tooltip>
         </icon-button>
-        <icon-button size="32px">
+        <icon-button
+          size="32px"
+          @click=${() => {
+            edgelessToBlob(model.page, {
+              surfaceRefBlock: blockElement,
+              surfaceRenderer: blockElement.surfaceRenderer,
+              edgelessElement: blockElement.referenceModel as EdgelessElement,
+              blockContainer: blockElement.blocksPortal,
+            })
+              .then(blob => {
+                downloadBlob(
+                  blob,
+                  blockElement.referenceModel?.title.toString() ??
+                    'Edgeless Content.png'
+                );
+              })
+              .catch(err => {
+                console.error(err);
+              });
+          }}
+        >
           ${DownloadIcon}
           <affine-tooltip tip-position="top">Download</affine-tooltip>
         </icon-button>
-        <icon-button size="32px">
+        <icon-button
+          size="32px"
+          @click=${() => {
+            edgelessToBlob(model.page, {
+              surfaceRefBlock: blockElement,
+              surfaceRenderer: blockElement.surfaceRenderer,
+              edgelessElement: blockElement.referenceModel as EdgelessElement,
+              blockContainer: blockElement.blocksPortal,
+            })
+              .then(blob => {
+                return writeImageBlobToClipboard(blob);
+              })
+              .then(() => {
+                toast('Copied image to clipboard');
+              })
+              .catch(err => {
+                console.error(err);
+              });
+          }}
+        >
           ${CopyIcon}
           <affine-tooltip tip-position="top">Copy to clipboard</affine-tooltip>
         </icon-button>

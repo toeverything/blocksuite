@@ -129,7 +129,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       background: radial-gradient(
         var(--affine-edgeless-grid-color) 1px,
         var(--affine-background-primary-color) 1px
-      ) lightgray;
+      );
     }
 
     .surface-block-portal {
@@ -213,6 +213,14 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   @query('.surface-block-portal')
   blocksPortal!: HTMLDivElement;
+
+  get surfaceRenderer() {
+    return this._surfaceRenderer;
+  }
+
+  get referenceModel() {
+    return this._referencedModel;
+  }
 
   override connectedCallback() {
     super.connectedCallback();
