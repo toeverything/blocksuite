@@ -14,7 +14,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   static offset = 12;
 
   @state()
-  titleHide = false;
+  showTitle = true;
 
   @query('.affine-frame-title')
   private _titleElement?: HTMLElement;
@@ -58,13 +58,13 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   override render() {
-    const { model, titleHide, _surface } = this;
+    const { model, showTitle, _surface } = this;
     const bound = Bound.deserialize(model.xywh);
     const { zoom } = _surface.viewport;
     const text = model.title.toString();
 
     return html`
-      ${!titleHide
+      ${showTitle
         ? html` <div
             style=${styleMap({
               transformOrigin: 'top left',

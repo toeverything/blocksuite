@@ -50,8 +50,10 @@ export class ImageBlockModel
   extends BaseBlockModel<ImageBlockProps>
   implements IEdgelessElement
 {
+  gridBound!: Bound;
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;
+
   get batch() {
     return BLOCK_BATCH;
   }

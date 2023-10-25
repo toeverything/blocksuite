@@ -701,8 +701,12 @@ type Action =
   | 'changeConnectorStrokeColor'
   | 'changeConnectorStrokeStyles'
   | 'addFrame'
+  | 'addGroup'
+  | 'ungroup'
+  | 'releaseFromGroup'
   | 'createFrameOnMoreOption'
-  | 'duplicate';
+  | 'duplicate'
+  | 'renameGroup';
 
 export async function triggerComponentToolbarAction(
   page: Page,
@@ -845,6 +849,34 @@ export async function triggerComponentToolbarAction(
     case 'addFrame': {
       const button = locatorComponentToolbar(page).locator(
         'edgeless-add-frame-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'addGroup': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-add-group-button'
+      );
+      await button.click();
+      break;
+    }
+    case 'ungroup': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-group-button')
+        .locator('.edgeless-component-toolbar-ungroup-button');
+      await button.click();
+      break;
+    }
+    case 'renameGroup': {
+      const button = locatorComponentToolbar(page)
+        .locator('edgeless-change-group-button')
+        .locator('.edgeless-component-toolbar-group-rename-button');
+      await button.click();
+      break;
+    }
+    case 'releaseFromGroup': {
+      const button = locatorComponentToolbar(page).locator(
+        'edgeless-release-from-group-button'
       );
       await button.click();
       break;
@@ -1095,6 +1127,45 @@ export async function getSelectedBound(page: Page, index = 0) {
     },
     [index]
   );
+}
+
+export async function getGroupIds(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface
+      .getElements()
+      .map(g => container.surface.getGroupParent(g));
+  });
+}
+
+export async function getGroupChildrenIds(page: Page, index = 0) {
+  return await page.evaluate(
+    ([index]) => {
+      const container = document.querySelector('affine-edgeless-page');
+      if (!container) throw new Error('container not found');
+      return Array.from(
+        container.surface.getElementsByType('group')[index].children.keys()
+      );
+    },
+    [index]
+  );
+}
+
+export async function getPhasorElementsCount(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElements().length;
+  });
+}
+
+export async function getIds(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElements().map(g => g.id);
+  });
 }
 
 export async function edgelessCommonSetup(page: Page) {

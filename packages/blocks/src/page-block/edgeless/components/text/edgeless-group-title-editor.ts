@@ -5,23 +5,19 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { getBlockElementById } from '../../../../_common/utils/index.js';
-import type {
-  FrameBlockComponent,
-  FrameBlockModel,
-} from '../../../../frame-block/index.js';
+import type { GroupElement } from '../../../../surface-block/index.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 
-@customElement('edgeless-frame-title-editor')
-export class EdgelessFrameTitleEditor extends WithDisposable(
+@customElement('edgeless-group-title-editor')
+export class EdgelessGroupTitleEditor extends WithDisposable(
   ShadowlessElement
 ) {
   @query('rich-text')
   richText!: RichText;
 
   @property({ attribute: false })
-  frameModel!: FrameBlockModel;
+  group!: GroupElement;
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -33,15 +29,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     return this.vEditor.rootElement;
   }
 
-  get frameBlock() {
-    const block = getBlockElementById(
-      this.frameModel.id,
-      this.edgeless
-    ) as FrameBlockComponent | null;
-    assertExists(block);
-    return block;
-  }
-
   override async getUpdateComplete(): Promise<boolean> {
     const result = await super.getUpdateComplete();
     await this.richText?.updateComplete;
@@ -50,11 +37,13 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override firstUpdated(): void {
     const dispatcher = this.edgeless.dispatcher;
+    const { surface } = this.edgeless;
     assertExists(dispatcher);
-    this.frameBlock.showTitle = false;
 
     this.updateComplete.then(() => {
       this.vEditor.selectAll();
+
+      surface.updateElementLocalRecord(this.group.id, { showTitle: false });
 
       this.vEditor.slots.updated.on(() => {
         this.requestUpdate();
@@ -90,9 +79,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.frameBlock.showTitle = true;
+    this.edgeless.surface.updateElementLocalRecord(this.group.id, {
+      showTitle: true,
+    });
     this.edgeless.selectionManager.setSelection({
-      elements: [],
+      elements: [this.group.id],
       editing: false,
     });
     this.remove();
@@ -100,11 +91,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
   override render() {
     const viewport = this.edgeless.surface.viewport;
-    const bound = Bound.deserialize(this.frameModel.xywh);
+    const bound = Bound.deserialize(this.group.xywh);
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const virgoStyle = styleMap({
       transformOrigin: 'top left',
-      borderRadius: '4px',
+      borderRadius: '35px',
       width: 'fit-content',
       padding: '4px 10px',
       fontSize: '14px',
@@ -122,7 +113,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
       boxShadow: `0px 0px 0px 2px rgba(30, 150, 235, 0.3)`,
     });
     return html`<rich-text
-      .yText=${this.frameModel.title.yText}
+      .yText=${this.group.title}
       .enableFormat=${false}
       .enableAutoScrollHorizontally=${false}
       .enableAutoScrollVertically=${false}
@@ -133,6 +124,6 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-frame-title-editor': EdgelessFrameTitleEditor;
+    'edgeless-group-title-editor': EdgelessGroupTitleEditor;
   }
 }
