@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitepress';
 import wasm from 'vite-plugin-wasm';
+import container from 'markdown-it-container';
+import { renderSandbox } from 'vitepress-plugin-sandpack';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -132,4 +134,13 @@ export default defineConfig({
       },
     ],
   ],
+  markdown: {
+    config(md) {
+      md.use(container, 'code-sandbox', {
+        render(tokens, idx) {
+          return renderSandbox(tokens, idx, 'code-sandbox');
+        },
+      });
+    },
+  },
 });

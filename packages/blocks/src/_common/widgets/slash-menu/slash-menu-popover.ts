@@ -1,4 +1,3 @@
-import { isFuzzyMatch } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { html, LitElement, nothing } from 'lit';
@@ -14,6 +13,7 @@ import {
   cleanSpecifiedTail,
   createKeydownObserver,
 } from '../../components/utils.js';
+import { isFuzzyMatch } from '../../utils/string.js';
 import { styles } from './styles.js';
 import {
   collectGroupNames,

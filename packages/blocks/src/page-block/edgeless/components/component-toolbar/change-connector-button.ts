@@ -2,7 +2,6 @@ import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../buttons/menu-button.js';
 
-import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
@@ -30,6 +29,7 @@ import {
   StraightLineIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth } from '../../../../_common/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {

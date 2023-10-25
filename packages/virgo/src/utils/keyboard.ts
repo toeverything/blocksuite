@@ -1,4 +1,4 @@
-import { IS_IOS, IS_MAC } from '@blocksuite/global/config';
+import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
 
 import type { VRange } from '../types.js';
 import type { VEditor } from '../virgo.js';

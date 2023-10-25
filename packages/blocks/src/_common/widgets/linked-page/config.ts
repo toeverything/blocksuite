@@ -1,4 +1,4 @@
-import { assertExists, isFuzzyMatch } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type PageMeta } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
@@ -12,6 +12,7 @@ import { getVirgoByModel } from '../../../_common/utils/query.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { createPage } from '../../utils/init.js';
+import { isFuzzyMatch } from '../../utils/string.js';
 import { showImportModal } from './import-page/index.js';
 
 export type LinkedPageOptions = {

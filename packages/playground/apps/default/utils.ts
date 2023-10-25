@@ -1,10 +1,5 @@
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import { EditorContainer } from '@blocksuite/editor';
-import {
-  configDebugLog,
-  disableDebuglog,
-  enableDebugLog,
-} from '@blocksuite/global/debug';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlobStorage, Page, Y } from '@blocksuite/store';
 import {
@@ -91,18 +86,6 @@ Object.defineProperty(globalThis, 'debugFromFile', {
 
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-
-export function initDebugConfig() {
-  Object.defineProperty(globalThis, 'enableDebugLog', {
-    value: enableDebugLog,
-  });
-  Object.defineProperty(globalThis, 'disableDebugLog', {
-    value: disableDebuglog,
-  });
-  Object.defineProperty(globalThis, 'configDebugLog', {
-    value: configDebugLog,
-  });
-}
 
 async function initWithMarkdownContent(
   workspace: Workspace,

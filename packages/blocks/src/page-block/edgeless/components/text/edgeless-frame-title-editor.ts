@@ -51,34 +51,36 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   override firstUpdated(): void {
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
-    this.frameBlock.titleHide = true;
-
-    this.disposables.add(
-      dispatcher.add('doubleClick', () => {
-        return true;
-      })
-    );
-    this.disposables.add(
-      dispatcher.add('keyDown', ctx => {
-        const state = ctx.get('keyboardState');
-        if (state.raw.key === 'Enter' && !state.raw.isComposing) {
-          this._unmount();
-          return true;
-        }
-        requestAnimationFrame(() => {
-          this.requestUpdate();
-        });
-        return false;
-      })
-    );
-    this.disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
+    this.frameBlock.showTitle = false;
 
     this.updateComplete.then(() => {
       this.vEditor.selectAll();
+
+      this.vEditor.slots.updated.on(() => {
+        this.requestUpdate();
+      });
+
+      this.disposables.add(
+        dispatcher.add('keyDown', ctx => {
+          const state = ctx.get('keyboardState');
+          if (state.raw.key === 'Enter' && !state.raw.isComposing) {
+            this._unmount();
+            return true;
+          }
+          requestAnimationFrame(() => {
+            this.requestUpdate();
+          });
+          return false;
+        })
+      );
+      this.disposables.add(
+        this.edgeless.slots.viewportUpdated.on(() => {
+          this.requestUpdate();
+        })
+      );
+
+      this.disposables.add(dispatcher.add('click', () => true));
+      this.disposables.add(dispatcher.add('doubleClick', () => true));
       this.disposables.addFromEvent(this.vEditorContainer, 'blur', () => {
         this._unmount();
       });
@@ -88,7 +90,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.frameBlock.titleHide = false;
+    this.frameBlock.showTitle = true;
     this.edgeless.selectionManager.setSelection({
       elements: [],
       editing: false,
@@ -102,24 +104,28 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
     const virgoStyle = styleMap({
       transformOrigin: 'top left',
-      borderRadius: '35px',
+      borderRadius: '4px',
       width: 'fit-content',
       padding: '4px 10px',
       fontSize: '14px',
       position: 'absolute',
-
       left: x + 'px',
-      top: y - 38 + 'px',
+      top: y - 36 + 'px',
       minWidth: '8px',
-      fontFamily: 'sans-serif',
-      color: 'white',
-      background: this.frameBlock.color,
+      fontFamily: 'var(--affine-font-family)',
+      background: 'var(--affine-text-primary-color)',
+      color: 'var(--affine-white)',
       outline: 'none',
       zIndex: '1',
+      border: `1px solid
+        var(--affine-primary-color)`,
+      boxShadow: `0px 0px 0px 2px rgba(30, 150, 235, 0.3)`,
     });
     return html`<rich-text
       .yText=${this.frameModel.title.yText}
       .enableFormat=${false}
+      .enableAutoScrollHorizontally=${false}
+      .enableAutoScrollVertically=${false}
       style=${virgoStyle}
     ></rich-text>`;
   }

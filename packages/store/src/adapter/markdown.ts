@@ -1,5 +1,7 @@
 import type { DeltaInsert } from '@blocksuite/virgo/types';
 import type { Heading, Root, RootContentMap } from 'mdast';
+import remarkGfm from 'remark-gfm';
+import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
@@ -9,6 +11,7 @@ import {
   type PageSnapshot,
   type SliceSnapshot,
 } from '../transformer/type.js';
+import { nanoid } from '../utils/id-generator.js';
 import type { AdapterAssetsManager } from './assets.js';
 import type {
   FromSliceSnapshotPayload,
@@ -35,22 +38,6 @@ type MarkdownAST =
   | MdastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
   | Root;
 
-const markdownConvertibleFlavours = [
-  'affine:code',
-  'affine:paragraph',
-  'affine:list',
-  'affine:divider',
-  'affine:image',
-  'affine:database',
-];
-
-type TraverseContext = {
-  indentDepth: number;
-  insideTheLists: boolean;
-  numberedListCount: number[];
-  assets?: AdapterAssetsManager;
-};
-
 export class MarkdownAdapter extends BaseAdapter<Markdown> {
   private markdownBuffer = new StringBuilder();
 
@@ -73,12 +60,12 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     snapshot,
     assets,
   }: FromBlockSnapshotPayload): Promise<Markdown> {
-    await this.traverseSnapshot(snapshot, {
-      indentDepth: 0,
-      insideTheLists: false,
-      numberedListCount: [0],
-      assets,
-    });
+    const root: Root = {
+      type: 'root',
+      children: [],
+    };
+    const ast = await this.traverseSnapshot(snapshot, root, assets);
+    this.markdownBuffer.write(this.astToMardown(ast));
     const markdown = this.markdownBuffer.toString();
     this.markdownBuffer.clear();
     return markdown;
@@ -89,12 +76,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     assets,
   }: FromSliceSnapshotPayload): Promise<Markdown> {
     for (const contentSlice of snapshot.content) {
-      await this.traverseSnapshot(contentSlice, {
-        indentDepth: 0,
-        insideTheLists: false,
-        numberedListCount: [0],
-        assets,
-      });
+      const root: Root = {
+        type: 'root',
+        children: [],
+      };
+      const ast = await this.traverseSnapshot(contentSlice, root, assets);
+      this.markdownBuffer.write(this.astToMardown(ast));
+      this.markdownBuffer.write('\n\n');
     }
     const markdown = this.markdownBuffer.toString();
     this.markdownBuffer.clear();
@@ -104,13 +92,44 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toPageSnapshot(
     _payload: ToPageSnapshotPayload<Markdown>
   ): Promise<PageSnapshot> {
-    throw new Error('Method not implemented.');
+    const markdownAst = this.markdownToAst(_payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return {
+      type: 'page',
+      meta: {
+        id: nanoid('page'),
+        title: 'Untitled',
+        createDate: +new Date(),
+        tags: [],
+      },
+      blocks: await this.tranverseMarkdown(
+        markdownAst,
+        blockSnapshotRoot as BlockSnapshot
+      ),
+    };
   }
 
   async toBlockSnapshot(
     _payload: ToBlockSnapshotPayload<Markdown>
   ): Promise<BlockSnapshot> {
-    throw new Error('Method not implemented.');
+    const markdownAst = this.markdownToAst(_payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return this.tranverseMarkdown(
+      markdownAst,
+      blockSnapshotRoot as BlockSnapshot
+    );
   }
 
   async toSliceSnapshot(
@@ -121,112 +140,15 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
 
   private traverseSnapshot = async (
     snapshot: BlockSnapshot,
-    context: TraverseContext
+    markdown: MarkdownAST,
+    assets?: AdapterAssetsManager
   ) => {
-    if (!markdownConvertibleFlavours.includes(snapshot.flavour)) {
-      for (const child of snapshot.children) {
-        await this.traverseSnapshot(child, context);
-      }
-      return;
-    }
-    const text = (snapshot.props.text ?? { delta: [] }) as {
-      delta: DeltaInsert[];
-    };
-    if (context.insideTheLists && snapshot.flavour !== 'affine:list') {
-      this.markdownBuffer.write('\n');
-      context.insideTheLists = false;
-      context.numberedListCount = [0];
-    }
-    switch (snapshot.flavour) {
-      case 'affine:code': {
-        this.markdownBuffer.write(`\`\`\`${snapshot.props.language ?? ''}\n`);
-        this.writeTextDelta(text);
-        this.markdownBuffer.write('\n```\n');
-        break;
-      }
-      case 'affine:paragraph': {
-        switch (snapshot.props.type) {
-          case 'h1':
-          case 'h2':
-          case 'h3':
-          case 'h4':
-          case 'h5':
-          case 'h6': {
-            const level = parseInt(snapshot.props.type[1]);
-            this.markdownBuffer.write('#'.repeat(level) + ' ');
-            break;
-          }
-          case 'text': {
-            break;
-          }
-          case 'quote': {
-            this.markdownBuffer.write('> ');
-            break;
-          }
-        }
-        this.writeTextDelta(text);
-        this.markdownBuffer.write('\n\n');
-        for (const child of snapshot.children) {
-          context.indentDepth += 1;
-          this.markdownBuffer.write('    '.repeat(context.indentDepth));
-          await this.traverseSnapshot(child, context);
-          context.indentDepth -= 1;
-        }
-        break;
-      }
-      case 'affine:list': {
-        if (snapshot.props.type === 'numbered') {
-          const order = (context.numberedListCount.pop() ?? 0) + 1;
-          this.markdownBuffer.write(`${order}. `);
-          context.numberedListCount.push(order);
-        } else if (snapshot.props.type === 'checkbox') {
-          this.markdownBuffer.write(
-            snapshot.props.checked ? '- [x] ' : '- [ ] '
-          );
-        } else {
-          this.markdownBuffer.write('- ');
-        }
-        this.writeTextDelta(text);
-        this.markdownBuffer.write('\n');
-        context.insideTheLists = true;
-        context.numberedListCount.push(0);
-        for (const child of snapshot.children) {
-          context.indentDepth += 1;
-          this.markdownBuffer.write('    '.repeat(context.indentDepth));
-          await this.traverseSnapshot(child, context);
-          context.indentDepth -= 1;
-        }
-        context.numberedListCount.pop();
-        break;
-      }
-      case 'affine:divider': {
-        this.markdownBuffer.write('---\n');
-        break;
-      }
-      case 'affine:image': {
-        const blobId = (snapshot.props.sourceId ?? '') as string;
-        await context.assets?.readFromBlob(blobId);
-        const blob = context.assets?.getAssets().get(blobId);
-        if (!blob) {
-          break;
-        }
-        const dataURL = await blobToDataURL(blob);
-        this.markdownBuffer.write(`![](${dataURL})\n`);
-        break;
-      }
-      case 'affine:database': {
-        break;
-      }
-    }
-  };
-
-  traverseSnapshot2 = async (snapshot: BlockSnapshot, markdownRoot: Root) => {
     const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
     walker.setONodeTypeGuard(
       (node): node is BlockSnapshot =>
         BlockSnapshotSchema.safeParse(node).success
     );
-    walker.setEnter((o, context) => {
+    walker.setEnter(async (o, context) => {
       const text = (o.node.props.text ?? { delta: [] }) as {
         delta: DeltaInsert[];
       };
@@ -386,19 +308,31 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'affine:image': {
-          break;
-        }
-        case 'affine:database': {
+          const blobId = (snapshot.props.sourceId ?? '') as string;
+          await assets?.readFromBlob(blobId);
+          const blob = assets?.getAssets().get(blobId);
+          if (!blob) {
+            break;
+          }
+          const dataURL = await blobToDataURL(blob);
+          context
+            .openNode(
+              {
+                type: 'image',
+                url: dataURL as string,
+                title: null,
+                alt: (blob as File).name,
+              },
+              'children'
+            )
+            .closeNode();
           break;
         }
       }
     });
-    walker.setLeave((o, context) => {
+    walker.setLeave(async (o, context) => {
       const currentTNode = context.currentNode();
       switch (o.node.flavour) {
-        case 'affine:code': {
-          break;
-        }
         case 'affine:paragraph': {
           context.setGlobalContext(
             'affine:paragraph:depth',
@@ -422,69 +356,279 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           }
           break;
         }
-        case 'affine:divider': {
+      }
+    });
+    return (await walker.walk(snapshot, markdown)) as Root;
+  };
+
+  private tranverseMarkdown = (
+    markdown: MarkdownAST,
+    snapshot: BlockSnapshot
+  ) => {
+    const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
+    walker.setONodeTypeGuard(
+      (node): node is MarkdownAST =>
+        'type' in (node as object) && (node as MarkdownAST).type !== undefined
+    );
+    walker.setEnter(async (o, context) => {
+      switch (o.node.type) {
+        case 'code': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:code',
+                props: {
+                  language: o.node.lang,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: o.node.value,
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
           break;
         }
-        case 'affine:image': {
+        case 'paragraph': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'text',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this.mdastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
           break;
         }
-        case 'affine:database': {
+        case 'heading': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: `h${o.node.depth}`,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: this.mdastToDelta(o.node),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'blockquote': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:paragraph',
+                props: {
+                  type: 'quote',
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: o.node.children.map(child =>
+                      this.mdastToDelta(child)
+                    ),
+                  },
+                },
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          context.skipAllChildren();
+          break;
+        }
+        case 'list': {
+          context.setNodeContext('mdast:list:ordered', o.node.ordered);
+          break;
+        }
+        case 'listItem': {
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid('block'),
+              flavour: 'affine:list',
+              props: {
+                type: context.getNodeContext('mdast:list:ordered')
+                  ? 'numbered'
+                  : 'bulleted',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta:
+                    o.node.children[0] &&
+                    o.node.children[0].type === 'paragraph'
+                      ? this.mdastToDelta(o.node.children[0])
+                      : [],
+                },
+                checked: o.node.checked ?? false,
+                collapsed: false,
+              },
+              children: [],
+            },
+            'children'
+          );
+          if (o.node.children[0] && o.node.children[0].type === 'paragraph') {
+            context.skipChildren(1);
+          }
+          break;
+        }
+        case 'thematicBreak': {
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:divider',
+                props: {},
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'table': {
+          const viewsColumns = o.node.children[0].children.map(() => {
+            return {
+              id: nanoid('block'),
+              hide: false,
+              width: 180,
+            };
+          });
+          const cells = Object.create(null);
+          o.node.children.slice(1).forEach(row => {
+            const rowId = nanoid('block');
+            cells[rowId] = Object.create(null);
+            row.children.slice(1).forEach((cell, index) => {
+              cells[rowId][viewsColumns[index + 1].id] = {
+                columnId: viewsColumns[index + 1].id,
+                value: cell.children
+                  .map(child => ('value' in child ? child.value : ''))
+                  .join(''),
+              };
+            });
+          });
+          const columns = o.node.children[0].children.map((_child, index) => {
+            return {
+              type: index === 0 ? 'title' : 'rich-text',
+              name: _child.children
+                .map(child => ('value' in child ? child.value : ''))
+                .join(''),
+              data: {},
+              id: viewsColumns[index].id,
+            };
+          });
+          context.openNode(
+            {
+              type: 'block',
+              id: nanoid('block'),
+              flavour: 'affine:database',
+              props: {
+                views: [
+                  {
+                    id: nanoid('block'),
+                    name: 'Table View',
+                    mode: 'table',
+                    columns: viewsColumns,
+                    filter: {
+                      type: 'group',
+                      op: 'and',
+                      conditions: [],
+                    },
+                    header: {
+                      titleColumn: viewsColumns[0]?.id,
+                      iconColumn: 'type',
+                    },
+                  },
+                ],
+                title: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+                cells,
+                columns,
+              },
+              children: [],
+            },
+            'children'
+          );
+          context.setNodeContext('affine:table:rowid', Object.keys(cells));
+          context.skipChildren(1);
+          break;
+        }
+        case 'tableRow': {
+          context
+            .openNode({
+              type: 'block',
+              id:
+                (
+                  context.getNodeContext('affine:table:rowid') as Array<string>
+                ).shift() ?? nanoid('block'),
+              flavour: 'affine:paragraph',
+              props: {
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: this.mdastToDelta(o.node.children[0]),
+                },
+                type: 'text',
+              },
+              children: [],
+            })
+            .closeNode();
+          context.skipAllChildren();
           break;
         }
       }
     });
-    return walker.walk(snapshot, markdownRoot) as Root;
+    walker.setLeave(async (o, context) => {
+      switch (o.node.type) {
+        case 'listItem': {
+          context.closeNode();
+          break;
+        }
+        case 'table': {
+          context.closeNode();
+          break;
+        }
+      }
+    });
+    return walker.walk(markdown, snapshot);
   };
 
-  astToMardown(ast: Root) {
-    return unified().use(remarkStringify).stringify(ast);
+  private astToMardown(ast: Root) {
+    return unified().use(remarkGfm).use(remarkStringify).stringify(ast);
   }
 
-  private writeTextDelta(text: { delta: DeltaInsert[] }) {
-    if (
-      Array.isArray(text?.delta) &&
-      text?.delta.every(delta => typeof delta === 'object')
-    ) {
-      this.markdownBuffer.write(this.deltaToMarkdown(text?.delta));
-    }
+  private markdownToAst(markdown: Markdown) {
+    return unified().use(remarkParse).use(remarkGfm).parse(markdown);
   }
 
-  escapeMarkdown(text: string) {
-    // https://spec.commonmark.org/0.30/#backslash-escapes
-    // Remove comma for better compatibility.
-    return text.replace(/([!"#$%&'()*+\-./:;<=>?@[\\\]^_`{|}~])/g, '\\$1');
-  }
-
-  deltaToMarkdown(deltas: DeltaInsert[]) {
-    const buffer = new StringBuilder();
-    for (const delta of deltas) {
-      let markdownText = delta.attributes?.code
-        ? delta.insert
-        : this.escapeMarkdown(delta.insert);
-      if (delta.attributes?.code) {
-        markdownText = `\`${markdownText}\``;
-      }
-      if (delta.attributes?.bold) {
-        markdownText = `**${markdownText}**`;
-      }
-      if (delta.attributes?.italic) {
-        markdownText = `*${markdownText}*`;
-      }
-      if (delta.attributes?.underline) {
-        markdownText = `<u>${markdownText}</u>`;
-      }
-      if (delta.attributes?.strike) {
-        markdownText = `~~${markdownText}~~`;
-      }
-      if (delta.attributes?.link) {
-        markdownText = `[${markdownText}](${delta.attributes.link})`;
-      }
-      buffer.write(markdownText);
-    }
-    return buffer.toString();
-  }
-
-  deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
+  private deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
     if (depth > 0) {
       deltas.unshift({ insert: ' '.repeat(4).repeat(depth) });
     }
@@ -528,6 +672,55 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       return mdast;
     });
+  }
+
+  private mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
+    switch (ast.type) {
+      case 'text': {
+        return [{ insert: ast.value }];
+      }
+      case 'inlineCode': {
+        return [{ insert: ast.value, attributes: { code: true } }];
+      }
+      case 'strong': {
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, bold: true };
+            return delta;
+          })
+        );
+      }
+      case 'emphasis': {
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, italic: true };
+            return delta;
+          })
+        );
+      }
+      case 'delete': {
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, strike: true };
+            return delta;
+          })
+        );
+      }
+      case 'link': {
+        return ast.children.flatMap(child =>
+          this.mdastToDelta(child).map(delta => {
+            delta.attributes = { ...delta.attributes, link: ast.url };
+            return delta;
+          })
+        );
+      }
+      case 'list': {
+        return [];
+      }
+    }
+    return 'children' in ast
+      ? ast.children.flatMap(child => this.mdastToDelta(child))
+      : [];
   }
 }
 
