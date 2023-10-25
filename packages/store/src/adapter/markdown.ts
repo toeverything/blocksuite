@@ -321,7 +321,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 type: 'image',
                 url: dataURL as string,
                 title: null,
-                alt: blob.name,
+                alt: (blob as File).name,
               },
               'children'
             )
