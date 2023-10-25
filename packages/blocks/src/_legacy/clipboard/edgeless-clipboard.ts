@@ -1,6 +1,7 @@
-import { assertExists, groupBy } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { type Page, Workspace } from '@blocksuite/store';
 
+import { groupBy } from '../../_common/utils/iterable.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type {

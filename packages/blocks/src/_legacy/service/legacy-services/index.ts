@@ -1,5 +1,3 @@
-import type { UnionToIntersection } from '@blocksuite/global/utils';
-
 import type { Flavour } from '../../../models.js';
 import { BaseService } from '../service.js';
 import { registerService } from '../singleton.js';
@@ -15,6 +13,12 @@ import { ListBlockService } from './list-service.js';
 import { NoteBlockService } from './note-service.js';
 import { PageBlockService } from './page-service.js';
 import ParagraphBlockService from './paragraph-service.js';
+
+type UnionToIntersection<T> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (T extends any ? (x: T) => any : never) extends (x: infer R) => any
+    ? R
+    : never;
 
 export const blockService = {
   'affine:page': PageBlockService,

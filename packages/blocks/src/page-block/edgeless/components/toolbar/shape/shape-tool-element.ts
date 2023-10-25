@@ -232,9 +232,12 @@ export class EdgelessShapeToolElement extends WithDisposable(LitElement) {
   private _addShape = (coord: Coord, padding: Coord) => {
     const width = 100;
     const height = 100;
+    const { x: edgelessX, y: edgelessY } =
+      this.edgeless.getBoundingClientRect();
+    const zoom = this.edgeless.surface.viewport.zoom;
     const [modelX, modelY] = this.edgeless.surface.viewport.toModelCoord(
-      coord.x - width * padding.x,
-      coord.y - height * padding.y
+      coord.x - edgelessX - width * padding.x * zoom,
+      coord.y - edgelessY - height * padding.y * zoom
     );
     const xywh = new Bound(modelX, modelY, width, height).serialize();
     this.edgeless.surface.addElement(PhasorElementType.SHAPE, {
