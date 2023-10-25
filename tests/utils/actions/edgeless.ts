@@ -1135,7 +1135,7 @@ export async function getGroupIds(page: Page) {
     if (!container) throw new Error('container not found');
     return container.surface
       .getElements()
-      .map(g => container.surface.getGroup(g));
+      .map(g => container.surface.getGroupParent(g));
   });
 }
 
