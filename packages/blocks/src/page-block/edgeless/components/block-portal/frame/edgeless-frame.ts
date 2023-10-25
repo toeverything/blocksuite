@@ -1,5 +1,5 @@
-import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -12,7 +12,7 @@ import type { SurfaceBlockComponent } from '../../../../../surface-block/surface
 const { FRAME } = EdgelessBlockType;
 
 @customElement('edgeless-block-portal-frame')
-class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
+class EdgelessBlockPortalFrame extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   frame!: FrameBlockModel;
 
@@ -21,10 +21,6 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  protected override createRenderRoot() {
-    return this;
-  }
 
   override firstUpdated() {
     this._disposables.add(
@@ -53,7 +49,7 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
 }
 
 @customElement('edgeless-frames-container')
-export class EdgelessFramesContainer extends WithDisposable(LitElement) {
+export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
@@ -61,10 +57,6 @@ export class EdgelessFramesContainer extends WithDisposable(LitElement) {
     super.connectedCallback();
     this.style.position = 'absolute';
     this.style.zIndex = '0';
-  }
-
-  protected override createRenderRoot() {
-    return this;
   }
 
   protected override firstUpdated() {

@@ -1,7 +1,7 @@
 import '../../note-slicer/index.js';
 
-import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement, nothing } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { html, nothing } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -17,16 +17,12 @@ import { deserializeXYWH } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-note-mask')
-export class EdgelessNoteMask extends WithDisposable(LitElement) {
+export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   model!: NoteBlockModel;
-
-  protected override createRenderRoot() {
-    return this;
-  }
 
   get edgeless() {
     return this.surface.edgeless;
@@ -64,7 +60,7 @@ export class EdgelessNoteMask extends WithDisposable(LitElement) {
 }
 
 @customElement('edgeless-block-portal-note')
-export class EdgelessBlockPortalNote extends WithDisposable(LitElement) {
+export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   index!: number;
 
@@ -73,10 +69,6 @@ export class EdgelessBlockPortalNote extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  protected override createRenderRoot() {
-    return this;
-  }
 
   override connectedCallback(): void {
     super.connectedCallback();
