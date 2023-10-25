@@ -16,8 +16,13 @@ import {
 import type { IGroup, IGroupLocalRecord } from './types.js';
 
 export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
-  private _copiedChildren: string[] = [];
-  private _copiedId: string = '';
+  // The children and id are cached since when removing the group,
+  // the ymap will be removed first, which will make the following operation
+  // unable to find the children and id.
+  private _cachedChildren: string[] = [];
+  // The cached id would not be changed after init.
+  private _cachedId: string = '';
+
   private _titleHeight = getLineHeight("'Kalam', cursive", 16);
   private _titleWidth = 0;
   private _padding = [0, 0];
@@ -34,14 +39,16 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
   override init(): void {
     super.init();
+
     const { surface } = this;
-    this._copiedId = this.id;
+    this._cachedId = this.id;
     this.childElements.forEach(ele => {
       surface.setGroup(ele, this.id);
     });
-    this._copiedChildren = this.arrayChildren;
-    const children = this.yMap.get('children') as IGroup['children'];
-    children.observe(event => {
+    this._cachedChildren = this._children;
+
+    const yChildren = this.yMap.get('children') as IGroup['children'];
+    yChildren.observe(event => {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
         if (action === 'delete') {
           const child = this.surface.pickById(key);
@@ -55,14 +62,15 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
           console.log('unexpected', key);
         }
       }
-      this._copiedChildren = this.arrayChildren;
+      this._cachedChildren = this._children;
     });
   }
 
   override get xywh() {
     const { surface } = this;
-    const children = this.arrayChildren;
+    const children = this._children;
     if (children.length === 0) return '[0,0,0,0]';
+
     const bound: Bound = children.reduce((prev, cur) => {
       const ele = surface.pickById(cur);
       assertExists(ele);
@@ -79,12 +87,12 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     return <IGroup['children']>this.yMap.get('children');
   }
 
-  get arrayChildren() {
+  private get _children() {
     return Array.from((<IGroup['children']>this.yMap.get('children')).keys());
   }
 
   get childElements() {
-    return this.arrayChildren.map(id => this.surface.pickById(id)!);
+    return this._children.map(id => this.surface.pickById(id)!);
   }
 
   get titleHeight() {
@@ -196,9 +204,9 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
   override unmount(): void {
     const { surface } = this;
-    this._copiedChildren.forEach(id => {
+    this._cachedChildren.forEach(id => {
       const ele = surface.pickById(id);
-      if (ele && surface.getGroup(ele) === this._copiedId)
+      if (ele && surface.getGroup(ele) === this._cachedId)
         surface.setGroup(ele, surface.getGroup(this));
     });
     super.unmount();

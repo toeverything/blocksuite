@@ -55,10 +55,10 @@ export class EdgelessGroupManager {
 
     const map = new Workspace.Y.Map<boolean>();
     let isValid = true;
-    selectionManager.elements.forEach(ele => {
-      map.set(ele.id, true);
+    selectionManager.elements.forEach(element => {
+      map.set(element.id, true);
       if (
-        surface.getGroup(ele) !==
+        surface.getGroup(element) !==
         surface.getGroup(selectionManager.firstElement)
       ) {
         isValid = false;
@@ -69,8 +69,8 @@ export class EdgelessGroupManager {
     const parentGroup = surface.getGroup(selectionManager.firstElement);
     const parent = surface.pickById(parentGroup) as GroupElement;
     if (parent) {
-      selectionManager.elements.forEach(ele => {
-        this.removeChild(parent, ele.id);
+      selectionManager.elements.forEach(element => {
+        this.removeChild(parent, element.id);
       });
     }
     const groups = surface.getElementsByType(PhasorElementType.GROUP);
@@ -89,14 +89,16 @@ export class EdgelessGroupManager {
     });
   }
 
-  isGroupAncestor(ele: EdgelessElement, group: GroupElement) {
+  isDescendant(element: EdgelessElement, parent: GroupElement) {
     const { surface } = this;
-    if (surface.getGroup(ele) === group.id) return true;
-    while (surface.getGroup(ele) !== GROUP_ROOT_ID) {
-      ele = this.surface.pickById(surface.getGroup(ele))!;
-      assertExists(ele);
-      if (surface.getGroup(ele) === group.id) return true;
+    if (surface.getGroup(element) === parent.id) return true;
+
+    while (surface.getGroup(element) !== GROUP_ROOT_ID) {
+      element = this.surface.pickById(surface.getGroup(element))!;
+      assertExists(element);
+      if (surface.getGroup(element) === parent.id) return true;
     }
+
     return false;
   }
 

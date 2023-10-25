@@ -955,7 +955,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       while (
         picked === selectionManager.activeGroup ||
         (picked instanceof GroupElement &&
-          this.group.isGroupAncestor(selectionManager.activeGroup, picked))
+          this.group.isDescendant(selectionManager.activeGroup, picked))
       ) {
         picked = results[--index];
       }
