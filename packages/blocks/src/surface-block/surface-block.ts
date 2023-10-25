@@ -715,7 +715,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       assertExists(element);
       const group = this.pickById(this.getGroup(id));
       if (group) {
-        (<GroupElement>group).removeChild(id);
+        this.group.removeChild(<GroupElement>group, id);
       }
       element.unmount();
       this._elements.delete(id);

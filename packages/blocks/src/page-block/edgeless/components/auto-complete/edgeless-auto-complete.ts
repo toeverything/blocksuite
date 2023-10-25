@@ -327,7 +327,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
     const group = surface.pickById(surface.getGroup(this.current));
     if (group instanceof GroupElement) {
-      group.addChild(id);
+      surface.group.addChild(group, id);
     }
     return id;
   }

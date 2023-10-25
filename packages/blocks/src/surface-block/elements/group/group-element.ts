@@ -16,8 +16,8 @@ import {
 import type { IGroup, IGroupLocalRecord } from './types.js';
 
 export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
-  private _cachedChildren: string[] = [];
-  private _cachedId: string = '';
+  private _copiedChildren: string[] = [];
+  private _copiedId: string = '';
   private _titleHeight = getLineHeight("'Kalam', cursive", 16);
   private _titleWidth = 0;
   private _padding = [0, 0];
@@ -35,11 +35,11 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   override init(): void {
     super.init();
     const { surface } = this;
-    this._cachedId = this.id;
+    this._copiedId = this.id;
     this.childElements.forEach(ele => {
       surface.setGroup(ele, this.id);
     });
-    this._cachedChildren = this.children;
+    this._copiedChildren = this.arrayChildren;
     const children = this.yMap.get('children') as IGroup['children'];
     children.observe(event => {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
@@ -55,12 +55,13 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
           console.log('unexpected', key);
         }
       }
+      this._copiedChildren = this.arrayChildren;
     });
   }
 
   override get xywh() {
     const { surface } = this;
-    const children = this.children;
+    const children = this.arrayChildren;
     if (children.length === 0) return '[0,0,0,0]';
     const bound: Bound = children.reduce((prev, cur) => {
       const ele = surface.pickById(cur);
@@ -75,11 +76,15 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   }
 
   get children() {
+    return <IGroup['children']>this.yMap.get('children');
+  }
+
+  get arrayChildren() {
     return Array.from((<IGroup['children']>this.yMap.get('children')).keys());
   }
 
   get childElements() {
-    return this.children.map(id => this.surface.pickById(id)!);
+    return this.arrayChildren.map(id => this.surface.pickById(id)!);
   }
 
   get titleHeight() {
@@ -103,22 +108,6 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     bound.y -= this._titleHeight;
     bound.h += this._titleHeight;
     return bound;
-  }
-
-  addChild(id: string) {
-    const children = this.yMap.get('children') as IGroup['children'];
-    this.surface.transact(() => {
-      children.set(id, true);
-    });
-    this._cachedChildren = this.children;
-  }
-
-  removeChild(id: string) {
-    const children = this.yMap.get('children') as IGroup['children'];
-    this.surface.transact(() => {
-      children.delete(id);
-    });
-    this._cachedChildren = this.children;
   }
 
   override render(
@@ -207,9 +196,9 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
   override unmount(): void {
     const { surface } = this;
-    this._cachedChildren.forEach(id => {
+    this._copiedChildren.forEach(id => {
       const ele = surface.pickById(id);
-      if (ele && surface.getGroup(ele) === this._cachedId)
+      if (ele && surface.getGroup(ele) === this._copiedId)
         surface.setGroup(ele, surface.getGroup(this));
     });
     super.unmount();

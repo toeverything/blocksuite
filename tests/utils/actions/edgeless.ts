@@ -1144,7 +1144,9 @@ export async function getGroupChildrenIds(page: Page, index = 0) {
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');
       if (!container) throw new Error('container not found');
-      return container.surface.getElementsByType('group')[index].children;
+      return Array.from(
+        container.surface.getElementsByType('group')[index].children.keys()
+      );
     },
     [index]
   );

@@ -35,6 +35,18 @@ export function getElementsWithoutGroup(elements: EdgelessElement[]) {
 export class EdgelessGroupManager {
   constructor(private surface: SurfaceBlockComponent) {}
 
+  addChild(group: GroupElement, id: string) {
+    this.surface.transact(() => {
+      group.children.set(id, true);
+    });
+  }
+
+  removeChild(group: GroupElement, id: string) {
+    this.surface.transact(() => {
+      group.children.delete(id);
+    });
+  }
+
   createGroupOnSelected() {
     const { surface } = this;
     const { edgeless } = surface;
@@ -58,7 +70,7 @@ export class EdgelessGroupManager {
     const parent = surface.pickById(parentGroup) as GroupElement;
     if (parent) {
       selectionManager.elements.forEach(ele => {
-        parent.removeChild(ele.id);
+        this.removeChild(parent, ele.id);
       });
     }
     const groups = surface.getElementsByType(PhasorElementType.GROUP);
@@ -68,7 +80,7 @@ export class EdgelessGroupManager {
     });
 
     if (parent) {
-      parent.addChild(groupId);
+      this.addChild(parent, groupId);
     }
 
     selectionManager.setSelection({
@@ -95,13 +107,13 @@ export class EdgelessGroupManager {
       this.surface.getGroup(element)
     ) as GroupElement;
 
-    group.removeChild(element.id);
+    this.removeChild(group, element.id);
 
     const parent = this.surface.pickById(
       this.surface.getGroup(group)
     ) as GroupElement;
     if (parent) {
-      parent.addChild(element.id);
+      this.addChild(parent, element.id);
     }
   }
 
@@ -112,12 +124,12 @@ export class EdgelessGroupManager {
     const elements = group.childElements;
     const parent = surface.pickById(surface.getGroup(group)) as GroupElement;
     if (parent) {
-      parent.removeChild(group.id);
+      this.removeChild(parent, group.id);
     }
     surface.removeElement(group.id);
     if (parent) {
       elements.forEach(ele => {
-        parent.addChild(ele.id);
+        this.addChild(parent, ele.id);
       });
     }
     selectionManager.setSelection({
