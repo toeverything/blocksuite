@@ -52,7 +52,6 @@ const NO_CONTENT_REASON = {
 export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel> {
   static override styles = css`
     .affine-surface-ref {
-      padding: 10px;
       position: relative;
     }
 
@@ -120,16 +119,26 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       background-color: var(--affine-background-error-color);
     }
 
-    .surface-viewport {
-      max-width: 100%;
-      margin: 0 auto;
+    .surface-container {
       position: relative;
-      overflow: hidden;
+      padding: 20px;
       background-color: var(--affine-background-primary-color);
       background: radial-gradient(
         var(--affine-edgeless-grid-color) 1px,
         var(--affine-background-primary-color) 1px
       );
+    }
+
+    .surface-viewport {
+      max-width: 100%;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .surface-viewport.frame {
+      border-radius: 8px;
+      border: 2px solid var(--affine-black-30);
     }
 
     .surface-blocks-portal {
@@ -158,7 +167,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     }
 
     .surface-ref-mask:hover .ref-label {
-      display: flex;
+      display: block;
     }
 
     .ref-label {
@@ -167,35 +176,44 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     .ref-label {
       position: absolute;
-      left: 16px;
-      bottom: 16px;
+      left: 0;
+      bottom: 0;
 
+      width: 100%;
+      padding: 8px 16px;
+      border: 1px solid #f1f1f1;
       gap: 14px;
+
+      background: #fff;
 
       font-size: 12px;
     }
 
     .ref-label .title {
+      display: inline-block;
       font-weight: 600;
       font-family: var(--affine-font-family);
       line-height: 20px;
 
-      display: flex;
       gap: 4px;
 
-      color: var(--affine-text-secondary-color)
+      color: var(--affine-text-secondary-color);
     }
 
     .ref-label .title > svg {
-      color: var(--affine-icon-secondary)
-      display: block;
+      color: var(--affine-icon-secondary);
+      display: inline-block;
+      vertical-align: baseline;
       width: 20px;
       height: 20px;
+      vertical-align: bottom;
     }
 
     .ref-label .suffix {
+      display: inline-block;
       font-weight: 400;
       color: var(--affine-text-disable-color);
+      line-height: 20px;
     }
   `;
   @state()
@@ -592,30 +610,38 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     const { zoom, translateX, translateY } = renderer;
     const { gap } = getBackgroundGrid(zoom, true);
 
-    return html` <div
-      class="surface-viewport"
+    return html`<div
+      class="surface-container"
       style=${styleMap({
-        width: `${w}px`,
-        aspectRatio: `${w} / ${h}`,
-        outline: this._focused
-          ? '2px solid var(--affine-primary-color)'
-          : undefined,
         backgroundSize: `${gap}px ${gap}px`,
       })}
-      @click=${this._focusBlock}
     >
-      ${this._referencedModel?.flavour === 'affine:frame'
-        ? html`<div
-            class="surface-blocks-portal"
-            style=${styleMap({
-              transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
-            })}
-          >
-            ${this._renderTopLevelBlocks()}
-          </div>`
-        : nothing}
-      <div class="surface-canvas-container">
-        <!-- attach canvas here -->
+      <div
+        class="surface-viewport ${referencedModel.flavour === 'affine:frame'
+          ? 'frame'
+          : ''}"
+        style=${styleMap({
+          width: `${w}px`,
+          aspectRatio: `${w} / ${h}`,
+          outline: this._focused
+            ? '2px solid var(--affine-primary-color)'
+            : undefined,
+        })}
+        @click=${this._focusBlock}
+      >
+        ${this._referencedModel?.flavour === 'affine:frame'
+          ? html`<div
+              class="surface-blocks-portal"
+              style=${styleMap({
+                transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
+              })}
+            >
+              ${this._renderTopLevelBlocks()}
+            </div>`
+          : nothing}
+        <div class="surface-canvas-container">
+          <!-- attach canvas here -->
+        </div>
       </div>
       ${this._renderMask(referencedModel)}
     </div>`;
