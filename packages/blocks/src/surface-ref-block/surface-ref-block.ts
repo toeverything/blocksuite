@@ -488,7 +488,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     this.page.deleteBlock(this.model);
   }
 
-  private _viewInEdgeless() {
+  viewInEdgeless() {
     if (!this._referencedModel) return;
 
     const xywh = deserializeXYWH(this._referencedModel.xywh);
@@ -606,7 +606,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
             ${this._renderTopLevelBlocks()}
           </div>`
         : nothing}
-      <div class="surface-canvas-container" @dblclick=${this._viewInEdgeless}>
+      <div class="surface-canvas-container">
         <!-- attach canvas here -->
       </div>
       ${this._renderMask(referencedModel)}
