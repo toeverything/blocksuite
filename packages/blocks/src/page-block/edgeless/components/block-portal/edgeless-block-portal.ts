@@ -8,8 +8,8 @@ import '../rects/edgeless-dragging-area-rect.js';
 import '../note-status/index.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
-import { WithDisposable } from '@blocksuite/lit';
-import { LitElement, nothing } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
@@ -33,7 +33,9 @@ const portalMap = {
 };
 
 @customElement('edgeless-block-portal-container')
-export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
+export class EdgelessBlockPortalContainer extends WithDisposable(
+  ShadowlessElement
+) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -226,10 +228,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(LitElement) {
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
       <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status>
     `;
-  }
-
-  override createRenderRoot() {
-    return this;
   }
 }
 
