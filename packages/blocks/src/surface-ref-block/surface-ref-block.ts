@@ -49,7 +49,7 @@ const NO_CONTENT_REASON = {
 } as Record<string, string>;
 
 @customElement('affine-surface-ref')
-export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel> {
+export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel> {
   static override styles = css`
     .affine-surface-ref {
       padding: 10px;
@@ -618,16 +618,19 @@ export class SurfaceSyncBlockComponent extends BlockElement<SurfaceRefBlockModel
     const noContent =
       !_surfaceModel || !_referenceModel || !_referenceModel.xywh;
 
-    return html`<div class="affine-surface-ref">
-      ${noContent
-        ? this._renderEmptyPlaceholder(model)
-        : this._renderSurfaceContent(_referenceModel, _surfaceRenderer)}
-    </div>`;
+    return html`
+      <div class="affine-surface-ref">
+        ${noContent
+          ? this._renderEmptyPlaceholder(model)
+          : this._renderSurfaceContent(_referenceModel, _surfaceRenderer)}
+      </div>
+      ${Object.values(this.widgets)}
+    `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-surface-ref': SurfaceSyncBlockComponent;
+    'affine-surface-ref': SurfaceRefBlockComponent;
   }
 }

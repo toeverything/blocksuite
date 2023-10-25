@@ -11,3 +11,4 @@ export {
 export { AffineLinkedPageWidget } from './linked-page/index.js';
 export { AffineModalWidget } from './modal-widget/index.js';
 export { AffineSlashMenuWidget } from './slash-menu/index.js';
+export { AffineSurfaceRefToolbar } from './surface-ref-toolbar/index.js';

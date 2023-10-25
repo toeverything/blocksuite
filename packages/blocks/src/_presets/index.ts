@@ -167,6 +167,9 @@ export const PagePreset: BlockSpec[] = [
     schema: SurfaceRefBlockSchema,
     view: {
       component: literal`affine-surface-ref`,
+      widgets: {
+        surfaceToolbar: literal`affine-surface-ref-toolbar`,
+      },
     },
   },
 ];
