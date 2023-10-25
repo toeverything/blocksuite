@@ -229,7 +229,10 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
         tr.pasted();
       }
       if (tr && payload.type === 'block') {
-        tr.focusPasted(payload.snapshot.id, payload.model);
+        // FIXME: This is a hack to make sure the focus is set after the block is imported.
+        requestAnimationFrame(() => {
+          tr?.focusPasted(payload.snapshot.id, payload.model);
+        });
       }
     });
   };
