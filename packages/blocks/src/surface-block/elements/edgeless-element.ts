@@ -2,6 +2,7 @@ import type { Bound, IVec, PointLocation, SerializedXYWH } from '../index.js';
 import type { SurfaceBlockComponent } from '../surface-block.js';
 import type { IBrush } from './brush/types.js';
 import type { IConnector } from './connector/types.js';
+import type { IGroup } from './group/types.js';
 import type { IShape } from './shape/types.js';
 import type { IText } from './text/types.js';
 
@@ -10,6 +11,7 @@ export enum PhasorElementType {
   BRUSH = 'brush',
   CONNECTOR = 'connector',
   TEXT = 'text',
+  GROUP = 'group',
 }
 
 export const isPhasorElementType = (
@@ -31,6 +33,7 @@ export interface IEdgelessElement {
   connectable: boolean;
   index: string;
   batch: string | null;
+  gridBound: Bound;
   containedByBounds(bounds: Bound): boolean;
   getNearestPoint(point: IVec): IVec;
   intersectWithLine(start: IVec, end: IVec): PointLocation[] | null;
@@ -49,6 +52,7 @@ export type IPhasorElementType = {
   brush: IBrush;
   connector: IConnector;
   text: IText;
+  group: IGroup;
 };
 
 export type IElementCreateProps<T extends keyof IPhasorElementType> = Partial<
@@ -75,4 +79,9 @@ export type IElementDefaultProps<T extends keyof IPhasorElementType> =
       >
     : T extends 'frame'
     ? Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'rotate' | 'batch'>
+    : T extends 'group'
+    ? Omit<
+        IPhasorElementType[T],
+        'id' | 'index' | 'seed' | 'rotate' | 'batch' | 'xywh'
+      >
     : Omit<IPhasorElementType[T], 'id' | 'index' | 'seed' | 'batch'>;

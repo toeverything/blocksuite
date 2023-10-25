@@ -19,14 +19,12 @@ import {
   createEditor,
   createWorkspaceOptions,
   defaultMode,
-  initDebugConfig,
   initParam,
   isE2E,
   tryInitExternalContent,
 } from './utils.js';
 
 const options = createWorkspaceOptions();
-initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {

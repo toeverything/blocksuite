@@ -96,6 +96,8 @@ export abstract class SurfaceElement<
     this.options = options;
   }
 
+  init() {}
+
   get id() {
     const id = this.yMap.get('id') as T['id'];
     return id;

@@ -1,15 +1,18 @@
-import { WithDisposable } from '@blocksuite/lit';
-import { html, LitElement } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import { html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { FrameBlockModel } from '../../../../../frame-block/index.js';
-import { Bound, compare } from '../../../../../surface-block/index.js';
+import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
+import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
+const { FRAME } = EdgelessBlockType;
+
 @customElement('edgeless-block-portal-frame')
-class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
+class EdgelessBlockPortalFrame extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   frame!: FrameBlockModel;
 
@@ -18,10 +21,6 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  protected override createRenderRoot() {
-    return this;
-  }
 
   override firstUpdated() {
     this._disposables.add(
@@ -50,9 +49,15 @@ class EdgelessBlockPortalFrame extends WithDisposable(LitElement) {
 }
 
 @customElement('edgeless-frames-container')
-export class EdgelessFramesContainer extends WithDisposable(LitElement) {
+export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.style.position = 'absolute';
+    this.style.zIndex = '0';
+  }
 
   protected override firstUpdated() {
     this._disposables.add(
@@ -69,26 +74,11 @@ export class EdgelessFramesContainer extends WithDisposable(LitElement) {
     });
   }
 
-  protected override createRenderRoot() {
-    return this;
-  }
-
-  private get _frames() {
-    return this.surface.model.children.filter(
-      child => child.flavour === 'affine:frame'
-    ) as FrameBlockModel[];
-  }
-
-  private get _sortedFrames() {
-    return this._frames.sort(compare);
-  }
-
   protected override render() {
-    const { _sortedFrames } = this;
-
+    const sortedFrames = this.surface.getSortedBlocks(FRAME);
     return html`
       ${repeat(
-        _sortedFrames,
+        sortedFrames,
         frame => frame.id,
         (frame, index) =>
           html`<edgeless-block-portal-frame

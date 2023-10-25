@@ -10,7 +10,7 @@ import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { mountFrameEditor } from '../../utils/text.js';
+import { mountFrameTitleEditor } from '../../utils/text.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import type { ColorEvent } from '../panel/color-panel.js';
 import { ColorUnit } from '../panel/color-panel.js';
@@ -158,7 +158,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
               .tipPosition=${'bottom'}
               .iconContainerPadding=${0}
               @click=${() =>
-                mountFrameEditor(this.frames[0], this.surface.edgeless)}
+                mountFrameTitleEditor(this.frames[0], this.surface.edgeless)}
             >
               ${RenameIcon}
             </edgeless-tool-icon-button>

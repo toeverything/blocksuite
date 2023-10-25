@@ -1,4 +1,3 @@
-import { debug } from '@blocksuite/global/debug';
 import type { Transaction } from 'yjs';
 import * as Y from 'yjs';
 
@@ -55,7 +54,6 @@ export class BlockSuiteDoc extends Y.Doc {
     return this.proxy.createYProxy(array) as Value;
   }
 
-  @debug('transact')
   override transact<T>(f: (arg0: Transaction) => T, origin?: number | string) {
     return super.transact(f, origin);
   }

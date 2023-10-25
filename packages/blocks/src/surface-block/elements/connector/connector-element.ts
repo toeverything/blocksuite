@@ -170,6 +170,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
   ) {
     const { seed, stroke, strokeWidth, roughness, rough } = this;
     const realStrokeColor = this.computedValue(stroke);
+
     if (rough) {
       const options = {
         seed,
