@@ -132,7 +132,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       );
     }
 
-    .surface-block-portal {
+    .surface-blocks-portal {
       pointer-events: none;
       position: absolute;
       left: 0;
@@ -211,7 +211,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
 
-  @query('.surface-block-portal')
+  @query('.surface-blocks-portal')
   blocksPortal!: HTMLDivElement;
 
   get surfaceRenderer() {
@@ -606,7 +606,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     >
       ${this._referencedModel?.flavour === 'affine:frame'
         ? html`<div
-            class="surface-block-portal"
+            class="surface-blocks-portal"
             style=${styleMap({
               transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
             })}
