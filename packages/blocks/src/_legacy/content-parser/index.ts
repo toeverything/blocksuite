@@ -275,7 +275,7 @@ export class ContentParser {
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockQueryContainer: HTMLElement | Document = document,
+    blockQuery: (id: string) => Element | null = getBlockElementById,
     edgelessBackground?: { zoom: number }
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
@@ -316,8 +316,7 @@ export class ContentParser {
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
-      const blockElement = getBlockElementById(block.id, blockQueryContainer)
-        ?.parentElement;
+      const blockElement = blockQuery(block.id)?.parentElement;
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
@@ -337,14 +336,9 @@ export class ContentParser {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = getBlockElementById(
-            element.id,
-            blockQueryContainer
-          )?.parentElement;
+          const htmlElement = blockQuery(element.id)?.parentElement;
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
-
-          console.log(element.id);
 
           ctx.drawImage(
             canvasData,

@@ -28,7 +28,7 @@ export const edgelessToBlob = async (
       undefined,
       isBlock ? [edgelessElement] : undefined,
       isBlock ? undefined : [edgelessElement],
-      blockContainer,
+      id => blockContainer.querySelector(`[portal-reference-block-id="${id}"]`),
       { zoom: options.surfaceRenderer.zoom }
     )
     .then(canvas => {
