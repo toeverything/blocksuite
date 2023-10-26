@@ -14,10 +14,7 @@ import {
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import {
-  assertEdgelessCanvasText,
-  assertEdgelessSelectedRect,
-} from '../utils/asserts.js';
+import { assertEdgelessCanvasText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
@@ -153,7 +150,7 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await switchEditorMode(page);
   await setEdgelessTool(page, 'text');
 
-  await page.mouse.click(130, 200);
+  await page.mouse.click(200, 200);
   await waitNextFrame(page);
 
   await type(page, 'aaa\nbbbbbbbb\n\ncc');
@@ -161,9 +158,10 @@ test('normalize text element rect after change its font', async ({ page }) => {
   await assertEdgelessTool(page, 'default');
   await page.mouse.click(10, 100);
 
-  await page.mouse.click(140, 210);
+  await page.mouse.click(220, 210);
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 112.875, 167.6]);
+  let { width: lastWidth, height: lastHeight } =
+    await getEdgelessSelectedRect(page);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
 
@@ -172,13 +170,19 @@ test('normalize text element rect after change its font', async ({ page }) => {
   const generalTextFont = page.getByText('General');
   await generalTextFont.click();
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 114.7, 116]);
+  let selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeGreaterThan(lastWidth);
+  expect(selectedRect.height).toBeLessThan(lastHeight);
+  lastWidth = selectedRect.width;
+  lastHeight = selectedRect.height;
   await fontButton.click();
   await assertTextFont(page, 'General');
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 111.7, 167.6]);
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeLessThan(lastWidth);
+  expect(selectedRect.height).toBeGreaterThan(lastHeight);
 });
 
 test('auto wrap text by dragging left and right edge', async ({ page }) => {

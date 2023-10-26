@@ -33,6 +33,7 @@ import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
@@ -44,7 +45,6 @@ import {
   type PhasorElement,
   serializeXYWH,
   Vec,
-  ZOOM_MAX,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
@@ -677,12 +677,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
         (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
         (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
       );
-      zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+      zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
 
       centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
       centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
     } else {
-      zoom = 1;
+      zoom = ZOOM_INITIAL;
     }
     return { zoom, centerX, centerY };
   }
