@@ -1,11 +1,7 @@
-/* eslint-disable lit/binding-positions, lit/no-invalid-html */
-
-import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
-import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { css, nothing, type TemplateResult } from 'lit';
+import type { BaseBlockModel } from '@blocksuite/store';
+import { type TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
@@ -21,21 +17,6 @@ import { deserializeXYWH } from '../../surface-block/index.js';
 
 @customElement('surface-ref-note-portal')
 export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
-  static override styles = css`
-    .edgeless-block-portal-note {
-      position: absolute;
-      border-radius: 8px;
-      box-sizing: border-box;
-      pointer-events: all;
-      overflow: hidden;
-      transform-origin: 0 0;
-      user-select: none;
-    }
-  `;
-
-  @property({ attribute: false })
-  root!: BlockSuiteRoot;
-
   @property({ attribute: false })
   index!: number;
 
@@ -43,70 +24,24 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
   model!: NoteBlockModel;
 
   @property({ attribute: false })
-  page!: Page;
+  renderModel!: (model: BaseBlockModel) => TemplateResult;
 
   override connectedCallback(): void {
     super.connectedCallback();
   }
 
-  private _onLoadModel(model: BaseBlockModel) {
-    this._disposables.add(
-      model.propsUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.add(
-      model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  override firstUpdated() {
+  override updated() {
     setTimeout(() => {
       const editiableElements = Array.from<HTMLDivElement>(
         this.querySelectorAll('[contenteditable]')
       );
 
       editiableElements.forEach(element => {
-        element.contentEditable = 'false';
+        if (element.contentEditable === 'true')
+          element.contentEditable = 'false';
       });
     }, 500);
   }
-
-  renderModel = (model: BaseBlockModel): TemplateResult => {
-    const { flavour, children } = model;
-    const schema = this.page.schema.flavourSchemaMap.get(flavour);
-    if (!schema) {
-      console.warn(`Cannot find schema for ${flavour}.`);
-      return html`${nothing}`;
-    }
-
-    const view = this.root.std.spec.getView(flavour);
-    if (!view) {
-      console.warn(`Cannot find view for ${flavour}.`);
-      return html`${nothing}`;
-    }
-
-    const tag = view.component;
-    const content = children.length
-      ? html`${repeat(
-          children,
-          child => child.id,
-          child => this.renderModel(child)
-        )}`
-      : null;
-
-    this._onLoadModel(model);
-
-    return html`<${tag}
-      portal-reference-block-id=${model.id}
-      .root=${this.root}
-      .page=${this.page}
-      .model=${model}
-      .content=${content}
-    ></${tag}>`;
-  };
 
   override render() {
     const { model, index } = this;
@@ -125,11 +60,18 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
         ? 'transparent'
         : `var(${background ?? DEFAULT_NOTE_COLOR})`,
       boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
+      position: 'absolute',
+      borderRadius: '8px',
+      boxSizing: 'border-box',
+      pointerEvents: 'none',
+      overflow: 'hidden',
+      transformOrigin: '0 0',
+      userSelect: 'none',
     };
 
     return html`
       <div
-        class="edgeless-block-portal-note"
+        class="surface-ref-note-portal"
         style=${styleMap(style)}
         data-model-height="${modelH}"
       >

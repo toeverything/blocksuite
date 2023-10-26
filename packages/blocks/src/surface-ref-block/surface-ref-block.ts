@@ -1,4 +1,4 @@
-import './portal/note.js';
+import './surface-ref-portal.js';
 
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
@@ -6,7 +6,6 @@ import { BlockElement } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
@@ -22,7 +21,6 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import type { AbstractEditor } from '../_common/utils/types.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
-import { getNotesInFrame } from '../page-block/edgeless/frame-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
@@ -31,6 +29,7 @@ import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
+import type { SurfaceRefPortal } from './surface-ref-portal.js';
 import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
 
 export const REF_LABEL_ICON = {
@@ -54,6 +53,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   static override styles = css`
     .affine-surface-ref {
       position: relative;
+      user-select: none;
     }
 
     .surface-empty-placeholder {
@@ -135,18 +135,13 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       margin: 0 auto;
       position: relative;
       overflow: hidden;
+      pointer-events: none;
+      user-select: none;
     }
 
     .surface-viewport.frame {
       border-radius: 8px;
       border: 2px solid var(--affine-black-30);
-    }
-
-    .surface-blocks-portal {
-      pointer-events: none;
-      position: absolute;
-      left: 0;
-      top: 0;
     }
 
     .surface-canvas-container {
@@ -257,8 +252,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   @query('.surface-canvas-container')
   container!: HTMLDivElement;
 
-  @query('.surface-blocks-portal')
-  blocksPortal!: HTMLDivElement;
+  @query('surface-ref-portal')
+  blocksPortal!: SurfaceRefPortal;
 
   get surfaceRenderer() {
     return this._surfaceRenderer;
@@ -402,7 +397,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     const referencedModel = this._referencedModel;
 
-    // trigger an rerender to update element's size
+    // trigger a rerender to update element's size
     // and set viewport after element's size has been updated
     this.requestUpdate();
     this.updateComplete.then(() => {
@@ -411,8 +406,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         Bound.fromXYWH(deserializeXYWH(referencedModel.xywh))
       );
 
-      // trigger an rerender to update portal transform
-      this.requestUpdate();
+      // update portal transform
+      this.blocksPortal.setViewport(this._surfaceRenderer);
     });
   }
 
@@ -549,27 +544,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     });
   }
 
-  private _renderTopLevelBlocks() {
-    const notes = getNotesInFrame(
-      this.page,
-      this._referencedModel as FrameBlockModel,
-      false
-    );
-
-    return repeat(
-      notes,
-      model => model.id,
-      (model, index) => {
-        return html`<surface-ref-note-portal
-          .index=${index}
-          .model=${model}
-          .page=${this.page}
-          .root=${this.root}
-        ></surface-ref-note-portal>`;
-      }
-    );
-  }
-
   private _renderMask(referencedModel: FrameBlockModel) {
     return html`
       <div class="surface-ref-mask">
@@ -607,7 +581,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     renderer: Renderer
   ) {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
-    const { zoom, translateX, translateY } = renderer;
+    const { zoom } = renderer;
     const { gap } = getBackgroundGrid(zoom, true);
 
     return html`<div
@@ -626,14 +600,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         })}
       >
         ${this._referencedModel?.flavour === 'affine:frame'
-          ? html`<div
-              class="surface-blocks-portal"
-              style=${styleMap({
-                transform: `translate(${translateX}px, ${translateY}px) scale(${zoom})`,
-              })}
-            >
-              ${this._renderTopLevelBlocks()}
-            </div>`
+          ? html`<surface-ref-portal
+              .page=${this.page}
+              .root=${this.root}
+              .frameModel=${referencedModel}
+            ></surface-ref-portal>`
           : nothing}
         <div class="surface-canvas-container">
           <!-- attach canvas here -->
