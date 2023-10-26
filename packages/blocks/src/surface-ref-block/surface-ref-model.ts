@@ -2,6 +2,7 @@ import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
 export type SurfaceRefProps = {
   reference: string;
+  caption?: string;
   refFlavour?: string;
 };
 
@@ -10,6 +11,7 @@ export const SurfaceRefBlockSchema = defineBlockSchema({
   props: () =>
     ({
       reference: '',
+      caption: '',
     }) as SurfaceRefProps,
   metadata: {
     version: 1,

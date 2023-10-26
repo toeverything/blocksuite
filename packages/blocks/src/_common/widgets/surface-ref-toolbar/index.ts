@@ -28,6 +28,8 @@ export class AffineSurfaceRefToolbar extends WidgetElement<SurfaceRefBlockCompon
   private _hoverController = new HoverController(
     this,
     ({ abortController }) => {
+      if (!this.blockElement.referenceModel) return null;
+
       return {
         template: SurfaceRefToolbarOptions({
           blockElement: this.blockElement,
@@ -123,7 +125,13 @@ function SurfaceRefToolbarOptions(options: {
           >${EdgelessModeIcon}
         </icon-button>
         <div class="divider"></div>
-        <icon-button size="32px" ?hidden=${readonly}>
+        <icon-button
+          size="32px"
+          ?hidden=${readonly}
+          @click=${() => {
+            blockElement.showCaption();
+          }}
+        >
           ${CaptionIcon}
           <affine-tooltip tip-position="top">Caption</affine-tooltip>
         </icon-button>

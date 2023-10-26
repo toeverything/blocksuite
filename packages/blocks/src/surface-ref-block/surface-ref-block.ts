@@ -19,6 +19,7 @@ import {
   isCssVariable,
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
+import { stopPropagation } from '../_common/utils/event.js';
 import type { AbstractEditor } from '../_common/utils/types.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
 import { getNotesInFrame } from '../page-block/edgeless/frame-manager.js';
@@ -215,12 +216,38 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       color: var(--affine-text-disable-color);
       line-height: 20px;
     }
+
+    .surface-ref-caption {
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .caption-input {
+      border: 0;
+      outline: none;
+      width: 100%;
+      display; block;
+      text-align: center;
+
+      font-size: var(--affine-font-sm);
+      color: var(--affine-icon-color);
+      background-color: transparent;
+    }
+    .caption-input::placeholder {
+      color: var(--affine-placeholder-color);
+    }
   `;
   @state()
   private _surfaceModel: SurfaceBlockModel | null = null;
 
   @state()
   private _focused: boolean = false;
+
+  @state()
+  private _caption: string = '';
+
+  @state()
+  private _showCaption: boolean = false;
 
   private _referencedModel: FrameBlockModel | null = null;
   private _surfaceRenderer = new Renderer();
@@ -310,6 +337,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     });
     this._disposables.add(() => {
       this.model.propsUpdated.on(() => {
+        this._caption = this.model.caption ?? '';
         if (this.model.reference !== this._referencedModel?.id) {
           init();
         }
@@ -514,36 +542,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     this.page.deleteBlock(this.model);
   }
 
-  viewInEdgeless() {
-    if (!this._referencedModel) return;
-
-    const xywh = deserializeXYWH(this._referencedModel.xywh);
-    const doc = this.ownerDocument;
-    const editorContainer = doc.querySelector(
-      'editor-container'
-    ) as AbstractEditor;
-
-    if (!editorContainer) return;
-
-    if (editorContainer.mode !== 'edgeless') {
-      editorContainer.mode = 'edgeless';
-    }
-
-    setTimeout(() => {
-      const edgeless = doc.querySelector('affine-edgeless-page');
-
-      edgeless?.surface.viewport.setViewportByBound(
-        Bound.fromXYWH(xywh),
-        [100, 60, 100, 60],
-        false
-      );
-    }, 50);
-
-    this.selection.update(selections => {
-      return selections.filter(sel => !PathFinder.equals(sel.path, this.path));
-    });
-  }
-
   private _focusBlock() {
     this.selection.update(() => {
       return [this.selection.getInstance('block', { path: this.path })];
@@ -647,6 +645,91 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     </div>`;
   }
 
+  private _updateCaption() {
+    this.page.updateBlock(this.model, {
+      caption: this._caption,
+    });
+  }
+
+  private _onCaptionKeydown(e: KeyboardEvent) {
+    if (e.isComposing) return;
+    if (e.key === 'Enter') {
+      e.stopPropagation();
+
+      this._updateCaption();
+    }
+  }
+
+  private _onCaptionBlur() {
+    this._updateCaption();
+
+    if (!this._caption.length && this._showCaption) {
+      this._showCaption = false;
+    }
+  }
+
+  private _renderCaption() {
+    if (!this._caption && !this._showCaption) return nothing;
+
+    return html`<div class="surface-ref-caption">
+      <input
+        .value=${this._caption}
+        .disabled=${this.model.page.readonly}
+        placeholder="Write a caption"
+        class="caption-input"
+        @input=${(e: InputEvent) =>
+          (this._caption = (e.target as HTMLInputElement).value)}
+        @keydown=${this._onCaptionKeydown}
+        @blur=${this._onCaptionBlur}
+        @pointerdown=${stopPropagation}
+        @click=${stopPropagation}
+        @paste=${stopPropagation}
+        @cut=${stopPropagation}
+        @copy=${stopPropagation}
+      />
+    </div>`;
+  }
+
+  showCaption() {
+    this._showCaption = true;
+
+    this.updateComplete.then(() => {
+      (
+        this.renderRoot.querySelector('.caption-input') as HTMLInputElement
+      )?.focus();
+    });
+  }
+
+  viewInEdgeless() {
+    if (!this._referencedModel) return;
+
+    const xywh = deserializeXYWH(this._referencedModel.xywh);
+    const doc = this.ownerDocument;
+    const editorContainer = doc.querySelector(
+      'editor-container'
+    ) as AbstractEditor;
+
+    if (!editorContainer) return;
+
+    if (editorContainer.mode !== 'edgeless') {
+      editorContainer.mode = 'edgeless';
+    }
+
+    setTimeout(() => {
+      const edgeless = doc.querySelector('affine-edgeless-page');
+
+      edgeless?.surface.viewport.setViewportByBound(
+        Bound.fromXYWH(xywh),
+        [100, 60, 100, 60],
+        false
+      );
+    }, 50);
+
+    this.selection.update(selections => {
+      return selections.filter(sel => !PathFinder.equals(sel.path, this.path));
+    });
+  }
+
   override render() {
     const { _surfaceModel, _referencedModel, _surfaceRenderer, model } = this;
     const noContent =
@@ -657,6 +740,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         ${noContent
           ? this._renderEmptyPlaceholder(model)
           : this._renderSurfaceContent(_referencedModel, _surfaceRenderer)}
+        ${this._renderCaption()}
       </div>
       ${Object.values(this.widgets)}
     `;
