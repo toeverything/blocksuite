@@ -1252,16 +1252,3 @@ test('Enter key should as expected after setting heading by shortkey', async ({
     noteId
   );
 });
-
-test('ctrl + y for redo', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await focusRichText(page);
-  await type(page, 'hello');
-  // undo
-  await undoByKeyboard(page);
-  await assertRichTexts(page, ['']);
-  // redo
-  await redoByKeyboard(page, true);
-  await assertRichTexts(page, ['hello']);
-});

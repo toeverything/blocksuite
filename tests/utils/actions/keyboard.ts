@@ -97,11 +97,7 @@ export async function formatType(page: Page) {
   });
 }
 
-export async function redoByKeyboard(page: Page, onlyWin = false) {
-  if (onlyWin && IS_WINDOWS) {
-    await page.keyboard.press(`Control+Y`, { delay: 20 });
-    return;
-  }
+export async function redoByKeyboard(page: Page) {
   await page.keyboard.press(`${SHORT_KEY}+Shift+Z`, { delay: 20 });
 }
 

@@ -1,4 +1,5 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
@@ -19,9 +20,11 @@ export class PageKeyboardManager {
           }
         },
         'Control-y': ctx => {
-          ctx.get('defaultState').event.preventDefault();
-          if (this._page.canRedo) {
-            this._page.redo();
+          if (IS_WINDOWS) {
+            ctx.get('defaultState').event.preventDefault();
+            if (this._page.canRedo) {
+              this._page.redo();
+            }
           }
         },
         'Mod-Backspace': () => true,
