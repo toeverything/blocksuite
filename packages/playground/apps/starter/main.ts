@@ -12,7 +12,8 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
-import { CustomNavigationPanel } from './components/custom-navigation-panel';
+import { CustomCopilotPanel } from './components/custom-copilot-panel.js';
+import { CustomNavigationPanel } from './components/custom-navigation-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';
 import {
@@ -36,24 +37,29 @@ function subscribePage(workspace: Workspace) {
       }
     }
     const app = document.getElementById('app');
-    if (!app) {
-      return;
-    }
+    if (!app) return;
+
     const page = workspace.getPage(pageId) as Page;
 
     const editor = createEditor(page, app);
     const contentParser = new ContentParser(page);
     const debugMenu = new DebugMenu();
     const navigationPanel = new CustomNavigationPanel();
+    const copilotPanel = new CustomCopilotPanel();
 
     debugMenu.workspace = workspace;
     debugMenu.editor = editor;
     debugMenu.mode = defaultMode;
     debugMenu.contentParser = contentParser;
     debugMenu.navigationPanel = navigationPanel;
+    debugMenu.copilotPanel = copilotPanel;
+
     navigationPanel.editor = editor;
+    copilotPanel.editor = editor;
+
     document.body.appendChild(debugMenu);
     document.body.appendChild(navigationPanel);
+    document.body.appendChild(copilotPanel);
 
     window.editor = editor;
     window.page = page;
@@ -91,9 +97,8 @@ export async function initPageContentByParam(
 }
 
 async function main() {
-  if (window.workspace) {
-    return;
-  }
+  if (window.workspace) return;
+
   const workspace = new Workspace(options);
   window.workspace = workspace;
   window.job = new Job({ workspace });
