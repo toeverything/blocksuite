@@ -9,6 +9,7 @@ export class PageKeyboardManager {
       {
         'Mod-z': ctx => {
           ctx.get('defaultState').event.preventDefault();
+
           if (this._page.canUndo) {
             this._page.undo();
           }
@@ -20,11 +21,11 @@ export class PageKeyboardManager {
           }
         },
         'Control-y': ctx => {
-          if (IS_WINDOWS) {
-            ctx.get('defaultState').event.preventDefault();
-            if (this._page.canRedo) {
-              this._page.redo();
-            }
+          if (!IS_WINDOWS) return;
+
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canRedo) {
+            this._page.redo();
           }
         },
         'Mod-Backspace': () => true,
