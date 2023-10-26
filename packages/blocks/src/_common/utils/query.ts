@@ -90,46 +90,48 @@ export function getNextBlock(
  *  - paragraph <- when invoked here, the traverse order will be above
  * ```
  *
- * NOTE: this method will skip the `affine:note` and `affine:page` block
+ * NOTE: this method will just return blocks with `content` role
  */
-export function getPreviousBlock(
-  model: BaseBlockModel,
-  map: Record<string, true> = {}
-): BaseBlockModel | null {
-  if (model.id in map) {
-    throw new Error(
-      "Can't get previous block! There's a loop in the block tree!"
-    );
-  }
-  map[model.id] = true;
+export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
+  const getPrev = (model: BaseBlockModel) => {
+    const parent = model.page.getParent(model);
+    if (!parent) return null;
 
-  const page = model.page;
-  const parentBlock = page.getParent(model);
-  if (!parentBlock) {
-    return null;
-  }
-  const previousBlock = page.getPreviousSibling(model);
-  if (!previousBlock) {
-    if (parentBlock.role === 'content') {
-      return parentBlock;
-    }
-    return getPreviousBlock(parentBlock);
-  } else {
-    if (previousBlock.role === 'content') {
-      if (previousBlock.children.length > 0) {
-        let lastChild =
-          previousBlock.children[previousBlock.children.length - 1];
-        while (lastChild.children.length) {
-          lastChild = lastChild.children[lastChild.children.length - 1];
-        }
-        // Assume children is not possible to be `affine:note` or `affine:page`
-        return lastChild;
+    const index = parent.children.indexOf(model);
+    if (index > 0) {
+      let prev = parent.children[index - 1];
+      while (prev.children.length > 0) {
+        prev = prev.children[prev.children.length - 1];
       }
-      return previousBlock;
-    } else {
-      return getPreviousBlock(previousBlock);
+      return prev;
     }
-  }
+    return parent;
+  };
+
+  const map: Record<string, true> = {};
+  const iterate: (model: BaseBlockModel) => BaseBlockModel | null = (
+    model: BaseBlockModel
+  ) => {
+    if (model.id in map) {
+      throw new Error(
+        "Can't get previous block! There's a loop in the block tree!"
+      );
+    }
+    map[model.id] = true;
+
+    const prev = getPrev(model);
+    if (prev) {
+      if (prev.role === 'content') {
+        return prev;
+      } else {
+        return iterate(prev);
+      }
+    } else {
+      return null;
+    }
+  };
+
+  return iterate(model);
 }
 
 /**
