@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
 const IS_MAC = process.platform === 'darwin';
-// const IS_WINDOWS = process.platform === 'win32';
+const IS_WINDOWS = process.platform === 'win32';
 // const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
 /**
@@ -98,7 +98,7 @@ export async function formatType(page: Page) {
 }
 
 export async function redoByKeyboard(page: Page, onlyWin = false) {
-  if (onlyWin && !IS_MAC) {
+  if (onlyWin && IS_WINDOWS) {
     await page.keyboard.press(`Control+Y`, { delay: 20 });
     return;
   }
