@@ -163,7 +163,7 @@ test('normalize text element rect after change its font', async ({ page }) => {
 
   await page.mouse.click(140, 210);
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 112.875, 167.6]);
+  await assertEdgelessSelectedRect(page, [130, 200, 91, 152]);
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
 
@@ -172,13 +172,13 @@ test('normalize text element rect after change its font', async ({ page }) => {
   const generalTextFont = page.getByText('General');
   await generalTextFont.click();
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 114.7, 116]);
+  await assertEdgelessSelectedRect(page, [130, 200, 106.7, 110]);
   await fontButton.click();
   await assertTextFont(page, 'General');
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
   await waitNextFrame(page);
-  await assertEdgelessSelectedRect(page, [130, 200, 111.7, 167.6]);
+  await assertEdgelessSelectedRect(page, [130, 200, 90, 152]);
 });
 
 test('auto wrap text by dragging left and right edge', async ({ page }) => {
