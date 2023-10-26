@@ -128,6 +128,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       .page=${this.page}
       .model=${model}
       .content=${content}
+      .calculatePath=${() => []}
     ></${tag}>`;
   };
 
