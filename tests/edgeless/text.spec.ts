@@ -14,10 +14,7 @@ import {
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import {
-  assertEdgelessCanvasText,
-  assertEdgelessSelectedRect,
-} from '../utils/asserts.js';
+import { assertEdgelessCanvasText } from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
