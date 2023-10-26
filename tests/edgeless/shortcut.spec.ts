@@ -167,8 +167,8 @@ test('cmd + A should not fire inside active note', async ({ page }) => {
   await type(page, 'hello');
   await switchEditorMode(page);
 
-  const start = { x: 0, y: 0 };
-  const end = { x: 100, y: 100 };
+  const start = { x: 200, y: 100 };
+  const end = { x: 300, y: 200 };
   await addBasicRectShapeElement(page, start, end);
   await selectAllByKeyboard(page);
 
