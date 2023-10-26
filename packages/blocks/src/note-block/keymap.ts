@@ -324,7 +324,18 @@ export function bindHotKey(blockElement: BlockElement) {
       }
       const blocks: BlockSelection[] = [];
       view.walkThrough(nodeView => {
-        if (nodeView.type === 'block') {
+        if (
+          nodeView.type === 'block' &&
+          // Remove children blocks, only select the most top level blocks.
+          !blocks
+            .map(b => b.path)
+            .reduce(
+              (acc, cur) =>
+                // check whether cur is a sub list of nodeView.path
+                acc || cur.every(path => nodeView.path.includes(path)),
+              false
+            )
+        ) {
           blocks.push(
             selection.getInstance('block', {
               path: nodeView.path,
