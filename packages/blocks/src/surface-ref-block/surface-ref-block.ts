@@ -173,6 +173,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     .ref-label {
       display: none;
+      user-select: none;
     }
 
     .ref-label {
@@ -562,7 +563,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         return html`<surface-ref-note-portal
           .index=${index}
           .model=${model}
-          .renderModel=${this.renderModel}
+          .page=${this.page}
+          .root=${this.root}
         ></surface-ref-note-portal>`;
       }
     );
