@@ -18,6 +18,12 @@ export class PageKeyboardManager {
             this._page.redo();
           }
         },
+        'Control-y': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canRedo) {
+            this._page.redo();
+          }
+        },
         'Mod-Backspace': () => true,
         Backspace: this._handleDelete,
         Delete: this._handleDelete,
