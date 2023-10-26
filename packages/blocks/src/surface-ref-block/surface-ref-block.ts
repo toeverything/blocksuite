@@ -623,11 +623,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         style=${styleMap({
           width: `${w}px`,
           aspectRatio: `${w} / ${h}`,
-          outline: this._focused
-            ? '2px solid var(--affine-primary-color)'
-            : undefined,
         })}
-        @click=${this._focusBlock}
       >
         ${this._referencedModel?.flavour === 'affine:frame'
           ? html`<div
@@ -738,7 +734,15 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;
 
     return html`
-      <div class="affine-surface-ref">
+      <div
+        class="affine-surface-ref"
+        @click=${this._focusBlock}
+        style=${styleMap({
+          outline: this._focused
+            ? '2px solid var(--affine-primary-color)'
+            : undefined,
+        })}
+      >
         ${noContent
           ? this._renderEmptyPlaceholder(model)
           : this._renderSurfaceContent(_referencedModel, _surfaceRenderer)}
