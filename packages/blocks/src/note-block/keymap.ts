@@ -331,7 +331,6 @@ export function bindHotKey(blockElement: BlockElement) {
             .map(b => b.path)
             .reduce(
               (acc, cur) =>
-                // cur.every(path => nodeView.path.includes(path))
                 // check whether cur is a sub list of nodeView.path
                 acc || cur.every(path => nodeView.path.includes(path)),
               false
