@@ -584,17 +584,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const { viewport } = this.edgeless.surface;
     const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const { w: selectedWidth, h: selectedHeight } = bound;
+    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
     const rect = componentToolbar.getBoundingClientRect();
-    if (
-      x >= width ||
-      x + selectedWidth <= 0 ||
-      y >= height ||
-      y + selectedHeight <= 0
-    ) {
+    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
       this._toolbarPosition = {
-        x: x + selectedWidth <= 0 ? x - rect.width : x,
-        y: y >= height ? y + selectedHeight : y,
+        x: right <= 0 ? x - rect.width : x,
+        y: y >= height ? bottom : y,
       };
       return;
     }
@@ -604,10 +599,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       offset += 10;
     }
     let top = y - rect.height - offset;
-    let left = x;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
-    left = clamp(left, 10, width - rect.width - 10);
-    top = clamp(top, 10, height - rect.height - 10);
+
+    const left = clamp(x, 10, width - rect.width - 10);
+    top = clamp(top, 10, height - rect.height - 100);
 
     this._toolbarPosition = {
       x: left,
