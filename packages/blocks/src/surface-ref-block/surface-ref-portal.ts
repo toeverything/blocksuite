@@ -12,6 +12,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
+import type { GroupElement, TopLevelBlockModel } from '../index.js';
 import { compare } from '../index.js';
 import type { FrameBlockModel } from '../models.js';
 import { getBlocksInFrame } from '../page-block/edgeless/frame-manager.js';
@@ -40,17 +41,27 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
   page!: Page;
 
   @property({ attribute: false })
-  frameModel!: FrameBlockModel;
+  containerModel!: GroupElement | FrameBlockModel;
 
   @query('.surface-blocks-portal')
   portal!: HTMLDivElement;
 
+  private _getBlocksInChildren(model: GroupElement): TopLevelBlockModel[] {
+    return Array.from(model.children.keys())
+      .map(id => this.page.getBlockById(id) as TopLevelBlockModel)
+      .filter(el => el);
+  }
+
   private _renderTopLevelBlocks() {
-    const topLevelBlocks = getBlocksInFrame(
-      this.page,
-      this.frameModel as FrameBlockModel,
-      false
-    );
+    const containerModel = this.containerModel;
+    const topLevelBlocks =
+      'flavour' in containerModel
+        ? getBlocksInFrame(
+            this.page,
+            this.containerModel as FrameBlockModel,
+            false
+          )
+        : this._getBlocksInChildren(containerModel);
 
     topLevelBlocks.sort(compare);
 
@@ -129,6 +140,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       .model=${model}
       .content=${content}
       .calculatePath=${() => []}
+      .widgets=${{}}
     ></${tag}>`;
   };
 

@@ -658,6 +658,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       onElementUpdated: update => {
         this.slots.elementUpdated.emit(update);
       },
+      updateElementLocalRecord: (id, record) => {
+        this.updateElementLocalRecord(id, record);
+      },
+      pickById: id => this.pickById(id),
+      getGroupParent: (element: string | EdgelessElement) => {
+        return this.getGroupParent(element);
+      },
+      setGroupParent: (element, groupId) => {
+        return this.setGroupParent(element, groupId);
+      },
+      selectionManager: this.edgeless.selectionManager,
     });
     element.init();
     element.computedValue = this.getCSSPropertyValue;
@@ -718,6 +729,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         onElementUpdated: update => {
           this.slots.elementUpdated.emit(update);
         },
+        updateElementLocalRecord: (id, record) => {
+          this.updateElementLocalRecord(id, record);
+        },
+        pickById: id => this.pickById(id),
+        getGroupParent: (element: string | EdgelessElement) => {
+          return this.getGroupParent(element);
+        },
+        setGroupParent: (element, groupId) => {
+          return this.setGroupParent(element, groupId);
+        },
+        selectionManager: this.edgeless.selectionManager,
       });
       element.init();
       element.computedValue = this.getCSSPropertyValue;

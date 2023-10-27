@@ -138,18 +138,23 @@ function SurfaceRefToolbarOptions(options: {
         <icon-button
           size="32px"
           @click=${() => {
+            const referencedModel = blockElement.referenceModel;
+
+            if (!referencedModel) return;
+
             edgelessToBlob(model.page, {
               surfaceRefBlock: blockElement,
               surfaceRenderer: blockElement.surfaceRenderer,
-              edgelessElement: blockElement.referenceModel as EdgelessElement,
+              edgelessElement: referencedModel,
               blockContainer: blockElement.blocksPortal,
             })
               .then(blob => {
-                downloadBlob(
-                  blob,
-                  blockElement.referenceModel?.title.toString() ??
-                    'Edgeless Content.png'
-                );
+                const fileName =
+                  'title' in referencedModel
+                    ? referencedModel.title.toString()
+                    : 'Edgeless Content';
+
+                downloadBlob(blob, fileName);
               })
               .catch(err => {
                 console.error(err);

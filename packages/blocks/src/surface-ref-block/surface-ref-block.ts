@@ -4,7 +4,7 @@ import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
-import { css, html, nothing } from 'lit';
+import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -24,7 +24,7 @@ import type {
   EdgelessElement,
   TopLevelBlockModel,
 } from '../_common/utils/types.js';
-import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
+import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
@@ -40,18 +40,20 @@ import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
 export const REF_LABEL_ICON = {
   'affine:frame': FrameIcon,
   DEFAULT_NOTE_HEIGHT: EdgelessModeIcon,
-};
+} as Record<string, TemplateResult>;
 
 const NO_CONTENT_TITLE = {
   'affine:frame': 'Frame',
-  'affine:group': 'Note',
+  group: 'Group',
   DEFAULT: 'Content',
 } as Record<string, string>;
 
 const NO_CONTENT_REASON = {
-  'affine:group': 'This content was ungrouped or deleted on edgeless mode',
+  group: 'This content was ungrouped or deleted on edgeless mode',
   DEFAULT: 'This content was deleted on edgeless mode',
 } as Record<string, string>;
+
+type RefElement = Exclude<EdgelessElement, NoteBlockModel>;
 
 @customElement('affine-surface-ref')
 export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel> {
@@ -250,7 +252,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   @state()
   private _showCaption: boolean = false;
 
-  private _referencedModel: FrameBlockModel | null = null;
+  private _referencedModel: RefElement | null = null;
   private _surfaceRenderer = new Renderer();
   private _connectorManager = new ConnectorPathGenerator({
     pickById: id => this.getModel(id),
@@ -308,25 +310,25 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     const init = () => {
       refWathcer?.dispose();
 
-      const referencedModel = this.getModel(
-        this.model.reference
-      ) as FrameBlockModel;
+      const referencedModel = this.getModel(this.model.reference);
       this._referencedModel =
         referencedModel && 'xywh' in referencedModel ? referencedModel : null;
 
-      if (!this._referencedModel) return;
+      if (!referencedModel) return;
 
-      refWathcer = referencedModel.propsUpdated.on(() => {
-        if (referencedModel.flavour !== this.model.refFlavour) {
-          this.page.updateBlock(this.model, {
-            refFlavour: referencedModel.flavour,
+      if ('propsUpdated' in referencedModel) {
+        refWathcer = referencedModel.propsUpdated.on(() => {
+          if (referencedModel.flavour !== this.model.refFlavour) {
+            this.page.updateBlock(this.model, {
+              refFlavour: referencedModel.flavour,
+            });
+          }
+
+          this.updateComplete.then(() => {
+            this._refreshViewport();
           });
-        }
-
-        this.updateComplete.then(() => {
-          this._refreshViewport();
         });
-      });
+      }
 
       this._refreshViewport();
     };
@@ -427,7 +429,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       );
 
       // update portal transform
-      this.blocksPortal.setViewport(this._surfaceRenderer);
+      this.blocksPortal?.setViewport(this._surfaceRenderer);
     });
   }
 
@@ -464,6 +466,10 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
           this._connectorManager.updatePath(element);
         }
       },
+      updateElementLocalRecord: () => {},
+      pickById: id => this.getModel(id),
+      getGroupParent: () => '',
+      setGroupParent: () => {},
     });
     element.computedValue = this._getCSSPropertyValue;
     element.mount(this._surfaceRenderer);
@@ -524,6 +530,10 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       const element = new ElementCtor(yElement, {
         onElementUpdated() {},
         getLocalRecord: () => undefined,
+        updateElementLocalRecord: () => {},
+        pickById: id => this.getModel(id),
+        getGroupParent: () => '',
+        setGroupParent: () => {},
       });
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
@@ -561,9 +571,12 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     return value;
   };
 
-  private getModel(id: string): EdgelessElement | null {
+  private getModel(id: string): RefElement | null {
     return (
-      (this.page.getBlockById(id) as TopLevelBlockModel) ??
+      (this.page.getBlockById(id) as Exclude<
+        TopLevelBlockModel,
+        NoteBlockModel
+      >) ??
       this._elements.get(id) ??
       null
     );
@@ -579,13 +592,15 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     });
   }
 
-  private _renderMask(referencedModel: FrameBlockModel) {
+  private _renderMask(referencedModel: RefElement, flavourOrType: string) {
+    const title = 'title' in referencedModel ? referencedModel.title : '';
+
     return html`
       <div class="surface-ref-mask">
         <div class="ref-label">
           <div class="title">
-            ${REF_LABEL_ICON[referencedModel.flavour ?? 'DEFAULT']}
-            <span>${referencedModel.title}</span>
+            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT']}
+            <span>${title}</span>
           </div>
           <div class="suffix">from edgeless mode</div>
         </div>
@@ -612,12 +627,16 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   }
 
   private _renderSurfaceContent(
-    referencedModel: FrameBlockModel,
+    referencedModel: RefElement,
     renderer: Renderer
   ) {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
     const { zoom } = renderer;
     const { gap } = getBackgroundGrid(zoom, true);
+    const flavourOrType =
+      'flavour' in referencedModel
+        ? referencedModel.flavour
+        : referencedModel.type;
 
     return html`<div
       class="surface-container"
@@ -626,7 +645,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       })}
     >
       <div
-        class="surface-viewport ${referencedModel.flavour === 'affine:frame'
+        class="surface-viewport ${flavourOrType === 'affine:frame'
           ? 'frame'
           : ''}"
         style=${styleMap({
@@ -634,18 +653,18 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
           aspectRatio: `${w} / ${h}`,
         })}
       >
-        ${this._referencedModel?.flavour === 'affine:frame'
+        ${flavourOrType === 'affine:frame' || flavourOrType === 'group'
           ? html`<surface-ref-portal
               .page=${this.page}
               .root=${this.root}
-              .frameModel=${referencedModel}
+              .containerModel=${referencedModel}
             ></surface-ref-portal>`
           : nothing}
         <div class="surface-canvas-container">
           <!-- attach canvas here -->
         </div>
       </div>
-      ${this._renderMask(referencedModel)}
+      ${this._renderMask(referencedModel, flavourOrType)}
     </div>`;
   }
 

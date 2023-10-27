@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Text } from '@blocksuite/store';
+import { Text, type Y } from '@blocksuite/store';
 
 import {
   ArrowDownBigIcon,
@@ -13,6 +13,7 @@ import {
   DualLinkIcon,
   DuplicateIcon,
   FrameIcon,
+  GroupingIcon,
   ImageIcon20,
   NewPageIcon,
   NowIcon,
@@ -36,6 +37,7 @@ import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
+import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../../page-block/edgeless/utils/consts.js';
@@ -47,6 +49,7 @@ import { updateBlockElementType } from '../../../page-block/utils/operations/ele
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import {
   deserializeXYWH,
+  PhasorElementType,
   serializeXYWH,
 } from '../../../surface-block/index.js';
 import type { SurfaceRefBlockModel } from '../../../surface-ref-block/index.js';
@@ -477,6 +480,84 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           },
         };
       });
+    },
+  },
+  {
+    name: 'Group',
+    items: options => {
+      const surfaceModel = (
+        options.pageElement.page.getBlockByFlavour(
+          'affine:surface'
+        ) as SurfaceBlockModel[]
+      )[0];
+
+      if (!surfaceModel) return [];
+
+      const groupElements: Y.Map<string>[] = Array.from(
+        surfaceModel.elements.getValue()?.values() ?? []
+      ).filter(
+        (element: Y.Map<string>) =>
+          element.get('type') === PhasorElementType.GROUP
+      );
+
+      return (
+        groupElements.map(element => {
+          return {
+            name: 'Group: ' + element.get('title'),
+            icon: GroupingIcon,
+            action: async ({ pageElement, model }) => {
+              const { page } = pageElement;
+              const noteModel = page.getParent(model) as NoteBlockModel;
+              const [x, y, w] = deserializeXYWH(noteModel.xywh);
+              const sliceIdx = noteModel.children.indexOf(model);
+              const slicedBlocks = noteModel.children.slice(sliceIdx + 1);
+              const insertAtMiddle = sliceIdx !== 0 && slicedBlocks.length > 0;
+
+              const surfaceRefProps = {
+                flavour: 'affine:surface-ref',
+                reference: element.get('id'),
+                refFlavour: 'group',
+              };
+              const [surfaceRefBlockId] = page.addSiblingBlocks(
+                noteModel,
+                [surfaceRefProps],
+                sliceIdx === 0 ? 'before' : 'after'
+              );
+
+              if (insertAtMiddle) {
+                const slicedNoteProps = {
+                  flavour: 'affine:note',
+                  background: noteModel.background,
+                  xywh: serializeXYWH(
+                    x,
+                    y +
+                      getHeightOfNoteChildern(noteModel, 0, sliceIdx) +
+                      EDGELESS_BLOCK_CHILD_PADDING,
+                    w,
+                    DEFAULT_NOTE_HEIGHT
+                  ),
+                };
+
+                const [slicedNoteId] = page.addSiblingBlocks(
+                  page.getBlockById(surfaceRefBlockId) as SurfaceRefBlockModel,
+                  [slicedNoteProps]
+                );
+                page.moveBlocks(
+                  slicedBlocks,
+                  page.getBlockById(slicedNoteId) as NoteBlockModel
+                );
+              }
+
+              if (
+                matchFlavours(model, ['affine:paragraph']) &&
+                model.text.length === 0
+              ) {
+                page.deleteBlock(model);
+              }
+            },
+          };
+        }) ?? []
+      );
     },
   },
   {

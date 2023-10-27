@@ -40,11 +40,13 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   override init(): void {
     super.init();
 
-    const { surface } = this;
-    surface.updateElementLocalRecord(this.id, { showTitle: true });
+    const { options } = this;
+
+    options.updateElementLocalRecord(this.id, { showTitle: true });
+
     this._cachedId = this.id;
     this.childElements.forEach(ele => {
-      surface.setGroupParent(ele, this.id);
+      options.setGroupParent(ele, this.id);
     });
     this._cachedChildren = this._children;
 
@@ -52,13 +54,13 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     yChildren.observe(event => {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
         if (action === 'delete') {
-          const child = this.surface.pickById(key);
-          if (child && surface.getGroupParent(child) === this.id)
-            surface.setGroupParent(child, surface.getGroupParent(this));
+          const child = options.pickById(key);
+          if (child && options.getGroupParent(child) === this.id)
+            options.setGroupParent(child, options.getGroupParent(this));
         } else if (action === 'add') {
-          const child = this.surface.pickById(key);
+          const child = options.pickById(key);
           assertExists(child);
-          surface.setGroupParent(child, this.id);
+          options.setGroupParent(child, this.id);
         } else {
           console.log('unexpected', key);
         }
@@ -68,15 +70,15 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   }
 
   override get xywh() {
-    const { surface } = this;
+    const { options } = this;
     const children = this._children;
     if (children.length === 0) return '[0,0,0,0]';
 
     const bound: Bound = children.reduce((prev, cur) => {
-      const ele = surface.pickById(cur);
+      const ele = options.pickById(cur);
       assertExists(ele);
       return prev.unite(ele.gridBound);
-    }, surface.pickById(children[0])!.gridBound);
+    }, options.pickById(children[0])!.gridBound);
     return bound.serialize();
   }
 
@@ -93,7 +95,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   }
 
   get childElements() {
-    return this._children.map(id => this.surface.pickById(id)!);
+    return this._children.map(id => this.options.pickById(id)!);
   }
 
   get titleHeight() {
@@ -124,9 +126,11 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     _matrix: DOMMatrix,
     _rc: RoughCanvas
   ): void {
-    const { xywh, surface } = this;
-    const { elements } = surface.edgeless.selectionManager;
+    const { xywh, options } = this;
+    const elements = options.selectionManager?.elements ?? [];
+
     _ctx.setTransform(_matrix);
+
     if (elements.includes(this)) {
       this._renderTitle(_ctx);
     } else if (this.childElements.some(child => elements.includes(child))) {
@@ -141,7 +145,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
   private _renderTitle(ctx: CanvasRenderingContext2D) {
     let text = this.title.toJSON();
-    const zoom = this.surface.viewport.zoom;
+    const zoom = this.renderer!.zoom;
     const bound = Bound.deserialize(this.xywh);
     const fontSize = 16 / zoom;
     const fontFamily = 'sans-serif';
@@ -204,11 +208,11 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   }
 
   override unmount(): void {
-    const { surface } = this;
+    const { options } = this;
     this._cachedChildren.forEach(id => {
-      const ele = surface.pickById(id);
-      if (ele && surface.getGroupParent(ele) === this._cachedId)
-        surface.setGroupParent(ele, surface.getGroupParent(this));
+      const ele = options.pickById(id);
+      if (ele && options.getGroupParent(ele) === this._cachedId)
+        options.setGroupParent(ele, options.getGroupParent(this));
     });
     super.unmount();
   }

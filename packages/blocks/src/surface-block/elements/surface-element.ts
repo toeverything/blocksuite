@@ -1,5 +1,7 @@
 import type { Y } from '@blocksuite/store';
 
+import type { EdgelessElement } from '../../index.js';
+import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
 import { Bound } from '../utils/bound.js';
@@ -73,6 +75,17 @@ export abstract class SurfaceElement<
       id: string;
       props: { [index: string]: { old: unknown; new: unknown } };
     }) => void;
+    updateElementLocalRecord: (
+      id: string,
+      record: Record<string, unknown>
+    ) => void;
+    pickById: (id: string) => EdgelessElement | null;
+    getGroupParent: (element: string | EdgelessElement) => string;
+    setGroupParent: (
+      element: string | EdgelessElement,
+      groupId: string
+    ) => void;
+    selectionManager?: EdgelessSelectionManager;
   };
   protected renderer: Renderer | null = null;
   protected _connectable = true;
