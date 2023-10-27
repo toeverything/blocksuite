@@ -29,6 +29,9 @@ import { downloadAttachment, hasBlob, isAttachmentLoading } from './utils.js';
 export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel> {
   static override styles = styles;
 
+  // 10MB (default)
+  static MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
+
   @state()
   private _showCaption = false;
 

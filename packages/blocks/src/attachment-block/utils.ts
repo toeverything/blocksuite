@@ -9,14 +9,13 @@ import type {
   ImageBlockProps,
 } from '../image-block/image-model.js';
 import { transformModel } from '../page-block/utils/operations/model.js';
+import { AttachmentBlockComponent } from './attachment-block.js';
 import type {
   AttachmentBlockModel,
   AttachmentProps,
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
-// 1GB
-export const MAX_ATTACHMENT_SIZE = 1000 * 1000 * 1000;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
 export function cloneAttachmentProperties(
@@ -149,10 +148,10 @@ export async function appendAttachmentBlock(
   file: File,
   model: BaseBlockModel
 ): Promise<void> {
-  if (file.size > MAX_ATTACHMENT_SIZE) {
+  if (file.size > AttachmentBlockComponent.MAX_ATTACHMENT_SIZE) {
     toast(
       `You can only upload files less than ${humanFileSize(
-        MAX_ATTACHMENT_SIZE,
+        AttachmentBlockComponent.MAX_ATTACHMENT_SIZE,
         true,
         0
       )}`

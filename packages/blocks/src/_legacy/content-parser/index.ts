@@ -14,8 +14,8 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
+import { AttachmentBlockComponent } from '../../attachment-block/attachment-block.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
-import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
@@ -519,10 +519,10 @@ export class ContentParser {
       ];
     }
 
-    if (file.size > MAX_ATTACHMENT_SIZE) {
+    if (file.size > AttachmentBlockComponent.MAX_ATTACHMENT_SIZE) {
       toast(
         `You can only upload files less than ${humanFileSize(
-          MAX_ATTACHMENT_SIZE,
+          AttachmentBlockComponent.MAX_ATTACHMENT_SIZE,
           true,
           0
         )}`

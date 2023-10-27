@@ -1,5 +1,6 @@
 import {
   type AbstractEditor,
+  AttachmentBlockComponent,
   type AttachmentProps,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -190,10 +191,12 @@ export class EditorContainer
     this.fileDropManager.register({
       name: 'Attachment',
       matcher: (file: File) => {
-        // TODO limit size in blob
-        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
-        if (file.size > MAX_ATTACHMENT_SIZE) {
-          console.warn('You can only upload files less than 10M.');
+        if (file.size > AttachmentBlockComponent.MAX_ATTACHMENT_SIZE) {
+          console.warn(
+            `You can only upload files less than ${
+              AttachmentBlockComponent.MAX_ATTACHMENT_SIZE / (1000 * 1000)
+            }MB.`
+          );
           return false;
         }
         return true;
