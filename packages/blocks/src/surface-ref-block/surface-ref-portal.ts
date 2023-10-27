@@ -12,11 +12,12 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html as staticHtml, literal, unsafeStatic } from 'lit/static-html.js';
 
-import type { GroupElement, TopLevelBlockModel } from '../index.js';
-import { compare } from '../index.js';
+import type { TopLevelBlockModel } from '../_common/utils/types.js';
 import type { FrameBlockModel } from '../models.js';
 import { getBlocksInFrame } from '../page-block/edgeless/frame-manager.js';
 import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
+import type { GroupElement } from '../surface-block/elements/group/group-element.js';
+import { compare } from '../surface-block/grid.js';
 
 const portalMap = {
   [EdgelessBlockType.NOTE]: 'surface-ref-note-portal',
