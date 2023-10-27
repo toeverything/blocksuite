@@ -3,14 +3,14 @@ import { offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
+import { HoverController } from '../../../_common/components/hover/controller.js';
+import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
+import { downloadBlob } from '../../../_common/utils/filesys.js';
+import type { EdgelessElement } from '../../../_common/utils/types.js';
 import {
-  downloadBlob,
-  type EdgelessElement,
-  HoverController,
-  PAGE_HEADER_HEIGHT,
   type SurfaceRefBlockComponent,
   type SurfaceRefBlockModel,
-} from '../../../index.js';
+} from '../../../surface-ref-block/index.js';
 import { toast } from '../../components/toast.js';
 import { EdgelessModeIcon } from '../../icons/edgeless.js';
 import {
