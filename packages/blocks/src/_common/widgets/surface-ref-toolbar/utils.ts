@@ -1,11 +1,13 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
+import { type EdgelessElement } from '../../../_common/utils/types.js';
 import { CLIPBOARD_MIMETYPE } from '../../../_legacy/clipboard/utils/pure.js';
 import { ContentParser } from '../../../content-parser.js';
-import { Bound, type EdgelessElement, type Renderer } from '../../../index.js';
 import { isTopLevelBlock } from '../../../page-block/edgeless/utils/query.js';
-import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.js';
+import type { Renderer } from '../../../surface-block/renderer.js';
+import { Bound } from '../../../surface-block/utils/bound.js';
+import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/surface-ref-block.js';
 
 export const edgelessToBlob = async (
   page: Page,
