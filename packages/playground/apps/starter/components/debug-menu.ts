@@ -35,7 +35,7 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
-import type { CustomCopilotPanel } from './custom-copilot-panel';
+import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
 // @ts-ignore
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
@@ -718,7 +718,11 @@ export class DebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <sl-tooltip content="Toggle copilot panel" placement="bottom" hoist>
+          <sl-tooltip
+            content="🚧 Toggle copilot panel"
+            placement="bottom"
+            hoist
+          >
             <sl-button
               size="small"
               content=""

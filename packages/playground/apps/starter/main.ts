@@ -12,7 +12,7 @@ import type { BlockSuiteRoot } from '@blocksuite/lit';
 import type { DocProvider, Page } from '@blocksuite/store';
 import { Job, Workspace } from '@blocksuite/store';
 
-import { CustomCopilotPanel } from './components/custom-copilot-panel.js';
+import { CustomCopilotPanel } from './components/copilot/custom-copilot-panel.js';
 import { CustomNavigationPanel } from './components/custom-navigation-panel.js';
 import { DebugMenu } from './components/debug-menu.js';
 import type { InitFn } from './data';
