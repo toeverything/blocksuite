@@ -2,6 +2,7 @@ import { assertEquals, assertExists } from '@blocksuite/global/utils';
 
 import {
   type Connectable,
+  type EdgelessElement,
   type Selectable,
 } from '../../_common/utils/types.js';
 import type { PhasorElementType } from '../../surface-block/index.js';
@@ -765,188 +766,49 @@ export class ConnectionOverlay extends Overlay {
   }
 }
 
-export class EdgelessConnectorManager {
-  private _aStarRunner: AStarRunner | null = null;
-  private _connectionOverlay = new ConnectionOverlay();
-  constructor(private _edgeless: EdgelessPageBlockComponent) {
-    this._edgeless.surface.viewport.addOverlay(this._connectionOverlay);
-    this._connectionOverlay.surface = this._edgeless.surface;
-  }
+export class ConnectorPathGenerator {
+  protected _aStarRunner: AStarRunner | null = null;
 
-  private _findConnectablesInViewport() {
-    const { surface } = this._edgeless;
-    const { viewport } = surface;
-    return surface
-      .pickByBound(Bound.from(viewport.viewportBounds))
-      .filter(ele => {
-        return ele.connectable;
-      }) as Connectable[];
-  }
+  constructor(
+    private options: {
+      pickById: (id: string) => EdgelessElement | Connectable | null;
+      refresh: () => void;
+    }
+  ) {}
 
-  searchConnection(point: IVec, excludedIds: string[] = []) {
-    const { _connectionOverlay } = this;
-    const { surface } = this._edgeless;
-    const connectables = this._findConnectablesInViewport();
+  private _getConnectorEndElement(
+    connector: IConnector,
+    type: 'source' | 'target'
+  ): Connectable | null {
+    const id = connector[type].id;
 
-    _connectionOverlay.clear();
-    let result: Connection | null = null;
-    for (let i = 0; i < connectables.length; i++) {
-      const connectable = connectables[i];
-      // first check if in excluedIds
-      if (excludedIds.includes(connectable.id)) continue;
-
-      // then check if in expanded bound
-      const bound = Bound.deserialize(connectable.xywh);
-      const rotateBound = Bound.from(
-        getBoundsWithRotation(rBound(connectable))
-      );
-      if (!rotateBound.expand(10).isPointInBound(point)) continue;
-
-      // then check if closes to anchors
-      const anchors = getAnchors(connectable);
-      _connectionOverlay.points = anchors.map(a => a.point);
-      for (let j = 0; j < anchors.length; j++) {
-        const anchor = anchors[j];
-        if (Vec.dist(anchor.point, point) < 4) {
-          _connectionOverlay.highlightPoint = anchor.point;
-          result = {
-            id: connectable.id,
-            position: anchor.coord,
-          };
-        }
-      }
-      if (result) break;
-
-      // if not, check if closes to bound
-      const nearestPoint = connectable.getNearestPoint(point);
-      if (Vec.dist(nearestPoint, point) < 8) {
-        _connectionOverlay.highlightPoint = nearestPoint;
-        const originPoint = getPointFromBoundsWithRotation(
-          rBound(connectable, true),
-          nearestPoint
-        );
-        surface.refresh();
-        result = {
-          id: connectable.id,
-          position: bound.toRelative(originPoint).map(n => clamp(n, 0, 1)),
-        };
-      }
-      if (result) break;
-      // if not, check if in inside of the element
-
-      if (
-        connectable.hitTest(point[0], point[1], {
-          ignoreTransparent: false,
-        })
-      ) {
-        result = {
-          id: connectable.id,
-        };
-      }
+    if (id) {
+      return this.options.pickById(id) as Connectable;
     }
 
-    // at last, if not, just return the point
-    if (!result)
-      result = {
-        position: point,
-      };
-
-    surface.refresh();
-    return result;
+    return null;
   }
 
-  hasRelatedElement(connecter: ConnectorElement) {
-    const { source, target } = connecter;
-    const { surface } = this._edgeless;
-    if (
-      (source.id && !surface.pickById(source.id)) ||
-      (target.id && !surface.pickById(target.id))
-    ) {
-      return false;
+  private _getConnectionPoint(
+    connector: IConnector,
+    type: 'source' | 'target'
+  ): PointLocation {
+    const connection = connector[type];
+    const anotherType = type === 'source' ? 'target' : 'source';
+
+    if (connection.id) {
+      const connectable = this._getConnectorEndElement(connector, type);
+      assertExists(connectable);
+      if (!connection.position) {
+        const otherPoint = this._getConnectionPoint(connector, anotherType);
+        return getNearestConnectableAnchor(connectable, otherPoint);
+      } else {
+        return getConnectableRelativePosition(connectable, connection.position);
+      }
+    } else {
+      assertExists(connection.position);
+      return PointLocation.fromVec(connection.position);
     }
-
-    return true;
-  }
-
-  clear() {
-    this._connectionOverlay.points = [];
-    this._connectionOverlay.highlightPoint = null;
-    this._connectionOverlay.bound = null;
-    this._edgeless.surface.refresh();
-  }
-
-  updateConnection(
-    connector: ConnectorElement,
-    point: IVec,
-    connection: 'source' | 'target'
-  ) {
-    const { surface } = this._edgeless;
-    const id = connector.id;
-    const anotherConnection = connection === 'source' ? 'target' : 'source';
-    const anotherId = connector[anotherConnection]?.id;
-    const result = this.searchConnection(point, anotherId ? [anotherId] : []);
-    surface.updateElement<PhasorElementType.CONNECTOR>(id, {
-      [connection]: result,
-    });
-  }
-
-  updatePath(connector: ConnectorElement, path?: PointLocation[]) {
-    const { surface } = this._edgeless;
-    const points = path ?? this._generateConnectorPath(connector) ?? [];
-
-    const bound = getBoundFromPoints(points);
-    const relativePoints = points.map(p => {
-      p.setVec(Vec.sub(p, [bound.x, bound.y]));
-      return p;
-    });
-    connector.path = relativePoints;
-    connector.xywh = bound.serialize();
-    surface.refresh();
-  }
-
-  updateXYWH(connector: ConnectorElement, bound: Bound) {
-    const { surface } = this._edgeless;
-
-    const oldBound = Bound.deserialize(connector.xywh);
-    const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
-    const updates: Partial<IConnector> = {};
-
-    const { source, target } = connector;
-    if (!source.id && source.position)
-      updates.source = { position: Vec.add(source.position, offset) };
-    if (!target.id && target.position)
-      updates.target = { position: Vec.add(target.position, offset) };
-    updates.xywh = bound.serialize();
-    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, updates);
-  }
-
-  private _generateConnectorPath(connector: ConnectorElement) {
-    const { mode } = connector;
-    if (mode === ConnectorMode.Straight) {
-      return this._generateStraightConnectorPath(connector);
-    } else if (mode === ConnectorMode.Orthogonal) {
-      const start = this._getConnectorEndElement(connector, 'source');
-      const end = this._getConnectorEndElement(connector, 'target');
-
-      const [startPoint, endPoint] = this._computeStartEndPoint(connector);
-
-      const startBound = start
-        ? Bound.from(getBoundsWithRotation(rBound(start)))
-        : null;
-      const endBound = end
-        ? Bound.from(getBoundsWithRotation(rBound(end)))
-        : null;
-      const path = this.generateOrthogonalConnectorPath({
-        startPoint,
-        endPoint,
-        startBound,
-        endBound,
-      });
-      return path.map(p => new PointLocation(p));
-    } else if (mode === ConnectorMode.Curve) {
-      return this._generateCurveConnectorPath(connector);
-    }
-    throw new Error('unknown connector mode');
   }
 
   private _generateStraightConnectorPath(connector: ConnectorElement) {
@@ -970,6 +832,39 @@ export class EdgelessConnectorManager {
       const startPoint = this._getConnectionPoint(connector, 'source');
       return (startPoint && endPoint && [startPoint, endPoint]) ?? [];
     }
+  }
+
+  private _computeStartEndPoint(connector: ConnectorElement) {
+    const { source, target } = connector;
+    const start = this._getConnectorEndElement(connector, 'source');
+    const end = this._getConnectorEndElement(connector, 'target');
+
+    let startPoint: PointLocation, endPoint: PointLocation;
+    if (source.id && !source.position && target.id && !target.position) {
+      assertExists(start);
+      assertExists(end);
+      const startAnchors = getAnchors(start);
+      const endAnchors = getAnchors(end);
+      let minDist = Infinity;
+      let minStartAnchor = new PointLocation();
+      let minEndAnchor = new PointLocation();
+      for (const sa of startAnchors) {
+        for (const ea of endAnchors) {
+          const dist = Vec.dist(sa.point, ea.point);
+          if (dist + 0.1 < minDist) {
+            minDist = dist;
+            minStartAnchor = sa.point;
+            minEndAnchor = ea.point;
+          }
+        }
+      }
+      startPoint = minStartAnchor;
+      endPoint = minEndAnchor;
+    } else {
+      startPoint = this._getConnectionPoint(connector, 'source');
+      endPoint = this._getConnectionPoint(connector, 'target');
+    }
+    return [startPoint, endPoint];
   }
 
   private _generateCurveConnectorPath(connector: ConnectorElement) {
@@ -1085,37 +980,47 @@ export class EdgelessConnectorManager {
     ];
   }
 
-  private _computeStartEndPoint(connector: ConnectorElement) {
-    const { source, target } = connector;
-    const start = this._getConnectorEndElement(connector, 'source');
-    const end = this._getConnectorEndElement(connector, 'target');
+  private _generateConnectorPath(connector: ConnectorElement) {
+    const { mode } = connector;
+    if (mode === ConnectorMode.Straight) {
+      return this._generateStraightConnectorPath(connector);
+    } else if (mode === ConnectorMode.Orthogonal) {
+      const start = this._getConnectorEndElement(connector, 'source');
+      const end = this._getConnectorEndElement(connector, 'target');
 
-    let startPoint: PointLocation, endPoint: PointLocation;
-    if (source.id && !source.position && target.id && !target.position) {
-      assertExists(start);
-      assertExists(end);
-      const startAnchors = getAnchors(start);
-      const endAnchors = getAnchors(end);
-      let minDist = Infinity;
-      let minStartAnchor = new PointLocation();
-      let minEndAnchor = new PointLocation();
-      for (const sa of startAnchors) {
-        for (const ea of endAnchors) {
-          const dist = Vec.dist(sa.point, ea.point);
-          if (dist + 0.1 < minDist) {
-            minDist = dist;
-            minStartAnchor = sa.point;
-            minEndAnchor = ea.point;
-          }
-        }
-      }
-      startPoint = minStartAnchor;
-      endPoint = minEndAnchor;
-    } else {
-      startPoint = this._getConnectionPoint(connector, 'source');
-      endPoint = this._getConnectionPoint(connector, 'target');
+      const [startPoint, endPoint] = this._computeStartEndPoint(connector);
+
+      const startBound = start
+        ? Bound.from(getBoundsWithRotation(rBound(start)))
+        : null;
+      const endBound = end
+        ? Bound.from(getBoundsWithRotation(rBound(end)))
+        : null;
+      const path = this.generateOrthogonalConnectorPath({
+        startPoint,
+        endPoint,
+        startBound,
+        endBound,
+      });
+      return path.map(p => new PointLocation(p));
+    } else if (mode === ConnectorMode.Curve) {
+      return this._generateCurveConnectorPath(connector);
     }
-    return [startPoint, endPoint];
+    throw new Error('unknown connector mode');
+  }
+
+  updatePath(connector: ConnectorElement, path?: PointLocation[]) {
+    const points = path ?? this._generateConnectorPath(connector) ?? [];
+
+    const bound = getBoundFromPoints(points);
+    const relativePoints = points.map(p => {
+      p.setVec(Vec.sub(p, [bound.x, bound.y]));
+      return p;
+    });
+
+    connector.path = relativePoints;
+    connector.xywh = bound.serialize();
+    this.options.refresh();
   }
 
   generateOrthogonalConnectorPath(input: OrthogonalConnectorInput) {
@@ -1177,38 +1082,151 @@ export class EdgelessConnectorManager {
     return path;
   }
 
-  private _getConnectorEndElement(
-    connector: IConnector,
-    type: 'source' | 'target'
-  ): Connectable | null {
-    const { surface } = this._edgeless;
-    const id = connector[type].id;
-    if (id) {
-      return surface.pickById(id) as Connectable;
+  hasRelatedElement(connecter: ConnectorElement) {
+    const { source, target } = connecter;
+    if (
+      (source.id && !this.options.pickById(source.id)) ||
+      (target.id && !this.options.pickById(target.id))
+    ) {
+      return false;
     }
-    return null;
+
+    return true;
+  }
+}
+
+export class EdgelessConnectorManager extends ConnectorPathGenerator {
+  private _connectionOverlay = new ConnectionOverlay();
+
+  constructor(private _edgeless: EdgelessPageBlockComponent) {
+    super({
+      pickById: (id: string) =>
+        this._edgeless.surface.pickById(id) as Connectable,
+      refresh: () => this._edgeless.surface.refresh(),
+    });
+
+    this._edgeless.surface.viewport.addOverlay(this._connectionOverlay);
+    this._connectionOverlay.surface = this._edgeless.surface;
   }
 
-  private _getConnectionPoint(
-    connector: IConnector,
-    type: 'source' | 'target'
-  ): PointLocation {
-    const connection = connector[type];
-    const anotherType = type === 'source' ? 'target' : 'source';
+  private _findConnectablesInViewport() {
+    const { surface } = this._edgeless;
+    const { viewport } = surface;
+    return surface
+      .pickByBound(Bound.from(viewport.viewportBounds))
+      .filter(ele => {
+        return ele.connectable;
+      }) as Connectable[];
+  }
 
-    if (connection.id) {
-      const connectable = this._getConnectorEndElement(connector, type);
-      assertExists(connectable);
-      if (!connection.position) {
-        const otherPoint = this._getConnectionPoint(connector, anotherType);
-        return getNearestConnectableAnchor(connectable, otherPoint);
-      } else {
-        return getConnectableRelativePosition(connectable, connection.position);
+  searchConnection(point: IVec, excludedIds: string[] = []) {
+    const { _connectionOverlay } = this;
+    const { surface } = this._edgeless;
+    const connectables = this._findConnectablesInViewport();
+
+    _connectionOverlay.clear();
+    let result: Connection | null = null;
+    for (let i = 0; i < connectables.length; i++) {
+      const connectable = connectables[i];
+      // first check if in excluedIds
+      if (excludedIds.includes(connectable.id)) continue;
+
+      // then check if in expanded bound
+      const bound = Bound.deserialize(connectable.xywh);
+      const rotateBound = Bound.from(
+        getBoundsWithRotation(rBound(connectable))
+      );
+      if (!rotateBound.expand(10).isPointInBound(point)) continue;
+
+      // then check if closes to anchors
+      const anchors = getAnchors(connectable);
+      _connectionOverlay.points = anchors.map(a => a.point);
+      for (let j = 0; j < anchors.length; j++) {
+        const anchor = anchors[j];
+        if (Vec.dist(anchor.point, point) < 4) {
+          _connectionOverlay.highlightPoint = anchor.point;
+          result = {
+            id: connectable.id,
+            position: anchor.coord,
+          };
+        }
       }
-    } else {
-      assertExists(connection.position);
-      return PointLocation.fromVec(connection.position);
+      if (result) break;
+
+      // if not, check if closes to bound
+      const nearestPoint = connectable.getNearestPoint(point);
+      if (Vec.dist(nearestPoint, point) < 8) {
+        _connectionOverlay.highlightPoint = nearestPoint;
+        const originPoint = getPointFromBoundsWithRotation(
+          rBound(connectable, true),
+          nearestPoint
+        );
+        surface.refresh();
+        result = {
+          id: connectable.id,
+          position: bound.toRelative(originPoint).map(n => clamp(n, 0, 1)),
+        };
+      }
+      if (result) break;
+      // if not, check if in inside of the element
+
+      if (
+        connectable.hitTest(point[0], point[1], {
+          ignoreTransparent: false,
+        })
+      ) {
+        result = {
+          id: connectable.id,
+        };
+      }
     }
+
+    // at last, if not, just return the point
+    if (!result)
+      result = {
+        position: point,
+      };
+
+    surface.refresh();
+    return result;
+  }
+
+  clear() {
+    this._connectionOverlay.points = [];
+    this._connectionOverlay.highlightPoint = null;
+    this._connectionOverlay.bound = null;
+    this._edgeless.surface.refresh();
+  }
+
+  updateConnection(
+    connector: ConnectorElement,
+    point: IVec,
+    connection: 'source' | 'target'
+  ) {
+    const { surface } = this._edgeless;
+    const id = connector.id;
+    const anotherConnection = connection === 'source' ? 'target' : 'source';
+    const anotherId = connector[anotherConnection]?.id;
+    const result = this.searchConnection(point, anotherId ? [anotherId] : []);
+    surface.updateElement<PhasorElementType.CONNECTOR>(id, {
+      [connection]: result,
+    });
+  }
+
+  updateXYWH(connector: ConnectorElement, bound: Bound) {
+    const { surface } = this._edgeless;
+
+    const oldBound = Bound.deserialize(connector.xywh);
+    const offset = Vec.sub([bound.x, bound.y], [oldBound.x, oldBound.y]);
+    const updates: Partial<IConnector> = {};
+
+    const { source, target } = connector;
+    if (!source.id && source.position)
+      updates.source = { position: Vec.add(source.position, offset) };
+    if (!target.id && target.position)
+      updates.target = { position: Vec.add(target.position, offset) };
+    updates.xywh = bound.serialize();
+    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, updates);
   }
 
   syncConnectorPos(connected: Connectable[]) {

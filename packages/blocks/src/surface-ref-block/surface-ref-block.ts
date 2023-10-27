@@ -19,12 +19,17 @@ import {
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { stopPropagation } from '../_common/utils/event.js';
-import type { AbstractEditor } from '../_common/utils/types.js';
+import type {
+  AbstractEditor,
+  EdgelessElement,
+  TopLevelBlockModel,
+} from '../_common/utils/types.js';
 import type { FrameBlockModel, SurfaceBlockModel } from '../models.js';
+import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
-import { ElementCtors } from '../surface-block/index.js';
+import { ConnectorElement, ElementCtors } from '../surface-block/index.js';
 import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
@@ -247,6 +252,10 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _referencedModel: FrameBlockModel | null = null;
   private _surfaceRenderer = new Renderer();
+  private _connectorManager = new ConnectorPathGenerator({
+    pickById: id => this.getModel(id),
+    refresh: () => this._surfaceRenderer.refresh(),
+  });
   private _elements = new Map<string, SurfaceElement>();
 
   @query('.surface-canvas-container')
@@ -379,6 +388,17 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     }
   }
 
+  private _onElementUpdatedOrAdded(id: string) {
+    const element = this.getModel(id);
+
+    if (
+      element instanceof ConnectorElement &&
+      this._connectorManager.hasRelatedElement(element)
+    ) {
+      this._connectorManager.updatePath(element);
+    }
+  }
+
   private _initSelection() {
     const selection = this.root.selection;
     this._disposables.add(
@@ -434,11 +454,21 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
       getLocalRecord: () => undefined,
-      onElementUpdated: () => {},
+      onElementUpdated: ({ id }) => {
+        const element = this.getModel(id);
+
+        if (
+          element instanceof ConnectorElement &&
+          !this._connectorManager.hasRelatedElement(element)
+        ) {
+          this._connectorManager.updatePath(element);
+        }
+      },
     });
     element.computedValue = this._getCSSPropertyValue;
     element.mount(this._surfaceRenderer);
     this._elements.set(element.id, element);
+    this._onElementUpdatedOrAdded(element.id);
   }
 
   private _onElementsChange = (
@@ -498,6 +528,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
       this._elements.set(element.id, element);
+      this._onElementUpdatedOrAdded(element.id);
     } else if (type.action === 'update') {
       console.error('update event on yElements is not supported', event);
     } else if (type.action === 'delete') {
@@ -530,8 +561,12 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     return value;
   };
 
-  private getModel(id: string) {
-    return this.page.getBlockById(id) ?? this._elements.get(id) ?? null;
+  private getModel(id: string): EdgelessElement | null {
+    return (
+      (this.page.getBlockById(id) as TopLevelBlockModel) ??
+      this._elements.get(id) ??
+      null
+    );
   }
 
   private _deleteThis() {
