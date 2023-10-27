@@ -4,7 +4,6 @@ import '../panel/color-panel.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { type Page } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -16,6 +15,7 @@ import {
   NOTE_COLORS,
   type NoteBlockModel,
 } from '../../../../note-block/note-model.js';
+import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import type { ColorEvent } from '../panel/color-panel.js';
 import { createButtonPopper } from '../utils.js';
@@ -29,7 +29,6 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       fill: currentColor;
       align-items: center;
       justify-content: center;
-      gap: 10px;
     }
 
     edgeless-color-panel {
@@ -60,77 +59,21 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
       font-size: 12px;
     }
 
-    .note-status {
-      display: flex;
-      align-items: center;
-      text-align: center;
-      justify-content: center;
-      gap: 10px;
-      width: 24px;
-      height: 24px;
-      background: var(--affine-blue-600);
-      border-radius: 4px;
-      color: var(--affine-white);
+    .show {
       font-size: 12px;
-      font-weight: 600;
-      line-height: 16px;
-    }
-
-    .note-status > span {
-      display: flex;
-      padding: 4px 6px;
-      width: 24px;
-      flex-direction: column;
-    }
-
-    .note-status.hidden > span {
-      display: flex;
-      padding: 4px;
-    }
-
-    .note-status-button {
-      display: flex;
-      justify-content: center;
-      align-items: center;
       color: var(--affine-text-secondary-color);
-      width: 74px;
-      height: 24px;
-      padding: 4px 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 30px;
+      cursor: pointer;
     }
 
-    .note-status-button.hidden {
-      width: 126px;
-    }
-
-    .note-status-button:hover {
+    .show:hover {
       background: var(--affine-hover-color);
       border-radius: 8px;
-    }
-
-    .note-status-button .hover {
-      display: none;
-    }
-    .note-status-button:hover .hover {
-      display: flex;
-    }
-    .note-status-button:hover .unhover {
-      display: none;
-    }
-
-    .note-status-button svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .note-status-button > span {
-      font-size: 12px;
-      font-style: normal;
-      font-weight: 600;
-      line-height: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 2px;
     }
   `;
 
@@ -138,7 +81,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   notes: NoteBlockModel[] = [];
 
   @property({ attribute: false })
-  page!: Page;
+  surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
   slots!: EdgelessSelectionSlots;
@@ -164,14 +107,14 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   private _setBlockBackground(color: CssVariableName) {
     this.notes.forEach(note => {
-      this.page.updateBlock(note, { background: color });
+      this.surface.page.updateBlock(note, { background: color });
     });
   }
 
   private _setNoteHidden(note: NoteBlockModel, hidden: boolean) {
-    this.page.updateBlock(note, { hidden });
+    this.surface.page.updateBlock(note, { hidden });
 
-    const noteParent = this.page.getParent(note);
+    const noteParent = this.surface.page.getParent(note);
     assertExists(noteParent);
     const noteParentChildNotes = noteParent.children.filter(block =>
       matchFlavours(block, ['affine:note'])
@@ -181,7 +124,12 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
     if (!hidden && note !== noteParentLastNote) {
       // move to the end
-      this.page.moveBlocks([note], noteParent, noteParentLastNote, false);
+      this.surface.page.moveBlocks(
+        [note],
+        noteParent,
+        noteParentLastNote,
+        false
+      );
     }
     this.requestUpdate();
   }
@@ -204,64 +152,45 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   override render() {
     if (this.notes.length !== 1) return nothing;
+
     const note = this.notes[0];
-    const noteParent = this.page.getParent(note);
-    assertExists(noteParent);
-    const allNotes = noteParent.children.filter(
-      block => matchFlavours(block, ['affine:note']) && !block.hidden
-    );
-
     const selectedBackground = note.background;
-    const noteIndex = allNotes.indexOf(note) + 1;
+    const enableIndex =
+      this.surface.page.awarenessStore.getFlag('enable_note_index');
 
-    const enableIndex = this.page.awarenessStore.getFlag('enable_note_index');
-
-    if (note.hidden) {
-      return html`
-        ${enableIndex
-          ? html`<div class="note-status hidden">
-              <span>${HiddenIcon}</span>
-            </div>`
-          : nothing}
-        <div
-          @click=${() => this._setNoteHidden(note, !note.hidden)}
-          class="note-status-button hidden"
-        >
-          <span class="unhover"><span>Hidden on page mode</span></span>
-          <span class="hover">${NoteIcon}<span>Show on page</span></span>
-        </div>
-      `;
-    } else {
-      return html`
-        ${enableIndex
-          ? html`<div class="note-status">
-              <span>${noteIndex}</span>
-            </div>`
-          : nothing}
-        <div
-          @click=${() => this._setNoteHidden(note, !note.hidden)}
-          class="note-status-button unhover"
-        >
-          <span class="unhover">${NoteIcon}<span>On page</span></span>
-          <span class="hover">${HiddenIcon}<span>Hidden</span></span>
-        </div>
-        <edgeless-tool-icon-button
-          .tooltip=${this._popperShow ? '' : 'Color'}
-          .active=${false}
-          @click=${() => this._colorSelectorPopper?.toggle()}
-        >
-          ${this._renderSelectedColor(selectedBackground)}
-        </edgeless-tool-icon-button>
-        <edgeless-color-panel
-          .value=${selectedBackground}
-          .options=${NOTE_COLORS}
-          .showLetterMark=${true}
-          @select=${(event: ColorEvent) => {
-            this._setBlockBackground(event.detail);
-          }}
-        ></edgeless-color-panel>
-      `;
-    }
+    return html`
+      ${enableIndex
+        ? html`<div
+            class="show"
+            style=${styleMap({
+              width: note.hidden ? '84px' : '158px',
+            })}
+            @click=${() => this._setNoteHidden(note, !note.hidden)}
+          >
+            ${note.hidden
+              ? html`${NoteIcon}On page`
+              : html`
+                  ${HiddenIcon}
+                  <div>${'Hidden on page mode'}</div>
+                `}
+          </div>`
+        : nothing}
+      <edgeless-tool-icon-button
+        .tooltip=${this._popperShow ? '' : 'Color'}
+        .active=${false}
+        @click=${() => this._colorSelectorPopper?.toggle()}
+      >
+        ${this._renderSelectedColor(selectedBackground)}
+      </edgeless-tool-icon-button>
+      <edgeless-color-panel
+        .value=${selectedBackground}
+        .options=${NOTE_COLORS}
+        .showLetterMark=${true}
+        @select=${(event: ColorEvent) => {
+          this._setBlockBackground(event.detail);
+        }}
+      ></edgeless-color-panel>
+    `;
   }
 }
 
