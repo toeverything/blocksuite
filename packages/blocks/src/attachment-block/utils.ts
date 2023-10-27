@@ -15,8 +15,6 @@ import type {
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
-// 100MB
-export const MAX_ATTACHMENT_SIZE = 100 * 1000 * 1000;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
 export function cloneAttachmentProperties(
@@ -149,13 +147,10 @@ export async function appendAttachmentBlock(
   file: File,
   model: BaseBlockModel
 ): Promise<void> {
-  if (file.size > MAX_ATTACHMENT_SIZE) {
+  const maxSize = model.page.workspace.config.get('attachmentMaxFileSize');
+  if (file.size > maxSize) {
     toast(
-      `You can only upload files less than ${humanFileSize(
-        MAX_ATTACHMENT_SIZE,
-        true,
-        0
-      )}`
+      `You can only upload files less than ${humanFileSize(maxSize, true, 0)}`
     );
     return;
   }

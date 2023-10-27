@@ -1,8 +1,11 @@
 import type { BlobAddon } from './blob.js';
+import type { ConfigAddon } from './config.js';
 import type { IndexerAddon } from './indexer.js';
 import type { TestAddon } from './test.js';
 
-export class WorkspaceAddonType implements BlobAddon, IndexerAddon, TestAddon {
+export class WorkspaceAddonType
+  implements BlobAddon, IndexerAddon, TestAddon, ConfigAddon
+{
   blobs!: BlobAddon['blobs'];
 
   indexer!: IndexerAddon['indexer'];
@@ -12,4 +15,6 @@ export class WorkspaceAddonType implements BlobAddon, IndexerAddon, TestAddon {
   exportPageSnapshot!: TestAddon['exportPageSnapshot'];
   exportPageYDoc!: TestAddon['exportPageYDoc'];
   exportJSX!: TestAddon['exportJSX'];
+
+  config!: ConfigAddon['config'];
 }

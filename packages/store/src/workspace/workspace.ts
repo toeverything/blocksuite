@@ -4,7 +4,13 @@ import * as Y from 'yjs';
 import type { DocProviderCreator } from '../providers/type.js';
 import type { Schema } from '../schema/index.js';
 import type { AwarenessStore } from '../yjs/index.js';
-import { blob, indexer, test, WorkspaceAddonType } from './addon/index.js';
+import {
+  blob,
+  config,
+  indexer,
+  test,
+  WorkspaceAddonType,
+} from './addon/index.js';
 import { type PageMeta, WorkspaceMeta } from './meta.js';
 import { Page } from './page.js';
 import { Store, type StoreOptions } from './store.js';
@@ -16,6 +22,7 @@ export type WorkspaceOptions = StoreOptions & {
 @blob
 @indexer
 @test
+@config
 export class Workspace extends WorkspaceAddonType {
   static Y = Y;
   protected _store: Store;

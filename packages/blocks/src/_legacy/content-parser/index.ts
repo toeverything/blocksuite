@@ -15,7 +15,6 @@ import {
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
-import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
@@ -519,13 +518,10 @@ export class ContentParser {
       ];
     }
 
-    if (file.size > MAX_ATTACHMENT_SIZE) {
+    const maxSize = this._page.workspace.config.get('attachmentMaxFileSize');
+    if (file.size > maxSize) {
       toast(
-        `You can only upload files less than ${humanFileSize(
-          MAX_ATTACHMENT_SIZE,
-          true,
-          0
-        )}`
+        `You can only upload files less than ${humanFileSize(maxSize, true, 0)}`
       );
       return [];
     }
