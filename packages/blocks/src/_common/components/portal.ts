@@ -203,6 +203,27 @@ export type AdvancedPortalOptions = Omit<
 };
 
 /**
+ * Where el is the DOM element you'd like to test for visibility
+ */
+function isElementVisible(el: Element) {
+  // The API is not stable, so we need to check the existence of the function first
+  // See also https://caniuse.com/?search=checkVisibility
+  if (el.checkVisibility) {
+    // See https://drafts.csswg.org/cssom-view-1/#dom-element-checkvisibility
+    return el.checkVisibility();
+  }
+  // Fallback to the old way
+  // Remove this when the `checkVisibility` API is stable
+  if (!el.isConnected) return false;
+
+  if (el instanceof HTMLElement) {
+    // See https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
+    return !(el.offsetParent === null);
+  }
+  return true;
+}
+
+/**
  * Similar to `createSimplePortal`, but supports auto update position.
  *
  * The template should be a **static** template since it will not be re-rendered.
@@ -285,7 +306,7 @@ export function createLitPortal({
     if (
       computePositionOptions.abortWhenRefRemoved !== false &&
       referenceElement instanceof Element &&
-      !referenceElement.isConnected
+      !isElementVisible(referenceElement)
     ) {
       abortController.abort();
     }

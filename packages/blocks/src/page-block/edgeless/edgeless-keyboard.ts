@@ -115,20 +115,22 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
             this._setEdgelessTool(pageElement, { type: 'frame' });
           }
         },
-        'Mod-g': () => {
+        'Mod-g': ctx => {
           if (
             this.pageElement.selectionManager.elements.length > 1 &&
             !this.pageElement.selectionManager.editing
           ) {
+            ctx.get('keyboardState').event.preventDefault();
             pageElement.surface.group.createGroupOnSelected();
           }
         },
-        'Shift-Mod-g': () => {
+        'Shift-Mod-g': ctx => {
           const { selectionManager, surface } = this.pageElement;
           if (
             selectionManager.elements.length === 1 &&
             selectionManager.firstElement instanceof GroupElement
           ) {
+            ctx.get('keyboardState').event.preventDefault();
             surface.group.ungroup(selectionManager.firstElement);
           }
         },

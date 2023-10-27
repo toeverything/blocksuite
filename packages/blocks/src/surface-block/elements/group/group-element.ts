@@ -41,6 +41,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     super.init();
 
     const { surface } = this;
+    surface.updateElementLocalRecord(this.id, { showTitle: true });
     this._cachedId = this.id;
     this.childElements.forEach(ele => {
       surface.setGroupParent(ele, this.id);

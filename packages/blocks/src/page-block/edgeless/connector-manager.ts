@@ -660,7 +660,7 @@ function getNextPoint(
   return result;
 }
 
-function computeNextStartEndPoint(
+function computeNextStartEndpoint(
   startPoint: PointLocation,
   endPoint: PointLocation,
   startBound: Bound | null,
@@ -948,7 +948,7 @@ export class ConnectorPathGenerator {
     const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 
     const [startOffset, endOffset] = computeOffset(startBound, endBound);
-    const [nextStartPoint, lastEndPoint] = computeNextStartEndPoint(
+    const [nextStartPoint, lastEndPoint] = computeNextStartEndpoint(
       startPoint,
       endPoint,
       startBound,
