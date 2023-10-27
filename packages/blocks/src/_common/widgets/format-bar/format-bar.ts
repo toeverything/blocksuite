@@ -78,9 +78,8 @@ export class AffineFormatBarWidget extends WidgetElement {
     if (layout) return false;
 
     if (
-      !this._selectedBlockElements[0] ||
-      (this.displayType === 'block' &&
-        this._selectedBlockElements[0].flavour === 'affine:surface-ref')
+      this.displayType === 'block' &&
+      this._selectedBlockElements?.[0].flavour === 'affine:surface-ref'
     ) {
       return false;
     }
