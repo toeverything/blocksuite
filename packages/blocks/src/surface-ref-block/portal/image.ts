@@ -5,8 +5,8 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { ImageBlockModel } from '../../index.js';
-import { Bound } from '../../index.js';
+import type { ImageBlockModel } from '../../image-block/image-model.js';
+import { Bound } from '../../surface-block/utils/bound.js';
 
 @customElement('surface-ref-image-portal')
 export class SurfaceRefImagePortal extends WithDisposable(ShadowlessElement) {
