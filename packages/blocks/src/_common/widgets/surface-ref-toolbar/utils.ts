@@ -3,9 +3,9 @@ import type { Page } from '@blocksuite/store';
 
 import { CLIPBOARD_MIMETYPE } from '../../../_legacy/clipboard/utils/pure.js';
 import { ContentParser } from '../../../content-parser.js';
-import type { SurfaceRefBlockComponent } from '../../../index.js';
 import { Bound, type EdgelessElement, type Renderer } from '../../../index.js';
 import { isTopLevelBlock } from '../../../page-block/edgeless/utils/query.js';
+import type { SurfaceRefBlockComponent } from '../../../surface-ref-block/index.js';
 
 export const edgelessToBlob = async (
   page: Page,
