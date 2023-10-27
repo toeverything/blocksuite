@@ -46,6 +46,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
   protected override render() {
     if (!this.show) return nothing;
+
     const { viewport } = this.surface;
     const notes = this.surface.getblocks(NOTE).filter(note => !note.hidden);
     const points: [IVec, IVec][] = [];
@@ -61,6 +62,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
       );
       points.push([start, end]);
     }
+
     return repeat(
       points,
       (_, index) => index,
@@ -97,18 +99,18 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
         return svg`
           <svg style=${style} width="${width}px" height="${height}px" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-          <marker
-      id="arrow"
-      refX="10"
-      refY="10"
-      markerWidth="10"
-      markerHeight="20"
-      orient="auto"
-      >
-      <path d="M 2 2 L 10 10 L 2 18" fill="none" stroke="var(--affine-black-10)" stroke-linecap="round" stroke-linejoin="round" />
-    </marker>
-  </defs>
+            <defs>
+              <marker
+                id="arrow"
+                refX="10"
+                refY="10"
+                markerWidth="10"
+                markerHeight="20"
+                orient="auto"
+              >
+                <path d="M 2 2 L 10 10 L 2 18" fill="none" stroke="var(--affine-black-10)" stroke-linecap="round" stroke-linejoin="round" />
+              </marker>
+            </defs>
 
             <line
               x1="${newstart[0]}"

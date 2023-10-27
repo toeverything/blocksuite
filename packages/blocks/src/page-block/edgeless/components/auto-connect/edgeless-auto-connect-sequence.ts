@@ -10,6 +10,7 @@ import type { SurfaceBlockComponent } from '../../../../surface-block/surface-bl
 import { isNoteBlock } from '../../utils/query.js';
 
 const { NOTE } = EdgelessBlockType;
+
 @customElement('edgeless-auto-connect-sequence')
 export class EdgelessAutoConnectSequence extends WithDisposable(LitElement) {
   static override styles = css`
@@ -61,9 +62,11 @@ export class EdgelessAutoConnectSequence extends WithDisposable(LitElement) {
 
   protected override render() {
     if (!this.show) return nothing;
+
     const { viewport } = this.surface;
     const { zoom } = viewport;
     const notes = this.surface.getblocks(NOTE).filter(note => !note.hidden);
+
     return repeat(
       notes,
       note => note.id,
@@ -77,6 +80,7 @@ export class EdgelessAutoConnectSequence extends WithDisposable(LitElement) {
             right + height - 14
           }px)`,
         });
+
         return html`
           <div class="edgeless-auto-connect-sequence" style=${style}>
             ${index + 1}

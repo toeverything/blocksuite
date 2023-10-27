@@ -91,6 +91,7 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
 
   @query('edgeless-tool-icon-button')
   private _colorSelectorButton!: HTMLDivElement;
+
   @query('edgeless-color-panel')
   private _colorSelector!: HTMLDivElement;
 
