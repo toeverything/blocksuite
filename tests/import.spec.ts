@@ -348,7 +348,7 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
               <div class="bookmark-href"><img src="https://github.com/fluidicon.png"
                   class="icon bookmark-icon" />https://github.com/toeverything/AFFiNE</div>
             </div><img
-              src="https://repository-images.githubusercontent.com/519859998/a99cfab6-8d58-4c05-9523-ea31e0cda7f8"
+              src="https://repository-images.githubusercontent.com/519859998/81557da6-35e0-421d-8ad7-ec0c7a4725d2"
               class="bookmark-image" />
           </a>
           <figcaption>cccxdsdddddd</figcaption>
@@ -375,7 +375,7 @@ test(scoped`import notion html-format bookmark`, async ({ page }) => {
         'There can be more than Notion and Miro. AFFiNE is a\n                  next-gen knowledge base that brings planning, sorting and creating all together. Privacy\n                  first, open-source, customizable and ready to use. - Gi...',
       icon: 'https://github.com/fluidicon.png',
       image:
-        'https://repository-images.githubusercontent.com/519859998/a99cfab6-8d58-4c05-9523-ea31e0cda7f8',
+        'https://repository-images.githubusercontent.com/519859998/81557da6-35e0-421d-8ad7-ec0c7a4725d2',
       caption: '',
     },
   ];
