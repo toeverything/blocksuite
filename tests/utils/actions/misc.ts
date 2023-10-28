@@ -549,6 +549,7 @@ export async function initEmptyCodeBlockState(
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);
     const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
     page.captureSync();
     return { pageId, noteId, codeBlockId };
   }, codeBlockProps);

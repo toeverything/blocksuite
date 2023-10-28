@@ -323,7 +323,11 @@ test.skip('use keyboard copy inside code block copy', async ({ page }) => {
 test('use code block copy menu of code block copy whole code block', async ({
   page,
 }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_transformer_clipboard: true,
+    },
+  });
   await initEmptyCodeBlockState(page, { language: 'javascript' });
   await focusRichText(page);
 
@@ -365,7 +369,11 @@ test('use code block copy menu of code block copy whole code block', async ({
 });
 
 test('code block copy button can work', async ({ page }) => {
-  await enterPlaygroundRoom(page);
+  await enterPlaygroundRoom(page, {
+    flags: {
+      enable_transformer_clipboard: true,
+    },
+  });
   await initEmptyCodeBlockState(page);
   await focusRichText(page);
 
@@ -378,7 +386,7 @@ test('code block copy button can work', async ({ page }) => {
     '.affine-codeblock-option > icon-button:nth-child(1)'
   );
   await page.mouse.click(position.x, position.y);
-  await focusRichText(page);
+  await focusRichText(page, 1);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['useuse']);
 });
