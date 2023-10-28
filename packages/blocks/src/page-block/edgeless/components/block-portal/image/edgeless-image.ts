@@ -1,5 +1,4 @@
-import { WithDisposable } from '@blocksuite/lit';
-import { LitElement } from 'lit';
+import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
@@ -9,7 +8,9 @@ import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
 
 @customElement('edgeless-block-portal-image')
-export class EdgelessBlockPortalImage extends WithDisposable(LitElement) {
+export class EdgelessBlockPortalImage extends WithDisposable(
+  ShadowlessElement
+) {
   @property({ attribute: false })
   index!: number;
 
@@ -18,10 +19,6 @@ export class EdgelessBlockPortalImage extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
-
-  protected override createRenderRoot() {
-    return this;
-  }
 
   override firstUpdated() {
     this._disposables.add(

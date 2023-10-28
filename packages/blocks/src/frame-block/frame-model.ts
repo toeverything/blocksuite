@@ -62,6 +62,10 @@ export class FrameBlockModel
     return 0;
   }
 
+  get gridBound() {
+    return Bound.deserialize(this.xywh);
+  }
+
   containedByBounds(bound: Bound): boolean {
     return bound.contains(Bound.deserialize(this.xywh));
   }

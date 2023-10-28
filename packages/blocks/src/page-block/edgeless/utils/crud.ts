@@ -2,6 +2,8 @@ import type {
   Connectable,
   EdgelessElement,
 } from '../../../_common/utils/index.js';
+import { GroupElement } from '../../../surface-block/index.js';
+import { getElementsFromGroup } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { isConnectable, isNoteBlock } from './query.js';
 
@@ -16,6 +18,12 @@ export function deleteElements(
         element as Connectable,
       ]);
       connectors.forEach(connector => set.add(connector));
+    }
+
+    if (element instanceof GroupElement) {
+      getElementsFromGroup(element).forEach(child => {
+        set.add(child);
+      });
     }
   });
 

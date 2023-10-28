@@ -7,12 +7,7 @@ import {
   type NoteChildrenFlavour,
 } from '../../../../../_common/utils/index.js';
 import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
-import {
-  NOTE_MENU_ITEMS,
-  NOTE_MENU_WIDTH,
-  TOP_END_TOOLTIP_TYPE,
-  TOP_START_TOOLTIP_TYPE,
-} from './note-menu-config.js';
+import { NOTE_MENU_ITEMS, NOTE_MENU_WIDTH } from './note-menu-config.js';
 
 @customElement('edgeless-note-menu')
 export class EdgelessNoteMenu extends WithDisposable(LitElement) {
@@ -72,16 +67,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
     });
   }
 
-  private _getTooltipPosition(childType: string | null) {
-    if (!childType) return 'top';
-
-    return TOP_END_TOOLTIP_TYPE.includes(childType)
-      ? 'top-end'
-      : TOP_START_TOOLTIP_TYPE.includes(childType)
-      ? 'top-start'
-      : 'top';
-  }
-
   override render() {
     if (this.edgelessTool.type !== 'note') return nothing;
 
@@ -99,7 +84,6 @@ export class EdgelessNoteMenu extends WithDisposable(LitElement) {
                   .activeMode=${'background'}
                   .iconContainerPadding=${2}
                   .tooltip=${item.tooltip}
-                  .tipPosition=${this._getTooltipPosition(item.childType)}
                   @click=${() =>
                     this._updateNoteTool(
                       item.childFlavour,

@@ -5,6 +5,8 @@ import type { ConnectorTool } from '../../../../_common/utils/index.js';
 import {
   type Connection,
   type ConnectorElement,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
   type IVec,
   PhasorElementType,
   StrokeStyle,
@@ -55,6 +57,8 @@ export class ConnectorToolController extends EdgelessToolController<ConnectorToo
       strokeStyle: StrokeStyle.Solid,
       source: this._source,
       target: { position: this._startPoint },
+      frontEndpointStyle: DEFAULT_FRONT_END_POINT_STYLE,
+      rearEndpointStyle: DEFAULT_REAR_END_POINT_STYLE,
     });
     this._connector = _surface.pickById(id) as unknown as ConnectorElement;
   }

@@ -70,6 +70,7 @@ export class NoteBlockModel
   implements IEdgelessElement
 {
   override flavour!: EdgelessBlockType.NOTE;
+  gridBound!: Bound;
 
   get connectable() {
     return true;
@@ -82,6 +83,7 @@ export class NoteBlockModel
   get rotate() {
     return 0;
   }
+
   containedByBounds!: (_: Bound) => boolean;
   getNearestPoint!: (_: IVec) => IVec;
   intersectWithLine!: (_: IVec, _1: IVec) => PointLocation[] | null;

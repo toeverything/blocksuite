@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import type { FrameBlockModel } from '../../../index.js';
+import type { FrameBlockModel, GroupElement } from '../../../index.js';
 import { ShapeElement } from '../../../surface-block/index.js';
 import {
   Bound,
@@ -15,6 +15,7 @@ import {
   GET_DEFAULT_TEXT_COLOR,
 } from '../components/panel/color-panel.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
+import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
@@ -27,7 +28,7 @@ export type CANVAS_TEXT_FONT =
   | typeof GENERAL_CANVAS_FONT_FAMILY
   | typeof SCRIBBLED_CANVAS_FONT_FAMILY;
 
-export function mountTextEditor(
+export function mountTextElementEditor(
   textElement: TextElement,
   edgeless: EdgelessPageBlockComponent,
   focusCoord?: IModelCoord
@@ -55,7 +56,7 @@ export function mountTextEditor(
   });
 }
 
-export function mountShapeEditor(
+export function mountShapeTextEditor(
   shapeElement: ShapeElement,
   edgeless: EdgelessPageBlockComponent
 ) {
@@ -81,7 +82,7 @@ export function mountShapeEditor(
   });
 }
 
-export function mountFrameEditor(
+export function mountFrameTitleEditor(
   frame: FrameBlockModel,
   edgeless: EdgelessPageBlockComponent
 ) {
@@ -92,6 +93,21 @@ export function mountFrameEditor(
   edgeless.pageBlockContainer.appendChild(frameEditor);
   edgeless.tools.switchToDefaultMode({
     elements: [frame.id],
+    editing: true,
+  });
+}
+
+export function mountGroupTitleEditor(
+  group: GroupElement,
+  edgeless: EdgelessPageBlockComponent
+) {
+  const groupEditor = new EdgelessGroupTitleEditor();
+  groupEditor.group = group;
+  groupEditor.edgeless = edgeless;
+
+  edgeless.pageBlockContainer.appendChild(groupEditor);
+  edgeless.tools.switchToDefaultMode({
+    elements: [group.id],
     editing: true,
   });
 }
@@ -122,7 +138,7 @@ export function addText(
     const textElement = edgeless.surface.pickById(id);
     assertExists(textElement);
     if (textElement instanceof TextElement) {
-      mountTextEditor(textElement, edgeless);
+      mountTextElementEditor(textElement, edgeless);
     }
   }
 }

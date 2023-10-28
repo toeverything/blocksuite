@@ -80,6 +80,7 @@ export const COLOR_VARIABLES = [
   '--affine-palette-shape-black',
   '--affine-palette-shape-grey',
   '--affine-tooltip',
+  '--affine-blue',
 ];
 
 export const SIZE_VARIABLES = [

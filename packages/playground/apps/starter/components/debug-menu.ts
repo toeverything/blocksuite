@@ -35,6 +35,7 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { Pane } from 'tweakpane';
 
+import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
 // @ts-ignore
 import { registerFormatBarCustomElement } from './custom-format-bar';
 import type { CustomNavigationPanel } from './custom-navigation-panel.js';
@@ -146,6 +147,9 @@ export class DebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   navigationPanel!: CustomNavigationPanel;
+
+  @property({ attribute: false })
+  copilotPanel!: CustomCopilotPanel;
 
   @state()
   private _connected = true;
@@ -259,6 +263,10 @@ export class DebugMenu extends ShadowlessElement {
 
   private _toggleNavigationPanel() {
     this.navigationPanel.toggleDisplay();
+  }
+
+  private _toggleCopilotPanel() {
+    this.copilotPanel.toggleDisplay();
   }
 
   private _switchOffsetMode() {
@@ -705,6 +713,20 @@ export class DebugMenu extends ShadowlessElement {
               size="small"
               content=""
               @click=${this._toggleNavigationPanel}
+            >
+              <sl-icon name="list"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip
+            content="🚧 Toggle copilot panel"
+            placement="bottom"
+            hoist
+          >
+            <sl-button
+              size="small"
+              content=""
+              @click=${this._toggleCopilotPanel}
             >
               <sl-icon name="list"></sl-icon>
             </sl-button>
