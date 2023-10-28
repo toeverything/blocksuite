@@ -1574,3 +1574,35 @@ test('paragraph indent and delete in line start', async ({ page }) => {
     noteId
   );
 });
+
+test('delete at the start of paragraph (multiple notes)', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await page.evaluate(() => {
+    const { page } = window;
+
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
+    });
+    page.addBlock('affine:surface', {}, pageId);
+
+    ['123', '456'].forEach(text => {
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      page.addBlock(
+        'affine:paragraph',
+        {
+          text: new page.Text(text),
+        },
+        noteId
+      );
+    });
+
+    page.resetHistory();
+  });
+
+  await assertBlockCount(page, 'note', 2);
+
+  await assertRichTexts(page, ['123', '456']);
+  await setSelection(page, 5, 0, 5, 0);
+  await pressBackspace(page);
+  await assertRichTexts(page, ['123456']);
+});

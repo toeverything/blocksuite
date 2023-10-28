@@ -16,12 +16,14 @@ import type { HitTestOptions } from '../../../../surface-block/elements/edgeless
 import {
   Bound,
   ConnectorElement,
+  GroupElement,
   type IVec,
   type PhasorElement,
   ShapeElement,
   TextElement,
   Vec,
 } from '../../../../surface-block/index.js';
+import { getElementsFromGroup } from '../../../../surface-block/managers/group-manager.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../../components/panel/color-panel.js';
 import { isConnectorAndBindingsAllSelected } from '../../connector-manager.js';
 import { edgelessElementsBound } from '../../utils/bound-utils.js';
@@ -34,9 +36,10 @@ import {
 } from '../../utils/query.js';
 import {
   addText,
-  mountFrameEditor,
-  mountShapeEditor,
-  mountTextEditor,
+  mountFrameTitleEditor,
+  mountGroupTitleEditor,
+  mountShapeTextEditor,
+  mountTextElementEditor,
 } from '../../utils/text.js';
 import { EdgelessToolController } from './index.js';
 
@@ -110,8 +113,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
 
   private _pick(x: number, y: number, options?: HitTestOptions) {
     const { surface } = this._edgeless;
-    const [modelX, modelY] = surface.viewport.toModelCoord(x, y);
-    return surface.pickTop(modelX, modelY, options);
+    return surface.pickTopWithGroup(
+      surface.viewport.toModelCoord(x, y),
+      options
+    );
   }
 
   private _setNoneSelectionState() {
@@ -275,15 +280,22 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
           e.x,
           e.y
         );
-        mountTextEditor(selected, this._edgeless, { x: modelX, y: modelY });
+        mountTextElementEditor(selected, this._edgeless, {
+          x: modelX,
+          y: modelY,
+        });
         return;
       }
       if (selected instanceof ShapeElement) {
-        mountShapeEditor(selected, this._edgeless);
+        mountShapeTextEditor(selected, this._edgeless);
         return;
       }
       if (isFrameBlock(selected)) {
-        mountFrameEditor(selected, this._edgeless);
+        mountFrameTitleEditor(selected, this._edgeless);
+        return;
+      }
+      if (selected instanceof GroupElement) {
+        mountGroupTitleEditor(selected, this._edgeless);
         return;
       }
     }
@@ -457,16 +469,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     // Determine the drag type based on the current state and event
     let dragType = this._determineDragType(e);
 
-    const elements = this.selection.elements;
-    const toBeMoved = new Set(elements);
-    elements.forEach(element => {
-      if (isFrameBlock(element)) {
-        this._surface.frame
-          .getElementsInFrame(element)
-          .forEach(ele => toBeMoved.add(ele));
-      }
-    });
-    this._toBeMoved = Array.from(toBeMoved);
+    this.prepareMovedElements();
     // If alt key is pressed and content is moving, clone the content
     if (e.keys.alt && dragType === DefaultModeDragType.ContentMoving) {
       dragType = DefaultModeDragType.AltCloning;
@@ -476,6 +479,21 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     this._addFrames();
     // Set up drag state
     this.initializeDragState(e, dragType);
+  }
+
+  private prepareMovedElements() {
+    const elements = this.selection.elements;
+    const toBeMoved = new Set(elements);
+    elements.forEach(element => {
+      if (isFrameBlock(element)) {
+        this._surface.frame
+          .getElementsInFrame(element)
+          .forEach(ele => toBeMoved.add(ele));
+      } else if (element instanceof GroupElement) {
+        getElementsFromGroup(element).forEach(ele => toBeMoved.add(ele));
+      }
+    });
+    this._toBeMoved = Array.from(toBeMoved);
   }
 
   initializeDragState(e: PointerEventState, dragType: DefaultModeDragType) {

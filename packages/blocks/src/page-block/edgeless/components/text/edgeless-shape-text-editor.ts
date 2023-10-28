@@ -6,16 +6,12 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
 import { isCssVariable } from '../../../../_common/theme/css-variables.js';
+import { SHAPE_TEXT_PADDING } from '../../../../surface-block/elements/shape/consts.js';
 import type {
   PhasorElementType,
   ShapeElement,
 } from '../../../../surface-block/index.js';
-import {
-  Bound,
-  SHAPE_TEXT_PADDING,
-  toRadian,
-  Vec,
-} from '../../../../surface-block/index.js';
+import { Bound, toRadian, Vec } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getSelectedRect } from '../../utils/query.js';
 

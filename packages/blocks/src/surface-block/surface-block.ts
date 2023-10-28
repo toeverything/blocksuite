@@ -53,17 +53,20 @@ import {
   type IPhasorElementType,
   isPhasorElementType,
 } from './elements/edgeless-element.js';
+import { GROUP_ROOT_ID } from './elements/group/consts.js';
 import {
   BrushElement,
   ConnectorElement,
   ElementCtors,
   ElementDefaultProps,
+  GroupElement,
   type IPhasorElementLocalRecord,
   type PhasorElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import { compare } from './grid.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
+import { EdgelessGroupManager } from './managers/group-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -147,10 +150,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     id,
     IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
   >();
+  private _groupMap = new Map<string, string>(); // { blockId: groupId }
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
+  group!: EdgelessGroupManager;
   compare = compare;
 
   private _defaultBatch = 'a1';
@@ -189,6 +194,20 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.getblocks(flavour).sort(this.compare);
   }
 
+  getGroupParent(element: id | EdgelessElement) {
+    const id = typeof element === 'string' ? element : element.id;
+    return this._groupMap.get(id) ?? GROUP_ROOT_ID;
+  }
+
+  setGroupParent(element: id | EdgelessElement, groupId: string) {
+    const id = typeof element === 'string' ? element : element.id;
+    if (groupId === GROUP_ROOT_ID) {
+      this._groupMap.delete(id);
+      return;
+    }
+    this._groupMap.set(id, groupId);
+  }
+
   get blocks() {
     return [
       ...this.getblocks(EdgelessBlockType.FRAME),
@@ -222,6 +241,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.connector = new EdgelessConnectorManager(edgeless);
     this.frame = new EdgelessFrameManager(edgeless);
     this.snap = new EdgelessSnapManager(edgeless);
+    this.group = new EdgelessGroupManager(this);
 
     this.init();
   }
@@ -606,7 +626,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private _syncFromExistingContainer() {
-    this._transact(() => {
+    this.transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as PhasorElementType;
@@ -628,6 +648,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, this);
+    element.init();
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
     this._elements.set(element.id, element);
@@ -680,6 +701,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, this);
+      element.init();
       element.computedValue = this.getCSSPropertyValue;
       element.mount(this._renderer);
       this._elements.set(element.id, element);
@@ -691,7 +713,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     } else if (type.action === 'delete') {
       const element = this._elements.get(id);
       assertExists(element);
-
+      const group = this.pickById(this.getGroupParent(id));
+      if (group) {
+        this.group.removeChild(<GroupElement>group, id);
+      }
       element.unmount();
       this._elements.delete(id);
       this.deleteElementLocalRecord(id);
@@ -700,7 +725,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
   };
 
-  private _transact(callback: () => void) {
+  transact(callback: () => void) {
     const doc = this._yContainer.doc as Y.Doc;
     doc.transact(callback, doc.clientID);
   }
@@ -772,7 +797,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         seed: randomSeed(),
       };
 
-      this._transact(() => {
+      this.transact(() => {
         for (const [key, value] of Object.entries(props)) {
           if (
             (key === 'text' || key === 'title') &&
@@ -820,7 +845,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (isTopLevelBlock(element)) {
       this.page.updateBlock(element, properties);
     } else {
-      this._transact(() => {
+      this.transact(() => {
         const element = this._elements.get(id);
         assertExists(element);
         element.applyUpdate(properties);
@@ -846,7 +871,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (isTopLevelBlock(element)) {
       this.page.deleteBlock(element);
     } else {
-      this._transact(() => {
+      this.transact(() => {
         this._yContainer.delete(id);
       });
     }
@@ -907,9 +932,45 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     x: number,
     y: number,
     options?: HitTestOptions
-  ): SurfaceElement | null {
+  ): EdgelessElement | null {
     const results = this.pickByPoint(x, y, options);
     return results[results.length - 1] ?? this.pickTopBlock([x, y]);
+  }
+
+  pickTopWithGroup(point: IVec, options?: HitTestOptions) {
+    const selectionManager = this.edgeless.selectionManager;
+    const results: EdgelessElement[] = this.pickByPoint(
+      point[0],
+      point[1],
+      options
+    );
+    const block = this.pickTopBlock(point);
+    if (block) {
+      results.unshift(block);
+    }
+    let picked: null | EdgelessElement = results[results.length - 1];
+    const first = picked;
+    if (selectionManager.activeGroup) {
+      let index = results.length - 1;
+      while (
+        picked === selectionManager.activeGroup ||
+        (picked instanceof GroupElement &&
+          this.group.isDescendant(selectionManager.activeGroup, picked))
+      ) {
+        picked = results[--index];
+      }
+    } else if (picked) {
+      let index = results.length - 1;
+      while (this.getGroupParent(picked.id) !== GROUP_ROOT_ID) {
+        if (--index < 0) {
+          picked = null;
+          break;
+        }
+        picked = results[index];
+      }
+    }
+
+    return picked ?? first;
   }
 
   pickByBound(bound: Bound): EdgelessElement[] {
@@ -917,7 +978,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       ...this._renderer.gridManager.search(bound),
       ...this.blocks,
     ];
-    const picked = candidates.filter(element => element.boxSelect(bound));
+    const picked = candidates.filter(
+      element =>
+        element.boxSelect(bound) &&
+        this.getGroupParent(element.id) === GROUP_ROOT_ID
+    );
     return picked;
   }
 

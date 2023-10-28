@@ -51,7 +51,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   override firstUpdated(): void {
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
-    this.frameBlock.titleHide = true;
+    this.frameBlock.showTitle = false;
 
     this.updateComplete.then(() => {
       this.vEditor.selectAll();
@@ -90,7 +90,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.frameBlock.titleHide = false;
+    this.frameBlock.showTitle = true;
     this.edgeless.selectionManager.setSelection({
       elements: [],
       editing: false,

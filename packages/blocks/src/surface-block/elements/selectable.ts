@@ -1,5 +1,6 @@
 import { Bound } from '../utils/bound.js';
 import {
+  getBoundsWithRotation,
   getPointsFromBoundsWithRotation,
   linePolygonIntersects,
   polygonGetPointTangent,
@@ -17,6 +18,13 @@ export const EdgelessSelectableMixin = <
   originalClass: T
 ) =>
   class extends originalClass {
+    override get gridBound() {
+      const bound = Bound.deserialize(this.xywh);
+      return Bound.from(
+        getBoundsWithRotation({ ...bound, rotate: this.rotate })
+      );
+    }
+
     override containedByBounds(bounds: Bound): boolean {
       const bound = Bound.deserialize(this.xywh);
       const points = getPointsFromBoundsWithRotation({
@@ -56,6 +64,7 @@ export const EdgelessSelectableMixin = <
       )[0];
       const points = rotatePoints(bound.points, bound.center, this.rotate ?? 0);
       const tangent = polygonGetPointTangent(points, rotatePoint);
+      console.log(rotatePoint, tangent);
       return new PointLocation(rotatePoint, tangent);
     }
 

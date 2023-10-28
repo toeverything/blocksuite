@@ -25,6 +25,7 @@ import {
   type SurfaceViewport,
   TextElement,
 } from '../../../surface-block/index.js';
+import { getElementsWithoutGroup } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 
 export function isTopLevelBlock(
@@ -142,31 +143,34 @@ export function getSelectedRect(selected: Selectable[]): DOMRect {
     return new DOMRect(x, y, w, h);
   }
 
-  return selected.reduce((bounds, selectable, index) => {
-    const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
-    const [x, y, w, h] = deserializeXYWH(selectable.xywh);
-    let { left, top, right, bottom } = getQuadBoundsWithRotation({
-      x,
-      y,
-      w,
-      h,
-      rotate,
-    });
+  return getElementsWithoutGroup(selected).reduce(
+    (bounds, selectable, index) => {
+      const rotate = isTopLevelBlock(selectable) ? 0 : selectable.rotate;
+      const [x, y, w, h] = deserializeXYWH(selectable.xywh);
+      let { left, top, right, bottom } = getQuadBoundsWithRotation({
+        x,
+        y,
+        w,
+        h,
+        rotate,
+      });
 
-    if (index !== 0) {
-      left = Math.min(left, bounds.left);
-      top = Math.min(top, bounds.top);
-      right = Math.max(right, bounds.right);
-      bottom = Math.max(bottom, bounds.bottom);
-    }
+      if (index !== 0) {
+        left = Math.min(left, bounds.left);
+        top = Math.min(top, bounds.top);
+        right = Math.max(right, bounds.right);
+        bottom = Math.max(bottom, bounds.bottom);
+      }
 
-    bounds.x = left;
-    bounds.y = top;
-    bounds.width = right - left;
-    bounds.height = bottom - top;
+      bounds.x = left;
+      bounds.y = top;
+      bounds.width = right - left;
+      bounds.height = bottom - top;
 
-    return bounds;
-  }, new DOMRect());
+      return bounds;
+    },
+    new DOMRect()
+  );
 }
 
 export function getSelectableBounds(selected: Selectable[]): Map<
@@ -183,18 +187,14 @@ export function getSelectableBounds(selected: Selectable[]): Map<
       rotate: number;
     }
   >();
-  for (const s of selected) {
-    const bound = Bound.deserialize(s.xywh);
-    let rotate = 0;
+  getElementsWithoutGroup(selected).forEach(ele => {
+    const bound = Bound.deserialize(ele.xywh);
 
-    if (!isTopLevelBlock(s)) {
-      rotate = s.rotate ?? 0;
-    }
-
-    bounds.set(s.id, {
+    bounds.set(ele.id, {
       bound,
-      rotate,
+      rotate: ele.rotate,
     });
-  }
+  });
+
   return bounds;
 }

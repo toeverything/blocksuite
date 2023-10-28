@@ -25,6 +25,7 @@ import type {
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
+  matchFlavours,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
@@ -32,6 +33,7 @@ import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
+import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
@@ -43,7 +45,6 @@ import {
   type PhasorElement,
   serializeXYWH,
   Vec,
-  ZOOM_MAX,
   ZOOM_MIN,
 } from '../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
@@ -78,6 +79,9 @@ import { xywhArrayToObject } from './utils/convert.js';
 import { getCursorMode, isFrameBlock, isPhasorElement } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
+
+const { NOTE, IMAGE } = EdgelessBlockType;
+
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
   viewportUpdated: Slot<{ zoom: number; center: IVec }>;
@@ -265,13 +269,10 @@ export class EdgelessPageBlockComponent extends BlockElement<
       page.slots.yBlockUpdated.on(({ id, props }) => {
         const block = page.getBlockById(id);
         if (
-          block &&
-          (block.flavour === EdgelessBlockType.NOTE ||
-            block.flavour === EdgelessBlockType.IMAGE)
+          matchFlavours(block, [NOTE, IMAGE]) &&
+          ('prop:xywh' in props || 'prop:rotate' in props)
         ) {
-          if ('prop:xywh' in props || 'prop:rotate' in props) {
-            this.slots.elementSizeUpdated.emit(id);
-          }
+          this.slots.elementSizeUpdated.emit(id);
         }
       })
     );
@@ -380,7 +381,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     } = options;
     const [x, y] = this.surface.toModelCoord(point.x, point.y);
     return this.surface.addElement(
-      EdgelessBlockType.NOTE,
+      NOTE,
       {
         xywh: serializeXYWH(x - offsetX, y - offsetY, width, height),
       },
@@ -442,7 +443,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     point = this.surface.toModelCoord(point[0], point[1]);
     const bound = new Bound(point[0], point[1], options.width, options.height);
     return this.surface.addElement(
-      EdgelessBlockType.IMAGE,
+      IMAGE,
       { ...model, xywh: bound.serialize() },
       this.surface.model
     );
@@ -458,7 +459,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     for (const { file, sourceId } of fileInfos) {
       const size = await readImageSize(file);
       models.push({
-        flavour: EdgelessBlockType.IMAGE,
+        flavour: IMAGE,
         sourceId,
         ...size,
       });
@@ -473,7 +474,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         model.height ?? 0
       );
       return this.surface.addElement(
-        EdgelessBlockType.IMAGE,
+        IMAGE,
         {
           xywh: bound.serialize(),
           sourceId: model.sourceId,
@@ -493,9 +494,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.surface
-      .getblocks(EdgelessBlockType.NOTE)
-      .find(b => b.id === noteId);
+    const noteBlock = this.surface.getblocks(NOTE).find(b => b.id === noteId);
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
@@ -678,12 +677,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
         (width - FIT_TO_SCREEN_PADDING - (pr + pl)) / bound.w,
         (height - FIT_TO_SCREEN_PADDING - (pt + pb)) / bound.h
       );
-      zoom = clamp(zoom, ZOOM_MIN, ZOOM_MAX);
+      zoom = clamp(zoom, ZOOM_MIN, ZOOM_INITIAL);
 
       centerX = bound.x + (bound.w + pr / zoom) / 2 - pl / zoom / 2;
       centerY = bound.y + (bound.h + pb / zoom) / 2 - pt / zoom / 2;
     } else {
-      zoom = 1;
+      zoom = ZOOM_INITIAL;
     }
     return { zoom, centerX, centerY };
   }

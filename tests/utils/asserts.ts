@@ -36,6 +36,9 @@ import type { VirgoRootElement } from '../../packages/virgo/src/index.js';
 import {
   getConnectorPath,
   getEdgelessSelectedRectModel,
+  getGroupChildrenIds,
+  getGroupIds,
+  getPhasorElementsCount,
   getSelectedBound,
   getZoomLevel,
 } from './actions/edgeless.js';
@@ -190,7 +193,7 @@ export async function assertRichTexts(page: Page, texts: string[]) {
 export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
     const editor = document.querySelector(
-      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor'
+      'edgeless-text-editor,edgeless-shape-text-editor,edgeless-frame-title-editor,edgeless-group-title-editor'
     );
     if (!editor) {
       throw new Error('editor not found');
@@ -910,6 +913,25 @@ export async function assertSelectedBound(
 ) {
   const bound = await getSelectedBound(page, index);
   assertBound(bound, expected);
+}
+
+export async function assertGroupIds(page: Page, expected: string[]) {
+  const ids = await getGroupIds(page);
+  expect(ids).toEqual(expected);
+}
+
+export async function assertGroupChildrenIds(
+  page: Page,
+  expected: string[],
+  index = 0
+) {
+  const ids = await getGroupChildrenIds(page, index);
+  expect(ids).toEqual(expected);
+}
+
+export async function assertPhasorElementsCount(page: Page, expected: number) {
+  const number = await getPhasorElementsCount(page);
+  expect(number).toEqual(expected);
 }
 
 export function assertBound(received: Bound, expected: Bound) {

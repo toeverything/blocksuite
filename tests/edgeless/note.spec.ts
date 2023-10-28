@@ -691,7 +691,7 @@ test('continuous undo and redo (note block add operation) should work', async ({
   await focusRichText(page);
   await type(page, 'hello');
   await switchEditorMode(page);
-  await click(page, { x: 60, y: 450 });
+  await click(page, { x: 260, y: 450 });
   await copyByKeyboard(page);
 
   let count = await countBlock(page, 'affine-note');

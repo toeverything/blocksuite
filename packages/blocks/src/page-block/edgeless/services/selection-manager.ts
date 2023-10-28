@@ -3,6 +3,7 @@ import { SurfaceSelection } from '@blocksuite/block-std';
 import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 
 import type { Selectable } from '../../../_common/utils/index.js';
+import { GroupElement } from '../../../surface-block/elements/index.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import { edgelessElementsBound } from '../utils/bound-utils.js';
 
@@ -46,6 +47,7 @@ export class EdgelessSelectionManager {
 
   remoteCursor: Record<string, CursorSelection> = {};
   remoteSelection: Record<string, SurfaceSelection> = {};
+  private _activeGroup: GroupElement | null = null;
 
   private _selectedElements: Set<string> = new Set();
   private _remoteSelectedElements: Set<string> = new Set();
@@ -58,6 +60,14 @@ export class EdgelessSelectionManager {
     return this.state.editing;
   }
 
+  get activeGroup() {
+    return this._activeGroup;
+  }
+
+  set activeGroup(group: GroupElement | null) {
+    this._activeGroup = group;
+  }
+
   /**
    * Models of selected elements
    */
@@ -68,6 +78,10 @@ export class EdgelessSelectionManager {
       if (element && element.id) pre.push(element);
       return pre;
     }, [] as Selectable[]);
+  }
+
+  get firstElement() {
+    return this.elements[0];
   }
 
   get selectedBound() {
@@ -188,6 +202,7 @@ export class EdgelessSelectionManager {
   }
 
   setSelection(selection: SurfaceSelection | EdgelessSelectionState) {
+    const { surface } = this.container;
     const instance = this._selection.getInstance(
       'surface',
       selection.elements,
@@ -198,6 +213,24 @@ export class EdgelessSelectionManager {
       'edgeless',
       this.cursor ? [instance, this.cursor] : [instance]
     );
+
+    if (
+      selection.elements.length === 1 &&
+      this.firstElement instanceof GroupElement
+    ) {
+      this._activeGroup = this.firstElement;
+    } else {
+      if (
+        this.elements.some(ele => {
+          surface.getGroupParent(ele) !== this._activeGroup?.id;
+        }) ||
+        this.elements.length === 0
+      ) {
+        this._activeGroup = null;
+      }
+    }
+
+    surface.refresh();
   }
 
   setCursor(cursor: CursorSelection | CursorSelectionState) {
