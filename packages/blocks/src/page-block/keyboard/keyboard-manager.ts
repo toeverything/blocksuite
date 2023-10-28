@@ -1,4 +1,5 @@
 import type { BlockSelection } from '@blocksuite/block-std';
+import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
@@ -8,11 +9,20 @@ export class PageKeyboardManager {
       {
         'Mod-z': ctx => {
           ctx.get('defaultState').event.preventDefault();
+
           if (this._page.canUndo) {
             this._page.undo();
           }
         },
         'Shift-Mod-z': ctx => {
+          ctx.get('defaultState').event.preventDefault();
+          if (this._page.canRedo) {
+            this._page.redo();
+          }
+        },
+        'Control-y': ctx => {
+          if (!IS_WINDOWS) return;
+
           ctx.get('defaultState').event.preventDefault();
           if (this._page.canRedo) {
             this._page.redo();

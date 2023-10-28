@@ -21,11 +21,8 @@ import {
   isOverlap,
   type IVec,
   lineIntersects,
-  linePolygonIntersects,
   Overlay,
   PointLocation,
-  polygonGetPointTangent,
-  polygonNearestPoint,
   sign,
   toRadian,
   Vec,
@@ -33,7 +30,6 @@ import {
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { isVecZero } from '../../surface-block/utils/math-utils.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
-import { getEdgelessElement, isTopLevelBlock } from './utils/query.js';
 
 export type OrthogonalConnectorInput = {
   startBound: Bound | null;
@@ -44,9 +40,6 @@ export type OrthogonalConnectorInput = {
 
 function rBound(ele: Connectable, anti = false): IBound {
   const bound = Bound.deserialize(ele.xywh);
-  if (isTopLevelBlock(ele)) {
-    return { ...bound, rotate: 0 };
-  }
   return { ...bound, rotate: anti ? -ele.rotate : ele.rotate };
 }
 
@@ -80,7 +73,8 @@ export function getAnchors(ele: Connectable) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
-  const rotate = isTopLevelBlock(ele) ? 0 : ele.rotate;
+  const rotate = ele.rotate;
+
   [
     [bound.center[0], bound.y - offset],
     [bound.center[0], bound.maxY + offset],
@@ -89,7 +83,7 @@ export function getAnchors(ele: Connectable) {
   ]
     .map(vec => getPointFromBoundsWithRotation({ ...bound, rotate }, vec))
     .forEach(vec => {
-      const rst = connectableIntersectLine(ele, [bound.center, vec]);
+      const rst = ele.intersectWithLine(bound.center, vec);
       assertExists(rst);
       const originPoint = getPointFromBoundsWithRotation(
         { ...bound, rotate: -rotate },
@@ -100,49 +94,20 @@ export function getAnchors(ele: Connectable) {
   return anchors;
 }
 
-export function connectableIntersectLine(ele: Connectable, line: IVec[]) {
-  if (isTopLevelBlock(ele)) {
-    return linePolygonIntersects(
-      line[0],
-      line[1],
-      Bound.deserialize(ele.xywh).points
-    );
-  } else {
-    return ele.intersectWithLine(line[0], line[1]);
-  }
-}
-
 function getConnectableRelativePosition(
   connectable: Connectable,
   position: IVec
 ) {
-  if (isTopLevelBlock(connectable)) {
-    const bound = Bound.deserialize(connectable.xywh);
-    const point = bound.getRelativePoint(position);
-    const tangent = polygonGetPointTangent(bound.points, point);
-    return new PointLocation(point, tangent);
-  } else {
-    const location = connectable.getRelativePointLocation(position);
-    if (isVecZero(Vec.sub(position, [0, 0.5])))
-      location.tangent = Vec.rot([0, -1], toRadian(connectable.rotate));
-    else if (isVecZero(Vec.sub(position, [1, 0.5])))
-      location.tangent = Vec.rot([0, 1], toRadian(connectable.rotate));
-    else if (isVecZero(Vec.sub(position, [0.5, 0])))
-      location.tangent = Vec.rot([1, 0], toRadian(connectable.rotate));
-    else if (isVecZero(Vec.sub(position, [0.5, 1])))
-      location.tangent = Vec.rot([-1, 0], toRadian(connectable.rotate));
-    return location;
-  }
-}
-
-function connectableHitTest(connectable: Connectable, point: IVec) {
-  if (isTopLevelBlock(connectable)) {
-    return Bound.deserialize(connectable.xywh).isPointInBound(point);
-  } else {
-    return connectable.hitTest(point[0], point[1], {
-      ignoreTransparent: false,
-    });
-  }
+  const location = connectable.getRelativePointLocation(position);
+  if (isVecZero(Vec.sub(position, [0, 0.5])))
+    location.tangent = Vec.rot([0, -1], toRadian(connectable.rotate));
+  else if (isVecZero(Vec.sub(position, [1, 0.5])))
+    location.tangent = Vec.rot([0, 1], toRadian(connectable.rotate));
+  else if (isVecZero(Vec.sub(position, [0.5, 0])))
+    location.tangent = Vec.rot([1, 0], toRadian(connectable.rotate));
+  else if (isVecZero(Vec.sub(position, [0.5, 1])))
+    location.tangent = Vec.rot([-1, 0], toRadian(connectable.rotate));
+  return location;
 }
 
 export function getNearestConnectableAnchor(ele: Connectable, point: IVec) {
@@ -694,7 +659,7 @@ function getNextPoint(
   return result;
 }
 
-function computeNextStartEndPoint(
+function computeNextStartEndpoint(
   startPoint: PointLocation,
   endPoint: PointLocation,
   startBound: Bound | null,
@@ -853,7 +818,7 @@ export class EdgelessConnectorManager {
       if (result) break;
 
       // if not, check if closes to bound
-      const nearestPoint = this._getConnectableNearestPoint(connectable, point);
+      const nearestPoint = connectable.getNearestPoint(point);
       if (Vec.dist(nearestPoint, point) < 8) {
         _connectionOverlay.highlightPoint = nearestPoint;
         const originPoint = getPointFromBoundsWithRotation(
@@ -868,7 +833,12 @@ export class EdgelessConnectorManager {
       }
       if (result) break;
       // if not, check if in inside of the element
-      if (connectableHitTest(connectable, point)) {
+
+      if (
+        connectable.hitTest(point[0], point[1], {
+          ignoreTransparent: false,
+        })
+      ) {
         result = {
           id: connectable.id,
         };
@@ -887,10 +857,10 @@ export class EdgelessConnectorManager {
 
   hasRelatedElement(connecter: ConnectorElement) {
     const { source, target } = connecter;
-
+    const { surface } = this._edgeless;
     if (
-      (source.id && !getEdgelessElement(this._edgeless, source.id)) ||
-      (target.id && !getEdgelessElement(this._edgeless, target.id))
+      (source.id && !surface.pickById(source.id)) ||
+      (target.id && !surface.pickById(target.id))
     ) {
       return false;
     }
@@ -903,17 +873,6 @@ export class EdgelessConnectorManager {
     this._connectionOverlay.highlightPoint = null;
     this._connectionOverlay.bound = null;
     this._edgeless.surface.refresh();
-  }
-
-  private _getConnectableNearestPoint(connectable: Connectable, point: IVec) {
-    if (isTopLevelBlock(connectable)) {
-      return polygonNearestPoint(
-        Bound.deserialize(connectable.xywh).points,
-        point
-      );
-    } else {
-      return connectable.getNearestPoint(point);
-    }
   }
 
   updateConnection(
@@ -969,7 +928,7 @@ export class EdgelessConnectorManager {
       const start = this._getConnectorEndElement(connector, 'source');
       const end = this._getConnectorEndElement(connector, 'target');
 
-      const [startPoint, endPoint] = this._computeStartEndPoint(connector);
+      const [startPoint, endPoint] = this._computeStartEndpoint(connector);
 
       const startBound = start
         ? Bound.from(getBoundsWithRotation(rBound(start)))
@@ -1094,7 +1053,7 @@ export class EdgelessConnectorManager {
     const { startBound, endBound, startPoint, endPoint } = connectorInfo;
 
     const [startOffset, endOffset] = computeOffset(startBound, endBound);
-    const [nextStartPoint, lastEndPoint] = computeNextStartEndPoint(
+    const [nextStartPoint, lastEndPoint] = computeNextStartEndpoint(
       startPoint,
       endPoint,
       startBound,
@@ -1126,7 +1085,7 @@ export class EdgelessConnectorManager {
     ];
   }
 
-  private _computeStartEndPoint(connector: ConnectorElement) {
+  private _computeStartEndpoint(connector: ConnectorElement) {
     const { source, target } = connector;
     const start = this._getConnectorEndElement(connector, 'source');
     const end = this._getConnectorEndElement(connector, 'target');
@@ -1301,13 +1260,9 @@ export class EdgelessConnectorManager {
     const results: Connectable[] = [];
     connectors.forEach(connector => {
       if (connector.source.id === element.id && connector.target.id) {
-        results.push(
-          getEdgelessElement(this._edgeless, connector.target.id) as Connectable
-        );
+        results.push(surface.pickById(connector.target.id) as Connectable);
       } else if (connector.target.id === element.id && connector.source.id) {
-        results.push(
-          getEdgelessElement(this._edgeless, connector.source.id) as Connectable
-        );
+        results.push(surface.pickById(connector.source.id) as Connectable);
       }
     });
     return results;

@@ -16,6 +16,7 @@ import {
   type Connection,
   type ConnectorElement,
   ConnectorMode,
+  GroupElement,
   type IVec,
   normalizeDegAngle,
   Overlay,
@@ -29,7 +30,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
-import { mountShapeEditor } from '../../utils/text.js';
+import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 
 enum Direction {
@@ -304,14 +305,16 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private async _createEdgelessElement() {
+    let id;
+    const { surface } = this.edgeless;
     if (this._isShape(this.current)) {
-      return this.edgeless.surface.addElement(this.current.type, {
+      id = this.edgeless.surface.addElement(this.current.type, {
         ...this.current.serialize(),
         text: new Workspace.Y.Text(),
       });
     } else {
       const { page } = this.edgeless;
-      const id = page.addBlock(
+      id = page.addBlock(
         'affine:note',
         { background: this.current.background },
         this.edgeless.model.id
@@ -321,8 +324,12 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       assertExists(note);
       const serializedBlock = (await getBlockClipboardInfo(this.current)).json;
       await noteService.json2Block(note, serializedBlock.children);
-      return id;
     }
+    const group = surface.pickById(surface.getGroupParent(this.current));
+    if (group instanceof GroupElement) {
+      surface.group.addChild(group, id);
+    }
+    return id;
   }
 
   private async _generateElementOnClick(type: Direction) {
@@ -343,7 +350,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         }
       );
 
-      mountShapeEditor(surface.pickById(id) as ShapeElement, this.edgeless);
+      mountShapeTextEditor(surface.pickById(id) as ShapeElement, this.edgeless);
     } else {
       const model = page.getBlockById(id);
       assertExists(model);

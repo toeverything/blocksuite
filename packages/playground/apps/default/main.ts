@@ -17,7 +17,6 @@ import {
   createEditor,
   createWorkspaceOptions,
   defaultMode,
-  initDebugConfig,
   params,
   testIDBExistence,
 } from './utils.js';
@@ -25,7 +24,6 @@ import { loadPresets } from './utils/preset.js';
 import { getProviderCreators } from './utils/providers.js';
 
 const options = createWorkspaceOptions();
-initDebugConfig();
 
 // Subscribe for page update and create editor after page loaded.
 function subscribePage(workspace: Workspace) {

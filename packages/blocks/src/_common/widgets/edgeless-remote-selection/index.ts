@@ -1,4 +1,3 @@
-import { pick } from '@blocksuite/global/utils';
 import { WidgetElement } from '@blocksuite/lit';
 import type { UserInfo } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -14,6 +13,7 @@ import {
 } from '../../../page-block/edgeless/utils/query.js';
 import { remoteColorManager } from '../../../page-block/remote-color-manager/index.js';
 import { RemoteCursor } from '../../icons/index.js';
+import { pick } from '../../utils/iterable.js';
 
 export const AFFINE_EDGELESS_REMOTE_SELECTION_WIDGET =
   'affine-edgeless-remote-selection-widget';

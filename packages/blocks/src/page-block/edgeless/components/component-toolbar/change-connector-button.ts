@@ -2,7 +2,6 @@ import '../buttons/tool-icon-button.js';
 import '../panel/color-panel.js';
 import '../buttons/menu-button.js';
 
-import { countBy, maxBy } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { css, html, LitElement } from 'lit';
@@ -10,22 +9,36 @@ import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  ConnectorCWithArrowIcon,
-  ConnectorLWithArrowIcon,
-  ConnectorXWithArrowIcon,
+  ConnectorEndpointNoneIcon,
+  CurveLineIcon,
   DashLineIcon,
+  ElbowedLineIcon,
+  FlipDirectionIcon,
+  FrontEndpointArrowIcon,
+  FrontEndpointCircleIcon,
+  FrontEndpointDiamondIcon,
+  FrontEndpointTriangleIcon,
   GeneralStyleIcon,
   LineStyleIcon,
+  RearEndpointArrowIcon,
+  RearEndpointCircleIcon,
+  RearEndpointDiamondIcon,
+  RearEndpointTriangleIcon,
   ScribbledStyleIcon,
   SmallArrowDownIcon,
   StraightLineIcon,
 } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
+import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth } from '../../../../_common/utils/types.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ConnectorElement,
+  ConnectorEndpoint,
+  ConnectorEndpointStyle,
   ConnectorMode,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
   StrokeStyle,
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
@@ -94,6 +107,19 @@ function getMostCommonRough(elements: ConnectorElement[]): boolean {
   return trueCount > falseCount;
 }
 
+function getMostCommonEndpointStyle(
+  elements: ConnectorElement[],
+  end: ConnectorEndpoint
+): ConnectorEndpointStyle | null {
+  const modes = countBy(elements, (ele: ConnectorElement) =>
+    end === ConnectorEndpoint.Front
+      ? ele.frontEndpointStyle
+      : ele.rearEndpointStyle
+  );
+  const max = maxBy(Object.entries(modes), ([_k, count]) => count);
+  return max ? (max[0] as ConnectorEndpointStyle) : null;
+}
+
 @customElement('edgeless-change-connector-button')
 export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
   static override styles = [
@@ -109,6 +135,13 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
       menu-divider {
         height: 24px;
+      }
+
+      .connector-style-sub-menu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
       }
     `,
   ];
@@ -178,6 +211,68 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
     });
   }
 
+  private _setConnectorEndpointStyle(
+    end: ConnectorEndpoint,
+    style: ConnectorEndpointStyle
+  ) {
+    this.elements.forEach(ele => {
+      if (end === ConnectorEndpoint.Front) {
+        this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
+          frontEndpointStyle: style,
+        });
+      } else {
+        this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
+          rearEndpointStyle: style,
+        });
+      }
+    });
+  }
+
+  private _flipEndpointStyle(
+    frontEndpointStyle: ConnectorEndpointStyle,
+    rearEndpointStyle: ConnectorEndpointStyle
+  ) {
+    if (frontEndpointStyle === rearEndpointStyle) return;
+
+    this.elements.forEach(ele => {
+      this.surface.updateElement<PhasorElementType.CONNECTOR>(ele.id, {
+        frontEndpointStyle: rearEndpointStyle,
+        rearEndpointStyle: frontEndpointStyle,
+      });
+    });
+  }
+
+  private _getEndpointIcon(
+    end: ConnectorEndpoint,
+    style: ConnectorEndpointStyle
+  ) {
+    switch (style) {
+      case ConnectorEndpointStyle.None: {
+        return ConnectorEndpointNoneIcon;
+      }
+      case ConnectorEndpointStyle.Arrow: {
+        return end === ConnectorEndpoint.Front
+          ? FrontEndpointArrowIcon
+          : RearEndpointArrowIcon;
+      }
+      case ConnectorEndpointStyle.Triangle: {
+        return end === ConnectorEndpoint.Front
+          ? FrontEndpointTriangleIcon
+          : RearEndpointTriangleIcon;
+      }
+      case ConnectorEndpointStyle.Circle: {
+        return end === ConnectorEndpoint.Front
+          ? FrontEndpointCircleIcon
+          : RearEndpointCircleIcon;
+      }
+      case ConnectorEndpointStyle.Diamond: {
+        return end === ConnectorEndpoint.Front
+          ? FrontEndpointDiamondIcon
+          : RearEndpointDiamondIcon;
+      }
+    }
+  }
+
   override render() {
     const selectedColor = getMostCommonColor(this.elements);
     const selectedMode = getMostCommonMode(this.elements);
@@ -185,6 +280,12 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
       getMostCommonLineWidth(this.elements) ?? LineWidth.LINE_WIDTH_FOUR;
     const selectedRough = getMostCommonRough(this.elements);
     const selectedLineStyle = getMostCommonLineStyle(this.elements);
+    const selectedStartPointStyle =
+      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Front) ??
+      DEFAULT_FRONT_END_POINT_STYLE;
+    const selectedEndPointStyle =
+      getMostCommonEndpointStyle(this.elements, ConnectorEndpoint.Rear) ??
+      DEFAULT_REAR_END_POINT_STYLE;
 
     return html`
       <edgeless-menu-button
@@ -283,48 +384,229 @@ export class EdgelessChangeConnectorButton extends WithDisposable(LitElement) {
 
       <menu-divider .vertical=${true} .dividerMargin=${12}></menu-divider>
 
-      <edgeless-menu-button
-        .padding=${8}
-        .gap=${8}
-        .iconInfo=${{
-          icon: html`${selectedMode === ConnectorMode.Straight
-            ? ConnectorLWithArrowIcon
-            : selectedMode === ConnectorMode.Orthogonal
-            ? ConnectorXWithArrowIcon
-            : ConnectorCWithArrowIcon}${SmallArrowDownIcon}`,
-          tooltip: 'Connector Shape',
-        }}
-        .menuChildren=${html`
-          <edgeless-tool-icon-button
-            .tooltip=${'Straight'}
-            .iconContainerPadding=${2}
-            .active=${selectedMode === ConnectorMode.Straight}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
-          >
-            ${ConnectorLWithArrowIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            .tooltip=${'Curve'}
-            .iconContainerPadding=${2}
-            .active=${selectedMode === ConnectorMode.Curve}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorMode(ConnectorMode.Curve)}
-          >
-            ${ConnectorCWithArrowIcon}
-          </edgeless-tool-icon-button>
-          <edgeless-tool-icon-button
-            .tooltip=${'Elbowed'}
-            .iconContainerPadding=${2}
-            .active=${selectedMode === ConnectorMode.Orthogonal}
-            .activeMode=${'background'}
-            @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
-          >
-            ${ConnectorXWithArrowIcon}
-          </edgeless-tool-icon-button>
-        `}
-      >
-      </edgeless-menu-button>
+      <div class="connector-style-sub-menu">
+        <edgeless-menu-button
+          .padding=${8}
+          .gap=${8}
+          .iconInfo=${{
+            icon: html`${this._getEndpointIcon(
+              ConnectorEndpoint.Front,
+              selectedStartPointStyle
+            )}${SmallArrowDownIcon}`,
+            tooltip: 'Start Point Style',
+          }}
+          .menuChildren=${html`
+            <edgeless-tool-icon-button
+              .tooltip=${'None'}
+              .iconContainerPadding=${2}
+              .active=${selectedStartPointStyle === ConnectorEndpointStyle.None}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.None
+                )}
+            >
+              ${ConnectorEndpointNoneIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Arrow'}
+              .iconContainerPadding=${2}
+              .active=${selectedStartPointStyle ===
+              ConnectorEndpointStyle.Arrow}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Arrow
+                )}
+            >
+              ${FrontEndpointArrowIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Triangle'}
+              .iconContainerPadding=${2}
+              .active=${selectedStartPointStyle ===
+              ConnectorEndpointStyle.Triangle}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Triangle
+                )}
+            >
+              ${FrontEndpointTriangleIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Circle'}
+              .iconContainerPadding=${2}
+              .active=${selectedStartPointStyle ===
+              ConnectorEndpointStyle.Circle}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Circle
+                )}
+            >
+              ${FrontEndpointCircleIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Diamond'}
+              .iconContainerPadding=${2}
+              .active=${selectedStartPointStyle ===
+              ConnectorEndpointStyle.Diamond}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Front,
+                  ConnectorEndpointStyle.Diamond
+                )}
+            >
+              ${FrontEndpointDiamondIcon}
+            </edgeless-tool-icon-button>
+          `}
+        >
+        </edgeless-menu-button>
+
+        <edgeless-tool-icon-button
+          .tooltip=${'Flip Direction'}
+          .iconContainerPadding=${2}
+          .disabled=${false}
+          @click=${() =>
+            this._flipEndpointStyle(
+              selectedStartPointStyle,
+              selectedEndPointStyle
+            )}
+        >
+          ${FlipDirectionIcon}
+        </edgeless-tool-icon-button>
+
+        <edgeless-menu-button
+          .padding=${8}
+          .gap=${8}
+          .iconInfo=${{
+            icon: html`${this._getEndpointIcon(
+              ConnectorEndpoint.Rear,
+              selectedEndPointStyle
+            )}${SmallArrowDownIcon}`,
+            tooltip: 'End Point Style',
+          }}
+          .menuChildren=${html`
+            <edgeless-tool-icon-button
+              .tooltip=${'Diamond'}
+              .iconContainerPadding=${2}
+              .active=${selectedEndPointStyle ===
+              ConnectorEndpointStyle.Diamond}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Diamond
+                )}
+            >
+              ${RearEndpointDiamondIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Circle'}
+              .iconContainerPadding=${2}
+              .active=${selectedEndPointStyle === ConnectorEndpointStyle.Circle}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Circle
+                )}
+            >
+              ${RearEndpointCircleIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Triangle'}
+              .iconContainerPadding=${2}
+              .active=${selectedEndPointStyle ===
+              ConnectorEndpointStyle.Triangle}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Triangle
+                )}
+            >
+              ${RearEndpointTriangleIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Arrow'}
+              .iconContainerPadding=${2}
+              .active=${selectedEndPointStyle === ConnectorEndpointStyle.Arrow}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.Arrow
+                )}
+            >
+              ${RearEndpointArrowIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'None'}
+              .iconContainerPadding=${2}
+              .active=${selectedEndPointStyle === ConnectorEndpointStyle.None}
+              .activeMode=${'background'}
+              @click=${() =>
+                this._setConnectorEndpointStyle(
+                  ConnectorEndpoint.Rear,
+                  ConnectorEndpointStyle.None
+                )}
+            >
+              ${ConnectorEndpointNoneIcon}
+            </edgeless-tool-icon-button>
+          `}
+        >
+        </edgeless-menu-button>
+
+        <edgeless-menu-button
+          .padding=${8}
+          .gap=${8}
+          .iconInfo=${{
+            icon: html`${selectedMode === ConnectorMode.Straight
+              ? StraightLineIcon
+              : selectedMode === ConnectorMode.Orthogonal
+              ? ElbowedLineIcon
+              : CurveLineIcon}${SmallArrowDownIcon}`,
+            tooltip: 'Connector Shape',
+          }}
+          .menuChildren=${html`
+            <edgeless-tool-icon-button
+              .tooltip=${'Straight'}
+              .iconContainerPadding=${2}
+              .active=${selectedMode === ConnectorMode.Straight}
+              .activeMode=${'background'}
+              @click=${() => this._setConnectorMode(ConnectorMode.Straight)}
+            >
+              ${StraightLineIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Elbowed'}
+              .iconContainerPadding=${2}
+              .active=${selectedMode === ConnectorMode.Orthogonal}
+              .activeMode=${'background'}
+              @click=${() => this._setConnectorMode(ConnectorMode.Orthogonal)}
+            >
+              ${ElbowedLineIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Curve'}
+              .iconContainerPadding=${2}
+              .active=${selectedMode === ConnectorMode.Curve}
+              .activeMode=${'background'}
+              @click=${() => this._setConnectorMode(ConnectorMode.Curve)}
+            >
+              ${CurveLineIcon}
+            </edgeless-tool-icon-button>
+          `}
+        >
+        </edgeless-menu-button>
+      </div>
     `;
   }
 }

@@ -74,7 +74,12 @@ class PasteTr {
   canMerge = () => {
     const firstTextSnapshot = this._textFromSnapshot(this.firstSnapshot);
     const lastTextSnapshot = this._textFromSnapshot(this.lastSnapshot);
-    return firstTextSnapshot && lastTextSnapshot;
+    return (
+      firstTextSnapshot &&
+      lastTextSnapshot &&
+      this.fromPointState.text.length > 0 &&
+      this.endPointState.text.length > 0
+    );
   };
 
   private _textFromSnapshot = (snapshot: BlockSnapshot) => {
@@ -125,13 +130,13 @@ class PasteTr {
 
   private _mergeMultiple = () => {
     this.firstSnapshot.flavour = this.fromPointState.model.flavour;
-    this.lastSnapshot.flavour = this.endPointState.model.flavour;
     if (this.firstSnapshot.props.type && this.fromPointState.text.length > 0) {
       this.firstSnapshot.props.type = (
         this.fromPointState.model as ParagraphBlockModel
       ).type;
     }
     if (this.lastSnapshot.props.type && this.to) {
+      this.lastSnapshot.flavour = this.endPointState.model.flavour;
       this.lastSnapshot.props.type = (
         this.endPointState.model as ParagraphBlockModel
       ).type;
@@ -224,7 +229,10 @@ export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
         tr.pasted();
       }
       if (tr && payload.type === 'block') {
-        tr.focusPasted(payload.snapshot.id, payload.model);
+        // FIXME: This is a hack to make sure the focus is set after the block is imported.
+        requestAnimationFrame(() => {
+          tr?.focusPasted(payload.snapshot.id, payload.model);
+        });
       }
     });
   };

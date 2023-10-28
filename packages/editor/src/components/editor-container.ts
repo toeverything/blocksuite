@@ -14,7 +14,7 @@ import {
 } from '@blocksuite/blocks';
 import { withTempBlobData } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
-import { IS_FIREFOX } from '@blocksuite/global/config';
+import { IS_FIREFOX } from '@blocksuite/global/env';
 import { noop, Slot } from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,

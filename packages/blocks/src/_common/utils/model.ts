@@ -77,10 +77,10 @@ type Flavours<T> = T extends BlockModelKey[] ? BlockModels[T[number]] : never;
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export function matchFlavours<const Key extends readonly string[]>(
-  model: BaseBlockModel,
+  model: BaseBlockModel | null,
   expected: Key
 ): model is Flavours<Writeable<Key>> {
-  return expected.includes(model.flavour);
+  return !!model && expected.includes(model.flavour);
 }
 
 export function isInsideBlockByFlavour(

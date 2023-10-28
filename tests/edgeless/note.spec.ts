@@ -133,6 +133,8 @@ test('add Note', async ({ page }) => {
 
   await assertEdgelessTool(page, 'default');
   await assertRichTexts(page, ['', 'hello']);
+  await page.mouse.click(300, 200);
+  await page.mouse.click(350, 320);
   await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
 });
 
@@ -143,7 +145,6 @@ test('add empty Note', async ({ page }) => {
   await switchEditorMode(page);
   await zoomResetByKeyboard(page);
   await setEdgelessTool(page, 'note');
-
   // add note at 300,300
   await page.mouse.click(300, 300);
   await waitForVirgoStateUpdated(page);
@@ -151,15 +152,14 @@ test('add empty Note', async ({ page }) => {
   await waitNextFrame(page);
 
   // assert add note success
-  await page.mouse.move(320, 320);
-  await assertEdgelessSelectedRect(page, [270, 260, 448, 95]);
+  await assertBlockCount(page, 'note', 2);
 
   // click out of note
   await page.mouse.click(250, 200);
 
   // assert empty note is removed
   await page.mouse.move(320, 320);
-  await assertEdgelessNonSelectedRect(page);
+  await assertBlockCount(page, 'note', 1);
 });
 
 test('always keep at least 1 note block', async ({ page }) => {
@@ -445,7 +445,6 @@ test.describe('note slicer', () => {
     const firstNoteId = await addNote(page, 'hello\n123\n456\n789', 50, 500);
     const secondNoteId = await addNote(page, 'world\n123\n456\n789', 100, 550);
     const lastNoteId = await addNote(page, 'done\n123\n456\n789', 150, 600);
-    await page.pause();
     await exitEditing(page);
     await waitNextFrame(page);
     await selectNoteInEdgeless(page, lastNoteId);
@@ -692,7 +691,7 @@ test('continuous undo and redo (note block add operation) should work', async ({
   await focusRichText(page);
   await type(page, 'hello');
   await switchEditorMode(page);
-  await click(page, { x: 60, y: 450 });
+  await click(page, { x: 260, y: 450 });
   await copyByKeyboard(page);
 
   let count = await countBlock(page, 'affine-note');

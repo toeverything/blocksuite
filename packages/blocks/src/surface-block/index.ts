@@ -10,8 +10,12 @@ export {
 export { DEFAULT_ROUGHNESS, GRID_GAP_MAX, GRID_GAP_MIN } from './consts.js';
 export {
   type Connection,
+  ConnectorEndpoint,
+  ConnectorEndpointStyle,
   ConnectorMode,
   type Controller,
+  DEFAULT_FRONT_END_POINT_STYLE,
+  DEFAULT_REAR_END_POINT_STYLE,
 } from './elements/connector/types.js';
 export { getArrowPoints } from './elements/connector/utils.js';
 export * from './elements/edgeless-element.js';

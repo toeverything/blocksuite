@@ -2,11 +2,6 @@ import * as blocks from '@blocksuite/blocks';
 import { __unstableSchemas, AffineSchemas } from '@blocksuite/blocks/models';
 import * as editor from '@blocksuite/editor';
 import { EditorContainer } from '@blocksuite/editor';
-import {
-  configDebugLog,
-  disableDebuglog,
-  enableDebugLog,
-} from '@blocksuite/global/debug';
 import * as globalUtils from '@blocksuite/global/utils';
 import { assertExists } from '@blocksuite/global/utils';
 import type {
@@ -141,21 +136,6 @@ if (isE2E) {
 
 export const isBase64 =
   /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
-
-export function initDebugConfig() {
-  Object.defineProperty(globalThis, 'enableDebugLog', {
-    value: enableDebugLog,
-  });
-  Object.defineProperty(globalThis, 'disableDebugLog', {
-    value: disableDebuglog,
-  });
-  Object.defineProperty(globalThis, 'configDebugLog', {
-    value: configDebugLog,
-  });
-
-  // Uncomment this line or paste it into console to enable debug log.
-  // enableDebugLog(['CRUD']);
-}
 
 async function initWithMarkdownContent(
   workspace: Workspace,

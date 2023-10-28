@@ -1,4 +1,4 @@
-import { noop, pickArray } from '@blocksuite/global/utils';
+import { noop } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import type { Page } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
@@ -8,6 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { ArrowIcon, HiddenIcon } from '../../../../_common/icons/index.js';
 import { getThemeMode, on, once } from '../../../../_common/utils/index.js';
+import { pickArray } from '../../../../_common/utils/iterable.js';
 import type { NoteBlockModel } from '../../../../note-block/note-model.js';
 import { TOCBlockPreview } from './toc-preview.js';
 

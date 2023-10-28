@@ -124,7 +124,6 @@ export class EdgelessShapeMenu extends WithDisposable(LitElement) {
             <div class="shape-style-container">
               <edgeless-tool-icon-button
                 .tooltip=${'General'}
-                .tipPosition=${'top-end'}
                 .iconContainerPadding=${2}
                 .active=${shapeStyle === ShapeStyle.General}
                 .activeMode=${'background'}

@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
 const IS_MAC = process.platform === 'darwin';
-// const IS_WINDOWS = process.platform === 'win32';
+const IS_WINDOWS = process.platform === 'win32';
 // const IS_LINUX = !IS_MAC && !IS_WINDOWS;
 
 /**

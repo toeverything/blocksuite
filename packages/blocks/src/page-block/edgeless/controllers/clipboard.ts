@@ -3,10 +3,11 @@ import type {
   SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
-import { assertExists, groupBy } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import { type BlockSnapshot, fromJSON, Job } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
+import { groupBy } from '../../../_common/utils/iterable.js';
 import {
   getBlockElementById,
   getEditorContainer,
