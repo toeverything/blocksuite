@@ -57,7 +57,7 @@ test.describe('copy&paste when editing', () => {
 });
 
 test.describe('copy&paste when selecting', () => {
-  test.only('should support copy&paste of a single cell', async ({ page }) => {
+  test('should support copy&paste of a single cell', async ({ page }) => {
     await enterPlaygroundRoom(page);
     await initEmptyDatabaseState(page);
 
