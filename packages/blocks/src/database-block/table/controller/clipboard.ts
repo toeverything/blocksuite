@@ -63,6 +63,10 @@ export class TableClipboardController implements ReactiveController {
     const cellsValue = copyCellsValue(tableSelection, data, view);
     const formatValue = cellsValue.map(value => value.join('\t')).join('\n');
 
+    const div = document.createElement('div');
+    div.innerHTML = JSON.stringify(copiedValues);
+    document.body.appendChild(div);
+
     this.std.clipboard.writeToClipboard(async items => {
       return {
         ...items,

@@ -28,6 +28,7 @@ export default defineConfig({
     video: 'on-first-retry',
     // Timeout for each action
     actionTimeout: 5_000,
+    permissions: ['clipboard-read', 'clipboard-write'],
   },
   workers: '80%',
   retries: process.env.CI ? 3 : 0,
