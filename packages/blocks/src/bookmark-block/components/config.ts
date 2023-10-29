@@ -1,5 +1,5 @@
 import type { BaseBlockModel } from '@blocksuite/store';
-import { Workspace } from '@blocksuite/store';
+import { Slice, Workspace } from '@blocksuite/store';
 import type { TemplateResult } from 'lit';
 
 import { toast } from '../../_common/components/toast.js';
@@ -15,7 +15,6 @@ import {
   RefreshIcon,
 } from '../../_common/icons/index.js';
 import { getBlockElementByModel } from '../../_common/utils/index.js';
-import { copyBlocks } from '../../_legacy/clipboard/utils/commons.js';
 import type { BookmarkBlockComponent } from '../bookmark-block.js';
 import type { BookmarkBlockModel, BookmarkProps } from '../bookmark-model.js';
 import { allowEmbed } from '../embed.js';
@@ -24,6 +23,7 @@ import {
   reloadBookmarkBlock,
   tryGetBookmarkAPI,
 } from '../utils.js';
+import type { BookmarkOperationMenu } from './bookmark-operation-popper.js';
 
 export type ConfigItem = {
   type: 'link' | 'card' | 'embed' | 'edit' | 'caption';
@@ -131,7 +131,7 @@ type MoreOperation = {
   action: (
     model: BaseBlockModel<BookmarkBlockModel>,
     callback?: MenuActionCallback,
-    element?: HTMLElement
+    element?: BookmarkOperationMenu
   ) => void;
   showWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
   disableWhen?: (model: BaseBlockModel<BookmarkBlockModel>) => boolean;
@@ -143,8 +143,9 @@ export const moreOperations: MoreOperation[] = [
     type: 'copy',
     icon: CopyIcon,
     label: 'Copy',
-    action: async (model, callback) => {
-      await copyBlocks([model]);
+    action: async (model, callback, element) => {
+      const slice = Slice.fromModels(model.page, [model]);
+      await element?.std.clipboard.copySlice(slice);
       toast('Copied link to clipboard');
       callback?.('copy');
     },
