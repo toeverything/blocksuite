@@ -1,24 +1,25 @@
-import type { BaseBlockModel } from '@blocksuite/store';
+import { type BaseBlockModel, Slice } from '@blocksuite/store';
 import { html, nothing } from 'lit';
 import { ref, type RefOrCallback } from 'lit/directives/ref.js';
 
+import { toast } from '../../_common/components/toast.js';
 import {
   CancelWrapIcon,
   CopyIcon,
   DeleteIcon,
   WrapIcon,
 } from '../../_common/icons/index.js';
-import { copyCode } from '../../page-block/doc/utils.js';
-import type { CodeBlockModel } from '../code-model.js';
+import type { CodeBlockComponent } from '../code-block.js';
 
 export function CodeOptionTemplate({
   ref: containerRef,
   model,
   wrap,
   onClickWrap,
+  anchor,
 }: {
   ref?: RefOrCallback;
-  anchor: HTMLElement;
+  anchor: CodeBlockComponent;
   model: BaseBlockModel;
   wrap: boolean;
   abortController: AbortController;
@@ -52,7 +53,11 @@ export function CodeOptionTemplate({
       <icon-button
         size="32px"
         data-testid="copy-button"
-        @click=${() => copyCode(model as CodeBlockModel)}
+        @click=${async () => {
+          const slice = Slice.fromModels(model.page, [model]);
+          await anchor.std.clipboard.copySlice(slice);
+          toast('Copied to clipboard');
+        }}
       >
         ${CopyIcon}
         <affine-tooltip tip-position="right" .offset=${12}

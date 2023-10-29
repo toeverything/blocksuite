@@ -1,3 +1,4 @@
+import type { BlockStdProvider } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 import { flip, offset } from '@floating-ui/dom';
@@ -55,6 +56,9 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
   @query('.more-button-wrapper')
   moreButton!: HTMLElement;
 
+  @property({ attribute: false })
+  std!: BlockStdProvider;
+
   private _moreMenuAbortController: AbortController | null = null;
 
   private _toggleMenu() {
@@ -67,6 +71,7 @@ export class BookmarkToolbar extends WithDisposable(LitElement) {
     const bookmarkOperationMenu = new BookmarkOperationMenu();
     bookmarkOperationMenu.model = this.model;
     bookmarkOperationMenu.onSelected = this.onSelected;
+    bookmarkOperationMenu.std = this.std;
 
     createLitPortal({
       template: bookmarkOperationMenu,
