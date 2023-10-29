@@ -386,7 +386,7 @@ test('code block copy button can work', async ({ page }) => {
     '.affine-codeblock-option > icon-button:nth-child(1)'
   );
   await page.mouse.click(position.x, position.y);
-  await focusRichText(page, 1);
+  await focusRichText(page);
   await pasteByKeyboard(page);
   await assertRichTexts(page, ['useuse']);
 });
