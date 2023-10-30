@@ -5,6 +5,7 @@ import { merge } from 'merge';
 import {
   applyAwarenessUpdate,
   encodeAwarenessUpdate,
+  removeAwarenessStates,
 } from 'y-protocols/awareness';
 import type { Doc } from 'yjs';
 
@@ -235,6 +236,12 @@ export const createAsyncCallRPCProviderCreator = (
       doc.subdocs.forEach(initDocMap);
     }
 
+    function windowBeforeUnloadHandler() {
+      removeAwarenessStates(awareness, [awareness.clientID], 'window unload');
+    }
+
+    window.addEventListener('beforeunload', windowBeforeUnloadHandler);
+
     let connected = false;
     const apis = {
       flavour,
@@ -260,6 +267,7 @@ export const createAsyncCallRPCProviderCreator = (
         apis.disconnect();
         cache.clear();
         options.cleanup();
+        window.removeEventListener('beforeunload', windowBeforeUnloadHandler);
       },
     } as const;
     return apis;

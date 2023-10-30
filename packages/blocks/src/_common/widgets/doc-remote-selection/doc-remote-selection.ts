@@ -10,7 +10,7 @@ import { css, html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { remoteColorManager } from '../../../page-block/remote-color-manager/index.js';
+import { RemoteColorManager } from '../../../page-block/remote-color-manager/remote-color-manager.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
 import { cursorStyle, filterCoveringRects, selectionStyle } from './utils.js';
 
@@ -32,6 +32,8 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       pointer-events: none;
     }
   `;
+
+  private _remoteColorManager: RemoteColorManager | null = null;
 
   private _remoteSelections: Array<{
     id: number;
@@ -61,14 +63,14 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     super.connectedCallback();
     this.disposables.add(
       this._selectionManager.slots.remoteChanged.on(
-        throttle((remoteSelections: Record<string, BaseSelection[]>) => {
+        throttle((remoteSelections: Map<number, BaseSelection[]>) => {
           const status = this.page.awarenessStore.getStates();
-          this._remoteSelections = Object.entries(remoteSelections).map(
+          this._remoteSelections = [...remoteSelections.entries()].map(
             ([id, selections]) => {
               return {
-                id: parseInt(id),
+                id,
                 selections,
-                user: status.get(parseInt(id))?.user,
+                user: status.get(id)?.user,
               };
             }
           );
@@ -77,11 +79,6 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
         }, 100)
       )
     );
-    this.disposables.add(
-      this.page.awarenessStore.slots.update.on(({ type, id }) => {
-        if (type === 'remove') remoteColorManager.delete(id);
-      })
-    );
     this.handleEvent('wheel', () => {
       this.requestUpdate();
     });
@@ -89,6 +86,10 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
     this.disposables.addFromEvent(window, 'resize', () => {
       this.requestUpdate();
     });
+
+    this._remoteColorManager = new RemoteColorManager(
+      this.root.page.workspace.awarenessStore
+    );
   }
 
   override disconnectedCallback() {
@@ -263,9 +264,12 @@ export class AffineDocRemoteSelectionWidget extends WidgetElement {
       };
     });
 
+    const remoteColorManager = this._remoteColorManager;
+    assertExists(remoteColorManager);
     return html`<div>
       ${selections.flatMap(selection => {
-        const color = remoteColorManager.get(selection.id) as string;
+        const color = remoteColorManager.get(selection.id);
+        if (!color) return;
         const cursorRect = this._getCursorRect(selection.selections);
 
         return selection.rects

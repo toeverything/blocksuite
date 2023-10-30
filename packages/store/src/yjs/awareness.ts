@@ -14,6 +14,7 @@ export type RawAwarenessState<
   Flags extends Record<string, unknown> = BlockSuiteFlags,
 > = {
   user?: UserInfo;
+  color?: string;
   flags: Flags;
   selection: Array<Record<string, unknown>>;
 };
