@@ -187,7 +187,7 @@ export class EdgelessAlignButton extends WithDisposable(LitElement) {
       <edgeless-menu-button
         .iconInfo=${{
           icon: html`${AlignLeftIcon}${SmallArrowDownIcon}`,
-          tooltip: 'Alignment',
+          tooltip: 'Align Objects',
         }}
         .menuChildren=${html`<edgeless-tool-icon-button
             @click=${() => this._alignLeft()}
