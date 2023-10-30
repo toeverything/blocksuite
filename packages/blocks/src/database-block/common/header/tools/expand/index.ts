@@ -188,6 +188,7 @@ export class DatabaseBlockModalPreview extends WithDisposable(
       dataSource: this.database.dataSource,
       viewSource: this.database.viewSource,
       headerComponent: this.database.headerComponent,
+      std: this.database.std,
     };
     return html`
       <affine-data-view-native .config="${config}"></affine-data-view-native>
