@@ -55,9 +55,9 @@ export default defineConfig({
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
           },
-          { text: 'The Editor State', link: '/editor-state' },
+          { text: 'Modeling Editor State', link: '/editor-state' },
           {
-            text: 'Using <code>block-std</code>',
+            text: 'The <code>block-std</code> Library',
             items: [
               { text: 'Overview', link: '/block-std-overview' },
               { text: 'Block Schema', link: '/block-schema' },

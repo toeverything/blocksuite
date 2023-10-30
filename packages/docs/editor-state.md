@@ -1,4 +1,4 @@
-# The Editor State
+# Modeling Editor State
 
 The editor state represents the core data structure of the editor. It contains the document, selection, and any other state relevant to the editor. It can only be updated by applying transactions. You can think of it as a snapshot of the editor at a given point in time. We can always restore the editor to a previous state.
 
