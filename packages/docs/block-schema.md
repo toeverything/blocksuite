@@ -1,9 +1,8 @@
 # Block Schema
 
-In block suite, all blocks should have a schema.
-The schema of the block describes the data structure of the block.
+In BlockSuite, all blocks should have a schema. The schema of the block describes the data structure of the block.
 
-You should always use the `defineSchema` function to define the schema of the block.
+You can use the `defineSchema` function to define the schema of the block.
 
 ```typescript
 import { defineBlockSchema } from '@blocksuite/store';
@@ -23,25 +22,14 @@ export const MyBlockSchema = defineBlockSchema({
 
 ## Flavour & Props
 
-The flavour of the block is a string that uniquely identifies the block.
-You can think of it as the name of the block.
+Key takeaways for this part:
 
-The props of the block are some attributes that the block has.
-They can be updated by some user actions.
-And they can be used to render the block.
-
-Some typical props are `text`, `level`, `url`, `src`, etc.
-
-You can use most of the primitive types in the props.
-But you should not use `undefined` or `null` in the props.
-
-And we also support some special types in the props, called `internal` types.
-The internal types are used to describe some internal data structures of the block.
-
-`internal.Text` is a special type that represents the text of the block.
-It represents [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) in the Yjs.
-
-You can also use arrays and objects in the props.
+- The `flavour` of the block is a string that uniquely identifies the block. You can think of it as the name of the block.
+- The `props` of the block are some attributes that the block has. They can be updated by some user actions. And they can be used to render the block. Some typical props are `text`, `level`, `url`, `src`, etc.
+- You can use most of the primitive types in the props. But you should not use `undefined` or `null` in the props.
+- We also support some special types in the props, called `internal` types. The internal types are used to describe some internal data structures of the block.
+- `internal.Text` is a special type that represents the text of the block. It represents [Y.Text](https://docs.yjs.dev/api/shared-types/y.text) in the Yjs.
+- You can also use arrays and objects in props.
 
 ## Schema Relations
 
@@ -70,8 +58,7 @@ root
 
 ### Parent & Children
 
-By default, a block will validate its children and parent by its role.
-You can also pass a `parent` or `children` option to the schema to override the default behaviour.
+By default, a block will validate its children and parent by its role. You can also pass a `parent` or `children` option to the schema to override the default behaviour.
 
 Some examples:
 
@@ -118,14 +105,13 @@ export const MyBlockSchema = defineBlockSchema({
 
 ## Schema to Model
 
-The schema of the block is used to generate the model of the block.
-By default, the model will holds the flavour, props and id of the block.
+The schema of the block is used to generate the model of the block. By default, the model will holds the flavour, props and id of the block.
 
 ```
 MyBlockSchema
-    -> MyBlockModel-1
-    -> MyBlockModel-2
-    -> MyBlockModel-3
+  -> MyBlockModel-1
+  -> MyBlockModel-2
+  -> MyBlockModel-3
 ```
 
 For example, if we have a schema like this:
