@@ -35,7 +35,7 @@ export default defineConfig({
         items: [{ text: 'BlockSuite Overview', link: '/blocksuite-overview' }],
       },
       {
-        text: 'Using BlockSuite',
+        text: 'Using Prebuilt Editor',
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
@@ -49,7 +49,7 @@ export default defineConfig({
         ],
       },
       {
-        text: 'BlockSuite Foundation',
+        text: 'BlockSuite Fundamentals',
         items: [
           {
             text: 'Unidirectional Data Flow',
@@ -57,34 +57,11 @@ export default defineConfig({
           },
           { text: 'The Editor State', link: '/editor-state' },
           {
-            text: '<code>block-std</code>',
+            text: 'Using <code>block-std</code>',
             items: [
               { text: 'Overview', link: '/block-std-overview' },
               { text: 'Block Schema', link: '/block-schema' },
             ],
-          },
-        ],
-      },
-      {
-        text: 'AFFiNE Editor Overview',
-        items: [
-          {
-            text: 'Editor UI Architecture',
-            link: '/editor-ui-architecture',
-            items: [
-              {
-                text: 'Editors as Hosts',
-                link: '/editors-as-hosts',
-              },
-              {
-                text: 'Framework Integration',
-                link: '/framework-integration',
-              },
-            ],
-          },
-          {
-            text: 'Defining Editable Blocks',
-            link: '/defining-editable-blocks',
           },
         ],
       },

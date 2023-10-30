@@ -1,6 +1,6 @@
 # `block-std` Overview
 
-To help you get started with the building blocks in BlockSuite, we've created a standard library of blocks called `block-std`.
+To help building and reusing block-based editors in BlockSuite, we've created an underlying standard library named `block-std`.
 
 ```sh
 pnpm i @blocksuite/block-std
@@ -8,9 +8,7 @@ pnpm i @blocksuite/block-std
 
 ![block-std-data-flow](./images/block-std-data-flow.png)
 
-The block standard library follows a unidirectional data flow. The editor state is treated as some kind of immutable data structure.
-
-When you want to change the editor state, you should create a command and dispatch it to the editor. A new editor state will be applied and the UI will be updated accordingly.
+As an overview, this standard block library follows a [unidirectional data flow](./unidirectional-data-flow). The editor state is treated as some kind of immutable data structure. When you want to change the editor state, you should create a command and dispatch it to the editor. A new editor state will be applied and the UI will be updated accordingly.
 
 Each part of the data flow contains some modules to make sure the system works correctly. They are:
 

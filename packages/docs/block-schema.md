@@ -4,7 +4,7 @@ In BlockSuite, all blocks should have a schema. The schema of the block describe
 
 You can use the `defineSchema` function to define the schema of the block.
 
-```typescript
+```ts
 import { defineBlockSchema } from '@blocksuite/store';
 
 export const MyBlockSchema = defineBlockSchema({
@@ -37,7 +37,7 @@ You can also declare some relations between blocks in the schema.
 
 ### Role
 
-You should declare a role for every block you create. The role of the block can be 3 values:
+You should declare a `role` for every block you create. The role of the block can be 3 values:
 
 - `root`: The block is the root of the document. A document can only have one root block.
 - `hub`: The block is a hub. A hub can have multiple children. The children of it can be either `hub` or `content`.
@@ -56,9 +56,9 @@ root
 | | content4
 ```
 
-### Parent & Children
+### Parent and Children
 
-By default, a block will validate its children and parent by its role. You can also pass a `parent` or `children` option to the schema to override the default behaviour.
+By default, a block will validate its children and parent by its `role`. You can also pass a `parent` or `children` option to the schema to override the default behaviour.
 
 Some examples:
 
@@ -66,7 +66,7 @@ Some examples:
 
 This means the block's children must match the flavour `my-leaf`.
 
-```typescript
+```ts
 import { defineBlockSchema } from '@blocksuite/store';
 
 export const MyBlockSchema = defineBlockSchema({
@@ -81,7 +81,7 @@ export const MyBlockSchema = defineBlockSchema({
 
 When passing `*`, it means all blocks that match the rule of `role` can be used.
 
-```typescript
+```ts
 export const MyBlockSchema = defineBlockSchema({
   // ...
   metadata: {
@@ -94,7 +94,7 @@ export const MyBlockSchema = defineBlockSchema({
 
 This means the block won't accept any children.
 
-```typescript
+```ts
 export const MyBlockSchema = defineBlockSchema({
   // ...
   metadata: {
@@ -116,7 +116,7 @@ MyBlockSchema
 
 For example, if we have a schema like this:
 
-```typescript
+```ts
 import { defineBlockSchema, type Text } from '@blocksuite/store';
 
 export type MyBlockProps = {
@@ -139,7 +139,7 @@ export const MyBlockSchema = defineBlockSchema({
 
 And when the model is created, you can use it like this:
 
-```typescript
+```ts
 import { type SchemaToModel } from '@blocksuite/store';
 
 function doSomething(model: SchemaToModel<typeof MyBlockSchema>) {
@@ -152,7 +152,7 @@ function doSomething(model: SchemaToModel<typeof MyBlockSchema>) {
 
 You can also customize the model by extends the `BaseBlockModel` to provide more methods:
 
-```typescript
+```ts
 export class MyBlockModel extends BaseBlockModel<MyBlockProps> {
   levelUp() {
     this.level += 1;
