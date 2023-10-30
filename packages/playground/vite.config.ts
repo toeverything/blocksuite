@@ -17,7 +17,7 @@ export default defineConfig({
       process.env.PLAYGROUND_SERVER ?? 'http://localhost:8787'
     ),
     'import.meta.env.PLAYGROUND_WS': JSON.stringify(
-      process.env.PLAYGROUND_COLLABORATION_SERVER ?? 'ws://localhost:8787'
+      process.env.PLAYGROUND_WS ?? 'ws://localhost:8787'
     ),
   },
   plugins: [
