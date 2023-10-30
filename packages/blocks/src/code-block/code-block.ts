@@ -501,7 +501,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         positionSlot.on(({ placement }) => {
           langList.placement = placement;
         });
-        return langList;
+        return html`
+          <style>
+            :host {
+              z-index: var(--affine-z-index-popover);
+            }
+          </style>
+          ${langList}
+        `;
       },
       computePosition: {
         referenceElement: this._langButton,
