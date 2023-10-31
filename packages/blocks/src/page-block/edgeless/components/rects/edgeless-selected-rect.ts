@@ -9,6 +9,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pick } from '../../../../_common/utils/iterable.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import type {
   EdgelessElement,
   IPoint,
@@ -581,8 +582,17 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const bound = edgelessElementsBound(this.selection.elements);
 
     const { viewport } = this.edgeless.surface;
+    const { width, height } = viewport;
     const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
     const rect = componentToolbar.getBoundingClientRect();
+    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
+      this._toolbarPosition = {
+        x: right <= 0 ? x - rect.width : x,
+        y: y >= height ? bottom : y,
+      };
+      return;
+    }
 
     let offset = 34;
     if (this.selection.elements.find(ele => isFrameBlock(ele))) {
@@ -591,8 +601,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let top = y - rect.height - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
+    const left = clamp(x, 10, width - rect.width - 10);
+    top = clamp(top, 10, height - rect.height - 100);
+
     this._toolbarPosition = {
-      x,
+      x: left,
       y: top,
     };
   }

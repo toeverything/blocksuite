@@ -15,8 +15,8 @@ import type {
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
-// 1GB
-export const MAX_ATTACHMENT_SIZE = 1000 * 1000 * 1000;
+// 100MB
+export const MAX_ATTACHMENT_SIZE = 100 * 1000 * 1000;
 const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 
 export function cloneAttachmentProperties(

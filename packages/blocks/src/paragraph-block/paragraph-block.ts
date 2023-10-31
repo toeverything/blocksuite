@@ -87,7 +87,7 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       position: relative;
     }
     code {
-      font-size: calc(var(--affine-font-base) - 4px);
+      font-size: calc(var(--affine-font-base) - 3px);
     }
     .h1 {
       font-size: var(--affine-font-h-1);

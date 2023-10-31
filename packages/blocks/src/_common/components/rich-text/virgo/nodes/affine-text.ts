@@ -24,16 +24,15 @@ export function affineTextStyles(
       'font-family': 'var(--affine-font-code-family)',
       background: 'var(--affine-background-code-block)',
       color: 'var(--affine-text-primary-color)',
-      'border-radius': '4px',
-      padding: '3px 6px',
+      'border-radius': '2px',
+      padding: '3px 6px 4px',
       'font-variant-ligatures': 'none',
       'line-height': 'var(--affine-font-base)',
-      border: '1px solid var(--affine-border-color)',
     };
   }
 
   return styleMap({
-    'font-weight': props.bold ? 'bold' : 'normal',
+    'font-weight': props.bold ? 'bold' : 'inherit',
     'font-style': props.italic ? 'italic' : 'normal',
     'background-color': props.background ? props.background : undefined,
     'text-decoration': textDecorations.length > 0 ? textDecorations : 'none',

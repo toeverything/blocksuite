@@ -23,7 +23,7 @@ export class SelectionManager {
 
   slots = {
     changed: new Slot<BaseSelection[]>(),
-    remoteChanged: new Slot<Record<string, BaseSelection[]>>(),
+    remoteChanged: new Slot<Map<number, BaseSelection[]>>(),
   };
 
   constructor(public std: BlockSuite.Std) {
@@ -118,14 +118,16 @@ export class SelectionManager {
   }
 
   get remoteSelections() {
-    return Object.fromEntries(
-      Array.from(this._store.getStates().entries())
-        .filter(([key]) => key !== this._store.awareness.clientID)
-        .map(
-          ([key, value]) =>
-            [key, value.selection.map(this._jsonToSelection)] as const
-        )
-    );
+    const map = new Map<number, BaseSelection[]>();
+    this._store.getStates().forEach((state, id) => {
+      if (id === this._store.awareness.clientID) return;
+
+      const selections = state.selection.map(json => {
+        return this._jsonToSelection(json);
+      });
+      map.set(id, selections);
+    });
+    return map;
   }
 
   private _itemAdded = (event: { stackItem: StackItem }) => {

@@ -9,6 +9,7 @@ import './data-view.js';
 import { PathFinder } from '@blocksuite/block-std';
 import { Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import { Slice } from '@blocksuite/store';
 import { css, unsafeCSS } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
@@ -30,7 +31,6 @@ import {
   captureEventTarget,
   getDropResult,
 } from '../_common/widgets/drag-handle/utils.js';
-import { copyBlocks } from '../_legacy/clipboard/index.js';
 import { dataViewCommonStyle } from './common/css-variable.js';
 import type { DataViewProps, DataViewTypes } from './common/data-view.js';
 import { type DataViewExpose } from './common/data-view.js';
@@ -118,7 +118,8 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
             icon: CopyIcon,
             name: 'Copy',
             select: () => {
-              copyBlocks([this.model]);
+              const slice = Slice.fromModels(this.page, [this.model]);
+              this.std.clipboard.copySlice(slice);
             },
           },
           // {
@@ -343,6 +344,7 @@ export class DatabaseBlockComponent extends BlockElement<DatabaseBlockModel> {
       viewSource: this.viewSource,
       headerComponent: this.headerComponent,
       onDrag: this.onDrag,
+      std: this.std,
     };
     return html`
       <div style="position: relative">

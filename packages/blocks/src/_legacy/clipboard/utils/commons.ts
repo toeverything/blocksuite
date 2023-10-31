@@ -211,16 +211,6 @@ export async function copyBlocksInPage(root: BlockSuiteRoot) {
   return clipboardItems;
 }
 
-export async function copyBlocks(models: BaseBlockModel[]) {
-  const clipboardItems = await createPageClipboardItems(models);
-  const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-  performNativeCopy(clipboardItems);
-
-  if (savedRange) {
-    resetNativeSelection(savedRange);
-  }
-}
-
 export async function textedClipboardData2Blocks(
   page: Page,
   clipboardData: ClipboardEvent['clipboardData']

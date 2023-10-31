@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
@@ -6,16 +7,13 @@ import {
   hasNativeSelection,
   resetNativeSelection,
 } from '../../../_common/utils/index.js';
-import { ClipboardItem } from '../../../_legacy/clipboard/clipboard-item.js';
-import {
-  CLIPBOARD_MIMETYPE,
-  performNativeCopy,
-} from '../../../_legacy/clipboard/utils/pure.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../data-view-manager.js';
 import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
+
+const TEXT = 'text/plain';
 
 export abstract class BaseCellRenderer<
     Value,
@@ -105,10 +103,18 @@ export abstract class BaseCellRenderer<
     if (target instanceof HTMLInputElement) return;
 
     const data = this.column.getStringValue(this.rowId);
-    const textClipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, data);
+
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
+      return {
+        ...items,
+        [TEXT]: data,
+      };
+    });
 
     const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-    performNativeCopy([textClipboardItem]);
     if (savedRange) {
       resetNativeSelection(savedRange);
     }
@@ -118,9 +124,7 @@ export abstract class BaseCellRenderer<
     const target = _e.target as HTMLElement;
     if (target instanceof HTMLInputElement) return;
 
-    const textClipboardData = _e.clipboardData?.getData(
-      CLIPBOARD_MIMETYPE.TEXT
-    ) as Value;
+    const textClipboardData = _e.clipboardData?.getData(TEXT) as Value;
     if (!textClipboardData) return;
     this.onChange(textClipboardData);
   }
