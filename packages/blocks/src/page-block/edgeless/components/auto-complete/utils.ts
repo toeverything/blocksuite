@@ -30,11 +30,13 @@ export enum Direction {
 export const MAIN_GAP = 100;
 export const SECOND_GAP = 20;
 
+export type TARGET_SHAPE_TYPE = ShapeType | 'roundedRect';
+
 export class AutoCompleteShapeOverlay extends Overlay {
   private _shape: Shape;
   constructor(
     xywh: XYWH,
-    type: string,
+    type: TARGET_SHAPE_TYPE,
     options: Options,
     shapeStyle: ShapeStyle
   ) {

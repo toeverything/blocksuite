@@ -1,18 +1,14 @@
 import '../buttons/tool-icon-button.js';
 
 import { assertExists } from '@blocksuite/global/utils';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  DiamondIcon,
-  EllipseIcon,
   FrameIcon,
-  RoundedRectangleIcon,
   SmallNoteIcon,
-  SquareIcon,
-  TriangleIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
 import { captureEventTarget } from '../../../../_common/widgets/drag-handle/utils.js';
@@ -23,17 +19,20 @@ import {
   normalizeDegAngle,
   type PhasorElementType,
   type ShapeElement,
+  ShapeStyle,
   type ShapeType,
   toDegree,
   Vec,
   type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   AutoCompleteShapeOverlay,
   createShapeElement,
   type Direction,
   isShape,
+  type TARGET_SHAPE_TYPE,
 } from './utils.js';
 
 @customElement('edgeless-auto-complete-panel')
@@ -49,10 +48,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       padding: 8px 0;
       gap: 8px;
       border-radius: 8px;
-      background: var(
-        --light-background-background-overlay-panel-color,
-        #fbfbfc
-      );
+      background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
       z-index: var(--affine-popper-index);
     }
@@ -63,9 +59,8 @@ export class EdgelessAutoCompletePanel extends LitElement {
       padding: 4px 0;
       text-align: center;
       border-radius: 4px;
-      color: var(--light-text-color-text-primary-color, #424149);
-      font-family: Inter;
-      font-size: 14px;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      font-size: 13px;
       font-style: normal;
       font-weight: 500;
       line-height: 20px;
@@ -147,7 +142,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     return { nextBound, position };
   }
 
-  private _showOverlay(targetType: ShapeType) {
+  private _showOverlay(targetType: TARGET_SHAPE_TYPE) {
     const current = this.current;
     if (!isShape(current)) return;
 
@@ -191,6 +186,8 @@ export class EdgelessAutoCompletePanel extends LitElement {
   }
 
   private _autoComplete(e: PointerEvent, targetType: ShapeType) {
+    e.preventDefault();
+
     this._generateShapeOnDrag(this.connector, targetType);
     this._removeOverlay();
     this.remove();
@@ -228,47 +225,31 @@ export class EdgelessAutoCompletePanel extends LitElement {
       left: `${this.position?.x}px`,
       top: `${this.position?.y}px`,
     });
+    const shapeStyle = this.current?.shapeStyle;
+    const currentShapeType = this.current?.shapeType;
+
+    const shapeButtons = html`${ShapeComponentConfig.map(
+      ({ name, generalIcon, scribbledIcon, tooltip }) => {
+        return html`
+          <edgeless-tool-icon-button
+            .tooltip=${tooltip}
+            .iconContainerPadding=${2}
+            @pointerenter=${() => this._showOverlay(name)}
+            @pointerleave=${() => this._removeOverlay()}
+            @click=${(e: PointerEvent) => {
+              const targetType = name === 'roundedRect' ? 'rect' : name;
+              this._autoComplete(e, targetType);
+            }}
+          >
+            ${shapeStyle === ShapeStyle.General ? generalIcon : scribbledIcon}
+          </edgeless-tool-icon-button>
+        `;
+      }
+    )}`;
+
     return html`<div class="auto-complete-panel-container" style=${style}>
-      <edgeless-tool-icon-button
-        .iconContainerPadding=${2}
-        @pointerenter=${() => this._showOverlay('ellipse')}
-        @pointerleave=${() => this._removeOverlay()}
-        @click=${(e: PointerEvent) => this._autoComplete(e, 'ellipse')}
-      >
-        ${EllipseIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .iconContainerPadding=${2}
-        @pointerenter=${() => this._showOverlay('diamond')}
-        @pointerleave=${() => this._removeOverlay()}
-        @click=${(e: PointerEvent) => this._autoComplete(e, 'diamond')}
-      >
-        ${DiamondIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .iconContainerPadding=${2}
-        @pointerenter=${() => this._showOverlay('triangle')}
-        @pointerleave=${() => this._removeOverlay()}
-        @click=${(e: PointerEvent) => this._autoComplete(e, 'triangle')}
-      >
-        ${TriangleIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .iconContainerPadding=${2}
-        @pointerenter=${() => this._showOverlay('rect')}
-        @pointerleave=${() => this._removeOverlay()}
-        @click=${(e: PointerEvent) => this._autoComplete(e, 'rect')}
-      >
-        ${RoundedRectangleIcon}
-      </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button
-        .iconContainerPadding=${2}
-        @pointerenter=${() => this._showOverlay('rect')}
-        @pointerleave=${() => this._removeOverlay()}
-        @click=${(e: PointerEvent) => this._autoComplete(e, 'rect')}
-      >
-        ${SquareIcon}
-      </edgeless-tool-icon-button>
+      ${shapeButtons}
+
       <edgeless-tool-icon-button .iconContainerPadding=${2}>
         ${FontFamilyIcon}
       </edgeless-tool-icon-button>
@@ -278,7 +259,15 @@ export class EdgelessAutoCompletePanel extends LitElement {
       <edgeless-tool-icon-button .iconContainerPadding=${2}>
         ${FrameIcon}
       </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button .iconContainerPadding=${0}>
+
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${0}
+        @pointerenter=${() => this._showOverlay(currentShapeType)}
+        @pointerleave=${() => this._removeOverlay()}
+        @click=${(e: PointerEvent) => {
+          this._autoComplete(e, currentShapeType);
+        }}
+      >
         <div class="row-button">Add a same object</div>
       </edgeless-tool-icon-button>
     </div>`;
