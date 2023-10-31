@@ -5,7 +5,7 @@ A block should be rendered to a DOM element, and we use `view` to represent the 
 
 By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`.
 But it's still possible to use other UI frameworks.
-I'll introduce later about how to write a custom renderer in [custom renderer](/#WIP).
+We'll introduce later about how to write a custom renderer in [custom renderer](/#WIP).
 
 ## Lit Block View
 
