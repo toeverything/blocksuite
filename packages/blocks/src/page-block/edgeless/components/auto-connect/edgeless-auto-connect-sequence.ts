@@ -148,7 +148,12 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
     const { notes } = this;
     if (this._index >= notes.length - 1) return;
     this._index = this._index + 1;
-    const bound = Bound.deserialize(notes[this._index].xywh);
+    const note = notes[this._index];
+    const bound = Bound.deserialize(note.xywh);
+    this.surface.edgeless.selectionManager.setSelection({
+      elements: [note.id],
+      editing: false,
+    });
     this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
@@ -156,7 +161,12 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
     const { notes } = this;
     if (this._index <= 0) return;
     this._index = this._index - 1;
-    const bound = Bound.deserialize(notes[this._index].xywh);
+    const note = notes[this._index];
+    const bound = Bound.deserialize(note.xywh);
+    this.surface.edgeless.selectionManager.setSelection({
+      elements: [note.id],
+      editing: false,
+    });
     this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
