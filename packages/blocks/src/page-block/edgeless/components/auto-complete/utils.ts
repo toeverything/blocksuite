@@ -7,15 +7,18 @@ import {
   Bound,
   type Connection,
   GroupElement,
-  type IVec,
   normalizeDegAngle,
+  type Options,
   Overlay,
   type RoughCanvas,
   ShapeElement,
+  type ShapeStyle,
   type ShapeType,
+  type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
+import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 
 export enum Direction {
   Right,
@@ -24,31 +27,26 @@ export enum Direction {
   Top,
 }
 
-export class AutoCompleteOverlay extends Overlay {
-  linePoints: IVec[] = [];
-  shapePoints: IVec[] = [];
-  stroke = '';
-  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    if (this.linePoints.length && this.shapePoints.length) {
-      ctx.setLineDash([2, 2]);
-      ctx.strokeStyle = this.stroke;
-      ctx.beginPath();
-      this.linePoints.forEach((p, index) => {
-        if (index === 0) ctx.moveTo(p[0], p[1]);
-        else ctx.lineTo(p[0], p[1]);
-      });
-      this.shapePoints.forEach((p, index) => {
-        if (index === 0) ctx.moveTo(p[0], p[1]);
-        else ctx.lineTo(p[0], p[1]);
-      });
-      ctx.closePath();
-      ctx.stroke();
-    }
-  }
-}
-
 export const MAIN_GAP = 100;
 export const SECOND_GAP = 20;
+
+export class AutoCompleteShapeOverlay extends Overlay {
+  private _shape: Shape;
+  constructor(
+    xywh: XYWH,
+    type: string,
+    options: Options,
+    shapeStyle: ShapeStyle
+  ) {
+    super();
+    this._shape = ShapeFactory.createShape(xywh, type, options, shapeStyle);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    this._shape.draw(ctx, rc);
+  }
+}
 
 export function nextBound(
   type: Direction,

@@ -22,12 +22,19 @@ import {
   type ConnectorElement,
   normalizeDegAngle,
   type PhasorElementType,
+  type ShapeElement,
   type ShapeType,
   toDegree,
   Vec,
+  type XYWH,
 } from '../../../../surface-block/index.js';
-import type { EdgelessAutoComplete } from './edgeless-auto-complete.js';
-import { createShapeElement, type Direction, isShape } from './utils.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import {
+  AutoCompleteShapeOverlay,
+  createShapeElement,
+  type Direction,
+  isShape,
+} from './utils.js';
 
 @customElement('edgeless-auto-complete-panel')
 export class EdgelessAutoCompletePanel extends LitElement {
@@ -67,7 +74,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
   `;
 
   @property({ attribute: false })
-  edgelessAutoComplete: EdgelessAutoComplete;
+  edgeless: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
   position: { x: number; y: number };
@@ -76,29 +83,50 @@ export class EdgelessAutoCompletePanel extends LitElement {
   type: Direction;
 
   @property({ attribute: false })
+  current: ShapeElement;
+
+  @property({ attribute: false })
   connector: ConnectorElement;
 
-  async generateShapeOnDrag(
+  private _overlay: AutoCompleteShapeOverlay | null = null;
+
+  private async _generateShapeOnDrag(
     connector: ConnectorElement,
     targetType: ShapeType
   ) {
-    const { edgeless, current } = this.edgelessAutoComplete;
-    if (!isShape(current)) return;
-    console.log('generate shape on drag');
+    const edgeless = this.edgeless;
+    const current = this.current;
+    const result = this._generateNextShapeBound(connector);
+    if (!isShape(current) || !result) return;
 
+    const { nextBound, position } = result;
     const { surface } = edgeless;
+    const id = await createShapeElement(edgeless, current, targetType);
+
+    surface.updateElement(id, { xywh: nextBound.serialize() });
+    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
+      target: { id, position },
+    });
+    edgeless.selectionManager.setSelection({
+      elements: [id],
+      editing: false,
+    });
+    edgeless.page.captureSync();
+  }
+
+  private _generateNextShapeBound(connector: ConnectorElement) {
+    const current = this.current;
+    if (!isShape(current)) return;
+
     const bound = Bound.deserialize(current.xywh);
     const { w, h } = bound;
     const point = connector.target.position;
     assertExists(point);
-    console.log('existing point');
 
     const len = connector.path.length;
     const angle = normalizeDegAngle(
       toDegree(Vec.angle(connector.path[len - 2], connector.path[len - 1]))
     );
-    const id = await createShapeElement(edgeless, current, targetType);
-    console.log('created shape element: ', id);
     let nextBound: Bound;
     let position: Connection['position'];
 
@@ -116,61 +144,78 @@ export class EdgelessAutoCompletePanel extends LitElement {
       position = [0, 0.5];
     }
 
-    surface.updateElement(id, { xywh: nextBound.serialize() });
-    surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
-      target: { id, position },
-    });
-    edgeless.selectionManager.setSelection({
-      elements: [id],
-      editing: false,
-    });
-    edgeless.page.captureSync();
+    return { nextBound, position };
   }
 
   private _showOverlay(targetType: ShapeType) {
-    console.log('show overlay when hover');
-    const { current } = this.edgelessAutoComplete;
+    const current = this.current;
     if (!isShape(current)) return;
 
-    const bound = this.edgelessAutoComplete.computeNextBound(this.type);
-    const path = this.edgelessAutoComplete.computeLine(
-      this.type,
-      current,
-      bound
+    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
+    const bound = this._generateNextShapeBound(this.connector)?.nextBound;
+    if (!bound) return;
+
+    this._removeOverlay();
+
+    const { x, y, w, h } = bound;
+    const xywh = [x, y, w, h] as XYWH;
+    const { shapeStyle, roughness, strokeColor, fillColor, strokeWidth } =
+      current;
+    const computedStyle = getComputedStyle(this.edgeless);
+    const stroke = computedStyle.getPropertyValue(strokeColor);
+    const fill = computedStyle.getPropertyValue(fillColor);
+
+    const options = {
+      seed: 666,
+      roughness: roughness,
+      strokeLineDash: [0, 0],
+      stroke,
+      strokeWidth,
+      fill,
+    };
+
+    this._overlay = new AutoCompleteShapeOverlay(
+      xywh,
+      targetType,
+      options,
+      shapeStyle
     );
-    this.edgelessAutoComplete.showNextShape(current, bound, path, targetType);
+
+    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.refresh();
   }
 
   private _removeOverlay() {
-    this.edgelessAutoComplete.removeOverlay();
+    if (this._overlay)
+      this.edgeless.surface.viewport.removeOverlay(this._overlay);
   }
 
   private _autoComplete(e: PointerEvent, targetType: ShapeType) {
-    console.log('auto complete');
-    e.stopPropagation();
-    e.preventDefault();
-
-    this.generateShapeOnDrag(this.connector, targetType);
+    this._generateShapeOnDrag(this.connector, targetType);
     this._removeOverlay();
     this.remove();
   }
 
   constructor(
     position: { x: number; y: number },
-    edgelessAutoComplete: EdgelessAutoComplete,
+    edgeless: EdgelessPageBlockComponent,
     type: Direction,
+    current: ShapeElement,
     connector: ConnectorElement
   ) {
     super();
+    console.log('constructor');
     this.position = position;
-    this.edgelessAutoComplete = edgelessAutoComplete;
+    this.edgeless = edgeless;
     this.type = type;
+    this.current = current;
     this.connector = connector;
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.edgelessAutoComplete.edgeless.handleEvent('click', ctx => {
+    console.log('connectedCallback');
+    this.edgeless.handleEvent('click', ctx => {
       const { target } = ctx.get('pointerState').raw;
       const element = captureEventTarget(target);
       const clickAway = !element?.closest('edgeless-auto-complete-panel');

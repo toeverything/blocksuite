@@ -16,8 +16,10 @@ import {
   type Connection,
   type ConnectorElement,
   ConnectorMode,
+  Overlay,
   PhasorElementType,
   rotatePoints,
+  type RoughCanvas,
   ShapeElement,
   ShapeMethodsMap,
   Vec,
@@ -28,7 +30,6 @@ import { mountShapeTextEditor } from '../../utils/text.js';
 import type { SelectedRect } from '../rects/edgeless-selected-rect.js';
 import { EdgelessAutoCompletePanel } from './auto-complete-panel.js';
 import {
-  AutoCompleteOverlay,
   createEdgelessElement,
   Direction,
   getPosition,
@@ -36,6 +37,29 @@ import {
   MAIN_GAP,
   nextBound,
 } from './utils.js';
+
+class AutoCompleteOverlay extends Overlay {
+  linePoints: IVec[] = [];
+  shapePoints: IVec[] = [];
+  stroke = '';
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    if (this.linePoints.length && this.shapePoints.length) {
+      ctx.setLineDash([2, 2]);
+      ctx.strokeStyle = this.stroke;
+      ctx.beginPath();
+      this.linePoints.forEach((p, index) => {
+        if (index === 0) ctx.moveTo(p[0], p[1]);
+        else ctx.lineTo(p[0], p[1]);
+      });
+      this.shapePoints.forEach((p, index) => {
+        if (index === 0) ctx.moveTo(p[0], p[1]);
+        else ctx.lineTo(p[0], p[1]);
+      });
+      ctx.closePath();
+      ctx.stroke();
+    }
+  }
+}
 
 // const autoCompleteOverlay = new AutoCompleteOverlay();
 
@@ -128,15 +152,18 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     type: Direction,
     connector: ConnectorElement
   ) {
+    if (!isShape(this.current)) return;
+
     const viewportRect = this.edgeless.surface.viewport.boundingClientRect;
-    const offsetLeft = 68;
-    const offsetTop = 82;
-    const x = e.clientX - viewportRect.left - offsetLeft;
-    const y = e.clientY - viewportRect.top - offsetTop;
+    // const offsetLeft = 68;
+    // const offsetTop = 82;
+    const x = e.clientX - viewportRect.left + 60;
+    const y = e.clientY - viewportRect.top - 80;
     const autoCompletePanel = new EdgelessAutoCompletePanel(
       { x, y },
-      this,
+      this.edgeless,
       type,
+      this.current,
       connector
     );
 
