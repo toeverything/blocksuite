@@ -1,11 +1,9 @@
 # Render Blocks
 
-In block suite, blocks can be rendered by any UI framework.
-A block should be rendered to a DOM element, and we use `view` to represent the renderer.
+In BlockSuite, blocks can be rendered by any UI framework. A block should be rendered to a DOM element, and we use `view` to represent the renderer.
 
 By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`.
-But it's still possible to use other UI frameworks.
-We'll introduce later about how to write a custom renderer in [custom renderer](/#WIP).
+But it's still possible to use other UI frameworks. We'll introduce later about how to write a custom renderer in [custom renderer](/#WIP).
 
 ## Lit Block View
 

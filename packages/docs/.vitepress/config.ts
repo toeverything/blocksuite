@@ -74,8 +74,7 @@ export default defineConfig({
         text: 'Packages',
         items: [
           { text: '🚧 <code>@blocksuite/store</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/blocks</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/block-std</code>', link: '' },
           { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
         ],
       },
