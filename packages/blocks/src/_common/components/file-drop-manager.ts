@@ -197,4 +197,8 @@ export class FileDropManager {
     this._handlers = this._handlers.filter(({ name }) => name !== rule.name);
     this._handlers.push(rule);
   }
+
+  clear() {
+    this._handlers = [];
+  }
 }

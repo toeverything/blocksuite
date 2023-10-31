@@ -171,35 +171,75 @@ export class EditorContainer
         }
       });
     }
+  }
 
-    // adds files from outside by dragging and dropping
-    this.fileDropManager.register({
-      name: 'Image',
-      matcher: file => file.type.startsWith('image'),
-      handler: async (
-        file: File
-      ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-        const storage = this.page.blobs;
-        const { saveAttachmentData } = withTempBlobData();
-        const sourceId = await storage.set(
-          new Blob([file], { type: file.type })
-        );
-        saveAttachmentData(sourceId, { name: file.name });
-        const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
-        return {
-          flavour: 'affine:image',
-          sourceId,
-          ...size,
-        };
-      },
-    });
-    this.updateComplete.then(() => {
+  override updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('mode')) {
+      this.slots.pageModeSwitched.emit(this.mode);
+      if (this.mode === 'page') {
+        this._saveViewportLocalRecord();
+      }
+    }
+
+    if (
+      changedProperties.has('pagePreset') ||
+      changedProperties.has('edgelessPreset') ||
+      changedProperties.has('page')
+    ) {
       const root = this.root.value;
-      assertExists(root);
+      if (!root) return;
+
       const service = root.spec.getService('affine:attachment');
       assertExists(service);
       assertInstanceOf(service, AttachmentService);
       const maxFileSize = service.maxFileSize;
+
+      this.fileDropManager.clear();
+
+      this.fileDropManager.register({
+        name: 'Image',
+        matcher: file => file.type.startsWith('image'),
+        handler: async (
+          file: File
+        ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
+          const storage = this.page.blobs;
+          const { saveAttachmentData } = withTempBlobData();
+          const sourceId = await storage.set(
+            new Blob([file], { type: file.type })
+          );
+          saveAttachmentData(sourceId, { name: file.name });
+          const size =
+            this.mode === 'edgeless' ? await readImageSize(file) : {};
+          return {
+            flavour: 'affine:image',
+            sourceId,
+            ...size,
+          };
+        },
+      });
+
+      this.fileDropManager.register({
+        name: 'Image',
+        matcher: file => file.type.startsWith('image'),
+        handler: async (
+          file: File
+        ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
+          const storage = this.page.blobs;
+          const { saveAttachmentData } = withTempBlobData();
+          const sourceId = await storage.set(
+            new Blob([file], { type: file.type })
+          );
+          saveAttachmentData(sourceId, { name: file.name });
+          const size =
+            this.mode === 'edgeless' ? await readImageSize(file) : {};
+          return {
+            flavour: 'affine:image',
+            sourceId,
+            ...size,
+          };
+        },
+      });
+
       this.fileDropManager.register({
         name: 'Attachment',
         matcher: (file: File) => {
@@ -229,15 +269,6 @@ export class EditorContainer
           };
         },
       });
-    });
-  }
-
-  override updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('mode')) {
-      this.slots.pageModeSwitched.emit(this.mode);
-      if (this.mode === 'page') {
-        this._saveViewportLocalRecord();
-      }
     }
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {
