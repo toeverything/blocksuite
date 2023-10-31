@@ -10,6 +10,7 @@ import { AFFINE_LINKED_PAGE_WIDGET } from '../_common/widgets/linked-page/index.
 import { AFFINE_MODAL_WIDGET } from '../_common/widgets/modal-widget/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../_common/widgets/slash-menu/index.js';
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
+import { AttachmentService } from '../attachment-block/attachment-service.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
@@ -161,6 +162,7 @@ export const PagePreset: BlockSpec[] = [
     view: {
       component: literal`affine-attachment`,
     },
+    service: AttachmentService,
   },
 ];
 
@@ -239,6 +241,7 @@ export const EdgelessPreset: BlockSpec[] = [
   },
   {
     schema: AttachmentBlockSchema,
+    service: AttachmentService,
     view: {
       component: literal`affine-attachment`,
     },

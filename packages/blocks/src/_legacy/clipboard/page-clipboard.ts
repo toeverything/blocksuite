@@ -1,7 +1,8 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 
+import { AttachmentService } from '../../attachment-block/attachment-service.js';
 import type { DocPageBlockComponent } from '../../page-block/index.js';
 import { getService } from '../service/index.js';
 import type { Clipboard } from './type.js';
@@ -67,7 +68,16 @@ export class PageClipboard implements Clipboard {
     if (['affine:code'].includes(focusedBlockModel?.flavour ?? '')) {
       blocks = await textedClipboardData2Blocks(this._page, e.clipboardData);
     } else {
-      blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+      const attachmentService =
+        this._ele.root.spec.getService('affine:attachment');
+      assertExists(attachmentService);
+      assertInstanceOf(attachmentService, AttachmentService);
+      const maxFileSize = attachmentService.maxFileSize;
+      blocks = await clipboardData2Blocks(
+        this._page,
+        e.clipboardData,
+        maxFileSize
+      );
     }
 
     if (!blocks.length) {

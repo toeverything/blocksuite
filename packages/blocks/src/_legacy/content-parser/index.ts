@@ -15,7 +15,6 @@ import {
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
-import { MAX_ATTACHMENT_SIZE } from '../../attachment-block/utils.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
@@ -498,7 +497,10 @@ export class ContentParser {
     return this._convertHtml2Blocks(htmlEl, context);
   }
 
-  async file2Blocks(clipboardData: DataTransfer): Promise<SerializedBlock[]> {
+  async file2Blocks(
+    clipboardData: DataTransfer,
+    maxFileSize: number
+  ): Promise<SerializedBlock[]> {
     const files = clipboardData.files;
     if (!files) return [];
     const file = files[0];
@@ -519,10 +521,10 @@ export class ContentParser {
       ];
     }
 
-    if (file.size > MAX_ATTACHMENT_SIZE) {
+    if (file.size > maxFileSize) {
       toast(
         `You can only upload files less than ${humanFileSize(
-          MAX_ATTACHMENT_SIZE,
+          maxFileSize,
           true,
           0
         )}`
