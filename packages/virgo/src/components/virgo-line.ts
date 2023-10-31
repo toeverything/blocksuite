@@ -45,6 +45,8 @@ export class VirgoLine extends LitElement {
       return html`<div><v-text .str=${ZERO_WIDTH_SPACE}></v-text></div>`;
     }
 
+    if (!this.isConnected) return;
+
     const rootElement = this.closest(
       `[${VIRGO_ROOT_ATTR}]`
     ) as VirgoRootElement;

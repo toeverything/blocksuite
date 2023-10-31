@@ -15,6 +15,7 @@ export class EdgelessToolIconButton extends LitElement {
       color: var(--affine-icon-color);
       border-radius: 4px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .icon-container:hover {
@@ -27,6 +28,10 @@ export class EdgelessToolIconButton extends LitElement {
 
     .icon-container.active-mode-background[active] {
       background: var(--affine-hover-color);
+    }
+
+    .icon-container > svg {
+      flex-shrink: 0;
     }
 
     .icon-container[disabled] {
