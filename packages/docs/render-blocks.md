@@ -105,3 +105,5 @@ class MyBlockView extends BlockElement<MyBlockModel> {
   }
 }
 ```
+
+You can get the `std` instance from `this.std` to use the full power of [std](/block-std-overview).
