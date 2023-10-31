@@ -15,10 +15,12 @@ import {
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
 import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import type { Renderer } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
 import { getBlocksInFrame } from '../../page-block/edgeless/frame-manager.js';
 import { xywhArrayToObject } from '../../page-block/edgeless/utils/convert.js';
+import { getBackgroundGrid } from '../../page-block/edgeless/utils/query.js';
 import type { IBound } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import type { SurfaceElement } from '../../surface-block/elements/surface-element.js';
@@ -34,6 +36,7 @@ import { MarkdownParser } from './parse-markdown.js';
 import { NotionHtmlParser } from './parse-notion-html.js';
 import type { SelectedBlock } from './types.js';
 
+type Html2CanvasFunction = typeof import('html2canvas').default;
 type ParseContext = 'Markdown' | 'NotionHtml';
 
 export type ParseHtml2BlockHandler = (
@@ -169,40 +172,46 @@ export class ContentParser {
     return await promise;
   }
 
-  public async edgelessToCanvas(
-    edgeless: EdgelessPageBlockComponent,
-    bound: IBound,
-    nodes?: TopLevelBlockModel[],
-    surfaces?: SurfaceElement[]
-  ): Promise<HTMLCanvasElement | undefined> {
-    const root = this._page.root;
-    if (!root) return;
+  private _drawEdgelessBackground(
+    ctx: CanvasRenderingContext2D,
+    {
+      size,
+      backgroundColor,
+      gridColor,
+    }: {
+      size: number;
+      backgroundColor: string;
+      gridColor: string;
+    }
+  ) {
+    const svgImg = `<svg width="${ctx.canvas.width}px" height="${ctx.canvas.height}px" xmlns="http://www.w3.org/2000/svg" style="background-size:${size}px ${size}px;background-color:${backgroundColor}; background-image: radial-gradient(${gridColor} 1px, ${backgroundColor} 1px)"></svg>`;
+    const img = new Image();
+    const cleanup = () => {
+      img.onload = null;
+      img.onerror = null;
+    };
 
-    const html2canvas = (await import('html2canvas')).default;
-    if (!(html2canvas instanceof Function)) return;
+    return new Promise<void>((resolve, reject) => {
+      img.onload = () => {
+        cleanup();
+        ctx.drawImage(img, 0, 0);
+        resolve();
+      };
+      img.onerror = e => {
+        cleanup();
+        reject(e);
+      };
 
-    const pathname = location.pathname;
-    const pageMode = isPageMode(this._page);
+      img.src = `data:image/svg+xml,${encodeURIComponent(svgImg)}`;
+    });
+  }
 
-    const editorContainer = getEditorContainer(this._page);
-    const container = document.querySelector(
-      '.affine-block-children-container'
-    );
-    if (!container) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const canvas = document.createElement('canvas');
-    canvas.width = (bound.w + 100) * dpr;
-    canvas.height = (bound.h + 100) * dpr;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-
-    ctx.fillStyle = window.getComputedStyle(container).backgroundColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const replaceRichTextWithSvgElementFunc =
-      this._replaceRichTextWithSvgElement.bind(this);
+  private async _html2canvas(
+    htmlElement: HTMLElement,
+    options: Parameters<Html2CanvasFunction>[1] = {}
+  ) {
+    const html2canvas = (await import('html2canvas'))
+      .default as unknown as Html2CanvasFunction;
     const html2canvasOption = {
       ignoreElements: function (element: Element) {
         if (
@@ -215,11 +224,14 @@ export class ContentParser {
           return false;
         }
       },
-      onclone: async function (documentClone: Document, element: HTMLElement) {
+      onclone: async (documentClone: Document, element: HTMLElement) => {
         // html2canvas can't support transform feature
         element.style.setProperty('transform', 'none');
-        const layer = documentClone.querySelector('.affine-edgeless-layer');
-        if (layer && layer instanceof HTMLElement) {
+        const layer = element.classList.contains('.affine-edgeless-layer')
+          ? element
+          : null;
+
+        if (layer instanceof HTMLElement) {
           layer.style.setProperty('transform', 'none');
         }
 
@@ -232,54 +244,110 @@ export class ContentParser {
           }
         });
 
-        await replaceRichTextWithSvgElementFunc(element);
+        await this._replaceRichTextWithSvgElement(element);
       },
-      backgroundColor: window.getComputedStyle(editorContainer).backgroundColor,
       useCORS: this._imageProxyEndpoint ? false : true,
       proxy: this._imageProxyEndpoint,
     };
 
+    return html2canvas(htmlElement, Object.assign(html2canvasOption, options));
+  }
+
+  private _createCanvas(bound: IBound, fillStyle: string) {
+    const canvas = document.createElement('canvas');
+    const dpr = window.devicePixelRatio || 1;
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+    canvas.width = (bound.w + 100) * dpr;
+    canvas.height = (bound.h + 100) * dpr;
+
+    ctx.scale(dpr, dpr);
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    return { canvas, ctx };
+  }
+
+  public async edgelessToCanvas(
+    surfaceRenderer: Renderer,
+    bound: IBound,
+    edgeless?: EdgelessPageBlockComponent,
+    nodes?: TopLevelBlockModel[],
+    surfaces?: SurfaceElement[],
+    blockQuery: (id: string) => Element | null = getBlockElementById,
+    edgelessBackground?: { zoom: number }
+  ): Promise<HTMLCanvasElement | undefined> {
+    const root = this._page.root;
+    if (!root) return;
+
+    const pathname = location.pathname;
+    const pageMode = isPageMode(this._page);
+    const editorContainer = getEditorContainer(this._page);
+    const containerComputedStyle = window.getComputedStyle(editorContainer);
+
+    const html2canvas = (element: HTMLElement) =>
+      this._html2canvas(element, {
+        backgroundColor: containerComputedStyle.backgroundColor,
+      });
+    const container = document.querySelector(
+      '.affine-block-children-container'
+    );
+
+    if (!container) return;
+
+    const { ctx, canvas } = this._createCanvas(
+      bound,
+      window.getComputedStyle(container).backgroundColor
+    );
+
+    if (edgelessBackground) {
+      await this._drawEdgelessBackground(ctx, {
+        backgroundColor: containerComputedStyle.getPropertyValue(
+          '--affine-background-primary-color'
+        ),
+        size: getBackgroundGrid(edgelessBackground.zoom, true).gap,
+        gridColor: containerComputedStyle.getPropertyValue(
+          '--affine-edgeless-grid-color'
+        ),
+      });
+    }
+
     // TODO: refactor of this part
-    const blocks = nodes ?? edgeless.getSortedElementsByBound(bound);
+    const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
-      const blockElement = getBlockElementById(block.id)?.parentElement;
-      const blockBound = xywhArrayToObject(block);
-      const canvasData = await html2canvas(
-        blockElement as HTMLElement,
-        html2canvasOption
-      );
-      ctx.drawImage(
-        canvasData,
-        blockBound.x - bound.x + 50,
-        blockBound.y - bound.y + 50,
-        blockBound.w,
-        blockBound.h
-      );
+      const blockElement = blockQuery(block.id)?.parentElement;
+
+      if (blockElement) {
+        const blockBound = xywhArrayToObject(block);
+        const canvasData = await this._html2canvas(blockElement as HTMLElement);
+        ctx.drawImage(
+          canvasData,
+          blockBound.x - bound.x + 50,
+          blockBound.y - bound.y + 50,
+          blockBound.w,
+          blockBound.h
+        );
+      }
 
       if (block.flavour === EdgelessBlockType.FRAME) {
-        const blocksInsideFrame = getBlocksInFrame(edgeless.page, block);
+        const blocksInsideFrame = getBlocksInFrame(this._page, block, false);
         const frameBound = Bound.deserialize(block.xywh);
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = getBlockElementById(element.id)?.parentElement;
+          const htmlElement = blockQuery(element.id)?.parentElement;
           const blockBound = xywhArrayToObject(element);
-
-          const canvasData = await html2canvas(
-            htmlElement as HTMLElement,
-            html2canvasOption
-          );
+          const canvasData = await html2canvas(htmlElement as HTMLElement);
 
           ctx.drawImage(
             canvasData,
             blockBound.x - bound.x + 50,
             blockBound.y - bound.y + 50,
             blockBound.w,
-            blockBound.h
+            (blockBound.w / canvasData.width) * canvasData.height
           );
         }
-        const surfaceCanvas =
-          edgeless.surface.viewport.getCanvasByBound(frameBound);
+        const surfaceCanvas = surfaceRenderer.getCanvasByBound(frameBound);
 
         ctx.drawImage(surfaceCanvas, 50, 50, frameBound.w, frameBound.h);
       }
@@ -287,10 +355,7 @@ export class ContentParser {
       this._checkCanContinueToCanvas(pathname, pageMode);
     }
 
-    const surfaceCanvas = edgeless.surface.viewport.getCanvasByBound(
-      bound,
-      surfaces
-    );
+    const surfaceCanvas = surfaceRenderer.getCanvasByBound(bound, surfaces);
     ctx.drawImage(surfaceCanvas, 50, 50, bound.w, bound.h);
 
     return canvas;
@@ -349,7 +414,7 @@ export class ContentParser {
     return data;
   }
 
-  private async _replaceRichTextWithSvgElement(element: HTMLElement) {
+  private _replaceRichTextWithSvgElement = async (element: HTMLElement) => {
     const richList = Array.from(element.querySelectorAll('.affine-rich-text'));
     await Promise.all(
       richList.map(async rich => {
@@ -362,7 +427,7 @@ export class ContentParser {
         rich.parentElement?.removeChild(rich);
       })
     );
-  }
+  };
 
   private async _elementToSvgElement(
     node: HTMLElement,
@@ -406,7 +471,7 @@ export class ContentParser {
       const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this.edgelessToCanvas(edgeless, bound);
+      return await this.edgelessToCanvas(edgeless.surface.viewport, bound);
     }
   }
 

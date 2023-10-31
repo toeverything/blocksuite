@@ -34,6 +34,8 @@ import type { ParagraphBlockModel } from './paragraph-block/paragraph-model.js';
 import { ParagraphBlockSchema } from './paragraph-block/paragraph-model.js';
 import type { SurfaceBlockModel } from './surface-block/surface-model.js';
 import { SurfaceBlockSchema } from './surface-block/surface-model.js';
+import type { SurfaceRefBlockModel } from './surface-ref-block/surface-ref-model.js';
+import { SurfaceRefBlockSchema } from './surface-ref-block/surface-ref-model.js';
 
 export type {
   AttachmentBlockModel,
@@ -64,6 +66,7 @@ export const AffineSchemas: z.infer<typeof BlockSchema>[] = [
   BookmarkBlockSchema,
   FrameBlockSchema,
   DatabaseBlockSchema,
+  SurfaceRefBlockSchema,
 ];
 
 export const __unstableSchemas = [
@@ -86,6 +89,7 @@ export type BlockSchemas = {
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
+  'affine:surface-ref': SurfaceRefBlockModel;
 };
 
 export type Flavour = keyof BlockSchemas;

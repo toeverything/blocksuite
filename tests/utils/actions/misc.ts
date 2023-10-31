@@ -58,6 +58,7 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
     "addRange(): The given range isn't in document.",
     //#region embed.spec.ts
     'Failed to load resource: the server responded with a status of 404 (Not Found)',
+    'Failed to load resource: the server responded with a status of 403 ()',
     'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
     'Error: Failed to fetch blob',
     'Error: Cannot find blob',

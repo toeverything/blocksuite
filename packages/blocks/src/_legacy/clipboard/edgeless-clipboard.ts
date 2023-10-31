@@ -539,8 +539,9 @@ export class EdgelessClipboard implements Clipboard {
 
     const parser = new ContentParser(this._page);
     const canvas = await parser.edgelessToCanvas(
-      this._edgeless,
+      this._edgeless.surface.viewport,
       bound,
+      this._edgeless,
       blocks,
       shapes
     );

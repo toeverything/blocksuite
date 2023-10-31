@@ -5,7 +5,8 @@ import { css, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import { RenameIcon } from '../../../../_common/icons/index.js';
+import { toast } from '../../../../_common/components/toast.js';
+import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
@@ -101,6 +102,19 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     });
   }
 
+  private _insertIntoPage() {
+    this.surface.page.addBlock(
+      'affine:surface-ref',
+      {
+        reference: this.frames[0].id,
+        refFlavour: 'affine:frame',
+      },
+      this.surface.page.root?.id
+    );
+
+    toast('Frame has been inserted into page');
+  }
+
   override firstUpdated() {
     this._frameBackground = createButtonPopper(
       this._fillColorButton,
@@ -131,10 +145,22 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
             <edgeless-tool-icon-button
               .tooltip=${'Rename'}
               .tipPosition=${'bottom'}
+              @click=${this._insertIntoPage}
+            >
+              ${NoteIcon}
+              <span style="margin-left: 2px;">Insert into Page</span>
+            </edgeless-tool-icon-button>
+            <component-toolbar-menu-divider
+              .vertical=${true}
+            ></component-toolbar-menu-divider>
+            <edgeless-tool-icon-button
+              .tooltip=${'Rename'}
+              .tipPosition=${'bottom'}
+              .iconContainerPadding=${0}
               @click=${() =>
                 mountFrameTitleEditor(this.frames[0], this.surface.edgeless)}
             >
-              ${RenameIcon}Rename
+              ${RenameIcon}
             </edgeless-tool-icon-button>
             <component-toolbar-menu-divider
               .vertical=${true}

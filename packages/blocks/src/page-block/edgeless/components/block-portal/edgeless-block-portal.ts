@@ -84,18 +84,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const { surface } = this.edgeless;
     const { zoom, translateX, translateY } = surface.viewport;
-    const { grid, gap } = getBackgroundGrid(zoom, this.edgeless.showGrid);
+    const { gap } = getBackgroundGrid(zoom, true);
 
     this.container.style.setProperty(
       'background-position',
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
-    this.container.style.setProperty(
-      'background-color',
-      'var(--affine-background-primary-color)'
-    );
-    this.container.style.setProperty('background-image', `${grid}`);
     this.layer.style.setProperty(
       'transform',
       `translate(${translateX}px, ${translateY}px) scale(${zoom})`
