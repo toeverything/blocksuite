@@ -87,6 +87,13 @@ export abstract class BaseCellRenderer<
       e.stopPropagation();
       this.onCopy(e);
     });
+
+    this._disposables.addFromEvent(this, 'cut', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onCut(e);
+    });
+
     this._disposables.addFromEvent(this, 'paste', e => {
       if (!this.isEditing) return;
       e.stopPropagation();
@@ -107,6 +114,45 @@ export abstract class BaseCellRenderer<
     // TODO: replace this dom operation
     const rootEl = document.querySelector('block-suite-root');
     assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
+      return {
+        ...items,
+        [TEXT]: data,
+      };
+    });
+
+    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
+    if (savedRange) {
+      resetNativeSelection(savedRange);
+    }
+  }
+
+  onCut(_e: ClipboardEvent) {
+    console.log(333);
+    const target = _e.target as HTMLElement;
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+
+    if (target instanceof HTMLInputElement) {
+      if (target.selectionStart === target.selectionEnd) return;
+
+      const value = target.value.slice(
+        target.selectionStart ?? 0,
+        target.selectionEnd ?? 0
+      );
+      if (!value) return;
+      rootEl.std.clipboard.writeToClipboard(async items => {
+        return {
+          ...items,
+          [TEXT]: value,
+        };
+      });
+      return;
+    }
+
+    const data = this.column.getStringValue(this.rowId);
+    this.onChange(undefined);
     rootEl.std.clipboard.writeToClipboard(async items => {
       return {
         ...items,

@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nanoid } from '@blocksuite/store';
 import type { Middleware } from '@floating-ui/dom';
@@ -15,6 +16,7 @@ import {
   PlusIcon,
 } from '../../../_common/icons/index.js';
 import { rangeWrap } from '../../../_common/utils/math.js';
+import { stopPropagation } from '../../utils/event.js';
 import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
@@ -34,6 +36,8 @@ type RenderOption = {
   group: SelectTag[];
   select: () => void;
 };
+
+const TEXT = 'text/plain';
 
 @customElement('affine-multi-tag-select')
 export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
@@ -107,7 +111,36 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     this._disposables.addFromEvent(this, 'click', () => {
       this._selectInput.focus();
     });
+
+    this._disposables.addFromEvent(this._selectInput, 'copy', e => {
+      e.stopPropagation();
+      this._onCopyToClipboard(this._selectInput);
+    });
+    this._disposables.addFromEvent(this._selectInput, 'cut', e => {
+      e.stopPropagation();
+      this._onCopyToClipboard(this._selectInput);
+    });
   }
+
+  private _onCopyToClipboard = (target: HTMLInputElement) => {
+    if (target.selectionStart === target.selectionEnd) return;
+
+    const value = target.value.slice(
+      target.selectionStart ?? 0,
+      target.selectionEnd ?? 0
+    );
+    if (!value) return;
+
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
+      return {
+        ...items,
+        [TEXT]: value,
+      };
+    });
+  };
 
   private _onDeleteSelected = (selectedValue: string[], value: string) => {
     const filteredValue = selectedValue.filter(item => item !== value);
@@ -365,6 +398,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
             .value="${this.text}"
             @input="${this._onInput}"
             @keydown="${this._onInputKeydown}"
+            @pointerdown="${stopPropagation}"
           />
         </div>
         <div class="select-option-container">

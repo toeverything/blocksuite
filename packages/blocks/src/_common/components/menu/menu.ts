@@ -111,6 +111,8 @@ const isSelectableItem = (item: Item): item is SelectItem => {
   return item.type === 'select';
 };
 
+const TEXT = 'text/plain';
+
 @customElement('affine-menu')
 export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -335,6 +337,15 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           return;
         }
       });
+
+      this._disposables.addFromEvent(input, 'copy', e => {
+        e.stopPropagation();
+        this._onCopyToClipboard(input);
+      });
+      this._disposables.addFromEvent(input, 'cut', e => {
+        e.stopPropagation();
+        this._onCopyToClipboard(input);
+      });
     }
   }
 
@@ -342,6 +353,26 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
     super.disconnectedCallback();
     this.selectedItem?.onHover?.(false);
   }
+
+  private _onCopyToClipboard = (target: HTMLInputElement) => {
+    if (target.selectionStart === target.selectionEnd) return;
+
+    const value = target.value.slice(
+      target.selectionStart ?? 0,
+      target.selectionEnd ?? 0
+    );
+    if (!value) return;
+
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
+      return {
+        ...items,
+        [TEXT]: value,
+      };
+    });
+  };
 
   private show(item: Menu): boolean {
     if (this.isSearchMode) {
