@@ -30,8 +30,11 @@ export async function exportPages(workspace: Workspace, pages: Page[]) {
   const assetsMap = job.assets;
 
   assetsMap.forEach((blob, id) => {
-    const name = (blob as File).name;
-    const ext = name.split('.').at(-1) ?? 'blob';
+    const name = 'name' in blob ? (blob as File).name : undefined;
+    const ext =
+      name !== undefined
+        ? name.split('.').at(-1) ?? blob.type.split('/').at(-1)
+        : blob.type.split('/').at(-1);
     assets.file(`${id}.${ext}`, blob);
   });
 
