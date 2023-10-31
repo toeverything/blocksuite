@@ -36,8 +36,8 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
 
   override connectedCallback() {
     super.connectedCallback();
-    const parent = this.root.view.viewFromPath('block', this.parentPath);
-    this._isInSurface = parent?.model.flavour === 'affine:surface';
+    const parent = this.root.page.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
   }
 
   get resizeImg() {
