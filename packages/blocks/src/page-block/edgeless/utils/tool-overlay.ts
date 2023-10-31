@@ -26,7 +26,7 @@ import {
 
 const drawRectangle = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
   const [x, y, w, h] = xywh;
-  ctx.rect(x + SHAPE_OVERLAY_OFFSET_X, y + SHAPE_OVERLAY_OFFSET_Y, w, h);
+  ctx.rect(x, y, w, h);
 };
 
 const drawTriangle = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
@@ -51,7 +51,7 @@ const drawEllipse = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
 
 const drawRoundedRect = (ctx: CanvasRenderingContext2D, xywh: XYWH) => {
   const [x, y, w, h] = xywh;
-  const width = w + 40;
+  const width = w;
   const height = h;
   const radius = 0.1;
   const cornerRadius = Math.min(width * radius, height * radius);
@@ -108,12 +108,12 @@ export abstract class Shape {
 
   constructor(
     xywh: XYWH,
-    _type: string,
+    type: string,
     options: Options,
     shapeStyle: ShapeStyle
   ) {
     this.xywh = xywh;
-    this.type = 'rect';
+    this.type = type;
     this.options = options;
     this.shapeStyle = shapeStyle;
   }
@@ -125,13 +125,7 @@ export class RectShape extends Shape {
   draw(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     if (this.shapeStyle === ShapeStyle.Scribbled) {
       const [x, y, w, h] = this.xywh;
-      rc.rectangle(
-        x + SHAPE_OVERLAY_OFFSET_X,
-        y + SHAPE_OVERLAY_OFFSET_Y,
-        w,
-        h,
-        this.options
-      );
+      rc.rectangle(x, y, w, h, this.options);
     } else {
       drawGeneralShape(ctx, 'rect', this.xywh, this.options);
     }
@@ -193,7 +187,7 @@ export class RoundedRectShape extends Shape {
       const radius = 0.1;
       const r = Math.min(w * radius, h * radius);
       const x0 = x + r;
-      const x1 = x + w + 40 - r;
+      const x1 = x + w - r;
       const y0 = y + r;
       const y1 = y + h - r;
       const path = `
@@ -309,12 +303,16 @@ export class ShapeOverlay extends ToolOverlay {
           fill: fillColor,
         };
 
-        const xywh = [
-          this.x,
-          this.y,
-          SHAPE_OVERLAY_WIDTH,
-          SHAPE_OVERLAY_HEIGHT,
-        ] as XYWH;
+        let { x, y } = this;
+        if (shapeType === 'roundedRect' || shapeType === 'rect') {
+          x += SHAPE_OVERLAY_OFFSET_X;
+          y += SHAPE_OVERLAY_OFFSET_Y;
+        }
+        const w =
+          shapeType === 'roundedRect'
+            ? SHAPE_OVERLAY_WIDTH + 40
+            : SHAPE_OVERLAY_WIDTH;
+        const xywh = [x, y, w, SHAPE_OVERLAY_HEIGHT] as XYWH;
         this.shape = ShapeFactory.createShape(
           xywh,
           shapeType,
@@ -328,12 +326,15 @@ export class ShapeOverlay extends ToolOverlay {
 
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas): void {
     ctx.globalAlpha = this.globalAlpha;
-    const xywh = [
-      this.x,
-      this.y,
-      SHAPE_OVERLAY_WIDTH,
-      SHAPE_OVERLAY_HEIGHT,
-    ] as XYWH;
+    let { x, y } = this;
+    const { type } = this.shape;
+    if (type === 'roundedRect' || type === 'rect') {
+      x += SHAPE_OVERLAY_OFFSET_X;
+      y += SHAPE_OVERLAY_OFFSET_Y;
+    }
+    const w =
+      type === 'roundedRect' ? SHAPE_OVERLAY_WIDTH + 40 : SHAPE_OVERLAY_WIDTH;
+    const xywh = [x, y, w, SHAPE_OVERLAY_HEIGHT] as XYWH;
     this.shape.xywh = xywh;
     this.shape.draw(ctx, rc);
   }

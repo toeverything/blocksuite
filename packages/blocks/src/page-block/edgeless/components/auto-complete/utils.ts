@@ -10,6 +10,7 @@ import {
   normalizeDegAngle,
   type Options,
   Overlay,
+  PhasorElementType,
   type RoughCanvas,
   ShapeElement,
   type ShapeStyle,
@@ -19,6 +20,7 @@ import {
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
+import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
 export enum Direction {
   Right,
@@ -181,13 +183,34 @@ export async function createEdgelessElement(
 export async function createShapeElement(
   edgeless: EdgelessPageBlockComponent,
   current: ShapeElement,
-  targetType: ShapeType
+  targetType: TARGET_SHAPE_TYPE
 ) {
   const { surface } = edgeless;
   const id = edgeless.surface.addElement(current.type, {
     ...current.serialize(),
-    shapeType: targetType,
+    shapeType: targetType === 'roundedRect' ? 'rect' : targetType,
+    radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new Workspace.Y.Text(),
+  });
+  const group = surface.pickById(surface.getGroupParent(current));
+  if (group instanceof GroupElement) {
+    surface.group.addChild(group, id);
+  }
+  return id;
+}
+
+export async function createTextElement(
+  edgeless: EdgelessPageBlockComponent,
+  current: ShapeElement
+) {
+  const { surface } = edgeless;
+  const id = edgeless.surface.addElement(PhasorElementType.TEXT, {
+    text: new Workspace.Y.Text(),
+    textAlign: 'left',
+    fontSize: 24,
+    color: GET_DEFAULT_TEXT_COLOR(),
+    bold: false,
+    italic: false,
   });
   const group = surface.pickById(surface.getGroupParent(current));
   if (group instanceof GroupElement) {

@@ -11,25 +11,34 @@ import {
   SmallNoteIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
+import { Point } from '../../../../_common/utils/index.js';
 import { captureEventTarget } from '../../../../_common/widgets/drag-handle/utils.js';
 import {
   Bound,
   type Connection,
   type ConnectorElement,
+  GroupElement,
   normalizeDegAngle,
   type PhasorElementType,
   type ShapeElement,
   ShapeStyle,
   type ShapeType,
+  TextElement,
   toDegree,
   Vec,
   type XYWH,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { DEFAULT_NOTE_WIDTH } from '../../utils/consts.js';
+import {
+  mountShapeTextEditor,
+  mountTextElementEditor,
+} from '../../utils/text.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
   AutoCompleteShapeOverlay,
   createShapeElement,
+  createTextElement,
   type Direction,
   isShape,
   type TARGET_SHAPE_TYPE,
@@ -87,11 +96,11 @@ export class EdgelessAutoCompletePanel extends LitElement {
 
   private async _generateShapeOnDrag(
     connector: ConnectorElement,
-    targetType: ShapeType
+    targetType: TARGET_SHAPE_TYPE
   ) {
     const edgeless = this.edgeless;
     const current = this.current;
-    const result = this._generateNextShapeBound(connector);
+    const result = this._generateTarget(connector);
     if (!isShape(current) || !result) return;
 
     const { nextBound, position } = result;
@@ -102,14 +111,16 @@ export class EdgelessAutoCompletePanel extends LitElement {
     surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
       target: { id, position },
     });
+
+    mountShapeTextEditor(surface.pickById(id) as ShapeElement, this.edgeless);
     edgeless.selectionManager.setSelection({
       elements: [id],
-      editing: false,
+      editing: true,
     });
     edgeless.page.captureSync();
   }
 
-  private _generateNextShapeBound(connector: ConnectorElement) {
+  private _generateTarget(connector: ConnectorElement) {
     const current = this.current;
     if (!isShape(current)) return;
 
@@ -147,7 +158,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     if (!isShape(current)) return;
 
     // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
-    const bound = this._generateNextShapeBound(this.connector)?.nextBound;
+    const bound = this._generateTarget(this.connector)?.nextBound;
     if (!bound) return;
 
     this._removeOverlay();
@@ -185,12 +196,85 @@ export class EdgelessAutoCompletePanel extends LitElement {
       this.edgeless.surface.viewport.removeOverlay(this._overlay);
   }
 
-  private _autoComplete(e: PointerEvent, targetType: ShapeType) {
+  private _autoComplete(e: PointerEvent, targetType: TARGET_SHAPE_TYPE) {
     e.preventDefault();
 
     this._generateShapeOnDrag(this.connector, targetType);
     this._removeOverlay();
     this.remove();
+  }
+
+  private async _addText() {
+    const result = this._generateTarget(this.connector);
+    if (!result) return;
+
+    const { nextBound, position } = result;
+    if (!nextBound) return;
+
+    const { x, h } = nextBound;
+    const y = nextBound.y + h / 2;
+    const id = await createTextElement(this.edgeless, this.current);
+
+    const { surface } = this.edgeless;
+    const newBound = new Bound(x, y, 32, 32);
+    surface.updateElement(id, { xywh: newBound.serialize() });
+    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+      target: { id, position },
+    });
+    this.edgeless.selectionManager.setSelection({
+      elements: [id],
+      editing: false,
+    });
+    this.edgeless.page.captureSync();
+    const textElement = this.edgeless.surface.pickById(id);
+    assertExists(textElement);
+    if (textElement instanceof TextElement) {
+      mountTextElementEditor(textElement, this.edgeless);
+    }
+
+    // this._removeOverlay();
+    this.remove();
+  }
+
+  private _addNote() {
+    const { page, surface } = this.edgeless;
+    const result = this._generateTarget(this.connector);
+    if (!result) return;
+
+    const { nextBound, position } = result;
+    if (!nextBound) return;
+
+    // TODO: need to accurate note position
+    const { x, h } = nextBound;
+    const y = nextBound.y + h / 2;
+    const viewportPosition = surface.viewport.toViewCoord(x + 40, y);
+    const point = new Point(...viewportPosition);
+
+    const id = this.edgeless.addNoteWithPoint(point, {
+      width: DEFAULT_NOTE_WIDTH,
+    });
+    page.addBlock('affine:paragraph', { type: 'text' }, id);
+
+    const group = surface.pickById(surface.getGroupParent(this.current));
+    if (group instanceof GroupElement) {
+      surface.group.addChild(group, id);
+    }
+
+    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+      target: { id, position },
+    });
+
+    this.edgeless.selectionManager.setSelection({
+      elements: [id],
+      editing: true,
+    });
+
+    // this._removeOverlay();
+    this.remove();
+  }
+
+  private _addFrame() {
+    console.log('add frame');
   }
 
   constructor(
@@ -226,7 +310,12 @@ export class EdgelessAutoCompletePanel extends LitElement {
       top: `${this.position?.y}px`,
     });
     const shapeStyle = this.current?.shapeStyle;
-    const currentShapeType = this.current?.shapeType;
+    const currentShapeType =
+      this.current.shapeType !== 'rect'
+        ? this.current.shapeType
+        : this.current.radius
+        ? 'roundedRect'
+        : 'rect';
 
     const shapeButtons = html`${ShapeComponentConfig.map(
       ({ name, generalIcon, scribbledIcon, tooltip }) => {
@@ -237,8 +326,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
             @pointerenter=${() => this._showOverlay(name)}
             @pointerleave=${() => this._removeOverlay()}
             @click=${(e: PointerEvent) => {
-              const targetType = name === 'roundedRect' ? 'rect' : name;
-              this._autoComplete(e, targetType);
+              this._autoComplete(e, name);
             }}
           >
             ${shapeStyle === ShapeStyle.General ? generalIcon : scribbledIcon}
@@ -250,10 +338,20 @@ export class EdgelessAutoCompletePanel extends LitElement {
     return html`<div class="auto-complete-panel-container" style=${style}>
       ${shapeButtons}
 
-      <edgeless-tool-icon-button .iconContainerPadding=${2}>
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${2}
+        @click=${() => {
+          this._addText();
+        }}
+      >
         ${FontFamilyIcon}
       </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button .iconContainerPadding=${2}>
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${2}
+        @click=${() => {
+          this._addNote();
+        }}
+      >
         ${SmallNoteIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button .iconContainerPadding=${2}>
@@ -262,7 +360,9 @@ export class EdgelessAutoCompletePanel extends LitElement {
 
       <edgeless-tool-icon-button
         .iconContainerPadding=${0}
-        @pointerenter=${() => this._showOverlay(currentShapeType)}
+        @pointerenter=${() => {
+          this._showOverlay(currentShapeType);
+        }}
         @pointerleave=${() => this._removeOverlay()}
         @click=${(e: PointerEvent) => {
           this._autoComplete(e, currentShapeType);
