@@ -49,11 +49,10 @@ test.describe('auto-complete', () => {
       await page.mouse.click(300, 50);
       await page.mouse.click(150, 120);
       const rect = await getEdgelessSelectedRectModel(page);
-      await clickView(page, [rect[0] + rect[2] / 2, rect[1] + rect[3] + 10]);
-
+      await clickView(page, [rect[0] + rect[2] + 10, rect[1] + rect[3] / 2]);
       const newRect = await getEdgelessSelectedRectModel(page);
-      expect(rect[0]).toEqual(newRect[0]);
-      expect(rect[1]).not.toEqual(newRect[1]);
+      expect(rect[0]).not.toEqual(newRect[0]);
+      expect(rect[1]).toEqual(newRect[1]);
       expect(rect[2]).toEqual(newRect[2]);
       expect(rect[3]).toEqual(newRect[3]);
     });

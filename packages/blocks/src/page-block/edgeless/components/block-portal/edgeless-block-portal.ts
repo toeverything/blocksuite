@@ -192,7 +192,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     _disposables.add(
       edgeless.selectionManager.slots.updated.on(() => {
         const { elements } = edgeless.selectionManager;
-        if (elements.length === 1 && isNoteBlock(elements[0])) {
+        if (
+          !edgeless.selectionManager.editing &&
+          elements.length === 1 &&
+          isNoteBlock(elements[0])
+        ) {
           this._showAutoConnect = true;
         } else {
           this._showAutoConnect = false;
