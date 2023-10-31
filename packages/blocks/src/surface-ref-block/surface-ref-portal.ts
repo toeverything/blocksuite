@@ -109,6 +109,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     );
   };
 
+  // FIXME: remove duplicated implementation of renderModel
   renderModel = (model: BaseBlockModel): TemplateResult => {
     const { flavour, children } = model;
     const schema = this.page.schema.flavourSchemaMap.get(flavour);

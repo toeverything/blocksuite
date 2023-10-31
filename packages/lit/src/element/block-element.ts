@@ -145,6 +145,7 @@ export class BlockElement<
     return result;
   }
 
+  // FIXME: remove this method
   calculatePath = () => {
     return this.root.view.calculatePath(this);
   };
