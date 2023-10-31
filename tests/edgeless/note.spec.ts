@@ -738,7 +738,6 @@ test('when no visible note block, clicking in page mode will auto add a new note
   await switchEditorMode(page);
 
   assertBlockCount(page, 'note', 1);
-  await page.pause();
   // select note
   await selectNoteInEdgeless(page, '2');
   await assertNoteSequence(page, '1');
