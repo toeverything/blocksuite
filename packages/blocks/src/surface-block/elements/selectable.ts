@@ -64,7 +64,7 @@ export const EdgelessSelectableMixin = <
       )[0];
       const points = rotatePoints(bound.points, bound.center, this.rotate ?? 0);
       const tangent = polygonGetPointTangent(points, rotatePoint);
-      console.log(rotatePoint, tangent);
+
       return new PointLocation(rotatePoint, tangent);
     }
 

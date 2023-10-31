@@ -159,8 +159,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   mouseRoot!: HTMLElement;
 
-  showGrid = true;
-
   @state()
   edgelessTool: EdgelessTool = {
     type: localStorage.defaultTool ?? 'default',

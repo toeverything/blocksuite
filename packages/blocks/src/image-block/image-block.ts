@@ -2,7 +2,6 @@ import './image/placeholder/image-not-found.js';
 import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { Text } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
@@ -39,8 +38,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   override connectedCallback() {
     super.connectedCallback();
     const parent = this.root.view.viewFromPath('block', this.parentPath);
-    assertExists(parent);
-    this._isInNote = parent.model.flavour === EdgelessBlockType.NOTE;
+    this._isInNote = parent?.model.flavour === EdgelessBlockType.NOTE;
   }
 
   get resizeImg() {
