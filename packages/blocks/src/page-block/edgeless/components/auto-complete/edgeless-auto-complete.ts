@@ -155,8 +155,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     if (!isShape(this.current)) return;
 
     const viewportRect = this.edgeless.surface.viewport.boundingClientRect;
-    // const offsetLeft = 68;
-    // const offsetTop = 82;
     const x = e.clientX - viewportRect.left + 60;
     const y = e.clientY - viewportRect.top - 80;
     const autoCompletePanel = new EdgelessAutoCompletePanel(
@@ -235,37 +233,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return surface.pickById(id) as ConnectorElement;
   }
 
-  // private async _createEdgelessElement(
-  //   edgeless: EdgelessPageBlockComponent,
-  //   current: ShapeElement | NoteBlockModel
-  // ) {
-  //   let id;
-  //   const { surface } = edgeless;
-  //   if (isShape(current)) {
-  //     id = edgeless.surface.addElement(current.type, {
-  //       ...current.serialize(),
-  //       text: new Workspace.Y.Text(),
-  //     });
-  //   } else {
-  //     const { page } = edgeless;
-  //     id = page.addBlock(
-  //       'affine:note',
-  //       { background: current.background },
-  //       edgeless.model.id
-  //     );
-  //     const noteService = edgeless.getService('affine:note');
-  //     const note = page.getBlockById(id) as NoteBlockModel;
-  //     assertExists(note);
-  //     const serializedBlock = (await getBlockClipboardInfo(current)).json;
-  //     await noteService.json2Block(note, serializedBlock.children);
-  //   }
-  //   const group = surface.pickById(surface.getGroupParent(current));
-  //   if (group instanceof GroupElement) {
-  //     surface.group.addChild(group, id);
-  //   }
-  //   return id;
-  // }
-
   private async _generateElementOnClick(type: Direction) {
     const { surface, page } = this.edgeless;
     const bound = this.computeNextBound(type);
@@ -297,45 +264,6 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     });
     this.removeOverlay();
   }
-
-  // async generateShapeOnDrag(_type: Direction, connector: ConnectorElement) {
-  //   const { surface } = this.edgeless;
-  //   const bound = Bound.deserialize(this.current.xywh);
-  //   const { w, h } = bound;
-  //   const point = connector.target.position;
-  //   assertExists(point);
-  //   const len = connector.path.length;
-  //   const angle = normalizeDegAngle(
-  //     toDegree(Vec.angle(connector.path[len - 2], connector.path[len - 1]))
-  //   );
-  //   const id = await this._createEdgelessElement();
-  //   let nextBound: Bound;
-  //   let position: Connection['position'];
-
-  //   if (angle >= 45 && angle <= 135) {
-  //     nextBound = new Bound(point[0] - w / 2, point[1], w, h);
-  //     position = [0.5, 0];
-  //   } else if (angle >= 135 && angle <= 225) {
-  //     nextBound = new Bound(point[0] - w, point[1] - h / 2, w, h);
-  //     position = [1, 0.5];
-  //   } else if (angle >= 225 && angle <= 315) {
-  //     nextBound = new Bound(point[0] - w / 2, point[1] - h, w, h);
-  //     position = [0.5, 1];
-  //   } else {
-  //     nextBound = new Bound(point[0], point[1] - h / 2, w, h);
-  //     position = [0, 0.5];
-  //   }
-
-  //   surface.updateElement(id, { xywh: nextBound.serialize() });
-  //   surface.updateElement<PhasorElementType.CONNECTOR>(connector.id, {
-  //     target: { id, position },
-  //   });
-  //   this.edgeless.selectionManager.setSelection({
-  //     elements: [id],
-  //     editing: false,
-  //   });
-  //   this.edgeless.page.captureSync();
-  // }
 
   showNextShape(
     current: ShapeElement,
