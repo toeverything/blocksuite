@@ -28,10 +28,12 @@ import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
 
+const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
+
 const portalMap = {
-  [EdgelessBlockType.FRAME]: 'edgeless-block-portal-frame',
-  [EdgelessBlockType.NOTE]: 'edgeless-block-portal-note',
-  [EdgelessBlockType.IMAGE]: 'edgeless-block-portal-image',
+  [FRAME]: 'edgeless-block-portal-frame',
+  [NOTE]: 'edgeless-block-portal-note',
+  [IMAGE]: 'edgeless-block-portal-image',
 };
 
 @customElement('edgeless-block-portal-container')
@@ -210,11 +212,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const { surface } = edgeless;
     if (!surface) return nothing;
-    const notes = surface.getblocks(EdgelessBlockType.NOTE);
-    const images = surface.getblocks(EdgelessBlockType.IMAGE);
+    const notes = surface.getblocks(NOTE);
+    const images = surface.getblocks(IMAGE);
     const blocks = [...notes, ...images].sort(surface.compare);
 
     const { readonly } = this.edgeless.page;
+    const showedNotes = surface.getblocks(NOTE).filter(note => !note.hidden);
     return html`
       <div class="affine-block-children-container edgeless">
         <edgeless-auto-connect-line
@@ -252,6 +255,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       ></edgeless-dragging-area-rect>
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
       <edgeless-auto-connect-sequence
+        .notes=${showedNotes}
         .surface=${surface}
         .show=${this._showAutoConnect}
       ></edgeless-auto-connect-sequence>

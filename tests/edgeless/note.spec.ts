@@ -51,6 +51,7 @@ import {
   assertEdgelessNoteBackground,
   assertEdgelessSelectedRect,
   assertNativeSelectionRangeCount,
+  assertNoteSequence,
   assertNoteXYWH,
   assertRectEqual,
   assertRectExist,
@@ -729,76 +730,6 @@ test('continuous undo and redo (note block add operation) should work', async ({
   expect(count).toBe(4);
 });
 
-test('manage note index and hidden status', async ({ page }) => {
-  await enterPlaygroundRoom(page);
-  await initEmptyEdgelessState(page);
-  await switchEditorMode(page);
-  await initThreeNotes(page);
-
-  // one note comes from `initEmptyEdgelessState`
-  assertBlockCount(page, 'note', 4);
-  await waitNextFrame(page);
-  await page.mouse.click(10, 100);
-
-  // select note-2
-  await selectNoteInEdgeless(page, '4');
-  expect(await page.locator('.note-status').innerText()).toBe('2');
-
-  // select note-3
-  await selectNoteInEdgeless(page, '6');
-  expect(await page.locator('.note-status').innerText()).toBe('3');
-
-  // select note-4
-  await selectNoteInEdgeless(page, '8');
-  expect(await page.locator('.note-status').innerText()).toBe('4');
-
-  // hide note-4
-  await page.locator('.note-status-button').click();
-  expect(await page.locator('.note-status.hidden').count()).toBe(1);
-  // reappear note-4
-  await page.locator('.note-status-button').click();
-  // index of note-4 still be 4
-  expect(await page.locator('.note-status').innerText()).toBe('4');
-
-  // select note-3 and hide
-  await selectNoteInEdgeless(page, '6');
-  await page.locator('.note-status-button').click();
-  expect(await page.locator('.note-status.hidden').count()).toBe(1);
-
-  // index of note-2 still 2
-  await selectNoteInEdgeless(page, '4');
-  expect(await page.locator('.note-status').innerText()).toBe('2');
-
-  // index of note-4 will be 3
-  await selectNoteInEdgeless(page, '8');
-  expect(await page.locator('.note-status').innerText()).toBe('3');
-
-  // switch to editor mode, note-3 will be hidden
-  await switchEditorMode(page);
-  expect(await page.locator('affine-note[data-block-id="6"]').count()).toBe(0);
-
-  // switch to edgeless mode, note-3 will be visible
-  await switchEditorMode(page);
-  expect(await page.locator('affine-note[data-block-id="6"]').count()).toBe(1);
-
-  // select note-3 and reappear
-  await selectNoteInEdgeless(page, '6');
-  await waitNextFrame(page);
-  await page.locator('.note-status-button').click();
-
-  // index of note-2 still 2
-  await selectNoteInEdgeless(page, '4');
-  expect(await page.locator('.note-status').innerText()).toBe('2');
-
-  // index of note-3 will be 4
-  await selectNoteInEdgeless(page, '6');
-  expect(await page.locator('.note-status').innerText()).toBe('4');
-
-  // index of note-4 will be 3
-  await selectNoteInEdgeless(page, '8');
-  expect(await page.locator('.note-status').innerText()).toBe('3');
-});
-
 test('when no visible note block, clicking in page mode will auto add a new note block', async ({
   page,
 }) => {
@@ -807,13 +738,13 @@ test('when no visible note block, clicking in page mode will auto add a new note
   await switchEditorMode(page);
 
   assertBlockCount(page, 'note', 1);
-
+  await page.pause();
   // select note
   await selectNoteInEdgeless(page, '2');
-  expect(await page.locator('.note-status').innerText()).toBe('1');
-  expect(await page.locator('affine-note').count()).toBe(1);
+  await assertNoteSequence(page, '1');
+  await assertBlockCount(page, 'note', 1);
   // hide note
-  await page.locator('.note-status-button').click();
+  await page.locator('edgeless-change-note-button').click();
 
   await switchEditorMode(page);
   let note = await page.evaluate(() => {

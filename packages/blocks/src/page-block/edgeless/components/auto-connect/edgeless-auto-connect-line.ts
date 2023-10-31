@@ -62,6 +62,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
       );
       points.push([start, end]);
     }
+    const expand = 20;
 
     return repeat(
       points,
@@ -71,10 +72,9 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
         const height = Math.abs(start[1] - end[1]);
         const style = styleMap({
           position: 'absolute',
-          transform: `translate(${Math.min(start[0], end[0])}px, ${Math.min(
-            start[1],
-            end[1]
-          )}px)`,
+          transform: `translate(${Math.min(start[0], end[0]) - expand / 2}px, ${
+            Math.min(start[1], end[1]) - expand / 2
+          }px)`,
         });
         const lineStart = [0, 0];
         const lineEnd = [width, height];
@@ -94,11 +94,20 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
           lineEnd[1] = height;
         }
 
-        const newstart = Vec.pointOffset(lineStart, lineEnd, 16);
-        const newend = Vec.pointOffset(lineEnd, lineStart, 16);
+        const newWidth = width + expand;
+        const newHeight = height + expand;
+
+        const newstart = Vec.add(Vec.pointOffset(lineStart, lineEnd, 16), [
+          expand / 2,
+          expand / 2,
+        ]);
+        const newend = Vec.add(Vec.pointOffset(lineEnd, lineStart, 16), [
+          expand / 2,
+          expand / 2,
+        ]);
 
         return svg`
-          <svg style=${style} width="${width}px" height="${height}px" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+          <svg style=${style} width="${newWidth}px" height="${newHeight}px" viewBox="0 0 ${newWidth} ${newHeight}" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <marker
                 id="arrow"
