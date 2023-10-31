@@ -14,15 +14,12 @@ import {
   hasNativeSelection,
   resetNativeSelection,
 } from '../../../_common/utils/index.js';
-import { ClipboardItem } from '../../../_legacy/clipboard/clipboard-item.js';
-import {
-  CLIPBOARD_MIMETYPE,
-  performNativeCopy,
-} from '../../../_legacy/clipboard/utils/pure.js';
 import type { DataViewKanbanManager } from '../../kanban/kanban-view-manager.js';
 import { tRichText } from '../../logical/data-type.js';
 import type { DataViewTableManager } from '../../table/table-view-manager.js';
 import { BaseCellRenderer } from '../columns/base-cell.js';
+
+const TEXT = 'text/plain';
 
 interface StackItem {
   meta: Map<'v-range', VRange | null | undefined>;
@@ -285,17 +282,25 @@ export class HeaderAreaTextCellEditing extends BaseTextCell {
       const value = this.column.getStringValue(this.rowId);
       data = value?.slice(start, end) ?? '';
     }
-    const textClipboardItem = new ClipboardItem(CLIPBOARD_MIMETYPE.TEXT, data);
+
+    // TODO: replace this dom operation
+    const rootEl = document.querySelector('block-suite-root');
+    assertExists(rootEl);
+    rootEl.std.clipboard.writeToClipboard(async items => {
+      return {
+        ...items,
+        [TEXT]: data,
+      };
+    });
 
     const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-    performNativeCopy([textClipboardItem]);
     if (savedRange) {
       resetNativeSelection(savedRange);
     }
   }
 
   override onPaste(e: ClipboardEvent) {
-    const textClipboardData = e.clipboardData?.getData(CLIPBOARD_MIMETYPE.TEXT);
+    const textClipboardData = e.clipboardData?.getData(TEXT);
     if (!textClipboardData) return;
 
     const range = this.vEditor?.getVRange();

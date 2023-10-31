@@ -1,8 +1,9 @@
 import type { Y } from '@blocksuite/store';
 
+import type { EdgelessElement } from '../../index.js';
+import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
-import type { SurfaceBlockComponent } from '../surface-block.js';
 import { Bound } from '../utils/bound.js';
 import { getBoundsWithRotation, isPointIn } from '../utils/math-utils.js';
 import { type PointLocation } from '../utils/point-location.js';
@@ -17,6 +18,7 @@ import type {
   IEdgelessElement,
   PhasorElementType,
 } from './edgeless-element.js';
+import type { IShapeLocalRecord } from './shape/types.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -65,7 +67,26 @@ export abstract class SurfaceElement<
 
   yMap: Y.Map<unknown>;
 
-  protected surface: SurfaceBlockComponent;
+  protected options: {
+    getLocalRecord: (
+      id: string
+    ) => ISurfaceElementLocalRecord | IShapeLocalRecord | undefined;
+    onElementUpdated: (update: {
+      id: string;
+      props: { [index: string]: { old: unknown; new: unknown } };
+    }) => void;
+    updateElementLocalRecord: (
+      id: string,
+      record: Record<string, unknown>
+    ) => void;
+    pickById: (id: string) => EdgelessElement | null;
+    getGroupParent: (element: string | EdgelessElement) => string;
+    setGroupParent: (
+      element: string | EdgelessElement,
+      groupId: string
+    ) => void;
+    selectionManager?: EdgelessSelectionManager;
+  };
   protected renderer: Renderer | null = null;
   protected _connectable = true;
 
@@ -73,7 +94,7 @@ export abstract class SurfaceElement<
 
   constructor(
     yMap: Y.Map<unknown>,
-    surface: SurfaceBlockComponent,
+    options: SurfaceElement['options'],
     data: Partial<T> = {}
   ) {
     if (!yMap.doc) {
@@ -85,7 +106,7 @@ export abstract class SurfaceElement<
       this.yMap.set(key, data[key] as T[keyof T]);
     }
 
-    this.surface = surface;
+    this.options = options;
   }
 
   init() {}
@@ -152,7 +173,7 @@ export abstract class SurfaceElement<
   }
 
   get localRecord() {
-    return this.surface.getElementLocalRecord(this.id);
+    return this.options.getLocalRecord(this.id);
   }
 
   get connectable() {
@@ -160,7 +181,7 @@ export abstract class SurfaceElement<
   }
 
   getLocalRecord(): L {
-    return this.surface.getElementLocalRecord(this.id) as L;
+    return this.options.getLocalRecord(this.id) as L;
   }
 
   applyUpdate(updates: Partial<T>) {
@@ -189,7 +210,7 @@ export abstract class SurfaceElement<
     e.changes.keys.forEach((change, key) => {
       props[key] = { old: change.oldValue, new: this.yMap.get(key) };
     });
-    this.surface.slots.elementUpdated.emit({
+    this.options.onElementUpdated({
       id: this.id,
       props: props,
     });

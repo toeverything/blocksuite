@@ -14,7 +14,7 @@ const handlePoint = (
   model: BaseBlockModel
 ) => {
   const { index, length } = point;
-  if (!snapshot.props.text) {
+  if (!snapshot.props.text || length === 0) {
     return;
   }
   (snapshot.props.text as Record<string, unknown>).delta =

@@ -30,6 +30,7 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { SurfaceRefBlockSchema } from '../surface-ref-block/index.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -162,6 +163,15 @@ export const PagePreset: BlockSpec[] = [
       component: literal`affine-attachment`,
     },
   },
+  {
+    schema: SurfaceRefBlockSchema,
+    view: {
+      component: literal`affine-surface-ref`,
+      widgets: {
+        surfaceToolbar: literal`affine-surface-ref-toolbar`,
+      },
+    },
+  },
 ];
 
 export const EdgelessPreset: BlockSpec[] = [
@@ -241,6 +251,12 @@ export const EdgelessPreset: BlockSpec[] = [
     schema: AttachmentBlockSchema,
     view: {
       component: literal`affine-attachment`,
+    },
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    view: {
+      component: literal`affine-surface-ref`,
     },
   },
 ];

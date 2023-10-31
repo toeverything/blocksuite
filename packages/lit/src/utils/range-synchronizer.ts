@@ -140,7 +140,10 @@ export class RangeSynchronizer {
     if (!range) return;
 
     const blocks = this._rangeManager.getSelectedBlockElementsByRange(range, {
-      match: element => element.model.role === 'content',
+      match: element =>
+        element.model.role === 'content' ||
+        // FIXME: remove affine related code
+        element.model.flavour === 'affine:surface-ref',
       mode: 'flat',
     });
 

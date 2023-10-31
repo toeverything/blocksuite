@@ -583,6 +583,9 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       console.error(e);
     });
     return true;
+  } else if (matchFlavours(previousSibling, ['affine:surface-ref'])) {
+    page.deleteBlock(previousSibling);
+    return true;
   }
 
   // TODO handle in block service

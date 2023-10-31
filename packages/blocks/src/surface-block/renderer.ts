@@ -1,4 +1,4 @@
-import { assertNotExists, Slot } from '@blocksuite/global/utils';
+import { Slot } from '@blocksuite/global/utils';
 
 import { type IBound, ZOOM_MAX, ZOOM_MIN } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
@@ -330,11 +330,6 @@ export class Renderer implements SurfaceViewport {
   }
 
   attach(container: HTMLElement) {
-    assertNotExists(
-      this._container,
-      'Phasor surface is attached multiple times'
-    );
-
     this._container = container;
     container.appendChild(this.canvas);
 
