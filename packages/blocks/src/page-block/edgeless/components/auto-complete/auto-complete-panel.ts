@@ -22,7 +22,6 @@ import {
   type PhasorElementType,
   type ShapeElement,
   ShapeStyle,
-  type ShapeType,
   TextElement,
   toDegree,
   Vec,
@@ -36,7 +35,10 @@ import {
 } from '../../utils/text.js';
 import { ShapeComponentConfig } from '../toolbar/shape/shape-menu-config.js';
 import {
+  AutoCompleteFrameOverlay,
+  AutoCompleteNoteOverlay,
   AutoCompleteShapeOverlay,
+  AutoCompleteTextOverlay,
   createShapeElement,
   createTextElement,
   type Direction,
@@ -92,7 +94,8 @@ export class EdgelessAutoCompletePanel extends LitElement {
   @property({ attribute: false })
   connector: ConnectorElement;
 
-  private _overlay: AutoCompleteShapeOverlay | null = null;
+  private _overlay: AutoCompleteShapeOverlay | AutoCompleteNoteOverlay | null =
+    null;
 
   private async _generateShapeOnDrag(
     connector: ConnectorElement,
@@ -191,6 +194,65 @@ export class EdgelessAutoCompletePanel extends LitElement {
     this.edgeless.surface.refresh();
   }
 
+  // TODO: optimize overlay style
+  private _showTextOverlay() {
+    const current = this.current;
+    if (!isShape(current)) return;
+
+    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
+    const bound = this._generateTarget(this.connector)?.nextBound;
+    if (!bound) return;
+
+    this._removeOverlay();
+
+    const { x, h } = bound;
+    const y = bound.y + h / 2 - 12;
+    const xywh = [x, y, 116, 24] as XYWH;
+
+    this._overlay = new AutoCompleteTextOverlay(xywh);
+    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.refresh();
+  }
+
+  private _showNoteOverlay() {
+    const current = this.current;
+    if (!isShape(current)) return;
+
+    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
+    const bound = this._generateTarget(this.connector)?.nextBound;
+    if (!bound) return;
+
+    this._removeOverlay();
+
+    const { x, h } = bound;
+    const y = bound.y + h / 2 - 110 / 2;
+    const xywh = [x, y, DEFAULT_NOTE_WIDTH, 110] as XYWH;
+
+    this._overlay = new AutoCompleteNoteOverlay(xywh);
+    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.refresh();
+  }
+
+  private _showFrameOverlay() {
+    const current = this.current;
+    if (!isShape(current)) return;
+
+    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
+    const bound = this._generateTarget(this.connector)?.nextBound;
+    if (!bound) return;
+
+    this._removeOverlay();
+
+    const { x, h } = bound;
+    const y = bound.y;
+    const w = h / 0.75;
+    const xywh = [x, y, w, h] as XYWH;
+
+    this._overlay = new AutoCompleteFrameOverlay(xywh);
+    this.edgeless.surface.viewport.addOverlay(this._overlay);
+    this.edgeless.surface.refresh();
+  }
+
   private _removeOverlay() {
     if (this._overlay)
       this.edgeless.surface.viewport.removeOverlay(this._overlay);
@@ -204,6 +266,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     this.remove();
   }
 
+  // TODO: optimize add different target
   private async _addText() {
     const result = this._generateTarget(this.connector);
     if (!result) return;
@@ -232,7 +295,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       mountTextElementEditor(textElement, this.edgeless);
     }
 
-    // this._removeOverlay();
+    this._removeOverlay();
     this.remove();
   }
 
@@ -269,7 +332,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       editing: true,
     });
 
-    // this._removeOverlay();
+    this._removeOverlay();
     this.remove();
   }
 
@@ -340,6 +403,10 @@ export class EdgelessAutoCompletePanel extends LitElement {
 
       <edgeless-tool-icon-button
         .iconContainerPadding=${2}
+        @pointerenter=${() => {
+          this._showTextOverlay();
+        }}
+        @pointerleave=${() => this._removeOverlay()}
         @click=${() => {
           this._addText();
         }}
@@ -348,13 +415,23 @@ export class EdgelessAutoCompletePanel extends LitElement {
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
         .iconContainerPadding=${2}
+        @pointerenter=${() => {
+          this._showNoteOverlay();
+        }}
+        @pointerleave=${() => this._removeOverlay()}
         @click=${() => {
           this._addNote();
         }}
       >
         ${SmallNoteIcon}
       </edgeless-tool-icon-button>
-      <edgeless-tool-icon-button .iconContainerPadding=${2}>
+      <edgeless-tool-icon-button
+        .iconContainerPadding=${2}
+        @pointerenter=${() => {
+          this._showFrameOverlay();
+        }}
+        @pointerleave=${() => this._removeOverlay()}
+      >
         ${FrameIcon}
       </edgeless-tool-icon-button>
 

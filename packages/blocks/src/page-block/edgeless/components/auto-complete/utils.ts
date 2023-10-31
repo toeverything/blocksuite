@@ -52,6 +52,107 @@ export class AutoCompleteShapeOverlay extends Overlay {
   }
 }
 
+class AutoCompleteOverlay extends Overlay {
+  xywh: XYWH;
+  constructor(xywh: XYWH) {
+    super();
+    this.xywh = xywh;
+  }
+
+  override render(_ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {}
+}
+
+export class AutoCompleteTextOverlay extends AutoCompleteOverlay {
+  constructor(xywh: XYWH) {
+    super(xywh);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    // fill color
+    ctx.fillStyle = 'white';
+    const [x, y, w, h] = this.xywh;
+    ctx.fillRect(x, y, w, h);
+
+    // fill text
+    ctx.font = '15px sans-serif';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Type '/' to insert", x + w / 2, y + h / 2);
+
+    ctx.strokeStyle = '#1e96eb';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, w, h);
+  }
+}
+
+export class AutoCompleteNoteOverlay extends AutoCompleteOverlay {
+  constructor(xywh: XYWH) {
+    super(xywh);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    // fill color
+    const [x, y, w, h] = this.xywh;
+    ctx.fillStyle = '#FFEACA';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // fill text
+    ctx.font = '15px sans-serif';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Type '/' for command", x + w / 2, y + h / 2);
+  }
+}
+
+export class AutoCompleteFrameOverlay extends AutoCompleteOverlay {
+  constructor(xywh: XYWH) {
+    super(xywh);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    const [x, y, w, h] = this.xywh;
+    // frame title
+    const titleWidth = 72;
+    const titleHeight = 30;
+    const titleY = y - titleHeight - 10;
+    ctx.fillStyle = '#1e96eb';
+    ctx.beginPath();
+    ctx.roundRect(x, titleY, titleWidth, titleHeight, 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // fill text
+    ctx.globalAlpha = 1;
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Frame 1', x + titleWidth / 2, titleY + titleHeight / 2);
+
+    // frame
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = '#1e96eb';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
 export function nextBound(
   type: Direction,
   curShape: ShapeElement,
