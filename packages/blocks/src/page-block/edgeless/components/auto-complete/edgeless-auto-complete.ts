@@ -210,7 +210,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
       if (!this._isMoving) {
         await this._generateElementOnClick(type);
       } else if (connector && !connector.target.id) {
-        // await this.generateShapeOnDrag(type, connector);
+        this.edgeless.selectionManager.clear();
         this._createAutoCompletePanel(e, type, connector);
       }
 
@@ -235,7 +235,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private async _generateElementOnClick(type: Direction) {
     const { surface, page } = this.edgeless;
-    const bound = this.computeNextBound(type);
+    const bound = this._computeNextBound(type);
     const id = await createEdgelessElement(this.edgeless, this.current);
     if (isShape(this.current)) {
       surface.updateElement(id, { xywh: bound.serialize() });
@@ -265,7 +265,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     this.removeOverlay();
   }
 
-  showNextShape(
+  private _showNextShape(
     current: ShapeElement,
     bound: Bound,
     path: IVec[],
@@ -286,7 +286,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     surface.refresh();
   }
 
-  computeNextBound(type: Direction) {
+  private _computeNextBound(type: Direction) {
     if (isShape(this.current)) {
       const connectedShapes = this._surface.connector
         .getConnecttedElements(this.current)
@@ -316,7 +316,11 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     }
   }
 
-  computeLine(type: Direction, curShape: ShapeElement, nextBound: Bound) {
+  private _computeLine(
+    type: Direction,
+    curShape: ShapeElement,
+    nextBound: Bound
+  ) {
     const startBound = getGridBound(this.current);
     const { startPosition, endPosition } = getPosition(type);
     const nextShape = {
@@ -399,9 +403,9 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           @mouseenter=${() => {
             this._timer = setTimeout(() => {
               if (this.current instanceof ShapeElement) {
-                const bound = this.computeNextBound(type);
-                const path = this.computeLine(type, this.current, bound);
-                this.showNextShape(
+                const bound = this._computeNextBound(type);
+                const path = this._computeLine(type, this.current, bound);
+                this._showNextShape(
                   this.current,
                   bound,
                   path,

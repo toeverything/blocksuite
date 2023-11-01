@@ -19,6 +19,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
+import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
@@ -36,6 +37,122 @@ export const DEFAULT_TEXT_WIDTH = 116;
 export const DEFAULT_TEXT_HEIGHT = 24;
 
 export type TARGET_SHAPE_TYPE = ShapeType | 'roundedRect';
+export type AUTO_COMPLETE_TARGET_TYPE =
+  | TARGET_SHAPE_TYPE
+  | 'text'
+  | 'note'
+  | 'frame';
+
+export const DEFAULT_NOTE_BACKGROUND_COLOR =
+  '--affine-background-secondary-color';
+export const NOTE_BACKGROUND_COLOR_MAP = new Map(
+  Object.entries({
+    '--affine-palette-shape-yellow': '--affine-tag-yellow',
+    '--affine-palette-shape-red': '--affine-tag-red',
+    '--affine-palette-shape-green': '--affine-tag-green',
+    '--affine-palette-shape-blue': '--affine-tag-blue',
+    '--affine-palette-shape-purple': '--affine-tag-purple',
+  })
+);
+
+class AutoCompleteTargetOverlay extends Overlay {
+  xywh: XYWH;
+  constructor(xywh: XYWH) {
+    super();
+    this.xywh = xywh;
+  }
+
+  override render(_ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {}
+}
+
+export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
+  constructor(xywh: XYWH) {
+    super(xywh);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = 'white';
+    const [x, y, w, h] = this.xywh;
+    ctx.fillRect(x, y, w, h);
+
+    // fill text placeholder
+    ctx.font = '15px sans-serif';
+    ctx.fillStyle = '#C0BFC1';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Type '/' to insert", x + w / 2, y + h / 2);
+
+    ctx.strokeStyle = '#1e96eb';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, w, h);
+  }
+}
+
+export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
+  private _background: string;
+  constructor(xywh: XYWH, background: string) {
+    super(xywh);
+    this._background = background;
+  }
+
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    const [x, y, w, h] = this.xywh;
+    ctx.fillStyle = this._background;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // fill text placeholder
+    ctx.font = '15px sans-serif';
+    ctx.fillStyle = 'black';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText("Type '/' for command", x + 24, y + h / 2);
+  }
+}
+
+export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
+  constructor(xywh: XYWH) {
+    super(xywh);
+  }
+
+  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
+    ctx.globalAlpha = 0.4;
+    const [x, y, w, h] = this.xywh;
+    // frame title background
+    const titleWidth = 72;
+    const titleHeight = 30;
+    const titleY = y - titleHeight - 10;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    ctx.beginPath();
+    ctx.roundRect(x, titleY, titleWidth, titleHeight, 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // fill title text
+    ctx.globalAlpha = 1;
+    ctx.font = '14px sans-serif';
+    ctx.fillStyle = 'white';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Frame', x + titleWidth / 2, titleY + titleHeight / 2);
+
+    // frame stroke
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.closePath();
+    ctx.stroke();
+  }
+}
 
 export class AutoCompleteShapeOverlay extends Overlay {
   private _shape: Shape;
@@ -52,105 +169,6 @@ export class AutoCompleteShapeOverlay extends Overlay {
   override render(ctx: CanvasRenderingContext2D, rc: RoughCanvas) {
     ctx.globalAlpha = 0.4;
     this._shape.draw(ctx, rc);
-  }
-}
-
-class AutoCompleteOverlay extends Overlay {
-  xywh: XYWH;
-  constructor(xywh: XYWH) {
-    super();
-    this.xywh = xywh;
-  }
-
-  override render(_ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {}
-}
-
-export class AutoCompleteTextOverlay extends AutoCompleteOverlay {
-  constructor(xywh: XYWH) {
-    super(xywh);
-  }
-
-  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    ctx.globalAlpha = 0.4;
-    // fill color
-    ctx.fillStyle = 'white';
-    const [x, y, w, h] = this.xywh;
-    ctx.fillRect(x, y, w, h);
-
-    // fill text
-    ctx.font = '15px sans-serif';
-    ctx.fillStyle = '#C0BFC1';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText("Type '/' to insert", x + w / 2, y + h / 2);
-
-    ctx.strokeStyle = '#1e96eb';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, w, h);
-  }
-}
-
-export class AutoCompleteNoteOverlay extends AutoCompleteOverlay {
-  constructor(xywh: XYWH) {
-    super(xywh);
-  }
-
-  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    ctx.globalAlpha = 0.4;
-    // fill color
-    const [x, y, w, h] = this.xywh;
-    ctx.fillStyle = '#FFEACA';
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 8);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // fill text
-    ctx.font = '15px sans-serif';
-    ctx.fillStyle = 'black';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.fillText("Type '/' for command", x + w / 2, y + h / 2);
-  }
-}
-
-export class AutoCompleteFrameOverlay extends AutoCompleteOverlay {
-  constructor(xywh: XYWH) {
-    super(xywh);
-  }
-
-  override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
-    ctx.globalAlpha = 0.4;
-    const [x, y, w, h] = this.xywh;
-    // frame title
-    const titleWidth = 72;
-    const titleHeight = 30;
-    const titleY = y - titleHeight - 10;
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-    ctx.beginPath();
-    ctx.roundRect(x, titleY, titleWidth, titleHeight, 4);
-    ctx.closePath();
-    ctx.fill();
-
-    // fill text
-    ctx.globalAlpha = 1;
-    ctx.font = '14px sans-serif';
-    ctx.fillStyle = 'white';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Frame', x + titleWidth / 2, titleY + titleHeight / 2);
-
-    // frame
-    ctx.globalAlpha = 0.4;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, 8);
-    ctx.closePath();
-    ctx.stroke();
   }
 }
 
@@ -251,6 +269,10 @@ export function isShape(
   return element instanceof ShapeElement;
 }
 
+export function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 export async function createEdgelessElement(
   edgeless: EdgelessPageBlockComponent,
   current: ShapeElement | NoteBlockModel
@@ -310,6 +332,7 @@ export async function createTextElement(
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
+    fontFamily: GENERAL_CANVAS_FONT_FAMILY,
     color: GET_DEFAULT_TEXT_COLOR(),
     bold: false,
     italic: false,
@@ -319,8 +342,4 @@ export async function createTextElement(
     surface.group.addChild(group, id);
   }
   return id;
-}
-
-export function capitalizeFirstLetter(str: string) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
 }
