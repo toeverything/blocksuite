@@ -562,6 +562,11 @@ export class Vec {
     });
   };
 
+  static pointOffset = (A: IVec, B: IVec, offset: number): IVec => {
+    const u = Vec.uni(Vec.sub(B, A));
+    return Vec.add(A, Vec.mul(u, offset));
+  };
+
   /**
    * Get the slope between two points.
    * @param A

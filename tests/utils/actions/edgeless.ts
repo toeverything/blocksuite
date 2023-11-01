@@ -1117,7 +1117,10 @@ export async function getConnectorPath(page: Page, index = 0) {
   );
 }
 
-export async function getSelectedBound(page: Page, index = 0) {
+export async function getSelectedBound(
+  page: Page,
+  index = 0
+): Promise<[number, number, number, number]> {
   return await page.evaluate(
     ([index]) => {
       const container = document.querySelector('affine-edgeless-page');

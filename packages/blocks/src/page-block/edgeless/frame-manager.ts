@@ -42,7 +42,7 @@ export class EdgelessFrameManager {
   }
 
   get frames() {
-    return this._edgeless.surface.getblocks(EdgelessBlockType.FRAME);
+    return this._edgeless.surface.getBlocks(EdgelessBlockType.FRAME);
   }
 
   selectFrame(eles: Selectable[]) {

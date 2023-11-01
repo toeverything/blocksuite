@@ -6,11 +6,13 @@ import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../note-status/index.js';
+import '../../components/auto-connect/edgeless-index-label.js';
+import '../../components/auto-connect/edgeless-auto-connect-line.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nothing } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
@@ -24,12 +26,14 @@ import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { almostEqual, Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
-import { getBackgroundGrid } from '../../utils/query.js';
+import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
+
+const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
 const portalMap = {
-  [EdgelessBlockType.FRAME]: 'edgeless-block-portal-frame',
-  [EdgelessBlockType.NOTE]: 'edgeless-block-portal-note',
-  [EdgelessBlockType.IMAGE]: 'edgeless-block-portal-image',
+  [FRAME]: 'edgeless-block-portal-frame',
+  [NOTE]: 'edgeless-block-portal-note',
+  [IMAGE]: 'edgeless-block-portal-image',
 };
 
 @customElement('edgeless-block-portal-container')
@@ -44,6 +48,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
+
+  @state()
+  private _showAutoConnect = false;
 
   private _cancelRestoreWillchange: (() => void) | null = null;
 
@@ -178,6 +185,21 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         this.requestUpdate();
       })
     );
+
+    _disposables.add(
+      edgeless.selectionManager.slots.updated.on(() => {
+        const { elements } = edgeless.selectionManager;
+        if (
+          !edgeless.selectionManager.editing &&
+          elements.length === 1 &&
+          isNoteBlock(elements[0])
+        ) {
+          this._showAutoConnect = true;
+        } else {
+          this._showAutoConnect = false;
+        }
+      })
+    );
   }
 
   override render() {
@@ -185,13 +207,19 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const { surface } = edgeless;
     if (!surface) return nothing;
-    const notes = surface.getblocks(EdgelessBlockType.NOTE);
-    const images = surface.getblocks(EdgelessBlockType.IMAGE);
+    const notes = surface.getBlocks(NOTE);
+    const images = surface.getBlocks(IMAGE);
     const blocks = [...notes, ...images].sort(surface.compare);
 
     const { readonly } = this.edgeless.page;
+    const showedNotes = surface.getBlocks(NOTE).filter(note => !note.hidden);
     return html`
       <div class="affine-block-children-container edgeless">
+        <edgeless-auto-connect-line
+          .surface=${surface}
+          .show=${this._showAutoConnect}
+        >
+        </edgeless-auto-connect-line>
         <div class="affine-edgeless-layer">
           <edgeless-frames-container .surface=${surface}>
           </edgeless-frames-container>
@@ -221,7 +249,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
-      <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status>
+      <edgeless-index-label
+        .notes=${showedNotes}
+        .surface=${surface}
+        .show=${this._showAutoConnect}
+      ></edgeless-index-label>
+      <!-- <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status> -->
     `;
   }
 }
