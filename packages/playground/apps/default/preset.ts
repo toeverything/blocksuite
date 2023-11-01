@@ -17,7 +17,7 @@ class CustomAttachmentService extends AttachmentService {
   }
 }
 
-export const getPlaygroundPresets = () => {
+export function getPlaygroundPresets() {
   const pageModePreset = PagePreset.map(preset => {
     if (preset.schema.model.flavour === 'affine:attachment') {
       return {
@@ -41,4 +41,4 @@ export const getPlaygroundPresets = () => {
     pageModePreset,
     edgelessModePreset,
   };
-};
+}
