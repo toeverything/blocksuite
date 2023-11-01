@@ -1,9 +1,10 @@
 import '../buttons/tool-icon-button.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import { WithDisposable } from '@blocksuite/lit';
 import { Workspace } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, unsafeCSS } from 'lit';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -16,6 +17,7 @@ import { captureEventTarget } from '../../../../_common/widgets/drag-handle/util
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   Bound,
+  clamp,
   type Connection,
   type ConnectorElement,
   GroupElement,
@@ -50,13 +52,13 @@ import {
   DEFAULT_TEXT_HEIGHT,
   DEFAULT_TEXT_WIDTH,
   Direction,
-  isShape,
   NOTE_BACKGROUND_COLOR_MAP,
+  PANEL_OFFSET,
   type TARGET_SHAPE_TYPE,
 } from './utils.js';
 
 @customElement('edgeless-auto-complete-panel')
-export class EdgelessAutoCompletePanel extends LitElement {
+export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   static override styles = css`
     .auto-complete-panel-container {
       position: absolute;
@@ -70,7 +72,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       border-radius: 8px;
       background: var(--affine-background-overlay-panel-color);
       box-shadow: var(--affine-shadow-2);
-      z-index: var(--affine-popper-index);
+      z-index: 1;
     }
 
     .row-button {
@@ -84,7 +86,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       font-style: normal;
       font-weight: 400;
       line-height: 20px;
-      border: 1px solid var(--light-detail-color-border-color, #e3e2e4);
+      border: 1px solid var(--affine-border-color, #e3e2e4);
     }
   `;
 
@@ -92,13 +94,10 @@ export class EdgelessAutoCompletePanel extends LitElement {
   edgeless: EdgelessPageBlockComponent;
 
   @property({ attribute: false })
-  position: { x: number; y: number };
+  position: [number, number];
 
   @property({ attribute: false })
-  type: Direction;
-
-  @property({ attribute: false })
-  current: ShapeElement;
+  currentShape: ShapeElement;
 
   @property({ attribute: false })
   connector: ConnectorElement;
@@ -111,10 +110,8 @@ export class EdgelessAutoCompletePanel extends LitElement {
     | null = null;
 
   private _generateTarget(connector: ConnectorElement) {
-    const current = this.current;
-    if (!isShape(current)) return;
-
-    const bound = Bound.deserialize(current.xywh);
+    const currentShape = this.currentShape;
+    const bound = Bound.deserialize(currentShape.xywh);
     const { w, h } = bound;
     const point = connector.target.position;
     assertExists(point);
@@ -198,7 +195,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     )?.xywh;
     if (!xywh) return;
 
-    const fillColor = this.current.fillColor;
+    const fillColor = this.currentShape.fillColor;
     const computedStyle = getComputedStyle(this.edgeless);
     const backgroundColor = computedStyle.getPropertyValue(
       NOTE_BACKGROUND_COLOR_MAP.get(fillColor) ?? DEFAULT_NOTE_BACKGROUND_COLOR
@@ -216,7 +213,9 @@ export class EdgelessAutoCompletePanel extends LitElement {
     const xywh = this._getTargetXYWH(w, h)?.xywh;
     if (!xywh) return;
 
-    this._overlay = new AutoCompleteFrameOverlay(xywh);
+    const computedStyle = getComputedStyle(this.edgeless);
+    const strokeColor = computedStyle.getPropertyValue('--affine-black-30');
+    this._overlay = new AutoCompleteFrameOverlay(xywh, strokeColor);
     this.edgeless.surface.viewport.addOverlay(this._overlay);
   }
 
@@ -227,7 +226,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     const { x, y, w, h } = bound;
     const xywh = [x, y, w, h] as XYWH;
     const { shapeStyle, roughness, strokeColor, fillColor, strokeWidth } =
-      this.current;
+      this.currentShape;
     const computedStyle = getComputedStyle(this.edgeless);
     const stroke = computedStyle.getPropertyValue(strokeColor);
     const fill = computedStyle.getPropertyValue(fillColor);
@@ -252,8 +251,6 @@ export class EdgelessAutoCompletePanel extends LitElement {
   }
 
   private _showOverlay(targetType: AUTO_COMPLETE_TARGET_TYPE) {
-    const current = this.current;
-    if (!isShape(current)) return;
     this._removeOverlay();
 
     switch (targetType) {
@@ -280,13 +277,13 @@ export class EdgelessAutoCompletePanel extends LitElement {
 
   private async _addShape(targetType: TARGET_SHAPE_TYPE) {
     const edgeless = this.edgeless;
-    const current = this.current;
+    const currentShape = this.currentShape;
     const result = this._generateTarget(this.connector);
-    if (!isShape(current) || !result) return;
+    if (!result) return;
 
     const { nextBound, position } = result;
     const { surface } = edgeless;
-    const id = await createShapeElement(edgeless, current, targetType);
+    const id = await createShapeElement(edgeless, currentShape, targetType);
 
     surface.updateElement(id, { xywh: nextBound.serialize() });
     surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
@@ -310,7 +307,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     if (!target) return;
 
     const { xywh, position } = target;
-    const fillColor = this.current.fillColor;
+    const fillColor = this.currentShape.fillColor;
     const backgroundColor =
       NOTE_BACKGROUND_COLOR_MAP.get(fillColor) ?? DEFAULT_NOTE_BACKGROUND_COLOR;
 
@@ -323,7 +320,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       page.root?.id
     );
     page.addBlock('affine:paragraph', { type: 'text' }, id);
-    const group = surface.pickById(surface.getGroupParent(this.current));
+    const group = surface.pickById(surface.getGroupParent(this.currentShape));
     if (group instanceof GroupElement) {
       surface.group.addChild(group, id);
     }
@@ -347,7 +344,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     const target = this._getTargetXYWH(w, h);
     if (!target) return;
 
-    const { xywh } = target;
+    const { xywh, position } = target;
 
     const edgeless = this.edgeless;
     const { surface } = edgeless;
@@ -363,6 +360,11 @@ export class EdgelessAutoCompletePanel extends LitElement {
     edgeless.page.captureSync();
     const frame = edgeless.surface.pickById(id);
     assertExists(frame);
+
+    // TODO: make frame connectable
+    // surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+    //   target: { id, position },
+    // });
     edgeless.selectionManager.setSelection({
       elements: [frame.id],
       editing: false,
@@ -374,7 +376,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
     if (!target) return;
 
     const { xywh, position } = target;
-    const id = await createTextElement(this.edgeless, this.current);
+    const id = await createTextElement(this.edgeless, this.currentShape);
 
     const { surface } = this.edgeless;
     surface.updateElement(id, { xywh: serializeXYWH(...xywh) });
@@ -413,18 +415,30 @@ export class EdgelessAutoCompletePanel extends LitElement {
     this.remove();
   }
 
+  private _getPanelPosition() {
+    const viewportRect = this.edgeless.surface.viewport.boundingClientRect;
+    let [x, y] = this.edgeless.surface.toViewCoord(...this.position);
+    const { width, height } = viewportRect;
+    // if connector target position is out of viewport, don't show the panel
+    if (x <= 0 || x >= width || y <= 0 || y >= height) return null;
+
+    x += PANEL_OFFSET.x;
+    y += PANEL_OFFSET.y;
+    x = clamp(x, 20, width - 20 - 136);
+    y = clamp(y, 20, height - 20 - 108);
+    return [x, y] as [number, number];
+  }
+
   constructor(
-    position: { x: number; y: number },
+    position: [number, number],
     edgeless: EdgelessPageBlockComponent,
-    type: Direction,
-    current: ShapeElement,
+    currentShape: ShapeElement,
     connector: ConnectorElement
   ) {
     super();
     this.position = position;
     this.edgeless = edgeless;
-    this.type = type;
-    this.current = current;
+    this.currentShape = currentShape;
     this.connector = connector;
   }
 
@@ -443,16 +457,25 @@ export class EdgelessAutoCompletePanel extends LitElement {
     this._removeOverlay();
   }
 
+  override firstUpdated() {
+    this.disposables.add(
+      this.edgeless.slots.viewportUpdated.on(() => this.requestUpdate())
+    );
+  }
+
   override render() {
+    const position = this._getPanelPosition();
+    if (!position) return nothing;
+
     const style = styleMap({
-      left: `${this.position?.x}px`,
-      top: `${this.position?.y}px`,
+      left: `${position[0]}px`,
+      top: `${position[1]}px`,
     });
-    const shapeStyle = this.current?.shapeStyle;
+    const shapeStyle = this.currentShape.shapeStyle;
     const currentShapeType =
-      this.current.shapeType !== 'rect'
-        ? this.current.shapeType
-        : this.current.radius
+      this.currentShape.shapeType !== 'rect'
+        ? this.currentShape.shapeType
+        : this.currentShape.radius
         ? 'roundedRect'
         : 'rect';
 

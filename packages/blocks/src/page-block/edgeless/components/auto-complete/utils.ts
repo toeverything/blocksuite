@@ -30,6 +30,10 @@ export enum Direction {
   Top,
 }
 
+export const PANEL_OFFSET = {
+  x: 100,
+  y: -160,
+};
 export const MAIN_GAP = 100;
 export const SECOND_GAP = 20;
 export const DEFAULT_NOTE_OVERLAY_HEIGHT = 110;
@@ -72,9 +76,10 @@ export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
     ctx.globalAlpha = 0.4;
-    ctx.fillStyle = 'white';
     const [x, y, w, h] = this.xywh;
-    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#1e96eb';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, w, h);
 
     // fill text placeholder
     ctx.font = '15px sans-serif';
@@ -82,10 +87,6 @@ export class AutoCompleteTextOverlay extends AutoCompleteTargetOverlay {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText("Type '/' to insert", x + w / 2, y + h / 2);
-
-    ctx.strokeStyle = '#1e96eb';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, w, h);
   }
 }
 
@@ -118,8 +119,10 @@ export class AutoCompleteNoteOverlay extends AutoCompleteTargetOverlay {
 }
 
 export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
-  constructor(xywh: XYWH) {
+  private _strokeColor;
+  constructor(xywh: XYWH, strokeColor: string) {
     super(xywh);
+    this._strokeColor = strokeColor;
   }
 
   override render(ctx: CanvasRenderingContext2D, _rc: RoughCanvas) {
@@ -145,7 +148,7 @@ export class AutoCompleteFrameOverlay extends AutoCompleteTargetOverlay {
 
     // frame stroke
     ctx.globalAlpha = 0.4;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.strokeStyle = this._strokeColor;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 8);

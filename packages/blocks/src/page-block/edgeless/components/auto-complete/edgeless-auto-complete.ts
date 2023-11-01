@@ -36,6 +36,7 @@ import {
   isShape,
   MAIN_GAP,
   nextBound,
+  PANEL_OFFSET,
 } from './utils.js';
 
 class AutoCompleteOverlay extends Overlay {
@@ -149,24 +150,20 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
   private _createAutoCompletePanel(
     e: PointerEvent,
-    type: Direction,
     connector: ConnectorElement
   ) {
     if (!isShape(this.current)) return;
 
-    const viewportRect = this.edgeless.surface.viewport.boundingClientRect;
-    const x = e.clientX - viewportRect.left + 100;
-    const y = e.clientY - viewportRect.top - 260;
+    const position = this._surface.toModelCoord(e.clientX, e.clientY);
     const autoCompletePanel = new EdgelessAutoCompletePanel(
-      { x, y },
+      position,
       this.edgeless,
-      type,
       this.current,
       connector
     );
 
     const pageBlockContainer = this.edgeless.pageBlockContainer;
-    pageBlockContainer.append(autoCompletePanel);
+    pageBlockContainer.appendChild(autoCompletePanel);
   }
 
   private _onPointerDown = (e: PointerEvent, type: Direction) => {
@@ -211,7 +208,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         await this._generateElementOnClick(type);
       } else if (connector && !connector.target.id) {
         this.edgeless.selectionManager.clear();
-        this._createAutoCompletePanel(e, type, connector);
+        this._createAutoCompletePanel(e, connector);
       }
 
       this._isMoving = false;
