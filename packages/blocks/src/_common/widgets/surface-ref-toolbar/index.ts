@@ -111,16 +111,21 @@ function SurfaceRefToolbarOptions(options: {
         background-color: var(--affine-border-color);
         margin: 0 8px;
       }
+
+      .view-in-edgeless-button {
+        font-size: 12px;
+        color: var(--affine-text-secondary-color);
+        font-weight: 600;
+        gap: 2px;
+      }
     </style>
 
     <div class="affine-embed-editing-state-container">
       <div class="embed-editing-state">
         <icon-button
+          class="view-in-edgeless-button"
           text="View in Edgeless"
           width="fit-content"
-          fontSize="12px"
-          textColor="var(--affine-text-secondary-color)"
-          style="gap: 2px; font-weight: 600;"
           @click=${() => blockElement.viewInEdgeless()}
           >${EdgelessModeIcon}
         </icon-button>

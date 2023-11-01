@@ -60,18 +60,18 @@ export function AttachmentOptionsTemplate({
       class="affine-attachment-options"
       @pointerdown=${stopPropagation}
     >
-      <icon-button size="24px" ?hidden=${true}>
+      <icon-button size="32px" ?hidden=${true}>
         ${ViewIcon}
         <affine-tooltip .offset=${12}>Preview</affine-tooltip>
       </icon-button>
       <div class="divider" ?hidden=${true}></div>
 
-      <icon-button size="24px" ?hidden=${true || readonly}>
+      <icon-button size="32px" ?hidden=${true || readonly}>
         ${LinkIcon}
         <affine-tooltip .offset=${12}>Turn into Link view</affine-tooltip>
       </icon-button>
       <icon-button
-        size="24px"
+        size="32px"
         ?disabled=${readonly || disableEmbed}
         @click="${() => {
           turnIntoEmbedView(model);
@@ -84,7 +84,7 @@ export function AttachmentOptionsTemplate({
       <div class="divider"></div>
 
       <icon-button
-        size="24px"
+        size="32px"
         ?hidden=${readonly}
         @click="${() => {
           abortController.abort();
@@ -109,7 +109,7 @@ export function AttachmentOptionsTemplate({
         <affine-tooltip .offset=${12}>Rename</affine-tooltip>
       </icon-button>
       <icon-button
-        size="24px"
+        size="32px"
         ?hidden=${readonly}
         @click=${() => {
           showCaption();
@@ -120,7 +120,7 @@ export function AttachmentOptionsTemplate({
       </icon-button>
       <div class="divider" ?hidden=${readonly}></div>
       <icon-button
-        size="24px"
+        size="32px"
         class="more-button"
         @click=${() => {
           if (moreMenuAbortController) {
