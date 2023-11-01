@@ -1,6 +1,7 @@
 import {
   type AbstractEditor,
   type AttachmentProps,
+  AttachmentService,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
   EdgelessPreset,
@@ -15,7 +16,12 @@ import {
 import { withTempBlobData } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/env';
-import { noop, Slot } from '@blocksuite/global/utils';
+import {
+  assertExists,
+  assertInstanceOf,
+  noop,
+  Slot,
+} from '@blocksuite/global/utils';
 import {
   BlockSuiteRoot,
   ShadowlessElement,
@@ -156,7 +162,7 @@ export class EditorContainer
   }
 
   override firstUpdated() {
-    // todo: refactor to a better solution
+    //FIXME: refactor to a better solution
     getServiceOrRegister('affine:code');
     if (this.mode === 'page') {
       setTimeout(() => {
@@ -165,55 +171,6 @@ export class EditorContainer
         }
       });
     }
-
-    // adds files from outside by dragging and dropping
-    this.fileDropManager.register({
-      name: 'Image',
-      matcher: file => file.type.startsWith('image'),
-      handler: async (
-        file: File
-      ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-        const storage = this.page.blobs;
-        const { saveAttachmentData } = withTempBlobData();
-        const sourceId = await storage.set(
-          new Blob([file], { type: file.type })
-        );
-        saveAttachmentData(sourceId, { name: file.name });
-        const size = this.mode === 'edgeless' ? await readImageSize(file) : {};
-        return {
-          flavour: 'affine:image',
-          sourceId,
-          ...size,
-        };
-      },
-    });
-    this.fileDropManager.register({
-      name: 'Attachment',
-      matcher: (file: File) => {
-        // TODO limit size in blob
-        const MAX_ATTACHMENT_SIZE = 10 * 1000 * 1000;
-        if (file.size > MAX_ATTACHMENT_SIZE) {
-          console.warn('You can only upload files less than 10M.');
-          return false;
-        }
-        return true;
-      },
-      handler: async (
-        file: File
-      ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
-        const storage = this.page.blobs;
-        const sourceId = await storage.set(
-          new Blob([file], { type: file.type })
-        );
-        return {
-          flavour: 'affine:attachment',
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          sourceId,
-        };
-      },
-    });
   }
 
   override updated(changedProperties: Map<string, unknown>) {
@@ -222,6 +179,96 @@ export class EditorContainer
       if (this.mode === 'page') {
         this._saveViewportLocalRecord();
       }
+    }
+
+    if (
+      changedProperties.has('pagePreset') ||
+      changedProperties.has('edgelessPreset') ||
+      changedProperties.has('page')
+    ) {
+      const root = this.root.value;
+      if (!root) return;
+
+      const service = root.spec.getService('affine:attachment');
+      assertExists(service);
+      assertInstanceOf(service, AttachmentService);
+      const maxFileSize = service.maxFileSize;
+
+      this.fileDropManager.clear();
+
+      this.fileDropManager.register({
+        name: 'Image',
+        matcher: file => file.type.startsWith('image'),
+        handler: async (
+          file: File
+        ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
+          const storage = this.page.blobs;
+          const { saveAttachmentData } = withTempBlobData();
+          const sourceId = await storage.set(
+            new Blob([file], { type: file.type })
+          );
+          saveAttachmentData(sourceId, { name: file.name });
+          const size =
+            this.mode === 'edgeless' ? await readImageSize(file) : {};
+          return {
+            flavour: 'affine:image',
+            sourceId,
+            ...size,
+          };
+        },
+      });
+
+      this.fileDropManager.register({
+        name: 'Image',
+        matcher: file => file.type.startsWith('image'),
+        handler: async (
+          file: File
+        ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
+          const storage = this.page.blobs;
+          const { saveAttachmentData } = withTempBlobData();
+          const sourceId = await storage.set(
+            new Blob([file], { type: file.type })
+          );
+          saveAttachmentData(sourceId, { name: file.name });
+          const size =
+            this.mode === 'edgeless' ? await readImageSize(file) : {};
+          return {
+            flavour: 'affine:image',
+            sourceId,
+            ...size,
+          };
+        },
+      });
+
+      this.fileDropManager.register({
+        name: 'Attachment',
+        matcher: (file: File) => {
+          if (file.size > maxFileSize) {
+            console.warn(
+              `You can only upload files less than ${
+                maxFileSize / (1000 * 1000)
+              }M.`
+            );
+            return false;
+          }
+          return true;
+        },
+        handler: async (
+          file: File
+        ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+          const storage = this.page.blobs;
+          const sourceId = await storage.set(
+            new Blob([file], { type: file.type })
+          );
+          return {
+            flavour: 'affine:attachment',
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            sourceId,
+          };
+        },
+      });
     }
 
     if (!changedProperties.has('page') && !changedProperties.has('mode')) {

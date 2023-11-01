@@ -85,7 +85,7 @@ function SurfaceRefToolbarOptions(options: {
       :host {
         z-index: 1;
       }
-      .embed-editing-state {
+      .surface-ref-toolbar-container {
         display: flex;
         box-sizing: border-box;
         box-shadow: var(--affine-shadow-2);
@@ -97,11 +97,11 @@ function SurfaceRefToolbarOptions(options: {
         background-color: var(--affine-background-overlay-panel-color);
         margin: 0;
       }
-      .delete-image-button:hover {
+      .delete-button:hover {
         background: var(--affine-background-error-color);
         color: var(--affine-error-color);
       }
-      .delete-image-button:hover > svg {
+      .delete-button:hover > svg {
         color: var(--affine-error-color);
       }
 
@@ -120,91 +120,89 @@ function SurfaceRefToolbarOptions(options: {
       }
     </style>
 
-    <div class="affine-embed-editing-state-container">
-      <div class="embed-editing-state">
-        <icon-button
-          class="view-in-edgeless-button"
-          text="View in Edgeless"
-          width="fit-content"
-          @click=${() => blockElement.viewInEdgeless()}
-          >${EdgelessModeIcon}
-        </icon-button>
-        <div class="divider"></div>
-        <icon-button
-          size="32px"
-          ?hidden=${readonly}
-          @click=${() => {
-            blockElement.showCaption();
-          }}
-        >
-          ${CaptionIcon}
-          <affine-tooltip tip-position="top">Caption</affine-tooltip>
-        </icon-button>
-        <icon-button
-          size="32px"
-          @click=${() => {
-            const referencedModel = blockElement.referenceModel;
+    <div class="surface-ref-toolbar-container">
+      <icon-button
+        class="view-in-edgeless-button"
+        text="View in Edgeless"
+        width="fit-content"
+        @click=${() => blockElement.viewInEdgeless()}
+        >${EdgelessModeIcon}
+      </icon-button>
+      <div class="divider"></div>
+      <icon-button
+        size="32px"
+        ?hidden=${readonly}
+        @click=${() => {
+          blockElement.showCaption();
+        }}
+      >
+        ${CaptionIcon}
+        <affine-tooltip tip-position="top">Caption</affine-tooltip>
+      </icon-button>
+      <icon-button
+        size="32px"
+        @click=${() => {
+          const referencedModel = blockElement.referenceModel;
 
-            if (!referencedModel) return;
+          if (!referencedModel) return;
 
-            edgelessToBlob(model.page, {
-              surfaceRefBlock: blockElement,
-              surfaceRenderer: blockElement.surfaceRenderer,
-              edgelessElement: referencedModel,
-              blockContainer: blockElement.blocksPortal,
+          edgelessToBlob(model.page, {
+            surfaceRefBlock: blockElement,
+            surfaceRenderer: blockElement.surfaceRenderer,
+            edgelessElement: referencedModel,
+            blockContainer: blockElement.blocksPortal,
+          })
+            .then(blob => {
+              const fileName =
+                'title' in referencedModel
+                  ? referencedModel.title.toString()
+                  : 'Edgeless Content';
+
+              downloadBlob(blob, fileName);
             })
-              .then(blob => {
-                const fileName =
-                  'title' in referencedModel
-                    ? referencedModel.title.toString()
-                    : 'Edgeless Content';
-
-                downloadBlob(blob, fileName);
-              })
-              .catch(err => {
-                console.error(err);
-              });
-          }}
-        >
-          ${DownloadIcon}
-          <affine-tooltip tip-position="top">Download</affine-tooltip>
-        </icon-button>
-        <icon-button
-          size="32px"
-          @click=${() => {
-            edgelessToBlob(model.page, {
-              surfaceRefBlock: blockElement,
-              surfaceRenderer: blockElement.surfaceRenderer,
-              edgelessElement: blockElement.referenceModel as EdgelessElement,
-              blockContainer: blockElement.blocksPortal,
+            .catch(err => {
+              console.error(err);
+            });
+        }}
+      >
+        ${DownloadIcon}
+        <affine-tooltip tip-position="top">Download</affine-tooltip>
+      </icon-button>
+      <icon-button
+        size="32px"
+        @click=${() => {
+          edgelessToBlob(model.page, {
+            surfaceRefBlock: blockElement,
+            surfaceRenderer: blockElement.surfaceRenderer,
+            edgelessElement: blockElement.referenceModel as EdgelessElement,
+            blockContainer: blockElement.blocksPortal,
+          })
+            .then(blob => {
+              return writeImageBlobToClipboard(blob);
             })
-              .then(blob => {
-                return writeImageBlobToClipboard(blob);
-              })
-              .then(() => {
-                toast('Copied image to clipboard');
-              })
-              .catch(err => {
-                console.error(err);
-              });
-          }}
-        >
-          ${CopyIcon}
-          <affine-tooltip tip-position="top">Copy to clipboard</affine-tooltip>
-        </icon-button>
-        <icon-button
-          class="delete-image-button"
-          size="32px"
-          ?hidden=${readonly}
-          @click="${() => {
-            model.page.deleteBlock(model);
-            abortController.abort();
-          }}"
-        >
-          ${DeleteIcon}
-          <affine-tooltip tip-position="top">Delete</affine-tooltip>
-        </icon-button>
-      </div>
+            .then(() => {
+              toast('Copied image to clipboard');
+            })
+            .catch(err => {
+              console.error(err);
+            });
+        }}
+      >
+        ${CopyIcon}
+        <affine-tooltip tip-position="top">Copy to clipboard</affine-tooltip>
+      </icon-button>
+      <icon-button
+        class="delete-button"
+        size="32px"
+        ?hidden=${readonly}
+        @click="${() => {
+          model.page.deleteBlock(model);
+          abortController.abort();
+        }}"
+      >
+        ${DeleteIcon}
+        <affine-tooltip tip-position="top">Delete</affine-tooltip>
+      </icon-button>
     </div>
   `;
 }
