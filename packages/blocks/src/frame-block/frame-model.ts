@@ -94,7 +94,7 @@ export class FrameBlockModel
     ) as FrameBlockComponent;
     if (!block) return false;
     const titleBound = block.titleBound;
-    return bound.isPointInBound([x, y]) || titleBound.isPointInBound([x, y], 0);
+    return bound.isPointOnBound([x, y]) || titleBound.isPointInBound([x, y], 0);
   }
   boxSelect(bound: Bound): boolean {
     return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
