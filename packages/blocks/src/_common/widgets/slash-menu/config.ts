@@ -1,4 +1,4 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Text, type Y } from '@blocksuite/store';
 
 import {
@@ -33,6 +33,7 @@ import {
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
+import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
@@ -289,7 +290,11 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) return;
           const file = await openFileOrFiles();
           if (!file) return;
-          await appendAttachmentBlock(file, model);
+          const service = pageElement.root.spec.getService('affine:attachment');
+          assertExists(service);
+          assertInstanceOf(service, AttachmentService);
+          const maxFileSize = service.maxFileSize;
+          await appendAttachmentBlock(file, model, maxFileSize);
         }),
       },
     ],

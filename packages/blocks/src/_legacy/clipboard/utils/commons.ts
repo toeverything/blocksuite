@@ -240,7 +240,8 @@ export async function textedClipboardData2Blocks(
 
 export async function clipboardData2Blocks(
   page: Page,
-  clipboardData: ClipboardEvent['clipboardData']
+  clipboardData: ClipboardEvent['clipboardData'],
+  maxFileSize: number
 ) {
   if (!clipboardData) {
     return [];
@@ -248,7 +249,7 @@ export async function clipboardData2Blocks(
 
   const contentParser = new ContentParser(page);
   if (isPureFileInClipboard(clipboardData)) {
-    return contentParser.file2Blocks(clipboardData);
+    return contentParser.file2Blocks(clipboardData, maxFileSize);
   }
 
   const HTMLClipboardData = clipboardData.getData(CLIPBOARD_MIMETYPE.HTML);
