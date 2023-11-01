@@ -61,7 +61,9 @@ export default defineConfig({
             items: [
               { text: 'Overview', link: '/block-std-overview' },
               { text: 'Block Schema', link: '/block-schema' },
-              { text: 'Render Blocks', link: '/render-blocks' },
+              { text: 'Block Rendering', link: '/block-rendering' },
+              { text: 'Block Service', link: '/block-service' },
+              { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
         ],
