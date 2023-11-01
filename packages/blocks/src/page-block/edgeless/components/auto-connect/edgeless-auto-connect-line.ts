@@ -9,6 +9,7 @@ import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 
+const EXPAND_OFFSET = 20;
 const { NOTE } = EdgelessBlockType;
 
 @customElement('edgeless-auto-connect-line')
@@ -62,7 +63,6 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
       );
       points.push([start, end]);
     }
-    const expand = 20;
 
     return repeat(
       points,
@@ -72,9 +72,9 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
         const height = Math.abs(start[1] - end[1]);
         const style = styleMap({
           position: 'absolute',
-          transform: `translate(${Math.min(start[0], end[0]) - expand / 2}px, ${
-            Math.min(start[1], end[1]) - expand / 2
-          }px)`,
+          transform: `translate(${
+            Math.min(start[0], end[0]) - EXPAND_OFFSET / 2
+          }px, ${Math.min(start[1], end[1]) - EXPAND_OFFSET / 2}px)`,
         });
         const lineStart = [0, 0];
         const lineEnd = [width, height];
@@ -94,16 +94,16 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
           lineEnd[1] = height;
         }
 
-        const newWidth = width + expand;
-        const newHeight = height + expand;
+        const newWidth = width + EXPAND_OFFSET;
+        const newHeight = height + EXPAND_OFFSET;
 
         const newStart = Vec.add(Vec.pointOffset(lineStart, lineEnd, 16), [
-          expand / 2,
-          expand / 2,
+          EXPAND_OFFSET / 2,
+          EXPAND_OFFSET / 2,
         ]);
         const newEnd = Vec.add(Vec.pointOffset(lineEnd, lineStart, 16), [
-          expand / 2,
-          expand / 2,
+          EXPAND_OFFSET / 2,
+          EXPAND_OFFSET / 2,
         ]);
 
         return svg`
