@@ -1,7 +1,6 @@
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 /**
  * Default size is 32px, you can override it by setting `size` property.
@@ -40,6 +39,7 @@ export class IconButton extends LitElement {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--affine-text-primary-color);
       pointer-events: auto;
+      padding: 4px;
     }
 
     :host(:hover) {
@@ -97,12 +97,6 @@ export class IconButton extends LitElement {
 
   @property()
   text: string | null = null;
-
-  @property()
-  fontSize: string | number | null = null;
-
-  @property()
-  textColor: string | null = null;
 
   @property({ attribute: true, type: Boolean })
   active?: boolean = false;
@@ -180,14 +174,7 @@ export class IconButton extends LitElement {
 
     return html`<slot></slot>${this.text
         ? // wrap a span around the text so we can ellipsis it automatically
-          html`<span
-            class="text"
-            style="${styleMap({
-              fontSize: this.fontSize,
-              color: this.textColor,
-            })}"
-            >${this.text}</span
-          >`
+          html`<span class="text">${this.text}</span>`
         : ''}<slot name="suffix"></slot>`;
   }
 }

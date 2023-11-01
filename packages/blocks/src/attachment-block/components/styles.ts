@@ -92,31 +92,11 @@ export const styles = css`
   .affine-attachment-options {
     display: flex;
     align-items: center;
-    padding: 8px;
-    gap: 8px;
+    padding: 4px 8px;
+    gap: 4px;
     border-radius: 8px;
     background: var(--affine-background-overlay-panel-color);
     box-shadow: var(--affine-shadow-2);
-  }
-
-  /* hover guardian */
-  .affine-attachment-options::before {
-    position: absolute;
-    content: ' ';
-    left: 0;
-    top: 0;
-    transform: translateY(-100%);
-    width: 100%;
-    height: 4px;
-  }
-  .affine-attachment-options::after {
-    position: absolute;
-    content: ' ';
-    left: 0;
-    bottom: 0;
-    transform: translateY(100%);
-    width: 100%;
-    height: 4px;
   }
 
   .affine-attachment-options .divider {
