@@ -2,6 +2,7 @@ import type { UIEventHandler } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { BlockSnapshot, Page } from '@blocksuite/store';
+import { MarkdownAdapter } from '@blocksuite/store';
 import type { ReactiveController, ReactiveControllerHost } from 'lit';
 
 import { replaceIdMiddleware } from '../../_common/transformers/utils.js';
@@ -22,7 +23,8 @@ export class ClipboardController implements ReactiveController {
     );
   }
 
-  private _clipboardAdapter: ClipboardAdapter = new ClipboardAdapter();
+  private _clipboardAdapter = new ClipboardAdapter();
+  private _markdownAdapter = new MarkdownAdapter();
 
   constructor(host: ReactiveControllerHost & BlockElement) {
     (this.host = host).addController(this);
@@ -50,6 +52,11 @@ export class ClipboardController implements ReactiveController {
       ClipboardAdapter.MIME,
       this._clipboardAdapter,
       100
+    );
+    this._std.clipboard.registerAdapter(
+      'text/plain',
+      this._markdownAdapter,
+      90
     );
     const copy = copyMiddleware(this._std);
     const paste = pasteMiddleware(this._std);

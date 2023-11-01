@@ -63,6 +63,7 @@ export function isPureFileInClipboard(clipboardData: DataTransfer) {
   );
 }
 
+/** @deprecated Should use `std.clipboard.writeToClipboard` instead */
 export function performNativeCopy(items: ClipboardItem[]): boolean {
   let success = false;
   const tempElem = document.createElement('textarea');

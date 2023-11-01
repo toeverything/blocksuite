@@ -149,11 +149,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getNoteButton(nots?: NoteBlockModel[]) {
-    return nots?.length === 1
+  private _getNoteButton(notes?: NoteBlockModel[]) {
+    return notes?.length === 1
       ? html`<edgeless-change-note-button
-          .notes=${nots}
-          .page=${this.page}
+          .notes=${notes}
           .surface=${this.surface}
           .slots=${this.slots}
         >

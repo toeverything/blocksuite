@@ -45,8 +45,8 @@ export class EdgelessSelectionManager {
 
   cursor: CursorSelection | null = null;
 
-  remoteCursor: Record<string, CursorSelection> = {};
-  remoteSelection: Record<string, SurfaceSelection> = {};
+  remoteCursor: Map<number, CursorSelection> = new Map();
+  remoteSelection: Map<number, SurfaceSelection> = new Map();
   private _activeGroup: GroupElement | null = null;
 
   private _selectedElements: Set<string> = new Set();
@@ -142,12 +142,11 @@ export class EdgelessSelectionManager {
 
     this.disposable.add(
       this._selection.slots.remoteChanged.on(states => {
-        const remoteSelection: Record<string, SurfaceSelection> = {};
-        const remoteCursors: Record<string, CursorSelection> = {};
+        const remoteSelection = new Map<number, SurfaceSelection>();
+        const remoteCursors = new Map<number, CursorSelection>();
         const remoteSelectedElements = new Set<string>();
 
-        Object.keys(states).forEach(id => {
-          const selections = states[id];
+        states.forEach((selections, id) => {
           let hasTextSelection = false;
           let hasBlockSelection = false;
 
@@ -161,17 +160,17 @@ export class EdgelessSelectionManager {
             }
 
             if (selection.is('surface')) {
-              remoteSelection[id] = selection;
+              remoteSelection.set(id, selection);
               selection.elements.forEach(id => remoteSelectedElements.add(id));
             }
 
             if (selection.is('cursor')) {
-              remoteCursors[id] = selection;
+              remoteCursors.set(id, selection);
             }
           });
 
           if (hasBlockSelection || hasTextSelection) {
-            delete remoteCursors[id];
+            remoteSelection.delete(id);
           }
         });
 

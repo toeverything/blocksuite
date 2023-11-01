@@ -12,4 +12,4 @@ Based on this framework, BlockSuite has already implemented editing capabilities
 
 - [Rich text editor](https://blocksuite-toeverything.vercel.app/starter/?init)
 - [Whiteboard editor](https://blocksuite-toeverything.vercel.app/)
-- [Table editor (with kanban view support)](https://blocksuite-toeverything.vercel.app/starter/?init=database)
+- [Table editing with kanban view support](https://blocksuite-toeverything.vercel.app/starter/?init=database)

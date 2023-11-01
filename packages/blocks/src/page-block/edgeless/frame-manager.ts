@@ -2,13 +2,19 @@ import { assertExists } from '@blocksuite/global/utils';
 import type { Page } from '@blocksuite/store';
 import { Workspace } from '@blocksuite/store';
 
+import { matchFlavours } from '../../_common/utils/model.js';
 import type {
   EdgelessElement,
   Selectable,
   TopLevelBlockModel,
 } from '../../_common/utils/types.js';
-import type { FrameBlockModel } from '../../models.js';
+import type {
+  FrameBlockModel,
+  NoteBlockModel,
+  SurfaceBlockModel,
+} from '../../models.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
+import type { Renderer } from '../../surface-block/index.js';
 import { Bound, Overlay, type RoughCanvas } from '../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from './edgeless-page-block.js';
 import { edgelessElementsBound } from './utils/bound-utils.js';
@@ -36,7 +42,7 @@ export class EdgelessFrameManager {
   }
 
   get frames() {
-    return this._edgeless.surface.getblocks(EdgelessBlockType.FRAME);
+    return this._edgeless.surface.getBlocks(EdgelessBlockType.FRAME);
   }
 
   selectFrame(eles: Selectable[]) {
@@ -105,23 +111,60 @@ export class EdgelessFrameManager {
   }
 }
 
+export function getElementsInFrame(
+  page: Page,
+  surfaceRenderer: Renderer,
+  frame: FrameBlockModel
+) {
+  const bound = Bound.deserialize(frame.xywh);
+
+  return (
+    surfaceRenderer.gridManager
+      .search(bound, true)
+      .filter(ele => !isFrameBlock(ele)) as EdgelessElement[]
+  ).concat(getNotesInFrame(page, frame));
+}
+
+export function getNotesInFrame(
+  page: Page,
+  frame: FrameBlockModel,
+  fullyContained: boolean = true
+) {
+  const bound = Bound.deserialize(frame.xywh);
+
+  return (page.getBlockByFlavour('affine:note') as NoteBlockModel[]).filter(
+    ele => {
+      const xywh = Bound.deserialize(ele.xywh);
+
+      return fullyContained
+        ? bound.contains(xywh)
+        : bound.isPointInBound([xywh.x, xywh.y]);
+    }
+  ) as NoteBlockModel[];
+}
+
 export function getBlocksInFrame(
   page: Page,
   model: FrameBlockModel,
   fullyContained: boolean = true
 ) {
   const bound = Bound.deserialize(model.xywh);
+  const surfaceModel = page.getBlockByFlavour([
+    'affine:surface',
+  ]) as SurfaceBlockModel[];
 
   return (
-    page.getBlockByFlavour([
-      'affine:note',
-      'affine:image',
-    ]) as TopLevelBlockModel[]
-  ).filter(ele => {
-    const blockBound = Bound.deserialize(ele.xywh);
+    getNotesInFrame(page, model, fullyContained) as TopLevelBlockModel[]
+  ).concat(
+    surfaceModel[0].children.filter(ele => {
+      if (matchFlavours(ele, ['affine:image'])) {
+        const blockBound = Bound.deserialize(ele.xywh);
+        return fullyContained
+          ? bound.contains(blockBound)
+          : bound.containsPoint([blockBound.x, blockBound.y]);
+      }
 
-    return fullyContained
-      ? bound.contains(blockBound)
-      : bound.containsPoint([blockBound.x, blockBound.y]);
-  });
+      return false;
+    }) as TopLevelBlockModel[]
+  );
 }

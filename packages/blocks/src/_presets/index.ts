@@ -10,6 +10,7 @@ import { AFFINE_LINKED_PAGE_WIDGET } from '../_common/widgets/linked-page/index.
 import { AFFINE_MODAL_WIDGET } from '../_common/widgets/modal-widget/index.js';
 import { AFFINE_SLASH_MENU_WIDGET } from '../_common/widgets/slash-menu/index.js';
 import { AttachmentBlockSchema } from '../attachment-block/attachment-model.js';
+import { AttachmentService } from '../attachment-block/attachment-service.js';
 import { BookmarkBlockSchema } from '../bookmark-block/index.js';
 import { CodeBlockSchema } from '../code-block/code-model.js';
 import { DataViewBlockSchema } from '../data-view-block/index.js';
@@ -30,6 +31,7 @@ import {
 import { PageBlockSchema } from '../page-block/page-model.js';
 import { ParagraphBlockSchema } from '../paragraph-block/paragraph-model.js';
 import { SurfaceBlockSchema } from '../surface-block/surface-model.js';
+import { SurfaceRefBlockSchema } from '../surface-ref-block/index.js';
 
 const DocPageSpec: BlockSpec<DocPageBlockWidgetName> = {
   schema: PageBlockSchema,
@@ -161,6 +163,16 @@ export const PagePreset: BlockSpec[] = [
     view: {
       component: literal`affine-attachment`,
     },
+    service: AttachmentService,
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    view: {
+      component: literal`affine-surface-ref`,
+      widgets: {
+        surfaceToolbar: literal`affine-surface-ref-toolbar`,
+      },
+    },
   },
 ];
 
@@ -239,8 +251,15 @@ export const EdgelessPreset: BlockSpec[] = [
   },
   {
     schema: AttachmentBlockSchema,
+    service: AttachmentService,
     view: {
       component: literal`affine-attachment`,
+    },
+  },
+  {
+    schema: SurfaceRefBlockSchema,
+    view: {
+      component: literal`affine-surface-ref`,
     },
   },
 ];

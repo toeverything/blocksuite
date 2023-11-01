@@ -6,8 +6,11 @@ import { notify } from '../utils/notify.js';
 import { createAsyncCallRPCProviderCreator } from './async-call-rpc.js';
 import type { DocProviderCreator } from './type.js';
 
+const BASE_URL = new URL(import.meta.env.PLAYGROUND_SERVER);
+const BASE_WEBSOCKET_URL = new URL(import.meta.env.PLAYGROUND_WS);
+
 export function generateRoomId(): Promise<string> {
-  return fetch('https://collaboration-room.douding.workers.dev/room/', {
+  return fetch(new URL('/room/', BASE_URL), {
     method: 'post',
   })
     .then(res => res.json())
@@ -22,9 +25,7 @@ export function createCollaborationSocket(room?: string) {
     return;
   }
 
-  const ws = new WebSocket(
-    `wss://collaboration-room.douding.workers.dev/room/${room}`
-  );
+  const ws = new WebSocket(new URL(`/room/${room}`, BASE_WEBSOCKET_URL));
 
   return ws;
 }

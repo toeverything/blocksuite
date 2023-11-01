@@ -39,6 +39,7 @@ export class IconButton extends LitElement {
       font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
       color: var(--affine-text-primary-color);
       pointer-events: auto;
+      padding: 4px;
     }
 
     :host(:hover) {

@@ -3,6 +3,7 @@
 import type {
   BlockSpec,
   SelectionManager,
+  SpecStore,
   UIEventDispatcher,
   ViewStore,
 } from '@blocksuite/block-std';
@@ -54,6 +55,10 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   get view(): ViewStore {
     return this.std.view;
+  }
+
+  get spec(): SpecStore {
+    return this.std.spec;
   }
 
   override willUpdate(changedProperties: PropertyValues) {
@@ -175,8 +180,8 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
         );
       },
       toDOM: ({ view }) => view,
-      getChildren: view =>
-        getChildren(view, blockSelector, widgetSelector, 'block'),
+      getChildren: node =>
+        getChildren(node, blockSelector, widgetSelector, 'block'),
     });
 
     this.std.view.register<'widget'>({
@@ -190,8 +195,8 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
         );
       },
       toDOM: ({ view }) => view,
-      getChildren: view =>
-        getChildren(view, blockSelector, widgetSelector, 'widget'),
+      getChildren: node =>
+        getChildren(node, blockSelector, widgetSelector, 'widget'),
     });
   };
 }
@@ -229,19 +234,19 @@ function fromDOM<T extends Element & { path: string[] }>(
 }
 
 function getChildren(
-  view: Element,
+  node: Element,
   blockSelector: string,
   widgetSelector: string,
   type: BlockSuite.ViewType
 ) {
   const selector = `${blockSelector},${widgetSelector}`;
   return Array.from(
-    view.querySelectorAll<BlockElement | WidgetElement>(selector)
+    node.querySelectorAll<BlockElement | WidgetElement>(selector)
   ).filter(
     x =>
       x.parentElement?.closest(
         type === 'block' ? blockSelector : widgetSelector
-      ) === view
+      ) === node
   );
 }
 

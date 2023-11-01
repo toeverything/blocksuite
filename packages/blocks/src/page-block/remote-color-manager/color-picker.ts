@@ -1,17 +1,29 @@
-class CircularPicker<T> {
-  private _list: T[];
-  private _current = 0;
+class RandomPicker<T> {
+  private _originalArray: T[];
+  private _copyArray: T[];
 
   constructor(array: T[]) {
-    this._list = [...array];
+    this._originalArray = [...array];
+    this._copyArray = [...array];
+  }
+
+  private randomIndex(max: number): number {
+    return Math.floor(Math.random() * max);
   }
 
   pick(): T {
-    return this._list[this._current++ % this._list.length];
+    if (this._copyArray.length === 0) {
+      this._copyArray = [...this._originalArray];
+    }
+
+    const index = this.randomIndex(this._copyArray.length);
+    const item = this._copyArray[index];
+    this._copyArray.splice(index, 1);
+    return item;
   }
 }
 
-export const multiPlayersColor = new CircularPicker([
+export const multiPlayersColor = new RandomPicker([
   'var(--affine-multi-players-purple)',
   'var(--affine-multi-players-magenta)',
   'var(--affine-multi-players-red)',

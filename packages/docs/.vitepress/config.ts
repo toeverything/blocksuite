@@ -61,6 +61,9 @@ export default defineConfig({
             items: [
               { text: 'Overview', link: '/block-std-overview' },
               { text: 'Block Schema', link: '/block-schema' },
+              { text: 'Block Rendering', link: '/block-rendering' },
+              { text: 'Block Service', link: '/block-service' },
+              { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
         ],
@@ -73,8 +76,8 @@ export default defineConfig({
         text: 'Packages',
         items: [
           { text: '🚧 <code>@blocksuite/store</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/blocks</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/editor</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/block-std</code>', link: '' },
+          { text: '🚧 <code>@blocksuite/lit</code>', link: '' },
           { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
         ],
       },

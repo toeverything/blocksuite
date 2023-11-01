@@ -129,6 +129,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
        */
       touch-action: none;
       background-color: var(--affine-background-primary-color);
+      background-image: radial-gradient(
+        var(--affine-edgeless-grid-color) 1px,
+        var(--affine-background-primary-color) 1px
+      );
       z-index: 0;
     }
 
@@ -180,7 +184,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.root.mode === 'edgeless';
   }
 
-  getblocks<T extends EdgelessBlockType>(flavour: T) {
+  getBlocks<T extends EdgelessBlockType>(flavour: T) {
     let parent: BaseBlockModel = this.model;
     if (flavour === EdgelessBlockType.NOTE) {
       parent = this.edgeless.model;
@@ -191,7 +195,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
-    return this.getblocks(flavour).sort(this.compare);
+    return this.getBlocks(flavour).sort(this.compare);
   }
 
   getGroupParent(element: id | EdgelessElement) {
@@ -210,18 +214,18 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
-      ...this.getblocks(EdgelessBlockType.FRAME),
-      ...this.getblocks(EdgelessBlockType.NOTE),
-      ...this.getblocks(EdgelessBlockType.IMAGE),
+      ...this.getBlocks(EdgelessBlockType.FRAME),
+      ...this.getBlocks(EdgelessBlockType.NOTE),
+      ...this.getBlocks(EdgelessBlockType.IMAGE),
     ];
   }
 
   get sortedBlocks() {
     return [
-      ...this.getblocks(EdgelessBlockType.FRAME).sort(this.compare),
+      ...this.getBlocks(EdgelessBlockType.FRAME).sort(this.compare),
       ...[
-        ...this.getblocks(EdgelessBlockType.NOTE),
-        ...this.getblocks(EdgelessBlockType.IMAGE),
+        ...this.getBlocks(EdgelessBlockType.NOTE),
+        ...this.getBlocks(EdgelessBlockType.IMAGE),
       ].sort(this.compare),
     ];
   }
@@ -647,7 +651,25 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const id = yElement.get('id') as id;
     const ElementCtor = ElementCtors[type];
     assertExists(ElementCtor);
-    const element = new ElementCtor(yElement, this);
+    const element = new ElementCtor(yElement, {
+      getLocalRecord: id => {
+        return this.getElementLocalRecord(id);
+      },
+      onElementUpdated: update => {
+        this.slots.elementUpdated.emit(update);
+      },
+      updateElementLocalRecord: (id, record) => {
+        this.updateElementLocalRecord(id, record);
+      },
+      pickById: id => this.pickById(id),
+      getGroupParent: (element: string | EdgelessElement) => {
+        return this.getGroupParent(element);
+      },
+      setGroupParent: (element, groupId) => {
+        return this.setGroupParent(element, groupId);
+      },
+      selectionManager: this.edgeless.selectionManager,
+    });
     element.init();
     element.computedValue = this.getCSSPropertyValue;
     element.mount(this._renderer);
@@ -700,7 +722,25 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
       const ElementCtor = ElementCtors[type];
       assertExists(ElementCtor);
-      const element = new ElementCtor(yElement, this);
+      const element = new ElementCtor(yElement, {
+        getLocalRecord: id => {
+          return this.getElementLocalRecord(id);
+        },
+        onElementUpdated: update => {
+          this.slots.elementUpdated.emit(update);
+        },
+        updateElementLocalRecord: (id, record) => {
+          this.updateElementLocalRecord(id, record);
+        },
+        pickById: id => this.pickById(id),
+        getGroupParent: (element: string | EdgelessElement) => {
+          return this.getGroupParent(element);
+        },
+        setGroupParent: (element, groupId) => {
+          return this.setGroupParent(element, groupId);
+        },
+        selectionManager: this.edgeless.selectionManager,
+      });
       element.init();
       element.computedValue = this.getCSSPropertyValue;
       element.mount(this._renderer);

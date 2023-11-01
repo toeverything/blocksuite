@@ -2,7 +2,6 @@ import './image/placeholder/image-not-found.js';
 import './image/placeholder/loading-card.js';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { Text } from '@blocksuite/store';
 import { css, html, type PropertyValues } from 'lit';
@@ -13,7 +12,6 @@ import { stopPropagation } from '../_common/utils/event.js';
 import { asyncFocusRichText } from '../_common/utils/selection.js';
 import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js';
 import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
-import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import { Bound } from '../surface-block/index.js';
 import { ImageResizeManager } from './image/image-resize-manager.js';
 import { ImageSelectedRectsContainer } from './image/image-selected-rects.js';
@@ -31,16 +29,15 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   _edgelessImage!: ImageBlockEdgelessComponent;
 
   private get _current() {
-    return this._isInNote ? this._pageImage : this._edgelessImage;
+    return this._isInSurface ? this._edgelessImage : this._pageImage;
   }
 
-  private _isInNote = true;
+  private _isInSurface = false;
 
   override connectedCallback() {
     super.connectedCallback();
-    const parent = this.root.view.viewFromPath('block', this.parentPath);
-    assertExists(parent);
-    this._isInNote = parent.model.flavour === EdgelessBlockType.NOTE;
+    const parent = this.root.page.getParent(this.model);
+    this._isInSurface = parent?.flavour === 'affine:surface';
   }
 
   get resizeImg() {
@@ -52,15 +49,7 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
   }
 
   override render() {
-    if (this._isInNote) {
-      return html`<affine-page-image
-        .model=${this.model}
-        .page=${this.page}
-        .root=${this.root}
-        .widgets=${this.widgets}
-        .content=${this.content}
-      ></affine-page-image>`;
-    } else {
+    if (this._isInSurface) {
       return html`<affine-edgeless-image
         .model=${this.model}
         .page=${this.page}
@@ -68,6 +57,14 @@ export class ImageBlockComponent extends BlockElement<ImageBlockModel> {
         .widgets=${this.widgets}
         .content=${this.content}
       ></affine-edgeless-image>`;
+    } else {
+      return html`<affine-page-image
+        .model=${this.model}
+        .page=${this.page}
+        .root=${this.root}
+        .widgets=${this.widgets}
+        .content=${this.content}
+      ></affine-page-image>`;
     }
   }
 }
