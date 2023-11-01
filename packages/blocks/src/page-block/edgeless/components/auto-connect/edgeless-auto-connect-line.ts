@@ -48,7 +48,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
     if (!this.show) return nothing;
 
     const { viewport } = this.surface;
-    const notes = this.surface.getblocks(NOTE).filter(note => !note.hidden);
+    const notes = this.surface.getBlocks(NOTE).filter(note => !note.hidden);
     const points: [IVec, IVec][] = [];
     for (let i = 1; i < notes.length; i++) {
       const last = notes[i - 1];
@@ -97,11 +97,11 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
         const newWidth = width + expand;
         const newHeight = height + expand;
 
-        const newstart = Vec.add(Vec.pointOffset(lineStart, lineEnd, 16), [
+        const newStart = Vec.add(Vec.pointOffset(lineStart, lineEnd, 16), [
           expand / 2,
           expand / 2,
         ]);
-        const newend = Vec.add(Vec.pointOffset(lineEnd, lineStart, 16), [
+        const newEnd = Vec.add(Vec.pointOffset(lineEnd, lineStart, 16), [
           expand / 2,
           expand / 2,
         ]);
@@ -122,10 +122,10 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
             </defs>
 
             <line
-              x1="${newstart[0]}"
-              y1="${newstart[1]}"
-              x2="${newend[0]}"
-              y2="${newend[1]}"
+              x1="${newStart[0]}"
+              y1="${newStart[1]}"
+              x2="${newEnd[0]}"
+              y2="${newEnd[1]}"
               stroke="var(--affine-black-10)"
               stroke-width="2"
               marker-end="url(#arrow)" 

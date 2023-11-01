@@ -207,12 +207,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const { surface } = edgeless;
     if (!surface) return nothing;
-    const notes = surface.getblocks(NOTE);
-    const images = surface.getblocks(IMAGE);
+    const notes = surface.getBlocks(NOTE);
+    const images = surface.getBlocks(IMAGE);
     const blocks = [...notes, ...images].sort(surface.compare);
 
     const { readonly } = this.edgeless.page;
-    const showedNotes = surface.getblocks(NOTE).filter(note => !note.hidden);
+    const showedNotes = surface.getBlocks(NOTE).filter(note => !note.hidden);
     return html`
       <div class="affine-block-children-container edgeless">
         <edgeless-auto-connect-line
