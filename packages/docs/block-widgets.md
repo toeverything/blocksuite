@@ -1,20 +1,14 @@
 # Block Widgets
 
-Widgets are components that can be used to display helper UI elements of a block.
+In BlockSuite, widgets are components that can be used to display helper UI elements of a block. Sometimes, you want to display a menu to provide some extra information or actions for a block. As another example, it's a common practice to display a toolbar when you select a block.
 
-Sometimes, you want to display a menu to provide some extra information or actions for a block.
-For example, it's a common practice to display a toolbar when you select a block.
-
-The widget is designed to provide this kind of functionality.
-Similar to block, widget is also related to UI framework.
-By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`.
-But it's still possible to use other UI frameworks. We'll introduce later about how to write a custom renderer in [custom renderer](/#WIP).
+The widget is designed to provide this kind of functionalities. Similar to blocks, widgets also depends on UI frameworks. By default, we provide a [lit](https://lit.dev/) renderer called `@blocksuite/lit`. But it's still possible to use other UI frameworks. We'll introduce later about how to write a custom renderer in [custom renderer](/#WIP).
 
 ## Lit Widget View
 
 We provide a `WidgetElement` class to help build a lit widget view.
 
-```typescript
+```ts
 import { WidgetElement } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
@@ -36,10 +30,9 @@ class MyWidgetView extends WidgetElement<MyBlockView> {
 Widget is always related to a block called host block.
 And we can get the host block by using `blockElement` property.
 
-For example, if we have a `code block` which can display some code examples,
-and we want to display a `language picker` widget to let users change the language of the code block.
+For example, if you have a `code block` for displaying code examples, and you want to display a `language picker` widget to let users change the language of the code block. The widget could be defined in this manner:
 
-```typescript
+```ts
 import { WidgetElement } from '@blocksuite/lit';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';

@@ -1,9 +1,8 @@
 # Block Service
 
-Every kind of block can have its own service.
-The service is a class that extends the `BlockService` class.
+Each kind of block can register its own service. The service is a class that extends the `BlockService` class.
 
-```typescript
+```ts
 import { BlockService } from '@blocksuite/block-std';
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 
@@ -18,14 +17,11 @@ class MyBlockService extends BlockService<MyBlockModel> {
 }
 ```
 
-For each kind of block, the service will only be instantiated once.
-And even though there is no block instance, the service will still be instantiated.
-
-So, it's a good place to put some global methods for a kind of block.
+For each block type, its service will only be instantiated once. And even though there is no block instance, the service will still be instantiated. So, it's designed to some global methods for certain kind of block.
 
 For example, if you want to create a hotkey to create a new block, you can do it in the service.
 
-```typescript
+```ts
 class MyBlockService extends BlockService<MyBlockModel> {
   override mounted() {
     super.mounted();
