@@ -1,6 +1,7 @@
 import '../buttons/tool-icon-button.js';
 
 import { assertExists } from '@blocksuite/global/utils';
+import { Workspace } from '@blocksuite/store';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
@@ -11,8 +12,8 @@ import {
   SmallNoteIcon,
 } from '../../../../_common/icons/edgeless.js';
 import { FontFamilyIcon } from '../../../../_common/icons/text.js';
-import { Point } from '../../../../_common/utils/index.js';
 import { captureEventTarget } from '../../../../_common/widgets/drag-handle/utils.js';
+import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import {
   Bound,
   type Connection,
@@ -20,6 +21,7 @@ import {
   GroupElement,
   normalizeDegAngle,
   type PhasorElementType,
+  serializeXYWH,
   type ShapeElement,
   ShapeStyle,
   TextElement,
@@ -39,9 +41,13 @@ import {
   AutoCompleteNoteOverlay,
   AutoCompleteShapeOverlay,
   AutoCompleteTextOverlay,
+  capitalizeFirstLetter,
   createShapeElement,
   createTextElement,
-  type Direction,
+  DEFAULT_NOTE_OVERLAY_HEIGHT,
+  DEFAULT_TEXT_HEIGHT,
+  DEFAULT_TEXT_WIDTH,
+  Direction,
   isShape,
   type TARGET_SHAPE_TYPE,
 } from './utils.js';
@@ -138,22 +144,30 @@ export class EdgelessAutoCompletePanel extends LitElement {
     );
     let nextBound: Bound;
     let position: Connection['position'];
+    // direction of the connector target arrow
+    let direction: Direction;
 
     if (angle >= 45 && angle <= 135) {
       nextBound = new Bound(point[0] - w / 2, point[1], w, h);
       position = [0.5, 0];
+      direction = Direction.Bottom;
     } else if (angle >= 135 && angle <= 225) {
       nextBound = new Bound(point[0] - w, point[1] - h / 2, w, h);
       position = [1, 0.5];
+      direction = Direction.Left;
     } else if (angle >= 225 && angle <= 315) {
       nextBound = new Bound(point[0] - w / 2, point[1] - h, w, h);
       position = [0.5, 1];
+      direction = Direction.Top;
     } else {
       nextBound = new Bound(point[0], point[1] - h / 2, w, h);
       position = [0, 0.5];
+      direction = Direction.Right;
     }
 
-    return { nextBound, position };
+    console.log('direction: ', direction);
+
+    return { nextBound, position, direction };
   }
 
   private _showOverlay(targetType: TARGET_SHAPE_TYPE) {
@@ -194,20 +208,46 @@ export class EdgelessAutoCompletePanel extends LitElement {
     this.edgeless.surface.refresh();
   }
 
-  // TODO: optimize overlay style
+  private _getTargetXYWH(width: number, height: number) {
+    const result = this._generateTarget(this.connector);
+    if (!result) return null;
+
+    const { nextBound: bound, direction, position } = result;
+    if (!bound) return null;
+
+    const { w, h } = bound;
+    let x = bound.x;
+    let y = bound.y;
+
+    switch (direction) {
+      case Direction.Right:
+        y += h / 2 - height / 2;
+        break;
+      case Direction.Bottom:
+        x -= width / 2 - w / 2;
+        break;
+      case Direction.Left:
+        y += h / 2 - height / 2;
+        x -= width - w;
+        break;
+      case Direction.Top:
+        x -= width / 2 - w / 2;
+        y += h - height;
+        break;
+    }
+
+    const xywh = [x, y, width, height] as XYWH;
+
+    return { xywh, position };
+  }
+
   private _showTextOverlay() {
     const current = this.current;
     if (!isShape(current)) return;
 
-    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
-    const bound = this._generateTarget(this.connector)?.nextBound;
-    if (!bound) return;
-
-    this._removeOverlay();
-
-    const { x, h } = bound;
-    const y = bound.y + h / 2 - 12;
-    const xywh = [x, y, 116, 24] as XYWH;
+    const xywh = this._getTargetXYWH(DEFAULT_TEXT_WIDTH, DEFAULT_TEXT_HEIGHT)
+      ?.xywh;
+    if (!xywh) return;
 
     this._overlay = new AutoCompleteTextOverlay(xywh);
     this.edgeless.surface.viewport.addOverlay(this._overlay);
@@ -218,15 +258,12 @@ export class EdgelessAutoCompletePanel extends LitElement {
     const current = this.current;
     if (!isShape(current)) return;
 
-    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
-    const bound = this._generateTarget(this.connector)?.nextBound;
-    if (!bound) return;
-
     this._removeOverlay();
-
-    const { x, h } = bound;
-    const y = bound.y + h / 2 - 110 / 2;
-    const xywh = [x, y, DEFAULT_NOTE_WIDTH, 110] as XYWH;
+    const xywh = this._getTargetXYWH(
+      DEFAULT_NOTE_WIDTH,
+      DEFAULT_NOTE_OVERLAY_HEIGHT
+    )?.xywh;
+    if (!xywh) return;
 
     this._overlay = new AutoCompleteNoteOverlay(xywh);
     this.edgeless.surface.viewport.addOverlay(this._overlay);
@@ -234,19 +271,17 @@ export class EdgelessAutoCompletePanel extends LitElement {
   }
 
   private _showFrameOverlay() {
+    this._removeOverlay();
     const current = this.current;
     if (!isShape(current)) return;
 
-    // const bound = this.edgelessAutoComplete.computeNextBound(this.type);
     const bound = this._generateTarget(this.connector)?.nextBound;
     if (!bound) return;
 
-    this._removeOverlay();
-
-    const { x, h } = bound;
-    const y = bound.y;
+    const { h } = bound;
     const w = h / 0.75;
-    const xywh = [x, y, w, h] as XYWH;
+    const xywh = this._getTargetXYWH(w, h)?.xywh;
+    if (!xywh) return;
 
     this._overlay = new AutoCompleteFrameOverlay(xywh);
     this.edgeless.surface.viewport.addOverlay(this._overlay);
@@ -266,21 +301,15 @@ export class EdgelessAutoCompletePanel extends LitElement {
     this.remove();
   }
 
-  // TODO: optimize add different target
   private async _addText() {
-    const result = this._generateTarget(this.connector);
-    if (!result) return;
+    const target = this._getTargetXYWH(DEFAULT_TEXT_WIDTH, DEFAULT_TEXT_HEIGHT);
+    if (!target) return;
 
-    const { nextBound, position } = result;
-    if (!nextBound) return;
-
-    const { x, h } = nextBound;
-    const y = nextBound.y + h / 2;
+    const { xywh, position } = target;
     const id = await createTextElement(this.edgeless, this.current);
 
     const { surface } = this.edgeless;
-    const newBound = new Bound(x, y, 32, 32);
-    surface.updateElement(id, { xywh: newBound.serialize() });
+    surface.updateElement(id, { xywh: serializeXYWH(...xywh) });
     surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
@@ -300,22 +329,24 @@ export class EdgelessAutoCompletePanel extends LitElement {
   }
 
   private _addNote() {
+    this._removeOverlay();
     const { page, surface } = this.edgeless;
-    const result = this._generateTarget(this.connector);
-    if (!result) return;
+    const target = this._getTargetXYWH(
+      DEFAULT_NOTE_WIDTH,
+      DEFAULT_NOTE_OVERLAY_HEIGHT
+    );
+    if (!target) return;
 
-    const { nextBound, position } = result;
-    if (!nextBound) return;
+    const { xywh, position } = target;
 
-    // TODO: need to accurate note position
-    const { x, h } = nextBound;
-    const y = nextBound.y + h / 2;
-    const viewportPosition = surface.viewport.toViewCoord(x + 40, y);
-    const point = new Point(...viewportPosition);
+    const id = surface.addElement(
+      EdgelessBlockType.NOTE,
+      {
+        xywh: serializeXYWH(...xywh),
+      },
+      page.root?.id
+    );
 
-    const id = this.edgeless.addNoteWithPoint(point, {
-      width: DEFAULT_NOTE_WIDTH,
-    });
     page.addBlock('affine:paragraph', { type: 'text' }, id);
 
     const group = surface.pickById(surface.getGroupParent(this.current));
@@ -332,12 +363,42 @@ export class EdgelessAutoCompletePanel extends LitElement {
       editing: true,
     });
 
-    this._removeOverlay();
     this.remove();
   }
 
   private _addFrame() {
-    console.log('add frame');
+    this._removeOverlay();
+
+    const bound = this._generateTarget(this.connector)?.nextBound;
+    if (!bound) return;
+
+    const { h } = bound;
+    const w = h / 0.75;
+    const target = this._getTargetXYWH(w, h);
+    if (!target) return;
+
+    const { xywh } = target;
+
+    const edgeless = this.edgeless;
+    const { surface } = edgeless;
+    const frameIndex = surface.frame.frames.length + 1;
+    const id = edgeless.surface.addElement(
+      EdgelessBlockType.FRAME,
+      {
+        title: new Workspace.Y.Text(`Frame ${frameIndex}`),
+        xywh: serializeXYWH(...xywh),
+      },
+      surface.model
+    );
+    edgeless.page.captureSync();
+    const frame = edgeless.surface.pickById(id);
+    assertExists(frame);
+    edgeless.selectionManager.setSelection({
+      elements: [frame.id],
+      editing: false,
+    });
+
+    this.remove();
   }
 
   constructor(
@@ -348,7 +409,6 @@ export class EdgelessAutoCompletePanel extends LitElement {
     connector: ConnectorElement
   ) {
     super();
-    console.log('constructor');
     this.position = position;
     this.edgeless = edgeless;
     this.type = type;
@@ -358,13 +418,17 @@ export class EdgelessAutoCompletePanel extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    console.log('connectedCallback');
     this.edgeless.handleEvent('click', ctx => {
       const { target } = ctx.get('pointerState').raw;
       const element = captureEventTarget(target);
       const clickAway = !element?.closest('edgeless-auto-complete-panel');
       if (clickAway) this.remove();
     });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._removeOverlay();
   }
 
   override render() {
@@ -402,6 +466,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
       ${shapeButtons}
 
       <edgeless-tool-icon-button
+        .tooltip=${'Text'}
         .iconContainerPadding=${2}
         @pointerenter=${() => {
           this._showTextOverlay();
@@ -414,6 +479,7 @@ export class EdgelessAutoCompletePanel extends LitElement {
         ${FontFamilyIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
+        .tooltip=${'Note'}
         .iconContainerPadding=${2}
         @pointerenter=${() => {
           this._showNoteOverlay();
@@ -426,16 +492,21 @@ export class EdgelessAutoCompletePanel extends LitElement {
         ${SmallNoteIcon}
       </edgeless-tool-icon-button>
       <edgeless-tool-icon-button
+        .tooltip=${'Frame'}
         .iconContainerPadding=${2}
         @pointerenter=${() => {
           this._showFrameOverlay();
         }}
         @pointerleave=${() => this._removeOverlay()}
+        @click=${() => {
+          this._addFrame();
+        }}
       >
         ${FrameIcon}
       </edgeless-tool-icon-button>
 
       <edgeless-tool-icon-button
+        .tooltip=${capitalizeFirstLetter(currentShapeType)}
         .iconContainerPadding=${0}
         @pointerenter=${() => {
           this._showOverlay(currentShapeType);

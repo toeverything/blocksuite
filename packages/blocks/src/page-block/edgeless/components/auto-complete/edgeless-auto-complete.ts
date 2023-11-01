@@ -155,8 +155,8 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     if (!isShape(this.current)) return;
 
     const viewportRect = this.edgeless.surface.viewport.boundingClientRect;
-    const x = e.clientX - viewportRect.left + 60;
-    const y = e.clientY - viewportRect.top - 80;
+    const x = e.clientX - viewportRect.left + 100;
+    const y = e.clientY - viewportRect.top - 260;
     const autoCompletePanel = new EdgelessAutoCompletePanel(
       { x, y },
       this.edgeless,
