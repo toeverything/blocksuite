@@ -121,12 +121,12 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
               this._index = index === this._index ? -1 : index;
               return true;
             } else if (target.closest('.edgeless-auto-connect-next-button')) {
-              this._next();
+              this._navigateToNext();
               return true;
             } else if (
               target.closest('.edgeless-auto-connect-previous-button')
             ) {
-              this._previous();
+              this._navigateToPrev();
               return true;
             }
             return false;
@@ -144,7 +144,7 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
     this.style.zIndex = '1';
   }
 
-  private _next() {
+  private _navigateToNext() {
     const { notes } = this;
     if (this._index >= notes.length - 1) return;
     this._index = this._index + 1;
@@ -157,7 +157,7 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
     this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
-  private _previous() {
+  private _navigateToPrev() {
     const { notes } = this;
     if (this._index <= 0) return;
     this._index = this._index - 1;
@@ -170,7 +170,7 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
     this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
-  private _navigator(notes: NoteBlockModel[]) {
+  private _NavigatorComponent(notes: NoteBlockModel[]) {
     const { viewport } = this.surface;
     const { zoom } = viewport;
     const classname = `navigator ${this._index >= 0 ? 'show' : 'hidden'}`;
@@ -227,7 +227,7 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
       }
     )}
     ${this._index >= 0 && this._index < notes.length
-      ? this._navigator(notes)
+      ? this._NavigatorComponent(notes)
       : nothing} `;
   }
 }
