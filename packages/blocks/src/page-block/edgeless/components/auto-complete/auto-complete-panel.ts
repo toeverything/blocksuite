@@ -179,6 +179,10 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     return { xywh, position };
   }
 
+  private _connectorExist() {
+    return !!this.edgeless.surface.pickById(this.connector.id);
+  }
+
   private _showTextOverlay() {
     const xywh = this._getTargetXYWH(DEFAULT_TEXT_WIDTH, DEFAULT_TEXT_HEIGHT)
       ?.xywh;
@@ -252,6 +256,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
   private _showOverlay(targetType: AUTO_COMPLETE_TARGET_TYPE) {
     this._removeOverlay();
+    if (!this._connectorExist()) return;
 
     switch (targetType) {
       case 'text':
@@ -324,11 +329,9 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     if (group instanceof GroupElement) {
       surface.group.addChild(group, id);
     }
-
     surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
       target: { id, position },
     });
-
     this.edgeless.selectionManager.setSelection({
       elements: [id],
       editing: true,
@@ -361,10 +364,9 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const frame = edgeless.surface.pickById(id);
     assertExists(frame);
 
-    // TODO: make frame connectable
-    // surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
-    //   target: { id, position },
-    // });
+    surface.updateElement<PhasorElementType.CONNECTOR>(this.connector.id, {
+      target: { id, position },
+    });
     edgeless.selectionManager.setSelection({
       elements: [frame.id],
       editing: false,
@@ -397,6 +399,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
 
   private async _autoComplete(targetType: AUTO_COMPLETE_TARGET_TYPE) {
     this._removeOverlay();
+    if (!this._connectorExist()) return;
 
     switch (targetType) {
       case 'text':

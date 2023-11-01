@@ -36,7 +36,6 @@ import {
   isShape,
   MAIN_GAP,
   nextBound,
-  PANEL_OFFSET,
 } from './utils.js';
 
 class AutoCompleteOverlay extends Overlay {
