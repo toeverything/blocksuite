@@ -1,22 +1,19 @@
-import type {
-  BlockSelection,
-  UIEventStateContext,
-} from '@blocksuite/block-std';
+import type { BlockSelection } from '@blocksuite/block-std';
 import { IS_WINDOWS } from '@blocksuite/global/env';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
 export class PageKeyboardManager {
   constructor(public pageElement: BlockElement) {
-    const isFromPage = (ctx: UIEventStateContext) => {
-      const { event } = ctx.get('defaultState');
-      return event.target instanceof Node && pageElement.contains(event.target);
+    const isFromPage = () => {
+      const activeElement = document.activeElement;
+      return activeElement && pageElement.root.contains(activeElement);
     };
 
     this.pageElement.bindHotKey(
       {
         'Mod-z': ctx => {
-          if (!isFromPage(ctx)) return;
+          if (!isFromPage()) return;
 
           ctx.get('defaultState').event.preventDefault();
 
@@ -25,7 +22,7 @@ export class PageKeyboardManager {
           }
         },
         'Shift-Mod-z': ctx => {
-          if (!isFromPage(ctx)) return;
+          if (!isFromPage()) return;
 
           ctx.get('defaultState').event.preventDefault();
           if (this._page.canRedo) {
@@ -33,7 +30,7 @@ export class PageKeyboardManager {
           }
         },
         'Control-y': ctx => {
-          if (!isFromPage(ctx)) return;
+          if (!isFromPage()) return;
           if (!IS_WINDOWS) return;
 
           ctx.get('defaultState').event.preventDefault();

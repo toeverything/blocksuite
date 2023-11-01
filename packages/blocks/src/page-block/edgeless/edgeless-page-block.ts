@@ -694,6 +694,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
   override connectedCallback() {
     super.connectedCallback();
 
+    this.tabIndex = -1;
+
     this.root.rangeManager?.rangeSynchronizer.setFilter(pageRangeSyncFilter);
 
     this.gesture = new Gesture(this);

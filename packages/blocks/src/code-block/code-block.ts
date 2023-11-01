@@ -495,6 +495,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         langList.currentLanguageId = this._perviousLanguage.id as Lang;
         langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
           getService('affine:code').setLang(this.model, lang ? lang.id : null);
+          this.vEditor.focusEnd();
           abortController.abort();
         };
         langList.onClose = () => abortController.abort();

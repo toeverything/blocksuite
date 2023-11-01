@@ -184,17 +184,20 @@ export class LangList extends LitElement {
     const onLanguageSelect = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
+        e.stopPropagation();
         this._currentSelectedIndex =
           (this._currentSelectedIndex + 1) % filteredLanguages.length;
         // TODO scroll to item
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
+        e.stopPropagation();
         this._currentSelectedIndex =
           (this._currentSelectedIndex + filteredLanguages.length - 1) %
           filteredLanguages.length;
         // TODO scroll to item
       } else if (e.key === 'Enter' && !e.isComposing) {
         e.preventDefault();
+        e.stopPropagation();
         if (
           this._currentSelectedIndex === -1 ||
           this._currentSelectedIndex >= filteredLanguages.length
