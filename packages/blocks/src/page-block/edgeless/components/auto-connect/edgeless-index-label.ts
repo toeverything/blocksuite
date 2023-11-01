@@ -13,12 +13,10 @@ import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 
-@customElement('edgeless-auto-connect-sequence')
-export class EdgelessAutoConnectSequence extends WithDisposable(
-  ShadowlessElement
-) {
+@customElement('edgeless-index-label')
+export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
-    .edgeless-auto-connect-sequence {
+    .edgeless-index-label {
       font-size: 15px;
       text-align: center;
       height: 24px;
@@ -113,10 +111,8 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
             const { raw } = event;
             const target = raw.target as HTMLElement;
             if (!target) return false;
-            if (target.closest('.edgeless-auto-connect-sequence')) {
-              const ele = target.closest(
-                '.edgeless-auto-connect-sequence'
-              ) as Element;
+            if (target.closest('.edgeless-index-label')) {
+              const ele = target.closest('.edgeless-index-label') as Element;
               const index = Number(ele.getAttribute('index'));
               this._index = index === this._index ? -1 : index;
               return true;
@@ -216,11 +212,7 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
           }px)`,
         });
         return html`
-          <div
-            index=${index}
-            class="edgeless-auto-connect-sequence"
-            style=${style}
-          >
+          <div index=${index} class="edgeless-index-label" style=${style}>
             ${index + 1}
           </div>
         `;
@@ -234,6 +226,6 @@ export class EdgelessAutoConnectSequence extends WithDisposable(
 
 declare global {
   interface HTMLElementTagNameMap {
-    'edgeless-auto-connect-sequence': EdgelessAutoConnectSequence;
+    'edgeless-index-label': EdgelessIndexLabel;
   }
 }

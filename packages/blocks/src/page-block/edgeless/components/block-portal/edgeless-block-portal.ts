@@ -6,7 +6,7 @@ import '../rects/edgeless-selected-rect.js';
 import '../rects/edgeless-hover-rect.js';
 import '../rects/edgeless-dragging-area-rect.js';
 import '../note-status/index.js';
-import '../../components/auto-connect/edgeless-auto-connect-sequence.js';
+import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
@@ -249,11 +249,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
       <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
-      <edgeless-auto-connect-sequence
+      <edgeless-index-label
         .notes=${showedNotes}
         .surface=${surface}
         .show=${this._showAutoConnect}
-      ></edgeless-auto-connect-sequence>
+      ></edgeless-index-label>
       <!-- <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status> -->
     `;
   }

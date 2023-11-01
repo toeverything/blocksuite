@@ -21,7 +21,7 @@ test.describe('auto-connect', () => {
     await page.mouse.click(200, 50);
     await selectNoteInEdgeless(page, id1);
     const bound = await getSelectedBound(page, 0);
-    await page.locator('.edgeless-auto-connect-sequence').nth(0).click();
+    await page.locator('.edgeless-index-label').nth(0).click();
     await assertSelectedBound(page, bound);
 
     await page.locator('.edgeless-auto-connect-next-button').click();
