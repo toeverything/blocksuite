@@ -128,7 +128,6 @@ export abstract class BaseCellRenderer<
   }
 
   onCut(_e: ClipboardEvent) {
-    console.log(333);
     const target = _e.target as HTMLElement;
     // TODO: replace this dom operation
     const rootEl = document.querySelector('block-suite-root');
