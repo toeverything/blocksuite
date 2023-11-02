@@ -733,7 +733,7 @@ test.describe.skip('linked page with clipboard', () => {
     );
   });
 
-  test(' duplicated subpage should paste as linked page', async ({ page }) => {
+  test('duplicated subpage should paste as linked page', async ({ page }) => {
     await enterPlaygroundRoom(page);
     const { noteId } = await initEmptyParagraphState(page);
     await focusRichText(page);
@@ -809,14 +809,47 @@ test.describe.skip('linked page with clipboard', () => {
   });
 });
 
-test('should not break bracket complete', async ({ page }) => {
+test('should [[Selected text]] converted to linked page', async ({ page }) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/2730',
+  });
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const { paragraphId } = await initEmptyParagraphState(page);
   await focusRichText(page);
   await type(page, '1234');
 
   await dragBetweenIndices(page, [0, 1], [0, 2]);
   await type(page, '[');
+  await assertRichTexts(page, ['1[2]34']);
   await type(page, '[');
-  await assertRichTexts(page, ['1[[2]]34']);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:paragraph
+  prop:text={
+    <>
+      <text
+        insert="1"
+      />
+      <text
+        insert=" "
+        reference={
+          Object {
+            "pageId": "3",
+            "type": "LinkedPage",
+          }
+        }
+      />
+      <text
+        insert="34"
+      />
+    </>
+  }
+  prop:type="text"
+/>`,
+    paragraphId
+  );
+  await switchToPage(page, '3');
+  await assertTitle(page, '2');
 });

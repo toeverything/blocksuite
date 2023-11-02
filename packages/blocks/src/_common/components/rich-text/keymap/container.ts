@@ -13,6 +13,9 @@ import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
+import { createPage } from '../../../utils/init.js';
+import { getPageBlock } from '../../../utils/query.js';
+import { insertLinkedNode } from '../../../widgets/linked-page/config.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
   handleIndent,
@@ -417,6 +420,39 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
     });
   });
 
+  function tryConvertToLinkedPage() {
+    const pageBlock = getPageBlock(model);
+    assertExists(pageBlock);
+    const linkedPageWidgetEle =
+      pageBlock.widgetElements['affine-linked-page-widget'];
+    if (!linkedPageWidgetEle) return false;
+
+    const vEditor = _getVirgo();
+    const vRange = vEditor.getVRange();
+    assertExists(vRange);
+    const text = vEditor.yText.toString();
+    const left = text[vRange.index - 1];
+    const right = text[vRange.index + vRange.length];
+    const needConvert = left === '[' && right === ']';
+    if (!needConvert) return false;
+
+    const pageName = text.slice(vRange.index, vRange.index + vRange.length);
+    vEditor.deleteText({
+      index: vRange.index - 1,
+      length: vRange.length + 2,
+    });
+    vEditor.setVRange({ index: vRange.index - 1, length: 0 });
+
+    createPage(blockElement.page.workspace, {
+      title: pageName,
+    })
+      .then(page => {
+        insertLinkedNode({ model: blockElement.model, pageId: page.id });
+      })
+      .catch(e => console.error(e));
+    return true;
+  }
+
   // Bracket auto complete
   bracketPairs.forEach(pair => {
     blockElement.bindHotKey({
@@ -441,6 +477,12 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         const selectedText = vEditor.yText
           .toString()
           .slice(vRange.index, vRange.index + vRange.length);
+        if (pair.name === 'square bracket') {
+          // [[Selected text]] should automatically be converted to a Linked page with the title "Selected text".
+          // See https://github.com/toeverything/blocksuite/issues/2730
+          const success = tryConvertToLinkedPage();
+          if (success) return;
+        }
         vEditor.insertText(vRange, pair.left + selectedText + pair.right);
 
         vEditor.setVRange({
@@ -457,19 +499,18 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   bracketPairs.forEach(pair => {
     blockElement.bindHotKey({
       [pair.right]: ctx => {
-        if (matchFlavours(blockElement.model, ['affine:code'])) {
-          const vEditor = _getVirgo();
-          const vRange = vEditor.getVRange();
-          assertExists(vRange);
-          const left = vEditor.yText.toString()[vRange.index - 1];
-          const right = vEditor.yText.toString()[vRange.index];
-          if (pair.left === left && pair.right === right) {
-            vEditor.setVRange({
-              index: vRange.index + 1,
-              length: 0,
-            });
-            _preventDefault(ctx);
-          }
+        if (!matchFlavours(blockElement.model, ['affine:code'])) return;
+        const vEditor = _getVirgo();
+        const vRange = vEditor.getVRange();
+        assertExists(vRange);
+        const left = vEditor.yText.toString()[vRange.index - 1];
+        const right = vEditor.yText.toString()[vRange.index];
+        if (pair.left === left && pair.right === right) {
+          vEditor.setVRange({
+            index: vRange.index + 1,
+            length: 0,
+          });
+          _preventDefault(ctx);
         }
       },
     });
