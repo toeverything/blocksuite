@@ -159,8 +159,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   mouseRoot!: HTMLElement;
 
-  showGrid = true;
-
   @state()
   edgelessTool: EdgelessTool = {
     type: localStorage.defaultTool ?? 'default',
@@ -494,7 +492,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
    * Not supports surface elements.
    */
   setSelection(noteId: string, _active = true, blockId: string, point?: Point) {
-    const noteBlock = this.surface.getblocks(NOTE).find(b => b.id === noteId);
+    const noteBlock = this.surface.getBlocks(NOTE).find(b => b.id === noteId);
     assertExists(noteBlock);
 
     requestAnimationFrame(() => {
@@ -519,7 +517,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     const bounds = [];
 
     Object.values(EdgelessBlockType).forEach(edgelessBlock => {
-      this.surface.getblocks(edgelessBlock).forEach(block => {
+      this.surface.getBlocks(edgelessBlock).forEach(block => {
         bounds.push(Bound.deserialize(block.xywh));
       });
     });

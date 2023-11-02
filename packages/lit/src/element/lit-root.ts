@@ -3,6 +3,7 @@
 import type {
   BlockSpec,
   SelectionManager,
+  SpecStore,
   UIEventDispatcher,
   ViewStore,
 } from '@blocksuite/block-std';
@@ -54,6 +55,10 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
 
   get view(): ViewStore {
     return this.std.view;
+  }
+
+  get spec(): SpecStore {
+    return this.std.spec;
   }
 
   override willUpdate(changedProperties: PropertyValues) {

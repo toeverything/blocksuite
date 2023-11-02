@@ -1,7 +1,8 @@
-import { assertExists } from '@blocksuite/global/utils';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { type Page, Workspace } from '@blocksuite/store';
 
 import { groupBy } from '../../_common/utils/iterable.js';
+import { AttachmentService } from '../../attachment-block/attachment-service.js';
 import type { FrameBlockModel } from '../../frame-block/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type {
@@ -238,7 +239,16 @@ export class EdgelessClipboard implements Clipboard {
   };
 
   private async _pasteInTextNote(e: ClipboardEvent) {
-    const blocks = await clipboardData2Blocks(this._page, e.clipboardData);
+    const attachmentService =
+      this._edgeless.root.spec.getService('affine:attachment');
+    assertExists(attachmentService);
+    assertInstanceOf(attachmentService, AttachmentService);
+    const maxFileSize = attachmentService.maxFileSize;
+    const blocks = await clipboardData2Blocks(
+      this._page,
+      e.clipboardData,
+      maxFileSize
+    );
     if (!blocks.length) {
       return;
     }
@@ -529,8 +539,9 @@ export class EdgelessClipboard implements Clipboard {
 
     const parser = new ContentParser(this._page);
     const canvas = await parser.edgelessToCanvas(
-      this._edgeless,
+      this._edgeless.surface.viewport,
       bound,
+      this._edgeless,
       blocks,
       shapes
     );

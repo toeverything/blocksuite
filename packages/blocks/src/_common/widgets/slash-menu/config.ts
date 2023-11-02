@@ -1,5 +1,5 @@
-import { assertExists } from '@blocksuite/global/utils';
-import { Text } from '@blocksuite/store';
+import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
+import { Text, type Y } from '@blocksuite/store';
 
 import {
   ArrowDownBigIcon,
@@ -12,6 +12,8 @@ import {
   DeleteIcon,
   DualLinkIcon,
   DuplicateIcon,
+  FrameIcon,
+  GroupingIcon,
   ImageIcon20,
   NewPageIcon,
   NowIcon,
@@ -24,39 +26,51 @@ import {
   getCurrentNativeRange,
   getPageBlock,
   getVirgoByModel,
+  matchFlavours,
   openFileOrFiles,
   resetNativeSelection,
   uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import { getServiceOrRegister } from '../../../_legacy/service/index.js';
+import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
+import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
+import type { SurfaceBlockModel } from '../../../models.js';
+import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
+import { DEFAULT_NOTE_HEIGHT } from '../../../page-block/edgeless/utils/consts.js';
 import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
 } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
+import {
+  deserializeXYWH,
+  PhasorElementType,
+  serializeXYWH,
+} from '../../../surface-block/index.js';
+import type { SurfaceRefBlockModel } from '../../../surface-ref-block/index.js';
+import { getHeightOfNoteChildern } from '../../../surface-ref-block/utils.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '../../consts.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
   insertContent,
   insideDatabase,
   type SlashItem,
+  type SlashMenuOptions,
   withRemoveEmptyLine,
 } from './utils.js';
 
-export const menuGroups: {
-  name: string;
-  items: SlashItem[];
-}[] = [
+export const menuGroups: SlashMenuOptions['menus'] = [
   {
     name: 'Text',
     items: [
@@ -276,7 +290,11 @@ export const menuGroups: {
           if (!parent) return;
           const file = await openFileOrFiles();
           if (!file) return;
-          await appendAttachmentBlock(file, model);
+          const service = pageElement.root.spec.getService('affine:attachment');
+          assertExists(service);
+          assertInstanceOf(service, AttachmentService);
+          const maxFileSize = service.maxFileSize;
+          await appendAttachmentBlock(file, model, maxFileSize);
         }),
       },
     ],
@@ -406,6 +424,148 @@ export const menuGroups: {
     ],
   },
   {
+    name: 'Frames',
+    items: options => {
+      const frameModels = options.pageElement.page.getBlockByFlavour(
+        'affine:frame'
+      ) as FrameBlockModel[];
+
+      return frameModels.map(frameModel => {
+        return {
+          name: 'Frame: ' + frameModel.title,
+          icon: FrameIcon,
+          action: async ({ pageElement, model }) => {
+            const { page } = pageElement;
+            const noteModel = page.getParent(model) as NoteBlockModel;
+            const [x, y, w] = deserializeXYWH(noteModel.xywh);
+            const sliceIdx = noteModel.children.indexOf(model);
+            const slicedBlocks = noteModel.children.slice(sliceIdx + 1);
+            const insertAtMiddle = sliceIdx !== 0 && slicedBlocks.length > 0;
+
+            const surfaceRefProps = {
+              flavour: 'affine:surface-ref',
+              reference: frameModel.id,
+            };
+            const [surfaceRefBlockId] = page.addSiblingBlocks(
+              noteModel,
+              [surfaceRefProps],
+              sliceIdx === 0 ? 'before' : 'after'
+            );
+
+            if (insertAtMiddle) {
+              const slicedNoteProps = {
+                flavour: 'affine:note',
+                background: noteModel.background,
+                xywh: serializeXYWH(
+                  x,
+                  y +
+                    getHeightOfNoteChildern(noteModel, 0, sliceIdx) +
+                    EDGELESS_BLOCK_CHILD_PADDING,
+                  w,
+                  DEFAULT_NOTE_HEIGHT
+                ),
+              };
+
+              const [slicedNoteId] = page.addSiblingBlocks(
+                page.getBlockById(surfaceRefBlockId) as SurfaceRefBlockModel,
+                [slicedNoteProps]
+              );
+              page.moveBlocks(
+                slicedBlocks,
+                page.getBlockById(slicedNoteId) as NoteBlockModel
+              );
+            }
+
+            if (
+              matchFlavours(model, ['affine:paragraph']) &&
+              model.text.length === 0
+            ) {
+              page.deleteBlock(model);
+            }
+          },
+        };
+      });
+    },
+  },
+  {
+    name: 'Group',
+    items: options => {
+      const surfaceModel = (
+        options.pageElement.page.getBlockByFlavour(
+          'affine:surface'
+        ) as SurfaceBlockModel[]
+      )[0];
+
+      if (!surfaceModel) return [];
+
+      const groupElements: Y.Map<string>[] = Array.from(
+        surfaceModel.elements.getValue()?.values() ?? []
+      ).filter(
+        (element: Y.Map<string>) =>
+          element.get('type') === PhasorElementType.GROUP
+      );
+
+      return (
+        groupElements.map(element => {
+          return {
+            name: 'Group: ' + element.get('title'),
+            icon: GroupingIcon,
+            action: async ({ pageElement, model }) => {
+              const { page } = pageElement;
+              const noteModel = page.getParent(model) as NoteBlockModel;
+              const [x, y, w] = deserializeXYWH(noteModel.xywh);
+              const sliceIdx = noteModel.children.indexOf(model);
+              const slicedBlocks = noteModel.children.slice(sliceIdx + 1);
+              const insertAtMiddle = sliceIdx !== 0 && slicedBlocks.length > 0;
+
+              const surfaceRefProps = {
+                flavour: 'affine:surface-ref',
+                reference: element.get('id'),
+                refFlavour: 'group',
+              };
+              const [surfaceRefBlockId] = page.addSiblingBlocks(
+                noteModel,
+                [surfaceRefProps],
+                sliceIdx === 0 ? 'before' : 'after'
+              );
+
+              if (insertAtMiddle) {
+                const slicedNoteProps = {
+                  flavour: 'affine:note',
+                  background: noteModel.background,
+                  xywh: serializeXYWH(
+                    x,
+                    y +
+                      getHeightOfNoteChildern(noteModel, 0, sliceIdx) +
+                      EDGELESS_BLOCK_CHILD_PADDING,
+                    w,
+                    DEFAULT_NOTE_HEIGHT
+                  ),
+                };
+
+                const [slicedNoteId] = page.addSiblingBlocks(
+                  page.getBlockById(surfaceRefBlockId) as SurfaceRefBlockModel,
+                  [slicedNoteProps]
+                );
+                page.moveBlocks(
+                  slicedBlocks,
+                  page.getBlockById(slicedNoteId) as NoteBlockModel
+                );
+              }
+
+              if (
+                matchFlavours(model, ['affine:paragraph']) &&
+                model.text.length === 0
+              ) {
+                page.deleteBlock(model);
+              }
+            },
+          };
+        }) ?? []
+      );
+    },
+  },
+  {
     name: 'Actions',
     items: [
       {
@@ -492,7 +652,4 @@ export const menuGroups: {
       },
     ],
   },
-] satisfies {
-  name: string;
-  items: SlashItem[];
-}[];
+];

@@ -1,7 +1,12 @@
 import type { IBound } from '../consts.js';
 import { EPSILON, getBoundsFromPoints, lineIntersects } from './math-utils.js';
 import type { IVec } from './vec.js';
-import { deserializeXYWH, type SerializedXYWH, serializeXYWH } from './xywh.js';
+import {
+  deserializeXYWH,
+  type SerializedXYWH,
+  serializeXYWH,
+  type XYWH,
+} from './xywh.js';
 
 export class Bound implements IBound {
   x: number;
@@ -14,6 +19,10 @@ export class Bound implements IBound {
     this.y = y;
     this.w = w;
     this.h = h;
+  }
+
+  static fromXYWH(xywh: XYWH) {
+    return new Bound(xywh[0], xywh[1], xywh[2], xywh[3]);
   }
 
   static from(arg1: IBound) {

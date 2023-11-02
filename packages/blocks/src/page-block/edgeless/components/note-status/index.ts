@@ -71,7 +71,7 @@ export class EdgelessNoteStatus extends WithDisposable(LitElement) {
   }
 
   get notes() {
-    return this.edgeless.surface.getblocks(EdgelessBlockType.NOTE);
+    return this.edgeless.surface.getBlocks(EdgelessBlockType.NOTE);
   }
 
   override connectedCallback() {

@@ -91,6 +91,7 @@ export const defaultStore: SerializedStore = {
       'affine:surface': 5,
       'affine:bookmark': 1,
       'affine:attachment': 1,
+      'affine:surface-ref': 1,
     },
     workspaceVersion: WORKSPACE_VERSION,
     pageVersion: PAGE_VERSION,
@@ -961,4 +962,9 @@ export async function assertNotHasClass(locator: Locator, className: string) {
   expect(
     (await locator.getAttribute('class'))?.split(' ').includes(className)
   ).toEqual(false);
+}
+
+export async function assertNoteSequence(page: Page, expected: string) {
+  const actual = await page.locator('.edgeless-index-label').innerText();
+  expect(expected).toBe(actual);
 }

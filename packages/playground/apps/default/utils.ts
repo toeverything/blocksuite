@@ -12,6 +12,7 @@ import {
 } from '@blocksuite/store';
 import { fileOpen } from 'browser-fs-access';
 
+import { getPlaygroundPresets } from './preset.js';
 import { INDEXED_DB_NAME } from './providers/indexeddb-provider.js';
 
 export const params = new URLSearchParams(location.search);
@@ -174,7 +175,11 @@ export async function testIDBExistence() {
 }
 
 export const createEditor = (page: Page, element: HTMLElement) => {
+  const presets = getPlaygroundPresets();
+
   const editor = new EditorContainer();
+  editor.pagePreset = presets.pageModePreset;
+  editor.edgelessPreset = presets.edgelessModePreset;
   editor.page = page;
   editor.slots.pageLinkClicked.on(({ pageId }) => {
     const target = page.workspace.getPage(pageId);

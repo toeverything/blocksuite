@@ -1,4 +1,4 @@
-# Render Blocks
+# Block Rendering
 
 In BlockSuite, blocks can be rendered by any UI framework. A block should be rendered to a DOM element, and we use `view` to represent the renderer.
 
@@ -7,9 +7,9 @@ But it's still possible to use other UI frameworks. We'll introduce later about 
 
 ## Lit Block View
 
-We provide a `BlockElement` class to help build a lit block view.
+We provide a `BlockElement` class to help building a lit-based block view.
 
-```typescript
+```ts
 import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
 import { BlockElement } from '@blocksuite/lit';
 import { html } from 'lit';
@@ -40,7 +40,7 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 
 A block can have children, and we can render them by using `content` property.
 
-```typescript
+```ts
 @customElements('my-block')
 class MyBlockView extends BlockElement<MyBlockModel> {
   override render() {
@@ -54,11 +54,11 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 }
 ```
 
-## Get & Set Props
+## Get and Set Props
 
 It's easy to get and set props in a block view.
 
-```typescript
+```ts
 @customElements('my-block')
 class MyBlockView extends BlockElement<MyBlockModel> {
   private _onClick = () => {
@@ -79,9 +79,9 @@ class MyBlockView extends BlockElement<MyBlockModel> {
 }
 ```
 
-It's also possible to watch prop changes to create something like `computed props`:
+It's also possible to watch prop changes to create something like `computed props`.
 
-```typescript
+```ts
 @customElements('my-block')
 class MyBlockView extends BlockElement<MyBlockModel> {
   private _yen = '0¥';
@@ -105,3 +105,5 @@ class MyBlockView extends BlockElement<MyBlockModel> {
   }
 }
 ```
+
+You can get the `std` instance from `this.std` to use the full power of [std](/block-std-overview).

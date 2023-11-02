@@ -86,7 +86,7 @@ export class Clipboard {
       return;
     }
 
-    this.copySlice(slice);
+    return this.copySlice(slice);
   };
 
   paste = async (
