@@ -300,7 +300,7 @@ test('text element should have maxWidth after adjusting width by dragging left o
   lastHeight = selectedRect.height;
 
   // enter edit mode
-  await page.mouse.dblclick(185, 200);
+  await page.mouse.dblclick(130 + lastWidth - 2, 200);
   await waitForVirgoStateUpdated(page);
   await waitNextFrame(page);
   await type(page, 'hello');
