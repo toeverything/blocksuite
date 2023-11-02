@@ -208,13 +208,6 @@ export class Schema {
         `Hub block cannot be child of content block: ${parentFlavour}.`
       );
     }
-
-    if (childRole === 'content' && parentRole === 'root') {
-      throw new SchemaValidateError(
-        childFlavour,
-        `Content block can only be child of hub block or itself. But get: ${parentFlavour}.`
-      );
-    }
   }
 
   private _matchFlavour(childFlavour: string, parentFlavour: string) {
