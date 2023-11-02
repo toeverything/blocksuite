@@ -137,10 +137,9 @@ export type Selectable = EdgelessElement;
 
 export type Erasable = EdgelessElement;
 
-export type Connectable = Exclude<
-  PhasorElement,
-  ConnectorElement | BrushElement
->;
+export type Connectable =
+  | TopLevelBlockModel
+  | Exclude<PhasorElement, ConnectorElement | BrushElement>;
 
 export type DefaultTool = {
   type: 'default';
