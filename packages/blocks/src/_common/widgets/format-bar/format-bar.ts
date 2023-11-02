@@ -79,7 +79,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     if (
       this.displayType === 'block' &&
-      this._selectedBlockElements?.[0].flavour === 'affine:surface-ref'
+      this._selectedBlockElements?.[0]?.flavour === 'affine:surface-ref'
     ) {
       return false;
     }
@@ -243,7 +243,9 @@ export class AffineFormatBarWidget extends WidgetElement {
     assertExists(formatQuickBarElement, 'format quick bar should exist');
     if (this.displayType === 'text' || this.displayType === 'native') {
       const range = this.nativeRange;
-      assertExists(range);
+      if (!range) {
+        return;
+      }
       const visualElement = {
         getBoundingClientRect: () => range.getBoundingClientRect(),
         getClientRects: () => range.getClientRects(),
