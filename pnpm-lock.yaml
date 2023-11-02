@@ -355,6 +355,9 @@ importers:
       lit:
         specifier: ^2.8.0
         version: 2.8.0
+      lz-string:
+        specifier: ^1.5.0
+        version: 1.5.0
       merge:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1801,6 +1804,7 @@ packages:
     resolution: {integrity: sha512-cdeYyv4KWoEgpBISTxWvqYsVy444DOqehiF3fM3ne10AmJ62RSyNkUnxMJXHQWRQQX2eR94m5y1IZyDwBjV9FQ==}
     dependencies:
       '@types/node': 18.17.14
+    dev: false
 
   /@types/connect@3.4.37:
     resolution: {integrity: sha512-zBUSRqkfZ59OcwXon4HVxhx5oWCJmc0OtBTK05M+p0dYjgN6iTwIL2T/WbsQZrEsdnwaF9cWQ+azOnpPvIqY3Q==}
