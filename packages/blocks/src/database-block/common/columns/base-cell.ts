@@ -85,7 +85,7 @@ export abstract class BaseCellRenderer<
     this._disposables.addFromEvent(this, 'copy', e => {
       if (!this.isEditing) return;
       e.stopPropagation();
-      // this.onCopy(e);
+      this.onCopy(e);
     });
 
     this._disposables.addFromEvent(this, 'cut', e => {
