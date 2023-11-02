@@ -86,15 +86,18 @@ export class FrameBlockModel
     x: number,
     y: number,
     _: HitTestOptions,
-    surface: SurfaceBlockComponent
+    surface?: SurfaceBlockComponent
   ): boolean {
     const bound = Bound.deserialize(this.xywh);
-    const block = surface.parentBlockElement.querySelector(
+    const hit = bound.isPointOnBound([x, y]);
+    if (hit) return true;
+
+    const block = surface?.parentBlockElement.querySelector(
       `[${BLOCK_ID_ATTR}="${this.id}"]`
     ) as FrameBlockComponent;
     if (!block) return false;
     const titleBound = block.titleBound;
-    return bound.isPointOnBound([x, y]) || titleBound.isPointInBound([x, y], 0);
+    return titleBound.isPointInBound([x, y], 0);
   }
   boxSelect(bound: Bound): boolean {
     return Bound.deserialize(this.xywh).isIntersectWithBound(bound);
