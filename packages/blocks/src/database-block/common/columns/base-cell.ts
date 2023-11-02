@@ -85,7 +85,7 @@ export abstract class BaseCellRenderer<
     this._disposables.addFromEvent(this, 'copy', e => {
       if (!this.isEditing) return;
       e.stopPropagation();
-      this.onCopy(e);
+      // this.onCopy(e);
     });
 
     this._disposables.addFromEvent(this, 'cut', e => {
@@ -135,19 +135,6 @@ export abstract class BaseCellRenderer<
     assertExists(rootEl);
 
     if (target instanceof HTMLInputElement) {
-      if (target.selectionStart === target.selectionEnd) return;
-
-      const value = target.value.slice(
-        target.selectionStart ?? 0,
-        target.selectionEnd ?? 0
-      );
-      if (!value) return;
-      rootEl.std.clipboard.writeToClipboard(async items => {
-        return {
-          ...items,
-          [TEXT]: value,
-        };
-      });
       return;
     }
 

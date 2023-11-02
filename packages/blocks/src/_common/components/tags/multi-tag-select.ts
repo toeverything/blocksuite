@@ -1,4 +1,3 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nanoid } from '@blocksuite/store';
 import type { Middleware } from '@floating-ui/dom';
@@ -36,8 +35,6 @@ type RenderOption = {
   group: SelectTag[];
   select: () => void;
 };
-
-const TEXT = 'text/plain';
 
 @customElement('affine-multi-tag-select')
 export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
@@ -114,33 +111,11 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
 
     this._disposables.addFromEvent(this._selectInput, 'copy', e => {
       e.stopPropagation();
-      this._onCopyToClipboard(this._selectInput);
     });
     this._disposables.addFromEvent(this._selectInput, 'cut', e => {
       e.stopPropagation();
-      this._onCopyToClipboard(this._selectInput);
     });
   }
-
-  private _onCopyToClipboard = (target: HTMLInputElement) => {
-    if (target.selectionStart === target.selectionEnd) return;
-
-    const value = target.value.slice(
-      target.selectionStart ?? 0,
-      target.selectionEnd ?? 0
-    );
-    if (!value) return;
-
-    // TODO: replace this dom operation
-    const rootEl = document.querySelector('block-suite-root');
-    assertExists(rootEl);
-    rootEl.std.clipboard.writeToClipboard(async items => {
-      return {
-        ...items,
-        [TEXT]: value,
-      };
-    });
-  };
 
   private _onDeleteSelected = (selectedValue: string[], value: string) => {
     const filteredValue = selectedValue.filter(item => item !== value);
