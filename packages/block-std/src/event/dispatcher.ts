@@ -144,10 +144,14 @@ export class UIEventDispatcher {
     const handlers = this._handlersMap[name];
     if (!handlers) return;
 
-    let output = this._buildEventScopeBySelection(name);
+    let output: EventScope | undefined;
 
-    if (!output && event.target && event.target instanceof Node) {
+    if (event.target && event.target instanceof Node) {
       output = this._buildEventScopeByTarget(name, event.target);
+    }
+
+    if (!output) {
+      output = this._buildEventScopeBySelection(name);
     }
 
     return output;
