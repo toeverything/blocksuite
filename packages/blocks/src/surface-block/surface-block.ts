@@ -184,7 +184,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.root.mode === 'edgeless';
   }
 
-  getblocks<T extends EdgelessBlockType>(flavour: T) {
+  getBlocks<T extends EdgelessBlockType>(flavour: T) {
     let parent: BaseBlockModel = this.model;
     if (flavour === EdgelessBlockType.NOTE) {
       parent = this.edgeless.model;
@@ -195,7 +195,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
-    return this.getblocks(flavour).sort(this.compare);
+    return this.getBlocks(flavour).sort(this.compare);
   }
 
   getGroupParent(element: id | EdgelessElement) {
@@ -214,18 +214,18 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   get blocks() {
     return [
-      ...this.getblocks(EdgelessBlockType.FRAME),
-      ...this.getblocks(EdgelessBlockType.NOTE),
-      ...this.getblocks(EdgelessBlockType.IMAGE),
+      ...this.getBlocks(EdgelessBlockType.FRAME),
+      ...this.getBlocks(EdgelessBlockType.NOTE),
+      ...this.getBlocks(EdgelessBlockType.IMAGE),
     ];
   }
 
   get sortedBlocks() {
     return [
-      ...this.getblocks(EdgelessBlockType.FRAME).sort(this.compare),
+      ...this.getBlocks(EdgelessBlockType.FRAME).sort(this.compare),
       ...[
-        ...this.getblocks(EdgelessBlockType.NOTE),
-        ...this.getblocks(EdgelessBlockType.IMAGE),
+        ...this.getBlocks(EdgelessBlockType.NOTE),
+        ...this.getBlocks(EdgelessBlockType.IMAGE),
       ].sort(this.compare),
     ];
   }

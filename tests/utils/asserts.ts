@@ -963,3 +963,8 @@ export async function assertNotHasClass(locator: Locator, className: string) {
     (await locator.getAttribute('class'))?.split(' ').includes(className)
   ).toEqual(false);
 }
+
+export async function assertNoteSequence(page: Page, expected: string) {
+  const actual = await page.locator('.edgeless-index-label').innerText();
+  expect(expected).toBe(actual);
+}
