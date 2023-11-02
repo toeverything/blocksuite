@@ -1,4 +1,5 @@
-import type { MigrationRunner, Text } from '@blocksuite/store';
+import { assertExists } from '@blocksuite/global/utils';
+import type { MigrationRunner, Page, Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema, nanoid } from '@blocksuite/store';
 
 import { getTagColor } from '../_common/components/tags/colors.js';
@@ -27,6 +28,25 @@ type SerializedCells = {
 };
 
 export class DatabaseBlockModel extends BaseBlockModel<DatabaseBlockProps> {
+  initDatabaseBlock(
+    page: Page,
+    model: BaseBlockModel,
+    databaseId: string,
+    viewType: DataViewTypes,
+    isAppendNewRow = true
+  ) {
+    const blockModel = page.getBlockById(databaseId) as DatabaseBlockModel;
+    assertExists(blockModel);
+    blockModel.initTemplate(viewType);
+    if (isAppendNewRow) {
+      // Add a paragraph after database
+      const parent = page.getParent(model);
+      assertExists(parent);
+      page.addBlock('affine:paragraph', {}, parent.id);
+    }
+    blockModel.applyColumnUpdate();
+  }
+
   getViewList() {
     return this.views;
   }

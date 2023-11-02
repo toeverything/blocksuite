@@ -1,10 +1,7 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../../_common/utils/index.js';
-import { getBlockClipboardInfo } from '../../../_legacy/clipboard/index.js';
-import type { FrameBlockService } from '../../../_legacy/service/legacy-services/frame-service.js';
-import type { ImageBlockService } from '../../../_legacy/service/legacy-services/image-service.js';
 import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { Bound, ConnectorElement } from '../../../surface-block/index.js';
 import { getCopyElements } from '../controllers/clipboard.js';
@@ -33,38 +30,42 @@ export async function duplicate(
           page.root?.id
         );
         const block = page.getBlockById(id);
-
         assertExists(block);
-        const serializedBlock = (await getBlockClipboardInfo(element)).json;
 
-        const service = edgeless.getService(element.flavour);
-        await service.json2Block(block, serializedBlock.children);
+        const job = new Job({
+          workspace: edgeless.root.std.workspace,
+        });
+        await job.blockToSnapshot(block);
 
         return id;
       } else if (isFrameBlock(element)) {
-        const service = edgeless.getService(
-          element.flavour
-        ) as FrameBlockService;
-        const json = service.block2Json(element);
+        const job = new Job({
+          workspace: edgeless.root.std.workspace,
+        });
+        const blockSnapshot = await job.blockToSnapshot(element);
+        const props = blockSnapshot.props;
+
         return surface.addElement(
           EdgelessBlockType.FRAME,
           {
             xywh: bound.serialize(),
-            title: new Workspace.Y.Text(json.title),
-            background: json.background,
+            title: new Workspace.Y.Text(props.title as string),
+            background: props.background,
           },
           surface.model.id
         );
       } else if (isImageBlock(element)) {
-        const service = edgeless.getService(
-          element.flavour
-        ) as ImageBlockService;
-        const json = service.block2Json(element, []);
+        const job = new Job({
+          workspace: edgeless.root.std.workspace,
+        });
+        const blockSnapshot = await job.blockToSnapshot(element);
+        const props = blockSnapshot.props;
+
         return surface.addElement(
           EdgelessBlockType.IMAGE,
           {
             xywh: bound.serialize(),
-            sourceId: json.sourceId,
+            sourceId: props.sourceId,
           },
           surface.model.id
         );

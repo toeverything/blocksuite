@@ -29,8 +29,6 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
-import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
@@ -170,8 +168,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   @query('.affine-edgeless-layer')
   edgelessLayer!: HTMLDivElement;
 
-  clipboard = new EdgelessClipboard(this.page, this);
-
   pageClipboardController = new PageClipboardController(this);
   clipboardController = new EdgelessClipboardController(
     this,
@@ -212,8 +208,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
   surface!: SurfaceBlockComponent;
 
   fontLoader!: FontLoader;
-
-  getService = getService;
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
@@ -322,10 +316,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
         if (!canCopyAsPng) return;
         canCopyAsPng = false;
 
-        (this.clipboardController._enabled
-          ? this.clipboardController
-          : this.clipboard
-        )
+        this.clipboardController
           .copyAsPng(blocks, shapes)
           .then(() => toast('Copied to clipboard'))
           .catch(() => toast('Failed to copy as PNG'))
@@ -618,9 +609,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
-    if (!this.clipboardController._enabled) {
-      this.clipboard.init(this.page);
-    }
 
     requestAnimationFrame(() => {
       if (!this._tryLoadViewportLocalRecord()) {
@@ -721,7 +709,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
       this._resizeObserver = null;

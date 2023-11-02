@@ -1,6 +1,6 @@
 import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -9,7 +9,6 @@ import {
   AutoCompleteArrowIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
-import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../../../index.js';
 import {
   Bound,
@@ -319,11 +318,14 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         { background: this.current.background },
         this.edgeless.model.id
       );
-      const noteService = this.edgeless.getService('affine:note');
       const note = page.getBlockById(id) as NoteBlockModel;
       assertExists(note);
-      const serializedBlock = (await getBlockClipboardInfo(this.current)).json;
-      await noteService.json2Block(note, serializedBlock.children);
+
+      const job = new Job({
+        workspace: this.edgeless.std.workspace,
+      });
+      const snapshot = await job.blockToSnapshot(note);
+      await job.snapshotToBlock(snapshot, page);
     }
     const group = surface.pickById(surface.getGroupParent(this.current));
     if (group instanceof GroupElement) {

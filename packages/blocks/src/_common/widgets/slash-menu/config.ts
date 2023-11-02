@@ -32,13 +32,12 @@ import {
   uploadImageFromLocal,
 } from '../../../_common/utils/index.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
-import { getServiceOrRegister } from '../../../_legacy/service/index.js';
 import { AttachmentService } from '../../../attachment-block/attachment-service.js';
 import { appendAttachmentBlock } from '../../../attachment-block/utils.js';
 import { getBookmarkInitialProps } from '../../../bookmark-block/components/bookmark-create-modal.js';
 import type { FrameBlockModel } from '../../../frame-block/index.js';
 import type { ImageBlockProps } from '../../../image-block/image-model.js';
-import type { SurfaceBlockModel } from '../../../models.js';
+import type { DatabaseBlockModel, SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
 import { DEFAULT_NOTE_HEIGHT } from '../../../page-block/edgeless/utils/consts.js';
@@ -365,24 +364,20 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: withRemoveEmptyLine(async ({ pageElement, model }) => {
-          const parent = pageElement.page.getParent(model);
+          const page = pageElement.page;
+          const parent = page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = pageElement.page.addBlock(
+          const id = page.addBlock(
             'affine:database',
             {},
-            pageElement.page.getParent(model),
+            page.getParent(model),
             index + 1
           );
-          const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(
-            pageElement.page,
-            model,
-            id,
-            'table',
-            false
-          );
+
+          const database = page.getBlockById(id) as DatabaseBlockModel;
+          database.initDatabaseBlock(page, model, id, 'table', false);
         }),
       },
       {
@@ -401,24 +396,19 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: withRemoveEmptyLine(async ({ model, pageElement }) => {
-          const parent = pageElement.page.getParent(model);
+          const page = pageElement.page;
+          const parent = page.getParent(model);
           assertExists(parent);
           const index = parent.children.indexOf(model);
 
-          const id = pageElement.page.addBlock(
+          const id = page.addBlock(
             'affine:database',
             {},
-            pageElement.page.getParent(model),
+            page.getParent(model),
             index + 1
           );
-          const service = await getServiceOrRegister('affine:database');
-          service.initDatabaseBlock(
-            pageElement.page,
-            model,
-            id,
-            'kanban',
-            false
-          );
+          const database = page.getBlockById(id) as DatabaseBlockModel;
+          database.initDatabaseBlock(page, model, id, 'table', false);
         }),
       },
     ],

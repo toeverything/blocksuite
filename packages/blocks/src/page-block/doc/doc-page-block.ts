@@ -14,7 +14,6 @@ import {
   asyncFocusRichText,
   matchFlavours,
 } from '../../_common/utils/index.js';
-import { PageClipboard } from '../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ClipboardController } from '../clipboard/index.js';
 import type { DocPageBlockWidgetName } from '../index.js';
@@ -121,8 +120,6 @@ export class DocPageBlockComponent extends BlockElement<
   keyboardManager: PageKeyboardManager | null = null;
 
   gesture: Gesture | null = null;
-
-  clipboard = new PageClipboard(this);
 
   clipboardController = new ClipboardController(this);
 
@@ -371,7 +368,6 @@ export class DocPageBlockComponent extends BlockElement<
 
     this.gesture = new Gesture(this);
     this.keyboardManager = new PageKeyboardManager(this);
-    this.clipboard.init(this.page);
     // filter cut event in page title
     this.handleEvent('cut', ctx => {
       const { event } = ctx.get('defaultState');
@@ -565,7 +561,6 @@ export class DocPageBlockComponent extends BlockElement<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboard.dispose();
     this._disposables.dispose();
     this.gesture = null;
     this.keyboardManager = null;

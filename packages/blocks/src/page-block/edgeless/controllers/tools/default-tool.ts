@@ -1,6 +1,6 @@
 import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, DisposableGroup, noop } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
 import {
   type DefaultTool,
@@ -9,7 +9,6 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../../../../_common/utils/index.js';
-import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { HitTestOptions } from '../../../../surface-block/elements/edgeless-element.js';
@@ -349,7 +348,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   private async _cloneSelected(selected: Selectable) {
     const { _edgeless, _surface } = this;
     if (isNoteBlock(selected)) {
-      const noteService = _edgeless.getService(EdgelessBlockType.NOTE);
       const id = _surface.addElement(
         EdgelessBlockType.NOTE,
         { xywh: selected.xywh },
@@ -357,25 +355,38 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       );
       const note = this._page.getBlockById(id);
       assertExists(note);
-      const serializedBlock = (await getBlockClipboardInfo(selected)).json;
-      await noteService.json2Block(note, serializedBlock.children);
+
+      const job = new Job({
+        workspace: _edgeless.std.workspace,
+      });
+      const snapshot = await job.blockToSnapshot(note);
+      await job.snapshotToBlock(snapshot, this._page);
+
       return _surface.pickById(id);
     } else if (isFrameBlock(selected)) {
-      const frameService = _edgeless.getService(EdgelessBlockType.FRAME);
-      const json = frameService.block2Json(selected);
+      const job = new Job({
+        workspace: _edgeless.std.workspace,
+      });
+      const snapshot = await job.blockToSnapshot(selected);
+      const props = snapshot.props;
+
       const id = this._surface.addElement(EdgelessBlockType.FRAME, {
-        xywh: json.xywh,
-        title: new Workspace.Y.Text(json.title),
-        background: json.background,
+        xywh: props.xywh,
+        title: new Workspace.Y.Text(props.title as string),
+        background: props.background,
       });
       return _surface.pickById(id);
     } else if (isImageBlock(selected)) {
-      const imageService = _edgeless.getService(EdgelessBlockType.IMAGE);
-      const json = imageService.block2Json(selected, []);
+      const job = new Job({
+        workspace: _edgeless.std.workspace,
+      });
+      const snapshot = await job.blockToSnapshot(selected);
+      const props = snapshot.props;
+
       const id = this._surface.addElement(EdgelessBlockType.IMAGE, {
-        xywh: json.xywh,
-        sourceId: json.sourceId,
-        rotate: json.rotate,
+        xywh: props.xywh,
+        sourceId: props.sourceId,
+        rotate: props.rotate,
       });
       return _surface.pickById(id);
     } else {

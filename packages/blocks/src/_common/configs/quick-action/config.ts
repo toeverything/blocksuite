@@ -2,14 +2,19 @@ import './database-convert-view.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
+import { Slice } from '@blocksuite/store';
 import { html, type TemplateResult } from 'lit';
 
 import { matchFlavours } from '../../../_common/utils/model.js';
-import { copyBlocksInPage } from '../../../_legacy/clipboard/utils/commons.js';
 import { getSelectedContentModels } from '../../../page-block/utils/selection.js';
 import { createSimplePortal } from '../../components/portal.js';
 import { toast } from '../../components/toast.js';
 import { CopyIcon, DatabaseTableViewIcon20 } from '../../icons/index.js';
+import {
+  getCurrentNativeRange,
+  hasNativeSelection,
+  resetNativeSelection,
+} from '../../utils/selection.js';
 import { DATABASE_CONVERT_WHITE_LIST } from './database-convert-view.js';
 
 export interface QuickActionConfig {
@@ -32,8 +37,20 @@ export const quickActionConfig: QuickActionConfig[] = [
     hotkey: undefined,
     showWhen: () => true,
     enabledWhen: () => true,
-    action: root => {
-      copyBlocksInPage(root);
+    action: async root => {
+      const selectedModels = getSelectedContentModels(root, [
+        'text',
+        'block',
+        'image',
+      ]);
+      const slice = Slice.fromModels(root.page, selectedModels);
+      await root.std.clipboard.copySlice(slice);
+
+      const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
+      if (savedRange) {
+        resetNativeSelection(savedRange);
+      }
+
       toast('Copied to clipboard');
     },
   },
