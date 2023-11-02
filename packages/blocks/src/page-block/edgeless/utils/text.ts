@@ -2,7 +2,7 @@ import type { PointerEventState } from '@blocksuite/block-std';
 import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import { type FrameBlockModel, type GroupElement } from '../../../index.js';
+import type { FrameBlockModel, GroupElement } from '../../../index.js';
 import { ShapeElement } from '../../../surface-block/index.js';
 import {
   Bound,
