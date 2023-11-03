@@ -6,6 +6,7 @@ import { linePolygonIntersects } from '../../utils/math-utils.js';
 import type { PointLocation } from '../../utils/point-location.js';
 import type { IVec } from '../../utils/vec.js';
 import type { HitTestOptions } from '../edgeless-element.js';
+import { EdgelessSelectableMixin } from '../selectable.js';
 import { SurfaceElement } from '../surface-element.js';
 import {
   getFontString,
@@ -15,6 +16,7 @@ import {
 } from '../text/utils.js';
 import type { IGroup, IGroupLocalRecord } from './types.js';
 
+@EdgelessSelectableMixin
 export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   // The children and id are cached since when removing the group,
   // the ymap will be removed first, which will make the following operation
@@ -27,6 +29,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   private _titleWidth = 0;
   private _padding = [0, 0];
   private _radius = 0;
+  protected override _connectable = false;
 
   override containedByBounds(bound: Bound): boolean {
     return bound.contains(Bound.deserialize(this.xywh));
