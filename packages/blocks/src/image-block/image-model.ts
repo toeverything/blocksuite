@@ -54,6 +54,49 @@ export class ImageBlockModel
   override xywh!: SerializedXYWH;
   override flavour!: EdgelessBlockType.IMAGE;
 
+  constructor() {
+    super();
+
+    this.created.on(() => {
+      const blobId = this.sourceId;
+      const blob = this.page.blobs.get(blobId);
+      if (!blob) {
+        console.error(`Blob ${blobId} not found in blob manager`);
+        return;
+      }
+      this.page.blobs.increaseRef(blobId);
+    });
+    this.propsUpdated.on(({ oldProps, newProps }) => {
+      const oldBlobId = (oldProps as ImageBlockProps).sourceId;
+      const newBlobId = (newProps as ImageBlockProps).sourceId;
+      if (oldBlobId === newBlobId) return;
+
+      const oldBlob = this.page.blobs.get(oldBlobId);
+      if (!oldBlob) {
+        console.error(`Blob ${oldBlobId} not found in blob manager`);
+        return;
+      }
+      const newBlob = this.page.blobs.get(newBlobId);
+      if (!newBlob) {
+        console.error(`Blob ${newBlobId} not found in blob manager`);
+        return;
+      }
+
+      this.page.blobs.decreaseRef(oldBlobId);
+      this.page.blobs.increaseRef(newBlobId);
+    });
+    this.deleted.on(() => {
+      const blobId = this.sourceId;
+      const blob = this.page.blobs.get(blobId);
+      if (!blob) {
+        console.error(`Blob ${blobId} not found in blob manager`);
+        return;
+      }
+
+      this.page.blobs.decreaseRef(blobId);
+    });
+  }
+
   get batch() {
     return BLOCK_BATCH;
   }

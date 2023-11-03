@@ -1,6 +1,6 @@
 import {
   type AbstractEditor,
-  type AttachmentProps,
+  type AttachmentBlockProps,
   AttachmentService,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -255,7 +255,7 @@ export class EditorContainer
         },
         handler: async (
           file: File
-        ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
+        ): Promise<AttachmentBlockProps & { flavour: 'affine:attachment' }> => {
           const storage = this.page.blobs;
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })

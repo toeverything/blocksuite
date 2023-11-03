@@ -13,8 +13,8 @@ import { AffineDragHandleWidget } from '../_common/widgets/drag-handle/index.js'
 import { captureEventTarget } from '../_common/widgets/drag-handle/utils.js';
 import {
   type AttachmentBlockModel,
+  type AttachmentBlockProps,
   AttachmentBlockSchema,
-  type AttachmentProps,
 } from './attachment-model.js';
 import { AttachmentOptionsTemplate } from './components/options.js';
 import {
@@ -118,7 +118,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     const caption = (e.target as HTMLInputElement).value;
     this.model.page.updateBlock(this.model, {
       caption,
-    } satisfies Partial<AttachmentProps>);
+    } satisfies Partial<AttachmentBlockProps>);
   }
 
   private _attachmentTail(isError: boolean) {

@@ -14,7 +14,7 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import type { Renderer } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -600,7 +600,7 @@ export class ContentParser {
       const sourceId = await storage.set(
         new File([file], file.name, { type: file.type })
       );
-      const attachmentProps: AttachmentProps & {
+      const attachmentProps: AttachmentBlockProps & {
         flavour: 'affine:attachment';
         children: [];
       } = {

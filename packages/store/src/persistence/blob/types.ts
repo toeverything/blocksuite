@@ -10,6 +10,10 @@ export interface BlobManager {
   set: (value: Blob, key?: string) => Promise<string>;
   delete: (key: string) => Promise<void>;
   list: () => Promise<string[]>;
+
+  gc: () => Promise<void>;
+  increaseRef: (blobId: string) => Promise<void>;
+  decreaseRef: (blobId: string) => Promise<void>;
 }
 
 export interface BlobStorage {
