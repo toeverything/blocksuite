@@ -968,17 +968,3 @@ export async function assertNoteSequence(page: Page, expected: string) {
   const actual = await page.locator('.edgeless-index-label').innerText();
   expect(expected).toBe(actual);
 }
-
-export async function assertFocusOnBlock(page: Page, blockTag: string) {
-  const element = await page.evaluate(
-    ({ blockTag }) => {
-      const selection = window.getSelection();
-      const range = selection?.getRangeAt(0);
-      const element = range?.startContainer.parentElement?.closest(blockTag);
-      return element;
-    },
-    { blockTag }
-  );
-
-  expect(element).toBeTruthy();
-}
