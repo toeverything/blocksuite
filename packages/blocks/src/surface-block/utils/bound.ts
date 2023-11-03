@@ -255,6 +255,16 @@ export class Bound implements IBound {
     );
   }
 
+  isPointOnBound([x, y]: IVec, tolerance = 4) {
+    return (
+      this.isPointInBound([x, y]) &&
+      (Math.abs(x - this.minX) < tolerance ||
+        Math.abs(x - this.maxX) < tolerance ||
+        Math.abs(y - this.minY) < tolerance ||
+        Math.abs(y - this.maxY) < tolerance)
+    );
+  }
+
   contains(bound: Bound) {
     return (
       bound.x >= this.x &&

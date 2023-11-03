@@ -33,6 +33,7 @@ import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
+import * as lz from 'lz-string';
 import { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
@@ -193,6 +194,31 @@ export class DebugMenu extends ShadowlessElement {
     return this;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    const readSelectionFromURL = async () => {
+      const editor = this.editor.root.value;
+      if (!editor) {
+        await new Promise(resolve => {
+          setTimeout(resolve, 500);
+        });
+        readSelectionFromURL();
+        return;
+      }
+      const url = new URL(window.location.toString());
+      const sel = url.searchParams.get('sel');
+      if (!sel) return;
+      try {
+        const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
+        editor.std.selection.fromJSON(json);
+      } catch {
+        return;
+      }
+    };
+    readSelectionFromURL();
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -216,38 +242,6 @@ export class DebugMenu extends ShadowlessElement {
       });
       this._connected = true;
     }
-  }
-
-  private _updateBlockType(
-    e: PointerEvent,
-    _flavour: 'affine:paragraph' | 'affine:list',
-    _type: string
-  ) {
-    e.preventDefault();
-    this.blockTypeDropdown.hide();
-
-    // FIXME: fix this
-  }
-
-  private _addCodeBlock(e: PointerEvent) {
-    e.preventDefault();
-    this.blockTypeDropdown.hide();
-
-    // FIXME: fix this
-    // const blockRange = getCurrentBlockRange(this.page);
-    // if (!blockRange) {
-    //   throw new Error("Can't add code block without a selection");
-    // }
-    // const startModel = blockRange.models[0];
-    // const parent = this.page.getParent(startModel);
-    // const index = parent?.children.indexOf(startModel);
-    // const blockProps = {
-    //   text: startModel.text?.clone(),
-    // };
-    // assertExists(parent);
-    // this.page.captureSync();
-    // this.page.deleteBlock(startModel);
-    // this.page.addBlock('affine:code', blockProps, parent, index);
   }
 
   private _switchEditorMode() {
@@ -354,6 +348,18 @@ export class DebugMenu extends ShadowlessElement {
   private _toggleReadonly() {
     const page = this.page;
     page.awarenessStore.setReadonly(page, !page.readonly);
+  }
+
+  private _shareSelection() {
+    const selection = this.editor.root.value?.selection.value;
+    if (!selection || selection.length === 0) {
+      return;
+    }
+    const json = selection.map(sel => sel.toJSON());
+    const hash = lz.compressToEncodedURIComponent(JSON.stringify(json));
+    const url = new URL(window.location.toString());
+    url.searchParams.set('sel', hash);
+    window.history.pushState({}, '', url);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -526,93 +532,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
-          <!-- block type -->
-          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
-            <sl-button size="small" slot="trigger" caret>
-              Block Type
-            </sl-button>
-            <sl-menu>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'text')}
-              >
-                Text
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h1')}
-              >
-                H1
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h2')}
-              >
-                H2
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h3')}
-              >
-                H3
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h4')}
-              >
-                H4
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h5')}
-              >
-                H5
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h6')}
-              >
-                H6
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'quote')}
-              >
-                Quote
-              </sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'bulleted')}
-              >
-                Bulleted List
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'numbered')}
-              >
-                Numbered List
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'todo')}
-              >
-                Todo List
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'toggle')}
-              >
-                Toggle List
-              </sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item
-                @click=${(e: PointerEvent) => this._addCodeBlock(e)}
-              >
-                Code
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
 
           <!-- test operations -->
           <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
@@ -648,6 +567,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleReadonly}>
                 Toggle Readonly
+              </sl-menu-item>
+              <sl-menu-item @click=${this._shareSelection}>
+                Share Selection
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>

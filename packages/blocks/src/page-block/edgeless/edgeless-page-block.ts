@@ -78,7 +78,7 @@ import { getCursorMode, isFrameBlock, isPhasorElement } from './utils/query.js';
 
 type EdtitorContainer = HTMLElement & { mode: 'page' | 'edgeless' };
 
-const { NOTE, IMAGE } = EdgelessBlockType;
+const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
 export interface EdgelessSelectionSlots {
   hoverUpdated: Slot;
@@ -261,7 +261,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       page.slots.yBlockUpdated.on(({ id, props }) => {
         const block = page.getBlockById(id);
         if (
-          matchFlavours(block, [NOTE, IMAGE]) &&
+          matchFlavours(block, [NOTE, IMAGE, FRAME]) &&
           ('prop:xywh' in props || 'prop:rotate' in props)
         ) {
           this.slots.elementSizeUpdated.emit(id);

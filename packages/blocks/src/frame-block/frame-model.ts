@@ -9,6 +9,7 @@ import type {
   HitTestOptions,
   IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
+import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
 import {
   Bound,
   type IVec,
@@ -44,6 +45,7 @@ type Props = {
   index: string;
 };
 
+@EdgelessSelectableMixin
 export class FrameBlockModel
   extends BaseBlockModel<Props>
   implements IEdgelessElement
@@ -51,7 +53,7 @@ export class FrameBlockModel
   override flavour!: EdgelessBlockType.FRAME;
 
   get connectable() {
-    return false;
+    return true;
   }
 
   get batch() {
@@ -79,16 +81,18 @@ export class FrameBlockModel
       Bound.deserialize(this.xywh).points
     );
   }
-  getRelativePointLocation(_: IVec): PointLocation {
-    throw new Error('Function not implemented.');
-  }
+  getRelativePointLocation!: (_: IVec) => PointLocation;
   hitTest(
     x: number,
     y: number,
     _: HitTestOptions,
-    surface: SurfaceBlockComponent
+    surface?: SurfaceBlockComponent
   ): boolean {
-    const block = surface.parentBlockElement.querySelector(
+    const bound = Bound.deserialize(this.xywh);
+    const hit = bound.isPointOnBound([x, y]);
+    if (hit) return true;
+
+    const block = surface?.parentBlockElement.querySelector(
       `[${BLOCK_ID_ATTR}="${this.id}"]`
     ) as FrameBlockComponent;
     if (!block) return false;
