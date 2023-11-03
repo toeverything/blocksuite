@@ -468,8 +468,11 @@ test.describe('slash menu with code block', () => {
     await codeBlock.click();
     await expect(slashMenu).toBeHidden();
 
+    const locator = page.locator('affine-code');
+    await expect(locator).toBeVisible();
+
     await page.waitForTimeout(500);
-    await type(page, '111');
+    await page.keyboard.type('111', { delay: 100 });
     await page.waitForTimeout(500);
     await assertRichTexts(page, ['000111']);
   });
