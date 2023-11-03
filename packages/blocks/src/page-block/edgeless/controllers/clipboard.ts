@@ -1,6 +1,5 @@
 import type {
   BlockStdProvider,
-  SurfaceSelection,
   UIEventStateContext,
 } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
@@ -94,11 +93,7 @@ export class EdgelessClipboardController implements ReactiveController {
 
   private _init = () => {
     this.host.handleEvent('copy', ctx => {
-      const surfaceSelection = this.selectionManager.state;
-      const elements = surfaceSelection.elements;
-      if (elements.length === 0) return false;
-
-      this._onCopy(ctx, surfaceSelection);
+      this._onCopy(ctx);
       return true;
     });
 
@@ -113,17 +108,18 @@ export class EdgelessClipboardController implements ReactiveController {
     });
   };
 
-  private _onCopy = async (
-    _context: UIEventStateContext,
-    surfaceSelection: SurfaceSelection
-  ) => {
+  private _onCopy = async (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
     event.preventDefault();
+
+    const surfaceSelection = this.selectionManager.state;
+    if (surfaceSelection.elements.length === 0) return;
 
     const elements = getCopyElements(
       this.surface,
       this.selectionManager.elements
     );
+
     // when note active, handle copy like page mode
     if (surfaceSelection.editing) {
       // use build-in copy handler in rich-text when copy in surface text element
@@ -132,6 +128,14 @@ export class EdgelessClipboardController implements ReactiveController {
       return;
     }
 
+    this.copy(elements);
+  };
+
+  public async copy(_elements?: EdgelessElement[]) {
+    const elements =
+      _elements ??
+      getCopyElements(this.surface, this.selectionManager.elements);
+
     this.std.clipboard.writeToClipboard(async _items => {
       const data = await prepareClipboardData(elements, this.std);
       return {
@@ -139,7 +143,7 @@ export class EdgelessClipboardController implements ReactiveController {
         [BLOCKSUITE_SURFACE]: JSON.stringify(data),
       };
     });
-  };
+  }
 
   private _onPaste = async (_context: UIEventStateContext) => {
     if (
@@ -191,7 +195,7 @@ export class EdgelessClipboardController implements ReactiveController {
     const event = _context.get('clipboardState').event;
     event.preventDefault();
 
-    this._onCopy(_context, state);
+    this._onCopy(_context);
     if (state.editing) {
       // use build-in cut handler in rich-text when cut in surface text element
       if (isPhasorElementWithText(elements[0])) return;

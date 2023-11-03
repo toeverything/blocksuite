@@ -229,7 +229,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
     const selection = this.edgeless.selectionManager;
     switch (type) {
       case 'copy': {
-        this.edgeless.clipboard.copy();
+        this.edgeless.clipboardController.copy();
         break;
       }
       case 'duplicate': {
