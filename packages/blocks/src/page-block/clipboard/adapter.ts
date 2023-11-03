@@ -1,8 +1,11 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type {
   FromBlockSnapshotPayload,
+  FromBlockSnapshotResult,
   FromPageSnapshotPayload,
+  FromPageSnapshotResult,
   FromSliceSnapshotPayload,
+  FromSliceSnapshotResult,
   ToBlockSnapshotPayload,
   ToPageSnapshotPayload,
   ToSliceSnapshotPayload,
@@ -26,7 +29,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
   static MIME = 'BLOCKSUITE/SNAPSHOT';
   override fromPageSnapshot(
     _payload: FromPageSnapshotPayload
-  ): Promise<string> {
+  ): Promise<FromPageSnapshotResult<string>> {
     throw new Error('not implemented');
   }
 
@@ -38,7 +41,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
 
   override fromBlockSnapshot(
     _payload: FromBlockSnapshotPayload
-  ): Promise<string> {
+  ): Promise<FromBlockSnapshotResult<string>> {
     throw new Error('not implemented');
   }
 
@@ -50,7 +53,7 @@ export class ClipboardAdapter extends BaseAdapter<string> {
 
   override async fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
-  ): Promise<string> {
+  ): Promise<FromSliceSnapshotResult<string>> {
     const snapshot = payload.snapshot;
     const assets = payload.assets;
     assertExists(assets);
@@ -70,10 +73,13 @@ export class ClipboardAdapter extends BaseAdapter<string> {
       },
       Promise.resolve({} as Record<string, FileSnapshot>)
     );
-    return JSON.stringify({
-      snapshot,
-      blobs,
-    });
+    return {
+      file: JSON.stringify({
+        snapshot,
+        blobs,
+      }),
+      assetsIds: [],
+    };
   }
 
   override toSliceSnapshot(
