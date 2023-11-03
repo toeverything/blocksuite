@@ -14,7 +14,10 @@ import {
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import { assertEdgelessCanvasText } from '../utils/asserts.js';
+import {
+  assertEdgelessCanvasText,
+  assertSelectedBound,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
@@ -300,7 +303,8 @@ test('text element should have maxWidth after adjusting width by dragging left o
   lastHeight = selectedRect.height;
 
   // enter edit mode
-  await page.mouse.dblclick(130 + lastWidth - 2, 200);
+  await waitNextFrame(page);
+  await page.mouse.dblclick(140, 180);
   await waitForVirgoStateUpdated(page);
   await waitNextFrame(page);
   await type(page, 'hello');
