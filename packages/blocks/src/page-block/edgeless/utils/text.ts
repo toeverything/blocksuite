@@ -19,9 +19,9 @@ import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-titl
 import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-editor.js';
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
-import type {
+import {
   GENERAL_CANVAS_FONT_FAMILY,
-  SCRIBBLED_CANVAS_FONT_FAMILY,
+  type SCRIBBLED_CANVAS_FONT_FAMILY,
 } from './consts.js';
 
 export type CANVAS_TEXT_FONT =
@@ -115,7 +115,8 @@ export function mountGroupTitleEditor(
 export function addText(
   edgeless: EdgelessPageBlockComponent,
   event: PointerEventState,
-  color: string = GET_DEFAULT_TEXT_COLOR()
+  color: string = GET_DEFAULT_TEXT_COLOR(),
+  fontFamily: CANVAS_TEXT_FONT = GENERAL_CANVAS_FONT_FAMILY
 ) {
   const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
   const selected = edgeless.surface.pickTop(x, y);
@@ -129,6 +130,7 @@ export function addText(
       xywh: new Bound(modelX, modelY, 32, 32).serialize(),
       text: new Workspace.Y.Text(),
       textAlign: 'left',
+      fontFamily,
       fontSize: 24,
       color: color,
       bold: false,
