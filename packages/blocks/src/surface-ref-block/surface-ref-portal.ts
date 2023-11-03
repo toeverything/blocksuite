@@ -17,7 +17,7 @@ import type { FrameBlockModel } from '../models.js';
 import { getBlocksInFrame } from '../page-block/edgeless/frame-manager.js';
 import { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type { GroupElement } from '../surface-block/elements/group/group-element.js';
-import { compare } from '../surface-block/grid.js';
+import { compare } from '../surface-block/managers/group-manager.js';
 
 const portalMap = {
   [EdgelessBlockType.NOTE]: 'surface-ref-note-portal',

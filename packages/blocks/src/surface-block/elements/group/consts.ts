@@ -7,6 +7,8 @@ import {
 
 export const GROUP_ROOT_ID = 'GROUP_ROOT';
 
+export const GROUP_ROOT = { id: GROUP_ROOT_ID };
+
 export const GroupElementDefaultProps: IElementDefaultProps<'group'> = {
   type: PhasorElementType.GROUP,
   children: new Workspace.Y.Map(),

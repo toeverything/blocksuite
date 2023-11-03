@@ -40,6 +40,7 @@ import {
   getGroupIds,
   getPhasorElementsCount,
   getSelectedBound,
+  getSortedIdsInViewport,
   getZoomLevel,
 } from './actions/edgeless.js';
 import {
@@ -918,6 +919,11 @@ export async function assertSelectedBound(
 
 export async function assertGroupIds(page: Page, expected: string[]) {
   const ids = await getGroupIds(page);
+  expect(ids).toEqual(expected);
+}
+
+export async function assertSortedIds(page: Page, expected: string[]) {
+  const ids = await getSortedIdsInViewport(page);
   expect(ids).toEqual(expected);
 }
 
