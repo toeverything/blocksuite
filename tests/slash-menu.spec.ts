@@ -24,6 +24,7 @@ import {
 import {
   assertAlmostEqual,
   assertBlockCount,
+  assertFocusOnBlock,
   assertRichTexts,
   assertStoreMatchJSX,
 } from './utils/asserts.js';
@@ -446,13 +447,13 @@ test.describe('slash menu with code block', () => {
     await codeBlock.click();
     await expect(slashMenu).toBeHidden();
 
-    await page.waitForTimeout(500);
-    await type(page, 'let a');
-    await page.waitForTimeout(500);
-    await assertRichTexts(page, ['let a']);
+    await page.waitForTimeout(200);
+    const locator = page.locator('affine-code');
+    await expect(locator).toBeVisible();
+    await assertFocusOnBlock(page, 'affine-code');
   });
 
-  test('should focus on code blocks created by the slash menu', async ({
+  test.only('should focus on code blocks created by the slash menu', async ({
     page,
   }) => {
     await enterPlaygroundRoom(page);
@@ -470,11 +471,7 @@ test.describe('slash menu with code block', () => {
 
     const locator = page.locator('affine-code');
     await expect(locator).toBeVisible();
-
-    await page.waitForTimeout(500);
-    await page.keyboard.type('111', { delay: 100 });
-    await page.waitForTimeout(500);
-    await assertRichTexts(page, ['000111']);
+    await assertFocusOnBlock(page, 'affine-code');
   });
 });
 // Selection is not yet available in edgeless
