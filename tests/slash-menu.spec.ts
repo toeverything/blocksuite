@@ -453,7 +453,7 @@ test.describe('slash menu with code block', () => {
     await assertFocusOnBlock(page, 'affine-code');
   });
 
-  test.only('should focus on code blocks created by the slash menu', async ({
+  test('should focus on code blocks created by the slash menu', async ({
     page,
   }) => {
     await enterPlaygroundRoom(page);
