@@ -1,7 +1,5 @@
-import { assertExists } from '@blocksuite/global/utils';
-import { Workspace } from '@blocksuite/store';
+import { Job, Workspace } from '@blocksuite/store';
 
-import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
   Bound,
@@ -294,11 +292,12 @@ export async function createEdgelessElement(
       { background: current.background },
       edgeless.model.id
     );
-    const noteService = edgeless.getService('affine:note');
-    const note = page.getBlockById(id) as NoteBlockModel;
-    assertExists(note);
-    const serializedBlock = (await getBlockClipboardInfo(current)).json;
-    await noteService.json2Block(note, serializedBlock.children);
+
+    const job = new Job({
+      workspace: edgeless.std.workspace,
+    });
+    const snapshot = await job.blockToSnapshot(current);
+    await job.snapshotToBlock(snapshot, edgeless.page);
   }
   const group = surface.pickById(surface.getGroupParent(current));
   if (group instanceof GroupElement) {
