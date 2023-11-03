@@ -16,6 +16,7 @@ import {
   type BrushElement,
   type ConnectorElement,
   type ConnectorMode,
+  type GroupElement,
   type PhasorElement,
   type ShapeType,
 } from '../../surface-block/elements/index.js';
@@ -139,7 +140,7 @@ export type Erasable = EdgelessElement;
 
 export type Connectable =
   | TopLevelBlockModel
-  | Exclude<PhasorElement, ConnectorElement | BrushElement>;
+  | Exclude<PhasorElement, ConnectorElement | BrushElement | GroupElement>;
 
 export type DefaultTool = {
   type: 'default';

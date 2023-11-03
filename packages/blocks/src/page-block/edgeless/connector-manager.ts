@@ -1112,11 +1112,15 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
   private _findConnectablesInViewport() {
     const { surface } = this._edgeless;
     const { viewport } = surface;
-    return surface
-      .pickByBound(Bound.from(viewport.viewportBounds))
-      .filter(ele => {
-        return ele.connectable;
-      }) as Connectable[];
+    const bound = viewport.viewportBounds;
+    const candidates = [
+      ...surface.viewport.gridManager.search(bound),
+      ...surface.blocks,
+    ];
+    const picked = candidates.filter(
+      element => element.boxSelect(bound) && element.connectable
+    );
+    return picked;
   }
 
   searchConnection(point: IVec, excludedIds: string[] = []) {
