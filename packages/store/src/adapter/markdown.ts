@@ -5,26 +5,27 @@ import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import { unified } from 'unified';
 
+import { sha } from '../persistence/blob/utils.js';
 import {
   type BlockSnapshot,
   BlockSnapshotSchema,
   type PageSnapshot,
   type SliceSnapshot,
 } from '../transformer/type.js';
+import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { nanoid } from '../utils/id-generator.js';
 import type { AdapterAssetsManager } from './assets.js';
 import type {
+  FromBlockSnapshotPayload,
+  FromBlockSnapshotResult,
+  FromPageSnapshotPayload,
+  FromPageSnapshotResult,
   FromSliceSnapshotPayload,
+  FromSliceSnapshotResult,
   ToBlockSnapshotPayload,
   ToPageSnapshotPayload,
-  ToSliceSnapshotPayload,
 } from './base.js';
-import {
-  ASTWalker,
-  BaseAdapter,
-  type FromBlockSnapshotPayload,
-  type FromPageSnapshotPayload,
-} from './base.js';
+import { ASTWalker, BaseAdapter } from './base.js';
 import { StringBuilder } from './string-builder.js';
 
 export type Markdown = string;
@@ -38,61 +39,86 @@ type MarkdownAST =
   | MdastUnionType<keyof RootContentMap, RootContentMap[keyof RootContentMap]>
   | Root;
 
-export class MarkdownAdapter extends BaseAdapter<Markdown> {
-  private markdownBuffer = new StringBuilder();
+type MarkdownToSliceSnapshotPayload = {
+  file: Markdown;
+  assets?: AdapterAssetsManager;
+  blockVersions: Record<string, number>;
+  pageVersion: number;
+  workspaceVersion: number;
+  workspaceId: string;
+  pageId: string;
+};
 
+export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async fromPageSnapshot({
     snapshot,
     assets,
-  }: FromPageSnapshotPayload): Promise<Markdown> {
+  }: FromPageSnapshotPayload): Promise<FromPageSnapshotResult<Markdown>> {
     const buffer = new StringBuilder();
-    buffer.write(`# ${snapshot.meta.title}\n`);
-    buffer.write(
-      await this.fromBlockSnapshot({
-        snapshot: snapshot.blocks,
-        assets,
-      })
-    );
-    return buffer.toString();
+    if (snapshot.meta.title) {
+      buffer.write(`# ${snapshot.meta.title}\n\n`);
+    }
+    const { file, assetsIds } = await this.fromBlockSnapshot({
+      snapshot: snapshot.blocks,
+      assets,
+    });
+    buffer.write(file);
+    return {
+      file: buffer.toString(),
+      assetsIds,
+    };
   }
 
   async fromBlockSnapshot({
     snapshot,
     assets,
-  }: FromBlockSnapshotPayload): Promise<Markdown> {
+  }: FromBlockSnapshotPayload): Promise<FromBlockSnapshotResult<Markdown>> {
     const root: Root = {
       type: 'root',
       children: [],
     };
-    const ast = await this.traverseSnapshot(snapshot, root, assets);
-    this.markdownBuffer.write(this.astToMardown(ast));
-    const markdown = this.markdownBuffer.toString();
-    this.markdownBuffer.clear();
-    return markdown;
+    const { ast, assetsIds } = await this.traverseSnapshot(
+      snapshot,
+      root,
+      assets
+    );
+    return {
+      file: this.astToMardown(ast),
+      assetsIds,
+    };
   }
 
   async fromSliceSnapshot({
     snapshot,
     assets,
-  }: FromSliceSnapshotPayload): Promise<Markdown> {
+  }: FromSliceSnapshotPayload): Promise<FromSliceSnapshotResult<Markdown>> {
+    const buffer = new StringBuilder();
+    const sliceAssetsIds: string[] = [];
     for (const contentSlice of snapshot.content) {
       const root: Root = {
         type: 'root',
         children: [],
       };
-      const ast = await this.traverseSnapshot(contentSlice, root, assets);
-      this.markdownBuffer.write(this.astToMardown(ast));
-      this.markdownBuffer.write('\n\n');
+      const { ast, assetsIds } = await this.traverseSnapshot(
+        contentSlice,
+        root,
+        assets
+      );
+      sliceAssetsIds.push(...assetsIds);
+      buffer.write(this.astToMardown(ast));
+      buffer.write('\n\n');
     }
-    const markdown = this.markdownBuffer.toString();
-    this.markdownBuffer.clear();
-    return markdown;
+    const markdown = buffer.toString();
+    return {
+      file: markdown,
+      assetsIds: sliceAssetsIds,
+    };
   }
 
   async toPageSnapshot(
-    _payload: ToPageSnapshotPayload<Markdown>
+    payload: ToPageSnapshotPayload<Markdown>
   ): Promise<PageSnapshot> {
-    const markdownAst = this.markdownToAst(_payload.file);
+    const markdownAst = this.markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
       id: nanoid('block'),
@@ -110,15 +136,16 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       },
       blocks: await this.tranverseMarkdown(
         markdownAst,
-        blockSnapshotRoot as BlockSnapshot
+        blockSnapshotRoot as BlockSnapshot,
+        payload.assets
       ),
     };
   }
 
   async toBlockSnapshot(
-    _payload: ToBlockSnapshotPayload<Markdown>
+    payload: ToBlockSnapshotPayload<Markdown>
   ): Promise<BlockSnapshot> {
-    const markdownAst = this.markdownToAst(_payload.file);
+    const markdownAst = this.markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
       id: nanoid('block'),
@@ -128,14 +155,37 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     };
     return this.tranverseMarkdown(
       markdownAst,
-      blockSnapshotRoot as BlockSnapshot
+      blockSnapshotRoot as BlockSnapshot,
+      payload.assets
     );
   }
 
   async toSliceSnapshot(
-    _payload: ToSliceSnapshotPayload<Markdown>
+    payload: MarkdownToSliceSnapshotPayload
   ): Promise<SliceSnapshot> {
-    throw new Error('Method not implemented.');
+    const markdownAst = this.markdownToAst(payload.file);
+    const blockSnapshotRoot = {
+      type: 'block',
+      id: nanoid('block'),
+      flavour: 'affine:note',
+      props: {},
+      children: [],
+    };
+    return {
+      type: 'slice',
+      content: [
+        await this.tranverseMarkdown(
+          markdownAst,
+          blockSnapshotRoot as BlockSnapshot,
+          payload.assets
+        ),
+      ],
+      blockVersions: payload.blockVersions,
+      pageVersion: payload.pageVersion,
+      workspaceVersion: payload.workspaceVersion,
+      workspaceId: payload.workspaceId,
+      pageId: payload.pageId,
+    };
   }
 
   private traverseSnapshot = async (
@@ -143,6 +193,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     markdown: MarkdownAST,
     assets?: AdapterAssetsManager
   ) => {
+    const assetsIds: string[] = [];
     const walker = new ASTWalker<BlockSnapshot, MarkdownAST>();
     walker.setONodeTypeGuard(
       (node): node is BlockSnapshot =>
@@ -308,18 +359,19 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           break;
         }
         case 'affine:image': {
-          const blobId = (snapshot.props.sourceId ?? '') as string;
+          const blobId = (o.node.props.sourceId ?? '') as string;
           await assets?.readFromBlob(blobId);
           const blob = assets?.getAssets().get(blobId);
+          assetsIds.push(blobId);
+          const blobName = assets?.getAssetName(blobId);
           if (!blob) {
             break;
           }
-          const dataURL = await blobToDataURL(blob);
           context
             .openNode(
               {
                 type: 'image',
-                url: dataURL as string,
+                url: `assets/${blobName}`,
                 title: null,
                 alt: (blob as File).name ?? null,
               },
@@ -358,12 +410,16 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
       }
     });
-    return (await walker.walk(snapshot, markdown)) as Root;
+    return {
+      ast: (await walker.walk(snapshot, markdown)) as Root,
+      assetsIds,
+    };
   };
 
   private tranverseMarkdown = (
     markdown: MarkdownAST,
-    snapshot: BlockSnapshot
+    snapshot: BlockSnapshot,
+    assets?: AdapterAssetsManager
   ) => {
     const walker = new ASTWalker<MarkdownAST, BlockSnapshot>();
     walker.setONodeTypeGuard(
@@ -505,6 +561,46 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 id: nanoid('block'),
                 flavour: 'affine:divider',
                 props: {},
+                children: [],
+              },
+              'children'
+            )
+            .closeNode();
+          break;
+        }
+        case 'image': {
+          let blobId = '';
+          if (!o.node.url.startsWith('http')) {
+            const imageURL = o.node.url;
+            assets?.getAssets().forEach((_value, key) => {
+              if (imageURL.includes(assets.getAssetName(key))) {
+                blobId = key;
+              }
+            });
+          } else {
+            const res = await fetch(o.node.url);
+            const file = new File(
+              [await res.blob()],
+              getFilenameFromContentDisposition(
+                res.headers.get('Content-Disposition') ?? ''
+              ) ??
+                o.node.url.split('/').at(-1) ??
+                'image' + res.headers.get('Content-Type')?.split('/').at(-1) ??
+                '.png'
+            );
+            blobId = await sha(await res.arrayBuffer());
+            assets?.getAssets().set(blobId, file);
+            assets?.writeToBlob(blobId);
+          }
+          context
+            .openNode(
+              {
+                type: 'block',
+                id: nanoid('block'),
+                flavour: 'affine:image',
+                props: {
+                  sourceId: blobId,
+                },
                 children: [],
               },
               'children'
@@ -722,12 +818,4 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       ? ast.children.flatMap(child => this.mdastToDelta(child))
       : [];
   }
-}
-
-function blobToDataURL(blob: Blob) {
-  return new Promise((resolve, _) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
 }

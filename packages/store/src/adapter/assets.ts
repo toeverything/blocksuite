@@ -1,7 +1,7 @@
 import { sha } from '../persistence/blob/utils.js';
 import { AssetsManager } from '../transformer/assets.js';
 
-class MemoryBlobManager {
+export class MemoryBlobManager {
   private readonly _map = new Map<string, Blob>();
 
   async get(key: string) {

@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import { MemoryBlobManager } from '../../adapter/assets';
 import { MarkdownAdapter } from '../../adapter/index';
+import { AssetsManager } from '../../transformer/assets';
 import type { BlockSnapshot } from '../../transformer/type';
 
 describe('snapshot to markdown', () => {
@@ -64,7 +66,7 @@ describe('snapshot to markdown', () => {
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
   });
 
   test('paragraph', async () => {
@@ -262,7 +264,7 @@ hhh
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
   });
 
   test('list', async () => {
@@ -413,7 +415,7 @@ hhh
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
   });
 
   test('code inline', async () => {
@@ -484,7 +486,7 @@ hhh
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
   });
 
   test('link', async () => {
@@ -555,7 +557,7 @@ hhh
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
   });
 
   test('bold', async () => {
@@ -627,7 +629,7 @@ hhh
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
   });
 
   test('italic', async () => {
@@ -699,7 +701,87 @@ hhh
     const target = await mdAdapter.fromBlockSnapshot({
       snapshot: blockSnapshot,
     });
-    expect(target).toBe(markdown);
+    expect(target.file).toBe(markdown);
+  });
+
+  test('image', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:WcYcyv-oZY',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:zqtuv999Ww',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:UTUZojv22c',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: '--affine-background-secondary-color',
+            index: 'a0',
+            hidden: false,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:Gan31s-dYK',
+              flavour: 'affine:image',
+              props: {
+                sourceId: 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=',
+                caption: '',
+                width: 0,
+                height: 0,
+                index: 'a0',
+                xywh: '[0,0,0,0]',
+                rotate: 0,
+              },
+              children: [],
+            },
+            {
+              type: 'block',
+              id: 'block:If92CIQiOl',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const markdown =
+      '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob)\n';
+
+    const mdAdapter = new MarkdownAdapter();
+    const blobManager = new MemoryBlobManager();
+    blobManager.set(new Blob(), 'YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=');
+    const assets = new AssetsManager({ blobs: blobManager });
+
+    const target = await mdAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+      assets,
+    });
+    expect(target.file).toBe(markdown);
   });
 });
 

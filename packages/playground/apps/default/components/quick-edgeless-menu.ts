@@ -340,12 +340,23 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           snapshot,
           assets: job.assetsManager,
         })
-        .then(markdown => {
-          const blob = new Blob([markdown], { type: 'plain/text' });
-          const fileURL = URL.createObjectURL(blob);
+        .then(async result => {
+          let downloadBlob: Blob;
           const element = document.createElement('a');
+          const contentBlob = new Blob([result.file], { type: 'plain/text' });
+          if (result.assetsIds.length > 0) {
+            const zip = job.assetsManager.createAssetsArchive(result.assetsIds);
+
+            zip.file('index.md', contentBlob);
+
+            downloadBlob = await zip.generateAsync({ type: 'blob' });
+            element.setAttribute('download', 'export.zip');
+          } else {
+            downloadBlob = contentBlob;
+            element.setAttribute('download', 'export.md');
+          }
+          const fileURL = URL.createObjectURL(downloadBlob);
           element.setAttribute('href', fileURL);
-          element.setAttribute('download', 'export.md');
           element.style.display = 'none';
           document.body.appendChild(element);
           element.click();

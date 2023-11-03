@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import JSZip from 'jszip';
 
 import type { BlobManager } from '../persistence/blob/types.js';
 
@@ -39,5 +40,32 @@ export class AssetsManager {
     }
 
     await this._blobs.set(blob, blobId);
+  }
+
+  getAssetName(blobId: string) {
+    const blob = this.getAssets().get(blobId);
+    assertExists(blob);
+    const name = 'name' in blob ? (blob as File).name : undefined;
+    const ext =
+      name !== undefined && name.includes('.')
+        ? name.split('.').at(-1)
+        : blob.type !== ''
+        ? blob.type.split('/').at(-1)
+        : 'blob';
+    return `${blobId}.${ext}`;
+  }
+
+  createAssetsArchive(assetsIds: string[]) {
+    const zip = new JSZip();
+
+    const assets = zip.folder('assets');
+    assertExists(assets);
+
+    this.getAssets().forEach((blob, id) => {
+      if (!assetsIds.includes(id)) return;
+      assets.file(`${this.getAssetName(id)}`, blob);
+    });
+
+    return zip;
   }
 }
