@@ -57,13 +57,20 @@ export default defineConfig({
           },
           { text: 'Modeling Editor State', link: '/editor-state' },
           {
-            text: 'The <code>block-std</code> Library',
+            text: 'Defining a Block',
             items: [
-              { text: 'Overview', link: '/block-std-overview' },
+              { text: 'Block Spec', link: '/block-spec' },
               { text: 'Block Schema', link: '/block-schema' },
               { text: 'Block Rendering', link: '/block-rendering' },
               { text: 'Block Service', link: '/block-service' },
               { text: 'Block Widgets', link: '/block-widgets' },
+            ],
+          },
+          {
+            text: 'The <code>block-std</code> Library',
+            items: [
+              { text: 'Overview', link: '/block-std-overview' },
+              { text: 'Data Driven Selection', link: '/data-driven-selection' },
             ],
           },
         ],
