@@ -45,26 +45,7 @@ function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
   if (!process.env.CI) {
     return true;
   }
-  const ignoredMessages = [
-    // basic.spec.ts
-    "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
-    // clipboard.spec.ts
-    "TypeError: Cannot read properties of null (reading 'model')",
-    // basic.spec.ts › should readonly mode not be able to modify text
-    'cannot modify data in readonly mode',
-    // Firefox warn on quill
-    // See https://github.com/quilljs/quill/issues/2030
-    '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
-    "addRange(): The given range isn't in document.",
-    //#region embed.spec.ts
-    'Failed to load resource: the server responded with a status of 404 (Not Found)',
-    'Failed to load resource: the server responded with a status of 403 ()',
-    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
-    'Error: Failed to fetch blob',
-    'Error: Cannot find blob',
-    'Cannot find blob',
-    //#endregion
-  ];
+  const ignoredMessages: string[] = [];
   return ignoredMessages.some(msg => message.text().startsWith(msg));
 }
 
