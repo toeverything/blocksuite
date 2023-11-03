@@ -802,7 +802,6 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   private _handleYEvent(event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>) {
-    console.log('YEvent', event);
     // event on top-level block store
     if (event.target === this._yBlocks) {
       const visited = new Set<string>();
