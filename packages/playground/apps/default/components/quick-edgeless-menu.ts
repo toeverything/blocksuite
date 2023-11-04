@@ -345,7 +345,10 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           const element = document.createElement('a');
           const contentBlob = new Blob([result.file], { type: 'plain/text' });
           if (result.assetsIds.length > 0) {
-            const zip = job.assetsManager.createAssetsArchive(result.assetsIds);
+            const zip = ZipTransformer.createAssetsArchive(
+              job.assets,
+              result.assetsIds
+            );
 
             zip.file('index.md', contentBlob);
 
