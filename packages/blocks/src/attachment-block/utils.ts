@@ -32,7 +32,7 @@ export function cloneAttachmentProperties(
 }
 
 async function getAttachment(model: AttachmentBlockModel) {
-  const blobManager = model.page.blobs;
+  const blobManager = model.page.blob;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
 
@@ -51,7 +51,7 @@ export async function downloadAttachment(
       'attachment load failed! sourceId:',
       attachmentModel.sourceId,
       'BlobManager:',
-      attachmentModel.page.blobs
+      attachmentModel.page.blob
     );
     return;
   }
@@ -116,7 +116,7 @@ async function uploadFileForAttachment(
     );
   }
   const page = attachmentModel.page;
-  const storage = page.blobs;
+  const storage = page.blob;
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
   // const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {

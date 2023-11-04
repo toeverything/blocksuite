@@ -59,41 +59,41 @@ export class ImageBlockModel
 
     this.created.on(() => {
       const blobId = this.sourceId;
-      const blob = this.page.blobs.get(blobId);
+      const blob = this.page.blob.get(blobId);
       if (!blob) {
         console.error(`Blob ${blobId} not found in blob manager`);
         return;
       }
-      this.page.blobs.increaseRef(blobId);
+      this.page.blob.increaseRef(blobId);
     });
     this.propsUpdated.on(({ oldProps, newProps }) => {
       const oldBlobId = (oldProps as ImageBlockProps).sourceId;
       const newBlobId = (newProps as ImageBlockProps).sourceId;
       if (oldBlobId === newBlobId) return;
 
-      const oldBlob = this.page.blobs.get(oldBlobId);
+      const oldBlob = this.page.blob.get(oldBlobId);
       if (!oldBlob) {
         console.error(`Blob ${oldBlobId} not found in blob manager`);
         return;
       }
-      const newBlob = this.page.blobs.get(newBlobId);
+      const newBlob = this.page.blob.get(newBlobId);
       if (!newBlob) {
         console.error(`Blob ${newBlobId} not found in blob manager`);
         return;
       }
 
-      this.page.blobs.decreaseRef(oldBlobId);
-      this.page.blobs.increaseRef(newBlobId);
+      this.page.blob.decreaseRef(oldBlobId);
+      this.page.blob.increaseRef(newBlobId);
     });
     this.deleted.on(() => {
       const blobId = this.sourceId;
-      const blob = this.page.blobs.get(blobId);
+      const blob = this.page.blob.get(blobId);
       if (!blob) {
         console.error(`Blob ${blobId} not found in blob manager`);
         return;
       }
 
-      this.page.blobs.decreaseRef(blobId);
+      this.page.blob.decreaseRef(blobId);
     });
   }
 

@@ -117,7 +117,7 @@ export class ContentParser {
       root.id,
       htmlContent,
       blobMap,
-      this._page.blobs
+      this._page.blob
     );
   }
 
@@ -136,7 +136,7 @@ export class ContentParser {
       root.id,
       markdownContent,
       blobMap,
-      this._page.blobs
+      this._page.blob
     );
   }
 
@@ -571,7 +571,7 @@ export class ContentParser {
     const file = files[0];
     if (!file) return [];
 
-    const storage = this._page.blobs;
+    const storage = this._page.blob;
     if (file.type.includes('image')) {
       // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
       const id = await storage.set(

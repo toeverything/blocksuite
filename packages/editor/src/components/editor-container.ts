@@ -202,7 +202,7 @@ export class EditorContainer
         handler: async (
           file: File
         ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-          const storage = this.page.blobs;
+          const storage = this.page.blob;
           const { saveAttachmentData } = withTempBlobData();
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })
@@ -224,7 +224,7 @@ export class EditorContainer
         handler: async (
           file: File
         ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-          const storage = this.page.blobs;
+          const storage = this.page.blob;
           const { saveAttachmentData } = withTempBlobData();
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })
@@ -256,7 +256,7 @@ export class EditorContainer
         handler: async (
           file: File
         ): Promise<AttachmentBlockProps & { flavour: 'affine:attachment' }> => {
-          const storage = this.page.blobs;
+          const storage = this.page.blob;
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })
           );

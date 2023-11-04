@@ -88,7 +88,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   // Check if the attachment is available
   private async _checkAttachment() {
-    const storage = this.page.blobs;
+    const storage = this.page.blob;
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
     if (!(await hasBlob(storage, sourceId))) {

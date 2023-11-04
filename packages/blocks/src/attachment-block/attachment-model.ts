@@ -45,12 +45,12 @@ export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {
     this.created.on(() => {
       const blobId = this.sourceId;
       if (!blobId) return;
-      const blob = this.page.blobs.get(blobId);
+      const blob = this.page.blob.get(blobId);
       if (!blob) {
         console.error(`Blob ${blobId} not found in blob manager`);
         return;
       }
-      this.page.blobs.increaseRef(blobId);
+      this.page.blob.increaseRef(blobId);
     });
     this.propsUpdated.on(({ oldProps, newProps }) => {
       const oldBlobId = (oldProps as AttachmentBlockProps).sourceId;
@@ -58,33 +58,33 @@ export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {
       if (oldBlobId === newBlobId) return;
 
       if (oldBlobId) {
-        const oldBlob = this.page.blobs.get(oldBlobId);
+        const oldBlob = this.page.blob.get(oldBlobId);
         if (!oldBlob) {
           console.error(`Blob ${oldBlobId} not found in blob manager`);
           return;
         }
-        this.page.blobs.decreaseRef(oldBlobId);
+        this.page.blob.decreaseRef(oldBlobId);
       }
 
       if (newBlobId) {
-        const newBlob = this.page.blobs.get(newBlobId);
+        const newBlob = this.page.blob.get(newBlobId);
         if (!newBlob) {
           console.error(`Blob ${newBlobId} not found in blob manager`);
           return;
         }
-        this.page.blobs.increaseRef(newBlobId);
+        this.page.blob.increaseRef(newBlobId);
       }
     });
     this.deleted.on(() => {
       const blobId = this.sourceId;
       if (!blobId) return;
-      const blob = this.page.blobs.get(blobId);
+      const blob = this.page.blob.get(blobId);
       if (!blob) {
         console.error(`Blob ${blobId} not found in blob manager`);
         return;
       }
 
-      this.page.blobs.decreaseRef(blobId);
+      this.page.blob.decreaseRef(blobId);
     });
   }
 }

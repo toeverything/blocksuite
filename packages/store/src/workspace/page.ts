@@ -124,7 +124,7 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get blobs() {
+  get blob() {
     return this.workspace.blob;
   }
 
