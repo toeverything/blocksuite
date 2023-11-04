@@ -83,11 +83,13 @@ export const blob = addOnFactory<keyof BlobAddon>(
           },
           decreaseRef: async blobId => {
             const ref = this._blobsRef.get(blobId) ?? 0;
-            this._blobsRef.set(blobId, ref - 1 < 0 ? 0 : ref - 1);
-
-            this.blob.gc();
+            this._blobsRef.set(blobId, Math.max(ref - 1, 0));
           },
         };
+
+        window.addEventListener('beforeunload', () => {
+          this.blob.gc();
+        });
       }
     }
 );

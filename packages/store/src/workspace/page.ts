@@ -516,8 +516,8 @@ export class Page extends Space<FlatBlockMap> {
     const newProps = toBlockProps(yBlock, this.doc.proxy);
 
     model.propsUpdated.emit({
-      oldProps: oldProps,
-      newProps: newProps,
+      oldProps,
+      newProps,
     });
 
     this.slots.blockUpdated.emit({
