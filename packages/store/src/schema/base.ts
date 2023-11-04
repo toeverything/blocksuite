@@ -1,4 +1,4 @@
-import { Slot } from '@blocksuite/global/utils';
+import { DisposableGroup, Slot } from '@blocksuite/global/utils';
 import type * as Y from 'yjs';
 import { z } from 'zod';
 
@@ -196,6 +196,8 @@ export class BaseBlockModel<
   childMap = new Map<string, number>();
   children: BaseBlockModel[] = [];
 
+  readonly disposables = new DisposableGroup();
+
   isEmpty() {
     return this.children.length === 0;
   }
@@ -230,6 +232,7 @@ export class BaseBlockModel<
     this.deleted.dispose();
     this.propsUpdated.dispose();
     this.childrenUpdated.dispose();
+    this.disposables.dispose();
   }
 
   clone(): this {

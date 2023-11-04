@@ -8,6 +8,7 @@ type PageProps = {
 export class PageBlockModel extends BaseBlockModel<PageProps> {
   constructor() {
     super();
+
     this.created.on(() => {
       this.page.slots.rootAdded.on(model => {
         if (model instanceof PageBlockModel) {
@@ -21,6 +22,10 @@ export class PageBlockModel extends BaseBlockModel<PageProps> {
           }
         }
       });
+    });
+
+    this.disposables.addFromEvent(window, 'beforeunload', () => {
+      this.page.workspace.blob.gc();
     });
   }
 }
