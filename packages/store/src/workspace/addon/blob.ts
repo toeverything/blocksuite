@@ -86,6 +86,10 @@ export const blob = addOnFactory<keyof BlobAddon>(
             this._blobsRef.set(blobId, Math.max(ref - 1, 0));
           },
         };
+
+        window.addEventListener('beforeunload', () => {
+          this.blob.gc();
+        });
       }
     }
 );
