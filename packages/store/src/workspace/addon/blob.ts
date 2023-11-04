@@ -87,9 +87,16 @@ export const blob = addOnFactory<keyof BlobAddon>(
           },
         };
 
-        window.addEventListener('beforeunload', () => {
-          this.blob.gc();
-        });
+        if (typeof window !== 'undefined') {
+          window.addEventListener('beforeunload', () => {
+            this.blob.gc();
+          });
+        }
+        if (typeof process !== 'undefined') {
+          process.on('exit', () => {
+            this.blob.gc();
+          });
+        }
       }
     }
 );
