@@ -35,7 +35,9 @@ declare global {
   }
 }
 
-export const defaultPlaygroundURL = new URL(`http://localhost:5173/starter/`);
+export const defaultPlaygroundURL = new URL(
+  `http://localhost:5173/starter/?features=clipboard`
+);
 
 const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
