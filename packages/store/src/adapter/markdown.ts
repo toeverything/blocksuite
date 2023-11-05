@@ -14,7 +14,7 @@ import {
 } from '../transformer/type.js';
 import { getFilenameFromContentDisposition } from '../utils/header-value-parser.js';
 import { nanoid } from '../utils/id-generator.js';
-import type { AdapterAssetsManager } from './assets.js';
+import { type AdapterAssetsManager, getAssetName } from './assets.js';
 import type {
   FromBlockSnapshotPayload,
   FromBlockSnapshotResult,
@@ -360,10 +360,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
         case 'affine:image': {
           const blobId = (o.node.props.sourceId ?? '') as string;
-          await assets?.readFromBlob(blobId);
-          const blob = assets?.getAssets().get(blobId);
+          if (!assets) {
+            break;
+          }
+          await assets.readFromBlob(blobId);
+          const blob = assets.getAssets().get(blobId);
           assetsIds.push(blobId);
-          const blobName = assets?.getAssetName(blobId);
+          const blobName = getAssetName(assets.getAssets(), blobId);
           if (!blob) {
             break;
           }
@@ -570,10 +573,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         }
         case 'image': {
           let blobId = '';
+          if (!assets) {
+            break;
+          }
           if (!o.node.url.startsWith('http')) {
             const imageURL = o.node.url;
-            assets?.getAssets().forEach((_value, key) => {
-              if (imageURL.includes(assets.getAssetName(key))) {
+            assets.getAssets().forEach((_value, key) => {
+              if (imageURL.includes(getAssetName(assets.getAssets(), key))) {
                 blobId = key;
               }
             });

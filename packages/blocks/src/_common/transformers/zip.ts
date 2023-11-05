@@ -6,7 +6,7 @@ import type {
   Workspace,
   WorkspaceInfoSnapshot,
 } from '@blocksuite/store';
-import { Job } from '@blocksuite/store';
+import { getAssetName, Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './utils.js';
@@ -26,19 +26,6 @@ export function createAssetsArchive(
   });
 
   return zip;
-}
-
-export function getAssetName(assets: Map<string, Blob>, blobId: string) {
-  const blob = assets.get(blobId);
-  assertExists(blob);
-  const name = 'name' in blob ? (blob as File).name : undefined;
-  const ext =
-    name !== undefined && name.includes('.')
-      ? name.split('.').at(-1)
-      : blob.type !== ''
-      ? blob.type.split('/').at(-1)
-      : 'blob';
-  return `${blobId}.${ext}`;
 }
 
 export async function exportPages(workspace: Workspace, pages: Page[]) {

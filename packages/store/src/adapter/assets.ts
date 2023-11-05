@@ -1,3 +1,5 @@
+import { assertExists } from '@blocksuite/global/utils';
+
 import { sha } from '../persistence/blob/utils.js';
 import { AssetsManager } from '../transformer/assets.js';
 
@@ -21,6 +23,19 @@ export class MemoryBlobManager {
   async list() {
     return Array.from(this._map.keys());
   }
+}
+
+export function getAssetName(assets: Map<string, Blob>, blobId: string) {
+  const blob = assets.get(blobId);
+  assertExists(blob);
+  const name = 'name' in blob ? (blob as File).name : undefined;
+  const ext =
+    name !== undefined && name.includes('.')
+      ? name.split('.').at(-1)
+      : blob.type !== ''
+      ? blob.type.split('/').at(-1)
+      : 'blob';
+  return `${blobId}.${ext}`;
 }
 
 export class AdapterAssetsManager extends AssetsManager {
