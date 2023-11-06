@@ -22,7 +22,6 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import type {
-  AbstractEditor,
   EdgelessElement,
   TopLevelBlockModel,
 } from '../_common/utils/types.js';
@@ -785,15 +784,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   viewInEdgeless() {
     if (!this._referencedModel) return;
 
-    const doc = this.ownerDocument;
-    const editorContainer = doc.querySelector(
-      'editor-container'
-    ) as AbstractEditor;
-
-    if (!editorContainer) return;
-
-    if (editorContainer.mode !== 'edgeless') {
-      editorContainer.mode = 'edgeless';
+    if (this.root.mode !== 'edgeless') {
+      this.root.mode = 'edgeless';
       saveViewportToSession(this.page.id, {
         referenceId: this.model.reference,
         padding: [60, 20, 20, 20],
@@ -805,7 +797,17 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     });
   }
 
+  private _shouldRender() {
+    return (
+      this.root.mode === 'page' &&
+      this.parentElement &&
+      !this.parentElement.closest('affine-surface-ref')
+    );
+  }
+
   override render() {
+    if (!this._shouldRender()) return nothing;
+
     const { _surfaceModel, _referencedModel, _surfaceRenderer, model } = this;
     const noContent =
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;

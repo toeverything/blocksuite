@@ -440,13 +440,14 @@ export const menuGroups: SlashMenuOptions['menus'] = [
               reference: frameModel.id,
               refFlavour: 'affine:frame',
             };
+            const sibling = noteModel.children[sliceIdx];
 
             if (insertAtMiddle) {
               splitNote(noteModel, sliceIdx);
             }
 
             page.addSiblingBlocks(
-              noteModel,
+              sibling,
               [surfaceRefProps],
               sliceIdx === 0 ? 'before' : 'after'
             );
@@ -496,13 +497,14 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                 reference: element.get('id'),
                 refFlavour: 'group',
               };
+              const sibling = noteModel.children[sliceIdx];
 
               if (insertAtMiddle) {
                 splitNote(noteModel, sliceIdx);
               }
 
               page.addSiblingBlocks(
-                noteModel,
+                sibling,
                 [surfaceRefProps],
                 sliceIdx === 0 ? 'before' : 'after'
               );

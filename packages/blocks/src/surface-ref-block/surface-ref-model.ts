@@ -16,7 +16,7 @@ export const SurfaceRefBlockSchema = defineBlockSchema({
   metadata: {
     version: 1,
     role: 'content',
-    parent: ['affine:page'],
+    parent: ['affine:note'],
   },
 });
 
