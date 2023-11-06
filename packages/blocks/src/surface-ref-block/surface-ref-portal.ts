@@ -6,7 +6,7 @@ import './portal/note.js';
 import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { css, nothing, type TemplateResult } from 'lit';
+import { css, type TemplateResult } from 'lit';
 import { html } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -35,7 +35,7 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  @property({ attribute: true })
+  @property({ attribute: false })
   root!: BlockSuiteRoot;
 
   @property({ attribute: false })
@@ -46,6 +46,9 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
 
   @query('.surface-blocks-portal')
   portal!: HTMLDivElement;
+
+  @property({ attribute: false })
+  renderModel!: (model: BaseBlockModel) => TemplateResult;
 
   private _getBlocksInChildren(model: GroupElement): TopLevelBlockModel[] {
     return Array.from(model.children.keys())
@@ -85,19 +88,6 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
     );
   }
 
-  private _onLoadModel(model: BaseBlockModel) {
-    this._disposables.add(
-      model.propsUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-    this._disposables.add(
-      model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
   setViewport = (viewport: {
     translateX: number;
     translateY: number;
@@ -107,43 +97,6 @@ export class SurfaceRefPortal extends WithDisposable(ShadowlessElement) {
       'transform',
       `translate(${viewport.translateX}px, ${viewport.translateY}px) scale(${viewport.zoom})`
     );
-  };
-
-  // FIXME: remove duplicated implementation of renderModel
-  renderModel = (model: BaseBlockModel): TemplateResult => {
-    const { flavour, children } = model;
-    const schema = this.page.schema.flavourSchemaMap.get(flavour);
-    if (!schema) {
-      console.warn(`Cannot find schema for ${flavour}.`);
-      return html`${nothing}`;
-    }
-
-    const view = this.root.std.spec.getView(flavour);
-    if (!view) {
-      console.warn(`Cannot find view for ${flavour}.`);
-      return html`${nothing}`;
-    }
-
-    const tag = view.component;
-    const content = children.length
-      ? staticHtml`${repeat(
-          children,
-          child => child.id,
-          child => this.renderModel(child)
-        )}`
-      : null;
-
-    this._onLoadModel(model);
-
-    return staticHtml`<${tag}
-      portal-reference-block-id=${model.id}
-      .root=${this.root}
-      .page=${this.page}
-      .model=${model}
-      .content=${content}
-      .calculatePath=${() => []}
-      .widgets=${{}}
-    ></${tag}>`;
   };
 
   override render() {

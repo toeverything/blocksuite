@@ -1,7 +1,7 @@
-import './surface-ref-portal.js';
+import './surface-ref-portal';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists, type Disposable } from '@blocksuite/global/utils';
+import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
@@ -34,8 +34,10 @@ import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
-import type { SurfaceRefPortal } from './surface-ref-portal.js';
+import { SurfaceRefPortal } from './surface-ref-portal.js';
 import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
+
+noop(SurfaceRefPortal);
 
 export const REF_LABEL_ICON = {
   'affine:frame': FrameIcon,
@@ -229,13 +231,14 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       border: 0;
       outline: none;
       width: 100%;
-      display; block;
+      display: block;
       text-align: center;
 
       font-size: var(--affine-font-sm);
       color: var(--affine-icon-color);
       background-color: transparent;
     }
+
     .caption-input::placeholder {
       color: var(--affine-placeholder-color);
     }
@@ -658,6 +661,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
               .page=${this.page}
               .root=${this.root}
               .containerModel=${referencedModel}
+              .renderModel=${this.renderModel}
             ></surface-ref-portal>`
           : nothing}
         <div class="surface-canvas-container">

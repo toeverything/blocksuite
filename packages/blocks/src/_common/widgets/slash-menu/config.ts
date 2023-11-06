@@ -23,8 +23,8 @@ import {
 } from '../../../_common/icons/index.js';
 import {
   createPage,
+  getBlockElementByModel,
   getCurrentNativeRange,
-  getPageBlock,
   getVirgoByModel,
   matchFlavours,
   openFileOrFiles,
@@ -188,7 +188,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         alias: ['dual link'],
         icon: DualLinkIcon,
         showWhen: model => {
-          const pageBlock = getPageBlock(model);
+          assertExists(model.page.root);
+          const pageBlock = getBlockElementByModel(model.page.root);
           assertExists(pageBlock);
           const linkedPageWidgetEle =
             pageBlock.widgetElements['affine-linked-page-widget'];
@@ -204,7 +205,8 @@ export const menuGroups: SlashMenuOptions['menus'] = [
         action: ({ model }) => {
           const triggerKey = '@';
           insertContent(model, triggerKey);
-          const pageBlock = getPageBlock(model);
+          assertExists(model.page.root);
+          const pageBlock = getBlockElementByModel(model);
           const widgetEle =
             pageBlock?.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);

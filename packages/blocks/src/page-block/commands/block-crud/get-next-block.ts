@@ -60,6 +60,7 @@ export const getNextBlockCommand: Command<
   assertExists(path);
 
   const nextBlock = getNextBlock(ctx.std, path, ctx.filter);
+  console.log(nextBlock);
 
   if (nextBlock) {
     next({ nextBlock });

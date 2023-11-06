@@ -1,8 +1,7 @@
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { BLOCK_ID_ATTR } from '../_common/consts.js';
-import type { SurfaceBlockComponent } from '../index.js';
+import { getBlockElementByModel } from '../index.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
@@ -82,15 +81,8 @@ export class FrameBlockModel
   getRelativePointLocation(_: IVec): PointLocation {
     throw new Error('Function not implemented.');
   }
-  hitTest(
-    x: number,
-    y: number,
-    _: HitTestOptions,
-    surface: SurfaceBlockComponent
-  ): boolean {
-    const block = surface.parentBlockElement.querySelector(
-      `[${BLOCK_ID_ATTR}="${this.id}"]`
-    ) as FrameBlockComponent;
+  hitTest(x: number, y: number, _: HitTestOptions): boolean {
+    const block = getBlockElementByModel(this) as FrameBlockComponent;
     if (!block) return false;
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);

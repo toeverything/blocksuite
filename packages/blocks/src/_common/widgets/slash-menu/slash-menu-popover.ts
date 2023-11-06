@@ -213,7 +213,7 @@ export class SlashMenu extends WithDisposable(LitElement) {
       .flat();
 
     allMenus = allMenus.filter(({ showWhen = () => true }) =>
-      showWhen(this.model)
+      showWhen(this.model, this.pageElement)
     );
     if (!searchStr) {
       return allMenus;
