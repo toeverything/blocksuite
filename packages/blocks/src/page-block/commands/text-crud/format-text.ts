@@ -83,8 +83,9 @@ export const formatTextCommand: Command<
 
   Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
     root.rangeManager?.syncTextSelectionToRange(textSelection);
-    next();
   });
+
+  next();
 };
 
 declare global {

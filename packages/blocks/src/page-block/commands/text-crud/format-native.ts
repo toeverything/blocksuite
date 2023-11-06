@@ -56,9 +56,7 @@ export const formatNativeCommand: Command<
     });
   });
 
-  Promise.all(selectedVEditors.map(e => e.waitForUpdate())).then(() => {
-    next();
-  });
+  next();
 };
 
 declare global {

@@ -64,9 +64,7 @@ export const formatBlockCommand: Command<
     );
   });
 
-  Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
-    next();
-  });
+  next();
 };
 
 declare global {
