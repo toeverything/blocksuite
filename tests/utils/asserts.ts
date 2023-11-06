@@ -186,6 +186,14 @@ export async function assertRichTexts(page: Page, texts: string[]) {
   expect(actualTexts).toEqual(texts);
 }
 
+export async function assertSelectionPath(page: Page, expected: string[]) {
+  const actual = await page.evaluate(() => {
+    const { root } = window;
+    return root.std.selection.value[0].path;
+  });
+  expect(actual).toEqual(expected);
+}
+
 export async function assertEdgelessCanvasText(page: Page, text: string) {
   const actualTexts = await page.evaluate(() => {
     const editor = document.querySelector(
