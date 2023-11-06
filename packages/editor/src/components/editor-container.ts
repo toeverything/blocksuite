@@ -11,6 +11,7 @@ import {
   type PageBlockModel,
   PagePreset,
   readImageSize,
+  saveViewportToSession,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { withTempBlobData } from '@blocksuite/blocks';
@@ -297,10 +298,11 @@ export class EditorContainer
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
-      sessionStorage.setItem(
-        'blocksuite:' + this.page.id + ':edgelessViewport',
-        JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
-      );
+      saveViewportToSession({
+        pageId: this.page.id,
+        center: viewport.center,
+        zoom: viewport.zoom,
+      });
     }
   }
 

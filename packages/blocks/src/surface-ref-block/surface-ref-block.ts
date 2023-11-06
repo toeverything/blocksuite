@@ -24,6 +24,7 @@ import type {
   EdgelessElement,
   TopLevelBlockModel,
 } from '../_common/utils/types.js';
+import { saveViewportToSession } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
@@ -730,7 +731,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   viewInEdgeless() {
     if (!this._referencedModel) return;
 
-    const xywh = deserializeXYWH(this._referencedModel.xywh);
     const doc = this.ownerDocument;
     const editorContainer = doc.querySelector(
       'editor-container'
@@ -740,17 +740,11 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
     if (editorContainer.mode !== 'edgeless') {
       editorContainer.mode = 'edgeless';
+      saveViewportToSession(this.page.id, {
+        referenceId: this.model.reference,
+        padding: [60, 20, 20, 20],
+      });
     }
-
-    setTimeout(() => {
-      const edgeless = doc.querySelector('affine-edgeless-page');
-
-      edgeless?.surface.viewport.setViewportByBound(
-        Bound.fromXYWH(xywh),
-        [100, 60, 100, 60],
-        false
-      );
-    }, 50);
 
     this.selection.update(selections => {
       return selections.filter(sel => !PathFinder.equals(sel.path, this.path));
