@@ -126,7 +126,9 @@ export class RangeManager {
     const { mode = 'all', match = () => true } = options;
 
     let result = Array.from<BlockElement>(
-      this.root.querySelectorAll(`[${this.root.blockIdAttr}]`)
+      this.root.querySelectorAll(
+        `[${this.root.blockIdAttr}]:not([data-queryable="false"])`
+      )
     ).filter(el => range.intersectsNode(el) && match(el));
 
     if (result.length === 0) {
