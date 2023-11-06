@@ -41,7 +41,6 @@ export function bindHotKey(blockElement: BlockElement) {
     }
     reset();
   });
-  console.log('bindHotKey', 'gaga');
   blockElement.bindHotKey({
     ArrowDown: () => {
       return root.std.command
@@ -168,7 +167,6 @@ export function bindHotKey(blockElement: BlockElement) {
         .run();
     },
     ArrowRight: () => {
-      console.trace('what');
       return root.std.command
         .pipe()
         .inline((_, next) => {
