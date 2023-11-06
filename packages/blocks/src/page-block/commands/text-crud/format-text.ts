@@ -19,10 +19,16 @@ export const formatTextCommand: Command<
   }
 > = (ctx, next) => {
   const { root, styles, mode = 'merge' } = ctx;
-  assertExists(root);
+  assertExists(
+    root,
+    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+  );
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
-  if (!textSelection) return;
+  assertExists(
+    textSelection,
+    '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
+  );
 
   const selectedElements = getSelectedContentBlockElements(root, [
     'text',
@@ -77,8 +83,9 @@ export const formatTextCommand: Command<
 
   Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
     root.rangeManager?.syncTextSelectionToRange(textSelection);
-    next();
   });
+
+  next();
 };
 
 declare global {

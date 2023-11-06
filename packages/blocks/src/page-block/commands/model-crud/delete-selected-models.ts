@@ -6,7 +6,10 @@ export const deleteSelectedModelsCommand: Command<'selectedModels'> = (
   next
 ) => {
   const models = ctx.selectedModels;
-  assertExists(models);
+  assertExists(
+    models,
+    '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
+  );
 
   models.forEach(model => {
     ctx.std.page.deleteBlock(model);

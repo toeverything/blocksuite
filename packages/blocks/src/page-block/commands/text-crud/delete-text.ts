@@ -10,9 +10,16 @@ export const deleteTextCommand: Command<
   }
 > = (ctx, next) => {
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
-  assertExists(textSelection);
+  assertExists(
+    textSelection,
+    '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
+  );
+
   const root = ctx.root;
-  assertExists(root);
+  assertExists(
+    root,
+    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
+  );
   assertExists(root.rangeManager);
 
   const range = root.rangeManager.textSelectionToRange(textSelection);
