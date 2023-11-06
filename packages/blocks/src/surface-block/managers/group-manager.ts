@@ -31,9 +31,9 @@ function getGroups(element: EdgelessElement) {
   const groups: { group: GroupElement; child: EdgelessElement }[] = [];
   groups.push({ group: group, child: element });
   while (group !== GROUP_ROOT) {
-    groups.push({ group: group, child: element });
     element = group;
     group = getGroupParent(group);
+    groups.push({ group: group, child: element });
   }
   return groups;
 }
