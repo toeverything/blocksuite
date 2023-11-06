@@ -8,6 +8,7 @@ const params = new URLSearchParams(location.search);
 
 class CustomAttachmentService extends AttachmentService {
   override mounted(): void {
+    super.mounted();
     const userType = params.get('userType');
     if (userType === 'pro') {
       this.maxFileSize = 100 * 1000 * 1000; // 100MB

@@ -3,7 +3,7 @@ import type { IndexerAddon } from './indexer.js';
 import type { TestAddon } from './test.js';
 
 export class WorkspaceAddonType implements BlobAddon, IndexerAddon, TestAddon {
-  blobs!: BlobAddon['blobs'];
+  blob!: BlobAddon['blob'];
 
   indexer!: IndexerAddon['indexer'];
   search!: IndexerAddon['search'];

@@ -108,7 +108,7 @@ class ImageBlock extends BlockElement<ImageBlockModel> {
       return;
     }
 
-    const storage = this.model.page.blobs;
+    const storage = this.model.page.blob;
     this._imageState = 'loading';
     storage
       .get(this.model.sourceId)

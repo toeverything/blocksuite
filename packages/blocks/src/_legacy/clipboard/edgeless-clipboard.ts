@@ -222,7 +222,7 @@ export class EdgelessClipboard implements Clipboard {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image')) {
-          const sourceId = await this._edgeless.page.blobs.set(file);
+          const sourceId = await this._edgeless.page.blob.set(file);
           res.push({ file, sourceId });
         }
       }
