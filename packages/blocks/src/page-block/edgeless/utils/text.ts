@@ -3,7 +3,7 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel, GroupElement } from '../../../index.js';
-import { ShapeElement } from '../../../surface-block/index.js';
+import { ShapeElement, ShapeStyle } from '../../../surface-block/index.js';
 import {
   Bound,
   type IModelCoord,
@@ -21,7 +21,7 @@ import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   GENERAL_CANVAS_FONT_FAMILY,
-  type SCRIBBLED_CANVAS_FONT_FAMILY,
+  SCRIBBLED_CANVAS_FONT_FAMILY,
 } from './consts.js';
 
 export type CANVAS_TEXT_FONT =
@@ -65,6 +65,10 @@ export function mountShapeTextEditor(
     edgeless.surface.updateElement<PhasorElementType.SHAPE>(shapeElement.id, {
       text,
       color: GET_DEFAULT_LINE_COLOR(),
+      fontFamily:
+        shapeElement.shapeStyle === ShapeStyle.General
+          ? GENERAL_CANVAS_FONT_FAMILY
+          : SCRIBBLED_CANVAS_FONT_FAMILY,
     });
   }
   const updatedElement = edgeless.surface.pickById(shapeElement.id);
