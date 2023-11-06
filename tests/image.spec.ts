@@ -269,8 +269,8 @@ test('image loading but failed', async ({ page }) => {
   );
   expectConsoleMessage(page, 'Cannot find blob, retrying', 'warning');
   expectConsoleMessage(page, 'Error: Cannot find blob');
-  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
 
+  const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const timeout = 2000;
 
   // block image data request, force wait 100ms for loading test,
@@ -313,6 +313,7 @@ test('image loading but success', async ({ page }) => {
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
   );
   expectConsoleMessage(page, 'Cannot find blob, retrying', 'warning');
+
   const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const imageBuffer = await readFile(
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))
