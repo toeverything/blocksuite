@@ -1,4 +1,4 @@
-# Flavoured Blocks
+# Block Basics
 
 In BlockSuite, block is the basic unit of structured content, representing a piece of text, an image or other media elements, or even a nested sub-document. BlockSuite supports defining various types of blocks, referred to as **flavoured blocks**. By combining and nesting blocks, users can create richly structured content.
 
@@ -88,51 +88,6 @@ In BlockSuite, the blocks can be also be categorized into two distinct roles:
 
 `HubBlock` acts as container that affects the presentation of the blocks it contains. For example, a note block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards. In contrast, `ContentBlock` can only nest other `ContentBlock` to express structures like nested markdown lists.
 
-## Defining Block Schema
+## Defining New Block
 
-::: info
-This section is subject to change in future updates.
-:::
-
-To define a new block, you need to define and register its schema, which describes the shape of the block. This can be done declaratively using the `defineBlockSchema` API:
-
-```ts
-import { defineBlockSchema } from '@blocksuite/store';
-
-type ListType = 'bulleted' | 'numbered' | 'todo';
-
-const ListBlockSchema = defineBlockSchema({
-  flavour: 'affine:list',
-  // The `Text` here is used for defining built-in rich text type
-  props: ({ Text }) => ({
-    // Supports strongly typed enums
-    type: 'bulleted' as ListType,
-    // Rich text content that supports inline formats
-    text: Text(),
-    // A boolean property with default value
-    checked: false,
-  }),
-  metadata: {
-    // Used for data validation and migration
-    version: 1,
-    // 'content' | 'hub'
-    role: 'content',
-  },
-});
-```
-
-In this example, `props` defines the fields on each block instance, while `metadata` contains singleton metadata specific to this block flavour. After registering the block flavour to the workspace, you can operate on it using `page` APIs:
-
-```ts
-workspace.register([ListBlockSchema]);
-const page = workspace.createPage();
-
-await page.waitForLoaded();
-const id = page.addBlock('affine:list');
-const listBlock = page.getBlockById(id);
-
-// Convert the list type
-page.updateBlock(listBlock, { type: 'numbered' });
-```
-
-So far, we have only covered the definition of the block model using the `@blocksuite/store` package, which is framework agnostic. In the following sections, we will explain how to integrate the block model with UI frameworks, as well as how to build your own editable block in AFFiNE, which involves additional runtime concepts.
+To define a new block flavour, you need to start with its spec, which describes the shape of the block. See [block spec](./block-spec-apis) for more comprehensive introduction!

@@ -1,20 +1,18 @@
-# Data Driven Selection
+# Selection API
 
-Selection is a very common concept in structural editors. It's used to represent the current cursor position or the current selected block.
+Selection is a very common concept in structural editors. It's used to represent the current cursor position or the current selected blocks.
 
-In BlockSuite, we use a data driven approach to represent the selection. It follows a unidirectional data flow, which means the selection is always derived from the data.
+In BlockSuite, we use a data driven approach to represent the selection. It also follows the [unidirectional data flow](./unidirectional-data-flow), which means the selection is always derived from the data.
 
 ## Selection Model
 
-The selection model contains a list of selections. Each selection is a range of the content.
-
-For example, if you have a text block with the following content:
+The selection model contains a list of selections. Each selection is a range of the content. For example, if you have a text block with the following content:
 
 > Hello
 >
 > World
 
-In BlockSuite, it will be represented as:
+In BlockSuite, it will be represented as following:
 
 ```
 |-- Root Block (id: 0)
@@ -23,7 +21,7 @@ In BlockSuite, it will be represented as:
         |-- Text Block (id: 3)
 ```
 
-And you select the text "ello Worl" via cursor like this:
+And if you select the text partially via mouse drag as following:
 
 ![text selection example](./images/text-selection-example.png)
 
@@ -69,7 +67,7 @@ The selection model will be:
 ];
 ```
 
-## Type & Group
+## Type and Group
 
 Selection model has two important properties: `type` and `group`.
 
@@ -78,7 +76,7 @@ And the `group` of a selection means the selection's scope.
 
 Some types of selections can share the same group because they have the same scope. For example, the `text` selection and the `block` selection can share the `note` group because they are both in the `note` block. And you may also have a `cell` and `row` selection in a `table` block, and they can share the `table` group.
 
-## Read & Write Selection
+## Read and Write Selection
 
 You can get the selection manager from `std.selection`. With the manager, you can read the selection model from `value`. And you can also write the selection model by `set` and `update`.
 

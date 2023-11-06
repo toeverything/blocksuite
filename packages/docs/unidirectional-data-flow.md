@@ -65,11 +65,10 @@ But the real power lies in the fact that if this block tree is being concurrentl
 ## Not Only Blocks
 
 When we talk about unidirectional data flow in blocksuite. We are not only talking about the block tree structure, but also the entire editor state.
-In fact, the block tree structure is just a part of the editor state. In addition, the editor state also includes:
+In fact, the block tree structure is just a part of the editor state. In addition, the editor state could also include:
 
 - Selection state
-- History stack
-- User information
+- User metadata
 - 🚧 Local state (not synchronized with other users)
 
 These states are also stored in the CRDT model, and the corresponding events will be triggered when they are updated.

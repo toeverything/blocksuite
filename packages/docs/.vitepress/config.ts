@@ -39,8 +39,7 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
-          { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
-          { text: 'Handling Events', link: '/handling-events' },
+          { text: 'Block Basics', link: '/block-basics' },
         ],
       },
       {
@@ -58,17 +57,18 @@ export default defineConfig({
       {
         text: 'API Walkthrough',
         items: [
-          { text: 'Selection API', link: '/selection-api' },
           {
-            text: 'Block APIs',
+            text: 'Block Spec APIs',
+            link: '/block-spec-apis',
             items: [
-              { text: 'Block Spec', link: '/block-spec' },
               { text: 'Block Schema', link: '/block-schema' },
-              { text: 'Block Rendering', link: '/block-rendering' },
               { text: 'Block Service', link: '/block-service' },
+              { text: 'Block View', link: '/block-view' },
               { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
+          { text: 'Selection API', link: '/selection-api' },
+          { text: 'Event API', link: '/event-api' },
         ],
       },
       {
