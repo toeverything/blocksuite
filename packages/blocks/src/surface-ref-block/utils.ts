@@ -1,10 +1,10 @@
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { html } from 'lit';
 
-import { type SurfaceRefBlockModel } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { DEFAULT_NOTE_HEIGHT } from '../page-block/edgeless/utils/consts.js';
 import { deserializeXYWH, serializeXYWH } from '../surface-block/utils/xywh.js';
+import { type SurfaceRefBlockModel } from './surface-ref-model.js';
 
 export function getSurfaceBlock(page: Page) {
   return (

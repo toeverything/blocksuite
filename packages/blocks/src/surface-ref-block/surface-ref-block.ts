@@ -19,13 +19,13 @@ import {
   isCssVariable,
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
+import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { matchFlavours } from '../_common/utils/model.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
 } from '../_common/utils/types.js';
-import { saveViewportToSession } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { ConnectorPathGenerator } from '../page-block/edgeless/connector-manager.js';
 import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
