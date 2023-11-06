@@ -9,6 +9,7 @@ import {
   initSysProps,
   schemaToModel,
   syncBlockProps,
+  toBlockProps,
   valueToProps,
 } from '../utils/utils.js';
 import type { AwarenessStore } from '../yjs/awareness.js';
@@ -123,8 +124,8 @@ export class Page extends Space<FlatBlockMap> {
     return this.workspace.meta.getPageMeta(this.id) as PageMeta;
   }
 
-  get blobs() {
-    return this.workspace.blobs;
+  get blob() {
+    return this.workspace.blob;
   }
 
   get root() {
@@ -492,6 +493,8 @@ export class Page extends Space<FlatBlockMap> {
     const yBlock = this._yBlocks.get(model.id);
     assertExists(yBlock);
 
+    const oldProps = toBlockProps(yBlock, this.doc.proxy);
+
     this.transact(() => {
       // TODO diff children changes
       // All child nodes will be deleted in the current behavior, then added again.
@@ -510,7 +513,12 @@ export class Page extends Space<FlatBlockMap> {
       syncBlockProps(schema, yBlock, props);
     });
 
-    model.propsUpdated.emit();
+    const newProps = toBlockProps(yBlock, this.doc.proxy);
+
+    model.propsUpdated.emit({
+      oldProps,
+      newProps,
+    });
 
     this.slots.blockUpdated.emit({
       type: 'update',
@@ -583,7 +591,6 @@ export class Page extends Space<FlatBlockMap> {
 
     this.transact(() => {
       this._yBlocks.delete(model.id);
-      model.dispose();
 
       if (parent) {
         const yParent = this._yBlocks.get(parent.id) as YBlock;
@@ -734,6 +741,7 @@ export class Page extends Space<FlatBlockMap> {
       parent: this.getParent(model)?.id ?? '',
     });
     model.deleted.emit();
+    model.dispose();
     this._blockMap.delete(id);
   }
 
@@ -742,6 +750,8 @@ export class Page extends Space<FlatBlockMap> {
     const id = yMap.get('sys:id') as string;
     const model = this.getBlockById(id);
     if (!model) return;
+
+    const oldProps = toBlockProps(yMap, this.doc.proxy);
 
     const props: Partial<BlockProps> = {};
     const yProps: { [key: string]: { old: unknown; new: unknown } } = {};
@@ -778,7 +788,10 @@ export class Page extends Space<FlatBlockMap> {
 
     if (hasPropsUpdate) {
       Object.assign(model, props);
-      model.propsUpdated.emit();
+      model.propsUpdated.emit({
+        oldProps: oldProps,
+        newProps: toBlockProps(yMap, this.doc.proxy),
+      });
       this.slots.yBlockUpdated.emit({
         id: model.id,
         props: yProps,

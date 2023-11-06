@@ -1,6 +1,6 @@
-import { defineBlockSchema, type SchemaToModel } from '@blocksuite/store';
+import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-export type AttachmentProps = {
+export type AttachmentBlockProps = {
   name: string;
   size: number;
   /**
@@ -18,7 +18,7 @@ export type AttachmentProps = {
   sourceId?: string;
 };
 
-export const defaultAttachmentProps: AttachmentProps = {
+export const defaultAttachmentProps: AttachmentBlockProps = {
   name: '',
   size: 0,
   type: 'application/octet-stream',
@@ -29,12 +29,62 @@ export const defaultAttachmentProps: AttachmentProps = {
 
 export const AttachmentBlockSchema = defineBlockSchema({
   flavour: 'affine:attachment',
-  props: (): AttachmentProps => defaultAttachmentProps,
+  props: (): AttachmentBlockProps => defaultAttachmentProps,
   metadata: {
     version: 1,
     role: 'content',
     parent: ['affine:note'],
   },
+  toModel: () => new AttachmentBlockModel(),
 });
 
-export type AttachmentBlockModel = SchemaToModel<typeof AttachmentBlockSchema>;
+export class AttachmentBlockModel extends BaseBlockModel<AttachmentBlockProps> {
+  constructor() {
+    super();
+
+    this.created.on(() => {
+      const blobId = this.sourceId;
+      if (!blobId) return;
+      const blob = this.page.blob.get(blobId);
+      if (!blob) {
+        console.error(`Blob ${blobId} not found in blob manager`);
+        return;
+      }
+      this.page.blob.increaseRef(blobId);
+    });
+    this.propsUpdated.on(({ oldProps, newProps }) => {
+      const oldBlobId = (oldProps as AttachmentBlockProps).sourceId;
+      const newBlobId = (newProps as AttachmentBlockProps).sourceId;
+      if (oldBlobId === newBlobId) return;
+
+      if (oldBlobId) {
+        const oldBlob = this.page.blob.get(oldBlobId);
+        if (!oldBlob) {
+          console.error(`Blob ${oldBlobId} not found in blob manager`);
+          return;
+        }
+        this.page.blob.decreaseRef(oldBlobId);
+      }
+
+      if (newBlobId) {
+        const newBlob = this.page.blob.get(newBlobId);
+        if (!newBlob) {
+          console.error(`Blob ${newBlobId} not found in blob manager`);
+          return;
+        }
+        this.page.blob.increaseRef(newBlobId);
+      }
+    });
+    this.deleted.on(() => {
+      const blobId = this.sourceId;
+      if (!blobId) return;
+      const blob = this.page.blob.get(blobId);
+      if (!blob) {
+        console.error(`Blob ${blobId} not found in blob manager`);
+        return;
+      }
+
+      this.page.blob.decreaseRef(blobId);
+    });
+  }
+}

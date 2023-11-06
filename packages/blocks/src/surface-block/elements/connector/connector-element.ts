@@ -223,6 +223,7 @@ export class ConnectorElement extends SurfaceElement<IConnector> {
       ctx.save();
       ctx.strokeStyle = realStrokeColor;
       ctx.lineWidth = this.strokeWidth;
+      ctx.lineJoin = 'round';
       dash && ctx.setLineDash([12, 12]);
       ctx.beginPath();
       if (curve) {

@@ -13,7 +13,7 @@ import {
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import type { Renderer } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -116,7 +116,7 @@ export class ContentParser {
       root.id,
       htmlContent,
       blobMap,
-      this._page.blobs
+      this._page.blob
     );
   }
 
@@ -135,7 +135,7 @@ export class ContentParser {
       root.id,
       markdownContent,
       blobMap,
-      this._page.blobs
+      this._page.blob
     );
   }
 
@@ -572,7 +572,7 @@ export class ContentParser {
     const file = files[0];
     if (!file) return [];
 
-    const storage = this._page.blobs;
+    const storage = this._page.blob;
     if (file.type.includes('image')) {
       // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
       const id = await storage.set(
@@ -601,7 +601,7 @@ export class ContentParser {
       const sourceId = await storage.set(
         new File([file], file.name, { type: file.type })
       );
-      const attachmentProps: AttachmentProps & {
+      const attachmentProps: AttachmentBlockProps & {
         flavour: 'affine:attachment';
         children: [];
       } = {

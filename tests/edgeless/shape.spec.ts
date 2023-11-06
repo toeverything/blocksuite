@@ -405,6 +405,11 @@ test('auto wrap text in shape', async ({ page }) => {
   await setEdgelessTool(page, 'shape');
   await waitNextFrame(page, 500);
 
+  const scribbledButton = page
+    .locator('edgeless-tool-icon-button')
+    .filter({ hasText: 'scribbled' });
+  await scribbledButton.click();
+
   await page.mouse.click(200, 150);
   await waitNextFrame(page);
   await page.mouse.dblclick(250, 200);
