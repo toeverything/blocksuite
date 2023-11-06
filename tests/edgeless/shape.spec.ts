@@ -419,7 +419,7 @@ test('auto wrap text in shape', async ({ page }) => {
   // select shape
   await page.mouse.click(200, 150);
   // the height of shape should be increased because of \n
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 136]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 109]);
 
   await page.mouse.dblclick(250, 200);
   await waitNextFrame(page);
@@ -432,23 +432,23 @@ test('auto wrap text in shape', async ({ page }) => {
   // select shape
   await page.mouse.click(200, 150);
   // the height of shape should be increased because of long text
-  // cccccccc -- wrap --> cccccc\ncc
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
+  // cccccccc -- wrap --> ccccc\nccc
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 132]);
 
   // try to decrease height
   await resizeElementByHandle(page, { x: 0, y: -50 }, 'bottom-right');
   // you can't decrease height because of min height to fit text
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 132]);
 
   // increase width to make text not wrap
   await resizeElementByHandle(page, { x: 50, y: 0 }, 'bottom-right');
   // the height of shape should be decreased because of long text not wrap
-  await assertEdgelessSelectedRect(page, [200, 150, 150, 136]);
+  await assertEdgelessSelectedRect(page, [200, 150, 150, 109]);
 
   // try to decrease width
   await resizeElementByHandle(page, { x: -50, y: 0 }, 'bottom-right');
   // you can't decrease width after text can't wrap (each line just has 1 char)
-  await assertEdgelessSelectedRect(page, [200, 150, 100, 168]);
+  await assertEdgelessSelectedRect(page, [200, 150, 100, 132]);
 });
 
 test('change shape style', async ({ page }) => {
