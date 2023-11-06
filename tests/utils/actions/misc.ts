@@ -41,14 +41,6 @@ const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.virgo-editor';
 
-function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
-  if (!process.env.CI) {
-    return true;
-  }
-  const ignoredMessages: string[] = [];
-  return ignoredMessages.some(msg => message.text().startsWith(msg));
-}
-
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
@@ -159,6 +151,57 @@ export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
 };
 
+type TaggedConsoleMessage = ConsoleMessage & { __ignore?: boolean };
+function ignoredLog(message: ConsoleMessage) {
+  (message as TaggedConsoleMessage).__ignore = true;
+}
+function isIgnoredLog(
+  message: ConsoleMessage
+): message is TaggedConsoleMessage {
+  return '__ignore' in message && !!message.__ignore;
+}
+
+export function expectConsoleStartsWith(
+  page: Page,
+  log: string,
+  type:
+    | 'log'
+    | 'debug'
+    | 'info'
+    | 'error'
+    | 'warning'
+    | 'dir'
+    | 'dirxml'
+    | 'table'
+    | 'trace'
+    | 'clear'
+    | 'startGroup'
+    | 'startGroupCollapsed'
+    | 'endGroup'
+    | 'assert'
+    | 'profile'
+    | 'profileEnd'
+    | 'count'
+    | 'timeEnd' = 'error'
+) {
+  page.on('console', (message: ConsoleMessage) => {
+    if (
+      [
+        '[vite] connecting...',
+        '[vite] connected.',
+        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
+        '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+      ].includes(message.text())
+    ) {
+      ignoredLog(message);
+      return;
+    }
+    if (message.type() === type && message.text().startsWith(log)) {
+      ignoredLog(message);
+    }
+  });
+}
+
 export async function enterPlaygroundRoom(
   page: Page,
   ops?: {
@@ -182,19 +225,15 @@ export async function enterPlaygroundRoom(
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
   page.on('console', message => {
-    const ignore = shamefullyIgnoreConsoleMessage(message);
+    const ignore = isIgnoredLog(message) || !process.env.CI;
     if (!ignore) {
-      expect('Unexpected console message: ' + message.text()).toBe(
-        'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
-      );
-      // throw new Error('Unexpected console message: ' + message.text());
+      expect
+        .soft('Unexpected console message: ' + message.text())
+        .toBe(
+          'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
+        );
     }
-    if (message.type() === 'warning') {
-      console.warn(message.text());
-    }
-    if (message.type() === 'error') {
-      console.error('Unexpected console error: ' + message.text());
-    }
+    console.log(`Console ${message.type()}: ${message.text()}`);
   });
 
   // Log all uncaught errors
