@@ -250,9 +250,13 @@ export function getViewportElement(page: Page) {
  * @deprecated
  */
 export function getBlockElementByModel(model: BaseBlockModel) {
+  return getBlockElementByPath(buildPath(model));
+}
+
+export function getBlockElementByPath(path: string[]) {
   const root = getLitRoot();
 
-  return root.view.viewFromPath('block', buildPath(model));
+  return root.view.viewFromPath('block', path);
 }
 
 /**
