@@ -18,9 +18,16 @@ export const formatBlockCommand: Command<
   }
 > = (ctx, next) => {
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
-  if (!blockSelections) return;
+  assertExists(
+    blockSelections,
+    '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before add this command to the pipeline.'
+  );
+
   const root = ctx.root;
-  assertExists(root);
+  assertExists(
+    root,
+    '`root` is required, you need to use `withRoot` command before add this command to the pipeline.'
+  );
 
   if (blockSelections.length === 0) return;
 

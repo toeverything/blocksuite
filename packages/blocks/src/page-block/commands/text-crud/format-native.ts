@@ -19,7 +19,10 @@ export const formatNativeCommand: Command<
   }
 > = (ctx, next) => {
   const { root, styles, mode = 'merge' } = ctx;
-  assertExists(root);
+  assertExists(
+    root,
+    '`root` is required, you need to use `withRoot` command before add this command to the pipeline.'
+  );
 
   let range = ctx.range;
   if (!range) {
