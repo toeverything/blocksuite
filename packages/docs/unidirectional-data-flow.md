@@ -62,7 +62,7 @@ In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated
 
 But the real power lies in the fact that if this block tree is being concurrently edited by multiple people, when user B performs a similar operation, the corresponding update will be encoded by Yjs and distributed by the provider. When User A receives and applies the update from User B, the same state update pipeline as local editing will be triggered. **This makes it unnecessary for the application to make any additional modifications or adaptations for collaboration scenarios, inherently gaining real-time collaboration capabilities**.
 
-## Not only Blocks
+## Not Only Blocks
 
 When we talk about unidirectional data flow in blocksuite. We are not only talking about the block tree structure, but also the entire editor state.
 In fact, the block tree structure is just a part of the editor state. In addition, the editor state also includes:

@@ -1,4 +1,6 @@
-# `block-std` Overview
+# Core Packages
+
+## The `block-std` Package
 
 To help building and reusing block-based editors in BlockSuite, we've created an underlying standard library named `block-std`.
 
@@ -21,3 +23,7 @@ Each part of the data flow contains some modules to make sure the system works c
 - **🚧 Context Manager**: a module to manage context.
 
 We'll introduce them in order in the following sections.
+
+## The `lit` Package
+
+WIP

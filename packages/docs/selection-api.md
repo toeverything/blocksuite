@@ -1,10 +1,8 @@
 # Data Driven Selection
 
-Selection is a very common concept in text editors.
-It's used to represent the current cursor position or the current selected block.
+Selection is a very common concept in structural editors. It's used to represent the current cursor position or the current selected block.
 
-In BlockSuite, we use a data driven approach to represent the selection.
-It follows a unidirectional data flow, which means the selection is always derived from the data.
+In BlockSuite, we use a data driven approach to represent the selection. It follows a unidirectional data flow, which means the selection is always derived from the data.
 
 ## Selection Model
 
@@ -78,15 +76,11 @@ Selection model has two important properties: `type` and `group`.
 The `type` of a selection means which kind of selection it is.
 And the `group` of a selection means the selection's scope.
 
-Some types of selections can share the same group because they have the same scope.
-For example, the `text` selection and the `block` selection can share the `note` group because they are both in the `note` block.
-And you may also have a `cell` and `row` selection in a `table` block, and they can share the `table` group.
+Some types of selections can share the same group because they have the same scope. For example, the `text` selection and the `block` selection can share the `note` group because they are both in the `note` block. And you may also have a `cell` and `row` selection in a `table` block, and they can share the `table` group.
 
 ## Read & Write Selection
 
-You can get the selection manager from `std.selection`.
-With the manager, you can read the selection model from `value`.
-And you can also write the selection model by `set` and `update`.
+You can get the selection manager from `std.selection`. With the manager, you can read the selection model from `value`. And you can also write the selection model by `set` and `update`.
 
 ```ts
 const { selection } = std;
@@ -109,8 +103,7 @@ const { selection } = std;
 const blockSelection = selection.getInstance('block', { path: [0, 1, 2] });
 ```
 
-What if you want to pick some selections by `type` from the current selection model?
-We provide `pick` and `find` methods to help you.
+What if you want to pick some selections by `type` from the current selection model? We provide `pick` and `find` methods to help you.
 
 ```ts
 const { selection } = std;
@@ -119,8 +112,7 @@ const textSelection: Selection = selection.pick('text');
 const blockSelections: Selection[] = selection.find('block');
 ```
 
-You can clear all the selections by call `clear`.
-If you just want to clear a type of selections, you can pass the type as the first argument of `clear` method.
+You can clear all the selections by call `clear`. If you just want to clear a type of selections, you can pass the type as the first argument of `clear` method.
 
 ```ts
 const { selection } = std;
@@ -132,8 +124,7 @@ selection.clear();
 selection.clear('text');
 ```
 
-And we also provide a `setGroup` method to override the selections in a specific group.
-Of course, we also provide a `getGroup` method.
+And we also provide a `setGroup` method to override the selections in a specific group. Of course, we also provide a `getGroup` method.
 
 ```ts
 const { selection } = std;
@@ -155,8 +146,7 @@ selection.slots.changed.on(nextSelection => {
 });
 ```
 
-You can also subscribe to the remote selection changes by using `remoteChanged` slot.
-This is useful when you want to display the selection of other users.
+You can also subscribe to the remote selection changes by using `remoteChanged` slot. This is useful when you want to display the selection of other users.
 
 ```ts
 const { selection } = std;
