@@ -5,18 +5,16 @@ import type { WorkspaceOptions } from '../workspace.js';
 import { addOnFactory } from './shared.js';
 
 export interface BlobAddon {
-  get blobs(): BlobManager;
+  get blob(): BlobManager;
 }
 
 export const blob = addOnFactory<keyof BlobAddon>(
   originalClass =>
     class extends originalClass {
       private readonly _storages: BlobStorage[] = [];
-      private readonly _blobStorage: BlobManager;
+      private readonly _blobsRef = new Map<string, number>();
 
-      get blobs() {
-        return this._blobStorage;
-      }
+      readonly blob: BlobManager;
 
       constructor(storeOptions: WorkspaceOptions) {
         super(storeOptions);
@@ -25,7 +23,7 @@ export const blob = addOnFactory<keyof BlobAddon>(
           storeOptions.blobStorages ?? [createMemoryStorage]
         ).map(fn => fn(storeOptions.id));
 
-        this._blobStorage = {
+        this.blob = {
           get: async id => {
             let found = false;
             let count = 0;
@@ -69,7 +67,36 @@ export const blob = addOnFactory<keyof BlobAddon>(
             );
             return Array.from(keys);
           },
+          gc: async () => {
+            const blobs = await this.blob.list();
+            blobs.forEach(blobId => {
+              const ref = this._blobsRef.get(blobId);
+              if (!ref || ref <= 0) {
+                this.blob.delete(blobId);
+                this._blobsRef.delete(blobId);
+              }
+            });
+          },
+          increaseRef: blobId => {
+            const ref = this._blobsRef.get(blobId) ?? 0;
+            this._blobsRef.set(blobId, ref + 1);
+          },
+          decreaseRef: blobId => {
+            const ref = this._blobsRef.get(blobId) ?? 0;
+            this._blobsRef.set(blobId, Math.max(ref - 1, 0));
+          },
         };
+
+        if (typeof window !== 'undefined') {
+          window.addEventListener('beforeunload', () => {
+            this.blob.gc();
+          });
+        }
+        if (typeof process !== 'undefined') {
+          process.on('exit', () => {
+            this.blob.gc();
+          });
+        }
       }
     }
 );

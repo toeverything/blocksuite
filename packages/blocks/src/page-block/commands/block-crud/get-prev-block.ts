@@ -71,7 +71,10 @@ export const getPrevBlockCommand: Command<
   }
 > = (ctx, next) => {
   const path = ctx.path ?? ctx.currentSelectionPath;
-  assertExists(path);
+  assertExists(
+    path,
+    '`path` is required, you need to pass it in args or ctx before adding this command to the pipeline.'
+  );
 
   const prevBlock = getPrevBlock(ctx.std, path, ctx.filter);
 

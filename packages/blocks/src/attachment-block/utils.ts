@@ -11,7 +11,7 @@ import type {
 import { transformModel } from '../page-block/utils/operations/model.js';
 import type {
   AttachmentBlockModel,
-  AttachmentProps,
+  AttachmentBlockProps,
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
@@ -20,17 +20,19 @@ const DEFAULT_ATTACHMENT_NAME = 'affine-attachment';
 export function cloneAttachmentProperties(
   model: BaseBlockModel<AttachmentBlockModel>
 ) {
-  const clonedProps = {} as AttachmentProps;
+  const clonedProps = {} as AttachmentBlockProps;
   for (const cur in defaultAttachmentProps) {
-    const key = cur as keyof AttachmentProps;
+    const key = cur as keyof AttachmentBlockProps;
     // @ts-expect-error it's safe because we just cloned the props simply
-    clonedProps[key] = model[key] as AttachmentProps[keyof AttachmentProps];
+    clonedProps[key] = model[
+      key
+    ] as AttachmentBlockProps[keyof AttachmentBlockProps];
   }
   return clonedProps;
 }
 
 async function getAttachment(model: AttachmentBlockModel) {
-  const blobManager = model.page.blobs;
+  const blobManager = model.page.blob;
   const sourceId = model.sourceId;
   if (!sourceId) return null;
 
@@ -49,7 +51,7 @@ export async function downloadAttachment(
       'attachment load failed! sourceId:',
       attachmentModel.sourceId,
       'BlobManager:',
-      attachmentModel.page.blobs
+      attachmentModel.page.blob
     );
     return;
   }
@@ -90,7 +92,7 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   const { saveImageData, getAttachmentData } = withTempBlobData();
   saveImageData(sourceId, { width: model.width, height: model.height });
   const attachmentConvertData = getAttachmentData(model.sourceId);
-  const attachmentProp: AttachmentProps = {
+  const attachmentProp: AttachmentBlockProps = {
     sourceId,
     name: DEFAULT_ATTACHMENT_NAME,
     size: blob.size,
@@ -114,7 +116,7 @@ async function uploadFileForAttachment(
     );
   }
   const page = attachmentModel.page;
-  const storage = page.blobs;
+  const storage = page.blob;
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
   // const anonymousFile = new File([file.slice(0, file.size)], 'anonymous', {
@@ -127,7 +129,7 @@ async function uploadFileForAttachment(
     page.updateBlock(attachmentModel, {
       sourceId,
       loadingKey: null,
-    } satisfies Partial<AttachmentProps>);
+    } satisfies Partial<AttachmentBlockProps>);
     return attachmentModel;
   } catch (error) {
     console.error(error);
@@ -138,7 +140,7 @@ async function uploadFileForAttachment(
     }
     page.updateBlock(attachmentModel, {
       loadingKey: null,
-    } satisfies Partial<AttachmentProps>);
+    } satisfies Partial<AttachmentBlockProps>);
     return null;
   }
 }
@@ -162,7 +164,7 @@ export async function appendAttachmentBlock(
   const page = model.page;
   const loadingKey = page.generateBlockId();
   setAttachmentLoading(loadingKey, true);
-  const props: AttachmentProps & { flavour: 'affine:attachment' } = {
+  const props: AttachmentBlockProps & { flavour: 'affine:attachment' } = {
     flavour: 'affine:attachment',
     name: file.name,
     size: file.size,

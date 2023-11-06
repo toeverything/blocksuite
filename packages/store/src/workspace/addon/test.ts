@@ -92,7 +92,7 @@ export const test = addOnFactory<keyof TestAddon>(
                 }
 
                 assertExists(page);
-                const storage = page.blobs;
+                const storage = page.blob;
                 assertExists(storage);
                 props['prop:sourceId'] = (await storage.set(imgBlob)) as never;
               } catch (e) {

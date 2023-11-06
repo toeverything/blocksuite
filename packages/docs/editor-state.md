@@ -31,7 +31,7 @@ type BlockModel = {
 };
 ```
 
-When the document is updated, the corresponding [slot](./handling-events#using-slots) events will be triggered, and the UI components of the blocks should be updated accordingly.
+When the document is updated, the corresponding [slot](./event-api#using-slots) events will be triggered, and the UI components of the blocks should be updated accordingly.
 
 ## Awareness
 
