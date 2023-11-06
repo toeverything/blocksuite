@@ -13,7 +13,7 @@ export const getBlockIndexCommand: Command<
   const path = ctx.path ?? ctx.currentSelectionPath;
   assertExists(
     path,
-    '`path` is required, you need to pass it in args or ctx before add this command to the pipeline.'
+    '`path` is required, you need to pass it in args or ctx before adding this command to the pipeline.'
   );
 
   const parent = ctx.std.view.getParent(path);

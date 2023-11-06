@@ -20,13 +20,13 @@ export const formatBlockCommand: Command<
   const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
   assertExists(
     blockSelections,
-    '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before add this command to the pipeline.'
+    '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before adding this command to the pipeline.'
   );
 
   const root = ctx.root;
   assertExists(
     root,
-    '`root` is required, you need to use `withRoot` command before add this command to the pipeline.'
+    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
   );
 
   if (blockSelections.length === 0) return;

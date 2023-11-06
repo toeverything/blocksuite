@@ -17,7 +17,7 @@ export const getSelectedModelsCommand: Command<
   const { root } = ctx;
   assertExists(
     root,
-    '`root` is required, you need to use `withRoot` command before add this command to the pipeline.'
+    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
   );
 
   const selectionType = ctx.selectionType ?? ['block', 'text', 'image'];

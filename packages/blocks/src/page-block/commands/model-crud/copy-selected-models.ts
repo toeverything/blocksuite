@@ -13,7 +13,7 @@ export const copySelectedModelsCommand: Command<
   const selectedModels = ctx.selectedModels;
   assertExists(
     selectedModels,
-    '`selectedModels` is required, you need to use `getSelectedModels` command before add this command to the pipeline.'
+    '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
   );
 
   const models: BaseBlockModel[] = selectedModels.map(model => model.clone());

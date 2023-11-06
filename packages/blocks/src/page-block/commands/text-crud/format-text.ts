@@ -21,13 +21,13 @@ export const formatTextCommand: Command<
   const { root, styles, mode = 'merge' } = ctx;
   assertExists(
     root,
-    '`root` is required, you need to use `withRoot` command before add this command to the pipeline.'
+    '`root` is required, you need to use `withRoot` command before adding this command to the pipeline.'
   );
 
   const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
   assertExists(
     textSelection,
-    '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before add this command to the pipeline.'
+    '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
   const selectedElements = getSelectedContentBlockElements(root, [
