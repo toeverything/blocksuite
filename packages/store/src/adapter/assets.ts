@@ -5,6 +5,7 @@ import { AssetsManager } from '../transformer/assets.js';
 
 export class MemoryBlobManager {
   private readonly _map = new Map<string, Blob>();
+  private readonly _blobsRef = new Map<string, number>();
 
   async get(key: string) {
     return this._map.get(key) ?? null;
@@ -23,6 +24,27 @@ export class MemoryBlobManager {
   async list() {
     return Array.from(this._map.keys());
   }
+
+  async gc() {
+    const blobs = await this.list();
+    blobs.forEach(blobId => {
+      const ref = this._blobsRef.get(blobId);
+      if (!ref || ref <= 0) {
+        this.delete(blobId);
+        this._blobsRef.delete(blobId);
+      }
+    });
+  }
+
+  increaseRef(blobId: string) {
+    const ref = this._blobsRef.get(blobId) ?? 0;
+    this._blobsRef.set(blobId, ref + 1);
+  }
+
+  decreaseRef(blobId: string) {
+    const ref = this._blobsRef.get(blobId) ?? 0;
+    this._blobsRef.set(blobId, Math.max(ref - 1, 0));
+  }
 }
 
 export function getAssetName(assets: Map<string, Blob>, blobId: string) {
@@ -40,6 +62,6 @@ export function getAssetName(assets: Map<string, Blob>, blobId: string) {
 
 export class AdapterAssetsManager extends AssetsManager {
   constructor() {
-    super({ blobs: new MemoryBlobManager() });
+    super({ blob: new MemoryBlobManager() });
   }
 }

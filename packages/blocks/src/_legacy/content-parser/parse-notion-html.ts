@@ -241,7 +241,7 @@ export class NotionHtmlParser extends BaseParser {
           },
         ];
       } else {
-        const storage = this._page.blobs;
+        const storage = this._page.blob;
         assertExists(storage);
         const id = await storage.set(imgBlob);
         return [
@@ -350,7 +350,7 @@ export class NotionHtmlParser extends BaseParser {
         },
       ];
     } else {
-      const storage = this._page.blobs;
+      const storage = this._page.blob;
       assertExists(storage);
       const id = await storage.set(fileBlob);
       const suffix = fileUrl.split('.').pop();

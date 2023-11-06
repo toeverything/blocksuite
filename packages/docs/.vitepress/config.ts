@@ -39,33 +39,36 @@ export default defineConfig({
         items: [
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Workspaces and Pages', link: '/workspaces-and-pages' },
-          { text: 'Flavoured Blocks', link: '/flavoured-blocks' },
-          { text: 'Handling Events', link: '/handling-events' },
+          { text: 'Block Basics', link: '/block-basics' },
+        ],
+      },
+      {
+        text: 'BlockSuite Architecture',
+        items: [
+          { text: 'Core Packages', link: '/core-packages' },
+          { text: 'Modeling Editor State', link: '/editor-state' },
           {
-            text: 'Attaching Editor',
-            link: '/attaching-editor',
+            text: 'Unidirectional Data Flow',
+            link: '/unidirectional-data-flow',
           },
           { text: 'Data Persistence', link: '/data-persistence' },
         ],
       },
       {
-        text: 'BlockSuite Fundamentals',
+        text: 'API Walkthrough',
         items: [
           {
-            text: 'Unidirectional Data Flow',
-            link: '/unidirectional-data-flow',
-          },
-          { text: 'Modeling Editor State', link: '/editor-state' },
-          {
-            text: 'The <code>block-std</code> Library',
+            text: 'Block Spec APIs',
+            link: '/block-spec-apis',
             items: [
-              { text: 'Overview', link: '/block-std-overview' },
               { text: 'Block Schema', link: '/block-schema' },
-              { text: 'Block Rendering', link: '/block-rendering' },
               { text: 'Block Service', link: '/block-service' },
+              { text: 'Block View', link: '/block-view' },
               { text: 'Block Widgets', link: '/block-widgets' },
             ],
           },
+          { text: 'Selection API', link: '/selection-api' },
+          { text: 'Event API', link: '/event-api' },
         ],
       },
       {

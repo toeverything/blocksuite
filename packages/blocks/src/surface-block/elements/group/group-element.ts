@@ -27,6 +27,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   private _titleWidth = 0;
   private _padding = [0, 0];
   private _radius = 0;
+  protected override _connectable = false;
 
   override containedByBounds(bound: Bound): boolean {
     return bound.contains(Bound.deserialize(this.xywh));

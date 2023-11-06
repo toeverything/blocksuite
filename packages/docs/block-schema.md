@@ -20,7 +20,7 @@ export const MyBlockSchema = defineBlockSchema({
 });
 ```
 
-## Flavour & Props
+## Flavour and Props
 
 Key takeaways for this part:
 
