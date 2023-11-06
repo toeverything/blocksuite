@@ -5,18 +5,14 @@ export const deleteSelectedModelsCommand: Command<'selectedModels'> = (
   ctx,
   next
 ) => {
-  try {
-    const models = ctx.selectedModels;
-    assertExists(models);
+  const models = ctx.selectedModels;
+  assertExists(models);
 
-    models.forEach(model => {
-      ctx.std.page.deleteBlock(model);
-    });
+  models.forEach(model => {
+    ctx.std.page.deleteBlock(model);
+  });
 
-    return next();
-  } catch {
-    return;
-  }
+  return next();
 };
 
 declare global {
