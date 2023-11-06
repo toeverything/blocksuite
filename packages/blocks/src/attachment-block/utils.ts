@@ -196,6 +196,5 @@ export function isAttachmentLoading(loadingKey: string) {
 }
 
 export async function hasBlob(storage: BlobManager, sourceId: string) {
-  const list = await storage.list();
-  return list.some(item => item === sourceId);
+  return !!(await storage.get(sourceId));
 }
