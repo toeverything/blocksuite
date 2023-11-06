@@ -77,11 +77,11 @@ export const blob = addOnFactory<keyof BlobAddon>(
               }
             });
           },
-          increaseRef: async blobId => {
+          increaseRef: blobId => {
             const ref = this._blobsRef.get(blobId) ?? 0;
             this._blobsRef.set(blobId, ref + 1);
           },
-          decreaseRef: async blobId => {
+          decreaseRef: blobId => {
             const ref = this._blobsRef.get(blobId) ?? 0;
             this._blobsRef.set(blobId, Math.max(ref - 1, 0));
           },

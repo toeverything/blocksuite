@@ -34,12 +34,12 @@ class MemoryBlobManager {
     });
   }
 
-  async increaseRef(blobId: string) {
+  increaseRef(blobId: string) {
     const ref = this._blobsRef.get(blobId) ?? 0;
     this._blobsRef.set(blobId, ref + 1);
   }
 
-  async decreaseRef(blobId: string) {
+  decreaseRef(blobId: string) {
     const ref = this._blobsRef.get(blobId) ?? 0;
     this._blobsRef.set(blobId, Math.max(ref - 1, 0));
   }

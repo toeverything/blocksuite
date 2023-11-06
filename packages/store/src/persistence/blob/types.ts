@@ -12,8 +12,8 @@ export interface BlobManager {
   list: () => Promise<string[]>;
 
   gc: () => Promise<void>;
-  increaseRef: (blobId: string) => Promise<void>;
-  decreaseRef: (blobId: string) => Promise<void>;
+  increaseRef: (blobId: string) => void;
+  decreaseRef: (blobId: string) => void;
 }
 
 export interface BlobStorage {
