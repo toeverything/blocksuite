@@ -4,7 +4,6 @@ import '../declare-test-window.js';
 import type { ConsoleMessage, Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-import type { ClipboardItem } from '../../../packages/blocks/src/_legacy/clipboard/clipboard-item.js';
 import {
   type CssVariableName,
   type DatabaseBlockModel,
@@ -1165,6 +1164,16 @@ export async function export2markdown(page: Page) {
   return promiseResult;
 }
 
+class ClipboardItem {
+  constructor(
+    public readonly mimeType: string,
+    public readonly data: string
+  ) {}
+
+  hasData() {
+    return this.data !== null && this.data !== undefined;
+  }
+}
 export async function getCopyClipItemsInPage(page: Page) {
   const clipItems: ClipboardItem[] = await page.evaluate(() => {
     return document

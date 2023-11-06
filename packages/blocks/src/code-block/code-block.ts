@@ -39,6 +39,7 @@ import { getStandardLanguage } from './utils/code-languages.js';
 import { getCodeLineRenderer } from './utils/code-line-renderer.js';
 import {
   DARK_THEME,
+  FALLBACK_LANG,
   LIGHT_THEME,
   PLAIN_TEXT_REGISTRATION,
 } from './utils/consts.js';
@@ -474,6 +475,14 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
     this._wrap = container.classList.toggle('wrap');
   }
 
+  private _setLang(model: CodeBlockModel, lang: string | null) {
+    const standardLang = lang ? getStandardLanguage(lang) : null;
+    const langName = standardLang?.id ?? FALLBACK_LANG;
+    model.page.updateBlock(model, {
+      language: langName,
+    });
+  }
+
   private _onClickLangBtn() {
     if (this.readonly) return;
     if (this._langListAbortController) return;
@@ -494,7 +503,7 @@ export class CodeBlockComponent extends BlockElement<CodeBlockModel> {
         const langList = new LangList();
         langList.currentLanguageId = this._perviousLanguage.id as Lang;
         langList.onSelectLanguage = (lang: ILanguageRegistration | null) => {
-          getService('affine:code').setLang(this.model, lang ? lang.id : null);
+          this._setLang(this.model, lang?.id ?? null);
           abortController.abort();
         };
         langList.onClose = () => abortController.abort();
