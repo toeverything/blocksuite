@@ -311,9 +311,9 @@ export class WorkspaceMeta {
   };
 
   get properties(): PagesPropertiesMeta {
-    let meta = this._proxy.properties;
+    const meta = this._proxy.properties;
     if (!meta) {
-      this._proxy.properties = meta = {
+      return {
         tags: {
           options: [],
         },

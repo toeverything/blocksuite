@@ -65,11 +65,6 @@ export { assertExists };
 
 export const defaultStore: SerializedStore = {
   meta: {
-    properties: {
-      tags: {
-        options: [],
-      },
-    },
     pages: [
       {
         id: 'page:home',
