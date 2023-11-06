@@ -298,9 +298,9 @@ export class EditorContainer
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
-      saveViewportToSession({
-        pageId: this.page.id,
-        center: viewport.center,
+      saveViewportToSession(this.page.id, {
+        x: viewport.center.x,
+        y: viewport.center.y,
         zoom: viewport.zoom,
       });
     }
