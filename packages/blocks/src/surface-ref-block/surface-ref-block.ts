@@ -3,6 +3,7 @@ import './surface-ref-portal';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -19,6 +20,7 @@ import {
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { stopPropagation } from '../_common/utils/event.js';
+import { matchFlavours } from '../_common/utils/model.js';
 import type {
   AbstractEditor,
   EdgelessElement,
@@ -280,6 +282,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
+    this._initHotkey();
     this._initSurfaceModel();
     this._initReferencedModel();
     this._initSelection();
@@ -294,6 +297,57 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     if (this._surfaceRenderer.canvas.isConnected || !this.container) return;
 
     this._surfaceRenderer.attach(this.container);
+  }
+
+  private _initHotkey() {
+    const selection = this.root.selection;
+    const addParagraph = () => {
+      if (!this.page.getParent(this.model)) return;
+
+      const parent = this.page.getParent(this.model) as BaseBlockModel;
+      const index = parent.children.indexOf(this.model);
+      let addedBlockId: string;
+      let path: string[];
+
+      if (matchFlavours(parent, ['affine:page'])) {
+        const noteId = this.page.addBlock('affine:note', {}, parent, index + 1);
+        addedBlockId = this.page.addBlock('affine:paragraph', {}, noteId, 0);
+        path = this.parentPath.concat([noteId, addedBlockId]);
+      } else if (matchFlavours(parent, ['affine:note'])) {
+        addedBlockId = this.page.addBlock(
+          'affine:paragraph',
+          {},
+          parent,
+          index + 1
+        );
+        path = this.parentPath.concat([addedBlockId]);
+      }
+
+      requestAnimationFrame(() => {
+        selection.update(selList => {
+          return selList
+            .filter(sel => !sel.is('block'))
+            .concat(
+              selection.getInstance('text', {
+                from: {
+                  path,
+                  index: 0,
+                  length: 0,
+                },
+                to: null,
+              })
+            );
+        });
+      });
+    };
+
+    this.bindHotKey({
+      Enter: () => {
+        if (!this._focused) return;
+        addParagraph();
+        return true;
+      },
+    });
   }
 
   private _initSurfaceRenderer() {
