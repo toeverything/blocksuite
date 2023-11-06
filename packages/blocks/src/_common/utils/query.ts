@@ -134,10 +134,9 @@ export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
 }
 
 /**
- * This function is used to build its "normal" block path.
- * If this function does not meet your needs, you may need to build your own path manually
- * @param model
- * @returns
+ * This function is used to build model's "normal" block path.
+ * If this function does not meet your needs, you may need to build path manually to satisfy your needs.
+ * You should not modify this function.
  */
 export function buildPath(model: BaseBlockModel | null): string[] {
   const path: string[] = [];
