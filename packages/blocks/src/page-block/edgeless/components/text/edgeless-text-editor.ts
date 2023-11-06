@@ -421,7 +421,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       style=${styleMap({
         textAlign,
         fontFamily,
-        minWidth: `${rect.width}px`,
+        minWidth: hasMaxWidth ? `${rect.width}px` : 'none',
         maxWidth: hasMaxWidth ? `${w}px` : 'none',
         fontSize: `${fontSize}px`,
         fontWeight: bold ? 'bold' : 'normal',
