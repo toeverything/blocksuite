@@ -13,7 +13,7 @@ import {
   dragEmbedResizeByTopLeft,
   dragEmbedResizeByTopRight,
   enterPlaygroundRoom,
-  expectConsoleStartsWith,
+  expectConsoleMessage,
   initImageState,
   insertThreeLevelLists,
   moveToImage,
@@ -262,16 +262,13 @@ async function initMockImage(page: Page) {
 }
 
 test('image loading but failed', async ({ page }) => {
-  expectConsoleStartsWith(
-    page,
-    'Error: Failed to fetch blob _e2e_test_image_id_'
-  );
-  expectConsoleStartsWith(
+  expectConsoleMessage(page, 'Error: Failed to fetch blob _e2e_test_image_id_');
+  expectConsoleMessage(
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
   );
-  expectConsoleStartsWith(page, 'Cannot find blob, retrying', 'warning');
-  expectConsoleStartsWith(page, 'Error: Cannot find blob');
+  expectConsoleMessage(page, 'Cannot find blob, retrying', 'warning');
+  expectConsoleMessage(page, 'Error: Cannot find blob');
   const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
 
   const timeout = 2000;
@@ -310,15 +307,12 @@ test('image loading but failed', async ({ page }) => {
 });
 
 test('image loading but success', async ({ page }) => {
-  expectConsoleStartsWith(
-    page,
-    'Error: Failed to fetch blob _e2e_test_image_id_'
-  );
-  expectConsoleStartsWith(
+  expectConsoleMessage(page, 'Error: Failed to fetch blob _e2e_test_image_id_');
+  expectConsoleMessage(
     page,
     'Failed to load resource: the server responded with a status of 404 (Not Found)'
   );
-  expectConsoleStartsWith(page, 'Cannot find blob, retrying', 'warning');
+  expectConsoleMessage(page, 'Cannot find blob, retrying', 'warning');
   const room = await enterPlaygroundRoom(page, { blobStorage: ['mock'] });
   const imageBuffer = await readFile(
     fileURLToPath(new URL('./fixtures/smile.png', import.meta.url))

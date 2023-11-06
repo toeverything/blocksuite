@@ -161,9 +161,19 @@ function isIgnoredLog(
   return '__ignore' in message && !!message.__ignore;
 }
 
-export function expectConsoleStartsWith(
+/**
+ * Expect console message to be called in the test.
+ *
+ * This function **should** be called before the `enterPlaygroundRoom` function!
+ *
+ * ```ts
+ * expectConsoleMessage(page, 'Failed to load resource'); // Default type is 'error'
+ * expectConsoleMessage(page, '[vite] connected.', 'warning'); // Specify type
+ * ```
+ */
+export function expectConsoleMessage(
   page: Page,
-  log: string,
+  logPrefixOrRegex: string | RegExp,
   type:
     | 'log'
     | 'debug'
@@ -196,7 +206,12 @@ export function expectConsoleStartsWith(
       ignoredLog(message);
       return;
     }
-    if (message.type() === type && message.text().startsWith(log)) {
+    const sameType = message.type() === type;
+    const textMatch =
+      logPrefixOrRegex instanceof RegExp
+        ? logPrefixOrRegex.test(message.text())
+        : message.text().startsWith(logPrefixOrRegex);
+    if (sameType && textMatch) {
       ignoredLog(message);
     }
   });
@@ -230,7 +245,7 @@ export async function enterPlaygroundRoom(
       expect
         .soft('Unexpected console message: ' + message.text())
         .toBe(
-          'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
+          'Please remove the "console.log" or declare `expectConsoleMessage` before `enterPlaygroundRoom`. It is advised not to output logs in a production environment.'
         );
     }
     console.log(`Console ${message.type()}: ${message.text()}`);
