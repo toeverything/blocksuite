@@ -472,7 +472,11 @@ export class ContentParser {
       ) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this.edgelessToCanvas(edgeless.surface.viewport, bound);
+      return await this.edgelessToCanvas(
+        edgeless.surface.viewport,
+        bound,
+        edgeless
+      );
     }
   }
 
