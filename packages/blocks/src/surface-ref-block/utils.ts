@@ -2,6 +2,7 @@ import type { Page } from '@blocksuite/store';
 import { html } from 'lit';
 
 import { getBlockElementByModel } from '../_common/utils/index.js';
+import { deserializeXYWH, serializeXYWH } from '../index.js';
 import type { NoteBlockModel, SurfaceBlockModel } from '../models.js';
 import { DEFAULT_NOTE_HEIGHT } from '../page-block/edgeless/utils/consts.js';
 
@@ -28,6 +29,30 @@ export function getHeightOfNoteChildern(
   }
 
   return last.bottom - first.top;
+}
+
+export function splitNote(noteModel: NoteBlockModel, idx: number) {
+  const { page } = noteModel;
+  const [x, y, w] = deserializeXYWH(noteModel.xywh);
+  const slicedBlocks = noteModel.children.slice(idx + 1);
+  const slicedNoteProps = {
+    flavour: 'affine:note',
+    background: noteModel.background,
+    xywh: serializeXYWH(
+      x,
+      y + getHeightOfNoteChildern(noteModel, 0, idx),
+      w,
+      DEFAULT_NOTE_HEIGHT
+    ),
+  };
+
+  const [slicedNoteId] = page.addSiblingBlocks(noteModel, [slicedNoteProps]);
+  page.moveBlocks(
+    slicedBlocks,
+    page.getBlockById(slicedNoteId) as NoteBlockModel
+  );
+
+  return page.getBlockById(slicedNoteId);
 }
 
 export const noContentPlaceholder = html`

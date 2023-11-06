@@ -41,25 +41,18 @@ import type { ImageBlockProps } from '../../../image-block/image-model.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
-import { DEFAULT_NOTE_HEIGHT } from '../../../page-block/edgeless/utils/consts.js';
 import {
   getSelectedContentBlockElements,
   onModelTextUpdated,
 } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
-import {
-  deserializeXYWH,
-  PhasorElementType,
-  serializeXYWH,
-} from '../../../surface-block/index.js';
-import type { SurfaceRefBlockModel } from '../../../surface-ref-block/index.js';
-import { getHeightOfNoteChildern } from '../../../surface-ref-block/utils.js';
+import { PhasorElementType } from '../../../surface-block/index.js';
+import { splitNote } from '../../../surface-ref-block/utils.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
 import { textFormatConfigs } from '../../configs/text-format/config.js';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '../../consts.js';
 import type { AffineLinkedPageWidget } from '../linked-page/index.js';
 import {
   formatDate,
@@ -439,44 +432,24 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           action: async ({ pageElement, model }) => {
             const { page } = pageElement;
             const noteModel = page.getParent(model) as NoteBlockModel;
-            const [x, y, w] = deserializeXYWH(noteModel.xywh);
             const sliceIdx = noteModel.children.indexOf(model);
-            const slicedBlocks = noteModel.children.slice(sliceIdx + 1);
-            const insertAtMiddle = sliceIdx !== 0 && slicedBlocks.length > 0;
-
+            const insertAtMiddle =
+              sliceIdx !== 0 && sliceIdx < noteModel.children.length - 1;
             const surfaceRefProps = {
               flavour: 'affine:surface-ref',
               reference: frameModel.id,
+              refFlavour: 'affine:frame',
             };
-            const [surfaceRefBlockId] = page.addSiblingBlocks(
+
+            if (insertAtMiddle) {
+              splitNote(noteModel, sliceIdx);
+            }
+
+            page.addSiblingBlocks(
               noteModel,
               [surfaceRefProps],
               sliceIdx === 0 ? 'before' : 'after'
             );
-
-            if (insertAtMiddle) {
-              const slicedNoteProps = {
-                flavour: 'affine:note',
-                background: noteModel.background,
-                xywh: serializeXYWH(
-                  x,
-                  y +
-                    getHeightOfNoteChildern(noteModel, 0, sliceIdx) +
-                    EDGELESS_BLOCK_CHILD_PADDING,
-                  w,
-                  DEFAULT_NOTE_HEIGHT
-                ),
-              };
-
-              const [slicedNoteId] = page.addSiblingBlocks(
-                page.getBlockById(surfaceRefBlockId) as SurfaceRefBlockModel,
-                [slicedNoteProps]
-              );
-              page.moveBlocks(
-                slicedBlocks,
-                page.getBlockById(slicedNoteId) as NoteBlockModel
-              );
-            }
 
             if (
               matchFlavours(model, ['affine:paragraph']) &&
@@ -515,45 +488,24 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             action: async ({ pageElement, model }) => {
               const { page } = pageElement;
               const noteModel = page.getParent(model) as NoteBlockModel;
-              const [x, y, w] = deserializeXYWH(noteModel.xywh);
               const sliceIdx = noteModel.children.indexOf(model);
-              const slicedBlocks = noteModel.children.slice(sliceIdx + 1);
-              const insertAtMiddle = sliceIdx !== 0 && slicedBlocks.length > 0;
-
+              const insertAtMiddle =
+                sliceIdx !== 0 && sliceIdx < noteModel.children.length - 1;
               const surfaceRefProps = {
                 flavour: 'affine:surface-ref',
                 reference: element.get('id'),
                 refFlavour: 'group',
               };
-              const [surfaceRefBlockId] = page.addSiblingBlocks(
+
+              if (insertAtMiddle) {
+                splitNote(noteModel, sliceIdx);
+              }
+
+              page.addSiblingBlocks(
                 noteModel,
                 [surfaceRefProps],
                 sliceIdx === 0 ? 'before' : 'after'
               );
-
-              if (insertAtMiddle) {
-                const slicedNoteProps = {
-                  flavour: 'affine:note',
-                  background: noteModel.background,
-                  xywh: serializeXYWH(
-                    x,
-                    y +
-                      getHeightOfNoteChildern(noteModel, 0, sliceIdx) +
-                      EDGELESS_BLOCK_CHILD_PADDING,
-                    w,
-                    DEFAULT_NOTE_HEIGHT
-                  ),
-                };
-
-                const [slicedNoteId] = page.addSiblingBlocks(
-                  page.getBlockById(surfaceRefBlockId) as SurfaceRefBlockModel,
-                  [slicedNoteProps]
-                );
-                page.moveBlocks(
-                  slicedBlocks,
-                  page.getBlockById(slicedNoteId) as NoteBlockModel
-                );
-              }
 
               if (
                 matchFlavours(model, ['affine:paragraph']) &&
