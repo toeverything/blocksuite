@@ -86,7 +86,12 @@ export class AffineSlashMenuWidget extends WidgetElement {
         '、',
       ];
 
-      if (event.key === 'Process' && event.code === 'Slash') {
+      if (
+        event.key === 'Process' &&
+        event.code === 'Slash' &&
+        // See https://github.com/toeverything/blocksuite/issues/5197
+        !event.shiftKey
+      ) {
         // Ad-hoc for https://github.com/toeverything/blocksuite/issues/3485
         // This key can be triggered by pressing the slash key while using CJK IME in Windows.
         //
