@@ -77,13 +77,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       type: 'root',
       children: [],
     };
-    const { ast, assetsIds } = await this.traverseSnapshot(
+    const { ast, assetsIds } = await this._traverseSnapshot(
       snapshot,
       root,
       assets
     );
     return {
-      file: this.astToMardown(ast),
+      file: this._astToMardown(ast),
       assetsIds,
     };
   }
@@ -99,13 +99,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         type: 'root',
         children: [],
       };
-      const { ast, assetsIds } = await this.traverseSnapshot(
+      const { ast, assetsIds } = await this._traverseSnapshot(
         contentSlice,
         root,
         assets
       );
       sliceAssetsIds.push(...assetsIds);
-      buffer.write(this.astToMardown(ast));
+      buffer.write(this._astToMardown(ast));
       buffer.write('\n\n');
     }
     const markdown = buffer.toString();
@@ -118,7 +118,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toPageSnapshot(
     payload: ToPageSnapshotPayload<Markdown>
   ): Promise<PageSnapshot> {
-    const markdownAst = this.markdownToAst(payload.file);
+    const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
       id: nanoid('block'),
@@ -134,7 +134,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
         createDate: +new Date(),
         tags: [],
       },
-      blocks: await this.tranverseMarkdown(
+      blocks: await this._traverseMarkdown(
         markdownAst,
         blockSnapshotRoot as BlockSnapshot,
         payload.assets
@@ -145,7 +145,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toBlockSnapshot(
     payload: ToBlockSnapshotPayload<Markdown>
   ): Promise<BlockSnapshot> {
-    const markdownAst = this.markdownToAst(payload.file);
+    const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
       id: nanoid('block'),
@@ -153,7 +153,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       props: {},
       children: [],
     };
-    return this.tranverseMarkdown(
+    return this._traverseMarkdown(
       markdownAst,
       blockSnapshotRoot as BlockSnapshot,
       payload.assets
@@ -163,7 +163,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
   async toSliceSnapshot(
     payload: MarkdownToSliceSnapshotPayload
   ): Promise<SliceSnapshot> {
-    const markdownAst = this.markdownToAst(payload.file);
+    const markdownAst = this._markdownToAst(payload.file);
     const blockSnapshotRoot = {
       type: 'block',
       id: nanoid('block'),
@@ -174,7 +174,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return {
       type: 'slice',
       content: [
-        await this.tranverseMarkdown(
+        await this._traverseMarkdown(
           markdownAst,
           blockSnapshotRoot as BlockSnapshot,
           payload.assets
@@ -188,7 +188,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     };
   }
 
-  private traverseSnapshot = async (
+  private _traverseSnapshot = async (
     snapshot: BlockSnapshot,
     markdown: MarkdownAST,
     assets?: AdapterAssetsManager
@@ -235,7 +235,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   {
                     type: 'heading',
                     depth: parseInt(o.node.props.type[1]) as Heading['depth'],
-                    children: this.deltaToMdAST(text.delta, paragraphDepth),
+                    children: this._deltaToMdAST(text.delta, paragraphDepth),
                   },
                   'children'
                 )
@@ -247,7 +247,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 .openNode(
                   {
                     type: 'paragraph',
-                    children: this.deltaToMdAST(text.delta, paragraphDepth),
+                    children: this._deltaToMdAST(text.delta, paragraphDepth),
                   },
                   'children'
                 )
@@ -266,7 +266,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                 .openNode(
                   {
                     type: 'paragraph',
-                    children: this.deltaToMdAST(text.delta),
+                    children: this._deltaToMdAST(text.delta),
                   },
                   'children'
                 )
@@ -309,7 +309,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               .openNode(
                 {
                   type: 'paragraph',
-                  children: this.deltaToMdAST(text.delta),
+                  children: this._deltaToMdAST(text.delta),
                 },
                 'children'
               )
@@ -339,7 +339,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               .openNode(
                 {
                   type: 'paragraph',
-                  children: this.deltaToMdAST(text.delta),
+                  children: this._deltaToMdAST(text.delta),
                 },
                 'children'
               )
@@ -419,7 +419,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     };
   };
 
-  private tranverseMarkdown = (
+  private _traverseMarkdown = (
     markdown: MarkdownAST,
     snapshot: BlockSnapshot,
     assets?: AdapterAssetsManager
@@ -467,7 +467,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   type: 'text',
                   text: {
                     '$blocksuite:internal:text$': true,
-                    delta: this.mdastToDelta(o.node),
+                    delta: this._mdastToDelta(o.node),
                   },
                 },
                 children: [],
@@ -488,7 +488,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   type: `h${o.node.depth}`,
                   text: {
                     '$blocksuite:internal:text$': true,
-                    delta: this.mdastToDelta(o.node),
+                    delta: this._mdastToDelta(o.node),
                   },
                 },
                 children: [],
@@ -510,7 +510,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   text: {
                     '$blocksuite:internal:text$': true,
                     delta: o.node.children.map(child =>
-                      this.mdastToDelta(child)
+                      this._mdastToDelta(child)
                     ),
                   },
                 },
@@ -541,7 +541,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   delta:
                     o.node.children[0] &&
                     o.node.children[0].type === 'paragraph'
-                      ? this.mdastToDelta(o.node.children[0])
+                      ? this._mdastToDelta(o.node.children[0])
                       : [],
                 },
                 checked: o.node.checked ?? false,
@@ -695,7 +695,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               props: {
                 text: {
                   '$blocksuite:internal:text$': true,
-                  delta: this.mdastToDelta(o.node.children[0]),
+                  delta: this._mdastToDelta(o.node.children[0]),
                 },
                 type: 'text',
               },
@@ -722,15 +722,15 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     return walker.walk(markdown, snapshot);
   };
 
-  private astToMardown(ast: Root) {
+  private _astToMardown(ast: Root) {
     return unified().use(remarkGfm).use(remarkStringify).stringify(ast);
   }
 
-  private markdownToAst(markdown: Markdown) {
+  private _markdownToAst(markdown: Markdown) {
     return unified().use(remarkParse).use(remarkGfm).parse(markdown);
   }
 
-  private deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
+  private _deltaToMdAST(deltas: DeltaInsert[], depth = 0) {
     if (depth > 0) {
       deltas.unshift({ insert: ' '.repeat(4).repeat(depth) });
     }
@@ -776,7 +776,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
     });
   }
 
-  private mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
+  private _mdastToDelta(ast: MarkdownAST): DeltaInsert[] {
     switch (ast.type) {
       case 'text': {
         return [{ insert: ast.value }];
@@ -786,7 +786,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       case 'strong': {
         return ast.children.flatMap(child =>
-          this.mdastToDelta(child).map(delta => {
+          this._mdastToDelta(child).map(delta => {
             delta.attributes = { ...delta.attributes, bold: true };
             return delta;
           })
@@ -794,7 +794,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       case 'emphasis': {
         return ast.children.flatMap(child =>
-          this.mdastToDelta(child).map(delta => {
+          this._mdastToDelta(child).map(delta => {
             delta.attributes = { ...delta.attributes, italic: true };
             return delta;
           })
@@ -802,7 +802,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       case 'delete': {
         return ast.children.flatMap(child =>
-          this.mdastToDelta(child).map(delta => {
+          this._mdastToDelta(child).map(delta => {
             delta.attributes = { ...delta.attributes, strike: true };
             return delta;
           })
@@ -810,7 +810,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
       case 'link': {
         return ast.children.flatMap(child =>
-          this.mdastToDelta(child).map(delta => {
+          this._mdastToDelta(child).map(delta => {
             delta.attributes = { ...delta.attributes, link: ast.url };
             return delta;
           })
@@ -821,7 +821,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
       }
     }
     return 'children' in ast
-      ? ast.children.flatMap(child => this.mdastToDelta(child))
+      ? ast.children.flatMap(child => this._mdastToDelta(child))
       : [];
   }
 }
