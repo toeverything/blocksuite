@@ -25,18 +25,12 @@ import {
   Rect,
 } from '../../../_common/utils/index.js';
 import type { SurfaceRefBlockModel } from '../../../index.js';
-import type { NoteBlockModel } from '../../../models.js';
 import { DocPageBlockComponent } from '../../../page-block/doc/doc-page-block.js';
 import { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';
 import {
   getNotesMergeInfo,
-  mergeableWithNext,
-  mergeableWithPrevios,
-  mergeNext,
-  mergeNote,
   mergeNotes,
-  mergePreviouse,
   splitNotesAtRefBlock,
 } from '../../../surface-ref-block/utils.js';
 import { DragPreview } from './components/drag-preview.js';
