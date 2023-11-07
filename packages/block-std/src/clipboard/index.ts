@@ -52,7 +52,9 @@ export class Clipboard {
     assertExists(adapterItem);
     const { adapter } = adapterItem;
     const snapshot = await job.sliceToSnapshot(slice);
-    return adapter.fromSliceSnapshot({ snapshot, assets: job.assetsManager });
+    return (
+      await adapter.fromSliceSnapshot({ snapshot, assets: job.assetsManager })
+    ).file;
   }
 
   private _getSnapshotByPriority = async (

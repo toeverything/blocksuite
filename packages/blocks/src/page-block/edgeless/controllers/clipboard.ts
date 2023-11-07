@@ -9,7 +9,7 @@ import type { ReactiveController } from 'lit';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  getBlockElementById,
+  getBlockElementByModel,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -171,7 +171,7 @@ export class EdgelessClipboardController implements ReactiveController {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image')) {
-          const sourceId = await this.page.blobs.set(file);
+          const sourceId = await this.page.blob.set(file);
           res.push({ file, sourceId });
         }
       }
@@ -643,7 +643,7 @@ export class EdgelessClipboardController implements ReactiveController {
 
     const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
+      const blockElement = getBlockElementByModel(nodeElement)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,

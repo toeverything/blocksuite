@@ -16,7 +16,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
       if (blobMap.has(blobId)) {
         imageSrc = blobMap.get(blobId) ?? '';
       } else {
-        const blob = await block.page.blobs.get(blobId);
+        const blob = await block.page.blob.get(blobId);
         if (blob) {
           const blobType = await this.getBlobType(blob);
           imageSrc = `images/${blobId}.${blobType.split('/')[1]}`;
@@ -45,7 +45,7 @@ export class ImageBlockService extends BaseService<ImageBlockModel> {
       if (blobMap.has(blobId)) {
         imageSrc = blobMap.get(blobId) ?? '';
       } else {
-        const blob = await block.page.blobs.get(blobId);
+        const blob = await block.page.blob.get(blobId);
         if (blob) {
           const blobType = await this.getBlobType(blob);
           imageSrc = `images/${blobId}.${blobType.split('/')[1]}`;

@@ -35,10 +35,17 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       const editiableElements = Array.from<HTMLDivElement>(
         this.querySelectorAll('[contenteditable]')
       );
+      const blockElements = Array.from(
+        this.querySelectorAll(`[data-block-id]`)
+      );
 
       editiableElements.forEach(element => {
         if (element.contentEditable === 'true')
           element.contentEditable = 'false';
+      });
+
+      blockElements.forEach(element => {
+        element.setAttribute('data-queryable', 'false');
       });
     }, 500);
   }

@@ -11,7 +11,11 @@ export const copySelectedModelsCommand: Command<
   { event: ClipboardEvent }
 > = (ctx, next) => {
   const selectedModels = ctx.selectedModels;
-  assertExists(selectedModels);
+  assertExists(
+    selectedModels,
+    '`selectedModels` is required, you need to use `getSelectedModels` command before adding this command to the pipeline.'
+  );
+
   const models: BaseBlockModel[] = selectedModels.map(model => model.clone());
   const traverse = (model: BaseBlockModel) => {
     const isDatabase = matchFlavours(model, ['affine:database']);

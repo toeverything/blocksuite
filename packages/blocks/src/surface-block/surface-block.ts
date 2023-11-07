@@ -557,7 +557,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       edgeless.slots.elementSizeUpdated.on(id => {
         const element = this.pickById(id);
         assertExists(element);
-        if (element instanceof BrushElement) return;
+        if (
+          element instanceof BrushElement ||
+          edgeless.selectionManager.editing
+        )
+          return;
         this.fitElementToViewport(element);
       })
     );
@@ -596,7 +600,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const models = this.sortedBlocks;
     for (let i = models.length - 1; i >= 0; i--) {
       const model = models[i];
-      if (model.hitTest(point[0], point[1], {}, this)) {
+      if (model.hitTest(point[0], point[1], {})) {
         return model;
       }
     }

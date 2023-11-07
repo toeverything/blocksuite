@@ -1,11 +1,10 @@
 import type { Point } from '@blocksuite/blocks';
 import {
   asyncFocusRichText,
-  type BlockComponentElement,
   BlockHub,
+  buildPath,
   getAllowSelectedBlocks,
   getBookmarkInitialProps,
-  getClosestNoteBlockElementById,
   getEdgelessPage,
   getHoveringNote,
   getServiceOrRegister,
@@ -33,7 +32,7 @@ export const createBlockHub: (
 
       if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(
-          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+          ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
             flavour: 'affine:image',
             sourceId,
           }))
@@ -76,7 +75,7 @@ export const createBlockHub: (
       const isDatabase = props.flavour === 'affine:database';
       if (props.flavour === 'affine:image' && props.type === 'image') {
         models.push(
-          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+          ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
             flavour: 'affine:image',
             sourceId,
           }))
@@ -95,7 +94,7 @@ export const createBlockHub: (
       // In some cases, like cancel bookmark initial modal, there will be no models.
       if (!models.length) return;
 
-      let parentId;
+      let parentModel;
       let focusId;
       if (end && type !== 'none') {
         const { model } = end;
@@ -105,13 +104,13 @@ export const createBlockHub: (
         if (type === 'database') {
           const ids = page.addBlocks(models, model);
           focusId = ids[0];
-          parentId = model.id;
+          parentModel = model;
         } else {
           const parent = page.getParent(model);
           assertExists(parent);
           const ids = page.addSiblingBlocks(model, models, type);
           focusId = ids[0];
-          parentId = parent.id;
+          parentModel = parent;
         }
 
         // database init basic structure
@@ -135,11 +134,11 @@ export const createBlockHub: (
       assertExists(pageBlock);
 
       let noteId;
-      if (focusId && parentId) {
-        const targetNoteBlock = getClosestNoteBlockElementById(
-          parentId,
-          pageBlock
-        ) as BlockComponentElement;
+      if (focusId && parentModel) {
+        const targetNoteBlock = editor.root.value?.view.viewFromPath(
+          'block',
+          buildPath(parentModel)
+        );
         assertExists(targetNoteBlock);
         noteId = targetNoteBlock.model.id;
       } else {

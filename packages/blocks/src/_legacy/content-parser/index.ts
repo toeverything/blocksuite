@@ -6,15 +6,14 @@ import { marked } from 'marked';
 import { getTagColor } from '../../_common/components/tags/colors.js';
 import { toast } from '../../_common/components/toast.js';
 import {
-  getBlockElementById,
+  getBlockElementByModel,
   getEditorContainer,
-  getPageBlock,
   isPageMode,
   type SerializedBlock,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
 import { humanFileSize } from '../../_common/utils/math.js';
-import type { AttachmentProps } from '../../attachment-block/attachment-model.js';
+import type { AttachmentBlockProps } from '../../attachment-block/attachment-model.js';
 import type { Renderer } from '../../index.js';
 import type { PageBlockModel } from '../../models.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
@@ -117,7 +116,7 @@ export class ContentParser {
       root.id,
       htmlContent,
       blobMap,
-      this._page.blobs
+      this._page.blob
     );
   }
 
@@ -136,7 +135,7 @@ export class ContentParser {
       root.id,
       markdownContent,
       blobMap,
-      this._page.blobs
+      this._page.blob
     );
   }
 
@@ -154,7 +153,7 @@ export class ContentParser {
           reject(e);
         }
         const root = this._page.root;
-        const pageBlock = root ? getPageBlock(root) : null;
+        const pageBlock = root ? getBlockElementByModel(root) : null;
         const imageLoadingComponent = document.querySelector(
           'affine-image-block-loading-card'
         );
@@ -274,7 +273,7 @@ export class ContentParser {
     edgeless?: EdgelessPageBlockComponent,
     nodes?: TopLevelBlockModel[],
     surfaces?: SurfaceElement[],
-    blockQuery: (id: string) => Element | null = getBlockElementById,
+    blockQuery: (id: BaseBlockModel) => Element | null = getBlockElementByModel,
     edgelessBackground?: { zoom: number }
   ): Promise<HTMLCanvasElement | undefined> {
     const root = this._page.root;
@@ -315,7 +314,7 @@ export class ContentParser {
     // TODO: refactor of this part
     const blocks = nodes ?? edgeless?.getSortedElementsByBound(bound) ?? [];
     for (const block of blocks) {
-      const blockElement = blockQuery(block.id)?.parentElement;
+      const blockElement = blockQuery(block)?.parentElement;
 
       if (blockElement) {
         const blockBound = xywhArrayToObject(block);
@@ -335,7 +334,7 @@ export class ContentParser {
 
         for (let i = 0; i < blocksInsideFrame.length; i++) {
           const element = blocksInsideFrame[i];
-          const htmlElement = blockQuery(element.id)?.parentElement;
+          const htmlElement = blockQuery(element)?.parentElement;
           const blockBound = xywhArrayToObject(element);
           const canvasData = await html2canvas(htmlElement as HTMLElement);
 
@@ -468,10 +467,16 @@ export class ContentParser {
       const root = this._page.root;
       if (!root) return;
 
-      const edgeless = getPageBlock(root) as EdgelessPageBlockComponent;
+      const edgeless = getBlockElementByModel(
+        root
+      ) as EdgelessPageBlockComponent;
       const bound = edgeless.getElementsBound();
       assertExists(bound);
-      return await this.edgelessToCanvas(edgeless.surface.viewport, bound);
+      return await this.edgelessToCanvas(
+        edgeless.surface.viewport,
+        bound,
+        edgeless
+      );
     }
   }
 
@@ -571,7 +576,7 @@ export class ContentParser {
     const file = files[0];
     if (!file) return [];
 
-    const storage = this._page.blobs;
+    const storage = this._page.blob;
     if (file.type.includes('image')) {
       // If file's arrayBuffer() is used, original clipboardData.files will release the file pointer.
       const id = await storage.set(
@@ -600,7 +605,7 @@ export class ContentParser {
       const sourceId = await storage.set(
         new File([file], file.name, { type: file.type })
       );
-      const attachmentProps: AttachmentProps & {
+      const attachmentProps: AttachmentBlockProps & {
         flavour: 'affine:attachment';
         children: [];
       } = {

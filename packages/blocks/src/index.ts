@@ -19,6 +19,7 @@ export type { CssVariableName } from './_common/theme/css-variables.js';
 export * from './_common/theme/css-variables.js';
 export * from './_common/theme/theme-observer.js';
 export * from './_common/transformers/index.js';
+export * from './_common/utils/edgeless.js';
 export * from './_common/utils/filesys.js';
 export * from './_common/utils/init.js';
 export * from './_common/utils/query.js';

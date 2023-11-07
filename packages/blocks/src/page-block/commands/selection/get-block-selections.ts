@@ -6,6 +6,7 @@ export const getBlockSelectionsCommand: Command<
   'currentBlockSelections'
 > = (ctx, next) => {
   const currentBlockSelections = ctx.std.selection.filter('block');
+  if (currentBlockSelections.length === 0) return;
 
   next({ currentBlockSelections });
 };

@@ -6,7 +6,7 @@ BlockSuite is centered around the concept of blocks. However, to handle a large 
 
 ## Workspaces
 
-A `Workspace` in BlockSuite acts as a top-level container for organizing pages. By creating workspaces, users can group and categorize different sets of pages, each representing a specific project or a collection of related content. Here is how we create a new workspace:
+A `workspace` in BlockSuite acts as a top-level container for organizing pages. By creating workspaces, users can group and categorize different sets of pages, each representing a specific project or a collection of related content. Here is how we create a new workspace:
 
 ```ts
 import { Workspace, Schema } from '@blocksuite/store';
@@ -21,7 +21,7 @@ const workspace = new Workspace({ id: 'foo', schema });
 
 ## Pages
 
-A `Page` in BlockSuite serves as the actual container for organizing blocks, allowing users to operate on the block tree through its APIs. In typical scenarios involving rich text documents, one document is represented by a single page within a workspace.
+A `page` in BlockSuite serves as the actual container for organizing blocks, allowing users to operate on the block tree through its APIs. By taking the advantage of [subdocuments](https://docs.yjs.dev/api/subdocuments), the page content can also be loaded asynchronously on-demand. In typical scenarios involving rich text documents, one document is represented by a single page within a workspace.
 
 Here is how we create a new page with id `page0` within the workspace:
 
@@ -32,9 +32,5 @@ const page = workspace.createPage({ id: 'page0' });
 The `page` instance provides a set of core APIs for performing block operations, e.g., `page.addBlock`, `page.updateBlock`, and `page.deleteBlock`. These APIs will be further introduced in the following sections of the document.
 
 ::: tip
-Block operations APIs are only available after the page is loaded. Remember to add `await page.waitForLoaded();` before calling these APIs.
-:::
-
-::: info
-🚧 A page within a workspace can also be loaded asynchronously.
+Block operations APIs are only available after the page is loaded. Remember to add `await page.waitForLoaded()` before calling these APIs.
 :::

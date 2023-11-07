@@ -122,7 +122,7 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     if (this.enableMarkdownShortcut) {
       const keyDownHandler = createVirgoKeyDownHandler(vEditor, {
         inputRule: {
-          key: ' ',
+          key: [' ', 'Enter'],
           handler: context => tryFormatInlineStyle(context, this.undoManager),
         },
       });

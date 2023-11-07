@@ -14,7 +14,7 @@ export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   text: new Workspace.Y.Text(),
   color: '#000000',
   fontSize: 16,
-  fontFamily: "'Kalam', cursive",
+  fontFamily: 'sans-serif',
   textAlign: 'center',
   bold: false,
   italic: false,

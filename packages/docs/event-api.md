@@ -1,10 +1,6 @@
-# Handling Events
+# Event API
 
 BlockSuite constructs a block tree using `Workspace`, `Page`, and `Block`, which can be used for framework agnostic state management. Once the block tree nodes are bound to a framework, the block content can be rendered. It is also necessary to subscribe to corresponding events when blocks are updated, in order to refresh the UI framework on demand.
-
-::: info
-Note that applications based on BlockSuite may not require virtual DOM, since the block tree can precisely trigger events when a single block is updated. Refer to [Unidirectional Data Flow](./unidirectional-data-flow) for the underlying principles behind this design.
-:::
 
 ## Using Slots
 
@@ -61,6 +57,4 @@ model.propsUpdated.on(() => updateMyComponent());
 model.childrenUpdated.on(() => updateMyComponent());
 ```
 
-In the prebuilt AFFiNE editor, which is based on the [Lit](https://lit.dev/) framework, the UI component of each block subscribes to its model updates using this pattern.
-
-So far, the information we've covered should be sufficient for you to use `@blocksuite/store` to construct basic collaborative application state. For rich-text content editing involving more intricate operations, we will continue to cover it in subsequent sections of the document.
+In the prebuilt AFFiNE editor, which is based on the [lit](https://lit.dev/) framework, the UI component of each block subscribes to its model updates using this pattern.

@@ -75,6 +75,13 @@ export class SelectionManager {
     });
   }
 
+  fromJSON(json: Record<string, unknown>[]) {
+    const selections = json.map(json => {
+      return this._jsonToSelection(json);
+    });
+    return this.set(selections);
+  }
+
   set(selections: BaseSelection[]) {
     this._store.setLocalSelection(selections.map(s => s.toJSON()));
     this.slots.changed.emit(selections);

@@ -33,7 +33,8 @@ import type { SlDropdown, SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { Pane } from 'tweakpane';
+import * as lz from 'lz-string';
+import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
 // @ts-ignore
@@ -51,13 +52,14 @@ const OTHER_CSS_VARIABLES = VARIABLES.filter(
     !COLOR_VARIABLES.includes(variable) &&
     !FONT_FAMILY_VARIABLES.includes(variable)
 );
+let styleDebugMenuLoaded = false;
 
 const basePath = import.meta.env.DEV
   ? '/node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
+function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({
     title: 'Font Family',
@@ -70,7 +72,7 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   SIZE_VARIABLES.forEach(name => {
     sizeFolder
-      .addInput(
+      .addBinding(
         {
           [name]: isNaN(parseFloat(cssVariablesMap[name]))
             ? 0
@@ -88,7 +90,7 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   FONT_FAMILY_VARIABLES.forEach(name => {
     fontFamilyFolder
-      .addInput(
+      .addBinding(
         {
           [name]: cssVariablesMap[name],
         },
@@ -100,13 +102,13 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   OTHER_CSS_VARIABLES.forEach(name => {
     othersFolder
-      .addInput({ [name]: cssVariablesMap[name] }, name)
+      .addBinding({ [name]: cssVariablesMap[name] }, name)
       .on('change', e => {
         style.setProperty(name, e.value);
       });
   });
   fontFamilyFolder
-    .addInput(
+    .addBinding(
       {
         '--affine-font-family':
           'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
@@ -117,7 +119,7 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
       style.setProperty('--affine-font-family', e.value);
     });
   for (const plateKey in plate) {
-    colorFolder.addInput(plate, plateKey).on('change', e => {
+    colorFolder.addBinding(plate, plateKey).on('change', e => {
       style.setProperty(plateKey, e.value);
     });
   }
@@ -193,6 +195,31 @@ export class DebugMenu extends ShadowlessElement {
     return this;
   }
 
+  override connectedCallback() {
+    super.connectedCallback();
+
+    const readSelectionFromURL = async () => {
+      const editor = this.editor.root.value;
+      if (!editor) {
+        await new Promise(resolve => {
+          setTimeout(resolve, 500);
+        });
+        readSelectionFromURL();
+        return;
+      }
+      const url = new URL(window.location.toString());
+      const sel = url.searchParams.get('sel');
+      if (!sel) return;
+      try {
+        const json = JSON.parse(lz.decompressFromEncodedURIComponent(sel));
+        editor.std.selection.fromJSON(json);
+      } catch {
+        return;
+      }
+    };
+    readSelectionFromURL();
+  }
+
   override disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -216,38 +243,6 @@ export class DebugMenu extends ShadowlessElement {
       });
       this._connected = true;
     }
-  }
-
-  private _updateBlockType(
-    e: PointerEvent,
-    _flavour: 'affine:paragraph' | 'affine:list',
-    _type: string
-  ) {
-    e.preventDefault();
-    this.blockTypeDropdown.hide();
-
-    // FIXME: fix this
-  }
-
-  private _addCodeBlock(e: PointerEvent) {
-    e.preventDefault();
-    this.blockTypeDropdown.hide();
-
-    // FIXME: fix this
-    // const blockRange = getCurrentBlockRange(this.page);
-    // if (!blockRange) {
-    //   throw new Error("Can't add code block without a selection");
-    // }
-    // const startModel = blockRange.models[0];
-    // const parent = this.page.getParent(startModel);
-    // const index = parent?.children.indexOf(startModel);
-    // const blockProps = {
-    //   text: startModel.text?.clone(),
-    // };
-    // assertExists(parent);
-    // this.page.captureSync();
-    // this.page.deleteBlock(startModel);
-    // this.page.addBlock('affine:code', blockProps, parent, index);
   }
 
   private _switchEditorMode() {
@@ -344,7 +339,16 @@ export class DebugMenu extends ShadowlessElement {
     window.history.pushState({}, '', url);
   }
 
-  private _toggleStyleDebugMenu() {
+  private async _toggleStyleDebugMenu() {
+    if (!styleDebugMenuLoaded) {
+      styleDebugMenuLoaded = true;
+      const { Pane } = await import('tweakpane');
+      this._styleMenu = new Pane({ title: 'Waiting' });
+      this._styleMenu.hidden = true;
+      this._styleMenu.element.style.width = '650';
+      initStyleDebugMenu(this._styleMenu, document.documentElement.style);
+    }
+
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
     this._showStyleDebugMenu
       ? (this._styleMenu.hidden = false)
@@ -354,6 +358,18 @@ export class DebugMenu extends ShadowlessElement {
   private _toggleReadonly() {
     const page = this.page;
     page.awarenessStore.setReadonly(page, !page.readonly);
+  }
+
+  private _shareSelection() {
+    const selection = this.editor.root.value?.selection.value;
+    if (!selection || selection.length === 0) {
+      return;
+    }
+    const json = selection.map(sel => sel.toJSON());
+    const hash = lz.compressToEncodedURIComponent(JSON.stringify(json));
+    const url = new URL(window.location.toString());
+    url.searchParams.set('sel', hash);
+    window.history.pushState({}, '', url);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -416,11 +432,6 @@ export class DebugMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new Pane({ title: 'CSS Debug Menu' });
-    this._styleMenu.hidden = true;
-    this._styleMenu.element.style.width = '650';
-    const style = document.documentElement.style;
-    init_css_debug_menu(this._styleMenu, style);
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -526,93 +537,6 @@ export class DebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           </sl-button-group>
-          <!-- block type -->
-          <sl-dropdown id="block-type-dropdown" placement="bottom" hoist>
-            <sl-button size="small" slot="trigger" caret>
-              Block Type
-            </sl-button>
-            <sl-menu>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'text')}
-              >
-                Text
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h1')}
-              >
-                H1
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h2')}
-              >
-                H2
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h3')}
-              >
-                H3
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h4')}
-              >
-                H4
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h5')}
-              >
-                H5
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'h6')}
-              >
-                H6
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:paragraph', 'quote')}
-              >
-                Quote
-              </sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'bulleted')}
-              >
-                Bulleted List
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'numbered')}
-              >
-                Numbered List
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'todo')}
-              >
-                Todo List
-              </sl-menu-item>
-              <sl-menu-item
-                @click=${(e: PointerEvent) =>
-                  this._updateBlockType(e, 'affine:list', 'toggle')}
-              >
-                Toggle List
-              </sl-menu-item>
-              <sl-divider></sl-divider>
-              <sl-menu-item
-                @click=${(e: PointerEvent) => this._addCodeBlock(e)}
-              >
-                Code
-              </sl-menu-item>
-            </sl-menu>
-          </sl-dropdown>
 
           <!-- test operations -->
           <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
@@ -648,6 +572,9 @@ export class DebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click=${this._toggleReadonly}>
                 Toggle Readonly
+              </sl-menu-item>
+              <sl-menu-item @click=${this._shareSelection}>
+                Share Selection
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>

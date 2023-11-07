@@ -12,7 +12,7 @@ import {
   pointInEllipse,
 } from '../../../utils/math-utils.js';
 import { PointLocation } from '../../../utils/point-location.js';
-import { type IVec } from '../../../utils/vec.js';
+import { type IVec, Vec } from '../../../utils/vec.js';
 import type { HitTestOptions } from '../../edgeless-element.js';
 import type { ShapeElement } from '../shape-element.js';
 import type { ShapeMethods } from '../types.js';
@@ -125,8 +125,35 @@ export const EllipseMethods: ShapeMethods = {
   },
 
   getNearestPoint(point: IVec, _element: ShapeElement) {
-    // TODO: get real nearest point on ellipse
-    return point;
+    const bound = Bound.deserialize(_element.xywh);
+
+    const iterations = 1000;
+    const learningRate = 0.01;
+    const cx = bound.center[0];
+    const cy = bound.center[1];
+    const rx = bound.w / 2;
+    const ry = bound.h / 2;
+
+    let x = (point[0] - cx) / rx;
+    let y = (point[1] - cy) / ry;
+
+    for (let i = 0; i < iterations; i++) {
+      const distance = Math.sqrt(x * x + y * y);
+      const normalX = x / distance;
+      const normalY = y / distance;
+
+      const toPx = point[0] - (point[0] + x * rx);
+      const toPy = point[1] - (point[1] + y * ry);
+      const dot = toPx * normalX * rx + toPy * normalY * ry;
+
+      x -= learningRate * dot * normalX;
+      y -= learningRate * dot * normalY;
+      const angle = Math.atan2(y, x);
+      x = Math.cos(angle);
+      y = Math.sin(angle);
+    }
+
+    return [cx + x * rx, cy + y * ry];
   },
 
   intersectWithLine(start: IVec, end: IVec, element: ShapeElement) {
@@ -145,7 +172,13 @@ export const EllipseMethods: ShapeMethods = {
   getRelativePointLocation(position, element) {
     const bound = Bound.deserialize(element.xywh);
     const point = bound.getRelativePoint(position);
-    // TODO: calculate the tangent of point on ellipse
-    return new PointLocation(point);
+
+    const rx = bound.w / 2;
+    const ry = bound.h / 2;
+
+    const normalVector = Vec.uni(
+      Vec.divV(Vec.sub(point, bound.center), [rx * rx, ry * ry])
+    );
+    return new PointLocation(point, [-normalVector[1], normalVector[0]]);
   },
 };

@@ -14,7 +14,10 @@ import {
   waitNextFrame,
   zoomResetByKeyboard,
 } from '../utils/actions/index.js';
-import { assertEdgelessCanvasText } from '../utils/asserts.js';
+import {
+  assertEdgelessCanvasText,
+  assertSelectedBound,
+} from '../utils/asserts.js';
 import { test } from '../utils/playwright.js';
 
 async function assertTextFont(page: Page, font: 'General' | 'Scribbled') {
@@ -165,24 +168,24 @@ test('normalize text element rect after change its font', async ({ page }) => {
   const fontButton = page.locator('.text-font-family-button');
   await fontButton.click();
 
-  // Default is Scribbled
-  await assertTextFont(page, 'Scribbled');
-  const generalTextFont = page.getByText('General');
-  await generalTextFont.click();
-  await waitNextFrame(page);
-  let selectedRect = await getEdgelessSelectedRect(page);
-  expect(selectedRect.width).toBeGreaterThan(lastWidth);
-  expect(selectedRect.height).toBeLessThan(lastHeight);
-  lastWidth = selectedRect.width;
-  lastHeight = selectedRect.height;
-  await fontButton.click();
+  // Default is General
   await assertTextFont(page, 'General');
   const scribbledTextFont = page.getByText('Scribbled');
   await scribbledTextFont.click();
   await waitNextFrame(page);
-  selectedRect = await getEdgelessSelectedRect(page);
+  let selectedRect = await getEdgelessSelectedRect(page);
   expect(selectedRect.width).toBeLessThan(lastWidth);
   expect(selectedRect.height).toBeGreaterThan(lastHeight);
+  lastWidth = selectedRect.width;
+  lastHeight = selectedRect.height;
+  await fontButton.click();
+  await assertTextFont(page, 'Scribbled');
+  const generalTextFont = page.getByText('General');
+  await generalTextFont.click();
+  await waitNextFrame(page);
+  selectedRect = await getEdgelessSelectedRect(page);
+  expect(selectedRect.width).toBeGreaterThan(lastWidth);
+  expect(selectedRect.height).toBeLessThan(lastHeight);
 });
 
 test('auto wrap text by dragging left and right edge', async ({ page }) => {
@@ -212,9 +215,9 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   let lastHeight = selectedRect.height;
 
   // move cursor to the right edge and drag it to resize the width of text element
-  await page.mouse.move(224, 160);
+  await page.mouse.move(130 + lastWidth, 160);
   await page.mouse.down();
-  await page.mouse.move(190, 160, {
+  await page.mouse.move(130 + lastWidth / 2, 160, {
     steps: 10,
   });
   await page.mouse.up();
@@ -241,7 +244,7 @@ test('auto wrap text by dragging left and right edge', async ({ page }) => {
   // move cursor to the left edge and drag it to resize the width of text element
   await page.mouse.move(130, 160);
   await page.mouse.down();
-  await page.mouse.move(96, 160, {
+  await page.mouse.move(79, 160, {
     steps: 10,
   });
   await page.mouse.up();
@@ -285,9 +288,9 @@ test('text element should have maxWidth after adjusting width by dragging left o
   let lastHeight = selectedRect.height;
 
   // move cursor to the right edge and drag it to resize the width of text element
-  await page.mouse.move(224, 160);
+  await page.mouse.move(130 + lastWidth, 160);
   await page.mouse.down();
-  await page.mouse.move(190, 160, {
+  await page.mouse.move(130 + lastWidth / 2, 160, {
     steps: 10,
   });
   await page.mouse.up();
@@ -300,7 +303,8 @@ test('text element should have maxWidth after adjusting width by dragging left o
   lastHeight = selectedRect.height;
 
   // enter edit mode
-  await page.mouse.dblclick(185, 200);
+  await waitNextFrame(page);
+  await page.mouse.dblclick(140, 180);
   await waitForVirgoStateUpdated(page);
   await waitNextFrame(page);
   await type(page, 'hello');

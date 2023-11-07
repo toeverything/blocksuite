@@ -1,6 +1,6 @@
 import {
   type AbstractEditor,
-  type AttachmentProps,
+  type AttachmentBlockProps,
   AttachmentService,
   type DocPageBlockComponent,
   type EdgelessPageBlockComponent,
@@ -11,6 +11,7 @@ import {
   type PageBlockModel,
   PagePreset,
   readImageSize,
+  saveViewportToSession,
   ThemeObserver,
 } from '@blocksuite/blocks';
 import { withTempBlobData } from '@blocksuite/blocks';
@@ -202,7 +203,7 @@ export class EditorContainer
         handler: async (
           file: File
         ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-          const storage = this.page.blobs;
+          const storage = this.page.blob;
           const { saveAttachmentData } = withTempBlobData();
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })
@@ -224,7 +225,7 @@ export class EditorContainer
         handler: async (
           file: File
         ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-          const storage = this.page.blobs;
+          const storage = this.page.blob;
           const { saveAttachmentData } = withTempBlobData();
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })
@@ -255,8 +256,8 @@ export class EditorContainer
         },
         handler: async (
           file: File
-        ): Promise<AttachmentProps & { flavour: 'affine:attachment' }> => {
-          const storage = this.page.blobs;
+        ): Promise<AttachmentBlockProps & { flavour: 'affine:attachment' }> => {
+          const storage = this.page.blob;
           const sourceId = await storage.set(
             new Blob([file], { type: file.type })
           );
@@ -297,10 +298,11 @@ export class EditorContainer
     const edgelessPage = this.querySelector('affine-edgeless-page');
     if (edgelessPage) {
       const { viewport } = edgelessPage.surface;
-      sessionStorage.setItem(
-        'blocksuite:' + this.page.id + ':edgelessViewport',
-        JSON.stringify({ ...viewport.center, zoom: viewport.zoom })
-      );
+      saveViewportToSession(this.page.id, {
+        x: viewport.center.x,
+        y: viewport.center.y,
+        zoom: viewport.zoom,
+      });
     }
   }
 

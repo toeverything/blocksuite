@@ -10,8 +10,8 @@
   "type": "module",
   "devDependencies": {
     "vite-plugin-wasm": "^3.2.2",
-    "vitepress": "1.0.0-rc.24",
-    "vue": "^3.3.4"
+    "vitepress": "1.0.0-rc.25",
+    "vue": "^3.3.8"
   },
   "scripts": {
     "dev": "vitepress dev --port 5200",
