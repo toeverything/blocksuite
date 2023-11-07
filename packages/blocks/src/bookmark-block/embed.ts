@@ -38,6 +38,70 @@ const embedConfig: EmbedConfig[] = [
       return `https://www.youtube.com/embed/${videoId}`;
     },
   },
+  {
+    // See also https://publish.twitter.com/
+    name: 'X(Twitter) ',
+    format: url => {
+      if (!['www.twitter.com', 'twitter.com', 'x.com'].includes(url.hostname))
+        return null;
+      // https://twitter.com/[username]/status/[tweetId]
+      const tweetId = url.pathname.match(
+        /\/[a-zA-Z0-9_]{1,20}\/status\/([0-9]*)/
+      )?.[1];
+
+      if (!tweetId) return null;
+
+      const twitterWidgetJs = 'https://platform.twitter.com/widgets.js';
+      // See https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-javascript-factory-function
+      const methodName = 'createTweet';
+      // See https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference
+      const options = {
+        // cards: 'hidden',
+        width: 698,
+        maxWidth: '100%',
+        height: 480,
+        theme:
+          document.documentElement.getAttribute('data-theme') === 'dark'
+            ? 'dark'
+            : 'light',
+        align: 'center',
+        // When set to true, the Tweet and its embedded page on your site are not used for purposes
+        // that include personalized suggestions and personalized ads.
+        dnt: true,
+      };
+
+      // Reference to https://github.com/saurabhnemade/react-twitter-embed
+      // Licensed under MIT
+      const template = html`
+        <div id="tweet" style="display: flex; justify-content: center;"></div>
+        <script src="${twitterWidgetJs}" charset="utf-8"></script>
+        <script>
+          (() => {
+            if (!window.twttr) {
+              console.error('Failure to load window.twttr, aborting load');
+              return;
+            }
+            if (!window.twttr.widgets.${methodName}) {
+              console.error(
+                'Method ${methodName} is not present anymore in twttr.widget api'
+              );
+              return;
+            }
+            window.twttr.widgets.${methodName}(
+              '${tweetId}',
+              tweet,
+              ${JSON.stringify(options)}
+            );
+          })();
+        </script>
+      `;
+
+      return (
+        'data:text/html;charset=utf-8,' +
+        encodeURIComponent(String.raw(template.strings, ...template.values))
+      );
+    },
+  },
 ];
 
 /**
