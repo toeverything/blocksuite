@@ -1,12 +1,13 @@
 import '../../note-slicer/index.js';
 
+import { sleep } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
+  ACTIVE_NOTE_EXTRA_PADDING,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../../_common/consts.js';
 import {
@@ -70,6 +71,12 @@ export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
 
+  @state()
+  private _editing = false;
+
+  @state()
+  private _transition = 'none';
+
   override connectedCallback(): void {
     super.connectedCallback();
 
@@ -94,29 +101,67 @@ export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
     );
   }
 
+  override firstUpdated() {
+    const selection = this.surface.edgeless.selectionManager;
+    selection.slots.updated.on(async () => {
+      if (
+        selection.state.editing &&
+        selection.state.elements.includes(this.model.id)
+      ) {
+        this._editing = true;
+        this._transition = 'transform 0.4s, padding 0.4s, width 0.4s';
+      } else {
+        this._editing = false;
+        if (this._transition !== 'none') {
+          // waiting for animation done
+          await sleep(400);
+          this._transition = 'none';
+        }
+      }
+    });
+  }
+
   override render() {
     const { model, surface, index } = this;
     const { xywh, background } = model;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
+
+    const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
+    const width = modelW + extra * 2;
+    const translateX = modelX - extra;
+    const translateY = modelY - extra;
+    const padding = EDGELESS_BLOCK_CHILD_PADDING + extra;
+
+    const border = this._editing
+      ? `1px solid var(--affine-blue-600)`
+      : isHiddenNote
+      ? `2px dashed var(--affine-black-10)`
+      : 'none';
+
+    const boxShadow = this._editing
+      ? 'var(--affine-active-shadow)'
+      : isHiddenNote
+      ? 'none'
+      : 'var(--affine-note-shadow-box)';
+
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
-      width: modelW + 'px',
-      transform: `translate(${modelX}px, ${modelY}px)`,
-      padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-      border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${
-        isHiddenNote ? 'dashed' : 'solid'
-      } var(--affine-black-10)`,
+      width: `${width}px`,
+      transform: `translate(${translateX}px, ${translateY}px)`,
+      padding: `${padding}px`,
+      border: border,
       borderRadius: '8px',
       boxSizing: 'border-box',
       background: isHiddenNote
         ? 'transparent'
         : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
+      boxShadow: boxShadow,
       pointerEvents: 'all',
       overflow: 'hidden',
       transformOrigin: '0 0',
+      transition: this._transition,
     };
 
     return html`

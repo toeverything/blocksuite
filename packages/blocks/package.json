@@ -21,7 +21,7 @@
     "@blocksuite/store": "workspace:*",
     "@blocksuite/virgo": "workspace:*",
     "@floating-ui/dom": "^1.5.3",
-    "@toeverything/theme": "^0.7.21",
+    "@toeverything/theme": "^0.7.23",
     "@types/webfontloader": "^1.6.36",
     "buffer": "^6.0.3",
     "date-fns": "^2.30.0",
@@ -76,7 +76,7 @@
     "@blocksuite/block-std": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.16",
+    "@toeverything/theme": "^0.7.23",
     "@types/marked": "^4.3.1",
     "@types/sortablejs": "^1.15.4"
   }
