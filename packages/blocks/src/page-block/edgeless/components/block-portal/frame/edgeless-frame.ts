@@ -8,6 +8,7 @@ import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import { isFrameBlock } from '../../../utils/query.js';
 
 const { FRAME } = EdgelessBlockType;
 
@@ -60,8 +61,14 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   }
 
   protected override firstUpdated() {
-    this._disposables.add(
-      this.surface.page.slots.historyUpdated.on(() => this.requestUpdate())
+    const { _disposables, surface } = this;
+
+    _disposables.add(
+      surface.page.slots.blockUpdated.on(({ flavour }) => {
+        if (flavour === FRAME) {
+          this.requestUpdate();
+        }
+      })
     );
 
     this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {
