@@ -109,12 +109,12 @@ export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
         selection.state.elements.includes(this.model.id)
       ) {
         this._editing = true;
-        this._transition = 'transform 0.4s, padding 0.4s, width 0.4s';
+        this._transition = 'transform 0.3s, padding 0.3s, width 0.3s';
       } else {
         this._editing = false;
         if (this._transition !== 'none') {
           // waiting for animation done
-          await sleep(400);
+          await sleep(300);
           this._transition = 'none';
         }
       }
