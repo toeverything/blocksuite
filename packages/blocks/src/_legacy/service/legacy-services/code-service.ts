@@ -2,8 +2,11 @@ import type { TextRangePoint } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { BLOCK_ID_ATTR } from '../../../_common/consts.js';
-import { getThemeMode, getVirgoByModel } from '../../../_common/utils/index.js';
+import {
+  getBlockElementByModel,
+  getThemeMode,
+  getVirgoByModel,
+} from '../../../_common/utils/index.js';
 import type {
   BlockTransformContext,
   SerializedBlock,
@@ -39,9 +42,8 @@ export class CodeBlockService extends BaseService<CodeBlockModel> {
     block: CodeBlockModel,
     { childText = '', begin, end }: BlockTransformContext = {}
   ): Promise<string> {
-    const richTextElement = document.querySelector(
-      `[${BLOCK_ID_ATTR}="${block.id}"] rich-text`
-    );
+    const richTextElement =
+      getBlockElementByModel(block)?.querySelector('rich-text');
     if (!richTextElement) {
       return await super.block2html(block, {
         childText,

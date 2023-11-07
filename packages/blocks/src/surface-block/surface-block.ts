@@ -600,7 +600,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const models = this.sortedBlocks;
     for (let i = models.length - 1; i >= 0; i--) {
       const model = models[i];
-      if (model.hitTest(point[0], point[1], {}, this)) {
+      if (model.hitTest(point[0], point[1], {})) {
         return model;
       }
     }

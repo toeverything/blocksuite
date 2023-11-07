@@ -5,7 +5,7 @@ import { customElement, property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import type { RichText } from '../../../../_common/components/rich-text/rich-text.js';
-import { getBlockElementById } from '../../../../_common/utils/index.js';
+import { getBlockElementByPath } from '../../../../_common/utils/index.js';
 import type {
   FrameBlockComponent,
   FrameBlockModel,
@@ -34,10 +34,11 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   get frameBlock() {
-    const block = getBlockElementById(
+    assertExists(this.frameModel.page.root);
+    const block = getBlockElementByPath([
+      this.frameModel.page.root.id,
       this.frameModel.id,
-      this.edgeless
-    ) as FrameBlockComponent | null;
+    ]) as FrameBlockComponent | null;
     assertExists(block);
     return block;
   }
