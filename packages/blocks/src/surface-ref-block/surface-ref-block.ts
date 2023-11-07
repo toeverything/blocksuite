@@ -22,7 +22,7 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { matchFlavours } from '../_common/utils/model.js';
-import { getEditorContainer } from '../_common/utils/query.js';
+import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
@@ -307,7 +307,6 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
       const parent = this.page.getParent(this.model) as BaseBlockModel;
       const index = parent.children.indexOf(this.model);
-      const isLast = parent.children.length - 1 === index;
       let addedBlockId: string;
       let path: string[];
 
@@ -316,32 +315,18 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         addedBlockId = this.page.addBlock('affine:paragraph', {}, noteId, 0);
         path = this.parentPath.concat([noteId, addedBlockId]);
       } else if (matchFlavours(parent, ['affine:note'])) {
-        if (!isLast) {
-          addedBlockId = this.page.addBlock(
-            'affine:paragraph',
-            {},
-            parent,
-            index + 1
-          );
-          path = this.parentPath.concat([addedBlockId]);
-        } else {
-          const root = this.page.getParent(parent);
+        const root = this.page.getParent(parent);
 
-          if (!root) return;
+        if (!root) return;
 
-          const parentIdx = root.children.indexOf(parent);
-          const targetParent =
-            root.children[parentIdx + 1]?.id ??
-            this.page.addBlock('affine:note', {}, root, parentIdx + 1);
+        const blocksId = this.page.addSiblingBlocks(this.model, [
+          {
+            flavour: 'affine:paragraph',
+          },
+        ]);
 
-          addedBlockId = this.page.addBlock(
-            'affine:paragraph',
-            {},
-            this.page.getBlockById(targetParent),
-            0
-          );
-          path = [root.id, targetParent, addedBlockId];
-        }
+        addedBlockId = blocksId[0];
+        path = buildPath(this.page.getBlockById(addedBlockId));
       }
 
       requestAnimationFrame(() => {
