@@ -57,8 +57,6 @@ const embedConfig: EmbedConfig[] = [
       // See https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/guides/embedded-tweet-parameter-reference
       const options = {
         // cards: 'hidden',
-        width: 698,
-        maxWidth: '100%',
         height: 480,
         theme:
           document.documentElement.getAttribute('data-theme') === 'dark'
