@@ -2,7 +2,8 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
+import type { BaseBlockModel } from '../schema/base.js';
+import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
@@ -562,51 +563,69 @@ export class Page extends Space<FlatBlockMap> {
   deleteBlock(
     model: BaseBlockModel,
     options: {
-      bringChildrenTo: 'parent' | BaseBlockModel | false;
-    } = {
-      bringChildrenTo: false,
-    }
+      bringChildrenTo?: BaseBlockModel;
+    } = {}
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
-    const parent = this.getParent(model);
-    const index = parent?.children.indexOf(model) ?? -1;
+
     const { bringChildrenTo } = options;
-    if (index > -1) {
-      parent?.children.splice(parent.children.indexOf(model), 1);
-    }
-    if (bringChildrenTo instanceof BaseBlockModel) {
-      model.children.forEach(child => {
-        this.schema.validate(child.flavour, bringChildrenTo.flavour);
-      });
-      // When bring children to parent, insert children to the original position of model
-      if (bringChildrenTo === parent && index > -1) {
-        parent.children.splice(index, 0, ...model.children);
-      } else {
-        bringChildrenTo.children.push(...model.children);
-      }
-    }
+
+    const yModel = this._yBlocks.get(model.id) as YBlock;
+    const yModelChildren = yModel.get('sys:children') as Y.Array<string>;
+
+    const parent = this.getParent(model);
+    assertExists(parent);
+    const yParent = this._yBlocks.get(parent.id) as YBlock;
+    const yParentChildren = yParent.get('sys:children') as Y.Array<string>;
+    const modelIndex = yParentChildren.toArray().indexOf(model.id);
 
     this.transact(() => {
+      if (modelIndex > -1) {
+        yParentChildren.delete(modelIndex, 1);
+      }
+
+      if (bringChildrenTo) {
+        // validate children flavour
+        model.children.forEach(child => {
+          this.schema.validate(child.flavour, bringChildrenTo.flavour);
+        });
+
+        if (bringChildrenTo.id === parent.id) {
+          // When bring children to parent, insert children to the original position of model
+          yParentChildren.insert(modelIndex, yModelChildren.toArray());
+        } else {
+          const yBringChildrenTo = this._yBlocks.get(
+            bringChildrenTo.id
+          ) as YBlock;
+          const yBringChildrenToChildren = yBringChildrenTo.get(
+            'sys:children'
+          ) as Y.Array<string>;
+          yBringChildrenToChildren.push(yModelChildren.toArray());
+        }
+      } else {
+        // delete children recursively
+        const deleteChildren = (id: string) => {
+          const yBlock = this._yBlocks.get(id) as YBlock;
+
+          const yChildren = yBlock.get('sys:children') as Y.Array<string>;
+          yChildren.forEach(id => {
+            deleteChildren(id);
+          });
+
+          this._yBlocks.delete(id);
+        };
+
+        yModelChildren.forEach(id => {
+          deleteChildren(id);
+        });
+      }
+
       this._yBlocks.delete(model.id);
 
-      if (parent) {
-        const yParent = this._yBlocks.get(parent.id) as YBlock;
-        const yChildren = yParent.get('sys:children') as Y.Array<string>;
-
-        if (index > -1) {
-          yChildren.delete(index, 1);
-        }
-        if (bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlock(bringChildrenTo, {
-            children: bringChildrenTo.children,
-          });
-        }
-
-        parent.childrenUpdated.emit();
-      }
+      parent.childrenUpdated.emit();
     });
   }
 
@@ -703,18 +722,17 @@ export class Page extends Space<FlatBlockMap> {
 
       yChildren.forEach((id: string) => {
         const index = model.childMap.get(id);
-        if (Number.isInteger(index)) {
-          const hasChild = this._blockMap.has(id);
+        assertExists(index);
+        const hasChild = this._blockMap.has(id);
 
-          if (!hasChild) {
-            visited.add(id);
-            this._handleYBlockAdd(visited, id);
-          }
-
-          model.children[index as number] = this._blockMap.get(
-            id
-          ) as BaseBlockModel;
+        if (!hasChild) {
+          visited.add(id);
+          this._handleYBlockAdd(visited, id);
         }
+
+        model.children[index as number] = this._blockMap.get(
+          id
+        ) as BaseBlockModel;
       });
     }
 
