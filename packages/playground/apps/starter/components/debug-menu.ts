@@ -72,7 +72,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   SIZE_VARIABLES.forEach(name => {
     sizeFolder
-      .addInput(
+      .addBinding(
         {
           [name]: isNaN(parseFloat(cssVariablesMap[name]))
             ? 0
@@ -90,7 +90,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   FONT_FAMILY_VARIABLES.forEach(name => {
     fontFamilyFolder
-      .addInput(
+      .addBinding(
         {
           [name]: cssVariablesMap[name],
         },
@@ -102,13 +102,13 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   OTHER_CSS_VARIABLES.forEach(name => {
     othersFolder
-      .addInput({ [name]: cssVariablesMap[name] }, name)
+      .addBinding({ [name]: cssVariablesMap[name] }, name)
       .on('change', e => {
         style.setProperty(name, e.value);
       });
   });
   fontFamilyFolder
-    .addInput(
+    .addBinding(
       {
         '--affine-font-family':
           'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
@@ -119,7 +119,7 @@ function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
       style.setProperty('--affine-font-family', e.value);
     });
   for (const plateKey in plate) {
-    colorFolder.addInput(plate, plateKey).on('change', e => {
+    colorFolder.addBinding(plate, plateKey).on('change', e => {
       style.setProperty(plateKey, e.value);
     });
   }
