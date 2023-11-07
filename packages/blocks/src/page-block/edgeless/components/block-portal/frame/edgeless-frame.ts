@@ -8,7 +8,6 @@ import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
-import { isFrameBlock } from '../../../utils/query.js';
 
 const { FRAME } = EdgelessBlockType;
 
