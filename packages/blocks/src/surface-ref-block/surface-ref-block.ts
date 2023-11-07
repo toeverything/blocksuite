@@ -305,29 +305,12 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     const addParagraph = () => {
       if (!this.page.getParent(this.model)) return;
 
-      const parent = this.page.getParent(this.model) as BaseBlockModel;
-      const index = parent.children.indexOf(this.model);
-      let addedBlockId: string;
-      let path: string[];
-
-      if (matchFlavours(parent, ['affine:page'])) {
-        const noteId = this.page.addBlock('affine:note', {}, parent, index + 1);
-        addedBlockId = this.page.addBlock('affine:paragraph', {}, noteId, 0);
-        path = this.parentPath.concat([noteId, addedBlockId]);
-      } else if (matchFlavours(parent, ['affine:note'])) {
-        const root = this.page.getParent(parent);
-
-        if (!root) return;
-
-        const blocksId = this.page.addSiblingBlocks(this.model, [
-          {
-            flavour: 'affine:paragraph',
-          },
-        ]);
-
-        addedBlockId = blocksId[0];
-        path = buildPath(this.page.getBlockById(addedBlockId));
-      }
+      const [paragraphId] = this.page.addSiblingBlocks(this.model, [
+        {
+          flavour: 'affine:paragraph',
+        },
+      ]);
+      const path = buildPath(this.page.getBlockById(paragraphId));
 
       requestAnimationFrame(() => {
         selection.update(selList => {
