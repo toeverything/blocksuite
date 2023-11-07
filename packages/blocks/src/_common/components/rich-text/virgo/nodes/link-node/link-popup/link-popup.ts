@@ -43,8 +43,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
   linkInput?: HTMLInputElement;
   @query('.popup-container')
   popupContainer?: HTMLDivElement;
-  @query('.mock-selection')
-  mockSelection?: HTMLDivElement;
+  @query('.mock-selection-container')
+  mockSelectionContainer?: HTMLDivElement;
   @query('.affine-confirm-button')
   confirmButton?: IconButton;
 
@@ -87,12 +87,19 @@ export class LinkPopup extends WithDisposable(LitElement) {
     assertExists(range);
 
     if (this.type !== 'view') {
-      assertExists(this.mockSelection);
-      const rangeRect = range.getBoundingClientRect();
-      this.mockSelection.style.left = `${rangeRect.left}px`;
-      this.mockSelection.style.top = `${rangeRect.top}px`;
-      this.mockSelection.style.width = `${rangeRect.width}px`;
-      this.mockSelection.style.height = `${rangeRect.height}px`;
+      const domRects = range.getClientRects();
+
+      Object.values(domRects).forEach(domRect => {
+        const mockSelection = document.createElement('div');
+        mockSelection.classList.add('mock-selection');
+        mockSelection.style.left = `${domRect.left}px`;
+        mockSelection.style.top = `${domRect.top}px`;
+        mockSelection.style.width = `${domRect.width}px`;
+        mockSelection.style.height = `${domRect.height}px`;
+
+        assertExists(this.mockSelectionContainer);
+        this.mockSelectionContainer.appendChild(mockSelection);
+      });
     }
 
     const visualElement = {
@@ -211,6 +218,8 @@ export class LinkPopup extends WithDisposable(LitElement) {
     e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
+      const link = this.linkInput?.value;
+      if (!link || !isValidUrl(link)) return;
       this._onConfirm();
     }
   }
@@ -369,7 +378,7 @@ export class LinkPopup extends WithDisposable(LitElement) {
         <div class="popup-container" @keydown=${this._onKeydown}>
           ${popover}
         </div>
-        <div class="mock-selection"></div>
+        <div class="mock-selection-container"></div>
       </div>
     `;
   }
