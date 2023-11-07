@@ -70,10 +70,16 @@ export class Clipboard {
       const item = getItem(type);
       if (item) {
         const job = this._getJob();
-        const sliceSnapshot = await adapter.toSliceSnapshot({
+        const payload = {
           file: item,
           assets: job.assetsManager,
-        });
+          blockVersions: page.workspace.meta.blockVersions,
+          pageVersion: page.workspace.meta.pageVersion,
+          workspaceVersion: page.workspace.meta.workspaceVersion,
+          workspaceId: page.workspace.id,
+          pageId: page.id,
+        };
+        const sliceSnapshot = await adapter.toSliceSnapshot(payload);
         if (sliceSnapshot) {
           return job.snapshotToSlice(sliceSnapshot, page, parent, index);
         }

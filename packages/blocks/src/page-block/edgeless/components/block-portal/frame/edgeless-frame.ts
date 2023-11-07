@@ -60,8 +60,14 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   }
 
   protected override firstUpdated() {
-    this._disposables.add(
-      this.surface.page.slots.historyUpdated.on(() => this.requestUpdate())
+    const { _disposables, surface } = this;
+
+    _disposables.add(
+      surface.page.slots.blockUpdated.on(({ flavour }) => {
+        if (flavour === FRAME) {
+          this.requestUpdate();
+        }
+      })
     );
 
     this.surface.edgeless.slots.edgelessToolUpdated.on(tool => {

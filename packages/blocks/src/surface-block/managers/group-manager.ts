@@ -3,9 +3,91 @@ import { Workspace } from '@blocksuite/store';
 
 import type { EdgelessElement } from '../../_common/utils/index.js';
 import { PhasorElementType } from '../elements/edgeless-element.js';
-import { GROUP_ROOT_ID } from '../elements/group/consts.js';
+import { GROUP_ROOT } from '../elements/group/consts.js';
 import { GroupElement } from '../elements/group/group-element.js';
 import type { SurfaceBlockComponent } from '../surface-block.js';
+
+export const GroupMap = new Map<string, GroupElement>(); // { blockId: groupId }
+
+export function getGroupParent(element: string | EdgelessElement) {
+  const id = typeof element === 'string' ? element : element.id;
+  return GroupMap.get(id) ?? (GROUP_ROOT as GroupElement);
+}
+
+export function setGroupParent(
+  element: string | EdgelessElement,
+  group: GroupElement
+) {
+  const id = typeof element === 'string' ? element : element.id;
+  if (group === GROUP_ROOT) {
+    GroupMap.delete(id);
+    return;
+  }
+  GroupMap.set(id, group);
+}
+
+function getGroups(element: EdgelessElement) {
+  let group = getGroupParent(element);
+  const groups: { group: GroupElement; child: EdgelessElement }[] = [];
+  groups.push({ group: group, child: element });
+  while (group !== GROUP_ROOT) {
+    element = group;
+    group = getGroupParent(group);
+    groups.push({ group: group, child: element });
+  }
+  return groups;
+}
+
+export function compare(a: EdgelessElement, b: EdgelessElement) {
+  if (a.batch && b.batch) {
+    if (a.batch < b.batch) return -1;
+    else if (a.batch > b.batch) return 1;
+  }
+
+  if (getGroupParent(a) === getGroupParent(b)) {
+    if (a.index < b.index) return -1;
+    else if (a.index > b.index) return 1;
+  } else if (a instanceof GroupElement && isDescendant(b, a)) {
+    return -1;
+  } else if (b instanceof GroupElement && isDescendant(a, b)) {
+    return 1;
+  } else {
+    const aGroups = getGroups(a);
+    const bGroups = getGroups(b);
+
+    for (let i = 0; i < aGroups.length; i++) {
+      for (let j = 0; j < bGroups.length; j++) {
+        const aGroup = aGroups[i];
+        const bGroup = bGroups[j];
+        if (aGroup.group === bGroup.group) {
+          const aChild = aGroup.child;
+          const bChild = bGroup.child;
+          assertExists(aChild);
+          assertExists(bChild);
+          if (aChild.index < bChild.index) return -1;
+          else if (aChild.index > bChild.index) return 1;
+          return 0;
+        }
+      }
+    }
+  }
+
+  if (a.index < b.index) return -1;
+  else if (a.index > b.index) return 1;
+  return 0;
+}
+
+export function isDescendant(element: EdgelessElement, parent: GroupElement) {
+  if (getGroupParent(element) === parent) return true;
+
+  while (getGroupParent(element) !== GROUP_ROOT) {
+    element = getGroupParent(element)!;
+    assertExists(element);
+    if (getGroupParent(element) === parent) return true;
+  }
+
+  return false;
+}
 
 export function getElementsFromGroup(group: GroupElement) {
   const elements: EdgelessElement[] = [];
@@ -67,9 +149,8 @@ export class EdgelessGroupManager {
     });
     if (!isValid) return;
 
-    const parentGroup = surface.getGroupParent(selectionManager.firstElement);
-    const parent = surface.pickById(parentGroup) as GroupElement;
-    if (parent) {
+    const parent = surface.getGroupParent(selectionManager.firstElement);
+    if (parent !== GROUP_ROOT) {
       selectionManager.elements.forEach(element => {
         this.removeChild(parent, element.id);
       });
@@ -80,7 +161,7 @@ export class EdgelessGroupManager {
       title: new Workspace.Y.Text(`Group ${groups.length + 1}`),
     });
 
-    if (parent) {
+    if (parent !== GROUP_ROOT) {
       this.addChild(parent, groupId);
     }
 
@@ -90,32 +171,28 @@ export class EdgelessGroupManager {
     });
   }
 
-  isDescendant(element: EdgelessElement, parent: GroupElement) {
+  getRootElement(element: EdgelessElement) {
     const { surface } = this;
-    if (surface.getGroupParent(element) === parent.id) return true;
-
-    while (surface.getGroupParent(element) !== GROUP_ROOT_ID) {
-      element = this.surface.pickById(surface.getGroupParent(element))!;
-      assertExists(element);
-      if (surface.getGroupParent(element) === parent.id) return true;
+    let group = surface.getGroupParent(element);
+    while (group !== GROUP_ROOT) {
+      element = group;
+      group = surface.getGroupParent(group);
     }
-
-    return false;
+    return element;
   }
 
   releaseFromGroup(element: EdgelessElement) {
-    if (this.surface.getGroupParent(element) === GROUP_ROOT_ID) return;
+    if (this.surface.getGroupParent(element) === GROUP_ROOT) return;
 
-    const group = this.surface.pickById(
-      this.surface.getGroupParent(element)
-    ) as GroupElement;
+    const group = this.surface.getGroupParent(element);
 
     this.removeChild(group, element.id);
 
-    const parent = this.surface.pickById(
-      this.surface.getGroupParent(group)
-    ) as GroupElement;
-    if (parent) {
+    const indexes = this.surface.getIndexes(group, 'after');
+    indexes && this.surface.updateIndexes(indexes, [element]);
+
+    const parent = this.surface.getGroupParent(group);
+    if (parent != GROUP_ROOT) {
       this.addChild(parent, element.id);
     }
   }
@@ -125,14 +202,16 @@ export class EdgelessGroupManager {
     const { edgeless } = surface;
     const { selectionManager } = edgeless;
     const elements = group.childElements;
-    const parent = surface.pickById(
-      surface.getGroupParent(group)
-    ) as GroupElement;
-    if (parent) {
+    const parent = surface.getGroupParent(group);
+    if (parent !== GROUP_ROOT) {
       this.removeChild(parent, group.id);
     }
+
+    const indexes = this.surface.getIndexes(group, 'after', elements.length);
+    indexes && this.surface.updateIndexes(indexes, elements);
+
     surface.removeElement(group.id);
-    if (parent) {
+    if (parent !== GROUP_ROOT) {
       elements.forEach(element => {
         this.addChild(parent, element.id);
       });
@@ -145,7 +224,7 @@ export class EdgelessGroupManager {
 
   getRootElements(elements: EdgelessElement[]) {
     return elements.filter(
-      element => this.surface.getGroupParent(element) === GROUP_ROOT_ID
+      element => this.surface.getGroupParent(element) === GROUP_ROOT
     );
   }
 }

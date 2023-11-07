@@ -22,7 +22,6 @@ export * from './elements/edgeless-element.js';
 export * from './elements/index.js';
 export { ShapeMethodsMap } from './elements/shape/shapes/index.js';
 export { type ComputedValue } from './elements/surface-element.js';
-export { compare } from './grid.js';
 export { getStroke } from './perfect-freehand/getStroke.js';
 export type { SurfaceViewport } from './renderer.js';
 export { Overlay, Renderer } from './renderer.js';

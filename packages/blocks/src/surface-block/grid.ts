@@ -2,6 +2,7 @@ import { assertExists } from '@blocksuite/global/utils';
 
 import { GRID_SIZE, type IBound } from './consts.js';
 import type { SurfaceElement } from './elements/surface-element.js';
+import { compare } from './managers/group-manager.js';
 import { Bound } from './utils/bound.js';
 import {
   getBoundsWithRotation,
@@ -29,20 +30,6 @@ function rangeFromElement(ele: SurfaceElement): number[] {
   const minCol = getGridIndex(bound.y);
   const maxCol = getGridIndex(bound.maxY);
   return [minRow, maxRow, minCol, maxCol];
-}
-
-// Dont compare by id, '398303718:2' > '398303718:14' is true
-export function compare<
-  T extends { id: string; index: string; batch?: string | null },
->(a: T, b: T): number {
-  if (a.batch && b.batch) {
-    if (a.batch < b.batch) return -1;
-    else if (a.batch > b.batch) return 1;
-  }
-
-  if (a.index < b.index) return -1;
-  else if (a.index > b.index) return 1;
-  return 0;
 }
 
 export class GridManager {
