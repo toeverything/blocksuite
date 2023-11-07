@@ -1138,7 +1138,7 @@ export async function getGroupIds(page: Page) {
     if (!container) throw new Error('container not found');
     return container.surface
       .getElements()
-      .map(g => container.surface.getGroupParent(g));
+      .map(g => container.surface.getGroupParent(g).id);
   });
 }
 
@@ -1167,7 +1167,26 @@ export async function getIds(page: Page) {
   return await page.evaluate(() => {
     const container = document.querySelector('affine-edgeless-page');
     if (!container) throw new Error('container not found');
-    return container.surface.getElements().map(g => g.id);
+    return container.surface.getElements().map(e => e.id);
+  });
+}
+
+export async function getIndexes(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    return container.surface.getElements().map(e => e.index);
+  });
+}
+
+export async function getSortedIdsInViewport(page: Page) {
+  return await page.evaluate(() => {
+    const container = document.querySelector('affine-edgeless-page');
+    if (!container) throw new Error('container not found');
+    const { surface } = container;
+    return surface.viewport.gridManager
+      .search(surface.viewport.viewportBounds)
+      .map(e => e.id);
   });
 }
 

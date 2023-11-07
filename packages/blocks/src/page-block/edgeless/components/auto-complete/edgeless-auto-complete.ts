@@ -10,18 +10,20 @@ import {
   AutoCompleteArrowIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
-import type { IVec, NoteBlockModel, ShapeType } from '../../../../index.js';
+import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
   type Bound,
   type Connection,
   type ConnectorElement,
   ConnectorMode,
+  type IVec,
   Overlay,
   PhasorElementType,
   rotatePoints,
   type RoughCanvas,
   ShapeElement,
   ShapeMethodsMap,
+  type ShapeType,
   Vec,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';

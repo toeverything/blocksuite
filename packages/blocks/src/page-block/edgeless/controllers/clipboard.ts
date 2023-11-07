@@ -28,7 +28,7 @@ import type { Connection } from '../../../surface-block/elements/connector/types
 import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
 import type { PhasorElement } from '../../../surface-block/elements/index.js';
 import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
-import { compare } from '../../../surface-block/grid.js';
+import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import {

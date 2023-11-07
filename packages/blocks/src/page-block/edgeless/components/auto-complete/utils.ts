@@ -300,7 +300,7 @@ export async function createEdgelessElement(
     const serializedBlock = (await getBlockClipboardInfo(current)).json;
     await noteService.json2Block(note, serializedBlock.children);
   }
-  const group = surface.pickById(surface.getGroupParent(current));
+  const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {
     surface.group.addChild(group, id);
   }
@@ -319,7 +319,7 @@ export async function createShapeElement(
     radius: targetType === 'roundedRect' ? 0.1 : 0,
     text: new Workspace.Y.Text(),
   });
-  const group = surface.pickById(surface.getGroupParent(current));
+  const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {
     surface.group.addChild(group, id);
   }
@@ -340,7 +340,7 @@ export async function createTextElement(
     bold: false,
     italic: false,
   });
-  const group = surface.pickById(surface.getGroupParent(current));
+  const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {
     surface.group.addChild(group, id);
   }

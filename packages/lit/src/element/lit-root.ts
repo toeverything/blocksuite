@@ -10,7 +10,12 @@ import type {
 import { BlockStdProvider } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
-import { nothing, type PropertyValues, type TemplateResult } from 'lit';
+import {
+  LitElement,
+  nothing,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import type { StaticValue } from 'lit/static-html.js';
@@ -66,6 +71,26 @@ export class BlockSuiteRoot extends WithDisposable(ShadowlessElement) {
       this.std.spec.applySpecs(this.preset);
     }
     super.willUpdate(changedProperties);
+  }
+
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    const root = this.page.root;
+    assertExists(root);
+    const view = this.std.spec.getView(root.flavour);
+    assertExists(view);
+    const widgetTags = Object.values(view.widgets ?? {});
+    const elementsTags = [view.component, ...widgetTags];
+    await Promise.all(
+      elementsTags.map(tag => {
+        const element = this.renderRoot.querySelector(tag._$litStatic$);
+        if (element instanceof LitElement) {
+          return element.updateComplete;
+        }
+        return;
+      })
+    );
+    return result;
   }
 
   override connectedCallback() {

@@ -31,6 +31,10 @@ import { getBackgroundGrid } from '../page-block/edgeless/utils/query.js';
 import { type PhasorElementType } from '../surface-block/elements/edgeless-element.js';
 import type { SurfaceElement } from '../surface-block/elements/surface-element.js';
 import { ConnectorElement, ElementCtors } from '../surface-block/index.js';
+import {
+  getGroupParent,
+  setGroupParent,
+} from '../surface-block/managers/group-manager.js';
 import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
@@ -513,8 +517,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       },
       updateElementLocalRecord: () => {},
       pickById: id => this.getModel(id),
-      getGroupParent: () => '',
-      setGroupParent: () => {},
+      getGroupParent: getGroupParent,
+      setGroupParent: setGroupParent,
     });
     element.computedValue = this._getCSSPropertyValue;
     element.mount(this._surfaceRenderer);
@@ -577,8 +581,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         getLocalRecord: () => undefined,
         updateElementLocalRecord: () => {},
         pickById: id => this.getModel(id),
-        getGroupParent: () => '',
-        setGroupParent: () => {},
+        getGroupParent: getGroupParent,
+        setGroupParent: setGroupParent,
       });
       element.computedValue = this._getCSSPropertyValue;
       element.mount(this._surfaceRenderer);
