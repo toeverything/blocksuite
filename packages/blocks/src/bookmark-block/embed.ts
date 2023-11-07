@@ -130,7 +130,7 @@ export const embedIframeTemplate = (url: string) => {
   const embedUrl = formatEmbedUrl(url);
   if (!embedUrl) return null;
   return html`<iframe
-    style="width: 100%;"
+    style="width: 100%; color-scheme: auto;"
     height="480"
     scrolling="no"
     src=${embedUrl}
