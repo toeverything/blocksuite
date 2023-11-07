@@ -306,6 +306,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
       const parent = this.page.getParent(this.model) as BaseBlockModel;
       const index = parent.children.indexOf(this.model);
+      const isLast = parent.children.length - 1 === index;
       let addedBlockId: string;
       let path: string[];
 
@@ -314,13 +315,32 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         addedBlockId = this.page.addBlock('affine:paragraph', {}, noteId, 0);
         path = this.parentPath.concat([noteId, addedBlockId]);
       } else if (matchFlavours(parent, ['affine:note'])) {
-        addedBlockId = this.page.addBlock(
-          'affine:paragraph',
-          {},
-          parent,
-          index + 1
-        );
-        path = this.parentPath.concat([addedBlockId]);
+        if (!isLast) {
+          addedBlockId = this.page.addBlock(
+            'affine:paragraph',
+            {},
+            parent,
+            index + 1
+          );
+          path = this.parentPath.concat([addedBlockId]);
+        } else {
+          const root = this.page.getParent(parent);
+
+          if (!root) return;
+
+          const parentIdx = root.children.indexOf(parent);
+          const targetParent =
+            root.children[parentIdx + 1]?.id ??
+            this.page.addBlock('affine:note', {}, root, parentIdx + 1);
+
+          addedBlockId = this.page.addBlock(
+            'affine:paragraph',
+            {},
+            this.page.getBlockById(targetParent),
+            0
+          );
+          path = [root.id, targetParent, addedBlockId];
+        }
       }
 
       requestAnimationFrame(() => {
