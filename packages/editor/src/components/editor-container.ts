@@ -100,6 +100,15 @@ export class EditorContainer
     tagClicked: new Slot<{ tagId: string }>(),
   };
 
+  override async getUpdateComplete(): Promise<boolean> {
+    const result = await super.getUpdateComplete();
+    const root = this.root.value;
+    if (root) {
+      await root.updateComplete;
+    }
+    return result;
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
