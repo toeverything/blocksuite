@@ -175,7 +175,7 @@ export class EdgelessClipboardController implements ReactiveController {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.type.startsWith('image')) {
-          const sourceId = await this.page.blobs.set(file);
+          const sourceId = await this.page.blob.set(file);
           res.push({ file, sourceId });
         }
       }

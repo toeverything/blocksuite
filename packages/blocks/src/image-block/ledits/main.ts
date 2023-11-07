@@ -52,7 +52,7 @@ export function openLeditsEditor(
             modal.close();
           }
 
-          const blobManager = model.page.blobs;
+          const blobManager = model.page.blob;
           blobManager.set(newBlob).then(sourceId => {
             model.page.updateBlock(model, {
               sourceId,

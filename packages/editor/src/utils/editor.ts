@@ -33,7 +33,7 @@ export const createBlockHub: (
 
       if (data.flavour === 'affine:image' && data.type === 'image') {
         models.push(
-          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+          ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
             flavour: 'affine:image',
             sourceId,
           }))
@@ -76,7 +76,7 @@ export const createBlockHub: (
       const isDatabase = props.flavour === 'affine:database';
       if (props.flavour === 'affine:image' && props.type === 'image') {
         models.push(
-          ...(await uploadImageFromLocal(page.blobs)).map(({ sourceId }) => ({
+          ...(await uploadImageFromLocal(page.blob)).map(({ sourceId }) => ({
             flavour: 'affine:image',
             sourceId,
           }))

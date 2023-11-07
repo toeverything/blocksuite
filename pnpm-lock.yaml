@@ -156,15 +156,27 @@ importers:
 
   packages/blocks:
     dependencies:
+      '@blocksuite/block-std':
+        specifier: workspace:*
+        version: link:../block-std
       '@blocksuite/global':
         specifier: workspace:*
         version: link:../global
+      '@blocksuite/lit':
+        specifier: workspace:*
+        version: link:../lit
+      '@blocksuite/store':
+        specifier: workspace:*
+        version: link:../store
       '@blocksuite/virgo':
         specifier: workspace:*
         version: link:../virgo
       '@floating-ui/dom':
         specifier: ^1.5.1
         version: 1.5.3
+      '@toeverything/theme':
+        specifier: ^0.7.16
+        version: 0.7.21
       '@types/webfontloader':
         specifier: ^1.6.35
         version: 1.6.36
@@ -193,7 +205,7 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0
       nanoid:
-        specifier: ^4
+        specifier: ^4.0.2
         version: 4.0.2
       pdf-lib:
         specifier: ^1.17.1
@@ -211,18 +223,6 @@ importers:
         specifier: ^3.22.2
         version: 3.22.4
     devDependencies:
-      '@blocksuite/block-std':
-        specifier: workspace:*
-        version: link:../block-std
-      '@blocksuite/lit':
-        specifier: workspace:*
-        version: link:../lit
-      '@blocksuite/store':
-        specifier: workspace:*
-        version: link:../store
-      '@toeverything/theme':
-        specifier: ^0.7.16
-        version: 0.7.21
       '@types/marked':
         specifier: ^4.3.1
         version: 4.3.2
@@ -260,16 +260,12 @@ importers:
 
   packages/editor:
     dependencies:
-      '@blocksuite/global':
-        specifier: workspace:*
-        version: link:../global
-      lit:
-        specifier: ^2.8.0
-        version: 2.8.0
-    devDependencies:
       '@blocksuite/blocks':
         specifier: workspace:*
         version: link:../blocks
+      '@blocksuite/global':
+        specifier: workspace:*
+        version: link:../global
       '@blocksuite/lit':
         specifier: workspace:*
         version: link:../lit
@@ -279,6 +275,9 @@ importers:
       '@toeverything/theme':
         specifier: ^0.7.16
         version: 0.7.21
+      lit:
+        specifier: ^2.8.0
+        version: 2.8.0
 
   packages/global:
     dependencies:
@@ -1707,7 +1706,7 @@ packages:
 
   /@toeverything/theme@0.7.21:
     resolution: {integrity: sha512-tCk7WXMrLp2qSVb/dXmbUsd68pvCWX1sT7N6iMmSJuF6AopqdeAoHJHmNYy93P7WgX4dX7saPxXCui3Gdq7QkQ==}
-    dev: true
+    dev: false
 
   /@toeverything/y-indexeddb@0.9.0-canary.0(yjs@13.6.8):
     resolution: {integrity: sha512-Jz3b1USNqethCAZBCIreTVJ7JzvUNQDDHym1FFGUCns+zEZJRS0xUXxA3AecN/e6lkBOp8BITSYhfILcTTosXA==}

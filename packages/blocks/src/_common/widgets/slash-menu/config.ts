@@ -237,7 +237,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           if (!parent) {
             return;
           }
-          const fileData = await uploadImageFromLocal(pageElement.page.blobs);
+          const fileData = await uploadImageFromLocal(pageElement.page.blob);
           const props = fileData.map(
             ({
               sourceId,

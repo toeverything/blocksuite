@@ -23,5 +23,5 @@ features:
   - title: 🧬 Intrinsically Collaborative
     details: Powered by CRDT, BlockSuite built conflict resolution and time travel into its core. Collaboration ready from day one.
   - title: 🚧 Extensible Suite
-    details: Experience extensibility through comprehensive API and reusable packages. Battery included. Framework agnostic.
+    details: Experience extensibility through comprehensive APIs and reusable packages. Battery included. Framework agnostic.
 ---

@@ -96,14 +96,20 @@ export class CommandManager {
             cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
           }
         };
+
         let success = false;
-        runCmds(ctx as BlockSuite.CommandData, [
-          ...cmds,
-          (_, next) => {
-            success = true;
-            next();
-          },
-        ]);
+        try {
+          runCmds(ctx as BlockSuite.CommandData, [
+            ...cmds,
+            (_, next) => {
+              success = true;
+              next();
+            },
+          ]);
+        } catch (err) {
+          console.error(err);
+        }
+
         return success;
       },
       with: value => {

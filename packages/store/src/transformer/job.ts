@@ -46,7 +46,7 @@ export class Job {
 
   constructor({ workspace, middlewares = [] }: JobConfig) {
     this._workspace = workspace;
-    this._assetsManager = new AssetsManager({ blobs: workspace.blobs });
+    this._assetsManager = new AssetsManager({ blob: workspace.blob });
 
     middlewares.forEach(middleware => {
       middleware({

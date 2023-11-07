@@ -65,11 +65,6 @@ export { assertExists };
 
 export const defaultStore: SerializedStore = {
   meta: {
-    properties: {
-      tags: {
-        options: [],
-      },
-    },
     pages: [
       {
         id: 'page:home',
@@ -189,6 +184,14 @@ export async function assertRichTexts(page: Page, texts: string[]) {
     });
   }, currentEditorIndex);
   expect(actualTexts).toEqual(texts);
+}
+
+export async function assertSelectionPath(page: Page, expected: string[]) {
+  const actual = await page.evaluate(() => {
+    const { root } = window;
+    return root.std.selection.value[0].path;
+  });
+  expect(actual).toEqual(expected);
 }
 
 export async function assertEdgelessCanvasText(page: Page, text: string) {

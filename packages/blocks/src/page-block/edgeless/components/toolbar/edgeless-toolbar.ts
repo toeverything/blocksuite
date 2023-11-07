@@ -197,7 +197,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   private async _addImages() {
     this._imageLoading = true;
 
-    const fileInfos = await uploadImageFromLocal(this.edgeless.page.blobs);
+    const fileInfos = await uploadImageFromLocal(this.edgeless.page.blob);
 
     if (!fileInfos.length) {
       this._imageLoading = false;
