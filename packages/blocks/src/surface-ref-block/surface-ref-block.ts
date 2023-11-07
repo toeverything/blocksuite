@@ -282,6 +282,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
+    if (!this._shouldRender()) return;
     this._initHotkey();
     this._initSurfaceModel();
     this._initReferencedModel();
