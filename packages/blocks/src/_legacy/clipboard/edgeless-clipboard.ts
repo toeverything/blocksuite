@@ -25,7 +25,6 @@ import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
 import {
   Bound,
-  compare,
   type Connection,
   ConnectorElement,
   deserializeXYWH,
@@ -35,6 +34,7 @@ import {
   type PhasorElementType,
   serializeXYWH,
 } from '../../surface-block/index.js';
+import { compare } from '../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service/index.js';

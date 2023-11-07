@@ -221,7 +221,7 @@ export class EdgelessSelectionManager {
     } else {
       if (
         this.elements.some(ele => {
-          surface.getGroupParent(ele) !== this._activeGroup?.id;
+          surface.getGroupParent(ele) !== this._activeGroup;
         }) ||
         this.elements.length === 0
       ) {

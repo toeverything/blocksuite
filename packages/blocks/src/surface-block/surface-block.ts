@@ -1,6 +1,6 @@
 import '../page-block/edgeless/components/block-portal/edgeless-block-portal.js';
 
-import { assertExists, Slot } from '@blocksuite/global/utils';
+import { assertEquals, assertExists, Slot } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
 import type { BlockProps } from '@blocksuite/store';
 import type { BaseBlockModel } from '@blocksuite/store';
@@ -14,14 +14,9 @@ import {
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import {
-  bringForward,
   type EdgelessElement,
-  reorder,
   type ReorderingAction,
-  type ReorderingRange,
-  reorderTo,
   type Selectable,
-  sendBackward,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
@@ -53,7 +48,7 @@ import {
   type IPhasorElementType,
   isPhasorElementType,
 } from './elements/edgeless-element.js';
-import { GROUP_ROOT_ID } from './elements/group/consts.js';
+import { GROUP_ROOT } from './elements/group/consts.js';
 import {
   BrushElement,
   ConnectorElement,
@@ -61,12 +56,16 @@ import {
   ElementDefaultProps,
   GroupElement,
   type IPhasorElementLocalRecord,
-  type PhasorElement,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
-import { compare } from './grid.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
-import { EdgelessGroupManager } from './managers/group-manager.js';
+import {
+  compare,
+  EdgelessGroupManager,
+  getGroupParent,
+  isDescendant,
+  setGroupParent,
+} from './managers/group-manager.js';
 import { Renderer } from './renderer.js';
 import { randomSeed } from './rough/math.js';
 import type { SurfaceBlockModel } from './surface-model.js';
@@ -81,6 +80,9 @@ import {
 import { serializeXYWH } from './utils/xywh.js';
 
 type id = string;
+
+const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
+
 export enum EdgelessBlocksFlavour {
   NOTE = 'affine:note',
   FRAME = 'affine:frame',
@@ -154,13 +156,14 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     id,
     IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
   >();
-  private _groupMap = new Map<string, string>(); // { blockId: groupId }
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
   frame!: EdgelessFrameManager;
   group!: EdgelessGroupManager;
   compare = compare;
+  getGroupParent = getGroupParent;
+  setGroupParent = setGroupParent;
 
   private _defaultBatch = 'a1';
   private _batches = new Map<string, Batch<IEdgelessElement>>();
@@ -198,35 +201,18 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.getBlocks(flavour).sort(this.compare);
   }
 
-  getGroupParent(element: id | EdgelessElement) {
-    const id = typeof element === 'string' ? element : element.id;
-    return this._groupMap.get(id) ?? GROUP_ROOT_ID;
-  }
-
-  setGroupParent(element: id | EdgelessElement, groupId: string) {
-    const id = typeof element === 'string' ? element : element.id;
-    if (groupId === GROUP_ROOT_ID) {
-      this._groupMap.delete(id);
-      return;
-    }
-    this._groupMap.set(id, groupId);
-  }
-
   get blocks() {
     return [
-      ...this.getBlocks(EdgelessBlockType.FRAME),
-      ...this.getBlocks(EdgelessBlockType.NOTE),
-      ...this.getBlocks(EdgelessBlockType.IMAGE),
+      ...this.getBlocks(FRAME),
+      ...this.getBlocks(NOTE),
+      ...this.getBlocks(IMAGE),
     ];
   }
 
   get sortedBlocks() {
     return [
-      ...this.getBlocks(EdgelessBlockType.FRAME).sort(this.compare),
-      ...[
-        ...this.getBlocks(EdgelessBlockType.NOTE),
-        ...this.getBlocks(EdgelessBlockType.IMAGE),
-      ].sort(this.compare),
+      ...this.getBlocks(FRAME).sort(this.compare),
+      ...[...this.getBlocks(NOTE), ...this.getBlocks(IMAGE)].sort(this.compare),
     ];
   }
 
@@ -270,14 +256,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _initEvents() {
     const { _disposables, edgeless } = this;
 
-    _disposables.add(
-      edgeless.slots.reorderingBlocksUpdated.on(this._reorderBlocks.bind(this))
-    );
-    _disposables.add(
-      edgeless.slots.reorderingShapesUpdated.on(this._reorderShapes.bind(this))
-    );
+    _disposables.add(edgeless.slots.reorderingBlocksUpdated.on(this._reorder));
+    _disposables.add(edgeless.slots.reorderingShapesUpdated.on(this._reorder));
 
-    this._disposables.add(
+    _disposables.add(
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
@@ -289,7 +271,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       })
     );
 
-    this._disposables.add(
+    _disposables.add(
       this.slots.elementUpdated.on(({ id, props }) => {
         if ('xywh' in props || 'rotate' in props) {
           this.edgeless.slots.elementSizeUpdated.emit(id);
@@ -306,7 +288,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       })
     );
 
-    this._disposables.add(
+    _disposables.add(
       this.edgeless.slots.elementSizeUpdated.on(id => {
         const element = this.pickById(id);
         if (isConnectable(element)) {
@@ -339,16 +321,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
             this._addToBatch(model);
           }
         } else if (e.type === 'delete') {
-          if (
-            e.flavour === EdgelessBlockType.NOTE ||
-            e.flavour === EdgelessBlockType.FRAME
-          ) {
+          if (e.flavour === NOTE || e.flavour === FRAME) {
             const model = this.pickById(e.id) as TopLevelBlockModel;
             this._removeFromBatch(model);
-          } else if (
-            e.flavour === EdgelessBlockType.IMAGE &&
-            e.parent === this.model.id
-          ) {
+          } else if (e.flavour === IMAGE && e.parent === this.model.id) {
             const model = this.pickById(e.id) as TopLevelBlockModel;
             this._removeFromBatch(model);
           }
@@ -357,182 +333,158 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     );
   }
 
-  private _reorderBlocks({
-    elements,
-    type,
-  }: ReorderingAction<TopLevelBlockModel>) {
-    const batchId = elements[0].batch;
-    const batch = this.getBatch(batchId);
-    const updateIndexes = (keys: string[], elements: Selectable[]) => {
-      this.updateIndexes(keys, elements as TopLevelBlockModel[], keys => {
-        const min = keys[0];
-        if (min < batch.min) {
-          batch.min = min;
-        }
-        const max = keys[keys.length - 1];
-        if (max > batch.max) {
-          batch.max = max;
-        }
-      });
-    };
+  private _getSortedSameGroupElements(element: EdgelessElement) {
+    let elements: EdgelessElement[];
+    const group = this.getGroupParent(element);
+    if (group === GROUP_ROOT) {
+      elements = this.group
+        .getRootElements(
+          isTopLevelBlock(element)
+            ? [...this.getBlocks(NOTE), ...this.getBlocks(IMAGE)]
+            : this.getElements()
+        )
+        .sort(this.compare);
+    } else {
+      elements = group.childElements.sort(this.compare);
+    }
+    return elements;
+  }
 
-    switch (type) {
-      case 'front':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: batch.max,
-            end: null,
-          }),
-          updateIndexes
-        );
-        break;
-      case 'forward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: generateKeyBetween(null, pickedElements[0].index),
-            end: null,
-          }),
-          () => this.edgeless.getSortedElementsWithViewportBounds(elements),
-          bringForward,
-          updateIndexes
-        );
-        break;
-      case 'backward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: null,
-            end: pickedElements[pickedElements.length - 1].index,
-          }),
-          () => this.edgeless.getSortedElementsWithViewportBounds(elements),
-          sendBackward,
-          updateIndexes
-        );
-        break;
-      case 'back':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: null,
-            end: batch.min,
-          }),
-          updateIndexes
-        );
-        break;
+  getIndexes(element: EdgelessElement, type: 'before' | 'after', number = 1) {
+    const elements = this._getSortedSameGroupElements(element);
+    const index = elements.findIndex(e => e.id === element.id);
+    if (type === 'before') {
+      return generateNKeysBetween(
+        elements[index - 1]?.index ?? null,
+        element.index,
+        number
+      );
+    } else {
+      return generateNKeysBetween(
+        element.index,
+        elements[index + 1]?.index ?? null,
+        number
+      );
     }
   }
 
-  private _reorderShapes = ({
-    elements,
-    type,
-  }: ReorderingAction<Selectable>) => {
-    const batch = this.getBatch(this.defaultBatch);
-    const updateIndexes = (keys: string[], elements: Selectable[]) => {
-      this.updateIndexes(keys, elements as PhasorElement[], keys => {
-        const min = keys[0];
-        if (min < batch.min) {
-          batch.min = min;
-        }
-        const max = keys[keys.length - 1];
-        if (max > batch.max) {
-          batch.max = max;
-        }
-      });
-    };
+  private _reorder = ({ elements, type }: ReorderingAction<Selectable>) => {
+    if (!elements.length) return;
+
+    if (
+      elements.some(
+        element =>
+          this.getGroupParent(element) !== this.getGroupParent(elements[0])
+      )
+    ) {
+      console.warn(`can't reorder shapes in different groups`);
+      return;
+    }
+
+    const levelElements = this._getSortedSameGroupElements(elements[0]);
+    elements = elements.sort(this.compare);
+    let indexes: string[] = [];
 
     switch (type) {
       case 'front':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: batch.max,
-            end: null,
-          }),
-          updateIndexes
+        indexes = generateNKeysBetween(
+          levelElements.at(-1)?.index,
+          null,
+          elements.length
         );
+
         break;
-      case 'forward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: generateKeyBetween(null, pickedElements[0].index),
-            end: null,
-          }),
-          () => this.getSortedPhasorElementsWithViewportBounds(),
-          bringForward,
-          updateIndexes
+      case 'forward': {
+        let start = -1;
+        let end = -1;
+        let index = -1;
+        for (let i = 0; i < elements.length; i++) {
+          const current = elements[i];
+          index = levelElements.findIndex(e => e.id === current.id);
+          if (start < 0) {
+            start = index;
+            end = index;
+            continue;
+          } else if (index - end === 1) {
+            end = index;
+            continue;
+          } else {
+            indexes.push(
+              ...generateNKeysBetween(
+                levelElements[end + 1]?.index ?? null,
+                levelElements[end + 2]?.index ?? null,
+                end - start + 1
+              )
+            );
+            start = index;
+            end = index;
+          }
+        }
+
+        indexes.push(
+          ...generateNKeysBetween(
+            levelElements[index + 1]?.index ?? null,
+            levelElements[index + 2]?.index ?? null,
+            end - start + 1
+          )
         );
+
+        assertEquals(elements.length, indexes.length);
+
         break;
-      case 'backward':
-        this._reorder(
-          elements,
-          (pickedElements: Selectable[]) => ({
-            start: null,
-            end: pickedElements[pickedElements.length - 1].index,
-          }),
-          () => this.getSortedPhasorElementsWithViewportBounds(),
-          sendBackward,
-          updateIndexes
+      }
+
+      case 'backward': {
+        let start = -1;
+        let end = -1;
+        let index = -1;
+        for (let i = elements.length - 1; i >= 0; i--) {
+          const current = elements[i];
+          index = levelElements.findIndex(e => e.id === current.id);
+          if (start < 0) {
+            start = index;
+            end = index;
+            continue;
+          } else if (index - end === -1) {
+            end = index;
+            continue;
+          } else {
+            indexes.unshift(
+              ...generateNKeysBetween(
+                levelElements[end - 2]?.index ?? null,
+                levelElements[end - 1]?.index ?? null,
+                Math.abs(end - start) + 1
+              )
+            );
+            start = index;
+            end = index;
+          }
+        }
+
+        indexes.unshift(
+          ...generateNKeysBetween(
+            levelElements[index - 2]?.index ?? null,
+            levelElements[index - 1]?.index ?? null,
+            Math.abs(end - start) + 1
+          )
         );
+
+        assertEquals(elements.length, indexes.length);
+
         break;
+      }
       case 'back':
-        this._reorderTo(
-          elements,
-          () => ({
-            start: null,
-            end: batch.min,
-          }),
-          updateIndexes
+        indexes = generateNKeysBetween(
+          null,
+          levelElements[0]?.index,
+          elements.length
         );
+
         break;
     }
+
+    if (indexes) this.updateIndexes(indexes, elements);
   };
-
-  /**
-   * Brings to front or sends to back.
-   */
-  private _reorderTo(
-    elements: Selectable[],
-    getIndexes: (elements: Selectable[]) => {
-      start: string | null;
-      end: string | null;
-    },
-    updateIndexes: (keys: string[], elements: Selectable[]) => void
-  ) {
-    reorderTo(
-      elements,
-      compare,
-      getIndexes,
-      (start, end, len) => generateNKeysBetween(start, end, len),
-      updateIndexes
-    );
-  }
-
-  /**
-   * Brings forward or sends backward layer by layer.
-   */
-  private _reorder(
-    elements: Selectable[],
-    getIndexes: (pickedElements: Selectable[]) => {
-      start: string | null;
-      end: string | null;
-    },
-    pick: () => Selectable[],
-    order: (ranges: ReorderingRange[], pickedElements: Selectable[]) => void,
-    updateIndexes: (keys: string[], elements: Selectable[]) => void
-  ) {
-    reorder(
-      elements,
-      compare,
-      pick,
-      getIndexes,
-      order,
-      (start, end, len) => generateNKeysBetween(start, end, len),
-      updateIndexes
-    );
-  }
 
   private _initEffects() {
     const { _disposables, page, edgeless } = this;
@@ -669,8 +621,8 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       getGroupParent: (element: string | EdgelessElement) => {
         return this.getGroupParent(element);
       },
-      setGroupParent: (element, groupId) => {
-        return this.setGroupParent(element, groupId);
+      setGroupParent: (element, group) => {
+        return this.setGroupParent(element, group);
       },
       selectionManager: this.edgeless.selectionManager,
     });
@@ -757,7 +709,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     } else if (type.action === 'delete') {
       const element = this._elements.get(id);
       assertExists(element);
-      const group = this.pickById(this.getGroupParent(id));
+      const group = this.pickById(this.getGroupParent(id).id);
       if (group) {
         this.group.removeChild(<GroupElement>group, id);
       }
@@ -999,13 +951,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       while (
         picked === selectionManager.activeGroup ||
         (picked instanceof GroupElement &&
-          this.group.isDescendant(selectionManager.activeGroup, picked))
+          isDescendant(selectionManager.activeGroup, picked))
       ) {
         picked = results[--index];
       }
     } else if (picked) {
       let index = results.length - 1;
-      while (this.getGroupParent(picked.id) !== GROUP_ROOT_ID) {
+      while (this.getGroupParent(picked.id) !== GROUP_ROOT) {
         if (--index < 0) {
           picked = null;
           break;
@@ -1025,7 +977,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const picked = candidates.filter(
       element =>
         element.boxSelect(bound) &&
-        this.getGroupParent(element.id) === GROUP_ROOT_ID
+        this.getGroupParent(element.id) === GROUP_ROOT
     );
     return picked;
   }
@@ -1033,7 +985,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   getSortedPhasorElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds)
       .filter(e => !isTopLevelBlock(e))
-      .sort(compare);
+      .sort(this.compare);
   }
 
   dispose() {
