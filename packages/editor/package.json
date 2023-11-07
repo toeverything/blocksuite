@@ -12,12 +12,12 @@
   "author": "toeverything",
   "license": "MPL-2.0",
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/blocks": "workspace:*",
+    "@blocksuite/global": "workspace:*",
     "@blocksuite/lit": "workspace:*",
     "@blocksuite/store": "workspace:*",
-    "@toeverything/theme": "^0.7.16",
-    "lit": "^2.8.0"
+    "@toeverything/theme": "^0.7.21",
+    "lit": "^3.0.2"
   },
   "exports": {
     ".": "./src/index.ts",

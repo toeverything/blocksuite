@@ -11,7 +11,6 @@ import {
   getBlockElementByModel,
   getDocPage,
   getDocPageByElement,
-  getPageBlock,
 } from './query.js';
 import { Rect } from './rect.js';
 import type { SelectionPosition } from './types.js';
@@ -219,7 +218,10 @@ export function focusBlockByModel(
     throw new Error("Can't focus note or page!");
   }
 
-  const pageBlock = getPageBlock(model) as DocPageBlockComponent;
+  assertExists(model.page.root);
+  const pageBlock = getBlockElementByModel(
+    model.page.root
+  ) as DocPageBlockComponent;
   assertExists(pageBlock);
 
   const element = getBlockElementByModel(model);

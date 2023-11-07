@@ -145,15 +145,10 @@ export class BlockElement<
     return result;
   }
 
-  // FIXME: remove this method
-  calculatePath = () => {
-    return this.root.view.calculatePath(this);
-  };
-
   override connectedCallback() {
     super.connectedCallback();
 
-    this.path = this.calculatePath();
+    this.path = this.root.view.calculatePath(this);
 
     this._disposables.add(
       this.model.propsUpdated.on(() => {

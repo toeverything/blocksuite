@@ -317,19 +317,24 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   };
 
+  private _moveToCurrentFrame() {
+    const current = this._currentFrameIndex;
+    const viewport = this.edgeless.surface.viewport;
+    const frame = this._frames[current];
+
+    if (frame) {
+      const bound = Bound.deserialize(frame.xywh);
+      viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
+    }
+  }
+
   protected override updated(changedProperties: PropertyValues) {
     const { type } = this.edgelessTool;
     if (
       changedProperties.has('_currentFrameIndex') &&
       type === 'frameNavigator'
     ) {
-      const current = this._currentFrameIndex;
-      const viewport = this.edgeless.surface.viewport;
-      const frame = this._frames[current];
-      if (frame) {
-        const bound = Bound.deserialize(frame.xywh);
-        viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
-      }
+      this._moveToCurrentFrame();
     }
   }
 
@@ -398,6 +403,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         @click=${() => {
           this.setEdgelessTool({ type: 'default' });
           document.fullscreenElement && this._toggleFullScreen();
+          setTimeout(() => this._moveToCurrentFrame(), 400);
         }}
       >
         Stop
