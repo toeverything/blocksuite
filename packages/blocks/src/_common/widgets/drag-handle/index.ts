@@ -32,7 +32,6 @@ import { autoScroll } from '../../../page-block/text-selection/utils.js';
 import {
   getNotesMergeInfo,
   mergeNotes,
-  splitNotesAtRefBlock,
 } from '../../../surface-ref-block/utils.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
@@ -917,7 +916,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     }
 
     mergeNotes(this.page, mergeableNotes);
-    splitNotesAtRefBlock(surfaceRefBlocks);
 
     // TODO: need a better way to update selection
     // Should update selection after moving blocks
