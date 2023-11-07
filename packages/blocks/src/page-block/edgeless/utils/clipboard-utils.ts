@@ -24,20 +24,31 @@ export async function duplicate(
         : getGridBound(element);
       bound.x += totalBound.w + offset;
       if (isNoteBlock(element)) {
-        const id = surface.addElement(
+        const noteId = surface.addElement(
           element.flavour,
           { xywh: bound.serialize() },
           page.root?.id
         );
-        const block = page.getBlockById(id);
+        const block = page.getBlockById(noteId);
         assertExists(block);
+
+        const note = surface.pickById(noteId);
+        assertExists(note);
 
         const job = new Job({
           workspace: edgeless.root.std.workspace,
         });
-        await job.blockToSnapshot(block);
+        const snapshot = await job.blockToSnapshot(element);
+        snapshot.children.forEach(child => {
+          edgeless.pageClipboardController.onBlockSnapshotPaste(
+            child,
+            page,
+            note.id,
+            0
+          );
+        });
 
-        return id;
+        return noteId;
       } else if (isFrameBlock(element)) {
         const job = new Job({
           workspace: edgeless.root.std.workspace,
