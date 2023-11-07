@@ -256,14 +256,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _initEvents() {
     const { _disposables, edgeless } = this;
 
-    _disposables.add(
-      edgeless.slots.reorderingBlocksUpdated.on(this._reorder.bind(this))
-    );
-    _disposables.add(
-      edgeless.slots.reorderingShapesUpdated.on(this._reorder.bind(this))
-    );
+    _disposables.add(edgeless.slots.reorderingBlocksUpdated.on(this._reorder));
+    _disposables.add(edgeless.slots.reorderingShapesUpdated.on(this._reorder));
 
-    this._disposables.add(
+    _disposables.add(
       this.slots.elementAdded.on(id => {
         const element = this.pickById(id);
         assertExists(element);
@@ -275,7 +271,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       })
     );
 
-    this._disposables.add(
+    _disposables.add(
       this.slots.elementUpdated.on(({ id, props }) => {
         if ('xywh' in props || 'rotate' in props) {
           this.edgeless.slots.elementSizeUpdated.emit(id);
@@ -292,7 +288,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       })
     );
 
-    this._disposables.add(
+    _disposables.add(
       this.edgeless.slots.elementSizeUpdated.on(id => {
         const element = this.pickById(id);
         if (isConnectable(element)) {
@@ -372,7 +368,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
   }
 
-  private _reorder({ elements, type }: ReorderingAction<Selectable>) {
+  private _reorder = ({ elements, type }: ReorderingAction<Selectable>) => {
     if (!elements.length) return;
 
     if (
@@ -488,7 +484,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
 
     if (indexes) this.updateIndexes(indexes, elements);
-  }
+  };
 
   private _initEffects() {
     const { _disposables, page, edgeless } = this;

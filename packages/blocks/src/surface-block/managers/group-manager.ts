@@ -38,7 +38,7 @@ function getGroups(element: EdgelessElement) {
   return groups;
 }
 
-export const compare = (a: EdgelessElement, b: EdgelessElement): number => {
+export function compare(a: EdgelessElement, b: EdgelessElement) {
   if (a.batch && b.batch) {
     if (a.batch < b.batch) return -1;
     else if (a.batch > b.batch) return 1;
@@ -75,7 +75,7 @@ export const compare = (a: EdgelessElement, b: EdgelessElement): number => {
   if (a.index < b.index) return -1;
   else if (a.index > b.index) return 1;
   return 0;
-};
+}
 
 export function isDescendant(element: EdgelessElement, parent: GroupElement) {
   if (getGroupParent(element) === parent) return true;
