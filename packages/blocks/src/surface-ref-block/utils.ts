@@ -62,9 +62,9 @@ export function mergeable(notes: NoteBlockModel[]) {
 
 export function mergePreviouse(note: NoteBlockModel) {
   const parent = note.page.getParent(note);
-  const idx = parent?.children.indexOf(note);
+  const idx = parent?.children.indexOf(note) as number;
 
-  if (!parent || !idx) return note;
+  if (!parent || !parent.children[idx - 1]) return note;
 
   const target = parent.children[idx - 1] as NoteBlockModel;
 
@@ -88,10 +88,9 @@ export function mergeableWithPrevios(note: NoteBlockModel) {
 
 export function mergeNext(note: NoteBlockModel) {
   const parent = note.page.getParent(note);
-  const idx = parent?.children.indexOf(note);
+  const idx = parent?.children.indexOf(note) as number;
 
-  if (!parent || idx === undefined || idx === parent.children.length)
-    return note;
+  if (!parent || parent.children[idx + 1]) return note;
 
   const target = parent.children[idx + 1] as NoteBlockModel;
 
