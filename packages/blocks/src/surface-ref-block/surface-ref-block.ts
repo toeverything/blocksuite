@@ -1,8 +1,9 @@
-import './surface-ref-portal.js';
+import './surface-ref-portal';
 
 import { PathFinder } from '@blocksuite/block-std';
-import { assertExists, type Disposable } from '@blocksuite/global/utils';
+import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -18,9 +19,11 @@ import {
   isCssVariable,
 } from '../_common/theme/css-variables.js';
 import { getThemePropertyValue } from '../_common/theme/utils.js';
+import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
+import { matchFlavours } from '../_common/utils/model.js';
+import { getEditorContainer } from '../_common/utils/query.js';
 import type {
-  AbstractEditor,
   EdgelessElement,
   TopLevelBlockModel,
 } from '../_common/utils/types.js';
@@ -38,8 +41,10 @@ import { Renderer } from '../surface-block/renderer.js';
 import { Bound } from '../surface-block/utils/bound.js';
 import { deserializeXYWH } from '../surface-block/utils/xywh.js';
 import type { SurfaceRefBlockModel } from './surface-ref-model.js';
-import type { SurfaceRefPortal } from './surface-ref-portal.js';
+import { SurfaceRefPortal } from './surface-ref-portal.js';
 import { getSurfaceBlock, noContentPlaceholder } from './utils.js';
+
+noop(SurfaceRefPortal);
 
 export const REF_LABEL_ICON = {
   'affine:frame': FrameIcon,
@@ -240,6 +245,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       color: var(--affine-icon-color);
       background-color: transparent;
     }
+
     .caption-input::placeholder {
       color: var(--affine-placeholder-color);
     }
@@ -280,6 +286,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
+    this._initHotkey();
     this._initSurfaceModel();
     this._initReferencedModel();
     this._initSelection();
@@ -294,6 +301,77 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     if (this._surfaceRenderer.canvas.isConnected || !this.container) return;
 
     this._surfaceRenderer.attach(this.container);
+  }
+
+  private _initHotkey() {
+    const selection = this.root.selection;
+    const addParagraph = () => {
+      if (!this.page.getParent(this.model)) return;
+
+      const parent = this.page.getParent(this.model) as BaseBlockModel;
+      const index = parent.children.indexOf(this.model);
+      const isLast = parent.children.length - 1 === index;
+      let addedBlockId: string;
+      let path: string[];
+
+      if (matchFlavours(parent, ['affine:page'])) {
+        const noteId = this.page.addBlock('affine:note', {}, parent, index + 1);
+        addedBlockId = this.page.addBlock('affine:paragraph', {}, noteId, 0);
+        path = this.parentPath.concat([noteId, addedBlockId]);
+      } else if (matchFlavours(parent, ['affine:note'])) {
+        if (!isLast) {
+          addedBlockId = this.page.addBlock(
+            'affine:paragraph',
+            {},
+            parent,
+            index + 1
+          );
+          path = this.parentPath.concat([addedBlockId]);
+        } else {
+          const root = this.page.getParent(parent);
+
+          if (!root) return;
+
+          const parentIdx = root.children.indexOf(parent);
+          const targetParent =
+            root.children[parentIdx + 1]?.id ??
+            this.page.addBlock('affine:note', {}, root, parentIdx + 1);
+
+          addedBlockId = this.page.addBlock(
+            'affine:paragraph',
+            {},
+            this.page.getBlockById(targetParent),
+            0
+          );
+          path = [root.id, targetParent, addedBlockId];
+        }
+      }
+
+      requestAnimationFrame(() => {
+        selection.update(selList => {
+          return selList
+            .filter(sel => !sel.is('block'))
+            .concat(
+              selection.getInstance('text', {
+                from: {
+                  path,
+                  index: 0,
+                  length: 0,
+                },
+                to: null,
+              })
+            );
+        });
+      });
+    };
+
+    this.bindHotKey({
+      Enter: () => {
+        if (!this._focused) return;
+        addParagraph();
+        return true;
+      },
+    });
   }
 
   private _initSurfaceRenderer() {
@@ -603,7 +681,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       <div class="surface-ref-mask">
         <div class="ref-label">
           <div class="title">
-            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT']}
+            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT'] ??
+            REF_LABEL_ICON.DEFAULT}
             <span>${title}</span>
           </div>
           <div class="suffix">from edgeless mode</div>
@@ -616,7 +695,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     return html`<div class="surface-empty-placeholder">
       <div class="placeholder-image">${noContentPlaceholder}</div>
       <div class="placeholder-text">
-        No Such ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT']}
+        No Such
+        ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_TITLE.DEFAULT}
       </div>
       <div class="placeholder-action">
         <button class="delete-button" type="button" @click=${this._deleteThis}>
@@ -625,7 +706,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         </button>
       </div>
       <div class="placeholder-reason">
-        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT']}
+        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_REASON.DEFAULT}
       </div>
     </div>`;
   }
@@ -662,6 +744,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
               .page=${this.page}
               .root=${this.root}
               .containerModel=${referencedModel}
+              .renderModel=${this.renderModel}
             ></surface-ref-portal>`
           : nothing}
         <div class="surface-canvas-container">
@@ -730,34 +813,32 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   viewInEdgeless() {
     if (!this._referencedModel) return;
 
-    const xywh = deserializeXYWH(this._referencedModel.xywh);
-    const doc = this.ownerDocument;
-    const editorContainer = doc.querySelector(
-      'editor-container'
-    ) as AbstractEditor;
-
-    if (!editorContainer) return;
+    const editorContainer = getEditorContainer(this.page);
 
     if (editorContainer.mode !== 'edgeless') {
       editorContainer.mode = 'edgeless';
+      saveViewportToSession(this.page.id, {
+        referenceId: this.model.reference,
+        padding: [60, 20, 20, 20],
+      });
     }
-
-    setTimeout(() => {
-      const edgeless = doc.querySelector('affine-edgeless-page');
-
-      edgeless?.surface.viewport.setViewportByBound(
-        Bound.fromXYWH(xywh),
-        [100, 60, 100, 60],
-        false
-      );
-    }, 50);
 
     this.selection.update(selections => {
       return selections.filter(sel => !PathFinder.equals(sel.path, this.path));
     });
   }
 
+  private _shouldRender() {
+    return (
+      this.root.mode === 'page' &&
+      this.parentElement &&
+      !this.parentElement.closest('affine-surface-ref')
+    );
+  }
+
   override render() {
+    if (!this._shouldRender()) return nothing;
+
     const { _surfaceModel, _referencedModel, _surfaceRenderer, model } = this;
     const noContent =
       !_surfaceModel || !_referencedModel || !_referencedModel.xywh;

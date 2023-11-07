@@ -1,8 +1,8 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { Text } from '@blocksuite/store';
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
-import { BLOCK_ID_ATTR } from '../_common/consts.js';
-import type { SurfaceBlockComponent } from '../index.js';
+import { getBlockElementByPath } from '../_common/utils/query.js';
 import { FRAME_BATCH } from '../surface-block/batch.js';
 import type { EdgelessBlockType } from '../surface-block/edgeless-types.js';
 import type {
@@ -82,19 +82,16 @@ export class FrameBlockModel
     );
   }
   getRelativePointLocation!: (_: IVec) => PointLocation;
-  hitTest(
-    x: number,
-    y: number,
-    _: HitTestOptions,
-    surface?: SurfaceBlockComponent
-  ): boolean {
+  hitTest(x: number, y: number, _: HitTestOptions): boolean {
     const bound = Bound.deserialize(this.xywh);
     const hit = bound.isPointOnBound([x, y]);
     if (hit) return true;
 
-    const block = surface?.parentBlockElement.querySelector(
-      `[${BLOCK_ID_ATTR}="${this.id}"]`
-    ) as FrameBlockComponent;
+    assertExists(this.page.root);
+    const block = getBlockElementByPath([
+      this.page.root?.id,
+      this.id,
+    ]) as FrameBlockComponent;
     if (!block) return false;
     const titleBound = block.titleBound;
     return titleBound.isPointInBound([x, y], 0);

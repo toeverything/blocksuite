@@ -19,9 +19,6 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import {
   COLOR_VARIABLES,
   extractCssVariables,
-  FONT_FAMILY_VARIABLES,
-  SIZE_VARIABLES,
-  VARIABLES,
   ZipTransformer,
 } from '@blocksuite/blocks';
 import { NOTE_WIDTH } from '@blocksuite/blocks';
@@ -33,7 +30,6 @@ import type { SlTab, SlTabGroup } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { Pane } from 'tweakpane';
 
 import {
   generateRoomId,
@@ -46,88 +42,11 @@ const plate: Record<string, string> = {};
 COLOR_VARIABLES.forEach((key: string) => {
   plate[key] = cssVariablesMap[key];
 });
-const OTHER_CSS_VARIABLES = VARIABLES.filter(
-  variable =>
-    !SIZE_VARIABLES.includes(variable) &&
-    !COLOR_VARIABLES.includes(variable) &&
-    !FONT_FAMILY_VARIABLES.includes(variable)
-);
 
 const basePath = import.meta.env.DEV
   ? 'node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
-
-function init_css_debug_menu(styleMenu: Pane) {
-  if (styleMenu.title !== 'Waiting') {
-    return;
-  }
-  const style = document.documentElement.style;
-  styleMenu.title = 'CSS Debug Menu';
-  const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
-  const fontFamilyFolder = styleMenu.addFolder({
-    title: 'Font Family',
-    expanded: false,
-  });
-  const colorFolder = styleMenu.addFolder({ title: 'Color', expanded: false });
-  const othersFolder = styleMenu.addFolder({
-    title: 'Others',
-    expanded: false,
-  });
-  SIZE_VARIABLES.forEach(name => {
-    sizeFolder
-      .addInput(
-        {
-          [name]: isNaN(parseFloat(cssVariablesMap[name]))
-            ? 0
-            : parseFloat(cssVariablesMap[name]),
-        },
-        name,
-        {
-          min: 0,
-          max: 100,
-        }
-      )
-      .on('change', e => {
-        style.setProperty(name, `${Math.round(e.value)}px`);
-      });
-  });
-  FONT_FAMILY_VARIABLES.forEach(name => {
-    fontFamilyFolder
-      .addInput(
-        {
-          [name]: cssVariablesMap[name],
-        },
-        name
-      )
-      .on('change', e => {
-        style.setProperty(name, e.value);
-      });
-  });
-  OTHER_CSS_VARIABLES.forEach(name => {
-    othersFolder
-      .addInput({ [name]: cssVariablesMap[name] }, name)
-      .on('change', e => {
-        style.setProperty(name, e.value);
-      });
-  });
-  fontFamilyFolder
-    .addInput(
-      {
-        '--affine-font-family':
-          'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
-      },
-      '--affine-font-family'
-    )
-    .on('change', e => {
-      style.setProperty('--affine-font-family', e.value);
-    });
-  for (const plateKey in plate) {
-    colorFolder.addInput(plate, plateKey).on('change', e => {
-      style.setProperty(plateKey, e.value);
-    });
-  }
-}
 
 function getTabGroupTemplate({
   workspace,
@@ -230,9 +149,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   readonly = false;
-
-  private _styleMenu!: Pane;
-  private _showStyleDebugMenu = false;
 
   @state()
   private _showTabMenu = false;
@@ -340,12 +256,26 @@ export class QuickEdgelessMenu extends ShadowlessElement {
           snapshot,
           assets: job.assetsManager,
         })
-        .then(markdown => {
-          const blob = new Blob([markdown], { type: 'plain/text' });
-          const fileURL = URL.createObjectURL(blob);
+        .then(async result => {
+          let downloadBlob: Blob;
           const element = document.createElement('a');
+          const contentBlob = new Blob([result.file], { type: 'plain/text' });
+          if (result.assetsIds.length > 0) {
+            const zip = ZipTransformer.createAssetsArchive(
+              job.assets,
+              result.assetsIds
+            );
+
+            zip.file('index.md', contentBlob);
+
+            downloadBlob = await zip.generateAsync({ type: 'blob' });
+            element.setAttribute('download', 'export.zip');
+          } else {
+            downloadBlob = contentBlob;
+            element.setAttribute('download', 'export.md');
+          }
+          const fileURL = URL.createObjectURL(downloadBlob);
           element.setAttribute('href', fileURL);
-          element.setAttribute('download', 'export.md');
           element.style.display = 'none';
           document.body.appendChild(element);
           element.click();
@@ -398,14 +328,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     const url = new URL(window.location.toString());
     url.searchParams.set('init', base64);
     window.history.pushState({}, '', url);
-  }
-
-  private _toggleStyleDebugMenu() {
-    init_css_debug_menu(this._styleMenu);
-    this._showStyleDebugMenu = !this._showStyleDebugMenu;
-    this._showStyleDebugMenu
-      ? (this._styleMenu.hidden = false)
-      : (this._styleMenu.hidden = true);
   }
 
   private _setThemeMode(dark: boolean) {
@@ -481,7 +403,7 @@ export class QuickEdgelessMenu extends ShadowlessElement {
     return result;
   }
 
-  override firstUpdated() {
+  override async firstUpdated() {
     this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
     this.workspace.slots.pageAdded.on(() => {
       this._showTabMenu = this.workspace.meta.pageMetas.length > 1;
@@ -493,9 +415,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new Pane({ title: 'Waiting' });
-    this._styleMenu.hidden = true;
-    this._styleMenu.element.style.width = '650';
   }
 
   override update(changedProperties: Map<string, unknown>) {
@@ -619,9 +538,6 @@ export class QuickEdgelessMenu extends ShadowlessElement {
                     <sl-menu-item @click=${this._shareUrl}>
                       Share URL</sl-menu-item
                     >
-                    <sl-menu-item @click=${this._toggleStyleDebugMenu}>
-                      Toggle CSS Debug Menu
-                    </sl-menu-item>
                   </sl-menu>
                 </sl-menu-item>
                 <sl-menu-item @click=${this._toggleDarkMode}>

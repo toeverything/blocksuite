@@ -34,7 +34,7 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
-import { Pane } from 'tweakpane';
+import type { Pane } from 'tweakpane';
 
 import type { CustomCopilotPanel } from './copilot/custom-copilot-panel';
 // @ts-ignore
@@ -52,13 +52,14 @@ const OTHER_CSS_VARIABLES = VARIABLES.filter(
     !COLOR_VARIABLES.includes(variable) &&
     !FONT_FAMILY_VARIABLES.includes(variable)
 );
+let styleDebugMenuLoaded = false;
 
 const basePath = import.meta.env.DEV
   ? '/node_modules/@shoelace-style/shoelace/dist'
   : 'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.0.0-beta.87/dist';
 setBasePath(basePath);
 
-function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
+function initStyleDebugMenu(styleMenu: Pane, style: CSSStyleDeclaration) {
   const sizeFolder = styleMenu.addFolder({ title: 'Size', expanded: false });
   const fontFamilyFolder = styleMenu.addFolder({
     title: 'Font Family',
@@ -71,7 +72,7 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   SIZE_VARIABLES.forEach(name => {
     sizeFolder
-      .addInput(
+      .addBinding(
         {
           [name]: isNaN(parseFloat(cssVariablesMap[name]))
             ? 0
@@ -89,7 +90,7 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   FONT_FAMILY_VARIABLES.forEach(name => {
     fontFamilyFolder
-      .addInput(
+      .addBinding(
         {
           [name]: cssVariablesMap[name],
         },
@@ -101,13 +102,13 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
   });
   OTHER_CSS_VARIABLES.forEach(name => {
     othersFolder
-      .addInput({ [name]: cssVariablesMap[name] }, name)
+      .addBinding({ [name]: cssVariablesMap[name] }, name)
       .on('change', e => {
         style.setProperty(name, e.value);
       });
   });
   fontFamilyFolder
-    .addInput(
+    .addBinding(
       {
         '--affine-font-family':
           'Roboto Mono, apple-system, BlinkMacSystemFont,Helvetica Neue, Tahoma, PingFang SC, Microsoft Yahei, Arial,Hiragino Sans GB, sans-serif, Apple Color Emoji, Segoe UI Emoji,Segoe UI Symbol, Noto Color Emoji',
@@ -118,7 +119,7 @@ function init_css_debug_menu(styleMenu: Pane, style: CSSStyleDeclaration) {
       style.setProperty('--affine-font-family', e.value);
     });
   for (const plateKey in plate) {
-    colorFolder.addInput(plate, plateKey).on('change', e => {
+    colorFolder.addBinding(plate, plateKey).on('change', e => {
       style.setProperty(plateKey, e.value);
     });
   }
@@ -338,7 +339,16 @@ export class DebugMenu extends ShadowlessElement {
     window.history.pushState({}, '', url);
   }
 
-  private _toggleStyleDebugMenu() {
+  private async _toggleStyleDebugMenu() {
+    if (!styleDebugMenuLoaded) {
+      styleDebugMenuLoaded = true;
+      const { Pane } = await import('tweakpane');
+      this._styleMenu = new Pane({ title: 'Waiting' });
+      this._styleMenu.hidden = true;
+      this._styleMenu.element.style.width = '650';
+      initStyleDebugMenu(this._styleMenu, document.documentElement.style);
+    }
+
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
     this._showStyleDebugMenu
       ? (this._styleMenu.hidden = false)
@@ -422,11 +432,6 @@ export class DebugMenu extends ShadowlessElement {
       this._canUndo = this.page.canUndo;
       this._canRedo = this.page.canRedo;
     });
-    this._styleMenu = new Pane({ title: 'CSS Debug Menu' });
-    this._styleMenu.hidden = true;
-    this._styleMenu.element.style.width = '650';
-    const style = document.documentElement.style;
-    init_css_debug_menu(this._styleMenu, style);
   }
 
   override update(changedProperties: Map<string, unknown>) {

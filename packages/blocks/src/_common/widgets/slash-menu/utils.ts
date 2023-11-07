@@ -35,7 +35,10 @@ export type SlashItem = {
    */
   icon: TemplateResult<1>;
   suffix?: TemplateResult<1>;
-  showWhen?: (model: BaseBlockModel) => boolean;
+  showWhen?: (
+    model: BaseBlockModel,
+    pageElement: PageBlockComponent
+  ) => boolean;
   disabled?: boolean;
   action: ({
     pageElement,

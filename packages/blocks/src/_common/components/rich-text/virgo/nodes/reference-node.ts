@@ -15,7 +15,7 @@ import {
   FontPageIcon,
 } from '../../../../../_common/icons/index.js';
 import {
-  getBlockElementById,
+  getBlockElementByModel,
   getClosestBlockElementByElement,
   getModelByElement,
 } from '../../../../../_common/utils/index.js';
@@ -130,7 +130,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
     const targetPageId = refMeta.id;
     const root = model.page.root;
     assertExists(root);
-    const element = getBlockElementById(root?.id) as DocPageBlockComponent;
+    const element = getBlockElementByModel(root) as DocPageBlockComponent;
     assertExists(element);
     element.slots.pageLinkClicked.emit({ pageId: targetPageId });
   }
