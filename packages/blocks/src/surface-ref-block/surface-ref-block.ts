@@ -3,7 +3,6 @@ import './surface-ref-portal';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -21,7 +20,6 @@ import {
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
-import { matchFlavours } from '../_common/utils/model.js';
 import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type {
   EdgelessElement,

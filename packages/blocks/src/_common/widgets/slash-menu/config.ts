@@ -437,10 +437,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
               reference: frameModel.id,
               refFlavour: 'affine:frame',
             };
-            const sibling = noteModel.children[insertIdx];
 
             page.addSiblingBlocks(
-              sibling,
+              model,
               [surfaceRefProps],
               insertIdx === 0 ? 'before' : 'after'
             );
@@ -488,10 +487,9 @@ export const menuGroups: SlashMenuOptions['menus'] = [
                 reference: element.get('id'),
                 refFlavour: 'group',
               };
-              const sibling = noteModel.children[insertIdx];
 
               page.addSiblingBlocks(
-                sibling,
+                model,
                 [surfaceRefProps],
                 insertIdx === 0 ? 'before' : 'after'
               );
