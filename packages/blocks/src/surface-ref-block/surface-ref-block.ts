@@ -22,6 +22,7 @@ import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
 import { matchFlavours } from '../_common/utils/model.js';
+import { getEditorContainer } from '../_common/utils/query.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
@@ -656,7 +657,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
       <div class="surface-ref-mask">
         <div class="ref-label">
           <div class="title">
-            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT']}
+            ${REF_LABEL_ICON[flavourOrType ?? 'DEFAULT'] ??
+            REF_LABEL_ICON.DEFAULT}
             <span>${title}</span>
           </div>
           <div class="suffix">from edgeless mode</div>
@@ -669,7 +671,9 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     return html`<div class="surface-empty-placeholder">
       <div class="placeholder-image">${noContentPlaceholder}</div>
       <div class="placeholder-text">
-        No Such ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT']}
+        No Such
+        ${NO_CONTENT_TITLE[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_TITLE.DEFAULT}
       </div>
       <div class="placeholder-action">
         <button class="delete-button" type="button" @click=${this._deleteThis}>
@@ -678,7 +682,8 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
         </button>
       </div>
       <div class="placeholder-reason">
-        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT']}
+        ${NO_CONTENT_REASON[model.refFlavour ?? 'DEFAULT'] ??
+        NO_CONTENT_REASON.DEFAULT}
       </div>
     </div>`;
   }
@@ -784,8 +789,10 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   viewInEdgeless() {
     if (!this._referencedModel) return;
 
-    if (this.root.mode !== 'edgeless') {
-      this.root.mode = 'edgeless';
+    const editorContainer = getEditorContainer(this.page);
+
+    if (editorContainer.mode !== 'edgeless') {
+      editorContainer.mode = 'edgeless';
       saveViewportToSession(this.page.id, {
         referenceId: this.model.reference,
         padding: [60, 20, 20, 20],
