@@ -165,8 +165,10 @@ export class LinkPopup extends WithDisposable(LitElement) {
     if (!this.vEditor.isVRangeValid(this.goalVRange)) return;
 
     assertExists(this.linkInput);
-    const link = normalizeUrl(this.linkInput.value);
-    if (!isValidUrl(link)) return;
+    const linkInputValue = this.linkInput.value;
+    if (!linkInputValue || !isValidUrl(linkInputValue)) return;
+
+    const link = normalizeUrl(linkInputValue);
 
     if (this.type === 'create') {
       this.vEditor.formatText(this.goalVRange, {
@@ -218,8 +220,6 @@ export class LinkPopup extends WithDisposable(LitElement) {
     e.stopPropagation();
     if (e.key === 'Enter' && !e.isComposing) {
       e.preventDefault();
-      const link = this.linkInput?.value;
-      if (!link || !isValidUrl(link)) return;
       this._onConfirm();
     }
   }
