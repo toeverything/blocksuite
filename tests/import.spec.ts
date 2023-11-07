@@ -4,6 +4,7 @@ import { expect } from '@playwright/test';
 
 import {
   enterPlaygroundRoom,
+  expectConsoleMessage,
   transformHtml,
   transformMarkdown,
 } from './utils/actions/index.js';
@@ -746,6 +747,10 @@ test(scoped`import notion html-format table`, async ({ page }) => {
 
 // todo this is temporary solution
 test(scoped`import notion markdown-format image`, async ({ page }) => {
+  expectConsoleMessage(
+    page,
+    'Failed to load resource: the server responded with a status of 404 (Not Found)'
+  );
   await enterPlaygroundRoom(page);
 
   const tempText = `
