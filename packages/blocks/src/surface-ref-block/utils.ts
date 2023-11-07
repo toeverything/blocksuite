@@ -62,10 +62,10 @@ export function mergeable(notes: NoteBlockModel[]) {
 
 export function mergePreviouse(note: NoteBlockModel) {
   const parent = note.page.getParent(note);
+  const idx = parent?.children.indexOf(note);
 
-  if (!parent) return note;
+  if (!parent || !idx) return note;
 
-  const idx = parent.children.indexOf(note);
   const target = parent.children[idx - 1] as NoteBlockModel;
 
   mergeNote(target, [note]);
@@ -88,10 +88,11 @@ export function mergeableWithPrevios(note: NoteBlockModel) {
 
 export function mergeNext(note: NoteBlockModel) {
   const parent = note.page.getParent(note);
+  const idx = parent?.children.indexOf(note);
 
-  if (!parent) return note;
+  if (!parent || idx === undefined || idx === parent.children.length)
+    return note;
 
-  const idx = parent.children.indexOf(note);
   const target = parent.children[idx + 1] as NoteBlockModel;
 
   mergeNote(note, [target]);
@@ -147,9 +148,11 @@ export function getNotesMergeInfo(blocks: SurfaceRefBlockModel[]) {
 export function mergeNotes(page: Page, mergeableNotes: MergealeNote[]) {
   mergeableNotes.forEach(({ id, mergeDirection }) => {
     if (mergeDirection === 'prev') {
-      mergePreviouse(page.getBlockById(id) as NoteBlockModel);
+      const block = page.getBlockById(id) as NoteBlockModel;
+      block && mergePreviouse(block);
     } else if (mergeDirection === 'next') {
-      mergeNext(page.getBlockById(id) as NoteBlockModel);
+      const block = page.getBlockById(id) as NoteBlockModel;
+      block && mergeNext(block);
     }
   });
 }

@@ -13,6 +13,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
+  buildPath,
   calcDropTarget,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
@@ -929,13 +930,12 @@ export class AffineDragHandleWidget extends WidgetElement<
       const parentElement = getBlockElementByModel(parent);
       if (parentElement) {
         const newSelectedBlocks = selectedBlocks
-          .map(block => parentElement.path.concat(block.id))
+          .map(block => buildPath(block))
           .map(path => this._getBlockElementFromViewStore(path));
 
         if (!newSelectedBlocks) return;
 
-        const noteId = getNoteId(parentElement);
-        this._setSelectedBlocks(newSelectedBlocks as BlockElement[], noteId);
+        this._setSelectedBlocks(newSelectedBlocks as BlockElement[]);
       }
     }, 0);
 
