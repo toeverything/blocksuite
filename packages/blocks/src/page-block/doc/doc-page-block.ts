@@ -501,66 +501,6 @@ export class DocPageBlockComponent extends BlockElement<
         return;
       },
     });
-
-    this.handleEvent('click', ctx => {
-      const state = ctx.get('pointerState');
-      if (
-        state.raw.target !== this &&
-        state.raw.target !== this.viewportElement &&
-        state.raw.target !== this.pageBlockContainer
-      ) {
-        return;
-      }
-      let noteId: string;
-      let paragraphId: string;
-      let index = 0;
-      const readonly = this.model.page.readonly;
-      const lastNote = this.model.children
-        .slice()
-        .reverse()
-        .find(
-          child =>
-            child.flavour === 'affine:note' && !(child as NoteBlockModel).hidden
-        );
-      if (!lastNote) {
-        if (readonly) return;
-        noteId = this.page.addBlock('affine:note', {}, this.model.id);
-        paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
-      } else {
-        noteId = lastNote.id;
-        const last = lastNote.children.at(-1);
-        if (
-          !last ||
-          matchFlavours(last, [
-            'affine:code',
-            'affine:divider',
-            'affine:image',
-            'affine:database',
-            'affine:bookmark',
-            'affine:attachment',
-          ])
-        ) {
-          if (readonly) return;
-          paragraphId = this.page.addBlock('affine:paragraph', {}, noteId);
-        } else {
-          paragraphId = last.id;
-          index = last.text?.length ?? 0;
-        }
-      }
-
-      requestAnimationFrame(() => {
-        this.root.selection.setGroup('note', [
-          this.root.selection.getInstance('text', {
-            from: {
-              path: [this.model.id, noteId, paragraphId],
-              index,
-              length: 0,
-            },
-            to: null,
-          }),
-        ]);
-      });
-    });
   }
 
   override disconnectedCallback() {
