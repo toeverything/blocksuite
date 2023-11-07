@@ -5,10 +5,6 @@ export class StringBuilder {
     this.buffer += text;
   }
 
-  clear() {
-    this.buffer = '';
-  }
-
   toString() {
     return this.buffer;
   }
