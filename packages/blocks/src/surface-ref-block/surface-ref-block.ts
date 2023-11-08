@@ -3,7 +3,6 @@ import './surface-ref-portal';
 import { PathFinder } from '@blocksuite/block-std';
 import { assertExists, type Disposable, noop } from '@blocksuite/global/utils';
 import { BlockElement } from '@blocksuite/lit';
-import type { BaseBlockModel } from '@blocksuite/store';
 import { type Y } from '@blocksuite/store';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
@@ -21,8 +20,7 @@ import {
 import { getThemePropertyValue } from '../_common/theme/utils.js';
 import { saveViewportToSession } from '../_common/utils/edgeless.js';
 import { stopPropagation } from '../_common/utils/event.js';
-import { matchFlavours } from '../_common/utils/model.js';
-import { getEditorContainer } from '../_common/utils/query.js';
+import { buildPath, getEditorContainer } from '../_common/utils/query.js';
 import type {
   EdgelessElement,
   TopLevelBlockModel,
@@ -286,6 +284,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   override connectedCallback() {
     super.connectedCallback();
+    if (!this._shouldRender()) return;
     this._initHotkey();
     this._initSurfaceModel();
     this._initReferencedModel();
@@ -308,44 +307,12 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
     const addParagraph = () => {
       if (!this.page.getParent(this.model)) return;
 
-      const parent = this.page.getParent(this.model) as BaseBlockModel;
-      const index = parent.children.indexOf(this.model);
-      const isLast = parent.children.length - 1 === index;
-      let addedBlockId: string;
-      let path: string[];
-
-      if (matchFlavours(parent, ['affine:page'])) {
-        const noteId = this.page.addBlock('affine:note', {}, parent, index + 1);
-        addedBlockId = this.page.addBlock('affine:paragraph', {}, noteId, 0);
-        path = this.parentPath.concat([noteId, addedBlockId]);
-      } else if (matchFlavours(parent, ['affine:note'])) {
-        if (!isLast) {
-          addedBlockId = this.page.addBlock(
-            'affine:paragraph',
-            {},
-            parent,
-            index + 1
-          );
-          path = this.parentPath.concat([addedBlockId]);
-        } else {
-          const root = this.page.getParent(parent);
-
-          if (!root) return;
-
-          const parentIdx = root.children.indexOf(parent);
-          const targetParent =
-            root.children[parentIdx + 1]?.id ??
-            this.page.addBlock('affine:note', {}, root, parentIdx + 1);
-
-          addedBlockId = this.page.addBlock(
-            'affine:paragraph',
-            {},
-            this.page.getBlockById(targetParent),
-            0
-          );
-          path = [root.id, targetParent, addedBlockId];
-        }
-      }
+      const [paragraphId] = this.page.addSiblingBlocks(this.model, [
+        {
+          flavour: 'affine:paragraph',
+        },
+      ]);
+      const path = buildPath(this.page.getBlockById(paragraphId));
 
       requestAnimationFrame(() => {
         selection.update(selList => {
