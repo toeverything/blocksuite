@@ -103,7 +103,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return result as CategorizedElements;
   }
 
-  private _getShapeButton(shapeElements?: ShapeElement[]) {
+  private _ShapeButton(shapeElements?: ShapeElement[]) {
     const shapeButton = shapeElements?.length
       ? html`<edgeless-change-shape-button
           .elements=${shapeElements}
@@ -116,7 +116,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return shapeButton;
   }
 
-  private _getBrushButton(brushElements?: BrushElement[]) {
+  private _BrushButton(brushElements?: BrushElement[]) {
     return brushElements?.length
       ? html`<edgeless-change-brush-button
           .elements=${brushElements}
@@ -128,7 +128,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getConnectorButton(connectorElements?: ConnectorElement[]) {
+  private _ConnectorButton(connectorElements?: ConnectorElement[]) {
     return connectorElements?.length
       ? html` <edgeless-change-connector-button
           .elements=${connectorElements}
@@ -141,7 +141,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getNoteButton(notes?: NoteBlockModel[]) {
+  private _NoteButton(notes?: NoteBlockModel[]) {
     return notes?.length === 1
       ? html`<edgeless-change-note-button
           .notes=${notes}
@@ -152,7 +152,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getTextButton(textElements: TextElement[]) {
+  private _TextButton(textElements: TextElement[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
           .texts=${textElements}
@@ -164,7 +164,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getFrameButton(frames: FrameBlockModel[]) {
+  private _FrameButton(frames: FrameBlockModel[]) {
     return frames?.length
       ? html`
           <edgeless-change-frame-button
@@ -176,7 +176,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getGroupButton(groups: GroupElement[]) {
+  private _GroupButton(groups: GroupElement[]) {
     return groups?.length
       ? html`<edgeless-change-group-button
           .surface=${this.surface}
@@ -226,32 +226,36 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     );
   }
 
-  private _getCreateGroupButton() {
+  private _CreateGroupButton() {
     return html`<edgeless-add-group-button
       .edgeless=${this.edgeless}
     ></edgeless-add-group-button> `;
   }
 
-  private _getCreateFrameButton() {
+  private _CreateFrameButton() {
     return html`<edgeless-add-frame-button
       .edgeless=${this.edgeless}
     ></edgeless-add-frame-button>`;
   }
 
-  private _getReleaseFromGroupButton() {
+  private _ReleaseFromGroupButton() {
     return html`<edgeless-release-from-group-button
       .surface=${this.surface}
     ></edgeless-release-from-group-button>`;
   }
 
-  private _getAlignButton() {
+  private _AlignButton() {
     return html`<edgeless-align-button
       .edgeless=${this.edgeless}
     ></edgeless-align-button>`;
   }
 
+  private _Divider() {
+    return html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`;
+  }
+
   private async _updatePosition() {
-    await this.updateComplete;
+    // await this.updateComplete;
     const { selectionManager } = this.edgeless;
 
     const bound = edgelessElementsBound(selectionManager.elements);
@@ -299,35 +303,28 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     const buttons = selectedAtLeastTwoTypes
       ? []
       : [
-          this._getShapeButton(shape),
-          this._getBrushButton(brush),
-          this._getConnectorButton(connector),
-          this._getNoteButton(note),
-          this._getTextButton(text),
-          this._getFrameButton(frame),
-          this._getGroupButton(group),
+          this._ShapeButton(shape),
+          this._BrushButton(brush),
+          this._ConnectorButton(connector),
+          this._NoteButton(note),
+          this._TextButton(text),
+          this._FrameButton(frame),
+          this._GroupButton(group),
         ].filter(b => !!b && b !== nothing);
 
     if (elements.length > 1) {
-      buttons.unshift(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
-      buttons.unshift(this._getAlignButton());
-      buttons.unshift(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
-      buttons.unshift(this._getCreateGroupButton());
-      buttons.unshift(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
-      buttons.unshift(this._getCreateFrameButton());
+      buttons.unshift(this._Divider());
+      buttons.unshift(this._AlignButton());
+      buttons.unshift(this._Divider());
+      buttons.unshift(this._CreateGroupButton());
+      buttons.unshift(this._Divider());
+      buttons.unshift(this._CreateFrameButton());
     }
+
     if (elements.length === 1) {
       if (this.surface.getGroupParent(selection.firstElement) !== GROUP_ROOT) {
-        buttons.unshift(
-          html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-        );
-        buttons.unshift(this._getReleaseFromGroupButton());
+        buttons.unshift(this._Divider());
+        buttons.unshift(this._ReleaseFromGroupButton());
       }
     }
 
