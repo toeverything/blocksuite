@@ -38,8 +38,6 @@ export class AffineFormatBarWidget extends WidgetElement {
   @query(`.${AFFINE_FORMAT_BAR_WIDGET}`)
   private _formatBarElement?: HTMLElement;
 
-  private _customElements: HTMLDivElement[] = [];
-
   private get _selectionManager() {
     return this.root.selection;
   }
@@ -86,6 +84,23 @@ export class AffineFormatBarWidget extends WidgetElement {
 
     const readonly = this.page.awarenessStore.isReadonly(this.page);
     return !readonly && this.displayType !== 'none' && !this._dragging;
+  }
+
+  private _appendCustomElement() {
+    if (
+      !this.customItemsContainer ||
+      this.customItemsContainer.children.length ===
+        AffineFormatBarWidget.customElements.size
+    )
+      return;
+
+    const customElements = Array.from(AffineFormatBarWidget.customElements).map(
+      element => element(this)
+    );
+    this.customItemsContainer.replaceChildren(...customElements);
+    this._disposables.add(() => {
+      this.customItemsContainer?.replaceChildren();
+    });
   }
 
   override connectedCallback() {
@@ -220,23 +235,8 @@ export class AffineFormatBarWidget extends WidgetElement {
       }
       return;
     }
-    if (
-      this._customElements.length === 0 &&
-      AffineFormatBarWidget.customElements.size !== 0
-    ) {
-      this._customElements = Array.from(
-        AffineFormatBarWidget.customElements
-      ).map(element => element(this));
-      this.customItemsContainer.append(...this._customElements);
-      this._disposables.add(() => {
-        this._customElements.forEach(element => {
-          element.remove();
-        });
-        this._customElements = [];
-        this.customItemsContainer.replaceChildren();
-      });
-    }
 
+    this._appendCustomElement();
     this._floatDisposables = new DisposableGroup();
 
     const formatQuickBarElement = this._formatBarElement;
