@@ -4,13 +4,12 @@ import { customElement, property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import { isNoteBlock } from '../../utils/query.js';
+import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
 const EXPAND_OFFSET = 20;
-const { NOTE } = EdgelessBlockType;
 
 @customElement('edgeless-auto-connect-line')
 export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
@@ -27,6 +26,19 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   show = false;
+
+  @property({ attribute: false })
+  elementsMap!: Map<AutoConnectElement, number>;
+
+  private _getElementsAndCounts() {
+    const elements: AutoConnectElement[] = [];
+    const counts: number[] = [];
+    for (const [key, value] of this.elementsMap.entries()) {
+      elements.push(key);
+      counts.push(value);
+    }
+    return { elements, counts };
+  }
 
   protected override firstUpdated(): void {
     const { _disposables, surface } = this;
@@ -49,11 +61,11 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
     if (!this.show) return nothing;
 
     const { viewport } = this.surface;
-    const notes = this.surface.getBlocks(NOTE).filter(note => !note.hidden);
+    const { elements } = this._getElementsAndCounts();
     const points: [IVec, IVec][] = [];
-    for (let i = 1; i < notes.length; i++) {
-      const last = notes[i - 1];
-      const current = notes[i];
+    for (let i = 1; i < elements.length; i++) {
+      const last = elements[i - 1];
+      const current = elements[i];
       const lastBound = Bound.deserialize(last.xywh);
       const currentBound = Bound.deserialize(current.xywh);
       const start = viewport.toViewCoord(lastBound.center[0], lastBound.maxY);

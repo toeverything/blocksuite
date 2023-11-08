@@ -28,6 +28,7 @@ import type {
   ParagraphBlockSchema,
   SurfaceBlockModel,
   SurfaceBlockSchema,
+  SurfaceRefBlockModel,
 } from '../../index.js';
 
 export type BlockModels = {
@@ -44,6 +45,7 @@ export type BlockModels = {
   'affine:data-view': DataViewBlockModel;
   'affine:bookmark': BookmarkBlockModel;
   'affine:attachment': AttachmentBlockModel;
+  'affine:surface-ref': SurfaceRefBlockModel;
 };
 
 export type BlockSchemas = {

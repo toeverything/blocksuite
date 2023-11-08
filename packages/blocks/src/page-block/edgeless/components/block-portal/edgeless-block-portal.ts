@@ -21,12 +21,21 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../_common/consts.js';
 import { delayCallback } from '../../../../_common/utils/event.js';
+import { matchFlavours } from '../../../../_common/utils/index.js';
 import type { TopLevelBlockModel } from '../../../../_common/utils/types.js';
+import type { FrameBlockModel } from '../../../../models.js';
+import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
+import type { GroupElement } from '../../../../surface-block/index.js';
 import { almostEqual, Bound } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
+
+export type AutoConnectElement =
+  | NoteBlockModel
+  | FrameBlockModel
+  | GroupElement;
 
 const { NOTE, IMAGE, FRAME } = EdgelessBlockType;
 
@@ -55,6 +64,8 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   private _cancelRestoreWillchange: (() => void) | null = null;
 
   private _noteResizeObserver = new NoteResizeObserver();
+
+  private _surfaceRefReferenceSet = new Set<string>();
 
   private _initNoteHeightUpdate() {
     const { page } = this.edgeless;
@@ -104,7 +115,34 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
   };
 
+  private _updateReference() {
+    const { _surfaceRefReferenceSet, edgeless } = this;
+    edgeless.surface.getBlocks(NOTE).forEach(note => {
+      note.children.forEach(model => {
+        if (matchFlavours(model, ['affine:surface-ref'])) {
+          _surfaceRefReferenceSet.add(model.reference);
+        }
+      });
+    });
+  }
+
+  private _updateAutoConnect() {
+    const { edgeless } = this;
+    const { elements } = edgeless.selectionManager;
+    if (
+      !edgeless.selectionManager.editing &&
+      elements.length === 1 &&
+      (isNoteBlock(elements[0]) ||
+        this._surfaceRefReferenceSet.has(elements[0].id))
+    ) {
+      this._showAutoConnect = true;
+    } else {
+      this._showAutoConnect = false;
+    }
+  }
+
   override firstUpdated() {
+    this._updateReference();
     const { _disposables, edgeless } = this;
     const { page } = edgeless;
 
@@ -187,17 +225,22 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
-        const { elements } = edgeless.selectionManager;
+      page.slots.blockUpdated.on(({ type, flavour }) => {
         if (
-          !edgeless.selectionManager.editing &&
-          elements.length === 1 &&
-          isNoteBlock(elements[0])
+          (type === 'add' || type === 'delete') &&
+          (flavour === 'affine:surface-ref' || flavour === NOTE)
         ) {
-          this._showAutoConnect = true;
-        } else {
-          this._showAutoConnect = false;
+          requestAnimationFrame(() => {
+            this._updateReference();
+            this._updateAutoConnect();
+          });
         }
+      })
+    );
+
+    _disposables.add(
+      edgeless.selectionManager.slots.updated.on(() => {
+        this._updateAutoConnect();
       })
     );
   }
@@ -212,12 +255,35 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const blocks = [...notes, ...images].sort(surface.compare);
 
     const { readonly } = this.edgeless.page;
-    const showedNotes = surface.getBlocks(NOTE).filter(note => !note.hidden);
+    const autoConnectedBlocks = new Map<AutoConnectElement, number>();
+
+    notes.forEach(note => {
+      if (isNoteBlock(note) && !note.hidden) {
+        autoConnectedBlocks.set(note, 1);
+      }
+      note.children.forEach(model => {
+        if (matchFlavours(model, ['affine:surface-ref'])) {
+          const reference = surface.pickById(
+            model.reference
+          ) as AutoConnectElement;
+          if (!autoConnectedBlocks.has(reference)) {
+            autoConnectedBlocks.set(reference, 1);
+          } else {
+            autoConnectedBlocks.set(
+              reference,
+              autoConnectedBlocks.get(reference)! + 1
+            );
+          }
+        }
+      });
+    });
+
     return html`
       <div class="affine-block-children-container edgeless">
         <edgeless-auto-connect-line
           .surface=${surface}
           .show=${this._showAutoConnect}
+          .elementsMap=${autoConnectedBlocks}
         >
         </edgeless-auto-connect-line>
         <div class="affine-edgeless-layer">
@@ -248,13 +314,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
-      <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
       <edgeless-index-label
-        .notes=${showedNotes}
+        .elementsMap=${autoConnectedBlocks}
         .surface=${surface}
         .show=${this._showAutoConnect}
       ></edgeless-index-label>
-      <!-- <edgeless-note-status .edgeless=${edgeless}></edgeless-note-status> -->
+      <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
     `;
   }
 }
