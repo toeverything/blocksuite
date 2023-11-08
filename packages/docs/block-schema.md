@@ -92,6 +92,21 @@ export const MyBlockSchema = defineBlockSchema({
 
 ---
 
+You can also pass glob patterns:
+
+```ts
+export const MyBlockSchema = defineBlockSchema({
+  // ...
+  metadata: {
+    children: ['my-data-*'],
+  },
+});
+```
+
+The glob match feature is powered by [minimatch](https://github.com/isaacs/minimatch).
+
+---
+
 This means the block won't accept any children.
 
 ```ts
