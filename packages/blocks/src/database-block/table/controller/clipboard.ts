@@ -1,5 +1,6 @@
 import type { UIEventStateContext } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
+import type { Y } from '@blocksuite/store';
 import type { ReactiveController } from 'lit';
 
 import type { TableViewSelection } from '../../../_common/utils/types.js';
@@ -35,6 +36,16 @@ export class TableClipboardController implements ReactiveController {
     );
 
     this.host.disposables.add(
+      this.host.handleEvent('cut', ctx => {
+        const tableSelection = this.host.selectionController.selection;
+        if (!tableSelection) return false;
+
+        this._onCut(ctx, tableSelection);
+        return true;
+      })
+    );
+
+    this.host.disposables.add(
       this.host.handleEvent('paste', ctx => {
         if (this.readonly) return false;
 
@@ -46,7 +57,8 @@ export class TableClipboardController implements ReactiveController {
 
   private _onCopy = async (
     _context: UIEventStateContext,
-    tableSelection: TableViewSelection
+    tableSelection: TableViewSelection,
+    isCut = false
   ) => {
     const view = this.host;
     const data = this.host.view;
@@ -60,9 +72,8 @@ export class TableClipboardController implements ReactiveController {
     );
 
     // For database paste outside(raw text).
-    const cellsValue = copyCellsValue(tableSelection, data, view);
+    const cellsValue = copyCellsValue(tableSelection, data, view, isCut);
     const formatValue = cellsValue.map(value => value.join('\t')).join('\n');
-
     this.std.clipboard.writeToClipboard(async items => {
       return {
         ...items,
@@ -74,8 +85,16 @@ export class TableClipboardController implements ReactiveController {
     return true;
   };
 
+  private _onCut = async (
+    _context: UIEventStateContext,
+    tableSelection: TableViewSelection
+  ) => {
+    this._onCopy(_context, tableSelection, true);
+  };
+
   private _onPaste = async (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
+    event.stopPropagation();
     const view = this.host;
     const data = this.host.view;
 
@@ -127,10 +146,15 @@ function getColumnValue(container: DatabaseCellContainer | undefined) {
   return container?.column.getStringValue(rowId) ?? '';
 }
 
+/**
+ * Columns that do not support cut operation yet
+ */
+const UNSUPPORTED_COLUMNS = ['progress', 'checkbox'];
 function copyCellsValue(
   selection: TableViewSelection,
   data: DataViewTableManager,
-  view: DataViewTable
+  view: DataViewTable,
+  isCut = false
 ) {
   const { rowsSelection, columnsSelection, focus, groupKey } = selection;
   const values: string[][] = [];
@@ -162,7 +186,17 @@ function copyCellsValue(
         );
         const cellValue = (cellToStringMap[column.type]?.(container) ??
           '') as string;
-        value.push(cellValue);
+        if (!isCut) {
+          value.push(cellValue);
+        }
+        if (isCut && !UNSUPPORTED_COLUMNS.includes(column.type)) {
+          value.push(cellValue);
+          container?.column.setValue(container.rowId, undefined);
+          if (column.type === 'title' || column.type === 'rich-text') {
+            const yText = container?.column.getValue(container.rowId) as Y.Text;
+            yText.delete(0, yText.length);
+          }
+        }
       }
       values.push(value);
     }
@@ -175,7 +209,17 @@ function copyCellsValue(
       focus.columnIndex
     );
     const value = (cellToStringMap[column.type]?.(container) ?? '') as string;
-    values.push([value]);
+    if (!isCut) {
+      values.push([value]);
+    }
+    if (isCut && !UNSUPPORTED_COLUMNS.includes(column.type)) {
+      values.push([value]);
+      container?.column.setValue(container.rowId, undefined);
+      if (column.type === 'title' || column.type === 'rich-text') {
+        const yText = container?.column.getValue(container.rowId) as Y.Text;
+        yText.delete(0, yText.length);
+      }
+    }
   }
 
   return values;
