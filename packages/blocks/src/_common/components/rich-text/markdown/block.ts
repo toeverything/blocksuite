@@ -61,7 +61,6 @@ export function tryConvertBlock(
 
     const parent = page.getParent(model);
     assertExists(parent);
-    const text = model.text?.split(0, prefixText.length);
     const index = parent.children.indexOf(model);
 
     const codeId = page.addBlock(
@@ -73,8 +72,10 @@ export function tryConvertBlock(
       parent,
       index
     );
-    if (text && text.length > 0) {
+    if (model.text && model.text.length > prefixText.length) {
+      const text = model.text.clone();
       page.addBlock('affine:paragraph', { text }, parent, index + 1);
+      text.delete(0, prefixText.length);
     }
     page.deleteBlock(model, {
       bringChildrenTo: parent,
