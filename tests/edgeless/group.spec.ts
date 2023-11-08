@@ -449,7 +449,7 @@ test.describe('group', () => {
   });
 
   test.describe('clipboard', () => {
-    test.only('copy and paste group', async ({ page }) => {
+    test('copy and paste group', async ({ page }) => {
       await edgelessCommonSetup(page);
       await createShapeElement(page, [0, 0], [100, 100], Shape.Square);
       await createShapeElement(page, [100, 0], [200, 100], Shape.Square);
