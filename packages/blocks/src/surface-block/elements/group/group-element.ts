@@ -112,6 +112,16 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     return this._radius;
   }
 
+  get titleBound() {
+    const bound = Bound.deserialize(this.xywh);
+    return new Bound(
+      bound.x,
+      bound.y - this._titleHeight,
+      this._titleWidth,
+      this._titleHeight
+    );
+  }
+
   override get gridBound() {
     const bound = Bound.deserialize(this.xywh);
     bound.y -= this._titleHeight;

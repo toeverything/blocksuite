@@ -275,11 +275,11 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       addText(this._edgeless, e, color);
       return;
     } else {
+      const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
+        e.x,
+        e.y
+      );
       if (selected instanceof TextElement) {
-        const [modelX, modelY] = this._edgeless.surface.viewport.toModelCoord(
-          e.x,
-          e.y
-        );
         mountTextElementEditor(selected, this._edgeless, {
           x: modelX,
           y: modelY,
@@ -294,7 +294,10 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
         mountFrameTitleEditor(selected, this._edgeless);
         return;
       }
-      if (selected instanceof GroupElement) {
+      if (
+        selected instanceof GroupElement &&
+        selected.titleBound.containsPoint([modelX, modelY])
+      ) {
         mountGroupTitleEditor(selected, this._edgeless);
         return;
       }

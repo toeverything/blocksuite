@@ -164,19 +164,18 @@ export class RangeSynchronizer {
         endText.delete(0, to.length);
         startText.join(endText);
       }
-    });
-    // make each delete operation in one transaction to ensure
-    // `deleteBlock` works correctly
-    // For example:
-    // aaa
-    //   bbb
-    // In this case, if we delete `aaa` firstly, then delete `bbb`,
-    // the `deleteBlock` will fail when it delete `bbb` because `aaa` is already deleted
-    // but `deleteBlock` still try to get the parent of `bbb` which is `aaa`
-    blocks.slice(1).forEach(block => {
-      this.root.page.transact(() => {
-        this.root.page.deleteBlock(block.model);
-      });
+
+      blocks
+        .slice(1)
+        // delete from lowest to highest
+        .reverse()
+        .forEach(block => {
+          const parent = this.root.page.getParent(block.model);
+          assertExists(parent);
+          this.root.page.deleteBlock(block.model, {
+            bringChildrenTo: parent,
+          });
+        });
     });
 
     const newSelection = this._selectionManager.getInstance('text', {

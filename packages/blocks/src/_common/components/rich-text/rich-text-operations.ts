@@ -396,7 +396,9 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
     children: model.children,
   };
   page.captureSync();
-  page.deleteBlock(model);
+  page.deleteBlock(model, {
+    deleteChildren: false,
+  });
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
   asyncFocusRichText(page, id);
   return true;
