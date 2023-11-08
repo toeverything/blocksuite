@@ -567,14 +567,23 @@ export class Page extends Space<FlatBlockMap> {
     model: BaseBlockModel,
     options: {
       bringChildrenTo?: BaseBlockModel;
-    } = {}
+      deleteChildren?: boolean;
+    } = {
+      deleteChildren: true,
+    }
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
 
-    const { bringChildrenTo } = options;
+    const { bringChildrenTo, deleteChildren } = options;
+    if (bringChildrenTo && deleteChildren) {
+      console.error(
+        'Cannot bring children to another block and delete them at the same time'
+      );
+      return;
+    }
 
     const yModel = this._yBlocks.get(model.id) as YBlock;
     const yModelChildren = yModel.get('sys:children') as Y.Array<string>;
@@ -609,21 +618,23 @@ export class Page extends Space<FlatBlockMap> {
           yBringChildrenToChildren.push(yModelChildren.toArray());
         }
       } else {
-        // delete children recursively
-        const deleteChildren = (id: string) => {
-          const yBlock = this._yBlocks.get(id) as YBlock;
+        if (deleteChildren) {
+          // delete children recursively
+          const dl = (id: string) => {
+            const yBlock = this._yBlocks.get(id) as YBlock;
 
-          const yChildren = yBlock.get('sys:children') as Y.Array<string>;
-          yChildren.forEach(id => {
-            deleteChildren(id);
+            const yChildren = yBlock.get('sys:children') as Y.Array<string>;
+            yChildren.forEach(id => {
+              dl(id);
+            });
+
+            this._yBlocks.delete(id);
+          };
+
+          yModelChildren.forEach(id => {
+            dl(id);
           });
-
-          this._yBlocks.delete(id);
-        };
-
-        yModelChildren.forEach(id => {
-          deleteChildren(id);
-        });
+        }
       }
 
       this._yBlocks.delete(model.id);
