@@ -37,13 +37,12 @@ disposable.dispose();
 Under the `page` instance, you can subscribe to common events using `page.slots`:
 
 ```ts
-page.slots.rootAdded.on(() => {
-  // The `page.root` is not null at this point
-  // You can bind it to a component tree now
-  console.log('rootAdded!');
+page.slots.ready.on(() => {
+  // The `page.root` should be ready to use at this moment
+  console.log('page ready!');
 });
 
-page.addBlock('affine:page'); // rootAdded!
+page.addBlock('affine:page');
 ```
 
 Moreover, for any node in the block tree, events can be triggered when the node is updated:
