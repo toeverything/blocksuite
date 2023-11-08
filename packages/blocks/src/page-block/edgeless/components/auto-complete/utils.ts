@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import { Job, Workspace } from '@blocksuite/store';
 
 import type { NoteBlockModel } from '../../../../models.js';
@@ -293,11 +294,20 @@ export async function createEdgelessElement(
       edgeless.model.id
     );
 
+    const note = surface.pickById(id);
+    assertExists(note);
     const job = new Job({
       workspace: edgeless.std.workspace,
     });
     const snapshot = await job.blockToSnapshot(current);
-    await job.snapshotToBlock(snapshot, edgeless.page);
+    snapshot.children.forEach(child => {
+      edgeless.pageClipboardController.onBlockSnapshotPaste(
+        child,
+        page,
+        note.id,
+        0
+      );
+    });
   }
   const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {

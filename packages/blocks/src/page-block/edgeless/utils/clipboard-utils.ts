@@ -43,8 +43,7 @@ export async function duplicate(
           edgeless.pageClipboardController.onBlockSnapshotPaste(
             child,
             page,
-            note.id,
-            0
+            note.id
           );
         });
 
