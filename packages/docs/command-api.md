@@ -128,3 +128,17 @@ std.command.pipe().my({ configA: 0, configB: 'hello' }).run();
 
 Please notice that commands take only one argument,
 so you need to wrap the options in an object if you want to pass multiple options.
+
+## Inline Command
+
+You can also use inline command for some temporary commands.
+
+```ts
+std.command
+  .pipe()
+  .inline((ctx, next) => {
+    // ...
+    return next();
+  })
+  .run();
+```
