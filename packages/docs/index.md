@@ -7,8 +7,8 @@ titleTemplate: Block-Based Collaborative Editing
 
 hero:
   name: BlockSuite
-  text: Block-Based Collaborative Editing
-  tagline: BlockSuite is the open-source collaborative editing project behind AFFiNE.
+  text: Where Diverse Editing Tools Converge
+  tagline: BlockSuite is an open-source project for block-based collaborative editing.
   actions:
     - theme: brand
       text: Get Started
@@ -19,7 +19,7 @@ hero:
 
 features:
   - title: 🎨 Interoperable Block-Based Editors
-    details: BlockSuite provides multiple block-based editors with shared schema and infra, including rich text, whiteboard and more!
+    details: BlockSuite provides multiple editors with shared block schema and infra, including rich text, whiteboard and more!
   - title: 🧬 Intrinsically Collaborative
     details: Powered by CRDT, BlockSuite built conflict resolution and time travel into its core. Collaboration ready from day one.
   - title: 🚧 Extensible Suite
