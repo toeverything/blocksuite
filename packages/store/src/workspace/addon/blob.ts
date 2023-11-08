@@ -87,7 +87,10 @@ export const blob = addOnFactory<keyof BlobAddon>(
           },
         };
 
-        if (typeof window?.addEventListener === 'function') {
+        if (
+          typeof window !== 'undefined' &&
+          typeof window.addEventListener === 'function'
+        ) {
           window.addEventListener('beforeunload', () => {
             this.blob.gc();
           });
