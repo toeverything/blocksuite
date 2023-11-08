@@ -73,7 +73,9 @@ export function tryConvertBlock(
       parent,
       index
     );
-    page.addBlock('affine:paragraph', { text }, parent, index + 1);
+    if (text && text.length > 0) {
+      page.addBlock('affine:paragraph', { text }, parent, index + 1);
+    }
     page.deleteBlock(model, {
       bringChildrenTo: parent,
     });
