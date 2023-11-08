@@ -335,6 +335,13 @@ export class MenuComponent<_T> extends WithDisposable(ShadowlessElement) {
           return;
         }
       });
+
+      this._disposables.addFromEvent(input, 'copy', e => {
+        e.stopPropagation();
+      });
+      this._disposables.addFromEvent(input, 'cut', e => {
+        e.stopPropagation();
+      });
     }
   }
 
