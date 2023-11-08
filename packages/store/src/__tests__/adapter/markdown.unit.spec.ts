@@ -770,7 +770,7 @@ hhh
     };
 
     const markdown =
-      '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob)\n';
+      '![](assets/YXXTjRmLlNyiOUnHb8nAIvUP6V7PAXhwW9F5_tc2LGs=.blob)\n\n';
 
     const mdAdapter = new MarkdownAdapter();
     const blobManager = new MemoryBlobManager();
