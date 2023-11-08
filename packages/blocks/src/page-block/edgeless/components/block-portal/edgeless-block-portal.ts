@@ -8,6 +8,7 @@ import '../rects/edgeless-dragging-area-rect.js';
 import '../note-status/index.js';
 import '../../components/auto-connect/edgeless-index-label.js';
 import '../../components/auto-connect/edgeless-auto-connect-line.js';
+import '../component-toolbar/component-toolbar.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
@@ -60,6 +61,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @state()
   private _showAutoConnect = false;
+
+  @state()
+  private _toolbarVisible = false;
 
   private _cancelRestoreWillchange: (() => void) | null = null;
 
@@ -239,7 +243,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
 
     _disposables.add(
-      edgeless.selectionManager.slots.updated.on(() => {
+      edgeless.selectionManager.slots.updated.on(e => {
+        if (e.elements.length === 0 || e.editing) {
+          this._toolbarVisible = false;
+        } else {
+          this._toolbarVisible = true;
+        }
         this._updateAutoConnect();
       })
     );
@@ -248,7 +257,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   override render() {
     const { edgeless } = this;
 
-    const { surface } = edgeless;
+    const { surface, page } = edgeless;
     if (!surface) return nothing;
     const notes = surface.getBlocks(NOTE);
     const images = surface.getBlocks(IMAGE);
@@ -314,12 +323,23 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-dragging-area-rect
         .edgeless=${edgeless}
       ></edgeless-dragging-area-rect>
+
+      <edgeless-selected-rect
+        .edgeless=${edgeless}
+        .toolbarVisible=${this._toolbarVisible}
+        .setToolbarVisible=${(v: boolean) => {
+          this._toolbarVisible = v;
+        }}
+      ></edgeless-selected-rect>
       <edgeless-index-label
         .elementsMap=${autoConnectedBlocks}
         .surface=${surface}
         .show=${this._showAutoConnect}
       ></edgeless-index-label>
-      <edgeless-selected-rect .edgeless=${edgeless}></edgeless-selected-rect>
+      ${this._toolbarVisible && !page.readonly
+        ? html`<edgeless-component-toolbar .edgeless=${edgeless}>
+          </edgeless-component-toolbar>`
+        : nothing}
     `;
   }
 }

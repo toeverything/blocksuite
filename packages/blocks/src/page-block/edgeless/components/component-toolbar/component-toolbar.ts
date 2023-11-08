@@ -31,11 +31,13 @@ import { GROUP_ROOT } from '../../../../surface-block/elements/group/consts.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
 import {
   type BrushElement,
+  clamp,
   type ConnectorElement,
   type ShapeElement,
   type TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
 
 type CategorizedElements = {
@@ -52,16 +54,6 @@ type CategorizedElements = {
 @customElement('edgeless-component-toolbar')
 export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      display: block;
-      position: absolute;
-      user-select: none;
-    }
-
-    :host([data-show]) {
-      display: block;
-    }
-
     .edgeless-component-toolbar-container {
       display: flex;
       align-items: center;
@@ -220,6 +212,18 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ]).forEach(slot =>
       this._disposables.add(slot.on(this._updateOnSelectedChange))
     );
+
+    this.style.position = 'absolute';
+    this.style.zIndex = '1';
+  }
+
+  protected override firstUpdated() {
+    const { _disposables } = this;
+    _disposables.add(
+      this.surface.viewport.slots.viewportUpdated.on(() =>
+        this._updatePosition()
+      )
+    );
   }
 
   private _getCreateGroupButton() {
@@ -246,7 +250,41 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ></edgeless-align-button>`;
   }
 
+  private async _updatePosition() {
+    await this.updateComplete;
+    const { selectionManager } = this.edgeless;
+
+    const bound = edgelessElementsBound(selectionManager.elements);
+
+    const { viewport } = this.edgeless.surface;
+    const { width, height } = viewport;
+    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+
+    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
+    const rect = this.getBoundingClientRect();
+
+    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
+      this.style.left = (right <= 0 ? x - rect.width : x) + 'px';
+      this.style.top = (bottom <= 0 ? y - rect.height : y) + 'px';
+      return;
+    }
+
+    let offset = 34;
+    if (this.selection.elements.find(ele => isFrameBlock(ele))) {
+      offset += 10;
+    }
+    let top = y - rect.height - offset;
+    top < 0 && (top = y + bound.h * viewport.zoom + offset);
+
+    const left = clamp(x, 10, width - rect.width - 10);
+    top = clamp(top, 10, height - rect.height - 100);
+
+    this.style.left = left + 'px';
+    this.style.top = top + 'px';
+  }
+
   override render() {
+    this._updatePosition();
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
     const { shape, brush, connector, note, text, frame, group } =

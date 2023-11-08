@@ -9,7 +9,7 @@ import type { SurfaceBlockComponent } from '../../../../surface-block/surface-bl
 import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
-const EXPAND_OFFSET = 20;
+const EXPAND_OFFSET = 40;
 
 @customElement('edgeless-auto-connect-line')
 export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
@@ -117,6 +117,9 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
           EXPAND_OFFSET / 2,
           EXPAND_OFFSET / 2,
         ]);
+
+        if (newStart.every(a => isNaN(a)) || newEnd.every(a => isNaN(a)))
+          return nothing;
 
         return svg`
           <svg style=${style} width="${newWidth}px" height="${newHeight}px" viewBox="0 0 ${newWidth} ${newHeight}" xmlns="http://www.w3.org/2000/svg">
