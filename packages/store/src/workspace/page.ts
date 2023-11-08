@@ -71,6 +71,7 @@ export class Page extends Space<FlatBlockMap> {
       | {
           type: 'add';
           id: string;
+          flavour: string;
         }
       | {
           type: 'delete';
@@ -81,6 +82,7 @@ export class Page extends Space<FlatBlockMap> {
       | {
           type: 'update';
           id: string;
+          flavour: string;
           props: Partial<BlockProps>;
         }
     >(),
@@ -523,6 +525,7 @@ export class Page extends Space<FlatBlockMap> {
 
     this.slots.blockUpdated.emit({
       type: 'update',
+      flavour: model.flavour,
       id: model.id,
       props,
     });
@@ -742,7 +745,7 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    this.slots.blockUpdated.emit({ type: 'add', id });
+    this.slots.blockUpdated.emit({ type: 'add', id, flavour: model.flavour });
   }
 
   private _handleYBlockDelete(id: string) {

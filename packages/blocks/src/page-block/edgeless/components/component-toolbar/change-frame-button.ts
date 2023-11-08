@@ -9,7 +9,12 @@ import { toast } from '../../../../_common/components/toast.js';
 import { NoteIcon, RenameIcon } from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import type { FrameBlockModel } from '../../../../frame-block/index.js';
+import {
+  deserializeXYWH,
+  serializeXYWH,
+} from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import { DEFAULT_NOTE_HEIGHT } from '../../utils/consts.js';
 import { mountFrameTitleEditor } from '../../utils/text.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import type { ColorEvent } from '../panel/color-panel.js';
@@ -103,13 +108,39 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   }
 
   private _insertIntoPage() {
+    if (!this.surface.page.root) return;
+
+    const root = this.surface.page.root;
+    const pageChildren = root.children;
+    const last = pageChildren[pageChildren.length - 1];
+    const referenceFrame = this.frames[0];
+
+    let targetParent = last?.id;
+
+    if (last?.flavour !== 'affine:note') {
+      const targetXYWH = deserializeXYWH(referenceFrame.xywh);
+
+      targetXYWH[1] = targetXYWH[1] + targetXYWH[3];
+      targetXYWH[3] = DEFAULT_NOTE_HEIGHT;
+
+      const newAddedNote = this.surface.page.addBlock(
+        'affine:note',
+        {
+          xywh: serializeXYWH(...targetXYWH),
+        },
+        root.id
+      );
+
+      targetParent = newAddedNote;
+    }
+
     this.surface.page.addBlock(
       'affine:surface-ref',
       {
         reference: this.frames[0].id,
         refFlavour: 'affine:frame',
       },
-      this.surface.page.root?.id
+      targetParent
     );
 
     toast('Frame has been inserted into page');
@@ -143,7 +174,7 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
     return html`${frames.length === 1
         ? html`
             <edgeless-tool-icon-button
-              .tooltip=${'Rename'}
+              .tooltip=${'Insert into Page'}
               .tipPosition=${'bottom'}
               @click=${this._insertIntoPage}
             >

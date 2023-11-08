@@ -506,6 +506,7 @@ function handleEmbedDividerCodeSibling(
       'affine:code',
       'affine:bookmark',
       'affine:attachment',
+      'affine:surface-ref',
     ] as const)
   )
     return false;
@@ -576,9 +577,6 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       index: lengthBeforeJoin,
       length: 0,
     });
-    return true;
-  } else if (matchFlavours(previousSibling, ['affine:surface-ref'])) {
-    page.deleteBlock(previousSibling);
     return true;
   }
 

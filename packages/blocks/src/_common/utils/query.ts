@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement } from '@blocksuite/lit';
+import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import type { BaseBlockModel, Page } from '@blocksuite/store';
 import { VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
 
@@ -8,7 +8,6 @@ import type { RichText } from '../../_common/components/rich-text/rich-text.js';
 import type { DocPageBlockComponent } from '../../page-block/doc/doc-page-block.js';
 import type { EdgelessCanvasTextEditor } from '../../page-block/edgeless/components/text/types.js';
 import type { EdgelessPageBlockComponent } from '../../page-block/edgeless/edgeless-page-block.js';
-import type { PageBlockComponent } from '../../page-block/types.js';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT as PADDING_LEFT,
   BLOCK_ID_ATTR as ATTR,
@@ -135,12 +134,18 @@ export function getPreviousBlock(model: BaseBlockModel): BaseBlockModel | null {
 }
 
 /**
- * Returns `DefaultPageBlockComponent` | `EdgelessPageBlockComponent` if it exists
- * otherwise return `null`.
+ * This function is used to build model's "normal" block path.
+ * If this function does not meet your needs, you may need to build path manually to satisfy your needs.
+ * You should not modify this function.
  */
-export function getPageBlock(model: BaseBlockModel): PageBlockComponent | null {
-  assertExists(model.page.root);
-  return document.querySelector(`[${ATTR}="${model.page.root.id}"]`);
+export function buildPath(model: BaseBlockModel | null): string[] {
+  const path: string[] = [];
+  let current = model;
+  while (current) {
+    path.unshift(current.id);
+    current = current.page.getParent(current);
+  }
+  return path;
 }
 
 /**
@@ -183,7 +188,7 @@ export function getEditorContainer(page: Page): AbstractEditor {
     page.root,
     'Failed to check page mode! Page root is not exists!'
   );
-  const pageBlock = getBlockElementById(page.root.id);
+  const pageBlock = getBlockElementByModel(page.root);
   // EditorContainer
   const editorContainer = pageBlock?.closest('editor-container');
   assertExists(editorContainer);
@@ -204,6 +209,12 @@ export function isPageMode(page: Page) {
   return editor.mode === 'page';
 }
 
+export function getLitRoot() {
+  const root = document.querySelector<BlockSuiteRoot>('block-suite-root');
+  assertExists(root);
+  return root;
+}
+
 /**
  * Get editor viewport element.
  *
@@ -220,9 +231,7 @@ export function getViewportElement(page: Page) {
   const isPage = isPageMode(page);
   if (!isPage) return null;
   assertExists(page.root);
-  const defaultPageBlock = document.querySelector(
-    `[${ATTR}="${page.root.id}"]`
-  );
+  const defaultPageBlock = getBlockElementByModel(page.root);
 
   if (
     !defaultPageBlock ||
@@ -233,27 +242,35 @@ export function getViewportElement(page: Page) {
   return (defaultPageBlock as DocPageBlockComponent).viewportElement;
 }
 
-export function getBlockElementByModel(
-  model: BaseBlockModel
-): BlockComponentElement | null {
-  assertExists(model.page.root);
-  const pageElement = getPageBlock(model);
-  if (!pageElement) return null;
-
-  if (model.id === model.page.root.id) {
-    return pageElement;
-  }
-
-  return pageElement.querySelector<BlockComponentElement>(
-    `[${ATTR}="${model.id}"]`
-  );
+/**
+ * Get block element by model.
+ * Note that this function is used for compatibility only, and may be removed in the future.
+ *
+ * Use `root.view.viewFromPath` instead.
+ * @deprecated
+ */
+export function getBlockElementByModel(model: BaseBlockModel) {
+  return getBlockElementByPath(buildPath(model));
 }
 
+export function getBlockElementByPath(path: string[]) {
+  const root = getLitRoot();
+
+  return root.view.viewFromPath('block', path);
+}
+
+/**
+ * Get block element by its model and wait for the page element to finish updating.
+ * Note that this function is used for compatibility only, and may be removed in the future.
+ *
+ * Use `root.view.viewFromPath` instead.
+ * @deprecated
+ */
 export async function asyncGetBlockElementByModel(
   model: BaseBlockModel
 ): Promise<BlockComponentElement | null> {
   assertExists(model.page.root);
-  const pageElement = getPageBlock(model);
+  const pageElement = getBlockElementByModel(model.page.root);
   if (!pageElement) return null;
   await pageElement.updateComplete;
 
@@ -261,9 +278,7 @@ export async function asyncGetBlockElementByModel(
     return pageElement;
   }
 
-  const blockElement = pageElement.querySelector<BlockComponentElement>(
-    `[${ATTR}="${model.id}"]`
-  );
+  const blockElement = getBlockElementByModel(model);
   return blockElement;
 }
 
@@ -619,29 +634,6 @@ export function getModelByBlockElement(element: Element) {
   }
   assertExists(containerBlock.model);
   return containerBlock.model;
-}
-
-/**
- * Returns the block element by id with the parent.
- */
-export function getBlockElementById(
-  id: string,
-  parent: BlockComponentElement | Document | Element = document
-) {
-  return parent.querySelector(`[${ATTR}="${id}"]`);
-}
-
-/**
- * Returns the closest note block element by id with the parent.
- */
-export function getClosestNoteBlockElementById(
-  id: string,
-  parent: BlockComponentElement | Document | Element = document
-) {
-  const element = getBlockElementById(id, parent);
-  if (!element) return null;
-  if (isNote(element)) return element;
-  return element.closest('affine-note');
 }
 
 /**

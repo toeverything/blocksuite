@@ -9,7 +9,7 @@ import type { ReactiveController } from 'lit';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  getBlockElementById,
+  getBlockElementByModel,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -28,7 +28,7 @@ import type { Connection } from '../../../surface-block/elements/connector/types
 import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
 import type { PhasorElement } from '../../../surface-block/elements/index.js';
 import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
-import { compare } from '../../../surface-block/grid.js';
+import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import {
@@ -643,7 +643,7 @@ export class EdgelessClipboardController implements ReactiveController {
 
     const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
+      const blockElement = getBlockElementByModel(nodeElement)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,

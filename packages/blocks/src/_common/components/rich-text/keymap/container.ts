@@ -14,7 +14,7 @@ import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
 import { createPage } from '../../../utils/init.js';
-import { getPageBlock } from '../../../utils/query.js';
+import { buildPath } from '../../../utils/query.js';
 import { insertLinkedNode } from '../../../widgets/linked-page/config.js';
 import { tryConvertBlock } from '../markdown/block.js';
 import {
@@ -421,7 +421,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
   });
 
   function tryConvertToLinkedPage() {
-    const pageBlock = getPageBlock(model);
+    const pageBlock = blockElement.root.view.viewFromPath(
+      'block',
+      buildPath(model.page.root)
+    );
     assertExists(pageBlock);
     const linkedPageWidgetEle =
       pageBlock.widgetElements['affine-linked-page-widget'];
