@@ -73,9 +73,33 @@ export abstract class BaseCellRenderer<
         }
       })
     );
+
+    this._disposables.addFromEvent(this, 'copy', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onCopy(e);
+    });
+
+    this._disposables.addFromEvent(this, 'cut', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onCut(e);
+    });
+
+    this._disposables.addFromEvent(this, 'paste', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onPaste(e);
+    });
   }
 
   forceUpdate(): void {
     this.requestUpdate();
   }
+
+  onCopy(_e: ClipboardEvent) {}
+
+  onCut(_e: ClipboardEvent) {}
+
+  onPaste(_e: ClipboardEvent) {}
 }
