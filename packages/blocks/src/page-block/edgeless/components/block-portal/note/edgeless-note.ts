@@ -109,7 +109,7 @@ export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
         selection.state.elements.includes(this.model.id)
       ) {
         this._editing = true;
-        this._transition = 'transform 0.3s, padding 0.3s, width 0.3s';
+        this._transition = 'left 0.3s, top 0.3s, width 0.3s, height 0.3s';
       } else {
         this._editing = false;
         if (this._transition !== 'none') {
@@ -127,41 +127,40 @@ export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
 
-    const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
-    const width = modelW + extra * 2;
-    const translateX = modelX - extra;
-    const translateY = modelY - extra;
-    const padding = EDGELESS_BLOCK_CHILD_PADDING + extra;
-
-    const border = this._editing
-      ? `1px solid var(--affine-blue-600)`
-      : isHiddenNote
-      ? `2px dashed var(--affine-black-10)`
-      : 'none';
-
-    const boxShadow = this._editing
-      ? 'var(--affine-active-shadow)'
-      : isHiddenNote
-      ? 'none'
-      : 'var(--affine-note-shadow-box)';
-
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
-      width: `${width}px`,
-      transform: `translate(${translateX}px, ${translateY}px)`,
-      padding: `${padding}px`,
-      border: border,
-      borderRadius: '8px',
+      width: `${modelW}px`,
+      transform: `translate(${modelX}px, ${modelY}px)`,
+      padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       boxSizing: 'border-box',
+      borderRadius: '8px',
+      pointerEvents: 'all',
+      transformOrigin: '0 0',
+    };
+
+    const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
+    const backgroundStyle = {
+      position: 'absolute',
+      left: `${-extra}px`,
+      top: `${-extra}px`,
+      width: `${modelW + extra * 2}px`,
+      height: `calc(100% + ${extra * 2}px)`,
+      borderRadius: '8px',
+      transition: this._transition,
       background: isHiddenNote
         ? 'transparent'
         : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      boxShadow: boxShadow,
-      pointerEvents: 'all',
-      overflow: 'hidden',
-      transformOrigin: '0 0',
-      transition: this._transition,
+      border: this._editing
+        ? `1px solid var(--affine-blue-600)`
+        : isHiddenNote
+        ? `2px dashed var(--affine-black-10)`
+        : 'none',
+      boxShadow: this._editing
+        ? 'var(--affine-active-shadow)'
+        : isHiddenNote
+        ? 'none'
+        : 'var(--affine-note-shadow-box)',
     };
 
     return html`
@@ -170,6 +169,7 @@ export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
         style=${styleMap(style)}
         data-model-height="${modelH}"
       >
+        <div class="note-background" style=${styleMap(backgroundStyle)}></div>
         ${surface.edgeless.renderModel(model)}
         <edgeless-note-mask
           .surface=${surface}
