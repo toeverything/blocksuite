@@ -39,6 +39,7 @@ import {
   pressShiftTab,
   pressTab,
   redoByKeyboard,
+  resetHistory,
   scrollToTop,
   selectAllByKeyboard,
   SHORT_KEY,
@@ -101,27 +102,170 @@ test('native range delete', async ({ page }) => {
 
 test('native range delete with indent', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
-  await initThreeParagraphs(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+  const { noteId } = await initEmptyParagraphState(page);
 
-  // test indent case
+  await focusRichText(page);
+  await type(page, '123');
+  await pressEnter(page);
+  await type(page, '456');
+  await pressEnter(page);
+  await type(page, '789');
+  await pressEnter(page);
+  await type(page, 'abc');
+  await pressEnter(page);
+  await type(page, 'def');
+  await pressEnter(page);
+  await type(page, 'ghi');
+  await resetHistory(page);
+
   await focusRichText(page, 1);
   await pressTab(page);
   await focusRichText(page, 2);
+  await pressTab(page, 2);
+  await focusRichText(page, 4);
   await pressTab(page);
-  await pressTab(page);
+  await focusRichText(page, 5);
+  await pressTab(page, 2);
 
-  await dragBetweenIndices(page, [0, 2], [2, 1]);
+  // 123
+  //   456
+  //     789
+  // abc
+  //   def
+  //     ghi
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="abc"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="def"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="ghi"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await dragBetweenIndices(page, [0, 2], [4, 1]);
+
+  // 12|3
+  //   456
+  //     789
+  // abc
+  //   d|ef
+  //     ghi
+
   await pressBackspace(page);
-  await assertBlockCount(page, 'paragraph', 1);
-  await assertRichTexts(page, ['1289']);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="12ef"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="ghi"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
 
   await waitNextFrame(page);
   await undoByKeyboard(page);
-  await assertRichTexts(page, ['123', '456', '789']);
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="123"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="456"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="789"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+  <affine:paragraph
+    prop:text="abc"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="def"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="ghi"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
   await redoByKeyboard(page);
-  await assertRichTexts(page, ['1289']);
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="12ef"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="ghi"
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
 });
 
 test('native range delete by forwardDelete', async ({ page }) => {
