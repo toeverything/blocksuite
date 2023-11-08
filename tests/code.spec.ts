@@ -22,6 +22,7 @@ import {
   pressTab,
   redoByKeyboard,
   selectAllByKeyboard,
+  setSelection,
   SHORT_KEY,
   switchReadonly,
   type,
@@ -78,14 +79,77 @@ test('use debug menu can create code block', async ({ page }) => {
 
 test('use markdown syntax can create code block', async ({ page }) => {
   await enterPlaygroundRoom(page);
-  await initEmptyParagraphState(page);
+  const { noteId } = await initEmptyParagraphState(page);
 
   await focusRichText(page);
-  await type(page, '```');
-  await type(page, ' ');
+  await type(page, 'aaa');
+  await pressEnter(page);
+  await type(page, 'bbb');
+  await pressTab(page);
+  await pressEnter(page);
+  await type(page, 'ccc');
+  await pressTab(page);
 
-  const locator = page.locator('affine-code');
-  await expect(locator).toBeVisible();
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:text="aaa"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="bbb"
+      prop:type="text"
+    >
+      <affine:paragraph
+        prop:text="ccc"
+        prop:type="text"
+      />
+    </affine:paragraph>
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
+
+  await setSelection(page, 2, 0, 2, 0);
+  // |aaa
+  //   bbb
+  //     ccc
+
+  await type(page, '``` ');
+
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:code
+    prop:language="Plain Text"
+  />
+  <affine:paragraph
+    prop:text="aaa"
+    prop:type="text"
+  />
+  <affine:paragraph
+    prop:text="bbb"
+    prop:type="text"
+  >
+    <affine:paragraph
+      prop:text="ccc"
+      prop:type="text"
+    />
+  </affine:paragraph>
+</affine:note>`,
+    noteId
+  );
 });
 
 test('use markdown syntax with trailing characters can create code block', async ({
