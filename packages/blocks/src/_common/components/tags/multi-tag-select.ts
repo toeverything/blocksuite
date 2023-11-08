@@ -15,6 +15,7 @@ import {
   PlusIcon,
 } from '../../../_common/icons/index.js';
 import { rangeWrap } from '../../../_common/utils/math.js';
+import { stopPropagation } from '../../utils/event.js';
 import { createPopup, popMenu } from '../menu/menu.js';
 import { getTagColor, selectOptionColors } from './colors.js';
 import { styles } from './styles.js';
@@ -106,6 +107,13 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
     this._selectInput.focus();
     this._disposables.addFromEvent(this, 'click', () => {
       this._selectInput.focus();
+    });
+
+    this._disposables.addFromEvent(this._selectInput, 'copy', e => {
+      e.stopPropagation();
+    });
+    this._disposables.addFromEvent(this._selectInput, 'cut', e => {
+      e.stopPropagation();
     });
   }
 
@@ -365,6 +373,7 @@ export class MultiTagSelect extends WithDisposable(ShadowlessElement) {
             .value="${this.text}"
             @input="${this._onInput}"
             @keydown="${this._onInputKeydown}"
+            @pointerdown="${stopPropagation}"
           />
         </div>
         <div class="select-option-container">

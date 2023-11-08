@@ -325,7 +325,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       page.root?.id
     );
     page.addBlock('affine:paragraph', { type: 'text' }, id);
-    const group = surface.pickById(surface.getGroupParent(this.currentShape));
+    const group = surface.getGroupParent(this.currentShape);
     if (group instanceof GroupElement) {
       surface.group.addChild(group, id);
     }
