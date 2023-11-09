@@ -16,10 +16,10 @@
     "vue": "^3.3.8"
   },
   "scripts": {
-    "typedoc": "pnpm -C $(git rev-parse --show-toplevel) build:editor && typedoc --options $(git rev-parse --show-toplevel)/typedoc.json",
+    "typedoc": "typedoc --options $(git rev-parse --show-toplevel)/typedoc.json",
     "dev": "pnpm run typedoc && vitepress dev --port 5200",
     "build": "pnpm run typedoc && vitepress build",
-    "build:vercel": "pnpm run typedoc && vitepress build",
+    "build:vercel": "pnpm -C $(git rev-parse --show-toplevel) build:editor && git remote add origin https://github.com/toeverything/blocksuite && pnpm run build",
     "preview": "pnpm run typedoc && vitepress preview"
   },
   "dependencies": {
