@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -eu -o pipefail
 
 rm -fr ./temp/size
 pnpm run build:editor
