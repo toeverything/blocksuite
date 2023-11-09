@@ -1,6 +1,10 @@
 import type { Y } from '@blocksuite/store';
 
-import type { EdgelessElement, GroupElement } from '../../index.js';
+import type {
+  EdgelessElement,
+  GroupElement,
+  PhasorElementLocalRecordValues,
+} from '../../index.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
@@ -69,9 +73,7 @@ export abstract class SurfaceElement<
   yMap: Y.Map<unknown>;
 
   protected options: {
-    getLocalRecord: (
-      id: string
-    ) => ISurfaceElementLocalRecord | IShapeLocalRecord | undefined;
+    getLocalRecord: (id: string) => PhasorElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
       props: { [index: string]: { old: unknown; new: unknown } };

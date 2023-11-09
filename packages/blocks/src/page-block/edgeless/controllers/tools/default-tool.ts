@@ -193,34 +193,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
       surface.connector.updateXYWH(selected, bound);
     }
 
-    this._setElementLocalBound(selected.id, bound);
-  }
-
-  private _setElementLocalBound(elementId: string, bound: Bound) {
-    const { _surface: surface } = this;
-
-    surface.updateElementLocalRecord(elementId, {
+    this._edgeless.updateElementInLocal(selected.id, {
       xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
-    });
-  }
-
-  private _applyLocalBoundRecord() {
-    const { _surface: surface } = this;
-
-    this._toBeMoved.forEach(element => {
-      const record = surface.getElementLocalRecord(element.id);
-
-      if (!record || !record.xywh) return;
-
-      const xywh = record.xywh;
-
-      delete record.xywh;
-      surface.deleteElementLocalRecord(element.id);
-      surface.updateElementLocalRecord(element.id, record);
-
-      surface.updateElement(element.id, {
-        xywh,
-      });
     });
   }
 
@@ -568,6 +542,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const { surface } = this._edgeless;
     const { viewport } = surface;
     const zoom = viewport.zoom;
+    console.log(this.dragType);
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
         // Record the last drag pointer position for auto panning and view port updating
@@ -637,7 +612,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDragEnd() {
-    this._applyLocalBoundRecord();
+    this._edgeless.applyLocalRecord(this._toBeMoved.map(ele => ele.id));
 
     if (this._lock) {
       this._page.captureSync();

@@ -37,6 +37,7 @@ import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
+import type { ISurfaceElementLocalRecord } from '../../surface-block/elements/surface-element.js';
 import {
   Bound,
   clamp,
@@ -45,6 +46,7 @@ import {
   intersects,
   type IVec,
   type PhasorElement,
+  type PhasorElementLocalRecordValues,
   serializeXYWH,
   Vec,
   ZOOM_MIN,
@@ -68,6 +70,7 @@ import {
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
+import { LocalRecordManager } from './services/local-record-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
 import {
@@ -219,6 +222,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
+  localRecordMgr!: LocalRecordManager<PhasorElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -532,6 +536,40 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return getCommonBound(bounds);
   }
 
+  updateElementInLocal(
+    elementId: string,
+    record: Partial<PhasorElementLocalRecordValues>
+  ) {
+    this.localRecordMgr.update(elementId, record);
+  }
+
+  applyLocalRecord(elements: string[]) {
+    if (!this.surface) return;
+
+    const elementsSet = new Set(elements);
+
+    this.localRecordMgr.each((id, record) => {
+      if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
+
+      const element = this.surface.pickById(id) as EdgelessElement;
+      const updateProps: Record<string, unknown> = {};
+      let flag = false;
+
+      Object.keys(record).forEach(key => {
+        if (key in element) {
+          flag = true;
+          updateProps[key] = record[key as keyof typeof record];
+          delete record[key as keyof typeof record];
+        }
+      });
+
+      if (!flag) return;
+
+      this.localRecordMgr.update(id, record);
+      this.surface.updateElement(id, updateProps);
+    });
+  }
+
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('edgelessTool')) {
       this.tools.edgelessTool = this.edgelessTool;
@@ -732,6 +770,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.root.event);
+    this.localRecordMgr =
+      new LocalRecordManager<PhasorElementLocalRecordValues>();
+
+    this.disposables.add(() => {
+      this.localRecordMgr.destroy();
+    });
   }
 
   override disconnectedCallback() {
