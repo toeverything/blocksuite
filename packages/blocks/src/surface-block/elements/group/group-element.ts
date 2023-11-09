@@ -20,8 +20,6 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
   // the ymap will be removed first, which will make the following operation
   // unable to find the children and id.
   private _cachedChildren: string[] = [];
-  // The cached id would not be changed after init.
-  private _cachedId: string = '';
 
   private _titleHeight = getLineHeight("'Kalam', cursive", 16);
   private _titleWidth = 0;
@@ -45,9 +43,8 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
     options.updateElementLocalRecord(this.id, { showTitle: true });
 
-    this._cachedId = this.id;
     this.childElements.forEach(ele => {
-      options.setGroupParent(ele, this.id);
+      options.setGroupParent(ele, this);
     });
     this._cachedChildren = this._children;
 
@@ -56,12 +53,12 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
       for (const [key, { action }] of Array.from(event.changes.keys)) {
         if (action === 'delete') {
           const child = options.pickById(key);
-          if (child && options.getGroupParent(child) === this.id)
+          if (child && options.getGroupParent(child) === this)
             options.setGroupParent(child, options.getGroupParent(this));
         } else if (action === 'add') {
           const child = options.pickById(key);
           assertExists(child);
-          options.setGroupParent(child, this.id);
+          options.setGroupParent(child, this);
         } else {
           console.log('unexpected', key);
         }
@@ -113,6 +110,16 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
 
   get radius() {
     return this._radius;
+  }
+
+  get titleBound() {
+    const bound = Bound.deserialize(this.xywh);
+    return new Bound(
+      bound.x,
+      bound.y - this._titleHeight,
+      this._titleWidth,
+      this._titleHeight
+    );
   }
 
   override get gridBound() {
@@ -212,7 +219,7 @@ export class GroupElement extends SurfaceElement<IGroup, IGroupLocalRecord> {
     const { options } = this;
     this._cachedChildren.forEach(id => {
       const ele = options.pickById(id);
-      if (ele && options.getGroupParent(ele) === this._cachedId)
+      if (ele && options.getGroupParent(ele) === this)
         options.setGroupParent(ele, options.getGroupParent(this));
     });
     super.unmount();

@@ -69,6 +69,7 @@ export default defineConfig({
           },
           { text: 'Selection API', link: '/selection-api' },
           { text: 'Event API', link: '/event-api' },
+          { text: 'Command API', link: '/command-api' },
         ],
       },
       {

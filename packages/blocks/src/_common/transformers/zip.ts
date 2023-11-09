@@ -6,10 +6,27 @@ import type {
   Workspace,
   WorkspaceInfoSnapshot,
 } from '@blocksuite/store';
-import { Job } from '@blocksuite/store';
+import { getAssetName, Job } from '@blocksuite/store';
 import JSZip from 'jszip';
 
 import { replaceIdMiddleware } from './utils.js';
+
+export function createAssetsArchive(
+  assetsMap: Map<string, Blob>,
+  assetsIds: string[]
+) {
+  const zip = new JSZip();
+
+  const assets = zip.folder('assets');
+  assertExists(assetsMap);
+
+  assetsMap.forEach((blob, id) => {
+    if (!assetsIds.includes(id)) return;
+    assets?.file(getAssetName(assetsMap, id), blob);
+  });
+
+  return zip;
+}
 
 export async function exportPages(workspace: Workspace, pages: Page[]) {
   const zip = new JSZip();
@@ -30,14 +47,7 @@ export async function exportPages(workspace: Workspace, pages: Page[]) {
   const assetsMap = job.assets;
 
   assetsMap.forEach((blob, id) => {
-    const name = 'name' in blob ? (blob as File).name : undefined;
-    const ext =
-      name !== undefined && name.includes('.')
-        ? name.split('.').at(-1)
-        : blob.type !== ''
-        ? blob.type.split('/').at(-1)
-        : 'blob';
-    assets.file(`${id}.${ext}`, blob);
+    assets.file(getAssetName(assetsMap, id), blob);
   });
 
   return zip.generateAsync({ type: 'blob' });

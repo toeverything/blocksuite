@@ -18,6 +18,18 @@ export type FromSliceSnapshotPayload = {
   snapshot: SliceSnapshot;
   assets?: AdapterAssetsManager;
 };
+export type FromPageSnapshotResult<Target> = {
+  file: Target;
+  assetsIds: string[];
+};
+export type FromBlockSnapshotResult<Target> = {
+  file: Target;
+  assetsIds: string[];
+};
+export type FromSliceSnapshotResult<Target> = {
+  file: Target;
+  assetsIds: string[];
+};
 export type ToPageSnapshotPayload<Target> = {
   file: Target;
   assets?: AdapterAssetsManager;
@@ -34,13 +46,13 @@ export type ToSliceSnapshotPayload<Target> = {
 export abstract class BaseAdapter<AdapterTarget = unknown> {
   abstract fromPageSnapshot(
     payload: FromPageSnapshotPayload
-  ): Promise<AdapterTarget>;
+  ): Promise<FromPageSnapshotResult<AdapterTarget>>;
   abstract fromBlockSnapshot(
     payload: FromBlockSnapshotPayload
-  ): Promise<AdapterTarget>;
+  ): Promise<FromBlockSnapshotResult<AdapterTarget>>;
   abstract fromSliceSnapshot(
     payload: FromSliceSnapshotPayload
-  ): Promise<AdapterTarget>;
+  ): Promise<FromSliceSnapshotResult<AdapterTarget>>;
   abstract toPageSnapshot(
     payload: ToPageSnapshotPayload<AdapterTarget>
   ): Promise<PageSnapshot>;

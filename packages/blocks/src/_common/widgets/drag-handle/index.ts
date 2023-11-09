@@ -895,6 +895,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
     const parent = this.page.getParent(targetBlockId);
+
     if (targetBlock && parent && selectedBlocks.length > 0) {
       this.page.moveBlocks(
         selectedBlocks,

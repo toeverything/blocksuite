@@ -41,33 +41,6 @@ const NEXT_FRAME_TIMEOUT = 100;
 const DEFAULT_PLAYGROUND = defaultPlaygroundURL.toString();
 const RICH_TEXT_SELECTOR = '.virgo-editor';
 
-function shamefullyIgnoreConsoleMessage(message: ConsoleMessage): boolean {
-  if (!process.env.CI) {
-    return true;
-  }
-  const ignoredMessages = [
-    // basic.spec.ts
-    "Caught error while handling a Yjs update TypeError: Cannot read properties of undefined (reading 'toJSON')",
-    // clipboard.spec.ts
-    "TypeError: Cannot read properties of null (reading 'model')",
-    // basic.spec.ts › should readonly mode not be able to modify text
-    'cannot modify data in readonly mode',
-    // Firefox warn on quill
-    // See https://github.com/quilljs/quill/issues/2030
-    '[JavaScript Warning: "Use of Mutation Events is deprecated. Use MutationObserver instead."',
-    "addRange(): The given range isn't in document.",
-    //#region embed.spec.ts
-    'Failed to load resource: the server responded with a status of 404 (Not Found)',
-    'Failed to load resource: the server responded with a status of 403 ()',
-    'Error while getting blob HTTPError: Request failed with status code 404 Not Found',
-    'Error: Failed to fetch blob',
-    'Error: Cannot find blob',
-    'Cannot find blob',
-    //#endregion
-  ];
-  return ignoredMessages.some(msg => message.text().startsWith(msg));
-}
-
 function generateRandomRoomId() {
   return `playwright-${Math.random().toFixed(8).substring(2)}`;
 }
@@ -178,6 +151,72 @@ export const getBlockHub = (page: Page) => {
   return page.locator('affine-block-hub').nth(currentEditorIndex);
 };
 
+type TaggedConsoleMessage = ConsoleMessage & { __ignore?: boolean };
+function ignoredLog(message: ConsoleMessage) {
+  (message as TaggedConsoleMessage).__ignore = true;
+}
+function isIgnoredLog(
+  message: ConsoleMessage
+): message is TaggedConsoleMessage {
+  return '__ignore' in message && !!message.__ignore;
+}
+
+/**
+ * Expect console message to be called in the test.
+ *
+ * This function **should** be called before the `enterPlaygroundRoom` function!
+ *
+ * ```ts
+ * expectConsoleMessage(page, 'Failed to load resource'); // Default type is 'error'
+ * expectConsoleMessage(page, '[vite] connected.', 'warning'); // Specify type
+ * ```
+ */
+export function expectConsoleMessage(
+  page: Page,
+  logPrefixOrRegex: string | RegExp,
+  type:
+    | 'log'
+    | 'debug'
+    | 'info'
+    | 'error'
+    | 'warning'
+    | 'dir'
+    | 'dirxml'
+    | 'table'
+    | 'trace'
+    | 'clear'
+    | 'startGroup'
+    | 'startGroupCollapsed'
+    | 'endGroup'
+    | 'assert'
+    | 'profile'
+    | 'profileEnd'
+    | 'count'
+    | 'timeEnd' = 'error'
+) {
+  page.on('console', (message: ConsoleMessage) => {
+    if (
+      [
+        '[vite] connecting...',
+        '[vite] connected.',
+        'Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.',
+        '%cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold',
+      ].includes(message.text())
+    ) {
+      ignoredLog(message);
+      return;
+    }
+    const sameType = message.type() === type;
+    const textMatch =
+      logPrefixOrRegex instanceof RegExp
+        ? logPrefixOrRegex.test(message.text())
+        : message.text().startsWith(logPrefixOrRegex);
+    if (sameType && textMatch) {
+      ignoredLog(message);
+    }
+  });
+}
+
 export async function enterPlaygroundRoom(
   page: Page,
   ops?: {
@@ -201,19 +240,15 @@ export async function enterPlaygroundRoom(
   // See https://github.com/microsoft/playwright/issues/5546
   // See https://github.com/microsoft/playwright/discussions/17813
   page.on('console', message => {
-    const ignore = shamefullyIgnoreConsoleMessage(message);
+    const ignore = isIgnoredLog(message) || !process.env.CI;
     if (!ignore) {
-      expect('Unexpected console message: ' + message.text()).toBe(
-        'Please remove the "console.log" statements from the code. It is advised not to output logs in a production environment.'
-      );
-      // throw new Error('Unexpected console message: ' + message.text());
+      expect
+        .soft('Unexpected console message: ' + message.text())
+        .toBe(
+          'Please remove the "console.log" or declare `expectConsoleMessage` before `enterPlaygroundRoom`. It is advised not to output logs in a production environment.'
+        );
     }
-    if (message.type() === 'warning') {
-      console.warn(message.text());
-    }
-    if (message.type() === 'error') {
-      console.error('Unexpected console error: ' + message.text());
-    }
+    console.log(`Console ${message.type()}: ${message.text()}`);
   });
 
   // Log all uncaught errors
@@ -254,14 +289,13 @@ export async function waitNextFrame(
 }
 
 export async function waitForPageReady(page: Page) {
-  await page.evaluate(
-    () =>
-      new Promise<void>(resolve => {
-        window.addEventListener('blocksuite:page-ready', () => resolve(), {
-          once: true,
-        });
-      })
-  );
+  await page.evaluate(async () => {
+    return new Promise<void>(resolve => {
+      window.addEventListener('blocksuite:page-ready', () => resolve(), {
+        once: true,
+      });
+    });
+  });
 }
 
 export async function clearLog(page: Page) {

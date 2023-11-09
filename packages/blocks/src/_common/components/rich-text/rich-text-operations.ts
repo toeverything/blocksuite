@@ -396,7 +396,9 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
     children: model.children,
   };
   page.captureSync();
-  page.deleteBlock(model);
+  page.deleteBlock(model, {
+    deleteChildren: false,
+  });
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
   asyncFocusRichText(page, id);
   return true;
@@ -506,6 +508,7 @@ function handleEmbedDividerCodeSibling(
       'affine:code',
       'affine:bookmark',
       'affine:attachment',
+      'affine:surface-ref',
     ] as const)
   )
     return false;
@@ -576,9 +579,6 @@ function handleParagraphDeleteActions(page: Page, model: ExtendedModel) {
       index: lengthBeforeJoin,
       length: 0,
     });
-    return true;
-  } else if (matchFlavours(previousSibling, ['affine:surface-ref'])) {
-    page.deleteBlock(previousSibling);
     return true;
   }
 

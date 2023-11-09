@@ -2,7 +2,8 @@ import { assertExists, Slot } from '@blocksuite/global/utils';
 import { uuidv4 } from 'lib0/random.js';
 import * as Y from 'yjs';
 
-import { BaseBlockModel, internalPrimitives } from '../schema/base.js';
+import type { BaseBlockModel } from '../schema/base.js';
+import { internalPrimitives } from '../schema/base.js';
 import type { IdGenerator } from '../utils/id-generator.js';
 import {
   assertValidChildren,
@@ -54,11 +55,22 @@ export class Page extends Space<FlatBlockMap> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _synced = false;
+  private _initialized = false;
   private _shouldTransact = true;
 
   readonly slots = {
+    /**
+     * This fires when the block tree is initialized via API call or underlying existing ydoc binary.
+     * Note that this is different with the `doc.loaded` field,
+     * since `loaded` only indicates that the ydoc is loaded, not the block tree.
+     */
+    ready: new Slot(),
     historyUpdated: new Slot(),
+    /**
+     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
+     * useful for internal block UI components to start subscribing following up events.
+     * Note that at this moment, the whole block tree may not be fully initialized yet.
+     */
     rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
@@ -70,6 +82,7 @@ export class Page extends Space<FlatBlockMap> {
       | {
           type: 'add';
           id: string;
+          flavour: string;
         }
       | {
           type: 'delete';
@@ -80,6 +93,7 @@ export class Page extends Space<FlatBlockMap> {
       | {
           type: 'update';
           id: string;
+          flavour: string;
           props: Partial<BlockProps>;
         }
     >(),
@@ -522,6 +536,7 @@ export class Page extends Space<FlatBlockMap> {
 
     this.slots.blockUpdated.emit({
       type: 'update',
+      flavour: model.flavour,
       id: model.id,
       props,
     });
@@ -562,56 +577,85 @@ export class Page extends Space<FlatBlockMap> {
   deleteBlock(
     model: BaseBlockModel,
     options: {
-      bringChildrenTo: 'parent' | BaseBlockModel | false;
+      bringChildrenTo?: BaseBlockModel;
+      deleteChildren?: boolean;
     } = {
-      bringChildrenTo: false,
+      deleteChildren: true,
     }
   ) {
     if (this.readonly) {
       console.error('cannot modify data in readonly mode');
       return;
     }
+
+    const { bringChildrenTo, deleteChildren } = options;
+    if (bringChildrenTo && deleteChildren) {
+      console.error(
+        'Cannot bring children to another block and delete them at the same time'
+      );
+      return;
+    }
+
+    const yModel = this._yBlocks.get(model.id) as YBlock;
+    const yModelChildren = yModel.get('sys:children') as Y.Array<string>;
+
     const parent = this.getParent(model);
-    const index = parent?.children.indexOf(model) ?? -1;
-    const { bringChildrenTo } = options;
-    if (index > -1) {
-      parent?.children.splice(parent.children.indexOf(model), 1);
-    }
-    if (bringChildrenTo instanceof BaseBlockModel) {
-      model.children.forEach(child => {
-        this.schema.validate(child.flavour, bringChildrenTo.flavour);
-      });
-      // When bring children to parent, insert children to the original position of model
-      if (bringChildrenTo === parent && index > -1) {
-        parent.children.splice(index, 0, ...model.children);
-      } else {
-        bringChildrenTo.children.push(...model.children);
-      }
-    }
+    assertExists(parent);
+    const yParent = this._yBlocks.get(parent.id) as YBlock;
+    const yParentChildren = yParent.get('sys:children') as Y.Array<string>;
+    const modelIndex = yParentChildren.toArray().indexOf(model.id);
 
     this.transact(() => {
-      this._yBlocks.delete(model.id);
+      if (modelIndex > -1) {
+        yParentChildren.delete(modelIndex, 1);
+      }
 
-      if (parent) {
-        const yParent = this._yBlocks.get(parent.id) as YBlock;
-        const yChildren = yParent.get('sys:children') as Y.Array<string>;
+      if (bringChildrenTo) {
+        // validate children flavour
+        model.children.forEach(child => {
+          this.schema.validate(child.flavour, bringChildrenTo.flavour);
+        });
 
-        if (index > -1) {
-          yChildren.delete(index, 1);
+        if (bringChildrenTo.id === parent.id) {
+          // When bring children to parent, insert children to the original position of model
+          yParentChildren.insert(modelIndex, yModelChildren.toArray());
+        } else {
+          const yBringChildrenTo = this._yBlocks.get(
+            bringChildrenTo.id
+          ) as YBlock;
+          const yBringChildrenToChildren = yBringChildrenTo.get(
+            'sys:children'
+          ) as Y.Array<string>;
+          yBringChildrenToChildren.push(yModelChildren.toArray());
         }
-        if (bringChildrenTo instanceof BaseBlockModel) {
-          this.updateBlock(bringChildrenTo, {
-            children: bringChildrenTo.children,
+      } else {
+        if (deleteChildren) {
+          // delete children recursively
+          const dl = (id: string) => {
+            const yBlock = this._yBlocks.get(id) as YBlock;
+
+            const yChildren = yBlock.get('sys:children') as Y.Array<string>;
+            yChildren.forEach(id => {
+              dl(id);
+            });
+
+            this._yBlocks.delete(id);
+          };
+
+          yModelChildren.forEach(id => {
+            dl(id);
           });
         }
-
-        parent.childrenUpdated.emit();
       }
+
+      this._yBlocks.delete(model.id);
+
+      parent.childrenUpdated.emit();
     });
   }
 
   trySyncFromExistingDoc() {
-    if (this._synced) {
+    if (this._initialized) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
@@ -629,7 +673,8 @@ export class Page extends Space<FlatBlockMap> {
       this._handleYBlockAdd(visited, id);
     });
 
-    this._synced = true;
+    this._initialized = true;
+    this.slots.ready.emit();
   }
 
   dispose() {
@@ -641,7 +686,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    if (this._synced) {
+    if (this._initialized) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -649,13 +694,6 @@ export class Page extends Space<FlatBlockMap> {
 
   private _initYBlocks() {
     const { _yBlocks } = this;
-    // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
-    // "unobserve" is potentially necessary to make sure we don't create
-    // an infinite loop when sync to remote then back to client.
-    // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
-    // We could unobserve in order to short circuit by ignoring the sync of remote
-    // events we actually generated locally.
-    // _yBlocks.unobserveDeep(this._handleYEvents);
     _yBlocks.observeDeep(this._handleYEvents);
     this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this._ySpaceDoc.clientID]),
@@ -667,11 +705,9 @@ export class Page extends Space<FlatBlockMap> {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _getYBlock(id: string): YBlock {
+  private _getYBlock(id: string): YBlock | null {
     const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      throw new Error(`Block with id ${id} does not exist`);
-    }
+    if (!yBlock) return null;
     return yBlock;
   }
 
@@ -692,6 +728,12 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
+    if (!yBlock) {
+      console.warn(
+        `Failed to handle yBlock add, yBlock with id-${id} not found`
+      );
+      return;
+    }
 
     const flavour = yBlock.get('sys:flavour') as string;
     const model = this._createBlockModel(id, flavour, yBlock);
@@ -703,18 +745,17 @@ export class Page extends Space<FlatBlockMap> {
 
       yChildren.forEach((id: string) => {
         const index = model.childMap.get(id);
-        if (Number.isInteger(index)) {
-          const hasChild = this._blockMap.has(id);
+        assertExists(index);
+        const hasChild = this._blockMap.has(id);
 
-          if (!hasChild) {
-            visited.add(id);
-            this._handleYBlockAdd(visited, id);
-          }
-
-          model.children[index as number] = this._blockMap.get(
-            id
-          ) as BaseBlockModel;
+        if (!hasChild) {
+          visited.add(id);
+          this._handleYBlockAdd(visited, id);
         }
+
+        model.children[index as number] = this._blockMap.get(
+          id
+        ) as BaseBlockModel;
       });
     }
 
@@ -724,7 +765,7 @@ export class Page extends Space<FlatBlockMap> {
       return;
     }
 
-    this.slots.blockUpdated.emit({ type: 'add', id });
+    this.slots.blockUpdated.emit({ type: 'add', id, flavour: model.flavour });
   }
 
   private _handleYBlockDelete(id: string) {
@@ -889,7 +930,7 @@ export class Page extends Space<FlatBlockMap> {
 
   override async waitForLoaded() {
     await super.waitForLoaded();
-    if (!this._synced) {
+    if (!this._initialized) {
       this.trySyncFromExistingDoc();
     }
 

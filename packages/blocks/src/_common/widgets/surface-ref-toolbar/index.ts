@@ -2,6 +2,7 @@ import { WidgetElement } from '@blocksuite/lit';
 import { offset, shift } from '@floating-ui/dom';
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 import { HoverController } from '../../../_common/components/hover/controller.js';
 import { PAGE_HEADER_HEIGHT } from '../../../_common/consts.js';
@@ -28,8 +29,6 @@ export class AffineSurfaceRefToolbar extends WidgetElement<SurfaceRefBlockCompon
   private _hoverController = new HoverController(
     this,
     ({ abortController }) => {
-      if (!this.blockElement.referenceModel) return null;
-
       return {
         template: SurfaceRefToolbarOptions({
           blockElement: this.blockElement,
@@ -79,6 +78,7 @@ function SurfaceRefToolbarOptions(options: {
 }) {
   const { blockElement, model, abortController } = options;
   const readonly = model.page.readonly;
+  const hasValidReference = !!blockElement.referenceModel;
 
   return html`
     <style>
@@ -122,13 +122,19 @@ function SurfaceRefToolbarOptions(options: {
 
     <div class="surface-ref-toolbar-container">
       <icon-button
+        ?hidden=${!hasValidReference}
         class="view-in-edgeless-button"
         text="View in Edgeless"
         width="fit-content"
         @click=${() => blockElement.viewInEdgeless()}
         >${EdgelessModeIcon}
       </icon-button>
-      <div class="divider"></div>
+      <div
+        class="divider"
+        style=${styleMap({
+          display: hasValidReference ? undefined : 'none',
+        })}
+      ></div>
       <icon-button
         size="32px"
         ?hidden=${readonly}
@@ -141,6 +147,7 @@ function SurfaceRefToolbarOptions(options: {
       </icon-button>
       <icon-button
         size="32px"
+        ?hidden=${!hasValidReference}
         @click=${() => {
           const referencedModel = blockElement.referenceModel;
 
@@ -170,6 +177,7 @@ function SurfaceRefToolbarOptions(options: {
       </icon-button>
       <icon-button
         size="32px"
+        ?hidden=${!hasValidReference}
         @click=${() => {
           edgelessToBlob(model.page, {
             surfaceRefBlock: blockElement,

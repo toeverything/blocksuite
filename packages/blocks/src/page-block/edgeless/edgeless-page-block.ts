@@ -17,7 +17,9 @@ import { repeat } from 'lit/directives/repeat.js';
 import { toast } from '../../_common/components/toast.js';
 import { BLOCK_ID_ATTR } from '../../_common/consts.js';
 import { listenToThemeChange } from '../../_common/theme/utils.js';
+import { getViewportFromSession } from '../../_common/utils/edgeless.js';
 import type {
+  EdgelessElement,
   EdgelessTool,
   Point,
   Selectable,
@@ -634,17 +636,30 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   private _tryLoadViewportLocalRecord() {
     const { viewport } = this.surface;
-    const key = 'blocksuite:' + this.page.id + ':edgelessViewport';
-    const viewportData = sessionStorage.getItem(key);
-    if (viewportData) {
-      try {
-        const { x, y, zoom } = JSON.parse(viewportData);
-        viewport.setViewport(zoom, [x, y]);
-        return true;
-      } catch (e) {
-        return false;
-      }
+    const viewportData = getViewportFromSession(this.page.id);
+
+    if (!viewportData) {
+      return false;
     }
+
+    if ('referenceId' in viewportData) {
+      const block = this.surface.pickById(
+        viewportData.referenceId
+      ) as EdgelessElement;
+
+      if (block) {
+        viewport.setViewportByBound(
+          Bound.deserialize(block.xywh),
+          viewportData.padding
+        );
+        return true;
+      }
+    } else {
+      const { zoom, x, y } = viewportData;
+      viewport.setViewport(zoom, [x, y]);
+      return true;
+    }
+
     return false;
   }
 

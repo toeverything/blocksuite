@@ -36,7 +36,7 @@ import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
 import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
-import { Bound, clamp, compare } from '../../../../surface-block/index.js';
+import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
 
@@ -181,7 +181,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   constructor(edgeless: EdgelessPageBlockComponent) {
     super();
     this.edgeless = edgeless;
-    this._frames = edgeless.surface.frame.frames.sort(compare);
+    this._frames = edgeless.surface.frame.frames.sort(edgeless.surface.compare);
   }
 
   get edgelessTool() {
@@ -210,7 +210,9 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
   }
 
   private _updateFrames() {
-    this._frames = this.edgeless.surface.frame.frames.sort(compare);
+    this._frames = this.edgeless.surface.frame.frames.sort(
+      this.edgeless.surface.compare
+    );
   }
 
   private _nextFrame() {
@@ -317,19 +319,24 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
     }
   };
 
+  private _moveToCurrentFrame() {
+    const current = this._currentFrameIndex;
+    const viewport = this.edgeless.surface.viewport;
+    const frame = this._frames[current];
+
+    if (frame) {
+      const bound = Bound.deserialize(frame.xywh);
+      viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
+    }
+  }
+
   protected override updated(changedProperties: PropertyValues) {
     const { type } = this.edgelessTool;
     if (
       changedProperties.has('_currentFrameIndex') &&
       type === 'frameNavigator'
     ) {
-      const current = this._currentFrameIndex;
-      const viewport = this.edgeless.surface.viewport;
-      const frame = this._frames[current];
-      if (frame) {
-        const bound = Bound.deserialize(frame.xywh);
-        viewport.setViewportByBound(bound, [20, 20, 20, 20], true);
-      }
+      this._moveToCurrentFrame();
     }
   }
 
@@ -398,6 +405,7 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
         @click=${() => {
           this.setEdgelessTool({ type: 'default' });
           document.fullscreenElement && this._toggleFullScreen();
+          setTimeout(() => this._moveToCurrentFrame(), 400);
         }}
       >
         Stop

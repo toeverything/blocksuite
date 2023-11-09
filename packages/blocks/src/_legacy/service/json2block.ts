@@ -143,7 +143,9 @@ export async function json2block(
     assertExists(lastMergedModel);
 
     lastMergedModel.text?.join(splitSuffixModel.text as Text);
-    page.deleteBlock(splitSuffixModel);
+    page.deleteBlock(splitSuffixModel, {
+      deleteChildren: false,
+    });
   }
 
   /**
@@ -201,7 +203,9 @@ export async function json2block(
   }
 
   if (isFocusedBlockEmpty && !shouldMergeFirstBlock) {
-    page.deleteBlock(focusedBlockModel);
+    page.deleteBlock(focusedBlockModel, {
+      deleteChildren: false,
+    });
   }
 }
 

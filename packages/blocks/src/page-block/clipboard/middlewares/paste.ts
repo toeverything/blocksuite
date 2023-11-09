@@ -209,11 +209,20 @@ class PasteTr {
   }
 }
 
+function flatNote(snapshot: SliceSnapshot) {
+  if (snapshot.content[0]?.flavour === 'affine:note') {
+    snapshot.content = snapshot.content[0].children;
+  }
+}
+
 export const pasteMiddleware = (std: BlockSuiteRoot['std']): JobMiddleware => {
   return ({ slots }) => {
     let tr: PasteTr | undefined;
     slots.beforeImport.on(payload => {
       if (payload.type === 'slice') {
+        const { snapshot } = payload;
+        flatNote(snapshot);
+
         const text = std.selection.find('text');
         if (!text) {
           return;

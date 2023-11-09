@@ -102,3 +102,6 @@ Example:
 - yunnian @yunnian 2023/09/11
 - Qinghao Huang, @wfnuser, 2023/10/07
 - wuchao, @jerrywu001, 2023/10/24
+- EYHN @EYHN, 2023/11/06
+- Ayush, @AyushAgrawal-A2, 2023/11/07
+- KokomiCat, @xiazeyu, 2023/11/08

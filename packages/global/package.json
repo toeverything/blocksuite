@@ -41,6 +41,6 @@
     "index.d.ts"
   ],
   "dependencies": {
-    "zod": "^3.22.2"
+    "zod": "^3.22.4"
   }
 }

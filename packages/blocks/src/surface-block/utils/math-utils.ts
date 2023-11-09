@@ -286,7 +286,13 @@ export function lineEllipseIntersects(
   }
 
   if (rst.length === 0) return null;
-  return rst.map(v => new PointLocation(v));
+
+  return rst.map(v => {
+    const pl = new PointLocation(v);
+    const normalVector = Vec.uni(Vec.divV(Vec.sub(v, C), [rx * rx, ry * ry]));
+    pl.tangent = [-normalVector[1], normalVector[0]];
+    return pl;
+  });
 }
 
 export function linePolygonIntersects(

@@ -9,7 +9,7 @@ import type { ReactiveController } from 'lit';
 
 import { groupBy } from '../../../_common/utils/iterable.js';
 import {
-  getBlockElementById,
+  getBlockElementByModel,
   getEditorContainer,
   isPageMode,
 } from '../../../_common/utils/query.js';
@@ -26,9 +26,12 @@ import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
-import type { PhasorElement } from '../../../surface-block/elements/index.js';
+import {
+  GroupElement,
+  type PhasorElement,
+} from '../../../surface-block/elements/index.js';
 import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
-import { compare } from '../../../surface-block/grid.js';
+import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
 import { Bound, getCommonBound } from '../../../surface-block/utils/bound.js';
 import {
@@ -643,7 +646,7 @@ export class EdgelessClipboardController implements ReactiveController {
 
     const nodeElements = nodes ?? edgeless.getSortedElementsByBound(bound);
     for (const nodeElement of nodeElements) {
-      const blockElement = getBlockElementById(nodeElement.id)?.parentElement;
+      const blockElement = getBlockElementByModel(nodeElement)?.parentElement;
       const blockBound = xywhArrayToObject(nodeElement);
       const canvasData = await html2canvas(
         blockElement as HTMLElement,
@@ -685,6 +688,11 @@ export function getCopyElements(
     if (isFrameBlock(element)) {
       set.add(element);
       surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+    } else if (element instanceof GroupElement) {
+      getCopyElements(surface, element.childElements).forEach(ele =>
+        set.add(ele)
+      );
+      set.add(element);
     } else {
       set.add(element);
     }
