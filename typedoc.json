@@ -1,0 +1,20 @@
+{
+  "entryPoints": [
+    "packages/block-std",
+    "packages/blocks",
+    "packages/editor",
+    "packages/lit",
+    "packages/store",
+    "packages/virgo"
+  ],
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "packages/docs/api",
+  "entryPointStrategy": "packages",
+  "includeVersion": false,
+  "logLevel": "Error",
+  "readme": "none",
+  "name": "BlockSuite API Documentation",
+  "entryFileName": "index.md",
+  "outputFileStrategy": "members",
+  "hidePageHeader": true
+}
