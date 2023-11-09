@@ -16,6 +16,7 @@
   "scripts": {
     "dev": "vitepress dev --port 5200",
     "build": "vitepress build",
+    "build:vercel": "vitepress build",
     "preview": "vitepress preview"
   },
   "dependencies": {
