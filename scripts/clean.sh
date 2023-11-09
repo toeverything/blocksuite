@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu -o pipefail
+
 # ALL_PACKAGES
 packages=(
   "blocks-std"

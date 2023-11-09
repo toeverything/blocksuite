@@ -248,12 +248,18 @@ importers:
         specifier: ^1.1.4
         version: 1.1.4(@lezer/common@1.1.0)(vite@4.5.0)(vitepress@1.0.0-rc.25)(vue@3.3.8)
     devDependencies:
+      typedoc:
+        specifier: ^0.25.3
+        version: 0.25.3(typescript@5.2.2)
+      typedoc-plugin-markdown:
+        specifier: 4.0.0-next.19
+        version: 4.0.0-next.19(typedoc@0.25.3)
       vite-plugin-wasm:
         specifier: ^3.2.2
         version: 3.2.2(vite@4.5.0)
       vitepress:
         specifier: 1.0.0-rc.25
-        version: 1.0.0-rc.25(@types/node@20.8.10)(postcss@8.4.31)(search-insights@2.9.0)(terser@5.24.0)(typescript@5.2.2)
+        version: 1.0.0-rc.25(search-insights@2.9.0)(typescript@5.2.2)
       vue:
         specifier: ^3.3.8
         version: 3.3.8(typescript@5.2.2)
@@ -2304,7 +2310,7 @@ packages:
       vite: ^4.0.0
       vue: ^3.2.25
     dependencies:
-      vite: 4.5.0(@types/node@20.8.10)(terser@5.24.0)
+      vite: 4.5.0
       vue: 3.3.8(typescript@5.2.2)
 
   /@vitest/coverage-istanbul@0.34.6(vitest@0.34.6):
@@ -2841,7 +2847,6 @@ packages:
     resolution: {integrity: sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==}
     dependencies:
       balanced-match: 1.0.2
-    dev: false
 
   /braces@3.0.2:
     resolution: {integrity: sha512-b8um+L1RzM3WDSzvhm6gIz1yfTbBt6YTlcEKAvsmqCZZFw46z626lVj9j1yEPW33H5H+lBQpZMP1k8l+78Ha0A==}
@@ -5100,6 +5105,10 @@ packages:
     engines: {node: '>=16.14'}
     dev: true
 
+  /lunr@2.3.9:
+    resolution: {integrity: sha512-zTU3DaZaF3Rt9rhN3uBMGQD3dD2/vFQqnvZCDv4dl5iOzq2IZQqTxu90r4E5J+nP70J3ilqVCrbho2eWaeW8Ow==}
+    dev: true
+
   /lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
     hasBin: true
@@ -5190,7 +5199,6 @@ packages:
     resolution: {integrity: sha512-PRsaiG84bK+AMvxziE/lCFss8juXjNaWzVbN5tXAm4XjeaS9NAHhop+PjQxz2A9h8Q4M/xGmzP8vqNwy6JeK0A==}
     engines: {node: '>= 12'}
     hasBin: true
-    dev: false
 
   /mdast-util-find-and-replace@3.0.1:
     resolution: {integrity: sha512-SG21kZHGC3XRTSUhtofZkBzZTJNM5ecCi0SK2IMKmSXR8vO3peL+kb1O0z7Zl83jKtutG4k5Wv/W7V3/YHvzPA==}
@@ -5647,7 +5655,6 @@ packages:
     engines: {node: '>=16 || 14 >=14.17'}
     dependencies:
       brace-expansion: 2.0.1
-    dev: false
 
   /minimist-options@4.1.0:
     resolution: {integrity: sha512-Q4r8ghd80yhO/0j1O3B2BjweX3fiHg9cdOwjJd2J76Q135c+NDxGCqdYKQ1SKBuFfgWbAUzBfvYjPUEeNgqN1A==}
@@ -7191,6 +7198,28 @@ packages:
       is-typedarray: 1.0.0
     dev: true
 
+  /typedoc-plugin-markdown@4.0.0-next.19(typedoc@0.25.3):
+    resolution: {integrity: sha512-6HQoxldHFHTqXD5dD9nM2wN7YvJwRt9LiRgegokFGKa35KP/5y4/is8hCnXfZ4Fhfx2HhJB9LG5L4DrSZ//jtg==}
+    peerDependencies:
+      typedoc: '>=0.24.0'
+    dependencies:
+      typedoc: 0.25.3(typescript@5.2.2)
+    dev: true
+
+  /typedoc@0.25.3(typescript@5.2.2):
+    resolution: {integrity: sha512-Ow8Bo7uY1Lwy7GTmphRIMEo6IOZ+yYUyrc8n5KXIZg1svpqhZSWgni2ZrDhe+wLosFS8yswowUzljTAV/3jmWw==}
+    engines: {node: '>= 16'}
+    hasBin: true
+    peerDependencies:
+      typescript: ^5.2.2
+    dependencies:
+      lunr: 2.3.9
+      marked: 4.3.0
+      minimatch: 9.0.3
+      shiki: 0.14.5
+      typescript: 5.2.2
+    dev: true
+
   /typescript@5.2.2:
     resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
     engines: {node: '>=14.17'}
@@ -7359,7 +7388,7 @@ packages:
     peerDependencies:
       vite: ^2 || ^3 || ^4
     dependencies:
-      vite: 4.5.0(@types/node@20.8.10)(terser@5.24.0)
+      vite: 4.5.0
     dev: true
 
   /vite-plugin-web-components-hmr@0.1.3(vite@4.5.0):
@@ -7376,6 +7405,40 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /vite@4.5.0:
+    resolution: {integrity: sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw==}
+    engines: {node: ^14.18.0 || >=16.0.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': '>= 14'
+      less: '*'
+      lightningcss: ^1.21.0
+      sass: '*'
+      stylus: '*'
+      sugarss: '*'
+      terser: ^5.4.0
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      less:
+        optional: true
+      lightningcss:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+    dependencies:
+      esbuild: 0.18.20
+      postcss: 8.4.31
+      rollup: 3.29.4
+    optionalDependencies:
+      fsevents: 2.3.3
 
   /vite@4.5.0(@types/node@20.8.10)(terser@5.24.0):
     resolution: {integrity: sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw==}
@@ -7431,14 +7494,14 @@ packages:
       '@codesandbox/sandpack-themes': 2.0.21
       markdown-it-container: 3.0.0
       sandpack-vue3: 3.1.9(@lezer/common@1.1.0)(vue@3.3.8)
-      vite: 4.5.0(@types/node@20.8.10)(terser@5.24.0)
-      vitepress: 1.0.0-rc.25(@types/node@20.8.10)(postcss@8.4.31)(search-insights@2.9.0)(terser@5.24.0)(typescript@5.2.2)
+      vite: 4.5.0
+      vitepress: 1.0.0-rc.25(search-insights@2.9.0)(typescript@5.2.2)
       vue: 3.3.8(typescript@5.2.2)
     transitivePeerDependencies:
       - '@lezer/common'
     dev: false
 
-  /vitepress@1.0.0-rc.25(@types/node@20.8.10)(postcss@8.4.31)(search-insights@2.9.0)(terser@5.24.0)(typescript@5.2.2):
+  /vitepress@1.0.0-rc.25(search-insights@2.9.0)(typescript@5.2.2):
     resolution: {integrity: sha512-1dqWiHNThNrVZ08ixmfEDBEH+764KOgnev9oXga/x6cN++Vb9pnuu8p3K6DQP+KZrYcG+WiX7jxal0iSNpAWuQ==}
     hasBin: true
     peerDependencies:
@@ -7460,9 +7523,8 @@ packages:
       focus-trap: 7.5.4
       mark.js: 8.11.1
       minisearch: 6.2.0
-      postcss: 8.4.31
       shiki: 0.14.5
-      vite: 4.5.0(@types/node@20.8.10)(terser@5.24.0)
+      vite: 4.5.0
       vue: 3.3.8(typescript@5.2.2)
     transitivePeerDependencies:
       - '@algolia/client-search'
