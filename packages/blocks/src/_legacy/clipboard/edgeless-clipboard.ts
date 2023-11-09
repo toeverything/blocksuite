@@ -23,18 +23,19 @@ import {
 } from '../../page-block/edgeless/utils/query.js';
 import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
+import { PhasorElementType } from '../../surface-block/index.js';
 import {
   Bound,
-  compare,
   type Connection,
   ConnectorElement,
   deserializeXYWH,
   getCommonBound,
+  GroupElement,
   type IBound,
   type PhasorElement,
-  type PhasorElementType,
   serializeXYWH,
 } from '../../surface-block/index.js';
+import { compare } from '../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { ContentParser } from '../content-parser/index.js';
 import { getService } from '../service/index.js';
@@ -56,6 +57,8 @@ import {
 } from './utils/index.js';
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
+const { GROUP } = PhasorElementType;
+
 export function getCopyElements(
   surface: SurfaceBlockComponent,
   elements: EdgelessElement[]
@@ -66,6 +69,11 @@ export function getCopyElements(
     if (isFrameBlock(element)) {
       set.add(element);
       surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+    } else if (element instanceof GroupElement) {
+      getCopyElements(surface, element.childElements).forEach(ele =>
+        set.add(ele)
+      );
+      set.add(element);
     } else {
       set.add(element);
     }
@@ -268,7 +276,20 @@ export class EdgelessClipboard implements Clipboard {
     await service.json2Block(focusedBlockModel, blocks, textSelection.from);
   }
 
-  private _createPhasorElement(clipboardData: Record<string, unknown>) {
+  private _createPhasorElement(
+    clipboardData: Record<string, unknown>,
+    idMap: Map<string, string>
+  ) {
+    if (clipboardData.type === GROUP) {
+      const yMap = new Workspace.Y.Map();
+      const children = clipboardData.children ?? {};
+      for (const [key, value] of Object.entries(children)) {
+        const newKey = idMap.get(key);
+        assertExists(newKey);
+        yMap.set(newKey, value);
+      }
+      clipboardData.children = yMap;
+    }
     const id = this.surface.addElement(
       clipboardData.type as PhasorElementType,
       clipboardData
@@ -291,7 +312,7 @@ export class EdgelessClipboard implements Clipboard {
         ?.map(d => {
           const oldId = d.id as string;
           assertExists(oldId);
-          const element = this._createPhasorElement(d);
+          const element = this._createPhasorElement(d, idMap);
           idMap.set(oldId, element.id);
           return element;
         })
@@ -308,7 +329,7 @@ export class EdgelessClipboard implements Clipboard {
           (<Connection>connector.target).id =
             idMap.get(targetId) ?? (targetId as string);
         }
-        return this._createPhasorElement(connector);
+        return this._createPhasorElement(connector, idMap);
       }) ?? []),
     ];
   }

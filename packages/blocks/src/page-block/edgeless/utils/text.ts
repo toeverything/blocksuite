@@ -13,6 +13,7 @@ import {
 import {
   GET_DEFAULT_LINE_COLOR,
   GET_DEFAULT_TEXT_COLOR,
+  isTransparent,
 } from '../components/panel/color-panel.js';
 import { EdgelessFrameTitleEditor } from '../components/text/edgeless-frame-title-editor.js';
 import { EdgelessGroupTitleEditor } from '../components/text/edgeless-group-title-editor.js';
@@ -22,6 +23,9 @@ import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
   GENERAL_CANVAS_FONT_FAMILY,
   SCRIBBLED_CANVAS_FONT_FAMILY,
+  SHAPE_FILL_COLOR_BLACK,
+  SHAPE_TEXT_COLOR_PURE_BLACK,
+  SHAPE_TEXT_COLOR_PURE_WHITE,
 } from './consts.js';
 
 export type CANVAS_TEXT_FONT =
@@ -62,9 +66,15 @@ export function mountShapeTextEditor(
 ) {
   if (!shapeElement.text) {
     const text = new Workspace.Y.Text();
+    const { fillColor } = shapeElement;
+    const color = isTransparent(fillColor)
+      ? GET_DEFAULT_LINE_COLOR()
+      : fillColor === SHAPE_FILL_COLOR_BLACK
+      ? SHAPE_TEXT_COLOR_PURE_WHITE
+      : SHAPE_TEXT_COLOR_PURE_BLACK;
     edgeless.surface.updateElement<PhasorElementType.SHAPE>(shapeElement.id, {
       text,
-      color: GET_DEFAULT_LINE_COLOR(),
+      color,
       fontFamily:
         shapeElement.shapeStyle === ShapeStyle.General
           ? GENERAL_CANVAS_FONT_FAMILY

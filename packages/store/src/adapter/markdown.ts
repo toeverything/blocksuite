@@ -373,6 +373,13 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
           context
             .openNode(
               {
+                type: 'paragraph',
+                children: [],
+              },
+              'children'
+            )
+            .openNode(
+              {
                 type: 'image',
                 url: `assets/${blobName}`,
                 title: null,
@@ -380,6 +387,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
               },
               'children'
             )
+            .closeNode()
             .closeNode();
           break;
         }

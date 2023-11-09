@@ -1,6 +1,6 @@
 import type { Y } from '@blocksuite/store';
 
-import type { EdgelessElement } from '../../index.js';
+import type { EdgelessElement, GroupElement } from '../../index.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
@@ -80,10 +80,10 @@ export abstract class SurfaceElement<
       record: Record<string, unknown>
     ) => void;
     pickById: (id: string) => EdgelessElement | null;
-    getGroupParent: (element: string | EdgelessElement) => string;
+    getGroupParent: (element: string | EdgelessElement) => GroupElement;
     setGroupParent: (
       element: string | EdgelessElement,
-      groupId: string
+      group: GroupElement
     ) => void;
     selectionManager?: EdgelessSelectionManager;
   };

@@ -193,6 +193,10 @@ export class ProgressCellEditing extends BaseCellRenderer<number> {
     _e.preventDefault();
   }
 
+  override onCut(_e: ClipboardEvent) {
+    _e.preventDefault();
+  }
+
   protected override render() {
     const progress = this._value;
     let backgroundColor = progressColors.processing;

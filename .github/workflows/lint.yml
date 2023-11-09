@@ -43,7 +43,7 @@ jobs:
         run: pnpm install
 
       - name: Run type check
-        run: pnpm build
+        run: pnpm build:editor && pnpm build:playground
         env:
           NODE_OPTIONS: --max-old-space-size=8192
 
