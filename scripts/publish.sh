@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e -o pipefail
+# Never set eux here otherwise it will break the CI
 
 # ALL_PACKAGES
 packages=(
