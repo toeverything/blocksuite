@@ -35,6 +35,7 @@ export interface ISurfaceElement {
 export interface ISurfaceElementLocalRecord {
   display?: boolean;
   opacity?: number;
+  xywh?: SerializedXYWH;
 }
 
 export type ComputedValue = (value: string) => string;
@@ -127,7 +128,7 @@ export abstract class SurfaceElement<
   }
 
   get xywh() {
-    const xywh = this.yMap.get('xywh') as T['xywh'];
+    const xywh = this.localRecord?.xywh ?? (this.yMap.get('xywh') as T['xywh']);
     return xywh;
   }
 

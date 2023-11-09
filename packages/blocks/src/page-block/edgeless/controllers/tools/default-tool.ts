@@ -19,6 +19,7 @@ import {
   GroupElement,
   type IVec,
   type PhasorElement,
+  serializeXYWH,
   ShapeElement,
   TextElement,
   Vec,
@@ -189,10 +190,38 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.y += delta[1];
 
     if (selected instanceof ConnectorElement) {
-      this._surface.connector.updateXYWH(selected, bound);
+      surface.connector.updateXYWH(selected, bound);
     }
 
-    surface.setElementBound(selected.id, bound);
+    this._setElementLocalBound(selected.id, bound);
+  }
+
+  private _setElementLocalBound(elementId: string, bound: Bound) {
+    const { _surface: surface } = this;
+
+    surface.updateElementLocalRecord(elementId, {
+      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+    });
+  }
+
+  private _applyLocalBoundRecord() {
+    const { _surface: surface } = this;
+
+    this._toBeMoved.forEach(element => {
+      const record = surface.getElementLocalRecord(element.id);
+
+      if (!record || !record.xywh) return;
+
+      const xywh = record.xywh;
+
+      delete record.xywh;
+      surface.deleteElementLocalRecord(element.id);
+      surface.updateElementLocalRecord(element.id, record);
+
+      surface.updateElement(element.id, {
+        xywh,
+      });
+    });
   }
 
   private _handleBlockDragMove(
@@ -608,6 +637,8 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
   }
 
   onContainerDragEnd() {
+    this._applyLocalBoundRecord();
+
     if (this._lock) {
       this._page.captureSync();
       this._lock = false;

@@ -57,7 +57,10 @@ import {
   GroupElement,
   type IPhasorElementLocalRecord,
 } from './elements/index.js';
-import type { SurfaceElement } from './elements/surface-element.js';
+import type {
+  ISurfaceElementLocalRecord,
+  SurfaceElement,
+} from './elements/surface-element.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
 import {
   compare,
@@ -1023,16 +1026,54 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     ) as unknown as IPhasorElementType[T][];
   }
 
+  extractElementProps(id: string, record: ISurfaceElementLocalRecord) {
+    const element = this.pickById(id);
+    const oldProps: [string, unknown][] = [];
+
+    if (!element) return oldProps;
+
+    Object.keys(record).forEach(key => {
+      if (key in element) {
+        oldProps.push([key, element[key as keyof EdgelessElement]]);
+      }
+    });
+
+    return oldProps;
+  }
+
   updateElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
     id: id,
     records: IPhasorElementLocalRecord[T]
   ) {
     const elementLocalRecord = this._elementLocalRecords.get(id);
+    const oldProps = this.extractElementProps(id, records);
+
     if (elementLocalRecord) {
       this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
     } else {
       this._elementLocalRecords.set(id, records);
     }
+
+    if (oldProps.length) {
+      this.slots.elementUpdated.emit({
+        id,
+        props: oldProps.reduce(
+          (pre, current) => {
+            pre[current[0]] = {
+              old: current[1],
+              new: (this.pickById(id) as EdgelessElement)[
+                current[0] as keyof EdgelessElement
+              ],
+            };
+            return pre;
+          },
+          {} as {
+            [index: string]: { old: unknown; new: unknown };
+          }
+        ),
+      });
+    }
+
     this.refresh();
   }
 
