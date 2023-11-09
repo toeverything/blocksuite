@@ -705,11 +705,9 @@ export class Page extends Space<FlatBlockMap> {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _getYBlock(id: string): YBlock {
+  private _getYBlock(id: string): YBlock | null {
     const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      throw new Error(`Block with id ${id} does not exist`);
-    }
+    if (!yBlock) return null;
     return yBlock;
   }
 
@@ -730,6 +728,12 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
+    if (!yBlock) {
+      console.warn(
+        `Failed to handle yBlock add, yBlock with id-${id} not found`
+      );
+      return;
+    }
 
     const flavour = yBlock.get('sys:flavour') as string;
     const model = this._createBlockModel(id, flavour, yBlock);
