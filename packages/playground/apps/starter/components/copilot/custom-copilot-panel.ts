@@ -25,7 +25,6 @@ import { insertFromMarkdown } from './utils/markdown-utils.js';
 import {
   getSelectedBlocks,
   getSelectedTextContent,
-  getSelectedTextSlice,
   hasSelectedTextContent,
 } from './utils/selection-utils.js';
 
