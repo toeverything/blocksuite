@@ -77,7 +77,7 @@ const FileTypes: NonNullable<OpenFilePickerOptions['types']> = [
   {
     description: 'Markdown',
     accept: {
-      'text/markdown': ['.md', '.markdwon'],
+      'text/markdown': ['.md', '.markdown'],
     },
   },
   {

@@ -39,7 +39,7 @@ import { lineSizeButtonStyles } from '../buttons/line-size-button.js';
 import type { LineStyleButtonProps } from '../buttons/line-style-button.js';
 import type { EdgelessToolIconButton } from '../buttons/tool-icon-button.js';
 import type { ColorEvent } from '../panel/color-panel.js';
-import { isTransparent } from '../panel/color-panel.js';
+import { GET_DEFAULT_LINE_COLOR, isTransparent } from '../panel/color-panel.js';
 import { ColorUnit } from '../panel/color-panel.js';
 import {
   LineStylesPanel,
@@ -313,11 +313,13 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
 
   private _getTextColor(fillColor: CssVariableName) {
     // When the shape is filled with black color, the text color should be white.
+    // When the shape is transparent, the text color should be set according to the theme.
     // Otherwise, the text color should be black.
-    const textColor =
-      fillColor === SHAPE_FILL_COLOR_BLACK
-        ? SHAPE_TEXT_COLOR_PURE_WHITE
-        : SHAPE_TEXT_COLOR_PURE_BLACK;
+    const textColor = isTransparent(fillColor)
+      ? GET_DEFAULT_LINE_COLOR()
+      : fillColor === SHAPE_FILL_COLOR_BLACK
+      ? SHAPE_TEXT_COLOR_PURE_WHITE
+      : SHAPE_TEXT_COLOR_PURE_BLACK;
 
     return textColor;
   }

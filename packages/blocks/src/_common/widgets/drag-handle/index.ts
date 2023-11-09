@@ -24,15 +24,9 @@ import {
   Point,
   Rect,
 } from '../../../_common/utils/index.js';
-import type { SurfaceRefBlockModel } from '../../../index.js';
 import { DocPageBlockComponent } from '../../../page-block/doc/doc-page-block.js';
 import { EdgelessPageBlockComponent } from '../../../page-block/edgeless/edgeless-page-block.js';
 import { autoScroll } from '../../../page-block/text-selection/utils.js';
-import {
-  getNotesMergeInfo,
-  mergeNotes,
-  splitNotesAtRefBlock,
-} from '../../../surface-ref-block/utils.js';
 import { DragPreview } from './components/drag-preview.js';
 import { DropIndicator } from './components/drop-indicator.js';
 import {
@@ -899,12 +893,8 @@ export class AffineDragHandleWidget extends WidgetElement<
     const selectedBlocks = getBlockElementsExcludeSubtrees(draggingElements)
       .map(element => getModelByBlockElement(element))
       .filter((x): x is BaseBlockModel => !!x);
-    const surfaceRefBlocks = selectedBlocks.filter(
-      block => block.flavour === 'affine:surface-ref'
-    ) as SurfaceRefBlockModel[];
     const targetBlock = this.page.getBlockById(targetBlockId);
     const parent = this.page.getParent(targetBlockId);
-    const mergeableNotes = getNotesMergeInfo(surfaceRefBlocks);
 
     if (targetBlock && parent && selectedBlocks.length > 0) {
       this.page.moveBlocks(
@@ -914,9 +904,6 @@ export class AffineDragHandleWidget extends WidgetElement<
         shouldInsertBefore
       );
     }
-
-    mergeNotes(this.page, mergeableNotes);
-    splitNotesAtRefBlock(surfaceRefBlocks);
 
     // TODO: need a better way to update selection
     // Should update selection after moving blocks

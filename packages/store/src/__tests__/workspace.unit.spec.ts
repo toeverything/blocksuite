@@ -435,23 +435,260 @@ describe('addBlock', () => {
 });
 
 describe('deleteBlock', () => {
-  it('can delete single model', async () => {
+  it('delete children recursively by default', async () => {
     const page = await createTestPage();
 
-    page.addBlock('affine:page', {
-      title: new page.Text(),
-    });
+    const pageId = page.addBlock('affine:page', {});
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, noteId);
     assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
       '0': {
-        'sys:children': [],
+        'prop:title': '',
+        'sys:children': ['1'],
         'sys:flavour': 'affine:page',
         'sys:id': '0',
-        'prop:title': '',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['2', '3'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+      },
+      '2': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
       },
     });
 
-    page.deleteBlock(page.root as BaseBlockModel);
-    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {});
+    const deletedModel = page.getBlockById('1') as BaseBlockModel;
+    page.deleteBlock(deletedModel);
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': [],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+    });
+  });
+
+  it('bring children to parent', async () => {
+    const page = await createTestPage();
+
+    const pageId = page.addBlock('affine:page', {});
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const p1 = page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p1);
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['2'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+      },
+      '2': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['3', '4'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+    });
+
+    const deletedModel = page.getBlockById('2') as BaseBlockModel;
+    const deletedModelParent = page.getBlockById('1') as BaseBlockModel;
+    page.deleteBlock(deletedModel, {
+      bringChildrenTo: deletedModelParent,
+    });
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['3', '4'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+    });
+  });
+
+  it('bring children to other block', async () => {
+    const page = await createTestPage();
+
+    const pageId = page.addBlock('affine:page', {});
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const p1 = page.addBlock('affine:paragraph', {}, noteId);
+    const p2 = page.addBlock('affine:paragraph', {}, noteId);
+    page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p1);
+    page.addBlock('affine:paragraph', {}, p2);
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['2', '3'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+      },
+      '2': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['4', '5'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '2',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['6'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+      '5': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '5',
+      },
+      '6': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '6',
+      },
+    });
+
+    const deletedModel = page.getBlockById('2') as BaseBlockModel;
+    const moveToModel = page.getBlockById('3') as BaseBlockModel;
+    page.deleteBlock(deletedModel, {
+      bringChildrenTo: moveToModel,
+    });
+
+    assert.deepEqual(serializeWorkspace(page.doc).spaces[spaceId].blocks, {
+      '0': {
+        'prop:title': '',
+        'sys:children': ['1'],
+        'sys:flavour': 'affine:page',
+        'sys:id': '0',
+      },
+      '1': {
+        'prop:background': '--affine-background-secondary-color',
+        'prop:hidden': false,
+        'prop:index': 'a0',
+        'prop:xywh': '[0,0,800,95]',
+        'sys:children': ['3'],
+        'sys:flavour': 'affine:note',
+        'sys:id': '1',
+      },
+      '3': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': ['6', '4', '5'],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '3',
+      },
+      '4': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '4',
+      },
+      '5': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '5',
+      },
+      '6': {
+        'prop:text': '',
+        'prop:type': 'text',
+        'sys:children': [],
+        'sys:flavour': 'affine:paragraph',
+        'sys:id': '6',
+      },
+    });
   });
 
   it('can delete model with parent', async () => {

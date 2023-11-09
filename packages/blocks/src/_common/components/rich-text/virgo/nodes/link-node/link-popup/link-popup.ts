@@ -171,10 +171,14 @@ export class LinkPopup extends WithDisposable(LitElement) {
     const link = normalizeUrl(linkInputValue);
 
     if (this.type === 'create') {
-      this.vEditor.formatText(this.goalVRange, {
-        link: link,
-        reference: null,
-      });
+      this.vEditor.formatText(
+        this.goalVRange,
+        {
+          link: link,
+          reference: null,
+        },
+        { mode: 'replace' }
+      );
       this.vEditor.setVRange(this.goalVRange);
     } else if (this.type === 'edit') {
       const text = this.textInput?.value ?? link;

@@ -535,6 +535,7 @@ export class DocPageBlockComponent extends BlockElement<
             'affine:database',
             'affine:bookmark',
             'affine:attachment',
+            'affine:surface-ref',
           ])
         ) {
           if (readonly) return;

@@ -1,19 +1,11 @@
-import { assertExists } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { property } from 'lit/decorators.js';
 
-import {
-  getCurrentNativeRange,
-  hasNativeSelection,
-  resetNativeSelection,
-} from '../../../_common/utils/index.js';
 import type {
   DataViewColumnManager,
   DataViewManager,
 } from '../data-view-manager.js';
 import type { CellRenderProps, DataViewCellLifeCycle } from './manager.js';
-
-const TEXT = 'text/plain';
 
 export abstract class BaseCellRenderer<
     Value,
@@ -87,6 +79,13 @@ export abstract class BaseCellRenderer<
       e.stopPropagation();
       this.onCopy(e);
     });
+
+    this._disposables.addFromEvent(this, 'cut', e => {
+      if (!this.isEditing) return;
+      e.stopPropagation();
+      this.onCut(e);
+    });
+
     this._disposables.addFromEvent(this, 'paste', e => {
       if (!this.isEditing) return;
       e.stopPropagation();
@@ -98,34 +97,9 @@ export abstract class BaseCellRenderer<
     this.requestUpdate();
   }
 
-  onCopy(_e: ClipboardEvent) {
-    const target = _e.target as HTMLElement;
-    if (target instanceof HTMLInputElement) return;
+  onCopy(_e: ClipboardEvent) {}
 
-    const data = this.column.getStringValue(this.rowId);
+  onCut(_e: ClipboardEvent) {}
 
-    // TODO: replace this dom operation
-    const rootEl = document.querySelector('block-suite-root');
-    assertExists(rootEl);
-    rootEl.std.clipboard.writeToClipboard(async items => {
-      return {
-        ...items,
-        [TEXT]: data,
-      };
-    });
-
-    const savedRange = hasNativeSelection() ? getCurrentNativeRange() : null;
-    if (savedRange) {
-      resetNativeSelection(savedRange);
-    }
-  }
-
-  onPaste(_e: ClipboardEvent) {
-    const target = _e.target as HTMLElement;
-    if (target instanceof HTMLInputElement) return;
-
-    const textClipboardData = _e.clipboardData?.getData(TEXT) as Value;
-    if (!textClipboardData) return;
-    this.onChange(textClipboardData);
-  }
+  onPaste(_e: ClipboardEvent) {}
 }

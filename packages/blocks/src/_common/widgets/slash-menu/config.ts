@@ -47,7 +47,6 @@ import {
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { PhasorElementType } from '../../../surface-block/index.js';
-import { splitNote } from '../../../surface-ref-block/utils.js';
 import { REFERENCE_NODE } from '../../components/rich-text/consts.js';
 import { toast } from '../../components/toast.js';
 import { textConversionConfigs } from '../../configs/text-conversion.js';
@@ -422,24 +421,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           action: async ({ pageElement, model }) => {
             const { page } = pageElement;
             const noteModel = page.getParent(model) as NoteBlockModel;
-            const sliceIdx = noteModel.children.indexOf(model);
-            const insertAtMiddle =
-              sliceIdx !== 0 && sliceIdx < noteModel.children.length - 1;
+            const insertIdx = noteModel.children.indexOf(model);
             const surfaceRefProps = {
               flavour: 'affine:surface-ref',
               reference: frameModel.id,
               refFlavour: 'affine:frame',
             };
-            const sibling = noteModel.children[sliceIdx];
-
-            if (insertAtMiddle) {
-              splitNote(noteModel, sliceIdx);
-            }
 
             page.addSiblingBlocks(
-              sibling,
+              model,
               [surfaceRefProps],
-              sliceIdx === 0 ? 'before' : 'after'
+              insertIdx === 0 ? 'before' : 'after'
             );
 
             if (
@@ -479,24 +471,17 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             action: async ({ pageElement, model }) => {
               const { page } = pageElement;
               const noteModel = page.getParent(model) as NoteBlockModel;
-              const sliceIdx = noteModel.children.indexOf(model);
-              const insertAtMiddle =
-                sliceIdx !== 0 && sliceIdx < noteModel.children.length - 1;
+              const insertIdx = noteModel.children.indexOf(model);
               const surfaceRefProps = {
                 flavour: 'affine:surface-ref',
                 reference: element.get('id'),
                 refFlavour: 'group',
               };
-              const sibling = noteModel.children[sliceIdx];
-
-              if (insertAtMiddle) {
-                splitNote(noteModel, sliceIdx);
-              }
 
               page.addSiblingBlocks(
-                sibling,
+                model,
                 [surfaceRefProps],
-                sliceIdx === 0 ? 'before' : 'after'
+                insertIdx === 0 ? 'before' : 'after'
               );
 
               if (

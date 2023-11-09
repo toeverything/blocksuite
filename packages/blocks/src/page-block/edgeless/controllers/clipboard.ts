@@ -25,7 +25,10 @@ import { EdgelessBlockType } from '../../../surface-block/edgeless-types.js';
 import { ConnectorElement } from '../../../surface-block/elements/connector/connector-element.js';
 import type { Connection } from '../../../surface-block/elements/connector/types.js';
 import type { PhasorElementType } from '../../../surface-block/elements/edgeless-element.js';
-import type { PhasorElement } from '../../../surface-block/elements/index.js';
+import {
+  GroupElement,
+  type PhasorElement,
+} from '../../../surface-block/elements/index.js';
 import type { SurfaceElement } from '../../../surface-block/elements/surface-element.js';
 import { compare } from '../../../surface-block/managers/group-manager.js';
 import type { SurfaceBlockComponent } from '../../../surface-block/surface-block.js';
@@ -689,6 +692,11 @@ export function getCopyElements(
     if (isFrameBlock(element)) {
       set.add(element);
       surface.frame.getElementsInFrame(element).forEach(ele => set.add(ele));
+    } else if (element instanceof GroupElement) {
+      getCopyElements(surface, element.childElements).forEach(ele =>
+        set.add(ele)
+      );
+      set.add(element);
     } else {
       set.add(element);
     }
