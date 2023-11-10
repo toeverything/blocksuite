@@ -30,10 +30,9 @@ const updateBackground = (
   root.std.command
     .pipe()
     .withRoot()
-    .try(chain => [chain.getTextSelection(), chain.getBlockSelections()])
     .try(chain => [
-      chain.formatText(payload),
-      chain.formatBlock(payload),
+      chain.getTextSelection().formatText(payload),
+      chain.getBlockSelections().formatBlock(payload),
       chain.formatNative(payload),
     ])
     .run();
