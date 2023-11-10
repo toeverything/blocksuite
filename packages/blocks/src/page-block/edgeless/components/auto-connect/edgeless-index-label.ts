@@ -46,6 +46,7 @@ function calculatePosition(gap: number, count: number, iconWidth: number) {
 
   return positions;
 }
+
 @customElement('edgeless-index-label')
 export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
