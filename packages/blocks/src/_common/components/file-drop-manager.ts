@@ -153,7 +153,7 @@ export class FileDropManager {
 
     page.captureSync();
 
-    if (type !== 'none' && type !== 'in' && model) {
+    if (type !== 'none' && model) {
       const parent = page.getParent(model);
       assertExists(parent);
       const ids = page.addSiblingBlocks(model, models, type);

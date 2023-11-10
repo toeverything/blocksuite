@@ -15,6 +15,8 @@ export const NOTE_CONTAINER_PADDING = 24;
 export const DRAG_HOVER_RECT_PADDING = 4;
 export const HOVER_DRAG_HANDLE_GRABBER_WIDTH = 2;
 
+export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 26;
+
 export type DropType = 'before' | 'after' | 'in';
 export type DropResult = {
   rect: Rect | null;

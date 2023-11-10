@@ -13,7 +13,6 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  calcDropTarget,
   getBlockElementByModel,
   getBlockElementsExcludeSubtrees,
   getCurrentNativeRange,
@@ -43,6 +42,7 @@ import {
 } from './config.js';
 import { DRAG_HANDLE_WIDTH, styles } from './styles.js';
 import {
+  calcDropTarget,
   captureEventTarget,
   containBlock,
   containChildBlock,
@@ -188,7 +188,6 @@ export class AffineDragHandleWidget extends WidgetElement<
     this.dropBlockId = blockId;
 
     let rect = null;
-    let targetElement = null;
     const model = closestBlockElement.model;
 
     const isDatabase = matchFlavours(model, ['affine:database'] as const);
@@ -213,15 +212,7 @@ export class AffineDragHandleWidget extends WidgetElement<
         rect.right = rect.right - state.containerOffset.x;
         rect.bottom = rect.bottom - state.containerOffset.y;
       }
-      targetElement = result.modelState.element;
-      if (result.type !== 'none' && result.type !== 'database') {
-        dropType = result.type;
-      }
-    }
-
-    if (targetElement) {
-      const targetBlockId = targetElement.getAttribute(this.root.blockIdAttr);
-      if (targetBlockId) this.dropBlockId = targetBlockId;
+      dropType = result.dropType;
     }
 
     dropIndicator = {

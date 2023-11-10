@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
-import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../consts.js';
 import { matchFlavours } from './model.js';
 import {
   type BlockComponentElement,
@@ -16,13 +15,8 @@ import { type EditingState } from './types.js';
 
 /**
  * A dropping type.
- * 'none': not dropping.
- * 'before': dropping before the target block.
- * 'after': dropping after the target block.
- * 'database': dropping into database.
- * 'in': dropping into the target block as children.
  */
-export type DroppingType = 'none' | 'before' | 'after' | 'database' | 'in';
+export type DroppingType = 'none' | 'before' | 'after' | 'database';
 
 export type DropResult = {
   type: DroppingType;
@@ -141,30 +135,13 @@ export function calcDropTarget(
       offsetY = (domRect.top - prevRect.bottom) / 2;
     }
   } else {
-    // Only consider drop as children when target block is list block.
-    // To drop in, the position must after the target first
-    // If drop in target has children, we can use insert before or after of that children
-    // to achieve the same effect.
-    const hasChild = (element as BlockComponentElement).childBlockElements
-      .length;
-    if (
-      matchFlavours(model, ['affine:list']) &&
-      !hasChild &&
-      point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-    ) {
-      type = 'in';
-    }
     // after
     let next;
     let nextRect;
 
     next = element.nextElementSibling;
     if (next) {
-      if (
-        type === 'after' &&
-        draggingElements.length &&
-        next === draggingElements[0]
-      ) {
+      if (draggingElements.length && next === draggingElements[0]) {
         type = 'none';
         next = null;
       }
@@ -186,11 +163,6 @@ export function calcDropTarget(
     top -= offsetY;
   } else {
     top += domRect.height + offsetY;
-  }
-
-  if (type === 'in') {
-    domRect.x += BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
-    domRect.width -= BLOCK_CHILDREN_CONTAINER_PADDING_LEFT;
   }
 
   return {
