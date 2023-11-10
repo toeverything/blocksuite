@@ -14,8 +14,15 @@ import './align-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValues,
+  unsafeCSS,
+} from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
@@ -31,11 +38,13 @@ import { GROUP_ROOT } from '../../../../surface-block/elements/group/consts.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
 import {
   type BrushElement,
+  clamp,
   type ConnectorElement,
   type ShapeElement,
   type TextElement,
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
+import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { isFrameBlock, isImageBlock, isNoteBlock } from '../../utils/query.js';
 
 type CategorizedElements = {
@@ -52,16 +61,6 @@ type CategorizedElements = {
 @customElement('edgeless-component-toolbar')
 export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   static override styles = css`
-    :host {
-      display: block;
-      position: absolute;
-      user-select: none;
-    }
-
-    :host([data-show]) {
-      display: block;
-    }
-
     .edgeless-component-toolbar-container {
       display: flex;
       align-items: center;
@@ -80,6 +79,12 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @state()
+  left = 0;
+
+  @state()
+  top = 0;
 
   get page() {
     return this.edgeless.page;
@@ -111,7 +116,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return result as CategorizedElements;
   }
 
-  private _getShapeButton(shapeElements?: ShapeElement[]) {
+  private _ShapeButton(shapeElements?: ShapeElement[]) {
     const shapeButton = shapeElements?.length
       ? html`<edgeless-change-shape-button
           .elements=${shapeElements}
@@ -124,7 +129,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return shapeButton;
   }
 
-  private _getBrushButton(brushElements?: BrushElement[]) {
+  private _BrushButton(brushElements?: BrushElement[]) {
     return brushElements?.length
       ? html`<edgeless-change-brush-button
           .elements=${brushElements}
@@ -136,20 +141,19 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getConnectorButton(connectorElements?: ConnectorElement[]) {
+  private _ConnectorButton(connectorElements?: ConnectorElement[]) {
     return connectorElements?.length
       ? html` <edgeless-change-connector-button
           .elements=${connectorElements}
           .page=${this.page}
           .surface=${this.surface}
-          .slots=${this.slots}
           .edgeless=${this.edgeless}
         >
         </edgeless-change-connector-button>`
       : nothing;
   }
 
-  private _getNoteButton(notes?: NoteBlockModel[]) {
+  private _NoteButton(notes?: NoteBlockModel[]) {
     return notes?.length === 1
       ? html`<edgeless-change-note-button
           .notes=${notes}
@@ -160,7 +164,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getTextButton(textElements: TextElement[]) {
+  private _TextButton(textElements: TextElement[]) {
     return textElements?.length
       ? html`<edgeless-change-text-button
           .texts=${textElements}
@@ -172,7 +176,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getFrameButton(frames: FrameBlockModel[]) {
+  private _FrameButton(frames: FrameBlockModel[]) {
     return frames?.length
       ? html`
           <edgeless-change-frame-button
@@ -184,7 +188,7 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       : nothing;
   }
 
-  private _getGroupButton(groups: GroupElement[]) {
+  private _GroupButton(groups: GroupElement[]) {
     return groups?.length
       ? html`<edgeless-change-group-button
           .surface=${this.surface}
@@ -196,54 +200,102 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
-
     if (this.selection.isSelected(id)) {
       this.requestUpdate();
     }
   };
 
-  override connectedCallback(): void {
-    super.connectedCallback();
+  protected override firstUpdated() {
+    const { _disposables, edgeless, surface } = this;
+    _disposables.add(
+      surface.viewport.slots.viewportUpdated.on(() => {
+        const [left, top] = this._computePosition();
+        this.left = left;
+        this.top = top;
+      })
+    );
 
-    this._disposables.add(
+    _disposables.add(
       this.selection.slots.updated.on(() => {
         this.requestUpdate();
       })
     );
-    this._disposables.add(
-      this.edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
-    );
+
     pickValues(this.edgeless.surface.slots, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
-    ]).forEach(slot =>
-      this._disposables.add(slot.on(this._updateOnSelectedChange))
+    ]).forEach(slot => _disposables.add(slot.on(this._updateOnSelectedChange)));
+
+    _disposables.add(
+      edgeless.page.slots.yBlockUpdated.on(this._updateOnSelectedChange)
     );
   }
 
-  private _getCreateGroupButton() {
+  private _CreateGroupButton() {
     return html`<edgeless-add-group-button
       .edgeless=${this.edgeless}
     ></edgeless-add-group-button> `;
   }
 
-  private _getCreateFrameButton() {
+  private _CreateFrameButton() {
     return html`<edgeless-add-frame-button
       .edgeless=${this.edgeless}
     ></edgeless-add-frame-button>`;
   }
 
-  private _getReleaseFromGroupButton() {
+  private _ReleaseFromGroupButton() {
     return html`<edgeless-release-from-group-button
       .surface=${this.surface}
     ></edgeless-release-from-group-button>`;
   }
 
-  private _getAlignButton() {
+  private _AlignButton() {
     return html`<edgeless-align-button
       .edgeless=${this.edgeless}
     ></edgeless-align-button>`;
+  }
+
+  private _Divider() {
+    return html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`;
+  }
+
+  protected override async updated(_changedProperties: PropertyValues) {
+    const [left, top] = this._computePosition();
+
+    await this.updateComplete;
+    this.left = left;
+    this.top = top;
+  }
+
+  private _computePosition() {
+    const { selectionManager } = this.edgeless;
+
+    const bound = edgelessElementsBound(selectionManager.elements);
+
+    const { viewport } = this.edgeless.surface;
+    const { width, height } = viewport;
+    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
+
+    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
+    const rect = this.getBoundingClientRect();
+    let left, top;
+    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
+      left = right <= 0 ? x - rect.width : x;
+      top = bottom <= 0 ? y - rect.height : y;
+      return [left, top];
+    }
+
+    let offset = 34;
+    if (this.selection.elements.find(ele => isFrameBlock(ele))) {
+      offset += 10;
+    }
+    top = y - rect.height - offset;
+    top < 0 && (top = y + bound.h * viewport.zoom + offset);
+
+    left = clamp(x, 10, width - rect.width - 10);
+    top = clamp(top, 10, height - rect.height - 100);
+    return [left, top];
   }
 
   override render() {
@@ -261,35 +313,28 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     const buttons = selectedAtLeastTwoTypes
       ? []
       : [
-          this._getShapeButton(shape),
-          this._getBrushButton(brush),
-          this._getConnectorButton(connector),
-          this._getNoteButton(note),
-          this._getTextButton(text),
-          this._getFrameButton(frame),
-          this._getGroupButton(group),
+          this._ShapeButton(shape),
+          this._BrushButton(brush),
+          this._ConnectorButton(connector),
+          this._NoteButton(note),
+          this._TextButton(text),
+          this._FrameButton(frame),
+          this._GroupButton(group),
         ].filter(b => !!b && b !== nothing);
 
     if (elements.length > 1) {
-      buttons.unshift(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
-      buttons.unshift(this._getAlignButton());
-      buttons.unshift(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
-      buttons.unshift(this._getCreateGroupButton());
-      buttons.unshift(
-        html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-      );
-      buttons.unshift(this._getCreateFrameButton());
+      buttons.unshift(this._Divider());
+      buttons.unshift(this._AlignButton());
+      buttons.unshift(this._Divider());
+      buttons.unshift(this._CreateGroupButton());
+      buttons.unshift(this._Divider());
+      buttons.unshift(this._CreateFrameButton());
     }
+
     if (elements.length === 1) {
       if (this.surface.getGroupParent(selection.firstElement) !== GROUP_ROOT) {
-        buttons.unshift(
-          html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`
-        );
-        buttons.unshift(this._getReleaseFromGroupButton());
+        buttons.unshift(this._Divider());
+        buttons.unshift(this._ReleaseFromGroupButton());
       }
     }
 
@@ -304,16 +349,24 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       );
     }
 
-    return html`<div
-      class="edgeless-component-toolbar-container"
-      @pointerdown=${stopPropagation}
-    >
-      ${join(buttons, () => '')}
-      <edgeless-more-button
-        .edgeless=${edgeless}
-        .vertical=${true}
-      ></edgeless-more-button>
-    </div>`;
+    return html` <style>
+        :host {
+          position: absolute;
+          z-index: 1;
+          left: ${this.left}px;
+          top: ${this.top}px;
+        }
+      </style>
+      <div
+        class="edgeless-component-toolbar-container"
+        @pointerdown=${stopPropagation}
+      >
+        ${join(buttons, () => '')}
+        <edgeless-more-button
+          .edgeless=${edgeless}
+          .vertical=${true}
+        ></edgeless-more-button>
+      </div>`;
   }
 }
 declare global {
