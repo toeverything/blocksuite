@@ -194,7 +194,7 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     }
 
     this._edgeless.updateElementInLocal(selected.id, {
-      xywh: serializeXYWH(bound.x, bound.y, bound.w, bound.h),
+      xywh: bound.serialize(),
     });
   }
 
@@ -207,7 +207,9 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     bound.x += delta[0];
     bound.y += delta[1];
 
-    this._page.updateBlock(block, { xywh: bound.serialize() });
+    this._edgeless.updateElementInLocal(block.id, {
+      xywh: bound.serialize(),
+    });
   }
 
   private _isInSelectedRect(viewX: number, viewY: number) {
@@ -542,7 +544,6 @@ export class DefaultToolController extends EdgelessToolController<DefaultTool> {
     const { surface } = this._edgeless;
     const { viewport } = surface;
     const zoom = viewport.zoom;
-    console.log(this.dragType);
     switch (this.dragType) {
       case DefaultModeDragType.Selecting: {
         // Record the last drag pointer position for auto panning and view port updating

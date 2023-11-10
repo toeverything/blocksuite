@@ -31,6 +31,7 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
+import { isEmpty } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
@@ -744,6 +745,20 @@ export class EdgelessPageBlockComponent extends BlockElement<
     viewport.setViewport(zoom, [centerX, centerY]);
   }
 
+  private _initLocalRecordMgr() {
+    this.localRecordMgr =
+      new LocalRecordManager<PhasorElementLocalRecordValues>();
+    this.localRecordMgr.slots.updated.on(({ id, data }) => {
+      if (this.page.getBlockById(id) && 'xywh' in data.new) {
+        if ('xywh' in data.new) this.slots.elementSizeUpdated.emit(id);
+      }
+    });
+
+    this.disposables.add(() => {
+      this.localRecordMgr.destroy();
+    });
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -770,12 +785,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.root.event);
-    this.localRecordMgr =
-      new LocalRecordManager<PhasorElementLocalRecordValues>();
-
-    this.disposables.add(() => {
-      this.localRecordMgr.destroy();
-    });
+    this._initLocalRecordMgr();
   }
 
   override disconnectedCallback() {

@@ -11,6 +11,7 @@ import {
 import type { NoteBlockModel } from '../../../../models.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isNoteBlock } from '../../utils/query.js';
 
 @customElement('edgeless-index-label')
@@ -69,6 +70,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
   show = false;
 
   @property({ attribute: false })
@@ -78,8 +82,8 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   private _index = -1;
 
   protected override firstUpdated(): void {
-    const { _disposables, surface } = this;
-    const { edgeless } = surface;
+    const { _disposables, surface, edgeless } = this;
+
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
         this.requestUpdate();
@@ -89,6 +93,14 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     _disposables.add(
       surface.page.slots.blockUpdated.on(({ type, id }) => {
         if (type === 'update' && isNoteBlock(surface.pickById(id))) {
+          this.requestUpdate();
+        }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementSizeUpdated.on(id => {
+        if (isNoteBlock(surface.pickById(id))) {
           this.requestUpdate();
         }
       })
@@ -212,7 +224,7 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
           }px)`,
         });
         return html`
-          <div index=${index} class="edgeless-index-label" style=${style}>
+          <div data-index=${index} class="edgeless-index-label" style=${style}>
             ${index + 1}
           </div>
         `;

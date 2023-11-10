@@ -1,6 +1,8 @@
 import { Slot } from '@blocksuite/global/utils';
+import type { BaseBlockModel } from '@blocksuite/store';
 
 import { pick } from '../../../_common/utils/iterable.js';
+import type { SerializedXYWH } from '../../../index.js';
 
 export class LocalRecordManager<T> {
   private _localRecords = new Map<string, Partial<T>>();
@@ -58,3 +60,17 @@ export class LocalRecordManager<T> {
     this.slots.deleted.dispose();
   }
 }
+
+export const localRecordWrapper = <T extends { xywh?: SerializedXYWH }>(
+  model: BaseBlockModel,
+  localRecordMgr: LocalRecordManager<T>
+) => {
+  return new Proxy(model, {
+    get: (target, prop, receiver) => {
+      return localRecordMgr.get(target.id) &&
+        Object.hasOwn(localRecordMgr.get(target.id) as T, prop)
+        ? localRecordMgr.get(target.id)![prop as keyof T]
+        : Reflect.get(target, prop, receiver);
+    },
+  });
+};

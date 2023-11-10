@@ -23,6 +23,7 @@ import { isEmpty } from '../_common/utils/iterable.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
+import { localRecordWrapper } from '../page-block/edgeless/services/local-record-manager.js';
 import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   isConnectable,
@@ -188,9 +189,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (flavour === EdgelessBlockType.NOTE) {
       parent = this.edgeless.model;
     }
-    return parent.children.filter(
-      child => child.flavour === flavour
-    ) as EdgelessBlockModelMap[T][];
+    return parent.children
+      .filter(child => child.flavour === flavour)
+      .map(child =>
+        localRecordWrapper(child, this.edgeless.localRecordMgr)
+      ) as EdgelessBlockModelMap[T][];
   }
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
@@ -549,7 +552,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       this.edgeless.localRecordMgr.slots.updated.on(({ id, data }) => {
         this.refresh();
 
-        const element = this.pickById(id);
+        const element = this._elements.get(id);
 
         if (!element) return;
 
@@ -931,10 +934,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   pickById(id: string): EdgelessElement | null {
-    return (
-      this._elements.get(id) ??
-      (this.page.getBlockById(id) as TopLevelBlockModel)
-    );
+    if (this._elements.has(id))
+      return this._elements.get(id) as EdgelessElement;
+
+    const block = this.page.getBlockById(id);
+
+    return block
+      ? (localRecordWrapper(
+          block,
+          this.edgeless.localRecordMgr
+        ) as EdgelessElement)
+      : null;
   }
 
   pickByPoint(
