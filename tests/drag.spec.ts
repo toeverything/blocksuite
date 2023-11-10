@@ -257,7 +257,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     '4',
     '3',
     true,
-    1 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    -(1 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT)
   );
   await expect(page.locator('.affine-drag-indicator')).toBeHidden();
 
@@ -324,7 +324,7 @@ test('move to the last block of each level in multi-level nesting', async ({
     '3',
     '4',
     true,
-    2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    -(2 * BLOCK_CHILDREN_CONTAINER_PADDING_LEFT)
   );
   await expect(page.locator('.affine-drag-indicator')).toBeHidden();
 
