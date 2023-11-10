@@ -517,9 +517,7 @@ export class MarkdownAdapter extends BaseAdapter<Markdown> {
                   type: 'quote',
                   text: {
                     '$blocksuite:internal:text$': true,
-                    delta: o.node.children.map(child =>
-                      this._mdastToDelta(child)
-                    ),
+                    delta: this._mdastToDelta(o.node),
                   },
                 },
                 children: [],
