@@ -563,7 +563,8 @@ export class Vec {
   };
 
   static pointOffset = (A: IVec, B: IVec, offset: number): IVec => {
-    const u = Vec.uni(Vec.sub(B, A));
+    let u = Vec.uni(Vec.sub(B, A));
+    if (Vec.isEqual(A, B)) u = A;
     return Vec.add(A, Vec.mul(u, offset));
   };
 
