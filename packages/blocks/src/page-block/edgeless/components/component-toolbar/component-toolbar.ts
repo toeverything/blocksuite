@@ -297,7 +297,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   }
 
   override render() {
-    this._updatePosition();
     const groupedSelected = this._groupSelected();
     const { edgeless, selection } = this;
     const { shape, brush, connector, note, text, frame, group } =
