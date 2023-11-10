@@ -122,20 +122,22 @@ export class CommandManager {
         return this.createChain(methods, [...cmds, command]) as never;
       },
       try: fn => {
-        const chains = fn(this.createChain(methods, cmds));
         return this.createChain(methods, [
           ...cmds,
-          (_, next) => {
+          (beforeCtx, next) => {
+            const beforeChain = this.pipe().with(beforeCtx);
+            const chains = fn(beforeChain);
+
             for (const chain of chains) {
-              let tmpCtx = {};
+              let branchCtx = {};
               const success = chain
                 .inline((ctx, next) => {
-                  tmpCtx = ctx;
+                  branchCtx = ctx;
                   next();
                 })
                 .run();
               if (success) {
-                next(tmpCtx);
+                next(branchCtx);
                 break;
               }
             }
