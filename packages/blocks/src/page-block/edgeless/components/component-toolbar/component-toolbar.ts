@@ -22,7 +22,7 @@ import {
   type PropertyValues,
   unsafeCSS,
 } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
@@ -80,10 +80,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @property({ attribute: false })
+  @state()
   left = 0;
 
-  @property({ attribute: false })
+  @state()
   top = 0;
 
   get page() {
