@@ -147,7 +147,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
           .elements=${connectorElements}
           .page=${this.page}
           .surface=${this.surface}
-          .slots=${this.slots}
           .edgeless=${this.edgeless}
         >
         </edgeless-change-connector-button>`
