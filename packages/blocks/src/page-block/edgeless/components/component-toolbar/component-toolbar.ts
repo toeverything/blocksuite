@@ -201,38 +201,31 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   private _updateOnSelectedChange = (element: string | { id: string }) => {
     const id = typeof element === 'string' ? element : element.id;
-
     if (this.selection.isSelected(id)) {
       this.requestUpdate();
     }
   };
 
-  override connectedCallback(): void {
-    super.connectedCallback();
+  protected override firstUpdated() {
+    const { _disposables, edgeless, surface } = this;
+    _disposables.add(
+      surface.viewport.slots.viewportUpdated.on(() => this._updatePosition())
+    );
 
-    this._disposables.add(
+    _disposables.add(
       this.selection.slots.updated.on(() => {
         this.requestUpdate();
       })
     );
-    this._disposables.add(
-      this.edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
-    );
+
     pickValues(this.edgeless.surface.slots, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
-    ]).forEach(slot =>
-      this._disposables.add(slot.on(this._updateOnSelectedChange))
-    );
-  }
+    ]).forEach(slot => _disposables.add(slot.on(this._updateOnSelectedChange)));
 
-  protected override firstUpdated() {
-    const { _disposables } = this;
     _disposables.add(
-      this.surface.viewport.slots.viewportUpdated.on(() =>
-        this._updatePosition()
-      )
+      edgeless.page.slots.yBlockUpdated.on(this._updateOnSelectedChange)
     );
   }
 
@@ -264,14 +257,13 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`;
   }
 
-  protected override updated(_changedProperties: PropertyValues): void {
-    // if (_changedProperties.has('left') || _changedProperties.has('top')) {
+  protected override async updated(_changedProperties: PropertyValues) {
     const [left, top] = this._updatePosition();
     if (this.left !== left || this.top !== top) {
+      await this.updateComplete;
       this.left = left;
       this.top = top;
     }
-    // }
   }
 
   private _updatePosition() {
