@@ -209,7 +209,11 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
   protected override firstUpdated() {
     const { _disposables, edgeless, surface } = this;
     _disposables.add(
-      surface.viewport.slots.viewportUpdated.on(() => this._computePosition())
+      surface.viewport.slots.viewportUpdated.on(() => {
+        const [left, top] = this._computePosition();
+        this.left = left;
+        this.top = top;
+      })
     );
 
     _disposables.add(
@@ -259,11 +263,10 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   protected override async updated(_changedProperties: PropertyValues) {
     const [left, top] = this._computePosition();
-    if (this.left !== left || this.top !== top) {
-      await this.updateComplete;
-      this.left = left;
-      this.top = top;
-    }
+
+    await this.updateComplete;
+    this.left = left;
+    this.top = top;
   }
 
   private _computePosition() {
