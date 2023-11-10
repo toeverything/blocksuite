@@ -19,7 +19,6 @@ import {
   GroupElement,
   type IVec,
   type PhasorElement,
-  serializeXYWH,
   ShapeElement,
   TextElement,
   Vec,

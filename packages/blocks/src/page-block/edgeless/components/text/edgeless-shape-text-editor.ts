@@ -80,7 +80,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     const dispatcher = this.edgeless.dispatcher;
     assertExists(dispatcher);
 
-    this.edgeless.surface.updateElementLocalRecord(this.element.id, {
+    this.edgeless.localRecordMgr.update(this.element.id, {
       textDisplay: false,
     });
 
@@ -128,7 +128,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
 
-    this.edgeless.surface.updateElementLocalRecord(this.element.id, {
+    this.edgeless.localRecordMgr.update(this.element.id, {
       textDisplay: true,
     });
 

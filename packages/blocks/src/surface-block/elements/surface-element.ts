@@ -22,7 +22,6 @@ import type {
   IEdgelessElement,
   PhasorElementType,
 } from './edgeless-element.js';
-import type { IShapeLocalRecord } from './shape/types.js';
 
 export interface ISurfaceElement {
   id: string;

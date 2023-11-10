@@ -102,7 +102,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
 
   override onContainerDragMove(e: PointerEventState): void {
     const currentPoint = this.toModelCoord(e.point);
-    const surface = this._surface;
+    const edgeless = this._edgeless;
     this._erasables.forEach(erasable => {
       if (this._eraseTargets.has(erasable)) return;
       if (isTopLevelBlock(erasable)) {
@@ -117,7 +117,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       } else {
         if (erasable.intersectWithLine(this._prevPoint, currentPoint)) {
           this._eraseTargets.add(erasable);
-          surface.updateElementLocalRecord(erasable.id, { opacity: 0.3 });
+          edgeless.localRecordMgr.update(erasable.id, { opacity: 0.3 });
         }
       }
     });
@@ -131,7 +131,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
         const ele = getBlockElementByModel(erasable);
         ele && ((<HTMLElement>ele).style.opacity = '1');
       } else {
-        this._surface.updateElementLocalRecord(erasable.id, { opacity: 1 });
+        this._edgeless.localRecordMgr.update(erasable.id, { opacity: 1 });
       }
     });
     this._reset();

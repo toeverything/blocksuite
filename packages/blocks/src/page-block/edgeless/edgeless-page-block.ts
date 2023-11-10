@@ -31,14 +31,12 @@ import {
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
-import { isEmpty } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
 import type { NoteBlockModel } from '../../note-block/index.js';
 import { ZOOM_INITIAL } from '../../surface-block/consts.js';
 import { EdgelessBlockType } from '../../surface-block/edgeless-types.js';
-import type { ISurfaceElementLocalRecord } from '../../surface-block/elements/surface-element.js';
 import {
   Bound,
   clamp,
