@@ -37,6 +37,7 @@ import {
   type DragHandleOption,
   DragHandleOptionsRunner,
   type DropResult,
+  type DropType,
   HOVER_DRAG_HANDLE_GRABBER_WIDTH,
   NOTE_CONTAINER_PADDING,
 } from './config.js';
@@ -79,8 +80,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   draggingElements: BlockElement[] = [];
   dropBlockId = '';
-  dropBefore = false;
-  dropIn = false;
+  dropType: DropType | null = null;
   dragging = false;
   dragPreview: DragPreview | null = null;
   dropIndicator: DropIndicator | null = null;
@@ -204,6 +204,7 @@ export class AffineDragHandleWidget extends WidgetElement<
       this.scale
     );
 
+    let dropType: DropType = 'before';
     if (result) {
       rect = result.rect;
       if (rect) {
@@ -213,8 +214,9 @@ export class AffineDragHandleWidget extends WidgetElement<
         rect.bottom = rect.bottom - state.containerOffset.y;
       }
       targetElement = result.modelState.element;
-      this.dropBefore = result.type === 'before' ? true : false;
-      this.dropIn = result.type === 'in' ? true : false;
+      if (result.type !== 'none' && result.type !== 'database') {
+        dropType = result.type;
+      }
     }
 
     if (targetElement) {
@@ -225,8 +227,7 @@ export class AffineDragHandleWidget extends WidgetElement<
     dropIndicator = {
       rect,
       dropBlockId: this.dropBlockId,
-      dropBefore: this.dropBefore,
-      dropIn: this.dropIn,
+      dropType,
     };
 
     return dropIndicator;
@@ -239,7 +240,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   updateDropIndicator = (indicator: DropResult | null) => {
     this.dropBlockId = indicator?.dropBlockId ?? '';
-    this.dropBefore = indicator?.dropBefore ?? false;
+    this.dropType = indicator?.dropType ?? null;
     if (this.dropIndicator) {
       this.dropIndicator.rect = indicator?.rect ?? null;
     }
@@ -254,7 +255,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   resetDropResult = () => {
     this.dropBlockId = '';
-    this.dropBefore = false;
+    this.dropType = null;
     if (this.dropIndicator) this.dropIndicator.rect = null;
   };
 
@@ -420,7 +421,7 @@ export class AffineDragHandleWidget extends WidgetElement<
   private _reset() {
     this.draggingElements = [];
     this.dropBlockId = '';
-    this.dropBefore = false;
+    this.dropType = null;
     this.lastDragPointerState = null;
     this.rafID = 0;
     this.dragging = false;
@@ -877,8 +878,7 @@ export class AffineDragHandleWidget extends WidgetElement<
 
   private _onDragEnd = () => {
     const targetBlockId = this.dropBlockId;
-    const shouldInsertBefore = this.dropBefore;
-    const shouldInsertIn = this.dropIn;
+    const dropType = this.dropType;
     const draggingElements = this.draggingElements;
 
     this.hide(true);
@@ -899,20 +899,21 @@ export class AffineDragHandleWidget extends WidgetElement<
       .filter((x): x is BaseBlockModel => !!x);
     const targetBlock = this.page.getBlockById(targetBlockId);
 
+    const shouldInsertIn = dropType === 'in';
     const parent = shouldInsertIn
       ? targetBlock
       : this.page.getParent(targetBlockId);
 
     if (targetBlock && parent && selectedBlocks.length > 0) {
-      if (!shouldInsertIn) {
+      if (shouldInsertIn) {
+        this.page.moveBlocks(selectedBlocks, targetBlock);
+      } else {
         this.page.moveBlocks(
           selectedBlocks,
           parent,
           targetBlock,
-          shouldInsertBefore
+          dropType === 'before'
         );
-      } else {
-        this.page.moveBlocks(selectedBlocks, targetBlock);
       }
     }
 

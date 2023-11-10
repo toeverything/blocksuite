@@ -16,10 +16,11 @@ import { type EditingState } from './types.js';
 
 /**
  * A dropping type.
- */
-/**
- * Question: Shall we add some comments here to describe each dropping type's meaning.
- * I'd like to add a new type for drop a block into another.
+ * 'none': not dropping.
+ * 'before': dropping before the target block.
+ * 'after': dropping after the target block.
+ * 'database': dropping into database.
+ * 'in': dropping into the target block as children.
  */
 export type DroppingType = 'none' | 'before' | 'after' | 'database' | 'in';
 
@@ -91,16 +92,6 @@ export function calcDropTarget(
     const before = distanceToTop < distanceToBottom;
     type = before ? 'before' : 'after';
 
-    // Question: I still don't know what is database type for?
-    const hasChild = (element as BlockComponentElement).childBlockElements
-      .length;
-    if (
-      !hasChild &&
-      point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-    ) {
-      type = 'in';
-    }
-
     return {
       type,
       rect: Rect.fromLWTH(
@@ -122,15 +113,6 @@ export function calcDropTarget(
   const before = distanceToTop < distanceToBottom;
 
   type = before ? 'before' : 'after';
-  // If drop in target has children, we can use insert before or after children
-  // to achieve the same effect.
-  const hasChild = (element as BlockComponentElement).childBlockElements.length;
-  if (
-    !hasChild &&
-    point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
-  ) {
-    type = 'in';
-  }
   let offsetY = 4;
 
   if (type === 'before') {
@@ -159,13 +141,30 @@ export function calcDropTarget(
       offsetY = (domRect.top - prevRect.bottom) / 2;
     }
   } else {
+    // Only consider drop as children when target block is list block.
+    // To drop in, the position must after the target first
+    // If drop in target has children, we can use insert before or after of that children
+    // to achieve the same effect.
+    const hasChild = (element as BlockComponentElement).childBlockElements
+      .length;
+    if (
+      matchFlavours(model, ['affine:list']) &&
+      !hasChild &&
+      point.x > domRect.x + BLOCK_CHILDREN_CONTAINER_PADDING_LEFT
+    ) {
+      type = 'in';
+    }
     // after
     let next;
     let nextRect;
 
     next = element.nextElementSibling;
     if (next) {
-      if (draggingElements.length && next === draggingElements[0]) {
+      if (
+        type === 'after' &&
+        draggingElements.length &&
+        next === draggingElements[0]
+      ) {
         type = 'none';
         next = null;
       }

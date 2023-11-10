@@ -23,6 +23,7 @@ import {
   DEFAULT_DRAG_HANDLE_CONTAINER_HEIGHT,
   DRAG_HANDLE_OFFSET_LEFT,
   type DropResult,
+  type DropType,
   LIST_DRAG_HANDLE_OFFSET_LEFT,
 } from './config.js';
 
@@ -158,7 +159,6 @@ export const getDropResult = (
 ): DropResult | null => {
   let dropIndicator = null;
   let dropBlockId = '';
-  let dropBefore = false;
 
   const target = captureEventTarget(event.target);
   const rootElement = target?.closest('block-suite-root');
@@ -182,6 +182,7 @@ export const getDropResult = (
 
   let rect = null;
   let targetElement = null;
+  let dropType: DropType = 'before';
   const model = closestBlockElement.model;
 
   const isDatabase = matchFlavours(model, ['affine:database'] as const);
@@ -194,7 +195,9 @@ export const getDropResult = (
   if (result) {
     rect = result.rect;
     targetElement = result.modelState.element;
-    dropBefore = result.type === 'before' ? true : false;
+    if (result.type !== 'none' && result.type !== 'database') {
+      dropType = result.type;
+    }
   }
 
   if (targetElement) {
@@ -205,7 +208,7 @@ export const getDropResult = (
   dropIndicator = {
     rect,
     dropBlockId,
-    dropBefore,
+    dropType,
   };
 
   return dropIndicator;
