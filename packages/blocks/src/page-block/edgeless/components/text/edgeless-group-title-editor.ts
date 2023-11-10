@@ -42,7 +42,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
     this.updateComplete.then(() => {
       this.vEditor.selectAll();
 
-      this.edgeless.localRecordMgr.update(this.group.id, { showTitle: false });
+      this.edgeless.localRecord.update(this.group.id, { showTitle: false });
 
       this.vEditor.slots.updated.on(() => {
         this.requestUpdate();
@@ -78,7 +78,7 @@ export class EdgelessGroupTitleEditor extends WithDisposable(
   private _unmount() {
     // dispose in advance to avoid execute `this.remove()` twice
     this.disposables.dispose();
-    this.edgeless.localRecordMgr.update(this.group.id, {
+    this.edgeless.localRecord.update(this.group.id, {
       showTitle: true,
     });
     this.edgeless.selectionManager.setSelection({

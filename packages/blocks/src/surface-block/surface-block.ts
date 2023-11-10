@@ -192,7 +192,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return parent.children
       .filter(child => child.flavour === flavour)
       .map(child =>
-        localRecordWrapper(child, this.edgeless.localRecordMgr)
+        localRecordWrapper(child, this.edgeless.localRecord)
       ) as EdgelessBlockModelMap[T][];
   }
 
@@ -549,7 +549,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
 
   private _initRecordListener() {
     this._disposables.add(
-      this.edgeless.localRecordMgr.slots.updated.on(({ id, data }) => {
+      this.edgeless.localRecord.slots.updated.on(({ id, data }) => {
         this.refresh();
 
         const element = this._elements.get(id);
@@ -643,13 +643,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
       getLocalRecord: id => {
-        return this.edgeless.localRecordMgr.get(id);
+        return this.edgeless.localRecord.get(id);
       },
       onElementUpdated: update => {
         this.slots.elementUpdated.emit(update);
       },
       updateElementLocalRecord: (id, record) => {
-        this.edgeless.localRecordMgr.update(id, record);
+        this.edgeless.localRecord.update(id, record);
       },
       pickById: id => this.pickById(id),
       getGroupParent: (element: string | EdgelessElement) => {
@@ -714,13 +714,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         getLocalRecord: id => {
-          return this.edgeless.localRecordMgr.get(id);
+          return this.edgeless.localRecord.get(id);
         },
         onElementUpdated: update => {
           this.slots.elementUpdated.emit(update);
         },
         updateElementLocalRecord: (id, record) => {
-          this.edgeless.localRecordMgr.update(id, record);
+          this.edgeless.localRecord.update(id, record);
         },
         pickById: id => this.pickById(id),
         getGroupParent: (element: string | EdgelessElement) => {
@@ -749,7 +749,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
       element.unmount();
       this._elements.delete(id);
-      this.edgeless.localRecordMgr.delete(id);
+      this.edgeless.localRecord.delete(id);
       this._removeFromBatch(element);
       this.slots.elementRemoved.emit({ id, element });
     }
@@ -942,7 +942,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return block
       ? (localRecordWrapper(
           block,
-          this.edgeless.localRecordMgr
+          this.edgeless.localRecord
         ) as EdgelessElement)
       : null;
   }

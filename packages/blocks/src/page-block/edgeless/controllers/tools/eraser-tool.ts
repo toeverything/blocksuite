@@ -117,7 +117,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
       } else {
         if (erasable.intersectWithLine(this._prevPoint, currentPoint)) {
           this._eraseTargets.add(erasable);
-          edgeless.localRecordMgr.update(erasable.id, { opacity: 0.3 });
+          edgeless.localRecord.update(erasable.id, { opacity: 0.3 });
         }
       }
     });
@@ -131,7 +131,7 @@ export class EraserToolController extends EdgelessToolController<EraserTool> {
         const ele = getBlockElementByModel(erasable);
         ele && ((<HTMLElement>ele).style.opacity = '1');
       } else {
-        this._edgeless.localRecordMgr.update(erasable.id, { opacity: 1 });
+        this._edgeless.localRecord.update(erasable.id, { opacity: 1 });
       }
     });
     this._reset();

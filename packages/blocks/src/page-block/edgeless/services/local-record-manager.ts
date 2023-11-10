@@ -61,16 +61,20 @@ export class LocalRecordManager<T> {
   }
 }
 
-export const localRecordWrapper = <T extends { xywh?: SerializedXYWH }>(
+/**
+ * This wraps block tree model with local record, so that its props can be temporarily shadowed.
+ * Useful for cases like batch dragging, where per-frame update could be too expensive.
+ */
+export function localRecordWrapper<T extends { xywh?: SerializedXYWH }>(
   model: BaseBlockModel,
-  localRecordMgr: LocalRecordManager<T>
-) => {
+  localRecord: LocalRecordManager<T>
+) {
   return new Proxy(model, {
     get: (target, prop, receiver) => {
-      return localRecordMgr.get(target.id) &&
-        Object.hasOwn(localRecordMgr.get(target.id) as T, prop)
-        ? localRecordMgr.get(target.id)![prop as keyof T]
+      return localRecord.get(target.id) &&
+        Object.hasOwn(localRecord.get(target.id) as T, prop)
+        ? localRecord.get(target.id)![prop as keyof T]
         : Reflect.get(target, prop, receiver);
     },
   });
-};
+}

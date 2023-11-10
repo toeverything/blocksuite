@@ -221,7 +221,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
-  localRecordMgr!: LocalRecordManager<PhasorElementLocalRecordValues>;
+  localRecord!: LocalRecordManager<PhasorElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -539,7 +539,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     elementId: string,
     record: Partial<PhasorElementLocalRecordValues>
   ) {
-    this.localRecordMgr.update(elementId, record);
+    this.localRecord.update(elementId, record);
   }
 
   applyLocalRecord(elements: string[]) {
@@ -547,7 +547,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
     const elementsSet = new Set(elements);
 
-    this.localRecordMgr.each((id, record) => {
+    this.localRecord.each((id, record) => {
       if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
 
       const element = this.surface.pickById(id) as EdgelessElement;
@@ -564,7 +564,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
       if (!flag) return;
 
-      this.localRecordMgr.update(id, record);
+      this.localRecord.update(id, record);
       this.surface.updateElement(id, updateProps);
     });
   }
@@ -743,17 +743,16 @@ export class EdgelessPageBlockComponent extends BlockElement<
     viewport.setViewport(zoom, [centerX, centerY]);
   }
 
-  private _initLocalRecordMgr() {
-    this.localRecordMgr =
-      new LocalRecordManager<PhasorElementLocalRecordValues>();
-    this.localRecordMgr.slots.updated.on(({ id, data }) => {
+  private _initLocalRecordManager() {
+    this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
+    this.localRecord.slots.updated.on(({ id, data }) => {
       if (this.page.getBlockById(id) && 'xywh' in data.new) {
         if ('xywh' in data.new) this.slots.elementSizeUpdated.emit(id);
       }
     });
 
     this.disposables.add(() => {
-      this.localRecordMgr.destroy();
+      this.localRecord.destroy();
     });
   }
 
@@ -783,7 +782,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.root.event);
-    this._initLocalRecordMgr();
+    this._initLocalRecordManager();
   }
 
   override disconnectedCallback() {
