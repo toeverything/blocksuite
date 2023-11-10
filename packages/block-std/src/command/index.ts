@@ -49,6 +49,9 @@ type CommonMethods<In extends object = {}> = {
   try: <InlineOut extends BlockSuite.CommandDataName = never>(
     fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
   ) => Chain<In & CommandKeyToData<InlineOut>>;
+  tryAll: <InlineOut extends BlockSuite.CommandDataName = never>(
+    fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
+  ) => Chain<In & CommandKeyToData<InlineOut>>;
 };
 const cmdSymbol = Symbol('cmds');
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -140,6 +143,32 @@ export class CommandManager {
                 next(branchCtx);
                 break;
               }
+            }
+          },
+        ]) as never;
+      },
+      tryAll: fn => {
+        return this.createChain(methods, [
+          ...cmds,
+          (beforeCtx, next) => {
+            const beforeChain = this.pipe().with(beforeCtx);
+            const chains = fn(beforeChain);
+
+            let ctx = {};
+            let allFail = true;
+            for (const chain of chains) {
+              const success = chain
+                .inline((branchCtx, next) => {
+                  ctx = { ...ctx, ...branchCtx };
+                  next();
+                })
+                .run();
+              if (success) {
+                allFail = false;
+              }
+            }
+            if (!allFail) {
+              next(ctx);
             }
           },
         ]) as never;
