@@ -108,7 +108,8 @@ export const createBlockHub: (
         } else {
           const parent = page.getParent(model);
           assertExists(parent);
-          const ids = page.addSiblingBlocks(model, models, type);
+          const dropType = type !== 'in' ? type : 'after';
+          const ids = page.addSiblingBlocks(model, models, dropType);
           focusId = ids[0];
           parentModel = parent;
         }
