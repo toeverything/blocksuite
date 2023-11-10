@@ -118,9 +118,6 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
           EXPAND_OFFSET / 2,
         ]);
 
-        if (newStart.every(a => isNaN(a)) || newEnd.every(a => isNaN(a)))
-          return nothing;
-
         return svg`
           <svg style=${style} width="${newWidth}px" height="${newHeight}px" viewBox="0 0 ${newWidth} ${newHeight}" xmlns="http://www.w3.org/2000/svg">
             <defs>

@@ -13,6 +13,39 @@ import type { SurfaceBlockComponent } from '../../../../surface-block/surface-bl
 import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
+function calculatePosition(gap: number, count: number, iconWidth: number) {
+  const positions = [];
+  if (count === 1) {
+    positions.push([0, 10]);
+    return positions;
+  }
+  const middleIndex = (count - 1) / 2;
+  const isEven = count % 2 === 0;
+  const middleOffset = (gap + iconWidth) / 2;
+  function getSign(num: number) {
+    return num - middleIndex > 0 ? 1 : -1;
+  }
+  for (let j = 0; j < count; j++) {
+    let left = 10;
+    if (isEven) {
+      if (Math.abs(j - middleIndex) < 1 && isEven) {
+        left = 10 + middleOffset * getSign(j);
+      } else {
+        left =
+          10 +
+          ((Math.ceil(Math.abs(j - middleIndex)) - 1) * (gap + 24) +
+            middleOffset) *
+            getSign(j);
+      }
+    } else {
+      const offset = gap + iconWidth;
+      left = 10 + Math.ceil(Math.abs(j - middleIndex)) * offset * getSign(j);
+    }
+    positions.push([0, left]);
+  }
+
+  return positions;
+}
 @customElement('edgeless-index-label')
 export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   static override styles = css`
@@ -231,43 +264,8 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
         });
         const components = [];
         const count = counts[i];
-
-        function calculatePosition(gap: number) {
-          const positions = [];
-          if (count === 1) {
-            positions.push([0, 10]);
-            return positions;
-          }
-          const middleIndex = (count - 1) / 2;
-          const isEven = count % 2 === 0;
-          const middleOffset = (gap + iconWidth) / 2;
-          function getSign(num: number) {
-            return num - middleIndex > 0 ? 1 : -1;
-          }
-          for (let j = 0; j < count; j++) {
-            let left = 10;
-            if (isEven) {
-              if (Math.abs(j - middleIndex) < 1 && isEven) {
-                left = 10 + middleOffset * getSign(j);
-              } else {
-                left =
-                  10 +
-                  ((Math.ceil(Math.abs(j - middleIndex)) - 1) * (gap + 24) +
-                    middleOffset) *
-                    getSign(j);
-              }
-            } else {
-              const offset = gap + iconWidth;
-              left =
-                10 + Math.ceil(Math.abs(j - middleIndex)) * offset * getSign(j);
-            }
-            positions.push([0, left]);
-          }
-
-          return positions;
-        }
         const initGap = 24 / count - 24;
-        const positions = calculatePosition(initGap);
+        const positions = calculatePosition(initGap, count, iconWidth);
         for (let j = 0; j < count; j++) {
           index++;
           components.push(html`
@@ -298,11 +296,11 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
         return html`<div
           style=${style}
           @mouseenter=${(e: MouseEvent) => {
-            const positions = calculatePosition(5);
+            const positions = calculatePosition(5, count, iconWidth);
             updateChildrenPosition(e, positions);
           }}
           @mouseleave=${(e: MouseEvent) => {
-            const positions = calculatePosition(initGap);
+            const positions = calculatePosition(initGap, count, iconWidth);
             updateChildrenPosition(e, positions);
           }}
         >
