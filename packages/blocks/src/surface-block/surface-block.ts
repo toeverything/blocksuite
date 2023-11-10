@@ -19,9 +19,11 @@ import {
   type Selectable,
   type TopLevelBlockModel,
 } from '../_common/utils/index.js';
+import { isEmpty } from '../_common/utils/iterable.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
+import { localRecordWrapper } from '../page-block/edgeless/services/local-record-manager.js';
 import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   isConnectable,
@@ -55,7 +57,6 @@ import {
   ElementCtors,
   ElementDefaultProps,
   GroupElement,
-  type IPhasorElementLocalRecord,
 } from './elements/index.js';
 import type { SurfaceElement } from './elements/surface-element.js';
 import type { IEdgelessElement, IVec, PhasorElementType } from './index.js';
@@ -152,10 +153,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _renderer!: Renderer;
   private _yContainer!: Y.Map<Y.Map<unknown>>;
   private _elements = new Map<id, SurfaceElement>();
-  private _elementLocalRecords = new Map<
-    id,
-    IPhasorElementLocalRecord[keyof IPhasorElementLocalRecord]
-  >();
 
   snap!: EdgelessSnapManager;
   connector!: EdgelessConnectorManager;
@@ -192,9 +189,11 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (flavour === EdgelessBlockType.NOTE) {
       parent = this.edgeless.model;
     }
-    return parent.children.filter(
-      child => child.flavour === flavour
-    ) as EdgelessBlockModelMap[T][];
+    return parent.children
+      .filter(child => child.flavour === flavour)
+      .map(child =>
+        localRecordWrapper(child, this.edgeless.localRecord)
+      ) as EdgelessBlockModelMap[T][];
   }
 
   getSortedBlocks<T extends EdgelessBlockType>(flavour: T) {
@@ -234,6 +233,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this.group = new EdgelessGroupManager(this);
 
     this.init();
+    this._initRecordListener();
   }
 
   getCSSPropertyValue = (value: string) => {
@@ -547,6 +547,40 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._initEffects();
   }
 
+  private _initRecordListener() {
+    this._disposables.add(
+      this.edgeless.localRecord.slots.updated.on(({ id, data }) => {
+        this.refresh();
+
+        const element = this._elements.get(id);
+
+        if (!element) return;
+
+        const changedProps = Object.keys(data.new).reduce(
+          (pre, current) => {
+            if (current in element) {
+              pre[current] = {
+                old: data.old?.[current as keyof typeof data.old] ?? undefined,
+                new: data.new[current as keyof typeof data.new],
+              };
+            }
+            return pre;
+          },
+          {} as {
+            [index: string]: { old: unknown; new: unknown };
+          }
+        );
+
+        if (!isEmpty(changedProps)) {
+          this.slots.elementUpdated.emit({
+            id,
+            props: changedProps,
+          });
+        }
+      })
+    );
+  }
+
   // query
   pickTopBlock(point: IVec) {
     const models = this.sortedBlocks;
@@ -609,13 +643,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     assertExists(ElementCtor);
     const element = new ElementCtor(yElement, {
       getLocalRecord: id => {
-        return this.getElementLocalRecord(id);
+        return this.edgeless.localRecord.get(id);
       },
       onElementUpdated: update => {
         this.slots.elementUpdated.emit(update);
       },
       updateElementLocalRecord: (id, record) => {
-        this.updateElementLocalRecord(id, record);
+        this.edgeless.localRecord.update(id, record);
       },
       pickById: id => this.pickById(id),
       getGroupParent: (element: string | EdgelessElement) => {
@@ -680,13 +714,13 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       assertExists(ElementCtor);
       const element = new ElementCtor(yElement, {
         getLocalRecord: id => {
-          return this.getElementLocalRecord(id);
+          return this.edgeless.localRecord.get(id);
         },
         onElementUpdated: update => {
           this.slots.elementUpdated.emit(update);
         },
         updateElementLocalRecord: (id, record) => {
-          this.updateElementLocalRecord(id, record);
+          this.edgeless.localRecord.update(id, record);
         },
         pickById: id => this.pickById(id),
         getGroupParent: (element: string | EdgelessElement) => {
@@ -715,7 +749,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       }
       element.unmount();
       this._elements.delete(id);
-      this.deleteElementLocalRecord(id);
+      this.edgeless.localRecord.delete(id);
       this._removeFromBatch(element);
       this.slots.elementRemoved.emit({ id, element });
     }
@@ -900,10 +934,17 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   pickById(id: string): EdgelessElement | null {
-    return (
-      this._elements.get(id) ??
-      (this.page.getBlockById(id) as TopLevelBlockModel)
-    );
+    if (this._elements.has(id))
+      return this._elements.get(id) as EdgelessElement;
+
+    const block = this.page.getBlockById(id);
+
+    return block
+      ? (localRecordWrapper(
+          block,
+          this.edgeless.localRecord
+        ) as EdgelessElement)
+      : null;
   }
 
   pickByPoint(
@@ -1021,29 +1062,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return this.getElements().filter(
       element => element.type === type
     ) as unknown as IPhasorElementType[T][];
-  }
-
-  updateElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(
-    id: id,
-    records: IPhasorElementLocalRecord[T]
-  ) {
-    const elementLocalRecord = this._elementLocalRecords.get(id);
-    if (elementLocalRecord) {
-      this._elementLocalRecords.set(id, { ...elementLocalRecord, ...records });
-    } else {
-      this._elementLocalRecords.set(id, records);
-    }
-    this.refresh();
-  }
-
-  getElementLocalRecord<T extends keyof IPhasorElementLocalRecord>(id: id) {
-    return this._elementLocalRecords.get(id) as
-      | IPhasorElementLocalRecord[T]
-      | undefined;
-  }
-
-  deleteElementLocalRecord(id: id) {
-    this._elementLocalRecords.delete(id);
   }
 }
 

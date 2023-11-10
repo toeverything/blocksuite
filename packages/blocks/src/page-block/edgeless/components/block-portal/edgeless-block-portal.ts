@@ -259,11 +259,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const { surface, page } = edgeless;
     if (!surface) return nothing;
-    const notes = surface.getBlocks(NOTE);
-    const images = surface.getBlocks(IMAGE);
-    const blocks = [...notes, ...images].sort(surface.compare);
 
     const { readonly } = this.edgeless.page;
+    const notes = surface.getBlocks(NOTE);
+    const images = surface.getBlocks(IMAGE);
+    const frames = surface.getSortedBlocks(FRAME);
+    const blocks = [...notes, ...images].sort(surface.compare);
+
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
     notes.forEach(note => {
@@ -296,7 +298,11 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
         >
         </edgeless-auto-connect-line>
         <div class="affine-edgeless-layer">
-          <edgeless-frames-container .surface=${surface}>
+          <edgeless-frames-container
+            .surface=${surface}
+            .edgeless=${edgeless}
+            .frames=${frames}
+          >
           </edgeless-frames-container>
           ${readonly
             ? nothing
@@ -314,6 +320,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                     .index=${index}
                     .model=${block}
                     .surface=${surface}
+                    .edgeless=${edgeless}
                   ></${tag}>`;
             }
           )}
@@ -334,6 +341,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-index-label
         .elementsMap=${autoConnectedBlocks}
         .surface=${surface}
+        .edgeless=${edgeless}
         .show=${this._showAutoConnect}
       ></edgeless-index-label>
       ${this._toolbarVisible && !page.readonly

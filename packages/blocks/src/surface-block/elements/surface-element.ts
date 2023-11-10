@@ -1,6 +1,10 @@
 import type { Y } from '@blocksuite/store';
 
-import type { EdgelessElement, GroupElement } from '../../index.js';
+import type {
+  EdgelessElement,
+  GroupElement,
+  PhasorElementLocalRecordValues,
+} from '../../index.js';
 import type { EdgelessSelectionManager } from '../../page-block/edgeless/services/selection-manager.js';
 import type { Renderer } from '../renderer.js';
 import type { RoughCanvas } from '../rough/canvas.js';
@@ -18,7 +22,6 @@ import type {
   IEdgelessElement,
   PhasorElementType,
 } from './edgeless-element.js';
-import type { IShapeLocalRecord } from './shape/types.js';
 
 export interface ISurfaceElement {
   id: string;
@@ -35,6 +38,7 @@ export interface ISurfaceElement {
 export interface ISurfaceElementLocalRecord {
   display?: boolean;
   opacity?: number;
+  xywh?: SerializedXYWH;
 }
 
 export type ComputedValue = (value: string) => string;
@@ -68,9 +72,7 @@ export abstract class SurfaceElement<
   yMap: Y.Map<unknown>;
 
   protected options: {
-    getLocalRecord: (
-      id: string
-    ) => ISurfaceElementLocalRecord | IShapeLocalRecord | undefined;
+    getLocalRecord: (id: string) => PhasorElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
       props: { [index: string]: { old: unknown; new: unknown } };
@@ -127,7 +129,7 @@ export abstract class SurfaceElement<
   }
 
   get xywh() {
-    const xywh = this.yMap.get('xywh') as T['xywh'];
+    const xywh = this.localRecord?.xywh ?? (this.yMap.get('xywh') as T['xywh']);
     return xywh;
   }
 
