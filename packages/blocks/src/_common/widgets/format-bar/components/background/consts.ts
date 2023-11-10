@@ -21,9 +21,11 @@ export const backgroundConfig: BackgroundConfig[] = [
     color: null,
     hotkey: null,
   },
-  ...colors.map(color => ({
-    name: `${color[0].toUpperCase()}${color.slice(1)} Background`,
-    color: `var(--affine-text-highlight-${color})`,
-    hotkey: null,
-  })),
+  ...colors
+    .filter(color => color !== 'pink')
+    .map(color => ({
+      name: `${color[0].toUpperCase()}${color.slice(1)} Background`,
+      color: `var(--affine-text-highlight-${color})`,
+      hotkey: null,
+    })),
 ];

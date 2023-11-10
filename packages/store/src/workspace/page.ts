@@ -55,11 +55,22 @@ export class Page extends Space<FlatBlockMap> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _synced = false;
+  private _initialized = false;
   private _shouldTransact = true;
 
   readonly slots = {
+    /**
+     * This fires when the block tree is initialized via API call or underlying existing ydoc binary.
+     * Note that this is different with the `doc.loaded` field,
+     * since `loaded` only indicates that the ydoc is loaded, not the block tree.
+     */
+    ready: new Slot(),
     historyUpdated: new Slot(),
+    /**
+     * This fires when the root block is added via API call or has just been initialized from existing ydoc.
+     * useful for internal block UI components to start subscribing following up events.
+     * Note that at this moment, the whole block tree may not be fully initialized yet.
+     */
     rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
@@ -644,7 +655,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   trySyncFromExistingDoc() {
-    if (this._synced) {
+    if (this._initialized) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
@@ -662,7 +673,8 @@ export class Page extends Space<FlatBlockMap> {
       this._handleYBlockAdd(visited, id);
     });
 
-    this._synced = true;
+    this._initialized = true;
+    this.slots.ready.emit();
   }
 
   dispose() {
@@ -674,7 +686,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    if (this._synced) {
+    if (this._initialized) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -682,13 +694,6 @@ export class Page extends Space<FlatBlockMap> {
 
   private _initYBlocks() {
     const { _yBlocks } = this;
-    // Consider if we need to expose the ability to temporarily unobserve this._yBlocks.
-    // "unobserve" is potentially necessary to make sure we don't create
-    // an infinite loop when sync to remote then back to client.
-    // `action(a) -> YDoc' -> YEvents(a) -> YRemoteDoc' -> YEvents(a) -> YDoc'' -> ...`
-    // We could unobserve in order to short circuit by ignoring the sync of remote
-    // events we actually generated locally.
-    // _yBlocks.unobserveDeep(this._handleYEvents);
     _yBlocks.observeDeep(this._handleYEvents);
     this._history = new Y.UndoManager([_yBlocks], {
       trackedOrigins: new Set([this._ySpaceDoc.clientID]),
@@ -700,11 +705,9 @@ export class Page extends Space<FlatBlockMap> {
     this._history.on('stack-item-updated', this._historyObserver);
   }
 
-  private _getYBlock(id: string): YBlock {
+  private _getYBlock(id: string): YBlock | null {
     const yBlock = this._yBlocks.get(id) as YBlock | undefined;
-    if (!yBlock) {
-      throw new Error(`Block with id ${id} does not exist`);
-    }
+    if (!yBlock) return null;
     return yBlock;
   }
 
@@ -725,6 +728,12 @@ export class Page extends Space<FlatBlockMap> {
 
   private _handleYBlockAdd(visited: Set<string>, id: string) {
     const yBlock = this._getYBlock(id);
+    if (!yBlock) {
+      console.warn(
+        `Failed to handle yBlock add, yBlock with id-${id} not found`
+      );
+      return;
+    }
 
     const flavour = yBlock.get('sys:flavour') as string;
     const model = this._createBlockModel(id, flavour, yBlock);
@@ -921,7 +930,7 @@ export class Page extends Space<FlatBlockMap> {
 
   override async waitForLoaded() {
     await super.waitForLoaded();
-    if (!this._synced) {
+    if (!this._initialized) {
       this.trySyncFromExistingDoc();
     }
 

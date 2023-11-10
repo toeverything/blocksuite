@@ -217,8 +217,6 @@ export class RichTextCellEditing extends BaseCellRenderer<Y.Text> {
         return;
       }
       event.stopPropagation();
-    } else {
-      this.selectCurrentCell(false);
     }
 
     if (event.key === 'Enter' && !event.isComposing) {

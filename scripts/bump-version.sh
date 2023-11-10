@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu -o pipefail
+
 if [ -z "$1" ]
 then
   echo "$0 [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease | from-git]"
