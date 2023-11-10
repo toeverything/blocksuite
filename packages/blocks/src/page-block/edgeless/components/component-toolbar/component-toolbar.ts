@@ -19,7 +19,6 @@ import {
   html,
   LitElement,
   nothing,
-  type PropertyValueMap,
   type PropertyValues,
   unsafeCSS,
 } from 'lit';
