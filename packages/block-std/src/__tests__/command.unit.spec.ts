@@ -95,7 +95,7 @@ describe('CommandManager', () => {
   });
 
   test('can handle command failure', () => {
-    const errorSpy = vi.spyOn(console, 'error');
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const command1: Command = vi.fn((ctx, next) => next());
     const command2: Command = vi.fn((ctx, next) => {
