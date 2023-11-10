@@ -14,7 +14,15 @@ import './align-button.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
-import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type PropertyValueMap,
+  type PropertyValues,
+  unsafeCSS,
+} from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { join } from 'lit/directives/join.js';
 
@@ -72,6 +80,12 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  left = 0;
+
+  @property({ attribute: false })
+  top = 0;
 
   get page() {
     return this.edgeless.page;
@@ -212,9 +226,6 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     ]).forEach(slot =>
       this._disposables.add(slot.on(this._updateOnSelectedChange))
     );
-
-    this.style.position = 'absolute';
-    this.style.zIndex = '1';
   }
 
   protected override firstUpdated() {
@@ -254,8 +265,17 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
     return html`<component-toolbar-menu-divider></component-toolbar-menu-divider>`;
   }
 
-  private async _updatePosition() {
-    // await this.updateComplete;
+  protected override updated(_changedProperties: PropertyValues): void {
+    // if (_changedProperties.has('left') || _changedProperties.has('top')) {
+    const [left, top] = this._updatePosition();
+    if (this.left !== left || this.top !== top) {
+      this.left = left;
+      this.top = top;
+    }
+    // }
+  }
+
+  private _updatePosition() {
     const { selectionManager } = this.edgeless;
 
     const bound = edgelessElementsBound(selectionManager.elements);
@@ -266,25 +286,23 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
 
     const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
     const rect = this.getBoundingClientRect();
-
+    let left, top;
     if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      this.style.left = (right <= 0 ? x - rect.width : x) + 'px';
-      this.style.top = (bottom <= 0 ? y - rect.height : y) + 'px';
-      return;
+      left = right <= 0 ? x - rect.width : x;
+      top = bottom <= 0 ? y - rect.height : y;
+      return [left, top];
     }
 
     let offset = 34;
     if (this.selection.elements.find(ele => isFrameBlock(ele))) {
       offset += 10;
     }
-    let top = y - rect.height - offset;
+    top = y - rect.height - offset;
     top < 0 && (top = y + bound.h * viewport.zoom + offset);
 
-    const left = clamp(x, 10, width - rect.width - 10);
+    left = clamp(x, 10, width - rect.width - 10);
     top = clamp(top, 10, height - rect.height - 100);
-
-    this.style.left = left + 'px';
-    this.style.top = top + 'px';
+    return [left, top];
   }
 
   override render() {
@@ -339,16 +357,24 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       );
     }
 
-    return html`<div
-      class="edgeless-component-toolbar-container"
-      @pointerdown=${stopPropagation}
-    >
-      ${join(buttons, () => '')}
-      <edgeless-more-button
-        .edgeless=${edgeless}
-        .vertical=${true}
-      ></edgeless-more-button>
-    </div>`;
+    return html` <style>
+        :host {
+          position: absolute;
+          z-index: 1;
+          left: ${this.left}px;
+          top: ${this.top}px;
+        }
+      </style>
+      <div
+        class="edgeless-component-toolbar-container"
+        @pointerdown=${stopPropagation}
+      >
+        ${join(buttons, () => '')}
+        <edgeless-more-button
+          .edgeless=${edgeless}
+          .vertical=${true}
+        ></edgeless-more-button>
+      </div>`;
   }
 }
 declare global {
