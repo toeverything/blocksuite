@@ -36,9 +36,12 @@ import { stopPropagation } from '../../../../_common/utils/event.js';
 import { uploadImageFromLocal } from '../../../../_common/utils/filesys.js';
 import type { EdgelessTool } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../index.js';
+import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import { Bound, clamp } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isFrameBlock } from '../../utils/query.js';
+
+const { FRAME } = EdgelessBlockType;
 
 export function launchIntoFullscreen(element: Element) {
   if (element.requestFullscreen) {
@@ -267,23 +270,22 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      page.slots.blockUpdated.on(e => {
-        const model = page.getBlockById(e.id);
-        if (e.type === 'add') {
-          if (isFrameBlock(model)) {
-            requestAnimationFrame(() => {
-              this._updateFrames();
-            });
-          }
-        } else if (e.type === 'update') {
-          if (isFrameBlock(model) && 'index' in e.props) {
+      page.slots.blockUpdated.on(({ flavour, type }) => {
+        if (flavour === FRAME && type !== 'update') {
+          requestAnimationFrame(() => {
             this._updateFrames();
-          }
-        } else if (e.flavour === 'affine:frame') {
+          });
+        }
+      })
+    );
+    _disposables.add(
+      page.slots.yBlockUpdated.on(e => {
+        if (e.type === 'update' && 'index' in e.props) {
           this._updateFrames();
         }
       })
     );
+    _disposables.add(page.slots.yBlockUpdated);
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => {
