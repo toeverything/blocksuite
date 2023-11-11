@@ -158,7 +158,15 @@ export class AffineFormatBarWidget extends WidgetElement {
         const blockSelections = pageElement.selection.filter('block');
 
         if (textSelection) {
-          if (!textSelection.isCollapsed()) {
+          const block = this.root.view.viewFromPath(
+            'block',
+            textSelection.path
+          );
+          if (
+            !textSelection.isCollapsed() &&
+            block &&
+            block.model.role === 'content'
+          ) {
             this._displayType = 'text';
             assertExists(pageElement.root.rangeManager);
 

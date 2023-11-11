@@ -30,6 +30,8 @@ function getCombinedFormatFromVEditors(
     formatArr.push(format);
   });
 
+  if (formatArr.length === 0) return {};
+
   // format will be active only when all vEditors have the same format.
   return formatArr.reduce((acc, cur) => {
     const newFormat: AffineTextAttributes = {};
