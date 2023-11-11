@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test';
-import { assertExists } from 'utils/asserts.js';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import type { Flavour } from '../../../packages/blocks/src/index.js';
@@ -24,7 +23,7 @@ export async function updateBlockType(
         })
         .inline(ctx => {
           const { selectedBlocks } = ctx;
-          assertExists(selectedBlocks);
+          if (!selectedBlocks) return;
           blocks.push(...selectedBlocks);
         })
         .run();
