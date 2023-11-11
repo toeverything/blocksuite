@@ -11,16 +11,16 @@ export async function updateBlockType(
 ) {
   await page.evaluate(
     ([flavour, type]) => {
-      const selectedBlockElements =
-        //@ts-ignore
-        window.testUtils.pageBlock.getSelectedContentBlockElements(
-          //@ts-ignore
-          window.root,
-          ['text', 'block']
-        );
+      const selectedBlocks = window.root.std.command
+        .pipe()
+        .withRoot()
+        .tryAll(chain => [chain.getTextSelection(), chain.getBlockSelections()])
+        .getSelectedBlocks({
+          types: ['text', 'block'],
+        });
       //@ts-ignore
       window.testUtils.pageBlock.updateBlockElementType(
-        selectedBlockElements,
+        selectedBlocks,
         flavour,
         type
       );
