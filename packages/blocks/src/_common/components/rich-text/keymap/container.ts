@@ -9,7 +9,6 @@ import {
 } from '@blocksuite/virgo';
 
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import { getNextBlock } from '../../../../note-block/utils.js';
 import type { PageBlockComponent } from '../../../../page-block/types.js';
 import { getSelectedContentModels } from '../../../../page-block/utils/selection.js';
 import { textFormatConfigs } from '../../../configs/text-format/config.js';
@@ -113,7 +112,10 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
   blockElement.bindHotKey({
     ArrowUp: ctx => {
-      if (!blockElement.selected?.is('text')) return;
+      if (!blockElement.selected?.is('text')) {
+        return;
+      }
+
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
       if (!vRange) {
@@ -127,19 +129,14 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         });
       }
 
-      const range = vEditor.toDomRange({
-        index: vRange.index,
-        length: 0,
-      });
-      assertExists(range);
-      if (vEditor.isFirstLine(vRange)) {
-        _preventDefault(ctx);
-        return;
-      }
-      return true;
+      _preventDefault(ctx);
+      return;
     },
     ArrowDown: ctx => {
-      if (!blockElement.selected?.is('text')) return;
+      if (!blockElement.selected?.is('text')) {
+        return;
+      }
+
       const vEditor = _getVirgo();
       const vRange = vEditor.getVRange();
       if (!vRange) {
@@ -153,17 +150,8 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
         });
       }
 
-      const range = vEditor.toDomRange({
-        index: vRange.index,
-        length: 0,
-      });
-      assertExists(range);
-      if (vEditor.isLastLine(vRange) && getNextBlock(blockElement)) {
-        _preventDefault(ctx);
-        return;
-      }
-
-      return true;
+      _preventDefault(ctx);
+      return;
     },
     ArrowRight: ctx => {
       if (blockElement.selected?.is('block')) {

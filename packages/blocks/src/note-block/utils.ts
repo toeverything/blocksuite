@@ -1,7 +1,7 @@
 import type { BlockSelection } from '@blocksuite/block-std';
 import { PathFinder } from '@blocksuite/block-std';
 import type { BlockElement } from '@blocksuite/lit';
-import { getTextNodesFromElement, VIRGO_ROOT_ATTR } from '@blocksuite/virgo';
+import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
@@ -254,24 +254,34 @@ export function horizontalGetNextCaret(
   forward = false,
   span = 5
 ) {
-  const selection = document.getSelection();
-  if (!selection) {
+  const current = getCurrentCaretPos(true);
+  if (!current) {
     return;
   }
-  const current = getCurrentCaretPos(!forward);
-  if (!current) return;
+
   const rect = block.getBoundingClientRect();
+
   let _point = {
-    x: Math.max(point.x, rect.left, current.x),
-    y: forward ? Math.min(point.y, current.y) : Math.max(point.y, current.y),
+    x:
+      point.x >= rect.left && point.x <= rect.right
+        ? point.x
+        : point.x < rect.left
+        ? rect.left
+        : rect.right,
+    y:
+      point.y >= rect.top && point.y <= rect.bottom
+        ? point.y
+        : forward && point.y > rect.bottom
+        ? rect.bottom - span
+        : !forward && point.y < rect.top
+        ? rect.top + span
+        : point.y,
   };
+
   let move = caretFromPoint(_point.x, _point.y);
-  const anchor = caretFromPoint(_point.x, _point.y);
+
   const needContinue = () => {
     if (!move) {
-      return false;
-    }
-    if (!anchor) {
       return false;
     }
     if (!block.contains(move.node)) {
@@ -285,6 +295,7 @@ export function horizontalGetNextCaret(
     }
     return true;
   };
+
   while (needContinue()) {
     _point = {
       x: _point.x,
@@ -292,31 +303,22 @@ export function horizontalGetNextCaret(
     };
     move = caretFromPoint(_point.x, _point.y);
   }
-  if (!move || !move.node.parentElement?.closest(`[${VIRGO_ROOT_ATTR}]`)) {
-    const texts = getTextNodesFromElement(block);
-    const text = forward ? texts[texts.length - 1] : texts[0];
-    return {
-      node: text,
-      offset: forward ? text.textContent?.length ?? 0 : 0,
-    };
+
+  if (move && !block.contains(move.node)) {
+    return;
   }
 
   return move;
 }
 
-export function horizontalMoveCursorToNextText(
-  point: { x: number; y: number },
-  block: BlockElement,
-  forward = false
-) {
+export function moveCursor(caret: { node: Node; offset: number }) {
+  const prevCursor = getCurrentCaretPos(true);
+
   const selection = document.getSelection();
   if (!selection) {
     return;
   }
-  const caret = horizontalGetNextCaret(point, block, forward);
-  if (!caret) {
-    return;
-  }
+
   const { node, offset } = caret;
 
   const nextRange = document.createRange();
@@ -327,51 +329,81 @@ export function horizontalMoveCursorToNextText(
   const element = node.parentElement;
   element?.scrollIntoView({ block: 'nearest' });
 
-  return {
-    caret,
-    range: nextRange,
+  const finalCursor = getCurrentCaretPos(true);
+
+  if (
+    !finalCursor ||
+    (prevCursor &&
+      prevCursor.x === finalCursor.x &&
+      prevCursor.y === finalCursor.y)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+export function moveCursorVertically(
+  blockElement: BlockElement,
+  forward: boolean
+) {
+  const selection = document.getSelection();
+  if (!selection) {
+    return false;
+  }
+
+  const cursorRect = getCurrentCaretPos(true);
+
+  if (!cursorRect) {
+    return false;
+  }
+
+  const nextCaret = horizontalGetNextCaret(
+    {
+      x: cursorRect.x,
+      y: forward
+        ? cursorRect.top - cursorRect.height / 2
+        : cursorRect.bottom + cursorRect.height / 2,
+    },
+    blockElement,
+    forward,
+    cursorRect.height / 2
+  );
+
+  if (!nextCaret) {
+    return;
+  }
+
+  return moveCursor(nextCaret);
+}
+
+export function moveCursorToBlock(blockElement: BlockElement, tail: boolean) {
+  const texts = getTextNodesFromElement(blockElement);
+  const text = tail ? texts[texts.length - 1] : texts[0];
+  if (!text) {
+    return false;
+  }
+  const nextCaret = {
+    node: text,
+    offset: tail ? text.textContent?.length ?? 0 : 0,
   };
-}
 
-export function moveCursorToNextBlockElement(nextBlock: BlockElement) {
-  const pos = getCurrentCaretPos(true);
-  if (!pos || !nextBlock) {
+  const success = moveCursor(nextCaret);
+  if (!success) {
+    return false;
+  }
+
+  const selection = document.getSelection();
+  if (!selection) {
     return;
   }
-  const nextRect = horizontalMoveCursorToNextText(
-    {
-      x: pos.right,
-      y: nextBlock.getBoundingClientRect().top ?? 0,
-    },
-    nextBlock
-  );
-  if (nextRect) {
-    const viewport = nextBlock.closest('affine-doc-page')?.viewportElement;
-    if (viewport) {
-      autoScroll(viewport, nextRect.range.getBoundingClientRect().bottom);
-    }
+  const range = selection.getRangeAt(0);
+  const viewport = blockElement.closest('affine-doc-page')?.viewportElement;
+  if (viewport) {
+    autoScroll(viewport, range.getBoundingClientRect().top);
   }
-}
 
-export function moveCursorToPrevBlockElement(prevBlock: BlockElement) {
-  const pos = getCurrentCaretPos(false);
-  if (!pos || !prevBlock) {
-    return;
-  }
-  const nextRect = horizontalMoveCursorToNextText(
-    {
-      x: pos.left,
-      y: prevBlock.getBoundingClientRect().bottom - 2 ?? 0,
-    },
-    prevBlock,
-    true
-  );
-  if (nextRect) {
-    const viewport = prevBlock.closest('affine-doc-page')?.viewportElement;
-    if (viewport) {
-      autoScroll(viewport, nextRect.range.getBoundingClientRect().top);
-    }
-  }
+  return true;
 }
 
 export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
