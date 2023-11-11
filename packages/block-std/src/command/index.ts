@@ -125,20 +125,22 @@ export class CommandManager {
         return this.createChain(methods, [...cmds, command]) as never;
       },
       try: fn => {
-        const chains = fn(this.createChain(methods, cmds));
         return this.createChain(methods, [
           ...cmds,
-          (_, next) => {
+          (beforeCtx, next) => {
+            const beforeChain = this.pipe().with(beforeCtx);
+            const chains = fn(beforeChain);
+
             for (const chain of chains) {
-              let tmpCtx = {};
+              let branchCtx = {};
               const success = chain
                 .inline((ctx, next) => {
-                  tmpCtx = ctx;
+                  branchCtx = ctx;
                   next();
                 })
                 .run();
               if (success) {
-                next(tmpCtx);
+                next(branchCtx);
                 break;
               }
             }
@@ -146,16 +148,18 @@ export class CommandManager {
         ]) as never;
       },
       tryAll: fn => {
-        const chains = fn(this.createChain(methods, cmds));
         return this.createChain(methods, [
           ...cmds,
-          (_, next) => {
-            let tmpCtx = {};
+          (beforeCtx, next) => {
+            const beforeChain = this.pipe().with(beforeCtx);
+            const chains = fn(beforeChain);
+
+            let ctx = {};
             let allFail = true;
             for (const chain of chains) {
               const success = chain
-                .inline((ctx, next) => {
-                  tmpCtx = { ...tmpCtx, ...ctx };
+                .inline((branchCtx, next) => {
+                  ctx = { ...ctx, ...branchCtx };
                   next();
                 })
                 .run();
@@ -164,7 +168,7 @@ export class CommandManager {
               }
             }
             if (!allFail) {
-              next(tmpCtx);
+              next(ctx);
             }
           },
         ]) as never;

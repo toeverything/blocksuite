@@ -73,16 +73,25 @@ export default defineConfig({
         ],
       },
       {
-        text: '🚧 API Reference',
-        items: [],
-      },
-      {
         text: 'Packages',
         items: [
           { text: '🚧 <code>@blocksuite/store</code>', link: '' },
           { text: '🚧 <code>@blocksuite/block-std</code>', link: '' },
           { text: '🚧 <code>@blocksuite/lit</code>', link: '' },
           { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
+        ],
+      },
+      {
+        text: '🚧 API Reference',
+        items: [
+          { text: '@blocksuite/store', link: '/api/@blocksuite/store/index' },
+          {
+            text: '@blocksuite/block-std',
+            link: '/api/@blocksuite/block-std/index',
+          },
+          { text: '@blocksuite/lit', link: '/api/@blocksuite/lit/index' },
+          { text: '@blocksuite/virgo', link: '/api/@blocksuite/virgo/index' },
+          { text: '@blocksuite/editor', link: '/api/@blocksuite/editor/index' },
         ],
       },
       {

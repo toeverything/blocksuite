@@ -8,10 +8,45 @@ import {
   AutoConnectLeftIcon,
   AutoConnectRightIcon,
 } from '../../../../_common/icons/edgeless.js';
-import type { NoteBlockModel } from '../../../../models.js';
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
+import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { isNoteBlock } from '../../utils/query.js';
+import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
+
+function calculatePosition(gap: number, count: number, iconWidth: number) {
+  const positions = [];
+  if (count === 1) {
+    positions.push([0, 10]);
+    return positions;
+  }
+  const middleIndex = (count - 1) / 2;
+  const isEven = count % 2 === 0;
+  const middleOffset = (gap + iconWidth) / 2;
+  function getSign(num: number) {
+    return num - middleIndex > 0 ? 1 : -1;
+  }
+  for (let j = 0; j < count; j++) {
+    let left = 10;
+    if (isEven) {
+      if (Math.abs(j - middleIndex) < 1 && isEven) {
+        left = 10 + middleOffset * getSign(j);
+      } else {
+        left =
+          10 +
+          ((Math.ceil(Math.abs(j - middleIndex)) - 1) * (gap + 24) +
+            middleOffset) *
+            getSign(j);
+      }
+    } else {
+      const offset = gap + iconWidth;
+      left = 10 + Math.ceil(Math.abs(j - middleIndex)) * offset * getSign(j);
+    }
+    positions.push([0, left]);
+  }
+
+  return positions;
+}
 
 @customElement('edgeless-index-label')
 export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
@@ -69,17 +104,20 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
   surface!: SurfaceBlockComponent;
 
   @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
   show = false;
 
   @property({ attribute: false })
-  notes: NoteBlockModel[] = [];
+  elementsMap!: Map<AutoConnectElement, number>;
 
   @state()
   private _index = -1;
 
   protected override firstUpdated(): void {
-    const { _disposables, surface } = this;
-    const { edgeless } = surface;
+    const { _disposables, surface, edgeless } = this;
+
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
         this.requestUpdate();
@@ -89,6 +127,14 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     _disposables.add(
       surface.page.slots.blockUpdated.on(({ type, id }) => {
         if (type === 'update' && isNoteBlock(surface.pickById(id))) {
+          this.requestUpdate();
+        }
+      })
+    );
+
+    _disposables.add(
+      edgeless.slots.elementSizeUpdated.on(id => {
+        if (isNoteBlock(surface.pickById(id))) {
           this.requestUpdate();
         }
       })
@@ -140,38 +186,48 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     this.style.zIndex = '1';
   }
 
+  private _getElementsAndCounts() {
+    const elements: AutoConnectElement[] = [];
+    const counts: number[] = [];
+    for (const [key, value] of this.elementsMap.entries()) {
+      elements.push(key);
+      counts.push(value);
+    }
+    return { elements, counts };
+  }
+
   private _navigateToNext() {
-    const { notes } = this;
-    if (this._index >= notes.length - 1) return;
+    const { elements } = this._getElementsAndCounts();
+    if (this._index >= elements.length - 1) return;
     this._index = this._index + 1;
-    const note = notes[this._index];
-    const bound = Bound.deserialize(note.xywh);
+    const element = elements[this._index];
+    const bound = Bound.deserialize(element.xywh);
     this.surface.edgeless.selectionManager.setSelection({
-      elements: [note.id],
+      elements: [element.id],
       editing: false,
     });
     this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
   private _navigateToPrev() {
-    const { notes } = this;
+    const { elements } = this._getElementsAndCounts();
     if (this._index <= 0) return;
     this._index = this._index - 1;
-    const note = notes[this._index];
-    const bound = Bound.deserialize(note.xywh);
+    const element = elements[this._index];
+    const bound = Bound.deserialize(element.xywh);
     this.surface.edgeless.selectionManager.setSelection({
-      elements: [note.id],
+      elements: [element.id],
       editing: false,
     });
     this.surface.viewport.setViewportByBound(bound, [80, 80, 80, 80], true);
   }
 
-  private _NavigatorComponent(notes: NoteBlockModel[]) {
+  private _NavigatorComponent(elements: AutoConnectElement[]) {
     const { viewport } = this.surface;
     const { zoom } = viewport;
     const classname = `navigator ${this._index >= 0 ? 'show' : 'hidden'}`;
-    const note = notes[this._index];
-    const bound = Bound.deserialize(note.xywh);
+    const element = elements[this._index];
+    const bound = Bound.deserialize(element.xywh);
     const [left, right] = viewport.toViewCoord(bound.x, bound.y);
     const [width, height] = [bound.w * zoom, bound.h * zoom];
     const navigatorStyle = styleMap({
@@ -196,30 +252,77 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
 
     const { viewport } = this.surface;
     const { zoom } = viewport;
-    const { notes } = this;
+    const { elements, counts } = this._getElementsAndCounts();
+    let index = 0;
 
     return html`${repeat(
-      notes,
-      note => note.id,
-      (note, index) => {
-        const bound = Bound.deserialize(note.xywh);
+      elements,
+      element => element.id,
+      (element, i) => {
+        const bound = Bound.deserialize(element.xywh);
         const [left, right] = viewport.toViewCoord(bound.x, bound.y);
         const [width, height] = [bound.w * zoom, bound.h * zoom];
+        const iconWidth = 24;
         const style = styleMap({
+          width: '44px',
+          maxWidth: '44px',
+          height: iconWidth + 'px',
           position: 'absolute',
-          transform: `translate(${left + width / 2 - 26 / 2}px, ${
+          transform: `translate(${left + width / 2 - 44 / 2}px, ${
             right + height - 14
           }px)`,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         });
-        return html`
-          <div index=${index} class="edgeless-index-label" style=${style}>
-            ${index + 1}
-          </div>
-        `;
+        const components = [];
+        const count = counts[i];
+        const initGap = 24 / count - 24;
+        const positions = calculatePosition(initGap, count, iconWidth);
+        for (let j = 0; j < count; j++) {
+          index++;
+          components.push(html`
+            <div
+              style=${styleMap({
+                position: 'absolute',
+                top: positions[j][0] + 'px',
+                left: positions[j][1] + 'px',
+                transition: 'all 0.1s linear',
+              })}
+              index=${i}
+              class="edgeless-index-label"
+            >
+              ${index}
+            </div>
+          `);
+        }
+
+        function updateChildrenPosition(e: MouseEvent, positions: number[][]) {
+          if (!e.target) return;
+          const children = (<HTMLElement>e.target).children;
+          (<HTMLElement[]>Array.from(children)).forEach((c, index) => {
+            c.style.top = positions[index][0] + 'px';
+            c.style.left = positions[index][1] + 'px';
+          });
+        }
+
+        return html`<div
+          style=${style}
+          @mouseenter=${(e: MouseEvent) => {
+            const positions = calculatePosition(5, count, iconWidth);
+            updateChildrenPosition(e, positions);
+          }}
+          @mouseleave=${(e: MouseEvent) => {
+            const positions = calculatePosition(initGap, count, iconWidth);
+            updateChildrenPosition(e, positions);
+          }}
+        >
+          ${components}
+        </div>`;
       }
     )}
-    ${this._index >= 0 && this._index < notes.length
-      ? this._NavigatorComponent(notes)
+    ${this._index >= 0 && this._index < elements.length
+      ? this._NavigatorComponent(elements)
       : nothing} `;
   }
 }

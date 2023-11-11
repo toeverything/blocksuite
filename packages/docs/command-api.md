@@ -28,7 +28,25 @@ std.command
   .run();
 ```
 
-In this chain, `command3` will be executed only if `command1` or `command2` succeeds.
+In this chain, `command3` will be executed only if `command1` or `command2` succeeds. If `command1` succeeds, `command2` will not be executed.
+
+### TryAll
+
+`tryAll` is used to attempt to execute an array of commands within a chain. Unlike `try`, which stops executing the list of commands as soon as one of them succeeds, `tryAll` will execute every command in the array, regardless of the individual outcomes of each command.
+
+This means that even if one of the commands succeeds, `tryAll` will still continue to execute the remaining commands in the array. The chain will only proceed to the next command after `tryAll` if at least one command in the array succeeds. If all commands fail, the chain will be interrupted.
+
+```ts
+std.command
+  .pipe()
+  .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
+  .command4()
+  .run();
+```
+
+If `command1`, `command2`, or `command3` succeeds, `command4` will be executed. If all commands in `tryAll` fail, the chain will stop, and `command4` will not be executed.
+
+Use `tryAll` when you want to ensure that multiple strategies or operations are attempted, even if the success of one is enough to allow the chain to continue. This approach is useful when each command in the array should be given a chance to execute, regardless of the success of the others.
 
 ## Writing Commands
 

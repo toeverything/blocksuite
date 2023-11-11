@@ -9,14 +9,18 @@
   "license": "MPL-2.0",
   "type": "module",
   "devDependencies": {
+    "typedoc": "^0.25.3",
+    "typedoc-plugin-markdown": "4.0.0-next.19",
     "vite-plugin-wasm": "^3.2.2",
     "vitepress": "1.0.0-rc.25",
     "vue": "^3.3.8"
   },
   "scripts": {
-    "dev": "vitepress dev --port 5200",
-    "build": "vitepress build",
-    "preview": "vitepress preview"
+    "typedoc": "pnpm -C $(git rev-parse --show-toplevel) build:editor && typedoc --options $(git rev-parse --show-toplevel)/typedoc.json",
+    "dev": "pnpm run typedoc && vitepress dev --port 5200",
+    "build": "pnpm run typedoc && vitepress build",
+    "build:vercel": "pnpm run typedoc && vitepress build",
+    "preview": "pnpm run typedoc && vitepress preview"
   },
   "dependencies": {
     "@blocksuite/blocks": "workspace:*",
