@@ -6,7 +6,9 @@ import { CommandManager } from '../command/index.js';
 declare global {
   namespace BlockSuite {
     interface CommandData {
-      myCommandData?: string;
+      commandData1?: string;
+      commandData2?: string;
+      commandData3?: string;
     }
 
     interface Commands {
@@ -145,12 +147,12 @@ describe('CommandManager', () => {
 
     const success = commandManager
       .pipe()
-      .with({ myCommandData: 'test' })
+      .with({ commandData1: 'test' })
       .command1()
       .run();
 
     expect(command1).toHaveBeenCalledWith(
-      expect.objectContaining({ myCommandData: 'test' }),
+      expect.objectContaining({ commandData1: 'test' }),
       expect.any(Function)
     );
     expect(success).toBeTruthy();
@@ -158,10 +160,10 @@ describe('CommandManager', () => {
 
   test('passes and updates context across commands', () => {
     const command1: Command = vi.fn((ctx, next) =>
-      next({ myCommandData: '123' })
+      next({ commandData1: '123' })
     );
-    const command2: Command<'myCommandData'> = vi.fn((ctx, next) => {
-      expect(ctx.myCommandData).toBe('123');
+    const command2: Command<'commandData1'> = vi.fn((ctx, next) => {
+      expect(ctx.commandData1).toBe('123');
       next();
     });
 
@@ -259,5 +261,153 @@ describe('CommandManager', () => {
 
     expect(command1).toHaveBeenCalled();
     expect(command2).not.toHaveBeenCalled();
+  });
+
+  test('should pass context correctly in `try` when a command succeeds', () => {
+    const command1: Command = vi.fn((ctx, next) =>
+      next({ commandData1: 'fromCommand1' })
+    );
+    const command2: Command = vi.fn((ctx, next) => {});
+    const command3: Command<'commandData1'> = vi.fn((ctx, next) => {
+      expect(ctx.commandData1).toBe('fromCommand1');
+      next();
+    });
+
+    commandManager.add('command1', command1);
+    commandManager.add('command2', command2);
+    commandManager.add('command3', command3);
+
+    const success = commandManager
+      .pipe()
+      .try(cmd => [cmd.command1(), cmd.command2()])
+      .command3()
+      .run();
+
+    expect(command1).toHaveBeenCalled();
+    expect(command2).not.toHaveBeenCalled();
+    expect(command3).toHaveBeenCalled();
+    expect(success).toBeTruthy();
+  });
+
+  test('should continue with the rest of the chain if at least one command in `tryAll` succeeds', () => {
+    const command1: Command = vi.fn((ctx, next) => {});
+    const command2: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((ctx, next) => next());
+
+    commandManager.add('command1', command1);
+    commandManager.add('command2', command2);
+    commandManager.add('command3', command3);
+
+    const success = commandManager
+      .pipe()
+      .tryAll(cmd => [cmd.command1(), cmd.command2()])
+      .command3()
+      .run();
+
+    expect(command1).toHaveBeenCalled();
+    expect(command2).toHaveBeenCalled();
+    expect(command3).toHaveBeenCalled();
+    expect(success).toBeTruthy();
+  });
+
+  test('should execute all commands in `tryAll` even if one has already succeeded', () => {
+    const command1: Command = vi.fn((ctx, next) => next());
+    const command2: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((ctx, next) => next());
+
+    commandManager.add('command1', command1);
+    commandManager.add('command2', command2);
+    commandManager.add('command3', command3);
+
+    const success = commandManager
+      .pipe()
+      .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
+      .run();
+
+    expect(command1).toHaveBeenCalled();
+    expect(command2).toHaveBeenCalled();
+    expect(command3).toHaveBeenCalled();
+    expect(success).toBeTruthy();
+  });
+
+  test('should not continue with the rest of the chain if all commands in `tryAll` fail', () => {
+    const command1: Command = vi.fn((ctx, next) => {});
+    const command2: Command = vi.fn((ctx, next) => {});
+    const command3: Command = vi.fn((ctx, next) => next());
+
+    commandManager.add('command1', command1);
+    commandManager.add('command2', command2);
+    commandManager.add('command3', command3);
+
+    const success = commandManager
+      .pipe()
+      .tryAll(cmd => [cmd.command1(), cmd.command2()])
+      .command3()
+      .run();
+
+    expect(command1).toHaveBeenCalled();
+    expect(command2).toHaveBeenCalled();
+    expect(command3).not.toHaveBeenCalled();
+    expect(success).toBeFalsy();
+  });
+
+  test('should pass context correctly in `tryAll` when at least one command succeeds', () => {
+    const command1: Command = vi.fn((ctx, next) => {});
+    const command2: Command = vi.fn((ctx, next) =>
+      next({ commandData1: 'fromCommand2', commandData2: 'fromCommand2' })
+    );
+    const command3: Command = vi.fn((ctx, next) =>
+      next({ commandData2: 'fromCommand3', commandData3: 'fromCommand3' })
+    );
+    const command4: Command<'commandData1' | 'commandData2' | 'commandData3'> =
+      vi.fn((ctx, next) => {
+        expect(ctx.commandData1).toBe('fromCommand2');
+        // command3 overrides command2
+        expect(ctx.commandData2).toBe('fromCommand3');
+        expect(ctx.commandData3).toBe('fromCommand3');
+        next();
+      });
+
+    commandManager.add('command1', command1);
+    commandManager.add('command2', command2);
+    commandManager.add('command3', command3);
+    commandManager.add('command4', command4);
+
+    const success = commandManager
+      .pipe()
+      .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
+      .command4()
+      .run();
+
+    expect(command1).toHaveBeenCalled();
+    expect(command2).toHaveBeenCalled();
+    expect(command3).toHaveBeenCalled();
+    expect(command4).toHaveBeenCalled();
+    expect(success).toBeTruthy();
+  });
+
+  test('should not re-execute commands before `tryAll` after executing `tryAll`', () => {
+    const command1: Command = vi.fn((ctx, next) => next());
+    const command2: Command = vi.fn((ctx, next) => next());
+    const command3: Command = vi.fn((ctx, next) => {});
+    const command4: Command = vi.fn((ctx, next) => next());
+
+    commandManager.add('command1', command1);
+    commandManager.add('command2', command2);
+    commandManager.add('command3', command3);
+    commandManager.add('command4', command4);
+
+    const success = commandManager
+      .pipe()
+      .command1()
+      .tryAll(cmd => [cmd.command2(), cmd.command3()])
+      .command4()
+      .run();
+
+    expect(command1).toHaveBeenCalledTimes(1);
+    expect(command2).toHaveBeenCalled();
+    expect(command3).toHaveBeenCalled();
+    expect(command4).toHaveBeenCalled();
+    expect(success).toBeTruthy();
   });
 });
