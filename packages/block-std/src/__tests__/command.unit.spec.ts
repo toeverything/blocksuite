@@ -170,10 +170,11 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    commandManager.pipe().command1().command2().run();
+    const success = commandManager.pipe().command1().command2().run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
+    expect(success).toBeTruthy();
   });
 
   test('can execute an inline command', () => {
@@ -215,7 +216,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    commandManager
+    const success = commandManager
       .pipe()
       .command1()
       .try(cmd => [cmd.command2(), cmd.command3()])
@@ -224,6 +225,7 @@ describe('CommandManager', () => {
     expect(command1).toHaveBeenCalledTimes(1);
     expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
+    expect(success).toBeTruthy();
   });
 
   test('should continue with the rest of the chain if one command in `try` succeeds', () => {
