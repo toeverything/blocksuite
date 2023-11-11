@@ -30,13 +30,8 @@ export const getSelectedBlocksCommand: Command<
 
   let dirtyResult: BlockElement[] = [];
 
-  if (types.includes('text')) {
-    const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
-    assertExists(
-      textSelection,
-      '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
-    );
-
+  const textSelection = ctx.textSelection ?? ctx.currentTextSelection;
+  if (types.includes('text') && textSelection) {
     const rangeManager = root.rangeManager;
     assertExists(rangeManager);
     const range = rangeManager.textSelectionToRange(textSelection);
@@ -52,13 +47,8 @@ export const getSelectedBlocksCommand: Command<
     dirtyResult.push(...selectedBlockElements);
   }
 
-  if (types.includes('block')) {
-    const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
-    assertExists(
-      blockSelections,
-      '`blockSelections` is required, you need to pass it in args or use `getBlockSelections` command before adding this command to the pipeline.'
-    );
-
+  const blockSelections = ctx.blockSelections ?? ctx.currentBlockSelections;
+  if (types.includes('block') && blockSelections) {
     const viewStore = root.view;
     const selectedBlockElements = blockSelections.flatMap(selection => {
       const el = viewStore.viewFromPath('block', selection.path);
@@ -67,13 +57,8 @@ export const getSelectedBlocksCommand: Command<
     dirtyResult.push(...selectedBlockElements);
   }
 
-  if (types.includes('image')) {
-    const imageSelections = ctx.imageSelections ?? ctx.currentImageSelections;
-    assertExists(
-      imageSelections,
-      '`imageSelections` is required, you need to pass it in args or use `getImageSelections` command before adding this command to the pipeline.'
-    );
-
+  const imageSelections = ctx.imageSelections ?? ctx.currentImageSelections;
+  if (types.includes('image') && imageSelections) {
     const viewStore = root.view;
     const selectedBlockElements = imageSelections.flatMap(selection => {
       const el = viewStore.viewFromPath('block', selection.path);

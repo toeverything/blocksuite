@@ -372,13 +372,12 @@ export function bindHotKey(blockElement: BlockElement) {
             .pipe()
             .withRoot()
             .tryAll(chain => [
-              chain.getTextSelection().getSelectedBlocks({
-                types: ['text'],
-              }),
-              chain.getBlockSelections().getSelectedBlocks({
-                types: ['block'],
-              }),
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
             ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
             .inline((ctx, next) => {
               const { selectedBlocks } = ctx;
               assertExists(selectedBlocks);

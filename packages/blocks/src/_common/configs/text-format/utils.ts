@@ -1,3 +1,4 @@
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
 import {
   VIRGO_ROOT_ATTR,
@@ -45,85 +46,105 @@ function getCombinedFormatFromVEditors(
 }
 
 function getCombinedFormat(root: BlockSuiteRoot): AffineTextAttributes {
-  const textSelection = root.selection.find('text');
-  const blockSelections = root.selection.filter('block');
+  let result: AffineTextAttributes = {};
 
-  // text selection, corresponding to `formatText` command
-  if (textSelection) {
-    const selectedElements = getSelectedContentBlockElements(root, [
-      'text',
-    ]).filter(el =>
-      FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour)
-    );
+  root.std.command
+    .pipe()
+    .withRoot()
+    .try(chain => [
+      // text selection, corresponding to `formatText` command
+      chain
+        .getTextSelection()
+        .getSelectedBlocks({
+          types: ['text'],
+          filter: el =>
+            FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+        })
+        .inline((ctx, next) => {
+          const { selectedBlocks } = ctx;
+          assertExists(selectedBlocks);
 
-    const selectedVEditors = selectedElements.flatMap(el => {
-      const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
-        `[${VIRGO_ROOT_ATTR}]`
-      );
-      if (vRoot && vRoot.virgoEditor.getVRange()) {
-        return vRoot.virgoEditor;
-      }
-      return [];
-    });
+          const selectedVEditors = selectedBlocks.flatMap(el => {
+            const vRoot = el.querySelector<
+              VirgoRootElement<AffineTextAttributes>
+            >(`[${VIRGO_ROOT_ATTR}]`);
+            if (vRoot && vRoot.virgoEditor.getVRange()) {
+              return vRoot.virgoEditor;
+            }
+            return [];
+          });
 
-    return getCombinedFormatFromVEditors(
-      selectedVEditors.map(e => [e, e.getVRange()])
-    );
-  }
+          result = getCombinedFormatFromVEditors(
+            selectedVEditors.map(e => [e, e.getVRange()])
+          );
 
-  // block selection, corresponding to `formatBlock` command
-  if (blockSelections.length > 0) {
-    const selectedElements = getSelectedContentBlockElements(root, [
-      'block',
-    ]).filter(el =>
-      FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour)
-    );
+          next();
+        }),
+      // block selection, corresponding to `formatBlock` command
+      chain
+        .getBlockSelections()
+        .getSelectedBlocks({
+          types: ['block'],
+          filter: el =>
+            FORMAT_BLOCK_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+        })
+        .inline((ctx, next) => {
+          const { selectedBlocks } = ctx;
+          assertExists(selectedBlocks);
 
-    const selectedVEditors = selectedElements.flatMap(el => {
-      const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
-        `[${VIRGO_ROOT_ATTR}]`
-      );
-      if (vRoot) {
-        return vRoot.virgoEditor;
-      }
-      return [];
-    });
+          const selectedVEditors = selectedBlocks.flatMap(el => {
+            const vRoot = el.querySelector<
+              VirgoRootElement<AffineTextAttributes>
+            >(`[${VIRGO_ROOT_ATTR}]`);
+            if (vRoot) {
+              return vRoot.virgoEditor;
+            }
+            return [];
+          });
 
-    return getCombinedFormatFromVEditors(
-      selectedVEditors.map(e => [
-        e,
-        {
-          index: 0,
-          length: e.yTextLength,
-        },
-      ])
-    );
-  }
+          result = getCombinedFormatFromVEditors(
+            selectedVEditors.map(e => [
+              e,
+              {
+                index: 0,
+                length: e.yTextLength,
+              },
+            ])
+          );
 
-  // native selection, corresponding to `formatNative` command
-  const selectedVEditors = Array.from<VirgoRootElement>(
-    root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
-  )
-    .filter(el => {
-      const selection = document.getSelection();
-      if (!selection || selection.rangeCount === 0) return false;
-      const range = selection.getRangeAt(0);
+          next();
+        }),
+      // native selection, corresponding to `formatNative` command
+      chain.inline(() => {
+        const selectedVEditors = Array.from<VirgoRootElement>(
+          root.querySelectorAll(`[${VIRGO_ROOT_ATTR}]`)
+        )
+          .filter(el => {
+            const selection = document.getSelection();
+            if (!selection || selection.rangeCount === 0) return false;
+            const range = selection.getRangeAt(0);
 
-      return range.intersectsNode(el);
-    })
-    .filter(el => {
-      const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
-      if (blockElement) {
-        return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
-          blockElement.model.flavour as Flavour
+            return range.intersectsNode(el);
+          })
+          .filter(el => {
+            const blockElement = el.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
+            if (blockElement) {
+              return FORMAT_NATIVE_SUPPORT_FLAVOURS.includes(
+                blockElement.model.flavour as Flavour
+              );
+            }
+            return false;
+          })
+          .map(el => el.virgoEditor);
+
+        result = getCombinedFormatFromVEditors(
+          selectedVEditors.map(e => [e, e.getVRange()])
         );
-      }
-      return false;
-    })
-    .map(el => el.virgoEditor);
-  return getCombinedFormatFromVEditors(
-    selectedVEditors.map(e => [e, e.getVRange()])
-  );
+      }),
+    ])
+    .run();
+
+  return result;
 }
 
 export function handleCommonStyle(
