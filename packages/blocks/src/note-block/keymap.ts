@@ -1,5 +1,4 @@
 import type { BlockSelection } from '@blocksuite/block-std';
-import { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
@@ -8,7 +7,6 @@ import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { getBlockElementByModel } from '../_common/utils/query.js';
 import {
-  getSelectedContentBlockElements,
   onModelElementUpdated,
   updateBlockElementType,
 } from '../page-block/utils/index.js';
@@ -370,38 +368,49 @@ export function bindHotKey(blockElement: BlockElement) {
         [key]: ctx => {
           ctx.get('defaultState').event.preventDefault();
 
-          const selected = getSelectedContentBlockElements(root, [
-            'text',
-            'block',
-          ]);
+          return root.std.command
+            .pipe()
+            .withRoot()
+            .tryAll(chain => [
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
+            ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
+            .inline((ctx, next) => {
+              const { selectedBlocks } = ctx;
+              assertExists(selectedBlocks);
 
-          const newModels = updateBlockElementType(
-            selected,
-            item.flavour,
-            item.type
-          );
+              const newModels = updateBlockElementType(
+                selectedBlocks,
+                item.flavour,
+                item.type
+              );
 
-          if (item.flavour !== 'affine:code') {
-            return;
-          }
+              if (item.flavour !== 'affine:code') {
+                return;
+              }
 
-          const [codeModel] = newModels;
-          onModelElementUpdated(codeModel, () => {
-            const codeElement = getBlockElementByModel(codeModel);
-            assertExists(codeElement);
-            selectionManager.setGroup('note', [
-              new TextSelection({
-                from: {
-                  path: codeElement.path,
-                  index: 0,
-                  length: codeModel.text?.length ?? 0,
-                },
-                to: null,
-              }),
-            ]);
-          });
+              const [codeModel] = newModels;
+              onModelElementUpdated(codeModel, () => {
+                const codeElement = getBlockElementByModel(codeModel);
+                assertExists(codeElement);
+                selectionManager.setGroup('note', [
+                  selectionManager.getInstance('text', {
+                    from: {
+                      path: codeElement.path,
+                      index: 0,
+                      length: codeModel.text?.length ?? 0,
+                    },
+                    to: null,
+                  }),
+                ]);
+              });
 
-          return true;
+              next();
+            })
+            .run();
         },
       });
     });

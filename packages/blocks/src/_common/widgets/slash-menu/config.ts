@@ -41,10 +41,7 @@ import type { ImageBlockProps } from '../../../image-block/image-model.js';
 import type { SurfaceBlockModel } from '../../../models.js';
 import type { NoteBlockModel } from '../../../note-block/index.js';
 import { copyBlock } from '../../../page-block/doc/utils.js';
-import {
-  getSelectedContentBlockElements,
-  onModelTextUpdated,
-} from '../../../page-block/utils/index.js';
+import { onModelTextUpdated } from '../../../page-block/utils/index.js';
 import { updateBlockElementType } from '../../../page-block/utils/operations/element/block-level.js';
 import type { ParagraphBlockModel } from '../../../paragraph-block/index.js';
 import { PhasorElementType } from '../../../surface-block/index.js';
@@ -82,29 +79,42 @@ export const menuGroups: SlashMenuOptions['menus'] = [
             return true;
           },
           action: ({ pageElement }) => {
-            const selectedBlockElements = getSelectedContentBlockElements(
-              pageElement.root,
-              ['text', 'block']
-            );
-            const newModels = updateBlockElementType(
-              selectedBlockElements,
-              flavour,
-              type
-            );
-            // Reset selection if the target is code block
-            if (flavour === 'affine:code') {
-              if (newModels.length !== 1) {
-                throw new Error(
-                  "Failed to reset selection! New model length isn't 1"
+            pageElement.root.std.command
+              .pipe()
+              .withRoot()
+              .tryAll(chain => [
+                chain.getTextSelection(),
+                chain.getBlockSelections(),
+              ])
+              .getSelectedBlocks({
+                types: ['text', 'block'],
+              })
+              .inline(ctx => {
+                const { selectedBlocks } = ctx;
+                assertExists(selectedBlocks);
+
+                const newModels = updateBlockElementType(
+                  selectedBlocks,
+                  flavour,
+                  type
                 );
-              }
-              const codeModel = newModels[0];
-              onModelTextUpdated(codeModel, richText => {
-                const vEditor = richText.vEditor;
-                assertExists(vEditor);
-                vEditor.focusEnd();
-              });
-            }
+
+                // Reset selection if the target is code block
+                if (flavour === 'affine:code') {
+                  if (newModels.length !== 1) {
+                    throw new Error(
+                      "Failed to reset selection! New model length isn't 1"
+                    );
+                  }
+                  const codeModel = newModels[0];
+                  onModelTextUpdated(codeModel, richText => {
+                    const vEditor = richText.vEditor;
+                    assertExists(vEditor);
+                    vEditor.focusEnd();
+                  });
+                }
+              })
+              .run();
           },
         })),
     ],
@@ -150,11 +160,23 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           return true;
         },
         action: ({ pageElement }) => {
-          const selectedBlockElements = getSelectedContentBlockElements(
-            pageElement.root,
-            ['text', 'block']
-          );
-          updateBlockElementType(selectedBlockElements, flavour, type);
+          pageElement.root.std.command
+            .pipe()
+            .withRoot()
+            .tryAll(chain => [
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
+            ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
+            .inline(ctx => {
+              const { selectedBlocks } = ctx;
+              assertExists(selectedBlocks);
+
+              updateBlockElementType(selectedBlocks, flavour, type);
+            })
+            .run();
         },
       })),
   },
