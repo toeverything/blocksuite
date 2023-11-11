@@ -2,7 +2,7 @@
 
 Selection is a very common concept in structural editors. It's used to represent the current cursor position or the current selected blocks.
 
-In BlockSuite, we use a data driven approach to represent the selection. It also follows the [unidirectional data flow](./unidirectional-data-flow), which means the selection is always derived from the data.
+In BlockSuite, we use a data driven approach to represent the selection. It also follows the [unidirectional data flow](./images/unidirectional-data-flow.png), which means the selection is always derived from the data.
 
 ## Selection Model
 
