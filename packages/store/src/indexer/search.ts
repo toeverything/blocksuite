@@ -58,6 +58,7 @@ export type IndexMeta = Readonly<{
 export class SearchIndexer {
   private readonly _doc: BlockSuiteDoc;
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
+  private _reIndexMap: Map<string, IndexMeta> | undefined;
 
   constructor(
     doc: BlockSuiteDoc,
@@ -76,6 +77,8 @@ export class SearchIndexer {
       tokenize: 'forward',
       context: true,
     });
+    this._reIndexMap = new Map();
+    this._reIndex();
 
     // fixme(Mirone): use better way to listen to page changes
     doc.spaces.observe(event => {
@@ -86,6 +89,35 @@ export class SearchIndexer {
         }
       });
     });
+
+    if (
+      typeof window !== 'undefined' &&
+      typeof window.addEventListener === 'function'
+    ) {
+      window.addEventListener('beforeunload', () => {
+        this._reIndexMap = undefined;
+      });
+    }
+    if (typeof process !== 'undefined') {
+      process.on('exit', () => {
+        this._reIndexMap = undefined;
+      });
+    }
+  }
+
+  private _reIndex() {
+    if (!this._reIndexMap) return;
+    for (const id of this._reIndexMap.keys()) {
+      const meta = this._reIndexMap.get(id);
+      if (meta) {
+        this._reIndexMap.delete(id);
+        this._indexer.add(id, meta);
+      }
+    }
+    setTimeout(() => {
+      if (!this._reIndexMap) return;
+      requestIdleCallback(this._reIndex.bind(this), { timeout: 1000 });
+    }, 200);
   }
 
   search(query: QueryContent) {
@@ -155,17 +187,17 @@ export class SearchIndexer {
             block.get('prop:title') || block.get('prop:text')
           );
           if (content) {
-            this._indexer.add(id, {
+            this._reIndexMap?.set(id, {
               content,
               space: page,
               tags: [page],
             });
           }
         }
-
         break;
       }
       case 'delete': {
+        this._reIndexMap?.delete(id);
         this._indexer.remove(id);
         break;
       }
