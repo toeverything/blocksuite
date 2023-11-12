@@ -100,16 +100,17 @@ export class BrushToolController extends EdgelessToolController<BrushTool> {
     this._lastPoint = [pointX, pointY];
     this._draggingPathPoints = points;
 
-    this._surface.updateElement<PhasorElementType.BRUSH>(
-      this._draggingElementId,
-      {
-        points,
-        lineWidth,
-      }
-    );
+    this._edgeless.updateElementInLocal(this._draggingElementId, {
+      points,
+      lineWidth,
+    });
   }
 
   onContainerDragEnd() {
+    if (this._draggingElementId) {
+      this._edgeless.applyLocalRecord([this._draggingElementId]);
+    }
+
     this._draggingElementId = null;
     this._draggingPathPoints = null;
     this._lastPoint = null;

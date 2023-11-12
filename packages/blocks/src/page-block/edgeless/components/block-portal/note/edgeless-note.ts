@@ -16,6 +16,7 @@ import {
 } from '../../../../../note-block/note-model.js';
 import { deserializeXYWH } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 @customElement('edgeless-note-mask')
 export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
@@ -61,45 +62,12 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 }
 
 @customElement('edgeless-block-portal-note')
-export class EdgelessBlockPortalNote extends WithDisposable(ShadowlessElement) {
-  @property({ attribute: false })
-  index!: number;
-
-  @property({ attribute: false })
-  model!: NoteBlockModel;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
-
+export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> {
   @state()
   private _editing = false;
 
   @state()
   private _transition = 'none';
-
-  override connectedCallback(): void {
-    super.connectedCallback();
-
-    this._disposables.add(
-      this.model.propsUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
-      this.model.childrenUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-
-    this._disposables.add(
-      this.surface.page.slots.yBlockUpdated.on(e => {
-        if (e.id === this.model.id) {
-          this.requestUpdate();
-        }
-      })
-    );
-  }
 
   override firstUpdated() {
     const selection = this.surface.edgeless.selectionManager;

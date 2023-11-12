@@ -199,11 +199,11 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 0, 0);
+  await assertRichTextVRange(page, 1, 4, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 0, 0);
+  await assertRichTextVRange(page, 0, 4, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);

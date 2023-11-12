@@ -1,15 +1,13 @@
-import '../component-toolbar/component-toolbar.js';
 import '../connector/connector-handle.js';
 import '../auto-complete/edgeless-auto-complete.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pick } from '../../../../_common/utils/iterable.js';
-import { clamp } from '../../../../_common/utils/math.js';
 import type {
   EdgelessElement,
   IPoint,
@@ -33,7 +31,6 @@ import {
 } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { edgelessElementsBound } from '../../utils/bound-utils.js';
 import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
 import {
   getSelectableBounds,
@@ -43,7 +40,6 @@ import {
   isNoteBlock,
   isPhasorElement,
 } from '../../utils/query.js';
-import type { EdgelessComponentToolbar } from '../component-toolbar/component-toolbar.js';
 import { HandleDirection } from '../resize/resize-handles.js';
 import { ResizeHandles, type ResizeMode } from '../resize/resize-handles.js';
 import { HandleResizeManager } from '../resize/resize-manager.js';
@@ -296,12 +292,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
-  @query('edgeless-component-toolbar')
-  private _componentToolbar!: EdgelessComponentToolbar;
-
-  @query('.affine-edgeless-selected-rect')
-  private _selectedRectEl!: HTMLDivElement;
-
   @state()
   private _selectedRect: SelectedRect = {
     width: 0,
@@ -314,17 +304,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     rotate: 0,
   };
 
-  @state()
-  private _toolbarVisible = false;
+  @property({ attribute: false })
+  toolbarVisible = false;
 
-  @state()
-  private _toolbarPosition: {
-    x: number;
-    y: number;
-  } = {
-    x: 0,
-    y: 0,
-  };
+  @property({ attribute: false })
+  setToolbarVisible!: (visible: boolean) => void;
 
   private _resizeManager: HandleResizeManager;
   private _cursorRotate = 0;
@@ -404,7 +388,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   }
 
   private _onDragStart = () => {
-    this._toolbarVisible = false;
+    this.setToolbarVisible(false);
     this._updateResizeManagerState(false);
   };
 
@@ -506,7 +490,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
 
   private _onDragEnd = () => {
     this._updateCursor(false);
-    this._toolbarVisible = true;
+    this.setToolbarVisible(true);
   };
 
   private _updateCursor = (
@@ -562,53 +546,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     }
     this.slots.cursorUpdated.emit(cursor);
   };
-
-  private async _updateToolbarPosition() {
-    if (
-      !this._toolbarVisible ||
-      !this._shouldRenderSelection() ||
-      this.page.readonly
-    )
-      return;
-
-    if (!this._selectedRectEl || !this._componentToolbar) {
-      await this.updateComplete;
-    }
-
-    if (this._componentToolbar.isUpdatePending)
-      await this._componentToolbar.updateComplete;
-
-    const componentToolbar = this._componentToolbar;
-    const bound = edgelessElementsBound(this.selection.elements);
-
-    const { viewport } = this.edgeless.surface;
-    const { width, height } = viewport;
-    const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-    const [right, bottom] = viewport.toViewCoord(bound.maxX, bound.maxY);
-    const rect = componentToolbar.getBoundingClientRect();
-    if (x >= width || right <= 0 || y >= height || bottom <= 0) {
-      this._toolbarPosition = {
-        x: right <= 0 ? x - rect.width : x,
-        y: y >= height ? bottom : y,
-      };
-      return;
-    }
-
-    let offset = 34;
-    if (this.selection.elements.find(ele => isFrameBlock(ele))) {
-      offset += 10;
-    }
-    let top = y - rect.height - offset;
-    top < 0 && (top = y + bound.h * viewport.zoom + offset);
-
-    const left = clamp(x, 10, width - rect.width - 10);
-    top = clamp(top, 10, height - rect.height - 100);
-
-    this._toolbarPosition = {
-      x: left,
-      y: top,
-    };
-  }
 
   private _updateSelectedRect() {
     const { surface, zoom, selection } = this;
@@ -677,12 +614,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   private _updateOnSelectionChange = () => {
     this._updateSelectedRect();
     this._updateResizeManagerState(true);
-
-    if (this.selection.editing) {
-      this._toolbarVisible = false;
-    } else {
-      this._toolbarVisible = true;
-    }
   };
 
   private _updateOnElementChange = (
@@ -717,6 +648,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       )
     );
 
+    _disposables.add(
+      edgeless.slots.elementSizeUpdated.on(this._updateOnElementChange)
+    );
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
     _disposables.add(
@@ -727,17 +661,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => this.requestUpdate())
     );
-  }
-
-  protected override updated(
-    _changedProperties: Map<PropertyKey, unknown>
-  ): void {
-    if (
-      _changedProperties.has('_selectedRect') ||
-      (_changedProperties.has('_toolbarVisible') && this._toolbarVisible)
-    ) {
-      this._updateToolbarPosition();
-    }
   }
 
   private _canAutoComplete() {
@@ -760,7 +683,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       resizeMode,
       _resizeManager,
       _selectedRect,
-      _toolbarPosition,
       _updateCursor,
     } = this;
 
@@ -820,16 +742,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       >
         ${resizeHandles} ${connectorHandle}
       </div>
-      ${this._toolbarVisible && !page.readonly
-        ? html`<edgeless-component-toolbar
-            style=${styleMap({
-              left: `${_toolbarPosition.x}px`,
-              top: `${_toolbarPosition.y}px`,
-            })}
-            .edgeless=${edgeless}
-          >
-          </edgeless-component-toolbar>`
-        : nothing}
     `;
   }
 }

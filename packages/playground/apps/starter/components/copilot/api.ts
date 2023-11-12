@@ -18,28 +18,84 @@ async function sendRequest(inputData: unknown) {
   return response;
 }
 
-export async function sendRefineRequest(lines: string[]) {
+export async function sendRefineRequest(text: string) {
   const payload = {
     action: 'refine',
-    input: lines,
+    input: text,
   };
   const response = await sendRequest(payload);
   return await response.text();
 }
 
-export async function sendTranslateRequest(lines: string[]) {
+export async function sendTranslateRequest(text: string, language: string) {
   const payload = {
     action: 'translate',
-    input: lines,
+    input: text,
+    language,
   };
   const response = await sendRequest(payload);
   return await response.text();
 }
 
-export async function sendSummaryRequest(lines: string[]) {
+export async function sendSummaryRequest(text: string) {
   const payload = {
     action: 'summary',
-    input: lines,
+    input: text,
+  };
+  const response = await sendRequest(payload);
+  return await response.text();
+}
+
+export async function sendImproveWritingRequest(text: string) {
+  const payload = {
+    action: 'improveWriting',
+    input: text,
+  };
+  const response = await sendRequest(payload);
+  return await response.text();
+}
+
+export async function sendFixSpellingRequest(text: string) {
+  const payload = {
+    action: 'fixSpelling',
+    input: text,
+  };
+  const response = await sendRequest(payload);
+  return await response.text();
+}
+
+export async function sendSimplifyLanguageRequest(text: string) {
+  const payload = {
+    action: 'simplifyLanguage',
+    input: text,
+  };
+  const response = await sendRequest(payload);
+  return await response.text();
+}
+
+export async function sendMakeLongerRequest(text: string) {
+  const payload = {
+    action: 'summary',
+    input: text,
+  };
+  const response = await sendRequest(payload);
+  return await response.text();
+}
+
+export async function sendMakeShorterRequest(text: string) {
+  const payload = {
+    action: 'summary',
+    input: text,
+  };
+  const response = await sendRequest(payload);
+  return await response.text();
+}
+
+export async function sendChangeToneRequest(text: string, tone: string) {
+  const payload = {
+    action: 'changeTone',
+    input: text,
+    tone,
   };
   const response = await sendRequest(payload);
   return await response.text();

@@ -40,7 +40,7 @@ const embedConfig: EmbedConfig[] = [
   },
   {
     // See also https://publish.twitter.com/
-    name: 'X(Twitter) ',
+    name: 'X(Twitter)',
     format: url => {
       if (!['www.twitter.com', 'twitter.com', 'x.com'].includes(url.hostname))
         return null;

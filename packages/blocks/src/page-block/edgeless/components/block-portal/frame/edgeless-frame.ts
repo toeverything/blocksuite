@@ -8,33 +8,16 @@ import type { FrameBlockModel } from '../../../../../frame-block/index.js';
 import { EdgelessBlockType } from '../../../../../surface-block/edgeless-types.js';
 import { Bound } from '../../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../../surface-block/surface-block.js';
+import type { EdgelessPageBlockComponent } from '../../../edgeless-page-block.js';
+import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 
 const { FRAME } = EdgelessBlockType;
 
 @customElement('edgeless-block-portal-frame')
-class EdgelessBlockPortalFrame extends WithDisposable(ShadowlessElement) {
-  @property({ attribute: false })
-  frame!: FrameBlockModel;
-
-  @property({ attribute: false })
-  index!: number;
-
-  @property({ attribute: false })
-  surface!: SurfaceBlockComponent;
-
-  override firstUpdated() {
-    this._disposables.add(
-      this.surface.page.slots.yBlockUpdated.on(e => {
-        if (e.id === this.frame.id) {
-          this.requestUpdate();
-        }
-      })
-    );
-  }
-
-  protected override render() {
-    const { frame, index } = this;
-    const { xywh } = frame;
+class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
+  override render() {
+    const { model, index } = this;
+    const { xywh } = model;
     const bound = Bound.deserialize(xywh);
     const style = styleMap({
       position: 'absolute',
@@ -43,7 +26,7 @@ class EdgelessBlockPortalFrame extends WithDisposable(ShadowlessElement) {
     });
 
     return html`
-      <div style=${style}>${this.surface.root.renderModel(frame)}</div>
+      <div style=${style}>${this.surface.root.renderModel(model)}</div>
     `;
   }
 }
@@ -52,6 +35,12 @@ class EdgelessBlockPortalFrame extends WithDisposable(ShadowlessElement) {
 export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })
   surface!: SurfaceBlockComponent;
+
+  @property({ attribute: false })
+  edgeless!: EdgelessPageBlockComponent;
+
+  @property({ attribute: false })
+  frames!: FrameBlockModel[];
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -81,16 +70,16 @@ export class EdgelessFramesContainer extends WithDisposable(ShadowlessElement) {
   }
 
   protected override render() {
-    const sortedFrames = this.surface.getSortedBlocks(FRAME);
     return html`
       ${repeat(
-        sortedFrames,
+        this.frames,
         frame => frame.id,
         (frame, index) =>
           html`<edgeless-block-portal-frame
-            .frame=${frame}
             .index=${index}
+            .model=${frame}
             .surface=${this.surface}
+            .edgeless=${this.edgeless}
           >
           </edgeless-block-portal-frame> `
       )}

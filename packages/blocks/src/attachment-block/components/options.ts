@@ -23,11 +23,13 @@ export function AttachmentOptionsTemplate({
   anchor,
   model,
   showCaption,
+  downloadAttachment,
   abortController,
   ref: refOrCallback = createRef<HTMLDivElement>(),
 }: {
   anchor: HTMLElement;
   model: AttachmentBlockModel;
+  downloadAttachment: (model: AttachmentBlockModel) => void;
   showCaption: () => void;
   abortController: AbortController;
   ref?: RefOrCallback;
@@ -133,7 +135,7 @@ export function AttachmentOptionsTemplate({
           assertExists(containerEl);
           createLitPortal({
             container: containerEl,
-            template: MoreMenu({ model, abortController }),
+            template: MoreMenu({ model, abortController, downloadAttachment }),
             abortController: moreMenuAbortController,
             computePosition: {
               referenceElement: containerEl,

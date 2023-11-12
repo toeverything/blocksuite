@@ -45,6 +45,7 @@ import {
   intersects,
   type IVec,
   type PhasorElement,
+  type PhasorElementLocalRecordValues,
   serializeXYWH,
   Vec,
   ZOOM_MIN,
@@ -68,6 +69,7 @@ import {
 import { EdgelessClipboardController } from './controllers/clipboard.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessPageService } from './edgeless-page-service.js';
+import { LocalRecordManager } from './services/local-record-manager.js';
 import { EdgelessSelectionManager } from './services/selection-manager.js';
 import { EdgelessToolsManager } from './services/tools-manager.js';
 import {
@@ -219,6 +221,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
   selectionManager!: EdgelessSelectionManager;
   tools!: EdgelessToolsManager;
+  localRecord!: LocalRecordManager<PhasorElementLocalRecordValues>;
 
   get dispatcher() {
     return this.service?.uiEventDispatcher;
@@ -532,6 +535,40 @@ export class EdgelessPageBlockComponent extends BlockElement<
     return getCommonBound(bounds);
   }
 
+  updateElementInLocal(
+    elementId: string,
+    record: Partial<PhasorElementLocalRecordValues>
+  ) {
+    this.localRecord.update(elementId, record);
+  }
+
+  applyLocalRecord(elements: string[]) {
+    if (!this.surface) return;
+
+    const elementsSet = new Set(elements);
+
+    this.localRecord.each((id, record) => {
+      if (!elementsSet.has(id) || !this.surface.pickById(id)) return;
+
+      const element = this.surface.pickById(id) as EdgelessElement;
+      const updateProps: Record<string, unknown> = {};
+      let flag = false;
+
+      Object.keys(record).forEach(key => {
+        if (key in element) {
+          flag = true;
+          updateProps[key] = record[key as keyof typeof record];
+          delete record[key as keyof typeof record];
+        }
+      });
+
+      if (!flag) return;
+
+      this.localRecord.update(id, record);
+      this.surface.updateElement(id, updateProps);
+    });
+  }
+
   override update(changedProperties: Map<string, unknown>) {
     if (changedProperties.has('edgelessTool')) {
       this.tools.edgelessTool = this.edgelessTool;
@@ -620,26 +657,25 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this._initFontloader();
     this._initReadonlyListener();
     this._initRemoteCursor();
+
     if (!this.clipboardController._enabled) {
       this.clipboard.init(this.page);
     }
 
-    requestAnimationFrame(() => {
-      if (!this._tryLoadViewportLocalRecord()) {
-        this._initViewport();
-      }
+    this._initViewport();
 
+    requestAnimationFrame(() => {
       this._handleToolbarFlag();
       this.requestUpdate();
     });
   }
 
-  private _tryLoadViewportLocalRecord() {
+  private _getSavedViewport() {
     const { viewport } = this.surface;
     const viewportData = getViewportFromSession(this.page.id);
 
     if (!viewportData) {
-      return false;
+      return null;
     }
 
     if ('referenceId' in viewportData) {
@@ -652,15 +688,19 @@ export class EdgelessPageBlockComponent extends BlockElement<
           Bound.deserialize(block.xywh),
           viewportData.padding
         );
-        return true;
+        return { xywh: block.xywh, padding: viewportData.padding };
       }
+
+      return null;
     } else {
       const { zoom, x, y } = viewportData;
-      viewport.setViewport(zoom, [x, y]);
-      return true;
-    }
 
-    return false;
+      return {
+        zoom,
+        centerX: x,
+        centerY: y,
+      };
+    }
   }
 
   public getFitToScreenData(
@@ -701,9 +741,37 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initViewport() {
-    const { zoom, centerX, centerY } = this.getFitToScreenData();
-    const { viewport } = this.surface;
-    viewport.setViewport(zoom, [centerX, centerY]);
+    const run = () => {
+      const viewport = this._getSavedViewport() ?? this.getFitToScreenData();
+
+      if ('xywh' in viewport) {
+        const { xywh, padding } = viewport;
+        const bound = Bound.deserialize(xywh);
+        this.surface.viewport.setViewportByBound(bound, padding);
+      } else {
+        const { zoom, centerX, centerY } = viewport;
+        this.surface.viewport.setViewport(zoom, [centerX, centerY]);
+      }
+    };
+
+    if (this.surface.isUpdatePending) {
+      this.surface.updateComplete.then(run);
+    } else {
+      run();
+    }
+  }
+
+  private _initLocalRecordManager() {
+    this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
+    this.localRecord.slots.updated.on(({ id, data }) => {
+      if (this.page.getBlockById(id) && 'xywh' in data.new) {
+        if ('xywh' in data.new) this.slots.elementSizeUpdated.emit(id);
+      }
+    });
+
+    this.disposables.add(() => {
+      this.localRecord.destroy();
+    });
   }
 
   override connectedCallback() {
@@ -732,6 +800,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
     this.mouseRoot = this.parentElement!;
     this.selectionManager = new EdgelessSelectionManager(this);
     this.tools = new EdgelessToolsManager(this, this.root.event);
+    this._initLocalRecordManager();
   }
 
   override disconnectedCallback() {

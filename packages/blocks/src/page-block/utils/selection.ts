@@ -1,7 +1,7 @@
 import type { TextSelection } from '@blocksuite/block-std';
 import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
-import type { BlockElement, BlockSuiteRoot } from '@blocksuite/lit';
+import type { BlockSuiteRoot } from '@blocksuite/lit';
 import { type BaseBlockModel } from '@blocksuite/store';
 
 import type { AffineTextAttributes } from '../../_common/components/rich-text/virgo/types.js';
@@ -12,93 +12,24 @@ export function getSelectedContentModels(
   root: BlockSuiteRoot,
   types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
 ): BaseBlockModel[] {
-  const selectedElements = getSelectedContentBlockElements(root, types);
-  const selectedModels = selectedElements.map(element => element.model);
-  return selectedModels;
-}
-
-/**
- * use `getSelectedBlockElementsByRange` with "flat" mode when in text selection
- */
-export function getSelectedContentBlockElements(
-  root: BlockSuiteRoot,
-  types: Extract<BlockSuite.SelectionType, 'block' | 'text' | 'image'>[]
-): BlockElement[] {
-  const { rangeManager } = root;
-  const selectionManager = root.selection;
-  const selections = selectionManager.value;
-
-  if (selections.length === 0) {
-    return [];
-  }
-
-  const dirtyResult: BlockElement[] = [];
-
-  if (types.includes('text') && selectionManager.find('text')) {
-    assertExists(rangeManager);
-    const range = rangeManager.value;
-    if (!range) {
-      return [];
-    }
-    const selectedBlockElements = rangeManager.getSelectedBlockElementsByRange(
-      range,
-      {
-        match: (el: BlockElement) => el.model.role === 'content',
-        mode: 'flat',
-      }
-    );
-    dirtyResult.push(...selectedBlockElements);
-  }
-
-  if (types.includes('block') && selectionManager.find('block')) {
-    const viewStore = root.view;
-    const blockSelections = selectionManager.filter('block');
-    dirtyResult.push(
-      ...blockSelections.flatMap(selection => {
-        const el = viewStore.viewFromPath('block', selection.path);
-        return el ?? [];
-      })
-    );
-  }
-
-  if (types.includes('image')) {
-    const viewStore = root.view;
-    const imageSelections = selectionManager.find('image');
-    const imageEle = imageSelections
-      ? viewStore.viewFromPath('block', imageSelections.path)
-      : null;
-    if (imageEle) {
-      dirtyResult.push(imageEle);
-    }
-  }
-
-  // remove duplicate elements
-  const result: BlockElement[] = dirtyResult
-    .filter((el, index) => dirtyResult.indexOf(el) === index)
-    // sort by document position
-    .sort((a, b) => {
-      if (a === b) {
-        return 0;
-      }
-
-      const position = a.compareDocumentPosition(b);
-      if (
-        position & Node.DOCUMENT_POSITION_FOLLOWING ||
-        position & Node.DOCUMENT_POSITION_CONTAINED_BY
-      ) {
-        return -1;
-      }
-
-      if (
-        position & Node.DOCUMENT_POSITION_PRECEDING ||
-        position & Node.DOCUMENT_POSITION_CONTAINS
-      ) {
-        return 1;
-      }
-
-      return 0;
-    });
-
+  const result: BaseBlockModel[] = [];
+  root.std.command
+    .pipe()
+    .withRoot()
+    .tryAll(chain => [
+      chain.getTextSelection(),
+      chain.getBlockSelections(),
+      chain.getImageSelections(),
+    ])
+    .getSelectedBlocks({
+      types,
+    })
+    .inline(ctx => {
+      const { selectedBlocks } = ctx;
+      assertExists(selectedBlocks);
+      result.push(...selectedBlocks.map(el => el.model));
+    })
+    .run();
   return result;
 }
 

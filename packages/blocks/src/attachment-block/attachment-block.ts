@@ -5,6 +5,7 @@ import { customElement, query, state } from 'lit/decorators.js';
 import { ref } from 'lit/directives/ref.js';
 
 import { HoverController } from '../_common/components/index.js';
+import { toast } from '../_common/components/toast.js';
 import { AttachmentIcon16 } from '../_common/icons/index.js';
 import { ThemeObserver } from '../_common/theme/theme-observer.js';
 import { stopPropagation } from '../_common/utils/event.js';
@@ -40,6 +41,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   @state()
   private _error = false;
 
+  @state()
+  private _isDownloading = false;
+
   private readonly _themeObserver = new ThemeObserver();
 
   private _hoverController = new HoverController(
@@ -54,6 +58,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
             this._captionInput.focus();
           });
         },
+        downloadAttachment: this._downloadAttachment,
         abortController,
       }),
       computePosition: {
@@ -105,7 +110,25 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   private async _downloadAttachment() {
-    downloadAttachment(this.model);
+    if (this._isDownloading) {
+      toast('Download in progress...');
+      return;
+    }
+
+    const shortName =
+      this.model.name.length < 20
+        ? this.model.name
+        : this.model.name.slice(0, 20) + '...';
+
+    toast(`Downloading ${shortName}`);
+    this._isDownloading = true;
+    try {
+      await downloadAttachment(this.model);
+    } catch (error) {
+      toast(`Failed to download ${shortName}!`);
+    } finally {
+      this._isDownloading = false;
+    }
   }
 
   private _onBlur() {
@@ -195,7 +218,8 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         @dblclick=${this._downloadAttachment}
       >
         <div class="affine-attachment-name">
-          ${AttachmentIcon16}${this.model.name}
+          ${this._isDownloading ? LoadingIcon : AttachmentIcon16}${this.model
+            .name}
         </div>
         <div class="affine-attachment-desc">
           ${humanFileSize(this.model.size)}

@@ -147,6 +147,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         this._autoCompleteOverlay.shapePoints = [];
       })
     );
+    this._disposables.add(() => this.removeOverlay());
   }
 
   private _createAutoCompletePanel(
