@@ -1,3 +1,4 @@
+import { IS_NODE, IS_WEB } from '@blocksuite/global/env';
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
@@ -48,7 +49,7 @@ function tokenize(locale: string) {
   };
 }
 
-export type IndexMeta = Readonly<{
+type IndexMeta = Readonly<{
   content: string;
   reference?: string;
   space: string;
@@ -58,7 +59,7 @@ export type IndexMeta = Readonly<{
 export class SearchIndexer {
   private readonly _doc: BlockSuiteDoc;
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
-  private _reIndexMap: Map<string, IndexMeta> | undefined;
+  private _reindexMap: Map<string, IndexMeta> | null = null;
 
   constructor(
     doc: BlockSuiteDoc,
@@ -77,8 +78,8 @@ export class SearchIndexer {
       tokenize: 'forward',
       context: true,
     });
-    this._reIndexMap = new Map();
-    this._reIndex();
+    this._reindexMap = new Map();
+    this._reindex();
 
     // fixme(Mirone): use better way to listen to page changes
     doc.spaces.observe(event => {
@@ -90,33 +91,30 @@ export class SearchIndexer {
       });
     });
 
-    if (
-      typeof window !== 'undefined' &&
-      typeof window.addEventListener === 'function'
-    ) {
+    if (IS_WEB) {
       window.addEventListener('beforeunload', () => {
-        this._reIndexMap = undefined;
+        this._reindexMap = null;
       });
     }
-    if (typeof process !== 'undefined') {
+    if (IS_NODE) {
       process.on('exit', () => {
-        this._reIndexMap = undefined;
+        this._reindexMap = null;
       });
     }
   }
 
-  private _reIndex() {
-    if (!this._reIndexMap) return;
-    for (const id of this._reIndexMap.keys()) {
-      const meta = this._reIndexMap.get(id);
+  private _reindex() {
+    if (!this._reindexMap) return;
+    for (const id of this._reindexMap.keys()) {
+      const meta = this._reindexMap.get(id);
       if (meta) {
-        this._reIndexMap.delete(id);
+        this._reindexMap.delete(id);
         this._indexer.add(id, meta);
       }
     }
     setTimeout(() => {
-      if (!this._reIndexMap) return;
-      requestIdleCallback(this._reIndex.bind(this), { timeout: 1000 });
+      if (!this._reindexMap) return;
+      requestIdleCallback(this._reindex.bind(this), { timeout: 1000 });
     }, 200);
   }
 
@@ -187,7 +185,7 @@ export class SearchIndexer {
             block.get('prop:title') || block.get('prop:text')
           );
           if (content) {
-            this._reIndexMap?.set(id, {
+            this._reindexMap?.set(id, {
               content,
               space: page,
               tags: [page],
@@ -197,7 +195,7 @@ export class SearchIndexer {
         break;
       }
       case 'delete': {
-        this._reIndexMap?.delete(id);
+        this._reindexMap?.delete(id);
         this._indexer.remove(id);
         break;
       }
