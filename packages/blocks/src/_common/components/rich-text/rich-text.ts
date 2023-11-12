@@ -134,23 +134,6 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       );
     }
 
-    // User can clicks more than one button at the same time.
-    // See https://stackoverflow.com/questions/322378/javascript-check-if-mouse-button-down
-    let mouseDown = 0;
-    let needScroll = false;
-    this.disposables.addFromEvent(window, 'mousedown', () => {
-      mouseDown++;
-    });
-    this.disposables.addFromEvent(window, 'mouseup', () => {
-      mouseDown--;
-      if (!mouseDown && needScroll) {
-        needScroll = false;
-        this.scrollIntoView({
-          block: 'nearest',
-        });
-      }
-    });
-
     // init auto scroll
     vEditor.disposables.add(
       vEditor.slots.vRangeUpdated.on(([vRange]) => {
@@ -159,20 +142,25 @@ export class RichText extends WithDisposable(ShadowlessElement) {
         vEditor.waitForUpdate().then(() => {
           if (!vEditor.mounted) return;
 
+          // get newest vRange
+          const vRange = vEditor.getVRange();
+          if (!vRange) return;
+
           const range = vEditor.toDomRange(vRange);
           if (!range) return;
 
+          // scroll container is window
           if (this.enableAutoScrollVertically) {
-            if (mouseDown) {
-              // We should not scroll when mouse is down
-              // See https://github.com/toeverything/blocksuite/issues/5034
-              const rect = range.getBoundingClientRect();
-              if (rect.top < 0 || rect.bottom > window.innerHeight) {
-                needScroll = true;
-              }
+            const rangeRect = range.getBoundingClientRect();
+
+            if (rangeRect.top < 0) {
+              this.scrollIntoView({ block: 'start' });
+            } else if (rangeRect.bottom > window.innerHeight) {
+              this.scrollIntoView({ block: 'end' });
             }
           }
 
+          // scroll container is rich-text
           if (this.enableAutoScrollHorizontally) {
             // make sure the result of moveX is expected
             this.scrollLeft = 0;
