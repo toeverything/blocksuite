@@ -176,7 +176,7 @@ importers:
         version: 1.5.3
       '@toeverything/theme':
         specifier: ^0.7.21
-        version: 0.7.23
+        version: 0.7.21
       '@types/webfontloader':
         specifier: ^1.6.36
         version: 1.6.36
@@ -280,7 +280,7 @@ importers:
         version: link:../store
       '@toeverything/theme':
         specifier: ^0.7.21
-        version: 0.7.23
+        version: 0.7.21
       lit:
         specifier: ^3.0.2
         version: 3.0.2
@@ -1768,7 +1768,7 @@ packages:
     dev: false
 
   /@toeverything/theme@0.7.21:
-    resolution: {integrity: sha512-Gjg6vVypb2dJGX05NM9xd0dZX0+Nu2NtldAjyxEza4o0zTzgHiwKphAH5BgbcksInYxL7sAuri6b9/P+9xcdbQ==}
+    resolution: {integrity: sha512-tCk7WXMrLp2qSVb/dXmbUsd68pvCWX1sT7N6iMmSJuF6AopqdeAoHJHmNYy93P7WgX4dX7saPxXCui3Gdq7QkQ==}
     dev: false
 
   /@toeverything/y-indexeddb@0.10.0-canary.9(yjs@13.6.8):
