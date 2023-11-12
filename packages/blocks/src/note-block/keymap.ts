@@ -13,8 +13,8 @@ import {
 import {
   ensureBlockInContainer,
   getBlockSelectionBySide,
-  moveCursorToNextBlockElement,
-  moveCursorToPrevBlockElement,
+  moveCursorToBlock,
+  moveCursorVertically,
   pathToBlock,
   selectBetween,
   setBlockSelection,
@@ -41,6 +41,7 @@ export function bindHotKey(blockElement: BlockElement) {
   });
   blockElement.bindHotKey({
     ArrowDown: () => {
+      let currentBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
         .inline((_, next) => {
@@ -48,22 +49,60 @@ export function bindHotKey(blockElement: BlockElement) {
           next();
         })
         .try(cmd => [
+          // text selection
           cmd
             .getTextSelection()
             .inline<'currentSelectionPath'>((ctx, next) => {
               const textSelection = ctx.currentTextSelection;
               assertExists(textSelection);
               const end = textSelection.to ?? textSelection.from;
+              currentBlock = pathToBlock(blockElement, end.path);
               next({ currentSelectionPath: end.path });
             })
-            .getNextBlock({
-              filter: block => !!block.model.text,
-            })
-            .inline((ctx, next) => {
-              assertExists(ctx.nextBlock);
-              moveCursorToNextBlockElement(ctx.nextBlock);
-              next();
-            }),
+            .try(cmd => [
+              // text selection - case 1: move cursor down within the same block
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorVertically(currentBlock, false);
+                if (success) {
+                  next();
+                }
+              }),
+              // text selection - case 2: move cursor down to the next block
+              cmd
+                .getNextBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.nextBlock);
+                  const success = moveCursorVertically(ctx.nextBlock, false);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 3: move cursor to the next block start
+              cmd
+                .getNextBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.nextBlock);
+                  const success = moveCursorToBlock(ctx.nextBlock, false);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 4: move cursor to the current block end
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorToBlock(currentBlock, true);
+                if (success) {
+                  next();
+                }
+              }),
+            ]),
+
+          // block selection - select the next block
           cmd
             .getBlockSelections()
             .inline<'currentSelectionPath'>((ctx, next) => {
@@ -91,6 +130,7 @@ export function bindHotKey(blockElement: BlockElement) {
         .run();
     },
     ArrowUp: () => {
+      let currentBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
         .inline((_, next) => {
@@ -98,22 +138,59 @@ export function bindHotKey(blockElement: BlockElement) {
           next();
         })
         .try(cmd => [
+          // text selection
           cmd
             .getTextSelection()
             .inline<'currentSelectionPath'>((ctx, next) => {
               const textSelection = ctx.currentTextSelection;
               assertExists(textSelection);
+              currentBlock = pathToBlock(blockElement, textSelection.from.path);
               next({ currentSelectionPath: textSelection.from.path });
             })
-            .getPrevBlock({
-              filter: block => !!block.model.text,
-            })
-            .inline((ctx, next) => {
-              assertExists(ctx.prevBlock);
-              moveCursorToPrevBlockElement(ctx.prevBlock);
-              next();
-            }),
+            .try(cmd => [
+              // text selection - case 1: move cursor up within the same block
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorVertically(currentBlock, true);
+                if (success) {
+                  next();
+                }
+              }),
+              // text selection - case 2: move cursor up to the previous block
+              cmd
+                .getPrevBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.prevBlock);
+                  const success = moveCursorVertically(ctx.prevBlock, true);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 3: move cursor to the previous block end
+              cmd
+                .getPrevBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.prevBlock);
+                  const success = moveCursorToBlock(ctx.prevBlock, true);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 4: move cursor to the current block start
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorToBlock(currentBlock, false);
+                if (success) {
+                  next();
+                }
+              }),
+            ]),
 
+          // block selection - select the previous block
           cmd
             .getBlockSelections()
             .inline<'currentSelectionPath'>(async (ctx, next) => {
