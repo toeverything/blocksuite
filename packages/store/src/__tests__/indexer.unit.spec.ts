@@ -78,9 +78,11 @@ describe('workspace.search works', () => {
 
     const id = page.id;
 
-    queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(expected1);
-      expect(workspace.search('索尼')).toStrictEqual(expected2);
+    requestIdleCallback(() => {
+      queueMicrotask(() => {
+        expect(workspace.search('处理器')).toStrictEqual(expected1);
+        expect(workspace.search('索尼')).toStrictEqual(expected2);
+      });
     });
 
     const update = encodeStateAsUpdate(page.spaceDoc);
@@ -94,9 +96,12 @@ describe('workspace.search works', () => {
     });
     applyUpdate(page2.spaceDoc, update);
     expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
-    queueMicrotask(() => {
-      expect(workspace2.search('处理器')).toStrictEqual(expected1);
-      expect(workspace2.search('索尼')).toStrictEqual(expected2);
+
+    requestIdleCallback(() => {
+      queueMicrotask(() => {
+        expect(workspace2.search('处理器')).toStrictEqual(expected1);
+        expect(workspace2.search('索尼')).toStrictEqual(expected2);
+      });
     });
   });
 });
