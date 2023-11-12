@@ -996,6 +996,13 @@ export class ContentParser {
         options: tags,
       },
     });
+
+    // Make sure the page name is synced with the page root model title
+    const pageMetaTitle = this._page.meta.title;
+    const pageModelTitle = (this._page.root as PageBlockModel).title.toString();
+    if (pageMetaTitle === pageModelTitle) {
+      this._page.workspace.meta.setName(pageModelTitle);
+    }
   }
 
   private _getMetaDataFromhtmlText(html: string) {
