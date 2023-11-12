@@ -662,9 +662,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
       this.clipboard.init(this.page);
     }
 
-    if (!this._tryLoadViewportLocalRecord()) {
-      this._initViewport();
-    }
+    this._initViewport();
 
     requestAnimationFrame(() => {
       this._handleToolbarFlag();
@@ -672,12 +670,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
     });
   }
 
-  private _tryLoadViewportLocalRecord() {
+  private _getSavedViewport() {
     const { viewport } = this.surface;
     const viewportData = getViewportFromSession(this.page.id);
 
     if (!viewportData) {
-      return false;
+      return null;
     }
 
     if ('referenceId' in viewportData) {
@@ -690,15 +688,19 @@ export class EdgelessPageBlockComponent extends BlockElement<
           Bound.deserialize(block.xywh),
           viewportData.padding
         );
-        return true;
+        return { xywh: block.xywh, padding: viewportData.padding };
       }
+
+      return null;
     } else {
       const { zoom, x, y } = viewportData;
-      viewport.setViewport(zoom, [x, y]);
-      return true;
-    }
 
-    return false;
+      return {
+        zoom,
+        centerX: x,
+        centerY: y,
+      };
+    }
   }
 
   public getFitToScreenData(
@@ -739,9 +741,24 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initViewport() {
-    const { zoom, centerX, centerY } = this.getFitToScreenData();
-    const { viewport } = this.surface;
-    viewport.setViewport(zoom, [centerX, centerY]);
+    const run = () => {
+      const viewport = this._getSavedViewport() ?? this.getFitToScreenData();
+
+      if ('xywh' in viewport) {
+        const { xywh, padding } = viewport;
+        const bound = Bound.deserialize(xywh);
+        this.surface.viewport.setViewportByBound(bound, padding);
+      } else {
+        const { zoom, centerX, centerY } = viewport;
+        this.surface.viewport.setViewport(zoom, [centerX, centerY]);
+      }
+    };
+
+    if (this.surface.isUpdatePending) {
+      this.surface.updateComplete.then(run);
+    } else {
+      run();
+    }
   }
 
   private _initLocalRecordManager() {
