@@ -19,6 +19,7 @@ import {
   pressEscape,
   pressShiftEnter,
   pressShiftTab,
+  pressSpace,
   pressTab,
   redoByClick,
   redoByKeyboard,
@@ -1605,4 +1606,54 @@ test('delete at the start of paragraph (multiple notes)', async ({ page }) => {
   await setSelection(page, 5, 0, 5, 0);
   await pressBackspace(page);
   await assertRichTexts(page, ['123456']);
+});
+
+test('arrow up/down navigation within and across paragraphs containing different types of text', async ({
+  page,
+}) => {
+  test.info().annotations.push({
+    type: 'issue',
+    description: 'https://github.com/toeverything/blocksuite/issues/5155',
+  });
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await focusRichText(page);
+
+  await type(page, 'a'.repeat(20));
+  await assertRichTextVRange(page, 0, 20, 0);
+  await type(page, '*');
+  await type(page, 'i'.repeat(5));
+  await type(page, '*');
+  await pressSpace(page);
+  await assertRichTextVRange(page, 0, 25, 0);
+  await type(page, 'a'.repeat(100));
+  await assertRichTextVRange(page, 0, 125, 0);
+  await pressEnter(page);
+
+  await type(page, 'a'.repeat(100));
+  await assertRichTextVRange(page, 1, 100, 0);
+  await type(page, '*');
+  await type(page, 'i'.repeat(5));
+  await type(page, '*');
+  await pressSpace(page);
+  await assertRichTextVRange(page, 1, 105, 0);
+  await type(page, 'a'.repeat(20));
+  await assertRichTextVRange(page, 1, 125, 0);
+
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 1, 32, 0);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 0, 125, 0);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 0, 35, 0);
+  await pressArrowUp(page);
+  await assertRichTextVRange(page, 0, 0, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 0, 93, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 1, 0, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 1, 90, 0);
+  await pressArrowDown(page);
+  await assertRichTextVRange(page, 1, 125, 0);
 });
