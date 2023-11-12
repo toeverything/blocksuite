@@ -56,6 +56,8 @@ type IndexMeta = Readonly<{
   tags: string[];
 }>;
 
+const REINDEX_TIMEOUT = 200;
+
 export class SearchIndexer {
   private readonly _doc: BlockSuiteDoc;
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
@@ -103,8 +105,9 @@ export class SearchIndexer {
     }
   }
 
-  private _reindex() {
+  private _reindex = () => {
     if (!this._reindexMap) return;
+
     for (const id of this._reindexMap.keys()) {
       const meta = this._reindexMap.get(id);
       if (meta) {
@@ -112,11 +115,12 @@ export class SearchIndexer {
         this._indexer.add(id, meta);
       }
     }
+
     setTimeout(() => {
       if (!this._reindexMap) return;
-      requestIdleCallback(this._reindex.bind(this), { timeout: 1000 });
-    }, 200);
-  }
+      requestIdleCallback(this._reindex, { timeout: 1000 });
+    }, REINDEX_TIMEOUT);
+  };
 
   search(query: QueryContent) {
     return new Map(
