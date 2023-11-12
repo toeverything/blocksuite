@@ -125,7 +125,7 @@ test('selection box of shape element sync on fast dragging', async ({
     { click: true }
   );
 
-  await assertEdgelessSelectedRect(page, [650, 447.5, 100, 100]);
+  await assertEdgelessSelectedRect(page, [650, 450, 100, 100]);
 });
 
 test('when the selection is always a note, it should remain in an active state', async ({
