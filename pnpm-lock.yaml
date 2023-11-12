@@ -175,7 +175,7 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       '@toeverything/theme':
-        specifier: ^0.7.23
+        specifier: ^0.7.21
         version: 0.7.23
       '@types/webfontloader':
         specifier: ^1.6.36
@@ -279,7 +279,7 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.23
+        specifier: ^0.7.21
         version: 0.7.23
       lit:
         specifier: ^3.0.2
@@ -1767,7 +1767,7 @@ packages:
     resolution: {integrity: sha512-Gfkvwk9o9kE9r9XNBmJRfV8zONvXThnm1tcuojL04Uy5uRyqg93DC83lDebl0rocZCfKSjUv+fWYtMQmEDJldg==}
     dev: false
 
-  /@toeverything/theme@0.7.23:
+  /@toeverything/theme@0.7.21:
     resolution: {integrity: sha512-Gjg6vVypb2dJGX05NM9xd0dZX0+Nu2NtldAjyxEza4o0zTzgHiwKphAH5BgbcksInYxL7sAuri6b9/P+9xcdbQ==}
     dev: false
 
