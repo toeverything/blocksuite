@@ -15,6 +15,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import {
@@ -113,11 +114,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
-    this.layer.style.setProperty(
-      'transform',
-      `translate(${translateX}px, ${translateY}px) scale(${zoom})`
-    );
+    this.layer.style.setProperty('transform', this._getLayerViewport());
   };
+
+  private _getLayerViewport() {
+    const { surface } = this.edgeless;
+    const { zoom, translateX, translateY } = surface.viewport;
+
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+  }
 
   private _updateReference() {
     const { _surfaceRefReferenceSet, edgeless } = this;
@@ -297,7 +302,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           .elementsMap=${autoConnectedBlocks}
         >
         </edgeless-auto-connect-line>
-        <div class="affine-edgeless-layer">
+        <div
+          class="affine-edgeless-layer"
+          style=${styleMap({
+            transform: this._getLayerViewport(),
+          })}
+        >
           <edgeless-frames-container
             .surface=${surface}
             .edgeless=${edgeless}
