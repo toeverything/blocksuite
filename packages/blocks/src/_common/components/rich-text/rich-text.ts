@@ -166,11 +166,10 @@ export class RichText extends WithDisposable(ShadowlessElement) {
             if (mouseDown) {
               // We should not scroll when mouse is down
               // See https://github.com/toeverything/blocksuite/issues/5034
-              needScroll = true;
-            } else {
-              this.scrollIntoView({
-                block: 'nearest',
-              });
+              const rect = range.getBoundingClientRect();
+              if (rect.top < 0 || rect.bottom > window.innerHeight) {
+                needScroll = true;
+              }
             }
           }
 
