@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
@@ -29,6 +29,10 @@ async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   await page.waitForLoaded();
   return page;
 }
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+});
 
 describe('workspace.search works', () => {
   it('workspace search matching', async () => {

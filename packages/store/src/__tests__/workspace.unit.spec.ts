@@ -2,7 +2,7 @@
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
 
 import type { Slot } from '@blocksuite/global/utils';
-import { assert, describe, expect, it, vi } from 'vitest';
+import { assert, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Awareness } from 'y-protocols/awareness.js';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
@@ -71,6 +71,10 @@ async function createTestPage(pageId = defaultPageId) {
   await page.waitForLoaded();
   return page;
 }
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+});
 
 describe('basic', () => {
   it('can init workspace', async () => {
@@ -867,8 +871,10 @@ describe('workspace search', () => {
     });
     const noteId = page.addBlock('affine:note', {}, pageId);
     page.addBlock('affine:paragraph', {}, noteId);
-    const result = workspace.search('test');
-    expect(result).toMatchInlineSnapshot(`
+
+    requestIdleCallback(() => {
+      const result = workspace.search('test');
+      expect(result).toMatchInlineSnapshot(`
       Map {
         "0" => {
           "content": "test123",
@@ -876,5 +882,6 @@ describe('workspace search', () => {
         },
       }
     `);
+    });
   });
 });
