@@ -170,10 +170,11 @@ describe('CommandManager', () => {
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
 
-    commandManager.pipe().command1().command2().run();
+    const success = commandManager.pipe().command1().command2().run();
 
     expect(command1).toHaveBeenCalled();
     expect(command2).toHaveBeenCalled();
+    expect(success).toBeTruthy();
   });
 
   test('can execute an inline command', () => {
@@ -215,7 +216,7 @@ describe('CommandManager', () => {
     commandManager.add('command2', command2);
     commandManager.add('command3', command3);
 
-    commandManager
+    const success = commandManager
       .pipe()
       .command1()
       .try(cmd => [cmd.command2(), cmd.command3()])
@@ -224,6 +225,7 @@ describe('CommandManager', () => {
     expect(command1).toHaveBeenCalledTimes(1);
     expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
+    expect(success).toBeTruthy();
   });
 
   test('should continue with the rest of the chain if one command in `try` succeeds', () => {
@@ -265,13 +267,23 @@ describe('CommandManager', () => {
 
   test('should pass context correctly in `try` when a command succeeds', () => {
     const command1: Command = vi.fn((ctx, next) =>
-      next({ commandData1: 'fromCommand1' })
+      next({ commandData1: 'fromCommand1', commandData2: 'fromCommand1' })
     );
-    const command2: Command = vi.fn((ctx, next) => {});
-    const command3: Command<'commandData1'> = vi.fn((ctx, next) => {
-      expect(ctx.commandData1).toBe('fromCommand1');
-      next();
-    });
+    const command2: Command<'commandData1' | 'commandData2'> = vi.fn(
+      (ctx, next) => {
+        expect(ctx.commandData1).toBe('fromCommand1');
+        expect(ctx.commandData2).toBe('fromCommand1');
+        // override commandData2
+        next({ commandData2: 'fromCommand2' });
+      }
+    );
+    const command3: Command<'commandData1' | 'commandData2'> = vi.fn(
+      (ctx, next) => {
+        expect(ctx.commandData1).toBe('fromCommand1');
+        expect(ctx.commandData2).toBe('fromCommand2');
+        next();
+      }
+    );
 
     commandManager.add('command1', command1);
     commandManager.add('command2', command2);
@@ -279,12 +291,13 @@ describe('CommandManager', () => {
 
     const success = commandManager
       .pipe()
-      .try(cmd => [cmd.command1(), cmd.command2()])
+      .command1()
+      .try(cmd => [cmd.command2()])
       .command3()
       .run();
 
     expect(command1).toHaveBeenCalled();
-    expect(command2).not.toHaveBeenCalled();
+    expect(command2).toHaveBeenCalled();
     expect(command3).toHaveBeenCalled();
     expect(success).toBeTruthy();
   });
@@ -352,17 +365,28 @@ describe('CommandManager', () => {
   });
 
   test('should pass context correctly in `tryAll` when at least one command succeeds', () => {
-    const command1: Command = vi.fn((ctx, next) => {});
-    const command2: Command = vi.fn((ctx, next) =>
-      next({ commandData1: 'fromCommand2', commandData2: 'fromCommand2' })
+    const command1: Command = vi.fn((ctx, next) =>
+      next({ commandData1: 'fromCommand1' })
     );
-    const command3: Command = vi.fn((ctx, next) =>
-      next({ commandData2: 'fromCommand3', commandData3: 'fromCommand3' })
+    const command2: Command<'commandData1'> = vi.fn((ctx, next) => {
+      expect(ctx.commandData1).toBe('fromCommand1');
+      // override commandData1
+      next({ commandData1: 'fromCommand2', commandData2: 'fromCommand2' });
+    });
+    const command3: Command<'commandData1' | 'commandData2'> = vi.fn(
+      (ctx, next) => {
+        expect(ctx.commandData1).toBe('fromCommand2');
+        expect(ctx.commandData2).toBe('fromCommand2');
+        next({
+          // override commandData2
+          commandData2: 'fromCommand3',
+          commandData3: 'fromCommand3',
+        });
+      }
     );
     const command4: Command<'commandData1' | 'commandData2' | 'commandData3'> =
       vi.fn((ctx, next) => {
         expect(ctx.commandData1).toBe('fromCommand2');
-        // command3 overrides command2
         expect(ctx.commandData2).toBe('fromCommand3');
         expect(ctx.commandData3).toBe('fromCommand3');
         next();
@@ -375,7 +399,8 @@ describe('CommandManager', () => {
 
     const success = commandManager
       .pipe()
-      .tryAll(cmd => [cmd.command1(), cmd.command2(), cmd.command3()])
+      .command1()
+      .tryAll(cmd => [cmd.command2(), cmd.command3()])
       .command4()
       .run();
 

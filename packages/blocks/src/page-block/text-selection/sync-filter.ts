@@ -19,6 +19,7 @@ export const pageRangeSyncFilter: RangeSyncFilter = {
       const endBlock = endElement?.closest<BlockElement>(`[${BLOCK_ID_ATTR}]`);
 
       if (startBlock && endBlock) {
+        //FIXME: use `rich-text` in page title
         // doc mode title
         if (
           startBlock.model.flavour === 'affine:page' &&
