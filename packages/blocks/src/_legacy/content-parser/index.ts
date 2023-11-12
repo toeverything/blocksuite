@@ -996,6 +996,15 @@ export class ContentParser {
         options: tags,
       },
     });
+
+    // Make sure the title is synced with the model
+    const pageMetaTitle = this._page.meta.title;
+    const pageModelTitle = (this._page.root as PageBlockModel).title.toString();
+    if (pageMetaTitle !== pageModelTitle) {
+      this._page.workspace.setPageMeta(this._page.id, {
+        title: pageModelTitle,
+      });
+    }
   }
 
   private _getMetaDataFromhtmlText(html: string) {

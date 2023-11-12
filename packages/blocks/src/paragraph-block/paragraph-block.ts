@@ -231,6 +231,16 @@ export class ParagraphBlockComponent extends BlockElement<ParagraphBlockModel> {
       this.requestUpdate();
     });
     this.model.childrenUpdated.on(() => this.requestUpdate());
+
+    this.page.awarenessStore.slots.update.on(v => {
+      const remoteSelections = this.std.selection.remoteSelections.get(v.id);
+      const textSelection = remoteSelections?.find(
+        selection => selection.type === 'text'
+      );
+      if (textSelection) {
+        this._updatePlaceholder();
+      }
+    });
   }
 
   private _updatePlaceholder = () => {
