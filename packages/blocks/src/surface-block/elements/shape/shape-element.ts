@@ -92,8 +92,7 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
 
   get fontFamily() {
     const fontFamily =
-      (this.yMap.get('fontFamily') as IShape['fontFamily']) ??
-      "'Kalam', cursive";
+      (this.yMap.get('fontFamily') as IShape['fontFamily']) ?? 'sans-serif';
     return fontFamily;
   }
 
