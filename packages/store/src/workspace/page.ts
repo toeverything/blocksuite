@@ -74,6 +74,7 @@ export class Page extends Space<FlatBlockMap> {
     rootAdded: new Slot<BaseBlockModel>(),
     rootDeleted: new Slot<string | string[]>(),
     textUpdated: new Slot<Y.YTextEvent>(),
+    /** @deprecated should not depend on y-concepts directly */
     yUpdated: new Slot(),
     onYEvent: new Slot<{
       event: Y.YEvent<YBlock | Y.Text | Y.Array<unknown>>;
@@ -97,12 +98,15 @@ export class Page extends Space<FlatBlockMap> {
           props: Partial<BlockProps>;
         }
     >(),
+    /** @deprecated should not depend on y-concepts directly */
     yBlockUpdated: new Slot<{
       id: string;
       type: 'add' | 'update' | 'delete';
       props: { [key: string]: { old: unknown; new: unknown } };
     }>(),
+    /** @deprecated */
     copied: new Slot(),
+    /** @deprecated */
     pasted: new Slot<Record<string, unknown>[]>(),
   };
 
