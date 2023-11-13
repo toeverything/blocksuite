@@ -1,5 +1,4 @@
 import type { BlockSelection } from '@blocksuite/block-std';
-import { TextSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
@@ -8,15 +7,14 @@ import { quickActionConfig } from '../_common/configs/quick-action/config.js';
 import { textConversionConfigs } from '../_common/configs/text-conversion.js';
 import { getBlockElementByModel } from '../_common/utils/query.js';
 import {
-  getSelectedContentBlockElements,
   onModelElementUpdated,
   updateBlockElementType,
 } from '../page-block/utils/index.js';
 import {
   ensureBlockInContainer,
   getBlockSelectionBySide,
-  moveCursorToNextBlockElement,
-  moveCursorToPrevBlockElement,
+  moveCursorToBlock,
+  moveCursorVertically,
   pathToBlock,
   selectBetween,
   setBlockSelection,
@@ -43,6 +41,7 @@ export function bindHotKey(blockElement: BlockElement) {
   });
   blockElement.bindHotKey({
     ArrowDown: () => {
+      let currentBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
         .inline((_, next) => {
@@ -50,22 +49,60 @@ export function bindHotKey(blockElement: BlockElement) {
           next();
         })
         .try(cmd => [
+          // text selection
           cmd
             .getTextSelection()
             .inline<'currentSelectionPath'>((ctx, next) => {
               const textSelection = ctx.currentTextSelection;
               assertExists(textSelection);
               const end = textSelection.to ?? textSelection.from;
+              currentBlock = pathToBlock(blockElement, end.path);
               next({ currentSelectionPath: end.path });
             })
-            .getNextBlock({
-              filter: block => !!block.model.text,
-            })
-            .inline((ctx, next) => {
-              assertExists(ctx.nextBlock);
-              moveCursorToNextBlockElement(ctx.nextBlock);
-              next();
-            }),
+            .try(cmd => [
+              // text selection - case 1: move cursor down within the same block
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorVertically(currentBlock, false);
+                if (success) {
+                  next();
+                }
+              }),
+              // text selection - case 2: move cursor down to the next block
+              cmd
+                .getNextBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.nextBlock);
+                  const success = moveCursorVertically(ctx.nextBlock, false);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 3: move cursor to the next block start
+              cmd
+                .getNextBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.nextBlock);
+                  const success = moveCursorToBlock(ctx.nextBlock, false);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 4: move cursor to the current block end
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorToBlock(currentBlock, true);
+                if (success) {
+                  next();
+                }
+              }),
+            ]),
+
+          // block selection - select the next block
           cmd
             .getBlockSelections()
             .inline<'currentSelectionPath'>((ctx, next) => {
@@ -93,6 +130,7 @@ export function bindHotKey(blockElement: BlockElement) {
         .run();
     },
     ArrowUp: () => {
+      let currentBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
         .inline((_, next) => {
@@ -100,22 +138,59 @@ export function bindHotKey(blockElement: BlockElement) {
           next();
         })
         .try(cmd => [
+          // text selection
           cmd
             .getTextSelection()
             .inline<'currentSelectionPath'>((ctx, next) => {
               const textSelection = ctx.currentTextSelection;
               assertExists(textSelection);
+              currentBlock = pathToBlock(blockElement, textSelection.from.path);
               next({ currentSelectionPath: textSelection.from.path });
             })
-            .getPrevBlock({
-              filter: block => !!block.model.text,
-            })
-            .inline((ctx, next) => {
-              assertExists(ctx.prevBlock);
-              moveCursorToPrevBlockElement(ctx.prevBlock);
-              next();
-            }),
+            .try(cmd => [
+              // text selection - case 1: move cursor up within the same block
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorVertically(currentBlock, true);
+                if (success) {
+                  next();
+                }
+              }),
+              // text selection - case 2: move cursor up to the previous block
+              cmd
+                .getPrevBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.prevBlock);
+                  const success = moveCursorVertically(ctx.prevBlock, true);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 3: move cursor to the previous block end
+              cmd
+                .getPrevBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.prevBlock);
+                  const success = moveCursorToBlock(ctx.prevBlock, true);
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 4: move cursor to the current block start
+              cmd.inline((_, next) => {
+                assertExists(currentBlock);
+                const success = moveCursorToBlock(currentBlock, false);
+                if (success) {
+                  next();
+                }
+              }),
+            ]),
 
+          // block selection - select the previous block
           cmd
             .getBlockSelections()
             .inline<'currentSelectionPath'>(async (ctx, next) => {
@@ -370,38 +445,49 @@ export function bindHotKey(blockElement: BlockElement) {
         [key]: ctx => {
           ctx.get('defaultState').event.preventDefault();
 
-          const selected = getSelectedContentBlockElements(root, [
-            'text',
-            'block',
-          ]);
+          return root.std.command
+            .pipe()
+            .withRoot()
+            .tryAll(chain => [
+              chain.getTextSelection(),
+              chain.getBlockSelections(),
+            ])
+            .getSelectedBlocks({
+              types: ['text', 'block'],
+            })
+            .inline((ctx, next) => {
+              const { selectedBlocks } = ctx;
+              assertExists(selectedBlocks);
 
-          const newModels = updateBlockElementType(
-            selected,
-            item.flavour,
-            item.type
-          );
+              const newModels = updateBlockElementType(
+                selectedBlocks,
+                item.flavour,
+                item.type
+              );
 
-          if (item.flavour !== 'affine:code') {
-            return;
-          }
+              if (item.flavour !== 'affine:code') {
+                return;
+              }
 
-          const [codeModel] = newModels;
-          onModelElementUpdated(codeModel, () => {
-            const codeElement = getBlockElementByModel(codeModel);
-            assertExists(codeElement);
-            selectionManager.setGroup('note', [
-              new TextSelection({
-                from: {
-                  path: codeElement.path,
-                  index: 0,
-                  length: codeModel.text?.length ?? 0,
-                },
-                to: null,
-              }),
-            ]);
-          });
+              const [codeModel] = newModels;
+              onModelElementUpdated(codeModel, () => {
+                const codeElement = getBlockElementByModel(codeModel);
+                assertExists(codeElement);
+                selectionManager.setGroup('note', [
+                  selectionManager.getInstance('text', {
+                    from: {
+                      path: codeElement.path,
+                      index: 0,
+                      length: codeModel.text?.length ?? 0,
+                    },
+                    to: null,
+                  }),
+                ]);
+              });
 
-          return true;
+              next();
+            })
+            .run();
         },
       });
     });

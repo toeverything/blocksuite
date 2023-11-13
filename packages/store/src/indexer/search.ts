@@ -1,3 +1,4 @@
+import { IS_NODE, IS_WEB } from '@blocksuite/global/env';
 import type { DocumentSearchOptions } from 'flexsearch';
 import FlexSearch from 'flexsearch';
 import type { Doc } from 'yjs';
@@ -48,16 +49,19 @@ function tokenize(locale: string) {
   };
 }
 
-export type IndexMeta = Readonly<{
+type IndexMeta = Readonly<{
   content: string;
   reference?: string;
   space: string;
   tags: string[];
 }>;
 
+const REINDEX_TIMEOUT = 200;
+
 export class SearchIndexer {
   private readonly _doc: BlockSuiteDoc;
   private readonly _indexer: FlexSearch.Document<IndexMeta, string[]>;
+  private _reindexMap: Map<string, IndexMeta> | null = null;
 
   constructor(
     doc: BlockSuiteDoc,
@@ -76,6 +80,8 @@ export class SearchIndexer {
       tokenize: 'forward',
       context: true,
     });
+    this._reindexMap = new Map();
+    this._reindex();
 
     // fixme(Mirone): use better way to listen to page changes
     doc.spaces.observe(event => {
@@ -86,7 +92,35 @@ export class SearchIndexer {
         }
       });
     });
+
+    if (IS_WEB) {
+      window.addEventListener('beforeunload', () => {
+        this._reindexMap = null;
+      });
+    }
+    if (IS_NODE) {
+      process.on('exit', () => {
+        this._reindexMap = null;
+      });
+    }
   }
+
+  private _reindex = () => {
+    if (!this._reindexMap) return;
+
+    for (const id of this._reindexMap.keys()) {
+      const meta = this._reindexMap.get(id);
+      if (meta) {
+        this._reindexMap.delete(id);
+        this._indexer.add(id, meta);
+      }
+    }
+
+    setTimeout(() => {
+      if (!this._reindexMap) return;
+      requestIdleCallback(this._reindex, { timeout: 1000 });
+    }, REINDEX_TIMEOUT);
+  };
 
   search(query: QueryContent) {
     return new Map(
@@ -155,17 +189,17 @@ export class SearchIndexer {
             block.get('prop:title') || block.get('prop:text')
           );
           if (content) {
-            this._indexer.add(id, {
+            this._reindexMap?.set(id, {
               content,
               space: page,
               tags: [page],
             });
           }
         }
-
         break;
       }
       case 'delete': {
+        this._reindexMap?.delete(id);
         this._indexer.remove(id);
         break;
       }

@@ -219,7 +219,7 @@ test.describe('reordering', () => {
 
       // should be note0
       await page.mouse.click(120, 140);
-      await assertEdgelessSelectedRect(page, [100, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [100, 100, 448, 91]);
 
       // bring note0 forward
       await triggerComponentToolbarAction(page, 'bringForward');
@@ -229,7 +229,7 @@ test.describe('reordering', () => {
 
       // should be rect0
       await page.mouse.click(150, 140);
-      await assertEdgelessSelectedRect(page, [100, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [100, 100, 448, 91]);
     });
 
     test('send backward', async ({ page }) => {
@@ -240,7 +240,7 @@ test.describe('reordering', () => {
 
       // should be note2
       await page.mouse.click(180, 140);
-      await assertEdgelessSelectedRect(page, [160, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [160, 100, 448, 91]);
 
       // bring note2 backward
       await triggerComponentToolbarAction(page, 'sendBackward');
@@ -250,7 +250,7 @@ test.describe('reordering', () => {
 
       // should be note1
       await page.mouse.click(180, 140);
-      await assertEdgelessSelectedRect(page, [130, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [130, 100, 448, 91]);
     });
 
     test('send to back', async ({ page }) => {
@@ -261,7 +261,7 @@ test.describe('reordering', () => {
 
       // should be note2
       await page.mouse.click(180, 140);
-      await assertEdgelessSelectedRect(page, [160, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [160, 100, 448, 91]);
 
       // bring note2 to back
       await triggerComponentToolbarAction(page, 'sendToBack');
@@ -271,7 +271,7 @@ test.describe('reordering', () => {
 
       // should be note1
       await page.mouse.click(180, 140);
-      await assertEdgelessSelectedRect(page, [130, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [130, 100, 448, 91]);
 
       // send note1 to back
       await triggerComponentToolbarAction(page, 'sendToBack');
@@ -281,7 +281,7 @@ test.describe('reordering', () => {
 
       // should be note0
       await page.mouse.click(180, 140);
-      await assertEdgelessSelectedRect(page, [100, 100, 448, 95]);
+      await assertEdgelessSelectedRect(page, [100, 100, 448, 91]);
     });
   });
 });

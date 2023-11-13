@@ -229,28 +229,6 @@ export class EditorContainer
       });
 
       this.fileDropManager.register({
-        name: 'Image',
-        matcher: file => file.type.startsWith('image'),
-        handler: async (
-          file: File
-        ): Promise<Partial<ImageBlockProps> & { flavour: 'affine:image' }> => {
-          const storage = this.page.blob;
-          const { saveAttachmentData } = withTempBlobData();
-          const sourceId = await storage.set(
-            new Blob([file], { type: file.type })
-          );
-          saveAttachmentData(sourceId, { name: file.name });
-          const size =
-            this.mode === 'edgeless' ? await readImageSize(file) : {};
-          return {
-            flavour: 'affine:image',
-            sourceId,
-            ...size,
-          };
-        },
-      });
-
-      this.fileDropManager.register({
         name: 'Attachment',
         matcher: (file: File) => {
           if (file.size > maxFileSize) {

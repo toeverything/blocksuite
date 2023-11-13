@@ -41,6 +41,10 @@ async function getAttachment(model: AttachmentBlockModel) {
   return blob;
 }
 
+/**
+ * Since the size of the attachment may be very large,
+ * the download process may take a long time!
+ */
 export async function downloadAttachment(
   attachmentModel: AttachmentBlockModel
 ) {

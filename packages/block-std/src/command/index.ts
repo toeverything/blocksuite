@@ -49,8 +49,14 @@ type CommonMethods<In extends object = {}> = {
   try: <InlineOut extends BlockSuite.CommandDataName = never>(
     fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
   ) => Chain<In & CommandKeyToData<InlineOut>>;
+  tryAll: <InlineOut extends BlockSuite.CommandDataName = never>(
+    fn: (chain: Chain<In>) => Chain<In & CommandKeyToData<InlineOut>>[]
+  ) => Chain<In & CommandKeyToData<InlineOut>>;
 };
 const cmdSymbol = Symbol('cmds');
+type Cmds = {
+  [cmdSymbol]: Command[];
+};
 // eslint-disable-next-line @typescript-eslint/ban-types
 type Chain<In extends object = {}> = CommonMethods<In> & {
   [K in keyof BlockSuite.Commands]: (
@@ -58,7 +64,7 @@ type Chain<In extends object = {}> = CommonMethods<In> & {
       Omit1<InDataOfCommand<BlockSuite.Commands[K]>, In>
     >
   ) => Chain<In & OutDataOfCommand<BlockSuite.Commands[K]>>;
-};
+} & Cmds;
 
 export class CommandManager {
   private _commands = new Map<string, Command>();
@@ -82,23 +88,27 @@ export class CommandManager {
 
   createChain = (
     methods: Record<BlockSuite.CommandName, unknown>,
-    cmds: Command[]
+    _cmds: Command[]
   ): Chain => {
-    return {
-      [cmdSymbol]: cmds,
-      run: () => {
-        const ctx = this._getCommandCtx();
-        const runCmds = (
-          ctx: BlockSuite.CommandData,
-          [cmd, ...rest]: Command[]
-        ) => {
-          if (cmd) {
-            cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
-          }
-        };
+    const getCommandCtx = this._getCommandCtx;
+    const createChain = this.createChain;
+    const pipe = this.pipe;
+    const runCmds = (
+      ctx: BlockSuite.CommandData,
+      [cmd, ...rest]: Command[]
+    ) => {
+      if (cmd) {
+        cmd(ctx, data => runCmds({ ...ctx, ...data }, rest));
+      }
+    };
 
+    return {
+      [cmdSymbol]: _cmds,
+      run: function (this: Chain) {
+        const ctx = getCommandCtx();
         let success = false;
         try {
+          const cmds = this[cmdSymbol];
           runCmds(ctx as BlockSuite.CommandData, [
             ...cmds,
             (_, next) => {
@@ -112,34 +122,78 @@ export class CommandManager {
 
         return success;
       },
-      with: value => {
-        return this.createChain(methods, [
+      with: function (this: Chain, value) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [
           ...cmds,
           (_, next) => next(value),
         ]) as never;
       },
-      inline: command => {
-        return this.createChain(methods, [...cmds, command]) as never;
+      inline: function (this: Chain, command) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [...cmds, command]) as never;
       },
-      try: fn => {
-        return this.createChain(methods, [
+      try: function (this: Chain, fn) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [
           ...cmds,
           (beforeCtx, next) => {
-            const beforeChain = this.pipe().with(beforeCtx);
-            const chains = fn(beforeChain);
+            let ctx = beforeCtx;
+            const chains = fn(pipe());
 
             for (const chain of chains) {
-              let branchCtx = {};
+              // inject ctx in the beginning
+              chain[cmdSymbol] = [
+                (_, next) => {
+                  next(ctx);
+                },
+                ...chain[cmdSymbol],
+              ];
+
               const success = chain
-                .inline((ctx, next) => {
-                  branchCtx = ctx;
+                .inline((branchCtx, next) => {
+                  ctx = { ...ctx, ...branchCtx };
                   next();
                 })
                 .run();
               if (success) {
-                next(branchCtx);
+                next(ctx);
                 break;
               }
+            }
+          },
+        ]) as never;
+      },
+      tryAll: function (this: Chain, fn) {
+        const cmds = this[cmdSymbol];
+        return createChain(methods, [
+          ...cmds,
+          (beforeCtx, next) => {
+            let ctx = beforeCtx;
+            const chains = fn(pipe());
+
+            let allFail = true;
+            for (const chain of chains) {
+              // inject ctx in the beginning
+              chain[cmdSymbol] = [
+                (_, next) => {
+                  next(ctx);
+                },
+                ...chain[cmdSymbol],
+              ];
+
+              const success = chain
+                .inline((branchCtx, next) => {
+                  ctx = { ...ctx, ...branchCtx };
+                  next();
+                })
+                .run();
+              if (success) {
+                allFail = false;
+              }
+            }
+            if (!allFail) {
+              next(ctx);
             }
           },
         ]) as never;

@@ -1,9 +1,12 @@
 const agent = globalThis.navigator?.userAgent ?? '';
 const platform = globalThis.navigator?.platform;
 
-export const IS_WEB = typeof window !== 'undefined';
+export const IS_WEB =
+  typeof window !== 'undefined' && typeof document !== 'undefined';
 
-const IS_SAFARI = /Apple Computer/.test(globalThis.navigator?.vendor);
+export const IS_NODE = typeof process !== 'undefined' && !IS_WEB;
+
+export const IS_SAFARI = /Apple Computer/.test(globalThis.navigator?.vendor);
 
 export const IS_FIREFOX =
   IS_WEB && navigator.userAgent.toLowerCase().indexOf('firefox') > -1;

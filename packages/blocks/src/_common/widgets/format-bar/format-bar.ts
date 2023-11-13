@@ -14,7 +14,6 @@ import { customElement, query } from 'lit/decorators.js';
 
 import { stopPropagation } from '../../../_common/utils/event.js';
 import { isPageComponent } from '../../../page-block/utils/guard.js';
-import { getSelectedContentBlockElements } from '../../../page-block/utils/selection.js';
 import { ActionItems } from './components/action-items.js';
 import { InlineItems } from './components/inline-items.js';
 import { ParagraphButton } from './components/paragraph-button.js';
@@ -159,13 +158,31 @@ export class AffineFormatBarWidget extends WidgetElement {
         const blockSelections = pageElement.selection.filter('block');
 
         if (textSelection) {
-          if (!textSelection.isCollapsed()) {
+          const block = this.root.view.viewFromPath(
+            'block',
+            textSelection.path
+          );
+          if (
+            !textSelection.isCollapsed() &&
+            block &&
+            block.model.role === 'content'
+          ) {
             this._displayType = 'text';
             assertExists(pageElement.root.rangeManager);
-            this._selectedBlockElements = getSelectedContentBlockElements(
-              this.root,
-              ['text']
-            );
+
+            this.root.std.command
+              .pipe()
+              .withRoot()
+              .getTextSelection()
+              .getSelectedBlocks({
+                types: ['text'],
+              })
+              .inline(ctx => {
+                const { selectedBlocks } = ctx;
+                assertExists(selectedBlocks);
+                this._selectedBlockElements = selectedBlocks;
+              })
+              .run();
           } else {
             this._reset();
           }

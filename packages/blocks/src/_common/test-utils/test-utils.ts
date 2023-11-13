@@ -3,10 +3,7 @@ import {
   mergeToCodeModel,
   transformModel,
 } from '../../page-block/utils/operations/model.js';
-import {
-  getSelectedContentBlockElements,
-  getSelectedContentModels,
-} from '../../page-block/utils/selection.js';
+import { getSelectedContentModels } from '../../page-block/utils/selection.js';
 
 class PageTestUtils {
   // block element operations (ui layer)
@@ -18,7 +15,6 @@ class PageTestUtils {
 
   // selection
   getSelectedContentModels = getSelectedContentModels;
-  getSelectedContentBlockElements = getSelectedContentBlockElements;
 }
 
 export class TestUtils {

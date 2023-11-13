@@ -6,7 +6,6 @@ import type { AffineTextAttributes } from '../../../_common/components/rich-text
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from '../../../_common/configs/text-format/consts.js';
 import { clearMarksOnDiscontinuousInput } from '../../../_common/utils/virgo.js';
 import type { Flavour } from '../../../models.js';
-import { getSelectedContentBlockElements } from '../../utils/selection.js';
 
 // for text selection
 export const formatTextCommand: Command<
@@ -30,62 +29,73 @@ export const formatTextCommand: Command<
     '`textSelection` is required, you need to pass it in args or use `getTextSelection` command before adding this command to the pipeline.'
   );
 
-  const selectedElements = getSelectedContentBlockElements(root, [
-    'text',
-  ]).filter(el =>
-    FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour)
-  );
+  const success = root.std.command
+    .pipe()
+    .withRoot()
+    .getSelectedBlocks({
+      textSelection,
+      filter: el =>
+        FORMAT_TEXT_SUPPORT_FLAVOURS.includes(el.model.flavour as Flavour),
+      types: ['text'],
+    })
+    .inline((ctx, next) => {
+      const { selectedBlocks } = ctx;
+      assertExists(selectedBlocks);
 
-  const selectedVEditors = selectedElements.flatMap(el => {
-    const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
-      `[${VIRGO_ROOT_ATTR}]`
-    );
-    if (vRoot && vRoot.virgoEditor.getVRange()) {
-      return vRoot.virgoEditor;
-    }
-    return [];
-  });
-
-  selectedVEditors.forEach(vEditor => {
-    const vRange = vEditor.getVRange();
-    if (!vRange) return;
-
-    if (vRange.length === 0) {
-      const delta = vEditor.getDeltaByRangeIndex(vRange.index);
-      if (!delta) return;
-
-      vEditor.setMarks({
-        ...vEditor.marks,
-        ...Object.fromEntries(
-          Object.entries(styles).map(([key, value]) => {
-            if (typeof value === 'boolean') {
-              return [
-                key,
-                (vEditor.marks &&
-                  vEditor.marks[key as keyof AffineTextAttributes]) ||
-                (delta.attributes &&
-                  delta.attributes[key as keyof AffineTextAttributes])
-                  ? null
-                  : value,
-              ];
-            }
-            return [key, value];
-          })
-        ),
+      const selectedVEditors = selectedBlocks.flatMap(el => {
+        const vRoot = el.querySelector<VirgoRootElement<AffineTextAttributes>>(
+          `[${VIRGO_ROOT_ATTR}]`
+        );
+        if (vRoot && vRoot.virgoEditor.getVRange()) {
+          return vRoot.virgoEditor;
+        }
+        return [];
       });
-      clearMarksOnDiscontinuousInput(vEditor);
-    } else {
-      vEditor.formatText(vRange, styles, {
-        mode,
+
+      selectedVEditors.forEach(vEditor => {
+        const vRange = vEditor.getVRange();
+        if (!vRange) return;
+
+        if (vRange.length === 0) {
+          const delta = vEditor.getDeltaByRangeIndex(vRange.index);
+          if (!delta) return;
+
+          vEditor.setMarks({
+            ...vEditor.marks,
+            ...Object.fromEntries(
+              Object.entries(styles).map(([key, value]) => {
+                if (typeof value === 'boolean') {
+                  return [
+                    key,
+                    (vEditor.marks &&
+                      vEditor.marks[key as keyof AffineTextAttributes]) ||
+                    (delta.attributes &&
+                      delta.attributes[key as keyof AffineTextAttributes])
+                      ? null
+                      : value,
+                  ];
+                }
+                return [key, value];
+              })
+            ),
+          });
+          clearMarksOnDiscontinuousInput(vEditor);
+        } else {
+          vEditor.formatText(vRange, styles, {
+            mode,
+          });
+        }
       });
-    }
-  });
 
-  Promise.all(selectedElements.map(el => el.updateComplete)).then(() => {
-    root.rangeManager?.syncTextSelectionToRange(textSelection);
-  });
+      Promise.all(selectedBlocks.map(el => el.updateComplete)).then(() => {
+        root.rangeManager?.syncTextSelectionToRange(textSelection);
+      });
 
-  next();
+      next();
+    })
+    .run();
+
+  if (success) next();
 };
 
 declare global {

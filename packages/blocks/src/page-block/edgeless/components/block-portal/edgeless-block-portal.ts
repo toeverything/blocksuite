@@ -15,6 +15,7 @@ import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
 
 import {
@@ -23,7 +24,6 @@ import {
 } from '../../../../_common/consts.js';
 import { delayCallback } from '../../../../_common/utils/event.js';
 import { matchFlavours } from '../../../../_common/utils/index.js';
-import type { TopLevelBlockModel } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -113,11 +113,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       `${translateX}px ${translateY}px`
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
-    this.layer.style.setProperty(
-      'transform',
-      `translate(${translateX}px, ${translateY}px) scale(${zoom})`
-    );
+    this.layer.style.setProperty('transform', this._getLayerViewport());
   };
+
+  private _getLayerViewport() {
+    const { surface } = this.edgeless;
+    const { zoom, translateX, translateY } = surface.viewport;
+
+    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+  }
 
   private _updateReference() {
     const { _surfaceRefReferenceSet, edgeless } = this;
@@ -162,7 +166,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         resizedNotes.forEach(([domRect, prevDomRect], id) => {
           if (page.readonly) return;
-          const model = page.getBlockById(id) as TopLevelBlockModel;
+          const model = page.getBlockById(id) as NoteBlockModel;
           const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);
 
@@ -170,7 +174,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           const newModelHeight =
             domRect.height +
             EDGELESS_BLOCK_CHILD_PADDING * 2 +
-            EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
+            (model.hidden ? EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2 : 0);
 
           if (!almostEqual(newModelHeight, h)) {
             const updateBlock = () => {
@@ -259,11 +263,13 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     const { surface, page } = edgeless;
     if (!surface) return nothing;
-    const notes = surface.getBlocks(NOTE);
-    const images = surface.getBlocks(IMAGE);
-    const blocks = [...notes, ...images].sort(surface.compare);
 
     const { readonly } = this.edgeless.page;
+    const notes = surface.getBlocks(NOTE);
+    const images = surface.getBlocks(IMAGE);
+    const frames = surface.getSortedBlocks(FRAME);
+    const blocks = [...notes, ...images].sort(surface.compare);
+
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
 
     notes.forEach(note => {
@@ -295,8 +301,17 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           .elementsMap=${autoConnectedBlocks}
         >
         </edgeless-auto-connect-line>
-        <div class="affine-edgeless-layer">
-          <edgeless-frames-container .surface=${surface}>
+        <div
+          class="affine-edgeless-layer"
+          style=${styleMap({
+            transform: this._getLayerViewport(),
+          })}
+        >
+          <edgeless-frames-container
+            .surface=${surface}
+            .edgeless=${edgeless}
+            .frames=${frames}
+          >
           </edgeless-frames-container>
           ${readonly
             ? nothing
@@ -314,6 +329,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                     .index=${index}
                     .model=${block}
                     .surface=${surface}
+                    .edgeless=${edgeless}
                   ></${tag}>`;
             }
           )}
@@ -334,6 +350,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       <edgeless-index-label
         .elementsMap=${autoConnectedBlocks}
         .surface=${surface}
+        .edgeless=${edgeless}
         .show=${this._showAutoConnect}
       ></edgeless-index-label>
       ${this._toolbarVisible && !page.readonly

@@ -39,7 +39,7 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
   rAfId: number | null = null;
 
-  refreshHoverRect = () => {
+  private _refreshHoverRect = () => {
     if (this.rAfId) cancelAnimationFrame(this.rAfId);
 
     const hoverState = this.edgeless.tools.getHoverState();
@@ -71,14 +71,14 @@ export class EdgelessHoverRect extends WithDisposable(LitElement) {
 
   protected override firstUpdated() {
     this._disposables.add(
-      this.edgeless.slots.hoverUpdated.on(() => this.refreshHoverRect())
+      this.edgeless.slots.hoverUpdated.on(() => this._refreshHoverRect())
     );
     this._disposables.add(
-      this.edgeless.slots.viewportUpdated.on(() => this.refreshHoverRect())
+      this.edgeless.slots.viewportUpdated.on(() => this._refreshHoverRect())
     );
     this._disposables.add(
       this.edgeless.selectionManager.slots.updated.on(() =>
-        this.refreshHoverRect()
+        this._refreshHoverRect()
       )
     );
   }

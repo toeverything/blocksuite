@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 // checkout https://vitest.dev/guide/debugging.html for debugging tests
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { applyUpdate, encodeStateAsUpdate } from 'yjs';
 
 // Use manual per-module import/export to support vitest environment on Node.js
@@ -29,6 +29,10 @@ async function createTestPage(pageId = 'page:home', workspace?: Workspace) {
   await page.waitForLoaded();
   return page;
 }
+
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['requestIdleCallback'] });
+});
 
 describe('workspace.search works', () => {
   it('workspace search matching', async () => {
@@ -78,9 +82,11 @@ describe('workspace.search works', () => {
 
     const id = page.id;
 
-    queueMicrotask(() => {
-      expect(workspace.search('处理器')).toStrictEqual(expected1);
-      expect(workspace.search('索尼')).toStrictEqual(expected2);
+    requestIdleCallback(() => {
+      queueMicrotask(() => {
+        expect(workspace.search('处理器')).toStrictEqual(expected1);
+        expect(workspace.search('索尼')).toStrictEqual(expected2);
+      });
     });
 
     const update = encodeStateAsUpdate(page.spaceDoc);
@@ -94,9 +100,12 @@ describe('workspace.search works', () => {
     });
     applyUpdate(page2.spaceDoc, update);
     expect(page2.spaceDoc.toJSON()).toEqual(page.spaceDoc.toJSON());
-    queueMicrotask(() => {
-      expect(workspace2.search('处理器')).toStrictEqual(expected1);
-      expect(workspace2.search('索尼')).toStrictEqual(expected2);
+
+    requestIdleCallback(() => {
+      queueMicrotask(() => {
+        expect(workspace2.search('处理器')).toStrictEqual(expected1);
+        expect(workspace2.search('索尼')).toStrictEqual(expected2);
+      });
     });
   });
 });

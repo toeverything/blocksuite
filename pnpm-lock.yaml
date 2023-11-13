@@ -279,8 +279,8 @@ importers:
         specifier: workspace:*
         version: link:../store
       '@toeverything/theme':
-        specifier: ^0.7.21
-        version: 0.7.21
+        specifier: ^0.7.24
+        version: 0.7.24
       lit:
         specifier: ^3.0.2
         version: 3.0.2
