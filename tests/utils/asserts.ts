@@ -842,9 +842,9 @@ export async function assertEdgelessNoteBackground(
   const backgroundColor = await editor
     .locator(`affine-note[data-block-id="${noteId}"]`)
     .evaluate(ele => {
-      const noteWrapper = ele.closest<HTMLDivElement>(
-        '.edgeless-block-portal-note'
-      );
+      const noteWrapper = ele
+        .closest<HTMLDivElement>('.edgeless-block-portal-note')
+        ?.querySelector<HTMLDivElement>('.note-background');
       if (!noteWrapper) {
         throw new Error(`Could not find note: ${noteId}`);
       }

@@ -259,7 +259,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
 
     this.edgeless.selectionManager.setSelection({
       elements: [id],
-      editing: true,
+      editing: false,
     });
     this.removeOverlay();
   }
