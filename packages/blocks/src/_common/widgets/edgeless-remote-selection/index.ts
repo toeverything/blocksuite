@@ -194,10 +194,12 @@ export class EdgelessRemoteSelectionWidget extends WidgetElement<EdgelessPageBlo
     ).forEach(slot => {
       _disposables.add(slot.on(this._updateOnElementChange));
     });
+
     _disposables.add(
       edgeless.slots.elementSizeUpdated.on(this._updateOnElementChange)
     );
-    _disposables.add(page.slots.yBlockUpdated.on(this._updateOnElementChange));
+
+    _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
 
     _disposables.add(
       this.selection.slots.remoteUpdated.on(this._updateRemoteRects)

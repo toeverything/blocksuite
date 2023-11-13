@@ -569,21 +569,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
           }
         );
 
-        if (!isEmpty(changedProps)) {
-          // FIXME: for temporary solution
-          if (isTopLevelBlock(element)) {
-            this.page.slots.yBlockUpdated.emit({
-              id,
-              type: 'update',
-              props: changedProps,
-            });
-          } else {
-            this.slots.elementUpdated.emit({
-              id,
-              props: changedProps,
-            });
-          }
-        }
+        if (isEmpty(changedProps)) return;
+
+        this.slots.elementUpdated.emit({
+          id,
+          props: changedProps,
+        });
       })
     );
   }

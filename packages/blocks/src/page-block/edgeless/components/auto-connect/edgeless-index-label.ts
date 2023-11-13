@@ -125,9 +125,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      surface.page.slots.yBlockUpdated.on(({ type, id }) => {
+      edgeless.slots.elementSizeUpdated.on(id => {
         const block = surface.page.getBlockById(id);
-        if (type === 'update' && isNoteBlock(block)) {
+        if (isNoteBlock(block)) {
           this.requestUpdate();
         } else if (isFrameBlock(block) && this.elementsMap.has(block)) {
           this.requestUpdate();
