@@ -45,12 +45,11 @@ export default defineConfig({
       {
         text: 'BlockSuite Architecture',
         items: [
-          { text: 'Core Packages', link: '/core-packages' },
-          { text: 'Modeling Editor State', link: '/editor-state' },
           {
             text: 'Unidirectional Data Flow',
             link: '/unidirectional-data-flow',
           },
+          { text: 'Modeling Editor State', link: '/editor-state' },
           { text: 'Data Persistence', link: '/data-persistence' },
         ],
       },
@@ -70,15 +69,6 @@ export default defineConfig({
           { text: 'Selection API', link: '/selection-api' },
           { text: 'Event API', link: '/event-api' },
           { text: 'Command API', link: '/command-api' },
-        ],
-      },
-      {
-        text: 'Packages',
-        items: [
-          { text: '🚧 <code>@blocksuite/store</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/block-std</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/lit</code>', link: '' },
-          { text: '🚧 <code>@blocksuite/virgo</code>', link: '' },
         ],
       },
       {
