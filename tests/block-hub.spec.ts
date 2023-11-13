@@ -119,7 +119,7 @@ test('auto-scroll should be activate when adding blank lines or blocks', async (
     { steps: 50 }
   );
 
-  await waitNextFrame(page);
+  await waitNextFrame(page, 2000);
   // now paragraph0 is in viewport
   await expect(paragraph0).toBeInViewport();
 

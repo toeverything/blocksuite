@@ -42,6 +42,7 @@ import {
   resetHistory,
   scrollToTop,
   selectAllByKeyboard,
+  setVRangeInVEditor,
   SHORT_KEY,
   switchEditorMode,
   type,
@@ -1093,7 +1094,14 @@ test('should select texts on cross-note dragging', async ({ page }) => {
   await initEmptyParagraphState(page, pageId);
 
   // focus last block in first note
-  await focusRichText(page, 2);
+  await setVRangeInVEditor(
+    page,
+    {
+      index: 3,
+      length: 0,
+    },
+    3
+  );
   // goto next note
   await pressArrowDown(page);
   await waitNextFrame(page);
