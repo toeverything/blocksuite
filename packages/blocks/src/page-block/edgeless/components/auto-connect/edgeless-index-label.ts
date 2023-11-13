@@ -125,8 +125,11 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(id => {
+      edgeless.slots.elementUpdated.on(({ id, props }) => {
+        if (!('xywh' in props || 'rotate' in props)) return;
+
         const block = surface.page.getBlockById(id);
+
         if (isNoteBlock(block)) {
           this.requestUpdate();
         } else if (isFrameBlock(block) && this.elementsMap.has(block)) {
@@ -136,17 +139,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      surface.slots.elementUpdated.on(({ id }) => {
+      edgeless.slots.elementUpdated.on(({ id }) => {
         const element = surface.pickById(id) as AutoConnectElement;
         if (element && this.elementsMap.has(element)) {
-          this.requestUpdate();
-        }
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(id => {
-        if (isNoteBlock(surface.pickById(id))) {
           this.requestUpdate();
         }
       })

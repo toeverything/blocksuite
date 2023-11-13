@@ -90,6 +90,7 @@ export class Page extends Space<FlatBlockMap> {
           id: string;
           flavour: string;
           parent: string;
+          model: BaseBlockModel;
         }
       | {
           type: 'update';
@@ -771,6 +772,7 @@ export class Page extends Space<FlatBlockMap> {
       id,
       flavour: model.flavour,
       parent: this.getParent(model)?.id ?? '',
+      model,
     });
     model.deleted.emit();
     model.dispose();

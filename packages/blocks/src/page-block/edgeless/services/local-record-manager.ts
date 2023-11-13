@@ -11,7 +11,7 @@ export class LocalRecordManager<T> {
     updated: new Slot<{
       id: string;
       data: {
-        old: Partial<T> | undefined;
+        old: { [key in keyof Partial<T>]: Partial<T>[keyof T] } | undefined;
         new: Partial<T>;
       };
     }>(),

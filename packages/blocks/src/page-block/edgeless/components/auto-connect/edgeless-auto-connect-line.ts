@@ -42,6 +42,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
   protected override firstUpdated(): void {
     const { _disposables, surface } = this;
+
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
         this.requestUpdate();
@@ -49,8 +50,8 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
     );
 
     _disposables.add(
-      surface.edgeless.slots.elementSizeUpdated.on(id => {
-        if (isNoteBlock(surface.pickById(id))) {
+      surface.edgeless.slots.elementUpdated.on(event => {
+        if (isNoteBlock(surface.pickById(event.id)) && 'xywh' in event.props) {
           this.requestUpdate();
         }
       })

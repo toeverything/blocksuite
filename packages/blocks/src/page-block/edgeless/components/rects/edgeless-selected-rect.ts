@@ -7,7 +7,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { pick } from '../../../../_common/utils/iterable.js';
+import { pickValues } from '../../../../_common/utils/iterable.js';
 import type {
   EdgelessElement,
   IPoint,
@@ -629,16 +629,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, page, slots, selection, surface, edgeless } = this;
+    const { _disposables, page, slots, selection, edgeless } = this;
 
     _disposables.add(
       // viewport zooming / scrolling
       slots.viewportUpdated.on(this._updateOnViewportChange)
     );
 
-    Object.values(
-      pick(surface.slots, ['elementAdded', 'elementRemoved', 'elementUpdated'])
-    ).forEach(slot => {
+    pickValues(edgeless.slots, [
+      'elementAdded',
+      'elementRemoved',
+      'elementUpdated',
+    ]).forEach(slot => {
       _disposables.add(slot.on(this._updateOnElementChange));
     });
 
@@ -648,9 +650,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       )
     );
 
-    _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(this._updateOnElementChange)
-    );
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
     _disposables.add(
