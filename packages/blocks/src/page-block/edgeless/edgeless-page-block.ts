@@ -764,6 +764,8 @@ export class EdgelessPageBlockComponent extends BlockElement<
 
       if (!element) return;
 
+      this.surface.refresh();
+
       const changedProps = pick(
         data.new,
         keys(data.new).filter(key => key in element)
