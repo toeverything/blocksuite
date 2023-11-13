@@ -654,7 +654,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
     _disposables.add(
-      page.slots.yBlockUpdated.on(data => {
+      page.slots.blockUpdated.on(data => {
         this._updateOnElementChange(data, true);
       })
     );

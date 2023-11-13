@@ -32,7 +32,7 @@ export class EdgelessPortalBase<
 
   override firstUpdated() {
     this._disposables.add(
-      this.surface.page.slots.yBlockUpdated.on(e => {
+      this.surface.page.slots.blockUpdated.on(e => {
         if (e.id === this.model.id) {
           this.requestUpdate();
         }

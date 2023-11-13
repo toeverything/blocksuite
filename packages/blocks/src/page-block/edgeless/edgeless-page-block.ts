@@ -269,13 +269,22 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initSlotEffects() {
     const { _disposables, slots, page, surface } = this;
     _disposables.add(
-      page.slots.yBlockUpdated.on(({ id, props }) => {
-        const block = page.getBlockById(id);
-        if (
-          matchFlavours(block, [NOTE, IMAGE, FRAME]) &&
-          ('prop:xywh' in props || 'prop:rotate' in props)
-        ) {
-          this.slots.elementSizeUpdated.emit(id);
+      page.slots.blockUpdated.on(event => {
+        const block = page.getBlockById(event.id);
+
+        switch (event.type) {
+          case 'add':
+            if (matchFlavours(block, [NOTE, IMAGE, FRAME])) {
+              this.slots.elementSizeUpdated.emit(event.id);
+            }
+            break;
+          case 'update':
+            if (
+              matchFlavours(block, [NOTE, IMAGE, FRAME]) &&
+              ('prop:xywh' in event.props || 'prop:rotate' in event.props)
+            ) {
+              this.slots.elementSizeUpdated.emit(event.id);
+            }
         }
       })
     );
