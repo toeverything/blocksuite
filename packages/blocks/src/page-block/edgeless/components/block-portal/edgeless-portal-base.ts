@@ -23,11 +23,13 @@ export class EdgelessPortalBase<
   override connectedCallback(): void {
     super.connectedCallback();
 
-    this.edgeless.slots.elementSizeUpdated.on(id => {
-      if (this.model.id === id) {
-        this.requestUpdate();
-      }
-    });
+    this._disposables.add(
+      this.model.propsUpdated.on(() => this.requestUpdate())
+    );
+
+    this._disposables.add(
+      this.model.childrenUpdated.on(() => this.requestUpdate())
+    );
   }
 
   override firstUpdated() {
