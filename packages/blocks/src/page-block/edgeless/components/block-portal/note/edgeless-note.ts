@@ -69,24 +69,30 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   @state()
   private _transition = 'none';
 
-  override firstUpdated() {
+  private _handleEditingTransition() {
     const selection = this.surface.edgeless.selectionManager;
-    selection.slots.updated.on(async () => {
-      if (
-        selection.state.editing &&
-        selection.state.elements.includes(this.model.id)
-      ) {
-        this._editing = true;
-        this._transition = 'left 0.3s, top 0.3s, width 0.3s, height 0.3s';
-      } else {
-        this._editing = false;
-        if (this._transition !== 'none') {
-          // waiting for animation done
-          await sleep(300);
-          this._transition = 'none';
+    this._disposables.add(
+      selection.slots.updated.on(async () => {
+        if (
+          selection.state.editing &&
+          selection.state.elements.includes(this.model.id)
+        ) {
+          this._editing = true;
+          this._transition = 'left 0.3s, top 0.3s, width 0.3s, height 0.3s';
+        } else {
+          this._editing = false;
+          if (this._transition !== 'none') {
+            // wait for animation done
+            await sleep(300);
+            this._transition = 'none';
+          }
         }
-      }
-    });
+      })
+    );
+  }
+
+  override firstUpdated() {
+    this._handleEditingTransition();
   }
 
   override render() {
