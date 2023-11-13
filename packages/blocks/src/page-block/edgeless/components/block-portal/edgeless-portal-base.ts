@@ -30,16 +30,8 @@ export class EdgelessPortalBase<
     );
 
     this._disposables.add(
-      this.edgeless.slots.elementUpdated.on(() => {
-        this.requestUpdate();
-      })
-    );
-  }
-
-  override firstUpdated() {
-    this._disposables.add(
-      this.surface.page.slots.blockUpdated.on(e => {
-        if (e.id === this.model.id) {
+      this.edgeless.slots.elementUpdated.on(({ id }) => {
+        if (id === this.model.id) {
           this.requestUpdate();
         }
       })

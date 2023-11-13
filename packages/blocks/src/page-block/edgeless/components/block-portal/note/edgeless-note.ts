@@ -92,7 +92,6 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
   }
 
   override firstUpdated() {
-    super.firstUpdated();
     this._handleEditingTransition();
   }
 
