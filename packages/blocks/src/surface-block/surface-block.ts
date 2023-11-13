@@ -550,7 +550,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._disposables.add(
       this.edgeless.localRecord.slots.updated.on(({ id, data }) => {
         this.refresh();
-        const element = this.pickById(id);
+
+        /**
+         *  should not use pickById here as this listener
+         *  is only applicable to surface element
+         */
+        const element = this._elements.get(id);
 
         if (!element) return;
 
