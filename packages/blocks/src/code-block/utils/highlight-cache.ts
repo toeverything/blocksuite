@@ -31,5 +31,5 @@ class LRUCache<K, V> {
 export type highlightCacheKey = `${string}-${string}-${string}`;
 
 export const highlightCache = new LRUCache<highlightCacheKey, IThemedToken[]>(
-  100
+  4000
 );

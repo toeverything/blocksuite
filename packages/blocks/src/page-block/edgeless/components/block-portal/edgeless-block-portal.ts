@@ -24,7 +24,6 @@ import {
 } from '../../../../_common/consts.js';
 import { delayCallback } from '../../../../_common/utils/event.js';
 import { matchFlavours } from '../../../../_common/utils/index.js';
-import type { TopLevelBlockModel } from '../../../../_common/utils/types.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -167,7 +166,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         resizedNotes.forEach(([domRect, prevDomRect], id) => {
           if (page.readonly) return;
-          const model = page.getBlockById(id) as TopLevelBlockModel;
+          const model = page.getBlockById(id) as NoteBlockModel;
           const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);
 
@@ -175,7 +174,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
           const newModelHeight =
             domRect.height +
             EDGELESS_BLOCK_CHILD_PADDING * 2 +
-            EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
+            (model.hidden ? EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2 : 0);
 
           if (!almostEqual(newModelHeight, h)) {
             const updateBlock = () => {

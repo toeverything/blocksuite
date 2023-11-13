@@ -551,8 +551,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     this._disposables.add(
       this.edgeless.localRecord.slots.updated.on(({ id, data }) => {
         this.refresh();
-
-        const element = this._elements.get(id);
+        const element = this.pickById(id);
 
         if (!element) return;
 
@@ -572,10 +571,19 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
         );
 
         if (!isEmpty(changedProps)) {
-          this.slots.elementUpdated.emit({
-            id,
-            props: changedProps,
-          });
+          // FIXME: for temporary solution
+          if (isTopLevelBlock(element)) {
+            this.page.slots.yBlockUpdated.emit({
+              id,
+              type: 'update',
+              props: changedProps,
+            });
+          } else {
+            this.slots.elementUpdated.emit({
+              id,
+              props: changedProps,
+            });
+          }
         }
       })
     );

@@ -49,7 +49,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
     );
 
     _disposables.add(
-      surface.page.slots.blockUpdated.on(({ type, id }) => {
+      surface.page.slots.yBlockUpdated.on(({ type, id }) => {
         if (type === 'update' && isNoteBlock(surface.pickById(id))) {
           this.requestUpdate();
         }

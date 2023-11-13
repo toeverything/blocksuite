@@ -1,12 +1,13 @@
 import '../../note-slicer/index.js';
 
+import { sleep } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import { html, nothing } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import {
-  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
+  ACTIVE_NOTE_EXTRA_PADDING,
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../../_common/consts.js';
 import {
@@ -62,29 +63,78 @@ export class EdgelessNoteMask extends WithDisposable(ShadowlessElement) {
 
 @customElement('edgeless-block-portal-note')
 export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> {
+  @state()
+  private _editing = false;
+
+  @state()
+  private _transition = 'none';
+
+  private _handleEditingTransition() {
+    const selection = this.surface.edgeless.selectionManager;
+    this._disposables.add(
+      selection.slots.updated.on(async () => {
+        if (
+          selection.state.editing &&
+          selection.state.elements.includes(this.model.id)
+        ) {
+          this._editing = true;
+          this._transition = 'left 0.3s, top 0.3s, width 0.3s, height 0.3s';
+        } else {
+          this._editing = false;
+          if (this._transition !== 'none') {
+            // wait for animation done
+            await sleep(300);
+            this._transition = 'none';
+          }
+        }
+      })
+    );
+  }
+
+  override firstUpdated() {
+    this._handleEditingTransition();
+  }
+
   override render() {
     const { model, surface, index } = this;
     const { xywh, background } = model;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
+
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
-      width: modelW + 'px',
+      width: `${modelW}px`,
       transform: `translate(${modelX}px, ${modelY}px)`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
-      border: `${EDGELESS_BLOCK_CHILD_BORDER_WIDTH}px ${
-        isHiddenNote ? 'dashed' : 'solid'
-      } var(--affine-black-10)`,
-      borderRadius: '8px',
       boxSizing: 'border-box',
+      borderRadius: '8px',
+      pointerEvents: 'all',
+      transformOrigin: '0 0',
+    };
+
+    const extra = this._editing ? ACTIVE_NOTE_EXTRA_PADDING : 0;
+    const backgroundStyle = {
+      position: 'absolute',
+      left: `${-extra}px`,
+      top: `${-extra}px`,
+      width: `${modelW + extra * 2}px`,
+      height: `calc(100% + ${extra * 2}px)`,
+      borderRadius: '8px',
+      transition: this._transition,
       background: isHiddenNote
         ? 'transparent'
         : `var(${background ?? DEFAULT_NOTE_COLOR})`,
-      boxShadow: isHiddenNote ? undefined : 'var(--affine-shadow-3)',
-      pointerEvents: 'all',
-      overflow: 'hidden',
-      transformOrigin: '0 0',
+      border: this._editing
+        ? `1px solid var(--affine-blue-600)`
+        : isHiddenNote
+        ? `2px dashed var(--affine-black-10)`
+        : 'none',
+      boxShadow: this._editing
+        ? 'var(--affine-active-shadow)'
+        : isHiddenNote
+        ? 'none'
+        : 'var(--affine-note-shadow-box)',
     };
 
     return html`
@@ -93,6 +143,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         style=${styleMap(style)}
         data-model-height="${modelH}"
       >
+        <div class="note-background" style=${styleMap(backgroundStyle)}></div>
         ${surface.edgeless.renderModel(model)}
         <edgeless-note-mask
           .surface=${surface}
