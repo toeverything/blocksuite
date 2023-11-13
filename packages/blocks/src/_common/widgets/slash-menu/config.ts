@@ -220,7 +220,7 @@ export const menuGroups: SlashMenuOptions['menus'] = [
           const triggerKey = '@';
           insertContent(model, triggerKey);
           assertExists(model.page.root);
-          const pageBlock = getBlockElementByModel(model);
+          const pageBlock = getBlockElementByModel(model.page.root);
           const widgetEle =
             pageBlock?.widgetElements['affine-linked-page-widget'];
           assertExists(widgetEle);
