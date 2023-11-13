@@ -768,3 +768,39 @@ test('should bracket complete works in code block', async ({ page }) => {
   await type(page, ']');
   await assertRichTexts(page, ['const a = "str(])"']);
 });
+
+test('auto scroll horizontally when typing', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+
+  await focusRichText(page);
+  await type(page, '``` ');
+
+  for (let i = 0; i < 60; i++) {
+    await type(page, String(i));
+  }
+
+  const richTextScrollLeft1 = await page.evaluate(() => {
+    const richText = document.querySelector('affine-code rich-text');
+    if (!richText) {
+      throw new Error('Failed to get rich text');
+    }
+
+    return richText.scrollLeft;
+  });
+  expect(richTextScrollLeft1).toBeGreaterThan(200);
+
+  await pressArrowLeft(page, 5);
+  await type(page, 'aa');
+
+  const richTextScrollLeft2 = await page.evaluate(() => {
+    const richText = document.querySelector('affine-code rich-text');
+    if (!richText) {
+      throw new Error('Failed to get rich text');
+    }
+
+    return richText.scrollLeft;
+  });
+
+  expect(richTextScrollLeft2).toEqual(richTextScrollLeft1);
+});
