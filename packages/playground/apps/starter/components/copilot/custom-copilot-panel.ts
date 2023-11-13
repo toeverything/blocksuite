@@ -22,6 +22,7 @@ import {
 } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
+import { createMindMap } from './utils/mind-map-utils.js';
 import {
   getSelectedBlocks,
   getSelectedTextContent,
@@ -133,6 +134,12 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
       case 'simplifyLanguage':
         result = await sendSimplifyLanguageRequest(payload.input);
         break;
+      case 'createMindMap':
+        console.log('createMindMap');
+        createMindMap(this.editor);
+        break;
+      default:
+        throw new Error('Invalid copilot action');
     }
 
     return result;
@@ -182,7 +189,6 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
       parentBlock.model.id,
       firstIndex
     );
-
     setTimeout(async () => {
       const parentPath = firstBlock.parentPath;
       const selections = models
@@ -326,6 +332,9 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
         </sl-menu-item>
         <sl-menu-item @click=${() => this._handleActionClick('fixSpelling')}>
           Fix Spelling and Grammar
+        </sl-menu-item>
+        <sl-menu-item @click=${() => this._handleActionClick('createMindMap')}>
+          Create Mind Map
         </sl-menu-item>
       </sl-menu>
       <sl-popup
