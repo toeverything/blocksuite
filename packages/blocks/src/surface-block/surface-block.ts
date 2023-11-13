@@ -23,7 +23,6 @@ import { isEmpty } from '../_common/utils/iterable.js';
 import { EdgelessConnectorManager } from '../page-block/edgeless/connector-manager.js';
 import type { EdgelessPageBlockComponent } from '../page-block/edgeless/edgeless-page-block.js';
 import { EdgelessFrameManager } from '../page-block/edgeless/frame-manager.js';
-import { localRecordWrapper } from '../page-block/edgeless/services/local-record-manager.js';
 import { getGridBound } from '../page-block/edgeless/utils/bound-utils.js';
 import {
   isConnectable,
@@ -192,7 +191,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return parent.children
       .filter(child => child.flavour === flavour)
       .map(child =>
-        localRecordWrapper(child, this.edgeless.localRecord)
+        this.edgeless.localRecord.wrap(child)
       ) as EdgelessBlockModelMap[T][];
   }
 
@@ -948,10 +947,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     const block = this.page.getBlockById(id);
 
     return block
-      ? (localRecordWrapper(
-          block,
-          this.edgeless.localRecord
-        ) as EdgelessElement)
+      ? (this.edgeless.localRecord.wrap(block) as EdgelessElement)
       : null;
   }
 
