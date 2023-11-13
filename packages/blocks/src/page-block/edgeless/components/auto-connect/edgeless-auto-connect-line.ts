@@ -6,7 +6,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
 const EXPAND_OFFSET = 40;

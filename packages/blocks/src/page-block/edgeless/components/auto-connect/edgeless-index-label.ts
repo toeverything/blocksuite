@@ -11,7 +11,7 @@ import {
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { isFrameBlock, isNoteBlock } from '../../utils/query.js';
+import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
 function calculatePosition(gap: number, count: number, iconWidth: number) {
