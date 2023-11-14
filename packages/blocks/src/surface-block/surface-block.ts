@@ -978,6 +978,12 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return picked;
   }
 
+  /**
+   * Block model retrieved from the surface block will be wrapped with local record.
+   * You can use this function to unwrap them to get real model
+   * @param block
+   * @returns
+   */
   unwrap<T extends BaseBlockModel>(block: T) {
     return this.edgeless.localRecord.unwrap(block) as T;
   }
