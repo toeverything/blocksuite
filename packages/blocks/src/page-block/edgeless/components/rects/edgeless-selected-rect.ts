@@ -324,6 +324,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.addEventListener('pointerdown', stopPropagation);
   }
 
+  get dragging() {
+    return this._resizeManager.dragging || this.edgeless.tools.dragging;
+  }
+
   get selection() {
     return this.edgeless.selectionManager;
   }
