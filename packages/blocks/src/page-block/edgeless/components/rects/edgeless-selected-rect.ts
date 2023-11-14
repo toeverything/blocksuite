@@ -401,7 +401,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
-    const { page, surface } = this;
+    const { surface, edgeless } = this;
 
     newBounds.forEach(({ bound }, id) => {
       const element = surface.pickById(id);
@@ -417,11 +417,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         if (height < NOTE_MIN_HEIGHT) {
           height = NOTE_MIN_HEIGHT;
         }
-        page.updateBlock(element, {
+        edgeless.updateElementInLocal(element.id, {
           xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
         });
       } else if (isFrameBlock(element)) {
-        page.updateBlock(element, {
+        edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
         });
       } else {
@@ -434,7 +434,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeTextBound(element, bound, true);
             // If the width of the text element has been changed by dragging,
             // We need to set hasMaxWidth to true for wrapping the text
-            surface.updateElement(id, {
+            edgeless.updateElementInLocal(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
               hasMaxWidth: true,
@@ -443,7 +443,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             p = bound.h / element.h;
             // const newFontsize = element.fontSize * p;
             // bound = normalizeTextBound(element, bound, false, newFontsize);
-            surface.updateElement(id, {
+            edgeless.updateElementInLocal(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
             });
@@ -452,7 +452,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           if (element instanceof ShapeElement) {
             bound = normalizeShapeBound(element, bound);
           }
-          surface.updateElement(id, {
+          edgeless.updateElementInLocal(id, {
             xywh: bound.serialize(),
           });
         }
@@ -489,6 +489,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
+    const selectedElements = this.edgeless.selectionManager.state.elements;
+    this.edgeless.applyLocalRecord(selectedElements);
+
     this._updateCursor(false);
     this.setToolbarVisible(true);
   };
