@@ -59,7 +59,7 @@ export function bindHotKey(blockElement: BlockElement) {
             .inline<'currentSelectionPath'>((ctx, next) => {
               const textSelection = ctx.currentTextSelection;
               assertExists(textSelection);
-              const end = textSelection.to ?? textSelection.from;
+              const end = textSelection.end;
               currentBlock = pathToBlock(blockElement, end.path);
               next({ currentSelectionPath: end.path });
             })
@@ -148,8 +148,9 @@ export function bindHotKey(blockElement: BlockElement) {
             .inline<'currentSelectionPath'>((ctx, next) => {
               const textSelection = ctx.currentTextSelection;
               assertExists(textSelection);
-              currentBlock = pathToBlock(blockElement, textSelection.from.path);
-              next({ currentSelectionPath: textSelection.from.path });
+              const end = textSelection.end;
+              currentBlock = pathToBlock(blockElement, end.path);
+              next({ currentSelectionPath: end.path });
             })
             .try(cmd => [
               // text selection - case 1: move cursor up within the same block

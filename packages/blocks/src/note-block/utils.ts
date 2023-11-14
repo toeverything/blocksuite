@@ -239,6 +239,42 @@ export function selectBetween(
   });
 }
 
+export function collapseSelection() {
+  const selection = document.getSelection();
+  if (!selection) {
+    return;
+  }
+
+  if (selection.isCollapsed) {
+    return;
+  }
+
+  const isReverse = isRangeReverse();
+
+  if (isReverse) {
+    selection.collapseToStart();
+  } else {
+    selection.collapseToEnd();
+  }
+}
+
+export function isRangeReverse() {
+  const selection = document.getSelection();
+  if (!selection) {
+    return false;
+  }
+
+  const isReverse =
+    !!selection.anchorNode &&
+    !!selection.focusNode &&
+    (selection.anchorNode === selection.focusNode
+      ? selection.anchorOffset > selection.focusOffset
+      : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
+        Node.DOCUMENT_POSITION_PRECEDING);
+
+  return isReverse;
+}
+
 export function getCurrentCaretPos(tail: boolean) {
   const selection = document.getSelection();
   if (!selection || !selection.anchorNode) {
@@ -593,13 +629,7 @@ function getCurrentTextSelectionCarets():
 
   const range = selection.getRangeAt(0);
 
-  const isRangeReversed =
-    !!selection.anchorNode &&
-    !!selection.focusNode &&
-    (selection.anchorNode === selection.focusNode
-      ? selection.anchorOffset > selection.focusOffset
-      : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
-        Node.DOCUMENT_POSITION_PRECEDING);
+  const isRangeReversed = isRangeReverse();
 
   const startCaret: Caret = {
     node: isRangeReversed ? range.endContainer : range.startContainer,
