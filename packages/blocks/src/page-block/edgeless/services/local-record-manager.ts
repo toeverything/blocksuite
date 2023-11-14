@@ -89,6 +89,13 @@ export function localRecordWrapper<T>(
   id: string
 ) {
   return new Proxy(model, {
+    has: (target, prop) => {
+      if (prop === rawSymbol) {
+        return true;
+      }
+
+      return Reflect.has(target, prop);
+    },
     get: (target, prop, receiver) => {
       if (prop === rawSymbol) {
         return model;
