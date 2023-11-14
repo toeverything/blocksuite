@@ -134,7 +134,6 @@ async function initEmptyEditor({
         });
       } else {
         const page = workspace.createPage({ id: 'page:home' });
-        await page.load();
         initPage(page);
       }
     },
@@ -352,18 +351,16 @@ export async function enterPlaygroundWithList(
 export async function initEmptyParagraphState(page: Page, pageId?: string) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
-    await page.load(() => {
-      page.captureSync();
-      if (!pageId) {
-        pageId = page.addBlock('affine:page', {
-          title: new page.Text(),
-        });
-      }
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
 
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
-      // page.addBlock('affine:surface', {}, pageId);
-    });
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
 
     return { pageId, noteId, paragraphId };
@@ -374,14 +371,13 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(async () => {
     const { page } = window;
-    await page.load(() => {
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
-      });
-      page.addBlock('affine:surface', {}, pageId);
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+    const pageId = page.addBlock('affine:page', {
+      title: new page.Text(),
     });
+    page.addBlock('affine:surface', {}, pageId);
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+
     page.resetHistory();
 
     return { pageId, noteId, paragraphId };
@@ -392,25 +388,24 @@ export async function initEmptyEdgelessState(page: Page) {
 export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
-    await page.load(() => {
-      page.captureSync();
-      if (!pageId) {
-        pageId = page.addBlock('affine:page', {
-          title: new page.Text(),
-        });
-      }
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      const databaseId = page.addBlock(
-        'affine:database',
-        {
-          title: new page.Text('Database 1'),
-        },
-        noteId
-      );
-      const model = page.getBlockById(databaseId) as DatabaseBlockModel;
-      model.initEmpty('table');
-      model.applyColumnUpdate();
-    });
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+      },
+      noteId
+    );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
+
     page.captureSync();
     return { pageId, noteId, databaseId };
   }, pageId);
@@ -428,67 +423,7 @@ export async function initKanbanViewState(
   const ids = await page.evaluate(
     async ({ pageId, config }) => {
       const { page } = window;
-      await page.load(() => {
-        page.captureSync();
-        if (!pageId) {
-          pageId = page.addBlock('affine:page', {
-            title: new page.Text(),
-          });
-        }
-        const noteId = page.addBlock('affine:note', {}, pageId);
-        const databaseId = page.addBlock(
-          'affine:database',
-          {
-            title: new page.Text('Database 1'),
-          },
-          noteId
-        );
-        const model = page.getBlockById(databaseId) as DatabaseBlockModel;
-        const database = page.getBlockById(databaseId) as DatabaseBlockModel;
 
-        const rowIds = config.rows.map(rowText => {
-          const rowId = page.addBlock(
-            'affine:paragraph',
-            { type: 'text', text: new page.Text(rowText) },
-            databaseId
-          );
-          return rowId;
-        });
-        config.columns.forEach(column => {
-          const columnId = database.addColumn('end', {
-            data: {},
-            name: column.type,
-            type: column.type,
-          });
-          rowIds.forEach((rowId, index) => {
-            const value = column.value?.[index];
-            if (value !== undefined) {
-              model.updateCell(rowId, {
-                columnId,
-                value,
-              });
-            }
-          });
-        });
-        model.initEmpty('kanban');
-        model.applyColumnUpdate();
-      });
-
-      page.captureSync();
-      return { pageId, noteId, databaseId };
-    },
-    { pageId, config }
-  );
-  return ids;
-}
-
-export async function initEmptyDatabaseWithParagraphState(
-  page: Page,
-  pageId?: string
-) {
-  const ids = await page.evaluate(async pageId => {
-    const { page } = window;
-    await page.load(() => {
       page.captureSync();
       if (!pageId) {
         pageId = page.addBlock('affine:page', {
@@ -504,10 +439,67 @@ export async function initEmptyDatabaseWithParagraphState(
         noteId
       );
       const model = page.getBlockById(databaseId) as DatabaseBlockModel;
-      model.initEmpty('table');
+      const database = page.getBlockById(databaseId) as DatabaseBlockModel;
+
+      const rowIds = config.rows.map(rowText => {
+        const rowId = page.addBlock(
+          'affine:paragraph',
+          { type: 'text', text: new page.Text(rowText) },
+          databaseId
+        );
+        return rowId;
+      });
+      config.columns.forEach(column => {
+        const columnId = database.addColumn('end', {
+          data: {},
+          name: column.type,
+          type: column.type,
+        });
+        rowIds.forEach((rowId, index) => {
+          const value = column.value?.[index];
+          if (value !== undefined) {
+            model.updateCell(rowId, {
+              columnId,
+              value,
+            });
+          }
+        });
+      });
+      model.initEmpty('kanban');
       model.applyColumnUpdate();
-      page.addBlock('affine:paragraph', {}, noteId);
-    });
+      page.captureSync();
+      return { pageId, noteId, databaseId };
+    },
+    { pageId, config }
+  );
+  return ids;
+}
+
+export async function initEmptyDatabaseWithParagraphState(
+  page: Page,
+  pageId?: string
+) {
+  const ids = await page.evaluate(async pageId => {
+    const { page } = window;
+
+    page.captureSync();
+    if (!pageId) {
+      pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+    }
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const databaseId = page.addBlock(
+      'affine:database',
+      {
+        title: new page.Text('Database 1'),
+      },
+      noteId
+    );
+    const model = page.getBlockById(databaseId) as DatabaseBlockModel;
+    model.initEmpty('table');
+    model.applyColumnUpdate();
+    page.addBlock('affine:paragraph', {}, noteId);
 
     page.captureSync();
     return { pageId, noteId, databaseId };
@@ -579,12 +571,10 @@ export async function initEmptyCodeBlockState(
 ) {
   const ids = await page.evaluate(async codeBlockProps => {
     const { page } = window;
-    await page.load(() => {
-      page.captureSync();
-      const pageId = page.addBlock('affine:page');
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
-    });
+    page.captureSync();
+    const pageId = page.addBlock('affine:page');
+    const noteId = page.addBlock('affine:note', {}, pageId);
+    const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
     page.captureSync();
 
     return { pageId, noteId, codeBlockId };
