@@ -978,6 +978,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     return picked;
   }
 
+  unwrap<T extends BaseBlockModel>(block: T) {
+    return this.edgeless.localRecord.unwrap(block) as T;
+  }
+
   getSortedPhasorElementsWithViewportBounds() {
     return this.pickByBound(this.viewport.viewportBounds)
       .filter(e => !isTopLevelBlock(e))

@@ -55,12 +55,20 @@ export class LocalRecordManager<T> {
     data.forEach(([id, record], idx) => callback(id, record, idx));
   }
 
-  wrap(model: BaseBlockModel) {
+  wrap(model: BaseBlockModel, id: string = model.id) {
     if (!this._wrappedModelCache.has(model)) {
-      this._wrappedModelCache.set(model, localRecordWrapper(model, this));
+      this._wrappedModelCache.set(
+        model,
+        localRecordWrapper(model, this, id) as BaseBlockModel
+      );
     }
 
     return this._wrappedModelCache.get(model) as BaseBlockModel;
+  }
+
+  unwrap(model: BaseBlockModel) {
+    if (rawSymbol in model) return model[rawSymbol] as BaseBlockModel;
+    return model;
   }
 
   destroy() {
@@ -69,19 +77,26 @@ export class LocalRecordManager<T> {
   }
 }
 
+const rawSymbol = Symbol('raw');
+
 /**
  * This wraps block tree model with local record, so that its props can be temporarily shadowed.
  * Useful for cases like batch dragging, where per-frame update could be too expensive.
  */
 export function localRecordWrapper<T>(
-  model: BaseBlockModel,
-  localRecord: LocalRecordManager<T>
+  model: object,
+  localRecord: LocalRecordManager<T>,
+  id: string
 ) {
   return new Proxy(model, {
     get: (target, prop, receiver) => {
-      return localRecord.get(target.id) &&
-        Object.hasOwn(localRecord.get(target.id) as T as object, prop)
-        ? localRecord.get(target.id)![prop as keyof T]
+      if (prop === rawSymbol) {
+        return model;
+      }
+
+      return localRecord.get(id) &&
+        Object.hasOwn(localRecord.get(id) as T as object, prop)
+        ? localRecord.get(id)![prop as keyof T]
         : Reflect.get(target, prop, receiver);
     },
   });
