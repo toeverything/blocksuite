@@ -543,7 +543,7 @@ export class Page extends Space<FlatBlockMap> {
 
   addSiblingBlocks(
     targetModel: BaseBlockModel,
-    props: Array<Partial<BaseBlockModel>>,
+    props: Array<Partial<BlockProps>>,
     place: 'after' | 'before' = 'after'
   ): string[] {
     if (!props.length) return [];
