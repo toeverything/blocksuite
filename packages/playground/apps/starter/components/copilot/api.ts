@@ -1,4 +1,4 @@
-const USE_LOCAL = true;
+const USE_LOCAL = false;
 // const USE_LOCAL = true; // for local debug toggling
 
 const ENDPOINT = USE_LOCAL
