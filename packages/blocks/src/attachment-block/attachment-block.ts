@@ -75,7 +75,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     if (this.model.caption) {
       this._showCaption = true;
     }
-    this._checkAttachment();
+    this._checkBlob();
     this._registerDragHandleOption();
 
     // Workaround for https://github.com/toeverything/blocksuite/issues/4724
@@ -86,13 +86,37 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
 
   override willUpdate(changedProperties: PropertyValues) {
     if (changedProperties.has('sourceId')) {
-      this._checkAttachment();
+      this._checkBlob();
     }
     super.willUpdate(changedProperties);
   }
 
-  // Check if the attachment is available
-  private async _checkAttachment() {
+  private _registerDragHandleOption = () => {
+    this._disposables.add(
+      AffineDragHandleWidget.registerOption({
+        flavour: AttachmentBlockSchema.model.flavour,
+        onDragStart: (state, startDragging) => {
+          // Check if start dragging from the image block
+          const target = captureEventTarget(state.raw.target);
+          const attachmentBlock = target?.closest('affine-attachment');
+          if (!attachmentBlock) return false;
+
+          // If start dragging from the attachment element
+          // Set selection and take over dragStart event to start dragging
+          this.root.selection.set([
+            this.root.selection.getInstance('block', {
+              path: attachmentBlock.path,
+            }),
+          ]);
+          startDragging([attachmentBlock], state);
+          return true;
+        },
+      })
+    );
+  };
+
+  // Check if the blob is available
+  private async _checkBlob() {
     const storage = this.page.blob;
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
@@ -125,6 +149,7 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     try {
       await downloadAttachment(this.model);
     } catch (error) {
+      console.error(error);
       toast(`Failed to download ${shortName}!`);
     } finally {
       this._isDownloading = false;
@@ -157,30 +182,6 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         : null}
     `;
   }
-
-  private _registerDragHandleOption = () => {
-    this._disposables.add(
-      AffineDragHandleWidget.registerOption({
-        flavour: AttachmentBlockSchema.model.flavour,
-        onDragStart: (state, startDragging) => {
-          // Check if start dragging from the image block
-          const target = captureEventTarget(state.raw.target);
-          const attachmentBlock = target?.closest('affine-attachment');
-          if (!attachmentBlock) return false;
-
-          // If start dragging from the attachment element
-          // Set selection and take over dragStart event to start dragging
-          this.root.selection.set([
-            this.root.selection.getInstance('block', {
-              path: attachmentBlock.path,
-            }),
-          ]);
-          startDragging([attachmentBlock], state);
-          return true;
-        },
-      })
-    );
-  };
 
   override render() {
     const isLoading =

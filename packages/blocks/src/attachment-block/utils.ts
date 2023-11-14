@@ -107,12 +107,15 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
   transformModel(model, 'affine:attachment', attachmentProp);
 }
 
-async function uploadFileForAttachment(
+/**
+ * NOTE: This function may take a long time!
+ */
+async function uploadBlobForAttachment(
   attachmentModel: AttachmentBlockModel,
-  file: File
+  blob: Blob
 ) {
   const loadingKey = attachmentModel.loadingKey;
-  const isLoading = loadingKey ? isAttachmentLoading(loadingKey) : false;
+  const isLoading = loadingKey && isAttachmentLoading(loadingKey);
   if (!isLoading) {
     console.warn(
       'uploadAttachment: the attachment is not loading!',
@@ -127,9 +130,10 @@ async function uploadFileForAttachment(
   //   type: file.type,
   // });
   try {
-    const sourceId = await storage.set(file);
+    // the uploading process may take a long time!
+    const sourceId = await storage.set(blob);
     // await new Promise(resolve => setTimeout(resolve, 1000));
-    setAttachmentLoading(attachmentModel.loadingKey ?? '', false);
+    setAttachmentLoading(loadingKey ?? '', false);
     page.updateBlock(attachmentModel, {
       sourceId,
       loadingKey: null,
@@ -149,6 +153,9 @@ async function uploadFileForAttachment(
   }
 }
 
+/**
+ * Append a new attachment block after the specified block.
+ */
 export async function appendAttachmentBlock(
   file: File,
   model: BaseBlockModel,
@@ -183,7 +190,7 @@ export async function appendAttachmentBlock(
   ) as AttachmentBlockModel | null;
   assertExists(attachmentModel);
   // Do not add await here, because upload may take a long time, we want to do it in the background.
-  uploadFileForAttachment(attachmentModel, file);
+  uploadBlobForAttachment(attachmentModel, file);
 }
 
 const attachmentLoadingMap = new Set<string>();
@@ -199,6 +206,9 @@ export function isAttachmentLoading(loadingKey: string) {
   return attachmentLoadingMap.has(loadingKey);
 }
 
+/**
+ * Use it with caution! This function may take a long time!
+ */
 export async function hasBlob(storage: BlobManager, sourceId: string) {
   return !!(await storage.get(sourceId));
 }

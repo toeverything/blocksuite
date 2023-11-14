@@ -9,11 +9,15 @@ export type AttachmentBlockProps = {
   type: string;
   caption?: string;
 
-  // `loadingKey` is used to indicate whether the attachment is loading
-  // You can query the loading state by `isAttachmentLoading(loadingKey)`
-  // We can not use `loading: true` directly because the state will be stored in the model
-  //
-  // The `loadingKey` and `sourceId` should not be existed at the same time
+  /**
+   * `loadingKey` is used to indicate whether the attachment is uploading.
+   * You can query the loading state by calling `isAttachmentLoading(loadingKey)`
+   *
+   * We can not use `loading: true` directly because the state will be stored in the model,
+   * which will cause infinite loading of the block after reloading the page.
+   *
+   * NOTE: The `loadingKey` and `sourceId` should not be existed at the same time
+   */
   loadingKey?: string | null;
   sourceId?: string;
 };
