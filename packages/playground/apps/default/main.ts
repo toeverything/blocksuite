@@ -67,7 +67,7 @@ export async function initContentByInitParam(
   if (presetsMap.has(param)) {
     presetsMap.get(param)?.(workspace, pageId);
     const page = workspace.getPage(pageId);
-    await page?.waitForLoaded();
+    await page?.load();
     page?.resetHistory();
   }
 }
@@ -110,7 +110,7 @@ const syncProviders = async (
 
   workspace.slots.pageAdded.on(async pageId => {
     const page = workspace.getPage(pageId) as Page;
-    await page.waitForLoaded().catch(e => {
+    await page.load().catch(e => {
       const isValidateError =
         e instanceof Error && e.message.includes('outdated');
       if (isValidateError) {

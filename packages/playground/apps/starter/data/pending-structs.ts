@@ -9,8 +9,8 @@ export const pendingStructs: InitFn = async (
 ) => {
   const page = workspace.createPage({ id });
   const tempPage = workspace.createPage({ id: 'tempPage' });
-  await page.waitForLoaded();
-  await tempPage.waitForLoaded();
+  await page.load();
+  await tempPage.load();
   const pageBlockId = tempPage.addBlock('affine:page', {
     title: new Text('Pending Structs'),
   });

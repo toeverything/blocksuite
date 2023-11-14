@@ -55,7 +55,10 @@ export class Page extends Space<FlatBlockMap> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _initialized = false;
+  /** Indicate whether the underlying subdoc has been loaded. */
+  private _docLoaded = false;
+  /** Indicate whether the block tree is ready */
+  private _ready = false;
   private _shouldTransact = true;
 
   readonly slots = {
@@ -124,6 +127,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get readonly() {
     return this.awarenessStore.isReadonly(this);
+  }
+
+  get ready() {
+    return this._ready;
   }
 
   get history() {
@@ -659,7 +666,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   trySyncFromExistingDoc() {
-    if (this._initialized) {
+    if (this._docLoaded) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
@@ -677,8 +684,7 @@ export class Page extends Space<FlatBlockMap> {
       this._handleYBlockAdd(visited, id);
     });
 
-    this._initialized = true;
-    this.slots.ready.emit();
+    this._docLoaded = true;
   }
 
   dispose() {
@@ -690,7 +696,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    if (this._initialized) {
+    if (this._docLoaded) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -766,6 +772,14 @@ export class Page extends Space<FlatBlockMap> {
     if (model.role === 'root') {
       this._root = model;
       this.slots.rootAdded.emit(this._root);
+
+      // This is intended since the initial blocks should be added right after the root block in the same tick.
+      // When the page is loaded from provider, the initial update binary is supposed to be handled in one tick as well.
+      // So when this slot emits, the block tree should be considered as ready.
+      queueMicrotask(() => {
+        this._ready = true;
+        this.slots.ready.emit();
+      });
       return;
     }
 
@@ -934,7 +948,7 @@ export class Page extends Space<FlatBlockMap> {
 
   override async load() {
     await super.load();
-    if (!this._initialized) {
+    if (!this._docLoaded) {
       this.trySyncFromExistingDoc();
     }
 
