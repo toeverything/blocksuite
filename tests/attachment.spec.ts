@@ -133,7 +133,6 @@ test('can insert attachment from slash menu', async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
-    prop:loadingKey={null}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -236,7 +235,7 @@ test('should turn attachment to image works', async ({ page }) => {
   );
 });
 
-test('should attachment can be deleted works', async ({ page }) => {
+test('should attachment can be deleted', async ({ page }) => {
   await enterPlaygroundRoom(page);
   const { noteId } = await initEmptyParagraphState(page);
   const { attachment, insertAttachment, waitLoading } = getAttachment(page);
@@ -288,7 +287,6 @@ test(`support dragging attachment block directly`, async ({ page }) => {
   prop:index="a0"
 >
   <affine:attachment
-    prop:loadingKey={null}
     prop:name="${FILE_NAME}"
     prop:size={${FILE_SIZE}}
     prop:sourceId="${FILE_ID}"
@@ -328,7 +326,6 @@ test(`support dragging attachment block directly`, async ({ page }) => {
     prop:index="a0"
   >
     <affine:attachment
-      prop:loadingKey={null}
       prop:name="${FILE_NAME}"
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
@@ -381,7 +378,6 @@ test(`support dragging attachment block directly`, async ({ page }) => {
       prop:type="text"
     />
     <affine:attachment
-      prop:loadingKey={null}
       prop:name="${FILE_NAME}"
       prop:size={${FILE_SIZE}}
       prop:sourceId="${FILE_ID}"
