@@ -950,7 +950,7 @@ export class Page extends Space<FlatBlockMap> {
     }
 
     if (initFn) {
-      initFn();
+      await initFn();
       this._ready = true;
       this.slots.ready.emit();
     }

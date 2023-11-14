@@ -24,7 +24,7 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.load(() => {
+  await page.load(async () => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text('Welcome to BlockSuite Playground'),
@@ -43,12 +43,12 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
       { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
       surfaceId
     );
-  });
-  // Import preset markdown content inside note block
-  const contentParser = new window.ContentParser(page);
+    // Import preset markdown content inside note block
+    const contentParser = new window.ContentParser(page);
 
-  await contentParser.importMarkdown(presetMarkdown, noteId);
-  page.resetHistory();
+    await contentParser.importMarkdown(presetMarkdown, noteId);
+    page.resetHistory();
+  });
 };
 
 preset.id = 'preset';

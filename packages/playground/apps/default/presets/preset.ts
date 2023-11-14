@@ -27,7 +27,7 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.getPage(id) ?? workspace.createPage({ id });
   page.clear();
 
-  await page.load(() => {
+  await page.load(async () => {
     // Add page block and surface block at root level
     const pageBlockId = page.addBlock('affine:page', {
       title: new Text('Welcome to BlockSuite Playground'),
@@ -42,11 +42,11 @@ export const preset: InitFn = async (workspace: Workspace, id: string) => {
 
     // Add surface block as whiteboard renderer
     page.addBlock('affine:surface', {}, pageBlockId);
+    // Import preset markdown content inside note block
+    const contentParser = new window.ContentParser(page);
+    await contentParser.importMarkdown(presetMarkdown, noteId);
   });
 
-  // Import preset markdown content inside note block
-  const contentParser = new window.ContentParser(page);
-  await contentParser.importMarkdown(presetMarkdown, noteId);
   page.resetHistory();
 };
 

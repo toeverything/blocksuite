@@ -29,14 +29,12 @@ export const pendingStructs: InitFn = async (
       },
       noteId
     );
+    const diff = Workspace.Y.encodeStateAsUpdate(tempPage.spaceDoc, vec);
+    // To avoid pending structs, uncomment the following line
+    // Workspace.Y.applyUpdate(page.spaceDoc, update);
+
+    Workspace.Y.applyUpdate(page.spaceDoc, diff);
   });
-
-  const diff = Workspace.Y.encodeStateAsUpdate(tempPage.spaceDoc, vec);
-
-  // To avoid pending structs, uncomment the following line
-  // Workspace.Y.applyUpdate(page.spaceDoc, update);
-
-  Workspace.Y.applyUpdate(page.spaceDoc, diff);
 };
 
 pendingStructs.id = 'pending-structs';
