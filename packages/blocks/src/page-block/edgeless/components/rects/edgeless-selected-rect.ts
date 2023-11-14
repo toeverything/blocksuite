@@ -718,21 +718,27 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           ></edgeless-connector-handle>`
         : nothing;
 
-    const elementHandle = elements.map(element => {
-      const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
-      const [x, y] = this.surface.toViewCoord(modelX, modelY);
-      const { left, top, borderWidth } = this._selectedRect;
-      const style = {
-        position: 'absolute',
-        boxSizing: 'border-box',
-        left: `${x - left - borderWidth}px`,
-        top: `${y - top - borderWidth}px`,
-        width: `${w * this.zoom}px`,
-        height: `${h * this.zoom}px`,
-        border: `1px solid var(--affine-primary-color)`,
-      };
-      return html`<div class="element-handle" style=${styleMap(style)}></div>`;
-    });
+    const elementHandle =
+      elements.length > 1
+        ? elements.map(element => {
+            const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
+            const [x, y] = this.surface.toViewCoord(modelX, modelY);
+            const { left, top, borderWidth } = this._selectedRect;
+            const style = {
+              position: 'absolute',
+              boxSizing: 'border-box',
+              left: `${x - left - borderWidth}px`,
+              top: `${y - top - borderWidth}px`,
+              width: `${w * this.zoom}px`,
+              height: `${h * this.zoom}px`,
+              border: `1px solid var(--affine-primary-color)`,
+            };
+            return html`<div
+              class="element-handle"
+              style=${styleMap(style)}
+            ></div>`;
+          })
+        : nothing;
 
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElement;
