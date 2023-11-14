@@ -12,6 +12,7 @@ import '../component-toolbar/component-toolbar.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -234,6 +235,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     _disposables.add(
       edgeless.surface.model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    _disposables.add(
+      (page.root as BaseBlockModel).childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );

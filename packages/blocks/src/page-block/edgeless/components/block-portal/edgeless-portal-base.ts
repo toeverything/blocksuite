@@ -20,6 +20,10 @@ export class EdgelessPortalBase<
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
+  protected renderModel(model: T) {
+    return this.surface.root.renderModel(this.surface.unwrap(model));
+  }
+
   override connectedCallback(): void {
     super.connectedCallback();
 
