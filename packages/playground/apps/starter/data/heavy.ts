@@ -14,26 +14,26 @@ export const heavy: InitFn = async (workspace: Workspace, pageId: string) => {
   };
 
   const page = workspace.createPage({ id: pageId });
-  await page.load();
+  await page.load(() => {
+    // Add page block and surface block at root level
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text(),
+    });
+    page.addBlock('affine:surface', {}, pageBlockId);
 
-  // Add page block and surface block at root level
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text(),
+    // Add note block inside page block
+    const noteId = page.addBlock('affine:note', {}, pageBlockId);
+    for (let i = 0; i < count; i++) {
+      // Add paragraph block inside note block
+      page.addBlock(
+        'affine:paragraph',
+        {
+          text: new Text('Hello, world! ' + i),
+        },
+        noteId
+      );
+    }
   });
-  page.addBlock('affine:surface', {}, pageBlockId);
-
-  // Add note block inside page block
-  const noteId = page.addBlock('affine:note', {}, pageBlockId);
-  for (let i = 0; i < count; i++) {
-    // Add paragraph block inside note block
-    page.addBlock(
-      'affine:paragraph',
-      {
-        text: new Text('Hello, world! ' + i),
-      },
-      noteId
-    );
-  }
 };
 
 heavy.id = 'heavy';

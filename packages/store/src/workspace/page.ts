@@ -685,6 +685,11 @@ export class Page extends Space<FlatBlockMap> {
     });
 
     this._docLoaded = true;
+
+    if (this._yBlocks.size > 0) {
+      this._ready = true;
+      this.slots.ready.emit();
+    }
   }
 
   dispose() {
@@ -772,14 +777,6 @@ export class Page extends Space<FlatBlockMap> {
     if (model.role === 'root') {
       this._root = model;
       this.slots.rootAdded.emit(this._root);
-
-      // This is intended since the initial blocks should be added right after the root block in the same tick.
-      // When the page is loaded from provider, the initial update binary is supposed to be handled in one tick as well.
-      // So when this slot emits, the block tree should be considered as ready.
-      queueMicrotask(() => {
-        this._ready = true;
-        this.slots.ready.emit();
-      });
       return;
     }
 
@@ -946,10 +943,16 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async load() {
+  override async load(initFn?: () => void) {
     await super.load();
     if (!this._docLoaded) {
       this.trySyncFromExistingDoc();
+    }
+
+    if (initFn) {
+      initFn();
+      this._ready = true;
+      this.slots.ready.emit();
     }
 
     return this;

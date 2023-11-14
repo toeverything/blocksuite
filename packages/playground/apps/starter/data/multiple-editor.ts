@@ -6,19 +6,20 @@ import { type InitFn } from './utils';
 
 export const multiEditor: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.load();
+  await page.load(() => {
+    // Add page block and surface block at root level
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text(),
+    });
 
-  // Add page block and surface block at root level
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text(),
+    page.addBlock('affine:surface', {}, pageBlockId);
+
+    // Add note block inside page block
+    const noteId = page.addBlock('affine:note', {}, pageBlockId);
+    // Add paragraph block inside note block
+    page.addBlock('affine:paragraph', {}, noteId);
   });
 
-  page.addBlock('affine:surface', {}, pageBlockId);
-
-  // Add note block inside page block
-  const noteId = page.addBlock('affine:note', {}, pageBlockId);
-  // Add paragraph block inside note block
-  page.addBlock('affine:paragraph', {}, noteId);
   page.resetHistory();
 
   const app = document.getElementById('app');
@@ -42,19 +43,20 @@ export const multiEditorVertical: InitFn = async (
   pageId: string
 ) => {
   const page = workspace.createPage({ id: pageId });
-  await page.load();
+  await page.load(() => {
+    // Add page block and surface block at root level
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text(),
+    });
 
-  // Add page block and surface block at root level
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text(),
+    page.addBlock('affine:surface', {}, pageBlockId);
+
+    // Add note block inside page block
+    const noteId = page.addBlock('affine:note', {}, pageBlockId);
+    // Add paragraph block inside note block
+    page.addBlock('affine:paragraph', {}, noteId);
   });
 
-  page.addBlock('affine:surface', {}, pageBlockId);
-
-  // Add note block inside page block
-  const noteId = page.addBlock('affine:note', {}, pageBlockId);
-  // Add paragraph block inside note block
-  page.addBlock('affine:paragraph', {}, noteId);
   page.resetHistory();
 
   const app = document.getElementById('app');

@@ -178,22 +178,19 @@ describe('basic', () => {
     page.slots.ready.on(readyCallback);
     page.slots.rootAdded.on(rootAddedCallback);
 
-    await page.load();
-    expect(page.ready).toBe(false);
+    await page.load(() => {
+      expect(page.ready).toBe(false);
+      const rootId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+      expect(rootAddedCallback).toBeCalledTimes(1);
+      expect(page.ready).toBe(false);
 
-    const rootId = page.addBlock('affine:page', {
-      title: new page.Text(),
+      page.addBlock('affine:note', {}, rootId);
     });
-    // After adding the root, the page should not be considered ready
-    expect(page.ready).toBe(false);
-    expect(rootAddedCallback).toBeCalledTimes(1);
 
-    page.addBlock('affine:note', {}, rootId);
-
-    queueMicrotask(() => {
-      expect(page.ready).toBe(true);
-      expect(readyCallback).toBeCalledTimes(1);
-    });
+    expect(page.ready).toBe(true);
+    expect(readyCallback).toBeCalledTimes(1);
   });
 
   it('workspace pages with yjs applyUpdate', async () => {
@@ -203,9 +200,10 @@ describe('basic', () => {
     const page = workspace.createPage({
       id: 'space:0',
     });
-    await page.load();
-    page.addBlock('affine:page', {
-      title: new page.Text(),
+    await page.load(() => {
+      page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
     });
     {
       const subdocsTester = vi.fn(({ added }) => {
@@ -862,14 +860,14 @@ describe('workspace.exportJSX works', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load();
-
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text(),
+    await page.load(() => {
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text(),
+      });
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      page.addBlock('affine:paragraph', {}, noteId);
+      page.addBlock('affine:paragraph', {}, noteId);
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock('affine:paragraph', {}, noteId);
-    page.addBlock('affine:paragraph', {}, noteId);
 
     expect(workspace.exportJSX()).toMatchInlineSnapshot(/* xml */ `
       <affine:page>
@@ -895,12 +893,13 @@ describe('workspace search', () => {
     const options = createTestOptions();
     const workspace = new Workspace(options);
     const page = workspace.createPage({ id: 'page:home' });
-    await page.load();
-    const pageId = page.addBlock('affine:page', {
-      title: new page.Text('test123'),
+    await page.load(() => {
+      const pageId = page.addBlock('affine:page', {
+        title: new page.Text('test123'),
+      });
+      const noteId = page.addBlock('affine:note', {}, pageId);
+      page.addBlock('affine:paragraph', {}, noteId);
     });
-    const noteId = page.addBlock('affine:note', {}, pageId);
-    page.addBlock('affine:paragraph', {}, noteId);
 
     requestIdleCallback(() => {
       const result = workspace.search('test');

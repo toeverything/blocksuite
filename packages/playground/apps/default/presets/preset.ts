@@ -26,23 +26,26 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.getPage(id) ?? workspace.createPage({ id });
   page.clear();
-  await page.load();
-  // Add page block and surface block at root level
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text('Welcome to BlockSuite Playground'),
+
+  await page.load(() => {
+    // Add page block and surface block at root level
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text('Welcome to BlockSuite Playground'),
+    });
+
+    // Add note block inside page block
+    const noteId = page.addBlock(
+      'affine:note',
+      { xywh: serializeXYWH(0, 100, 800, 640) },
+      pageBlockId
+    );
+
+    // Add surface block as whiteboard renderer
+    page.addBlock('affine:surface', {}, pageBlockId);
   });
 
-  // Add note block inside page block
-  const noteId = page.addBlock(
-    'affine:note',
-    { xywh: serializeXYWH(0, 100, 800, 640) },
-    pageBlockId
-  );
-
-  page.addBlock('affine:surface', {}, pageBlockId);
   // Import preset markdown content inside note block
   const contentParser = new window.ContentParser(page);
-
   await contentParser.importMarkdown(presetMarkdown, noteId);
   page.resetHistory();
 };
