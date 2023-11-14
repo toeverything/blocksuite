@@ -13,8 +13,10 @@ import {
   readImageSize,
   saveViewportToSession,
   ThemeObserver,
+  uploadBlobForAttachment,
 } from '@blocksuite/blocks';
 import { withTempBlobData } from '@blocksuite/blocks';
+import { toast } from '@blocksuite/blocks';
 import { ContentParser } from '@blocksuite/blocks/content-parser';
 import { IS_FIREFOX } from '@blocksuite/global/env';
 import {
@@ -232,7 +234,7 @@ export class EditorContainer
         name: 'Attachment',
         matcher: (file: File) => {
           if (file.size > maxFileSize) {
-            console.warn(
+            toast(
               `You can only upload files less than ${
                 maxFileSize / (1000 * 1000)
               }M.`
@@ -243,17 +245,17 @@ export class EditorContainer
         },
         handler: async (
           file: File
-        ): Promise<AttachmentBlockProps & { flavour: 'affine:attachment' }> => {
-          const storage = this.page.blob;
-          const sourceId = await storage.set(
-            new Blob([file], { type: file.type })
-          );
+        ): Promise<
+          AttachmentBlockProps & { id: string; flavour: 'affine:attachment' }
+        > => {
+          const blockId = this.page.generateBlockId();
+          uploadBlobForAttachment(this.page, blockId, file);
           return {
+            id: blockId,
             flavour: 'affine:attachment',
             name: file.name,
             size: file.size,
             type: file.type,
-            sourceId,
           };
         },
       });
