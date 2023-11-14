@@ -184,6 +184,7 @@ describe('basic', () => {
     const rootId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
+    // After adding the root, the page should not be considered ready
     expect(page.ready).toBe(false);
     expect(rootAddedCallback).toBeCalledTimes(1);
 
