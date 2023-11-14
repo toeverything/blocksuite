@@ -55,7 +55,10 @@ export class Page extends Space<FlatBlockMap> {
   private _history!: Y.UndoManager;
   private _root: BaseBlockModel | null = null;
   private _blockMap = new Map<string, BaseBlockModel>();
-  private _initialized = false;
+  /** Indicate whether the underlying subdoc has been loaded. */
+  private _docLoaded = false;
+  /** Indicate whether the block tree is ready */
+  private _ready = false;
   private _shouldTransact = true;
 
   readonly slots = {
@@ -119,6 +122,10 @@ export class Page extends Space<FlatBlockMap> {
 
   get readonly() {
     return this.awarenessStore.isReadonly(this);
+  }
+
+  get ready() {
+    return this._ready;
   }
 
   get history() {
@@ -647,7 +654,7 @@ export class Page extends Space<FlatBlockMap> {
   }
 
   trySyncFromExistingDoc() {
-    if (this._initialized) {
+    if (this._docLoaded) {
       throw new Error('Cannot sync from existing doc more than once');
     }
 
@@ -665,8 +672,12 @@ export class Page extends Space<FlatBlockMap> {
       this._handleYBlockAdd(visited, id);
     });
 
-    this._initialized = true;
-    this.slots.ready.emit();
+    this._docLoaded = true;
+
+    if (this._yBlocks.size > 0) {
+      this._ready = true;
+      this.slots.ready.emit();
+    }
   }
 
   dispose() {
@@ -678,7 +689,7 @@ export class Page extends Space<FlatBlockMap> {
     this.slots.blockUpdated.dispose();
     this.slots.onYEvent.dispose();
 
-    if (this._initialized) {
+    if (this._docLoaded) {
       this._yBlocks.unobserveDeep(this._handleYEvents);
       this._yBlocks.clear();
     }
@@ -922,10 +933,16 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async load() {
+  override async load(initFn?: () => void) {
     await super.load();
-    if (!this._initialized) {
+    if (!this._docLoaded) {
       this.trySyncFromExistingDoc();
+    }
+
+    if (initFn) {
+      await initFn();
+      this._ready = true;
+      this.slots.ready.emit();
     }
 
     return this;

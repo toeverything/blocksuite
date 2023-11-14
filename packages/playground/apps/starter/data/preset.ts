@@ -24,30 +24,31 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.waitForLoaded();
-  // Add page block and surface block at root level
-  const pageBlockId = page.addBlock('affine:page', {
-    title: new Text('Welcome to BlockSuite Playground'),
+  await page.load(async () => {
+    // Add page block and surface block at root level
+    const pageBlockId = page.addBlock('affine:page', {
+      title: new Text('Welcome to BlockSuite Playground'),
+    });
+    const surfaceId = page.addBlock('affine:surface', {}, pageBlockId);
+
+    // Add note block inside page block
+    const noteId = page.addBlock(
+      'affine:note',
+      { xywh: serializeXYWH(0, 100, 800, 640) },
+      pageBlockId
+    );
+
+    page.addBlock(
+      'affine:frame',
+      { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
+      surfaceId
+    );
+    // Import preset markdown content inside note block
+    const contentParser = new window.ContentParser(page);
+
+    await contentParser.importMarkdown(presetMarkdown, noteId);
+    page.resetHistory();
   });
-  const surfaceId = page.addBlock('affine:surface', {}, pageBlockId);
-
-  // Add note block inside page block
-  const noteId = page.addBlock(
-    'affine:note',
-    { xywh: serializeXYWH(0, 100, 800, 640) },
-    pageBlockId
-  );
-
-  page.addBlock(
-    'affine:frame',
-    { xywh: '[-40,-40,880,817]', title: new Text('Frame 1') },
-    surfaceId
-  );
-  // Import preset markdown content inside note block
-  const contentParser = new window.ContentParser(page);
-
-  await contentParser.importMarkdown(presetMarkdown, noteId);
-  page.resetHistory();
 };
 
 preset.id = 'preset';
