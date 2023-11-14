@@ -389,6 +389,7 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
   const parent = page.getParent(model);
   if (!parent) return false;
 
+  const nextSiblings = page.getNextSiblings(model);
   const index = parent.children.indexOf(model);
   const blockProps = {
     type: 'text' as const,
@@ -399,6 +400,13 @@ function handleListBlockBackspace(page: Page, model: ExtendedModel) {
   page.deleteBlock(model, {
     deleteChildren: false,
   });
+  nextSiblings
+    .filter(
+      sibling =>
+        matchFlavours(sibling, ['affine:list']) && sibling.type === 'numbered'
+    )
+    .forEach(sibling => page.updateBlock(sibling, {}));
+
   const id = page.addBlock('affine:paragraph', blockProps, parent, index);
   asyncFocusRichText(page, id);
   return true;
