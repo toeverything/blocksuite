@@ -5,10 +5,13 @@ import {
   pressBackspace,
   pressEnter,
   pressEscape,
+  redoByKeyboard,
   SHORT_KEY,
   type,
+  undoByKeyboard,
 } from './utils/actions/keyboard.js';
 import {
+  captureHistory,
   enterPlaygroundRoom,
   focusRichText,
   initEmptyParagraphState,
@@ -55,6 +58,8 @@ function getAttachment(page: Page) {
 
     await pressEnter(page);
     await page.setInputFiles("input[type='file']", FILE_PATH);
+    // Try to break the undo redo test
+    await captureHistory(page);
 
     await expect(attachment).toBeVisible();
   };
@@ -125,6 +130,71 @@ test('can insert attachment from slash menu', async ({ page }) => {
   expect(await getName()).toBe(FILE_NAME);
   expect(await getSize()).toBe('45.8 kB');
 
+  await assertStoreMatchJSX(
+    page,
+    `<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:attachment
+    prop:name="${FILE_NAME}"
+    prop:size={${FILE_SIZE}}
+    prop:sourceId="${FILE_ID}"
+    prop:type="image/png"
+  />
+</affine:note>`,
+    noteId
+  );
+});
+
+test('should undo/redo works for attachment', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  const { noteId } = await initEmptyParagraphState(page);
+
+  const { insertAttachment, waitLoading } = getAttachment(page);
+
+  await focusRichText(page);
+  await insertAttachment();
+
+  // Wait for the attachment to be uploaded
+  await waitLoading();
+
+  await assertStoreMatchJSX(
+    page,
+    `<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:attachment
+    prop:name="${FILE_NAME}"
+    prop:size={${FILE_SIZE}}
+    prop:sourceId="${FILE_ID}"
+    prop:type="image/png"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  await undoByKeyboard(page);
+  // The loading/error state should not be restored after undo
+  await assertStoreMatchJSX(
+    page,
+    `
+<affine:note
+  prop:background="--affine-background-secondary-color"
+  prop:hidden={false}
+  prop:index="a0"
+>
+  <affine:paragraph
+    prop:type="text"
+  />
+</affine:note>`,
+    noteId
+  );
+
+  await redoByKeyboard(page);
   await assertStoreMatchJSX(
     page,
     `<affine:note

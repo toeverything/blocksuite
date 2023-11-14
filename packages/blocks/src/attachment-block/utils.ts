@@ -144,9 +144,11 @@ export async function uploadBlobForAttachment(
       console.error(attachmentModel);
       throw new Error('the model is not an attachment model!');
     }
-    page.updateBlock(attachmentModel, {
-      sourceId,
-    } satisfies Partial<AttachmentBlockProps>);
+    page.withoutTransact(() => {
+      page.updateBlock(attachmentModel, {
+        sourceId,
+      } satisfies Partial<AttachmentBlockProps>);
+    });
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
