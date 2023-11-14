@@ -4,8 +4,8 @@ import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
  * When the attachment is uploading, the `sourceId` is `undefined`.
  * And we can query the upload status by the `isAttachmentLoading` function.
  *
- * Other collaborators will show a error attachment block when the blob is not uploaded.
- * We can sync the upload status by the awareness system in the future.
+ * Other collaborators will see an error attachment block when the blob has not finished uploading.
+ * This issue can be resolve by sync the upload status through the awareness system in the future.
  *
  * When the attachment is uploaded, the `sourceId` is the id of the blob.
  *
