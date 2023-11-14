@@ -39,7 +39,7 @@ The major packages in BlockSuite include the following:
 - `@blocksuite/block-std`: The standard toolkit for working with editable blocks, including selections, events, services, commands and more.
 - `@blocksuite/lit`: The default view layer for rendering blocks and widgets as [web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). It's built on top of [lit](https://lit.dev/) and the headless `block-std`, and could be replaced by alternative frameworks.
 - `@blocksuite/virgo`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own virgo instances, leveraging the store to reconcile the block tree.
-- `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of `affine:page` blocks.
+- `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of the `affine:page` blocks.
 - `@blocksuite/editor`: The ready-to-use editors composed by blocks.
 
 ## Getting Started

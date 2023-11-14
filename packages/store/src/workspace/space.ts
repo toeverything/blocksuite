@@ -48,7 +48,7 @@ export class Space<
     return this._ySpaceDoc;
   }
 
-  async waitForLoaded() {
+  async load() {
     if (this.loaded) {
       return this;
     }

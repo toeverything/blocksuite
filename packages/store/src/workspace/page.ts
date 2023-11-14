@@ -932,12 +932,17 @@ export class Page extends Space<FlatBlockMap> {
     }
   }
 
-  override async waitForLoaded() {
-    await super.waitForLoaded();
+  override async load() {
+    await super.load();
     if (!this._initialized) {
       this.trySyncFromExistingDoc();
     }
 
     return this;
+  }
+
+  /** @deprecated use page.load() instead */
+  async waitForLoaded() {
+    await this.load();
   }
 }
