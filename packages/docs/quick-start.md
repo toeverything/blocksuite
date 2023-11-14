@@ -1,4 +1,4 @@
-# Getting Started
+# Quick Start
 
 The `@blocksuite/editor` package contains the editor built into AFFiNE. Its `nightly` versions are released daily based on the master branch, and they are always tested on CI. This means that the `nightly` versions can already be used in real-world projects like AFFiNE at any time:
 

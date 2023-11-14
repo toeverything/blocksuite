@@ -53,7 +53,7 @@ The major packages in BlockSuite include the following:
 
 ## Getting Started
 
-To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/getting-started.html).
+To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://blocksuite.affine.pro/quick-start.html).
 
 ## Resources
 
@@ -62,11 +62,10 @@ To learn how to start using BlockSuite, visit [blocksuite.affine.pro](https://bl
   - [The `SimpleAffineEditor` Example](https://blocksuite-toeverything.vercel.app/examples/basic/)
   - [BlockSuite Monorepo in StackBlitz](https://stackblitz.com/github/toeverything/blocksuite)
   - [Vue-based BlocksVite Editor](https://github.com/zuozijian3720/blocksvite)
-- 🚧 [Documentation](https://blocksuite.affine.pro/blocksuite-overview.html)
+- 📝 [Documentation](https://blocksuite.affine.pro/quick-start.html)
 - 📍 [Good First Issues](https://github.com/toeverything/blocksuite/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22)
 - 🎙️ [GitHub Discussions](https://github.com/toeverything/blocksuite/discussions)
 - 💬 [Discord Channel](https://discord.gg/9vwSWmYYcZ)
-- 🏠 [AFFiNE Community](https://community.affine.pro/c/open-development/)
 - 🚀 [Releases](https://github.com/toeverything/blocksuite/releases)
 
 ## Building

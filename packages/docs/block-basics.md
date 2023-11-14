@@ -75,7 +75,7 @@ There are more block flavours available in the prebuilt editor, including:
 - [`affine:code`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/code-block)
 - [`affine:database`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/database-block)
 - [`affine:divider`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/divider-block)
-- [`affine:embed`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/embed-block)
+- [`affine:image`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/image-block)
 - [`affine:list`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/list-block)
 - [`affine:surface`](https://github.com/toeverything/blocksuite/tree/master/packages/blocks/src/surface-block)
 
@@ -84,7 +84,7 @@ There are more block flavours available in the prebuilt editor, including:
 In BlockSuite, the blocks can be also be categorized into two distinct roles:
 
 1. `HubBlock` serves as an empty block container, which include `affine:page`, `affine:note` and `affine:database`.
-2. `ContentBlock` contains atomic content, this includes `affine:paragraph`, `affine:list`, `affine:code` and `affine:embed`.
+2. `ContentBlock` contains atomic content, this includes `affine:paragraph`, `affine:list`, `affine:code` and `affine:image`.
 
 `HubBlock` acts as container that affects the presentation of the blocks it contains. For example, a note block can be positioned absolutely on a whiteboard, while a database block can display each of its child blocks as separate rows or group them further into boards. In contrast, `ContentBlock` can only nest other `ContentBlock` to express structures like nested markdown lists.
 
