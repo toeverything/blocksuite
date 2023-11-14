@@ -64,7 +64,7 @@ export class AffineFormatBarWidget extends WidgetElement {
 
   private _abortController = new AbortController();
 
-  private _placement: Placement = 'bottom';
+  private _placement: Placement = 'top';
 
   private _reset() {
     this._displayType = 'none';
