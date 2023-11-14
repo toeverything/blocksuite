@@ -17,6 +17,8 @@ import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
 import { deserializeXYWH } from '../surface-block/index.js';
 import type { NoteBlockComponent } from './note-block.js';
 
+type Caret = { node: Node; offset: number };
+
 const getSelection = (blockComponent: BlockElement) =>
   blockComponent.root.selection;
 
@@ -239,13 +241,17 @@ export function selectBetween(
 
 export function getCurrentCaretPos(tail: boolean) {
   const selection = document.getSelection();
-  if (!selection || selection.rangeCount === 0) {
+  if (!selection || !selection.anchorNode) {
     return null;
   }
-  const range = selection.getRangeAt(0);
-  const rects = range.getClientRects();
-
-  return tail ? rects[rects.length - 1] : rects[0];
+  const caretRange = document.createRange();
+  caretRange.setStart(
+    selection.focusNode ?? selection.anchorNode,
+    selection.focusNode ? selection.focusOffset : selection.anchorOffset
+  );
+  const caretRect = caretRange.getClientRects();
+  caretRange.detach();
+  return tail ? caretRect[caretRect.length - 1] : caretRect[0];
 }
 
 export function horizontalGetNextCaret(
@@ -253,7 +259,7 @@ export function horizontalGetNextCaret(
   block: BlockElement,
   forward = false,
   span = 5
-) {
+): Caret | undefined {
   const current = getCurrentCaretPos(true);
   if (!current) {
     return;
@@ -277,6 +283,8 @@ export function horizontalGetNextCaret(
         ? rect.top + span
         : point.y,
   };
+
+  // showPoint(_point, 'green');
 
   let move = caretFromPoint(_point.x, _point.y);
 
@@ -311,7 +319,7 @@ export function horizontalGetNextCaret(
   return move;
 }
 
-export function moveCursor(caret: { node: Node; offset: number }) {
+export function moveCursor(caret: Caret) {
   const prevCursor = getCurrentCaretPos(true);
 
   const selection = document.getSelection();
@@ -344,16 +352,10 @@ export function moveCursor(caret: { node: Node; offset: number }) {
 }
 
 export function moveCursorVertically(
-  blockElement: BlockElement,
+  targetBlockElement: BlockElement,
   forward: boolean
 ) {
-  const selection = document.getSelection();
-  if (!selection) {
-    return false;
-  }
-
   const cursorRect = getCurrentCaretPos(true);
-
   if (!cursorRect) {
     return false;
   }
@@ -365,7 +367,7 @@ export function moveCursorVertically(
         ? cursorRect.top - cursorRect.height / 2
         : cursorRect.bottom + cursorRect.height / 2,
     },
-    blockElement,
+    targetBlockElement,
     forward,
     cursorRect.height / 2
   );
@@ -377,8 +379,11 @@ export function moveCursorVertically(
   return moveCursor(nextCaret);
 }
 
-export function moveCursorToBlock(blockElement: BlockElement, tail: boolean) {
-  const texts = getTextNodesFromElement(blockElement);
+export function moveCursorToBlock(
+  targetBlockElement: BlockElement,
+  tail: boolean
+) {
+  const texts = getTextNodesFromElement(targetBlockElement);
   const text = tail ? texts[texts.length - 1] : texts[0];
   if (!text) {
     return false;
@@ -398,7 +403,8 @@ export function moveCursorToBlock(blockElement: BlockElement, tail: boolean) {
     return;
   }
   const range = selection.getRangeAt(0);
-  const viewport = blockElement.closest('affine-doc-page')?.viewportElement;
+  const viewport =
+    targetBlockElement.closest('affine-doc-page')?.viewportElement;
   if (viewport) {
     autoScroll(viewport, range.getBoundingClientRect().top);
   }
@@ -429,4 +435,196 @@ export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
       });
     }
   });
+}
+
+export function changeTextSelectionVertically(
+  targetBlockElement: BlockElement,
+  upward: boolean
+): boolean {
+  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
+  if (!currentTextSelectionCarets) {
+    return false;
+  }
+  const { startCaret, endCaret: prevEndCaret } = currentTextSelectionCarets;
+
+  const cursorRect = getCurrentCaretPos(true);
+  if (!cursorRect) {
+    return false;
+  }
+
+  const nextEndCaret = horizontalGetNextCaret(
+    {
+      x: cursorRect.x,
+      y: upward
+        ? cursorRect.top - cursorRect.height / 2
+        : cursorRect.bottom + cursorRect.height / 2,
+    },
+    targetBlockElement,
+    upward,
+    cursorRect.height / 2
+  );
+
+  if (
+    !nextEndCaret ||
+    (prevEndCaret.node === nextEndCaret.node &&
+      prevEndCaret.offset === nextEndCaret.offset)
+  ) {
+    return false;
+  }
+
+  return applyTextSelection(startCaret, nextEndCaret);
+}
+
+export function changeTextSelectionToBlockStartEnd(
+  targetBlockElement: BlockElement,
+  tail: boolean
+): boolean {
+  const texts = getTextNodesFromElement(targetBlockElement);
+  const text = tail ? texts[texts.length - 1] : texts[0];
+  if (!text) {
+    return false;
+  }
+
+  const nextEndCaret = {
+    node: text,
+    offset: tail ? text.textContent?.length ?? 0 : 0,
+  };
+
+  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
+  if (!currentTextSelectionCarets) {
+    return false;
+  }
+
+  const { startCaret, endCaret } = currentTextSelectionCarets;
+
+  if (
+    endCaret.node === nextEndCaret.node &&
+    endCaret.offset === nextEndCaret.offset
+  ) {
+    return false;
+  }
+
+  return applyTextSelection(startCaret, nextEndCaret);
+}
+
+export function changeTextSelectionSideways(
+  targetBlockElement: BlockElement,
+  left: boolean
+): boolean {
+  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
+  if (!currentTextSelectionCarets) {
+    return false;
+  }
+  const { startCaret, endCaret: prevEndCaret } = currentTextSelectionCarets;
+
+  const texts = getTextNodesFromElement(targetBlockElement);
+
+  const currentTextIndex = texts.findIndex(text => text === prevEndCaret.node);
+
+  if (currentTextIndex === -1) {
+    return false;
+  }
+
+  let nextEndCaret = {
+    node: prevEndCaret.node,
+    offset: left ? prevEndCaret.offset - 1 : prevEndCaret.offset + 1,
+  };
+
+  if (
+    nextEndCaret.offset >= 0 &&
+    nextEndCaret.offset <= texts[currentTextIndex].length
+  ) {
+    return applyTextSelection(startCaret, nextEndCaret);
+  }
+
+  const nextTextIndex = currentTextIndex + (left ? -1 : 1);
+
+  if (nextTextIndex < 0 || nextTextIndex >= texts.length) {
+    return false;
+  }
+
+  nextEndCaret = {
+    node: texts[nextTextIndex],
+    offset: left ? texts[nextTextIndex].length - 1 : 1,
+  };
+
+  return applyTextSelection(startCaret, nextEndCaret);
+}
+
+export function changeTextSelectionSidewaysToBlock(
+  targetBlockElement: BlockElement,
+  left: boolean
+): boolean {
+  const currentTextSelectionCarets = getCurrentTextSelectionCarets();
+  if (!currentTextSelectionCarets) {
+    return false;
+  }
+  const { startCaret } = currentTextSelectionCarets;
+
+  const texts = getTextNodesFromElement(targetBlockElement);
+  if (texts.length === 0) {
+    return false;
+  }
+
+  const nextTextIndex = left ? texts.length - 1 : 0;
+
+  const nextEndCaret = {
+    node: texts[nextTextIndex],
+    offset: left ? texts[nextTextIndex].length - 1 : 1,
+  };
+
+  if (
+    nextEndCaret.offset >= 0 &&
+    nextEndCaret.offset <= texts[nextTextIndex].length
+  ) {
+    return applyTextSelection(startCaret, nextEndCaret);
+  }
+
+  return applyTextSelection(startCaret, nextEndCaret);
+}
+
+function getCurrentTextSelectionCarets():
+  | { startCaret: Caret; endCaret: Caret }
+  | undefined {
+  const selection = document.getSelection();
+  if (!selection) {
+    return;
+  }
+
+  const range = selection.getRangeAt(0);
+
+  const isRangeReversed =
+    !!selection.anchorNode &&
+    !!selection.focusNode &&
+    (selection.anchorNode === selection.focusNode
+      ? selection.anchorOffset > selection.focusOffset
+      : selection.anchorNode.compareDocumentPosition(selection.focusNode) ===
+        Node.DOCUMENT_POSITION_PRECEDING);
+
+  const startCaret: Caret = {
+    node: isRangeReversed ? range.endContainer : range.startContainer,
+    offset: isRangeReversed ? range.endOffset : range.startOffset,
+  };
+
+  const endCaret: Caret = {
+    node: isRangeReversed ? range.startContainer : range.endContainer,
+    offset: isRangeReversed ? range.startOffset : range.endOffset,
+  };
+
+  return { startCaret, endCaret };
+}
+
+function applyTextSelection(startCaret: Caret, endCaret: Caret): boolean {
+  const selection = document.getSelection();
+  if (!selection) {
+    return false;
+  }
+
+  const newRange = document.createRange();
+  newRange.setStart(startCaret.node, startCaret.offset);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
+  selection.extend(endCaret.node, endCaret.offset);
+
+  return true;
 }

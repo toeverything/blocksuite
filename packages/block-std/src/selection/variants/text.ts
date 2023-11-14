@@ -12,6 +12,7 @@ export type TextRangePoint = {
 export type TextSelectionProps = {
   from: TextRangePoint;
   to: TextRangePoint | null;
+  isReverse?: boolean;
 };
 
 const TextSelectionSchema = z.object({
@@ -27,6 +28,7 @@ const TextSelectionSchema = z.object({
       length: z.number(),
     })
     .nullable(),
+  isReverse: z.boolean().nullable(),
 });
 
 export class TextSelection extends BaseSelection {
@@ -37,13 +39,25 @@ export class TextSelection extends BaseSelection {
 
   to: TextRangePoint | null;
 
-  constructor({ from, to }: TextSelectionProps) {
+  isReverse: boolean;
+
+  constructor({ from, to, isReverse }: TextSelectionProps) {
     super({
       path: from.path,
     });
     this.from = from;
 
     this.to = this._equalPoint(from, to) ? null : to;
+
+    this.isReverse = !!isReverse;
+  }
+
+  get start(): TextRangePoint {
+    return this.isReverse ? this.to ?? this.from : this.from;
+  }
+
+  get end(): TextRangePoint {
+    return this.isReverse ? this.from : this.to ?? this.from;
   }
 
   empty(): boolean {
@@ -80,6 +94,7 @@ export class TextSelection extends BaseSelection {
       type: 'text',
       from: this.from,
       to: this.to,
+      isReverse: this.isReverse,
     };
   }
 
@@ -88,6 +103,7 @@ export class TextSelection extends BaseSelection {
     return new TextSelection({
       from: json.from as TextRangePoint,
       to: json.to as TextRangePoint | null,
+      isReverse: !!json.isReverse,
     });
   }
 

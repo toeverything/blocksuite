@@ -11,6 +11,10 @@ import {
   updateBlockElementType,
 } from '../page-block/utils/index.js';
 import {
+  changeTextSelectionSideways,
+  changeTextSelectionSidewaysToBlock,
+  changeTextSelectionToBlockStartEnd,
+  changeTextSelectionVertically,
   ensureBlockInContainer,
   getBlockSelectionBySide,
   moveCursorToBlock,
@@ -266,78 +270,301 @@ export function bindHotKey(blockElement: BlockElement) {
         })
         .run();
     },
-    'Shift-ArrowDown': () => {
+    'Shift-ArrowDown': ctx => {
+      ctx.get('defaultState').event.preventDefault();
       let anchorBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
-        .getBlockSelections()
-        .inline<'currentSelectionPath'>((ctx, next) => {
-          const blockSelections = ctx.currentBlockSelections;
-          assertExists(blockSelections);
-          if (!anchorSel) {
-            anchorSel = blockSelections.at(-1) ?? null;
-          }
-          if (!anchorSel) {
-            return;
-          }
-          anchorBlock = pathToBlock(blockElement, anchorSel.path);
-          if (!anchorBlock) {
-            return;
-          }
-          next({
-            currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
-          });
-        })
-        .getNextBlock({})
-        .inline((ctx, next) => {
-          assertExists(ctx.nextBlock);
-          focusBlock = ctx.nextBlock;
-          if (!ensureBlockInContainer(focusBlock, blockElement)) {
-            return;
-          }
-          if (!anchorBlock) {
-            return;
-          }
-          selectBetween(anchorBlock, focusBlock, true);
-          next();
-        })
+        .try(cmd => [
+          // text selection
+          cmd
+            .getTextSelection()
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const textSelection = ctx.currentTextSelection;
+              assertExists(textSelection);
+              const end = textSelection.end;
+              focusBlock = pathToBlock(blockElement, end.path);
+              next({
+                currentSelectionPath: end.path,
+              });
+            })
+            .try(cmd => [
+              // text selection - case 1: change selection downwards within the same block
+              cmd.inline((_, next) => {
+                assertExists(focusBlock);
+                const success = changeTextSelectionVertically(
+                  focusBlock,
+                  false
+                );
+                if (success) {
+                  next();
+                }
+              }),
+              // text selection - case 2: change selection downwards to the next block
+              cmd
+                .getNextBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.nextBlock);
+                  const success = changeTextSelectionVertically(
+                    ctx.nextBlock,
+                    false
+                  );
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 3: change selection downwards to the next block start
+              cmd
+                .getNextBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.nextBlock);
+                  const success = changeTextSelectionToBlockStartEnd(
+                    ctx.nextBlock,
+                    false
+                  );
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 4: change selection to the current block end
+              cmd.inline((_, next) => {
+                assertExists(focusBlock);
+                const success = changeTextSelectionToBlockStartEnd(
+                  focusBlock,
+                  true
+                );
+                if (success) {
+                  next();
+                }
+              }),
+            ]),
+
+          //block selection
+          cmd
+            .getBlockSelections()
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const blockSelections = ctx.currentBlockSelections;
+              assertExists(blockSelections);
+              if (!anchorSel) {
+                anchorSel = blockSelections.at(-1) ?? null;
+              }
+              if (!anchorSel) {
+                return;
+              }
+              anchorBlock = pathToBlock(blockElement, anchorSel.path);
+              if (!anchorBlock) {
+                return;
+              }
+              next({
+                currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+              });
+            })
+            .getNextBlock({})
+            .inline((ctx, next) => {
+              assertExists(ctx.nextBlock);
+              focusBlock = ctx.nextBlock;
+              if (!ensureBlockInContainer(focusBlock, blockElement)) {
+                return;
+              }
+              if (!anchorBlock) {
+                return;
+              }
+              selectBetween(anchorBlock, focusBlock, true);
+              next();
+            }),
+        ])
         .run();
     },
-    'Shift-ArrowUp': () => {
+    'Shift-ArrowUp': ctx => {
+      ctx.get('defaultState').event.preventDefault();
       let anchorBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
-        .getBlockSelections()
+        .try(cmd => [
+          // text selection
+          cmd
+            .getTextSelection()
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const textSelection = ctx.currentTextSelection;
+              assertExists(textSelection);
+              const end = textSelection.end;
+              focusBlock = pathToBlock(blockElement, end.path);
+              next({
+                currentSelectionPath: end.path,
+              });
+            })
+            .try(cmd => [
+              // text selection - case 1: change selection upwards within the same block
+              cmd.inline((_, next) => {
+                assertExists(focusBlock);
+                const success = changeTextSelectionVertically(focusBlock, true);
+                if (success) {
+                  next();
+                }
+              }),
+              // text selection - case 2: change selection upwards to the previous block
+              cmd
+                .getPrevBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.prevBlock);
+                  const success = changeTextSelectionVertically(
+                    ctx.prevBlock,
+                    true
+                  );
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 3: change selection upwards to the previous block end
+              cmd
+                .getPrevBlock({
+                  filter: block => !!block.model.text,
+                })
+                .inline((ctx, next) => {
+                  assertExists(ctx.prevBlock);
+                  const success = changeTextSelectionToBlockStartEnd(
+                    ctx.prevBlock,
+                    true
+                  );
+                  if (success) {
+                    next();
+                  }
+                }),
+              // text selection - case 4: change selection to the current block start
+              cmd.inline((_, next) => {
+                assertExists(focusBlock);
+                const success = changeTextSelectionToBlockStartEnd(
+                  focusBlock,
+                  false
+                );
+                if (success) {
+                  next();
+                }
+              }),
+            ]),
+
+          //block selection
+          cmd
+            .getBlockSelections()
+            .inline<'currentSelectionPath'>((ctx, next) => {
+              const blockSelections = ctx.currentBlockSelections;
+              assertExists(blockSelections);
+              if (!anchorSel) {
+                anchorSel = blockSelections.at(0) ?? null;
+              }
+              if (!anchorSel) {
+                return;
+              }
+              anchorBlock = pathToBlock(blockElement, anchorSel.path);
+              if (!anchorBlock) {
+                return;
+              }
+              next({
+                currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+              });
+            })
+            .getPrevBlock({})
+            .inline((ctx, next) => {
+              assertExists(ctx.prevBlock);
+              focusBlock = ctx.prevBlock;
+              if (!ensureBlockInContainer(focusBlock, blockElement)) {
+                return;
+              }
+              if (!anchorBlock) {
+                return;
+              }
+              selectBetween(anchorBlock, focusBlock, false);
+              next();
+            }),
+        ])
+        .run();
+    },
+    'Shift-ArrowRight': ctx => {
+      ctx.get('defaultState').event.preventDefault();
+      return root.std.command
+        .pipe()
+        .getTextSelection()
         .inline<'currentSelectionPath'>((ctx, next) => {
-          const blockSelections = ctx.currentBlockSelections;
-          assertExists(blockSelections);
-          if (!anchorSel) {
-            anchorSel = blockSelections.at(0) ?? null;
-          }
-          if (!anchorSel) {
-            return;
-          }
-          anchorBlock = pathToBlock(blockElement, anchorSel.path);
-          if (!anchorBlock) {
-            return;
-          }
-          return next({
-            currentSelectionPath: focusBlock?.path ?? anchorBlock?.path,
+          const textSelection = ctx.currentTextSelection;
+          assertExists(textSelection);
+          const end = textSelection.end;
+          focusBlock = pathToBlock(blockElement, end.path);
+          next({
+            currentSelectionPath: end.path,
           });
         })
-        .getPrevBlock({})
-        .inline((ctx, next) => {
-          assertExists(ctx.prevBlock);
-          focusBlock = ctx.prevBlock;
-          if (!ensureBlockInContainer(focusBlock, blockElement)) {
-            return;
-          }
-          if (!anchorBlock) {
-            return;
-          }
-          selectBetween(anchorBlock, focusBlock, false);
-          return next();
+        .try(cmd => [
+          // text selection - case 1: change selection towards right within the same block
+          cmd.inline((_, next) => {
+            assertExists(focusBlock);
+            const success = changeTextSelectionSideways(focusBlock, false);
+            if (success) {
+              next();
+            }
+          }),
+          // text selection - case 2: change selection towards right to the next block
+          cmd
+            .getNextBlock({
+              filter: block => !!block.model.text,
+            })
+            .inline((ctx, next) => {
+              assertExists(ctx.nextBlock);
+              const success = changeTextSelectionSidewaysToBlock(
+                ctx.nextBlock,
+                false
+              );
+              if (success) {
+                next();
+              }
+            }),
+        ])
+        .run();
+    },
+    'Shift-ArrowLeft': ctx => {
+      ctx.get('defaultState').event.preventDefault();
+      return root.std.command
+        .pipe()
+        .getTextSelection()
+        .inline<'currentSelectionPath'>((ctx, next) => {
+          const textSelection = ctx.currentTextSelection;
+          assertExists(textSelection);
+          const end = textSelection.end;
+          focusBlock = pathToBlock(blockElement, end.path);
+          next({
+            currentSelectionPath: end.path,
+          });
         })
+        .try(cmd => [
+          // text selection - case 1: change selection towards left within the same block
+          cmd.inline((_, next) => {
+            assertExists(focusBlock);
+            const success = changeTextSelectionSideways(focusBlock, true);
+            if (success) {
+              next();
+            }
+          }),
+          // text selection - case 2: change selection towards left to the next block
+          cmd
+            .getPrevBlock({
+              filter: block => !!block.model.text,
+            })
+            .inline((ctx, next) => {
+              assertExists(ctx.prevBlock);
+              const success = changeTextSelectionSidewaysToBlock(
+                ctx.prevBlock,
+                true
+              );
+              if (success) {
+                next();
+              }
+            }),
+        ])
         .run();
     },
     Escape: () => {
