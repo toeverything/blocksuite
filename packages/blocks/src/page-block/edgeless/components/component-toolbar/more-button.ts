@@ -26,6 +26,7 @@ import type { FrameBlockModel } from '../../../../frame-block/index.js';
 import type { ImageBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { type PhasorElement } from '../../../../surface-block/index.js';
+import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { duplicate } from '../../utils/clipboard-utils.js';
 import { deleteElements } from '../../utils/crud.js';
@@ -189,7 +190,7 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
 
   private _splitElements() {
     const { notes, frames, shapes, images } = groupBy(
-      this.selection.elements,
+      getElementsWithoutGroup(this.selection.elements),
       element => {
         if (isNoteBlock(element)) {
           return 'notes';
