@@ -1,4 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
+import type { Page } from '@blocksuite/store';
 import { type BaseBlockModel, type BlobManager } from '@blocksuite/store';
 
 import { toast } from '../_common/components/toast.js';
@@ -9,9 +10,9 @@ import type {
   ImageBlockProps,
 } from '../image-block/image-model.js';
 import { transformModel } from '../page-block/utils/operations/model.js';
-import type {
+import {
   AttachmentBlockModel,
-  AttachmentBlockProps,
+  type AttachmentBlockProps,
 } from './attachment-model.js';
 import { defaultAttachmentProps } from './attachment-model.js';
 
@@ -108,21 +109,22 @@ export function turnImageIntoCardView(model: ImageBlockModel, blob: Blob) {
 }
 
 /**
+ * This function will not verify the size of the file.
+ *
  * NOTE: This function may take a long time!
+ *
+ * @internal
  */
-async function uploadBlobForAttachment(
-  attachmentModel: AttachmentBlockModel,
+export async function uploadBlobForAttachment(
+  page: Page,
+  attachmentModelId: string,
   blob: Blob
 ) {
-  const loadingKey = attachmentModel.loadingKey;
-  const isLoading = loadingKey && isAttachmentLoading(loadingKey);
-  if (!isLoading) {
-    console.warn(
-      'uploadAttachment: the attachment is not loading!',
-      attachmentModel
-    );
+  const isLoading = isAttachmentLoading(attachmentModelId);
+  if (isLoading) {
+    throw new Error('the attachment is already uploading!');
   }
-  const page = attachmentModel.page;
+  setAttachmentLoading(attachmentModelId, true);
   const storage = page.blob;
   // The original file name can not be modified after the file is uploaded to the storage,
   // so we create a new file with a fixed name to prevent privacy leaks.
@@ -133,12 +135,18 @@ async function uploadBlobForAttachment(
     // the uploading process may take a long time!
     const sourceId = await storage.set(blob);
     // await new Promise(resolve => setTimeout(resolve, 1000));
-    setAttachmentLoading(loadingKey ?? '', false);
+    const attachmentModel = page.getBlockById(attachmentModelId);
+    if (!attachmentModel) {
+      // It occurs when the block is deleted before the uploading process is finished.
+      throw new Error('the attachment model is not found!');
+    }
+    if (!(attachmentModel instanceof AttachmentBlockModel)) {
+      console.error(attachmentModel);
+      throw new Error('the model is not an attachment model!');
+    }
     page.updateBlock(attachmentModel, {
       sourceId,
-      loadingKey: null,
     } satisfies Partial<AttachmentBlockProps>);
-    return attachmentModel;
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
@@ -146,10 +154,8 @@ async function uploadBlobForAttachment(
         `Failed to upload attachment! ${error.message || error.toString()}`
       );
     }
-    page.updateBlock(attachmentModel, {
-      loadingKey: null,
-    } satisfies Partial<AttachmentBlockProps>);
-    return null;
+  } finally {
+    setAttachmentLoading(attachmentModelId, false);
   }
 }
 
@@ -173,37 +179,33 @@ export async function appendAttachmentBlock(
   }
 
   const page = model.page;
-  const loadingKey = page.generateBlockId();
-  setAttachmentLoading(loadingKey, true);
-  const props: AttachmentBlockProps & { flavour: 'affine:attachment' } = {
+  const blockId = page.generateBlockId();
+  const props: AttachmentBlockProps & {
+    id: string;
+    flavour: 'affine:attachment';
+  } = {
+    id: blockId,
     flavour: 'affine:attachment',
     name: file.name,
     size: file.size,
     type: file.type,
-    loadingKey,
   };
   const [newBlockId] = page.addSiblingBlocks(model, [props]);
-
-  // Upload the file to the storage
-  const attachmentModel = page.getBlockById(
-    newBlockId
-  ) as AttachmentBlockModel | null;
-  assertExists(attachmentModel);
   // Do not add await here, because upload may take a long time, we want to do it in the background.
-  uploadBlobForAttachment(attachmentModel, file);
+  uploadBlobForAttachment(page, newBlockId, file);
 }
 
 const attachmentLoadingMap = new Set<string>();
-export function setAttachmentLoading(loadingKey: string, loading: boolean) {
+export function setAttachmentLoading(modelId: string, loading: boolean) {
   if (loading) {
-    attachmentLoadingMap.add(loadingKey);
+    attachmentLoadingMap.add(modelId);
   } else {
-    attachmentLoadingMap.delete(loadingKey);
+    attachmentLoadingMap.delete(modelId);
   }
 }
 
-export function isAttachmentLoading(loadingKey: string) {
-  return attachmentLoadingMap.has(loadingKey);
+export function isAttachmentLoading(modelId: string) {
+  return attachmentLoadingMap.has(modelId);
 }
 
 /**
