@@ -90,6 +90,7 @@ export class Page extends Space<FlatBlockMap> {
           id: string;
           flavour: string;
           parent: string;
+          model: BaseBlockModel;
         }
       | {
           type: 'update';
@@ -98,12 +99,6 @@ export class Page extends Space<FlatBlockMap> {
           props: Partial<BlockProps>;
         }
     >(),
-    /** @deprecated should not depend on y-concepts directly */
-    yBlockUpdated: new Slot<{
-      id: string;
-      type: 'add' | 'update' | 'delete';
-      props: { [key: string]: { old: unknown; new: unknown } };
-    }>(),
     /** @deprecated */
     copied: new Slot(),
     /** @deprecated */
@@ -537,13 +532,6 @@ export class Page extends Space<FlatBlockMap> {
       oldProps,
       newProps,
     });
-
-    this.slots.blockUpdated.emit({
-      type: 'update',
-      flavour: model.flavour,
-      id: model.id,
-      props,
-    });
   }
 
   addSiblingBlocks(
@@ -784,6 +772,7 @@ export class Page extends Space<FlatBlockMap> {
       id,
       flavour: model.flavour,
       parent: this.getParent(model)?.id ?? '',
+      model,
     });
     model.deleted.emit();
     model.dispose();
@@ -837,10 +826,11 @@ export class Page extends Space<FlatBlockMap> {
         oldProps: oldProps,
         newProps: toBlockProps(yMap, this.doc.proxy),
       });
-      this.slots.yBlockUpdated.emit({
-        id: model.id,
-        props: yProps,
+      this.slots.blockUpdated.emit({
         type: 'update',
+        id: model.id,
+        flavour: model.flavour,
+        props: yProps,
       });
     }
     hasChildrenUpdate && model.childrenUpdated.emit();

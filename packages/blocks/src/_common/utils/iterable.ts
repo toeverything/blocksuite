@@ -135,17 +135,20 @@ export function pickArray<T>(target: Array<T>, keys: number[]): Array<T> {
   }, [] as T[]);
 }
 
-export function pick<T, K extends Partial<keyof T>>(
+export function pick<T, K extends keyof T>(
   target: T,
   keys: K[]
-): Partial<T> {
-  return keys.reduce((pre, key) => {
-    pre[key] = target[key];
-    return pre;
-  }, {} as Partial<T>);
+): { [key in K]: T[K] } {
+  return keys.reduce(
+    (pre, key) => {
+      pre[key] = target[key];
+      return pre;
+    },
+    {} as { [key in K]: T[K] }
+  );
 }
 
-export function pickValues<T, K extends Partial<keyof T>>(
+export function pickValues<T, K extends keyof T>(
   target: T,
   keys: K[]
 ): Array<T[K]> {
@@ -172,4 +175,8 @@ export function isEmpty(obj: unknown) {
   }
 
   return false;
+}
+
+export function keys<T>(obj: T): (keyof T)[] {
+  return Object.keys(obj as object) as (keyof T)[];
 }

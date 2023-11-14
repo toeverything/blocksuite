@@ -25,9 +25,7 @@ class EdgelessBlockPortalFrame extends EdgelessPortalBase<FrameBlockModel> {
       transform: `translate(${bound.x}px, ${bound.y}px)`,
     });
 
-    return html`
-      <div style=${style}>${this.surface.root.renderModel(model)}</div>
-    `;
+    return html` <div style=${style}>${this.renderModel(model)}</div> `;
   }
 }
 

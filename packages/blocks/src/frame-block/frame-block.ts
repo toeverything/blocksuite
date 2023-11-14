@@ -21,7 +21,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
 
   get titleBound() {
     if (!this._titleElement) return new Bound();
-    const { viewport } = this._surface;
+    const { viewport } = this.surface;
     const { zoom } = viewport;
     const rect = viewport.boundingClientRect;
     const bound = Bound.fromDOMRect(this._titleElement.getBoundingClientRect());
@@ -36,7 +36,7 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     return bound;
   }
 
-  private get _surface() {
+  get surface() {
     return (<EdgelessPageBlockComponent>this.parentBlockElement).surface;
   }
 
@@ -44,11 +44,17 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
     super.connectedCallback();
     let lastZoom = 0;
     this._disposables.add(
-      this._surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
+      this.surface.viewport.slots.viewportUpdated.on(({ zoom }) => {
         if (zoom !== lastZoom) {
           this.requestUpdate();
           lastZoom = zoom;
         }
+      })
+    );
+
+    this._disposables.add(
+      this.surface.edgeless.slots.elementUpdated.on(() => {
+        this.requestUpdate();
       })
     );
   }
@@ -58,9 +64,11 @@ export class FrameBlockComponent extends BlockElement<FrameBlockModel> {
   }
 
   override render() {
-    const { model, showTitle, _surface } = this;
-    const bound = Bound.deserialize(model.xywh);
-    const { zoom } = _surface.viewport;
+    const { model, showTitle, surface } = this;
+    const bound = Bound.deserialize(
+      (surface.edgeless.localRecord.wrap(model) as FrameBlockModel).xywh
+    );
+    const { zoom } = surface.viewport;
     const text = model.title.toString();
 
     return html`

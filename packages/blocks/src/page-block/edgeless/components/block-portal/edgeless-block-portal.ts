@@ -12,6 +12,7 @@ import '../component-toolbar/component-toolbar.js';
 
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
+import type { BaseBlockModel } from '@blocksuite/store';
 import { nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -28,10 +29,15 @@ import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
 import type { GroupElement } from '../../../../surface-block/index.js';
-import { almostEqual, Bound } from '../../../../surface-block/index.js';
+import {
+  almostEqual,
+  Bound,
+  serializeXYWH,
+} from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { NoteResizeObserver } from '../../utils/note-resize-observer.js';
 import { getBackgroundGrid, isNoteBlock } from '../../utils/query.js';
+import type { EdgelessSelectedRect } from '../rects/edgeless-selected-rect.js';
 
 export type AutoConnectElement =
   | NoteBlockModel
@@ -55,6 +61,9 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
   @query('.affine-block-children-container.edgeless')
   container!: HTMLDivElement;
+
+  @query('edgeless-selected-rect')
+  selectedRect!: EdgelessSelectedRect;
 
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
@@ -88,6 +97,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
+  }
+
+  get isDragging() {
+    return this.selectedRect.dragging || this.edgeless.tools;
   }
 
   aboutToChangeViewport() {
@@ -164,9 +177,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     _disposables.add(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
-        resizedNotes.forEach(([domRect, prevDomRect], id) => {
+        resizedNotes.forEach(([domRect], id) => {
           if (page.readonly) return;
-          const model = page.getBlockById(id) as NoteBlockModel;
+
+          const model = edgeless.surface.pickById(id) as NoteBlockModel;
           const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);
 
@@ -177,21 +191,14 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             (model.hidden ? EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2 : 0);
 
           if (!almostEqual(newModelHeight, h)) {
-            const updateBlock = () => {
-              page.updateBlock(model, {
-                xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
+            if (this.isDragging && edgeless.selectionManager.isSelected(id)) {
+              edgeless.updateElementInLocal(model.id, {
+                xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
               });
-            };
-
-            // Assume it's user-triggered resizing if both width and height change,
-            // otherwise we don't add the size updating into history.
-            // See https://github.com/toeverything/blocksuite/issues/3671
-            const isResize =
-              prevDomRect && !almostEqual(domRect.width, prevDomRect.width);
-            if (isResize) {
-              updateBlock();
             } else {
-              page.withoutTransact(updateBlock);
+              page.updateBlock(model, {
+                xywh: serializeXYWH(x, y, w, Math.round(newModelHeight)),
+              });
             }
           }
         });
@@ -228,6 +235,12 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
 
     _disposables.add(
       edgeless.surface.model.childrenUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    _disposables.add(
+      (page.root as BaseBlockModel).childrenUpdated.on(() => {
         this.requestUpdate();
       })
     );

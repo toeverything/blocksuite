@@ -2,16 +2,16 @@ import { Slot } from '@blocksuite/global/utils';
 import type { BaseBlockModel } from '@blocksuite/store';
 
 import { pick } from '../../../_common/utils/iterable.js';
-import type { SerializedXYWH } from '../../../index.js';
 
 export class LocalRecordManager<T> {
   private _localRecords = new Map<string, Partial<T>>();
+  private _wrappedModelCache = new WeakMap<BaseBlockModel, BaseBlockModel>();
 
   slots = {
     updated: new Slot<{
       id: string;
       data: {
-        old: Partial<T> | undefined;
+        old: { [key in keyof Partial<T>]: Partial<T>[keyof T] } | undefined;
         new: Partial<T>;
       };
     }>(),
@@ -55,25 +55,55 @@ export class LocalRecordManager<T> {
     data.forEach(([id, record], idx) => callback(id, record, idx));
   }
 
+  wrap(model: BaseBlockModel, id: string = model.id) {
+    if (!this._wrappedModelCache.has(model)) {
+      this._wrappedModelCache.set(
+        model,
+        localRecordWrapper(model, this, id) as BaseBlockModel
+      );
+    }
+
+    return this._wrappedModelCache.get(model) as BaseBlockModel;
+  }
+
+  unwrap(model: BaseBlockModel) {
+    if (rawSymbol in model) return model[rawSymbol] as BaseBlockModel;
+    return model;
+  }
+
   destroy() {
     this.slots.updated.dispose();
     this.slots.deleted.dispose();
   }
 }
 
+const rawSymbol = Symbol('raw');
+
 /**
  * This wraps block tree model with local record, so that its props can be temporarily shadowed.
  * Useful for cases like batch dragging, where per-frame update could be too expensive.
  */
-export function localRecordWrapper<T extends { xywh?: SerializedXYWH }>(
-  model: BaseBlockModel,
-  localRecord: LocalRecordManager<T>
+export function localRecordWrapper<T>(
+  model: object,
+  localRecord: LocalRecordManager<T>,
+  id: string
 ) {
   return new Proxy(model, {
+    has: (target, prop) => {
+      if (prop === rawSymbol) {
+        return true;
+      }
+
+      return Reflect.has(target, prop);
+    },
     get: (target, prop, receiver) => {
-      return localRecord.get(target.id) &&
-        Object.hasOwn(localRecord.get(target.id) as T, prop)
-        ? localRecord.get(target.id)![prop as keyof T]
+      if (prop === rawSymbol) {
+        return model;
+      }
+
+      return localRecord.get(id) &&
+        Object.hasOwn(localRecord.get(id) as T as object, prop)
+        ? localRecord.get(id)![prop as keyof T]
         : Reflect.get(target, prop, receiver);
     },
   });
