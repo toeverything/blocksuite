@@ -24,7 +24,7 @@ For any feedback, please visit [BlockSuite issues](https://github.com/toeverythi
 
 export const preset: InitFn = async (workspace: Workspace, id: string) => {
   const page = workspace.createPage({ id });
-  await page.waitForLoaded();
+  await page.load();
   // Add page block and surface block at root level
   const pageBlockId = page.addBlock('affine:page', {
     title: new Text('Welcome to BlockSuite Playground'),
