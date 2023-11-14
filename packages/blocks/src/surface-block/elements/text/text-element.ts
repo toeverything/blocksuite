@@ -33,7 +33,7 @@ export class TextElement extends SurfaceElement<IText> {
 
   get fontSize() {
     return (
-      (this.localRecord as ITextLocalRecord).fontSize ??
+      (this.localRecord as ITextLocalRecord)?.fontSize ??
       (this.yMap.get('fontSize') as IText['fontSize'])
     );
   }
@@ -56,7 +56,7 @@ export class TextElement extends SurfaceElement<IText> {
 
   get hasMaxWidth() {
     return (
-      (this.localRecord as ITextLocalRecord).hasMaxWidth ??
+      (this.localRecord as ITextLocalRecord)?.hasMaxWidth ??
       (this.yMap.get('hasMaxWidth') as IText['hasMaxWidth'])
     );
   }
