@@ -115,12 +115,18 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
     );
   };
 
-  // Check if the blob is available
+  /**
+   * Check if the blob is available. It is necessary since the block may be copied from another workspace.
+   */
   private async _checkBlob() {
     const storage = this.page.blob;
     const sourceId = this.model.sourceId;
     if (!sourceId) return;
     if (!(await hasBlob(storage, sourceId))) {
+      console.warn(
+        'The attachment is unavailable since the blob is missing!',
+        this.model
+      );
       this._error = true;
     }
   }
@@ -184,9 +190,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
   }
 
   override render() {
-    const isLoading =
-      this.model.loadingKey && isAttachmentLoading(this.model.loadingKey);
-    const isError = !isLoading && (this._error || !this.model.sourceId);
+    const isLoading = isAttachmentLoading(this.model.id);
+    const isError = this._error || (!isLoading && !this.model.sourceId);
+
     if (isLoading) {
       return html`<div
         class="affine-attachment-container"
