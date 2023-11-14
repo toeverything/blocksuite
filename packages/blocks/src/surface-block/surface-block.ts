@@ -831,7 +831,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.updateBlock(element, properties);
+      this.page.updateBlock(this.unwrap(element), properties);
     } else {
       this.transact(() => {
         const element = this._elements.get(id);
@@ -857,7 +857,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     }
     const element = this.pickById(id);
     if (isTopLevelBlock(element)) {
-      this.page.deleteBlock(element);
+      this.page.deleteBlock(this.unwrap(element));
     } else {
       this.transact(() => {
         this._yContainer.delete(id);
