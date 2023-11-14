@@ -270,8 +270,7 @@ export function bindHotKey(blockElement: BlockElement) {
         })
         .run();
     },
-    'Shift-ArrowDown': ctx => {
-      ctx.get('defaultState').event.preventDefault();
+    'Shift-ArrowDown': () => {
       let anchorBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
@@ -379,8 +378,7 @@ export function bindHotKey(blockElement: BlockElement) {
         ])
         .run();
     },
-    'Shift-ArrowUp': ctx => {
-      ctx.get('defaultState').event.preventDefault();
+    'Shift-ArrowUp': () => {
       let anchorBlock: BlockElement | null = null;
       return root.std.command
         .pipe()
@@ -485,8 +483,7 @@ export function bindHotKey(blockElement: BlockElement) {
         ])
         .run();
     },
-    'Shift-ArrowRight': ctx => {
-      ctx.get('defaultState').event.preventDefault();
+    'Shift-ArrowRight': () => {
       return root.std.command
         .pipe()
         .getTextSelection()
@@ -526,8 +523,7 @@ export function bindHotKey(blockElement: BlockElement) {
         ])
         .run();
     },
-    'Shift-ArrowLeft': ctx => {
-      ctx.get('defaultState').event.preventDefault();
+    'Shift-ArrowLeft': () => {
       return root.std.command
         .pipe()
         .getTextSelection()

@@ -190,6 +190,18 @@ export const bindContainerHotkey = (blockElement: BlockElement) => {
 
       return true;
     },
+    'Shift-ArrowUp': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowDown': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowRight': ctx => {
+      _preventDefault(ctx);
+    },
+    'Shift-ArrowLeft': ctx => {
+      _preventDefault(ctx);
+    },
     Escape: () => {
       if (blockElement.selected?.is('text')) {
         return _selectBlock();
