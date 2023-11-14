@@ -66,7 +66,7 @@ test('should format quick bar show when select text', async ({ page }) => {
   await expect(formatBar).not.toBeVisible();
 });
 
-test('should format quick bar show when click drag handler', async ({
+test('should format quick bar show when clicking drag handle', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);

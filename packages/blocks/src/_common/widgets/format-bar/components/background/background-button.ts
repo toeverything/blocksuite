@@ -80,7 +80,7 @@ export const BackgroundButton = (formatBar: AffineFormatBarWidget) => {
     assertExists(panel);
     panel.style.display = 'block';
     computePosition(button, panel, {
-      placement: 'top',
+      placement: 'bottom',
       middleware: [
         flip(),
         shift({
