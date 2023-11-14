@@ -1,5 +1,18 @@
 import { BaseBlockModel, defineBlockSchema } from '@blocksuite/store';
 
+/**
+ * When the attachment is uploading, the `sourceId` is `undefined`.
+ * And we can query the upload status by the `isAttachmentLoading` function.
+ *
+ * Other collaborators will show a error attachment block when the blob is not uploaded.
+ * We can sync the upload status by the awareness system in the future.
+ *
+ * When the attachment is uploaded, the `sourceId` is the id of the blob.
+ *
+ * If there are no `sourceId` and the `isAttachmentLoading` function returns `false`,
+ * it means that the attachment is failed to upload.
+ */
+
 export type AttachmentBlockProps = {
   name: string;
   size: number;
@@ -8,17 +21,6 @@ export type AttachmentBlockProps = {
    */
   type: string;
   caption?: string;
-
-  /**
-   * `loadingKey` is used to indicate whether the attachment is uploading.
-   * You can query the loading state by calling `isAttachmentLoading(loadingKey)`
-   *
-   * We can not use `loading: true` directly because the state will be stored in the model,
-   * which will cause infinite loading of the block after reloading the page.
-   *
-   * NOTE: The `loadingKey` and `sourceId` should not be existed at the same time
-   */
-  loadingKey?: string | null;
   sourceId?: string;
 };
 
@@ -27,7 +29,6 @@ export const defaultAttachmentProps: AttachmentBlockProps = {
   size: 0,
   type: 'application/octet-stream',
   sourceId: undefined,
-  loadingKey: undefined,
   caption: undefined,
 };
 
