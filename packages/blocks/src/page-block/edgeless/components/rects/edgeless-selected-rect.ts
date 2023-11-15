@@ -7,7 +7,7 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
-import { pick } from '../../../../_common/utils/iterable.js';
+import { pickValues } from '../../../../_common/utils/iterable.js';
 import type {
   EdgelessElement,
   IPoint,
@@ -324,6 +324,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     this.addEventListener('pointerdown', stopPropagation);
   }
 
+  get dragging() {
+    return this._resizeManager.dragging || this.edgeless.tools.dragging;
+  }
+
   get selection() {
     return this.edgeless.selectionManager;
   }
@@ -401,7 +405,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     >,
     direction: HandleDirection
   ) => {
-    const { page, surface } = this;
+    const { surface, edgeless } = this;
 
     newBounds.forEach(({ bound }, id) => {
       const element = surface.pickById(id);
@@ -417,11 +421,11 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         if (height < NOTE_MIN_HEIGHT) {
           height = NOTE_MIN_HEIGHT;
         }
-        page.updateBlock(element, {
+        edgeless.updateElementInLocal(element.id, {
           xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
         });
       } else if (isFrameBlock(element)) {
-        page.updateBlock(element, {
+        edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
         });
       } else {
@@ -434,7 +438,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             bound = normalizeTextBound(element, bound, true);
             // If the width of the text element has been changed by dragging,
             // We need to set hasMaxWidth to true for wrapping the text
-            surface.updateElement(id, {
+            edgeless.updateElementInLocal(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
               hasMaxWidth: true,
@@ -443,7 +447,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
             p = bound.h / element.h;
             // const newFontsize = element.fontSize * p;
             // bound = normalizeTextBound(element, bound, false, newFontsize);
-            surface.updateElement(id, {
+            edgeless.updateElementInLocal(id, {
               xywh: bound.serialize(),
               fontSize: element.fontSize * p,
             });
@@ -452,7 +456,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           if (element instanceof ShapeElement) {
             bound = normalizeShapeBound(element, bound);
           }
-          surface.updateElement(id, {
+          edgeless.updateElementInLocal(id, {
             xywh: bound.serialize(),
           });
         }
@@ -489,6 +493,9 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   private _onDragEnd = () => {
+    const selectedElements = this.edgeless.selectionManager.state.elements;
+    this.edgeless.applyLocalRecord(selectedElements);
+
     this._updateCursor(false);
     this.setToolbarVisible(true);
   };
@@ -631,16 +638,18 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
   };
 
   override firstUpdated() {
-    const { _disposables, page, slots, selection, surface, edgeless } = this;
+    const { _disposables, page, slots, selection, edgeless } = this;
 
     _disposables.add(
       // viewport zooming / scrolling
       slots.viewportUpdated.on(this._updateOnViewportChange)
     );
 
-    Object.values(
-      pick(surface.slots, ['elementAdded', 'elementRemoved', 'elementUpdated'])
-    ).forEach(slot => {
+    pickValues(edgeless.slots, [
+      'elementAdded',
+      'elementRemoved',
+      'elementUpdated',
+    ]).forEach(slot => {
       _disposables.add(slot.on(this._updateOnElementChange));
     });
 
@@ -650,13 +659,10 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       )
     );
 
-    _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(this._updateOnElementChange)
-    );
     _disposables.add(selection.slots.updated.on(this._updateOnSelectionChange));
     _disposables.add(page.slots.blockUpdated.on(this._updateOnElementChange));
     _disposables.add(
-      page.slots.yBlockUpdated.on(data => {
+      page.slots.blockUpdated.on(data => {
         this._updateOnElementChange(data, true);
       })
     );

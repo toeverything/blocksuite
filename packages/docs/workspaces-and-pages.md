@@ -12,13 +12,13 @@ A `workspace` in BlockSuite acts as a top-level container for organizing pages. 
 import { Workspace, Schema } from '@blocksuite/store';
 import { AffineSchemas } from '@blocksuite/blocks/models';
 
-const schema = new Schema();
-
-// You can register a batch of custom blocks to the workspace
-schema.register(AffineSchemas);
-
+const schema = new Schema().register(AffineSchemas);
 const workspace = new Workspace({ id: 'foo', schema });
 ```
+
+::: info
+The concept of `schema` here relates to the block definitions used in the workspace. See [block schema](./block-schema) for further information.
+:::
 
 ## Pages
 
@@ -27,12 +27,18 @@ A `page` in BlockSuite serves as the actual container for organizing blocks, all
 Here is how we create a new page with id `page0` within the workspace:
 
 ```ts
-const page = workspace.createPage({ id: 'page0' });
-await page.load();
+const page = workspace.createPage();
 ```
 
 The `page` instance provides a set of core APIs for performing block operations, e.g., `page.addBlock`, `page.updateBlock`, and `page.deleteBlock`. These APIs will be further introduced in the following sections of the document.
 
-::: tip
-Block operations APIs are only available after the page is loaded. Remember to add `await page.load()` before calling these APIs.
-:::
+To init basic block content in a `page`, simply wrap the initial block operation APIs inside `page.load()`:
+
+```ts
+const page = workspace.createPage();
+
+page.load(() => {
+  page.addBlock('affine:page', {});
+  // ...
+});
+```

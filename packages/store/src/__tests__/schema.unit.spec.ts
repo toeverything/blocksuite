@@ -63,7 +63,7 @@ async function createTestPage(pageId = defaultPageId) {
   const options = createTestOptions();
   const workspace = new Workspace(options);
   const page = workspace.createPage({ id: pageId });
-  await page.waitForLoaded();
+  await page.load();
   return page;
 }
 

@@ -9,6 +9,7 @@ import type {
   DocProviderCreator,
   Page,
   PassiveDocProvider,
+  Workspace,
   Y,
 } from '@blocksuite/store';
 import * as store from '@blocksuite/store';
@@ -18,14 +19,11 @@ import {
   createSimpleServerStorage,
   Generator,
   Schema,
-  Utils,
-  Workspace,
   type WorkspaceOptions,
 } from '@blocksuite/store';
 import { createBroadcastChannelProvider } from '@blocksuite/store/providers/broadcast-channel';
 import type { IndexedDBProvider } from '@toeverything/y-indexeddb';
 import { createIndexedDBProvider } from '@toeverything/y-indexeddb';
-import { fileOpen } from 'browser-fs-access';
 
 const params = new URLSearchParams(location.search);
 const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);
@@ -79,63 +77,7 @@ if (isE2E) {
       editor,
     }),
   });
-} else {
-  Object.defineProperty(globalThis, 'openFromFile', {
-    value: async function importFromFile(pageId?: string) {
-      const file = await fileOpen({
-        extensions: ['.ydoc'],
-      });
-      const buffer = await file.arrayBuffer();
-      if (pageId) {
-        globalThis.targetPageId = pageId;
-      }
-      Workspace.Y.applyUpdate(window.workspace.doc, new Uint8Array(buffer));
-    },
-  });
-
-  Object.defineProperty(globalThis, 'rebuildPageTree', {
-    value: async function rebuildPageTree(doc: Y.Doc, pages: string[]) {
-      const pageTree = doc
-        .getMap<Y.Array<Y.Map<unknown>>>('space:meta')
-        .get('pages');
-      if (pageTree) {
-        const pageIds = pageTree.map(p => p.get('id') as string).filter(v => v);
-        for (const page of pages) {
-          if (!pageIds.includes(page)) {
-            const map = new Workspace.Y.Map([
-              ['id', page],
-              ['title', ''],
-              ['createDate', +new Date()],
-              ['subpageIds', []],
-            ]);
-            pageTree.push([map]);
-          }
-        }
-      }
-    },
-  });
-
-  Object.defineProperty(globalThis, 'debugFromFile', {
-    value: async function debuggerFromFile() {
-      const file = await fileOpen({
-        extensions: ['.ydoc'],
-      });
-      const buffer = await file.arrayBuffer();
-      const schema = new Schema();
-      schema.register(AffineSchemas).register(__unstableSchemas);
-
-      const workspace = new Workspace({
-        schema,
-        id: 'temporary',
-      });
-      Workspace.Y.applyUpdate(workspace.doc, new Uint8Array(buffer));
-      globalThis.debugWorkspace = workspace;
-    },
-  });
 }
-
-export const isBase64 =
-  /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/;
 
 async function initWithMarkdownContent(
   workspace: Workspace,
@@ -153,6 +95,16 @@ async function initWithMarkdownContent(
   return contentParser.importMarkdown(content, page.root.id);
 }
 
+function isValidUrl(urlLike: string) {
+  let url;
+  try {
+    url = new URL(urlLike);
+  } catch (_) {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
 export async function tryInitExternalContent(
   workspace: Workspace,
   initParam: string,
@@ -161,8 +113,6 @@ export async function tryInitExternalContent(
   if (isValidUrl(initParam)) {
     const url = new URL(initParam);
     await initWithMarkdownContent(workspace, url, pageId);
-  } else if (isBase64.test(initParam)) {
-    Utils.applyYjsUpdateV2(workspace, initParam);
   }
 }
 
@@ -228,17 +178,7 @@ export function createWorkspaceOptions(): WorkspaceOptions {
   };
 }
 
-export function isValidUrl(urlLike: string) {
-  let url;
-  try {
-    url = new URL(urlLike);
-  } catch (_) {
-    return false;
-  }
-  return url.protocol === 'http:' || url.protocol === 'https:';
-}
-
-export const createEditor = (page: Page, element: HTMLElement) => {
+export function createEditor(page: Page, element: HTMLElement) {
   const editor = new EditorContainer();
   editor.page = page;
   element.append(editor);
@@ -247,4 +187,4 @@ export const createEditor = (page: Page, element: HTMLElement) => {
     document.body.appendChild(blockHub);
   });
   return editor;
-};
+}

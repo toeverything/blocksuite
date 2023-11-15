@@ -11,7 +11,7 @@ import {
 import { Bound } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { isFrameBlock, isNoteBlock } from '../../utils/query.js';
+import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
 function calculatePosition(gap: number, count: number, iconWidth: number) {
@@ -125,28 +125,9 @@ export class EdgelessIndexLabel extends WithDisposable(ShadowlessElement) {
     );
 
     _disposables.add(
-      surface.page.slots.yBlockUpdated.on(({ type, id }) => {
-        const block = surface.page.getBlockById(id);
-        if (type === 'update' && isNoteBlock(block)) {
-          this.requestUpdate();
-        } else if (isFrameBlock(block) && this.elementsMap.has(block)) {
-          this.requestUpdate();
-        }
-      })
-    );
-
-    _disposables.add(
-      surface.slots.elementUpdated.on(({ id }) => {
+      edgeless.slots.elementUpdated.on(({ id }) => {
         const element = surface.pickById(id) as AutoConnectElement;
         if (element && this.elementsMap.has(element)) {
-          this.requestUpdate();
-        }
-      })
-    );
-
-    _disposables.add(
-      edgeless.slots.elementSizeUpdated.on(id => {
-        if (isNoteBlock(surface.pickById(id))) {
           this.requestUpdate();
         }
       })

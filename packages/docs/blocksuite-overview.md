@@ -21,3 +21,12 @@ The major packages in BlockSuite include the following:
 - `@blocksuite/virgo`: Atomic rich text _component_ used in BlockSuite. Every editable block could hold its own virgo instances, leveraging the store to reconcile the block tree.
 - `@blocksuite/blocks`: Editable first-party blocks under the `affine` scope. The default AFFiNE editors are simply different implementations of the `affine:page` blocks.
 - `@blocksuite/editor`: The ready-to-use editors composed by blocks.
+
+## Why BlockSuite?
+
+- 🧬 **CRDT-Native Collaboration**: At the heart of BlockSuite is its native use of CRDTs ([Conflict-free Replicated Data Types](https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type)) as the single source of truth for data flow. This design sets it apart from traditional editors that often graft on real-time collaboration. By integrating CRDTs at its core, BlockSuite inherently supports advanced features like time travel (undo/redo) and automatic conflict resolution. This means smoother, more reliable collaborative editing without the need for additional layers or complex integrations.
+- 🧩 **Rich Text Orchestration Across Blocks**: BlockSuite diverges from the conventional monolithic rich text edit model. It enables each block to support its own atomic rich text component. This allows for granular control and flexibility in editing, which is especially powerful in complex documents where different sections require varied formatting and features.
+- 🎨 **Reusable Blocks Across Editors**: BlockSuite provides great interoperability of custom blocks across different editor types (document, whiteboard, etc.). This allows for a more consistent and efficient use of blocks, simplifying the development process by enabling the same block to function seamlessly in various editing environments.
+- 🔌 **Plug-and-Play Data Synchronization**: BlockSuite simplifies data synchronization with its provider-based approach. Connecting an editor instance to a provider automatically enables data synchronization. It supports incremental data sync, meaning only the changes are transmitted, enhancing efficiency and performance. It eliminates the need for explicit requests or complex synchronization logic, streamlining DX and ensuring data consistency across collaborative environments.
+
+> 🚧 BlockSuite is currently in beta, with some extension capabilities still under refinement. Hope you can stay tuned, try it out, or share your feedback!

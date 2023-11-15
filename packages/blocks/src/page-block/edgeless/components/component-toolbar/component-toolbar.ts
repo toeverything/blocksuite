@@ -221,14 +221,14 @@ export class EdgelessComponentToolbar extends WithDisposable(LitElement) {
       })
     );
 
-    pickValues(this.edgeless.surface.slots, [
+    pickValues(this.edgeless.slots, [
       'elementAdded',
       'elementRemoved',
       'elementUpdated',
     ]).forEach(slot => _disposables.add(slot.on(this._updateOnSelectedChange)));
 
     _disposables.add(
-      edgeless.page.slots.yBlockUpdated.on(this._updateOnSelectedChange)
+      edgeless.page.slots.blockUpdated.on(this._updateOnSelectedChange)
     );
   }
 
