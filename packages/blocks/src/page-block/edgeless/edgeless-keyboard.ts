@@ -1,3 +1,5 @@
+import { IS_MAC } from '@blocksuite/global/env';
+
 import {
   type EdgelessTool,
   LineWidth,
@@ -174,6 +176,11 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         },
         Delete: () => {
           this._delete();
+        },
+        'Control-d': () => {
+          if (IS_MAC) {
+            this._delete();
+          }
         },
         ArrowUp: () => {
           this._move('ArrowUp');
