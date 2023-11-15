@@ -71,7 +71,8 @@ export const renderGroupTitle = (
         padding: 4px;
         border-radius: 4px;
         visibility: hidden;
-        transition: visibility 100ms ease-in-out;
+        opacity: 0;
+        transition: opacity 150ms cubic-bezier(0.42, 0, 1, 1);
       }
 
       .group-header-icon {
