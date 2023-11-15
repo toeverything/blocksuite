@@ -1,7 +1,6 @@
 # Command API
 
-Commands are the actions that can be triggered by the user.
-With the command API, you can define chainable commands and execute them.
+Commands are the reusable actions for triggering state updates. Inside a command, you can query different states of the editor, or perform operations to update them. With the command API, you can define chainable commands and execute them.
 
 ## Command Chain
 
@@ -11,14 +10,11 @@ Commands are executed in a chain, and each command can decide whether to continu
 std.command.pipe().command1().command2().command3().run();
 ```
 
-You will need to call `pipe()` to start a new chain.
-Then, you can call any command defined in the `Commands` interface.
-And finally, call `run()` to execute the chain.
+You will need to call `pipe()` to start a new chain. Then, you can call any command defined in the `Commands` interface. And finally, call `run()` to execute the chain.
 
 ### Try
 
-If a command fails, the chain will be interrupted.
-However, you can use `try()` to call a list of commands until one of them succeeds.
+If a command fails, the chain will be interrupted. However, you can use `try()` to call a list of commands until one of them succeeds.
 
 ```ts
 std.command

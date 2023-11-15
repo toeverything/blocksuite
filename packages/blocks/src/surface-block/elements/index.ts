@@ -20,7 +20,7 @@ import type {
 } from './surface-element.js';
 import { TextElementDefaultProps } from './text/consts.js';
 import { TextElement } from './text/text-element.js';
-import type { IText } from './text/types.js';
+import type { IText, ITextLocalRecord } from './text/types.js';
 
 // eslint-disable-next-line simple-import-sort/exports
 export { BrushElement } from './brush/brush-element.js';
@@ -59,7 +59,7 @@ export type IPhasorElementLocalRecord = {
   shape: IShapeLocalRecord;
   brush: IBrushLocalRecord;
   connector: ISurfaceElementLocalRecord;
-  text: ISurfaceElementLocalRecord;
+  text: ITextLocalRecord;
   group: IGroupLocalRecord;
 };
 

@@ -73,7 +73,7 @@ export function addNote(
             const block = page.getBlockById(noteId);
             assertExists(block);
             if (!editing && isEmpty(block)) {
-              page.deleteBlock(element);
+              page.deleteBlock(edgeless.surface.unwrap(element));
             }
           });
         });

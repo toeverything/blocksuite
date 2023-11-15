@@ -6,7 +6,6 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { Bound, type IVec, Vec } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
-import { isNoteBlock } from '../../utils/query.js';
 import type { AutoConnectElement } from '../block-portal/edgeless-block-portal.js';
 
 const EXPAND_OFFSET = 40;
@@ -42,6 +41,7 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
 
   protected override firstUpdated(): void {
     const { _disposables, surface } = this;
+
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(() => {
         this.requestUpdate();
@@ -49,8 +49,10 @@ export class EdgelessAutoConnectLine extends WithDisposable(LitElement) {
     );
 
     _disposables.add(
-      surface.page.slots.yBlockUpdated.on(({ type, id }) => {
-        if (type === 'update' && isNoteBlock(surface.pickById(id))) {
+      surface.edgeless.slots.elementUpdated.on(event => {
+        if (
+          this.elementsMap.has(surface.pickById(event.id) as AutoConnectElement)
+        ) {
           this.requestUpdate();
         }
       })

@@ -75,7 +75,7 @@ async function initEmptyEditor({
       const { workspace } = window;
 
       async function initPage(page: ReturnType<typeof workspace.createPage>) {
-        page.waitForLoaded();
+        page.load();
         for (const [key, value] of Object.entries(flags)) {
           page.awarenessStore.setFlag(key as keyof typeof flags, value);
         }
@@ -134,9 +134,7 @@ async function initEmptyEditor({
         });
       } else {
         const page = workspace.createPage({ id: 'page:home' });
-        page.waitForLoaded().then(() => {
-          initPage(page);
-        });
+        initPage(page);
       }
     },
     [flags, noInit, multiEditor] as const
@@ -328,21 +326,21 @@ export async function enterPlaygroundWithList(
   await page.evaluate(
     async ({ contents, type }: { contents: string[]; type: ListType }) => {
       const { page } = window;
-      await page.waitForLoaded();
-
-      const pageId = page.addBlock('affine:page', {
-        title: new page.Text(),
+      await page.load(() => {
+        const pageId = page.addBlock('affine:page', {
+          title: new page.Text(),
+        });
+        const noteId = page.addBlock('affine:note', {}, pageId);
+        for (let i = 0; i < contents.length; i++) {
+          page.addBlock(
+            'affine:list',
+            contents.length > 0
+              ? { text: new page.Text(contents[i]), type }
+              : { type },
+            noteId
+          );
+        }
       });
-      const noteId = page.addBlock('affine:note', {}, pageId);
-      for (let i = 0; i < contents.length; i++) {
-        page.addBlock(
-          'affine:list',
-          contents.length > 0
-            ? { text: new page.Text(contents[i]), type }
-            : { type },
-          noteId
-        );
-      }
     },
     { contents, type }
   );
@@ -353,9 +351,7 @@ export async function enterPlaygroundWithList(
 export async function initEmptyParagraphState(page: Page, pageId?: string) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
-    await page.waitForLoaded();
     page.captureSync();
-
     if (!pageId) {
       pageId = page.addBlock('affine:page', {
         title: new page.Text(),
@@ -366,6 +362,7 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
     // page.addBlock('affine:surface', {}, pageId);
     page.captureSync();
+
     return { pageId, noteId, paragraphId };
   }, pageId);
   return ids;
@@ -374,14 +371,13 @@ export async function initEmptyParagraphState(page: Page, pageId?: string) {
 export async function initEmptyEdgelessState(page: Page) {
   const ids = await page.evaluate(async () => {
     const { page } = window;
-    await page.waitForLoaded();
-
     const pageId = page.addBlock('affine:page', {
       title: new page.Text(),
     });
     page.addBlock('affine:surface', {}, pageId);
     const noteId = page.addBlock('affine:note', {}, pageId);
     const paragraphId = page.addBlock('affine:paragraph', {}, noteId);
+
     page.resetHistory();
 
     return { pageId, noteId, paragraphId };
@@ -392,8 +388,6 @@ export async function initEmptyEdgelessState(page: Page) {
 export async function initEmptyDatabaseState(page: Page, pageId?: string) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
-    await page.waitForLoaded();
-
     page.captureSync();
     if (!pageId) {
       pageId = page.addBlock('affine:page', {
@@ -411,6 +405,7 @@ export async function initEmptyDatabaseState(page: Page, pageId?: string) {
     const model = page.getBlockById(databaseId) as DatabaseBlockModel;
     model.initEmpty('table');
     model.applyColumnUpdate();
+
     page.captureSync();
     return { pageId, noteId, databaseId };
   }, pageId);
@@ -428,7 +423,6 @@ export async function initKanbanViewState(
   const ids = await page.evaluate(
     async ({ pageId, config }) => {
       const { page } = window;
-      await page.waitForLoaded();
 
       page.captureSync();
       if (!pageId) {
@@ -471,7 +465,6 @@ export async function initKanbanViewState(
           }
         });
       });
-
       model.initEmpty('kanban');
       model.applyColumnUpdate();
       page.captureSync();
@@ -488,7 +481,6 @@ export async function initEmptyDatabaseWithParagraphState(
 ) {
   const ids = await page.evaluate(async pageId => {
     const { page } = window;
-    await page.waitForLoaded();
 
     page.captureSync();
     if (!pageId) {
@@ -508,6 +500,7 @@ export async function initEmptyDatabaseWithParagraphState(
     model.initEmpty('table');
     model.applyColumnUpdate();
     page.addBlock('affine:paragraph', {}, noteId);
+
     page.captureSync();
     return { pageId, noteId, databaseId };
   }, pageId);
@@ -578,13 +571,12 @@ export async function initEmptyCodeBlockState(
 ) {
   const ids = await page.evaluate(async codeBlockProps => {
     const { page } = window;
-    await page.waitForLoaded();
-
     page.captureSync();
     const pageId = page.addBlock('affine:page');
     const noteId = page.addBlock('affine:note', {}, pageId);
     const codeBlockId = page.addBlock('affine:code', codeBlockProps, noteId);
     page.captureSync();
+
     return { pageId, noteId, codeBlockId };
   }, codeBlockProps);
   await page.waitForSelector(`[data-block-id="${ids.codeBlockId}"] rich-text`);

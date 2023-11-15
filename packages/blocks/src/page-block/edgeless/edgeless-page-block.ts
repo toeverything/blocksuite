@@ -27,10 +27,10 @@ import type {
 import {
   asyncFocusRichText,
   handleNativeRangeAtPoint,
-  matchFlavours,
   type ReorderingAction,
   type TopLevelBlockModel,
 } from '../../_common/utils/index.js';
+import { keys, pick } from '../../_common/utils/iterable.js';
 import { EdgelessClipboard } from '../../_legacy/clipboard/index.js';
 import { getService } from '../../_legacy/service/index.js';
 import type { ImageBlockModel } from '../../image-block/index.js';
@@ -199,7 +199,6 @@ export class EdgelessPageBlockComponent extends BlockElement<
     zoomUpdated: new Slot<ZoomAction>(),
     pressShiftKeyUpdated: new Slot<boolean>(),
     cursorUpdated: new Slot<string>(),
-    elementSizeUpdated: new Slot<string>(),
     copyAsPng: new Slot<{
       blocks: TopLevelBlockModel[];
       shapes: PhasorElement[];
@@ -210,6 +209,13 @@ export class EdgelessPageBlockComponent extends BlockElement<
     tagClicked: new Slot<{ tagId: string }>(),
     readonlyUpdated: new Slot<boolean>(),
     draggingAreaUpdated: new Slot(),
+
+    elementUpdated: new Slot<{
+      id: string;
+      props: Record<string, unknown>;
+    }>(),
+    elementAdded: new Slot<string>(),
+    elementRemoved: new Slot<{ id: string; element: EdgelessElement }>(),
   };
 
   @query('affine-surface')
@@ -267,18 +273,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initSlotEffects() {
-    const { _disposables, slots, page, surface } = this;
-    _disposables.add(
-      page.slots.yBlockUpdated.on(({ id, props }) => {
-        const block = page.getBlockById(id);
-        if (
-          matchFlavours(block, [NOTE, IMAGE, FRAME]) &&
-          ('prop:xywh' in props || 'prop:rotate' in props)
-        ) {
-          this.slots.elementSizeUpdated.emit(id);
-        }
-      })
-    );
+    const { _disposables, slots, surface } = this;
 
     _disposables.add(
       surface.viewport.slots.viewportUpdated.on(({ zoom, center }) => {
@@ -645,6 +640,7 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   override firstUpdated() {
+    this._initElementSlot();
     this._initSlotEffects();
     this._initResizeEffect();
     this._initPixelRatioChangeEffect();
@@ -758,14 +754,52 @@ export class EdgelessPageBlockComponent extends BlockElement<
   private _initLocalRecordManager() {
     this.localRecord = new LocalRecordManager<PhasorElementLocalRecordValues>();
     this.localRecord.slots.updated.on(({ id, data }) => {
-      if (this.page.getBlockById(id) && 'xywh' in data.new) {
-        if ('xywh' in data.new) this.slots.elementSizeUpdated.emit(id);
-      }
+      const element = this.surface.pickById(id);
+
+      if (!element) return;
+
+      this.surface.refresh();
+
+      const changedProps = pick(
+        data.new,
+        keys(data.new).filter(key => key in element)
+      );
+
+      this.slots.elementUpdated.emit({
+        id,
+        props: changedProps,
+      });
     });
 
     this.disposables.add(() => {
       this.localRecord.destroy();
     });
+  }
+
+  private _initElementSlot() {
+    this._disposables.add(
+      this.page.slots.blockUpdated.on(event => {
+        if (![IMAGE, NOTE, FRAME].includes(event.flavour as EdgelessBlockType))
+          return;
+
+        switch (event.type) {
+          case 'update':
+            this.slots.elementUpdated.emit({
+              id: event.id,
+              props: event.props,
+            });
+            break;
+          case 'add':
+            this.slots.elementAdded.emit(event.id);
+            break;
+          case 'delete':
+            this.slots.elementRemoved.emit({
+              id: event.id,
+              element: event.model as TopLevelBlockModel,
+            });
+        }
+      })
+    );
   }
 
   override connectedCallback() {

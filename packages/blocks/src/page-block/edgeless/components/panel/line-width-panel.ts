@@ -207,8 +207,8 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
       steps = Math.floor((x - boundLeft) / stepWidth);
     }
 
-    // The drag handler should not be dragged to the left of the first icon or right of the last icon.
-    // Calculate the drag handler position based on the steps.
+    // The drag handle should not be dragged to the left of the first icon or right of the last icon.
+    // Calculate the drag handle position based on the steps.
     const bottomLineOffsetX = 4;
     const bottomLineStepWidth = (bottomLineWidth - bottomLineOffsetX) / 100;
     const dragHandlerPosition = steps * bottomLineStepWidth;
@@ -218,7 +218,7 @@ export class EdgelessLineWidthPanel extends WithDisposable(LitElement) {
   private _updateLineWidthPanelByDragHandlePosition(
     dragHandlerPosition: number
   ) {
-    // Calculate the selected size based on the drag handler position.
+    // Calculate the selected size based on the drag handle position.
     // Need to select the nearest size.
     let selectedSize = this.selectedSize;
     if (dragHandlerPosition <= 12) {

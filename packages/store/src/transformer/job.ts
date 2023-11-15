@@ -257,7 +257,7 @@ export class Job {
     PageSnapshotSchema.parse(snapshot);
     const { meta, blocks } = snapshot;
     const page = this._workspace.createPage({ id: meta.id });
-    await page.waitForLoaded();
+    await page.load();
     this._importPageMeta(page, meta);
     await this.snapshotToBlock(blocks, page);
     this._slots.afterImport.emit({

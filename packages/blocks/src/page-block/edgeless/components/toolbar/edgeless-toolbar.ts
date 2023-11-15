@@ -279,13 +279,13 @@ export class EdgelessToolbar extends WithDisposable(LitElement) {
       })
     );
     _disposables.add(
-      page.slots.yBlockUpdated.on(e => {
+      page.slots.blockUpdated.on(e => {
         if (e.type === 'update' && 'index' in e.props) {
           this._updateFrames();
         }
       })
     );
-    _disposables.add(page.slots.yBlockUpdated);
+    _disposables.add(page.slots.blockUpdated);
     _disposables.add(slots.viewportUpdated.on(() => this.requestUpdate()));
     _disposables.add(
       edgeless.slots.readonlyUpdated.on(() => {

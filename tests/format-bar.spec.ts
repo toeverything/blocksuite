@@ -66,7 +66,7 @@ test('should format quick bar show when select text', async ({ page }) => {
   await expect(formatBar).not.toBeVisible();
 });
 
-test('should format quick bar show when click drag handler', async ({
+test('should format quick bar show when clicking drag handle', async ({
   page,
 }) => {
   await enterPlaygroundRoom(page);
@@ -1320,27 +1320,24 @@ test('should register custom elements in format quick bar', async ({
   await expect(page.getByTestId('custom-format-bar-element')).toBeVisible();
 });
 
-test.fixme(
-  'format quick bar should not break cursor jumping',
-  async ({ page }) => {
-    await enterPlaygroundRoom(page);
-    await initEmptyParagraphState(page);
-    await initThreeParagraphs(page);
-    await dragBetweenIndices(page, [1, 3], [1, 2]);
+test('format quick bar should not break cursor jumping', async ({ page }) => {
+  await enterPlaygroundRoom(page);
+  await initEmptyParagraphState(page);
+  await initThreeParagraphs(page);
+  await dragBetweenIndices(page, [1, 3], [1, 2]);
 
-    const { formatBar } = getFormatBar(page);
-    await expect(formatBar).toBeVisible();
+  const { formatBar } = getFormatBar(page);
+  await expect(formatBar).toBeVisible();
 
-    await pressArrowUp(page);
-    await type(page, '0');
-    await assertRichTexts(page, ['1203', '456', '789']);
+  await pressArrowUp(page);
+  await type(page, '0');
+  await assertRichTexts(page, ['1203', '456', '789']);
 
-    await dragBetweenIndices(page, [1, 3], [1, 2]);
-    await pressArrowDown(page);
-    await type(page, '0');
-    await assertRichTexts(page, ['1203', '456', '7809']);
-  }
-);
+  await dragBetweenIndices(page, [1, 3], [1, 2]);
+  await pressArrowDown(page);
+  await type(page, '0');
+  await assertRichTexts(page, ['1203', '456', '7809']);
+});
 
 test('selecting image should not show format bar', async ({ page }) => {
   test.info().annotations.push({

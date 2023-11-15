@@ -75,7 +75,7 @@ export abstract class SurfaceElement<
     getLocalRecord: (id: string) => PhasorElementLocalRecordValues | undefined;
     onElementUpdated: (update: {
       id: string;
-      props: { [index: string]: { old: unknown; new: unknown } };
+      props: Record<string, unknown>;
     }) => void;
     updateElementLocalRecord: (
       id: string,
@@ -208,9 +208,9 @@ export abstract class SurfaceElement<
     this.renderer?.removeElement(this);
     this.renderer?.addElement(this);
     const e = events[0] as Y.YMapEvent<Y.Map<unknown>>;
-    const props: { [index: string]: { old: unknown; new: unknown } } = {};
-    e.changes.keys.forEach((change, key) => {
-      props[key] = { old: change.oldValue, new: this.yMap.get(key) };
+    const props: Record<string, unknown> = {};
+    e.changes.keys.forEach((_, key) => {
+      props[key] = this.yMap.get(key);
     });
     this.options.onElementUpdated({
       id: this.id,

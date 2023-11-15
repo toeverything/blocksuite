@@ -330,7 +330,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       });
 
       this.disposables.add(
-        edgeless.surface.slots.elementUpdated.on(({ id }) => {
+        edgeless.slots.elementUpdated.on(({ id }) => {
           if (id === element.id) this.requestUpdate();
         })
       );

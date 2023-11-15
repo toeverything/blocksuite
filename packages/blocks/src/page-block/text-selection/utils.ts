@@ -11,22 +11,44 @@ export function caretFromPoint(
   x: number,
   y: number
 ): { node: Node; offset: number } | undefined {
+  let caret: { node: Node; offset: number } | undefined = undefined;
+
+  // hide all widget modals
+  const widgetsEls = Array.from(
+    document.querySelectorAll('[data-widget-id]')
+  ) as HTMLElement[];
+  const prevWidgetElDisplayState = widgetsEls.map(
+    widgetsEl => widgetsEl.style.display
+  );
+  widgetsEls.forEach(widgetsEl => {
+    widgetsEl.style.display = 'none';
+  });
+
   // @ts-ignore
   if (document.caretPositionFromPoint) {
     try {
       // Firefox throws for this call in hard-to-predict circumstances
       const pos = document.caretPositionFromPoint(x, y);
-      if (pos) return { node: pos.offsetNode, offset: pos.offset };
+      if (pos) {
+        caret = { node: pos.offsetNode, offset: pos.offset };
+      }
     } catch (_) {
       // do nothing
     }
   }
-  if (document.caretRangeFromPoint) {
+  if (!caret && document.caretRangeFromPoint) {
     const range = document.caretRangeFromPoint(x, y);
-    if (range) return { node: range.startContainer, offset: range.startOffset };
+    if (range) {
+      caret = { node: range.startContainer, offset: range.startOffset };
+    }
   }
 
-  return undefined;
+  // restore all widget modals
+  widgetsEls.forEach((widgetsEl, i) => {
+    widgetsEl.style.display = prevWidgetElDisplayState[i];
+  });
+
+  return caret;
 }
 
 export function rangeFromCaret(caret: { node: Node; offset: number }): Range {

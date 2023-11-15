@@ -1,6 +1,6 @@
 # Selection API
 
-Selection is a very common concept in structural editors. It's used to represent the current cursor position or the current selected blocks.
+Selection is a very common concept in structure editors. It's used to represent the current cursor position or the current selected blocks.
 
 In BlockSuite, we use a data driven approach to represent the selection. It also follows the [unidirectional data flow](./unidirectional-data-flow), which means the selection is always derived from the data.
 
@@ -156,7 +156,7 @@ selection.slots.remoteChanged.on(nextSelectionMap => {
 });
 ```
 
-## Create a Custom Selection
+## Create Custom Selection
 
 You can create your own selection type by extending the `BaseSelection` interface.
 

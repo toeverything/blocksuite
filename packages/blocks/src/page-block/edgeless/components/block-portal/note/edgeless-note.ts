@@ -144,7 +144,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         data-model-height="${modelH}"
       >
         <div class="note-background" style=${styleMap(backgroundStyle)}></div>
-        ${surface.edgeless.renderModel(model)}
+        ${this.renderModel(model)}
         <edgeless-note-mask
           .surface=${surface}
           .model=${this.model}

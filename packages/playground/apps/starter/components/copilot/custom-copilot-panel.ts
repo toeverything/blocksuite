@@ -9,19 +9,13 @@ import type { SlPopup } from '@shoelace-style/shoelace';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
-import {
-  sendChangeToneRequest,
-  sendFixSpellingRequest,
-  sendImproveWritingRequest,
-  sendMakeLongerRequest,
-  sendMakeShorterRequest,
-  sendRefineRequest,
-  sendSimplifyLanguageRequest,
-  sendSummaryRequest,
-  sendTranslateRequest,
-} from './api.js';
+import { sendRequest } from './api.js';
 import { LANGUAGE, TONE } from './config.js';
 import { insertFromMarkdown } from './utils/markdown-utils.js';
+import {
+  createMindMapOnEdgeless,
+  getSurfaceElementFromEditor,
+} from './utils/mind-map-utils.js';
 import {
   getSelectedBlocks,
   getSelectedTextContent,
@@ -103,39 +97,25 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
     return getSelectedTextContent(this.root);
   }
 
-  private async _sendRequest(payload: { [key: string]: string }) {
-    let result = '';
-    switch (payload.action) {
-      case 'refine':
-        result = await sendRefineRequest(payload.input);
-        break;
-      case 'translate':
-        result = await sendTranslateRequest(payload.input, payload.language);
-        break;
-      case 'summary':
-        result = await sendSummaryRequest(payload.input);
-        break;
-      case 'improveWriting':
-        result = await sendImproveWritingRequest(payload.input);
-        break;
-      case 'fixSpelling':
-        result = await sendFixSpellingRequest(payload.input);
-        break;
-      case 'makeShorter':
-        result = await sendMakeShorterRequest(payload.input);
-        break;
-      case 'makeLonger':
-        result = await sendMakeLongerRequest(payload.input);
-        break;
-      case 'changeTone':
-        result = await sendChangeToneRequest(payload.input, payload.tone);
-        break;
-      case 'simplifyLanguage':
-        result = await sendSimplifyLanguageRequest(payload.input);
-        break;
-    }
+  private async _createMindMap() {
+    const { viewport } = getSurfaceElementFromEditor(this.editor);
+    const { center, width, height } = viewport;
+    const payload = {
+      action: 'createMindMap',
+      input: await this._selectedTextContent,
+      center: `[${center.x},${center.y}]`,
+      wh: `[${width},${height}]`,
+    };
 
-    return result;
+    const response = await (await sendRequest(payload)).text();
+    const mindMap = JSON.parse(response);
+    if (!mindMap) return;
+
+    if (this.editor.mode === 'page') {
+      console.log('page mode, mind map: ', mindMap);
+    } else {
+      createMindMapOnEdgeless(this.editor, mindMap);
+    }
   }
 
   private async _handleActionClick(
@@ -149,7 +129,7 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
     };
 
     this._lastPayload = payload;
-    this._result = await this._sendRequest(payload);
+    this._result = await (await sendRequest(payload)).text();
   }
 
   private _clearState() {
@@ -182,7 +162,6 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
       parentBlock.model.id,
       firstIndex
     );
-
     setTimeout(async () => {
       const parentPath = firstBlock.parentPath;
       const selections = models
@@ -229,7 +208,7 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
   private async _retry() {
     if (!this._lastPayload) return;
 
-    this._result = await this._sendRequest(this._lastPayload);
+    this._result = await (await sendRequest(this._lastPayload)).text();
   }
 
   private _ResultArea() {
@@ -326,6 +305,9 @@ export class CustomCopilotPanel extends WithDisposable(LitElement) {
         </sl-menu-item>
         <sl-menu-item @click=${() => this._handleActionClick('fixSpelling')}>
           Fix Spelling and Grammar
+        </sl-menu-item>
+        <sl-menu-item @click=${() => this._createMindMap()}>
+          Create Mind Map
         </sl-menu-item>
       </sl-menu>
       <sl-popup

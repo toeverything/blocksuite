@@ -1,11 +1,8 @@
 # Unidirectional Data Flow
 
-Although `@blocksuite/editor` is an editor specifically designed for AFFiNE, the BlockSuite project is not solely designed to meet the needs of rich-text editing. Its vision is to become a universal infrastructure for collaborative applications. This means:
+To make the editor logic based on BlockSuite intuitive and collaboration-ready, there is one major goal in BlockSuite: **Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it**.
 
-1. Regardless of whether you build an editor or a regular web application based on BlockSuite, they should operate data in a consistent manner.
-2. Regardless of whether it is in a multi-user collaboration state, the application-layer code based on BlockSuite should be unaware of it.
-
-Next, we will introduce how this design concept is embodied in `@blocksuite/editor`.
+We will introduce how this design is embodied in BlockSuite.
 
 ## CRDT as Single Source of Truth
 
@@ -62,23 +59,20 @@ In this example, as the parent of `ParagraphBlock 2`, the `model.childrenUpdated
 
 But the real power lies in the fact that if this block tree is being concurrently edited by multiple people, when user B performs a similar operation, the corresponding update will be encoded by Yjs and distributed by the provider. When User A receives and applies the update from User B, the same state update pipeline as local editing will be triggered. **This makes it unnecessary for the application to make any additional modifications or adaptations for collaboration scenarios, inherently gaining real-time collaboration capabilities**.
 
-## Not Only Blocks
+## Modeling Editor State
 
-When we talk about unidirectional data flow in blocksuite. We are not only talking about the block tree structure, but also the entire editor state.
-In fact, the block tree structure is just a part of the editor state. In addition, the editor state could also include:
+In a typical editor, besides the block tree mentioned above, this data flow also applies to:
 
-- Selection state
-- User metadata
-- 🚧 Local state (not synchronized with other users)
+- Per-user selection state and more user metadata.
+- Local state that are not synchronized with other users.
 
-These states are also stored in the CRDT model, and the corresponding events will be triggered when they are updated.
-The blocks can subscribe to these events to update the UI components accordingly.
+These states may not be recorded in history, but their
 
-![state-event-view](./images/state-event-view.png)
+A more comprehensive real-world data flow works in this manner:
 
-For example, we store the selection state for every user.
-When a collaborator tries to move the cursor, the selection state will be updated.
-Then, we can render the cursor of the collaborator in the UI.
+![block-std-data-flow](./images/block-std-data-flow.png)
+
+For the new concepts involved, see [command](./command-api), [view](./block-view) and [event](./event-api) sections for more information.
 
 ## Summary
 
