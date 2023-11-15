@@ -44,16 +44,6 @@ export const EXCLUDING_MOUSE_OUT_CLASS_LIST = [
   'affine-block-children-container',
 ];
 
-export const enum CanvasTextFont {
-  Inter = 'Inter',
-  Kalam = 'Kalam',
-  Satoshi = 'Satoshi',
-  Poppins = 'Poppins',
-  Lora = 'Lora',
-  BebasNeue = 'BebasNeue',
-  OrelegaOne = 'OrelegaOne',
-}
-
 export const SurfaceColor = '#6046FE';
 export const NoteColor = '#1E96EB';
 export const BlendColor = '#7D91FF';

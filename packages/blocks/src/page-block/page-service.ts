@@ -1,5 +1,6 @@
 import { BlockService, type BlockServiceOptions } from '@blocksuite/block-std';
 
+import { CanvasTextFont } from '../surface-block/consts.js';
 import {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
@@ -17,7 +18,6 @@ import {
   getTextSelectionCommand,
   withRootCommand,
 } from './commands/index.js';
-import { CanvasTextFont } from './edgeless/utils/consts.js';
 import { type FontConfig, FontLoader } from './font-loader/font-loader.js';
 import type { PageBlockModel } from './page-model.js';
 

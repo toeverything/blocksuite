@@ -1,5 +1,4 @@
-import { CanvasTextFont } from '../../../page-block/edgeless/utils/consts.js';
-import { DEFAULT_ROUGHNESS } from '../../consts.js';
+import { CanvasTextFont, DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
 import { isPointIn } from '../../utils/math-utils.js';

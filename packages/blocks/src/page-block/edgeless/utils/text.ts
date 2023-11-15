@@ -3,6 +3,7 @@ import { assertExists, assertInstanceOf } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
 import type { FrameBlockModel, GroupElement } from '../../../index.js';
+import { CanvasTextFont } from '../../../surface-block/consts.js';
 import { ShapeElement, ShapeStyle } from '../../../surface-block/index.js';
 import {
   Bound,
@@ -21,7 +22,6 @@ import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
-  CanvasTextFont,
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,

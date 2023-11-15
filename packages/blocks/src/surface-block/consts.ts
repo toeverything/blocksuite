@@ -33,3 +33,13 @@ export interface IModelCoord {
   x: number;
   y: number;
 }
+
+export const enum CanvasTextFont {
+  Inter = 'Inter',
+  Kalam = 'Kalam',
+  Satoshi = 'Satoshi',
+  Poppins = 'Poppins',
+  Lora = 'Lora',
+  BebasNeue = 'BebasNeue',
+  OrelegaOne = 'OrelegaOne',
+}

@@ -1,6 +1,6 @@
 import { Workspace } from '@blocksuite/store';
 
-import { CanvasTextFont } from '../../../page-block/edgeless/utils/consts.js';
+import { CanvasTextFont } from '../../consts.js';
 import {
   type IElementDefaultProps,
   PhasorElementType,

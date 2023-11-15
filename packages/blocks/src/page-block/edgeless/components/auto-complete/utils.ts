@@ -3,6 +3,7 @@ import { Workspace } from '@blocksuite/store';
 
 import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../../../models.js';
+import { CanvasTextFont } from '../../../../surface-block/consts.js';
 import {
   Bound,
   type Connection,
@@ -19,7 +20,6 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
-import { CanvasTextFont } from '../../utils/consts.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 

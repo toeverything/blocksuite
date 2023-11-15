@@ -20,6 +20,7 @@ import {
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { countBy, maxBy } from '../../../../_common/utils/iterable.js';
 import { LineWidth, type ShapeTool } from '../../../../_common/utils/types.js';
+import { CanvasTextFont } from '../../../../surface-block/consts.js';
 import type { PhasorElementType } from '../../../../surface-block/index.js';
 import {
   type ShapeElement,
@@ -29,7 +30,6 @@ import {
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
-  CanvasTextFont,
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
