@@ -170,7 +170,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private get _isEdgeless() {
-    return this.root.mode === 'edgeless';
+    return !!this.root.querySelector('affine-edgeless-page');
   }
 
   getBlocks<T extends EdgelessBlockType>(flavour: T) {

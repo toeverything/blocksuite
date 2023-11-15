@@ -307,7 +307,6 @@ export class EditorContainer
         ${ref(this.root)}
         .page=${this.page}
         .preset=${this.mode === 'page' ? this.pagePreset : this.edgelessPreset}
-        .mode=${this.mode}
       ></block-suite-root>`
     );
 

@@ -797,7 +797,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _shouldRender() {
     return (
-      this.root.mode === 'page' &&
+      !!this.root.querySelector('affine-doc-page') &&
       this.parentElement &&
       !this.parentElement.closest('affine-surface-ref')
     );
