@@ -1,5 +1,6 @@
 import { Workspace } from '@blocksuite/store';
 
+import { CanvasTextFont } from '../../../page-block/edgeless/utils/consts.js';
 import {
   type IElementDefaultProps,
   PhasorElementType,
@@ -14,7 +15,7 @@ export const TextElementDefaultProps: IElementDefaultProps<'text'> = {
   text: new Workspace.Y.Text(),
   color: '#000000',
   fontSize: 16,
-  fontFamily: 'sans-serif',
+  fontFamily: CanvasTextFont.Inter,
   textAlign: 'center',
   bold: false,
   italic: false,

@@ -1,3 +1,4 @@
+import { CanvasTextFont } from '../../../page-block/edgeless/utils/consts.js';
 import { DEFAULT_ROUGHNESS } from '../../consts.js';
 import type { RoughCanvas } from '../../rough/canvas.js';
 import type { Bound } from '../../utils/bound.js';
@@ -92,7 +93,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
 
   get fontFamily() {
     const fontFamily =
-      (this.yMap.get('fontFamily') as IShape['fontFamily']) ?? 'sans-serif';
+      (this.yMap.get('fontFamily') as IShape['fontFamily']) ??
+      CanvasTextFont.Inter;
     return fontFamily;
   }
 

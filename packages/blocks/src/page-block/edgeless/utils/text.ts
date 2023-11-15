@@ -21,16 +21,11 @@ import { EdgelessShapeTextEditor } from '../components/text/edgeless-shape-text-
 import { EdgelessTextEditor } from '../components/text/edgeless-text-editor.js';
 import type { EdgelessPageBlockComponent } from '../edgeless-page-block.js';
 import {
-  GENERAL_CANVAS_FONT_FAMILY,
-  SCRIBBLED_CANVAS_FONT_FAMILY,
+  CanvasTextFont,
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
 } from './consts.js';
-
-export type CANVAS_TEXT_FONT =
-  | typeof GENERAL_CANVAS_FONT_FAMILY
-  | typeof SCRIBBLED_CANVAS_FONT_FAMILY;
 
 export function mountTextElementEditor(
   textElement: TextElement,
@@ -77,8 +72,8 @@ export function mountShapeTextEditor(
       color,
       fontFamily:
         shapeElement.shapeStyle === ShapeStyle.General
-          ? GENERAL_CANVAS_FONT_FAMILY
-          : SCRIBBLED_CANVAS_FONT_FAMILY,
+          ? CanvasTextFont.Inter
+          : CanvasTextFont.Kalam,
     });
   }
   const updatedElement = edgeless.surface.pickById(shapeElement.id);
@@ -130,7 +125,7 @@ export function addText(
   edgeless: EdgelessPageBlockComponent,
   event: PointerEventState,
   color: string = GET_DEFAULT_TEXT_COLOR(),
-  fontFamily: CANVAS_TEXT_FONT = GENERAL_CANVAS_FONT_FAMILY
+  fontFamily: CanvasTextFont = CanvasTextFont.Inter
 ) {
   const [x, y] = edgeless.surface.viewport.toModelCoord(event.x, event.y);
   const selected = edgeless.surface.pickTop(x, y);

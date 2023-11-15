@@ -27,7 +27,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
+import { CanvasTextFont } from '../../utils/consts.js';
 import type { EdgelessAlignPanel } from '../panel/align-panel.js';
 import {
   type ColorEvent,
@@ -194,7 +194,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
     const max = maxBy(Object.entries(fontFamilies), ([_k, count]) => count);
     return max
       ? (max[0] as EdgelessCanvasTextElement['fontFamily'])
-      : GENERAL_CANVAS_FONT_FAMILY;
+      : CanvasTextFont.Inter;
   };
 
   private _getMostCommonFontSize = (
@@ -289,7 +289,7 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
   ) => {
     this.elements.forEach(element => {
       this.surface.updateElement<PhasorElementType.TEXT>(element.id, {
-        fontFamily: fontFamily,
+        fontFamily,
       });
 
       this._updateElementBound(element);
@@ -422,33 +422,6 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
             <component-toolbar-menu-divider></component-toolbar-menu-divider>
           `}
 
-      <edgeless-tool-icon-button
-        class="text-font-size-button"
-        .tooltip=${this._fontFamilyPopperShow ? '' : 'Font Size'}
-        .tipPosition=${'bottom'}
-        .active=${false}
-        .iconContainerPadding=${2}
-        @click=${() => this._textFontSizePopper?.toggle()}
-      >
-        <div class="font-size-button-group">
-          <div class="selected-font-size-label">
-            ${this._getFontSizeLabel(selectedFontSize)}
-          </div>
-          <div class="arrow-down-icon">${ShapeArrowDownSmallIcon}</div>
-        </div>
-      </edgeless-tool-icon-button>
-      <div class="font-size-panel-container text-font-size">
-        <edgeless-font-size-panel
-          .fontSize=${selectedFontSize}
-          .onSelect=${(fontSize: EdgelessFontSizePanel['fontSize']) => {
-            this._setFontSize(fontSize);
-          }}
-          .onPopperCose=${() => this._textFontSizePopper?.hide()}
-        ></edgeless-font-size-panel>
-      </div>
-
-      <component-toolbar-menu-divider></component-toolbar-menu-divider>
-
       <div class="font-style-container">
         ${this.elementType === 'shape'
           ? nothing
@@ -472,6 +445,35 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
                   }}
                 ></edgeless-font-family-panel>
               </div>`}
+
+        <component-toolbar-menu-divider></component-toolbar-menu-divider>
+
+        <edgeless-tool-icon-button
+          class="text-font-size-button"
+          .tooltip=${this._fontFamilyPopperShow ? '' : 'Font Size'}
+          .tipPosition=${'bottom'}
+          .active=${false}
+          .iconContainerPadding=${2}
+          @click=${() => this._textFontSizePopper?.toggle()}
+        >
+          <div class="font-size-button-group">
+            <div class="selected-font-size-label">
+              ${this._getFontSizeLabel(selectedFontSize)}
+            </div>
+            <div class="arrow-down-icon">${ShapeArrowDownSmallIcon}</div>
+          </div>
+        </edgeless-tool-icon-button>
+        <div class="font-size-panel-container text-font-size">
+          <edgeless-font-size-panel
+            .fontSize=${selectedFontSize}
+            .onSelect=${(fontSize: EdgelessFontSizePanel['fontSize']) => {
+              this._setFontSize(fontSize);
+            }}
+            .onPopperCose=${() => this._textFontSizePopper?.hide()}
+          ></edgeless-font-size-panel>
+        </div>
+
+        <component-toolbar-menu-divider></component-toolbar-menu-divider>
 
         <edgeless-tool-icon-button
           class="text-bold-button"

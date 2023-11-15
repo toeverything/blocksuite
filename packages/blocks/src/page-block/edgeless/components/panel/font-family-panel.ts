@@ -1,10 +1,7 @@
 import { css, html, LitElement } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 
-import {
-  GENERAL_CANVAS_FONT_FAMILY,
-  SCRIBBLED_CANVAS_FONT_FAMILY,
-} from '../../utils/consts.js';
+import { CanvasTextFont } from '../../utils/consts.js';
 
 @customElement('edgeless-font-family-panel')
 export class EdgelessFontFamilyPanel extends LitElement {
@@ -23,17 +20,37 @@ export class EdgelessFontFamilyPanel extends LitElement {
       padding: 8px;
     }
 
-    .general-button {
-      font-family: sans-serif;
+    .inter {
+      font-family: 'Inter', sans-serif;
     }
 
-    .scibbled-button {
-      font-family: Kalam, cursive;
+    .kalam {
+      font-family: 'Kalam', sans-serif;
+    }
+
+    .satoshi {
+      font-family: 'Satoshi', sans-serif;
+    }
+
+    .poppins {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .lora {
+      font-family: 'Lora', sans-serif;
+    }
+
+    .bebas-neue {
+      font-family: 'Bebas Neue', sans-serif;
+    }
+
+    .orelega-one {
+      font-family: 'Orelega One', sans-serif;
     }
   `;
 
   @property({ attribute: false })
-  value = GENERAL_CANVAS_FONT_FAMILY;
+  value = CanvasTextFont.Inter;
 
   @property({ attribute: false })
   onSelect?: (value: EdgelessFontFamilyPanel['value']) => void;
@@ -49,26 +66,87 @@ export class EdgelessFontFamilyPanel extends LitElement {
     return html`
       <div class="font-family-container">
         <edgeless-tool-icon-button
-          class="general-button"
-          .active=${this.value === GENERAL_CANVAS_FONT_FAMILY}
+          class="inter"
+          .active=${this.value === CanvasTextFont.Inter}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(GENERAL_CANVAS_FONT_FAMILY);
+            this._onSelect(CanvasTextFont.Inter);
           }}
         >
-          <div class="font-family-button">General</div>
+          <div class="font-family-button">Inter</div>
         </edgeless-tool-icon-button>
+
         <edgeless-tool-icon-button
-          class="scibbled-button"
-          .active=${this.value === SCRIBBLED_CANVAS_FONT_FAMILY}
+          class="kalam"
+          .active=${this.value === CanvasTextFont.Kalam}
           .activeMode=${'background'}
           .iconContainerPadding=${2}
           @click=${() => {
-            this._onSelect(SCRIBBLED_CANVAS_FONT_FAMILY);
+            this._onSelect(CanvasTextFont.Kalam);
           }}
         >
-          <div class="font-family-button">Scribbled</div>
+          <div class="font-family-button">Kalam</div>
+        </edgeless-tool-icon-button>
+
+        <edgeless-tool-icon-button
+          class="satoshi"
+          .active=${this.value === CanvasTextFont.Satoshi}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
+          @click=${() => {
+            this._onSelect(CanvasTextFont.Satoshi);
+          }}
+        >
+          <div class="font-family-button">Satoshi</div>
+        </edgeless-tool-icon-button>
+
+        <edgeless-tool-icon-button
+          class="poppins"
+          .active=${this.value === CanvasTextFont.Poppins}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
+          @click=${() => {
+            this._onSelect(CanvasTextFont.Poppins);
+          }}
+        >
+          <div class="font-family-button">Poppins</div>
+        </edgeless-tool-icon-button>
+
+        <edgeless-tool-icon-button
+          class="lora"
+          .active=${this.value === CanvasTextFont.Lora}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
+          @click=${() => {
+            this._onSelect(CanvasTextFont.Lora);
+          }}
+        >
+          <div class="font-family-button">Lora</div>
+        </edgeless-tool-icon-button>
+
+        <edgeless-tool-icon-button
+          class="bebas-neue"
+          .active=${this.value === CanvasTextFont.BebasNeue}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
+          @click=${() => {
+            this._onSelect(CanvasTextFont.BebasNeue);
+          }}
+        >
+          <div class="font-family-button">Bebas Neue</div>
+        </edgeless-tool-icon-button>
+
+        <edgeless-tool-icon-button
+          class="orelega-one"
+          .active=${this.value === CanvasTextFont.OrelegaOne}
+          .activeMode=${'background'}
+          .iconContainerPadding=${2}
+          @click=${() => {
+            this._onSelect(CanvasTextFont.OrelegaOne);
+          }}
+        >
+          <div class="font-family-button">Orelega One</div>
         </edgeless-tool-icon-button>
       </div>
     `;

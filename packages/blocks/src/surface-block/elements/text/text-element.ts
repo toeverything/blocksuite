@@ -63,7 +63,7 @@ export class TextElement extends SurfaceElement<IText> {
       italic,
       fontSize,
       lineHeight: `${lineHeight}px`,
-      fontFamily: fontFamily,
+      fontFamily,
     });
   }
 

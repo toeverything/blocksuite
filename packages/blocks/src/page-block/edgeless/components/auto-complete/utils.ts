@@ -19,7 +19,7 @@ import {
 } from '../../../../surface-block/index.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
 import { getGridBound } from '../../utils/bound-utils.js';
-import { GENERAL_CANVAS_FONT_FAMILY } from '../../utils/consts.js';
+import { CanvasTextFont } from '../../utils/consts.js';
 import { type Shape, ShapeFactory } from '../../utils/tool-overlay.js';
 import { GET_DEFAULT_TEXT_COLOR } from '../panel/color-panel.js';
 
@@ -335,7 +335,7 @@ export async function createTextElement(
     text: new Workspace.Y.Text(),
     textAlign: 'left',
     fontSize: 24,
-    fontFamily: GENERAL_CANVAS_FONT_FAMILY,
+    fontFamily: CanvasTextFont.Inter,
     color: GET_DEFAULT_TEXT_COLOR(),
     bold: false,
     italic: false,

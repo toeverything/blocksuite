@@ -29,8 +29,7 @@ import {
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
 import {
-  GENERAL_CANVAS_FONT_FAMILY,
-  SCRIBBLED_CANVAS_FONT_FAMILY,
+  CanvasTextFont,
   SHAPE_FILL_COLOR_BLACK,
   SHAPE_TEXT_COLOR_PURE_BLACK,
   SHAPE_TEXT_COLOR_PURE_WHITE,
@@ -388,8 +387,8 @@ export class EdgelessChangeShapeButton extends WithDisposable(LitElement) {
         shapeStyle: shapeStyle,
         fontFamily:
           shapeStyle === ShapeStyle.General
-            ? GENERAL_CANVAS_FONT_FAMILY
-            : SCRIBBLED_CANVAS_FONT_FAMILY,
+            ? CanvasTextFont.Inter
+            : CanvasTextFont.Kalam,
       });
     });
   }

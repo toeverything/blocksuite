@@ -53,7 +53,7 @@ import {
 import type { SurfaceBlockComponent } from '../../surface-block/surface-block.js';
 import { type SurfaceBlockModel } from '../../surface-block/surface-model.js';
 import { ClipboardController as PageClipboardController } from '../clipboard/index.js';
-import { FontLoader } from '../font-loader/index.js';
+import type { FontLoader } from '../font-loader/font-loader.js';
 import type { PageBlockModel } from '../page-model.js';
 import { Gesture } from '../text-selection/gesture.js';
 import { pageRangeSyncFilter } from '../text-selection/sync-filter.js';
@@ -603,18 +603,12 @@ export class EdgelessPageBlockComponent extends BlockElement<
   }
 
   private _initFontloader() {
-    if (!this.fontLoader) this.fontLoader = new FontLoader();
+    const fontLoader = this.service?.fontLoader;
+    assertExists(fontLoader);
 
-    this._disposables.add(
-      this.fontLoader.slots.loaded.on(font => {
-        if (font !== 'Kalam:n4,n7' || !this.surface) return;
-
-        if (this.surface.getElementsByType('text').length > 0) {
-          this.surface.refresh();
-        }
-      })
-    );
-    this.fontLoader.load(['Kalam:n4,n7']);
+    fontLoader.load.then(() => {
+      this.surface.refresh();
+    });
   }
 
   private _initReadonlyListener() {
