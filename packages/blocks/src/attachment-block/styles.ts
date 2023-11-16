@@ -28,6 +28,7 @@ export const styles = css`
     text-overflow: ellipsis;
     fill: var(--affine-icon-color);
     user-select: none;
+    z-index: 1;
   }
 
   .affine-attachment-title > svg {
