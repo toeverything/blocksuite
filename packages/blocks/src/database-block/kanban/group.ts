@@ -72,6 +72,11 @@ const styles = css`
     opacity: 1;
   }
 
+  affine-data-view-kanban-group .add-card:hover {
+    background-color: var(--affine-hover-color);
+    color: var(--affine-text-primary-color);
+  }
+
   affine-data-view-kanban-group:has(.add-card:hover) .add-card {
     background-color: var(--affine-hover-color);
     color: var(--affine-text-primary-color);
