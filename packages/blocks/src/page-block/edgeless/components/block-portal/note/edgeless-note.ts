@@ -141,7 +141,7 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
         : `${borderSize}px ${
             borderStyle === StrokeStyle.Dashed ? 'dashed' : borderStyle
           } var(--affine-black-10)`,
-      boxShadow: hidden ? 'none' : `var(${shadowStyle})`,
+      boxShadow: hidden || !shadowStyle ? 'none' : `var(${shadowStyle})`,
     };
 
     return html`

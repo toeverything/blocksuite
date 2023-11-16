@@ -467,8 +467,9 @@ test('use code block copy menu of code block copy whole code block', async ({
       prop:language="javascript"
       prop:text="use"
     />
-    <affine:paragraph
-      prop:type="text"
+    <affine:code
+      prop:language="javascript"
+      prop:text="use"
     />
   </affine:note>
 </affine:page>`

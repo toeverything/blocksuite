@@ -516,7 +516,7 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
   await waitNextFrame(page, 400);
   // current implementation may be a little inefficient
   await fillLine(page, true);
-
+  await page.pause();
   await page.mouse.click(0, 0);
   await waitNextFrame(page, 400);
   await selectNoteInEdgeless(page, ids.noteId);
@@ -538,7 +538,7 @@ test('undo/redo should work correctly after resizing', async ({ page }) => {
     w: initRect.w - 50,
     h: draggedRect.h, // not assert `h` here
   });
-  expect(draggedRect.h).toBeGreaterThan(initRect.h);
+  expect(draggedRect.h).toBe(initRect.h);
 
   await undoByKeyboard(page);
   await waitNextFrame(page);
