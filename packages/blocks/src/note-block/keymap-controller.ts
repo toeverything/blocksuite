@@ -1,5 +1,5 @@
 import type { BlockSelection, UIEventHandler } from '@blocksuite/block-std';
-import { assertExists, DisposableGroup } from '@blocksuite/global/utils';
+import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 import type { ReactiveController } from 'lit';
 import type { ReactiveControllerHost } from 'lit';
@@ -31,7 +31,6 @@ export class KeymapController implements ReactiveController {
   private _anchorSel: BlockSelection | null = null;
   private _focusBlock: BlockElement | null = null;
 
-  protected _disposables = new DisposableGroup();
   host: ReactiveControllerHost & BlockElement;
 
   private get _std() {
@@ -43,16 +42,11 @@ export class KeymapController implements ReactiveController {
   }
 
   hostConnected() {
-    if (this._disposables.disposed) {
-      this._disposables = new DisposableGroup();
-    }
-    this.host.updateComplete.then(() => {
-      this._init();
-    });
+    this._reset();
   }
 
   hostDisconnected() {
-    this._disposables.dispose();
+    this._reset();
   }
 
   private _reset = () => {
@@ -60,7 +54,7 @@ export class KeymapController implements ReactiveController {
     this._focusBlock = null;
   };
 
-  private _init = () => {
+  bind = () => {
     this.host.handleEvent('keyDown', ctx => {
       const state = ctx.get('keyboardState');
       if (state.raw.key === 'Shift') {

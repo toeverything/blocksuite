@@ -19,6 +19,11 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
 
   keymapController = new KeymapController(this);
 
+  override connectedCallback() {
+    super.connectedCallback();
+    this.keymapController.bind();
+  }
+
   override firstUpdated() {
     this._disposables.add(
       this.model.propsUpdated.on(() => this.requestUpdate())
