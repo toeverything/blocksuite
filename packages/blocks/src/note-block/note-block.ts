@@ -3,7 +3,7 @@ import { BlockElement } from '@blocksuite/lit';
 import { css, html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { bindHotKey } from './keymap.js';
+import { KeymapController } from './keymap-controller.js';
 import type { NoteBlockModel } from './note-model.js';
 
 @customElement('affine-note')
@@ -17,10 +17,7 @@ export class NoteBlockComponent extends BlockElement<NoteBlockModel> {
     }
   `;
 
-  override connectedCallback() {
-    super.connectedCallback();
-    bindHotKey(this);
-  }
+  keymapController = new KeymapController(this);
 
   override firstUpdated() {
     this._disposables.add(
