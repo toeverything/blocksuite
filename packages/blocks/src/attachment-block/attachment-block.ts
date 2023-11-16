@@ -210,8 +210,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         class="affine-attachment-container"
         @click=${this._focusAttachment}
       >
-        <div class="affine-attachment-name">
-          ${AttachmentIcon16}${this.model.name}
+        <div class="affine-attachment-title">
+          ${AttachmentIcon16}
+          <span class="affine-attachment-name">${this.model.name}</span>
         </div>
         <div class="affine-attachment-desc">Unable to upload</div>
         ${this._attachmentTail(isError)}
@@ -224,9 +225,9 @@ export class AttachmentBlockComponent extends BlockElement<AttachmentBlockModel>
         @click=${this._focusAttachment}
         @dblclick=${this._downloadAttachment}
       >
-        <div class="affine-attachment-name">
-          ${this._isDownloading ? LoadingIcon : AttachmentIcon16}${this.model
-            .name}
+        <div class="affine-attachment-title">
+          ${this._isDownloading ? LoadingIcon : AttachmentIcon16}
+          <span class="affine-attachment-name">${this.model.name}</span>
         </div>
         <div class="affine-attachment-desc">
           ${humanFileSize(this.model.size)}
