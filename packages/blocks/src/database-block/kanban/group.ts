@@ -63,7 +63,7 @@ const styles = css`
     line-height: var(--data-view-cell-text-line-height);
     visibility: hidden;
     opacity: 0;
-    transition: opacity 150ms cubic-bezier(0.42, 0, 1, 1);
+    transition: all 150ms cubic-bezier(0.42, 0, 1, 1);
     color: var(--affine-text-secondary-color);
   }
 
@@ -72,7 +72,7 @@ const styles = css`
     opacity: 1;
   }
 
-  .add-card:hover {
+  affine-data-view-kanban-group:has(.add-card:hover) .add-card {
     background-color: var(--affine-hover-color);
     color: var(--affine-text-primary-color);
   }

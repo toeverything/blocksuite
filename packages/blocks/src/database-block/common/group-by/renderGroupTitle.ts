@@ -72,7 +72,7 @@ export const renderGroupTitle = (
         border-radius: 4px;
         visibility: hidden;
         opacity: 0;
-        transition: opacity 150ms cubic-bezier(0.42, 0, 1, 1);
+        transition: all 150ms cubic-bezier(0.42, 0, 1, 1);
       }
 
       .group-header-icon {
@@ -107,7 +107,7 @@ export const renderGroupTitle = (
     ${ops.readonly
       ? nothing
       : html` <div class="group-header-ops">
-          <div @click="${ops.clickAdd}" class="group-header-op">
+          <div @click="${ops.clickAdd}" class="group-header-op add-card">
             ${PlusIcon}
           </div>
           <div @click="${ops.clickOps}" class="group-header-op">
