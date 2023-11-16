@@ -21,6 +21,10 @@ export type AttachmentBlockProps = {
    */
   type: string;
   caption?: string;
+  // `loadingKey` was used to indicate whether the attachment is loading,
+  // which is currently unused but no breaking change is needed.
+  // The `loadingKey` and `sourceId` should not be existed at the same time.
+  // loadingKey?: string | null;
   sourceId?: string;
 };
 
