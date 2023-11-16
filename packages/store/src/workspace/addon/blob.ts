@@ -87,19 +87,20 @@ export const blob = addOnFactory<keyof BlobAddon>(
           },
         };
 
-        if (
-          typeof window !== 'undefined' &&
-          typeof window.addEventListener === 'function'
-        ) {
-          window.addEventListener('beforeunload', () => {
-            this.blob.gc();
-          });
-        }
-        if (typeof process !== 'undefined') {
-          process.on('exit', () => {
-            this.blob.gc();
-          });
-        }
+        //FIXME: Each page might be lazy-loaded and could clear away blobs used by other pages.
+        // if (
+        //   typeof window !== 'undefined' &&
+        //   typeof window.addEventListener === 'function'
+        // ) {
+        //   window.addEventListener('beforeunload', () => {
+        //     this.blob.gc();
+        //   });
+        // }
+        // if (typeof process !== 'undefined') {
+        //   process.on('exit', () => {
+        //     this.blob.gc();
+        //   });
+        // }
       }
     }
 );

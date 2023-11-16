@@ -170,7 +170,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   }
 
   private get _isEdgeless() {
-    return this.root.mode === 'edgeless';
+    return !!this.root.querySelector('affine-edgeless-page');
   }
 
   getBlocks<T extends EdgelessBlockType>(flavour: T) {
@@ -578,15 +578,23 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _syncFromExistingContainer() {
     this.transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
+      const yGroups: Y.Map<unknown>[] = [];
       this._yContainer.forEach(yElement => {
         const type = yElement.get('type') as PhasorElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
         }
+        if (type === 'group') {
+          yGroups.push(yElement);
+          return;
+        }
         this._createElementFromYMap(yElement);
       });
       yConnectors.forEach(yElement => {
+        this._createElementFromYMap(yElement);
+      });
+      yGroups.forEach(yElement => {
         this._createElementFromYMap(yElement);
       });
     });
@@ -768,7 +776,6 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
     if (this.page.readonly) {
       throw new Error('Cannot add element in readonly mode');
     }
-
     if (isPhasorElementType(type)) {
       const attr = properties as IElementCreateProps<typeof type>;
       const id = generateElementId();

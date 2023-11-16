@@ -485,15 +485,23 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
   private _syncFromExistingContainer(elementsMap: Y.Map<Y.Map<unknown>>) {
     elementsMap.doc?.transact(() => {
       const yConnectors: Y.Map<unknown>[] = [];
+      const yGroups: Y.Map<unknown>[] = [];
       elementsMap.forEach(yElement => {
         const type = yElement.get('type') as PhasorElementType;
         if (type === 'connector') {
           yConnectors.push(yElement);
           return;
         }
+        if (type === 'group') {
+          yGroups.push(yElement);
+          return;
+        }
         this._createElementFromYMap(yElement);
       });
       yConnectors.forEach(yElement => {
+        this._createElementFromYMap(yElement);
+      });
+      yGroups.forEach(yElement => {
         this._createElementFromYMap(yElement);
       });
     });
@@ -797,7 +805,7 @@ export class SurfaceRefBlockComponent extends BlockElement<SurfaceRefBlockModel>
 
   private _shouldRender() {
     return (
-      this.root.mode === 'page' &&
+      !!this.root.querySelector('affine-doc-page') &&
       this.parentElement &&
       !this.parentElement.closest('affine-surface-ref')
     );

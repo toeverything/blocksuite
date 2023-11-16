@@ -396,7 +396,7 @@ export function moveCursorVertically(
 
   const nextCaret = horizontalGetNextCaret(
     {
-      x: cursorRect.x,
+      x: cursorRect.x + 1,
       y: forward
         ? cursorRect.top - cursorRect.height / 2
         : cursorRect.bottom + cursorRect.height / 2,
@@ -488,7 +488,7 @@ export function changeTextSelectionVertically(
 
   const nextEndCaret = horizontalGetNextCaret(
     {
-      x: cursorRect.x,
+      x: cursorRect.x + 1,
       y: upward
         ? cursorRect.top - cursorRect.height / 2
         : cursorRect.bottom + cursorRect.height / 2,
