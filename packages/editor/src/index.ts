@@ -5,12 +5,12 @@ const env =
   typeof globalThis !== 'undefined'
     ? globalThis
     : typeof window !== 'undefined'
-    ? window
-    : // @ts-ignore
-    typeof global !== 'undefined'
-    ? // @ts-ignore
-      global
-    : {};
+      ? window
+      : // @ts-ignore
+        typeof global !== 'undefined'
+        ? // @ts-ignore
+          global
+        : {};
 const importIdentifier = '__ $BLOCKSUITE_EDITOR$ __';
 
 // @ts-ignore

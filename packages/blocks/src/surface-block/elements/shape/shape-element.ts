@@ -157,8 +157,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return textAlign === 'center'
       ? w / 2
       : textAlign === 'right'
-      ? w - SHAPE_TEXT_PADDING
-      : SHAPE_TEXT_PADDING;
+        ? w - SHAPE_TEXT_PADDING
+        : SHAPE_TEXT_PADDING;
   }
 
   verticalOffset(lines: ITextDelta[][], lineHeight: number) {
@@ -166,8 +166,8 @@ export class ShapeElement extends SurfaceElement<IShape, IShapeLocalRecord> {
     return textVerticalAlign === 'center'
       ? (h - lineHeight * lines.length) / 2
       : textVerticalAlign === 'top'
-      ? SHAPE_TEXT_PADDING
-      : h - lineHeight * lines.length - SHAPE_TEXT_PADDING;
+        ? SHAPE_TEXT_PADDING
+        : h - lineHeight * lines.length - SHAPE_TEXT_PADDING;
   }
 
   override hitTest(x: number, y: number, options: HitTestOptions) {

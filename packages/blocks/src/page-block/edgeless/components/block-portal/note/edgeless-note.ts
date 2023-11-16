@@ -128,13 +128,13 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
       border: this._editing
         ? `1px solid var(--affine-blue-600)`
         : isHiddenNote
-        ? `2px dashed var(--affine-black-10)`
-        : 'none',
+          ? `2px dashed var(--affine-black-10)`
+          : 'none',
       boxShadow: this._editing
         ? 'var(--affine-active-shadow)'
         : isHiddenNote
-        ? 'none'
-        : 'var(--affine-note-shadow-box)',
+          ? 'none'
+          : 'var(--affine-note-shadow-box)',
     };
 
     return html`

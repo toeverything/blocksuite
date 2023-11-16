@@ -414,8 +414,8 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
       textAlign === 'left'
         ? EdgelessTextEditor.HORIZONTAL_PADDING + 'px'
         : textAlign === 'center'
-        ? '50%'
-        : `calc(100% - ${EdgelessTextEditor.HORIZONTAL_PADDING}px)`;
+          ? '50%'
+          : `calc(100% - ${EdgelessTextEditor.HORIZONTAL_PADDING}px)`;
 
     return html`<div
       style=${styleMap({

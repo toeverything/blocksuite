@@ -379,8 +379,8 @@ export class DocPageBlockComponent extends BlockElement<
         event.target instanceof HTMLElement
           ? event.target
           : event.target instanceof Node
-          ? event.target.parentElement
-          : null;
+            ? event.target.parentElement
+            : null;
       if (!element) {
         return;
       }

@@ -510,8 +510,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           ${selectedAlign === 'left'
             ? TextAlignLeftIcon
             : selectedAlign === 'center'
-            ? TextAlignCenterIcon
-            : TextAlignRightIcon}
+              ? TextAlignCenterIcon
+              : TextAlignRightIcon}
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>
