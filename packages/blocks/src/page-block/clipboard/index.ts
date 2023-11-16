@@ -34,9 +34,11 @@ export class ClipboardController implements ReactiveController {
     if (this._disposables.disposed) {
       this._disposables = new DisposableGroup();
     }
-    if (this._enabled) {
-      this._init();
-    }
+    this.host.updateComplete.then(() => {
+      if (this._enabled) {
+        this._init();
+      }
+    });
   }
 
   hostDisconnected() {

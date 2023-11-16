@@ -4,18 +4,9 @@ import type { BlockElement } from '@blocksuite/lit';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
 import {
-  EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
-  EDGELESS_BLOCK_CHILD_PADDING,
-} from '../_common/consts.js';
-import { almostEqual } from '../_common/utils/math.js';
-import { isEdgelessPage } from '../_common/utils/query.js';
-import {
   autoScroll,
   caretFromPoint,
 } from '../page-block/text-selection/utils.js';
-import { getClosestPageBlockComponent } from '../page-block/utils/query.js';
-import { deserializeXYWH } from '../surface-block/index.js';
-import type { NoteBlockComponent } from './note-block.js';
 
 type Caret = { node: Node; offset: number };
 
@@ -444,31 +435,6 @@ export function moveCursorToBlock(
   }
 
   return true;
-}
-
-export function tryUpdateNoteSize(noteElement: NoteBlockComponent) {
-  requestAnimationFrame(() => {
-    const page = noteElement.page;
-    if (!page.root) return;
-
-    let zoom = 1;
-    const pageElement = getClosestPageBlockComponent(noteElement);
-    if (pageElement && isEdgelessPage(pageElement)) {
-      zoom = pageElement.surface.viewport.zoom;
-    }
-
-    const bound = noteElement.getBoundingClientRect();
-    const [x, y, w, h] = deserializeXYWH(noteElement.model.xywh);
-    const newModelHeight =
-      bound.height / zoom +
-      EDGELESS_BLOCK_CHILD_PADDING * 2 +
-      EDGELESS_BLOCK_CHILD_BORDER_WIDTH * 2;
-    if (!almostEqual(newModelHeight, h)) {
-      page.updateBlock(noteElement.model, {
-        xywh: JSON.stringify([x, y, w, Math.round(newModelHeight)]),
-      });
-    }
-  });
 }
 
 export function changeTextSelectionVertically(

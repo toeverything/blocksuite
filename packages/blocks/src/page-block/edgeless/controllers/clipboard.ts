@@ -90,9 +90,11 @@ export class EdgelessClipboardController implements ReactiveController {
   }
 
   hostConnected() {
-    if (this._enabled) {
-      this._init();
-    }
+    this.host.updateComplete.then(() => {
+      if (this._enabled) {
+        this._init();
+      }
+    });
   }
 
   private _init = () => {
