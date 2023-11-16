@@ -50,10 +50,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       width: 168px;
     }
 
-    .fill-color-button {
-      /* margin-right: 8px; */
-    }
-
     .fill-color-container {
       display: flex;
       justify-content: center;
@@ -94,12 +90,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
   @query('.color-panel-container.fill-color')
   private _fillColorMenu!: HTMLDivElement;
   private _frameBackground: ReturnType<typeof createButtonPopper> | null = null;
-
-  // @query('.image-background-button')
-  // private _imageBackgroundButton!: EdgelessToolIconButton;
-  // @query('.image-background-container')
-  // private _imageBackgroundMenu!: HTMLDivElement;
-  // private _imageBackground: ReturnType<typeof createButtonPopper> | null = null;
 
   private _setFrameBackground(color: CssVariableName) {
     this.frames.forEach(frame => {
@@ -155,16 +145,6 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       }
     );
     this._disposables.add(this._frameBackground);
-
-    // this._imageBackground = createButtonPopper(
-    //   this._imageBackgroundButton,
-    //   this._imageBackgroundMenu,
-    //   ({ display }) => {
-    //     this._popperShow = display === 'show';
-    //   }
-    // );
-
-    // this._disposables.add(this._imageBackground);
   }
 
   protected override render() {
@@ -219,16 +199,3 @@ export class EdgelessChangeFrameButton extends WithDisposable(LitElement) {
       </div> `;
   }
 }
-// <!-- <edgeless-tool-icon-button
-//                 class='image-background-button'
-//         .tooltip=${this._popperShow ? '' : 'Image Background'}
-//         .tipPosition=${'bottom'}
-//         .active=${false}
-//         .iconContainerPadding=${2}
-//         @click=${() => this._imageBackground?.toggle()}
-//       >
-//         ${ImageUploadIcon}
-//       </edgeless-tool-icon-button>
-//       <div class='image-background-container'>
-//                 <div>123</div>
-//       </div> -->
