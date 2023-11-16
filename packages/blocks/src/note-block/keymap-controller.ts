@@ -13,14 +13,8 @@ import {
   updateBlockElementType,
 } from '../page-block/index.js';
 import {
-  changeTextSelectionSideways,
-  changeTextSelectionSidewaysToBlock,
-  changeTextSelectionToBlockStartEnd,
-  changeTextSelectionVertically,
   ensureBlockInContainer,
   getBlockSelectionBySide,
-  moveCursorToBlock,
-  moveCursorVertically,
   pathToBlock,
   selectBetween,
   setBlockSelection,
@@ -83,7 +77,6 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onArrowDown = () => {
-    let currentBlock: BlockElement | null = null;
     return this._std.command
       .pipe()
       .inline((_, next) => {
@@ -94,54 +87,40 @@ export class KeymapController implements ReactiveController {
         // text selection
         cmd
           .getTextSelection()
-          .inline<'currentSelectionPath'>((ctx, next) => {
+          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
             const textSelection = ctx.currentTextSelection;
             assertExists(textSelection);
             const end = textSelection.end;
-            currentBlock = pathToBlock(this.host, end.path);
-            return next({ currentSelectionPath: end.path });
+            return next({
+              currentSelectionPath: end.path,
+              targetBlock: pathToBlock(this.host, end.path),
+            });
           })
           .try(cmd => [
             // text selection - case 1: move cursor down within the same block
-            cmd.inline((_, next) => {
-              assertExists(currentBlock);
-              const success = moveCursorVertically(currentBlock, false);
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.moveCursorVertically({ forward: false }),
+
             // text selection - case 2: move cursor down to the next block
             cmd
               .getNextBlock({
                 filter: block => !!block.model.text,
               })
-              .inline((ctx, next) => {
-                assertExists(ctx.nextBlock);
-                const success = moveCursorVertically(ctx.nextBlock, false);
-                if (success) {
-                  return next();
-                }
-              }),
+              .inline<'targetBlock'>((ctx, next) =>
+                next({ targetBlock: ctx.nextBlock })
+              )
+              .moveCursorVertically({ forward: false }),
+
             // text selection - case 3: move cursor to the next block start
             cmd
               .getNextBlock({
                 filter: block => !!block.model.text,
               })
-              .inline((ctx, next) => {
-                assertExists(ctx.nextBlock);
-                const success = moveCursorToBlock(ctx.nextBlock, false);
-                if (success) {
-                  return next();
-                }
-              }),
+              .inline<'targetBlock'>((ctx, next) =>
+                next({ targetBlock: ctx.nextBlock })
+              )
+              .moveCursorToBlock({ tail: false }),
             // text selection - case 4: move cursor to the current block end
-            cmd.inline((_, next) => {
-              assertExists(currentBlock);
-              const success = moveCursorToBlock(currentBlock, true);
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.moveCursorToBlock({ tail: true }),
           ]),
 
         // block selection - select the next block
@@ -173,7 +152,6 @@ export class KeymapController implements ReactiveController {
   };
 
   private _onArrowUp = () => {
-    let currentBlock: BlockElement | null = null;
     return this._std.command
       .pipe()
       .inline((_, next) => {
@@ -184,54 +162,38 @@ export class KeymapController implements ReactiveController {
         // text selection
         cmd
           .getTextSelection()
-          .inline<'currentSelectionPath'>((ctx, next) => {
+          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
             const textSelection = ctx.currentTextSelection;
             assertExists(textSelection);
             const end = textSelection.end;
-            currentBlock = pathToBlock(this.host, end.path);
-            return next({ currentSelectionPath: end.path });
+            return next({
+              currentSelectionPath: end.path,
+              targetBlock: pathToBlock(this.host, end.path),
+            });
           })
           .try(cmd => [
             // text selection - case 1: move cursor up within the same block
-            cmd.inline((_, next) => {
-              assertExists(currentBlock);
-              const success = moveCursorVertically(currentBlock, true);
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.moveCursorVertically({ forward: true }),
             // text selection - case 2: move cursor up to the previous block
             cmd
               .getPrevBlock({
                 filter: block => !!block.model.text,
               })
-              .inline((ctx, next) => {
-                assertExists(ctx.prevBlock);
-                const success = moveCursorVertically(ctx.prevBlock, true);
-                if (success) {
-                  return next();
-                }
-              }),
+              .inline<'targetBlock'>((ctx, next) =>
+                next({ targetBlock: ctx.prevBlock })
+              )
+              .moveCursorVertically({ forward: true }),
             // text selection - case 3: move cursor to the previous block end
             cmd
               .getPrevBlock({
                 filter: block => !!block.model.text,
               })
-              .inline((ctx, next) => {
-                assertExists(ctx.prevBlock);
-                const success = moveCursorToBlock(ctx.prevBlock, true);
-                if (success) {
-                  return next();
-                }
-              }),
+              .inline<'targetBlock'>((ctx, next) =>
+                next({ targetBlock: ctx.prevBlock })
+              )
+              .moveCursorToBlock({ tail: true }),
             // text selection - case 4: move cursor to the current block start
-            cmd.inline((_, next) => {
-              assertExists(currentBlock);
-              const success = moveCursorToBlock(currentBlock, false);
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.moveCursorToBlock({ tail: false }),
           ]),
 
         // block selection - select the previous block
@@ -321,68 +283,39 @@ export class KeymapController implements ReactiveController {
         // text selection
         cmd
           .getTextSelection()
-          .inline<'currentSelectionPath'>((ctx, next) => {
+          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
             const textSelection = ctx.currentTextSelection;
             assertExists(textSelection);
             const end = textSelection.end;
             this._focusBlock = pathToBlock(this.host, end.path);
             return next({
               currentSelectionPath: end.path,
+              targetBlock: pathToBlock(this.host, end.path),
             });
           })
           .try(cmd => [
             // text selection - case 1: change selection downwards within the same block
-            cmd.inline((_, next) => {
-              assertExists(this._focusBlock);
-              const success = changeTextSelectionVertically(
-                this._focusBlock,
-                false
-              );
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.changeTextSelectionVertically({ upward: false }),
             // text selection - case 2: change selection downwards to the next block
             cmd
               .getNextBlock({
                 filter: block => !!block.model.text,
               })
               .inline((ctx, next) => {
-                assertExists(ctx.nextBlock);
-                const success = changeTextSelectionVertically(
-                  ctx.nextBlock,
-                  false
-                );
-                if (success) {
-                  return next();
-                }
-              }),
+                return next({ targetBlock: ctx.nextBlock });
+              })
+              .changeTextSelectionVertically({ upward: false }),
             // text selection - case 3: change selection downwards to the next block start
             cmd
               .getNextBlock({
                 filter: block => !!block.model.text,
               })
               .inline((ctx, next) => {
-                assertExists(ctx.nextBlock);
-                const success = changeTextSelectionToBlockStartEnd(
-                  ctx.nextBlock,
-                  false
-                );
-                if (success) {
-                  return next();
-                }
-              }),
+                return next({ targetBlock: ctx.nextBlock });
+              })
+              .changeTextSelectionToBlockStartEnd({ tail: false }),
             // text selection - case 4: change selection to the current block end
-            cmd.inline((_, next) => {
-              assertExists(this._focusBlock);
-              const success = changeTextSelectionToBlockStartEnd(
-                this._focusBlock,
-                true
-              );
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.changeTextSelectionToBlockStartEnd({ tail: true }),
           ]),
 
         //block selection
@@ -430,68 +363,39 @@ export class KeymapController implements ReactiveController {
         // text selection
         cmd
           .getTextSelection()
-          .inline<'currentSelectionPath'>((ctx, next) => {
+          .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
             const textSelection = ctx.currentTextSelection;
             assertExists(textSelection);
             const end = textSelection.end;
             this._focusBlock = pathToBlock(this.host, end.path);
             return next({
               currentSelectionPath: end.path,
+              targetBlock: pathToBlock(this.host, end.path),
             });
           })
           .try(cmd => [
             // text selection - case 1: change selection upwards within the same block
-            cmd.inline((_, next) => {
-              assertExists(this._focusBlock);
-              const success = changeTextSelectionVertically(
-                this._focusBlock,
-                true
-              );
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.changeTextSelectionVertically({ upward: true }),
             // text selection - case 2: change selection upwards to the previous block
             cmd
               .getPrevBlock({
                 filter: block => !!block.model.text,
               })
               .inline((ctx, next) => {
-                assertExists(ctx.prevBlock);
-                const success = changeTextSelectionVertically(
-                  ctx.prevBlock,
-                  true
-                );
-                if (success) {
-                  return next();
-                }
-              }),
+                return next({ targetBlock: ctx.prevBlock });
+              })
+              .changeTextSelectionVertically({ upward: true }),
             // text selection - case 3: change selection upwards to the previous block end
             cmd
               .getPrevBlock({
                 filter: block => !!block.model.text,
               })
               .inline((ctx, next) => {
-                assertExists(ctx.prevBlock);
-                const success = changeTextSelectionToBlockStartEnd(
-                  ctx.prevBlock,
-                  true
-                );
-                if (success) {
-                  return next();
-                }
-              }),
+                return next({ targetBlock: ctx.prevBlock });
+              })
+              .changeTextSelectionToBlockStartEnd({ tail: true }),
             // text selection - case 4: change selection to the current block start
-            cmd.inline((_, next) => {
-              assertExists(this._focusBlock);
-              const success = changeTextSelectionToBlockStartEnd(
-                this._focusBlock,
-                false
-              );
-              if (success) {
-                return next();
-              }
-            }),
+            cmd.changeTextSelectionToBlockStartEnd({ tail: false }),
           ]),
 
         //block selection
@@ -535,39 +439,28 @@ export class KeymapController implements ReactiveController {
     return this._std.command
       .pipe()
       .getTextSelection()
-      .inline<'currentSelectionPath'>((ctx, next) => {
+      .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
         const textSelection = ctx.currentTextSelection;
         assertExists(textSelection);
         const end = textSelection.end;
         this._focusBlock = pathToBlock(this.host, end.path);
         return next({
           currentSelectionPath: end.path,
+          targetBlock: pathToBlock(this.host, end.path),
         });
       })
       .try(cmd => [
         // text selection - case 1: change selection towards right within the same block
-        cmd.inline((_, next) => {
-          assertExists(this._focusBlock);
-          const success = changeTextSelectionSideways(this._focusBlock, false);
-          if (success) {
-            return next();
-          }
-        }),
+        cmd.changeTextSelectionSideways({ left: false }),
         // text selection - case 2: change selection towards right to the next block
         cmd
           .getNextBlock({
             filter: block => !!block.model.text,
           })
-          .inline((ctx, next) => {
-            assertExists(ctx.nextBlock);
-            const success = changeTextSelectionSidewaysToBlock(
-              ctx.nextBlock,
-              false
-            );
-            if (success) {
-              return next();
-            }
-          }),
+          .inline<'targetBlock'>((ctx, next) => {
+            return next({ targetBlock: ctx.nextBlock });
+          })
+          .changeTextSelectionSidewaysToBlock({ left: false }),
       ])
       .run();
   };
@@ -576,39 +469,28 @@ export class KeymapController implements ReactiveController {
     return this._std.command
       .pipe()
       .getTextSelection()
-      .inline<'currentSelectionPath'>((ctx, next) => {
+      .inline<'currentSelectionPath' | 'targetBlock'>((ctx, next) => {
         const textSelection = ctx.currentTextSelection;
         assertExists(textSelection);
         const end = textSelection.end;
         this._focusBlock = pathToBlock(this.host, end.path);
         return next({
           currentSelectionPath: end.path,
+          targetBlock: pathToBlock(this.host, end.path),
         });
       })
       .try(cmd => [
         // text selection - case 1: change selection towards left within the same block
-        cmd.inline((_, next) => {
-          assertExists(this._focusBlock);
-          const success = changeTextSelectionSideways(this._focusBlock, true);
-          if (success) {
-            return next();
-          }
-        }),
+        cmd.changeTextSelectionSideways({ left: true }),
         // text selection - case 2: change selection towards left to the next block
         cmd
           .getPrevBlock({
             filter: block => !!block.model.text,
           })
-          .inline((ctx, next) => {
-            assertExists(ctx.prevBlock);
-            const success = changeTextSelectionSidewaysToBlock(
-              ctx.prevBlock,
-              true
-            );
-            if (success) {
-              return next();
-            }
-          }),
+          .inline<'targetBlock'>((ctx, next) => {
+            return next({ targetBlock: ctx.prevBlock });
+          })
+          .changeTextSelectionSidewaysToBlock({ left: true }),
       ])
       .run();
   };
