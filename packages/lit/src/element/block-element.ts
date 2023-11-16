@@ -113,8 +113,8 @@ export class BlockElement<
       flavour: options?.global
         ? undefined
         : options?.flavour
-        ? this.model.flavour
-        : undefined,
+          ? this.model.flavour
+          : undefined,
       path: options?.global || options?.flavour ? undefined : this.path,
     };
     this._disposables.add(this.root.event.add(name, handler, config));
@@ -128,8 +128,8 @@ export class BlockElement<
       flavour: options?.global
         ? undefined
         : options?.flavour
-        ? this.model.flavour
-        : undefined,
+          ? this.model.flavour
+          : undefined,
       path: options?.global || options?.flavour ? undefined : this.path,
     };
     this._disposables.add(this.root.event.bindHotkey(keymap, config));
