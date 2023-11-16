@@ -743,7 +743,7 @@ test('when no visible note block, clicking in page mode will auto add a new note
   await assertNoteSequence(page, '1');
   await assertBlockCount(page, 'note', 1);
   // hide note
-  await page.locator('edgeless-change-note-button').click();
+  await page.locator('edgeless-change-note-button .hidden-status').click();
 
   await switchEditorMode(page);
   let note = await page.evaluate(() => {

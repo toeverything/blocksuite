@@ -537,9 +537,20 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       page,
       /*xml*/ `
 <affine:note
+  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
+  prop:borderRadius={8}
+  prop:borderSize={4}
+  prop:borderStyle="solid"
   prop:hidden={false}
   prop:index="a0"
+  prop:lastwh={
+    Array [
+      0,
+      0,
+    ]
+  }
+  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:type="text"
@@ -576,9 +587,20 @@ test.describe('Drag block hub can snap to the edge and function properly', () =>
       page,
       /*xml*/ `
 <affine:note
+  prop:autoHeight={true}
   prop:background="--affine-background-secondary-color"
+  prop:borderRadius={8}
+  prop:borderSize={4}
+  prop:borderStyle="solid"
   prop:hidden={false}
   prop:index="a0"
+  prop:lastwh={
+    Array [
+      0,
+      0,
+    ]
+  }
+  prop:shadowStyle="--affine-note-shadow-box"
 >
   <affine:paragraph
     prop:type="text"
