@@ -211,7 +211,9 @@ export class NoteSlicer extends WithDisposable(LitElement) {
     }
 
     const shouldTransition = note === this._noteModel;
-    const noteContainer = noteElement.closest('.edgeless-block-portal-note');
+    const noteContainer = noteElement.closest(
+      '.edgeless-block-portal-note'
+    ) as HTMLElement;
     assertExists(noteContainer);
     const noteContainerRect = noteContainer.getBoundingClientRect();
     const [baseX, baseY, noteWidth] = deserializeXYWH(note.xywh);
