@@ -81,7 +81,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   private _surfaceRefReferenceSet = new Set<string>();
 
   private _initNoteHeightUpdate() {
-    const { page } = this.edgeless;
+    const { page, surface } = this.edgeless;
     assertExists(page.root);
 
     const resetNoteResizeObserver = throttle(
@@ -97,10 +97,19 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     this._disposables.add(
       page.root.childrenUpdated.on(resetNoteResizeObserver)
     );
+
+    this._disposables.add(
+      this.edgeless.slots.elementUpdated.on(({ id, props }) => {
+        const model = surface.pickById(id);
+        if (isNoteBlock(model) && 'prop:autoHeight' in props) {
+          resetNoteResizeObserver();
+        }
+      })
+    );
   }
 
   get isDragging() {
-    return this.selectedRect.dragging || this.edgeless.tools;
+    return this.selectedRect.dragging;
   }
 
   aboutToChangeViewport() {
@@ -179,7 +188,6 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         resizedNotes.forEach(([domRect], id) => {
           if (page.readonly) return;
-
           const model = edgeless.surface.pickById(id) as NoteBlockModel;
           const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);

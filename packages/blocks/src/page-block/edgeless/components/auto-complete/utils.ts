@@ -1,7 +1,6 @@
 import { assertExists } from '@blocksuite/global/utils';
 import { Workspace } from '@blocksuite/store';
 
-import { getBlockClipboardInfo } from '../../../../_legacy/clipboard/index.js';
 import type { NoteBlockModel } from '../../../../models.js';
 import {
   Bound,
@@ -276,7 +275,7 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export async function createEdgelessElement(
+export function createEdgelessElement(
   edgeless: EdgelessPageBlockComponent,
   current: ShapeElement | NoteBlockModel
 ) {
@@ -291,14 +290,19 @@ export async function createEdgelessElement(
     const { page } = edgeless;
     id = page.addBlock(
       'affine:note',
-      { background: current.background },
+      {
+        background: current.background,
+        borderRadius: current.borderRadius,
+        borderStyle: current.borderStyle,
+        borderSize: current.borderSize,
+        shadowStyle: current.shadowStyle,
+        hidden: current.hidden,
+      },
       edgeless.model.id
     );
-    const noteService = edgeless.getService('affine:note');
     const note = page.getBlockById(id) as NoteBlockModel;
     assertExists(note);
-    const serializedBlock = (await getBlockClipboardInfo(current)).json;
-    await noteService.json2Block(note, serializedBlock.children);
+    page.addBlock('affine:paragraph', {}, note.id);
   }
   const group = surface.getGroupParent(current);
   if (group instanceof GroupElement) {

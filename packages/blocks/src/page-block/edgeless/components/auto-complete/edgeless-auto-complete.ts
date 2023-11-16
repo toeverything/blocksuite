@@ -10,6 +10,7 @@ import {
   AutoCompleteArrowIcon,
   NoteAutoCompleteIcon,
 } from '../../../../_common/icons/index.js';
+import { handleNativeRangeAtPoint } from '../../../../_common/utils/index.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import {
   type Bound,
@@ -232,10 +233,10 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     return surface.pickById(id) as ConnectorElement;
   }
 
-  private async _generateElementOnClick(type: Direction) {
+  private _generateElementOnClick(type: Direction) {
     const { surface, page } = this.edgeless;
     const bound = this._computeNextBound(type);
-    const id = await createEdgelessElement(this.edgeless, this.current);
+    const id = createEdgelessElement(this.edgeless, this.current);
     if (isShape(this.current)) {
       surface.updateElement(id, { xywh: bound.serialize() });
       const { startPosition, endPosition } = getPosition(type);
@@ -254,12 +255,20 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
     } else {
       const model = page.getBlockById(id);
       assertExists(model);
+      bound.h = 91;
       page.updateBlock(model, { xywh: bound.serialize() });
+      const [x, y] = surface.viewport.toViewCoord(
+        bound.center[0],
+        bound.center[1]
+      );
+      requestAnimationFrame(() => {
+        handleNativeRangeAtPoint(x, y);
+      });
     }
 
     this.edgeless.selectionManager.setSelection({
       elements: [id],
-      editing: false,
+      editing: true,
     });
     this.removeOverlay();
   }
@@ -292,7 +301,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         .filter(e => e instanceof ShapeElement) as ShapeElement[];
       return nextBound(type, this.current, connectedShapes);
     } else {
-      const bound = getGridBound(this.current);
+      const bound = this.current.gridBound;
       switch (type) {
         case Direction.Right: {
           bound.x += bound.w + MAIN_GAP;
@@ -307,7 +316,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
           break;
         }
         case Direction.Top: {
-          bound.y -= bound.h + MAIN_GAP;
+          bound.y -= 91 + MAIN_GAP;
           break;
         }
       }

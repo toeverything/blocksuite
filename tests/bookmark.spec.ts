@@ -46,9 +46,20 @@ test(scoped`create bookmark by slash menu`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:bookmark
       prop:bookmarkTitle=""
@@ -87,9 +98,20 @@ test(scoped`create bookmark by blockhub`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:type="text"
@@ -118,9 +140,20 @@ test(scoped`covert bookmark block to link text`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text={
@@ -155,9 +188,20 @@ test(scoped`copy url to create bookmark in page mode`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text={
@@ -208,9 +252,20 @@ test(scoped`copy url to create bookmark in edgeless mode`, async ({ page }) => {
     /*xml*/ `<affine:page>
   <affine:surface />
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text={
@@ -244,9 +299,20 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:bookmark
       prop:bookmarkTitle=""
@@ -287,9 +353,20 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:bookmark
       prop:bookmarkTitle=""
@@ -335,9 +412,20 @@ test(scoped`support dragging bookmark block directly`, async ({ page }) => {
     page,
     /*xml*/ `<affine:page>
   <affine:note
+    prop:autoHeight={true}
     prop:background="--affine-background-secondary-color"
+    prop:borderRadius={8}
+    prop:borderSize={4}
+    prop:borderStyle="solid"
     prop:hidden={false}
     prop:index="a0"
+    prop:lastwh={
+      Array [
+        0,
+        0,
+      ]
+    }
+    prop:shadowStyle="--affine-note-shadow-box"
   >
     <affine:paragraph
       prop:text="111"

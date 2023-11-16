@@ -9,6 +9,7 @@ import type {
   IEdgelessElement,
 } from '../surface-block/elements/edgeless-element.js';
 import { EdgelessSelectableMixin } from '../surface-block/elements/selectable.js';
+import type { StrokeStyle } from '../surface-block/index.js';
 import {
   Bound,
   type IVec,
@@ -25,15 +26,30 @@ export const NOTE_COLORS: CssVariableName[] = [
   '--affine-tag-purple',
 ];
 
+export const NOTE_SHADOWS = [
+  '',
+  '--affine-note-shadow-box',
+  '--affine-note-shadow-sticker',
+  '--affine-note-shadow-paper',
+  '--affine-note-shadow-float',
+  `--affine-note-shadow-film`,
+];
+
 export const DEFAULT_NOTE_COLOR = NOTE_COLORS[0];
 
 export const NoteBlockSchema = defineBlockSchema({
   flavour: 'affine:note',
   props: () => ({
     xywh: `[0,0,${NOTE_WIDTH},95]`,
+    lastwh: [0, 0],
     background: DEFAULT_NOTE_COLOR,
     index: 'a0',
     hidden: false,
+    borderRadius: 8,
+    borderSize: 4,
+    borderStyle: 'solid',
+    shadowStyle: NOTE_SHADOWS[1],
+    autoHeight: true,
   }),
   metadata: {
     version: 1,
@@ -60,9 +76,15 @@ export const NoteBlockSchema = defineBlockSchema({
 
 type Props = {
   xywh: SerializedXYWH;
+  lastwh: Array<number>;
   background: string;
   index: string;
   hidden: boolean;
+  borderSize: number;
+  borderStyle: StrokeStyle;
+  borderRadius: number;
+  shadowStyle: string;
+  autoHeight: boolean;
 };
 
 @EdgelessSelectableMixin

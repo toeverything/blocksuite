@@ -1,81 +1,159 @@
 import '../buttons/tool-icon-button.js';
 import '../toolbar/shape/shape-menu.js';
 import '../panel/color-panel.js';
+import './component-toolbar-menu-divider.js';
+import '../panel/note-shadow-panel.js';
 
 import { assertExists } from '@blocksuite/global/utils';
 import { WithDisposable } from '@blocksuite/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
-import { HiddenIcon, NoteIcon } from '../../../../_common/icons/index.js';
+import {
+  ExpandIcon,
+  HiddenIcon,
+  LineStyleIcon,
+  NoteCornerIcon,
+  NoteIcon,
+  NoteShadowIcon,
+  ShrinkIcon,
+  SmallArrowDownIcon,
+} from '../../../../_common/icons/index.js';
 import type { CssVariableName } from '../../../../_common/theme/css-variables.js';
 import { matchFlavours } from '../../../../_common/utils/model.js';
-import {
-  NOTE_COLORS,
-  type NoteBlockModel,
-} from '../../../../note-block/note-model.js';
+import { type NoteBlockModel } from '../../../../note-block/note-model.js';
+import { Bound, StrokeStyle } from '../../../../surface-block/index.js';
 import type { SurfaceBlockComponent } from '../../../../surface-block/surface-block.js';
 import type { EdgelessSelectionSlots } from '../../edgeless-page-block.js';
-import type { ColorEvent } from '../panel/color-panel.js';
+import { type ColorEvent, ColorUnit } from '../panel/color-panel.js';
+import {
+  LineStylesPanel,
+  type LineStylesPanelClickedButton,
+  lineStylesPanelStyles,
+} from '../panel/line-styles-panel.js';
 import { createButtonPopper } from '../utils.js';
+
+const NOTE_BACKGROUND: CssVariableName[] = [
+  '--affine-tag-red',
+  '--affine-tag-orange',
+  '--affine-tag-yellow',
+  '--affine-tag-green',
+  '--affine-tag-teal',
+  '--affine-tag-blue',
+  '--affine-tag-purple',
+  '--affine-tag-pink',
+  '--affine-tag-gray',
+  '--affine-palette-transparent',
+];
 
 @customElement('edgeless-change-note-button')
 export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
-  static override styles = css`
-    :host {
-      display: flex;
-      color: var(--affine-text-primary-color);
-      fill: currentColor;
-      align-items: center;
-      justify-content: center;
-    }
+  static override styles = [
+    lineStylesPanelStyles,
+    css`
+      :host {
+        display: flex;
+        color: var(--affine-text-primary-color);
+        fill: currentColor;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
 
-    edgeless-color-panel {
-      display: none;
-      width: 108px;
-      height: 68px;
-      padding: 8px 12px;
-      flex-wrap: wrap;
-      background: var(--affine-background-overlay-panel-color);
-      box-shadow: var(--affine-shadow-2);
-      border-radius: 8px;
-    }
+      .hidden-status {
+        font-size: 12px;
+        color: var(--affine-text-secondary-color);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        cursor: pointer;
+        width: 151px;
+      }
 
-    edgeless-color-panel[data-show] {
-      display: flex;
-    }
+      .hidden-status:hover {
+        background: var(--affine-hover-color);
+        border-radius: 8px;
+      }
 
-    .selected-background {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      width: 20px;
-      height: 20px;
-      box-sizing: border-box;
-      border-radius: 50%;
-      color: var(--affine-text-primary-color);
-      font-size: 12px;
-    }
+      .hidden-status .unhover {
+        display: flex;
+        justify-content: flex-start;
+        gap: 4px;
+      }
 
-    .show {
-      font-size: 12px;
-      color: var(--affine-text-secondary-color);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      height: 30px;
-      cursor: pointer;
-    }
+      .hidden-status:hover .unhover {
+        display: none;
+      }
 
-    .show:hover {
-      background: var(--affine-hover-color);
-      border-radius: 8px;
-    }
-  `;
+      .hidden-status .hover {
+        display: none;
+      }
+
+      .hidden-status:hover .hover {
+        display: flex;
+        justify-content: flex-start;
+        gap: 4px;
+      }
+
+      .fill-color-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 20px;
+        height: 20px;
+      }
+
+      .item {
+        width: 40px;
+        height: 24px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      edgeless-color-panel {
+        width: 168px;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: var(--affine-background-overlay-panel-color);
+        box-shadow: var(--affine-shadow-2);
+        border-radius: 8px;
+      }
+
+      edgeless-color-panel[data-show] {
+        display: flex;
+      }
+      edgeless-note-shadow-panel,
+      edgeless-size-panel {
+        display: none;
+      }
+
+      edgeless-note-shadow-panel[data-show],
+      edgeless-size-panel[data-show] {
+        display: flex;
+      }
+
+      component-toolbar-menu-divider {
+        width: 4px;
+      }
+
+      .line-style-panel {
+        display: none;
+        padding: 6px;
+      }
+
+      .line-style-panel component-toolbar-menu-divider {
+        margin: 0 8px;
+      }
+
+      .line-style-panel[data-show] {
+        display: flex;
+      }
+    `,
+  ];
 
   @property({ attribute: false })
   notes: NoteBlockModel[] = [];
@@ -89,26 +167,42 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
   @state()
   private _popperShow = false;
 
-  @query('edgeless-tool-icon-button')
-  private _colorSelectorButton!: HTMLDivElement;
-
+  @query('.fill-color-button')
+  private _fillColorButton!: HTMLDivElement;
   @query('edgeless-color-panel')
-  private _colorSelector!: HTMLDivElement;
+  private _fillColorMenu!: HTMLDivElement;
+  private _fillColorPopper: ReturnType<typeof createButtonPopper> | null = null;
 
-  private _colorSelectorPopper: ReturnType<typeof createButtonPopper> | null =
+  @query('.border-style-button')
+  private _borderStyleButton!: HTMLDivElement;
+  @query('.line-style-panel')
+  private _borderStylesPanel!: HTMLDivElement;
+  private _borderStylePopper: ReturnType<typeof createButtonPopper> | null =
     null;
 
-  private _renderSelectedColor(color: CssVariableName) {
-    const style = { backgroundColor: `var(${color})` };
+  @query('.border-radius-button')
+  private _borderRadiusButton!: HTMLDivElement;
+  @query('edgeless-size-panel')
+  private _boderRadiusPanel!: HTMLDivElement;
+  private _borderRadiusPopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
-    return html`<div class="selected-background" style=${styleMap(style)}>
-      A
-    </div>`;
-  }
+  @query('.shadow-style-button')
+  private _shadowStyleButton!: HTMLDivElement;
+  @query('edgeless-note-shadow-panel')
+  private _shadowStylesPanel!: HTMLDivElement;
+  private _shadowStylePopper: ReturnType<typeof createButtonPopper> | null =
+    null;
 
-  private _setBlockBackground(color: CssVariableName) {
+  private _setBackground(color: CssVariableName) {
     this.notes.forEach(note => {
       this.surface.page.updateBlock(note, { background: color });
+    });
+  }
+
+  private _setShadowStyle(shadowStyle: string) {
+    this.notes.forEach(note => {
+      this.surface.page.updateBlock(note, { shadowStyle });
     });
   }
 
@@ -136,62 +230,239 @@ export class EdgelessChangeNoteButton extends WithDisposable(LitElement) {
     this.requestUpdate();
   }
 
-  override updated(changedProperties: Map<string, unknown>) {
-    const _disposables = this._disposables;
+  private _setStrokeWidth(borderSize: number) {
+    this.notes.forEach(ele => {
+      this.surface.updateElement(ele.id, {
+        borderSize,
+      });
+    });
+  }
 
-    if (this._colorSelector) {
-      this._colorSelectorPopper = createButtonPopper(
-        this._colorSelectorButton,
-        this._colorSelector,
-        ({ display }) => {
-          this._popperShow = display === 'show';
+  private _setStrokeStyle(borderStyle: StrokeStyle) {
+    this.notes.forEach(ele => {
+      this.surface.updateElement(ele.id, {
+        borderStyle,
+      });
+    });
+  }
+
+  private _setStyles({ type, value }: LineStylesPanelClickedButton) {
+    if (type === 'size') {
+      this._setStrokeWidth(value);
+    } else if (type === 'lineStyle') {
+      switch (value) {
+        case 'solid': {
+          this._setStrokeStyle(StrokeStyle.Solid);
+          break;
         }
-      );
-      _disposables.add(this._colorSelectorPopper);
+        case 'dash': {
+          this._setStrokeStyle(StrokeStyle.Dashed);
+          break;
+        }
+        case 'none': {
+          this._setStrokeStyle(StrokeStyle.None);
+          break;
+        }
+      }
     }
-    super.updated(changedProperties);
+  }
+
+  private _setBorderRadius = (size: number) => {
+    this.notes.forEach(element => {
+      this.surface.updateElement(element.id, {
+        borderRadius: size,
+      });
+    });
+  };
+
+  private _setAutoHeight() {
+    this.notes.forEach(element => {
+      const autoHeight = element.autoHeight;
+      const bound = Bound.deserialize(element.xywh);
+      if (autoHeight) {
+        if (element.lastwh.every(v => v !== 0)) {
+          bound.w = element.lastwh[0];
+          bound.h = element.lastwh[1];
+        }
+        this.surface.updateElement(element.id, {
+          autoHeight: !element.autoHeight,
+          xywh: bound.serialize(),
+        });
+      } else {
+        const lastwh = [bound.w, bound.h];
+        this.surface.updateElement(element.id, {
+          autoHeight: !element.autoHeight,
+          lastwh: lastwh,
+        });
+      }
+    });
+  }
+
+  override firstUpdated() {
+    const { _disposables } = this;
+
+    this._fillColorPopper = createButtonPopper(
+      this._fillColorButton,
+      this._fillColorMenu,
+      ({ display }) => (this._popperShow = display === 'show')
+    );
+
+    this._disposables.add(this._fillColorPopper);
+
+    this._borderStylePopper = createButtonPopper(
+      this._borderStyleButton,
+      this._borderStylesPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._borderStylePopper);
+
+    this._borderRadiusPopper = createButtonPopper(
+      this._borderRadiusButton,
+      this._boderRadiusPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._borderRadiusPopper);
+
+    this._shadowStylePopper = createButtonPopper(
+      this._shadowStyleButton,
+      this._shadowStylesPanel,
+      ({ display }) => {
+        this._popperShow = display === 'show';
+      }
+    );
+    _disposables.add(this._shadowStylePopper);
   }
 
   override render() {
     if (this.notes.length !== 1) return nothing;
 
     const note = this.notes[0];
-    const selectedBackground = note.background;
     const enableIndex =
       this.surface.page.awarenessStore.getFlag('enable_note_index');
+    const {
+      hidden,
+      borderSize,
+      borderStyle,
+      borderRadius,
+      shadowStyle,
+      background,
+      autoHeight,
+    } = note;
 
     return html`
       ${enableIndex
         ? html`<div
-            class="show"
-            style=${styleMap({
-              width: note.hidden ? '84px' : '158px',
-            })}
-            @click=${() => this._setNoteHidden(note, !note.hidden)}
+            class="hidden-status"
+            @click=${() => this._setNoteHidden(note, !hidden)}
           >
-            ${note.hidden
-              ? html`${NoteIcon}On page`
-              : html`
-                  ${HiddenIcon}
-                  <div>${'Hidden on page mode'}</div>
-                `}
+            ${hidden
+              ? html`<div class="unhover">
+                    ${HiddenIcon} Hidden In Page Mode
+                  </div>
+                  <div class="hover">${NoteIcon} Show In Page Mode</div> `
+              : html`<div class="unhover">${NoteIcon} Shown In Page Mode</div>
+                  <div class="hover">${HiddenIcon} Hide In Page Mode</div>`}
           </div>`
         : nothing}
+
+      <component-toolbar-menu-divider
+        .vertical=${true}
+      ></component-toolbar-menu-divider>
+
       <edgeless-tool-icon-button
-        .tooltip=${this._popperShow ? '' : 'Color'}
-        .active=${false}
-        @click=${() => this._colorSelectorPopper?.toggle()}
+        class="fill-color-button"
+        .tooltip=${this._popperShow ? '' : 'Background'}
+        .tipPosition=${'bottom'}
+        .iconContainerPadding=${2}
+        @click=${() => this._fillColorPopper?.toggle()}
       >
-        ${this._renderSelectedColor(selectedBackground)}
+        <div class="fill-color-container">${ColorUnit(background)}</div>
       </edgeless-tool-icon-button>
+
       <edgeless-color-panel
-        .value=${selectedBackground}
-        .options=${NOTE_COLORS}
-        .showLetterMark=${true}
-        @select=${(event: ColorEvent) => {
-          this._setBlockBackground(event.detail);
+        .value=${background}
+        .options=${NOTE_BACKGROUND}
+        @select=${(e: ColorEvent) => this._setBackground(e.detail)}
+      >
+      </edgeless-color-panel>
+
+      <component-toolbar-menu-divider
+        .vertical=${true}
+      ></component-toolbar-menu-divider>
+
+      <div class="item shadow-style-button">
+        <edgeless-tool-icon-button
+          .tooltip=${'Shadow Style'}
+          .tipPosition=${'bottom'}
+          .iconContainerPadding=${0}
+          @click=${() => this._shadowStylePopper?.toggle()}
+        >
+          ${NoteShadowIcon}${SmallArrowDownIcon}
+        </edgeless-tool-icon-button>
+      </div>
+
+      <edgeless-note-shadow-panel
+        .value=${shadowStyle}
+        .background=${background}
+        .onSelect=${(value: string) => this._setShadowStyle(value)}
+      >
+      </edgeless-note-shadow-panel>
+
+      <div class="item border-style-button">
+        <edgeless-tool-icon-button
+          .tooltip=${this._popperShow ? '' : 'Border Style'}
+          .tipPosition=${'bottom'}
+          .iconContainerPadding=${0}
+          @click=${() => this._borderStylePopper?.toggle()}
+        >
+          ${LineStyleIcon}${SmallArrowDownIcon}
+        </edgeless-tool-icon-button>
+      </div>
+      ${LineStylesPanel({
+        selectedLineSize: borderSize,
+        selectedLineStyle: borderStyle,
+        onClick: event => {
+          this._setStyles(event);
+        },
+      })}
+
+      <div class="item border-radius-button">
+        <edgeless-tool-icon-button
+          .tooltip=${'Corners'}
+          .tipPosition=${'bottom'}
+          .iconContainerPadding=${0}
+          @click=${() => this._borderRadiusPopper?.toggle()}
+        >
+          ${NoteCornerIcon}${SmallArrowDownIcon}
+        </edgeless-tool-icon-button>
+      </div>
+      <edgeless-size-panel
+        .size=${borderRadius}
+        .sizes=${[8, 16, 24, 32]}
+        .onSelect=${(size: number) => {
+          this._setBorderRadius(size);
         }}
-      ></edgeless-color-panel>
+        .onPopperCose=${() => this._borderRadiusPopper?.hide()}
+      ></edgeless-size-panel>
+
+      <component-toolbar-menu-divider
+        .vertical=${true}
+      ></component-toolbar-menu-divider>
+
+      <edgeless-tool-icon-button
+        .tooltip=${autoHeight ? 'Customized Size' : 'Auto Size'}
+        .tipPosition=${'bottom'}
+        .iconContainerPadding=${2}
+        @click=${() => {
+          this._setAutoHeight();
+        }}
+      >
+        ${autoHeight ? ShrinkIcon : ExpandIcon}
+      </edgeless-tool-icon-button>
     `;
   }
 }

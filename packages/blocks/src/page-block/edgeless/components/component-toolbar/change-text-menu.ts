@@ -1,5 +1,5 @@
 import '../panel/font-family-panel.js';
-import '../panel/font-size-panel.js';
+import '../panel/size-panel.js';
 
 import { WithDisposable } from '@blocksuite/lit';
 import { baseTheme } from '@toeverything/theme';
@@ -36,7 +36,7 @@ import {
   LINE_COLORS,
 } from '../panel/color-panel.js';
 import type { EdgelessFontFamilyPanel } from '../panel/font-family-panel.js';
-import type { EdgelessFontSizePanel } from '../panel/font-size-panel.js';
+import type { EdgelessSizePanel } from '../panel/size-panel.js';
 import {
   type EdgelessCanvasTextElement,
   type EdgelessCanvasTextElementType,
@@ -438,13 +438,19 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
         </div>
       </edgeless-tool-icon-button>
       <div class="font-size-panel-container text-font-size">
-        <edgeless-font-size-panel
-          .fontSize=${selectedFontSize}
-          .onSelect=${(fontSize: EdgelessFontSizePanel['fontSize']) => {
+        <edgeless-size-panel
+          .size=${selectedFontSize}
+          .sizes=${[
+            TEXT_FONT_SIZE.SMALL,
+            TEXT_FONT_SIZE.MEDIUM,
+            TEXT_FONT_SIZE.LARGE,
+            TEXT_FONT_SIZE.XLARGE,
+          ]}
+          .onSelect=${(fontSize: EdgelessSizePanel['size']) => {
             this._setFontSize(fontSize);
           }}
           .onPopperCose=${() => this._textFontSizePopper?.hide()}
-        ></edgeless-font-size-panel>
+        ></edgeless-size-panel>
       </div>
 
       <component-toolbar-menu-divider></component-toolbar-menu-divider>
@@ -510,8 +516,8 @@ export class EdgelessChangeTextMenu extends WithDisposable(LitElement) {
           ${selectedAlign === 'left'
             ? TextAlignLeftIcon
             : selectedAlign === 'center'
-            ? TextAlignCenterIcon
-            : TextAlignRightIcon}
+              ? TextAlignCenterIcon
+              : TextAlignRightIcon}
           ${SmallArrowDownIcon}
         </div>
       </edgeless-tool-icon-button>

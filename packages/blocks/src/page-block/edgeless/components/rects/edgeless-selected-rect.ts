@@ -8,12 +8,15 @@ import { styleMap } from 'lit/directives/style-map.js';
 
 import { stopPropagation } from '../../../../_common/utils/event.js';
 import { pickValues } from '../../../../_common/utils/iterable.js';
+import { clamp } from '../../../../_common/utils/math.js';
 import type {
   EdgelessElement,
   IPoint,
   Selectable,
 } from '../../../../_common/utils/types.js';
+import type { NoteBlockModel } from '../../../../models.js';
 import {
+  deserializeXYWH,
   GroupElement,
   normalizeTextBound,
   PhasorElementType,
@@ -21,7 +24,6 @@ import {
 import {
   Bound,
   ConnectorElement,
-  deserializeXYWH,
   type IVec,
   normalizeDegAngle,
   normalizeShapeBound,
@@ -31,7 +33,11 @@ import {
 } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { NOTE_MIN_HEIGHT, SELECTED_RECT_PADDING } from '../../utils/consts.js';
+import {
+  NOTE_MIN_HEIGHT,
+  NOTE_MIN_WIDTH,
+  SELECTED_RECT_PADDING,
+} from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
@@ -354,18 +360,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     let areAllConnectors = true;
     let areAllShapes = true;
     let areAllTexts = true;
-    let hasNote = false;
 
     for (const element of elements) {
       if (isNoteBlock(element)) {
-        hasNote = true;
+        areAllConnectors = false;
       } else if (isFrameBlock(element)) {
         areAllConnectors = false;
       } else if (isImageBlock(element)) {
         areAllConnectors = false;
         areAllShapes = false;
         areAllTexts = false;
-        hasNote = false;
       } else {
         if (element.type !== PhasorElementType.CONNECTOR)
           areAllConnectors = false;
@@ -378,7 +382,6 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       }
     }
 
-    if (hasNote) return 'edge';
     if (areAllConnectors) return 'none';
     if (areAllShapes) return 'all';
     if (areAllTexts) return 'edgeAndCorner';
@@ -412,18 +415,20 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
       if (!element) return;
 
       if (isNoteBlock(element)) {
-        let height = deserializeXYWH(element.xywh)[3];
-        // // Limit the width of the selected note
-        // if (noteW < NOTE_MIN_WIDTH) {
-        //   noteW = NOTE_MIN_WIDTH;
-        // }
-        // Limit the height of the selected note
-        if (height < NOTE_MIN_HEIGHT) {
-          height = NOTE_MIN_HEIGHT;
+        const curBound = Bound.deserialize(element.xywh);
+        const props: Partial<NoteBlockModel> = {};
+        if (curBound.h !== bound.h && element.autoHeight) {
+          props.autoHeight = false;
         }
-        edgeless.updateElementInLocal(element.id, {
-          xywh: serializeXYWH(bound.x, bound.y, bound.w, height),
-        });
+
+        bound.w = clamp(bound.w, NOTE_MIN_WIDTH, Infinity);
+        bound.h = clamp(bound.h, NOTE_MIN_HEIGHT, Infinity);
+        props.xywh = bound.serialize();
+        if ('autoHeight' in props) {
+          this.page.updateBlock(element, props);
+        } else {
+          edgeless.updateElementInLocal(element.id, props);
+        }
       } else if (isFrameBlock(element)) {
         edgeless.updateElementInLocal(element.id, {
           xywh: bound.serialize(),
@@ -679,6 +684,12 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     );
   }
 
+  private _canRotate() {
+    return !this.selection.elements.every(
+      ele => isNoteBlock(ele) || isFrameBlock(ele)
+    );
+  }
+
   override render() {
     const { selection } = this;
     const elements = selection.elements;
@@ -695,10 +706,15 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     } = this;
 
     const hasResizeHandles = !selection.editing && !page.readonly;
+
     const resizeHandles = hasResizeHandles
       ? ResizeHandles(
           resizeMode,
           (e: PointerEvent, direction: HandleDirection) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains('rotate') && !this._canRotate()) {
+              return;
+            }
             const proportional = elements.some(el => el instanceof TextElement);
             _resizeManager.onPointerDown(e, direction, proportional);
           },
@@ -711,6 +727,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
               point?: IVec;
             }
           ) => {
+            if (!this._canRotate() && options?.type === 'rotate') return;
             _updateCursor(dragging, options);
           }
         )
