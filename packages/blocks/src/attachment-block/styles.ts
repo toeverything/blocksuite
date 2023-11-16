@@ -17,9 +17,8 @@ export const styles = css`
     cursor: pointer;
   }
 
-  .affine-attachment-name {
+  .affine-attachment-title {
     display: flex;
-    align-items: center;
     gap: 8px;
 
     color: var(--affine-text-primary-color);
@@ -29,6 +28,16 @@ export const styles = css`
     text-overflow: ellipsis;
     fill: var(--affine-icon-color);
     user-select: none;
+  }
+
+  .affine-attachment-title > svg {
+    /* Align icon vertically to the center of the first line of text,  */
+    /* Assume the height of the icon is 16px */
+    margin-top: calc((var(--affine-line-height) - 16px) / 2);
+  }
+
+  .affine-attachment-name {
+    flex: 1;
   }
 
   .affine-attachment-desc {
