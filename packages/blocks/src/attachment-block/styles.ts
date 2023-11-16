@@ -39,6 +39,8 @@ export const styles = css`
 
   .affine-attachment-name {
     flex: 1;
+    word-wrap: break-word;
+    overflow: hidden;
   }
 
   .affine-attachment-desc {
