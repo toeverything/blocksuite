@@ -15,17 +15,22 @@ import type { DataViewManager } from '../../data-view-manager.js';
 
 const styles = css`
   .affine-database-toolbar {
-    display: none;
+    display: flex;
     align-items: center;
     gap: 6px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 150ms cubic-bezier(0.42, 0, 1, 1);
   }
 
   .toolbar-hover-container:hover .affine-database-toolbar {
-    display: flex;
+    visibility: visible;
+    opacity: 1;
   }
 
   .show-toolbar {
-    display: flex;
+    visibility: visible;
+    opacity: 1;
   }
 
   @media print {
