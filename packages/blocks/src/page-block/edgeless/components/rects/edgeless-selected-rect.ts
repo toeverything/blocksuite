@@ -31,7 +31,7 @@ import {
 } from '../../../../surface-block/index.js';
 import { getElementsWithoutGroup } from '../../../../surface-block/managers/group-manager.js';
 import type { EdgelessPageBlockComponent } from '../../edgeless-page-block.js';
-import { NOTE_MIN_HEIGHT } from '../../utils/consts.js';
+import { NOTE_MIN_HEIGHT, SELECTED_RECT_PADDING } from '../../utils/consts.js';
 import {
   getSelectableBounds,
   getSelectedRect,
@@ -574,14 +574,16 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
     const isSingleHiddenNote =
       isSingleNote && isNoteBlock(elements[0]) && elements[0].hidden;
 
+    const padding = elements.length > 1 ? SELECTED_RECT_PADDING : 0;
+
     this._selectedRect = {
-      width,
-      height,
+      width: width + padding * 2,
+      height: height + padding * 2,
       borderWidth: selection.editing ? 2 : 1,
       borderStyle: isSingleHiddenNote ? 'dashed' : 'solid',
       borderRadius: isSingleNote ? 8 * zoom : 0,
-      left,
-      top,
+      left: left - padding,
+      top: top - padding,
       rotate,
     };
   }
@@ -722,6 +724,28 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
           ></edgeless-connector-handle>`
         : nothing;
 
+    const elementHandle =
+      elements.length > 1
+        ? elements.map(element => {
+            const [modelX, modelY, w, h] = deserializeXYWH(element.xywh);
+            const [x, y] = this.surface.toViewCoord(modelX, modelY);
+            const { left, top, borderWidth } = this._selectedRect;
+            const style = {
+              position: 'absolute',
+              boxSizing: 'border-box',
+              left: `${x - left - borderWidth}px`,
+              top: `${y - top - borderWidth}px`,
+              width: `${w * this.zoom}px`,
+              height: `${h * this.zoom}px`,
+              border: `1px solid var(--affine-primary-color)`,
+            };
+            return html`<div
+              class="element-handle"
+              style=${styleMap(style)}
+            ></div>`;
+          })
+        : nothing;
+
     const isSingleGroup =
       elements.length === 1 && elements[0] instanceof GroupElement;
     _selectedRect.borderStyle = isSingleGroup ? 'dashed' : 'solid';
@@ -746,7 +770,7 @@ export class EdgelessSelectedRect extends WithDisposable(LitElement) {
         })}
         disabled="true"
       >
-        ${resizeHandles} ${connectorHandle}
+        ${resizeHandles} ${connectorHandle} ${elementHandle}
       </div>
     `;
   }
