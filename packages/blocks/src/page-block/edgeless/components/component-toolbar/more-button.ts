@@ -258,18 +258,11 @@ export class EdgelessMoreButton extends WithDisposable(LitElement) {
       case 'backward':
       case 'back': {
         const { notes, shapes, images } = this._splitElements();
-        if (notes.length + images.length > 0) {
-          this.slots.reorderingBlocksUpdated.emit({
-            elements: [...notes, ...images],
-            type,
-          });
-        }
-        if (shapes.length) {
-          this.slots.reorderingShapesUpdated.emit({
-            elements: shapes,
-            type,
-          });
-        }
+
+        this.slots.reorderingShapesUpdated.emit({
+          elements: [...notes, ...images, ...shapes],
+          type,
+        });
         break;
       }
     }

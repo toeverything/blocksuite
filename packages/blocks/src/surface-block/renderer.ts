@@ -436,23 +436,61 @@ export class Renderer implements SurfaceViewport {
   }
 
   public getCanvasByBound(
-    bound: IBound,
-    surfaceElements?: SurfaceElement[]
+    bound: IBound = this.viewportBounds,
+    surfaceElements?: SurfaceElement[],
+    canvas?: HTMLCanvasElement,
+    clearBeforeDrawing?: boolean,
+    withZoom?: boolean
   ): HTMLCanvasElement {
+    canvas = canvas || document.createElement('canvas');
+
     const dpr = window.devicePixelRatio || 1;
-    const canvas = document.createElement('canvas');
-    canvas.width = bound.w * dpr;
-    canvas.height = bound.h * dpr;
+    if (canvas.width !== bound.w * dpr) canvas.width = bound.w * dpr;
+    if (canvas.height !== bound.h * dpr) canvas.height = bound.h * dpr;
+
+    canvas.style.width = `${bound.w}px`;
+    canvas.style.height = `${bound.h}px`;
 
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
-    const matrix = new DOMMatrix().scaleSelf(dpr);
+    const matrix = new DOMMatrix().scaleSelf(withZoom ? dpr * this.zoom : dpr);
     const rc = new RoughCanvas(canvas);
 
+    if (clearBeforeDrawing) ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(matrix);
 
     this._renderByBound(ctx, matrix, rc, bound, surfaceElements);
 
     return canvas;
+  }
+
+  public cloneCanvasContent(
+    bound: IBound = this.viewportBounds,
+    surfaceElements?: SurfaceElement[],
+    targetCanvas?: HTMLCanvasElement
+  ): HTMLCanvasElement {
+    targetCanvas = targetCanvas || document.createElement('canvas');
+
+    const { canvas } = this;
+    const dpr = window.devicePixelRatio || 1;
+
+    targetCanvas.style.width = `${canvas.width / dpr}px`;
+    targetCanvas.style.height = `${canvas.height / dpr}px`;
+
+    if (targetCanvas.width !== canvas.width) targetCanvas.width = canvas.width;
+    if (targetCanvas.height !== canvas.height)
+      targetCanvas.height = canvas.height;
+
+    const ctx = targetCanvas.getContext('2d') as CanvasRenderingContext2D;
+    const matrix = new DOMMatrix().scaleSelf(dpr * this.zoom);
+    const rc = new RoughCanvas(targetCanvas);
+
+    ctx.save();
+    ctx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+    ctx.setTransform(matrix);
+
+    this._renderByBound(ctx, matrix, rc, bound, surfaceElements);
+
+    return targetCanvas;
   }
 
   public addOverlay(overlay: Overlay) {

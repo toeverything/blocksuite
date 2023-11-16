@@ -9,14 +9,17 @@ import { EdgelessPortalBase } from '../edgeless-portal-base.js';
 @customElement('edgeless-block-portal-image')
 export class EdgelessBlockPortalImage extends EdgelessPortalBase<ImageBlockModel> {
   override render() {
-    const { model, index } = this;
+    const { model, index, surface } = this;
     const bound = Bound.deserialize(model.xywh);
+    const { zoom } = surface.viewport;
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
       width: `${bound.w}px`,
       height: `${bound.h}px`,
-      transform: `translate(${bound.x}px, ${bound.y}px)`,
+      transform: `translate(${bound.x * zoom}px, ${
+        bound.y * zoom
+      }px) scale(${zoom})`,
     };
 
     return html`

@@ -94,6 +94,7 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
       position: absolute;
       width: 100%;
       height: 100%;
+      opacity: 0;
     }
 
     .affine-edgeless-surface-block-container canvas {
@@ -164,6 +165,10 @@ export class SurfaceBlockComponent extends BlockElement<SurfaceBlockModel> {
   private _batches = new Map<string, Batch<IEdgelessElement>>();
   private _lastTime = 0;
   private _cachedViewport = new Bound();
+
+  get renderer() {
+    return this._renderer;
+  }
 
   get edgeless() {
     return this.parentBlockElement as EdgelessPageBlockComponent;

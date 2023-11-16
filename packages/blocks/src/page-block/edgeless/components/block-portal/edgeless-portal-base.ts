@@ -28,6 +28,12 @@ export class EdgelessPortalBase<
     super.connectedCallback();
 
     this._disposables.add(
+      this.edgeless.slots.viewportUpdated.on(() => {
+        this.requestUpdate();
+      })
+    );
+
+    this._disposables.add(
       this.model.childrenUpdated.on(() => {
         this.requestUpdate();
       })

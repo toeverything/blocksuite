@@ -100,12 +100,15 @@ export class EdgelessBlockPortalNote extends EdgelessPortalBase<NoteBlockModel> 
     const { xywh, background } = model;
     const [modelX, modelY, modelW, modelH] = deserializeXYWH(xywh);
     const isHiddenNote = model.hidden;
+    const { zoom } = surface.viewport;
 
     const style = {
       position: 'absolute',
       zIndex: `${index}`,
       width: `${modelW}px`,
-      transform: `translate(${modelX}px, ${modelY}px)`,
+      transform: `translate(${modelX * zoom}px, ${
+        modelY * zoom
+      }px) scale(${zoom})`,
       padding: `${EDGELESS_BLOCK_CHILD_PADDING}px`,
       boxSizing: 'border-box',
       borderRadius: '8px',

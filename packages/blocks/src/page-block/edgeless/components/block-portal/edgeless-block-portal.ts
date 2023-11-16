@@ -13,8 +13,16 @@ import '../component-toolbar/component-toolbar.js';
 import { assertExists, throttle } from '@blocksuite/global/utils';
 import { ShadowlessElement, WithDisposable } from '@blocksuite/lit';
 import type { BaseBlockModel } from '@blocksuite/store';
-import { nothing } from 'lit';
-import { customElement, property, query, state } from 'lit/decorators.js';
+import { css, nothing } from 'lit';
+import {
+  customElement,
+  property,
+  query,
+  queryAll,
+  state,
+} from 'lit/decorators.js';
+import { map } from 'lit/directives/map.js';
+import { range } from 'lit/directives/range.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html, literal, unsafeStatic } from 'lit/static-html.js';
@@ -24,7 +32,11 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '../../../../_common/consts.js';
 import { delayCallback } from '../../../../_common/utils/event.js';
-import { matchFlavours } from '../../../../_common/utils/index.js';
+import {
+  type EdgelessElement,
+  matchFlavours,
+  type TopLevelBlockModel,
+} from '../../../../_common/utils/index.js';
 import type { FrameBlockModel } from '../../../../models.js';
 import type { NoteBlockModel } from '../../../../note-block/index.js';
 import { EdgelessBlockType } from '../../../../surface-block/edgeless-types.js';
@@ -56,6 +68,12 @@ const portalMap = {
 export class EdgelessBlockPortalContainer extends WithDisposable(
   ShadowlessElement
 ) {
+  static override styles = css`
+    .surface-layer {
+      position: absolute;
+    }
+  `;
+
   @property({ attribute: false })
   edgeless!: EdgelessPageBlockComponent;
 
@@ -68,11 +86,19 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
   @query('.affine-edgeless-layer')
   layer!: HTMLDivElement;
 
+  @queryAll('.surface-layer')
+  canvases!: HTMLCanvasElement[];
+
   @state()
   private _showAutoConnect = false;
 
   @state()
   private _toolbarVisible = false;
+
+  private _cachedPhasorGroups: {
+    zIndex: number;
+    elements: Exclude<EdgelessElement, TopLevelBlockModel>[];
+  }[] = [];
 
   private _cancelRestoreWillchange: (() => void) | null = null;
 
@@ -127,13 +153,16 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
     this.container.style.setProperty('background-size', `${gap}px ${gap}px`);
     this.layer.style.setProperty('transform', this._getLayerViewport());
+    this.rerenderPhasors(this._getLayerViewport(true));
   };
 
-  private _getLayerViewport() {
+  private _getLayerViewport(negative = false) {
     const { surface } = this.edgeless;
-    const { zoom, translateX, translateY } = surface.viewport;
+    const { translateX, translateY } = surface.viewport;
 
-    return `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+    return `translate(${negative ? -translateX : translateX}px, ${
+      negative ? -translateY : translateY
+    }px)`;
   }
 
   private _updateReference() {
@@ -271,6 +300,59 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     );
   }
 
+  override updated() {
+    this.rerenderPhasors(this._getLayerViewport(true));
+  }
+
+  private rerenderPhasors(transformStyle: string) {
+    const canvases = Array.from(this.canvases);
+    const renderer = this.edgeless.surface.renderer;
+
+    this._cachedPhasorGroups.forEach((group, i) => {
+      canvases[i].style.setProperty('transform', transformStyle);
+      canvases[i].style.setProperty('z-index', group.zIndex.toString());
+      renderer.cloneCanvasContent(undefined, group.elements, canvases[i]);
+    });
+  }
+
+  private _sortElements(elements: EdgelessElement[]) {
+    return elements.sort(this.edgeless.surface.compare);
+  }
+
+  private _groupedPhasors(elements: EdgelessElement[]) {
+    const groups: {
+      zIndex: number;
+      elements: Exclude<EdgelessElement, TopLevelBlockModel>[];
+    }[] = [];
+    let lastGroupIdx = 0;
+    let zIndex = 0;
+    const zIndexMap: Record<string, number> = {};
+
+    this._cachedPhasorGroups = elements.reduce((_, current) => {
+      if ('flavour' in current) {
+        if (groups[0]?.elements.length) ++lastGroupIdx;
+        if ([IMAGE, NOTE].includes(current['flavour'])) {
+          zIndexMap[current.id] = zIndex;
+          ++zIndex;
+        }
+      } else {
+        if (groups[lastGroupIdx]) groups[lastGroupIdx].elements.push(current);
+        else
+          groups[lastGroupIdx] = {
+            zIndex,
+            elements: [current],
+          };
+      }
+
+      return groups;
+    }, groups);
+
+    return {
+      zIndexMap,
+      groups,
+    };
+  }
+
   override render() {
     const { edgeless } = this;
 
@@ -281,9 +363,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
     const notes = surface.getBlocks(NOTE);
     const images = surface.getBlocks(IMAGE);
     const frames = surface.getSortedBlocks(FRAME);
-    const blocks = [...notes, ...images].sort(surface.compare);
+    const phasors = surface.getElements();
+    const elements = this._sortElements([...phasors, ...notes, ...images]);
+    const blocks = elements.filter(
+      element => 'flavour' in element
+    ) as TopLevelBlockModel[];
 
     const autoConnectedBlocks = new Map<AutoConnectElement, number>();
+
+    const { zIndexMap } = this._groupedPhasors(elements);
 
     notes.forEach(note => {
       if (isNoteBlock(note) && !note.hidden) {
@@ -331,6 +419,10 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
             : html`<affine-note-slicer
                 .edgelessPage=${edgeless}
               ></affine-note-slicer>`}
+          ${map(
+            range(this._cachedPhasorGroups.length),
+            i => html`<canvas class="surface-layer" data-layer="${i}"></canvas>`
+          )}
           ${repeat(
             blocks,
             block => block.id,
@@ -339,10 +431,15 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
                 portalMap[block.flavour as EdgelessBlockType]
               )}`;
               return html`<${tag}
+                    data-index=${block.index}
                     .index=${index}
                     .model=${block}
                     .surface=${surface}
                     .edgeless=${edgeless}
+                    style=${styleMap({
+                      zIndex: zIndexMap[block.id],
+                      position: 'relative',
+                    })}
                   ></${tag}>`;
             }
           )}
