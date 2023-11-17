@@ -1,11 +1,24 @@
+import type { BlockSelection } from '@blocksuite/block-std';
 import { assertExists } from '@blocksuite/global/utils';
 import type { BlockElement } from '@blocksuite/lit';
 
-import {
-  getBlockSelectionBySide,
-  getTextSelection,
-  pathToBlock,
-} from '../../note-block/utils.js';
+const getSelection = (blockComponent: BlockElement) =>
+  blockComponent.root.selection;
+
+function getBlockSelectionBySide(blockElement: BlockElement, tail: boolean) {
+  const selection = getSelection(blockElement);
+  const selections = selection.filter('block');
+  const sel = selections.at(tail ? -1 : 0) as BlockSelection | undefined;
+  return sel ?? null;
+}
+
+function getTextSelection(blockElement: BlockElement) {
+  const selection = getSelection(blockElement);
+  return selection.find('text');
+}
+
+const pathToBlock = (blockElement: BlockElement, path: string[]) =>
+  blockElement.root.view.viewFromPath('block', path);
 
 interface MoveBlockConfig {
   name: string;

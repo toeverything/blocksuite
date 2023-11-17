@@ -1,21 +1,21 @@
 import type { Command } from '@blocksuite/block-std';
 import { getTextNodesFromElement } from '@blocksuite/virgo';
 
-import { applyTextSelection, getCurrentTextSelectionCarets } from '../utils.js';
+import { applyCarets, getCurrentTextSelectionCarets } from '../utils.js';
 
 export const changeTextSelectionSidewaysToBlock: Command<
-  'targetBlock',
+  'focusBlock',
   never,
   { left: boolean }
 > = (ctx, next) => {
-  const { left, targetBlock } = ctx;
+  const { left, focusBlock } = ctx;
   const currentTextSelectionCarets = getCurrentTextSelectionCarets();
-  if (!currentTextSelectionCarets || !targetBlock) {
+  if (!currentTextSelectionCarets || !focusBlock) {
     return;
   }
   const { startCaret } = currentTextSelectionCarets;
 
-  const texts = getTextNodesFromElement(targetBlock);
+  const texts = getTextNodesFromElement(focusBlock);
   if (texts.length === 0) {
     return;
   }
@@ -31,7 +31,7 @@ export const changeTextSelectionSidewaysToBlock: Command<
     nextEndCaret.offset >= 0 &&
     nextEndCaret.offset <= texts[nextTextIndex].length
   ) {
-    const result = applyTextSelection(startCaret, nextEndCaret);
+    const result = applyCarets(startCaret, nextEndCaret);
     if (!result) {
       return;
     }
@@ -39,7 +39,7 @@ export const changeTextSelectionSidewaysToBlock: Command<
     return next();
   }
 
-  const result = applyTextSelection(startCaret, nextEndCaret);
+  const result = applyCarets(startCaret, nextEndCaret);
   if (!result) {
     return;
   }
