@@ -58,6 +58,7 @@ import {
 import { deleteModelsByTextSelection } from './utils/operation.js';
 
 const { GROUP } = PhasorElementType;
+const { NOTE, FRAME, IMAGE } = EdgelessBlockType;
 
 export function getCopyElements(
   surface: SurfaceBlockComponent,
@@ -356,7 +357,7 @@ export class EdgelessClipboard implements Clipboard {
           assertExists(xywh);
 
           const noteId = this.surface.addElement(
-            EdgelessBlockType.NOTE,
+            NOTE,
             {
               xywh,
               background,
@@ -385,7 +386,7 @@ export class EdgelessClipboard implements Clipboard {
     const frameIds = await Promise.all(
       frames.map(async ({ xywh, title, background }) => {
         const frameId = this.surface.addElement(
-          EdgelessBlockType.FRAME,
+          FRAME,
           {
             xywh,
             background,
@@ -403,7 +404,7 @@ export class EdgelessClipboard implements Clipboard {
     const imageIds = await Promise.all(
       images.map(async ({ xywh, sourceId, rotate }) => {
         const imageId = this.surface.addElement(
-          EdgelessBlockType.IMAGE,
+          IMAGE,
           {
             xywh,
             sourceId,

@@ -188,6 +188,7 @@ export class EdgelessBlockPortalContainer extends WithDisposable(
       this._noteResizeObserver.slots.resize.on(resizedNotes => {
         resizedNotes.forEach(([domRect], id) => {
           if (page.readonly) return;
+
           const model = edgeless.surface.pickById(id) as NoteBlockModel;
           const { xywh } = model;
           const { x, y, w, h } = Bound.deserialize(xywh);
