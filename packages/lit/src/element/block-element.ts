@@ -109,6 +109,7 @@ export class BlockElement<
     handler: UIEventHandler,
     options?: { global?: boolean; flavour?: boolean }
   ) => {
+    assertExists(this.path, 'Cannot bind block level hotkey without path');
     const config = {
       flavour: options?.global
         ? undefined
@@ -124,6 +125,7 @@ export class BlockElement<
     keymap: Record<string, UIEventHandler>,
     options?: { global?: boolean; flavour?: boolean }
   ) {
+    assertExists(this.path, 'Cannot bind block level hotkey without path');
     const config = {
       flavour: options?.global
         ? undefined

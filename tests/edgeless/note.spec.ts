@@ -184,11 +184,11 @@ test('edgeless arrow up/down', async ({ page }) => {
   await activeNoteInEdgeless(page, ids.noteId);
   await waitNextFrame(page, 400);
 
-  await type(page, 'hello');
+  await type(page, 'aaaaa');
   await pressEnter(page);
-  await type(page, 'world');
+  await type(page, 'aaaaa');
   await pressEnter(page);
-  await type(page, 'foo');
+  await type(page, 'aaa');
 
   await activeNoteInEdgeless(page, ids.noteId);
   await waitForVirgoStateUpdated(page);
@@ -199,11 +199,11 @@ test('edgeless arrow up/down', async ({ page }) => {
 
   await pressArrowDown(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 1, 4, 0);
+  await assertRichTextVRange(page, 1, 5, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);
-  await assertRichTextVRange(page, 0, 4, 0);
+  await assertRichTextVRange(page, 0, 5, 0);
 
   await pressArrowUp(page);
   await waitNextFrame(page);

@@ -1147,7 +1147,12 @@ export class EdgelessConnectorManager extends ConnectorPathGenerator {
       _connectionOverlay.points = anchors.map(a => a.point);
       for (let j = 0; j < anchors.length; j++) {
         const anchor = anchors[j];
-        if (Vec.dist(anchor.point, point) < 4) {
+        const anchorViewCoord = surface.toViewCoord(
+          anchor.point[0],
+          anchor.point[1]
+        );
+        const pointerViewCoord = surface.toViewCoord(point[0], point[1]);
+        if (Vec.dist(anchorViewCoord, pointerViewCoord) < 20) {
           _connectionOverlay.highlightPoint = anchor.point;
           result = {
             id: connectable.id,

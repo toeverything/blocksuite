@@ -1,5 +1,5 @@
 import { assertExists } from '@blocksuite/global/utils';
-import { type BaseBlockModel, type Page } from '@blocksuite/store';
+import type { BaseBlockModel, BlockProps, Page } from '@blocksuite/store';
 
 import type { AbstractEditor } from '../../_common/utils/index.js';
 import {
@@ -26,7 +26,7 @@ export type GetPageInfo = () => {
   pageBlock: DocPageBlockComponent | EdgelessPageBlockComponent | undefined;
 };
 
-type ImportHandler = (file: File) => Promise<Partial<BaseBlockModel> | void>;
+type ImportHandler = (file: File) => Promise<Partial<BlockProps> | void>;
 
 type FileDropRule = {
   name: string;
