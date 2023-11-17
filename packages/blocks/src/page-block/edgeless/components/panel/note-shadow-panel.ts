@@ -10,7 +10,7 @@ import {
   NoteNoShadowIcon,
   NoteShadowSampleIcon,
 } from '../../../../_common/icons/edgeless.js';
-import { NOTE_SHADOWS } from '../../../../note-block/index.js';
+import { NOTE_SHADOWS } from '../../../../note-block/note-model.js';
 
 const TOOLBAR_SHADOWS = [
   '',
